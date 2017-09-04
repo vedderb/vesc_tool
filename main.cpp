@@ -1,0 +1,98 @@
+/*
+    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+
+    This file is part of VESC Tool.
+
+    VESC Tool is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    VESC Tool is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    */
+
+#include "mainwindow.h"
+#include <QApplication>
+#include <QStyleFactory>
+#include <QSettings>
+#include <QDesktopWidget>
+
+int main(int argc, char *argv[])
+{
+    // Settings
+    QCoreApplication::setOrganizationName("VESC");
+    QCoreApplication::setOrganizationDomain("vesc-project.com");
+    QCoreApplication::setApplicationName("VESC Tool");
+
+    // DPI settings
+    // TODO: http://www.qcustomplot.com/index.php/support/forum/1344
+
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
+
+    QSettings set;
+    bool scaleAuto = true;
+    double scale = 1.0;
+
+    if (set.contains("app_scale_auto")) {
+        scaleAuto = set.value("app_scale_auto").toBool();
+    } else {
+        set.setValue("app_scale_auto", scaleAuto);
+    }
+
+    if (scaleAuto) {
+        QApplication tmp(argc, argv);
+        QRect rec = tmp.desktop()->screenGeometry();
+        int height = rec.height();
+        int width = rec.width();
+        double ptFont = tmp.font().pointSizeF();
+        if (ptFont < 0.0) {
+            ptFont = tmp.font().pixelSize();
+        }
+
+        if (width > 3000 && height > 1700) {
+            scale = 1.5;
+        } else {
+            if (ptFont > 11.0) {
+                scale = ptFont / 11.0;
+            }
+        }
+
+        set.setValue("app_scale_factor", scale);
+    } else if (set.contains("app_scale_factor")) {
+        scale = set.value("app_scale_factor").toDouble();
+    }
+
+    set.setValue("app_scale_factor", scale);
+
+    if (scale > 1.01) {
+        qputenv("QT_SCALE_FACTOR", set.value("app_scale_factor").toByteArray());
+        qputenv("QT_SCALE_FACTOR", QString::number(scale).toLocal8Bit());
+    }
+
+    QApplication a(argc, argv);
+
+    // Ignore the OS font settings and do scaling with the method above.
+    QFont font = qApp->font();
+    if (font.pixelSize() > 0) {
+        font.setPixelSize(11);
+    } else {
+        font.setPointSize(11);
+    }
+    qApp->setFont(font);
+
+    // Style
+    a.setStyleSheet("");
+    a.setStyle(QStyleFactory::create("Fusion"));
+
+    MainWindow w;
+    w.show();
+
+    return a.exec();
+}

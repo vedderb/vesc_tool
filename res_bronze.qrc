@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="res/icon.png">res/version/bronze_v.png</file>
+        <file alias="res/logo.png">res/version/bronze_vesc_tool.png</file>
+    </qresource>
+</RCC>

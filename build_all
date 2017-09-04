@@ -1,0 +1,10 @@
+#!/bin/bash
+
+./build_cp_fw
+./build_lin
+./build_win
+
+rm /storage/mnt_webserver/web/ubercart_downloads/vesc_tool_*
+mv build/lin/vesc_tool_* /storage/mnt_webserver/web/ubercart_downloads/
+mv build/win/vesc_tool_* /storage/mnt_webserver/web/ubercart_downloads/
+

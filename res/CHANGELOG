@@ -1,0 +1,76 @@
+== 0.80 ==
+* Fixed C header export names (PPM_HYST).
+* Fixed some typos.
+* Added platinum version to build system.
+* Increased maximum motor resistance in detection widget.
+* Support for FW 3.27.
+
+== 0.79 ==
+* Made help dialogs for FOC and BLDC detect non-modal.
+* Support for FW 3.26.
+
+== 0.78 ==
+* Added experimental bootloader upload support.
+* Changed tab shape and fixed spelling mistake in additional motor info page.
+
+== 0.77 ==
+* Fixed bug in percentage display mode for floats that would cause rounding errors.
+* Changed version check to assume a floating point number so that older online versions won't be considered as newer.
+* Added support for FW 3.25 with ADC ramping and a new ADC control mode.
+
+== 0.76 ==
+* Changed default current controller gain calculation time constant.
+* Support for FW 3.24
+
+== 0.75 ==
+* Improved UI scaling support for high DPI monitors.
+* Realtime data text box fixes.
+* FOC hall table read bug fix.
+* Significantly improved observer gain calculation.
+* Improved current controller gain calculation.
+* QCustomPlot scale factor 1 for high-DPI monitors. This gives lower resolution, but plotting is much faster.
+
+== 0.7 ==
+* Check motor paramters after writing them and show dialog if they were truncated.
+* FW 3.22 support.
+* UI scaling support.
+* New configuration page for VESC Tool.
+* Updated wzards with scalable high resolution images.
+
+== 0.6 ==
+* Added firmware changelog to help menu.
+* FW 3.20 support.
+* ADC center throttle support.
+
+== 0.5 ==
+* FW 3.19 support.
+* Sampled data is now transmitted in floating point with scaling done at the VESC.
+* Updated setup wizard logos.
+
+== 0.4 ==
+* FW 3.18 support.
+* Autoconnect support.
+* Autoconnect buttons in welcome and connection page.
+* Autoconnect function in wizards.
+* Check for the latest VESC Tool version online.
+* Poll serial port in addition to waiting for the readyRead signal since readyRead is not emitted recursively. This can be a problem when e.g. showing message boxes and data comes in.
+
+== 0.3 ==
+* FW 3.17 support.
+* Automatic build support for different versions.
+* VESC Project forum link in help menu.
+
+== 0.2 ==
+* First complete version of input setup wizard.
+* Support for DRV configuration.
+* Support for throttle curves.
+* Bug fix in displaybar and displaybarpercentage which made them render incorrectly in scroll areas.
+
+=== 0.1 ===
+* Added changelog.
+* Created VTextBrowser for displaying rich text with more control.
+ - Hyperlink support in help texts.
+ - Correct cursor display.
+* Image updates.
+* Text updates and corrections.
+* Updated welcome page.

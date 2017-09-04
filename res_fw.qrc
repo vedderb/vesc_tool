@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/firmwares/46_o_47/VESC_0005ohm.bin</file>
+        <file>res/firmwares/46_o_47/VESC_33k.bin</file>
+        <file>res/firmwares/46_o_47/VESC_default.bin</file>
+        <file>res/firmwares/46_o_47/VESC_servoout.bin</file>
+        <file>res/firmwares/46_o_47/VESC_ws2811.bin</file>
+        <file>res/firmwares/46_o_47/VESC_ws2811_33k.bin</file>
+        <file>res/firmwares/48/VESC_0005ohm.bin</file>
+        <file>res/firmwares/48/VESC_default.bin</file>
+        <file>res/firmwares/48/VESC_servoout.bin</file>
+        <file>res/firmwares/48/VESC_ws2811.bin</file>
+        <file>res/firmwares/60/VESC_default.bin</file>
+        <file>res/firmwares/60/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/60/VESC_servoout.bin</file>
+        <file>res/firmwares/60/VESC_ws2811.bin</file>
+        <file>res/firmwares/410_o_411_o_412/VESC_0005ohm.bin</file>
+        <file>res/firmwares/410_o_411_o_412/VESC_default.bin</file>
+        <file>res/firmwares/410_o_411_o_412/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/410_o_411_o_412/VESC_servoout.bin</file>
+        <file>res/firmwares/410_o_411_o_412/VESC_ws2811.bin</file>
+        <file>res/firmwares/DAS_RS/VESC_default.bin</file>
+    </qresource>
+</RCC>

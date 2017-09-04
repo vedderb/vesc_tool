@@ -1,0 +1,13 @@
+#!/bin/bash
+
+FWPATH="../../ARM/STM_Eclipse/BLDC_4_ChibiOS/build_all"
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+cd $FWPATH
+./rebuild_all
+cd $DIR
+rm -r res/firmwares/*
+cp -r $FWPATH/* res/firmwares/
+find res/firmwares -maxdepth 1 -type f -exec rm {} \;
+cp $FWPATH/../CHANGELOG res/firmwares
+

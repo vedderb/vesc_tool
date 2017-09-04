@@ -1,0 +1,1050 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1054</width>
+    <height>642</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>VESC Tool</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="res_neutral.qrc">
+    <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+    <property name="leftMargin">
+     <number>6</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="minimumSize">
+           <size>
+            <width>220</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>232</width>
+            <height>53</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="res_neutral.qrc">:/res/logo.png</pixmap>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="pageList">
+          <property name="minimumSize">
+           <size>
+            <width>220</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>220</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QStackedWidget" name="pageWidget">
+        <property name="currentIndex">
+         <number>-1</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <item row="1" column="8">
+       <widget class="DisplayBar" name="dispCurrent" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="8">
+       <widget class="DisplayBar" name="dispDuty" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6" rowspan="2">
+       <widget class="QPushButton" name="fullBrakeButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Full brake</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Anchor-96.png</normaloff>:/res/icons/Anchor-96.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>40</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="default">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QDoubleSpinBox" name="handbrakeBox">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Handbrake current</string>
+        </property>
+        <property name="prefix">
+         <string>HB </string>
+        </property>
+        <property name="suffix">
+         <string> A</string>
+        </property>
+        <property name="minimum">
+         <double>-500.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>500.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.500000000000000</double>
+        </property>
+        <property name="value">
+         <double>3.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QPushButton" name="handbrakeButton">
+        <property name="toolTip">
+         <string>Handbrake current</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QDoubleSpinBox" name="currentBox">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Current</string>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="prefix">
+         <string>I </string>
+        </property>
+        <property name="suffix">
+         <string> A</string>
+        </property>
+        <property name="minimum">
+         <double>-500.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>500.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.500000000000000</double>
+        </property>
+        <property name="value">
+         <double>3.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QDoubleSpinBox" name="speedBox">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Speed</string>
+        </property>
+        <property name="prefix">
+         <string>ω </string>
+        </property>
+        <property name="suffix">
+         <string> RPM</string>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="minimum">
+         <double>-400000.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>400000.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>5000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="dutyButton">
+        <property name="toolTip">
+         <string>Duty cycle</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QDoubleSpinBox" name="posBox">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Position</string>
+        </property>
+        <property name="prefix">
+         <string>P </string>
+        </property>
+        <property name="suffix">
+         <string> °</string>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>10.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="posButton">
+        <property name="toolTip">
+         <string>Position</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7" rowspan="2">
+       <widget class="QPushButton" name="stopButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Switch off</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Stop Sign-96.png</normaloff>:/res/icons/Stop Sign-96.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>40</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="shortcut">
+         <string>Esc</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="speedButton">
+        <property name="toolTip">
+         <string>Speed</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="currentButton">
+        <property name="toolTip">
+         <string>Current</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QDoubleSpinBox" name="brakeCurrentBox">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Brake current</string>
+        </property>
+        <property name="prefix">
+         <string>IB </string>
+        </property>
+        <property name="suffix">
+         <string> A</string>
+        </property>
+        <property name="minimum">
+         <double>-500.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>500.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.500000000000000</double>
+        </property>
+        <property name="value">
+         <double>3.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QPushButton" name="brakeCurrentButton">
+        <property name="toolTip">
+         <string>Brake current</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QDoubleSpinBox" name="dutyBox">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Duty cycle</string>
+        </property>
+        <property name="wrapping">
+         <bool>false</bool>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="prefix">
+         <string>D </string>
+        </property>
+        <property name="minimum">
+         <double>-1.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.200000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1054</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSaveMotorConfXml"/>
+    <addaction name="actionLoadMotorConfXml"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveAppconfXml"/>
+    <addaction name="actionLoadAppconfXml"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveMotorConfigurationHeader"/>
+    <addaction name="actionSaveMotorConfigurationHeaderWrap"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveAppConfigurationHeader"/>
+    <addaction name="actionSaveAppConfigurationHeaderWrap"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionMotorSetupWizard"/>
+    <addaction name="actionAppSetupWizard"/>
+    <addaction name="separator"/>
+    <addaction name="actionVESCProjectForums"/>
+    <addaction name="separator"/>
+    <addaction name="actionVESCToolChangelog"/>
+    <addaction name="actionFirmwareChangelog"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout"/>
+    <addaction name="actionLibrariesUsed"/>
+    <addaction name="actionAboutQt"/>
+    <addaction name="separator"/>
+    <addaction name="actionSafetyInformation"/>
+    <addaction name="actionWarrantyStatement"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Developer</string>
+    </property>
+    <addaction name="actionParameterEditorMcconf"/>
+    <addaction name="actionParameterEditorAppconf"/>
+    <addaction name="actionParameterEditorInfo"/>
+   </widget>
+   <widget class="QMenu" name="menuTerminal">
+    <property name="title">
+     <string>Terminal</string>
+    </property>
+    <addaction name="actionTerminalShowHelp"/>
+    <addaction name="actionTerminalPrintFaults"/>
+    <addaction name="actionTerminalPrintThreads"/>
+    <addaction name="separator"/>
+    <addaction name="actionTerminalDRV8301ResetLatchedFaults"/>
+    <addaction name="separator"/>
+    <addaction name="actionTerminalClear"/>
+   </widget>
+   <widget class="QMenu" name="menuCommands">
+    <property name="title">
+     <string>Commands</string>
+    </property>
+    <addaction name="actionReboot"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuCommands"/>
+   <addaction name="menuTerminal"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionReconnect"/>
+   <addaction name="actionDisconnect"/>
+   <addaction name="separator"/>
+   <addaction name="actionReadMcconf"/>
+   <addaction name="actionReadMcconfDefault"/>
+   <addaction name="actionWriteMcconf"/>
+   <addaction name="separator"/>
+   <addaction name="actionReadAppconf"/>
+   <addaction name="actionReadAppconfDefault"/>
+   <addaction name="actionWriteAppconf"/>
+   <addaction name="separator"/>
+   <addaction name="actionKeyboardControl"/>
+   <addaction name="actionRtData"/>
+   <addaction name="actionRtDataApp"/>
+   <addaction name="actionSendAlive"/>
+   <addaction name="actionCanFwd"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionReadMcconf">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/motor_up.png</normaloff>:/res/icons/motor_up.png</iconset>
+   </property>
+   <property name="text">
+    <string>readMcconf</string>
+   </property>
+   <property name="toolTip">
+    <string>Read motor Configuration</string>
+   </property>
+  </action>
+  <action name="actionReadMcconfDefault">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/motor_default.png</normaloff>:/res/icons/motor_default.png</iconset>
+   </property>
+   <property name="text">
+    <string>readMcconfDefault</string>
+   </property>
+   <property name="toolTip">
+    <string>Read default motor configuration</string>
+   </property>
+  </action>
+  <action name="actionWriteMcconf">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/motor_down.png</normaloff>:/res/icons/motor_down.png</iconset>
+   </property>
+   <property name="text">
+    <string>writeMcconf</string>
+   </property>
+   <property name="toolTip">
+    <string>Write motor configuration</string>
+   </property>
+  </action>
+  <action name="actionSaveMotorConfXml">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Motor Configuration XML as...</string>
+   </property>
+  </action>
+  <action name="actionLoadMotorConfXml">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Motor Configuration XML</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Disconnected-96.png</normaloff>:/res/icons/Disconnected-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>disconnect</string>
+   </property>
+   <property name="toolTip">
+    <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionReboot">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reboot</string>
+   </property>
+   <property name="toolTip">
+    <string>Reboot</string>
+   </property>
+  </action>
+  <action name="actionCanFwd">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/can_off.png</normaloff>
+     <normalon>:/res/icons/can_on.png</normalon>:/res/icons/can_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>canFwd</string>
+   </property>
+   <property name="toolTip">
+    <string>Forward communication over CAN-bus</string>
+   </property>
+  </action>
+  <action name="actionReconnect">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Connected-96.png</normaloff>:/res/icons/Connected-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>reconnect</string>
+   </property>
+   <property name="toolTip">
+    <string>Reconnect last connection</string>
+   </property>
+  </action>
+  <action name="actionRtData">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/rt_off.png</normaloff>
+     <normalon>:/res/icons/rt_on.png</normalon>:/res/icons/rt_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>rtData</string>
+   </property>
+   <property name="toolTip">
+    <string>Stream realtime data</string>
+   </property>
+  </action>
+  <action name="actionReadAppconf">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/app_up.png</normaloff>:/res/icons/app_up.png</iconset>
+   </property>
+   <property name="text">
+    <string>readAppconf</string>
+   </property>
+   <property name="toolTip">
+    <string>Read app configuration</string>
+   </property>
+  </action>
+  <action name="actionReadAppconfDefault">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/app_default.png</normaloff>:/res/icons/app_default.png</iconset>
+   </property>
+   <property name="text">
+    <string>readAppconfDefault</string>
+   </property>
+   <property name="toolTip">
+    <string>Read default app configuration</string>
+   </property>
+  </action>
+  <action name="actionWriteAppconf">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/app_down.png</normaloff>:/res/icons/app_down.png</iconset>
+   </property>
+   <property name="text">
+    <string>writeAppconf</string>
+   </property>
+   <property name="toolTip">
+    <string>Write app configuration</string>
+   </property>
+  </action>
+  <action name="actionSaveAppconfXml">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save App Configuration XML as...</string>
+   </property>
+  </action>
+  <action name="actionLoadAppconfXml">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load App Configuration XML</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>About VESC Tool</string>
+   </property>
+  </action>
+  <action name="actionKeyboardControl">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/keys_off.png</normaloff>
+     <normalon>:/res/icons/keys_on.png</normalon>:/res/icons/keys_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>keyboardControl</string>
+   </property>
+   <property name="toolTip">
+    <string>Use arrow keys to control motor</string>
+   </property>
+  </action>
+  <action name="actionParameterEditorMcconf">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Parameter Editor Mcconf</string>
+   </property>
+  </action>
+  <action name="actionParameterEditorAppconf">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Parameter Editor Appconf</string>
+   </property>
+  </action>
+  <action name="actionSaveAppConfigurationHeader">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save App Configuration C Header as...</string>
+   </property>
+  </action>
+  <action name="actionSaveMotorConfigurationHeader">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Motor Configuration C Header as...</string>
+   </property>
+  </action>
+  <action name="actionSaveAppConfigurationHeaderWrap">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save App Configuration C Header (ifdef wrapped) as...</string>
+   </property>
+  </action>
+  <action name="actionSaveMotorConfigurationHeaderWrap">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Motor Configuration C Header (ifdef wrapped) as...</string>
+   </property>
+  </action>
+  <action name="actionRtDataApp">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/rt_app_off.png</normaloff>
+     <normalon>:/res/icons/rt_app_on.png</normalon>:/res/icons/rt_app_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>rtDataApp</string>
+   </property>
+   <property name="toolTip">
+    <string>Stream realtime app data</string>
+   </property>
+  </action>
+  <action name="actionTerminalPrintFaults">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Console-96.png</normaloff>:/res/icons/Console-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Print Faults</string>
+   </property>
+   <property name="toolTip">
+    <string>Print Faults</string>
+   </property>
+  </action>
+  <action name="actionTerminalShowHelp">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Help</string>
+   </property>
+  </action>
+  <action name="actionTerminalClear">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Terminal</string>
+   </property>
+  </action>
+  <action name="actionTerminalPrintThreads">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Electronics-96.png</normaloff>:/res/icons/Electronics-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Print Threads</string>
+   </property>
+   <property name="toolTip">
+    <string>Print Threads</string>
+   </property>
+  </action>
+  <action name="actionSendAlive">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/alive_off.png</normaloff>
+     <normalon>:/res/icons/alive_on.png</normalon>:/res/icons/alive_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>Send Alive Commands</string>
+   </property>
+   <property name="toolTip">
+    <string>Send alive packets periodically to prevent timeout</string>
+   </property>
+  </action>
+  <action name="actionLibrariesUsed">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>About Libraries Used</string>
+   </property>
+  </action>
+  <action name="actionMotorSetupWizard">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Motor Setup Wizard [MOTOR]</string>
+   </property>
+   <property name="toolTip">
+    <string>Start the Motor Setup Wizard</string>
+   </property>
+  </action>
+  <action name="actionAppSetupWizard">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Input Setup Wizard [APP]</string>
+   </property>
+   <property name="toolTip">
+    <string>Start the App Setup Wizard</string>
+   </property>
+  </action>
+  <action name="actionAboutQt">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+   <property name="toolTip">
+    <string>Show the Qt library's About box</string>
+   </property>
+  </action>
+  <action name="actionParameterEditorInfo">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Parameter Editor Info</string>
+   </property>
+  </action>
+  <action name="actionSafetyInformation">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Safety Information</string>
+   </property>
+  </action>
+  <action name="actionWarrantyStatement">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Limited Warranty Statement</string>
+   </property>
+   <property name="toolTip">
+    <string>Limited Warranty Statement</string>
+   </property>
+  </action>
+  <action name="actionVESCToolChangelog">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>VESC Tool Changelog</string>
+   </property>
+  </action>
+  <action name="actionTerminalDRV8301ResetLatchedFaults">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Bug-96.png</normaloff>:/res/icons/Bug-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>DRV8301 Reset Latched Faults</string>
+   </property>
+  </action>
+  <action name="actionVESCProjectForums">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/User Group Man Man-96.png</normaloff>:/res/icons/User Group Man Man-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>VESC Project Forums</string>
+   </property>
+  </action>
+  <action name="actionFirmwareChangelog">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Firmware Changelog</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>DisplayBar</class>
+   <extends>QWidget</extends>
+   <header>widgets/displaybar.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="res.qrc"/>
+  <include location="res_neutral.qrc"/>
+ </resources>
+ <connections/>
+</ui>

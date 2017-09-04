@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PageAppSettings</class>
+ <widget class="QWidget" name="PageAppSettings">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="VTextBrowser" name="textEdit"/>
+   </item>
+   <item>
+    <widget class="QPushButton" name="appWizardButton">
+     <property name="text">
+      <string>Input Setup Wizard</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../res.qrc">
+       <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>VTextBrowser</class>
+   <extends>QTextEdit</extends>
+   <header>widgets/vtextbrowser.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

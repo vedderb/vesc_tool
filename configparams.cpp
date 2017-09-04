@@ -27,6 +27,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
+#include <cmath>
 
 ConfigParams::ConfigParams(QObject *parent) : QObject(parent)
 {

@@ -26,7 +26,7 @@
 namespace util {
 
 double map(double x, double in_min, double in_max, double out_min, double out_max);
-float throttle_curve(float val, float curve, int mode);
+float throttle_curve(float val, float curve_acc, float curve_brake, int mode);
 bool autoconnectBlockingWithProgress(VescInterface *vesc, QWidget *parent = 0);
 void checkVersion(QString version, VescInterface *vesc = 0);
 

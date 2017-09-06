@@ -32,7 +32,7 @@ double map(double x, double in_min, double in_max, double out_min, double out_ma
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-float throttle_curve(float val, float curve, int mode) {
+float throttle_curve(float val, float curve_acc, float curve_brake, int mode) {
     float ret = 0.0;
     float val_a = fabsf(val);
 
@@ -42,6 +42,13 @@ float throttle_curve(float val, float curve, int mode) {
 
     if (val > 1.0) {
         val = 1.0;
+    }
+
+    float curve;
+    if (val >= 0.0) {
+        curve = curve_acc;
+    } else {
+        curve = curve_brake;
     }
 
     // See

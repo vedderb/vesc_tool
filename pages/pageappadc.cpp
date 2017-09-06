@@ -77,6 +77,7 @@ void PageAppAdc::setVesc(VescInterface *vesc)
         ui->mappingTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_inverted");
 
         ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_adc_conf.throttle_exp");
+        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_adc_conf.throttle_exp_brake");
         ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_adc_conf.throttle_exp_mode");
 
         ui->adcMap->setVesc(mVesc);
@@ -93,14 +94,18 @@ void PageAppAdc::setVesc(VescInterface *vesc)
 void PageAppAdc::paramChangedDouble(QObject *src, QString name, double newParam)
 {
     (void)src;
+    (void)newParam;
 
-    if (name == "app_adc_conf.throttle_exp") {
+    if (name == "app_adc_conf.throttle_exp" || name == "app_adc_conf.throttle_exp_brake") {
         int mode = mVesc->appConfig()->getParamEnum("app_adc_conf.throttle_exp_mode");
+        float val_acc = mVesc->appConfig()->getParamDouble("app_adc_conf.throttle_exp");
+        float val_brake = mVesc->appConfig()->getParamDouble("app_adc_conf.throttle_exp_brake");
+
         QVector<double> x;
         QVector<double> y;
         for (float i = -1.0;i < 1.0001;i += 0.002) {
             x.append(i);
-            double val = util::throttle_curve(i, newParam, mode);
+            double val = util::throttle_curve(i, val_acc, val_brake, mode);
             y.append(val);
         }
         ui->throttlePlot->graph()->setData(x, y);
@@ -115,7 +120,6 @@ void PageAppAdc::paramChangedEnum(QObject *src, QString name, int newParam)
     (void)newParam;
 
     if (name == "app_adc_conf.throttle_exp_mode") {
-        paramChangedDouble(0, "app_adc_conf.throttle_exp",
-                           mVesc->appConfig()->getParamDouble("app_adc_conf.throttle_exp"));
+        paramChangedDouble(0, "app_adc_conf.throttle_exp", 0.0);
     }
 }

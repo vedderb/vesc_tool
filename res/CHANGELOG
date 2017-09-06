@@ -1,3 +1,8 @@
+== 0.81 ==
+* Fixed RT data time scale.
+* Individual throttle curves for acc and brake.
+* Support for FW 3.27.
+
 == 0.80 ==
 * Fixed C header export names (PPM_HYST).
 * Fixed some typos.

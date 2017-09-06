@@ -170,7 +170,7 @@ void PageRtData::timerSlot()
 {
     if (mUpdateValPlot) {
         int dataSize = mTempMosVec.size();
-        float fsamp = 10.0;
+        float fsamp = 50.0;
 
         QVector<double> xAxis(dataSize);
         for (int i = 0;i < mTempMosVec.size();i++) {

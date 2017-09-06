@@ -2171,6 +2171,28 @@ p, li { white-space: pre-wrap; }
             <suffix> kHz</suffix>
             <vTx>9</vTx>
         </m_dc_f_sw>
+        <m_ntc_motor_beta>
+            <longName>Beta Value for Motor Thermistor</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Beta Value for Motor Thermistor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_NTC_MOTOR_BETA</cDefine>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>100000</maxDouble>
+            <minDouble>100</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>3380</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix> K</suffix>
+            <vTx>9</vTx>
+        </m_ntc_motor_beta>
         <motor_brand>
             <longName>Motor Brand</longName>
             <type>3</type>
@@ -2465,5 +2487,6 @@ p, li { white-space: pre-wrap; }
         <ser>m_bldc_f_sw_min</ser>
         <ser>m_bldc_f_sw_max</ser>
         <ser>m_dc_f_sw</ser>
+        <ser>m_ntc_motor_beta</ser>
     </SerOrder>
 </ConfigParams>

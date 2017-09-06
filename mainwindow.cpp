@@ -93,7 +93,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mVersion = "0.80";
+    mVersion = "0.81";
     mVesc = new VescInterface(this);
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);

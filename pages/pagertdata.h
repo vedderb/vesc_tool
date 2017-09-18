@@ -72,6 +72,7 @@ private:
     QVector<double> mDutyVec;
     QVector<double> mRpmVec;
     QVector<double> mPositionVec;
+    QVector<double> mMseconds;
 
     bool mUpdateValPlot;
     bool mUpdatePosPlot;

@@ -93,7 +93,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mVersion = "0.81";
+    mVersion = QString::number(VT_VERSION);
     mVesc = new VescInterface(this);
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
@@ -167,6 +167,7 @@ MainWindow::~MainWindow()
 {
     // Save settings
     mSettings.setValue("version", mVersion);
+    mSettings.setValue("introVersion", VT_INTRO_VERSION);
     mSettings.setValue("mainwindow/position", pos());
     mSettings.setValue("mainwindow/maximized", isMaximized());
 
@@ -378,8 +379,8 @@ void MainWindow::timerSlot()
     // Run startup checks
     static bool has_run_start_checks = false;
     if (!has_run_start_checks) {
-        if (mSettings.contains("version")) {
-            if (mSettings.value("version").toString() != mVersion) {
+        if (mSettings.contains("introVersion")) {
+            if (mSettings.value("introVersion").toInt() != VT_INTRO_VERSION) {
                 mSettings.setValue("intro_done", false);
             }
         } else {

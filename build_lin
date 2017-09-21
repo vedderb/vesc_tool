@@ -29,8 +29,8 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_original_linux.zip vesc_tool
-rm vesc_tool
+zip vesc_tool_original_linux.zip vesc_tool*
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Platinum
@@ -39,8 +39,8 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_platinum_linux.zip vesc_tool
-rm vesc_tool
+zip vesc_tool_platinum_linux.zip vesc_tool*
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Gold
@@ -49,8 +49,8 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_gold_linux.zip vesc_tool
-rm vesc_tool
+zip vesc_tool_gold_linux.zip vesc_tool*
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Silver
@@ -59,8 +59,8 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_silver_linux.zip vesc_tool
-rm vesc_tool
+zip vesc_tool_silver_linux.zip vesc_tool*
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Bronze
@@ -69,8 +69,8 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_bronze_linux.zip vesc_tool
-rm vesc_tool
+zip vesc_tool_bronze_linux.zip vesc_tool*
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Free of charge
@@ -79,7 +79,7 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_free_linux.zip vesc_tool
-rm vesc_tool
+zip vesc_tool_free_linux.zip vesc_tool*
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 

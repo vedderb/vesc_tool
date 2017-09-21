@@ -20,8 +20,8 @@ make clean
 make -j4
 rm -rf build/win/obj
 cd build/win
-zip vesc_tool_original_windows.zip vesc_tool.exe
-rm vesc_tool.exe
+zip vesc_tool_original_windows.zip vesc_tool*.exe
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Platinum
@@ -30,8 +30,8 @@ make clean
 make -j4
 rm -rf build/win/obj
 cd build/win
-zip vesc_tool_platinum_windows.zip vesc_tool.exe
-rm vesc_tool.exe
+zip vesc_tool_platinum_windows.zip vesc_tool*.exe
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Gold
@@ -40,8 +40,8 @@ make clean
 make -j4
 rm -rf build/win/obj
 cd build/win
-zip vesc_tool_gold_windows.zip vesc_tool.exe
-rm vesc_tool.exe
+zip vesc_tool_gold_windows.zip vesc_tool*.exe
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Silver
@@ -50,8 +50,8 @@ make clean
 make -j4
 rm -rf build/win/obj
 cd build/win
-zip vesc_tool_silver_windows.zip vesc_tool.exe
-rm vesc_tool.exe
+zip vesc_tool_silver_windows.zip vesc_tool*.exe
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Bronze
@@ -60,8 +60,8 @@ make clean
 make -j4
 rm -rf build/win/obj
 cd build/win
-zip vesc_tool_bronze_windows.zip vesc_tool.exe
-rm vesc_tool.exe
+zip vesc_tool_bronze_windows.zip vesc_tool*.exe
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Free of charge
@@ -70,7 +70,7 @@ make clean
 make -j4
 rm -rf build/win/obj
 cd build/win
-zip vesc_tool_free_windows.zip vesc_tool.exe
-rm vesc_tool.exe
+zip vesc_tool_free_windows.zip vesc_tool*.exe
+ls | grep -v '\.zip$' | xargs rm
 cd ../..
 

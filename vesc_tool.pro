@@ -4,6 +4,13 @@
 #
 #-------------------------------------------------
 
+# Version
+VT_VERSION = 0.82
+VT_INTRO_VERSION = 1
+
+DEFINES += VT_VERSION=$$VT_VERSION
+DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
+
 # Serial port available
 DEFINES += HAS_SERIALPORT
 
@@ -25,7 +32,7 @@ contains(DEFINES, HAS_SERIALPORT) {
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = vesc_tool
+TARGET = vesc_tool_$$VT_VERSION
 TEMPLATE = app
 
 release_win {

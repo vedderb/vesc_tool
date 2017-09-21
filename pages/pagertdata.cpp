@@ -170,11 +170,10 @@ void PageRtData::timerSlot()
 {
     if (mUpdateValPlot) {
         int dataSize = mTempMosVec.size();
-        float fsamp = 50.0;
 
         QVector<double> xAxis(dataSize);
-        for (int i = 0;i < mTempMosVec.size();i++) {
-            xAxis[i] = (double)i / fsamp;
+        for (int i = 0;i < mMseconds.size();i++) {
+            xAxis[i] = mMseconds[i];
         }
 
         // Current and duty-plot
@@ -235,6 +234,8 @@ void PageRtData::valuesReceived(MC_VALUES values)
 {
     ui->rtText->setValues(values);
 
+    static double startTime = QDateTime::currentMSecsSinceEpoch() / 1000.0;
+
     const int maxS = 500;
 
     appendDoubleAndTrunc(&mTempMosVec, values.temp_mos, maxS);
@@ -245,6 +246,7 @@ void PageRtData::valuesReceived(MC_VALUES values)
     appendDoubleAndTrunc(&mIqVec, values.iq, maxS);
     appendDoubleAndTrunc(&mDutyVec, values.duty_now, maxS);
     appendDoubleAndTrunc(&mRpmVec, values.rpm, maxS);
+    appendDoubleAndTrunc(&mMseconds, (QDateTime::currentMSecsSinceEpoch() / 1000.0) - startTime, maxS);
 
     mUpdateValPlot = true;
 }

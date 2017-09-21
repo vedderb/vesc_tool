@@ -29,7 +29,7 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_original_linux.zip vesc_tool*
+zip vesc_tool_original_linux.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
@@ -39,7 +39,7 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_platinum_linux.zip vesc_tool*
+zip vesc_tool_platinum_linux.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
@@ -49,7 +49,7 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_gold_linux.zip vesc_tool*
+zip vesc_tool_gold_linux.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
@@ -59,7 +59,7 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_silver_linux.zip vesc_tool*
+zip vesc_tool_silver_linux.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
@@ -69,7 +69,7 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_bronze_linux.zip vesc_tool*
+zip vesc_tool_bronze_linux.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
@@ -79,7 +79,7 @@ make clean
 make -j4
 rm -rf build/lin/obj
 cd build/lin
-zip vesc_tool_free_linux.zip vesc_tool*
+zip vesc_tool_free_linux.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm
 cd ../..
 

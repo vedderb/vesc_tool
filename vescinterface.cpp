@@ -23,6 +23,7 @@
 #include <QFileInfo>
 #include <QThread>
 #include <QEventLoop>
+#include <QSettings>
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
@@ -46,7 +47,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mTimer->setInterval(20);
     mTimer->start();
 
-    mLastConnType = CONN_NONE;
+    mLastConnType = static_cast<conn_t>(QSettings().value("connection_type", CONN_NONE).toInt());
+
     mSendCanBefore = false;
     mCanIdBefore = 0;
     mWasConnected = false;
@@ -68,8 +70,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     // TCP
     mTcpSocket = new QTcpSocket(this);
     mTcpConnected = false;
-    mLastTcpServer = "";
-    mLastTcpPort = 0;
+    mLastTcpServer = QSettings().value("tcp_server").toString();
+    mLastTcpPort = QSettings().value("tcp_port").toInt();
 
     connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
     connect(mTcpSocket, SIGNAL(connected()), this, SLOT(tcpInputConnected()));
@@ -305,7 +307,7 @@ bool VescInterface::connectSerial(QString port, int baudrate)
 #ifdef HAS_SERIALPORT
     mLastSerialPort = port;
     mLastSerialBaud = baudrate;
-    mLastConnType = CONN_SERIAL;
+    setLastConnectionType(CONN_SERIAL);
 
     bool found = false;
     for (VSerialInfo_t ser: listSerialPorts()) {
@@ -400,7 +402,7 @@ void VescInterface::connectTcp(QString server, int port)
 {
     mLastTcpServer = server;
     mLastTcpPort = port;
-    mLastConnType = CONN_TCP;
+    setLastConnectionType(CONN_TCP);
 
     QHostAddress host;
     host.setAddress(server);
@@ -699,4 +701,10 @@ void VescInterface::updateFwRx(bool fwRx)
     if (change) {
         emit fwRxChanged(mFwVersionReceived, mCommands->isLimitedMode());
     }
+}
+
+void VescInterface::setLastConnectionType(conn_t type)
+{
+    mLastConnType = type;
+    QSettings().setValue("connection_type", type);
 }

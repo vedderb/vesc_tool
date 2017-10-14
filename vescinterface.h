@@ -136,6 +136,7 @@ private:
     double mAutoconnectProgress;
 
     void updateFwRx(bool fwRx);
+    void setLastConnectionType(conn_t type);
 
 };
 

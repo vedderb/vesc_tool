@@ -22,6 +22,7 @@
 #include "widgets/helpdialog.h"
 #include "util.h"
 #include <QMessageBox>
+#include <QSettings>
 
 PageConnection::PageConnection(QWidget *parent) :
     QWidget(parent),
@@ -29,6 +30,15 @@ PageConnection::PageConnection(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
+
+    QString lastTcpServer =
+        QSettings().value("tcp_server", ui->tcpServerEdit->text()).toString();
+    ui->tcpServerEdit->setText(lastTcpServer);
+
+    int lastTcpPort =
+        QSettings().value("tcp_port", ui->tcpPortBox->value()).toInt();
+    ui->tcpPortBox->setValue(lastTcpPort);
+
     mVesc = 0;
     mTimer = new QTimer(this);
 
@@ -108,7 +118,11 @@ void PageConnection::on_tcpDisconnectButton_clicked()
 void PageConnection::on_tcpConnectButton_clicked()
 {
     if (mVesc) {
-        mVesc->connectTcp(ui->tcpServerEdit->text(), ui->tcpPortBox->value());
+        QString tcpServer = ui->tcpServerEdit->text();
+        int tcpPort = ui->tcpPortBox->value();
+        mVesc->connectTcp(tcpServer, tcpPort);
+        QSettings().setValue("tcp_server", tcpServer);
+        QSettings().setValue("tcp_port", tcpPort);
     }
 }
 

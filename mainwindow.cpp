@@ -1224,3 +1224,8 @@ void MainWindow::on_actionVESCProjectForums_triggered()
 {
     QDesktopServices::openUrl(QUrl("http://vesc-project.com/forum"));
 }
+
+void MainWindow::on_actionLicense_triggered()
+{
+    HelpDialog::showHelp(this, mVesc->infoConfig(), "gpl_text");
+}

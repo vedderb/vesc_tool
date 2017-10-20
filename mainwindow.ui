@@ -14,7 +14,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_neutral.qrc">
+   <iconset resource="res_platinum.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -47,7 +47,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_neutral.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_platinum.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -471,7 +471,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>19</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -510,6 +510,7 @@
     <addaction name="separator"/>
     <addaction name="actionSafetyInformation"/>
     <addaction name="actionWarrantyStatement"/>
+    <addaction name="actionLicense"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -1032,6 +1033,15 @@
     <string>Firmware Changelog</string>
    </property>
   </action>
+  <action name="actionLicense">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>License</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1044,7 +1054,7 @@
  </customwidgets>
  <resources>
   <include location="res.qrc"/>
-  <include location="res_neutral.qrc"/>
+  <include location="res_platinum.qrc"/>
  </resources>
  <connections/>
 </ui>

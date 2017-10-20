@@ -48,7 +48,9 @@ public:
         Page_MultiId,
         Page_General,
         Page_Nunchuk,
+        Page_Ppm_Map,
         Page_Ppm,
+        Page_Adc_Map,
         Page_Adc,
         Page_Conclusion
     };
@@ -194,6 +196,28 @@ private:
 
 };
 
+class AppPpmMapPage : public QWizardPage
+{
+    Q_OBJECT
+
+public:
+    AppPpmMapPage(VescInterface *vesc, QWidget *parent = 0);
+    int nextId() const Q_DECL_OVERRIDE;
+    bool validatePage() Q_DECL_OVERRIDE;
+    void initializePage() Q_DECL_OVERRIDE;
+
+private slots:
+    void paramChangedDouble(QObject *src, QString name, double newParam);
+    void timerSlot();
+
+private:
+    VescInterface *mVesc;
+    ParamTable *mParamTab;
+    PpmMap *mPpmMap;
+    QTimer *mTimer;
+
+};
+
 class AppPpmPage : public QWizardPage
 {
     Q_OBJECT
@@ -204,15 +228,32 @@ public:
     bool validatePage() Q_DECL_OVERRIDE;
     void initializePage() Q_DECL_OVERRIDE;
 
+private:
+    VescInterface *mVesc;
+    ParamTable *mParamTab;
+    QPushButton *mWriteButton;
+
+};
+
+class AppAdcMapPage : public QWizardPage
+{
+    Q_OBJECT
+
+public:
+    AppAdcMapPage(VescInterface *vesc, QWidget *parent = 0);
+    int nextId() const Q_DECL_OVERRIDE;
+    bool validatePage() Q_DECL_OVERRIDE;
+    void initializePage() Q_DECL_OVERRIDE;
+
 private slots:
+    void paramChangedDouble(QObject *src, QString name, double newParam);
     void timerSlot();
 
 private:
     VescInterface *mVesc;
     ParamTable *mParamTab;
-    PpmMap *mPpmMap;
+    AdcMap *mAdcMap;
     QTimer *mTimer;
-    QPushButton *mWriteButton;
 
 };
 
@@ -226,14 +267,9 @@ public:
     bool validatePage() Q_DECL_OVERRIDE;
     void initializePage() Q_DECL_OVERRIDE;
 
-private slots:
-    void timerSlot();
-
 private:
     VescInterface *mVesc;
     ParamTable *mParamTab;
-    AdcMap *mAdcMap;
-    QTimer *mTimer;
     QPushButton *mWriteButton;
 
 };

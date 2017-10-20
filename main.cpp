@@ -22,6 +22,7 @@
 #include <QStyleFactory>
 #include <QSettings>
 #include <QDesktopWidget>
+#include <QFontDatabase>
 
 int main(int argc, char *argv[])
 {
@@ -78,14 +79,17 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-    // Ignore the OS font settings and do scaling with the method above.
-    QFont font = qApp->font();
-    if (font.pixelSize() > 0) {
-        font.setPixelSize(11);
-    } else {
-        font.setPointSize(11);
-    }
-    qApp->setFont(font);
+    // Fonts
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Bold.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-BoldOblique.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Oblique.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Bold.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-BoldOblique.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Oblique.ttf");
+
+    qApp->setFont(QFont("DejaVu Sans", 11));
 
     // Style
     a.setStyleSheet("");

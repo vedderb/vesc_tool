@@ -309,6 +309,12 @@ void PageFirmware::on_uploadButton_clicked()
         if (reply == QMessageBox::Yes) {
             QByteArray data = file.readAll();
             mVesc->commands()->startFirmwareUpload(data, isBootloader);
+
+            QMessageBox::warning(this,
+                                 tr("Warning"),
+                                 tr("The firmware upload is now ongoing. After the upload has finished you must wait at least "
+                                    "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
+                                    "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
         }
     }
 }

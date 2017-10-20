@@ -119,6 +119,7 @@ private slots:
     void on_actionVESCToolChangelog_triggered();
     void on_actionFirmwareChangelog_triggered();
     void on_actionVESCProjectForums_triggered();
+    void on_actionLicense_triggered();
 
 private:
     Ui::MainWindow *ui;

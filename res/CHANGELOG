@@ -1,3 +1,11 @@
+== 0.83 ==
+* Embedded fonts for consistency and static linking without fontconfig.
+* Split PPM wizard page into two pages.
+* Split ADC wizard page into two pages.
+* Removed devicepixelratio support from QCustomPlot as it slows it down a lot.
+* FW 3.30 support.
+* Added firmware upload unplug power warning.
+
 == 0.82 ==
 * Only show introduction if it has changed since the previous version.
 * Proper fix for RT data time scale https://github.com/vedderb/vesc_tool/pull/5

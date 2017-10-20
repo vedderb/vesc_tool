@@ -1,11 +1,11 @@
 #!/bin/bash
 
-export PATH=/opt/Qt/5.7-static/bin:$PATH
+export PATH=/opt/Qt/5.9-static/bin:$PATH
 rm -rf build/lin/*
 
 # Original
 qmake -config release "CONFIG += release_lin build_original"
 make clean
-make -j4
+make -j8
 rm -rf build/lin/obj
 

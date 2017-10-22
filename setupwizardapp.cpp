@@ -32,7 +32,9 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     setPage(Page_MultiId, new AppMultiIdPage(vesc));
     setPage(Page_General, new AppGeneralPage(vesc));
     setPage(Page_Nunchuk, new AppNunchukPage(vesc));
+    setPage(Page_Ppm_Map, new AppPpmMapPage(vesc));
     setPage(Page_Ppm, new AppPpmPage(vesc));
+    setPage(Page_Adc_Map, new AppAdcMapPage(vesc));
     setPage(Page_Adc, new AppAdcPage(vesc));
     setPage(Page_Conclusion, new AppConclusionPage(vesc));
 
@@ -365,11 +367,11 @@ int AppGeneralPage::nextId() const
         break;
 
     case SetupWizardApp::Input_Ppm:
-        return SetupWizardApp::Page_Ppm;
+        return SetupWizardApp::Page_Ppm_Map;
         break;
 
     case SetupWizardApp::Input_Adc:
-        return SetupWizardApp::Page_Adc;
+        return SetupWizardApp::Page_Adc_Map;
         break;
 
     default:
@@ -497,6 +499,75 @@ void AppNunchukPage::timerSlot()
     mVesc->commands()->getDecodedChuk();
 }
 
+AppPpmMapPage::AppPpmMapPage(VescInterface *vesc, QWidget *parent)
+    : QWizardPage(parent)
+{
+    mVesc = vesc;
+
+    setTitle(tr("PPM Mapping"));
+    setSubTitle(tr("Map your PPM receiver."));
+
+    mParamTab = new ParamTable;
+    mPpmMap = new PpmMap;
+    mTimer = new QTimer(this);
+
+    mPpmMap->setVesc(mVesc);
+
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(mParamTab);
+    layout->addWidget(mPpmMap);
+    setLayout(layout);
+
+    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    connect(mVesc->appConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
+            this, SLOT(paramChangedDouble(QObject*,QString,double)));
+}
+
+int AppPpmMapPage::nextId() const
+{
+    return SetupWizardApp::Page_Ppm;
+}
+
+bool AppPpmMapPage::validatePage()
+{
+    mVesc->commands()->setAppConf();
+    return true;
+}
+
+void AppPpmMapPage::initializePage()
+{
+    mParamTab->setRowCount(0);
+
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_start");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_end");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_center");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.hyst");
+
+    mVesc->appConfig()->updateParamEnum("app_ppm_conf.ctrl_type", 0);
+    mVesc->appConfig()->updateParamEnum("app_to_use", 1);
+    mVesc->commands()->setAppConf();
+
+    mTimer->start(20);
+}
+
+void AppPpmMapPage::paramChangedDouble(QObject *src, QString name, double newParam)
+{
+    (void)src;
+    (void)newParam;
+
+    if (name == "app_ppm_conf.pulse_start" ||
+            name == "app_ppm_conf.pulse_end" ||
+            name == "app_ppm_conf.pulse_center" ||
+            name == "app_ppm_conf.hyst") {
+        mVesc->commands()->setAppConf();
+    }
+}
+
+void AppPpmMapPage::timerSlot()
+{
+    mVesc->commands()->getDecodedPpm();
+}
+
 AppPpmPage::AppPpmPage(VescInterface *vesc, QWidget *parent)
     : QWizardPage(parent)
 {
@@ -506,21 +577,15 @@ AppPpmPage::AppPpmPage(VescInterface *vesc, QWidget *parent)
     setSubTitle(tr("Configure your PPM receiver."));
 
     mParamTab = new ParamTable;
-    mPpmMap = new PpmMap;
-    mTimer = new QTimer(this);
     mWriteButton = new QPushButton(tr(" | Write Configuration To Vesc"));
     mWriteButton->setIcon(QIcon("://res/icons/app_down.png"));
     mWriteButton->setIconSize(QSize(24, 24));
 
-    mPpmMap->setVesc(mVesc);
-
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mParamTab);
     layout->addWidget(mWriteButton);
-    layout->addWidget(mPpmMap);
     setLayout(layout);
 
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
     connect(mWriteButton, SIGNAL(clicked(bool)),
             mVesc->commands(), SLOT(setAppConf()));
 }
@@ -548,12 +613,6 @@ void AppPpmPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_neg");
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pid_max_erpm");
 
-    mParamTab->addRowSeparator(tr("Mapping"));
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_start");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_end");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_center");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.hyst");
-
     if (field("Multi").toInt() == SetupWizardApp::Multi_Master) {
         mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
         mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc");
@@ -563,15 +622,85 @@ void AppPpmPage::initializePage()
         mVesc->appConfig()->updateParamBool("app_ppm_conf.multi_esc", false);
     }
 
-    mVesc->appConfig()->updateParamEnum("app_to_use", 1);
+    mVesc->appConfig()->updateParamEnum("app_ppm_conf.ctrl_type", 3);
+    mVesc->commands()->setAppConf();
+}
+
+AppAdcMapPage::AppAdcMapPage(VescInterface *vesc, QWidget *parent)
+    : QWizardPage(parent)
+{
+    mVesc = vesc;
+
+    setTitle(tr("ADC Mapping"));
+    setSubTitle(tr("Map your analog throttle."));
+
+    mParamTab = new ParamTable;
+    mAdcMap = new AdcMap;
+    mTimer = new QTimer(this);
+
+    mAdcMap->setVesc(mVesc);
+
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(mParamTab);
+    layout->addWidget(mAdcMap);
+    setLayout(layout);
+
+    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    connect(mVesc->appConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
+            this, SLOT(paramChangedDouble(QObject*,QString,double)));
+}
+
+int AppAdcMapPage::nextId() const
+{
+    return SetupWizardApp::Page_Adc;
+}
+
+bool AppAdcMapPage::validatePage()
+{
+    mVesc->commands()->setAppConf();
+    return true;
+}
+
+void AppAdcMapPage::initializePage()
+{
+    mParamTab->setRowCount(0);
+
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_start");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_end");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_center");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_inverted");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_start");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_end");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_inverted");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.hyst");
+
+    mVesc->appConfig()->updateParamEnum("app_to_use", 2);
+    mVesc->appConfig()->updateParamEnum("app_adc_conf.ctrl_type", 0);
     mVesc->commands()->setAppConf();
 
     mTimer->start(20);
 }
 
-void AppPpmPage::timerSlot()
+void AppAdcMapPage::paramChangedDouble(QObject *src, QString name, double newParam)
 {
-    mVesc->commands()->getDecodedPpm();
+    (void)src;
+    (void)newParam;
+
+    if (name == "app_adc_conf.voltage_start" ||
+            name == "app_adc_conf.voltage_end" ||
+            name == "app_adc_conf.voltage_center" ||
+            name == "app_adc_conf.voltage_inverted" ||
+            name == "app_adc_conf.voltage2_start" ||
+            name == "app_adc_conf.voltage2_end" ||
+            name == "app_adc_conf.voltage2_inverted" ||
+            name == "app_adc_conf.hyst") {
+        mVesc->commands()->setAppConf();
+    }
+}
+
+void AppAdcMapPage::timerSlot()
+{
+    mVesc->commands()->getDecodedAdc();
 }
 
 AppAdcPage::AppAdcPage(VescInterface *vesc, QWidget *parent)
@@ -583,21 +712,15 @@ AppAdcPage::AppAdcPage(VescInterface *vesc, QWidget *parent)
     setSubTitle(tr("Configure your analog throttle."));
 
     mParamTab = new ParamTable;
-    mAdcMap = new AdcMap;
-    mTimer = new QTimer(this);
     mWriteButton = new QPushButton(tr(" | Write Configuration To Vesc"));
     mWriteButton->setIcon(QIcon("://res/icons/app_down.png"));
     mWriteButton->setIconSize(QSize(24, 24));
 
-    mAdcMap->setVesc(mVesc);
-
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mParamTab);
     layout->addWidget(mWriteButton);
-    layout->addWidget(mAdcMap);
     setLayout(layout);
 
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
     connect(mWriteButton, SIGNAL(clicked(bool)),
             mVesc->commands(), SLOT(setAppConf()));
 }
@@ -626,16 +749,6 @@ void AppAdcPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_pos");
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_neg");
 
-    mParamTab->addRowSeparator(tr("Mapping"));
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_start");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_end");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_center");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_inverted");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_start");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_end");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_inverted");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.hyst");
-
     if (field("Multi").toInt() == SetupWizardApp::Multi_Master) {
         mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
         mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc");
@@ -645,15 +758,8 @@ void AppAdcPage::initializePage()
         mVesc->appConfig()->updateParamBool("app_adc_conf.multi_esc", false);
     }
 
-    mVesc->appConfig()->updateParamEnum("app_to_use", 2);
+    mVesc->appConfig()->updateParamEnum("app_adc_conf.ctrl_type", 1);
     mVesc->commands()->setAppConf();
-
-    mTimer->start(20);
-}
-
-void AppAdcPage::timerSlot()
-{
-    mVesc->commands()->getDecodedAdc();
 }
 
 AppConclusionPage::AppConclusionPage(VescInterface *vesc, QWidget *parent)

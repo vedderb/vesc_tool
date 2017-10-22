@@ -10,23 +10,23 @@
 # sudo chown $USER qt5
 # git clone https://code.qt.io/qt/qt5.git
 # cd qt5
-# git checkout 5.7
+# git checkout 5.9
 # perl init-repository --module-subset=default,-qtwebkit,-qtwebkit-examples,-qtwebengine
 # mkdir build
 # cd build
-# ../configure -prefix /opt/Qt/5.7-static/ -release -opensource -confirm-license -static -no-largefile -no-sql-mysql -no-sql-psql -no-sql-sqlite -no-journald -qt-zlib -no-mtdev -no-gif -qt-libpng -qt-libjpeg -qt-harfbuzz -no-openssl -qt-pcre -qt-xcb -no-xinput2 -no-glib -no-egl -no-xcursor -no-xfixes -no-xrandr -qt-xkbcommon-x11 -no-pulseaudio -no-alsa -no-compile-examples -no-cups -no-iconv -no-tslib -fontconfig -dbus-linked -qt-xcb -no-xcb-xlib -no-eglfs -no-directfb -no-linuxfb -no-kms -no-opengl -no-gstreamer -nomake examples -nomake tests -skip qtwebkit -skip qtwebsockets -skip qtwebkit-examples -skip qtwebchannel -skip qtwebengine -skip qtwayland -skip qtwinextras -skip qtsvg -skip qtsensors -skip qtcanvas3d -skip qtconnectivity -skip declarative -skip multimedia -skip quick1 -no-audio-backend -no-xkbcommon-evdev -no-evdev -no-libproxy -no-icu -no-accessibility -skip imageformats -no-dbus
-# make -j4
+# ../configure -prefix /opt/Qt/5.9-static/ -release -opensource -confirm-license -static -no-sql-mysql -no-sql-psql -no-sql-sqlite -no-journald -qt-zlib -no-mtdev -no-gif -qt-libpng -qt-libjpeg -qt-harfbuzz -no-openssl -qt-pcre -qt-xcb -no-xinput2 -no-glib -no-egl -qt-xkbcommon-x11 -no-compile-examples -no-cups -no-iconv -no-tslib -dbus-linked -no-xcb-xlib -no-eglfs -no-directfb -no-linuxfb -no-kms -no-opengl -nomake examples -nomake tests -skip qtwebsockets -skip qtwebchannel -skip qtwebengine -skip qtwayland -skip qtwinextras -skip qtsvg -skip qtsensors -skip qtcanvas3d -skip qtconnectivity -skip declarative -skip multimedia -skip quick1 -no-xkbcommon-evdev -no-evdev -no-libproxy -no-icu -no-accessibility -skip imageformats -no-dbus -skip location -no-xinput2 -qt-freetype
+# make -j9
 # sudo make install
 
 # Note: remove -no-dbus to get titlebar menus in ubuntu
 
-export PATH=/opt/Qt/5.7-static/bin:$PATH
+export PATH=/opt/Qt/5.9-static/bin:$PATH
 rm -rf build/lin/*
 
 # Original
 qmake -config release "CONFIG += release_lin build_original"
 make clean
-make -j4
+make -j8
 rm -rf build/lin/obj
 cd build/lin
 zip vesc_tool_original_linux.zip `ls | grep -v '\.zip$'`
@@ -36,7 +36,7 @@ cd ../..
 # Platinum
 qmake -config release "CONFIG += release_lin build_platinum"
 make clean
-make -j4
+make -j8
 rm -rf build/lin/obj
 cd build/lin
 zip vesc_tool_platinum_linux.zip `ls | grep -v '\.zip$'`
@@ -46,7 +46,7 @@ cd ../..
 # Gold
 qmake -config release "CONFIG += release_lin build_gold"
 make clean
-make -j4
+make -j8
 rm -rf build/lin/obj
 cd build/lin
 zip vesc_tool_gold_linux.zip `ls | grep -v '\.zip$'`
@@ -56,7 +56,7 @@ cd ../..
 # Silver
 qmake -config release "CONFIG += release_lin build_silver"
 make clean
-make -j4
+make -j8
 rm -rf build/lin/obj
 cd build/lin
 zip vesc_tool_silver_linux.zip `ls | grep -v '\.zip$'`
@@ -66,7 +66,7 @@ cd ../..
 # Bronze
 qmake -config release "CONFIG += release_lin build_bronze"
 make clean
-make -j4
+make -j8
 rm -rf build/lin/obj
 cd build/lin
 zip vesc_tool_bronze_linux.zip `ls | grep -v '\.zip$'`
@@ -76,7 +76,7 @@ cd ../..
 # Free of charge
 qmake -config release "CONFIG += release_lin build_free"
 make clean
-make -j4
+make -j8
 rm -rf build/lin/obj
 cd build/lin
 zip vesc_tool_free_linux.zip `ls | grep -v '\.zip$'`

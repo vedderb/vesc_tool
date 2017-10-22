@@ -122,5 +122,13 @@
         <file>res/icons/Settings-96.png</file>
         <file>res/bootloaders/60.bin</file>
         <file>res/bootloaders/40_o_47_o_48_o_410_o_411_o_412_o_DAS_RS.bin</file>
+        <file>res/fonts/DejaVuSans.ttf</file>
+        <file>res/fonts/DejaVuSans-Oblique.ttf</file>
+        <file>res/fonts/DejaVuSansMono-Oblique.ttf</file>
+        <file>res/fonts/DejaVuSansMono-BoldOblique.ttf</file>
+        <file>res/fonts/DejaVuSansMono-Bold.ttf</file>
+        <file>res/fonts/DejaVuSansMono.ttf</file>
+        <file>res/fonts/DejaVuSans-BoldOblique.ttf</file>
+        <file>res/fonts/DejaVuSans-Bold.ttf</file>
     </qresource>
 </RCC>

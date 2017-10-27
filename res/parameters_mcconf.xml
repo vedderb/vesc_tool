@@ -479,6 +479,28 @@ p, li { white-space: pre-wrap; }
             <suffix> °C</suffix>
             <vTx>9</vTx>
         </l_temp_motor_end>
+        <l_temp_accel_dec>
+            <longName>Acceleration Temperature Decrease</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Decrease the motor and MOSFET temperature limits by this amount during acceleration. This is useful to still have braking torque left when the components get warm. A decrease of 0 % means that the acceleration temperature limits are the same as the braking temperature limits, and a decrease of 100 % meanse that the acceleration temperature limits are at 25 °C.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_L_LIM_TEMP_ACCEL_DEC</cDefine>
+            <editorDecimalsDouble>0</editorDecimalsDouble>
+            <editorScale>100</editorScale>
+            <editAsPercentage>1</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>1</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>0.15</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> %</suffix>
+            <vTx>9</vTx>
+        </l_temp_accel_dec>
         <l_min_duty>
             <longName>Minimum Duty Cycle</longName>
             <type>1</type>
@@ -2407,6 +2429,7 @@ p, li { white-space: pre-wrap; }
         <ser>l_temp_fet_end</ser>
         <ser>l_temp_motor_start</ser>
         <ser>l_temp_motor_end</ser>
+        <ser>l_temp_accel_dec</ser>
         <ser>l_min_duty</ser>
         <ser>l_max_duty</ser>
         <ser>l_watt_max</ser>

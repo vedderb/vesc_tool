@@ -195,7 +195,7 @@ void PageSampledData::timerSlot()
             // Calculate current and voltages
             QVector<double> curr1 = curr1Vector;
             QVector<double> curr2 = curr2Vector;
-            QVector<double> curr3(size);
+            QVector<double> curr3 = curr3Vector;
 
             QVector<double> ph1 = ph1Vector;
             QVector<double> ph2 = ph2Vector;
@@ -206,7 +206,6 @@ void PageSampledData::timerSlot()
             QVector<double> fSw = fSwVector;
 
             for (int i=0;i < curr2.size(); i++) {
-                curr3[i] = -(curr1[i] + curr2[i]);
 
                 if (ui->truncateBox->isChecked()) {
                     if (!(position[i] == 1 || position[i] == 4)) {
@@ -467,6 +466,7 @@ void PageSampledData::samplesReceived(QByteArray bytes)
 
     tmpCurr1Vector.append(vb.vbPopFrontDouble32Auto());
     tmpCurr2Vector.append(vb.vbPopFrontDouble32Auto());
+    tmpCurr3Vector.append(vb.vbPopFrontDouble32Auto());
     tmpPh1Vector.append(vb.vbPopFrontDouble32Auto());
     tmpPh2Vector.append(vb.vbPopFrontDouble32Auto());
     tmpPh3Vector.append(vb.vbPopFrontDouble32Auto());
@@ -482,6 +482,7 @@ void PageSampledData::samplesReceived(QByteArray bytes)
     if (tmpCurr1Vector.size() == mSamplesToWait) {
         curr1Vector = tmpCurr1Vector;
         curr2Vector = tmpCurr2Vector;
+        curr3Vector  = tmpCurr3Vector;
         ph1Vector = tmpPh1Vector;
         ph2Vector = tmpPh2Vector;
         ph3Vector = tmpPh3Vector;
@@ -605,6 +606,7 @@ void PageSampledData::clearBuffers()
     mSampleInt = 0;
     tmpCurr1Vector.clear();
     tmpCurr2Vector.clear();
+    tmpCurr3Vector.clear();
     tmpPh1Vector.clear();
     tmpPh2Vector.clear();
     tmpPh3Vector.clear();

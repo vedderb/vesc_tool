@@ -148,6 +148,7 @@ public:
     AppMultiIdPage(VescInterface *vesc, QWidget *parent = 0);
     int nextId() const Q_DECL_OVERRIDE;
     bool validatePage() Q_DECL_OVERRIDE;
+    void initializePage() Q_DECL_OVERRIDE;
 
 private:
     VescInterface *mVesc;
@@ -247,6 +248,7 @@ public:
 
 private slots:
     void paramChangedDouble(QObject *src, QString name, double newParam);
+    void paramChangedBool(QObject *src, QString name, bool newParam);
     void timerSlot();
 
 private:

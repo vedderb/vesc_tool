@@ -315,6 +315,15 @@ bool AppMultiIdPage::validatePage()
     return true;
 }
 
+void AppMultiIdPage::initializePage()
+{
+    if (field("Multi").toInt() == SetupWizardApp::Multi_Slave) {
+        mVesc->appConfig()->updateParamInt("controller_id", 1);
+    } else {
+        mVesc->appConfig()->updateParamInt("controller_id", 0);
+    }
+}
+
 AppGeneralPage::AppGeneralPage(VescInterface *vesc, QWidget *parent)
     : QWizardPage(parent)
 {
@@ -648,6 +657,8 @@ AppAdcMapPage::AppAdcMapPage(VescInterface *vesc, QWidget *parent)
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
     connect(mVesc->appConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
             this, SLOT(paramChangedDouble(QObject*,QString,double)));
+    connect(mVesc->appConfig(), SIGNAL(paramChangedBool(QObject*,QString,bool)),
+            this, SLOT(paramChangedBool(QObject*,QString,bool)));
 }
 
 int AppAdcMapPage::nextId() const
@@ -689,11 +700,20 @@ void AppAdcMapPage::paramChangedDouble(QObject *src, QString name, double newPar
     if (name == "app_adc_conf.voltage_start" ||
             name == "app_adc_conf.voltage_end" ||
             name == "app_adc_conf.voltage_center" ||
-            name == "app_adc_conf.voltage_inverted" ||
             name == "app_adc_conf.voltage2_start" ||
             name == "app_adc_conf.voltage2_end" ||
-            name == "app_adc_conf.voltage2_inverted" ||
             name == "app_adc_conf.hyst") {
+        mVesc->commands()->setAppConf();
+    }
+}
+
+void AppAdcMapPage::paramChangedBool(QObject *src, QString name, bool newParam)
+{
+    (void)src;
+    (void)newParam;
+
+    if (name == "app_adc_conf.voltage_inverted" ||
+            name == "app_adc_conf.voltage2_inverted") {
         mVesc->commands()->setAppConf();
     }
 }

@@ -1,3 +1,7 @@
+== 0.84 ==
+* FW 3.31 support.
+* Input setup wizard improvements.
+
 == 0.83 ==
 * Embedded fonts for consistency and static linking without fontconfig.
 * Split PPM wizard page into two pages.

@@ -38,7 +38,7 @@ public:
     void setSendCan(bool sendCan, int id = -1);
     bool getSendCan();
     void setCanSendId(unsigned int id);
-    unsigned int getCanSendId();
+    int getCanSendId();
     void setMcConfig(ConfigParams *mcConfig);
     void setAppConfig(ConfigParams *appConfig);
     void startFirmwareUpload(QByteArray &newFirmware, bool isBootloader = false);
@@ -115,7 +115,7 @@ private:
 
     QTimer *mTimer;
     bool mSendCan;
-    unsigned int mCanId;
+    int mCanId;
     bool mIsLimitedMode;
 
     // FW upload state

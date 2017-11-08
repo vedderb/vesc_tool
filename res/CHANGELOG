@@ -1,3 +1,7 @@
+== 0.86 ==
+* FW 3.33 support.
+* Synchronized CAN FWD ID between connection pages.
+
 == 0.85 ==
 * FW 3.32 support.
 * Configurable CAN baud rate.

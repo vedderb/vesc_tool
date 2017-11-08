@@ -50,5 +50,6 @@ void PageAppGeneral::setVesc(VescInterface *vesc)
         ui->appTab->addParamRow(mVesc->appConfig(), "timeout_brake_current");
         ui->appTab->addParamRow(mVesc->appConfig(), "send_can_status");
         ui->appTab->addParamRow(mVesc->appConfig(), "send_can_status_rate_hz");
+        ui->appTab->addParamRow(mVesc->appConfig(), "can_baud_rate");
     }
 }

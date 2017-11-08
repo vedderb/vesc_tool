@@ -1,3 +1,7 @@
+== 0.85 ==
+* FW 3.32 support.
+* Configurable CAN baud rate.
+
 == 0.84 ==
 * FW 3.31 support.
 * Input setup wizard improvements.

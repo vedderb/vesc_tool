@@ -130,7 +130,7 @@ private:
     int mLastTcpPort;
 
     bool mSendCanBefore = false;
-    unsigned int mCanIdBefore = 0;
+    int mCanIdBefore = 0;
     bool mWasConnected;
     bool mAutoconnectOngoing;
     double mAutoconnectProgress;

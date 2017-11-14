@@ -1,3 +1,9 @@
+=== FW 3.33 ===
+* Fixed CAN-bus baud rate update.
+
+=== FW 3.32 ===
+* Added CAN-bus baud rate setting.
+
 === FW 3.31 ===
 * Option to decrease temperature limits during acceleration to still have braking torque left.
 * Added PID speed control mode to ADC app.

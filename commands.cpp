@@ -74,7 +74,7 @@ void Commands::setCanSendId(unsigned int id)
     mCanId = id;
 }
 
-unsigned int Commands::getCanSendId()
+int Commands::getCanSendId()
 {
     return mCanId;
 }

@@ -34,38 +34,41 @@
 #include "configparams.h"
 #include "commands.h"
 #include "packet.h"
+#include "bleuart.h"
 
 class VescInterface : public QObject
 {
     Q_OBJECT
 public:
     explicit VescInterface(QObject *parent = 0);
-    Commands *commands() const;
-    ConfigParams *mcConfig();
-    ConfigParams *appConfig();
-    ConfigParams *infoConfig();
-    QStringList getSupportedFirmwares();
+    Q_INVOKABLE Commands *commands() const;
+    Q_INVOKABLE ConfigParams *mcConfig();
+    Q_INVOKABLE ConfigParams *appConfig();
+    Q_INVOKABLE ConfigParams *infoConfig();
+    Q_INVOKABLE QStringList getSupportedFirmwares();
     QList<QPair<int, int> > getSupportedFirmwarePairs();
-    QString getFirmwareNow();
-    void emitStatusMessage(const QString &msg, bool isGood);
-    bool fwRx();
-
+    Q_INVOKABLE QString getFirmwareNow();
+    Q_INVOKABLE void emitStatusMessage(const QString &msg, bool isGood);
+    Q_INVOKABLE void emitMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText = false);
+    Q_INVOKABLE bool fwRx();
+    Q_INVOKABLE BleUart* bleDevice();
 
     // Connection
-    bool isPortConnected();
-    void disconnectPort();
-    bool reconnectLastPort();
-    bool autoconnect();
-    QString getConnectedPortName();
+    Q_INVOKABLE bool isPortConnected();
+    Q_INVOKABLE void disconnectPort();
+    Q_INVOKABLE bool reconnectLastPort();
+    Q_INVOKABLE bool autoconnect();
+    Q_INVOKABLE QString getConnectedPortName();
     bool connectSerial(QString port, int baudrate = 115200);
     QList<VSerialInfo_t> listSerialPorts();
-    void connectTcp(QString server, int port);
-    bool isAutoconnectOngoing() const;
-    double getAutoconnectProgress() const;
+    Q_INVOKABLE void connectTcp(QString server, int port);
+    Q_INVOKABLE void connectBle(QString address);
+    Q_INVOKABLE bool isAutoconnectOngoing() const;
+    Q_INVOKABLE double getAutoconnectProgress() const;
 
 signals:
     void statusMessage(const QString &msg, bool isGood);
-    void messageDialog(const QString &title, const QString &msg, bool isGood);
+    void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
     void fwUploadStatus(const QString &status, double progress, bool isOngoing);
     void serialPortNotWritable(const QString &port);
     void fwRxChanged(bool rx, bool limited);
@@ -86,6 +89,8 @@ private slots:
     void tcpInputDataAvailable();
     void tcpInputError(QAbstractSocket::SocketError socketError);
 
+    void bleDataRx(QByteArray data);
+
     void timerSlot();
     void packetDataToSend(QByteArray &data);
     void packetReceived(QByteArray &data);
@@ -99,7 +104,8 @@ private:
     typedef enum {
         CONN_NONE = 0,
         CONN_SERIAL,
-        CONN_TCP
+        CONN_TCP,
+        CONN_BLE
     } conn_t;
 
     ConfigParams *mMcConfig;
@@ -111,6 +117,7 @@ private:
     Commands *mCommands;
     bool mFwVersionReceived;
     int mFwRetries;
+    int mFwPollCnt;
     QString mFwTxt;
     QString mHwTxt;
     bool mIsUploadingFw;
@@ -128,6 +135,9 @@ private:
     bool mTcpConnected;
     QString mLastTcpServer;
     int mLastTcpPort;
+
+    BleUart *mBleUart;
+    QString mLastBleAddr;
 
     bool mSendCanBefore = false;
     int mCanIdBefore = 0;

@@ -130,5 +130,7 @@
         <file>res/fonts/DejaVuSansMono.ttf</file>
         <file>res/fonts/DejaVuSans-BoldOblique.ttf</file>
         <file>res/fonts/DejaVuSans-Bold.ttf</file>
+        <file>res/icons/ic_folder_open_black_48dp.png</file>
+        <file>res/icons/ic_insert_drive_file_black_48dp.png</file>
     </qresource>
 </RCC>

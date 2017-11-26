@@ -34,17 +34,17 @@ public:
     explicit Commands(QObject *parent = 0);
 
     void setLimitedMode(bool is_limited);
-    bool isLimitedMode();
-    void setSendCan(bool sendCan, int id = -1);
-    bool getSendCan();
-    void setCanSendId(unsigned int id);
-    int getCanSendId();
+    Q_INVOKABLE bool isLimitedMode();
+    Q_INVOKABLE void setSendCan(bool sendCan, int id = -1);
+    Q_INVOKABLE bool getSendCan();
+    Q_INVOKABLE void setCanSendId(unsigned int id);
+    Q_INVOKABLE int getCanSendId();
     void setMcConfig(ConfigParams *mcConfig);
     void setAppConfig(ConfigParams *appConfig);
-    void startFirmwareUpload(QByteArray &newFirmware, bool isBootloader = false);
+    Q_INVOKABLE void startFirmwareUpload(QByteArray &newFirmware, bool isBootloader = false);
     double getFirmwareUploadProgress();
     QString getFirmwareUploadStatus();
-    void cancelFirmwareUpload();
+    Q_INVOKABLE void cancelFirmwareUpload();
     void checkMcConfig();
 
 signals:
@@ -132,6 +132,15 @@ private:
     ConfigParams *mAppConfig;
     ConfigParams mMcConfigLast;
     bool mCheckNextMcConfig;
+
+    int mTimeoutCount;
+    int mTimeoutFwVer;
+    int mTimeoutMcconf;
+    int mTimeoutAppconf;
+    int mTimeoutValues;
+    int mTimeoutDecPpm;
+    int mTimeoutDecAdc;
+    int mTimeoutDecChuk;
 
 };
 

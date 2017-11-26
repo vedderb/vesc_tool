@@ -1,3 +1,14 @@
+== 0.87 ==
+* RT plot time measurement improvement.
+* First implementation of BLE support.
+* Added poll command timeouts.
+* Less frequent FW version and conf sampling.
+* Better page list size calculation.
+* Refactoring for accessing most backend functionality from QML.
+* First implentation of mobile GUI preview, a lot of work left.
+* Firmware display synchronization fix.
+* FW 3.34 support.
+
 == 0.86 ==
 * FW 3.33 support.
 * Synchronized CAN FWD ID between connection pages.

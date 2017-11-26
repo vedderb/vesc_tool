@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qtquickcontrols2.conf</file>
+    </qresource>
+    <qresource prefix="/mobile">
+        <file>main.qml</file>
+        <file>ConnectBle.qml</file>
+        <file>ConnectBleForm.ui.qml</file>
+        <file>RtData.qml</file>
+        <file>FwUpdate.qml</file>
+        <file>FilePicker.qml</file>
+    </qresource>
+</RCC>

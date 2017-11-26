@@ -42,6 +42,15 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mMcConfig = 0;
     mAppConfig = 0;
 
+    mTimeoutCount = 50;
+    mTimeoutFwVer = 0;
+    mTimeoutMcconf = 0;
+    mTimeoutAppconf = 0;
+    mTimeoutValues = 0;
+    mTimeoutDecPpm = 0;
+    mTimeoutDecAdc = 0;
+    mTimeoutDecChuk = 0;
+
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
 }
 
@@ -86,6 +95,7 @@ void Commands::processPacket(QByteArray data)
 
     switch (id) {
     case COMM_FW_VERSION: {
+        mTimeoutFwVer = 0;
         int fw_major;
         int fw_minor;
         QString hw;
@@ -113,6 +123,7 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_GET_VALUES: {
+        mTimeoutValues = 0;
         MC_VALUES values;
         values.temp_mos = vb.vbPopFrontDouble16(1e1);
         values.temp_motor = vb.vbPopFrontDouble16(1e1);
@@ -131,6 +142,13 @@ void Commands::processPacket(QByteArray data)
         values.tachometer_abs = vb.vbPopFrontInt32();
         values.fault_code = (mc_fault_code)vb.vbPopFrontInt8();
         values.fault_str = faultToStr(values.fault_code);
+
+        if (vb.size() >= 4) {
+            values.position = vb.vbPopFrontDouble32(1e6);
+        } else {
+            values.position = -1.0;
+        }
+
         emit valuesReceived(values);
     } break;
 
@@ -156,6 +174,7 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_GET_MCCONF:
     case COMM_GET_MCCONF_DEFAULT:
+        mTimeoutMcconf = 0;
         if (mMcConfig) {
             mMcConfig->deSerialize(vb);
             mMcConfig->updateDone();
@@ -169,6 +188,7 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_GET_APPCONF:
     case COMM_GET_APPCONF_DEFAULT:
+        mTimeoutAppconf = 0;
         if (mAppConfig) {
             mAppConfig->deSerialize(vb);
             mAppConfig->updateDone();
@@ -213,12 +233,14 @@ void Commands::processPacket(QByteArray data)
     } break;
 
     case COMM_GET_DECODED_PPM: {
+        mTimeoutDecPpm = 0;
         double dec_ppm = vb.vbPopFrontDouble32(1e6);
         double ppm_last_len = vb.vbPopFrontDouble32(1e6);
         emit decodedPpmReceived(dec_ppm, ppm_last_len);
     } break;
 
     case COMM_GET_DECODED_ADC: {
+        mTimeoutDecAdc = 0;
         double dec_adc = vb.vbPopFrontDouble32(1e6);
         double dec_adc_voltage = vb.vbPopFrontDouble32(1e6);
         double dec_adc2 = vb.vbPopFrontDouble32(1e6);
@@ -227,6 +249,7 @@ void Commands::processPacket(QByteArray data)
     } break;
 
     case COMM_GET_DECODED_CHUK:
+        mTimeoutDecChuk = 0;
         emit decodedChukReceived(vb.vbPopFrontDouble32(1000000.0));
         break;
 
@@ -253,6 +276,12 @@ void Commands::processPacket(QByteArray data)
 
 void Commands::getFwVersion()
 {
+    if (mTimeoutFwVer > 0) {
+        return;
+    }
+
+    mTimeoutFwVer = mTimeoutCount;
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_FW_VERSION);
     emitData(vb);
@@ -260,6 +289,12 @@ void Commands::getFwVersion()
 
 void Commands::getValues()
 {
+    if (mTimeoutValues > 0) {
+        return;
+    }
+
+    mTimeoutValues = mTimeoutCount;
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_VALUES);
     emitData(vb);
@@ -341,6 +376,13 @@ void Commands::samplePrint(debug_sampling_mode mode, int sample_len, int dec)
 
 void Commands::getMcconf()
 {
+    if (mTimeoutMcconf > 0) {
+        return;
+    }
+
+    mTimeoutMcconf = mTimeoutCount;
+
+
     mCheckNextMcConfig = false;
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_MCCONF);
@@ -349,6 +391,12 @@ void Commands::getMcconf()
 
 void Commands::getMcconfDefault()
 {
+    if (mTimeoutMcconf > 0) {
+        return;
+    }
+
+    mTimeoutMcconf = mTimeoutCount;
+
     mCheckNextMcConfig = false;
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_MCCONF_DEFAULT);
@@ -372,6 +420,12 @@ void Commands::setMcconf(bool check)
 
 void Commands::getAppConf()
 {
+    if (mTimeoutAppconf > 0) {
+        return;
+    }
+
+    mTimeoutAppconf = mTimeoutCount;
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_APPCONF);
     emitData(vb);
@@ -379,6 +433,12 @@ void Commands::getAppConf()
 
 void Commands::getAppConfDefault()
 {
+    if (mTimeoutAppconf > 0) {
+        return;
+    }
+
+    mTimeoutAppconf = mTimeoutCount;
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_APPCONF_DEFAULT);
     emitData(vb);
@@ -420,6 +480,12 @@ void Commands::sendAlive()
 
 void Commands::getDecodedPpm()
 {
+    if (mTimeoutDecPpm > 0) {
+        return;
+    }
+
+    mTimeoutDecPpm = mTimeoutCount;
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_DECODED_PPM);
     emitData(vb);
@@ -427,6 +493,12 @@ void Commands::getDecodedPpm()
 
 void Commands::getDecodedAdc()
 {
+    if (mTimeoutDecAdc > 0) {
+        return;
+    }
+
+    mTimeoutDecAdc = mTimeoutCount;
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_DECODED_ADC);
     emitData(vb);
@@ -434,6 +506,12 @@ void Commands::getDecodedAdc()
 
 void Commands::getDecodedChuk()
 {
+    if (mTimeoutDecChuk > 0) {
+        return;
+    }
+
+    mTimeoutDecChuk = mTimeoutCount;
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_DECODED_CHUK);
     emitData(vb);
@@ -526,6 +604,14 @@ void Commands::timerSlot()
             firmwareUploadUpdate(true);
         }
     }
+
+    if (mTimeoutFwVer > 0) mTimeoutFwVer--;
+    if (mTimeoutMcconf > 0) mTimeoutMcconf--;
+    if (mTimeoutAppconf > 0) mTimeoutAppconf--;
+    if (mTimeoutValues > 0) mTimeoutValues--;
+    if (mTimeoutDecPpm > 0) mTimeoutDecPpm--;
+    if (mTimeoutDecAdc > 0) mTimeoutDecAdc--;
+    if (mTimeoutDecChuk > 0) mTimeoutDecChuk--;
 }
 
 void Commands::emitData(QByteArray data)

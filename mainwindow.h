@@ -68,7 +68,7 @@ public:
 private slots:
     void timerSlot();
     void showStatusInfo(QString info, bool isGood);
-    void showMessageDialog(const QString &title, const QString &msg, bool isGood);
+    void showMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
     void serialPortNotWritable(const QString &port);
     void valuesReceived(MC_VALUES values);
     void paramChangedDouble(QObject *src, QString name, double newParam);

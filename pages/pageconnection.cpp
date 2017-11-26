@@ -20,7 +20,7 @@
 #include "pageconnection.h"
 #include "ui_pageconnection.h"
 #include "widgets/helpdialog.h"
-#include "util.h"
+#include "utility.h"
 #include <QMessageBox>
 
 PageConnection::PageConnection(QWidget *parent) :
@@ -51,6 +51,10 @@ VescInterface *PageConnection::vesc() const
 void PageConnection::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
+
+    connect(mVesc->bleDevice(), SIGNAL(scanDone(QVariantMap,bool)),
+            this, SLOT(bleScanDone(QVariantMap,bool)));
+
     on_serialRefreshButton_clicked();
 }
 
@@ -71,6 +75,33 @@ void PageConnection::timerSlot()
             ui->canFwdBox->setValue(mVesc->commands()->getCanSendId());;
         }
     }
+}
+
+void PageConnection::bleScanDone(QVariantMap devs, bool done)
+{
+    if (done) {
+        ui->bleScanButton->setEnabled(true);
+    }
+
+    ui->bleDevBox->clear();
+    for (auto d: devs.keys()) {
+        if (d.contains("VESC")) {
+            QString name;
+            name += d;
+            name += " [";
+            name += devs.value(d).toString();
+            name += "]";
+            ui->bleDevBox->insertItem(0, name, devs.value(d).toString());
+        } else {
+            QString name;
+            name += d;
+            name += " [";
+            name += devs.value(d).toString();
+            name += "]";
+            ui->bleDevBox->addItem(name, devs.value(d).toString());
+        }
+    }
+    ui->bleDevBox->setCurrentIndex(0);
 }
 
 void PageConnection::on_serialRefreshButton_clicked()
@@ -137,5 +168,29 @@ void PageConnection::on_canFwdButton_toggled(bool checked)
 
 void PageConnection::on_autoConnectButton_clicked()
 {
-    util::autoconnectBlockingWithProgress(mVesc, this);
+    Utility::autoconnectBlockingWithProgress(mVesc, this);
+}
+
+void PageConnection::on_bleScanButton_clicked()
+{
+    if (mVesc) {
+        mVesc->bleDevice()->startScan();
+        ui->bleScanButton->setEnabled(false);
+    }
+}
+
+void PageConnection::on_bleDisconnectButton_clicked()
+{
+    if (mVesc) {
+        mVesc->disconnectPort();
+    }
+}
+
+void PageConnection::on_bleConnectButton_clicked()
+{
+    if (mVesc) {
+        if (ui->bleDevBox->count() > 0) {
+            mVesc->connectBle(ui->bleDevBox->currentData().toString());
+        }
+    }
 }

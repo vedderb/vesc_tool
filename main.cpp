@@ -18,11 +18,14 @@
     */
 
 #include "mainwindow.h"
+
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
 #include <QDesktopWidget>
 #include <QFontDatabase>
+
+#include "mobile/qmlui.h"
 
 int main(int argc, char *argv[])
 {
@@ -35,6 +38,10 @@ int main(int argc, char *argv[])
     // TODO: http://www.qcustomplot.com/index.php/support/forum/1344
 
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+#ifdef USE_MOBILE
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#else
     QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
 
     QSettings set;
@@ -72,10 +79,14 @@ int main(int argc, char *argv[])
 
     set.setValue("app_scale_factor", scale);
 
+#ifdef Q_OS_ANDROID
+    scale = 1.0;
+#endif
+
     if (scale > 1.01) {
-        qputenv("QT_SCALE_FACTOR", set.value("app_scale_factor").toByteArray());
         qputenv("QT_SCALE_FACTOR", QString::number(scale).toLocal8Bit());
     }
+#endif
 
     QApplication a(argc, argv);
 
@@ -95,8 +106,13 @@ int main(int argc, char *argv[])
     a.setStyleSheet("");
     a.setStyle(QStyleFactory::create("Fusion"));
 
+#ifdef USE_MOBILE
+    QmlUi q;
+    q.startQmlUi();
+#else
     MainWindow w;
     w.show();
+#endif
 
     return a.exec();
 }

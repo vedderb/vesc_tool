@@ -14,7 +14,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_platinum.qrc">
+   <iconset resource="res_original.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -30,24 +30,21 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QLabel" name="label">
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>50</height>
-           </size>
+         <widget class="QLabel" name="pageLabel">
+          <property name="enabled">
+           <bool>true</bool>
           </property>
           <property name="maximumSize">
            <size>
-            <width>232</width>
-            <height>53</height>
+            <width>220</width>
+            <height>56</height>
            </size>
           </property>
           <property name="text">
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_platinum.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_original.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -1053,8 +1050,8 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="res_original.qrc"/>
   <include location="res.qrc"/>
-  <include location="res_platinum.qrc"/>
  </resources>
  <connections/>
 </ui>

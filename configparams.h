@@ -44,13 +44,14 @@ public:
     bool hasParam(const QString &name);
     ConfigParam *getParam(const QString &name);
     ConfigParam getParamCopy(const QString &name) const;
-    double getParamDouble(const QString &name);
-    int getParamInt(const QString &name);
-    int getParamEnum(const QString &name);
-    QString getParamQString(const QString &name);
-    bool getParamBool(const QString &name);
-    QString getLongName(const QString &name);
-    QString getDescription(const QString &name);
+
+    Q_INVOKABLE double getParamDouble(const QString &name);
+    Q_INVOKABLE int getParamInt(const QString &name);
+    Q_INVOKABLE int getParamEnum(const QString &name);
+    Q_INVOKABLE QString getParamQString(const QString &name);
+    Q_INVOKABLE bool getParamBool(const QString &name);
+    Q_INVOKABLE QString getLongName(const QString &name);
+    Q_INVOKABLE QString getDescription(const QString &name);
 
     QStringList getParamOrder() const;
     void setParamOrder(const QStringList &order);

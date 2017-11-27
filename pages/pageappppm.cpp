@@ -19,7 +19,7 @@
 
 #include "pageappppm.h"
 #include "ui_pageappppm.h"
-#include "util.h"
+#include "utility.h"
 
 PageAppPpm::PageAppPpm(QWidget *parent) :
     QWidget(parent),
@@ -97,7 +97,7 @@ void PageAppPpm::paramChangedDouble(QObject *src, QString name, double newParam)
         QVector<double> y;
         for (float i = -1.0;i < 1.0001;i += 0.002) {
             x.append(i);
-            double val = util::throttle_curve(i, val_acc, val_brake, mode);
+            double val = Utility::throttle_curve(i, val_acc, val_brake, mode);
             y.append(val);
         }
         ui->throttlePlot->graph()->setData(x, y);

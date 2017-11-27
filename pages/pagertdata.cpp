@@ -31,6 +31,9 @@ PageRtData::PageRtData(QWidget *parent) :
     mTimer = new QTimer(this);
     mTimer->start(20);
 
+    mSecondCounter = 0.0;
+    mLastUpdateTime = 0;
+
     mUpdateValPlot = false;
     mUpdatePosPlot = false;
 
@@ -172,8 +175,8 @@ void PageRtData::timerSlot()
         int dataSize = mTempMosVec.size();
 
         QVector<double> xAxis(dataSize);
-        for (int i = 0;i < mMseconds.size();i++) {
-            xAxis[i] = mMseconds[i];
+        for (int i = 0;i < mSeconds.size();i++) {
+            xAxis[i] = mSeconds[i];
         }
 
         // Current and duty-plot
@@ -234,8 +237,6 @@ void PageRtData::valuesReceived(MC_VALUES values)
 {
     ui->rtText->setValues(values);
 
-    static double startTime = QDateTime::currentMSecsSinceEpoch() / 1000.0;
-
     const int maxS = 500;
 
     appendDoubleAndTrunc(&mTempMosVec, values.temp_mos, maxS);
@@ -246,7 +247,19 @@ void PageRtData::valuesReceived(MC_VALUES values)
     appendDoubleAndTrunc(&mIqVec, values.iq, maxS);
     appendDoubleAndTrunc(&mDutyVec, values.duty_now, maxS);
     appendDoubleAndTrunc(&mRpmVec, values.rpm, maxS);
-    appendDoubleAndTrunc(&mMseconds, (QDateTime::currentMSecsSinceEpoch() / 1000.0) - startTime, maxS);
+
+    qint64 tNow = QDateTime::currentMSecsSinceEpoch();
+
+    double elapsed = (double)(tNow - mLastUpdateTime) / 1000.0;
+    if (elapsed > 1.0) {
+        elapsed = 1.0;
+    }
+
+    mSecondCounter += elapsed;
+
+    appendDoubleAndTrunc(&mSeconds, mSecondCounter, maxS);
+
+    mLastUpdateTime = tNow;
 
     mUpdateValPlot = true;
 }

@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 0.86
+VT_VERSION = 0.87
 VT_INTRO_VERSION = 1
 
 DEFINES += VT_VERSION=$$VT_VERSION
@@ -22,17 +22,28 @@ DEFINES += HAS_SERIALPORT
 #CONFIG += build_bronze
 #CONFIG += build_free
 
+# Build mobile GUI
+#CONFIG += build_mobile
+
+#CONFIG += qtquickcompiler
+
 QT       += core gui
+QT       += widgets
 QT       += printsupport
 QT       += network
+QT       += bluetooth
+QT       += quick
+QT       += quickcontrols2
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
 }
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+android: QT += androidextras
 
-TARGET = vesc_tool_$$VT_VERSION
+android: TARGET = vesc_tool
+!android: TARGET = vesc_tool_$$VT_VERSION
+
 TEMPLATE = app
 
 release_win {
@@ -54,6 +65,18 @@ release_lin {
     UI_DIR = build/lin/obj
 }
 
+release_android {
+    DESTDIR = build/android
+    OBJECTS_DIR = build/android/obj
+    MOC_DIR = build/android/obj
+    RCC_DIR = build/android/obj
+    UI_DIR = build/android/obj
+}
+
+build_mobile {
+    DEFINES += USE_MOBILE
+}
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     packet.cpp \
@@ -66,8 +89,9 @@ SOURCES += main.cpp\
     digitalfiltering.cpp \
     setupwizardapp.cpp \
     setupwizardmotor.cpp \
-    util.cpp \
-    startupwizard.cpp
+    startupwizard.cpp \
+    bleuart.cpp \
+    utility.cpp
 
 HEADERS  += mainwindow.h \
     packet.h \
@@ -81,14 +105,16 @@ HEADERS  += mainwindow.h \
     digitalfiltering.h \
     setupwizardapp.h \
     setupwizardmotor.h \
-    util.h \
-    startupwizard.h
+    startupwizard.h \
+    bleuart.h \
+    utility.h
 
 FORMS    += mainwindow.ui \
     parametereditor.ui
 
 include(pages/pages.pri)
 include(widgets/widgets.pri)
+include(mobile/mobile.pri)
 
 RESOURCES += res.qrc
 
@@ -121,3 +147,13 @@ build_original {
     res_fw.qrc
     DEFINES += VER_NEUTRAL
 }
+
+DISTFILES += \
+    android/AndroidManifest.xml \
+    android/gradle/wrapper/gradle-wrapper.jar \
+    android/gradlew \
+    android/res/values/libs.xml \
+    android/build.gradle \
+    android/gradle/wrapper/gradle-wrapper.properties
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

@@ -29,7 +29,7 @@
 #include "parametereditor.h"
 #include "startupwizard.h"
 #include "widgets/helpdialog.h"
-#include "util.h"
+#include "utility.h"
 #include "widgets/paramdialog.h"
 
 namespace {
@@ -108,8 +108,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(timerSlot()));
     connect(mVesc, SIGNAL(statusMessage(QString,bool)),
             this, SLOT(showStatusInfo(QString,bool)));
-    connect(mVesc, SIGNAL(messageDialog(QString,QString,bool)),
-            this, SLOT(showMessageDialog(QString,QString,bool)));
+    connect(mVesc, SIGNAL(messageDialog(QString,QString,bool,bool)),
+            this, SLOT(showMessageDialog(QString,QString,bool,bool)));
     connect(mVesc, SIGNAL(serialPortNotWritable(QString)),
             this, SLOT(serialPortNotWritable(QString)));
     connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES)),
@@ -314,7 +314,7 @@ void MainWindow::timerSlot()
     if (mVesc->isPortConnected()) {
         static int conf_cnt = 0;
         conf_cnt++;
-        if (conf_cnt >= 10) {
+        if (conf_cnt >= 20) {
             conf_cnt = 0;
             if (!mMcConfRead) {
                 mVesc->commands()->getMcconf();
@@ -406,7 +406,7 @@ void MainWindow::timerSlot()
 
         has_run_start_checks = true;
         checkUdev();
-        util::checkVersion(mVersion, mVesc);
+        Utility::checkVersion(mVesc);
     }
 }
 
@@ -424,8 +424,10 @@ void MainWindow::showStatusInfo(QString info, bool isGood)
     mStatusLabel->setText(info);
 }
 
-void MainWindow::showMessageDialog(const QString &title, const QString &msg, bool isGood)
+void MainWindow::showMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText)
 {
+    (void)richText;
+
     if (isGood) {
         QMessageBox::information(this, title, msg);
     } else {
@@ -486,11 +488,11 @@ void MainWindow::serialPortNotWritable(const QString &port)
                                  "You have to reboot for this "
                                  "change to take effect.").
                               arg(QString(process.readAllStandardOutput())),
-                              true);
+                              true, false);
         } else {
             showMessageDialog(tr("Command Result"),
                               tr("Running command failed."),
-                              false);
+                              false, false);
         }
         process.close();
     }
@@ -614,7 +616,7 @@ void MainWindow::on_actionSaveMotorConfXml_triggered()
         showMessageDialog(tr("Save motor configuration"),
                           tr("Could not save motor configuration:<BR>"
                              "%1").arg(mVesc->mcConfig()->xmlStatus()),
-                          false);
+                          false, false);
     }
 }
 
@@ -638,7 +640,7 @@ void MainWindow::on_actionLoadMotorConfXml_triggered()
         showMessageDialog(tr("Load motor configuration"),
                           tr("Could not load motor configuration:<BR>"
                              "%1").arg(mVesc->mcConfig()->xmlStatus()),
-                          false);
+                          false, false);
     }
 }
 
@@ -666,7 +668,7 @@ void MainWindow::on_actionSaveAppconfXml_triggered()
         showMessageDialog(tr("Save app configuration"),
                           tr("Could not save app configuration:<BR>"
                              "%1").arg(mVesc->appConfig()->xmlStatus()),
-                          false);
+                          false, false);
     }
 }
 
@@ -690,7 +692,7 @@ void MainWindow::on_actionLoadAppconfXml_triggered()
         showMessageDialog(tr("Load app configuration"),
                           tr("Could not load app configuration:<BR>"
                              "%1").arg(mVesc->appConfig()->xmlStatus()),
-                          false);
+                          false, false);
     }
 }
 
@@ -701,25 +703,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, "VESC Tool",
-                       tr("<b>VESC® Tool %1</b><br>"
-                      #if defined(VER_ORIGINAL)
-                          "Original Version<br>"
-                      #elif defined(VER_PLATINUM)
-                          "Platinum Version<br>"
-                      #elif defined(VER_GOLD)
-                          "Gold Version<br>"
-                      #elif defined(VER_SILVER)
-                          "Silver Version<br>"
-                      #elif defined(VER_BRONZE)
-                          "Bronze Version<br>"
-                      #elif defined(VER_FREE)
-                          "Free of Charge Version<br>"
-                      #endif
-                          "&copy; Benjamin Vedder 2016 - 2017<br>"
-                          "<a href=\"mailto:benjamin@vedder.se\">benjamin@vedder.se</a><br>"
-                          "<a href=\"http://vesc-project.com/\">http://vesc-project.com/</a>").
-                       arg(mVersion));
+    QMessageBox::about(this, "VESC Tool", Utility::aboutText());
 }
 
 void MainWindow::on_actionLibrariesUsed_triggered()
@@ -803,7 +787,7 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
     if (path.contains(" ")) {
         showMessageDialog(tr("Save header"),
                           tr("Spaces are not allowed in the filename."),
-                          false);
+                          false, false);
         return;
     }
 
@@ -818,7 +802,7 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
     } else {
         showMessageDialog(tr("Save header"),
                           tr("Could not save header"),
-                          false);
+                          false, false);
     }
 }
 
@@ -972,11 +956,20 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageSettings);
     addPageItem(tr("VESC Tool Settings"), "://res/icons/Settings-96.png", "", true);
 
-    // Make the rows a bit higher
+    // Adjust sizes
+    QFontMetrics fm(this->font());
+    int width = fm.width("Welcome & Wizards++++++");
+    int height = fm.height();
+
     for(int i = 0; i < ui->pageList->count(); i++) {
         QListWidgetItem *item = ui->pageList->item(i);
-        item->setSizeHint(QSize(item->sizeHint().width(), 18));
+        item->setSizeHint(QSize(item->sizeHint().width(), height));
     }
+
+    ui->pageList->setMinimumWidth(width);
+    ui->pageList->setMaximumWidth(width);
+    ui->pageLabel->setMaximumWidth(width);
+    ui->pageLabel->setMaximumHeight((394 * width) / 1549);
 
     ui->pageList->setCurrentRow(0);
     ui->pageWidget->setCurrentIndex(0);
@@ -1004,7 +997,7 @@ void MainWindow::checkUdev()
                 if (!f_vesc.open(QIODevice::WriteOnly | QIODevice::Text)) {
                     showMessageDialog(tr("Create File Error"),
                                       f_vesc.errorString(),
-                                      false);
+                                      false, false);
                     return;
                 }
 
@@ -1041,7 +1034,7 @@ void MainWindow::checkUdev()
                         if (process.exitCode() == 0) {
                             showMessageDialog(tr("Command Result"),
                                               tr("Reloaded udev rules sucessfully."),
-                                              true);
+                                              true, false);
                         } else {
                             QString out = process.readAll();
 
@@ -1049,7 +1042,7 @@ void MainWindow::checkUdev()
                                 showMessageDialog(tr("Command Result"),
                                                   tr("Could not reload udev rules. A reboot is probably "
                                                      "required for this change to take effect."),
-                                                  false);
+                                                  false, false);
                             }
                         }
                         process.close();
@@ -1059,7 +1052,7 @@ void MainWindow::checkUdev()
                                       tr("Could not move rules file:\n\n"
                                          "%1").
                                       arg(QString(process.readAllStandardOutput())),
-                                      false);
+                                      false, false);
                 }
                 process.close();
             }
@@ -1206,18 +1199,12 @@ void MainWindow::on_actionWarrantyStatement_triggered()
 
 void MainWindow::on_actionVESCToolChangelog_triggered()
 {
-    QFile cl("://res/CHANGELOG");
-    if (cl.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        HelpDialog::showHelp(this, "VESC® Tool Changelog", QString::fromUtf8(cl.readAll()));
-    }
+    HelpDialog::showHelp(this, "VESC® Tool Changelog", Utility::vescToolChangeLog());
 }
 
 void MainWindow::on_actionFirmwareChangelog_triggered()
 {
-    QFile cl("://res/firmwares/CHANGELOG");
-    if (cl.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        HelpDialog::showHelp(this, "Firmware Changelog", QString::fromUtf8(cl.readAll()));
-    }
+    HelpDialog::showHelp(this, "Firmware Changelog", Utility::fwChangeLog());
 }
 
 void MainWindow::on_actionVESCProjectForums_triggered()

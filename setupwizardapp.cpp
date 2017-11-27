@@ -20,7 +20,7 @@
 #include "setupwizardapp.h"
 #include <QVBoxLayout>
 #include <QMessageBox>
-#include "util.h"
+#include "utility.h"
 
 SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     : QWizard(parent)
@@ -115,7 +115,7 @@ bool AppIntroPage::validatePage()
                                          QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
         if (reply == QMessageBox::Yes) {
-            util::autoconnectBlockingWithProgress(mVesc, this);
+            Utility::autoconnectBlockingWithProgress(mVesc, this);
             res = true;
         }
     }
@@ -553,7 +553,7 @@ void AppPpmMapPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.hyst");
 
     mVesc->appConfig()->updateParamEnum("app_ppm_conf.ctrl_type", 0);
-    mVesc->appConfig()->updateParamEnum("app_to_use", 1);
+    mVesc->appConfig()->updateParamEnum("app_to_use", 4);
     mVesc->commands()->setAppConf();
 
     mTimer->start(20);

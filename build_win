@@ -10,6 +10,9 @@
 # cd mxe
 # make qtbase
 # make qtserialport
+# make qtconnectivity
+# make qtquickcontrols
+# make qtquickcontrols2
 
 export PATH=/opt/mxe/usr/bin/:$PATH
 rm -rf build/win/*

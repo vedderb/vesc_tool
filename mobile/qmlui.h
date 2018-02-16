@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -17,19 +17,32 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef QMLUI_H
+#define QMLUI_H
+
+#include <QObject>
+#include <QQmlApplicationEngine>
 
 #include "vescinterface.h"
-#include <QWidget>
+#include "utility.h"
 
-namespace util {
+class QmlUi : public QObject
+{
+    Q_OBJECT
+public:
+    explicit QmlUi(QObject *parent = nullptr);
+    bool startQmlUi();
 
-double map(double x, double in_min, double in_max, double out_min, double out_max);
-float throttle_curve(float val, float curve_acc, float curve_brake, int mode);
-bool autoconnectBlockingWithProgress(VescInterface *vesc, QWidget *parent = 0);
-void checkVersion(QString version, VescInterface *vesc = 0);
+signals:
 
-}
+public slots:
 
-#endif // UTIL_H
+private:
+    QQmlApplicationEngine *mEngine;
+
+    static QObject *vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
+    static QObject *utility_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
+
+};
+
+#endif // QMLUI_H

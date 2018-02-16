@@ -6,6 +6,6 @@ rm -rf build/win/*
 # Original
 /opt/mxe/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG += release_win build_original"
 make clean
-make -j4
+make -j8
 rm -rf build/win/obj
 

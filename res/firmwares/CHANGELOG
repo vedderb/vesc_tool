@@ -1,3 +1,22 @@
+=== FW 3.34 ===
+* Added motor PID position to COMM_GET_VALUES.
+* Inverted direction angle normalization in mc_interface.
+
+=== FW 3.33 ===
+* Fixed CAN-bus baud rate update.
+
+=== FW 3.32 ===
+* Added CAN-bus baud rate setting.
+
+=== FW 3.31 ===
+* Option to decrease temperature limits during acceleration to still have braking torque left.
+* Added PID speed control mode to ADC app.
+
+=== FW 3.30 ===
+* Activated iterative observer for better operation at high ERPM.
+* Check for NAN and truncate some FOC variables.
+* Speed controller windup protection improvement.
+
 === FW 3.29 ===
 * Disabled throttle limit scaling for now.
 * Increased packet timeout.

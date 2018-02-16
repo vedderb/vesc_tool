@@ -18,7 +18,7 @@
     <widget class="QTextBrowser" name="terminalBrowser">
      <property name="font">
       <font>
-       <family>Monospace</family>
+       <family>DejaVu Sans Mono</family>
       </font>
      </property>
      <property name="lineWrapMode">

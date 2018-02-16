@@ -20,7 +20,7 @@
 #include "setupwizardmotor.h"
 #include <QVBoxLayout>
 #include <QMessageBox>
-#include "util.h"
+#include "utility.h"
 
 SetupWizardMotor::SetupWizardMotor(VescInterface *vesc, QWidget *parent)
     : QWizard(parent)
@@ -119,7 +119,7 @@ bool IntroPage::validatePage()
                                          QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
         if (reply == QMessageBox::Yes) {
-            util::autoconnectBlockingWithProgress(mVesc, this);
+            Utility::autoconnectBlockingWithProgress(mVesc, this);
             res = true;
         }
     }

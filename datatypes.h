@@ -20,6 +20,7 @@
 #ifndef DATATYPES_H
 #define DATATYPES_H
 
+#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QVector>
@@ -73,7 +74,29 @@ typedef enum {
     DISP_POS_MODE_ENCODER_OBSERVER_ERROR
 } disp_pos_mode;
 
-typedef struct {
+struct MC_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(double v_in MEMBER v_in)
+    Q_PROPERTY(double temp_mos MEMBER temp_mos)
+    Q_PROPERTY(double temp_motor MEMBER temp_motor)
+    Q_PROPERTY(double current_motor MEMBER current_motor)
+    Q_PROPERTY(double current_in MEMBER current_in)
+    Q_PROPERTY(double id MEMBER id)
+    Q_PROPERTY(double iq MEMBER iq)
+    Q_PROPERTY(double rpm MEMBER rpm)
+    Q_PROPERTY(double duty_now MEMBER duty_now)
+    Q_PROPERTY(double amp_hours MEMBER amp_hours)
+    Q_PROPERTY(double amp_hours_charged MEMBER amp_hours_charged)
+    Q_PROPERTY(double watt_hours MEMBER watt_hours)
+    Q_PROPERTY(double watt_hours_charged MEMBER watt_hours_charged)
+    Q_PROPERTY(int tachometer MEMBER tachometer)
+    Q_PROPERTY(int tachometer_abs MEMBER tachometer_abs)
+    Q_PROPERTY(double position MEMBER position)
+    Q_PROPERTY(mc_fault_code fault_code MEMBER fault_code)
+    Q_PROPERTY(QString fault_str MEMBER fault_str)
+
+public:
     double v_in;
     double temp_mos;
     double temp_motor;
@@ -89,9 +112,12 @@ typedef struct {
     double watt_hours_charged;
     int tachometer;
     int tachometer_abs;
+    double position;
     mc_fault_code fault_code;
     QString fault_str;
-} MC_VALUES;
+};
+
+Q_DECLARE_METATYPE(MC_VALUES)
 
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,

@@ -72,8 +72,7 @@ void RtDataText::paintEvent(QPaintEvent *event)
     painter.fillRect(event->rect(), QBrush(Qt::transparent));
 
     QFont font;
-    font.setFamily("Monospace");
-    font.setStyleHint(QFont::TypeWriter);
+    font.setFamily("DejaVu Sans Mono");
     font.setPointSize(11);
     painter.setFont(font);
 

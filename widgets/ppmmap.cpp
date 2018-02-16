@@ -20,7 +20,7 @@
 #include "ppmmap.h"
 #include "ui_ppmmap.h"
 #include "helpdialog.h"
-#include "util.h"
+#include "utility.h"
 #include <QMessageBox>
 
 PpmMap::PpmMap(QWidget *parent) :
@@ -68,9 +68,9 @@ void PpmMap::decodedPpmReceived(double value, double last_len)
         double p = 0.0;
 
         if (last_len < center_now) {
-            p = util::map(last_len, min_now, center_now, -100.0, 0.0);
+            p = Utility::map(last_len, min_now, center_now, -100.0, 0.0);
         } else {
-            p = util::map(last_len, center_now, max_now, 0.0, 100.0);
+            p = Utility::map(last_len, center_now, max_now, 0.0, 100.0);
         }
 
         ui->display->setValue(p);
@@ -84,7 +84,7 @@ void PpmMap::decodedPpmReceived(double value, double last_len)
                                  arg(last_len, 0, 'f', 4).
                                  arg(p2, 0, 'f', 1));
     } else {
-        double p = util::map(last_len, min_now, max_now, 0.0, 100.0);
+        double p = Utility::map(last_len, min_now, max_now, 0.0, 100.0);
 
         ui->display->setValue(p);
         ui->display->setText(tr("%1 ms (%2 %)").

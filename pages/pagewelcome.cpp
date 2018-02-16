@@ -21,7 +21,7 @@
 #include "ui_pagewelcome.h"
 #include "setupwizardmotor.h"
 #include "setupwizardapp.h"
-#include "util.h"
+#include "utility.h"
 #include <QMessageBox>
 
 PageWelcome::PageWelcome(QWidget *parent) :
@@ -72,5 +72,5 @@ void PageWelcome::setVesc(VescInterface *vesc)
 
 void PageWelcome::on_autoConnectButton_clicked()
 {
-    util::autoconnectBlockingWithProgress(mVesc, this);
+    Utility::autoconnectBlockingWithProgress(mVesc, this);
 }

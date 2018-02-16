@@ -59,7 +59,11 @@ void PageListItem::setIcon(const QString &path)
 {
     if (!path.isEmpty()) {
         mIconLabel->setPixmap(QPixmap(path));
-        mIconLabel->setFixedSize(15, 15);
+
+        QFontMetrics fm(this->font());
+        int height = fm.height() * 0.9;
+
+        mIconLabel->setFixedSize(height, height);
     } else {
         mIconLabel->setPixmap(QPixmap());
     }
@@ -70,7 +74,11 @@ void PageListItem::setGroupIcon(const QString &path)
     if (!path.isEmpty()) {
         QPixmap pix(path);
         mGroupLabel->setPixmap(pix);
-        mGroupLabel->setFixedSize((15 * pix.width()) / pix.height(), 15);
+
+        QFontMetrics fm(this->font());
+        int height = fm.height() * 0.9;
+
+        mGroupLabel->setFixedSize((height * pix.width()) / pix.height(), height);
     } else {
         mSpaceStart->changeSize(2, 0);
         mGroupLabel->setPixmap(QPixmap());

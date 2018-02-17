@@ -1,3 +1,6 @@
+== 0.88 ==
+* Added Option in APP > NRF > Transmit Power for powering off the nRF module.
+
 == 0.87 ==
 * RT plot time measurement improvement.
 * First implementation of BLE support.

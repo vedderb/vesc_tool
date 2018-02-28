@@ -191,7 +191,7 @@ QString Utility::aboutText()
           #elif defined(VER_FREE)
               "Free of Charge Version<br>"
           #endif
-              "&copy; Benjamin Vedder 2016 - 2017<br>"
+              "&copy; Benjamin Vedder 2016 - 2018<br>"
               "<a href=\"mailto:benjamin@vedder.se\">benjamin@vedder.se</a><br>"
               "<a href=\"http://vesc-project.com/\">http://vesc-project.com/</a>").
             arg(QString::number(VT_VERSION));

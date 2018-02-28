@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 0.87
+VT_VERSION = 0.88
 VT_INTRO_VERSION = 1
 
 DEFINES += VT_VERSION=$$VT_VERSION

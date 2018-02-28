@@ -123,7 +123,7 @@ bool Utility::autoconnectBlockingWithProgress(VescInterface *vesc, QWidget *pare
 void Utility::checkVersion(VescInterface *vesc)
 {
     QString version = QString::number(VT_VERSION);
-    QUrl url("http://vesc-project.com/vesctool-version.html");
+    QUrl url("https://vesc-project.com/vesctool-version.html");
     QNetworkAccessManager manager;
     QNetworkRequest request(url);
     QNetworkReply *reply = manager.get(request);

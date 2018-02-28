@@ -361,6 +361,13 @@ ApplicationWindow {
             vescDialogLabel.textFormat = richText ? Text.RichText : Text.AutoText
             vescDialog.open()
         }
+
+        onFwRxChanged: {
+            if (rx && !limited) {
+                mCommands.getMcconf()
+                mCommands.getAppConf()
+            }
+        }
     }
 
     Connections {

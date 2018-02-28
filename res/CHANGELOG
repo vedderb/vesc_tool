@@ -1,5 +1,6 @@
 == 0.88 ==
 * Added Option in APP > NRF > Transmit Power for powering off the nRF module.
+* Mobile: reload mc_config and app_config on fw rx change to rescale meters.
 
 == 0.87 ==
 * RT plot time measurement improvement.

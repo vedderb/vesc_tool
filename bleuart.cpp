@@ -93,7 +93,7 @@ void BleUart::disconnectBle()
 
 bool BleUart::isConnected()
 {
-    return mControl != 0 && mConnectDone;;
+    return mControl != 0 && mConnectDone;
 }
 
 bool BleUart::isConnecting()

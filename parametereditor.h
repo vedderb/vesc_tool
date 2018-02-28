@@ -60,6 +60,7 @@ private slots:
     void on_actionSave_XML_as_triggered();
     void on_actionDeleteAll_triggered();
     void on_doubleTxTypeBox_currentIndexChanged(int index);
+    void on_actionCalculatePacketSize_triggered();
 
 private:
     Ui::ParameterEditor *ui;

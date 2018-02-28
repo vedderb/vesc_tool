@@ -9,5 +9,6 @@
         <file>RtData.qml</file>
         <file>FwUpdate.qml</file>
         <file>FilePicker.qml</file>
+        <file>ParamEditDouble.qml</file>
     </qresource>
 </RCC>

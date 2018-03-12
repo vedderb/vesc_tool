@@ -49,7 +49,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="terminalEdit"/>
+      <widget class="HistoryLineEdit" name="terminalEdit"/>
      </item>
      <item>
       <widget class="QPushButton" name="sendButton">
@@ -95,6 +95,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HistoryLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>widgets/historylineedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../res.qrc"/>
  </resources>

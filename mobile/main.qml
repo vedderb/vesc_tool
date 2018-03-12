@@ -40,6 +40,7 @@ ApplicationWindow {
 
     Component.onCompleted: {
         Utility.checkVersion(VescIf)
+//        swipeView.currentIndex = 3
     }
 
     Drawer {
@@ -68,6 +69,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "Reconnect"
                 enabled: false
+                flat: true
 
                 onClicked: {
                     VescIf.reconnectLastPort()
@@ -78,6 +80,8 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "Disconnect"
                 enabled: connBle.disconnectButton.enabled
+                flat: true
+
                 onClicked: {
                     VescIf.disconnectPort()
                 }
@@ -92,6 +96,8 @@ ApplicationWindow {
             Button {
                 Layout.fillWidth: true
                 text: "About"
+                flat: true
+
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 "About",
@@ -103,6 +109,8 @@ ApplicationWindow {
             Button {
                 Layout.fillWidth: true
                 text: "Changelog"
+                flat: true
+
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 "VESC Tool Changelog",
@@ -114,6 +122,8 @@ ApplicationWindow {
             Button {
                 Layout.fillWidth: true
                 text: "License"
+                flat: true
+
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 mInfoConf.getLongName("gpl_text"),
@@ -151,9 +161,20 @@ ApplicationWindow {
         }
 
         Page {
-            Label {
-                text: qsTr("TODO!")
-                anchors.centerIn: parent
+            ConfigPageMotor {
+                id: confPageMotor
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+            }
+        }
+
+        Page {
+            ConfigPageApp {
+                id: confPageApp
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
             }
         }
 
@@ -169,7 +190,6 @@ ApplicationWindow {
         height: tabBar.height
 
         RowLayout {
-//            width: parent.width
             anchors.fill: parent
             spacing: 0
 
@@ -207,7 +227,7 @@ ApplicationWindow {
                     color: "#e8e8e8"
                 }
 
-                property int buttons: 5
+                property int buttons: 6
                 property int buttonWidth: 120
 
                 TabButton {
@@ -223,7 +243,11 @@ ApplicationWindow {
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {
-                    text: qsTr("Config")
+                    text: qsTr("Motor Cfg")
+                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                }
+                TabButton {
+                    text: qsTr("App Cfg")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {

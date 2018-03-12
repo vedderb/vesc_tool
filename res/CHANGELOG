@@ -1,3 +1,16 @@
+== 0.89 ==
+* Added history to terminal text edit that can be accessed with the up and down arrows.
+* Major mobile UI update:
+ - MC configuration.
+ - App configuration.
+ - FOC parameter detection.
+ - BLDC parameter detection.
+ - FOC encoder detection.
+ - FOC hall sensor detection.
+ - PPM pulselength mapping.
+ - ADC voltage mapping.
+ - At this point the mobile UI should be able to do a full configuration.
+
 == 0.88 ==
 * Added Option in APP > NRF > Transmit Power for powering off the nRF module.
 * Mobile: reload mc_config and app_config on fw rx change to rescale meters.

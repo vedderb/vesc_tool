@@ -35,26 +35,9 @@ Item {
 
     Component.onCompleted: {
         if (params !== null) {
-            if (Math.abs(params.getParamMaxDouble(paramName)) > params.getParamMinDouble(paramName)) {
-                maxVal = Math.abs(params.getParamMaxDouble(paramName))
-            } else {
-                maxVal = Math.abs(params.getParamMinDouble(paramName))
-            }
-
             nameText.text = params.getLongName(paramName)
-            valueBox.decimals = params.getParamDecimalsDouble(paramName)
-            valueBox.realFrom = params.getParamMinDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realTo = params.getParamMaxDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realValue = params.getParamDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realStepSize = params.getParamStepDouble(paramName)
-            valueBox.visible = !params.getParamEditAsPercentage(paramName)
-            valueBox.suffix = params.getParamSuffix(paramName)
-
-            var p = (params.getParamDouble(paramName) * 100.0) / maxVal
-            percentageBox.from = (100.0 * params.getParamMinDouble(paramName)) / maxVal
-            percentageBox.to = (100.0 * params.getParamMaxDouble(paramName)) / maxVal
-            percentageBox.value = p
-            percentageBox.visible = params.getParamEditAsPercentage(paramName)
+            enumBox.model = params.getParamEnumNames(paramName)
+            enumBox.currentIndex = params.getParamEnum(paramName)
 
             if (params.getParamTransmittable(paramName)) {
                 nowButton.visible = true
@@ -66,10 +49,6 @@ Item {
 
             createReady = true
         }
-    }
-
-    function updateDisplay(value) {
-        // TODO: No display for now...
     }
 
     Rectangle {
@@ -93,52 +72,17 @@ Item {
                 font.pointSize: 12
             }
 
-            DoubleSpinBox {
-                id: valueBox
+            ComboBox {
+                id: enumBox
                 Layout.fillWidth: true
 
-                onRealValueChanged: {
-                    if (!params.getParamEditAsPercentage(paramName)) {
-                        var val = realValue / params.getParamEditorScale(paramName)
-
-                        if (params !== null && createReady) {
-                            if (params.getUpdateOnly() !== paramName) {
-                                params.setUpdateOnly("")
-                            }
-                            params.updateParamDouble(paramName, val, editor);
+                onCurrentIndexChanged: {
+                    if (params !== null && createReady) {
+                        if (params.getUpdateOnly() !== paramName) {
+                            params.setUpdateOnly("")
                         }
-
-                        updateDisplay(val);
+                        params.updateParamEnum(paramName, currentIndex, editor);
                     }
-                }
-            }
-
-            SpinBox {
-                id: percentageBox
-                Layout.fillWidth: true
-                editable: true
-
-                onValueChanged: {
-                    if (params.getParamEditAsPercentage(paramName)) {
-                        var val = (value / 100.0) * maxVal
-
-                        if (params !== null && createReady) {
-                            if (params.getUpdateOnly() !== paramName) {
-                                params.setUpdateOnly("")
-                            }
-                            params.updateParamDouble(paramName, val, editor);
-                        }
-
-                        updateDisplay(val);
-                    }
-                }
-
-                textFromValue: function(value, locale) {
-                    return Number(value).toLocaleString(locale, 'f', 0) + " %"
-                }
-
-                valueFromText: function(text, locale) {
-                    return Number.fromLocaleString(locale, text.replace("%", ""))
                 }
             }
 
@@ -188,10 +132,9 @@ Item {
     Connections {
         target: params
 
-        onParamChangedDouble: {
+        onParamChangedEnum: {
             if (src !== editor && name == paramName) {
-                valueBox.realValue = newParam * params.getParamEditorScale(paramName)
-                percentageBox.value = Math.round((100.0 * newParam) / maxVal)
+                enumBox.currentIndex = newParam
             }
         }
     }

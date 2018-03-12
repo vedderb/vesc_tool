@@ -35,24 +35,23 @@ Item {
 
     Component.onCompleted: {
         if (params !== null) {
-            if (Math.abs(params.getParamMaxDouble(paramName)) > params.getParamMinDouble(paramName)) {
-                maxVal = Math.abs(params.getParamMaxDouble(paramName))
+            if (Math.abs(params.getParamMaxInt(paramName)) > params.getParamMinInt(paramName)) {
+                maxVal = Math.abs(params.getParamMaxInt(paramName))
             } else {
-                maxVal = Math.abs(params.getParamMinDouble(paramName))
+                maxVal = Math.abs(params.getParamMinInt(paramName))
             }
 
             nameText.text = params.getLongName(paramName)
-            valueBox.decimals = params.getParamDecimalsDouble(paramName)
-            valueBox.realFrom = params.getParamMinDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realTo = params.getParamMaxDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realValue = params.getParamDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realStepSize = params.getParamStepDouble(paramName)
+            valueBox.from = params.getParamMinInt(paramName) * params.getParamEditorScale(paramName)
+            valueBox.to = params.getParamMaxInt(paramName) * params.getParamEditorScale(paramName)
+            valueBox.value = params.getParamInt(paramName) * params.getParamEditorScale(paramName)
+            valueBox.stepSize = params.getParamStepInt(paramName)
             valueBox.visible = !params.getParamEditAsPercentage(paramName)
             valueBox.suffix = params.getParamSuffix(paramName)
 
-            var p = (params.getParamDouble(paramName) * 100.0) / maxVal
-            percentageBox.from = (100.0 * params.getParamMinDouble(paramName)) / maxVal
-            percentageBox.to = (100.0 * params.getParamMaxDouble(paramName)) / maxVal
+            var p = (params.getParamInt(paramName) * 100.0) / maxVal
+            percentageBox.from = (100.0 * params.getParamMinInt(paramName)) / maxVal
+            percentageBox.to = (100.0 * params.getParamMaxInt(paramName)) / maxVal
             percentageBox.value = p
             percentageBox.visible = params.getParamEditAsPercentage(paramName)
 
@@ -93,23 +92,33 @@ Item {
                 font.pointSize: 12
             }
 
-            DoubleSpinBox {
+            SpinBox {
                 id: valueBox
                 Layout.fillWidth: true
+                property string suffix: ""
+                editable: true
 
-                onRealValueChanged: {
+                onValueChanged: {
                     if (!params.getParamEditAsPercentage(paramName)) {
-                        var val = realValue / params.getParamEditorScale(paramName)
+                        var val = value / params.getParamEditorScale(paramName)
 
                         if (params !== null && createReady) {
                             if (params.getUpdateOnly() !== paramName) {
                                 params.setUpdateOnly("")
                             }
-                            params.updateParamDouble(paramName, val, editor);
+                            params.updateParamInt(paramName, val, editor);
                         }
 
                         updateDisplay(val);
                     }
+                }
+
+                textFromValue: function(value, locale) {
+                    return Number(value).toLocaleString(locale, 'f', 0) + suffix
+                }
+
+                valueFromText: function(text, locale) {
+                    return Number.fromLocaleString(locale, text.replace(suffix, ""))
                 }
             }
 
@@ -126,7 +135,7 @@ Item {
                             if (params.getUpdateOnly() !== paramName) {
                                 params.setUpdateOnly("")
                             }
-                            params.updateParamDouble(paramName, val, editor);
+                            params.updateParamInt(paramName, val, editor);
                         }
 
                         updateDisplay(val);
@@ -188,9 +197,9 @@ Item {
     Connections {
         target: params
 
-        onParamChangedDouble: {
+        onParamChangedInt: {
             if (src !== editor && name == paramName) {
-                valueBox.realValue = newParam * params.getParamEditorScale(paramName)
+                valueBox.value = newParam * params.getParamEditorScale(paramName)
                 percentageBox.value = Math.round((100.0 * newParam) / maxVal)
             }
         }

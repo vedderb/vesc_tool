@@ -31,30 +31,11 @@ Item {
     height: column.implicitHeight + 2 * column.anchors.margins
     Layout.fillWidth: true
     property real maxVal: 1.0
-    property bool createReady: false
 
     Component.onCompleted: {
         if (params !== null) {
-            if (Math.abs(params.getParamMaxDouble(paramName)) > params.getParamMinDouble(paramName)) {
-                maxVal = Math.abs(params.getParamMaxDouble(paramName))
-            } else {
-                maxVal = Math.abs(params.getParamMinDouble(paramName))
-            }
-
             nameText.text = params.getLongName(paramName)
-            valueBox.decimals = params.getParamDecimalsDouble(paramName)
-            valueBox.realFrom = params.getParamMinDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realTo = params.getParamMaxDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realValue = params.getParamDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realStepSize = params.getParamStepDouble(paramName)
-            valueBox.visible = !params.getParamEditAsPercentage(paramName)
-            valueBox.suffix = params.getParamSuffix(paramName)
-
-            var p = (params.getParamDouble(paramName) * 100.0) / maxVal
-            percentageBox.from = (100.0 * params.getParamMinDouble(paramName)) / maxVal
-            percentageBox.to = (100.0 * params.getParamMaxDouble(paramName)) / maxVal
-            percentageBox.value = p
-            percentageBox.visible = params.getParamEditAsPercentage(paramName)
+            boolSwitch.checked = params.getParamBool(paramName)
 
             if (params.getParamTransmittable(paramName)) {
                 nowButton.visible = true
@@ -63,13 +44,7 @@ Item {
                 nowButton.visible = false
                 defaultButton.visible = false
             }
-
-            createReady = true
         }
-    }
-
-    function updateDisplay(value) {
-        // TODO: No display for now...
     }
 
     Rectangle {
@@ -93,52 +68,17 @@ Item {
                 font.pointSize: 12
             }
 
-            DoubleSpinBox {
-                id: valueBox
+            Switch {
+                id: boolSwitch
                 Layout.fillWidth: true
 
-                onRealValueChanged: {
-                    if (!params.getParamEditAsPercentage(paramName)) {
-                        var val = realValue / params.getParamEditorScale(paramName)
-
-                        if (params !== null && createReady) {
-                            if (params.getUpdateOnly() !== paramName) {
-                                params.setUpdateOnly("")
-                            }
-                            params.updateParamDouble(paramName, val, editor);
+                onCheckedChanged: {
+                    if (params !== null) {
+                        if (params.getUpdateOnly() !== paramName) {
+                            params.setUpdateOnly("")
                         }
-
-                        updateDisplay(val);
+                        params.updateParamBool(paramName, checked, editor);
                     }
-                }
-            }
-
-            SpinBox {
-                id: percentageBox
-                Layout.fillWidth: true
-                editable: true
-
-                onValueChanged: {
-                    if (params.getParamEditAsPercentage(paramName)) {
-                        var val = (value / 100.0) * maxVal
-
-                        if (params !== null && createReady) {
-                            if (params.getUpdateOnly() !== paramName) {
-                                params.setUpdateOnly("")
-                            }
-                            params.updateParamDouble(paramName, val, editor);
-                        }
-
-                        updateDisplay(val);
-                    }
-                }
-
-                textFromValue: function(value, locale) {
-                    return Number(value).toLocaleString(locale, 'f', 0) + " %"
-                }
-
-                valueFromText: function(text, locale) {
-                    return Number.fromLocaleString(locale, text.replace("%", ""))
                 }
             }
 
@@ -188,10 +128,9 @@ Item {
     Connections {
         target: params
 
-        onParamChangedDouble: {
+        onParamChangedBool: {
             if (src !== editor && name == paramName) {
-                valueBox.realValue = newParam * params.getParamEditorScale(paramName)
-                percentageBox.value = Math.round((100.0 * newParam) / maxVal)
+                boolSwitch.checked = newParam
             }
         }
     }

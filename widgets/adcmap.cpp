@@ -179,7 +179,7 @@ void AdcMap::on_applyButton_clicked()
             mVesc->appConfig()->updateParamDouble("app_adc_conf.voltage_center", ui->centerCh1Box->value());
             mVesc->appConfig()->updateParamDouble("app_adc_conf.voltage2_start", ui->minCh2Box->value());
             mVesc->appConfig()->updateParamDouble("app_adc_conf.voltage2_end", ui->maxCh2Box->value());
-            mVesc->emitStatusMessage(tr("Start and End ADC Voltages Applied"), true);
+            mVesc->emitStatusMessage(tr("Start, End and Center ADC Voltages Applied"), true);
         } else {
             mVesc->emitStatusMessage(tr("Applying Pulselengths Failed"), false);
             QMessageBox::warning(this,

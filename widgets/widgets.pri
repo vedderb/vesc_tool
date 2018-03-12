@@ -42,7 +42,8 @@ HEADERS += \
     $$PWD/imagewidget.h \
     $$PWD/parameditstring.h \
     $$PWD/paramdialog.h \
-    $$PWD/aspectimglabel.h
+    $$PWD/aspectimglabel.h \
+    $$PWD/historylineedit.h
 
 SOURCES += \
     $$PWD/parameditbool.cpp \
@@ -70,5 +71,6 @@ SOURCES += \
     $$PWD/imagewidget.cpp \
     $$PWD/parameditstring.cpp \
     $$PWD/paramdialog.cpp \
-    $$PWD/aspectimglabel.cpp
+    $$PWD/aspectimglabel.cpp \
+    $$PWD/historylineedit.cpp
 

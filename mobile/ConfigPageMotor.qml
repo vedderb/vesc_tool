@@ -249,6 +249,7 @@ Item {
                 createEditorMc("foc_sample_v0_v7")
                 createEditorMc("foc_sample_high_current")
                 createEditorMc("foc_observer_gain_slow")
+                createEditorMc("foc_current_filter_const")
                 addSpacer()
                 break;
             default:
@@ -261,12 +262,14 @@ Item {
             createEditorMc("s_pid_kp")
             createEditorMc("s_pid_ki")
             createEditorMc("s_pid_kd")
+            createEditorMc("s_pid_kd_filter")
             createEditorMc("s_pid_min_erpm")
             createEditorMc("s_pid_allow_braking")
             addSeparator("Position Controller")
             createEditorMc("p_pid_kp")
             createEditorMc("p_pid_ki")
             createEditorMc("p_pid_kd")
+            createEditorMc("p_pid_kd_filter")
             createEditorMc("p_pid_ang_div")
             addSpacer()
             break;

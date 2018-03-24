@@ -181,7 +181,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 180
                     readOnly: true
-                    font.family: "DejaVuSansMono"
+                    font.family: "DejaVu Sans Mono"
                 }
 
                 Button {

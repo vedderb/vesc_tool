@@ -38,6 +38,7 @@ bool HistoryLineEdit::eventFilter(QObject *object, QEvent *e)
         case Qt::Key_Up:
         case Qt::Key_Down:
         case Qt::Key_Return:
+        case Qt::Key_Enter:
             break;
 
         default:
@@ -79,6 +80,7 @@ bool HistoryLineEdit::eventFilter(QObject *object, QEvent *e)
             break;
 
         case Qt::Key_Return:
+        case Qt::Key_Enter:
             if (!text().isEmpty()) {
                 if (mHistory.isEmpty() || mHistory.last() != text()) {
                     mHistory.append(text());

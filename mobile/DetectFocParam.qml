@@ -232,7 +232,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 200
                     readOnly: true
-                    font.family: "DejaVuSansMono"
+                    font.family: "DejaVu Sans Mono"
                 }
 
                 Button {

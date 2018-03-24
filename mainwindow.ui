@@ -14,7 +14,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_original.qrc">
+   <iconset resource="res_free.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -44,7 +44,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_original.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_free.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -303,7 +303,7 @@
          <double>360.000000000000000</double>
         </property>
         <property name="singleStep">
-         <double>10.000000000000000</double>
+         <double>0.100000000000000</double>
         </property>
         <property name="value">
          <double>0.000000000000000</double>
@@ -1050,7 +1050,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_original.qrc"/>
+  <include location="res_free.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

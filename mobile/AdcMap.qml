@@ -91,7 +91,7 @@ Item {
                     Layout.preferredHeight: 300
                     readOnly: true
                     wrapMode: TextEdit.WordWrap
-                    font.family: "DejaVuSansMono"
+                    font.family: "DejaVu Sans Mono"
                 }
 
                 ProgressBar {

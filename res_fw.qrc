@@ -20,5 +20,9 @@
         <file>res/firmwares/410_o_411_o_412/VESC_servoout.bin</file>
         <file>res/firmwares/410_o_411_o_412/VESC_ws2811.bin</file>
         <file>res/firmwares/DAS_RS/VESC_default.bin</file>
+        <file>res/firmwares/75_300/VESC_default.bin</file>
+        <file>res/firmwares/75_300/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/75_300/VESC_servoout.bin</file>
+        <file>res/firmwares/75_300/VESC_ws2811.bin</file>
     </qresource>
 </RCC>

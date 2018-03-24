@@ -25,5 +25,8 @@
         <file>DetectBldc.qml</file>
         <file>PpmMap.qml</file>
         <file>AdcMap.qml</file>
+        <file>NrfPair.qml</file>
+        <file>Controls.qml</file>
+        <file>Terminal.qml</file>
     </qresource>
 </RCC>

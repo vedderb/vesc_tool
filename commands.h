@@ -66,7 +66,7 @@ signals:
     void encoderParamReceived(double offset, double ratio, bool inverted);
     void customAppDataReceived(QByteArray data);
     void focHallTableReceived(QVector<int> hall_table, int res);
-    void nrfPairingRes(NRF_PAIR_RES res);
+    void nrfPairingRes(int res);
     void mcConfigCheckResult(QStringList paramsNotSet);
 
 public slots:

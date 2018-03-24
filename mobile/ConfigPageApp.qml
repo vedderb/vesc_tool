@@ -43,6 +43,11 @@ Item {
         parentWidth: column.width
     }
 
+    NrfPair {
+        id: nrfPair
+        parentWidth: column.width
+    }
+
     function addSpacer() {
         editorsVisible.push(Qt.createQmlObject(
                                 'import QtQuick 2.7; import QtQuick.Layouts 1.3; Rectangle {Layout.fillHeight: true}',
@@ -345,6 +350,12 @@ Item {
                         text: "ADC Mapping..."
                         onTriggered: {
                             adcMap.openDialog()
+                        }
+                    }
+                    MenuItem {
+                        text: "Pair NRF..."
+                        onTriggered: {
+                            nrfPair.openDialog()
                         }
                     }
                 }

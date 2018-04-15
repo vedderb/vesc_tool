@@ -196,6 +196,16 @@ void PageFirmware::updateBlList(QString hw)
         }
     }
 
+    if (ui->blList->count() == 0) {
+        QFileInfo generic("://res/bootloaders/generic.bin");
+        if (generic.exists()) {
+            QListWidgetItem *item = new QListWidgetItem;
+            item->setText("generic");
+            item->setData(Qt::UserRole, generic.absoluteFilePath());
+            ui->blList->insertItem(ui->blList->count(), item);
+        }
+    }
+
     if (ui->blList->count() > 0) {
         ui->blList->setCurrentRow(0);
     }

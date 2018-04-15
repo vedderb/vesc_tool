@@ -79,6 +79,13 @@ QVariantMap FwHelper::getBootloaders(QString hw)
         }
     }
 
+    if (bls.isEmpty()) {
+        QFileInfo generic("://res/bootloaders/generic.bin");
+        if (generic.exists()) {
+            bls.insert("generic", generic.absoluteFilePath());
+        }
+    }
+
     return bls;
 }
 

@@ -1,5 +1,6 @@
 == 0.92 ==
 * Added generic bootloader for all hardwares.
+* FW 3.38 support.
 
 == 0.91 ==
 * Mobile: Added controls dialog, which can be opened from drawer menu.

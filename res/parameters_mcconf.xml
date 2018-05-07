@@ -580,7 +580,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Maximum allowed braking wattage (thus negative). There usuallt aren't any laws limiting how much braking is allowed, and limiting the wattage does not make much sense in general, so this parameter is present mostly for the sake of completeness. There might be some applications where limiting the braking wattage is useful though.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Notice that setting this parameter to a very high value essentially disables it, which is why the default value is high. The other limits will still apply.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_L_WATT_MAX</cDefine>
+            <cDefine>MCCONF_L_WATT_MIN</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -668,7 +668,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Cycle ingegrator limit. This is how much area will be integrated under the back EMF after a zero crossing before doing a commutation. A too low value will cause a too early commutation, and a too high value will cause a too late commutation. A too late commutation will cause more problems than too early commutations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_SL_MIN_ERPM_CYCLE_INT_LIMIT</cDefine>
+            <cDefine>MCCONF_SL_CYCLE_INT_LIMIT</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -1694,7 +1694,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Constant for the filtered current in the FOC implementation. Will affect how fast the slow abs max current fault triggers. Range 0 to 1, where 0 is the slowest and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_TEMP_COMP_BASE_TEMP</cDefine>
+            <cDefine>MCCONF_FOC_CURRENT_FILTER_CONST</cDefine>
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -1782,7 +1782,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Filter on derivative term for speed controller. &lt;/span&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The range is 0 to 1, where 0 is the maximum amount of filtering (infinite) and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_S_PID_KD</cDefine>
+            <cDefine>MCCONF_S_PID_KD_FILTER</cDefine>
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -1904,7 +1904,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Filter on derivative term for position controller. The range is 0 to 1, where 0 is the maximum amount of filtering (infinite) and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_S_PID_KD</cDefine>
+            <cDefine>MCCONF_P_PID_KD_FILTER</cDefine>
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>

@@ -25,6 +25,7 @@ Item {
     property alias scanButton: scanButton
     property alias connectButton: connectButton
     property alias disconnectButton: disconnectButton
+    property alias setNameButton: setNameButton
     property alias bleItems: bleItems
     property alias bleBox: bleBox
     property alias canIdBox: canIdBox
@@ -56,7 +57,7 @@ Item {
             visible: true
             rowSpacing: 0
             columnSpacing: 5
-            rows: 4
+            rows: 5
             columns: 2
 
             Label {
@@ -105,6 +106,15 @@ Item {
                 id: disconnectButton
                 text: qsTr("Disconnect")
                 enabled: false
+                Layout.preferredHeight: 48
+                Layout.preferredWidth: 100
+                Layout.fillWidth: true
+            }
+
+            Button {
+                id: setNameButton
+                text: qsTr("Set Name")
+                Layout.columnSpan: 2
                 Layout.preferredHeight: 48
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true

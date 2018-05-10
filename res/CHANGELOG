@@ -1,3 +1,6 @@
+== 0.93 ==
+* BLE device naming support.
+
 == 0.92 ==
 * Added generic bootloader for all hardwares.
 * FW 3.38 support.

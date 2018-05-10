@@ -25,6 +25,8 @@
 #include <QByteArray>
 #include <QList>
 #include <QTcpSocket>
+#include <QSettings>
+#include <QHash>
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPort>
@@ -41,6 +43,7 @@ class VescInterface : public QObject
     Q_OBJECT
 public:
     explicit VescInterface(QObject *parent = 0);
+    ~VescInterface();
     Q_INVOKABLE Commands *commands() const;
     Q_INVOKABLE ConfigParams *mcConfig();
     Q_INVOKABLE ConfigParams *appConfig();
@@ -52,6 +55,8 @@ public:
     Q_INVOKABLE void emitMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText = false);
     Q_INVOKABLE bool fwRx();
     Q_INVOKABLE BleUart* bleDevice();
+    Q_INVOKABLE void storeBleName(QString address, QString name);
+    Q_INVOKABLE QString getBleName(QString address);
 
     // Connection
     Q_INVOKABLE bool isPortConnected();
@@ -107,6 +112,9 @@ private:
         CONN_TCP,
         CONN_BLE
     } conn_t;
+
+    QSettings mSettings;
+    QHash<QString, QString> mBleNames;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;

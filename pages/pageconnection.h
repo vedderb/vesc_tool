@@ -55,6 +55,7 @@ private slots:
     void on_bleScanButton_clicked();
     void on_bleDisconnectButton_clicked();
     void on_bleConnectButton_clicked();
+    void on_bleSetNameButton_clicked();
 
 private:
     Ui::PageConnection *ui;

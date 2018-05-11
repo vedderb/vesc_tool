@@ -106,16 +106,17 @@ ConnectBleForm {
 
             bleItems.clear()
 
-            for (var name in devs) {
-                var name2 = name + " [" + devs[name] + "]"
-                var setName = VescIf.getBleName(devs[name])
+            for (var addr in devs) {
+                var name = devs[addr]
+                var name2 = name + " [" + addr + "]"
+                var setName = VescIf.getBleName(addr)
                 if (setName.length > 0) {
-                    setName += " [" + devs[name] + "]"
-                    bleItems.insert(0, { key: setName, value: devs[name] })
+                    setName += " [" + addr + "]"
+                    bleItems.insert(0, { key: setName, value: addr })
                 } else if (name.indexOf("VESC") !== -1) {
-                    bleItems.insert(0, { key: name2, value: devs[name] })
+                    bleItems.insert(0, { key: name2, value: addr })
                 } else {
-                    bleItems.append({ key: name2, value: devs[name] })
+                    bleItems.append({ key: name2, value: addr })
                 }
             }
 

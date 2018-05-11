@@ -122,7 +122,7 @@ void BleUart::addDevice(const QBluetoothDeviceInfo &dev)
     if (dev.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration) {
         qDebug() << "BLE scan found device:" << dev.name();
 
-        mDevs.insert(dev.name(), dev.address().toString());
+        mDevs.insert(dev.address().toString(), dev.name());
 
         emit scanDone(mDevs, false);
     }

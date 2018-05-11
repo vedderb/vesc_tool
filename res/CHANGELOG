@@ -1,3 +1,6 @@
+== 0.94 ==
+* Map detected BLE devices by address instead of by name to show multiple devices with the same name.
+
 == 0.93 ==
 * BLE device naming support.
 

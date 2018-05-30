@@ -9,5 +9,24 @@
         <file>RtData.qml</file>
         <file>FwUpdate.qml</file>
         <file>FilePicker.qml</file>
+        <file>ParamEditDouble.qml</file>
+        <file>ConfigPageMotor.qml</file>
+        <file>ParamEditors.qml</file>
+        <file>ConfigPageApp.qml</file>
+        <file>DoubleSpinBox.qml</file>
+        <file>ParamEditInt.qml</file>
+        <file>ParamEditEnum.qml</file>
+        <file>ParamEditBool.qml</file>
+        <file>ParamEditString.qml</file>
+        <file>ParamEditSeparator.qml</file>
+        <file>DetectFocParam.qml</file>
+        <file>DetectFocHall.qml</file>
+        <file>DetectFocEncoder.qml</file>
+        <file>DetectBldc.qml</file>
+        <file>PpmMap.qml</file>
+        <file>AdcMap.qml</file>
+        <file>NrfPair.qml</file>
+        <file>Controls.qml</file>
+        <file>Terminal.qml</file>
     </qresource>
 </RCC>

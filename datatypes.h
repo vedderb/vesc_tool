@@ -181,12 +181,22 @@ typedef struct {
     bool bt_z;
 } chuck_data;
 
-typedef struct {
+struct bldc_detect {
+    Q_GADGET
+
+    Q_PROPERTY(double cycle_int_limit MEMBER cycle_int_limit)
+    Q_PROPERTY(double bemf_coupling_k MEMBER bemf_coupling_k)
+    Q_PROPERTY(QVector<int> hall_table MEMBER hall_table)
+    Q_PROPERTY(int hall_res MEMBER hall_res)
+
+public:
     double cycle_int_limit;
     double bemf_coupling_k;
     QVector<int> hall_table;
     int hall_res;
-} bldc_detect;
+};
+
+Q_DECLARE_METATYPE(bldc_detect)
 
 typedef enum {
     NRF_PAIR_STARTED = 0,

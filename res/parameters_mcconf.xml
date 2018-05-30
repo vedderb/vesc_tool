@@ -78,13 +78,13 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Maximum motor current.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Maximum motor current.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_CURRENT_MAX</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>500</maxDouble>
+            <maxDouble>1000</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
@@ -100,14 +100,14 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Maximum (braking) motor current. The is the maximum current that will be fed back to the VESC and when braking, thus negative. The energy from the braking current will be fed back to the battery.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Maximum (braking) motor current. The is the maximum current that will be fed back to the VESC and when braking, thus negative. The energy from the braking current will be fed back to the battery.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_CURRENT_MIN</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>0</maxDouble>
-            <minDouble>-500</minDouble>
+            <minDouble>-1000</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>-60</valDouble>
@@ -122,13 +122,13 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The maximum current that can be drawn from the battery. The battery current is always lower than or equal to the motor current.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The maximum current that can be drawn from the battery. The battery current is always lower than or equal to the motor current.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_IN_CURRENT_MAX</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>500</maxDouble>
+            <maxDouble>1000</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
@@ -144,14 +144,14 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The maximum regenerative current that can be fed to the battery (thus negative). The battery current is always lower than or equal to the motor current.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The maximum regenerative current that can be fed to the battery (thus negative). The battery current is always lower than or equal to the motor current.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_IN_CURRENT_MIN</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>0</maxDouble>
-            <minDouble>-500</minDouble>
+            <minDouble>-1000</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>-20</valDouble>
@@ -166,13 +166,13 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The current magnitute above which all output will be switched off and a fault code thrown. Usually the current control loops take care of limiting the current, but in some conditions short current spikes can appear very quickly. The system can handle them quite well in most cased, so this value can be set relatively high compared to the other current values to avoid cutouts.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_MAX_ABS_CURRENT</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>500</maxDouble>
+            <maxDouble>1000</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
@@ -1685,6 +1685,28 @@ p, li { white-space: pre-wrap; }
             <suffix> °C</suffix>
             <vTx>9</vTx>
         </foc_temp_comp_base_temp>
+        <foc_current_filter_const>
+            <longName>Current Filter Constant</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Constant for the filtered current in the FOC implementation. Will affect how fast the slow abs max current fault triggers. Range 0 to 1, where 0 is the slowest and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_TEMP_COMP_BASE_TEMP</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.1</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </foc_current_filter_const>
         <s_pid_kp>
             <longName>Speed PID Kp</longName>
             <type>1</type>
@@ -1751,6 +1773,28 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </s_pid_kd>
+        <s_pid_kd_filter>
+            <longName>Speed PID Kd Filer</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Filter on derivative term for speed controller. &lt;/span&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The range is 0 to 1, where 0 is the maximum amount of filtering (infinite) and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_S_PID_KD</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.2</valDouble>
+            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </s_pid_kd_filter>
         <s_pid_min_erpm>
             <longName>Minimum ERPM</longName>
             <type>1</type>
@@ -1851,6 +1895,28 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </p_pid_kd>
+        <p_pid_kd_filter>
+            <longName>Position PID Kd Filer</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Filter on derivative term for position controller. The range is 0 to 1, where 0 is the maximum amount of filtering (infinite) and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_S_PID_KD</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.2</valDouble>
+            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </p_pid_kd_filter>
         <p_pid_ang_div>
             <longName>Position Angle Division</longName>
             <type>1</type>
@@ -2486,14 +2552,17 @@ p, li { white-space: pre-wrap; }
         <ser>foc_sat_comp</ser>
         <ser>foc_temp_comp</ser>
         <ser>foc_temp_comp_base_temp</ser>
+        <ser>foc_current_filter_const</ser>
         <ser>s_pid_kp</ser>
         <ser>s_pid_ki</ser>
         <ser>s_pid_kd</ser>
+        <ser>s_pid_kd_filter</ser>
         <ser>s_pid_min_erpm</ser>
         <ser>s_pid_allow_braking</ser>
         <ser>p_pid_kp</ser>
         <ser>p_pid_ki</ser>
         <ser>p_pid_kd</ser>
+        <ser>p_pid_kd_filter</ser>
         <ser>p_pid_ang_div</ser>
         <ser>cc_startup_boost_duty</ser>
         <ser>cc_min_current</ser>

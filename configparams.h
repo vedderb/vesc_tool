@@ -34,16 +34,22 @@ public:
     explicit ConfigParams(QObject *parent = 0);
     void addParam(const QString &name, ConfigParam param);
     void deleteParam(const QString &name);
-    void setUpdateOnly(const QString &name);
-    QString getUpdateOnly();
-    bool getUpdatesEnabled() const;
-    void setUpdatesEnabled(bool updatesEnabled);
+    Q_INVOKABLE void setUpdateOnly(const QString &name);
+    Q_INVOKABLE QString getUpdateOnly();
+    Q_INVOKABLE bool getUpdatesEnabled() const;
+    Q_INVOKABLE void setUpdatesEnabled(bool updatesEnabled);
     void clearParams();
     void clearAll();
 
-    bool hasParam(const QString &name);
+    Q_INVOKABLE bool hasParam(const QString &name);
     ConfigParam *getParam(const QString &name);
     ConfigParam getParamCopy(const QString &name) const;
+
+    Q_INVOKABLE bool isParamDouble(const QString &name);
+    Q_INVOKABLE bool isParamInt(const QString &name);
+    Q_INVOKABLE bool isParamEnum(const QString &name);
+    Q_INVOKABLE bool isParamQString(const QString &name);
+    Q_INVOKABLE bool isParamBool(const QString &name);
 
     Q_INVOKABLE double getParamDouble(const QString &name);
     Q_INVOKABLE int getParamInt(const QString &name);
@@ -52,6 +58,20 @@ public:
     Q_INVOKABLE bool getParamBool(const QString &name);
     Q_INVOKABLE QString getLongName(const QString &name);
     Q_INVOKABLE QString getDescription(const QString &name);
+
+    Q_INVOKABLE double getParamMaxDouble(const QString &name);
+    Q_INVOKABLE double getParamMinDouble(const QString &name);
+    Q_INVOKABLE double getParamStepDouble(const QString &name);
+    Q_INVOKABLE int getParamDecimalsDouble(const QString &name);
+    Q_INVOKABLE int getParamMaxInt(const QString &name);
+    Q_INVOKABLE int getParamMinInt(const QString &name);
+    Q_INVOKABLE int getParamStepInt(const QString &name);
+    Q_INVOKABLE QStringList getParamEnumNames(const QString &name);
+    Q_INVOKABLE double getParamEditorScale(const QString &name);
+    Q_INVOKABLE QString getParamSuffix(const QString &name);
+    Q_INVOKABLE bool getParamEditAsPercentage(const QString &name);
+    Q_INVOKABLE bool getParamShowDisplay(const QString &name);
+    Q_INVOKABLE bool getParamTransmittable(const QString &name);
 
     QStringList getParamOrder() const;
     void setParamOrder(const QStringList &order);

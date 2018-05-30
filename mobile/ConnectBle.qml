@@ -17,7 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.4
+import QtQuick 2.7
+import QtQuick.Controls 2.2
+import QtQuick.Layouts 1.3
+
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.bleuart 1.0
 import Vedder.vesc.commands 1.0
@@ -41,6 +44,16 @@ ConnectBleForm {
 
     disconnectButton.onClicked: {
         VescIf.disconnectPort()
+    }
+
+    setNameButton.onClicked: {
+        if (bleItems.rowCount() > 0) {
+            bleNameDialog.open()
+        } else {
+            VescIf.emitMessageDialog("Set BLE Device Name",
+                                     "No device selected.",
+                                     false, false);
+        }
     }
 
     fwdCanBox.onClicked: {
@@ -93,18 +106,65 @@ ConnectBleForm {
 
             bleItems.clear()
 
-            for (var name in devs) {
-                var name2 = name + " [" + devs[name] + "]"
-                if (name.indexOf("VESC") !== -1) {
-                    bleItems.insert(0, { key: name2, value: devs[name] })
+            for (var addr in devs) {
+                var name = devs[addr]
+                var name2 = name + " [" + addr + "]"
+                var setName = VescIf.getBleName(addr)
+                if (setName.length > 0) {
+                    setName += " [" + addr + "]"
+                    bleItems.insert(0, { key: setName, value: addr })
+                } else if (name.indexOf("VESC") !== -1) {
+                    bleItems.insert(0, { key: name2, value: addr })
                 } else {
-                    bleItems.append({ key: name2, value: devs[name] })
+                    bleItems.append({ key: name2, value: addr })
                 }
             }
 
             connectButton.enabled = (bleItems.rowCount() > 0) && !VescIf.isPortConnected()
 
             bleBox.currentIndex = 0
+        }
+    }
+
+    Dialog {
+        id: bleNameDialog
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        modal: true
+        focus: true
+        title: "Set BLE Device Name"
+
+        width: parent.width - 20
+        height: 200
+        closePolicy: Popup.CloseOnEscape
+        x: 10
+        y: 10
+
+        Rectangle {
+            anchors.fill: parent
+            height: stringInput.implicitHeight + 14
+            border.width: 2
+            border.color: "#8d8d8d"
+            color: "#33a8a8a8"
+            radius: 3
+            TextInput {
+                id: stringInput
+                anchors.fill: parent
+                anchors.margins: 7
+                font.pointSize: 12
+                focus: true
+            }
+        }
+
+        onAccepted: {
+            if (stringInput.text.length > 0) {
+                var addr = bleItems.get(bleBox.currentIndex).value
+                var setName = stringInput.text + " [" + addr + "]"
+
+                VescIf.storeBleName(addr, stringInput.text)
+
+                bleItems.set(bleBox.currentIndex, { key: setName, value: addr })
+                bleBox.currentText
+            }
         }
     }
 }

@@ -326,6 +326,31 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Set Device Name</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="bleNameEdit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="bleSetNameButton">
+           <property name="text">
+            <string>Set</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../res.qrc">
+             <normaloff>:/res/icons/Ok-96.png</normaloff>:/res/icons/Ok-96.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

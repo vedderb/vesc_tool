@@ -1,6 +1,22 @@
+=== FW 3.38 ===
+* Fixed temperature limit bug when the acceleration and brake current limits are different in magnitude.
+
+=== FW 3.37 ===
+* Temperature compensation on KI in addition to the observer resistance.
+* Configurable FOC current filter (useful for slow abs max current setting).
+
+=== FW 3.36 ===
+* Added handbrake current commands to the simple CAN interface.
+* Added D-term filter to position and speed controllers.
+
+=== FW 3.35 ===
+* Added option to disable nRF transmission (option in Transmit Power parameter).
+* Fixed servo output driver for all hardwares and removed software servo driver.
+
 === FW 3.34 ===
 * Added motor PID position to COMM_GET_VALUES.
 * Inverted direction angle normalization in mc_interface.
+* Use relative current mode in APP_ADC to support multiple VESCs with different current limits.
 
 === FW 3.33 ===
 * Fixed CAN-bus baud rate update.

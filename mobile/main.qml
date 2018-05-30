@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2018 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -42,6 +42,12 @@ ApplicationWindow {
         Utility.checkVersion(VescIf)
     }
 
+    Controls {
+        id: controls
+        parentWidth: appWindow.width
+        parentHeight: appWindow.height - footer.height - tabBar.height
+    }
+
     Drawer {
         id: drawer
         width: 0.5 * appWindow.width
@@ -68,6 +74,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "Reconnect"
                 enabled: false
+                flat: true
 
                 onClicked: {
                     VescIf.reconnectLastPort()
@@ -78,8 +85,20 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "Disconnect"
                 enabled: connBle.disconnectButton.enabled
+                flat: true
+
                 onClicked: {
                     VescIf.disconnectPort()
+                }
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: "Controls..."
+                flat: true
+
+                onClicked: {
+                    controls.openDialog()
                 }
             }
 
@@ -92,6 +111,8 @@ ApplicationWindow {
             Button {
                 Layout.fillWidth: true
                 text: "About"
+                flat: true
+
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 "About",
@@ -103,6 +124,8 @@ ApplicationWindow {
             Button {
                 Layout.fillWidth: true
                 text: "Changelog"
+                flat: true
+
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 "VESC Tool Changelog",
@@ -114,6 +137,8 @@ ApplicationWindow {
             Button {
                 Layout.fillWidth: true
                 text: "License"
+                flat: true
+
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 mInfoConf.getLongName("gpl_text"),
@@ -151,15 +176,35 @@ ApplicationWindow {
         }
 
         Page {
-            Label {
-                text: qsTr("TODO!")
-                anchors.centerIn: parent
+            ConfigPageMotor {
+                id: confPageMotor
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+            }
+        }
+
+        Page {
+            ConfigPageApp {
+                id: confPageApp
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
             }
         }
 
         Page {
             FwUpdate {
                 anchors.fill: parent
+            }
+        }
+
+        Page {
+            Terminal {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                anchors.topMargin: 10
             }
         }
     }
@@ -169,7 +214,6 @@ ApplicationWindow {
         height: tabBar.height
 
         RowLayout {
-//            width: parent.width
             anchors.fill: parent
             spacing: 0
 
@@ -207,7 +251,7 @@ ApplicationWindow {
                     color: "#e8e8e8"
                 }
 
-                property int buttons: 5
+                property int buttons: 7
                 property int buttonWidth: 120
 
                 TabButton {
@@ -223,11 +267,19 @@ ApplicationWindow {
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {
-                    text: qsTr("Config")
+                    text: qsTr("Motor Cfg")
+                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                }
+                TabButton {
+                    text: qsTr("App Cfg")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {
                     text: qsTr("Firmware")
+                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                }
+                TabButton {
+                    text: qsTr("Terminal")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
             }
@@ -360,6 +412,13 @@ ApplicationWindow {
             vescDialogLabel.text = msg
             vescDialogLabel.textFormat = richText ? Text.RichText : Text.AutoText
             vescDialog.open()
+        }
+
+        onFwRxChanged: {
+            if (rx && !limited) {
+                mCommands.getMcconf()
+                mCommands.getAppConf()
+            }
         }
     }
 

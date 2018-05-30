@@ -83,6 +83,15 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     // BLE
     mBleUart = new BleUart(this);
 
+    int size = mSettings.beginReadArray("bleNames");
+    for (int i = 0; i < size; ++i) {
+        mSettings.setArrayIndex(i);
+        QString address = mSettings.value("address").toString();
+        QString name = mSettings.value("name").toString();
+        mBleNames.insert(address, name);
+    }
+    mSettings.endArray();
+
     connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
 
     mCommands->setAppConfig(mAppConfig);
@@ -101,6 +110,23 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mCommands, SIGNAL(ackReceived(QString)), this, SLOT(ackReceived(QString)));
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
+}
+
+VescInterface::~VescInterface()
+{
+    mSettings.beginWriteArray("bleNames");
+
+    QHashIterator<QString, QString> i(mBleNames);
+    int ind = 0;
+    while (i.hasNext()) {
+        i.next();
+        mSettings.setArrayIndex(ind);
+        mSettings.setValue("address", i.key());
+        mSettings.setValue("name", i.value());
+        ind++;
+    }
+
+    mSettings.endArray();
 }
 
 Commands *VescInterface::commands() const
@@ -178,6 +204,20 @@ bool VescInterface::fwRx()
 BleUart *VescInterface::bleDevice()
 {
     return mBleUart;
+}
+
+void VescInterface::storeBleName(QString address, QString name)
+{
+    mBleNames.insert(address, name);
+}
+
+QString VescInterface::getBleName(QString address)
+{
+    QString res;
+    if(mBleNames.contains(address)) {
+        res = mBleNames[address];
+    }
+    return res;
 }
 
 bool VescInterface::isPortConnected()

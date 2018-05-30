@@ -1113,7 +1113,7 @@
      <x>0</x>
      <y>0</y>
      <width>1170</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1129,8 +1129,15 @@
     </property>
     <addaction name="actionDeleteAll"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionCalculatePacketSize"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuTools"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionLoad_XML">
@@ -1158,6 +1165,15 @@
    </property>
    <property name="text">
     <string>Delete All Data</string>
+   </property>
+  </action>
+  <action name="actionCalculatePacketSize">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Calculator-96.png</normaloff>:/res/icons/Calculator-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Calculate Packet Size</string>
    </property>
   </action>
  </widget>

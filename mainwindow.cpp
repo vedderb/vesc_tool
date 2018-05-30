@@ -1216,3 +1216,14 @@ void MainWindow::on_actionLicense_triggered()
 {
     HelpDialog::showHelp(this, mVesc->infoConfig(), "gpl_text");
 }
+
+void MainWindow::on_posBox_editingFinished()
+{
+    on_posButton_clicked();
+}
+
+void MainWindow::on_posBox_valueChanged(double arg1)
+{
+    (void)arg1;
+//    on_posButton_clicked();
+}

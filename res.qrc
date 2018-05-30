@@ -120,7 +120,7 @@
         <file>res/images/multi_slave.png</file>
         <file>res/icons/User Group Man Man-96.png</file>
         <file>res/icons/Settings-96.png</file>
-        <file>res/bootloaders/60.bin</file>
+        <file>res/bootloaders/60_o_75_300.bin</file>
         <file>res/bootloaders/40_o_47_o_48_o_410_o_411_o_412_o_DAS_RS.bin</file>
         <file>res/fonts/DejaVuSans.ttf</file>
         <file>res/fonts/DejaVuSans-Oblique.ttf</file>
@@ -132,5 +132,6 @@
         <file>res/fonts/DejaVuSans-Bold.ttf</file>
         <file>res/icons/ic_folder_open_black_48dp.png</file>
         <file>res/icons/ic_insert_drive_file_black_48dp.png</file>
+        <file>res/bootloaders/generic.bin</file>
     </qresource>
 </RCC>

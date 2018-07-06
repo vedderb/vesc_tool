@@ -137,6 +137,7 @@ Item {
                 createEditorMc("cc_min_current")
                 createEditorMc("m_fault_stop_time_ms")
                 createEditorMc("m_ntc_motor_beta")
+                createEditorMc("m_out_aux_mode")
                 addSpacer()
                 break;
             default:

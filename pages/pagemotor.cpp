@@ -89,5 +89,6 @@ void PageMotor::setVesc(VescInterface *vesc)
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "cc_min_current");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_fault_stop_time_ms");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_ntc_motor_beta");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_out_aux_mode");
     }
 }

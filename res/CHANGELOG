@@ -1,3 +1,6 @@
+== 0.95 ==
+* FW 3.39: auxiliary output support.
+
 == 0.94 ==
 * Map detected BLE devices by address instead of by name to show multiple devices with the same name.
 

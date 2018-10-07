@@ -27,6 +27,7 @@
 #include <QDebug>
 #include <QNetworkReply>
 #include <QMessageBox>
+#include <QFile>
 
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>

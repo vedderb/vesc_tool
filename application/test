@@ -1,0 +1,9 @@
+#!/bin/bash
+
+rm -rf app_test
+./create_app app_test qml
+cd app_test
+/opt/Qt/5.9.2/gcc_64/bin/qmake
+make -j4
+./application
+

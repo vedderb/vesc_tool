@@ -81,6 +81,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
 
     // BLE
+#ifdef HAS_BLUETOOTH
     mBleUart = new BleUart(this);
 
     int size = mSettings.beginReadArray("bleNames");
@@ -93,6 +94,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mSettings.endArray();
 
     connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
+#endif
 
     mCommands->setAppConfig(mAppConfig);
     mCommands->setMcConfig(mMcConfig);
@@ -201,6 +203,7 @@ bool VescInterface::fwRx()
     return mFwVersionReceived;
 }
 
+#ifdef HAS_BLUETOOTH
 BleUart *VescInterface::bleDevice()
 {
     return mBleUart;
@@ -219,6 +222,7 @@ QString VescInterface::getBleName(QString address)
     }
     return res;
 }
+#endif
 
 bool VescInterface::isPortConnected()
 {
@@ -234,9 +238,11 @@ bool VescInterface::isPortConnected()
         res = true;
     }
 
+#ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         res = true;
     }
+#endif
 
     return res;
 }
@@ -255,10 +261,12 @@ void VescInterface::disconnectPort()
         updateFwRx(false);
     }
 
+#ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         mBleUart->disconnectBle();
         updateFwRx(false);
     }
+#endif
 
     mFwRetries = 0;
 }
@@ -275,7 +283,9 @@ bool VescInterface::reconnectLastPort()
         connectTcp(mLastTcpServer, mLastTcpPort);
         return true;
     } else if (mLastConnType == CONN_BLE) {
+#ifdef HAS_BLUETOOTH
         mBleUart->startConnect(mLastBleAddr);
+#endif
         return true;
     } else {
 #ifdef HAS_SERIALPORT
@@ -362,10 +372,12 @@ QString VescInterface::getConnectedPortName()
         connected = true;
     }
 
+#ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         res = tr("Connected (BLE) to %1").arg(mLastBleAddr);
         connected = true;
     }
+#endif
 
     if (connected && mCommands->isLimitedMode()) {
         res += tr(", limited mode");
@@ -494,9 +506,13 @@ void VescInterface::connectTcp(QString server, int port)
 
 void VescInterface::connectBle(QString address)
 {
+#ifdef HAS_BLUETOOTH
     mBleUart->startConnect(address);
     mLastConnType = CONN_BLE;
     mLastBleAddr = address;
+#else
+    (void)address;
+#endif
 }
 
 bool VescInterface::isAutoconnectOngoing() const
@@ -570,10 +586,12 @@ void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
     updateFwRx(false);
 }
 
+#ifdef HAS_BLUETOOTH
 void VescInterface::bleDataRx(QByteArray data)
 {
     mPacket->processData(data);
 }
+#endif
 
 void VescInterface::timerSlot()
 {
@@ -654,9 +672,11 @@ void VescInterface::packetDataToSend(QByteArray &data)
         mTcpSocket->write(data);
     }
 
+#ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         mBleUart->writeData(data);
     }
+#endif
 }
 
 void VescInterface::packetReceived(QByteArray &data)

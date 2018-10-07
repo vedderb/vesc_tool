@@ -1,0 +1,82 @@
+#!/bin/bash
+
+if [ -n "$1" ]; then
+	APP_NAME=$1
+else
+	echo Please specify application name
+	exit 1
+fi
+
+if [ "$2" == "qml" ]; then
+	QML=true
+else
+	QML=false
+fi
+
+mkdir $APP_NAME
+mkdir $APP_NAME/res
+mkdir $APP_NAME/widgets
+
+if [ $QML == true ]; then
+	cp template/application_qml.pro $APP_NAME/$APP_NAME.pro
+	cp template/qml.qrc $APP_NAME
+	cp template/main.qml $APP_NAME/res
+	cp template/qtquickcontrols2.conf $APP_NAME
+	cp template/main_qml.cpp $APP_NAME/main.cpp
+else
+	cp template/application.pro $APP_NAME/$APP_NAME.pro
+	cp template/mainwindow.cpp $APP_NAME
+	cp template/mainwindow.h $APP_NAME
+	cp template/mainwindow.ui $APP_NAME
+	cp template/main.cpp $APP_NAME
+fi
+
+cp template/res.qrc $APP_NAME
+cp ../bleuart.cpp $APP_NAME
+cp ../bleuart.h $APP_NAME
+cp ../commands.cpp $APP_NAME
+cp ../commands.h $APP_NAME
+cp ../configparam.cpp $APP_NAME
+cp ../configparam.h $APP_NAME
+cp ../configparams.cpp $APP_NAME
+cp ../configparams.h $APP_NAME
+cp ../datatypes.h $APP_NAME
+cp ../packet.cpp $APP_NAME
+cp ../packet.h $APP_NAME
+cp ../parametereditor.cpp $APP_NAME
+cp ../parametereditor.h $APP_NAME
+cp ../vbytearray.cpp $APP_NAME
+cp ../vbytearray.h $APP_NAME
+cp ../vescinterface.cpp $APP_NAME
+cp ../vescinterface.h $APP_NAME
+cp ../utility.cpp $APP_NAME
+cp ../utility.h $APP_NAME
+
+cp ../res/info.xml $APP_NAME/res
+cp ../res/parameters_mcconf.xml $APP_NAME/res
+cp ../res/parameters_appconf.xml $APP_NAME/res
+
+cp ../widgets/displaypercentage.cpp $APP_NAME/widgets
+cp ../widgets/displaypercentage.h $APP_NAME/widgets
+cp ../widgets/helpdialog.cpp $APP_NAME/widgets
+cp ../widgets/helpdialog.h $APP_NAME/widgets
+cp ../widgets/helpdialog.ui $APP_NAME/widgets
+cp ../widgets/parameditbool.cpp $APP_NAME/widgets
+cp ../widgets/parameditbool.h $APP_NAME/widgets
+cp ../widgets/parameditbool.ui $APP_NAME/widgets
+cp ../widgets/parameditdouble.cpp $APP_NAME/widgets
+cp ../widgets/parameditdouble.h $APP_NAME/widgets
+cp ../widgets/parameditdouble.ui $APP_NAME/widgets
+cp ../widgets/parameditenum.cpp $APP_NAME/widgets
+cp ../widgets/parameditenum.h $APP_NAME/widgets
+cp ../widgets/parameditenum.ui $APP_NAME/widgets
+cp ../widgets/parameditint.cpp $APP_NAME/widgets
+cp ../widgets/parameditint.h $APP_NAME/widgets
+cp ../widgets/parameditint.ui $APP_NAME/widgets
+cp ../widgets/parameditstring.cpp $APP_NAME/widgets
+cp ../widgets/parameditstring.h $APP_NAME/widgets
+cp ../widgets/parameditstring.ui $APP_NAME/widgets
+cp ../widgets/vtextbrowser.cpp $APP_NAME/widgets
+cp ../widgets/vtextbrowser.h $APP_NAME/widgets
+cp template/widgets.pri $APP_NAME/widgets
+

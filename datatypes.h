@@ -94,6 +94,7 @@ struct MC_VALUES {
     Q_PROPERTY(int tachometer_abs MEMBER tachometer_abs)
     Q_PROPERTY(double position MEMBER position)
     Q_PROPERTY(mc_fault_code fault_code MEMBER fault_code)
+    Q_PROPERTY(uint8_t vesc_id MEMBER vesc_id)
     Q_PROPERTY(QString fault_str MEMBER fault_str)
 
 public:
@@ -114,6 +115,7 @@ public:
     int tachometer_abs;
     double position;
     mc_fault_code fault_code;
+    uint8_t vesc_id;
     QString fault_str;
 };
 

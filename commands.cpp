@@ -149,6 +149,12 @@ void Commands::processPacket(QByteArray data)
             values.position = -1.0;
         }
 
+        if (vb.size() >= 1) {
+            values.vesc_id = vb.vbPopFrontUint8();
+        } else {
+            values.vesc_id = 255;
+        }
+
         emit valuesReceived(values);
     } break;
 

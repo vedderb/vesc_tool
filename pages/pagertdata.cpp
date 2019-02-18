@@ -60,18 +60,6 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->currentPlot->graph(graphIndex)->setName("Duty cycle");
     graphIndex++;
 
-    // Temperatures
-    graphIndex = 0;
-    ui->tempPlot->addGraph();
-    ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
-    ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET");
-    graphIndex++;
-
-    ui->tempPlot->addGraph(ui->tempPlot->xAxis, ui->tempPlot->yAxis2);
-    ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::magenta));
-    ui->tempPlot->graph(graphIndex)->setName("Temperature Motor");
-    graphIndex++;
-
     // RPM
     graphIndex = 0;
     ui->rpmPlot->addGraph();
@@ -162,8 +150,8 @@ void PageRtData::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES)),
-                this, SLOT(valuesReceived(MC_VALUES)));
+        connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,unsigned int)),
+                this, SLOT(valuesReceived(MC_VALUES, unsigned int)));
         connect(mVesc->commands(), SIGNAL(rotorPosReceived(double)),
                 this, SLOT(rotorPosReceived(double)));
     }
@@ -186,9 +174,40 @@ void PageRtData::timerSlot()
         ui->currentPlot->graph(graphIndex++)->setData(xAxis, mDutyVec);
 
         // Temperature plot
+        ui->tempPlot->clearGraphs();
+
         graphIndex = 0;
-        ui->tempPlot->graph(graphIndex++)->setData(xAxis, mTempMosVec);
-        ui->tempPlot->graph(graphIndex++)->setData(xAxis, mTempMotorVec);
+        ui->tempPlot->addGraph();
+        ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+        ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET");
+        ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMosVec);
+        graphIndex++;
+
+        if (!mTempMos1Vec.isEmpty() && mTempMos1Vec.last() != 0.0) {
+            ui->tempPlot->addGraph();
+            ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+            ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET 1");
+            ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMos1Vec);
+            graphIndex++;
+
+            ui->tempPlot->addGraph();
+            ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::darkGreen));
+            ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET 2");
+            ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMos2Vec);
+            graphIndex++;
+
+            ui->tempPlot->addGraph();
+            ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::cyan));
+            ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET 3");
+            ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMos3Vec);
+            graphIndex++;
+        }
+
+        ui->tempPlot->addGraph(ui->tempPlot->xAxis, ui->tempPlot->yAxis2);
+        ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::magenta));
+        ui->tempPlot->graph(graphIndex)->setName("Temperature Motor");
+        ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMotorVec);
+        graphIndex++;
 
         // RPM plot
         graphIndex = 0;
@@ -233,13 +252,17 @@ void PageRtData::timerSlot()
     }
 }
 
-void PageRtData::valuesReceived(MC_VALUES values)
+void PageRtData::valuesReceived(MC_VALUES values, unsigned int mask)
 {
+    (void)mask;
     ui->rtText->setValues(values);
 
     const int maxS = 500;
 
     appendDoubleAndTrunc(&mTempMosVec, values.temp_mos, maxS);
+    appendDoubleAndTrunc(&mTempMos1Vec, values.temp_mos_1, maxS);
+    appendDoubleAndTrunc(&mTempMos2Vec, values.temp_mos_2, maxS);
+    appendDoubleAndTrunc(&mTempMos3Vec, values.temp_mos_3, maxS);
     appendDoubleAndTrunc(&mTempMotorVec, values.temp_motor, maxS);
     appendDoubleAndTrunc(&mCurrInVec, values.current_in, maxS);
     appendDoubleAndTrunc(&mCurrMotorVec, values.current_motor, maxS);

@@ -37,7 +37,7 @@ public:
 
 private slots:
     void timerSlot();
-    void valuesReceived(MC_VALUES values);
+    void valuesReceived(MC_VALUES values, unsigned int mask);
 
     void on_connectButton_clicked();
     void on_disconnectButton_clicked();

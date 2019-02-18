@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2018 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -18,14 +18,13 @@
     */
 
 #include "mainwindow.h"
+#include "mobile/qmlui.h"
 
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
 #include <QDesktopWidget>
 #include <QFontDatabase>
-
-#include "mobile/qmlui.h"
 
 int main(int argc, char *argv[])
 {
@@ -39,8 +38,10 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
-#ifdef USE_MOBILE
+#if USE_MOBILE
+#ifndef DEBUG_BUILD
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
 #else
     QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
 

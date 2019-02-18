@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2018 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -28,35 +28,73 @@ import Vedder.vesc.configparams 1.0
 Item {
     property Commands mCommands: VescIf.commands()
     property var editorsVisible: []
+    property bool isHorizontal: width > height
 
     ParamEditors {
         id: editors
     }
 
-    PpmMap {
+    Dialog {
         id: ppmMap
-        parentWidth: column.width
+        title: "PPM Mapping"
+        standardButtons: Dialog.Close
+        modal: true
+        focus: true
+
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        x: 10
+        y: parent.height / 2 - height / 2
+        parent: ApplicationWindow.overlay
+
+        PpmMap {
+            anchors.fill: parent
+        }
     }
 
-    AdcMap {
+    Dialog {
         id: adcMap
-        parentWidth: column.width
+        title: "ADC Mapping"
+        standardButtons: Dialog.Close
+        modal: true
+        focus: true
+
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        x: 10
+        y: parent.height / 2 - height / 2
+        parent: ApplicationWindow.overlay
+
+        AdcMap {
+            anchors.fill: parent
+        }
     }
 
-    NrfPair {
+    Dialog {
         id: nrfPair
-        parentWidth: column.width
+        title: "NRF Pairing"
+        standardButtons: Dialog.Close
+        modal: true
+        focus: true
+
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        x: 10
+        y: parent.height / 2 - height / 2
+        parent: ApplicationWindow.overlay
+
+        NrfPair {
+            anchors.fill: parent
+        }
     }
 
-    function addSpacer() {
-        editorsVisible.push(Qt.createQmlObject(
-                                'import QtQuick 2.7; import QtQuick.Layouts 1.3; Rectangle {Layout.fillHeight: true}',
-                                scrollCol,
-                                "spacer1"))
+    onIsHorizontalChanged: {
+        updateEditors()
     }
 
     function addSeparator(text) {
         editorsVisible.push(editors.createSeparator(scrollCol, text))
+        editorsVisible[editorsVisible.length - 1].Layout.columnSpan = isHorizontal ? 2 : 1
     }
 
     function destroyEditors() {
@@ -68,6 +106,8 @@ Item {
 
     function createEditorApp(param) {
         editorsVisible.push(editors.createEditorApp(scrollCol, param))
+        editorsVisible[editorsVisible.length - 1].Layout.preferredWidth = 500
+        editorsVisible[editorsVisible.length - 1].Layout.fillsWidth = true
     }
 
     function updateEditors() {
@@ -82,7 +122,9 @@ Item {
             createEditorApp("send_can_status")
             createEditorApp("send_can_status_rate_hz")
             createEditorApp("can_baud_rate")
-            addSpacer()
+            createEditorApp("pairing_done")
+            createEditorApp("uavcan_enable")
+            createEditorApp("uavcan_esc_index")
             break;
 
         case "PPM":
@@ -98,20 +140,17 @@ Item {
                 createEditorApp("app_ppm_conf.multi_esc")
                 createEditorApp("app_ppm_conf.tc")
                 createEditorApp("app_ppm_conf.tc_max_diff")
-                addSpacer()
                 break;
             case "Mapping":
                 createEditorApp("app_ppm_conf.pulse_start")
                 createEditorApp("app_ppm_conf.pulse_end")
                 createEditorApp("app_ppm_conf.pulse_center")
                 createEditorApp("app_ppm_conf.hyst")
-                addSpacer()
                 break;
             case "Throttle Curve":
                 createEditorApp("app_ppm_conf.throttle_exp")
                 createEditorApp("app_ppm_conf.throttle_exp_brake")
                 createEditorApp("app_ppm_conf.throttle_exp_mode")
-                addSpacer()
                 break;
             default:
                 break;
@@ -133,7 +172,6 @@ Item {
                 createEditorApp("app_adc_conf.multi_esc")
                 createEditorApp("app_adc_conf.tc")
                 createEditorApp("app_adc_conf.tc_max_diff")
-                addSpacer()
                 break;
             case "Mapping":
                 createEditorApp("app_adc_conf.hyst")
@@ -146,13 +184,11 @@ Item {
                 createEditorApp("app_adc_conf.voltage2_start")
                 createEditorApp("app_adc_conf.voltage2_end")
                 createEditorApp("app_adc_conf.voltage2_inverted")
-                addSpacer()
                 break;
             case "Throttle Curve":
                 createEditorApp("app_adc_conf.throttle_exp")
                 createEditorApp("app_adc_conf.throttle_exp_brake")
                 createEditorApp("app_adc_conf.throttle_exp_mode")
-                addSpacer()
                 break;
             default:
                 break;
@@ -161,7 +197,6 @@ Item {
 
         case "UART":
             createEditorApp("app_uart_baudrate")
-            addSpacer()
             break;
 
         case "Nunchuk":
@@ -176,13 +211,11 @@ Item {
                 createEditorApp("app_chuk_conf.multi_esc")
                 createEditorApp("app_chuk_conf.tc")
                 createEditorApp("app_chuk_conf.tc_max_diff")
-                addSpacer()
                 break;
             case "Throttle Curve":
                 createEditorApp("app_chuk_conf.throttle_exp")
                 createEditorApp("app_chuk_conf.throttle_exp_brake")
                 createEditorApp("app_chuk_conf.throttle_exp_mode")
-                addSpacer()
                 break;
             default:
                 break;
@@ -203,7 +236,6 @@ Item {
             createEditorApp("app_nrf_conf.address_0")
             createEditorApp("app_nrf_conf.address_1")
             createEditorApp("app_nrf_conf.address_2")
-            addSpacer()
             break;
 
         default:
@@ -216,76 +248,81 @@ Item {
         anchors.fill: parent
         spacing: 0
 
-        ComboBox {
-            id: pageBox
+        GridLayout {
             Layout.fillWidth: true
-            model: [
-                "General",
-                "PPM",
-                "ADC",
-                "UART",
-                "Nunchuk",
-                "NRF"
-            ]
+            columns: isHorizontal ? 2 : 1
+            rowSpacing: -5
+            ComboBox {
+                id: pageBox
+                Layout.fillWidth: true
+                model: [
+                    "General",
+                    "PPM",
+                    "ADC",
+                    "UART",
+                    "Nunchuk",
+                    "NRF"
+                ]
 
-            onCurrentTextChanged: {
-                var tabTextOld = tabBox.currentText
+                onCurrentTextChanged: {
+                    var tabTextOld = tabBox.currentText
 
-                switch(currentText) {
-                case "General":
-                    tabBox.model = []
-                    break;
+                    switch(currentText) {
+                    case "General":
+                        tabBox.model = []
+                        break;
 
-                case "PPM":
-                    tabBox.model = [
-                                "General",
-                                "Mapping",
-                                "Throttle Curve"
-                            ]
-                    break;
+                    case "PPM":
+                        tabBox.model = [
+                                    "General",
+                                    "Mapping",
+                                    "Throttle Curve"
+                                ]
+                        break;
 
-                case "ADC":
-                    tabBox.model = [
-                                "General",
-                                "Mapping",
-                                "Throttle Curve"
-                            ]
-                    break;
+                    case "ADC":
+                        tabBox.model = [
+                                    "General",
+                                    "Mapping",
+                                    "Throttle Curve"
+                                ]
+                        break;
 
-                case "UART":
-                    tabBox.model = []
-                    break;
+                    case "UART":
+                        tabBox.model = []
+                        break;
 
-                case "Nunchuk":
-                    tabBox.model = [
-                                "General",
-                                "Throttle Curve"
-                            ]
-                    break;
+                    case "Nunchuk":
+                        tabBox.model = [
+                                    "General",
+                                    "Throttle Curve"
+                                ]
+                        break;
 
-                case "NRF":
-                    tabBox.model = []
-                    break;
+                    case "NRF":
+                        tabBox.model = []
+                        break;
 
-                default:
-                    tabBox.model = []
-                    break;
-                }
+                    default:
+                        tabBox.model = []
+                        break;
+                    }
 
-                tabBox.visible = tabBox.currentText.length !== 0
+                    tabBox.visible = tabBox.currentText.length !== 0
 
-                if (tabTextOld == tabBox.currentText) {
-                    updateEditors()
+                    if (tabTextOld == tabBox.currentText) {
+                        updateEditors()
+                    }
                 }
             }
-        }
 
-        ComboBox {
-            id: tabBox
-            Layout.fillWidth: true
+            ComboBox {
+                id: tabBox
+                Layout.fillWidth: true
 
-            onCurrentTextChanged: {
-                updateEditors()
+                onCurrentTextChanged: {
+                    updateEditors()
+                }
             }
         }
 
@@ -296,9 +333,10 @@ Item {
             contentWidth: column.width
             clip: true
 
-            ColumnLayout {
+            GridLayout {
                 id: scrollCol
                 anchors.fill: parent
+                columns: isHorizontal ? 2 : 1
             }
         }
 
@@ -343,19 +381,19 @@ Item {
                     MenuItem {
                         text: "PPM Mapping..."
                         onTriggered: {
-                            ppmMap.openDialog()
+                            ppmMap.open()
                         }
                     }
                     MenuItem {
                         text: "ADC Mapping..."
                         onTriggered: {
-                            adcMap.openDialog()
+                            adcMap.open()
                         }
                     }
                     MenuItem {
                         text: "Pair NRF..."
                         onTriggered: {
-                            nrfPair.openDialog()
+                            nrfPair.open()
                         }
                     }
                 }

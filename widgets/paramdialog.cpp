@@ -41,6 +41,8 @@ ParamDialog::ParamDialog(QString title,
             ui->paramTable->addParamRow(&mConfig, s);
         }
     }
+
+    setAttribute(Qt::WA_DeleteOnClose);
 }
 
 ParamDialog::~ParamDialog()

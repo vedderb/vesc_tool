@@ -73,7 +73,7 @@ Item {
         modal: true
         focus: true
         width: parentWidth - 20
-        height: Math.min(implicitHeight, column.height - 40)
+        height: column.height - 40
         closePolicy: Popup.CloseOnEscape
         x: 10
         y: 10
@@ -172,6 +172,7 @@ Item {
 
         Text {
             id: detectLambdaLabel
+            color: "#ffffff"
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

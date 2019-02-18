@@ -72,7 +72,7 @@ void ParamEditDouble::setConfig(ConfigParams *config)
         mParam = *param;
 
         mMaxVal = fabs(mParam.maxDouble) > fabs(mParam.minDouble) ?
-                    fabs(mParam.maxDouble) : fabsf(mParam.minDouble);
+                    fabs(mParam.maxDouble) : fabs(mParam.minDouble);
 
         mDoubleBox->setMaximum(mParam.maxDouble * mParam.editorScale);
         mDoubleBox->setMinimum(mParam.minDouble * mParam.editorScale);

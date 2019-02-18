@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -18,6 +18,8 @@
     */
 
 #include "packet.h"
+#include <cstring>
+#include <QDebug>
 
 namespace {
 // CRC Table
@@ -49,17 +51,19 @@ const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
         0x1ad0, 0x2ab3, 0x3a92, 0xfd2e, 0xed0f, 0xdd6c, 0xcd4d, 0xbdaa, 0xad8b,
         0x9de8, 0x8dc9, 0x7c26, 0x6c07, 0x5c64, 0x4c45, 0x3ca2, 0x2c83, 0x1ce0,
         0x0cc1, 0xef1f, 0xff3e, 0xcf5d, 0xdf7c, 0xaf9b, 0xbfba, 0x8fd9, 0x9ff8,
-                                     0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0 };
+        0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0 };
 }
 
 Packet::Packet(QObject *parent) : QObject(parent)
 {
-    mRxState = 0;
     mRxTimer = 0;
-    mPayloadLength = 0;
-    mCrcLow = 0;
-    mCrcHigh = 0;
     mByteTimeout = 50;
+    mMaxPacketLen = 512;
+    mRxReadPtr = 0;
+    mRxWritePtr = 0;
+    mBytesLeft = 0;
+    mBufferLen = mMaxPacketLen + 8;
+    mRxBuffer = new unsigned char[mBufferLen];
 
     mTimer = new QTimer(this);
     mTimer->setInterval(10);
@@ -68,17 +72,31 @@ Packet::Packet(QObject *parent) : QObject(parent)
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
 }
 
+Packet::~Packet()
+{
+    delete[] mRxBuffer;
+}
+
 void Packet::sendPacket(const QByteArray &data)
 {
+    if (data.size() == 0 || data.size() > (int)mMaxPacketLen) {
+        return;
+    }
+
     QByteArray to_send;
     unsigned int len_tot = data.size();
 
-    if (len_tot <= 256) {
+    if (len_tot <= 255) {
         to_send.append((char)2);
         to_send.append((char)len_tot);
-    } else {
+    } else if (len_tot <= 65535) {
         to_send.append((char)3);
         to_send.append((char)(len_tot >> 8));
+        to_send.append((char)(len_tot & 0xFF));
+    } else {
+        to_send.append((char)4);
+        to_send.append((char)((len_tot >> 16) & 0xFF));
+        to_send.append((char)((len_tot >> 8) & 0xFF));
         to_send.append((char)(len_tot & 0xFF));
     }
 
@@ -103,76 +121,68 @@ unsigned short Packet::crc16(const unsigned char *buf, unsigned int len)
 
 void Packet::processData(QByteArray data)
 {
-    unsigned char rx_data;
+    QVector<QByteArray> decodedPackets;
 
-    for(int i = 0;i < data.length();i++) {
-        rx_data = data.at(i);
+    for(unsigned char rx_data: data) {
+        mRxTimer = mByteTimeout;
 
-        switch (mRxState) {
-        case 0:
-            if (rx_data == 2) {
-                mRxState += 2;
-                mRxTimer = mByteTimeout;
-                mRxBuffer.clear();
-                mPayloadLength = 0;
-            } else if (rx_data == 3) {
-                mRxState++;
-                mRxTimer = mByteTimeout;
-                mRxBuffer.clear();
-                mPayloadLength = 0;
-            } else {
-                mRxState = 0;
-            }
-            break;
+        unsigned int data_len = mRxWritePtr - mRxReadPtr;
 
-        case 1:
-            mPayloadLength = (unsigned int)rx_data << 8;
-            mRxState++;
-            mRxTimer = mByteTimeout;
-            break;
-
-        case 2:
-            mPayloadLength |= (unsigned int)rx_data;
-            mRxState++;
-            mRxTimer = mByteTimeout;
-            break;
-
-        case 3:
-            mRxBuffer.append((char)rx_data);
-            if (mRxBuffer.size() == (int)mPayloadLength) {
-                mRxState++;
-            }
-            mRxTimer = mByteTimeout;
-            break;
-
-        case 4:
-            mCrcHigh = rx_data;
-            mRxState++;
-            mRxTimer = mByteTimeout;
-            break;
-
-        case 5:
-            mCrcLow = rx_data;
-            mRxState++;
-            mRxTimer = mByteTimeout;
-            break;
-
-        case 6:
-            if (rx_data == 3) {
-                if (crc16((const unsigned char*)mRxBuffer.data(), mPayloadLength) ==
-                        ((unsigned short)mCrcHigh << 8 | (unsigned short)mCrcLow)) {
-                    // Packet received!
-                    emit packetReceived(mRxBuffer);
-                }
-            }
-
-            mRxState = 0;
-            break;
-
-        default:
-            mRxState = 0;
-            break;
+        // Out of space (should not happen)
+        if (data_len >= mBufferLen) {
+            mRxWritePtr = 0;
+            mRxReadPtr = 0;
+            mBytesLeft = 0;
+            mRxBuffer[mRxWritePtr++] = rx_data;
+            continue;
         }
+
+        // Everything has to be aligned, so shift buffer if we are out of space.
+        // (as opposed to using a circular buffer)
+        if (mRxWritePtr >= mBufferLen) {
+            memmove(mRxBuffer, mRxBuffer + mRxReadPtr, data_len);
+            mRxReadPtr = 0;
+            mRxWritePtr = data_len;
+        }
+
+        mRxBuffer[mRxWritePtr++] = rx_data;
+        data_len++;
+
+        if (mBytesLeft > 1) {
+            mBytesLeft--;
+            continue;
+        }
+
+        // Try decoding the packet at various offsets until it succeeds, or
+        // until we run out of data.
+        for (;;) {
+            int res = try_decode_packet(mRxBuffer + mRxReadPtr, data_len,
+                                        &mBytesLeft, decodedPackets);
+
+            // More data is needed
+            if (res == -2) {
+                break;
+            }
+
+            if (res > 0) {
+                data_len -= res;
+                mRxReadPtr += res;
+            } else if (res == -1) {
+                // Something went wrong. Move pointer forward and try again.
+                mRxReadPtr++;
+                data_len--;
+            }
+        }
+
+        // Nothing left, move pointers to avoid memmove
+        if (data_len == 0) {
+            mRxReadPtr = 0;
+            mRxWritePtr = 0;
+        }
+    }
+
+    for (QByteArray b: decodedPackets) {
+        emit packetReceived(b);
     }
 }
 
@@ -181,6 +191,90 @@ void Packet::timerSlot()
     if (mRxTimer) {
         mRxTimer--;
     } else {
-        mRxState = 0;
+        mRxReadPtr = 0;
+        mRxWritePtr = 0;
+        mBytesLeft = 0;
+    }
+}
+
+int Packet::try_decode_packet(unsigned char *buffer, unsigned int in_len,
+                              int *bytes_left, QVector<QByteArray> &decodedPackets)
+{
+    *bytes_left = 0;
+
+    if (in_len == 0) {
+        *bytes_left = 1;
+        return -2;
+    }
+
+    unsigned int data_start = buffer[0];
+    bool is_len_8b = buffer[0] == 2;
+    bool is_len_16b = buffer[0] == 3;
+    bool is_len_24b = buffer[0] == 4;
+
+    // No valid start byte
+    if (!is_len_8b && !is_len_16b && !is_len_24b) {
+        return -1;
+    }
+
+    // Not enough data to determine length
+    if (in_len < data_start) {
+        *bytes_left = data_start - in_len;
+        return -2;
+    }
+
+    unsigned int len = 0;
+
+    if (is_len_8b) {
+        len = (unsigned int)buffer[1];
+
+        // No support for zero length packets
+        if (len < 1) {
+            return -1;
+        }
+    } else if (is_len_16b) {
+        len = (unsigned int)buffer[1] << 8 | (unsigned int)buffer[2];
+
+        // A shorter packet should use less length bytes
+        if (len < 255) {
+            return -1;
+        }
+    } else if (is_len_24b) {
+        len = (unsigned int)buffer[1] << 16 |
+              (unsigned int)buffer[2] << 8 |
+              (unsigned int)buffer[3];
+
+        // A shorter packet should use less length bytes
+        if (len < 65535) {
+            return -1;
+        }
+    }
+
+    // Too long packet
+    if (len > mMaxPacketLen) {
+        return -1;
+    }
+
+    // Need more data to determine rest of packet
+    if (in_len < (len + data_start + 3)) {
+        *bytes_left = (len + data_start + 3) - in_len;
+        return -2;
+    }
+
+    // Invalid stop byte
+    if (buffer[data_start + len + 2] != 3) {
+        return -1;
+    }
+
+    unsigned short crc_calc = crc16(buffer + data_start, len);
+    unsigned short crc_rx = (unsigned short)buffer[data_start + len] << 8
+                          | (unsigned short)buffer[data_start + len + 1];
+
+    if (crc_calc == crc_rx) {
+        QByteArray res((const char*)(buffer + data_start), (int)len);
+        decodedPackets.append(res);
+        return len + data_start + 3;
+    } else {
+        return -1;
     }
 }

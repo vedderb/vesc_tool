@@ -64,16 +64,21 @@ p, li { white-space: pre-wrap; }
             <vTx>9</vTx>
         </timeout_brake_current>
         <send_can_status>
-            <longName>Send CAN Status</longName>
-            <type>5</type>
+            <longName>Can Status Message Mode</longName>
+            <type>4</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Send a status message on the CAN bus with a periodic interval. Useful for letting other VESCs know which VESCs are on the CAN-bus. This is required by some apps to function with multiple VESCs. The master VESC of the app does not need this option checked.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_SEND_CAN_STATUS</cDefine>
             <valInt>0</valInt>
+            <enumNames>CAN_STATUS_DISABLED</enumNames>
+            <enumNames>CAN_STATUS_1</enumNames>
+            <enumNames>CAN_STATUS_1_2</enumNames>
+            <enumNames>CAN_STATUS_1_2_3</enumNames>
+            <enumNames>CAN_STATUS_1_2_3_4</enumNames>
         </send_can_status>
         <send_can_status_rate_hz>
             <longName>Can Status Rate</longName>
@@ -111,6 +116,50 @@ p, li { white-space: pre-wrap; }
             <enumNames>CAN_BAUD_500K</enumNames>
             <enumNames>CAN_BAUD_1M</enumNames>
         </can_baud_rate>
+        <pairing_done>
+            <longName>Pairing Done</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Pairing done flag. If this flag is set, a bluetooth connection can only be made if the VESC Tool instance making the connection has been paired to this VESC. The pairing is done by storing the UUID of the VESC in the pairing list.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_PAIRING_DONE</cDefine>
+            <valInt>0</valInt>
+        </pairing_done>
+        <uavcan_enable>
+            <longName>Use UAVCAN</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Use UAVCAN instead of the default CAN-implementation.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_UAVCAN_ENABLE</cDefine>
+            <valInt>0</valInt>
+        </uavcan_enable>
+        <uavcan_esc_index>
+            <longName>UAVCAN ESC Index</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;ESC index in UAVCAN messages.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_UAVCAN_ESC_INDEX</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>255</maxInt>
+            <minInt>0</minInt>
+            <showDisplay>0</showDisplay>
+            <stepInt>1</stepInt>
+            <valInt>0</valInt>
+            <suffix></suffix>
+            <vTx>1</vTx>
+        </uavcan_esc_index>
         <app_to_use>
             <longName>APP to Use</longName>
             <type>4</type>
@@ -1445,6 +1494,9 @@ p, li { white-space: pre-wrap; }
         <ser>send_can_status</ser>
         <ser>send_can_status_rate_hz</ser>
         <ser>can_baud_rate</ser>
+        <ser>pairing_done</ser>
+        <ser>uavcan_enable</ser>
+        <ser>uavcan_esc_index</ser>
         <ser>app_to_use</ser>
         <ser>app_ppm_conf.ctrl_type</ser>
         <ser>app_ppm_conf.pid_max_erpm</ser>

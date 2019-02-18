@@ -1,3 +1,45 @@
+== 1.00 ==
+* First build for VESC Tool on google play.
+* Added direction setup to desktop version.
+* Added direction setup to QML start tools.
+
+== 0.99 ==
+* FW 3.48 support.
+* Added (non-secure) BLE pairing support.
+* Color adjustments.
+* Highlight active profile.
+* Several qml style improvements.
+
+== 0.98 ==
+* FW 3.47 support.
+* Profiles based on current percentages.
+* Removed input current from profiles.
+* Made watt limit optional for profiles.
+
+== 0.97 ==
+* FW 3.46 support.
+* CAN-bus scan support.
+* New motor setup wizard.
+* New QML connection page, with scroll and horizontal layout support.
+* Horizontal screen support for motor cfg and app cfg.
+* Invert direction setup tool.
+
+== 0.96 ==
+* Experiment page.
+* Shorter FW Upload timeout.
+* FW 3.44 support.
+* FW 3.43 support.
+* General Purpose Drive support.
+* Setup info and profile support.
+* Dark QML theme.
+* Setup realtime data support.
+* New style for gauges.
+* Fixed bug in VByteArray.
+* Some horizontal screen orientation support.
+* Many QML changes and improvements in general.
+* General purpose drive support.
+* Added calc apply old settings button to FOC detection.
+
 == 0.95 ==
 * FW 3.39: auxiliary output support.
 

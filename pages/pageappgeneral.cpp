@@ -51,5 +51,8 @@ void PageAppGeneral::setVesc(VescInterface *vesc)
         ui->appTab->addParamRow(mVesc->appConfig(), "send_can_status");
         ui->appTab->addParamRow(mVesc->appConfig(), "send_can_status_rate_hz");
         ui->appTab->addParamRow(mVesc->appConfig(), "can_baud_rate");
+        ui->appTab->addParamRow(mVesc->appConfig(), "pairing_done");
+        ui->appTab->addParamRow(mVesc->appConfig(), "uavcan_enable");
+        ui->appTab->addParamRow(mVesc->appConfig(), "uavcan_esc_index");
     }
 }

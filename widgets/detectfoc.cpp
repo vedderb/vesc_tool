@@ -88,10 +88,10 @@ void DetectFoc::on_lambdaButton_clicked()
                                      QMessageBox::Ok | QMessageBox::Cancel);
 
         if (reply == QMessageBox::Ok) {
-            mVesc->commands()->measureLinkage(ui->currentBox->value(),
-                                              ui->erpmBox->value(),
-                                              ui->dutyBox->value(),
-                                              ui->resistanceBox->value() / 1e3);
+            mVesc->commands()->measureLinkageOpenloop(ui->currentBox->value(),
+                                                      ui->erpmBox->value(),
+                                                      ui->dutyBox->value(),
+                                                      ui->resistanceBox->value() / 1e3);
 
             mRunning = true;
         }
@@ -119,6 +119,10 @@ void DetectFoc::setVesc(VescInterface *vesc)
                 this, SLOT(motorRLReceived(double,double)));
         connect(mVesc->commands(), SIGNAL(motorLinkageReceived(double)),
                 this, SLOT(motorLinkageReceived(double)));
+        connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
+                this, SLOT(paramChangedDouble(QObject*,QString,double)));
+
+        ui->currentBox->setValue(mVesc->mcConfig()->getParamDouble("l_current_max") / 3.0);
     }
 }
 
@@ -178,6 +182,15 @@ void DetectFoc::motorLinkageReceived(double flux_linkage)
 
     mLastOkValuesApplied = false;
     updateColors();
+}
+
+void DetectFoc::paramChangedDouble(QObject *src, QString name, double newParam)
+{
+    (void)src;
+
+    if (name == "l_current_max") {
+        ui->currentBox->setValue(newParam / 3.0);
+    }
 }
 
 void DetectFoc::on_applyAllButton_clicked()
@@ -319,9 +332,39 @@ void DetectFoc::on_calcGainButton_clicked()
         return;
     }
 
-    ui->obsGainBox->setValue((0.001 / (lambda * lambda)));
+    ui->obsGainBox->setValue(0.001 / (lambda * lambda));
 
     mLastOkValuesApplied = false;
     mLastCalcOk = true;
     updateColors();
+}
+
+void DetectFoc::on_calcApplyLocalButton_clicked()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::information(this,
+                                     tr("Calculate"),
+                                     tr("This is going to calculate KP, KI and the observer "
+                                        "gain from the old settings and the time constant, and "
+                                        "apply them. This is useful for manually entering parameters, "
+                                        "of for changing time constant without running detection. Do "
+                                        "you want to proceed?"),
+                                     QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+    if (reply == QMessageBox::Yes) {
+        double tc = ui->tcBox->value();
+        double l = mVesc->mcConfig()->getParamDouble("foc_motor_l");
+        double r = mVesc->mcConfig()->getParamDouble("foc_motor_r");
+        double lambda = mVesc->mcConfig()->getParamDouble("foc_motor_flux_linkage");
+
+        double bw = 1.0 / (tc * 1e-6);
+        double kp = l * bw;
+        double ki = r * bw;
+        double gain = 0.001 / (lambda * lambda);
+
+        mVesc->mcConfig()->updateParamDouble("foc_current_kp", kp);
+        mVesc->mcConfig()->updateParamDouble("foc_current_ki", ki);
+        mVesc->mcConfig()->updateParamDouble("foc_observer_gain", gain * 1e6);
+        mVesc->emitStatusMessage(tr("KP, KI and Observer Gain Applied"), true);
+    }
 }

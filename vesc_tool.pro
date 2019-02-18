@@ -5,17 +5,30 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 0.95
+VT_VERSION = 1.00
 VT_INTRO_VERSION = 1
+
+# Ubuntu 18.04
+# sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential
 
 DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
 
-# Serial port available
-DEFINES += HAS_SERIALPORT
+CONFIG += c++11
+
+# Build mobile GUI
+#CONFIG += build_mobile
 
 # Bluetooth available
 DEFINES += HAS_BLUETOOTH
+
+# Debug build (e.g. F5 to reload QML files)
+#DEFINES += DEBUG_BUILD
+
+!android: {
+    # Serial port available
+    DEFINES += HAS_SERIALPORT
+}
 
 # Options
 #CONFIG += build_original
@@ -24,11 +37,6 @@ DEFINES += HAS_BLUETOOTH
 #CONFIG += build_silver
 #CONFIG += build_bronze
 #CONFIG += build_free
-
-# Build mobile GUI
-#CONFIG += build_mobile
-
-#CONFIG += qtquickcompiler
 
 QT       += core gui
 QT       += widgets

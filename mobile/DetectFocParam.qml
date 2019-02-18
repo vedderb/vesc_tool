@@ -111,7 +111,7 @@ Item {
         modal: true
         focus: true
         width: parentWidth - 20
-        height: Math.min(implicitHeight, column.height - 40)
+        height: column.height - 40
         closePolicy: Popup.CloseOnEscape
         x: 10
         y: 10
@@ -128,7 +128,7 @@ Item {
                     id: currentBox
                     Layout.fillWidth: true
                     decimals: 2
-                    realValue: 5.0
+                    realValue: mMcConf.getParamDouble("l_current_max") / 3.0
                     realFrom: 0.0
                     realTo: 200.0
                     prefix: "I: "
@@ -139,7 +139,7 @@ Item {
                     id: dutyBox
                     Layout.fillWidth: true
                     decimals: 2
-                    realValue: 0.5
+                    realValue: 0.3
                     realFrom: 0.0
                     realTo: 1.0
                     realStepSize: 0.1
@@ -150,12 +150,12 @@ Item {
                     id: erpmBox
                     Layout.fillWidth: true
                     decimals: 1
-                    realValue: 450.0
+                    realValue: 2000.0
                     realFrom: 0.0
                     realTo: 20000.0
                     realStepSize: 10.0
                     prefix: "\u03C9: "
-                    suffix: " ERPM"
+                    suffix: " ERPM/s"
                 }
 
                 DoubleSpinBox {
@@ -291,6 +291,7 @@ Item {
 
         Text {
             id: detectRlLabel
+            color: "#ffffff"
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -319,6 +320,7 @@ Item {
 
         Text {
             id: detectLambdaLabel
+            color: "#ffffff"
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -329,7 +331,7 @@ Item {
         }
 
         onAccepted: {
-            mCommands.measureLinkage(currentBox.realValue, erpmBox.realValue, dutyBox.realValue, res)
+            mCommands.measureLinkageOpenloop(currentBox.realValue, erpmBox.realValue, dutyBox.realValue, res)
         }
     }
 
@@ -361,6 +363,16 @@ Item {
                 VescIf.emitStatusMessage("FOC Detection Result Received", true)
                 lambda = flux_linkage
                 calcGain()
+            }
+        }
+    }
+
+    Connections {
+        target: mMcConf
+
+        onParamChangedDouble: {
+            if (name == "l_current_max") {
+                currentBox.realValue = newParam / 3.0
             }
         }
     }

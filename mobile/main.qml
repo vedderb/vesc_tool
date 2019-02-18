@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 - 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -34,12 +34,22 @@ ApplicationWindow {
     property ConfigParams mInfoConf: VescIf.infoConfig()
 
     visible: true
-    width: 400
-    height: 650
+    width: 500
+    height: 850
     title: qsTr("VESC Tool")
 
     Component.onCompleted: {
-        Utility.checkVersion(VescIf)
+//        Utility.checkVersion(VescIf)
+//        swipeView.setCurrentIndex(1)
+//        rtSwipeView.setCurrentIndex(1)
+
+        if (!VescIf.isIntroDone()) {
+            introWizard.openDialog()
+        }
+    }
+
+    SetupWizardIntro {
+        id: introWizard
     }
 
     Controls {
@@ -65,7 +75,7 @@ ApplicationWindow {
                 Layout.preferredWidth: Math.min(parent.width, parent.height)
                 Layout.preferredHeight: (394 * Layout.preferredWidth) / 1549
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                source: "qrc:/res/logo.png"
+                source: "qrc:/res/logo_white.png"
             }
 
             Button {
@@ -94,10 +104,11 @@ ApplicationWindow {
 
             Button {
                 Layout.fillWidth: true
-                text: "Controls..."
+                text: "Controls"
                 flat: true
 
                 onClicked: {
+                    drawer.close()
                     controls.openDialog()
                 }
             }
@@ -159,19 +170,61 @@ ApplicationWindow {
                 id: connBle
                 anchors.fill: parent
                 anchors.margins: 10
+
+                onRequestOpenControls: {
+                    controls.openDialog()
+                }
             }
         }
 
         Page {
-            RtData {
+            RowLayout {
                 anchors.fill: parent
+                spacing: 0
+
+                Rectangle {
+                    color: "#4f4f4f"
+                    width: 16
+                    Layout.fillHeight: true
+                    Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
+
+                    PageIndicator {
+                        count: rtSwipeView.count
+                        currentIndex: rtSwipeView.currentIndex
+                        anchors.centerIn: parent
+                        rotation: 90
+                    }
+                }
+
+                SwipeView {
+                    id: rtSwipeView
+                    enabled: true
+                    clip: true
+
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    orientation: Qt.Vertical
+
+                    Page {
+                        RtData {
+                            anchors.fill: parent
+                        }
+                    }
+
+                    Page {
+                        RtDataSetup {
+                            anchors.fill: parent
+                        }
+                    }
+                }
             }
         }
 
         Page {
-            Label {
-                text: qsTr("TODO!")
-                anchors.centerIn: parent
+            Profiles {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
             }
         }
 
@@ -210,7 +263,7 @@ ApplicationWindow {
     }
 
     header: Rectangle {
-        color: "#dbdbdb"
+        color: "#5f5f5f"
         height: tabBar.height
 
         RowLayout {
@@ -248,18 +301,18 @@ ApplicationWindow {
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#e8e8e8"
+                    color: "#4f4f4f"
                 }
 
                 property int buttons: 7
                 property int buttonWidth: 120
 
                 TabButton {
-                    text: qsTr("Connection")
+                    text: qsTr("Start")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {
-                    text: qsTr("RT")
+                    text: qsTr("RT Data")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {
@@ -288,11 +341,11 @@ ApplicationWindow {
 
     footer: Rectangle {
         id: connectedRect
-        color: "lightgray"
+        color: "#4f4f4f"
 
         Text {
             id: connectedText
-            color: "black"
+            color: "white"
             text: VescIf.getConnectedPortName()
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
@@ -310,7 +363,7 @@ ApplicationWindow {
         repeat: false
         onTriggered: {
             connectedText.text = VescIf.getConnectedPortName()
-            connectedRect.color = "lightgray"
+            connectedRect.color = "#4f4f4f"
         }
     }
 
@@ -357,7 +410,11 @@ ApplicationWindow {
         onTriggered: {
             if (VescIf.isPortConnected() && tabBar.currentIndex == 1) {
                 // Sample RT data when the RT page is selected
-                mCommands.getValues()
+                if (rtSwipeView.currentIndex == 0) {
+                    mCommands.getValues()
+                } else if (rtSwipeView.currentIndex == 1) {
+                    mCommands.getValuesSetup()
+                }
             }
         }
     }
@@ -381,6 +438,8 @@ ApplicationWindow {
 
             Text {
                 id: vescDialogLabel
+                color: "#ffffff"
+                linkColor: "lightblue"
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
                 wrapMode: Text.WordWrap
@@ -403,21 +462,25 @@ ApplicationWindow {
 
         onStatusMessage: {
             connectedText.text = msg
-            connectedRect.color = isGood ? "lightgreen" : "red"
+            connectedRect.color = isGood ? "green" : "red"
             statusTimer.restart()
         }
 
         onMessageDialog: {
             vescDialog.title = title
-            vescDialogLabel.text = msg
+            vescDialogLabel.text = (richText ? "<style>a:link { color: lightblue; }</style>" : "") + msg
             vescDialogLabel.textFormat = richText ? Text.RichText : Text.AutoText
             vescDialog.open()
         }
 
         onFwRxChanged: {
-            if (rx && !limited) {
-                mCommands.getMcconf()
-                mCommands.getAppConf()
+            if (rx) {
+                if (limited) {
+                    swipeView.setCurrentIndex(5)
+                } else {
+                    mCommands.getMcconf()
+                    mCommands.getAppConf()
+                }
             }
         }
     }

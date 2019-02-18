@@ -43,6 +43,7 @@ Item {
 
     function updateDisplay() {
         var txt = ""
+        var i = 0
 
         txt +=
                 "Integrator limit : " + parseFloat(intLim).toFixed(2) + "\n" +
@@ -50,7 +51,7 @@ Item {
 
         if (hallRes == 0) {
             txt += "Detected hall sensor table:\n"
-            for (var i = 0;i < hallTable.length;i++) {
+            for (i = 0;i < hallTable.length;i++) {
                 txt += "" + hallTable[i]
 
                 if (i != hallTable.length - 1) {
@@ -59,7 +60,7 @@ Item {
             }
         } else if (hallRes == -1) {
             txt += "Hall sensor detection failed:\n"
-            for (var i = 0;i < hallTable.length;i++) {
+            for (i = 0;i < hallTable.length;i++) {
                 txt += "" + hallTable[i]
 
                 if (i != hallTable.length - 1) {
@@ -101,7 +102,7 @@ Item {
         modal: true
         focus: true
         width: parentWidth - 20
-        height: Math.min(implicitHeight, column.height - 40)
+        height: column.height - 40
         closePolicy: Popup.CloseOnEscape
         x: 10
         y: 10
@@ -225,6 +226,7 @@ Item {
 
         Text {
             id: detectLabel
+            color: "#ffffff"
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

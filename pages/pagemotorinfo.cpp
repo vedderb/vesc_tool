@@ -45,6 +45,13 @@ void PageMotorInfo::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
+        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_motor_poles");
+        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_gear_ratio");
+        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_wheel_diameter");
+        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_battery_type");
+        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_battery_cells");
+        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_battery_ah");
+
         ui->descriptionEdit->document()->setHtml(mVesc->mcConfig()->getParamQString("motor_description"));
         ui->qualityEdit->document()->setHtml(mVesc->mcConfig()->getParamQString("motor_quality_description"));
 

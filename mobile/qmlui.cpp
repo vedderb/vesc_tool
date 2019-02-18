@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2018 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -21,10 +21,14 @@
 #include "fwhelper.h"
 
 #include <QQuickStyle>
+#include <QApplication>
 
 QmlUi::QmlUi(QObject *parent) : QObject(parent)
 {
     mEngine = new QQmlApplicationEngine(this);
+#ifdef DEBUG_BUILD
+    qApp->installEventFilter(this);
+#endif
 }
 
 bool QmlUi::startQmlUi()
@@ -40,6 +44,32 @@ bool QmlUi::startQmlUi()
 
     mEngine->load(QUrl(QLatin1String("qrc:/mobile/main.qml")));
     return !mEngine->rootObjects().isEmpty();
+}
+
+bool QmlUi::eventFilter(QObject *object, QEvent *e)
+{
+    Q_UNUSED(object);
+
+    if (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
+        bool isPress = e->type() == QEvent::KeyPress;
+
+        if (isPress && !keyEvent->isAutoRepeat()) {
+            switch(keyEvent->key()) {
+            case Qt::Key_F5:
+                delete mEngine;
+                mEngine = new QQmlApplicationEngine(this);
+                mEngine->load(QUrl(QLatin1String("mobile/main.qml")));
+                return true;
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
+    return false;
 }
 
 QObject *QmlUi::vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine)

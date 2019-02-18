@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -42,16 +42,21 @@ Item {
         RowLayout {
             Layout.fillHeight: true
             Layout.fillWidth: true
+            spacing: 0
 
-            PageIndicator {
-                id: indicator
-
-                count: swipeView.count
-                currentIndex: swipeView.currentIndex
-
-                Layout.preferredWidth: 15
+            Rectangle {
+                color: "#4f4f4f"
+                width: 16
+                Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
-                rotation: 90
+
+                PageIndicator {
+                    id: indicator
+                    count: swipeView.count
+                    currentIndex: swipeView.currentIndex
+                    anchors.centerIn: parent
+                    rotation: 90
+                }
             }
 
             SwipeView {
@@ -61,7 +66,6 @@ Item {
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.rightMargin: 15
                 orientation: Qt.Vertical
 
                 Page {
@@ -76,25 +80,27 @@ Item {
                             border.width: 0
                             gradient: Gradient {
                                 GradientStop {
-                                    position: 0
-                                    color: "#002dcbff"
+                                    position: 0.00;
+                                    color: "#002dcbff";
                                 }
-
                                 GradientStop {
-                                    position: 0.534
-                                    color: "#4c4de43a"
+                                    position: 0.3;
+                                    color: "#80014cb2";
                                 }
-
                                 GradientStop {
-                                    position: 1
-                                    color: "#000dc3ff"
+                                    position: 0.7;
+                                    color: "#80014cb2";
                                 }
-
+                                GradientStop {
+                                    position: 1.00;
+                                    color: "#000dc3ff";
+                                }
                             }
                             border.color: "#00000000"
 
                             Text {
                                 anchors.centerIn: parent
+                                color: "white"
                                 text: "Included Files"
                                 font.bold: true
                                 verticalAlignment: Text.AlignVCenter
@@ -109,6 +115,7 @@ Item {
                         }
 
                         Text {
+                            color: "white"
                             Layout.fillWidth: true
                             height: 30;
                             text: "Hardware"
@@ -152,6 +159,7 @@ Item {
                         }
 
                         Text {
+                            color: "white"
                             Layout.fillWidth: true
                             height: 30;
                             text: "Firmware"
@@ -202,25 +210,27 @@ Item {
                             border.width: 0
                             gradient: Gradient {
                                 GradientStop {
-                                    position: 0
-                                    color: "#002dcbff"
+                                    position: 0.00;
+                                    color: "#002dcbff";
                                 }
-
                                 GradientStop {
-                                    position: 0.534
-                                    color: "#4c4de43a"
+                                    position: 0.3;
+                                    color: "#80014cb2";
                                 }
-
                                 GradientStop {
-                                    position: 1
-                                    color: "#000dc3ff"
+                                    position: 0.7;
+                                    color: "#80014cb2";
                                 }
-
+                                GradientStop {
+                                    position: 1.00;
+                                    color: "#000dc3ff";
+                                }
                             }
                             border.color: "#00000000"
 
                             Text {
                                 anchors.centerIn: parent
+                                color: "white"
                                 text: "Custom File"
                                 font.bold: true
                                 verticalAlignment: Text.AlignVCenter
@@ -235,6 +245,7 @@ Item {
                         }
 
                         TextInput {
+                            color: "white"
                             id: customFwText
                             Layout.fillWidth: true
                         }
@@ -256,25 +267,25 @@ Item {
                             }
                         }
 
-                        FilePicker {
-                            id: filePicker
-                            anchors.fill: parent
-                            showDotAndDotDot: true
-                            nameFilters: "*.bin"
-                            visible: false
-                            enabled: false
-
-                            onFileSelected: {
-                                customFwText.text = currentFolder() + "/" + fileName
-                                visible = false
-                                enabled = false
-                            }
-                        }
-
                         Item {
                             // Spacer
                             Layout.fillWidth: true
                             Layout.fillHeight: true
+                        }
+                    }
+
+                    FilePicker {
+                        id: filePicker
+                        anchors.fill: parent
+                        showDotAndDotDot: true
+                        nameFilters: "*.bin"
+                        visible: false
+                        enabled: false
+
+                        onFileSelected: {
+                            customFwText.text = currentFolder() + "/" + fileName
+                            visible = false
+                            enabled = false
                         }
                     }
                 }
@@ -291,25 +302,27 @@ Item {
                             border.width: 0
                             gradient: Gradient {
                                 GradientStop {
-                                    position: 0
-                                    color: "#002dcbff"
+                                    position: 0.00;
+                                    color: "#002dcbff";
                                 }
-
                                 GradientStop {
-                                    position: 0.534
-                                    color: "#4c4de43a"
+                                    position: 0.3;
+                                    color: "#80014cb2";
                                 }
-
                                 GradientStop {
-                                    position: 1
-                                    color: "#000dc3ff"
+                                    position: 0.7;
+                                    color: "#80014cb2";
                                 }
-
+                                GradientStop {
+                                    position: 1.00;
+                                    color: "#000dc3ff";
+                                }
                             }
                             border.color: "#00000000"
 
                             Text {
                                 anchors.centerIn: parent
+                                color: "white"
                                 text: "Bootloader"
                                 font.bold: true
                                 verticalAlignment: Text.AlignVCenter
@@ -324,6 +337,7 @@ Item {
                         }
 
                         Text {
+                            color: "white"
                             Layout.fillWidth: true
                             height: 30;
                             text: "Hardware"
@@ -359,20 +373,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: asd.implicitHeight + 20
-            gradient: Gradient {
-                GradientStop {
-                    position: 0.00;
-                    color: "#e4eaff";
-                }
-                GradientStop {
-                    position: 0.91;
-                    color: "#d8e4d2";
-                }
-                GradientStop {
-                    position: 1.00;
-                    color: "#a4c096";
-                }
-            }
+            color: "#414141"
 
             ColumnLayout {
                 id: asd
@@ -381,6 +382,7 @@ Item {
 
                 Text {
                     Layout.fillWidth: true
+                    color: "white"
                     id: uploadText
                     text: qsTr("Not Uploading")
                     horizontalAlignment: Text.AlignHCenter
@@ -400,73 +402,17 @@ Item {
                         Layout.fillWidth: true
 
                         onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog(
-                                            "Connection Error",
-                                            "The VESC is not connected. Please open a connection.",
-                                            false)
-                                return
-                            }
+                            uploadFw(false)
+                        }
+                    }
 
-                            if (swipeView.currentIndex == 0) {
-                                if (fwItems.rowCount() === 0) {
-                                    VescIf.emitMessageDialog(
-                                                "Upload Error",
-                                                "This version of VESC Tool does not include any firmware " +
-                                                "for your hardware version. You can either " +
-                                                "upload a custom file or look for a later version of VESC " +
-                                                "Tool that might support your hardware.",
-                                                false)
-                                    return;
-                                }
+                    Button {
+                        id: uploadAllButton
+                        text: qsTr("Upload All")
+                        Layout.fillWidth: true
 
-                                if (hwItems.rowCount() === 1) {
-                                    uploadDialog.title = "Warning"
-                                    uploadDialogLabel.text =
-                                            "Uploading new firmware will clear all settings on your VESC " +
-                                            "and you have to do the configuration again. Do you want to " +
-                                            "continue?"
-                                    uploadDialog.open()
-                                } else {
-                                    uploadDialog.title = "Warning"
-                                    uploadDialogLabel.text =
-                                            "Uploading firmware for the wrong hardware version " +
-                                            "WILL damage the VESC for sure. Are you sure that you have " +
-                                            "chosen the correct hardware version?"
-                                    uploadDialog.open()
-                                }
-                            } else if (swipeView.currentIndex == 1) {
-                                if (customFwText.text.length > 0) {
-                                    uploadDialog.title = "Warning"
-                                    uploadDialogLabel.text =
-                                            "Uploading firmware for the wrong hardware version " +
-                                            "WILL damage the VESC for sure. Are you sure that you have " +
-                                            "chosen the correct hardware version?"
-                                    uploadDialog.open()
-                                } else {
-                                    VescIf.emitMessageDialog(
-                                                "Error",
-                                                "Please select a file",
-                                                false, false)
-                                }
-                            } else if (swipeView.currentIndex == 2) {
-                                if (blItems.rowCount() === 0) {
-                                    VescIf.emitMessageDialog(
-                                                "Upload Error",
-                                                "This version of VESC Tool does not include any bootloader " +
-                                                "for your hardware version.",
-                                                false)
-                                    return;
-                                }
-
-                                uploadDialog.title = "Warning"
-                                uploadDialogLabel.text =
-                                        "This will attempt to upload a bootloader to the connected VESC. " +
-                                        "If the connected VESC already has a bootloader this will destroy " +
-                                        "the bootloader and firmware updates cannot be done anymore. Do " +
-                                        "you want to continue?"
-                                uploadDialog.open()
-                            }
+                        onClicked: {
+                            uploadFw(true)
                         }
                     }
 
@@ -485,7 +431,7 @@ Item {
                 Text {
                     Layout.fillWidth: true
                     id: versionText
-                    color: "#606060"
+                    color: "#e0e0e0"
                     text:
                         "FW   : \n" +
                         "HW   : \n" +
@@ -499,6 +445,7 @@ Item {
 
     Dialog {
         id: uploadDialog
+        property bool fwdCan: false
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
@@ -509,6 +456,7 @@ Item {
         y: (parent.height - height) / 2
 
         Text {
+            color: "#ffffff"
             id: uploadDialogLabel
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
@@ -517,11 +465,11 @@ Item {
 
         onAccepted: {
             if (swipeView.currentIndex == 0) {
-                fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false)
+                fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan)
             } else if (swipeView.currentIndex == 1) {
-                fwHelper.uploadFirmware(customFwText.text, VescIf, false, true)
+                fwHelper.uploadFirmware(customFwText.text, VescIf, false, true, fwdCan)
             } else if (swipeView.currentIndex == 2) {
-                fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false)
+                fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
             }
         }
     }
@@ -556,6 +504,106 @@ Item {
         }
 
         blBox.currentIndex = 0
+    }
+
+    function uploadFw(fwdCan) {
+        if (!VescIf.isPortConnected()) {
+            VescIf.emitMessageDialog(
+                        "Connection Error",
+                        "The VESC is not connected. Please open a connection.",
+                        false)
+            return
+        }
+
+        var msg = "You are about to upload new firmware to the connected VESC"
+        var msgBl = "You are about to upload a bootloader to the connected VESC"
+
+        var msgEnd = "."
+        if (fwdCan) {
+            msgEnd = ", as well as all VESCs found on the CAN-bus. \n\n" +
+                    "WARNING: The upload all function should ONLY be used if all " +
+                    "VESCs on the CAN-bus have the same hardware version. If that " +
+                    "is not the case, you must upload firmware to the VESCs individually."
+        }
+
+        msg += msgEnd
+        msgBl += msgEnd
+
+        uploadDialog.fwdCan = fwdCan
+
+        if (swipeView.currentIndex == 0) {
+            if (fwItems.rowCount() === 0) {
+                VescIf.emitMessageDialog(
+                            "Upload Error",
+                            "This version of VESC Tool does not include any firmware " +
+                            "for your hardware version. You can either " +
+                            "upload a custom file or look for a later version of VESC " +
+                            "Tool that might support your hardware.",
+                            false)
+                return;
+            }
+
+            if (hwItems.rowCount() === 1) {
+                uploadDialog.title = "Warning"
+                uploadDialogLabel.text =
+                        msg + "\n\n" +
+                        "Uploading new firmware will clear all settings on your VESC " +
+                        "and you have to do the configuration again. Do you want to " +
+                        "continue?"
+                uploadDialog.open()
+            } else {
+                uploadDialog.title = "Warning"
+                uploadDialogLabel.text =
+                        msg + "\n\n" +
+                        "Uploading firmware for the wrong hardware version " +
+                        "WILL damage the VESC for sure. Are you sure that you have " +
+                        "chosen the correct hardware version?"
+                uploadDialog.open()
+            }
+        } else if (swipeView.currentIndex == 1) {
+            if (customFwText.text.length > 0) {
+                uploadDialog.title = "Warning"
+                uploadDialogLabel.text =
+                        msg + "\n\n" +
+                        "Uploading firmware for the wrong hardware version " +
+                        "WILL damage the VESC for sure. Are you sure that you have " +
+                        "chosen the correct hardware version?"
+                uploadDialog.open()
+            } else {
+                VescIf.emitMessageDialog(
+                            "Error",
+                            "Please select a file",
+                            false, false)
+            }
+        } else if (swipeView.currentIndex == 2) {
+            if (blItems.rowCount() === 0) {
+                VescIf.emitMessageDialog(
+                            "Upload Error",
+                            "This version of VESC Tool does not include any bootloader " +
+                            "for your hardware version.",
+                            false)
+                return;
+            }
+
+            uploadDialog.title = "Warning"
+            uploadDialogLabel.text =
+                    msgBl + "\n\n" +
+                    "If the VESC already has a bootloader this will destroy " +
+                    "the bootloader and firmware updates cannot be done anymore. Do " +
+                    "you want to continue?"
+            uploadDialog.open()
+        }
+    }
+
+    Timer {
+        interval: 100
+        running: true
+        repeat: true
+
+        onTriggered: {
+            uploadAllButton.enabled = mCommands.getLimitedSupportsFwdAllCan() &&
+                    !mCommands.getSendCan() && mCommands.getFirmwareUploadProgress() < 0
+        }
     }
 
     Connections {

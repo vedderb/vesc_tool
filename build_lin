@@ -20,6 +20,8 @@
 
 # Note: -no-dbus and -skip qtconnectivity can also be added, but then bluetooth and window titlebar menus don't work.
 
+set -e
+
 export PATH=/opt/Qt/5.9-static/bin:$PATH
 rm -rf build/lin/*
 

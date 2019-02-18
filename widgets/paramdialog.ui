@@ -25,7 +25,13 @@
     </widget>
    </item>
    <item>
-    <widget class="ParamTable" name="paramTable"/>
+    <widget class="ParamTable" name="paramTable">
+     <property name="font">
+      <font>
+       <family>DejaVu Sans Mono</family>
+      </font>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

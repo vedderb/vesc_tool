@@ -33,8 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mTimer->start(20);
 
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
-    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES)),
-            this, SLOT(valuesReceived(MC_VALUES)));
+    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,unsigned int)),
+            this, SLOT(valuesReceived(MC_VALUES,unsigned int)));
 }
 
 MainWindow::~MainWindow()
@@ -53,8 +53,9 @@ void MainWindow::timerSlot()
     }
 }
 
-void MainWindow::valuesReceived(MC_VALUES values)
+void MainWindow::valuesReceived(MC_VALUES values, unsigned int mask)
 {
+    (void)mask;
     ui->textEdit->clear();
     ui->textEdit->appendPlainText(
                 QString::asprintf(

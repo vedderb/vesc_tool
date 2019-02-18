@@ -30,11 +30,12 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: "#b5e3ff"
+        color: "#9e0000"
         radius: 5
 
         Text {
             anchors.centerIn: parent
+            color: "white"
             id: name
             text: sepName
             font.bold: true

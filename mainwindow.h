@@ -51,6 +51,8 @@
 #include "pages/pageappnunchuk.h"
 #include "pages/pageappnrf.h"
 #include "pages/pagesettings.h"
+#include "pages/pagegpd.h"
+#include "pages/pageexperiments.h"
 
 namespace Ui {
 class MainWindow;
@@ -70,7 +72,7 @@ private slots:
     void showStatusInfo(QString info, bool isGood);
     void showMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
     void serialPortNotWritable(const QString &port);
-    void valuesReceived(MC_VALUES values);
+    void valuesReceived(MC_VALUES values, unsigned int mask);
     void paramChangedDouble(QObject *src, QString name, double newParam);
     void mcconfUpdated();
     void appconfUpdated();
@@ -150,8 +152,10 @@ private:
     PageBldc *mPageBldc;
     PageDc *mPageDc;
     PageFoc *mPageFoc;
+    PageGPD *mPageGpd;
     PageControllers *mPageControllers;
     PageMotorInfo *mPageMotorInfo;
+    PageExperiments *mPageExperiments;
     PageAppSettings *mPageAppSettings;
     PageAppGeneral *mPageAppGeneral;
     PageAppPpm *mPageAppPpm;

@@ -133,5 +133,13 @@
         <file>res/icons/ic_folder_open_black_48dp.png</file>
         <file>res/icons/ic_insert_drive_file_black_48dp.png</file>
         <file>res/bootloaders/generic.bin</file>
+        <file>res/logo_white.png</file>
+        <file>res/images/motors/6374.jpg</file>
+        <file>res/images/motors/ebike_dd_1kw.jpg</file>
+        <file>res/images/motors/edf_small.jpg</file>
+        <file>res/images/motors/inrunner_medium.jpg</file>
+        <file>res/images/motors/inrunner_small.jpg</file>
+        <file>res/images/motors/outrunner_mini.jpg</file>
+        <file>res/images/motors/outrunner_small.jpg</file>
     </qresource>
 </RCC>

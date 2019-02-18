@@ -37,10 +37,14 @@ PageFirmware::PageFirmware(QWidget *parent) :
     updateHwList();
     updateBlList();
 
+    mTimer = new QTimer(this);
+    mTimer->start(500);
+
     connect(ui->hwList, SIGNAL(currentRowChanged(int)),
             this, SLOT(updateFwList()));
     connect(ui->showNonDefaultBox, SIGNAL(toggled(bool)),
             this, SLOT(updateFwList()));
+    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
 }
 
 PageFirmware::~PageFirmware()
@@ -72,8 +76,16 @@ void PageFirmware::setVesc(VescInterface *vesc)
 
         connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
                 this, SLOT(fwUploadStatus(QString,double,bool)));
-        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray)),
-                this, SLOT(fwVersionReceived(int,int,QString,QByteArray)));
+        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+    }
+}
+
+void PageFirmware::timerSlot()
+{
+    if (mVesc) {
+        ui->uploadAllButton->setEnabled(mVesc->commands()->getLimitedSupportsFwdAllCan() &&
+                                        !mVesc->commands()->getSendCan());
     }
 }
 
@@ -92,7 +104,7 @@ void PageFirmware::fwUploadStatus(const QString &status, double progress, bool i
     ui->cancelButton->setEnabled(isOngoing);
 }
 
-void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid)
+void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired)
 {
     QString fwStr;
     QString strUuid = Utility::uuid2Str(uuid, true);
@@ -111,6 +123,8 @@ void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArra
             fwStr += "\n" + strUuid;
         }
     }
+
+    fwStr += "\n" + QString("Paired: %1").arg(isPaired ? "true" : "false");
 
     ui->currentLabel->setText(fwStr);
     updateHwList(hw);
@@ -226,6 +240,35 @@ void PageFirmware::on_chooseButton_clicked()
 
 void PageFirmware::on_uploadButton_clicked()
 {
+    uploadFw(false);
+}
+
+void PageFirmware::on_readVersionButton_clicked()
+{
+    if (mVesc) {
+        mVesc->commands()->getFwVersion();
+    }
+}
+
+void PageFirmware::on_cancelButton_clicked()
+{
+    if (mVesc) {
+        mVesc->commands()->cancelFirmwareUpload();
+    }
+}
+
+void PageFirmware::on_changelogButton_clicked()
+{
+    HelpDialog::showHelp(this, "Firmware Changelog", Utility::fwChangeLog());
+}
+
+void PageFirmware::on_uploadAllButton_clicked()
+{
+    uploadFw(true);
+}
+
+void PageFirmware::uploadFw(bool allOverCan)
+{
     if (mVesc) {
         if (!mVesc->isPortConnected()) {
             QMessageBox::critical(this,
@@ -334,7 +377,7 @@ void PageFirmware::on_uploadButton_clicked()
 
         if (reply == QMessageBox::Yes) {
             QByteArray data = file.readAll();
-            mVesc->commands()->startFirmwareUpload(data, isBootloader);
+            mVesc->commands()->startFirmwareUpload(data, isBootloader, allOverCan);
 
             QMessageBox::warning(this,
                                  tr("Warning"),
@@ -343,23 +386,4 @@ void PageFirmware::on_uploadButton_clicked()
                                     "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
         }
     }
-}
-
-void PageFirmware::on_readVersionButton_clicked()
-{
-    if (mVesc) {
-        mVesc->commands()->getFwVersion();
-    }
-}
-
-void PageFirmware::on_cancelButton_clicked()
-{
-    if (mVesc) {
-        mVesc->commands()->cancelFirmwareUpload();
-    }
-}
-
-void PageFirmware::on_changelogButton_clicked()
-{
-    HelpDialog::showHelp(this, "Firmware Changelog", Utility::fwChangeLog());
 }

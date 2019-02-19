@@ -1164,6 +1164,10 @@ QString Commands::faultToStr(mc_fault_code fault)
     case FAULT_CODE_ABS_OVER_CURRENT: return "FAULT_CODE_ABS_OVER_CURRENT";
     case FAULT_CODE_OVER_TEMP_FET: return "FAULT_CODE_OVER_TEMP_FET";
     case FAULT_CODE_OVER_TEMP_MOTOR: return "FAULT_CODE_OVER_TEMP_MOTOR";
+    case FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE";
+    case FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE";
+    case FAULT_CODE_MCU_UNDER_VOLTAGE: return "FAULT_CODE_MCU_UNDER_VOLTAGE";
+    case FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: return "FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET";
     default: return "Unknown fault";
     }
 }
@@ -1271,26 +1275,6 @@ void Commands::emitEmptyValues()
     values.position = 0.0;
     values.vesc_id = 0;
 
-//    values.temp_mos = 20.0;
-//    values.temp_motor = 10.0;
-//    values.current_motor = 40.0;
-//    values.current_in = 20.0;
-//    values.id = 0.0;
-//    values.iq = 0.0;
-//    values.duty_now = 0.5;
-//    values.rpm = 25000.0;
-//    values.v_in = 45.0;
-//    values.amp_hours = 10.0;
-//    values.amp_hours_charged = 1.0;
-//    values.watt_hours = 200.0;
-//    values.watt_hours_charged = 20.0;
-//    values.tachometer = 560000;
-//    values.tachometer_abs = 1233340;
-//    values.fault_code = FAULT_CODE_NONE;
-//    values.fault_str = faultToStr(values.fault_code);
-//    values.position = 12.0;
-//    values.vesc_id = 1;
-
     emit valuesReceived(values, 0xFFFFFFFF);
 }
 
@@ -1318,28 +1302,6 @@ void Commands::emitEmptySetupValues()
     values.vesc_id = 0;
     values.num_vescs = 1;
     values.battery_wh = 0.0;
-
-//    values.temp_mos = 0.0;
-//    values.temp_motor = 0.0;
-//    values.current_motor = -50.0;
-//    values.current_in = -20.0;
-//    values.duty_now = 0.5;
-//    values.rpm = 0.0;
-//    values.speed = 10.0;
-//    values.v_in = 45.0;
-//    values.battery_level = 0.72;
-//    values.amp_hours = 10.0;
-//    values.amp_hours_charged = 2.0;
-//    values.watt_hours = 1000.0;
-//    values.watt_hours_charged = 20.0;
-//    values.tachometer = 500.0;
-//    values.tachometer_abs = 600.0;
-//    values.position = 0.0;
-//    values.fault_code = FAULT_CODE_NONE;
-//    values.fault_str = faultToStr(values.fault_code);
-//    values.vesc_id = 0;
-//    values.num_vescs = 2;
-//    values.battery_wh = 500.0;
 
     emit valuesSetupReceived(values, 0xFFFFFFFF);
 }

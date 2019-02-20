@@ -23,7 +23,6 @@
 #include <QFileInfo>
 #include <QThread>
 #include <QEventLoop>
-#include <QSettings>
 #include <utility.h>
 #include <cmath>
 #include <QRegularExpression>
@@ -57,7 +56,9 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mTimer->setInterval(20);
     mTimer->start();
 
-    mLastConnType = static_cast<conn_t>(QSettings().value("connection_type", CONN_NONE).toInt());
+    mLastConnType = static_cast<conn_t>(mSettings.value("connection_type", CONN_NONE).toInt());
+    mLastTcpServer = mSettings.value("tcp_server", "127.0.0.1").toString();
+    mLastTcpPort = mSettings.value("tcp_port", 65102).toInt();
 
     mSendCanBefore = false;
     mCanIdBefore = 0;
@@ -69,8 +70,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     // Serial
 #ifdef HAS_SERIALPORT
     mSerialPort = new QSerialPort(this);
-    mLastSerialPort = "";
-    mLastSerialBaud = 0;
+    mLastSerialPort = mSettings.value("serial_port", "").toString();
+    mLastSerialBaud = mSettings.value("serial_baud", 115200).toInt();
 
     connect(mSerialPort, SIGNAL(readyRead()),
             this, SLOT(serialDataAvailable()));
@@ -81,8 +82,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     // TCP
     mTcpSocket = new QTcpSocket(this);
     mTcpConnected = false;
-    mLastTcpServer = QSettings().value("tcp_server").toString();
-    mLastTcpPort = QSettings().value("tcp_port").toInt();
+    mLastTcpServer = QSettings().value("tcp_server", "").toString();
+    mLastTcpPort = QSettings().value("tcp_port", 65102).toInt();
 
     connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
     connect(mTcpSocket, SIGNAL(connected()), this, SLOT(tcpInputConnected()));
@@ -94,6 +95,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     // BLE
 #ifdef HAS_BLUETOOTH
     mBleUart = new BleUart(this);
+    mLastBleAddr = mSettings.value("ble_addr").toString();
 
     {
         int size = mSettings.beginReadArray("bleNames");
@@ -107,6 +109,10 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     }
 
     connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
+    connect(mBleUart, &BleUart::connected, [this]{
+        setLastConnectionType(CONN_BLE);
+        mSettings.setValue("ble_addr", mLastBleAddr);
+    });
 #endif
 
     {
@@ -522,6 +528,28 @@ void VescInterface::setIntroDone(bool done)
     mSettings.setValue("intro_done", done);
 }
 
+QString VescInterface::getLastTcpServer() const
+{
+    return mLastTcpServer;
+}
+
+int VescInterface::getLastTcpPort() const
+{
+    return mLastTcpPort;
+}
+
+#ifdef HAS_SERIALPORT
+QString VescInterface::getLastSerialPort() const
+{
+    return mLastSerialPort;
+}
+
+int VescInterface::getLastSerialBaud() const
+{
+    return mLastSerialBaud;
+}
+#endif
+
 #ifdef HAS_BLUETOOTH
 BleUart *VescInterface::bleDevice()
 {
@@ -540,6 +568,11 @@ QString VescInterface::getBleName(QString address)
         res = mBleNames[address];
     }
     return res;
+}
+
+QString VescInterface::getLastBleAddr() const
+{
+    return mLastBleAddr;
 }
 #endif
 
@@ -708,10 +741,6 @@ QString VescInterface::getConnectedPortName()
 bool VescInterface::connectSerial(QString port, int baudrate)
 {
 #ifdef HAS_SERIALPORT
-    mLastSerialPort = port;
-    mLastSerialBaud = baudrate;
-    setLastConnectionType(CONN_SERIAL);
-
     bool found = false;
     for (VSerialInfo_t ser: listSerialPorts()) {
         if (ser.systemPath == port) {
@@ -725,42 +754,46 @@ bool VescInterface::connectSerial(QString port, int baudrate)
         return false;
     }
 
-    if(mSerialPort->isOpen()) {
-        return true;
-    }
+    if(!mSerialPort->isOpen()) {
 
-    // TODO: Maybe this test works on other OSes as well
-#ifdef Q_OS_UNIX
-    QFileInfo fi(port);
-    if (fi.exists()) {
-        if (!fi.isWritable()) {
-            emit statusMessage(tr("Serial port is not writable"), false);
-            emit serialPortNotWritable(port);
+        // TODO: Maybe this test works on other OSes as well
+    #ifdef Q_OS_UNIX
+        QFileInfo fi(port);
+        if (fi.exists()) {
+            if (!fi.isWritable()) {
+                emit statusMessage(tr("Serial port is not writable"), false);
+                emit serialPortNotWritable(port);
+                return false;
+            }
+        }
+    #endif
+
+        mSerialPort->setPortName(port);
+        mSerialPort->open(QIODevice::ReadWrite);
+
+        if(!mSerialPort->isOpen()) {
             return false;
         }
+
+        mSerialPort->setBaudRate(baudrate);
+        mSerialPort->setDataBits(QSerialPort::Data8);
+        mSerialPort->setParity(QSerialPort::NoParity);
+        mSerialPort->setStopBits(QSerialPort::OneStop);
+        mSerialPort->setFlowControl(QSerialPort::NoFlowControl);
+
+        // For nrf
+        mSerialPort->setRequestToSend(true);
+        mSerialPort->setDataTerminalReady(true);
+        QThread::msleep(5);
+        mSerialPort->setDataTerminalReady(false);
+        QThread::msleep(100);
     }
-#endif
 
-    mSerialPort->setPortName(port);
-    mSerialPort->open(QIODevice::ReadWrite);
-
-    if(!mSerialPort->isOpen()) {
-        return false;
-    }
-
-    mSerialPort->setBaudRate(baudrate);
-    mSerialPort->setDataBits(QSerialPort::Data8);
-    mSerialPort->setParity(QSerialPort::NoParity);
-    mSerialPort->setStopBits(QSerialPort::OneStop);
-    mSerialPort->setFlowControl(QSerialPort::NoFlowControl);
-
-    // For nrf
-    mSerialPort->setRequestToSend(true);
-    mSerialPort->setDataTerminalReady(true);
-    QThread::msleep(5);
-    mSerialPort->setDataTerminalReady(false);
-    QThread::msleep(100);
-
+    mLastSerialPort = port;
+    mLastSerialBaud = baudrate;
+    mSettings.setValue("serial_port", mLastSerialPort);
+    mSettings.setValue("serial_baud", mLastSerialBaud);
+    setLastConnectionType(CONN_SERIAL);
     return true;
 #else
     (void)port;
@@ -805,7 +838,6 @@ void VescInterface::connectTcp(QString server, int port)
 {
     mLastTcpServer = server;
     mLastTcpPort = port;
-    setLastConnectionType(CONN_TCP);
 
     QHostAddress host;
     host.setAddress(server);
@@ -827,7 +859,6 @@ void VescInterface::connectBle(QString address)
 {
 #ifdef HAS_BLUETOOTH
     mBleUart->startConnect(address);
-    mLastConnType = CONN_BLE;
     mLastBleAddr = address;
 #else
     (void)address;
@@ -922,6 +953,10 @@ void VescInterface::serialPortError(QSerialPort::SerialPortError error)
 
 void VescInterface::tcpInputConnected()
 {
+    mSettings.setValue("tcp_server", mLastTcpServer);
+    mSettings.setValue("tcp_port", mLastTcpPort);
+    setLastConnectionType(CONN_TCP);
+
     mTcpConnected = true;
     updateFwRx(false);
 }
@@ -1202,5 +1237,5 @@ void VescInterface::updateFwRx(bool fwRx)
 void VescInterface::setLastConnectionType(conn_t type)
 {
     mLastConnType = type;
-    QSettings().setValue("connection_type", type);
+    mSettings.setValue("connection_type", type);
 }

@@ -14,7 +14,9 @@ FORMS += \
     $$PWD/adcmap.ui \
     $$PWD/nrfpair.ui \
     $$PWD/parameditstring.ui \
-    $$PWD/paramdialog.ui
+    $$PWD/paramdialog.ui \
+    $$PWD/detectallfocdialog.ui \
+    $$PWD/dirsetup.ui
 
 HEADERS += \
     $$PWD/parameditbool.h \
@@ -42,7 +44,10 @@ HEADERS += \
     $$PWD/imagewidget.h \
     $$PWD/parameditstring.h \
     $$PWD/paramdialog.h \
-    $$PWD/aspectimglabel.h
+    $$PWD/aspectimglabel.h \
+    $$PWD/historylineedit.h \
+    $$PWD/detectallfocdialog.h \
+    $$PWD/dirsetup.h
 
 SOURCES += \
     $$PWD/parameditbool.cpp \
@@ -70,5 +75,8 @@ SOURCES += \
     $$PWD/imagewidget.cpp \
     $$PWD/parameditstring.cpp \
     $$PWD/paramdialog.cpp \
-    $$PWD/aspectimglabel.cpp
+    $$PWD/aspectimglabel.cpp \
+    $$PWD/historylineedit.cpp \
+    $$PWD/detectallfocdialog.cpp \
+    $$PWD/dirsetup.cpp
 

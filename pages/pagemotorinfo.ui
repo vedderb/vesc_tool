@@ -22,9 +22,19 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Setup</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="ParamTable" name="setupTab"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>General</string>
+       <string>Motor General</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>

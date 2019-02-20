@@ -5,9 +5,39 @@
     <qresource prefix="/mobile">
         <file>main.qml</file>
         <file>ConnectBle.qml</file>
-        <file>ConnectBleForm.ui.qml</file>
         <file>RtData.qml</file>
         <file>FwUpdate.qml</file>
         <file>FilePicker.qml</file>
+        <file>ParamEditDouble.qml</file>
+        <file>ConfigPageMotor.qml</file>
+        <file>ParamEditors.qml</file>
+        <file>ConfigPageApp.qml</file>
+        <file>DoubleSpinBox.qml</file>
+        <file>ParamEditInt.qml</file>
+        <file>ParamEditEnum.qml</file>
+        <file>ParamEditBool.qml</file>
+        <file>ParamEditString.qml</file>
+        <file>ParamEditSeparator.qml</file>
+        <file>DetectFocParam.qml</file>
+        <file>DetectFocHall.qml</file>
+        <file>DetectFocEncoder.qml</file>
+        <file>DetectBldc.qml</file>
+        <file>PpmMap.qml</file>
+        <file>AdcMap.qml</file>
+        <file>NrfPair.qml</file>
+        <file>Controls.qml</file>
+        <file>Terminal.qml</file>
+        <file>Profiles.qml</file>
+        <file>ProfileEditor.qml</file>
+        <file>ProfileDisplay.qml</file>
+        <file>RtDataSetup.qml</file>
+        <file>CustomGauge.qml</file>
+        <file>SetupWizardFoc.qml</file>
+        <file>SetupWizardInput.qml</file>
+        <file>ParamList.qml</file>
+        <file>ParamListScroll.qml</file>
+        <file>DirectionSetup.qml</file>
+        <file>PairingDialog.qml</file>
+        <file>SetupWizardIntro.qml</file>
     </qresource>
 </RCC>

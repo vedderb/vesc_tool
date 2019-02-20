@@ -42,7 +42,7 @@ public:
 
 private slots:
     void timerSlot();
-    void valuesReceived(MC_VALUES values);
+    void valuesReceived(MC_VALUES values, unsigned int mask);
     void rotorPosReceived(double pos);
 
     void on_zoomHButton_toggled(bool checked);
@@ -64,6 +64,9 @@ private:
     QTimer *mTimer;
 
     QVector<double> mTempMosVec;
+    QVector<double> mTempMos1Vec;
+    QVector<double> mTempMos2Vec;
+    QVector<double> mTempMos3Vec;
     QVector<double> mTempMotorVec;
     QVector<double> mCurrInVec;
     QVector<double> mCurrMotorVec;

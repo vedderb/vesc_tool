@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -25,13 +25,21 @@
 #include <QEventLoop>
 #include <QSettings>
 #include <utility.h>
+#include <cmath>
+#include <QRegularExpression>
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
 #endif
 
+#ifndef VT_INTRO_VERSION
+#define VT_INTRO_VERSION 1
+#endif
+
 VescInterface::VescInterface(QObject *parent) : QObject(parent)
 {
+    qRegisterMetaType<MCCONF_TEMP>();
+
     mMcConfig = new ConfigParams(this);
     mAppConfig = new ConfigParams(this);
     mInfoConfig = new ConfigParams(this);
@@ -56,6 +64,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mWasConnected = false;
     mAutoconnectOngoing = false;
     mAutoconnectProgress = 0.0;
+    mIgnoreCanChange = false;
 
     // Serial
 #ifdef HAS_SERIALPORT
@@ -83,9 +92,51 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
 
     // BLE
+#ifdef HAS_BLUETOOTH
     mBleUart = new BleUart(this);
 
+    {
+        int size = mSettings.beginReadArray("bleNames");
+        for (int i = 0; i < size; ++i) {
+            mSettings.setArrayIndex(i);
+            QString address = mSettings.value("address").toString();
+            QString name = mSettings.value("name").toString();
+            mBleNames.insert(address, name);
+        }
+        mSettings.endArray();
+    }
+
     connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
+#endif
+
+    {
+        int size = mSettings.beginReadArray("profiles");
+        for (int i = 0; i < size; ++i) {
+            mSettings.setArrayIndex(i);
+            MCCONF_TEMP cfg;
+            cfg.current_min_scale = mSettings.value("current_min_scale", 1.0).toDouble();
+            cfg.current_max_scale = mSettings.value("current_max_scale", 1.0).toDouble();
+            cfg.erpm_or_speed_min = mSettings.value("erpm_or_speed_min").toDouble();
+            cfg.erpm_or_speed_max = mSettings.value("erpm_or_speed_max").toDouble();
+            cfg.duty_min = mSettings.value("duty_min").toDouble();
+            cfg.duty_max = mSettings.value("duty_max").toDouble();
+            cfg.watt_min = mSettings.value("watt_min").toDouble();
+            cfg.watt_max = mSettings.value("watt_max").toDouble();
+            cfg.name = mSettings.value("name").toString();
+            mProfiles.append(QVariant::fromValue(cfg));
+        }
+        mSettings.endArray();
+    }
+
+    {
+        int size = mSettings.beginReadArray("pairedUuids");
+        for (int i = 0; i < size; ++i) {
+            mSettings.setArrayIndex(i);
+            QString uuid = mSettings.value("uuid").toString().toUpper();
+            mPairedUuids.append(uuid.replace(" ", ""));
+        }
+        mSettings.endArray();
+    }
 
     mCommands->setAppConfig(mAppConfig);
     mCommands->setMcConfig(mMcConfig);
@@ -98,11 +149,16 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             this, SLOT(packetReceived(QByteArray&)));
     connect(mCommands, SIGNAL(dataToSend(QByteArray&)),
             this, SLOT(cmdDataToSend(QByteArray&)));
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray)));
+    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
     connect(mCommands, SIGNAL(ackReceived(QString)), this, SLOT(ackReceived(QString)));
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
+}
+
+VescInterface::~VescInterface()
+{
+    storeSettings();
 }
 
 Commands *VescInterface::commands() const
@@ -177,10 +233,315 @@ bool VescInterface::fwRx()
     return mFwVersionReceived;
 }
 
+void VescInterface::storeSettings()
+{
+    mSettings.beginWriteArray("bleNames");
+    QHashIterator<QString, QString> i(mBleNames);
+    int ind = 0;
+    while (i.hasNext()) {
+        i.next();
+        mSettings.setArrayIndex(ind);
+        mSettings.setValue("address", i.key());
+        mSettings.setValue("name", i.value());
+        ind++;
+    }
+    mSettings.endArray();
+
+    mSettings.beginWriteArray("profiles");
+    for (int i = 0; i < mProfiles.size(); ++i) {
+        MCCONF_TEMP cfg = mProfiles.value(i).value<MCCONF_TEMP>();
+        mSettings.setArrayIndex(i);
+        mSettings.setValue("current_min_scale", cfg.current_min_scale);
+        mSettings.setValue("current_max_scale", cfg.current_max_scale);
+        mSettings.setValue("erpm_or_speed_min", cfg.erpm_or_speed_min);
+        mSettings.setValue("erpm_or_speed_max", cfg.erpm_or_speed_max);
+        mSettings.setValue("duty_min", cfg.duty_min);
+        mSettings.setValue("duty_max", cfg.duty_max);
+        mSettings.setValue("watt_min", cfg.watt_min);
+        mSettings.setValue("watt_max", cfg.watt_max);
+        mSettings.setValue("name", cfg.name);
+    }
+    mSettings.endArray();
+
+    mSettings.beginWriteArray("pairedUuids");
+    for (int i = 0;i < mPairedUuids.size();i++) {
+        mSettings.setArrayIndex(i);
+        mSettings.setValue("uuid", mPairedUuids.at(i));
+    }
+    mSettings.endArray();
+}
+
+QVariantList VescInterface::getProfiles()
+{
+    return mProfiles;
+}
+
+void VescInterface::addProfile(QVariant profile)
+{
+    mProfiles.append(profile);
+    emit profilesUpdated();
+}
+
+void VescInterface::clearProfiles()
+{
+    mProfiles.clear();
+    emit profilesUpdated();
+}
+
+void VescInterface::deleteProfile(int index)
+{
+    if (index >= 0 && mProfiles.length() > index) {
+        mProfiles.removeAt(index);
+        emit profilesUpdated();
+    }
+}
+
+void VescInterface::moveProfileUp(int index)
+{
+    if (index > 0 && index < mProfiles.size()) {
+        mProfiles.swap(index, index - 1);
+        emit profilesUpdated();
+    }
+}
+
+void VescInterface::moveProfileDown(int index)
+{
+    if (index >= 0 && index < (mProfiles.size() - 1)) {
+        mProfiles.swap(index, index + 1);
+        emit profilesUpdated();
+    }
+}
+
+MCCONF_TEMP VescInterface::getProfile(int index)
+{
+    MCCONF_TEMP conf = createMcconfTemp();
+
+    if (index >= 0 && mProfiles.length() > index) {
+        conf = mProfiles.value(index).value<MCCONF_TEMP>();
+    }
+
+    return conf;
+}
+
+void VescInterface::updateProfile(int index, QVariant profile)
+{
+    if (index >= 0 && mProfiles.length() > index) {
+        mProfiles[index] = profile;
+        emit profilesUpdated();
+    }
+}
+
+bool VescInterface::isProfileInUse(int index)
+{
+    MCCONF_TEMP conf = getProfile(index);
+
+    bool res = true;
+
+    if (!Utility::almostEqual(conf.current_max_scale,
+                              mMcConfig->getParamDouble("l_current_max_scale"), 0.0001)) {
+        res = false;
+    }
+
+    if (!Utility::almostEqual(conf.current_min_scale,
+                              mMcConfig->getParamDouble("l_current_min_scale"), 0.0001)) {
+        res = false;
+    }
+
+    if (!Utility::almostEqual(conf.duty_max,
+                              mMcConfig->getParamDouble("l_max_duty"), 0.0001)) {
+        res = false;
+    }
+
+    if (!Utility::almostEqual(conf.duty_min,
+                              mMcConfig->getParamDouble("l_min_duty"), 0.0001)) {
+        res = false;
+    }
+
+    if (!Utility::almostEqual(conf.watt_max,
+                              mMcConfig->getParamDouble("l_watt_max"), 0.0001)) {
+        res = false;
+    }
+
+    if (!Utility::almostEqual(conf.watt_min,
+                              mMcConfig->getParamDouble("l_watt_min"), 0.0001)) {
+        res = false;
+    }
+
+    double speedFact = ((mMcConfig->getParamInt("si_motor_poles") / 2.0) * 60.0 *
+            mMcConfig->getParamDouble("si_gear_ratio")) /
+            (mMcConfig->getParamDouble("si_wheel_diameter") * M_PI);
+
+    if (!Utility::almostEqual(conf.erpm_or_speed_max * speedFact,
+                              mMcConfig->getParamDouble("l_max_erpm"), 0.0001)) {
+        res = false;
+    }
+
+    if (!Utility::almostEqual(conf.erpm_or_speed_min * speedFact,
+                              mMcConfig->getParamDouble("l_min_erpm"), 0.0001)) {
+        res = false;
+    }
+
+    return res;
+}
+
+MCCONF_TEMP VescInterface::createMcconfTemp()
+{
+    MCCONF_TEMP conf;
+    conf.name = "Unnamed Profile";
+    conf.current_min_scale = 1.0;
+    conf.current_max_scale = 1.0;
+    conf.duty_min = 0.05;
+    conf.duty_max = 0.95;
+    conf.erpm_or_speed_min = -5.0;
+    conf.erpm_or_speed_max = 5.0;
+    conf.watt_min = -500.0;
+    conf.watt_max = 500.0;
+    return conf;
+}
+
+void VescInterface::updateMcconfFromProfile(MCCONF_TEMP profile)
+{
+    double speedFact = (((double)mMcConfig->getParamInt("si_motor_poles") / 2.0) * 60.0 *
+            mMcConfig->getParamDouble("si_gear_ratio")) /
+            (mMcConfig->getParamDouble("si_wheel_diameter") * M_PI);
+
+    mMcConfig->updateParamDouble("l_current_min_scale", profile.current_min_scale);
+    mMcConfig->updateParamDouble("l_current_max_scale", profile.current_max_scale);
+    mMcConfig->updateParamDouble("l_watt_min", profile.watt_min);
+    mMcConfig->updateParamDouble("l_watt_max", profile.watt_max);
+    mMcConfig->updateParamDouble("l_min_erpm", profile.erpm_or_speed_min * speedFact);
+    mMcConfig->updateParamDouble("l_max_erpm", profile.erpm_or_speed_max * speedFact);
+    mMcConfig->updateParamDouble("l_min_duty", profile.duty_min);
+    mMcConfig->updateParamDouble("l_max_duty", profile.duty_max);
+}
+
+QStringList VescInterface::getPairedUuids()
+{
+    return mPairedUuids;
+}
+
+bool VescInterface::addPairedUuid(QString uuid)
+{
+    bool res = false;
+
+    uuid = uuid.replace(" ", "").toUpper();
+
+    QRegularExpression hexMatcher("^[0-9A-F]{24}$",
+                                  QRegularExpression::CaseInsensitiveOption);
+
+    QRegularExpressionMatch match = hexMatcher.match(uuid);
+    if (!match.hasMatch()) {
+        emitMessageDialog("Add VESC",
+                          "The UUID must consist of 24 hexadecimal characters.",
+                          false, false);
+        return false;
+    }
+
+    if (hasPairedUuid(uuid)) {
+        emitMessageDialog("Add VESC",
+                          "This VESC already is in your paired UUID list.",
+                          true, false);
+    } else {
+        mPairedUuids.append(uuid);
+        emit pairingListUpdated();
+        res = true;
+    }
+
+    return res;
+}
+
+bool VescInterface::deletePairedUuid(QString uuid)
+{
+    bool res = false;
+
+    uuid = uuid.replace(" ", "").toUpper();
+
+    for (int i = 0;i < mPairedUuids.size();i++) {
+        QString str = mPairedUuids.at(i);
+        if (str.replace(" ", "").toUpper() == uuid) {
+            mPairedUuids.removeAt(i);
+            emit pairingListUpdated();
+            res = true;
+            break;
+        }
+    }
+
+    return res;
+}
+
+void VescInterface::clearPairedUuids()
+{
+    mPairedUuids.clear();
+    emit pairingListUpdated();
+}
+
+bool VescInterface::hasPairedUuid(QString uuid)
+{
+    bool res = false;
+
+    uuid = uuid.replace(" ", "").toUpper();
+
+    for (int i = 0;i < mPairedUuids.size();i++) {
+        QString str = mPairedUuids.at(i);
+        if (str.replace(" ", "").toUpper() == uuid) {
+            res = true;
+            break;
+        }
+    }
+
+    return res;
+}
+
+QString VescInterface::getConnectedUuid()
+{
+    QString res;
+
+    if (isPortConnected()) {
+        res = mUuidStr;
+    }
+
+    return res;
+}
+
+bool VescInterface::isIntroDone()
+{
+    if (mSettings.contains("introVersion")) {
+        if (mSettings.value("introVersion").toInt() != VT_INTRO_VERSION) {
+            mSettings.setValue("intro_done", false);
+        }
+    } else {
+        mSettings.setValue("intro_done", false);
+    }
+
+    return mSettings.value("intro_done", false).toBool();
+}
+
+void VescInterface::setIntroDone(bool done)
+{
+    mSettings.setValue("introVersion", VT_INTRO_VERSION);
+    mSettings.setValue("intro_done", done);
+}
+
+#ifdef HAS_BLUETOOTH
 BleUart *VescInterface::bleDevice()
 {
     return mBleUart;
 }
+
+void VescInterface::storeBleName(QString address, QString name)
+{
+    mBleNames.insert(address, name);
+}
+
+QString VescInterface::getBleName(QString address)
+{
+    QString res;
+    if(mBleNames.contains(address)) {
+        res = mBleNames[address];
+    }
+    return res;
+}
+#endif
 
 bool VescInterface::isPortConnected()
 {
@@ -196,9 +557,11 @@ bool VescInterface::isPortConnected()
         res = true;
     }
 
+#ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         res = true;
     }
+#endif
 
     return res;
 }
@@ -217,10 +580,12 @@ void VescInterface::disconnectPort()
         updateFwRx(false);
     }
 
+#ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         mBleUart->disconnectBle();
         updateFwRx(false);
     }
+#endif
 
     mFwRetries = 0;
 }
@@ -237,7 +602,9 @@ bool VescInterface::reconnectLastPort()
         connectTcp(mLastTcpServer, mLastTcpPort);
         return true;
     } else if (mLastConnType == CONN_BLE) {
+#ifdef HAS_BLUETOOTH
         mBleUart->startConnect(mLastBleAddr);
+#endif
         return true;
     } else {
 #ifdef HAS_SERIALPORT
@@ -268,8 +635,8 @@ bool VescInterface::autoconnect()
     mAutoconnectProgress = 0.0;
 
     disconnectPort();
-    disconnect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray)),
-               this, SLOT(fwVersionReceived(int,int,QString,QByteArray)));
+    disconnect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+               this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
 
     for (int i = 0;i < ports.size();i++) {
         VSerialInfo_t serial = ports[i];
@@ -282,7 +649,7 @@ bool VescInterface::autoconnect()
         QTimer timeoutTimer;
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(500);
-        connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray)), &loop, SLOT(quit()));
+        connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)), &loop, SLOT(quit()));
         connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
         loop.exec();
 
@@ -297,8 +664,8 @@ bool VescInterface::autoconnect()
         }
     }
 
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray)));
+    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
 #endif
 
     emit autoConnectProgressUpdated(1.0, true);
@@ -324,10 +691,12 @@ QString VescInterface::getConnectedPortName()
         connected = true;
     }
 
+#ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         res = tr("Connected (BLE) to %1").arg(mLastBleAddr);
         connected = true;
     }
+#endif
 
     if (connected && mCommands->isLimitedMode()) {
         res += tr(", limited mode");
@@ -456,9 +825,13 @@ void VescInterface::connectTcp(QString server, int port)
 
 void VescInterface::connectBle(QString address)
 {
+#ifdef HAS_BLUETOOTH
     mBleUart->startConnect(address);
     mLastConnType = CONN_BLE;
     mLastBleAddr = address;
+#else
+    (void)address;
+#endif
 }
 
 bool VescInterface::isAutoconnectOngoing() const
@@ -469,6 +842,50 @@ bool VescInterface::isAutoconnectOngoing() const
 double VescInterface::getAutoconnectProgress() const
 {
     return mAutoconnectProgress;
+}
+
+QVector<int> VescInterface::scanCan()
+{
+    QVector<int> canDevs;
+
+    if (!isPortConnected()) {
+        return canDevs;
+    }
+
+    QEventLoop loop;
+
+    bool timeout;
+    auto conn = connect(commands(), &Commands::pingCanRx,
+                        [&canDevs, &timeout, &loop](QVector<int> devs, bool isTimeout) {
+        for (int dev: devs) {
+            canDevs.append(dev);
+        }
+        timeout = isTimeout;
+        loop.quit();
+    });
+
+    commands()->pingCan();
+    loop.exec();
+
+    disconnect(conn);
+
+    if (!timeout) {
+        mCanDevsLast = canDevs;
+    } else {
+        canDevs.clear();
+    }
+
+    return canDevs;
+}
+
+QVector<int> VescInterface::getCanDevsLast() const
+{
+    return mCanDevsLast;
+}
+
+void VescInterface::ignoreCanChange(bool ignore)
+{
+    mIgnoreCanChange = ignore;
 }
 
 #ifdef HAS_SERIALPORT
@@ -532,10 +949,12 @@ void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
     updateFwRx(false);
 }
 
+#ifdef HAS_BLUETOOTH
 void VescInterface::bleDataRx(QByteArray data)
 {
     mPacket->processData(data);
 }
+#endif
 
 void VescInterface::timerSlot()
 {
@@ -546,37 +965,39 @@ void VescInterface::timerSlot()
     serialDataAvailable();
 #endif
 
-    if (isPortConnected()) {
-        if (mSendCanBefore != mCommands->getSendCan() ||
-                mCanIdBefore != mCommands->getCanSendId()) {
+    if (!mIgnoreCanChange) {
+        if (isPortConnected()) {
+            if (mSendCanBefore != mCommands->getSendCan() ||
+                    mCanIdBefore != mCommands->getCanSendId()) {
+                updateFwRx(false);
+                mFwRetries = 0;
+            }
+
+            mFwPollCnt++;
+            if (mFwPollCnt >= 4) {
+                mFwPollCnt = 0;
+                if (!mFwVersionReceived) {
+                    mCommands->getFwVersion();
+                    mFwRetries++;
+
+                    // Timeout if the firmware cannot be read
+                    if (mFwRetries >= 25) {
+                        emit statusMessage(tr("No firmware read response"), false);
+                        emit messageDialog(tr("Read Firmware Version"),
+                                           tr("Could not read firmware version. Make sure that "
+                                              "the selected port really belongs to the VESC. "),
+                                           false, false);
+                        disconnectPort();
+                    }
+                }
+            }
+        } else {
             updateFwRx(false);
             mFwRetries = 0;
         }
-
-        mFwPollCnt++;
-        if (mFwPollCnt >= 4) {
-            mFwPollCnt = 0;
-        if (!mFwVersionReceived) {
-            mCommands->getFwVersion();
-            mFwRetries++;
-
-            // Timeout if the firmware cannot be read
-                if (mFwRetries >= 25) {
-                emit statusMessage(tr("No firmware read response"), false);
-                emit messageDialog(tr("Read Firmware Version"),
-                                   tr("Could not read firmware version. Make sure "
-                                      "that selected port really belongs to the VESC. "),
-                                       false, false);
-                disconnectPort();
-            }
-        }
-        }
-    } else {
-        updateFwRx(false);
-        mFwRetries = 0;
+        mSendCanBefore = mCommands->getSendCan();
+        mCanIdBefore = mCommands->getCanSendId();
     }
-    mSendCanBefore = mCommands->getSendCan();
-    mCanIdBefore = mCommands->getCanSendId();
 
     // Update fw upload bar and label
     double fwProg = mCommands->getFirmwareUploadProgress();
@@ -585,12 +1006,16 @@ void VescInterface::timerSlot()
         mIsUploadingFw = true;
         emit fwUploadStatus(fwStatus, fwProg, true);
     } else {
-        // If the firmware upload just finished or failed
+        // The firmware upload just finished or failed
         if (mIsUploadingFw) {
-            updateFwRx(false);
             mFwRetries = 0;
             if (fwStatus.compare("FW Upload Done") == 0) {
+                disconnectPort();
                 emit fwUploadStatus(fwStatus, 1.0, false);
+                emitMessageDialog("Firmware Upload",
+                                  "Firmware upload finished! Give the VESC around 10 "
+                                  "seconds to apply the firmware and reboot, then reconnect.",
+                                  true, false);
             } else {
                 emit fwUploadStatus(fwStatus, 0.0, false);
             }
@@ -616,9 +1041,11 @@ void VescInterface::packetDataToSend(QByteArray &data)
         mTcpSocket->write(data);
     }
 
+#ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         mBleUart->writeData(data);
     }
+#endif
 }
 
 void VescInterface::packetReceived(QByteArray &data)
@@ -631,11 +1058,30 @@ void VescInterface::cmdDataToSend(QByteArray &data)
     mPacket->sendPacket(data);
 }
 
-void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid)
+void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired)
 {
-    QList<QPair<int, int> > fwPairs = getSupportedFirmwarePairs();
+    QString uuidStr = Utility::uuid2Str(uuid, true);
+    mUuidStr = uuidStr.toUpper();
+    mUuidStr.replace(" ", "");
 
-    QString strUuid = Utility::uuid2Str(uuid, true);
+#ifdef HAS_BLUETOOTH
+    if (mBleUart->isConnected()) {
+        if (isPaired && !hasPairedUuid(mUuidStr)) {
+            disconnectPort();
+            emitMessageDialog("Pairing",
+                              "This VESC is not paired to your local version of VESC Tool. You can either "
+                              "add the UUID to the pairing list manually, or connect over USB and set the app "
+                              "pairing flag to false for this VESC. Then you can pair to this version of VESC "
+                              "tool, or leave the VESC unpaired.",
+                              false, false);
+            return;
+        }
+    }
+#else
+    (void)isPaired;
+#endif
+
+    QList<QPair<int, int> > fwPairs = getSupportedFirmwarePairs();
 
     if (fwPairs.isEmpty()) {
         emit messageDialog(tr("No Supported Firmwares"),
@@ -651,6 +1097,8 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
 
     QPair<int, int> highest_supported = *std::max_element(fwPairs.begin(), fwPairs.end());
     QPair<int, int> fw_connected = qMakePair(major, minor);
+
+    mCommands->setLimitedSupportsFwdAllCan(fw_connected >= qMakePair(3, 45));
 
     bool wasReceived = mFwVersionReceived;
     mCommands->setLimitedMode(false);
@@ -707,8 +1155,8 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
             fwStr += ", Hardware: " + hw;
         }
 
-        if (!strUuid.isEmpty()) {
-            fwStr += ", UUID: " + strUuid;
+        if (!uuidStr.isEmpty()) {
+            fwStr += ", UUID: " + uuidStr;
         }
 
         emit statusMessage(fwStr, true);
@@ -721,8 +1169,8 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
             mFwTxt += ", Hw: " + hw;
         }
 
-        if (!strUuid.isEmpty()) {
-            mFwTxt += "\n" + strUuid;
+        if (!uuidStr.isEmpty()) {
+            mFwTxt += "\n" + uuidStr;
         }
     }
 }

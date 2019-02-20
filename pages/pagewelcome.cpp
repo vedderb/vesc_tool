@@ -22,6 +22,7 @@
 #include "setupwizardmotor.h"
 #include "setupwizardapp.h"
 #include "utility.h"
+#include "widgets/detectallfocdialog.h"
 #include <QMessageBox>
 
 PageWelcome::PageWelcome(QWidget *parent) :
@@ -33,8 +34,8 @@ PageWelcome::PageWelcome(QWidget *parent) :
     mVesc = 0;
     ui->bgWidget->setPixmap(QPixmap("://res/bg.png"));
 
-    connect(ui->wizardMotorButton, SIGNAL(clicked(bool)),
-            this, SLOT(startSetupWizardMotor()));
+    connect(ui->wizardFocSimpleButton, SIGNAL(clicked(bool)),
+            this, SLOT(startSetupWizardFocSimple()));
     connect(ui->wizardAppButton, SIGNAL(clicked(bool)),
             this, SLOT(startSetupWizardApp()));
 }
@@ -42,6 +43,13 @@ PageWelcome::PageWelcome(QWidget *parent) :
 PageWelcome::~PageWelcome()
 {
     delete ui;
+}
+
+void PageWelcome::startSetupWizardFocSimple()
+{
+    if (mVesc) {
+        DetectAllFocDialog::showDialog(mVesc, this);
+    }
 }
 
 void PageWelcome::startSetupWizardMotor()

@@ -18,6 +18,7 @@
     */
 
 #include "bleuart.h"
+#include "utility.h"
 
 #include <QDebug>
 #include <QLowEnergyConnectionParameters>
@@ -55,7 +56,17 @@ void BleUart::startConnect(QString addr)
     mUartServiceFound = false;
     mConnectDone = false;
 
+#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
+    // Create BT Controller from unique device UUID stored as addr. Creating
+    // a controller using a devices address is not supported on macOS or iOS.
+    QBluetoothDeviceInfo deviceInfo = QBluetoothDeviceInfo();
+    deviceInfo.setDeviceUuid(QBluetoothUuid(addr));
+    mControl = new QLowEnergyController(deviceInfo);
+
+#else
     mControl = new QLowEnergyController(QBluetoothAddress(addr));
+
+#endif
 
     mControl->setRemoteAddressType(QLowEnergyController::RandomAddress);
 
@@ -93,7 +104,7 @@ void BleUart::disconnectBle()
 
 bool BleUart::isConnected()
 {
-    return mControl != 0 && mConnectDone;;
+    return mControl != 0 && mConnectDone;
 }
 
 bool BleUart::isConnecting()
@@ -122,7 +133,14 @@ void BleUart::addDevice(const QBluetoothDeviceInfo &dev)
     if (dev.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration) {
         qDebug() << "BLE scan found device:" << dev.name();
 
-        mDevs.insert(dev.name(), dev.address().toString());
+#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
+        // macOS and iOS do not expose the hardware address of BLTE devices, must use
+        // the OS generated UUID.
+        mDevs.insert(dev.deviceUuid().toString(), dev.name());
+#else
+        mDevs.insert(dev.address().toString(), dev.name());
+
+#endif
 
         emit scanDone(mDevs, false);
     }
@@ -136,10 +154,10 @@ void BleUart::scanFinished()
 
 void BleUart::deviceScanError(QBluetoothDeviceDiscoveryAgent::Error e)
 {
-    qWarning() << "BLE Scan error:" << e;
-
+    qWarning() << "BLE Scan error: " << e;
     mDevs.clear();
     emit scanDone(mDevs, true);
+    emit bleError(tr("BLE Scan error: ") + Utility::QEnumToQString(e));
 }
 
 void BleUart::serviceDiscovered(const QBluetoothUuid &gatt)
@@ -178,6 +196,8 @@ void BleUart::serviceScanDone()
 void BleUart::controllerError(QLowEnergyController::Error e)
 {
     qWarning() << "BLE error:" << e;
+    disconnectBle();
+    emit bleError(tr("BLE error: ") + Utility::QEnumToQString(e));
 }
 
 void BleUart::deviceConnected()

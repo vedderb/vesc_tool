@@ -89,5 +89,6 @@ void PageFoc::setVesc(VescInterface *vesc)
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_sample_v0_v7");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_sample_high_current");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_observer_gain_slow");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_current_filter_const");
     }
 }

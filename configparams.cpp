@@ -127,6 +127,51 @@ ConfigParam ConfigParams::getParamCopy(const QString &name) const
     return retVal;
 }
 
+bool ConfigParams::isParamDouble(const QString &name)
+{
+    if (mParams.contains(name) && mParams[name].type == CFG_T_DOUBLE) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ConfigParams::isParamInt(const QString &name)
+{
+    if (mParams.contains(name) && mParams[name].type == CFG_T_INT) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ConfigParams::isParamEnum(const QString &name)
+{
+    if (mParams.contains(name) && mParams[name].type == CFG_T_ENUM) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ConfigParams::isParamQString(const QString &name)
+{
+    if (mParams.contains(name) && mParams[name].type == CFG_T_QSTRING) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ConfigParams::isParamBool(const QString &name)
+{
+    if (mParams.contains(name) && mParams[name].type == CFG_T_BOOL) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 double ConfigParams::getParamDouble(const QString &name)
 {
     double retVal = 0.0;
@@ -241,6 +286,223 @@ QString ConfigParams::getDescription(const QString &name)
 
     if (mParams.contains(name)) {
         retVal = mParams[name].description;
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+double ConfigParams::getParamMaxDouble(const QString &name)
+{
+    double retVal = 0.0;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_DOUBLE) {
+            retVal = p.maxDouble;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+double ConfigParams::getParamMinDouble(const QString &name)
+{
+    double retVal = 0.0;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_DOUBLE) {
+            retVal = p.minDouble;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+double ConfigParams::getParamStepDouble(const QString &name)
+{
+    double retVal = 0.0;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_DOUBLE) {
+            retVal = p.stepDouble;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+int ConfigParams::getParamDecimalsDouble(const QString &name)
+{
+    int retVal = 0;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_DOUBLE) {
+            retVal = p.editorDecimalsDouble;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+int ConfigParams::getParamMaxInt(const QString &name)
+{
+    int retVal = 0;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_INT) {
+            retVal = p.maxInt;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+int ConfigParams::getParamMinInt(const QString &name)
+{
+    int retVal = 0;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_INT) {
+            retVal = p.minInt;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+int ConfigParams::getParamStepInt(const QString &name)
+{
+    int retVal = 0;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_INT) {
+            retVal = p.stepInt;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+QStringList ConfigParams::getParamEnumNames(const QString &name)
+{
+    QStringList retVal;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_ENUM) {
+            retVal = p.enumNames;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+double ConfigParams::getParamEditorScale(const QString &name)
+{
+    double retVal = 0.0;
+
+    if (mParams.contains(name)) {
+        retVal = mParams[name].editorScale;
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+QString ConfigParams::getParamSuffix(const QString &name)
+{
+    QString retVal = "";
+
+    if (mParams.contains(name)) {
+        retVal = mParams[name].suffix;
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+bool ConfigParams::getParamEditAsPercentage(const QString &name)
+{
+    bool retVal = false;
+
+    if (mParams.contains(name)) {
+        retVal = mParams[name].editAsPercentage;
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+bool ConfigParams::getParamShowDisplay(const QString &name)
+{
+    bool retVal = false;
+
+    if (mParams.contains(name)) {
+        retVal = mParams[name].showDisplay;
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
+bool ConfigParams::getParamTransmittable(const QString &name)
+{
+    bool retVal = false;
+
+    if (mParams.contains(name)) {
+        retVal = mParams[name].transmittable;
     } else {
         qWarning() << name << "not found";
     }

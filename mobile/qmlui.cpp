@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2018 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -21,23 +21,55 @@
 #include "fwhelper.h"
 
 #include <QQuickStyle>
+#include <QApplication>
 
 QmlUi::QmlUi(QObject *parent) : QObject(parent)
 {
     mEngine = new QQmlApplicationEngine(this);
+#ifdef DEBUG_BUILD
+    qApp->installEventFilter(this);
+#endif
 }
 
 bool QmlUi::startQmlUi()
 {
     qmlRegisterSingletonType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf", vescinterface_singletontype_provider);
     qmlRegisterSingletonType<Utility>("Vedder.vesc.utility", 1, 0, "Utility", utility_singletontype_provider);
+#ifdef HAS_BLUETOOTH
     qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
+#endif
     qmlRegisterType<Commands>("Vedder.vesc.commands", 1, 0, "Commands");
     qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");
     qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
 
     mEngine->load(QUrl(QLatin1String("qrc:/mobile/main.qml")));
     return !mEngine->rootObjects().isEmpty();
+}
+
+bool QmlUi::eventFilter(QObject *object, QEvent *e)
+{
+    Q_UNUSED(object);
+
+    if (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
+        bool isPress = e->type() == QEvent::KeyPress;
+
+        if (isPress && !keyEvent->isAutoRepeat()) {
+            switch(keyEvent->key()) {
+            case Qt::Key_F5:
+                delete mEngine;
+                mEngine = new QQmlApplicationEngine(this);
+                mEngine->load(QUrl(QLatin1String("mobile/main.qml")));
+                return true;
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
+    return false;
 }
 
 QObject *QmlUi::vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine)

@@ -21,6 +21,7 @@
 #define UTILITY_H
 
 #include <QObject>
+#include <QMetaEnum>
 #include "vescinterface.h"
 
 class Utility : public QObject
@@ -39,6 +40,24 @@ public:
     Q_INVOKABLE static QString aboutText();
     Q_INVOKABLE static QString uuid2Str(QByteArray uuid, bool space);
     Q_INVOKABLE static bool requestFilePermission();
+    Q_INVOKABLE static bool waitSignal(QObject *sender, QString signal, int timeoutMs);
+    Q_INVOKABLE static QString detectAllFoc(VescInterface *vesc,
+                                            bool detect_can, double max_power_loss, double min_current_in,
+                                            double max_current_in, double openloop_rpm, double sl_erpm);
+    Q_INVOKABLE static bool resetInputCan(VescInterface *vesc, QVector<int> canIds);
+    Q_INVOKABLE static bool setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
+                                             double cutStart, double cutEnd);
+    Q_INVOKABLE static bool setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds);
+    Q_INVOKABLE static bool setInvertDirection(VescInterface *vesc, int canId, bool inverted);
+    Q_INVOKABLE static bool getInvertDirection(VescInterface *vesc, int canId);
+    Q_INVOKABLE static QString testDirection(VescInterface *vesc, int canId, double duty, int ms);
+    Q_INVOKABLE static bool restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app);
+    Q_INVOKABLE static bool almostEqual(double A, double B, double eps);
+
+    template<typename QEnum>
+    static QString QEnumToQString (const QEnum value) {
+        return QString(QMetaEnum::fromType<QEnum>().valueToKey(value));
+    }
 
 signals:
 

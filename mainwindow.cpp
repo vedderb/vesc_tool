@@ -31,6 +31,7 @@
 #include "widgets/helpdialog.h"
 #include "utility.h"
 #include "widgets/paramdialog.h"
+#include "widgets/detectallfocdialog.h"
 
 namespace {
 void stepTowards(double &value, double goal, double step) {
@@ -112,8 +113,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(showMessageDialog(QString,QString,bool,bool)));
     connect(mVesc, SIGNAL(serialPortNotWritable(QString)),
             this, SLOT(serialPortNotWritable(QString)));
-    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES)),
-            this, SLOT(valuesReceived(MC_VALUES)));
+    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,unsigned int)),
+            this, SLOT(valuesReceived(MC_VALUES,unsigned int)));
     connect(mVesc->commands(), SIGNAL(mcConfigCheckResult(QStringList)),
             this, SLOT(mcConfigCheckResult(QStringList)));
     connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
@@ -499,8 +500,9 @@ void MainWindow::serialPortNotWritable(const QString &port)
 #endif
 }
 
-void MainWindow::valuesReceived(MC_VALUES values)
+void MainWindow::valuesReceived(MC_VALUES values, unsigned int mask)
 {
+    (void)mask;
     ui->dispCurrent->setVal(values.current_motor);
     ui->dispDuty->setVal(values.duty_now * 100.0);
 }
@@ -553,6 +555,7 @@ void MainWindow::on_actionReboot_triggered()
 void MainWindow::on_stopButton_clicked()
 {
     mVesc->commands()->setCurrent(0);
+    mPageExperiments->stop();
     ui->actionSendAlive->setChecked(false);
 }
 
@@ -831,6 +834,8 @@ void MainWindow::reloadPages()
     mPageWelcome->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageWelcome);
     addPageItem(tr("Welcome & Wizards"), "://res/icons/Home-96.png", "", true);
+    connect(ui->actionAutoSetupFOC, SIGNAL(triggered(bool)),
+            mPageWelcome, SLOT(startSetupWizardFocSimple()));
     connect(ui->actionMotorSetupWizard, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardMotor()));
     connect(ui->actionAppSetupWizard, SIGNAL(triggered(bool)),
@@ -875,6 +880,12 @@ void MainWindow::reloadPages()
     addPageItem(tr("FOC"), "://res/icons/3ph_sine.png",
                 "://res/icons/mcconf.png", false, true);
 
+    mPageGpd = new PageGPD(this);
+    mPageGpd->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageGpd);
+    addPageItem(tr("GPDrive"), "://res/icons/3ph_sine.png",
+                "://res/icons/mcconf.png", false, true);
+
     mPageControllers = new PageControllers(this);
     mPageControllers->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageControllers);
@@ -885,6 +896,12 @@ void MainWindow::reloadPages()
     mPageMotorInfo->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotorInfo);
     addPageItem(tr("Additional Info"), "://res/icons/About-96.png",
+                "://res/icons/mcconf.png", false, true);
+
+    mPageExperiments = new PageExperiments(this);
+    mPageExperiments->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageExperiments);
+    addPageItem(tr("Experiments"), "://res/icons/Calculator-96.png",
                 "://res/icons/mcconf.png", false, true);
 
     mPageAppSettings = new PageAppSettings(this);
@@ -1184,7 +1201,14 @@ void MainWindow::on_actionTerminalDRV8301ResetLatchedFaults_triggered()
 
 void MainWindow::on_actionCanFwd_toggled(bool arg1)
 {
-    mVesc->commands()->setSendCan(arg1);
+    if (arg1 && mVesc->commands()->getCanSendId() < 0) {
+        ui->actionCanFwd->setChecked(false);
+        mVesc->emitMessageDialog("CAN Forward",
+                                 "No CAN device is selected. Go to the connection page and select one.",
+                                 false, false);
+    } else {
+        mVesc->commands()->setSendCan(arg1);
+    }
 }
 
 void MainWindow::on_actionSafetyInformation_triggered()
@@ -1215,4 +1239,15 @@ void MainWindow::on_actionVESCProjectForums_triggered()
 void MainWindow::on_actionLicense_triggered()
 {
     HelpDialog::showHelp(this, mVesc->infoConfig(), "gpl_text");
+}
+
+void MainWindow::on_posBox_editingFinished()
+{
+    on_posButton_clicked();
+}
+
+void MainWindow::on_posBox_valueChanged(double arg1)
+{
+    (void)arg1;
+//    on_posButton_clicked();
 }

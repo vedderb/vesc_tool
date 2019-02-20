@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DetectAllFocDialog</class>
+ <widget class="QDialog" name="DetectAllFocDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>863</width>
+    <height>678</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Detect FOC Parameters on all VESCs</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="tabPosition">
+      <enum>QTabWidget::West</enum>
+     </property>
+     <property name="tabShape">
+      <enum>QTabWidget::Triangular</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="icon">
+       <iconset resource="../res.qrc">
+        <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
+      </attribute>
+      <attribute name="title">
+       <string>Simple</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QToolBox" name="simpleSetupBox">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="page">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>796</width>
+            <height>481</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Motor</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QListWidget" name="motorList"/>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="nextMotorButton">
+               <property name="text">
+                <string>Next</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/Down-96.png</normaloff>:/res/icons/Down-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_2">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>796</width>
+            <height>481</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Battery</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="ParamTable" name="simpleBatteryTab"/>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="prevBattButton">
+               <property name="text">
+                <string>Previous</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/Up-96.png</normaloff>:/res/icons/Up-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="nextBattButton">
+               <property name="text">
+                <string>Next</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/Down-96.png</normaloff>:/res/icons/Down-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_3">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>796</width>
+            <height>481</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Setup</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="simpleSetupPage3Layout">
+           <item>
+            <widget class="QGroupBox" name="groupBox">
+             <property name="title">
+              <string>Gear Ratio</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <widget class="QCheckBox" name="directDriveBox">
+                <property name="text">
+                 <string>Direct Drive</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="pulleyMotorBox">
+                <property name="prefix">
+                 <string>Motor Pulley: </string>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>999</number>
+                </property>
+                <property name="value">
+                 <number>13</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="pulleyWheelBox">
+                <property name="prefix">
+                 <string>Wheel Pulley: </string>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>999</number>
+                </property>
+                <property name="value">
+                 <number>36</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="wheelDiameterBox">
+             <property name="title">
+              <string>Wheel Diameter</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>129</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="prevSetupButton">
+               <property name="text">
+                <string>Previous</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/Up-96.png</normaloff>:/res/icons/Up-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="runButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Run Detection</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_4">
+          <attribute name="label">
+           <string>Directions</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_8">
+           <item>
+            <widget class="DirSetup" name="dirSetup" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="prevDirButton">
+               <property name="text">
+                <string>Previous</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/Up-96.png</normaloff>:/res/icons/Up-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="finishButton">
+               <property name="text">
+                <string>Finish</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/Ok-96.png</normaloff>:/res/icons/Ok-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="icon">
+       <iconset resource="../res.qrc">
+        <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
+      </attribute>
+      <attribute name="title">
+       <string>Advanced</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QWidget" name="settingsBox" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QDoubleSpinBox" name="maxPowerLossBox">
+            <property name="toolTip">
+             <string>Acceptable motor power loss to derive current limits from.</string>
+            </property>
+            <property name="prefix">
+             <string>Max Power Loss: </string>
+            </property>
+            <property name="suffix">
+             <string> W</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <double>99999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>50.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note&lt;/span&gt;: Leave below parameters at 0 for default values&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="currentInMinBox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="prefix">
+             <string>Current In Min: </string>
+            </property>
+            <property name="suffix">
+             <string> A</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="currentInMaxBox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="prefix">
+             <string>Current In Max: </string>
+            </property>
+            <property name="suffix">
+             <string> A</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <double>9999.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="openloopErpmBox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="prefix">
+             <string>Openloop ERPM: </string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <double>999999.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="sensorlessErpmBox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="prefix">
+             <string>Sensorless ERPM: </string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <double>999999.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="ParamTable" name="paramTab"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="runAdvancedButton">
+         <property name="text">
+          <string>Run Detection</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../res.qrc">
+           <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QProgressBar" name="progressBar">
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="format">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeButton">
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ParamTable</class>
+   <extends>QTableWidget</extends>
+   <header>widgets/paramtable.h</header>
+  </customwidget>
+  <customwidget>
+   <class>DirSetup</class>
+   <extends>QWidget</extends>
+   <header>widgets/dirsetup.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>runAdvancedButton</sender>
+   <signal>clicked()</signal>
+   <receiver>runButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>419</x>
+     <y>624</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>832</x>
+     <y>583</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>finishButton</sender>
+   <signal>clicked()</signal>
+   <receiver>closeButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>805</x>
+     <y>604</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>844</x>
+     <y>656</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

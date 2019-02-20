@@ -39,6 +39,7 @@ public:
     void setVesc(VescInterface *vesc);
 
 public slots:
+    void startSetupWizardFocSimple();
     void startSetupWizardMotor();
     void startSetupWizardApp();
 

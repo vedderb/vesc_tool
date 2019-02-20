@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2018 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -54,6 +54,14 @@ typedef enum {
     VESC_TX_DOUBLE32_AUTO
 } VESC_TX_T;
 
+// General purpose drive output mode
+typedef enum {
+    GPD_OUTPUT_MODE_NONE = 0,
+    GPD_OUTPUT_MODE_MODULATION,
+    GPD_OUTPUT_MODE_VOLTAGE,
+    GPD_OUTPUT_MODE_CURRENT
+} gpd_output_mode;
+
 typedef enum {
     FAULT_CODE_NONE = 0,
     FAULT_CODE_OVER_VOLTAGE,
@@ -61,7 +69,11 @@ typedef enum {
     FAULT_CODE_DRV,
     FAULT_CODE_ABS_OVER_CURRENT,
     FAULT_CODE_OVER_TEMP_FET,
-    FAULT_CODE_OVER_TEMP_MOTOR
+    FAULT_CODE_OVER_TEMP_MOTOR,
+    FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE,
+    FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE,
+    FAULT_CODE_MCU_UNDER_VOLTAGE,
+    FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET
 } mc_fault_code;
 
 typedef enum {
@@ -79,6 +91,9 @@ struct MC_VALUES {
 
     Q_PROPERTY(double v_in MEMBER v_in)
     Q_PROPERTY(double temp_mos MEMBER temp_mos)
+    Q_PROPERTY(double temp_mos_1 MEMBER temp_mos_1)
+    Q_PROPERTY(double temp_mos_2 MEMBER temp_mos_2)
+    Q_PROPERTY(double temp_mos_3 MEMBER temp_mos_3)
     Q_PROPERTY(double temp_motor MEMBER temp_motor)
     Q_PROPERTY(double current_motor MEMBER current_motor)
     Q_PROPERTY(double current_in MEMBER current_in)
@@ -94,11 +109,39 @@ struct MC_VALUES {
     Q_PROPERTY(int tachometer_abs MEMBER tachometer_abs)
     Q_PROPERTY(double position MEMBER position)
     Q_PROPERTY(mc_fault_code fault_code MEMBER fault_code)
+    Q_PROPERTY(int vesc_id MEMBER vesc_id)
     Q_PROPERTY(QString fault_str MEMBER fault_str)
 
 public:
+    MC_VALUES() {
+        v_in = 0.0;
+        temp_mos = 0.0;
+        temp_mos_1 = 0.0;
+        temp_mos_2 = 0.0;
+        temp_mos_3 = 0.0;
+        temp_motor = 0.0;
+        current_motor = 0.0;
+        current_in = 0.0;
+        id = 0.0;
+        iq = 0.0;
+        rpm = 0.0;
+        duty_now = 0.0;
+        amp_hours = 0.0;
+        amp_hours_charged = 0.0;
+        watt_hours = 0.0;
+        watt_hours_charged = 0.0;
+        tachometer = 0;
+        tachometer_abs = 0;
+        position = 0.0;
+        fault_code = FAULT_CODE_NONE;
+        vesc_id = 0;
+    }
+
     double v_in;
     double temp_mos;
+    double temp_mos_1;
+    double temp_mos_2;
+    double temp_mos_3;
     double temp_motor;
     double current_motor;
     double current_in;
@@ -114,10 +157,112 @@ public:
     int tachometer_abs;
     double position;
     mc_fault_code fault_code;
+    int vesc_id;
     QString fault_str;
 };
 
 Q_DECLARE_METATYPE(MC_VALUES)
+
+struct SETUP_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(double temp_mos MEMBER temp_mos)
+    Q_PROPERTY(double temp_motor MEMBER temp_motor)
+    Q_PROPERTY(double current_motor MEMBER current_motor)
+    Q_PROPERTY(double current_in MEMBER current_in)
+    Q_PROPERTY(double duty_now MEMBER duty_now)
+    Q_PROPERTY(double rpm MEMBER rpm)
+    Q_PROPERTY(double speed MEMBER speed)
+    Q_PROPERTY(double v_in MEMBER v_in)
+    Q_PROPERTY(double battery_level MEMBER battery_level)
+    Q_PROPERTY(double amp_hours MEMBER amp_hours)
+    Q_PROPERTY(double amp_hours_charged MEMBER amp_hours_charged)
+    Q_PROPERTY(double watt_hours MEMBER watt_hours)
+    Q_PROPERTY(double watt_hours_charged MEMBER watt_hours_charged)
+    Q_PROPERTY(double tachometer MEMBER tachometer)
+    Q_PROPERTY(double tachometer_abs MEMBER tachometer_abs)
+    Q_PROPERTY(double position MEMBER position)
+    Q_PROPERTY(mc_fault_code fault_code MEMBER fault_code)
+    Q_PROPERTY(int vesc_id MEMBER vesc_id)
+    Q_PROPERTY(int num_vescs MEMBER num_vescs)
+    Q_PROPERTY(double battery_wh MEMBER battery_wh)
+    Q_PROPERTY(QString fault_str MEMBER fault_str)
+
+public:
+    SETUP_VALUES() {
+        temp_mos = 0.0;
+        temp_motor = 0.0;
+        current_motor = 0.0;
+        current_in = 0.0;
+        duty_now = 0.0;
+        rpm = 0.0;
+        speed = 0.0;
+        v_in = 0.0;
+        battery_level = 0.0;
+        amp_hours = 0.0;
+        amp_hours_charged = 0.0;
+        watt_hours = 0.0;
+        watt_hours_charged = 0.0;
+        tachometer = 0.0;
+        tachometer_abs = 0.0;
+        position = 0.0;
+        fault_code = FAULT_CODE_NONE;
+        vesc_id = 0;
+        num_vescs = 0;
+        battery_wh = 0.0;
+    }
+
+    double temp_mos;
+    double temp_motor;
+    double current_motor;
+    double current_in;
+    double duty_now;
+    double rpm;
+    double speed;
+    double v_in;
+    double battery_level;
+    double amp_hours;
+    double amp_hours_charged;
+    double watt_hours;
+    double watt_hours_charged;
+    double tachometer;
+    double tachometer_abs;
+    double position;
+    mc_fault_code fault_code;
+    int vesc_id;
+    int num_vescs;
+    double battery_wh;
+    QString fault_str;
+};
+
+Q_DECLARE_METATYPE(SETUP_VALUES)
+
+struct MCCONF_TEMP {
+    Q_GADGET
+
+    Q_PROPERTY(double current_min_scale MEMBER current_min_scale)
+    Q_PROPERTY(double current_max_scale MEMBER current_max_scale)
+    Q_PROPERTY(double erpm_or_speed_min MEMBER erpm_or_speed_min)
+    Q_PROPERTY(double erpm_or_speed_max MEMBER erpm_or_speed_max)
+    Q_PROPERTY(double duty_min MEMBER duty_min)
+    Q_PROPERTY(double duty_max MEMBER duty_max)
+    Q_PROPERTY(double watt_min MEMBER watt_min)
+    Q_PROPERTY(double watt_max MEMBER watt_max)
+    Q_PROPERTY(QString name MEMBER name)
+
+public:
+    double current_min_scale;
+    double current_max_scale;
+    double erpm_or_speed_min;
+    double erpm_or_speed_max;
+    double duty_min;
+    double duty_max;
+    double watt_min;
+    double watt_max;
+    QString name;
+};
+
+Q_DECLARE_METATYPE(MCCONF_TEMP)
 
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,
@@ -168,7 +313,33 @@ typedef enum {
     COMM_FORWARD_CAN,
     COMM_SET_CHUCK_DATA,
     COMM_CUSTOM_APP_DATA,
-    COMM_NRF_START_PAIRING
+    COMM_NRF_START_PAIRING,
+    COMM_GPD_SET_FSW,
+    COMM_GPD_BUFFER_NOTIFY,
+    COMM_GPD_BUFFER_SIZE_LEFT,
+    COMM_GPD_FILL_BUFFER,
+    COMM_GPD_OUTPUT_SAMPLE,
+    COMM_GPD_SET_MODE,
+    COMM_GPD_FILL_BUFFER_INT8,
+    COMM_GPD_FILL_BUFFER_INT16,
+    COMM_GPD_SET_BUFFER_INT_SCALE,
+    COMM_GET_VALUES_SETUP,
+    COMM_SET_MCCONF_TEMP,
+    COMM_SET_MCCONF_TEMP_SETUP,
+    COMM_GET_VALUES_SELECTIVE,
+    COMM_GET_VALUES_SETUP_SELECTIVE,
+    COMM_EXT_NRF_PRESENT,
+    COMM_EXT_NRF_ESB_SET_CH_ADDR,
+    COMM_EXT_NRF_ESB_SEND_DATA,
+    COMM_EXT_NRF_ESB_RX_DATA,
+    COMM_EXT_NRF_SET_ENABLED,
+    COMM_DETECT_MOTOR_FLUX_LINKAGE_OPENLOOP,
+    COMM_DETECT_APPLY_ALL_FOC,
+    COMM_JUMP_TO_BOOTLOADER_ALL_CAN,
+    COMM_ERASE_NEW_APP_ALL_CAN,
+    COMM_WRITE_NEW_APP_DATA_ALL_CAN,
+    COMM_PING_CAN,
+    COMM_APP_DISABLE_OUTPUT
 } COMM_PACKET_ID;
 
 typedef struct {
@@ -181,12 +352,22 @@ typedef struct {
     bool bt_z;
 } chuck_data;
 
-typedef struct {
+struct bldc_detect {
+    Q_GADGET
+
+    Q_PROPERTY(double cycle_int_limit MEMBER cycle_int_limit)
+    Q_PROPERTY(double bemf_coupling_k MEMBER bemf_coupling_k)
+    Q_PROPERTY(QVector<int> hall_table MEMBER hall_table)
+    Q_PROPERTY(int hall_res MEMBER hall_res)
+
+public:
     double cycle_int_limit;
     double bemf_coupling_k;
     QVector<int> hall_table;
     int hall_res;
-} bldc_detect;
+};
+
+Q_DECLARE_METATYPE(bldc_detect)
 
 typedef enum {
     NRF_PAIR_STARTED = 0,

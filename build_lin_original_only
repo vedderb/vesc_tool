@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 export PATH=/opt/Qt/5.9-static/bin:$PATH
 rm -rf build/lin/*
 

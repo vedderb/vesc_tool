@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>437</height>
+    <width>752</width>
+    <height>536</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,7 +28,13 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="ParamTable" name="motorTab"/>
+        <widget class="QSplitter" name="splitter">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <widget class="ParamTable" name="motorTab"/>
+         <widget class="DirSetup" name="dirSetup" native="true"/>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -109,6 +115,12 @@
    <class>BatteryCalculator</class>
    <extends>QWidget</extends>
    <header>widgets/batterycalculator.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DirSetup</class>
+   <extends>QWidget</extends>
+   <header>widgets/dirsetup.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

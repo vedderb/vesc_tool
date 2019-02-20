@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -35,24 +35,29 @@ public:
 
     void setLimitedMode(bool is_limited);
     Q_INVOKABLE bool isLimitedMode();
-    Q_INVOKABLE void setSendCan(bool sendCan, int id = -1);
+    Q_INVOKABLE bool setSendCan(bool sendCan, int id = -1);
     Q_INVOKABLE bool getSendCan();
     Q_INVOKABLE void setCanSendId(unsigned int id);
     Q_INVOKABLE int getCanSendId();
     void setMcConfig(ConfigParams *mcConfig);
     void setAppConfig(ConfigParams *appConfig);
-    Q_INVOKABLE void startFirmwareUpload(QByteArray &newFirmware, bool isBootloader = false);
-    double getFirmwareUploadProgress();
-    QString getFirmwareUploadStatus();
+    Q_INVOKABLE void startFirmwareUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false);
+    Q_INVOKABLE double getFirmwareUploadProgress();
+    Q_INVOKABLE QString getFirmwareUploadStatus();
     Q_INVOKABLE void cancelFirmwareUpload();
     void checkMcConfig();
+    Q_INVOKABLE void emitEmptyValues();
+    Q_INVOKABLE void emitEmptySetupValues();
+
+    Q_INVOKABLE bool getLimitedSupportsFwdAllCan() const;
+    void setLimitedSupportsFwdAllCan(bool limitedSupportsFwdAllCan);
 
 signals:
     void dataToSend(QByteArray &data);
 
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid);
+    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired);
     void ackReceived(QString ackType);
-    void valuesReceived(MC_VALUES values);
+    void valuesReceived(MC_VALUES values, unsigned int mask);
     void printReceived(QString str);
     void samplesReceived(QByteArray bytes);
     void rotorPosReceived(double pos);
@@ -66,8 +71,13 @@ signals:
     void encoderParamReceived(double offset, double ratio, bool inverted);
     void customAppDataReceived(QByteArray data);
     void focHallTableReceived(QVector<int> hall_table, int res);
-    void nrfPairingRes(NRF_PAIR_RES res);
+    void nrfPairingRes(int res);
     void mcConfigCheckResult(QStringList paramsNotSet);
+    void gpdBufferNotifyReceived();
+    void gpdBufferSizeLeftReceived(int sizeLeft);
+    void valuesSetupReceived(SETUP_VALUES values, unsigned int mask);
+    void detectAllFocReceived(int result);
+    void pingCanRx(QVector<int> devs, bool isTimeout);
 
 public slots:
     void processPacket(QByteArray data);
@@ -104,6 +114,24 @@ public slots:
     void sendCustomAppData(unsigned char *data, unsigned int len);
     void setChukData(chuck_data &data);
     void pairNrf(int ms);
+    void gpdSetFsw(float fsw);
+    void getGpdBufferSizeLeft();
+    void gpdFillBuffer(QVector<float> samples);
+    void gpdOutputSample(float sample);
+    void gpdSetMode(gpd_output_mode mode);
+    void gpdFillBufferInt8(QVector<qint8> samples);
+    void gpdFillBufferInt16(QVector<qint16> samples);
+    void gpdSetBufferIntScale(float scale);
+    void getValuesSetup();
+    void setMcconfTemp(const MCCONF_TEMP &conf, bool is_setup, bool store,
+                       bool forward_can, bool divide_by_controllers, bool ack);
+    void getValuesSelective(unsigned int mask);
+    void getValuesSetupSelective(unsigned int mask);
+    void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty, double resistance);
+    void detectAllFoc(bool detect_can, double max_power_loss, double min_current_in,
+                      double max_current_in, double openloop_rpm, double sl_erpm);
+    void pingCan();
+    void disableAppOutput(int time_ms, bool fwdCan);
 
 private slots:
     void timerSlot();
@@ -117,6 +145,7 @@ private:
     bool mSendCan;
     int mCanId;
     bool mIsLimitedMode;
+    bool mLimitedSupportsFwdAllCan;
 
     // FW upload state
     QByteArray mNewFirmware;
@@ -126,6 +155,7 @@ private:
     int mFirmwareTimer;
     int mFirmwareRetries;
     bool mFirmwareIsBootloader;
+    bool mFirmwareFwdAllCan;
     QString mFirmwareUploadStatus;
 
     ConfigParams *mMcConfig;
@@ -138,9 +168,11 @@ private:
     int mTimeoutMcconf;
     int mTimeoutAppconf;
     int mTimeoutValues;
+    int mTimeoutValuesSetup;
     int mTimeoutDecPpm;
     int mTimeoutDecAdc;
     int mTimeoutDecChuk;
+    int mTimeoutPingCan;
 
 };
 

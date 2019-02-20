@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -25,6 +25,8 @@
 #include <QByteArray>
 #include <QList>
 #include <QTcpSocket>
+#include <QSettings>
+#include <QHash>
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPort>
@@ -34,13 +36,17 @@
 #include "configparams.h"
 #include "commands.h"
 #include "packet.h"
+
+#ifdef HAS_BLUETOOTH
 #include "bleuart.h"
+#endif
 
 class VescInterface : public QObject
 {
     Q_OBJECT
 public:
     explicit VescInterface(QObject *parent = 0);
+    ~VescInterface();
     Q_INVOKABLE Commands *commands() const;
     Q_INVOKABLE ConfigParams *mcConfig();
     Q_INVOKABLE ConfigParams *appConfig();
@@ -51,7 +57,32 @@ public:
     Q_INVOKABLE void emitStatusMessage(const QString &msg, bool isGood);
     Q_INVOKABLE void emitMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText = false);
     Q_INVOKABLE bool fwRx();
+    Q_INVOKABLE void storeSettings();
+    Q_INVOKABLE QVariantList getProfiles();
+    Q_INVOKABLE void addProfile(QVariant profile);
+    Q_INVOKABLE void clearProfiles();
+    Q_INVOKABLE void deleteProfile(int index);
+    Q_INVOKABLE void moveProfileUp(int index);
+    Q_INVOKABLE void moveProfileDown(int index);
+    Q_INVOKABLE MCCONF_TEMP getProfile(int index);
+    Q_INVOKABLE void updateProfile(int index, QVariant profile);
+    Q_INVOKABLE bool isProfileInUse(int index);
+    Q_INVOKABLE MCCONF_TEMP createMcconfTemp();
+    Q_INVOKABLE void updateMcconfFromProfile(MCCONF_TEMP profile);
+    Q_INVOKABLE QStringList getPairedUuids();
+    Q_INVOKABLE bool addPairedUuid(QString uuid);
+    Q_INVOKABLE bool deletePairedUuid(QString uuid);
+    Q_INVOKABLE void clearPairedUuids();
+    Q_INVOKABLE bool hasPairedUuid(QString uuid);
+    Q_INVOKABLE QString getConnectedUuid();
+    Q_INVOKABLE bool isIntroDone();
+    Q_INVOKABLE void setIntroDone(bool done);
+
+#ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
+    Q_INVOKABLE void storeBleName(QString address, QString name);
+    Q_INVOKABLE QString getBleName(QString address);
+#endif
 
     // Connection
     Q_INVOKABLE bool isPortConnected();
@@ -65,6 +96,9 @@ public:
     Q_INVOKABLE void connectBle(QString address);
     Q_INVOKABLE bool isAutoconnectOngoing() const;
     Q_INVOKABLE double getAutoconnectProgress() const;
+    Q_INVOKABLE QVector<int> scanCan();
+    Q_INVOKABLE QVector<int> getCanDevsLast() const;
+    Q_INVOKABLE void ignoreCanChange(bool ignore);
 
 signals:
     void statusMessage(const QString &msg, bool isGood);
@@ -75,6 +109,8 @@ signals:
     void portConnectedChanged();
     void autoConnectProgressUpdated(double progress, bool isOngoing);
     void autoConnectFinished();
+    void profilesUpdated();
+    void pairingListUpdated();
 
 public slots:
 
@@ -89,13 +125,15 @@ private slots:
     void tcpInputDataAvailable();
     void tcpInputError(QAbstractSocket::SocketError socketError);
 
+#ifdef HAS_BLUETOOTH
     void bleDataRx(QByteArray data);
+#endif
 
     void timerSlot();
     void packetDataToSend(QByteArray &data);
     void packetReceived(QByteArray &data);
     void cmdDataToSend(QByteArray &data);
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid);
+    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired);
     void appconfUpdated();
     void mcconfUpdated();
     void ackReceived(QString ackType);
@@ -107,6 +145,11 @@ private:
         CONN_TCP,
         CONN_BLE
     } conn_t;
+
+    QSettings mSettings;
+    QHash<QString, QString> mBleNames;
+    QVariantList mProfiles;
+    QStringList mPairedUuids;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;
@@ -120,6 +163,7 @@ private:
     int mFwPollCnt;
     QString mFwTxt;
     QString mHwTxt;
+    QString mUuidStr;
     bool mIsUploadingFw;
 
     // Connections
@@ -136,7 +180,10 @@ private:
     QString mLastTcpServer;
     int mLastTcpPort;
 
+#ifdef HAS_BLUETOOTH
     BleUart *mBleUart;
+#endif
+
     QString mLastBleAddr;
 
     bool mSendCanBefore = false;
@@ -144,6 +191,9 @@ private:
     bool mWasConnected;
     bool mAutoconnectOngoing;
     double mAutoconnectProgress;
+    bool mIgnoreCanChange;
+
+    QVector<int> mCanDevsLast;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

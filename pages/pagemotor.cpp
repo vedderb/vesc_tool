@@ -44,6 +44,7 @@ void PageMotor::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
+        ui->dirSetup->setVesc(mVesc);
         ui->batteryCalc->setVesc(mVesc);
 
         ui->motorTab->addParamRow(mVesc->mcConfig(), "motor_type");
@@ -56,6 +57,8 @@ void PageMotor::setVesc(VescInterface *vesc)
         ui->currentTab->addParamRow(mVesc->mcConfig(), "l_current_min");
         ui->currentTab->addParamRow(mVesc->mcConfig(), "l_abs_current_max");
         ui->currentTab->addParamRow(mVesc->mcConfig(), "l_slow_abs_current");
+        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_current_max_scale");
+        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_current_min_scale");
         ui->currentTab->addRowSeparator(tr("Battery"));
         ui->currentTab->addParamRow(mVesc->mcConfig(), "l_in_current_max");
         ui->currentTab->addParamRow(mVesc->mcConfig(), "l_in_current_min");
@@ -89,5 +92,6 @@ void PageMotor::setVesc(VescInterface *vesc)
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "cc_min_current");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_fault_stop_time_ms");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_ntc_motor_beta");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_out_aux_mode");
     }
 }

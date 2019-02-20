@@ -572,3 +572,12 @@ void ParameterEditor::on_doubleTxTypeBox_currentIndexChanged(int index)
         ui->doubleTxScaleLabel->setEnabled(true);
     }
 }
+
+void ParameterEditor::on_actionCalculatePacketSize_triggered()
+{
+    VByteArray bytes;
+    mParams.serialize(bytes);
+    QMessageBox::information(this,
+                             tr("Packet Size"),
+                             tr("%1 Bytes").arg(bytes.size()));
+}

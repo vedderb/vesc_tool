@@ -43,6 +43,7 @@ public:
 private slots:
     void motorRLReceived(double r, double l);
     void motorLinkageReceived(double flux_linkage);
+    void paramChangedDouble(QObject *src, QString name, double newParam);
 
     void on_rlButton_clicked();
     void on_lambdaButton_clicked();
@@ -50,6 +51,7 @@ private slots:
     void on_applyAllButton_clicked();
     void on_calcKpKiButton_clicked();
     void on_calcGainButton_clicked();
+    void on_calcApplyLocalButton_clicked();
 
 private:
     Ui::DetectFoc *ui;

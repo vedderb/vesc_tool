@@ -77,11 +77,18 @@ public:
     Q_INVOKABLE QString getConnectedUuid();
     Q_INVOKABLE bool isIntroDone();
     Q_INVOKABLE void setIntroDone(bool done);
+    Q_INVOKABLE QString getLastTcpServer() const;
+    Q_INVOKABLE int getLastTcpPort() const;
+#ifdef HAS_SERIALPORT
+    Q_INVOKABLE QString getLastSerialPort() const;
+    Q_INVOKABLE int getLastSerialBaud() const;
+#endif
 
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
     Q_INVOKABLE void storeBleName(QString address, QString name);
     Q_INVOKABLE QString getBleName(QString address);
+    Q_INVOKABLE QString getLastBleAddr() const;
 #endif
 
     // Connection
@@ -182,9 +189,8 @@ private:
 
 #ifdef HAS_BLUETOOTH
     BleUart *mBleUart;
-#endif
-
     QString mLastBleAddr;
+#endif
 
     bool mSendCanBefore = false;
     int mCanIdBefore = 0;
@@ -196,6 +202,7 @@ private:
     QVector<int> mCanDevsLast;
 
     void updateFwRx(bool fwRx);
+    void setLastConnectionType(conn_t type);
 
 };
 

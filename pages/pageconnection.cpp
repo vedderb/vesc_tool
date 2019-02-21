@@ -31,6 +31,7 @@ PageConnection::PageConnection(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
+
     mVesc = 0;
     mTimer = new QTimer(this);
 
@@ -54,9 +55,32 @@ void PageConnection::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
 
+    ui->tcpServerEdit->setText(mVesc->getLastTcpServer());
+    ui->tcpPortBox->setValue(mVesc->getLastTcpPort());
+
 #ifdef HAS_BLUETOOTH
     connect(mVesc->bleDevice(), SIGNAL(scanDone(QVariantMap,bool)),
             this, SLOT(bleScanDone(QVariantMap,bool)));
+
+    QString lastBleAddr = mVesc->getLastBleAddr();
+    if (lastBleAddr != "") {
+        QString setName = mVesc->getBleName(lastBleAddr);
+
+        QString name;
+        if (!setName.isEmpty()) {
+            name += setName;
+            name += " [";
+            name += lastBleAddr;
+            name += "]";
+        } else {
+            name = lastBleAddr;
+        }
+        ui->bleDevBox->insertItem(0, name, lastBleAddr);
+    }
+#endif
+
+#ifdef HAS_SERIALPORT
+    ui->serialBaudBox->setValue(mVesc->getLastSerialBaud());
 #endif
 
     connect(mVesc->commands(), SIGNAL(pingCanRx(QVector<int>,bool)),
@@ -203,7 +227,9 @@ void PageConnection::on_tcpDisconnectButton_clicked()
 void PageConnection::on_tcpConnectButton_clicked()
 {
     if (mVesc) {
-        mVesc->connectTcp(ui->tcpServerEdit->text(), ui->tcpPortBox->value());
+        QString tcpServer = ui->tcpServerEdit->text();
+        int tcpPort = ui->tcpPortBox->value();
+        mVesc->connectTcp(tcpServer, tcpPort);
     }
 }
 

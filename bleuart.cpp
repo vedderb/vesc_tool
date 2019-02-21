@@ -266,6 +266,7 @@ void BleUart::confirmedDescriptorWrite(const QLowEnergyDescriptor &d, const QByt
         disconnectBle();
     } else {
         mConnectDone = true;
+        emit connected();
     }
 }
 

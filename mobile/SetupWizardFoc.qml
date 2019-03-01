@@ -652,7 +652,10 @@ Item {
             mCommands.setMcconf(false)
             Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)
             var canDevs = VescIf.scanCan();
-            Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0);
+            if (!Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0)) {
+                enableDialog()
+                return
+            }
 
             var res  = Utility.detectAllFoc(VescIf, true,
                                             maxPowerLossBox.realValue,

@@ -476,8 +476,12 @@ Item {
                                                  canIdList.currentItem.modelData.canId)
 
                             disableDialog()
-                            Utility.resetInputCan(VescIf, VescIf.getCanDevsLast())
+                            var res = Utility.resetInputCan(VescIf, VescIf.getCanDevsLast())
                             enableDialog()
+
+                            if (!res) {
+                                closeWizard(false)
+                            }
                         } else if (stackLayout.currentIndex == 2) {
                             // Map page
                             adcMap.visible = false

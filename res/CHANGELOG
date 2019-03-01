@@ -1,3 +1,6 @@
+== 1.03 ==
+* FW compatibility check on all devices on CAN-bus when performing simultaneous configurations.
+
 == 1.02 ==
 * FW 3.50 support
 * Signature in app and motor configuration.

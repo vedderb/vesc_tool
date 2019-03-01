@@ -332,6 +332,14 @@ QString Utility::detectAllFoc(VescInterface *vesc,
 
             for (int id: canDevs) {
                 vesc->commands()->setSendCan(true, id);
+
+                if (!checkFwCompatibility(vesc)) {
+                    vesc->emitMessageDialog("FW Versions",
+                                            "All VESCs must have the latest firmware to perform this operation.",
+                                            false, false);
+                    break;
+                }
+
                 vesc->commands()->getMcconf();
                 waitSignal(p, SIGNAL(updated()), 1500);
                 vesc->commands()->getAppConf();
@@ -389,8 +397,17 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
     ConfigParams *ap = vesc->appConfig();
     vesc->commands()->setSendCan(false);
 
-    vesc->commands()->getAppConf();
-    res = waitSignal(ap, SIGNAL(updated()), 1500);
+    if (!checkFwCompatibility(vesc)) {
+        vesc->emitMessageDialog("FW Versions",
+                                "All VESCs must have the latest firmware to perform this operation.",
+                                false, false);
+        res = false;
+    }
+
+    if (res) {
+        vesc->commands()->getAppConf();
+        res = waitSignal(ap, SIGNAL(updated()), 1500);
+    }
 
     if (res) {
         int canId = ap->getParamInt("controller_id");
@@ -410,6 +427,17 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
     if (res) {
         for (int id: canIds) {
             vesc->commands()->setSendCan(true, id);
+
+            if (!checkFwCompatibility(vesc)) {
+                vesc->emitMessageDialog("FW Versions",
+                                        "All VESCs must have the latest firmware to perform this operation.",
+                                        false, false);
+                res = false;
+            }
+
+            if (!res) {
+                break;
+            }
 
             vesc->commands()->getAppConf();
             res = waitSignal(ap, SIGNAL(updated()), 1500);
@@ -463,8 +491,17 @@ bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
     ConfigParams *p = vesc->mcConfig();
     vesc->commands()->setSendCan(false);
 
-    vesc->commands()->getMcconf();
-    res = waitSignal(p, SIGNAL(updated()), 1500);
+    if (!checkFwCompatibility(vesc)) {
+        vesc->emitMessageDialog("FW Versions",
+                                "All VESCs must have the latest firmware to perform this operation.",
+                                false, false);
+        res = false;
+    }
+
+    if (res) {
+        vesc->commands()->getMcconf();
+        res = waitSignal(p, SIGNAL(updated()), 1500);
+    }
 
     if (res) {
         p->updateParamDouble("l_battery_cut_start", cutStart);
@@ -477,6 +514,17 @@ bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
     if (res) {
         for (int id: canIds) {
             vesc->commands()->setSendCan(true, id);
+
+            if (!checkFwCompatibility(vesc)) {
+                vesc->emitMessageDialog("FW Versions",
+                                        "All VESCs must have the latest firmware to perform this operation.",
+                                        false, false);
+                res = false;
+            }
+
+            if (!res) {
+                break;
+            }
 
             vesc->commands()->getMcconf();
             res = waitSignal(p, SIGNAL(updated()), 1500);
@@ -542,9 +590,19 @@ bool Utility::setInvertDirection(VescInterface *vesc, int canId, bool inverted)
     vesc->ignoreCanChange(true);
     vesc->commands()->setSendCan(canId >= 0, canId);
 
+    if (!checkFwCompatibility(vesc)) {
+        vesc->emitMessageDialog("FW Versions",
+                                "All VESCs must have the latest firmware to perform this operation.",
+                                false, false);
+        res = false;
+    }
+
     ConfigParams *p = vesc->mcConfig();
-    vesc->commands()->getMcconf();
-    res = waitSignal(p, SIGNAL(updated()), 1500);
+
+    if (res) {
+        vesc->commands()->getMcconf();
+        res = waitSignal(p, SIGNAL(updated()), 1500);
+    }
 
     if (res) {
         p->updateParamBool("m_invert_direction", inverted);
@@ -573,6 +631,15 @@ bool Utility::getInvertDirection(VescInterface *vesc, int canId)
     vesc->ignoreCanChange(true);
     vesc->commands()->setSendCan(canId >= 0, canId);
 
+    if (!checkFwCompatibility(vesc)) {
+        vesc->emitMessageDialog("FW Versions",
+                                "All VESCs must have the latest firmware to perform this operation.",
+                                false, false);
+        vesc->commands()->setSendCan(canLastFwd, canLastId);
+        vesc->ignoreCanChange(false);
+        return false;
+    }
+
     ConfigParams *p = vesc->mcConfig();
     vesc->commands()->getMcconf();
     waitSignal(p, SIGNAL(updated()), 1500);
@@ -596,6 +663,15 @@ QString Utility::testDirection(VescInterface *vesc, int canId, double duty, int 
 
     vesc->ignoreCanChange(true);
     vesc->commands()->setSendCan(canId >= 0, canId);
+
+    if (!checkFwCompatibility(vesc)) {
+        vesc->emitMessageDialog("FW Versions",
+                                "All VESCs must have the latest firmware to perform this operation.",
+                                false, false);
+        vesc->commands()->setSendCan(canLastFwd, canLastId);
+        vesc->ignoreCanChange(false);
+        return "FW not up to date";
+    }
 
     QEventLoop loop;
     QTimer timeoutTimer;
@@ -661,6 +737,14 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
     if (can) {
         vesc->ignoreCanChange(true);
         vesc->commands()->setSendCan(false);
+        if (!checkFwCompatibility(vesc)) {
+            vesc->emitMessageDialog("FW Versions",
+                                    "All VESCs must have the latest firmware to perform this operation.",
+                                    false, false);
+            vesc->commands()->setSendCan(canLastFwd, canLastId);
+            vesc->ignoreCanChange(false);
+            return false;
+        }
     }
 
     if (mc) {
@@ -690,6 +774,15 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
 
         for (int d: canDevs) {
             vesc->commands()->setSendCan(true, d);
+
+            if (!checkFwCompatibility(vesc)) {
+                vesc->emitMessageDialog("FW Versions",
+                                        "All VESCs must have the latest firmware to perform this operation.",
+                                        false, false);
+                vesc->commands()->setSendCan(canLastFwd, canLastId);
+                vesc->ignoreCanChange(false);
+                return false;
+            }
 
             if (mc) {
                 ConfigParams *p = vesc->mcConfig();
@@ -1087,4 +1180,30 @@ uint32_t Utility::crc32c(uint8_t *data, uint32_t len)
     }
 
     return ~crc;
+}
+
+bool Utility::checkFwCompatibility(VescInterface *vesc)
+{
+    bool res = false;
+
+    auto conn = connect(vesc->commands(), &Commands::fwVersionReceived,
+            [&res, vesc](int major, int minor, QString hw, QByteArray uuid, bool isPaired) {
+        (void)hw;(void)uuid;(void)isPaired;
+        if (vesc->getSupportedFirmwarePairs().contains(qMakePair(major, minor))) {
+            res = true;
+        }
+    });
+
+    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+               vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+
+    vesc->commands()->getFwVersion();
+    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)), 100);
+
+    disconnect(conn);
+
+    connect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+            vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+
+    return res;
 }

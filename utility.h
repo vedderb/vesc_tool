@@ -56,6 +56,7 @@ public:
     Q_INVOKABLE static bool almostEqual(double A, double B, double eps);
     static bool createParamParserC(VescInterface *vesc, QString filename);
     static uint32_t crc32c(uint8_t *data, uint32_t len);
+    static bool checkFwCompatibility(VescInterface *vesc);
 
     template<typename QEnum>
     static QString QEnumToQString (const QEnum value) {

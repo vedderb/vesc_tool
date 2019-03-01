@@ -101,7 +101,7 @@ AppIntroPage::AppIntroPage(VescInterface *vesc, QWidget *parent)
 int AppIntroPage::nextId() const
 {
     if (mVesc->isPortConnected()) {
-        if (mVesc->commands()->isLimitedMode()) {
+        if (mVesc->commands()->isLimitedMode() || !mResetInputOk) {
             return SetupWizardApp::Page_Firmware;
         } else {
             if (mVesc->getCanDevsLast().size() == 0) {
@@ -145,7 +145,7 @@ bool AppIntroPage::validatePage()
 
         setEnabled(false);
         auto devs = mVesc->scanCan();
-        Utility::resetInputCan(mVesc, devs);
+        mResetInputOk = Utility::resetInputCan(mVesc, devs);
         setEnabled(true);
     }
 
@@ -196,7 +196,8 @@ AppFirmwarePage::AppFirmwarePage(VescInterface *vesc, QWidget *parent)
     setSubTitle(tr("You need to update the firmware on the VESC in order "
                    "to use it with this version of VESC Tool."));
 
-    mLabel = new QLabel(tr("Your VESC has old firmware, and needs to be updated. After that, "
+    mLabel = new QLabel(tr("Your VESC (or one of the VESCs on the CAN-bus) has old firmware, "
+                           "and needs to be updated. After that, "
                            "the motor configuration has to be done again."));
 
     mLabel->setWordWrap(true);

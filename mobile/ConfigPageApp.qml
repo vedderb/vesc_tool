@@ -233,9 +233,9 @@ Item {
             createEditorApp("app_nrf_conf.retry_delay")
             createEditorApp("app_nrf_conf.retries")
             addSeparator("Address")
-            createEditorApp("app_nrf_conf.address_0")
-            createEditorApp("app_nrf_conf.address_1")
-            createEditorApp("app_nrf_conf.address_2")
+            createEditorApp("app_nrf_conf.address__0")
+            createEditorApp("app_nrf_conf.address__1")
+            createEditorApp("app_nrf_conf.address__2")
             break;
 
         default:

@@ -146,7 +146,7 @@ Item {
                         }
 
                         for(var i = 0;i < 7;i++) {
-                            mMcConf.updateParamInt("foc_hall_table_" + i, table[i])
+                            mMcConf.updateParamInt("foc_hall_table__" + i, table[i])
                         }
 
                         VescIf.emitStatusMessage("Hall Sensor Parameters Applied", true)

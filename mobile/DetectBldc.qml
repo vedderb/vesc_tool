@@ -201,7 +201,7 @@ Item {
 
                         if (hallRes == 0) {
                             for(var i = 0;i < 7;i++) {
-                                mMcConf.updateParamInt("hall_table_" + i, hallTable[i])
+                                mMcConf.updateParamInt("hall_table__" + i, hallTable[i])
                             }
                         }
 

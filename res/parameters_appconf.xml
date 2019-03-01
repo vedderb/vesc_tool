@@ -1414,7 +1414,7 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>2</vTx>
         </app_nrf_conf.channel>
-        <app_nrf_conf.address_0>
+        <app_nrf_conf.address__0>
             <longName>Address 0</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1433,8 +1433,8 @@ p, li { white-space: pre-wrap; }
             <valInt>198</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </app_nrf_conf.address_0>
-        <app_nrf_conf.address_1>
+        </app_nrf_conf.address__0>
+        <app_nrf_conf.address__1>
             <longName>Address 1</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1453,8 +1453,8 @@ p, li { white-space: pre-wrap; }
             <valInt>199</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </app_nrf_conf.address_1>
-        <app_nrf_conf.address_2>
+        </app_nrf_conf.address__1>
+        <app_nrf_conf.address__2>
             <longName>Address 2</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1473,7 +1473,7 @@ p, li { white-space: pre-wrap; }
             <valInt>0</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </app_nrf_conf.address_2>
+        </app_nrf_conf.address__2>
         <app_nrf_conf.send_crc_ack>
             <longName>Send ACK</longName>
             <type>5</type>
@@ -1554,9 +1554,9 @@ p, li { white-space: pre-wrap; }
         <ser>app_nrf_conf.retry_delay</ser>
         <ser>app_nrf_conf.retries</ser>
         <ser>app_nrf_conf.channel</ser>
-        <ser>app_nrf_conf.address_0</ser>
-        <ser>app_nrf_conf.address_1</ser>
-        <ser>app_nrf_conf.address_2</ser>
+        <ser>app_nrf_conf.address__0</ser>
+        <ser>app_nrf_conf.address__1</ser>
+        <ser>app_nrf_conf.address__2</ser>
         <ser>app_nrf_conf.send_crc_ack</ser>
     </SerOrder>
 </ConfigParams>

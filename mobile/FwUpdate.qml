@@ -603,6 +603,13 @@ Item {
         onTriggered: {
             uploadAllButton.enabled = mCommands.getLimitedSupportsFwdAllCan() &&
                     !mCommands.getSendCan() && mCommands.getFirmwareUploadProgress() < 0
+
+            if (!VescIf.isPortConnected()) {
+                versionText.text =
+                        "FW   : \n" +
+                        "HW   : \n" +
+                        "UUID : "
+            }
         }
     }
 

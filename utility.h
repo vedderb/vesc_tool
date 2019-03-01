@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QMetaEnum>
+#include <cstdint>
 #include "vescinterface.h"
 
 class Utility : public QObject
@@ -53,6 +54,8 @@ public:
     Q_INVOKABLE static QString testDirection(VescInterface *vesc, int canId, double duty, int ms);
     Q_INVOKABLE static bool restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app);
     Q_INVOKABLE static bool almostEqual(double A, double B, double eps);
+    static bool createParamParserC(VescInterface *vesc, QString filename);
+    static uint32_t crc32c(uint8_t *data, uint32_t len);
 
     template<typename QEnum>
     static QString QEnumToQString (const QEnum value) {

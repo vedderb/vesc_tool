@@ -124,6 +124,7 @@ private slots:
     void on_actionLicense_triggered();
     void on_posBox_editingFinished();
     void on_posBox_valueChanged(double arg1);
+    void on_actionExportConfigurationParser_triggered();
 
 private:
     Ui::MainWindow *ui;

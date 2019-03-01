@@ -755,9 +755,8 @@ bool VescInterface::connectSerial(QString port, int baudrate)
     }
 
     if(!mSerialPort->isOpen()) {
-
         // TODO: Maybe this test works on other OSes as well
-    #ifdef Q_OS_UNIX
+#ifdef Q_OS_UNIX
         QFileInfo fi(port);
         if (fi.exists()) {
             if (!fi.isWritable()) {
@@ -766,7 +765,7 @@ bool VescInterface::connectSerial(QString port, int baudrate)
                 return false;
             }
         }
-    #endif
+#endif
 
         mSerialPort->setPortName(port);
         mSerialPort->open(QIODevice::ReadWrite);

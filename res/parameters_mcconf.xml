@@ -795,7 +795,7 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </sl_bemf_coupling_k>
-        <hall_table_0>
+        <hall_table__0>
             <longName>Hall Table [0]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -814,8 +814,8 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>2</vTx>
-        </hall_table_0>
-        <hall_table_1>
+        </hall_table__0>
+        <hall_table__1>
             <longName>Hall Table [1]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -834,8 +834,8 @@ p, li { white-space: pre-wrap; }
             <valInt>1</valInt>
             <suffix></suffix>
             <vTx>2</vTx>
-        </hall_table_1>
-        <hall_table_2>
+        </hall_table__1>
+        <hall_table__2>
             <longName>Hall Table [2]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -854,8 +854,8 @@ p, li { white-space: pre-wrap; }
             <valInt>3</valInt>
             <suffix></suffix>
             <vTx>2</vTx>
-        </hall_table_2>
-        <hall_table_3>
+        </hall_table__2>
+        <hall_table__3>
             <longName>Hall Table [3]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -874,8 +874,8 @@ p, li { white-space: pre-wrap; }
             <valInt>2</valInt>
             <suffix></suffix>
             <vTx>2</vTx>
-        </hall_table_3>
-        <hall_table_4>
+        </hall_table__3>
+        <hall_table__4>
             <longName>Hall Table [4]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -894,8 +894,8 @@ p, li { white-space: pre-wrap; }
             <valInt>5</valInt>
             <suffix></suffix>
             <vTx>2</vTx>
-        </hall_table_4>
-        <hall_table_5>
+        </hall_table__4>
+        <hall_table__5>
             <longName>Hall Table [5]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -914,8 +914,8 @@ p, li { white-space: pre-wrap; }
             <valInt>6</valInt>
             <suffix></suffix>
             <vTx>2</vTx>
-        </hall_table_5>
-        <hall_table_6>
+        </hall_table__5>
+        <hall_table__6>
             <longName>Hall Table [6]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -934,8 +934,8 @@ p, li { white-space: pre-wrap; }
             <valInt>4</valInt>
             <suffix></suffix>
             <vTx>2</vTx>
-        </hall_table_6>
-        <hall_table_7>
+        </hall_table__6>
+        <hall_table__7>
             <longName>Hall Table [7]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -954,7 +954,7 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>2</vTx>
-        </hall_table_7>
+        </hall_table__7>
         <hall_sl_erpm>
             <longName>Sensorless ERPM Hybrid</longName>
             <type>1</type>
@@ -1455,7 +1455,7 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </foc_sl_d_current_factor>
-        <foc_hall_table_0>
+        <foc_hall_table__0>
             <longName>Hall Table [0]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1474,8 +1474,8 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </foc_hall_table_0>
-        <foc_hall_table_1>
+        </foc_hall_table__0>
+        <foc_hall_table__1>
             <longName>Hall Table [1]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1494,8 +1494,8 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </foc_hall_table_1>
-        <foc_hall_table_2>
+        </foc_hall_table__1>
+        <foc_hall_table__2>
             <longName>Hall Table [2]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1514,8 +1514,8 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </foc_hall_table_2>
-        <foc_hall_table_3>
+        </foc_hall_table__2>
+        <foc_hall_table__3>
             <longName>Hall Table [3]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1534,8 +1534,8 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </foc_hall_table_3>
-        <foc_hall_table_4>
+        </foc_hall_table__3>
+        <foc_hall_table__4>
             <longName>Hall Table [4]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1554,8 +1554,8 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </foc_hall_table_4>
-        <foc_hall_table_5>
+        </foc_hall_table__4>
+        <foc_hall_table__5>
             <longName>Hall Table [5]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1574,8 +1574,8 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </foc_hall_table_5>
-        <foc_hall_table_6>
+        </foc_hall_table__5>
+        <foc_hall_table__6>
             <longName>Hall Table [6]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1594,8 +1594,8 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </foc_hall_table_6>
-        <foc_hall_table_7>
+        </foc_hall_table__6>
+        <foc_hall_table__7>
             <longName>Hall Table [7]</longName>
             <type>2</type>
             <transmittable>1</transmittable>
@@ -1614,7 +1614,7 @@ p, li { white-space: pre-wrap; }
             <valInt>-1</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
-        </foc_hall_table_7>
+        </foc_hall_table__7>
         <foc_sl_erpm>
             <longName>Sensorless ERPM</longName>
             <type>1</type>
@@ -2815,14 +2815,14 @@ p, li { white-space: pre-wrap; }
         <ser>sl_phase_advance_at_br</ser>
         <ser>sl_cycle_int_rpm_br</ser>
         <ser>sl_bemf_coupling_k</ser>
-        <ser>hall_table_0</ser>
-        <ser>hall_table_1</ser>
-        <ser>hall_table_2</ser>
-        <ser>hall_table_3</ser>
-        <ser>hall_table_4</ser>
-        <ser>hall_table_5</ser>
-        <ser>hall_table_6</ser>
-        <ser>hall_table_7</ser>
+        <ser>hall_table__0</ser>
+        <ser>hall_table__1</ser>
+        <ser>hall_table__2</ser>
+        <ser>hall_table__3</ser>
+        <ser>hall_table__4</ser>
+        <ser>hall_table__5</ser>
+        <ser>hall_table__6</ser>
+        <ser>hall_table__7</ser>
         <ser>hall_sl_erpm</ser>
         <ser>foc_current_kp</ser>
         <ser>foc_current_ki</ser>
@@ -2846,14 +2846,14 @@ p, li { white-space: pre-wrap; }
         <ser>foc_sl_openloop_time</ser>
         <ser>foc_sl_d_current_duty</ser>
         <ser>foc_sl_d_current_factor</ser>
-        <ser>foc_hall_table_0</ser>
-        <ser>foc_hall_table_1</ser>
-        <ser>foc_hall_table_2</ser>
-        <ser>foc_hall_table_3</ser>
-        <ser>foc_hall_table_4</ser>
-        <ser>foc_hall_table_5</ser>
-        <ser>foc_hall_table_6</ser>
-        <ser>foc_hall_table_7</ser>
+        <ser>foc_hall_table__0</ser>
+        <ser>foc_hall_table__1</ser>
+        <ser>foc_hall_table__2</ser>
+        <ser>foc_hall_table__3</ser>
+        <ser>foc_hall_table__4</ser>
+        <ser>foc_hall_table__5</ser>
+        <ser>foc_hall_table__6</ser>
+        <ser>foc_hall_table__7</ser>
         <ser>foc_sl_erpm</ser>
         <ser>foc_sample_v0_v7</ser>
         <ser>foc_sample_high_current</ser>

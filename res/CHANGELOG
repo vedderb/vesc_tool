@@ -1,3 +1,6 @@
+== 1.04 ==
+* Fixed crash when turning off BLE module while connected.
+
 == 1.03 ==
 * FW compatibility check on all devices on CAN-bus when performing simultaneous configurations.
 

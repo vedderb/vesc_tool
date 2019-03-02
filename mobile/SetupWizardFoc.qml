@@ -582,7 +582,7 @@ Item {
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
-            text: "Would you like to restors this VESC, and all VESCs on the CAN-bus (if any), " +
+            text: "Would you like to restore this VESC, and all VESCs on the CAN-bus (if any), " +
                   "to their default settings before proceeding?"
         }
 

@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.03
+VT_VERSION = 1.04
 VT_INTRO_VERSION = 1
 
 # Ubuntu 18.04

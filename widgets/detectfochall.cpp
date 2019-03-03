@@ -62,14 +62,14 @@ void DetectFocHall::on_startButton_clicked()
 void DetectFocHall::on_applyButton_clicked()
 {
     if (mVesc) {
-        mVesc->mcConfig()->updateParamInt("foc_hall_table_0", ui->hall0Box->value());
-        mVesc->mcConfig()->updateParamInt("foc_hall_table_1", ui->hall1Box->value());
-        mVesc->mcConfig()->updateParamInt("foc_hall_table_2", ui->hall2Box->value());
-        mVesc->mcConfig()->updateParamInt("foc_hall_table_3", ui->hall3Box->value());
-        mVesc->mcConfig()->updateParamInt("foc_hall_table_4", ui->hall4Box->value());
-        mVesc->mcConfig()->updateParamInt("foc_hall_table_5", ui->hall5Box->value());
-        mVesc->mcConfig()->updateParamInt("foc_hall_table_6", ui->hall6Box->value());
-        mVesc->mcConfig()->updateParamInt("foc_hall_table_7", ui->hall7Box->value());
+        mVesc->mcConfig()->updateParamInt("foc_hall_table__0", ui->hall0Box->value());
+        mVesc->mcConfig()->updateParamInt("foc_hall_table__1", ui->hall1Box->value());
+        mVesc->mcConfig()->updateParamInt("foc_hall_table__2", ui->hall2Box->value());
+        mVesc->mcConfig()->updateParamInt("foc_hall_table__3", ui->hall3Box->value());
+        mVesc->mcConfig()->updateParamInt("foc_hall_table__4", ui->hall4Box->value());
+        mVesc->mcConfig()->updateParamInt("foc_hall_table__5", ui->hall5Box->value());
+        mVesc->mcConfig()->updateParamInt("foc_hall_table__6", ui->hall6Box->value());
+        mVesc->mcConfig()->updateParamInt("foc_hall_table__7", ui->hall7Box->value());
         mVesc->emitStatusMessage(tr("Hall Sensor Parameters Applied"), true);
     }
 }

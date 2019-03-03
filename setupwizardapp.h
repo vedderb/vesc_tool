@@ -87,6 +87,7 @@ public:
 private:
     VescInterface *mVesc;
     QLabel *mLabel;
+    bool mResetInputOk;
 
 };
 

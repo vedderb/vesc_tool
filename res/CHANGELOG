@@ -1,3 +1,20 @@
+== 1.04 ==
+* Fixed crash when turning off BLE module while connected.
+
+== 1.03 ==
+* FW compatibility check on all devices on CAN-bus when performing simultaneous configurations.
+
+== 1.02 ==
+* FW 3.50 support
+* Signature in app and motor configuration.
+* Generate parameter parser for firmware.
+* Signature checks on configurations.
+
+== 1.01 ==
+* Save last connected port.
+* Show UUID after pairing, and ask user to write it down.
+* Clear version text on FW page when disconnected.
+
 == 1.00 ==
 * First build for VESC Tool on google play.
 * Added direction setup to desktop version.

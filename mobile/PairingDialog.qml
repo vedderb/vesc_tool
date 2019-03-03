@@ -24,6 +24,7 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     function openDialog() {
@@ -270,6 +271,13 @@ Item {
             VescIf.storeSettings()
             mAppConf.updateParamBool("pairing_done", true, 0)
             mCommands.setAppConf()
+            if (Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)) {
+                VescIf.emitMessageDialog("Pairing Successful!",
+                                         "Pairing is done! Please note the UUID if this VESC (or take a screenshot) in order " +
+                                         "to add it to VESC Tool instances that are not paired in the future. The UUID is:\n" +
+                                         VescIf.getConnectedUuid(),
+                                         true, false)
+            }
         }
     }
 

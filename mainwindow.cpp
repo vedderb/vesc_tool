@@ -1251,3 +1251,18 @@ void MainWindow::on_posBox_valueChanged(double arg1)
     (void)arg1;
 //    on_posButton_clicked();
 }
+
+void MainWindow::on_actionExportConfigurationParser_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the parser C source and header file"),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    Utility::createParamParserC(mVesc, path);
+}

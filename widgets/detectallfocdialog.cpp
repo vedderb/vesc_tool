@@ -182,7 +182,16 @@ void DetectAllFocDialog::on_runButton_clicked()
     mVesc->commands()->setMcconf(false);
     Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
     auto canDevs = mVesc->scanCan();
-    Utility::setBatteryCutCan(mVesc, canDevs, 6.0, 6.0);
+
+    if (!Utility::setBatteryCutCan(mVesc, canDevs, 6.0, 6.0)) {
+        ui->tabWidget->setEnabled(true);
+        ui->runButton->setEnabled(true);
+        ui->closeButton->setEnabled(true);
+        mRejectOk = true;
+        ui->progressBar->setRange(0, 100);
+        ui->progressBar->setValue(0);
+        return;
+    }
 
     QString res = Utility::detectAllFoc(mVesc, true,
                                         ui->maxPowerLossBox->value(),

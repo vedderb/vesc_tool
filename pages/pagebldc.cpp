@@ -58,7 +58,7 @@ void PageBldc::setVesc(VescInterface *vesc)
         ui->sensorTab->addParamRow(mVesc->mcConfig(), "hall_sl_erpm");
         for (int i = 0;i < 8;i++) {
             QString str;
-            str.sprintf("hall_table_%d", i);
+            str.sprintf("hall_table__%d", i);
             ui->sensorTab->addParamRow(mVesc->mcConfig(), str);
         }
 

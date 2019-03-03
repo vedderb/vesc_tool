@@ -691,14 +691,14 @@ FocHallPage::FocHallPage(VescInterface *vesc, QWidget *parent)
     mDetect->setVesc(vesc);
 
     mParamTab->addParamRow(mVesc->mcConfig(), "foc_sl_erpm");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_0");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_1");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_2");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_3");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_4");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_5");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_6");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_7");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__0");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__1");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__2");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__3");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__4");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__5");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__6");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__7");
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mParamTab);

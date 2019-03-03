@@ -28,6 +28,7 @@
 #include <QFileInfo>
 #include <QBuffer>
 #include <cmath>
+#include "utility.h"
 
 ConfigParams::ConfigParams(QObject *parent) : QObject(parent)
 {
@@ -864,6 +865,8 @@ void ConfigParams::clearSerializeOrder()
 
 void ConfigParams::serialize(VByteArray &vb)
 {
+    vb.vbAppendUint32(getSignature());
+
     for (int i = 0;i < mSerializeOrder.size();i++) {
         getParamSerial(vb, mSerializeOrder.at(i));
     }
@@ -871,6 +874,13 @@ void ConfigParams::serialize(VByteArray &vb)
 
 void ConfigParams::deSerialize(VByteArray &vb)
 {
+    auto signature = vb.vbPopFrontUint32();
+
+    if (signature != getSignature()) {
+        qWarning() << "Invalid signature";
+        return;
+    }
+
     for (int i = 0;i < mSerializeOrder.size();i++) {
         setParamSerial(vb, mSerializeOrder.at(i));
     }
@@ -1384,6 +1394,23 @@ QStringList ConfigParams::checkDifference(ConfigParams *config)
     }
 
     return res;
+}
+
+quint32 ConfigParams::getSignature()
+{
+    QString sigStr;
+    for (QString s: mSerializeOrder) {
+        sigStr.append(s);
+        ConfigParam *p = getParam(s);
+
+        if (p) {
+            sigStr.append(QString("%1").arg((int)p->type));
+            sigStr.append(QString("%1").arg((int)p->vTx));
+        }
+    }
+
+    QByteArray bytes = sigStr.toUtf8();
+    return Utility::crc32c((uint8_t*)bytes.data(), bytes.size());
 }
 
 ConfigParams &ConfigParams::operator=(const ConfigParams &other)

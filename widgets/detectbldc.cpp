@@ -67,14 +67,14 @@ void DetectBldc::on_applyButton_clicked()
             mVesc->mcConfig()->updateParamDouble("sl_cycle_int_limit", mResult.cycle_int_limit);
 
             if (mResult.hall_res == 0) {
-                mVesc->mcConfig()->updateParamInt("hall_table_0", mResult.hall_table.at(0));
-                mVesc->mcConfig()->updateParamInt("hall_table_1", mResult.hall_table.at(1));
-                mVesc->mcConfig()->updateParamInt("hall_table_2", mResult.hall_table.at(2));
-                mVesc->mcConfig()->updateParamInt("hall_table_3", mResult.hall_table.at(3));
-                mVesc->mcConfig()->updateParamInt("hall_table_4", mResult.hall_table.at(4));
-                mVesc->mcConfig()->updateParamInt("hall_table_5", mResult.hall_table.at(5));
-                mVesc->mcConfig()->updateParamInt("hall_table_6", mResult.hall_table.at(6));
-                mVesc->mcConfig()->updateParamInt("hall_table_7", mResult.hall_table.at(7));
+                mVesc->mcConfig()->updateParamInt("hall_table__0", mResult.hall_table.at(0));
+                mVesc->mcConfig()->updateParamInt("hall_table__1", mResult.hall_table.at(1));
+                mVesc->mcConfig()->updateParamInt("hall_table__2", mResult.hall_table.at(2));
+                mVesc->mcConfig()->updateParamInt("hall_table__3", mResult.hall_table.at(3));
+                mVesc->mcConfig()->updateParamInt("hall_table__4", mResult.hall_table.at(4));
+                mVesc->mcConfig()->updateParamInt("hall_table__5", mResult.hall_table.at(5));
+                mVesc->mcConfig()->updateParamInt("hall_table__6", mResult.hall_table.at(6));
+                mVesc->mcConfig()->updateParamInt("hall_table__7", mResult.hall_table.at(7));
             }
 
             mVesc->emitStatusMessage(tr("Detection Result Applied"), true);

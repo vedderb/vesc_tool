@@ -91,13 +91,13 @@ void BleUart::startConnect(QString addr)
 void BleUart::disconnectBle()
 {
     if (mService) {
-        delete mService;
+        mService->deleteLater();
         mService = 0;
     }
 
     if (mControl) {
         mControl->disconnectFromDevice();
-        delete mControl;
+        mControl->deleteLater();
         mControl = 0;
     }
 }
@@ -171,7 +171,7 @@ void BleUart::serviceDiscovered(const QBluetoothUuid &gatt)
 void BleUart::serviceScanDone()
 {
     if (mService) {
-        delete mService;
+        mService->deleteLater();
         mService = 0;
     }
 

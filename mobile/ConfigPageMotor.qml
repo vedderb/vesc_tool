@@ -176,14 +176,14 @@ Item {
                 break;
             case "Sensors":
                 createEditorMc("hall_sl_erpm")
-                createEditorMc("hall_table_0")
-                createEditorMc("hall_table_1")
-                createEditorMc("hall_table_2")
-                createEditorMc("hall_table_3")
-                createEditorMc("hall_table_4")
-                createEditorMc("hall_table_5")
-                createEditorMc("hall_table_6")
-                createEditorMc("hall_table_7")
+                createEditorMc("hall_table__0")
+                createEditorMc("hall_table__1")
+                createEditorMc("hall_table__2")
+                createEditorMc("hall_table__3")
+                createEditorMc("hall_table__4")
+                createEditorMc("hall_table__5")
+                createEditorMc("hall_table__6")
+                createEditorMc("hall_table__7")
                 break;
             case "Advanced":
                 createEditorMc("sl_phase_advance_at_br")
@@ -230,14 +230,14 @@ Item {
                 break;
             case "Hall Sensors":
                 createEditorMc("foc_sl_erpm")
-                createEditorMc("foc_hall_table_0")
-                createEditorMc("foc_hall_table_1")
-                createEditorMc("foc_hall_table_2")
-                createEditorMc("foc_hall_table_3")
-                createEditorMc("foc_hall_table_4")
-                createEditorMc("foc_hall_table_5")
-                createEditorMc("foc_hall_table_6")
-                createEditorMc("foc_hall_table_7")
+                createEditorMc("foc_hall_table__0")
+                createEditorMc("foc_hall_table__1")
+                createEditorMc("foc_hall_table__2")
+                createEditorMc("foc_hall_table__3")
+                createEditorMc("foc_hall_table__4")
+                createEditorMc("foc_hall_table__5")
+                createEditorMc("foc_hall_table__6")
+                createEditorMc("foc_hall_table__7")
                 break;
             case "Encoder":
                 createEditorMc("foc_sl_erpm")

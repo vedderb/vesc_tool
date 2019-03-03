@@ -582,7 +582,7 @@ Item {
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
-            text: "Would you like to restors this VESC, and all VESCs on the CAN-bus (if any), " +
+            text: "Would you like to restore this VESC, and all VESCs on the CAN-bus (if any), " +
                   "to their default settings before proceeding?"
         }
 
@@ -652,7 +652,10 @@ Item {
             mCommands.setMcconf(false)
             Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)
             var canDevs = VescIf.scanCan();
-            Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0);
+            if (!Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0)) {
+                enableDialog()
+                return
+            }
 
             var res  = Utility.detectAllFoc(VescIf, true,
                                             maxPowerLossBox.realValue,

@@ -86,6 +86,10 @@ void PageFirmware::timerSlot()
     if (mVesc) {
         ui->uploadAllButton->setEnabled(mVesc->commands()->getLimitedSupportsFwdAllCan() &&
                                         !mVesc->commands()->getSendCan());
+
+        if (!mVesc->isPortConnected()) {
+            ui->currentLabel->clear();
+        }
     }
 }
 

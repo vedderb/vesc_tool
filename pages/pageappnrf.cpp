@@ -56,8 +56,8 @@ void PageAppNrf::setVesc(VescInterface *vesc)
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.retry_delay");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.retries");
         ui->generalTab->addRowSeparator(tr("Address"));
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.address_0");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.address_1");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.address_2");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.address__0");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.address__1");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.address__2");
     }
 }

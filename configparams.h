@@ -103,6 +103,8 @@ public:
 
     QStringList checkDifference(ConfigParams *config);
 
+    quint32 getSignature();
+
     // Operators
     ConfigParams& operator=(const ConfigParams &other);
 

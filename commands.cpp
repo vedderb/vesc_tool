@@ -724,7 +724,7 @@ void Commands::measureEncoder(double current)
 {
     VByteArray vb;
     vb.vbAppendInt8(COMM_DETECT_ENCODER);
-    vb.vbAppendDouble16(current, 1e3);
+    vb.vbAppendDouble32(current, 1e3);
     emitData(vb);
 }
 

@@ -1,3 +1,7 @@
+== 1.05 ==
+* Fixed bug with encoder detection command.
+* FW 3.51 support.
+
 == 1.04 ==
 * Fixed crash when turning off BLE module while connected.
 

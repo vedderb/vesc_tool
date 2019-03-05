@@ -13,6 +13,7 @@ p, li { white-space: pre-wrap; }
             <cDefine></cDefine>
             <valInt>0</valInt>
             <enumNames>3.50</enumNames>
+            <enumNames>3.51</enumNames>
         </fw_version>
         <help_battery_cutoff>
             <longName>Soft Battery Cutoff Calculator</longName>

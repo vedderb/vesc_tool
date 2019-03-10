@@ -78,6 +78,7 @@ signals:
     void valuesSetupReceived(SETUP_VALUES values, unsigned int mask);
     void detectAllFocReceived(int result);
     void pingCanRx(QVector<int> devs, bool isTimeout);
+    void valuesImuReceived(IMU_VALUES values, unsigned int mask);
 
 public slots:
     void processPacket(QByteArray data);
@@ -85,6 +86,7 @@ public slots:
     void getFwVersion();
     void getValues();
     void sendTerminalCmd(QString cmd);
+    void sendTerminalCmdSync(QString cmd);
     void setDutyCycle(double dutyCycle);
     void setCurrent(double current);
     void setCurrentBrake(double current);
@@ -132,6 +134,7 @@ public slots:
                       double max_current_in, double openloop_rpm, double sl_erpm);
     void pingCan();
     void disableAppOutput(int time_ms, bool fwdCan);
+    void getImuData(unsigned int mask);
 
 private slots:
     void timerSlot();
@@ -169,6 +172,7 @@ private:
     int mTimeoutAppconf;
     int mTimeoutValues;
     int mTimeoutValuesSetup;
+    int mTimeoutImuData;
     int mTimeoutDecPpm;
     int mTimeoutDecAdc;
     int mTimeoutDecChuk;

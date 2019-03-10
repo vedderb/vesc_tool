@@ -584,6 +584,7 @@
    <addaction name="actionKeyboardControl"/>
    <addaction name="actionRtData"/>
    <addaction name="actionRtDataApp"/>
+   <addaction name="actionIMU"/>
    <addaction name="actionSendAlive"/>
    <addaction name="actionCanFwd"/>
   </widget>
@@ -1062,6 +1063,22 @@
    </property>
    <property name="text">
     <string>Export Configuration Parser</string>
+   </property>
+  </action>
+  <action name="actionIMU">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/imu_off.png</normaloff>
+     <normalon>:/res/icons/imu_on.png</normalon>:/res/icons/imu_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>IMU</string>
+   </property>
+   <property name="toolTip">
+    <string>Activate IMU Sampling</string>
    </property>
   </action>
  </widget>

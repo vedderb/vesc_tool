@@ -50,6 +50,7 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mTimeoutAppconf = 0;
     mTimeoutValues = 0;
     mTimeoutValuesSetup = 0;
+    mTimeoutImuData = 0;
     mTimeoutDecPpm = 0;
     mTimeoutDecAdc = 0;
     mTimeoutDecChuk = 0;
@@ -447,6 +448,69 @@ void Commands::processPacket(QByteArray data)
         emit pingCanRx(devs, false);
     } break;
 
+    case COMM_GET_IMU_DATA: {
+        mTimeoutImuData = 0;
+
+        IMU_VALUES values;
+
+        uint32_t mask = vb.vbPopFrontUint16();
+
+        if (mask & ((uint32_t)1 << 0)) {
+            values.roll = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 1)) {
+            values.pitch = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 2)) {
+            values.yaw = vb.vbPopFrontDouble32Auto();
+        }
+
+        if (mask & ((uint32_t)1 << 3)) {
+            values.accX = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 4)) {
+            values.accY = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 5)) {
+            values.accZ = vb.vbPopFrontDouble32Auto();
+        }
+
+        if (mask & ((uint32_t)1 << 6)) {
+            values.gyroX = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 7)) {
+            values.gyroY = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 8)) {
+            values.gyroZ = vb.vbPopFrontDouble32Auto();
+        }
+
+        if (mask & ((uint32_t)1 << 9)) {
+            values.magX = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 10)) {
+            values.magY = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 11)) {
+            values.magZ = vb.vbPopFrontDouble32Auto();
+        }
+
+        if (mask & ((uint32_t)1 << 12)) {
+            values.q0 = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 13)) {
+            values.q1 = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 14)) {
+            values.q2 = vb.vbPopFrontDouble32Auto();
+        }
+        if (mask & ((uint32_t)1 << 15)) {
+            values.q3 = vb.vbPopFrontDouble32Auto();
+        }
+
+        emit valuesImuReceived(values, mask);
+    } break;
+
     default:
         break;
     }
@@ -482,6 +546,14 @@ void Commands::sendTerminalCmd(QString cmd)
 {
     VByteArray vb;
     vb.vbAppendInt8(COMM_TERMINAL_CMD);
+    vb.append(cmd.toLatin1());
+    emitData(vb);
+}
+
+void Commands::sendTerminalCmdSync(QString cmd)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_TERMINAL_CMD_SYNC);
     vb.append(cmd.toLatin1());
     emitData(vb);
 }
@@ -995,6 +1067,20 @@ void Commands::disableAppOutput(int time_ms, bool fwdCan)
     emitData(vb);
 }
 
+void Commands::getImuData(unsigned int mask)
+{
+    if (mTimeoutImuData > 0) {
+        return;
+    }
+
+    mTimeoutImuData = mTimeoutCount;
+
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_IMU_DATA);
+    vb.vbAppendUint16(mask);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mFirmwareIsUploading) {
@@ -1015,6 +1101,7 @@ void Commands::timerSlot()
     if (mTimeoutAppconf > 0) mTimeoutAppconf--;
     if (mTimeoutValues > 0) mTimeoutValues--;
     if (mTimeoutValuesSetup > 0) mTimeoutValuesSetup--;
+    if (mTimeoutImuData > 0) mTimeoutImuData--;
     if (mTimeoutDecPpm > 0) mTimeoutDecPpm--;
     if (mTimeoutDecAdc > 0) mTimeoutDecAdc--;
     if (mTimeoutDecChuk > 0) mTimeoutDecChuk--;

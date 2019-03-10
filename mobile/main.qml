@@ -201,6 +201,8 @@ ApplicationWindow {
                     enabled: true
                     clip: true
 
+                    property var vesc3dViewNow: 0
+
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     orientation: Qt.Vertical
@@ -214,6 +216,39 @@ ApplicationWindow {
                     Page {
                         RtDataSetup {
                             anchors.fill: parent
+                        }
+                    }
+
+                    Page {
+                        ColumnLayout {
+                            anchors.fill: parent
+
+                            CheckBox {
+                                Layout.fillWidth: true
+                                id: useYawBox
+                                text: "Use Yaw (will drift)"
+                                checked: false
+                            }
+
+                            Item {
+                                id: item3d
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                            }
+                        }
+                    }
+
+                    // Create 3d view on demand, due to high CPU usage even when hidden
+                    onCurrentIndexChanged: {
+                        if (currentIndex == 2) {
+                            var component = Qt.createComponent("Vesc3DView.qml");
+                            vesc3dViewNow = component.createObject(item3d, {"anchors.fill": item3d})
+                            vesc3dViewNow.setRotation(0.1, 0.1, 0.1)
+                        } else {
+                            if (vesc3dViewNow != 0) {
+                                vesc3dViewNow.destroy()
+                                vesc3dViewNow = 0
+                            }
                         }
                     }
                 }
@@ -411,9 +446,14 @@ ApplicationWindow {
             if (VescIf.isPortConnected() && tabBar.currentIndex == 1) {
                 // Sample RT data when the RT page is selected
                 if (rtSwipeView.currentIndex == 0) {
+                    interval = 50
                     mCommands.getValues()
                 } else if (rtSwipeView.currentIndex == 1) {
+                    interval = 50
                     mCommands.getValuesSetup()
+                } else if (rtSwipeView.currentIndex == 2) {
+                    interval = 20
+                    mCommands.getImuData(0x7)
                 }
             }
         }
@@ -498,6 +538,18 @@ ApplicationWindow {
 
         onUpdated: {
             confTimer.appConfRx = true
+        }
+    }
+
+    Connections {
+        target: mCommands
+
+        onValuesImuReceived: {
+            if (rtSwipeView.vesc3dViewNow != 0) {
+                rtSwipeView.vesc3dViewNow.setRotation(
+                            values.roll, values.pitch,
+                            useYawBox.checked ? values.yaw : -Math.PI / 2.0)
+            }
         }
     }
 }

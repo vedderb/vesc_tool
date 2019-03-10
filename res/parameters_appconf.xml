@@ -128,6 +128,18 @@ p, li { white-space: pre-wrap; }
             <cDefine>APPCONF_PAIRING_DONE</cDefine>
             <valInt>0</valInt>
         </pairing_done>
+        <permanent_uart_enabled>
+            <longName>Enable Permanent UART</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Enable the permanent UART port (if the hardware has one). This port can be connected to e.g. the NRF51 for providing a BLE link. You may want to disable this to prevent access to your VESC over BLE.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_PERMANENT_UART_ENABLED</cDefine>
+            <valInt>1</valInt>
+        </permanent_uart_enabled>
         <uavcan_enable>
             <longName>Use UAVCAN</longName>
             <type>5</type>
@@ -1495,6 +1507,7 @@ p, li { white-space: pre-wrap; }
         <ser>send_can_status_rate_hz</ser>
         <ser>can_baud_rate</ser>
         <ser>pairing_done</ser>
+        <ser>permanent_uart_enabled</ser>
         <ser>uavcan_enable</ser>
         <ser>uavcan_esc_index</ser>
         <ser>app_to_use</ser>

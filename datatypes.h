@@ -238,6 +238,63 @@ public:
 
 Q_DECLARE_METATYPE(SETUP_VALUES)
 
+struct IMU_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(double roll MEMBER roll)
+    Q_PROPERTY(double pitch MEMBER pitch)
+    Q_PROPERTY(double yaw MEMBER yaw)
+
+    Q_PROPERTY(double accX MEMBER accX)
+    Q_PROPERTY(double accY MEMBER accY)
+    Q_PROPERTY(double accZ MEMBER accZ)
+
+    Q_PROPERTY(double gyroX MEMBER gyroX)
+    Q_PROPERTY(double gyroY MEMBER gyroY)
+    Q_PROPERTY(double gyroZ MEMBER gyroZ)
+
+    Q_PROPERTY(double magX MEMBER magX)
+    Q_PROPERTY(double magY MEMBER magY)
+    Q_PROPERTY(double magZ MEMBER magZ)
+
+    Q_PROPERTY(double q0 MEMBER q0)
+    Q_PROPERTY(double q1 MEMBER q1)
+    Q_PROPERTY(double q2 MEMBER q2)
+    Q_PROPERTY(double q3 MEMBER q3)
+
+public:
+    IMU_VALUES() {
+        roll = 0; pitch = 0; yaw = 0;
+        accX = 0; accY = 0; accZ = 0;
+        gyroX = 0; gyroY = 0; gyroZ = 0;
+        magX = 0; magY = 0; magZ = 0;
+        q0 = 1; q1 = 0; q2 = 0; q3 = 0;
+    }
+
+    double roll;
+    double pitch;
+    double yaw;
+
+    double accX;
+    double accY;
+    double accZ;
+
+    double gyroX;
+    double gyroY;
+    double gyroZ;
+
+    double magX;
+    double magY;
+    double magZ;
+
+    double q0;
+    double q1;
+    double q2;
+    double q3;
+};
+
+Q_DECLARE_METATYPE(IMU_VALUES)
+
 struct MCCONF_TEMP {
     Q_GADGET
 
@@ -340,7 +397,9 @@ typedef enum {
     COMM_ERASE_NEW_APP_ALL_CAN,
     COMM_WRITE_NEW_APP_DATA_ALL_CAN,
     COMM_PING_CAN,
-    COMM_APP_DISABLE_OUTPUT
+    COMM_APP_DISABLE_OUTPUT,
+    COMM_TERMINAL_CMD_SYNC,
+    COMM_GET_IMU_DATA
 } COMM_PACKET_ID;
 
 typedef struct {

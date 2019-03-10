@@ -39,5 +39,6 @@
         <file>DirectionSetup.qml</file>
         <file>PairingDialog.qml</file>
         <file>SetupWizardIntro.qml</file>
+        <file>Vesc3DView.qml</file>
     </qresource>
 </RCC>

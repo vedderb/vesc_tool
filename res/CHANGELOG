@@ -1,3 +1,9 @@
+== 1.06 ==
+* FW 3.52 support.
+* Added setting to disable permanent UART.
+* Added IMU page.
+* Added 3D orientation visualization to mobile interface.
+
 == 1.05 ==
 * Fixed bug with encoder detection command.
 * FW 3.51 support.

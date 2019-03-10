@@ -301,6 +301,11 @@ void MainWindow::timerSlot()
         mVesc->commands()->getDecodedPpm();
     }
 
+    // IMU Data
+    if (ui->actionIMU->isChecked()) {
+        mVesc->commands()->getImuData(0xFFFF);
+    }
+
     // Send alive command once every 10 iterations
     if (ui->actionSendAlive->isChecked()) {
         static int alive_cnt = 0;
@@ -332,6 +337,7 @@ void MainWindow::timerSlot()
         ui->actionSendAlive->setChecked(false);
         ui->actionRtData->setChecked(false);
         ui->actionRtDataApp->setChecked(false);
+        ui->actionIMU->setChecked(false);
         ui->actionKeyboardControl->setChecked(false);
     }
 
@@ -958,7 +964,12 @@ void MainWindow::reloadPages()
     mPageSampledData = new PageSampledData(this);
     mPageSampledData->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSampledData);
-    addPageItem(tr("Sampled Data"), "://res/icons/Line Chart-96.png", "", false, true);
+    addPageItem(tr("Sampled Data"), "://res/icons/Gyroscope-96.png", "", false, true);
+
+    mPageImu = new PageImu(this);
+    mPageImu->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageImu);
+    addPageItem(tr("IMU Data"), "://res/icons/Line Chart-96.png", "", false, true);
 
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);

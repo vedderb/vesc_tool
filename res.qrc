@@ -141,5 +141,9 @@
         <file>res/images/motors/inrunner_small.jpg</file>
         <file>res/images/motors/outrunner_mini.jpg</file>
         <file>res/images/motors/outrunner_small.jpg</file>
+        <file>res/icons/Gyroscope-96.png</file>
+        <file>res/icons/imu_off.png</file>
+        <file>res/icons/imu_on.png</file>
+        <file>res/images/v6plus_top.png</file>
     </qresource>
 </RCC>

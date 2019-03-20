@@ -1,3 +1,8 @@
+== 1.07 ==
+* FW 3.53 support.
+* Updated parameters in default FOC detection.
+* Added missing l_max_erpm_fbrake parameter.
+
 == 1.06 ==
 * FW 3.52 support.
 * Added setting to disable permanent UART.

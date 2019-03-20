@@ -188,6 +188,7 @@ Item {
             case "Advanced":
                 createEditorMc("sl_phase_advance_at_br")
                 createEditorMc("sl_cycle_int_rpm_br")
+                createEditorMc("l_max_erpm_fbrake")
                 createEditorMc("pwm_mode")
                 createEditorMc("cc_gain")
                 createEditorMc("cc_ramp_step_max")

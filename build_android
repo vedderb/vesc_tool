@@ -2,7 +2,7 @@
 
 set -e
 
-export ANDROID_HOME=/home/benjamin/Android
+export ANDROID_HOME=~/Android
 export ANDROID_NDK_HOST=linux-x86_64
 export ANDROID_NDK_PLATFORM=android-23
 export ANDROID_NDK_ROOT=$ANDROID_HOME/Ndk

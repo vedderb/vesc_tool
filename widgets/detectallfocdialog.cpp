@@ -43,43 +43,43 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
     QListWidgetItem *item = new QListWidgetItem;
     item->setText(tr("Mini Outrunner (~75 g)"));
     item->setIcon(QIcon("://res/images/motors/outrunner_mini.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(10, 1400, 7000, 14)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(10, 1400, 4000, 14)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Small Outrunner (~200 g)"));
     item->setIcon(QIcon("://res/images/motors/outrunner_small.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(25, 1400, 7000, 14)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(25, 1400, 4000, 14)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Medium Outrunner (~750 g)"));
     item->setIcon(QIcon("://res/images/motors/6374.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(60, 700, 7000, 14)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(60, 700, 4000, 14)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Large Outrunner (~2000 g)"));
     item->setIcon(QIcon("://res/icons/motor.png"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 700, 7000, 14)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 700, 4000, 14)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Small Inrunner (~200 g)"));
     item->setIcon(QIcon("://res/images/motors/inrunner_small.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(25, 1400, 7000, 2)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(25, 1400, 4000, 2)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Medium Inrunner (~750 g)"));
     item->setIcon(QIcon("://res/images/motors/inrunner_medium.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(70, 1400, 7000, 4)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(70, 1400, 4000, 4)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Large Inrunner (~2000 g)"));
     item->setIcon(QIcon("://res/icons/motor.png"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 1000, 7000, 4)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 1000, 4000, 4)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
@@ -91,7 +91,7 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
     item = new QListWidgetItem;
     item->setText(tr("EDF Inrunner Small (~200 g)"));
     item->setIcon(QIcon("://res/images/motors/edf_small.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(55, 1400, 7000, 6)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(55, 1400, 4000, 6)));
     ui->motorList->addItem(item);
 
     ui->motorList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);

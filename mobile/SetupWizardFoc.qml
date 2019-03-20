@@ -80,7 +80,7 @@ Item {
                             motorImg: "qrc:/res/images/motors/outrunner_mini.jpg"
                             maxLosses: 10
                             openloopErpm: 1400
-                            sensorlessErpm: 7000
+                            sensorlessErpm: 4000
                             poles: 14
                         }
                         ListElement {
@@ -88,7 +88,7 @@ Item {
                             motorImg: "qrc:/res/images/motors/outrunner_small.jpg"
                             maxLosses: 25
                             openloopErpm: 1400
-                            sensorlessErpm: 7000
+                            sensorlessErpm: 4000
                             poles: 14
                         }
                         ListElement {
@@ -96,7 +96,7 @@ Item {
                             motorImg: "qrc:/res/images/motors/6374.jpg"
                             maxLosses: 60
                             openloopErpm: 700
-                            sensorlessErpm: 7000
+                            sensorlessErpm: 4000
                             poles: 14
                         }
                         ListElement {
@@ -104,7 +104,7 @@ Item {
                             motorImg: "qrc:/res/icons/motor.png"
                             maxLosses: 200
                             openloopErpm: 700
-                            sensorlessErpm: 7000
+                            sensorlessErpm: 4000
                             poles: 14
                         }
                         ListElement {
@@ -112,7 +112,7 @@ Item {
                             motorImg: "qrc:/res/images/motors/inrunner_small.jpg"
                             maxLosses: 25
                             openloopErpm: 1400
-                            sensorlessErpm: 7000
+                            sensorlessErpm: 4000
                             poles: 2
                         }
                         ListElement {
@@ -120,7 +120,7 @@ Item {
                             motorImg: "qrc:/res/images/motors/inrunner_medium.jpg"
                             maxLosses: 70
                             openloopErpm: 1400
-                            sensorlessErpm: 7000
+                            sensorlessErpm: 4000
                             poles: 4
                         }
                         ListElement {
@@ -128,7 +128,7 @@ Item {
                             motorImg: "qrc:/res/icons/motor.png"
                             maxLosses: 200
                             openloopErpm: 1000
-                            sensorlessErpm: 7000
+                            sensorlessErpm: 4000
                             poles: 4
                         }
                         ListElement {
@@ -144,7 +144,7 @@ Item {
                             motorImg: "qrc:/res/images/motors/edf_small.jpg"
                             maxLosses: 55
                             openloopErpm: 1400
-                            sensorlessErpm: 7000
+                            sensorlessErpm: 4000
                             poles: 6
                         }
                     }

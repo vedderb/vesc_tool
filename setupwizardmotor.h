@@ -61,6 +61,7 @@ public:
         Sensor_EncoderAbi,
         Sensor_EncoderAs,
         Sensor_Resolver_AD2S1205,
+        Sensor_Encoder_SinCos,
         Sensor_EncoderBiSS
     };
 

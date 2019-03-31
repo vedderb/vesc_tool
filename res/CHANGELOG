@@ -1,3 +1,10 @@
+== 1.08 ==
+* FW 3.54 support.
+* SWD programming support, using the VESC as a programmer.
+ - Can be used to flash bricked VESCs from a working one.
+ - Can be used to make a custom NRF5x module.
+* Remember last custom firmware file path.
+
 == 1.07 ==
 * FW 3.53 support.
 * Updated parameters in default FOC detection.

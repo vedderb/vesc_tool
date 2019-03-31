@@ -79,6 +79,10 @@ signals:
     void detectAllFocReceived(int result);
     void pingCanRx(QVector<int> devs, bool isTimeout);
     void valuesImuReceived(IMU_VALUES values, unsigned int mask);
+    void bmConnRes(int res);
+    void bmEraseFlashAllRes(int res);
+    void bmWriteFlashRes(int res);
+    void bmRebootRes(int res);
 
 public slots:
     void processPacket(QByteArray data);
@@ -135,6 +139,11 @@ public slots:
     void pingCan();
     void disableAppOutput(int time_ms, bool fwdCan);
     void getImuData(unsigned int mask);
+    void bmConnect();
+    void bmEraseFlashAll();
+    void bmWriteFlash(uint32_t addr, QByteArray data);
+    void bmReboot();
+    void bmDisconnect();
 
 private slots:
     void timerSlot();

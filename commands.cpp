@@ -511,6 +511,26 @@ void Commands::processPacket(QByteArray data)
         emit valuesImuReceived(values, mask);
     } break;
 
+    case COMM_BM_CONNECT:
+        emit bmConnRes(vb.vbPopFrontInt16());
+        break;
+
+    case COMM_BM_ERASE_FLASH_ALL:
+        emit bmEraseFlashAllRes(vb.vbPopFrontInt16());
+        break;
+
+    case COMM_BM_WRITE_FLASH:
+        emit bmWriteFlashRes(vb.vbPopFrontInt16());
+        break;
+
+    case COMM_BM_REBOOT:
+        emit bmRebootRes(vb.vbPopFrontInt16());
+        break;
+
+    case COMM_BM_DISCONNECT:
+        emit ackReceived("COMM_BM_DISCONNECT OK");
+        break;
+
     default:
         break;
     }
@@ -1078,6 +1098,43 @@ void Commands::getImuData(unsigned int mask)
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_IMU_DATA);
     vb.vbAppendUint16(mask);
+    emitData(vb);
+}
+
+void Commands::bmConnect()
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_CONNECT);
+    emitData(vb);
+}
+
+void Commands::bmEraseFlashAll()
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_ERASE_FLASH_ALL);
+    emitData(vb);
+}
+
+void Commands::bmWriteFlash(uint32_t addr, QByteArray data)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_WRITE_FLASH);
+    vb.vbAppendUint32(addr);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::bmReboot()
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_REBOOT);
+    emitData(vb);
+}
+
+void Commands::bmDisconnect()
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_DISCONNECT);
     emitData(vb);
 }
 

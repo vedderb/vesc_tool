@@ -145,5 +145,14 @@
         <file>res/icons/imu_off.png</file>
         <file>res/icons/imu_on.png</file>
         <file>res/images/v6plus_top.png</file>
+        <file>res/other_fw/nrf51_remote_mt_32k_32m.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_16k_16m_rx1_tx2_led3.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_16k_16m_rx11_tx9_led3.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_32k_16m_rx11_tx9_led3.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_32k_32m_rx1_tx2_led3.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_32k_32m_rx2_tx1_led3.bin</file>
+        <file>res/other_fw/nrf52840_vesc_ble_rx11_tx8_led7.bin</file>
+        <file>res/other_fw/nrf52832_vesc_ble_rx6_tx7_led8.bin</file>
+        <file>res/other_fw/nrf52832_vesc_ble_rx7_tx6_led8.bin</file>
     </qresource>
 </RCC>

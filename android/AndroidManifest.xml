@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<manifest package="vedder.vesctool" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.07" android:versionCode="10" android:installLocation="auto">
+<manifest package="vedder.vesctool" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.08" android:versionCode="11" android:installLocation="auto">
     <application android:hardwareAccelerated="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="VESC Tool" android:icon="@drawable/icon">
         <activity android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation" android:name="org.qtproject.qt5.android.bindings.QtActivity" android:label="VESC Tool" android:screenOrientation="unspecified" android:launchMode="singleTop">
             <intent-filter>

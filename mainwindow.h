@@ -54,6 +54,7 @@
 #include "pages/pagegpd.h"
 #include "pages/pageexperiments.h"
 #include "pages/pageimu.h"
+#include "pages/pageswdprog.h"
 
 namespace Ui {
 class MainWindow;
@@ -167,6 +168,7 @@ private:
     PageAppNunchuk *mPageAppNunchuk;
     PageAppNrf *mPageAppNrf;
     PageSettings *mPageSettings;
+    PageSwdProg *mPageSwdProg;
 
     void addPageItem(QString name,
                      QString icon = "",

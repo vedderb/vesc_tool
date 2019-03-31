@@ -976,6 +976,11 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageTerminal);
     addPageItem(tr("VESC Terminal"), "://res/icons/Console-96.png", "", true);
 
+    mPageSwdProg = new PageSwdProg(this);
+    mPageSwdProg->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageSwdProg);
+    addPageItem(tr("SWD Prog"), "://res/icons/Electronics-96.png", "", true);
+
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
     addPageItem(tr("Debug Console"), "://res/icons/Bug-96.png", "", true);

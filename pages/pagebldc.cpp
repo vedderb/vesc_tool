@@ -64,6 +64,7 @@ void PageBldc::setVesc(VescInterface *vesc)
 
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "sl_phase_advance_at_br");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "sl_cycle_int_rpm_br");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "l_max_erpm_fbrake");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "pwm_mode");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "cc_gain");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "cc_ramp_step_max");

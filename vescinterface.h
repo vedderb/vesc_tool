@@ -83,6 +83,10 @@ public:
     Q_INVOKABLE QString getLastSerialPort() const;
     Q_INVOKABLE int getLastSerialBaud() const;
 #endif
+    bool swdEraseFlash();
+    bool swdUploadFw(QByteArray newFirmware, uint32_t startAddr = 0);
+    void swdCancel();
+    bool swdReboot();
 
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
@@ -172,6 +176,8 @@ private:
     QString mHwTxt;
     QString mUuidStr;
     bool mIsUploadingFw;
+
+    bool mCancelSwdUpload;
 
     // Connections
     conn_t mLastConnType;

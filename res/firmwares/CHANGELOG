@@ -1,5 +1,35 @@
+=== FW 3.54 ===
+* Added mcpwm_foc_set_openloop_duty and mcpwm_foc_set_openloop_duty_phase.
+* Added blackmagic probe SWD output to program other MCUs.
+ - Can be used to flash bricked VESCs from a working one.
+ - Can be used to make a custom NRF5x module.
+
+=== FW 3.53 ===
+* Limit foc_current_filter_const range to prevent damage due to bad configuration.
+* Set default NRF speed to 1 Mbit/s.
+* Use lower switching frequency when detecting resistance to reduce deat-time distortion.
+* Don't enable temperature compensation in auto detection by default.
+
+=== FW 3.52 ===
+* Added support for second revision of HW75/300 with separate UART for NRF51.
+* Added COMM_TERMINAL_CMD_SYNC, which does not drop commands when busy.
+* Added option to disable permanent UART.
+* Moved TIM5 to own file, and use it from other places.
+* Removed need for TIM2 in mcpwm.
+* Added utilization percentage to threads terminal command.
+* Added IMU interface.
+* Added support for the MPU9150 and MPU9250.
+* Added COMM_GET_IMU_DATA.
+
+=== FW 3.51 ===
+* Fixed AS5047 error rate bug at position 0.
+* Increased threshold for AS5047 fault to 5 %.
+* Set correct V_REG value for HW 75/300.
+* Better command processing.
+* Proper scaling when setting relative currents and acceleration and braking currents are different.
+
 === FW 3.50 ===
-* AS5047 parity check and fault code on error rates > 1%.
+* AS5047 parity check and fault code on error rates > 1 %.
 * Signature on mc and app configuration.
 * FOC loop frequency truncation on all hardwares.
 

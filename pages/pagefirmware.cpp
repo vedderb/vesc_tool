@@ -45,10 +45,17 @@ PageFirmware::PageFirmware(QWidget *parent) :
     connect(ui->showNonDefaultBox, SIGNAL(toggled(bool)),
             this, SLOT(updateFwList()));
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+
+    QSettings set;
+    if (set.contains("pagefirmware/lastcustomfile")) {
+        ui->fwEdit->setText(set.value("pagefirmware/lastcustomfile").toString());
+    }
 }
 
 PageFirmware::~PageFirmware()
 {
+    QSettings set;
+    set.setValue("pagefirmware/lastcustomfile", ui->fwEdit->text());
     delete ui;
 }
 

@@ -52,6 +52,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mFwTxt = "x.x";
     mIsUploadingFw = false;
 
+    mCancelSwdUpload = false;
+
     mTimer = new QTimer(this);
     mTimer->setInterval(20);
     mTimer->start();
@@ -536,6 +538,177 @@ QString VescInterface::getLastTcpServer() const
 int VescInterface::getLastTcpPort() const
 {
     return mLastTcpPort;
+}
+
+bool VescInterface::swdEraseFlash()
+{
+    auto waitBmEraseRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(20000);
+        auto conn = connect(mCommands, &Commands::bmEraseFlashAllRes, [&res,&loop](int erRes) {
+            res = erRes;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    mCommands->bmEraseFlashAll();
+    emit fwUploadStatus("Erasing flash...", 0.0, true);
+    int erRes = waitBmEraseRes();
+    if (erRes != 1) {
+        QString msg = "Unknown failure";
+
+        if (erRes == -10) {
+            msg = "Erase timed out";
+        } else if (erRes == -3) {
+            msg = "Erase failed";
+        } else if (erRes == -2) {
+            msg = "Could not recognize target";
+        } else if (erRes == -1) {
+            msg = "Not connected to target";
+        }
+
+        emitMessageDialog("SWD Upload", msg, false, false);
+        emit fwUploadStatus(msg, 0.0, false);
+
+        return false;
+    }
+
+    emit fwUploadStatus("Erase done", 0.0, false);
+
+    return true;
+}
+
+bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr)
+{
+    auto waitBmWriteRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(3000);
+        auto conn = connect(mCommands, &Commands::bmWriteFlashRes, [&res,&loop](int wrRes) {
+            res = wrRes;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    auto writeChunk = [this, &waitBmWriteRes](uint32_t addr, QByteArray chunk) {
+        for (int i = 0;i < 3;i++) {
+            mCommands->bmWriteFlash(addr, chunk);
+            int res = waitBmWriteRes();
+
+            if (res != -10) {
+                return res;
+            }
+        }
+
+        return -20;
+    };
+
+    mCancelSwdUpload = false;
+    uint32_t addr = startAddr;
+    uint32_t szTot = newFirmware.size();
+    while (newFirmware.size() > 0) {
+        int chunkSize = 256;
+
+        uint32_t sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
+        int res = writeChunk(addr, newFirmware.mid(0, sz));
+        newFirmware.remove(0, sz);
+        addr += sz;
+
+        if (res == 1) {
+            emit fwUploadStatus("Uploading firmware over SWD", (double)(addr - startAddr) / (double)szTot, true);
+        } else {
+            QString msg = "Unknown failure";
+
+            if (res == -20) {
+                msg = "Timed out";
+            } else if (res == -2) {
+                msg = "Write failed";
+            } else if (res == -1) {
+                msg = "Not connected to target";
+            }
+
+            emitMessageDialog("SWD Upload", msg, false, false);
+            emit fwUploadStatus(msg, 0.0, false);
+
+            return false;
+        }
+
+        if (mCancelSwdUpload) {
+            emit fwUploadStatus("Upload cancelled", 0.0, false);
+            return false;
+        }
+    }
+
+    emit fwUploadStatus("Upload done", 1.0, false);
+
+    return true;
+}
+
+void VescInterface::swdCancel()
+{
+    mCancelSwdUpload = true;
+}
+
+bool VescInterface::swdReboot()
+{
+    auto waitBmReboot = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(3000);
+        auto conn = connect(mCommands, &Commands::bmRebootRes, [&res,&loop](int wrRes) {
+            res = wrRes;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    mCommands->bmReboot();
+    int res = waitBmReboot();
+    if (res == -10) {
+        QString msg = "Reboot: Unknown failure";
+
+        if (res == -10) {
+            msg = "Reboot: Timed out";
+        } else if (res == -1) {
+            msg = "Reboot: Not connected to target";
+        } else if (res == -2) {
+            msg = "Reboot: Flash done failed";
+        }
+
+        emitMessageDialog("SWD Upload", msg, false, false);
+        emit fwUploadStatus(msg, 1.0, false);
+
+        return false;
+    }
+
+    return true;
 }
 
 #ifdef HAS_SERIALPORT

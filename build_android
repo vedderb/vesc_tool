@@ -2,7 +2,7 @@
 
 set -e
 
-export ANDROID_HOME=/home/benjamin/Android
+export ANDROID_HOME=~/Android
 export ANDROID_NDK_HOST=linux-x86_64
 export ANDROID_NDK_PLATFORM=android-23
 export ANDROID_NDK_ROOT=$ANDROID_HOME/Ndk
@@ -15,7 +15,7 @@ export ANDROID_API_VERSION=android-23
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 export PATH=$PATH:$ANDROID_HOME/Sdk/tools:/usr/bin:$JAVA_HOME/bin
 
-export PATH=/opt/Qt2/5.9.3/android_armv7/bin/:$PATH
+export PATH=/opt/Qt3/5.9.7/android_armv7/bin/:$PATH
 #export PATH=/opt/Qt3/5.12.1/android_armv7/bin/:$PATH
 rm -rf build/android/*
 

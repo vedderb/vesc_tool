@@ -1198,7 +1198,7 @@ bool Utility::checkFwCompatibility(VescInterface *vesc)
                vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)), 100);
+    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)), 1000);
 
     disconnect(conn);
 

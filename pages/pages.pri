@@ -24,7 +24,9 @@ FORMS += \
     $$PWD/pagesetupcalculators.ui \
     $$PWD/pagesettings.ui \
     $$PWD/pagegpd.ui \
-    $$PWD/pageexperiments.ui
+    $$PWD/pageexperiments.ui \
+    $$PWD/pageimu.ui \
+    $$PWD/pageswdprog.ui
 
 HEADERS += \
     $$PWD/pageconnection.h \
@@ -52,7 +54,9 @@ HEADERS += \
     $$PWD/pagesetupcalculators.h \
     $$PWD/pagesettings.h \
     $$PWD/pagegpd.h \
-    $$PWD/pageexperiments.h
+    $$PWD/pageexperiments.h \
+    $$PWD/pageimu.h \
+    $$PWD/pageswdprog.h
 
 SOURCES += \
     $$PWD/pageconnection.cpp \
@@ -80,4 +84,6 @@ SOURCES += \
     $$PWD/pagesetupcalculators.cpp \
     $$PWD/pagesettings.cpp \
     $$PWD/pagegpd.cpp \
-    $$PWD/pageexperiments.cpp
+    $$PWD/pageexperiments.cpp \
+    $$PWD/pageimu.cpp \
+    $$PWD/pageswdprog.cpp

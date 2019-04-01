@@ -123,6 +123,7 @@ Item {
             createEditorApp("send_can_status_rate_hz")
             createEditorApp("can_baud_rate")
             createEditorApp("pairing_done")
+            createEditorApp("permanent_uart_enabled")
             createEditorApp("uavcan_enable")
             createEditorApp("uavcan_esc_index")
             break;

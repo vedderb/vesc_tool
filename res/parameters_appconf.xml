@@ -616,7 +616,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>Current Reverse Center</enumNames>
             <enumNames>Current Reverse Button</enumNames>
             <enumNames>Current Reverse ADC2 Brake Button</enumNames>
-            <enumNames>ADC_CTRL_TYPE_CURRENT_REV_BUTTON_BRAKE_CENTER</enumNames>
+            <enumNames>Current Reverse Button Brake Center</enumNames>
             <enumNames>Current No Reverse Brake Center</enumNames>
             <enumNames>Current No Reverse Brake Button</enumNames>
             <enumNames>Current No Reverse Brake ADC2</enumNames>

@@ -1,3 +1,8 @@
+== 1.09 == (Ongoing)
+* FW 3.55 support
+ - New ADC control mode
+ - Initial support for sin/cos encoders
+
 == 1.08 ==
 * FW 3.54 support.
 * SWD programming support, using the VESC as a programmer.

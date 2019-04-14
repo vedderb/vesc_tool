@@ -12,9 +12,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;The firmware version(s) that this version of VESC Tool supports.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine></cDefine>
             <valInt>0</valInt>
-            <enumNames>3.52</enumNames>
-            <enumNames>3.53</enumNames>
-            <enumNames>3.54</enumNames>
+            <enumNames>3.55</enumNames>
         </fw_version>
         <help_battery_cutoff>
             <longName>Soft Battery Cutoff Calculator</longName>

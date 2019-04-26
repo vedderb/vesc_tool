@@ -1,7 +1,10 @@
-== 1.09 == (Ongoing)
-* FW 3.55 support
- - New ADC control mode
- - Initial support for sin/cos encoders
+== 1.09 ==
+* FW 3.55 support.
+ - New ADC control mode.
+ - Initial support for sin/cos encoders.
+ - Nunchuk CC fixes.
+ - PPM multi duty mode fix.
+* Added more fault codes.
 
 == 1.08 ==
 * FW 3.54 support.

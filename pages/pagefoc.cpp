@@ -51,6 +51,8 @@ void PageFoc::setVesc(VescInterface *vesc)
         ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_sensor_mode");
         ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_motor_r");
         ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_motor_l");
+        ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_motor_ld");
+        ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_motor_lq");
         ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_motor_flux_linkage");
         ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_current_kp");
         ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_current_ki");
@@ -95,5 +97,9 @@ void PageFoc::setVesc(VescInterface *vesc)
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_sample_high_current");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_observer_gain_slow");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_current_filter_const");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_mtpa_enable");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_field_weakening_enable");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_field_weakening_kp");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_field_weakening_ki");
     }
 }

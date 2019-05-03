@@ -1,3 +1,9 @@
+== 1.10 ==
+* FW 3.56 support.
+ - Fixed current offset fault in BLDC mode.
+ - Support for multiple IMUs and ICM-20948.
+* Include working firmwares for 16K NRF51 modules.
+
 == 1.09 ==
 * FW 3.55 support.
  - New ADC control mode.

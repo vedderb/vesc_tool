@@ -1,3 +1,7 @@
+== 1.11 ==
+* Added RT data logging to CSV file (desktop and mobile).
+* Fixed 16K NRF51 firmware (again).
+
 == 1.10 ==
 * FW 3.56 support.
  - Fixed current offset fault in BLDC mode.

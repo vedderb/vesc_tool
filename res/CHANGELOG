@@ -1,3 +1,6 @@
+== 1.12 ==
+* Fixed 16k_16m_rx11_tx9 NRF51 fw as well.
+
 == 1.11 ==
 * Added RT data logging to CSV file (desktop and mobile).
 * Fixed 16K NRF51 firmware (again).

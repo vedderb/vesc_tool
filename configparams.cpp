@@ -1406,6 +1406,9 @@ quint32 ConfigParams::getSignature()
         if (p) {
             sigStr.append(QString("%1").arg((int)p->type));
             sigStr.append(QString("%1").arg((int)p->vTx));
+            for (auto n: p->enumNames) {
+                sigStr.append(n);
+            }
         }
     }
 

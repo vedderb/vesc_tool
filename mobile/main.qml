@@ -295,6 +295,80 @@ ApplicationWindow {
                 anchors.topMargin: 10
             }
         }
+
+        Page {
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                anchors.topMargin: 10
+
+                TextInput {
+                    color: "white"
+                    id: rtLogFileText
+                    Layout.fillWidth: true
+                }
+
+                Button {
+                    text: "Choose Log File..."
+                    Layout.fillWidth: true
+
+                    onClicked: {
+                        if (Utility.requestFilePermission()) {
+                            logFilePicker.enabled = true
+                            logFilePicker.visible = true
+                        } else {
+                            VescIf.emitMessageDialog(
+                                        "File Permissions",
+                                        "Unable to request file system permission.",
+                                        false, false)
+                        }
+                    }
+                }
+
+                CheckBox {
+                    id: rtLogEnBox
+                    text: "Enable RT Data Logging"
+                    Layout.fillWidth: true
+
+                    onClicked: {
+                        if (checked) {
+                            VescIf.openRtLogFile(rtLogFileText.text)
+                        } else {
+                            VescIf.closeRtLogFile()
+                        }
+                    }
+
+                    Timer {
+                        repeat: true
+                        running: true
+                        interval: 500
+
+                        onTriggered: {
+                            rtLogEnBox.checked = VescIf.isRtLogOpen()
+                        }
+                    }
+                }
+
+                Item {
+                    // Spacer
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
+
+                DirectoryPicker {
+                    id: logFilePicker
+                    anchors.fill: parent
+                    showDotAndDotDot: true
+                    visible: false
+                    enabled: false
+
+                    onDirSelected: {
+                        rtLogFileText.text = fileName
+                    }
+                }
+            }
+        }
     }
 
     header: Rectangle {
@@ -339,7 +413,7 @@ ApplicationWindow {
                     color: "#4f4f4f"
                 }
 
-                property int buttons: 7
+                property int buttons: 8
                 property int buttonWidth: 120
 
                 TabButton {
@@ -368,6 +442,10 @@ ApplicationWindow {
                 }
                 TabButton {
                     text: qsTr("Terminal")
+                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                }
+                TabButton {
+                    text: qsTr("Developer")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
             }

@@ -57,6 +57,8 @@ private slots:
     void on_posStopButton_clicked();
     void on_tempShowMosfetBox_toggled(bool checked);
     void on_tempShowMotorBox_toggled(bool checked);
+    void on_csvChooseDirButton_clicked();
+    void on_csvEnableLogBox_clicked(bool checked);
 
 private:
     Ui::PageRtData *ui;

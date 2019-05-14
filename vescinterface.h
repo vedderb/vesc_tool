@@ -88,6 +88,10 @@ public:
     void swdCancel();
     bool swdReboot();
 
+    Q_INVOKABLE bool openRtLogFile(QString outDirectory);
+    Q_INVOKABLE void closeRtLogFile();
+    Q_INVOKABLE bool isRtLogOpen();
+
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
     Q_INVOKABLE void storeBleName(QString address, QString name);
@@ -161,6 +165,7 @@ private:
     QHash<QString, QString> mBleNames;
     QVariantList mProfiles;
     QStringList mPairedUuids;
+    QFile mRtLogFile;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;

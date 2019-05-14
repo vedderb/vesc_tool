@@ -159,6 +159,12 @@ void PageRtData::setVesc(VescInterface *vesc)
 
 void PageRtData::timerSlot()
 {
+    if (mVesc) {
+        if (mVesc->isRtLogOpen() != ui->csvEnableLogBox->isChecked()) {
+            ui->csvEnableLogBox->setChecked(mVesc->isRtLogOpen());
+        }
+    }
+
     if (mUpdateValPlot) {
         int dataSize = mTempMosVec.size();
 
@@ -399,4 +405,21 @@ void PageRtData::on_tempShowMosfetBox_toggled(bool checked)
 void PageRtData::on_tempShowMotorBox_toggled(bool checked)
 {
     ui->tempPlot->graph(1)->setVisible(checked);
+}
+
+void PageRtData::on_csvChooseDirButton_clicked()
+{
+    ui->csvFileEdit->setText(QFileDialog::getExistingDirectory(this,
+                                                               "Choose CSV output directory"));
+}
+
+void PageRtData::on_csvEnableLogBox_clicked(bool checked)
+{
+    if (checked) {
+        if (mVesc) {
+            mVesc->openRtLogFile(ui->csvFileEdit->text());
+        }
+    } else {
+        mVesc->closeRtLogFile();
+    }
 }

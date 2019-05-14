@@ -3,7 +3,7 @@
 set -e
 
 export PATH=/opt/mxe2/usr/bin/:$PATH
-rm -rf build/win2/*
+rm -rf build/win/*
 
 # Original
 /opt/mxe2/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG += release_win build_original"

@@ -228,6 +228,61 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="tab_6">
+        <attribute name="title">
+         <string>Log</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>CSV</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="csvFileEdit"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="csvChooseDirButton">
+             <property name="toolTip">
+              <string>Choose output directory</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="csvEnableLogBox">
+             <property name="text">
+              <string>Enable Logging</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>384</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
      <item>

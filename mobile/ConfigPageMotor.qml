@@ -245,6 +245,11 @@ Item {
                 createEditorMc("foc_encoder_offset")
                 createEditorMc("foc_encoder_ratio")
                 createEditorMc("foc_encoder_inverted")
+                createEditorMc("foc_encoder_sin_gain")
+                createEditorMc("foc_encoder_sin_offset")
+                createEditorMc("foc_encoder_cos_gain")
+                createEditorMc("foc_encoder_cos_offset")
+                createEditorMc("foc_encoder_sincos_filter_constant")
                 break;
             case "Advanced":
                 createEditorMc("foc_f_sw")

@@ -26,6 +26,8 @@
 #include <utility.h>
 #include <cmath>
 #include <QRegularExpression>
+#include <QDateTime>
+#include <QDir>
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
@@ -162,11 +164,43 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mCommands, SIGNAL(ackReceived(QString)), this, SLOT(ackReceived(QString)));
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
+
+    connect(mCommands, &Commands::valuesReceived, [this](MC_VALUES v) {
+        if (mRtLogFile.isOpen()) {
+            auto t = QTime::currentTime();
+            QTextStream os(&mRtLogFile);
+            os << t.msecsSinceStartOfDay() << ";";
+            os << v.v_in << ";";
+            os << v.temp_mos << ";";
+            os << v.temp_mos_1 << ";";
+            os << v.temp_mos_2 << ";";
+            os << v.temp_mos_3 << ";";
+            os << v.temp_motor << ";";
+            os << v.current_motor << ";";
+            os << v.current_in << ";";
+            os << v.id << ";";
+            os << v.iq << ";";
+            os << v.rpm << ";";
+            os << v.duty_now << ";";
+            os << v.amp_hours << ";";
+            os << v.amp_hours_charged << ";";
+            os << v.watt_hours << ";";
+            os << v.watt_hours_charged << ";";
+            os << v.tachometer << ";";
+            os << v.tachometer_abs << ";";
+            os << v.position << ";";
+            os << v.fault_code << ";";
+            os << v.vesc_id << ";";
+            os << "\n";
+            os.flush();
+        }
+    });
 }
 
 VescInterface::~VescInterface()
 {
     storeSettings();
+    closeRtLogFile();
 }
 
 Commands *VescInterface::commands() const
@@ -709,6 +743,54 @@ bool VescInterface::swdReboot()
     }
 
     return true;
+}
+
+bool VescInterface::openRtLogFile(QString outDirectory)
+{
+    if (!QDir(outDirectory).exists()) {
+        if (outDirectory.startsWith("file:/")) {
+            outDirectory.remove(0, 6);
+        }
+    }
+
+    if (!QDir(outDirectory).exists()) {
+        emitMessageDialog("Log to file",
+                          "Output directory does not exist",
+                          false, false);
+        return false;
+    }
+
+    QDateTime d = QDateTime::currentDateTime();
+    mRtLogFile.setFileName(QString("%1/%2-%3-%4_%5:%6:%7.csv").
+                           arg(outDirectory).
+                           arg(d.date().year(), 2, 10, QChar('0')).
+                           arg(d.date().month(), 2, 10, QChar('0')).
+                           arg(d.date().day(), 2, 10, QChar('0')).
+                           arg(d.time().hour(), 2, 10, QChar('0')).
+                           arg(d.time().minute(), 2, 10, QChar('0')).
+                           arg(d.time().second(), 2, 10, QChar('0')));
+
+    bool res = mRtLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    if (!res) {
+        emitMessageDialog("Log to file",
+                          "Could not open file for writing.",
+                          false, false);
+    }
+
+    return res;
+}
+
+void VescInterface::closeRtLogFile()
+{
+    if (mRtLogFile.isOpen()) {
+        mRtLogFile.close();
+    }
+}
+
+bool VescInterface::isRtLogOpen()
+{
+    return mRtLogFile.isOpen();
 }
 
 #ifdef HAS_SERIALPORT

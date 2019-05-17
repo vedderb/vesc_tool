@@ -79,6 +79,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>CAN_STATUS_1_2</enumNames>
             <enumNames>CAN_STATUS_1_2_3</enumNames>
             <enumNames>CAN_STATUS_1_2_3_4</enumNames>
+            <enumNames>CAN_STATUS_1_2_3_4_5</enumNames>
         </send_can_status>
         <send_can_status_rate_hz>
             <longName>Can Status Rate</longName>

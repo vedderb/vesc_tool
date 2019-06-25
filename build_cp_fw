@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FWPATH="../../ARM/STM_Eclipse/BLDC_4_ChibiOS/build_all"
+FWPATH="../bldc/build_all"
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 cd $FWPATH

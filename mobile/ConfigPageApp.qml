@@ -135,6 +135,7 @@ Item {
                 createEditorApp("app_ppm_conf.pid_max_erpm")
                 createEditorApp("app_ppm_conf.ramp_time_pos")
                 createEditorApp("app_ppm_conf.ramp_time_neg")
+                createEditorApp("app_ppm_conf.max_erpm_for_dir")
                 addSeparator("Multiple VESCs over CAN-bus")
                 createEditorApp("app_ppm_conf.multi_esc")
                 createEditorApp("app_ppm_conf.tc")

@@ -548,6 +548,7 @@ Item {
                                 paramsConf.addEditorApp("app_ppm_conf.ramp_time_pos")
                                 paramsConf.addEditorApp("app_ppm_conf.ramp_time_neg")
                                 paramsConf.addEditorApp("app_ppm_conf.pid_max_erpm")
+                                paramsConf.addEditorApp("app_ppm_conf.max_erpm_for_dir")
                                 paramsConf.addSeparator("Multiple VESCs over CAN-bus")
                                 paramsConf.addEditorApp("app_ppm_conf.tc")
                                 paramsConf.addEditorApp("app_ppm_conf.tc_max_diff")

@@ -339,7 +339,7 @@ Item {
                             label: CheckBox {
                                 id: overrideBattBox
                                 checked: false
-                                text: qsTr("Override (Advanced, 0 = defaults)")
+                                text: qsTr("Advanced (0 = defaults)")
 
                                 onToggled: {
                                     if (!checked) {
@@ -361,7 +361,7 @@ Item {
                                     realFrom: 0
                                     realTo: -9999
                                     realValue: 0
-                                    prefix: "Min Current "
+                                    prefix: "Battery Current Regen: "
                                     suffix: " A"
                                 }
 
@@ -373,7 +373,7 @@ Item {
                                     realFrom: 0
                                     realTo: 9999
                                     realValue: 0
-                                    prefix: "Max Current: "
+                                    prefix: "Battery Current Max: "
                                     suffix: " A"
                                 }
                             }

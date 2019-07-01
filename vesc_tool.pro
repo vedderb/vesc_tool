@@ -23,7 +23,7 @@ DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
 CONFIG += c++11
 
 # Build mobile GUI
-#CONFIG += build_mobile
+CONFIG += build_mobile
 
 # Bluetooth available
 DEFINES += HAS_BLUETOOTH

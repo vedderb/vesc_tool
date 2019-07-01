@@ -618,6 +618,7 @@ Item {
 
         onAccepted: {
             stackLayout.currentIndex++
+            updateButtonText()
         }
     }
 

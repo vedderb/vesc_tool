@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.13
+VT_VERSION = 1.14
 VT_INTRO_VERSION = 1
 
 # Ubuntu 18.04
@@ -77,6 +77,15 @@ release_lin {
     MOC_DIR = build/lin/obj
     RCC_DIR = build/lin/obj
     UI_DIR = build/lin/obj
+}
+
+release_macos {
+    # brew install qt
+    DESTDIR = build/macos
+    OBJECTS_DIR = build/macos/obj
+    MOC_DIR = build/macos/obj
+    RCC_DIR = build/macos/obj
+    UI_DIR = build/macos/obj
 }
 
 release_android {

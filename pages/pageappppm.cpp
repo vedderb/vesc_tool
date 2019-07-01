@@ -62,6 +62,8 @@ void PageAppPpm::setVesc(VescInterface *vesc)
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.multi_esc");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc_max_diff");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.max_erpm_for_dir_active");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.max_erpm_for_dir");
 
         ui->mappingTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_start");
         ui->mappingTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_end");

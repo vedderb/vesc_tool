@@ -87,7 +87,7 @@ Item {
                             color: "#ffffff"
                             linkColor: "lightblue"
                             verticalAlignment: Text.AlignVCenter
-                            anchors.fill: parent
+                            width: parent.parent.width - 20
                             wrapMode: Text.WordWrap
                             textFormat: Text.RichText
                             onLinkActivated: {
@@ -123,7 +123,7 @@ Item {
                             color: "#ffffff"
                             linkColor: "lightblue"
                             verticalAlignment: Text.AlignVCenter
-                            anchors.fill: parent
+                            width: parent.parent.width - 20
                             wrapMode: Text.WordWrap
                             textFormat: Text.RichText
                             onLinkActivated: {

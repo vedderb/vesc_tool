@@ -310,7 +310,7 @@ Item {
                                 prefix: "Motor Poles    : "
 
                                 onRealValueChanged: {
-                                    mMcConf.updateParamInt("si_motor_poles", realValue, 0)
+                                    mMcConf.updateParamInt("si_motor_poles", realValue, null)
                                 }
                             }
                         }

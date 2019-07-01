@@ -92,7 +92,6 @@ QVariantMap FwHelper::getBootloaders(QString hw)
 bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
                               bool isBootloader, bool checkName, bool fwdCan)
 {
-    // TODO: Should this be removed on android?
     if (filename.startsWith("file:/")) {
         filename.remove(0, 6);
     }

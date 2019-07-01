@@ -27,7 +27,6 @@ import Vedder.vesc.configparams 1.0
 
 Item {
     property Commands mCommands: VescIf.commands()
-    property var editorsVisible: []
     property bool isHorizontal: width > height
 
     ParamEditors {
@@ -44,7 +43,7 @@ Item {
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         x: 10
-        y: parent.height / 2 - height / 2
+        y: (parent.height - height) / 2
         parent: ApplicationWindow.overlay
 
         PpmMap {
@@ -93,21 +92,20 @@ Item {
     }
 
     function addSeparator(text) {
-        editorsVisible.push(editors.createSeparator(scrollCol, text))
-        editorsVisible[editorsVisible.length - 1].Layout.columnSpan = isHorizontal ? 2 : 1
+        var e = editors.createSeparator(scrollCol, text)
+        e.Layout.columnSpan = isHorizontal ? 2 : 1
     }
 
     function destroyEditors() {
-        for (var i = 0;i < editorsVisible.length;i++) {
-            editorsVisible[i].destroy();
+        for(var i = scrollCol.children.length;i > 0;i--) {
+            scrollCol.children[i - 1].destroy(1) // Only works with delay on android, seems to be a bug
         }
-        editorsVisible = []
     }
 
     function createEditorApp(param) {
-        editorsVisible.push(editors.createEditorApp(scrollCol, param))
-        editorsVisible[editorsVisible.length - 1].Layout.preferredWidth = 500
-        editorsVisible[editorsVisible.length - 1].Layout.fillsWidth = true
+        var e = editors.createEditorApp(scrollCol, param)
+        e.Layout.preferredWidth = 500
+        e.Layout.fillsWidth = true
     }
 
     function updateEditors() {

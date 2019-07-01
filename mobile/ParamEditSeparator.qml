@@ -23,7 +23,7 @@ import QtQuick.Layouts 1.3
 
 Item {
     Layout.fillWidth: true
-    height: name.implicitHeight + 8
+    height: 25
 
     property string sepName: ""
 

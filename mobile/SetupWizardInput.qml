@@ -609,8 +609,8 @@ Item {
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
-        parent: ApplicationWindow.overlay
 
+        parent: ApplicationWindow.overlay
         x: 10
         y: dialog.y + dialog.height / 2 - height / 2
 

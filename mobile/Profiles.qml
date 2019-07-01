@@ -24,15 +24,12 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 
 Item {
-    property var profilesVisible: []
-
     function updateVisibleProfiles() {
         var i = 0
 
-        for (i = 0;i < profilesVisible.length;i++) {
-            profilesVisible[i].destroy();
+        for(var i = scrollCol.children.length;i > 0;i--) {
+            scrollCol.children[i - 1].destroy(1) // Only works with delay on android, seems to be a bug
         }
-        profilesVisible = []
 
         var prof = VescIf.getProfiles()
         for (i = 0;i < prof.length;i++) {
@@ -42,13 +39,11 @@ Item {
             disp.editRequested.connect(handleProfileEdit)
             disp.deleteRequested.connect(handleProfileDelete)
             disp.checkActive()
-            profilesVisible.push(disp)
         }
 
-        profilesVisible.push(Qt.createQmlObject(
-                                 'import QtQuick 2.7; import QtQuick.Layouts 1.3; Rectangle {Layout.fillHeight: true}',
-                                 scrollCol,
-                                 "spacer1"))
+        Qt.createQmlObject(
+                    'import QtQuick 2.7; import QtQuick.Layouts 1.3; Rectangle {Layout.fillHeight: true}',
+                    scrollCol, "spacer1")
     }
 
     function handleProfileEdit(index) {

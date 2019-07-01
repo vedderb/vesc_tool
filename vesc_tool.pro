@@ -8,6 +8,12 @@
 VT_VERSION = 1.13
 VT_INTRO_VERSION = 1
 
+VT_ANDROID_VERSION_ARMV7 = 18
+VT_ANDROID_VERSION_ARM64 = 19
+VT_ANDROID_VERSION_X86 = 20
+
+VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
+
 # Ubuntu 18.04
 # sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev
 
@@ -57,6 +63,27 @@ android: QT += androidextras
 
 android: TARGET = vesc_tool
 !android: TARGET = vesc_tool_$$VT_VERSION
+
+
+ANDROID_VERSION = 1
+
+android:contains(QT_ARCH, i386) {
+    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
+}
+
+contains(ANDROID_TARGET_ARCH, arm64-v8a) {
+    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_ARM64
+}
+
+contains(ANDROID_TARGET_ARCH, armeabi-v7a) {
+    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_ARMV7
+}
+
+android: {
+    manifest.input = $$PWD/android/AndroidManifest.xml.in
+    manifest.output = $$PWD/android/AndroidManifest.xml
+    QMAKE_SUBSTITUTES += manifest
+}
 
 TEMPLATE = app
 

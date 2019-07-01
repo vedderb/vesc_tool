@@ -747,10 +747,12 @@ bool VescInterface::swdReboot()
 
 bool VescInterface::openRtLogFile(QString outDirectory)
 {
+    if (outDirectory.startsWith("file:/")) {
+        outDirectory.remove(0, 6);
+    }
+
     if (!QDir(outDirectory).exists()) {
-        if (outDirectory.startsWith("file:/")) {
-            outDirectory.remove(0, 6);
-        }
+        QDir().mkpath(outDirectory);
     }
 
     if (!QDir(outDirectory).exists()) {

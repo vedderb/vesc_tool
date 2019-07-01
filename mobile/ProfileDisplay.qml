@@ -33,7 +33,7 @@ Item {
     signal editRequested(int index)
     signal deleteRequested(int index)
 
-    height: column.implicitHeight + 2 * column.anchors.margins
+    implicitHeight: column.implicitHeight + 2 * column.anchors.margins
     Layout.fillWidth: true
 
     function setFromMcConfTemp(cfg) {

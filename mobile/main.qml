@@ -46,6 +46,8 @@ ApplicationWindow {
         if (!VescIf.isIntroDone()) {
             introWizard.openDialog()
         }
+
+        Utility.keepScreenOn(VescIf.keepScreenOn())
     }
 
     SetupWizardIntro {
@@ -56,6 +58,10 @@ ApplicationWindow {
         id: controls
         parentWidth: appWindow.width
         parentHeight: appWindow.height - footer.height - tabBar.height
+    }
+
+    Settings {
+        id: settings
     }
 
     Drawer {
@@ -117,6 +123,17 @@ ApplicationWindow {
                 // Spacer
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: "Settings"
+                flat: true
+
+                onClicked: {
+                    drawer.close()
+                    settings.openDialog()
+                }
             }
 
             Button {

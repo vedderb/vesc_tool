@@ -148,6 +148,9 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         mSettings.endArray();
     }
 
+    mUseImperialUnits = mSettings.value("useImperialUnits", false).toBool();
+    mKeepScreenOn = mSettings.value("keepScreenOn", true).toBool();
+
     mCommands->setAppConfig(mAppConfig);
     mCommands->setMcConfig(mMcConfig);
 
@@ -311,6 +314,9 @@ void VescInterface::storeSettings()
         mSettings.setValue("uuid", mPairedUuids.at(i));
     }
     mSettings.endArray();
+
+    mSettings.setValue("useImperialUnits", mUseImperialUnits);
+    mSettings.setValue("keepScreenOn", mKeepScreenOn);
 }
 
 QVariantList VescInterface::getProfiles()
@@ -793,6 +799,26 @@ void VescInterface::closeRtLogFile()
 bool VescInterface::isRtLogOpen()
 {
     return mRtLogFile.isOpen();
+}
+
+bool VescInterface::useImperialUnits()
+{
+    return mUseImperialUnits;
+}
+
+void VescInterface::setUseImperialUnits(bool useImperialUnits)
+{
+    mUseImperialUnits = useImperialUnits;
+}
+
+bool VescInterface::keepScreenOn()
+{
+    return mKeepScreenOn;
+}
+
+void VescInterface::setKeepScreenOn(bool on)
+{
+    mKeepScreenOn = on;
 }
 
 #ifdef HAS_SERIALPORT

@@ -542,7 +542,11 @@ Item {
                     if (stackLayout.currentIndex == 0) {
                         startWarningDialog.open()
                     } else if (stackLayout.currentIndex == 1) {
-                        stackLayout.currentIndex++
+                        if (overrideBattBox.checked) {
+                            stackLayout.currentIndex++
+                        } else {
+                            batteryWarningDialog.open()
+                        }
                     } else if (stackLayout.currentIndex == 2) {
                         if (stackLayout.currentIndex == (stackLayout.count - 2)) {
                             if (VescIf.isPortConnected()) {
@@ -614,6 +618,36 @@ Item {
             text: "Warning: Choosing a significantly too large motor for detection is likely to destroy the motor " +
                   "during detection. It is important to choose a motor size similar to the motor you are using. " +
                   "Are you sure that your motor selection is within range?"
+        }
+
+        onAccepted: {
+            stackLayout.currentIndex++
+            updateButtonText()
+        }
+    }
+
+    Dialog {
+        id: batteryWarningDialog
+        property int indexNow: 0
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        modal: true
+        focus: true
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        title: "Battery Settings"
+        x: 10
+        y: 10 + parent.height / 2 - height / 2
+        parent: ApplicationWindow.overlay
+
+        Text {
+            color: "#ffffff"
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text: "Warning: You have not specified battery current limits, which essentially only limits " +
+                  "the current if the voltage drops too much. This is fine in most cases, but check with " +
+                  "your battery and BMS specification to be safe. Keep in mind that you have to divide the " +
+                  "battery current settings by the number of VESCs."
         }
 
         onAccepted: {

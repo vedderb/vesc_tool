@@ -34,6 +34,7 @@
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
 #include <QAndroidJniObject>
+#include <QAndroidJniEnvironment>
 #endif
 
 Utility::Utility(QObject *parent) : QObject(parent)
@@ -232,6 +233,34 @@ bool Utility::requestFilePermission()
 #endif
 #else
     return true;
+#endif
+}
+
+void Utility::keepScreenOn(bool on)
+{
+#ifdef Q_OS_ANDROID
+    QtAndroid::runOnAndroidThread([on]{
+        QAndroidJniObject activity = QtAndroid::androidActivity();
+        if (activity.isValid()) {
+            QAndroidJniObject window =
+                    activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+
+            if (window.isValid()) {
+                const int FLAG_KEEP_SCREEN_ON = 128;
+                if (on) {
+                    window.callMethod<void>("addFlags", "(I)V", FLAG_KEEP_SCREEN_ON);
+                } else {
+                    window.callMethod<void>("clearFlags", "(I)V", FLAG_KEEP_SCREEN_ON);
+                }
+            }
+        }
+        QAndroidJniEnvironment env;
+        if (env->ExceptionCheck()) {
+            env->ExceptionClear();
+        }
+    });
+#else
+    (void)on;
 #endif
 }
 

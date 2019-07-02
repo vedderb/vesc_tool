@@ -92,6 +92,11 @@ public:
     Q_INVOKABLE void closeRtLogFile();
     Q_INVOKABLE bool isRtLogOpen();
 
+    Q_INVOKABLE bool useImperialUnits();
+    Q_INVOKABLE void setUseImperialUnits(bool useImperialUnits);
+    Q_INVOKABLE bool keepScreenOn();
+    Q_INVOKABLE void setKeepScreenOn(bool on);
+
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
     Q_INVOKABLE void storeBleName(QString address, QString name);
@@ -211,6 +216,10 @@ private:
     bool mIgnoreCanChange;
 
     QVector<int> mCanDevsLast;
+
+    // Other settings
+    bool mUseImperialUnits;
+    bool mKeepScreenOn;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

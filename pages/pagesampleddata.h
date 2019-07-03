@@ -58,6 +58,7 @@ private slots:
     void on_rescaleButton_clicked();
     void on_filterLogScaleBox_toggled(bool checked);
     void on_plotModeBox_currentIndexChanged(int index);
+    void on_saveDataButton_clicked();
 
 private:
     Ui::PageSampledData *ui;

@@ -1,3 +1,7 @@
+== 1.16 ==
+* Added support to export sampled data as CSV.
+* Added erase only button to SWD prog.
+
 == 1.15 ==
 * Keep screen on setting on android.
 * Added support for imperial units.

@@ -171,9 +171,20 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="eraseFlashButton">
+       <property name="text">
+        <string>Erase Only</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../res.qrc">
+         <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="uploadButton">
        <property name="text">
-        <string>Upload</string>
+        <string>Erase &amp;&amp; Upload</string>
        </property>
        <property name="icon">
         <iconset resource="../res.qrc">

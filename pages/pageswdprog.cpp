@@ -196,6 +196,7 @@ void PageSwdProg::fwUploadStatus(const QString &status, double progress, bool is
     ui->display->setValue(progress * 100.0);
 
     ui->connectButton->setEnabled(!isOngoing);
+    ui->eraseFlashButton->setEnabled(!isOngoing);
     ui->disconnectButton->setEnabled(!isOngoing);
     ui->uploadButton->setEnabled(!isOngoing);
 }
@@ -311,4 +312,22 @@ void PageSwdProg::addSwdFw(QString name, QString path, uint32_t addr, QString bl
     fw.bootloaderAddr = blAddr;
     item->setData(Qt::UserRole, QVariant::fromValue(fw));
     ui->fwList->insertItem(ui->fwList->count(), item);
+}
+
+void PageSwdProg::on_eraseFlashButton_clicked()
+{
+    if (mVesc) {
+        if (!mVesc->isPortConnected()) {
+            QMessageBox::critical(this,
+                                  tr("Connection Error"),
+                                  tr("The VESC is not connected."));
+            return;
+        }
+
+        if (mVesc->swdEraseFlash()) {
+            QMessageBox::information(this,
+                                  tr("Erase Flash"),
+                                  tr("The flash memory on the target was erased successfully!"));
+        }
+    }
 }

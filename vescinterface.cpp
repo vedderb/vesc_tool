@@ -33,6 +33,10 @@
 #include <QSerialPortInfo>
 #endif
 
+#ifdef HAS_CANBUS
+#include <QCanBus>
+#endif
+
 #ifndef VT_INTRO_VERSION
 #define VT_INTRO_VERSION 1
 #endif
@@ -81,6 +85,16 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             this, SLOT(serialDataAvailable()));
     connect(mSerialPort, SIGNAL(error(QSerialPort::SerialPortError)),
             this, SLOT(serialPortError(QSerialPort::SerialPortError)));
+#endif
+
+    // CANbus
+#ifdef HAS_CANBUS
+    m_canDevice = nullptr;
+    mLastCanDeviceInterface = mSettings.value("CANbusDeviceInterface", "can0").toString();
+    mLastCanDeviceBitrate = mSettings.value("CANbusDeviceBitrate", 500000).toInt();
+    mLastCanBackend = mSettings.value("CANbusBackend", "socketcan").toString();
+    mLastCanDeviceID = mSettings.value("CANbusLastDeviceID", 01).toInt();
+    mCANbusScanning = false;
 #endif
 
     // TCP
@@ -833,6 +847,18 @@ int VescInterface::getLastSerialBaud() const
 }
 #endif
 
+#ifdef HAS_CANBUS
+QString VescInterface::getLastCANbusInterface() const
+{
+    return mLastCanDeviceInterface;
+}
+
+int VescInterface::getLastCANbusBitrate() const
+{
+    return mLastCanDeviceBitrate;
+}
+#endif
+
 #ifdef HAS_BLUETOOTH
 BleUart *VescInterface::bleDevice()
 {
@@ -869,6 +895,12 @@ bool VescInterface::isPortConnected()
     }
 #endif
 
+#ifdef HAS_CANBUS
+    if (isCANbusConnected() && !mCANbusScanning) {
+        res = true;
+    }
+#endif
+
     if (mTcpConnected) {
         res = true;
     }
@@ -888,6 +920,15 @@ void VescInterface::disconnectPort()
     if(mSerialPort->isOpen()) {
         mSerialPort->close();
         updateFwRx(false);
+    }
+#endif
+
+#ifdef HAS_CANBUS
+    if(isCANbusConnected())
+    {
+        m_canDevice->disconnectDevice();
+        delete m_canDevice;
+        m_canDevice = nullptr;
     }
 #endif
 
@@ -998,6 +1039,13 @@ QString VescInterface::getConnectedPortName()
 #ifdef HAS_SERIALPORT
     if (mSerialPort->isOpen()) {
         res = tr("Connected (serial) to %1").arg(mSerialPort->portName());
+        connected = true;
+    }
+#endif
+
+#ifdef HAS_CANBUS
+    if (isCANbusConnected()) {
+        res = tr("Connected (CAN bus) to %1").arg(mLastCanDeviceInterface);
         connected = true;
     }
 #endif
@@ -1116,6 +1164,111 @@ QList<VSerialInfo_t> VescInterface::listSerialPorts()
     return res;
 }
 
+QList<QString> VescInterface::listCANbusInterfaces()
+{
+    QList<QString> res;
+
+#ifdef HAS_CANBUS
+
+#ifdef Q_OS_UNIX
+    QFile devicesFile("/proc/net/dev");
+    if (devicesFile.open(QIODevice::ReadOnly))
+    {
+        QTextStream in(&devicesFile);
+        do{
+            QString line = in.readLine();
+            for ( int i = 0; i<10; i++)
+            {
+                QString interface = QString("can").append(QString::number(i));
+                if (line.contains(interface))
+                    res.append(interface);
+            }
+        }while (!in.atEnd());
+
+        devicesFile.close();
+    }
+#endif
+
+#endif
+
+    return res;
+}
+
+bool VescInterface::connectCANbus(QString backend, QString interface, int bitrate)
+{
+#ifdef HAS_CANBUS
+    QString errorString;
+
+    mCANbusScanning = false;
+    m_canDevice = QCanBus::instance()->createDevice(backend, interface, &errorString);
+    if (!m_canDevice) {
+        emit statusMessage(tr("Error creating device '%1' using backend '%2', reason: '%3'").arg(mLastCanDeviceInterface).arg(mLastCanBackend).arg(errorString), false);
+        return false;
+    }
+
+    connect(m_canDevice, SIGNAL(framesReceived()), this, SLOT(CANbusDataAvailable()));
+    connect(m_canDevice, SIGNAL(errorOccurred(QCanBusDevice::CanBusError)), this, SLOT(CANbusError(QCanBusDevice::CanBusError)));
+
+    m_canDevice->setConfigurationParameter(QCanBusDevice::LoopbackKey, false);
+    m_canDevice->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, false);
+    // bitrate change not supported yet by socketcan. It is possible to set the rate when
+    // configuring the CAN network interface using the ip link command.
+    // m_canDevice->setConfigurationParameter(QCanBusDevice::BitRateKey, bitrate);
+    m_canDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, false);
+    m_canDevice->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, false);
+
+    if (!m_canDevice->connectDevice()) {
+        emit statusMessage(tr("Connection error: %1").arg(m_canDevice->errorString()), false);
+
+        delete m_canDevice;
+        m_canDevice = nullptr;
+        return false;
+    }
+
+    QThread::msleep(100);
+
+    mLastCanBackend = backend;
+    mLastCanDeviceInterface = interface;
+    mLastCanDeviceBitrate = bitrate;
+
+    mSettings.setValue("CANbusBackend", mLastCanBackend);
+    mSettings.setValue("CANbusDeviceInterface", mLastCanDeviceInterface);
+    mSettings.setValue("CANbusDeviceBitrate", mLastCanDeviceBitrate);
+    setLastConnectionType(CONN_CANBUS);
+    return true;
+#else
+    (void)backend;
+    (void)interface;
+    (void)bitrate;
+    emit messageDialog(tr("Connect serial"),
+                       tr("CAN bus support is not enabled in this build "
+                          "of VESC Tool."),
+                       false, false);
+    return false;
+#endif
+}
+
+bool VescInterface::isCANbusConnected()
+{
+#ifdef HAS_CANBUS
+    if (m_canDevice != nullptr)
+    {
+        if (m_canDevice->state() == QCanBusDevice::ConnectedState)
+            return true;
+    }
+#endif
+    return false;
+}
+
+void VescInterface::setCANbusReceiverID(int node_ID)
+{
+#ifdef HAS_CANBUS
+    mLastCanDeviceID = node_ID;
+#else
+    (void)node_ID;
+#endif
+}
+
 void VescInterface::connectTcp(QString server, int port)
 {
     mLastTcpServer = server;
@@ -1155,6 +1308,32 @@ bool VescInterface::isAutoconnectOngoing() const
 double VescInterface::getAutoconnectProgress() const
 {
     return mAutoconnectProgress;
+}
+
+void VescInterface::scanCANbus()
+{
+#ifdef HAS_CANBUS
+    if (!isCANbusConnected()) {
+        return;
+    }
+
+    mCANbusScanning = true;
+    mCanNodesID.clear();
+
+    QCanBusFrame frame;
+    frame.setExtendedFrameFormat(true);
+    frame.setFrameType(QCanBusFrame::UnknownFrame);
+    frame.setFlexibleDataRateFormat(false);
+    frame.setBitrateSwitch(false);
+
+    for(int i = 0; i<254; i++)
+    {
+        frame.setFrameId(i | (uint32_t)CAN_PACKET_PING << 8);
+        m_canDevice->writeFrame(frame);
+        QThread::msleep(15);
+    }
+#endif
+    return;
 }
 
 QVector<int> VescInterface::scanCan()
@@ -1233,6 +1412,110 @@ void VescInterface::serialPortError(QSerialPort::SerialPortError error)
 }
 #endif
 
+#ifdef HAS_CANBUS
+void VescInterface::CANbusDataAvailable()
+{
+    QCanBusFrame frame;
+    QByteArray payload;
+    unsigned short rxbuf_len = 0;
+    char commands_send;
+
+    while (m_canDevice->framesAvailable() > 0) {
+        frame = m_canDevice->readFrame();
+        if (frame.isValid() && (frame.frameType() == QCanBusFrame::DataFrame))
+        {
+            int packet_type = frame.frameId() >> 8;
+            payload = frame.payload();
+
+            switch(packet_type)
+            {
+            case CAN_PACKET_PONG:
+                mCanNodesID.append(payload[0]);
+                emit CANbusNewNode(payload[0]);
+                break;
+            case CAN_PACKET_PROCESS_SHORT_BUFFER:
+                payload.remove(0,2);
+                mPacket->processData(payload);
+                break;
+
+            case CAN_PACKET_FILL_RX_BUFFER:
+                payload.remove(0,1);    // discard index
+                mCanRxBuffer.append(payload);
+                break;
+            case CAN_PACKET_FILL_RX_BUFFER_LONG:
+                payload.remove(0,2);    // discard the 2 byte index
+                mCanRxBuffer.append(payload);
+                break;
+            case CAN_PACKET_PROCESS_RX_BUFFER:
+                commands_send = payload[1];
+                rxbuf_len = (unsigned short)payload[2] << 8 | (unsigned char)payload[3];
+
+                if (rxbuf_len > 512) {
+                    return;
+                }
+                unsigned char len_high = payload[2];
+                unsigned char len_low = payload[3];
+
+                unsigned char crc_high = payload[4];
+                unsigned char crc_low = payload[5];
+
+                if (Packet::crc16((const unsigned char*)mCanRxBuffer.data(), rxbuf_len) == ((unsigned short) crc_high << 8
+                                | (unsigned short) crc_low)) {
+                    switch (commands_send) {
+                        case 0:
+                            break;
+                        case 1:
+                            // add stop, start, length and crc for the packet decoder
+                            if (len_high == 0)
+                            {
+                                mCanRxBuffer.prepend((unsigned char)len_low);
+                                mCanRxBuffer.prepend((unsigned char)2);
+                            }
+                            else
+                            {
+                                mCanRxBuffer.prepend((unsigned char)len_low);
+                                mCanRxBuffer.prepend((unsigned char)len_high);
+                                mCanRxBuffer.prepend((unsigned char)3); //size is 16 bit long
+                            }
+                            mCanRxBuffer.append((unsigned char)crc_high);
+                            mCanRxBuffer.append((unsigned char)crc_low);
+                            mCanRxBuffer.append((unsigned char)3);
+                            mPacket->processData(mCanRxBuffer);
+                            break;
+                        case 2:
+                            //commands_process_packet(rx_buffer, rxbuf_len, 0);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                mCanRxBuffer.clear();
+                break;
+            }
+        }
+    }
+}
+
+void VescInterface::CANbusError(QCanBusDevice::CanBusError error)
+{
+    QString message;
+    switch (error) {
+    case QCanBusDevice::NoError:
+        break;
+
+    default:
+        message = "CAN bus error: " + m_canDevice->errorString();
+        break;
+    }
+
+    if(!message.isEmpty()) {
+        emit statusMessage(message, false);
+        m_canDevice->disconnectDevice();
+        updateFwRx(false);
+    }
+}
+#endif
+
 void VescInterface::tcpInputConnected()
 {
     mSettings.setValue("tcp_server", mLastTcpServer);
@@ -1280,6 +1563,14 @@ void VescInterface::timerSlot()
     // when using QMessageBox.
 #ifdef HAS_SERIALPORT
     serialDataAvailable();
+#endif
+
+#ifdef HAS_CANBUS
+    if (mCanDeviceInterfaces != listCANbusInterfaces())
+    {
+        mCanDeviceInterfaces = listCANbusInterfaces();
+        emit CANbusInterfaceListUpdated();
+    }
 #endif
 
     if (!mIgnoreCanChange) {
@@ -1351,6 +1642,86 @@ void VescInterface::packetDataToSend(QByteArray &data)
 #ifdef HAS_SERIALPORT
     if (mSerialPort->isOpen()) {
         mSerialPort->write(data);
+    }
+#endif
+
+#ifdef HAS_CANBUS
+    if (isCANbusConnected())
+    {
+        //prepare packet
+        QCanBusFrame frame;
+        frame.setExtendedFrameFormat(true);
+        frame.setFrameType(QCanBusFrame::UnknownFrame);
+        frame.setFlexibleDataRateFormat(false);
+        frame.setBitrateSwitch(false);
+
+        if (data.size() <= 6)    // send packet in a single frame
+        {
+            data[0] = 254;   //replace start byte with the VESC Tool ID in the bus
+            data[1] = 0;   //replace length byte with 0
+            data.truncate(data.size() - 3); //Remove crc_high, crc_low and stop byte
+
+            frame.setFrameId(mLastCanDeviceID | (uint32_t)CAN_PACKET_PROCESS_SHORT_BUFFER << 8);
+            frame.setPayload(data);
+
+            m_canDevice->writeFrame(frame);
+        }
+        else
+        {
+            //remove start byte, length, crc and stop
+            data.remove(0,3);
+            data.truncate(data.size() - 3);
+
+            unsigned int len = data.size();
+            unsigned short crc = Packet::crc16((const unsigned char*)data.data(), len);
+            QByteArray payload;
+            unsigned int end_a = 0;
+
+            for (unsigned int i = 0;i < len;i += 7) {
+                if (i > 255) {
+                    break;
+                }
+
+                end_a = i + 7;
+
+                payload[0] = i;
+                payload.append(data.left(7));
+                data.remove(0,7);
+                frame.setPayload(payload);
+                frame.setFrameId(mLastCanDeviceID | (uint32_t)CAN_PACKET_FILL_RX_BUFFER << 8);
+
+                m_canDevice->writeFrame(frame);
+                m_canDevice->waitForFramesWritten(100);
+                QThread::msleep(10);
+                payload.clear();
+            }
+
+            for (unsigned int i = end_a;i < len;i += 6) {
+                payload[0] = i >> 8;
+                payload[1] = i & 0xFF;
+
+                payload.append(data.left(6));
+                data.remove(0,6);
+                frame.setPayload(payload);
+                frame.setFrameId(mLastCanDeviceID | (uint32_t)CAN_PACKET_FILL_RX_BUFFER_LONG << 8);
+
+                m_canDevice->writeFrame(frame);
+                m_canDevice->waitForFramesWritten(100);
+                QThread::msleep(10);
+                payload.clear();
+            }
+
+            payload[0] = 254; //vesc tool node ID
+            payload[1] = 2; //process
+            payload[2] = len >> 8;
+            payload[3] = len & 0xFF;
+            payload[4] = crc >> 8;
+            payload[5] = crc & 0xFF;
+            frame.setPayload(payload);
+            frame.setFrameId(mLastCanDeviceID | (uint32_t)CAN_PACKET_PROCESS_RX_BUFFER << 8);
+
+            m_canDevice->writeFrame(frame);
+        }
     }
 #endif
 

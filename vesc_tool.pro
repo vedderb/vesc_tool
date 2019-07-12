@@ -28,6 +28,9 @@ CONFIG += c++11
 # Bluetooth available
 DEFINES += HAS_BLUETOOTH
 
+# CAN bus available
+DEFINES += HAS_CANBUS
+
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
 
@@ -53,6 +56,10 @@ QT       += quickcontrols2
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
+}
+
+contains(DEFINES, HAS_CANBUS) {
+    QT       += serialbus
 }
 
 contains(DEFINES, HAS_BLUETOOTH) {

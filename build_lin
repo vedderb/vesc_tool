@@ -1,5 +1,6 @@
 #!/bin/bash
-
+echo "this script is very dangerous and will delete all files in ../.. if you don't have build/lin (which it deletes)"
+exit
 # https://github.com/LairdCP/UwTerminalX/wiki/Compiling-Qt-Statically
 # https://wiki.qt.io/Building_Qt_5_from_Git
 

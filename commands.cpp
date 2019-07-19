@@ -1061,6 +1061,7 @@ void Commands::pingCan()
     mTimeoutPingCan = 500;
 
     VByteArray vb;
+
     vb.vbAppendInt8(COMM_PING_CAN);
     emitData(vb);
 }

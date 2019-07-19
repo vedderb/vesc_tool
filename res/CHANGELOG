@@ -1,3 +1,7 @@
+== 1.17 ==
+* FOC wizard motor pole setting now only allows multiples of two.
+* Native CAN-bus support.
+
 == 1.16 ==
 * Added support to export sampled data as CSV.
 * Added erase only button to SWD prog.

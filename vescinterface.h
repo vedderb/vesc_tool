@@ -221,7 +221,7 @@ private:
 #endif
 
 #ifdef HAS_CANBUS
-    QCanBusDevice *m_canDevice;
+    QCanBusDevice *mCanDevice;
     QString mLastCanDeviceInterface;
     int mLastCanDeviceBitrate;
     QString mLastCanBackend;

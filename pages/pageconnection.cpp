@@ -89,8 +89,10 @@ void PageConnection::setVesc(VescInterface *vesc)
     ui->CANbusInterfaceBox->clear();
     QList<QString> interfaces = mVesc->listCANbusInterfaces();
 
-    for(int i = 0; i<interfaces.size(); i++)
+    for(int i = 0;i < interfaces.size();i++) {
         ui->CANbusInterfaceBox->addItem(interfaces.at(i), interfaces.at(i));
+    }
+
     ui->CANbusInterfaceBox->setCurrentIndex(0);
 #endif
 
@@ -198,8 +200,10 @@ void PageConnection::CANbusInterfaceListUpdated()
     ui->CANbusInterfaceBox->clear();
     QList<QString> interfaces = mVesc->listCANbusInterfaces();
 
-    for(int i = 0; i<interfaces.size(); i++)
+    for(int i = 0; i<interfaces.size(); i++) {
         ui->CANbusInterfaceBox->addItem(interfaces.at(i), interfaces.at(i));
+    }
+
     ui->CANbusInterfaceBox->setCurrentIndex(0);
 }
 
@@ -250,11 +254,13 @@ void PageConnection::on_serialConnectButton_clicked()
 void PageConnection::on_CANbusScanButton_clicked()
 {
     if (mVesc) {
+        ui->CANbusScanButton->setEnabled(false);
         mVesc->connectCANbus("socketcan", ui->CANbusInterfaceBox->currentData().toString(),
                              ui->CANbusBitrateBox->value());
 
         ui->CANbusTargetIdBox->clear();
         mVesc->scanCANbus();
+        ui->CANbusScanButton->setEnabled(true);
     }
 }
 

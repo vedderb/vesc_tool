@@ -307,6 +307,7 @@ Item {
                                 realFrom: 2
                                 realTo: 512
                                 realValue: 2
+                                realStepSize: 2
                                 prefix: "Motor Poles    : "
 
                                 onRealValueChanged: {

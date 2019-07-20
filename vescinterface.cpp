@@ -1653,44 +1653,55 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
 #ifdef HAS_CANBUS
     if (isCANbusConnected()) {
-        //prepare packet
         QCanBusFrame frame;
         frame.setExtendedFrameFormat(true);
         frame.setFrameType(QCanBusFrame::UnknownFrame);
         frame.setFlexibleDataRateFormat(false);
         frame.setBitrateSwitch(false);
 
-        if (data.size() <= 6) { // send packet in a single frame
-            data[0] = 254;   // replace start byte with the VESC Tool ID in the bus
-            data[1] = 0;   // replace length byte with 0
-            data.truncate(data.size() - 3); //Remove crc_high, crc_low and stop byte
+        // Remember CRC
+        char crc_hi = data[data.length() - 3];
+        char crc_lo = data[data.length() - 2];
 
-            frame.setFrameId((uint32_t)mLastCanDeviceID | (uint32_t)CAN_PACKET_PROCESS_SHORT_BUFFER << 8);
+        // Remove start byte and length
+        if (data[0] == char(2)) {
+            data.remove(0, 2);
+        } else if (data[0] == char(3)) {
+            data.remove(0, 3);
+        } else if (data[0] == char(4)) {
+            data.remove(0, 4);
+        }
+
+        // Remove CRC and stop byte
+        data.truncate(data.size() - 3);
+
+        if (data.size() <= 6) { // Send packet in a single frame
+            data.prepend(char(0)); // Process packet at receiver
+            data.prepend(char(254)); // VESC Tool sender ID
+
+            frame.setFrameId(uint32_t(mLastCanDeviceID) |
+                             uint32_t(CAN_PACKET_PROCESS_SHORT_BUFFER << 8));
             frame.setPayload(data);
 
             mCanDevice->writeFrame(frame);
         } else {
-            // remove start byte, length, crc and stop
-            data.remove(0,3);
-            data.truncate(data.size() - 3);
-
-            unsigned int len = data.size();
-            unsigned short crc = Packet::crc16((const unsigned char*)data.data(), len);
+            int len = data.size();
             QByteArray payload;
-            unsigned int end_a = 0;
+            int end_a = 0;
 
-            for (unsigned int i = 0;i < len;i += 7) {
+            for (int i = 0;i < len;i += 7) {
                 if (i > 255) {
                     break;
                 }
 
                 end_a = i + 7;
 
-                payload[0] = i;
+                payload[0] = char(i);
                 payload.append(data.left(7));
                 data.remove(0,7);
                 frame.setPayload(payload);
-                frame.setFrameId((uint32_t)mLastCanDeviceID | (uint32_t)CAN_PACKET_FILL_RX_BUFFER << 8);
+                frame.setFrameId(uint32_t(mLastCanDeviceID) |
+                                 uint32_t(CAN_PACKET_FILL_RX_BUFFER << 8));
 
                 mCanDevice->writeFrame(frame);
                 mCanDevice->waitForFramesWritten(100);
@@ -1698,14 +1709,15 @@ void VescInterface::packetDataToSend(QByteArray &data)
                 payload.clear();
             }
 
-            for (unsigned int i = end_a;i < len;i += 6) {
-                payload[0] = i >> 8;
-                payload[1] = i & 0xFF;
+            for (int i = end_a;i < len;i += 6) {
+                payload[0] = char(i >> 8);
+                payload[1] = char(i & 0xFF);
 
                 payload.append(data.left(6));
                 data.remove(0,6);
                 frame.setPayload(payload);
-                frame.setFrameId(mLastCanDeviceID | (uint32_t)CAN_PACKET_FILL_RX_BUFFER_LONG << 8);
+                frame.setFrameId(uint32_t(mLastCanDeviceID) |
+                                 uint32_t(CAN_PACKET_FILL_RX_BUFFER_LONG << 8));
 
                 mCanDevice->writeFrame(frame);
                 mCanDevice->waitForFramesWritten(100);
@@ -1713,14 +1725,15 @@ void VescInterface::packetDataToSend(QByteArray &data)
                 payload.clear();
             }
 
-            payload[0] = 254; //vesc tool node ID
-            payload[1] = 2; //process
-            payload[2] = len >> 8;
-            payload[3] = len & 0xFF;
-            payload[4] = crc >> 8;
-            payload[5] = crc & 0xFF;
+            payload[0] = char(254); // vesc tool node ID
+            payload[1] = char(0); // process
+            payload[2] = char(len >> 8);
+            payload[3] = char(len & 0xFF);
+            payload[4] = crc_hi;
+            payload[5] = crc_lo;
             frame.setPayload(payload);
-            frame.setFrameId(mLastCanDeviceID | (uint32_t)CAN_PACKET_PROCESS_RX_BUFFER << 8);
+            frame.setFrameId(uint32_t(mLastCanDeviceID) |
+                             uint32_t(CAN_PACKET_PROCESS_RX_BUFFER << 8));
 
             mCanDevice->writeFrame(frame);
         }

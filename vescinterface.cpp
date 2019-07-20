@@ -1430,6 +1430,7 @@ void VescInterface::CANbusDataAvailable()
     QCanBusFrame frame;
     QByteArray payload;
     unsigned short rxbuf_len = 0;
+    unsigned short crc;
     char commands_send;
 
     while (mCanDevice->framesAvailable() > 0) {
@@ -1446,6 +1447,16 @@ void VescInterface::CANbusDataAvailable()
 
             case CAN_PACKET_PROCESS_SHORT_BUFFER:
                 payload.remove(0,2);
+
+                rxbuf_len = payload.size();
+                crc = Packet::crc16((const unsigned char*)payload.data(), rxbuf_len);
+
+                // add stop, start, length and crc for the packet decoder
+                payload.prepend((unsigned char) rxbuf_len);
+                payload.prepend(2);
+                payload.append((unsigned char)(crc>>8));
+                payload.append((unsigned char)(crc & 0xFF));
+                payload.append(3);
                 mPacket->processData(payload);
                 break;
 
@@ -1466,11 +1477,11 @@ void VescInterface::CANbusDataAvailable()
                 if (rxbuf_len > 512) {
                     return;
                 }
-                char len_high = payload[2];
-                char len_low = payload[3];
+                unsigned char len_high = payload[2];
+                unsigned char len_low = payload[3];
 
-                char crc_high = payload[4];
-                char crc_low = payload[5];
+                unsigned char crc_high = payload[4];
+                unsigned char crc_low = payload[5];
 
                 if (Packet::crc16((const unsigned char*)mCanRxBuffer.data(), rxbuf_len) ==
                         ((unsigned short) crc_high << 8 | (unsigned short) crc_low)) {
@@ -1716,8 +1727,8 @@ void VescInterface::packetDataToSend(QByteArray &data)
                                  uint32_t(CAN_PACKET_FILL_RX_BUFFER << 8));
 
                 mCanDevice->writeFrame(frame);
-                mCanDevice->waitForFramesWritten(100);
-                QThread::msleep(10);
+                mCanDevice->waitForFramesWritten(5);
+                QThread::msleep(5);
                 payload.clear();
             }
 
@@ -1732,8 +1743,8 @@ void VescInterface::packetDataToSend(QByteArray &data)
                                  uint32_t(CAN_PACKET_FILL_RX_BUFFER_LONG << 8));
 
                 mCanDevice->writeFrame(frame);
-                mCanDevice->waitForFramesWritten(100);
-                QThread::msleep(10);
+                mCanDevice->waitForFramesWritten(5);
+                QThread::msleep(5);
                 payload.clear();
             }
 

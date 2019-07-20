@@ -924,8 +924,7 @@ void VescInterface::disconnectPort()
 #endif
 
 #ifdef HAS_CANBUS
-    if(isCANbusConnected())
-    {
+    if(isCANbusConnected()) {
         mCanDevice->disconnectDevice();
         delete mCanDevice;
         mCanDevice = nullptr;
@@ -963,6 +962,12 @@ bool VescInterface::reconnectLastPort()
         mBleUart->startConnect(mLastBleAddr);
 #endif
         return true;
+    } else if (mLastConnType == CONN_CANBUS) {
+#ifdef HAS_CANBUS
+        return connectCANbus(mLastCanBackend, mLastCanDeviceInterface, mLastCanDeviceBitrate);
+#else
+        return false;
+#endif
     } else {
 #ifdef HAS_SERIALPORT
         QList<VSerialInfo_t> ports = listSerialPorts();
@@ -1329,7 +1334,7 @@ void VescInterface::scanCANbus()
 
     auto conn = connect(&pollTimer, &QTimer::timeout,
                         [this, &loop, &frame, &i]() {
-        frame.setFrameId(i | (uint32_t)CAN_PACKET_PING << 8);
+        frame.setFrameId(i | uint32_t(CAN_PACKET_PING << 8));
         mCanDevice->writeFrame(frame);
         i++;
         if (i >= 254) {
@@ -1337,9 +1342,8 @@ void VescInterface::scanCANbus()
         }
     });
 
-    disconnect(conn);
-
     loop.exec();
+    disconnect(conn);
 #endif
     return;
 }
@@ -1468,8 +1472,8 @@ void VescInterface::CANbusDataAvailable()
                 char crc_high = payload[4];
                 char crc_low = payload[5];
 
-                if (Packet::crc16((const unsigned char*)mCanRxBuffer.data(), rxbuf_len) == ((unsigned short) crc_high << 8
-                                | (unsigned short) crc_low)) {
+                if (Packet::crc16((const unsigned char*)mCanRxBuffer.data(), rxbuf_len) ==
+                        ((unsigned short) crc_high << 8 | (unsigned short) crc_low)) {
                     switch (commands_send) {
                         case 0:
                             break;
@@ -1659,10 +1663,6 @@ void VescInterface::packetDataToSend(QByteArray &data)
         frame.setFlexibleDataRateFormat(false);
         frame.setBitrateSwitch(false);
 
-        // Remember CRC
-        char crc_hi = data[data.length() - 3];
-        char crc_lo = data[data.length() - 2];
-
         // Remove start byte and length
         if (data[0] == char(2)) {
             data.remove(0, 2);
@@ -1675,11 +1675,19 @@ void VescInterface::packetDataToSend(QByteArray &data)
         // Remove CRC and stop byte
         data.truncate(data.size() - 3);
 
+        // Since we already are on the CAN-bus, we can send packets that
+        // are supposed to be forwarded directly to the correct device.
+        int target_id = mLastCanDeviceID;
+        if (data.at(0) == COMM_FORWARD_CAN) {
+            target_id = uint8_t(data.at(1));
+            data.remove(0, 2);
+        }
+
         if (data.size() <= 6) { // Send packet in a single frame
             data.prepend(char(0)); // Process packet at receiver
             data.prepend(char(254)); // VESC Tool sender ID
 
-            frame.setFrameId(uint32_t(mLastCanDeviceID) |
+            frame.setFrameId(uint32_t(target_id) |
                              uint32_t(CAN_PACKET_PROCESS_SHORT_BUFFER << 8));
             frame.setPayload(data);
 
@@ -1688,6 +1696,10 @@ void VescInterface::packetDataToSend(QByteArray &data)
             int len = data.size();
             QByteArray payload;
             int end_a = 0;
+
+            unsigned short crc = Packet::crc16(
+                        reinterpret_cast<const unsigned char*>(data.data()),
+                        uint32_t(len));
 
             for (int i = 0;i < len;i += 7) {
                 if (i > 255) {
@@ -1700,7 +1712,7 @@ void VescInterface::packetDataToSend(QByteArray &data)
                 payload.append(data.left(7));
                 data.remove(0,7);
                 frame.setPayload(payload);
-                frame.setFrameId(uint32_t(mLastCanDeviceID) |
+                frame.setFrameId(uint32_t(target_id) |
                                  uint32_t(CAN_PACKET_FILL_RX_BUFFER << 8));
 
                 mCanDevice->writeFrame(frame);
@@ -1716,7 +1728,7 @@ void VescInterface::packetDataToSend(QByteArray &data)
                 payload.append(data.left(6));
                 data.remove(0,6);
                 frame.setPayload(payload);
-                frame.setFrameId(uint32_t(mLastCanDeviceID) |
+                frame.setFrameId(uint32_t(target_id) |
                                  uint32_t(CAN_PACKET_FILL_RX_BUFFER_LONG << 8));
 
                 mCanDevice->writeFrame(frame);
@@ -1729,10 +1741,10 @@ void VescInterface::packetDataToSend(QByteArray &data)
             payload[1] = char(0); // process
             payload[2] = char(len >> 8);
             payload[3] = char(len & 0xFF);
-            payload[4] = crc_hi;
-            payload[5] = crc_lo;
+            payload[4] = char(crc >> 8);
+            payload[5] = char(crc & 0xFF);
             frame.setPayload(payload);
-            frame.setFrameId(uint32_t(mLastCanDeviceID) |
+            frame.setFrameId(uint32_t(target_id) |
                              uint32_t(CAN_PACKET_PROCESS_RX_BUFFER << 8));
 
             mCanDevice->writeFrame(frame);

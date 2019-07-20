@@ -13,6 +13,7 @@
 # make qtconnectivity
 # make qtquickcontrols
 # make qtquickcontrols2
+# make qtserialbus
 
 set -e
 

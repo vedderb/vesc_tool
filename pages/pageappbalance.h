@@ -42,9 +42,7 @@ public:
 
 private slots:
     void timerSlot();
-    void imuValuesReceived(IMU_VALUES values, unsigned int mask);
-    void motorValuesReceived(MC_VALUES values, unsigned int mask);
-    void appValuesReceived(double pid_outpout, double pitch, double roll, double motor_current);
+    void appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position);
 
 private:
     Ui::PageAppBalance *ui;
@@ -54,38 +52,12 @@ private:
 
     bool mUpdatePlots;
 
-    QVector<double> mRollVec;
-    QVector<double> mPitchVec;
-    QVector<double> mYawVec;
-
-    QVector<double> mAccXVec;
-    QVector<double> mAccYVec;
-    QVector<double> mAccZVec;
-
-    QVector<double> mGyroXVec;
-    QVector<double> mGyroYVec;
-    QVector<double> mGyroZVec;
-
-    QVector<double> mMagXVec;
-    QVector<double> mMagYVec;
-    QVector<double> mMagZVec;
-
-    QVector<double> mTempMosVec;
-    QVector<double> mTempMos1Vec;
-    QVector<double> mTempMos2Vec;
-    QVector<double> mTempMos3Vec;
-    QVector<double> mTempMotorVec;
-    QVector<double> mCurrInVec;
-    QVector<double> mCurrMotorVec;
-    QVector<double> mIdVec;
-    QVector<double> mIqVec;
-    QVector<double> mDutyVec;
-    QVector<double> mRpmVec;
-
     QVector<double> mAppPidOutputVec;
     QVector<double> mAppPitchVec;
     QVector<double> mAppRollVec;
+    QVector<uint32_t> mAppDiffTimeVec;
     QVector<double> mAppMotorCurrentVec;
+    QVector<double> mAppMotorPositionVec;
 
     QVector<double> mSeconds;
 
@@ -93,6 +65,7 @@ private:
     qint64 mLastUpdateTime;
 
     void appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize);
+    void appendUint32tAndTrunc(QVector<uint32_t> *vec, uint32_t num, int maxSize);
 
 };
 

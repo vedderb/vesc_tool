@@ -38,9 +38,12 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="ParamTable" name="generalTab"/>
+        <widget class="ParamTable" name="configPane"/>
+       </item>
+       <item>
+        <widget class="ParamTable" name="tunePane"/>
        </item>
       </layout>
      </widget>

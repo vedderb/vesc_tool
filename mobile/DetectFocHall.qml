@@ -26,7 +26,6 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
 Item {
-    property int parentWidth: 10
     property var table: []
 
     property Commands mCommands: VescIf.commands()
@@ -72,11 +71,13 @@ Item {
         standardButtons: Dialog.Close
         modal: true
         focus: true
-        width: parentWidth - 20
+        width: parent.width - 20
         height: column.height - 40
         closePolicy: Popup.CloseOnEscape
+
         x: 10
-        y: 10
+        y: Math.max((parent.height - height) / 2, 10)
+        parent: ApplicationWindow.overlay
 
         ScrollView {
             anchors.fill: parent
@@ -163,12 +164,13 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parentWidth - 20
+        width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "Detect FOC Hall Sensor Parameters"
 
         x: 10
-        y: dialog.y + dialog.height / 2 - height / 2
+        y: Math.max((parent.height - height) / 2, 10)
+        parent: ApplicationWindow.overlay
 
         Text {
             id: detectLambdaLabel

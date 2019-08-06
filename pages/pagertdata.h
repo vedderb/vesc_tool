@@ -59,6 +59,7 @@ private slots:
     void on_tempShowMotorBox_toggled(bool checked);
     void on_csvChooseDirButton_clicked();
     void on_csvEnableLogBox_clicked(bool checked);
+    void on_csvHelpButton_clicked();
 
 private:
     Ui::PageRtData *ui;

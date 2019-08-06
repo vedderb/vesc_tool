@@ -254,7 +254,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Pair connected VESC"
         x: 10
-        y: 10 + parent.height / 2 - height / 2
+        y: 10 + Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
 
         Text {

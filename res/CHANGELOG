@@ -1,3 +1,29 @@
+== 1.17 ==
+* FOC wizard motor pole setting now only allows multiples of two.
+* Native CAN-bus support.
+
+== 1.16 ==
+* Added support to export sampled data as CSV.
+* Added erase only button to SWD prog.
+
+== 1.15 ==
+* Keep screen on setting on android.
+* Added support for imperial units.
+* Added battery current warning.
+
+== 1.14 ==
+* FW 3.58 support:
+ - Set motor to FOC mode after successful FOC detection instead of the default type for the hardware.
+ - APP_ADC: Do not send brake command over CAN if config.multi_esc is not set.
+ - APP_PPM: Make pulses invalid if they are above 150 % instead of 120 %.
+ - APP_PPM: Introduced a new control mode that allows reverse with hysteria (@ackmaniac port).
+* Moved to Qt 5.12 for the mobile version.
+* Added arm64_v8a and x86 builds.
+* Request file permission when opening log and fw files.
+* Enable RT logging without having the RT data page active.
+* Added help text about RT logging.
+* Try to create RT logging path if it does not exist.
+
 == 1.13 ==
 * FW 3.57 support:
  - Added CAN status message 5 with input voltage and tachometer data.

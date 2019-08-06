@@ -5,8 +5,14 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.13
+VT_VERSION = 1.16
 VT_INTRO_VERSION = 1
+
+VT_ANDROID_VERSION_ARMV7 = 22
+VT_ANDROID_VERSION_ARM64 = 23
+VT_ANDROID_VERSION_X86 = 24
+
+VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
 # Ubuntu 18.04
 # sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev
@@ -21,6 +27,9 @@ CONFIG += c++11
 
 # Bluetooth available
 DEFINES += HAS_BLUETOOTH
+
+# CAN bus available
+DEFINES += HAS_CANBUS
 
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
@@ -49,6 +58,10 @@ contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
 }
 
+contains(DEFINES, HAS_CANBUS) {
+    QT       += serialbus
+}
+
 contains(DEFINES, HAS_BLUETOOTH) {
     QT       += bluetooth
 }
@@ -57,6 +70,27 @@ android: QT += androidextras
 
 android: TARGET = vesc_tool
 !android: TARGET = vesc_tool_$$VT_VERSION
+
+
+ANDROID_VERSION = 1
+
+android:contains(QT_ARCH, i386) {
+    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
+}
+
+contains(ANDROID_TARGET_ARCH, arm64-v8a) {
+    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_ARM64
+}
+
+contains(ANDROID_TARGET_ARCH, armeabi-v7a) {
+    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_ARMV7
+}
+
+android: {
+    manifest.input = $$PWD/android/AndroidManifest.xml.in
+    manifest.output = $$PWD/android/AndroidManifest.xml
+    QMAKE_SUBSTITUTES += manifest
+}
 
 TEMPLATE = app
 
@@ -77,6 +111,15 @@ release_lin {
     MOC_DIR = build/lin/obj
     RCC_DIR = build/lin/obj
     UI_DIR = build/lin/obj
+}
+
+release_macos {
+    # brew install qt
+    DESTDIR = build/macos
+    OBJECTS_DIR = build/macos/obj
+    MOC_DIR = build/macos/obj
+    RCC_DIR = build/macos/obj
+    UI_DIR = build/macos/obj
 }
 
 release_android {

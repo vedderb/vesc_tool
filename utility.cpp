@@ -29,10 +29,12 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QFileInfo>
+#include <QtGlobal>
 
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
 #include <QAndroidJniObject>
+#include <QAndroidJniEnvironment>
 #endif
 
 Utility::Utility(QObject *parent) : QObject(parent)
@@ -214,19 +216,51 @@ QString Utility::uuid2Str(QByteArray uuid, bool space)
 bool Utility::requestFilePermission()
 {
 #ifdef Q_OS_ANDROID
-    // Note: The following should work on Qt 5.10
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     // https://codereview.qt-project.org/#/c/199162/
-//    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-//    if(r == QtAndroid::PermissionResult::Denied) {
-//        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE" );
-//        r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-//        if(r == QtAndroid::PermissionResult::Denied) {
-//            return false;
-//        }
-//    }
+    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+    if(r == QtAndroid::PermissionResult::Denied) {
+        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE", 5000);
+        r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+        if(r == QtAndroid::PermissionResult::Denied) {
+            return false;
+        }
+    }
+
     return true;
 #else
     return true;
+#endif
+#else
+    return true;
+#endif
+}
+
+void Utility::keepScreenOn(bool on)
+{
+#ifdef Q_OS_ANDROID
+    QtAndroid::runOnAndroidThread([on]{
+        QAndroidJniObject activity = QtAndroid::androidActivity();
+        if (activity.isValid()) {
+            QAndroidJniObject window =
+                    activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+
+            if (window.isValid()) {
+                const int FLAG_KEEP_SCREEN_ON = 128;
+                if (on) {
+                    window.callMethod<void>("addFlags", "(I)V", FLAG_KEEP_SCREEN_ON);
+                } else {
+                    window.callMethod<void>("clearFlags", "(I)V", FLAG_KEEP_SCREEN_ON);
+                }
+            }
+        }
+        QAndroidJniEnvironment env;
+        if (env->ExceptionCheck()) {
+            env->ExceptionClear();
+        }
+    });
+#else
+    (void)on;
 #endif
 }
 

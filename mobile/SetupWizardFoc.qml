@@ -307,10 +307,11 @@ Item {
                                 realFrom: 2
                                 realTo: 512
                                 realValue: 2
+                                realStepSize: 2
                                 prefix: "Motor Poles    : "
 
                                 onRealValueChanged: {
-                                    mMcConf.updateParamInt("si_motor_poles", realValue, 0)
+                                    mMcConf.updateParamInt("si_motor_poles", realValue, null)
                                 }
                             }
                         }
@@ -339,7 +340,7 @@ Item {
                             label: CheckBox {
                                 id: overrideBattBox
                                 checked: false
-                                text: qsTr("Override (Advanced, 0 = defaults)")
+                                text: qsTr("Advanced (0 = defaults)")
 
                                 onToggled: {
                                     if (!checked) {
@@ -361,7 +362,7 @@ Item {
                                     realFrom: 0
                                     realTo: -9999
                                     realValue: 0
-                                    prefix: "Min Current "
+                                    prefix: "Battery Current Regen: "
                                     suffix: " A"
                                 }
 
@@ -373,7 +374,7 @@ Item {
                                     realFrom: 0
                                     realTo: 9999
                                     realValue: 0
-                                    prefix: "Max Current: "
+                                    prefix: "Battery Current Max: "
                                     suffix: " A"
                                 }
                             }
@@ -542,7 +543,11 @@ Item {
                     if (stackLayout.currentIndex == 0) {
                         startWarningDialog.open()
                     } else if (stackLayout.currentIndex == 1) {
-                        stackLayout.currentIndex++
+                        if (overrideBattBox.checked) {
+                            stackLayout.currentIndex++
+                        } else {
+                            batteryWarningDialog.open()
+                        }
                     } else if (stackLayout.currentIndex == 2) {
                         if (stackLayout.currentIndex == (stackLayout.count - 2)) {
                             if (VescIf.isPortConnected()) {
@@ -618,6 +623,37 @@ Item {
 
         onAccepted: {
             stackLayout.currentIndex++
+            updateButtonText()
+        }
+    }
+
+    Dialog {
+        id: batteryWarningDialog
+        property int indexNow: 0
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        modal: true
+        focus: true
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        title: "Battery Settings"
+        x: 10
+        y: 10 + parent.height / 2 - height / 2
+        parent: ApplicationWindow.overlay
+
+        Text {
+            color: "#ffffff"
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text: "Warning: You have not specified battery current limits, which essentially only limits " +
+                  "the current if the voltage drops too much. This is fine in most cases, but check with " +
+                  "your battery and BMS specification to be safe. Keep in mind that you have to divide the " +
+                  "battery current settings by the number of VESCs."
+        }
+
+        onAccepted: {
+            stackLayout.currentIndex++
+            updateButtonText()
         }
     }
 

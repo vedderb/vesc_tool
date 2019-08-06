@@ -236,6 +236,23 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
+            <widget class="QPushButton" name="csvHelpButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QLabel" name="label">
              <property name="text">
               <string>CSV</string>
@@ -243,7 +260,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="csvFileEdit"/>
+            <widget class="QLineEdit" name="csvFileEdit">
+             <property name="text">
+              <string>./log</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="csvChooseDirButton">

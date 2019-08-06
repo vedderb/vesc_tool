@@ -201,30 +201,31 @@ Item {
             }
         }
 
-        Button {
+        RowLayout {
             Layout.fillWidth: true
-            text: "Cancel"
-            Layout.margins: 10
-            Layout.topMargin: -5
-            Layout.bottomMargin: 0
+            Layout.leftMargin: 10
+            Layout.rightMargin: 10
+            Layout.bottomMargin: 5
 
-            onClicked: {
-                picker.enabled = false
-                picker.visible = false
+            Button {
+                Layout.fillWidth: true
+                text: "Cancel"
+
+                onClicked: {
+                    picker.enabled = false
+                    picker.visible = false
+                }
             }
-        }
 
-        Button {
-            Layout.fillWidth: true
-            text: "Ok"
-            Layout.margins: 10
-            Layout.topMargin: -5
-            Layout.bottomMargin: 0
+            Button {
+                Layout.fillWidth: true
+                text: "Ok"
 
-            onClicked: {
-                dirSelected(folderListModel.folder)
-                picker.enabled = false
-                picker.visible = false
+                onClicked: {
+                    dirSelected(folderListModel.folder)
+                    picker.enabled = false
+                    picker.visible = false
+                }
             }
         }
     }

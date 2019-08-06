@@ -548,6 +548,7 @@ Item {
                                 paramsConf.addEditorApp("app_ppm_conf.ramp_time_pos")
                                 paramsConf.addEditorApp("app_ppm_conf.ramp_time_neg")
                                 paramsConf.addEditorApp("app_ppm_conf.pid_max_erpm")
+                                paramsConf.addEditorApp("app_ppm_conf.max_erpm_for_dir")
                                 paramsConf.addSeparator("Multiple VESCs over CAN-bus")
                                 paramsConf.addEditorApp("app_ppm_conf.tc")
                                 paramsConf.addEditorApp("app_ppm_conf.tc_max_diff")
@@ -609,8 +610,8 @@ Item {
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
-        parent: ApplicationWindow.overlay
 
+        parent: ApplicationWindow.overlay
         x: 10
         y: dialog.y + dialog.height / 2 - height / 2
 

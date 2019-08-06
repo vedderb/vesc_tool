@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -19,6 +19,7 @@
 
 #include "pagertdata.h"
 #include "ui_pagertdata.h"
+#include "widgets/helpdialog.h"
 
 PageRtData::PageRtData(QWidget *parent) :
     QWidget(parent),
@@ -422,4 +423,9 @@ void PageRtData::on_csvEnableLogBox_clicked(bool checked)
     } else {
         mVesc->closeRtLogFile();
     }
+}
+
+void PageRtData::on_csvHelpButton_clicked()
+{
+    HelpDialog::showHelp(this, mVesc->infoConfig(), "help_rt_logging");
 }

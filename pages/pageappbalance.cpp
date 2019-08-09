@@ -95,14 +95,26 @@ void PageAppBalance::setVesc(VescInterface *vesc)
         ui->tunePane->addRowSeparator(tr("Main loop"));
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.loop_delay");
         ui->tunePane->addRowSeparator(tr("Gyro Calibration"));
+        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_offset");
+        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_offset");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.m_acd");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.m_b");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.cal_delay");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.cal_m_acd");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.cal_m_b");
-        ui->configPane->addRowSeparator(tr("Offset"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_offset");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_offset");
+        ui->tunePane->addRowSeparator(tr("Experimental"));
+        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.deadzone");
+        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.current_boost");
+        ui->configPane->addRowSeparator(tr("Startup"));
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_pitch");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_roll");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_speed");
+        ui->configPane->addRowSeparator(tr("Tiltback"));
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_duty");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_angle");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_speed");
+        ui->configPane->addRowSeparator(tr("Overspeed"));
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.overspeed_duty");
         ui->configPane->addRowSeparator(tr("Fault"));
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_fault");
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_fault");
@@ -135,6 +147,8 @@ void PageAppBalance::timerSlot()
         ui->balancePlot->rescaleAxes();
 
         ui->balancePlot->replot();
+
+        ui->textOutput->setText(QString::number(mAppDiffTimeVec.last()));
     }
 }
 

@@ -333,7 +333,8 @@ void Commands::processPacket(QByteArray data)
         uint32_t dec_balance_diff_time = vb.vbPopFrontUint32();
         double dec_balance_motor_current = vb.vbPopFrontDouble32(1e6);
         double dec_balance_motor_position = vb.vbPopFrontDouble32(1e6);
-        emit decodedBalanceReceived(dec_balance_pid_output, dec_balance_pitch, dec_balance_roll, dec_balance_diff_time, dec_balance_motor_current, dec_balance_motor_position);
+        uint16_t dec_balance_state = vb.vbPopFrontUint16();
+        emit decodedBalanceReceived(dec_balance_pid_output, dec_balance_pitch, dec_balance_roll, dec_balance_diff_time, dec_balance_motor_current, dec_balance_motor_position, dec_balance_state);
     } break;
 
     case COMM_SET_MCCONF:

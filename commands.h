@@ -66,7 +66,7 @@ signals:
     void decodedPpmReceived(double value, double last_len);
     void decodedAdcReceived(double value, double voltage, double value2, double voltage2);
     void decodedChukReceived(double value);
-    void decodedBalanceReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position);
+    void decodedBalanceReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state);
     void motorRLReceived(double r, double l);
     void motorLinkageReceived(double flux_linkage);
     void encoderParamReceived(double offset, double ratio, bool inverted);

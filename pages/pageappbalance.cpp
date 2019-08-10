@@ -69,7 +69,6 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
     ui->balancePlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
     ui->balancePlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->balancePlot->xAxis->setLabel("Seconds (s)");
-    ui->balancePlot->yAxis->setLabel("Angle (Deg)/Current (A)");
 
 }
 
@@ -119,9 +118,11 @@ void PageAppBalance::setVesc(VescInterface *vesc)
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_fault");
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_fault");
 
+        updateTextOutput();
 
-        connect(mVesc->commands(), SIGNAL(decodedBalanceReceived(double, double, double, uint32_t, double, double)),
-                this, SLOT(appValuesReceived(double, double, double, uint32_t, double, double)));
+
+        connect(mVesc->commands(), SIGNAL(decodedBalanceReceived(double, double, double, uint32_t, double, double, uint16_t)),
+                this, SLOT(appValuesReceived(double, double, double, uint32_t, double, double, uint16_t)));
     }
 }
 
@@ -148,20 +149,21 @@ void PageAppBalance::timerSlot()
 
         ui->balancePlot->replot();
 
-        ui->textOutput->setText(QString::number(mAppDiffTimeVec.last()));
+        updateTextOutput();
     }
 }
 
-void PageAppBalance::appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position) {
+void PageAppBalance::appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state) {
 
     const int maxS = 500;
 
     appendDoubleAndTrunc(&mAppPidOutputVec, pid_outpout, maxS);
     appendDoubleAndTrunc(&mAppPitchVec, pitch, maxS);
     appendDoubleAndTrunc(&mAppRollVec, roll, maxS);
-    appendUint32tAndTrunc(&mAppDiffTimeVec, diff_time, maxS);
+    mAppDiffTime = diff_time;
     appendDoubleAndTrunc(&mAppMotorCurrentVec, motor_current, maxS);
     appendDoubleAndTrunc(&mAppMotorPositionVec, motor_position, maxS);
+    mAppState = state;
 
 
     qint64 tNow = QDateTime::currentMSecsSinceEpoch();
@@ -189,11 +191,30 @@ void PageAppBalance::appendDoubleAndTrunc(QVector<double> *vec, double num, int 
     }
 }
 
-void PageAppBalance::appendUint32tAndTrunc(QVector<uint32_t> *vec, uint32_t num, int maxSize)
-{
-    vec->append(num);
+void PageAppBalance::updateTextOutput(){
+    QString output = "Loop Time: ";
+    output = output + QString::number(mAppDiffTime);
 
-    if(vec->size() > maxSize) {
-        vec->remove(0, vec->size() - maxSize);
+    output = output + "\tState: ";
+    if(mAppState == 0){
+        output = output + "Calibrating";
+    }else if(mAppState == 1){
+        output = output + "Running";
+    }else if(mAppState == 2){
+        output = output + "Fault";
+    }else if(mAppState == 3){
+        output = output + "Dead";
+    }else{
+        output = output + "Unknown";
     }
+
+    output = output + "\tMotor Position: ";
+    if(mAppMotorPositionVec.empty() == false){
+        output = output + QString::number((int)mAppMotorPositionVec.last());
+    }else{
+        output = output + "Unknown";
+    }
+
+
+    ui->textOutput->setText(output);
 }

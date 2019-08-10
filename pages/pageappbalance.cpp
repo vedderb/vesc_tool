@@ -101,6 +101,7 @@ void PageAppBalance::setVesc(VescInterface *vesc)
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.cal_delay");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.cal_m_acd");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.cal_m_b");
+        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.use_peripheral");
         ui->tunePane->addRowSeparator(tr("Experimental"));
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.deadzone");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.current_boost");

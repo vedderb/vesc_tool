@@ -17,12 +17,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#include "pageappbalance.h"
-#include "ui_pageappbalance.h"
+#include "pageappimu.h"
+#include "ui_pageappimu.h"
 
-PageAppBalance::PageAppBalance(QWidget *parent) :
+PageAppImu::PageAppImu(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PageAppBalance)
+    ui(new Ui::PageAppImu)
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
@@ -72,52 +72,35 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
 
 }
 
-PageAppBalance::~PageAppBalance()
+PageAppImu::~PageAppImu()
 {
     delete ui;
 }
 
-VescInterface *PageAppBalance::vesc() const
+VescInterface *PageAppImu::vesc() const
 {
     return mVesc;
 }
 
-void PageAppBalance::setVesc(VescInterface *vesc)
+void PageAppImu::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
 
     if (mVesc) {
-        ui->tunePane->addRowSeparator(tr("PID"));
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.kp");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.ki");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.kd");
-        ui->tunePane->addRowSeparator(tr("Main loop"));
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.hertz");
-        ui->tunePane->addRowSeparator(tr("Gyro Calibration"));
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_offset");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_offset");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_acd");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_b");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_delay");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_acd");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_b");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.use_peripheral");
-        ui->tunePane->addRowSeparator(tr("Experimental"));
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.deadzone");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.current_boost");
-        ui->configPane->addRowSeparator(tr("Startup"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_pitch");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_roll");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_speed");
-        ui->configPane->addRowSeparator(tr("Tiltback"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_duty");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_angle");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_speed");
-        ui->configPane->addRowSeparator(tr("Overspeed"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.overspeed_duty");
-        ui->configPane->addRowSeparator(tr("Fault"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_fault");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_fault");
+        ui->configPane->addRowSeparator(tr("Input Source"));
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.use_peripheral");
+        ui->configPane->addRowSeparator(tr("Axes"));
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.pitch_axis");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.roll_axis");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.yaw_axis");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.flip");
+        ui->configPane->addRowSeparator(tr("AHRS"));
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.hertz");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_acd");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_b");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_delay");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_acd");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_b");
 
         updateTextOutput();
 
@@ -127,7 +110,7 @@ void PageAppBalance::setVesc(VescInterface *vesc)
     }
 }
 
-void PageAppBalance::timerSlot()
+void PageAppImu::timerSlot()
 {
     if (mUpdatePlots) {
 
@@ -154,7 +137,7 @@ void PageAppBalance::timerSlot()
     }
 }
 
-void PageAppBalance::appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state) {
+void PageAppImu::appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state) {
 
     const int maxS = 250;
 
@@ -183,7 +166,7 @@ void PageAppBalance::appValuesReceived(double pid_outpout, double pitch, double 
     mUpdatePlots = true;
 }
 
-void PageAppBalance::appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize)
+void PageAppImu::appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize)
 {
     vec->append(num);
 
@@ -192,7 +175,7 @@ void PageAppBalance::appendDoubleAndTrunc(QVector<double> *vec, double num, int 
     }
 }
 
-void PageAppBalance::updateTextOutput(){
+void PageAppImu::updateTextOutput(){
     QString output = "Loop Time: ";
     output = output + QString::number(mAppDiffTime);
 

@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#ifndef PAGEAPPBALANCE_H
-#define PAGEAPPBALANCE_H
+#ifndef PAGEAPPIMU_H
+#define PAGEAPPIMU_H
 
 #include <QWidget>
 #include <QVector>
@@ -26,16 +26,16 @@
 #include "vescinterface.h"
 
 namespace Ui {
-class PageAppBalance;
+class PageAppImu;
 }
 
-class PageAppBalance : public QWidget
+class PageAppImu : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit PageAppBalance(QWidget *parent = 0);
-    ~PageAppBalance();
+    explicit PageAppImu(QWidget *parent = 0);
+    ~PageAppImu();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
@@ -45,7 +45,7 @@ private slots:
     void appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state);
 
 private:
-    Ui::PageAppBalance *ui;
+    Ui::PageAppImu *ui;
     VescInterface *mVesc;
 
     QTimer *mTimer;
@@ -70,4 +70,4 @@ private:
 
 };
 
-#endif // PAGEAPPBALANCE_H
+#endif // PAGEAPPIMU_H

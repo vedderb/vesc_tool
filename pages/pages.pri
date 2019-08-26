@@ -1,5 +1,6 @@
 FORMS += \
     $$PWD/pageappbalance.ui \
+    $$PWD/pageappimu.ui \
     $$PWD/pageconnection.ui \
     $$PWD/pagemotor.ui \
     $$PWD/pagedebugprint.ui \
@@ -31,6 +32,7 @@ FORMS += \
 
 HEADERS += \
     $$PWD/pageappbalance.h \
+    $$PWD/pageappimu.h \
     $$PWD/pageconnection.h \
     $$PWD/pagemotor.h \
     $$PWD/pagedebugprint.h \
@@ -62,6 +64,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/pageappbalance.cpp \
+    $$PWD/pageappimu.cpp \
     $$PWD/pageconnection.cpp \
     $$PWD/pagemotor.cpp \
     $$PWD/pagedebugprint.cpp \

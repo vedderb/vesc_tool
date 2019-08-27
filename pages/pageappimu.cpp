@@ -37,38 +37,34 @@ PageAppImu::PageAppImu(QWidget *parent) :
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
 
-    ui->balancePlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    ui->rpyPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 
     int graphIndex = 0;
 
-    ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Qt::red));
-    ui->balancePlot->graph(graphIndex)->setName("PID Output");
+    ui->rpyPlot->addGraph();
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+    ui->rpyPlot->graph(graphIndex)->setName("Roll");
     graphIndex++;
 
-    ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Qt::blue));
-    ui->balancePlot->graph(graphIndex)->setName("Pitch");
+    ui->rpyPlot->addGraph();
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Qt::red));
+    ui->rpyPlot->graph(graphIndex)->setName("Pitch");
     graphIndex++;
 
-    ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Qt::cyan));
-    ui->balancePlot->graph(graphIndex)->setName("Roll");
-    graphIndex++;
-
-    ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Qt::black));
-    ui->balancePlot->graph(graphIndex)->setName("Current");
+    ui->rpyPlot->addGraph();
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+    ui->rpyPlot->graph(graphIndex)->setName("Yaw");
     graphIndex++;
 
     QFont legendFont = font();
     legendFont.setPointSize(9);
 
-    ui->balancePlot->legend->setVisible(true);
-    ui->balancePlot->legend->setFont(legendFont);
-    ui->balancePlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->balancePlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
-    ui->balancePlot->xAxis->setLabel("Seconds (s)");
+    ui->rpyPlot->legend->setVisible(true);
+    ui->rpyPlot->legend->setFont(legendFont);
+    ui->rpyPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
+    ui->rpyPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
+    ui->rpyPlot->xAxis->setLabel("Seconds (s)");
+    ui->rpyPlot->yAxis->setLabel("Angle (Deg)");
 
 }
 
@@ -102,21 +98,17 @@ void PageAppImu::setVesc(VescInterface *vesc)
         ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_acd");
         ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_b");
 
-        updateTextOutput();
-
-
-        connect(mVesc->commands(), SIGNAL(decodedBalanceReceived(double, double, double, uint32_t, double, double, uint16_t)),
-                this, SLOT(appValuesReceived(double, double, double, uint32_t, double, double, uint16_t)));
+        connect(mVesc->commands(), SIGNAL(valuesImuReceived(IMU_VALUES,uint)),
+                this, SLOT(valuesReceived(IMU_VALUES,uint)));
     }
 }
 
 void PageAppImu::timerSlot()
 {
     if (mUpdatePlots) {
-
         mUpdatePlots = false;
 
-        int dataSize = mAppPidOutputVec.size();
+        int dataSize = mRollVec.size();
 
         QVector<double> xAxis(dataSize);
         for (int i = 0;i < mSeconds.size();i++) {
@@ -124,31 +116,25 @@ void PageAppImu::timerSlot()
         }
 
         int graphIndex = 0;
-        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppPidOutputVec);
-        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppPitchVec);
-        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppRollVec);
-        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppMotorCurrentVec);
+        ui->rpyPlot->graph(graphIndex++)->setData(xAxis, mRollVec);
+        ui->rpyPlot->graph(graphIndex++)->setData(xAxis, mPitchVec);
+        ui->rpyPlot->graph(graphIndex++)->setData(xAxis, mYawVec);
 
-        ui->balancePlot->rescaleAxes();
+        ui->rpyPlot->rescaleAxes();
 
-        ui->balancePlot->replot();
-
-        updateTextOutput();
+        ui->rpyPlot->replot();
     }
 }
 
-void PageAppImu::appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state) {
+void PageAppImu::valuesReceived(IMU_VALUES values, unsigned int mask)
+{
+    (void)mask;
 
-    const int maxS = 250;
+    const int maxS = 500;
 
-    appendDoubleAndTrunc(&mAppPidOutputVec, pid_outpout, maxS);
-    appendDoubleAndTrunc(&mAppPitchVec, pitch, maxS);
-    appendDoubleAndTrunc(&mAppRollVec, roll, maxS);
-    mAppDiffTime = diff_time;
-    appendDoubleAndTrunc(&mAppMotorCurrentVec, motor_current, maxS);
-    appendDoubleAndTrunc(&mAppMotorPositionVec, motor_position, maxS);
-    mAppState = state;
-
+    appendDoubleAndTrunc(&mRollVec, values.roll * 180.0 / M_PI, maxS);
+    appendDoubleAndTrunc(&mPitchVec, values.pitch * 180.0 / M_PI, maxS);
+    appendDoubleAndTrunc(&mYawVec, values.yaw * 180.0 / M_PI, maxS);
 
     qint64 tNow = QDateTime::currentMSecsSinceEpoch();
 
@@ -173,32 +159,4 @@ void PageAppImu::appendDoubleAndTrunc(QVector<double> *vec, double num, int maxS
     if(vec->size() > maxSize) {
         vec->remove(0, vec->size() - maxSize);
     }
-}
-
-void PageAppImu::updateTextOutput(){
-    QString output = "Loop Time: ";
-    output = output + QString::number(mAppDiffTime);
-
-    output = output + "\tState: ";
-    if(mAppState == 0){
-        output = output + "Calibrating";
-    }else if(mAppState == 1){
-        output = output + "Running";
-    }else if(mAppState == 2){
-        output = output + "Fault";
-    }else if(mAppState == 3){
-        output = output + "Dead";
-    }else{
-        output = output + "Unknown";
-    }
-
-    output = output + "\tMotor Position: ";
-    if(mAppMotorPositionVec.empty() == false){
-        output = output + QString::number((int)mAppMotorPositionVec.last());
-    }else{
-        output = output + "Unknown";
-    }
-
-
-    ui->textOutput->setText(output);
 }

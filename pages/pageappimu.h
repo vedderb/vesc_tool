@@ -42,7 +42,7 @@ public:
 
 private slots:
     void timerSlot();
-    void appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state);
+    void valuesReceived(IMU_VALUES values, unsigned int mask);
 
 private:
     Ui::PageAppImu *ui;
@@ -52,13 +52,9 @@ private:
 
     bool mUpdatePlots;
 
-    QVector<double> mAppPidOutputVec;
-    QVector<double> mAppPitchVec;
-    QVector<double> mAppRollVec;
-    uint32_t mAppDiffTime = 0;
-    QVector<double> mAppMotorCurrentVec;
-    QVector<double> mAppMotorPositionVec;
-    uint16_t mAppState;
+    QVector<double> mRollVec;
+    QVector<double> mPitchVec;
+    QVector<double> mYawVec;
 
     QVector<double> mSeconds;
 
@@ -66,8 +62,6 @@ private:
     qint64 mLastUpdateTime;
 
     void appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize);
-    void updateTextOutput();
-
 };
 
 #endif // PAGEAPPIMU_H

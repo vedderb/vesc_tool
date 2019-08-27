@@ -1964,7 +1964,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Yaw Axis, used to modify orientation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_IMU_ROLL_AXIS</cDefine>
+            <cDefine>APPCONF_IMU_YAW_AXIS</cDefine>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxInt>2</maxInt>

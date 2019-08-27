@@ -96,12 +96,6 @@ void PageAppBalance::setVesc(VescInterface *vesc)
         ui->tunePane->addRowSeparator(tr("Gyro Calibration"));
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_offset");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_offset");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_acd");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_b");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_delay");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_acd");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_b");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_imu_conf.use_peripheral");
         ui->tunePane->addRowSeparator(tr("Experimental"));
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.deadzone");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.current_boost");

@@ -53,7 +53,7 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QCustomPlot" name="balancePlot" native="true">
+        <widget class="QCustomPlot" name="rpyPlot" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -64,13 +64,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="textOutput">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
     </widget>
    </item>
   </layout>

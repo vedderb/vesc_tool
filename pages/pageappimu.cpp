@@ -94,9 +94,10 @@ void PageAppImu::setVesc(VescInterface *vesc)
         ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.hertz");
         ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_acd");
         ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_b");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_delay");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_acd");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_m_b");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.startup_time");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.startup_m_acd");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.startup_m_b");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_type");
 
         connect(mVesc->commands(), SIGNAL(valuesImuReceived(IMU_VALUES,uint)),
                 this, SLOT(valuesReceived(IMU_VALUES,uint)));

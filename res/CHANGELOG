@@ -1,6 +1,16 @@
 == 1.17 ==
 * FOC wizard motor pole setting now only allows multiples of two.
 * Native CAN-bus support.
+* Added support for multiple SWD interfaces.
+* FW 3.59 support.
+* Added wand firmware and NRF52840 firmware for VESC HD.
+* Added header to RT CSV log.
+* Added VESC HD and UAVC Omega firmwares.
+* Added NRF quick pair button.
+* Support as many commands as possible in limited mode. This will make the app quite useful even if the FW is out of date.
+* Ble improvements for NRF52 firmwares.
+* Do not disconnect after bootloader update and show different message.
+* Added IMU page with many IMU settings and live plots to adjust them.
 
 == 1.16 ==
 * Added support to export sampled data as CSV.

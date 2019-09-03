@@ -208,6 +208,7 @@ private:
     QString mHwTxt;
     QString mUuidStr;
     bool mIsUploadingFw;
+    bool mIsLastFwBootloader;
 
     bool mCancelSwdUpload;
 

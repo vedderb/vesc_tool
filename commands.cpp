@@ -25,6 +25,8 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mSendCan = false;
     mCanId = -1;
     mIsLimitedMode = false;
+    mLimitedSupportsFwdAllCan = false;
+    mLimitedSupportsEraseBootloader = false;
 
     // Firmware state
     mFirmwareIsUploading = false;
@@ -133,6 +135,7 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_ERASE_NEW_APP:
     case COMM_WRITE_NEW_APP_DATA:
+    case COMM_ERASE_BOOTLOADER:
         firmwareUploadUpdate(!vb.at(0));
         break;
 
@@ -529,6 +532,14 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_BM_DISCONNECT:
         emit ackReceived("COMM_BM_DISCONNECT OK");
+        break;
+
+    case COMM_BM_MAP_PINS_DEFAULT:
+        emit bmMapPinsDefaultRes(vb.vbPopFrontInt16());
+        break;
+
+    case COMM_BM_MAP_PINS_NRF5X:
+        emit bmMapPinsNrf5xRes(vb.vbPopFrontInt16());
         break;
 
     default:
@@ -1138,6 +1149,20 @@ void Commands::bmDisconnect()
     emitData(vb);
 }
 
+void Commands::bmMapPinsDefault()
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_MAP_PINS_DEFAULT);
+    emitData(vb);
+}
+
+void Commands::bmMapPinsNrf5x()
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_MAP_PINS_NRF5X);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mFirmwareIsUploading) {
@@ -1180,7 +1205,14 @@ void Commands::emitData(QByteArray data)
                 (data.at(0) != COMM_JUMP_TO_BOOTLOADER_ALL_CAN &&
                 data.at(0) != COMM_ERASE_NEW_APP_ALL_CAN &&
                 data.at(0) != COMM_WRITE_NEW_APP_DATA_ALL_CAN)) {
-            return;
+            if (!mLimitedSupportsEraseBootloader ||
+                    (data.at(0) != COMM_ERASE_BOOTLOADER &&
+                     data.at(0) != COMM_ERASE_BOOTLOADER_ALL_CAN)) {
+
+                if (!mCompatibilityCommands.contains(int(data.at(0)))) {
+                    return;
+                }
+            }
         }
     }
 
@@ -1211,6 +1243,11 @@ void Commands::firmwareUploadUpdate(bool isTimeout)
             mFirmwareUploadStatus = "Buffer Erase Timeout";
         } else {
             mFirmwareState++;
+
+            if (mFirmwareIsBootloader) {
+                mFirmwareState++;
+            }
+
             mFirmwareRetries = retries;
             mFirmwareTimer = timeout;
             firmwareUploadUpdate(true);
@@ -1334,6 +1371,26 @@ void Commands::setLimitedSupportsFwdAllCan(bool limitedSupportsFwdAllCan)
     mLimitedSupportsFwdAllCan = limitedSupportsFwdAllCan;
 }
 
+bool Commands::getLimitedSupportsEraseBootloader() const
+{
+    return mLimitedSupportsEraseBootloader;
+}
+
+void Commands::setLimitedSupportsEraseBootloader(bool limitedSupportsEraseBootloader)
+{
+    mLimitedSupportsEraseBootloader = limitedSupportsEraseBootloader;
+}
+
+QVector<int> Commands::getLimitedCompatibilityCommands() const
+{
+    return mCompatibilityCommands;
+}
+
+void Commands::setLimitedCompatibilityCommands(QVector<int> compatibilityCommands)
+{
+    mCompatibilityCommands = compatibilityCommands;
+}
+
 void Commands::setAppConfig(ConfigParams *appConfig)
 {
     mAppConfig = appConfig;
@@ -1362,7 +1419,15 @@ void Commands::startFirmwareUpload(QByteArray &newFirmware, bool isBootloader, b
     mFirmwareUploadStatus = "Buffer Erase";
 
     if (mFirmwareIsBootloader) {
-        firmwareUploadUpdate(true);
+        if (mLimitedSupportsEraseBootloader) {
+            mFirmwareState = 0;
+            VByteArray vb;
+            vb.vbAppendInt8(mFirmwareFwdAllCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
+                                                 COMM_ERASE_BOOTLOADER);
+            emitData(vb);
+        } else {
+            firmwareUploadUpdate(true);
+        }
     } else {
         VByteArray vb;
         vb.vbAppendInt8(mFirmwareFwdAllCan ? COMM_ERASE_NEW_APP_ALL_CAN :
@@ -1375,7 +1440,7 @@ void Commands::startFirmwareUpload(QByteArray &newFirmware, bool isBootloader, b
 double Commands::getFirmwareUploadProgress()
 {
     if (mFirmwareIsUploading) {
-        return (double)mFimwarePtr / (double)mNewFirmware.size();
+        return double(mFimwarePtr) / double(mNewFirmware.size());
     } else {
         return -1.0;
     }
@@ -1394,6 +1459,11 @@ void Commands::cancelFirmwareUpload()
         mFirmwareState = 0;
         mFirmwareUploadStatus = "Cancelled";
     }
+}
+
+bool Commands::isCurrentFiwmwareBootloader()
+{
+    return mFirmwareIsBootloader;
 }
 
 void Commands::checkMcConfig()

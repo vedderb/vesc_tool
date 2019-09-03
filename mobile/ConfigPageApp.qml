@@ -122,6 +122,7 @@ Item {
             createEditorApp("can_baud_rate")
             createEditorApp("pairing_done")
             createEditorApp("permanent_uart_enabled")
+            createEditorApp("shutdown_mode")
             createEditorApp("uavcan_enable")
             createEditorApp("uavcan_esc_index")
             break;
@@ -238,6 +239,32 @@ Item {
             createEditorApp("app_nrf_conf.address__2")
             break;
 
+        case "IMU":
+            createEditorApp("imu_conf.type")
+            createEditorApp("imu_conf.sample_rate_hz")
+            addSeparator("Filters")
+            createEditorApp("imu_conf.mode")
+            createEditorApp("imu_conf.accel_confidence_decay")
+            createEditorApp("imu_conf.mahony_kp")
+            createEditorApp("imu_conf.mahony_ki")
+            createEditorApp("imu_conf.madgwick_beta")
+            addSeparator("Rotation")
+            createEditorApp("imu_conf.rot_roll")
+            createEditorApp("imu_conf.rot_pitch")
+            createEditorApp("imu_conf.rot_yaw")
+            addSeparator("Offsets")
+            createEditorApp("imu_conf.accel_offsets__0")
+            createEditorApp("imu_conf.accel_offsets__1")
+            createEditorApp("imu_conf.accel_offsets__2")
+            createEditorApp("imu_conf.gyro_offsets__0")
+            createEditorApp("imu_conf.gyro_offsets__1")
+            createEditorApp("imu_conf.gyro_offsets__2")
+            createEditorApp("imu_conf.gyro_offset_comp_fact__0")
+            createEditorApp("imu_conf.gyro_offset_comp_fact__1")
+            createEditorApp("imu_conf.gyro_offset_comp_fact__2")
+            createEditorApp("imu_conf.gyro_offset_comp_clamp")
+            break;
+
         default:
             break;
         }
@@ -261,7 +288,8 @@ Item {
                     "ADC",
                     "UART",
                     "Nunchuk",
-                    "NRF"
+                    "NRF",
+                    "IMU"
                 ]
 
                 onCurrentTextChanged: {
@@ -300,6 +328,10 @@ Item {
                         break;
 
                     case "NRF":
+                        tabBox.model = []
+                        break;
+
+                    case "IMU":
                         tabBox.model = []
                         break;
 

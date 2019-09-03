@@ -45,12 +45,19 @@ public:
     Q_INVOKABLE double getFirmwareUploadProgress();
     Q_INVOKABLE QString getFirmwareUploadStatus();
     Q_INVOKABLE void cancelFirmwareUpload();
+    Q_INVOKABLE bool isCurrentFiwmwareBootloader();
     void checkMcConfig();
     Q_INVOKABLE void emitEmptyValues();
     Q_INVOKABLE void emitEmptySetupValues();
 
     Q_INVOKABLE bool getLimitedSupportsFwdAllCan() const;
     void setLimitedSupportsFwdAllCan(bool limitedSupportsFwdAllCan);
+
+    Q_INVOKABLE bool getLimitedSupportsEraseBootloader() const;
+    void setLimitedSupportsEraseBootloader(bool limitedSupportsEraseBootloader);
+
+    Q_INVOKABLE QVector<int> getLimitedCompatibilityCommands() const;
+    void setLimitedCompatibilityCommands(QVector<int> compatibilityCommands);
 
 signals:
     void dataToSend(QByteArray &data);
@@ -83,6 +90,8 @@ signals:
     void bmEraseFlashAllRes(int res);
     void bmWriteFlashRes(int res);
     void bmRebootRes(int res);
+    void bmMapPinsDefaultRes(bool ok);
+    void bmMapPinsNrf5xRes(bool ok);
 
 public slots:
     void processPacket(QByteArray data);
@@ -144,6 +153,8 @@ public slots:
     void bmWriteFlash(uint32_t addr, QByteArray data);
     void bmReboot();
     void bmDisconnect();
+    void bmMapPinsDefault();
+    void bmMapPinsNrf5x();
 
 private slots:
     void timerSlot();
@@ -158,6 +169,8 @@ private:
     int mCanId;
     bool mIsLimitedMode;
     bool mLimitedSupportsFwdAllCan;
+    bool mLimitedSupportsEraseBootloader;
+    QVector<int> mCompatibilityCommands; // int to be QML-compatible
 
     // FW upload state
     QByteArray mNewFirmware;

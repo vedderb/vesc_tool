@@ -5,17 +5,17 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.16
+VT_VERSION = 1.17
 VT_INTRO_VERSION = 1
 
-VT_ANDROID_VERSION_ARMV7 = 22
-VT_ANDROID_VERSION_ARM64 = 23
-VT_ANDROID_VERSION_X86 = 24
+VT_ANDROID_VERSION_ARMV7 = 25
+VT_ANDROID_VERSION_ARM64 = 26
+VT_ANDROID_VERSION_X86 = 27
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
-# Ubuntu 18.04
-# sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev
+# Ubuntu 18.04 (should work on raspbian buster too)
+# sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev qtdeclarative5-dev
 
 DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
@@ -28,15 +28,15 @@ CONFIG += c++11
 # Bluetooth available
 DEFINES += HAS_BLUETOOTH
 
-# CAN bus available
-DEFINES += HAS_CANBUS
-
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
 
 !android: {
     # Serial port available
     DEFINES += HAS_SERIALPORT
+
+    # CAN bus available
+    DEFINES += HAS_CANBUS
 }
 
 # Options

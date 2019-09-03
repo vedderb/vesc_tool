@@ -27,6 +27,7 @@ import Vedder.vesc.configparams 1.0
 
 Item {
     implicitHeight: column.implicitHeight
+    property bool hideAfterPair: false
 
     function startPairing() {
         mCommands.pairNrf(timeBox.realValue * 1000.0)
@@ -151,10 +152,15 @@ Item {
                             "pairing mode, just switch it on using any of the buttons. Then it " +
                             "will enter pairing mode if it was switched off previously.",
                             false, false)
+//                VescIf.emitMessageDialog("Test", "test23", false, false)
                 break;
 
             default:
                 break;
+            }
+
+            if (hideAfterPair && res > 0) {
+                visible = false
             }
         }
     }

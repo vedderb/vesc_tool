@@ -374,13 +374,21 @@ void PageFirmware::uploadFw(bool allOverCan)
                                             "chosen the correct hardware version?"),
                                          QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         } else if (ui->fwTabWidget->currentIndex() == 2) {
-            reply = QMessageBox::warning(this,
-                                         tr("Warning"),
-                                         tr("This will attempt to upload a bootloader to the connected VESC. "
-                                            "If the connected VESC already has a bootloader this will destroy "
-                                            "the bootloader and firmware updates cannot be done anymore. Do "
-                                            "you want to continue?"),
-                                         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (mVesc->commands()->getLimitedSupportsEraseBootloader()) {
+                reply = QMessageBox::warning(this,
+                                             tr("Warning"),
+                                             tr("This will attempt to upload a bootloader to the connected VESC. "
+                                                "Do you want to continue?"),
+                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            } else {
+                reply = QMessageBox::warning(this,
+                                             tr("Warning"),
+                                             tr("This will attempt to upload a bootloader to the connected VESC. "
+                                                "If the connected VESC already has a bootloader this will destroy "
+                                                "the bootloader and firmware updates cannot be done anymore. Do "
+                                                "you want to continue?"),
+                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            }
             isBootloader = true;
         } else {
             reply = QMessageBox::No;
@@ -390,11 +398,13 @@ void PageFirmware::uploadFw(bool allOverCan)
             QByteArray data = file.readAll();
             mVesc->commands()->startFirmwareUpload(data, isBootloader, allOverCan);
 
-            QMessageBox::warning(this,
-                                 tr("Warning"),
-                                 tr("The firmware upload is now ongoing. After the upload has finished you must wait at least "
-                                    "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
-                                    "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
+            if (!isBootloader) {
+                QMessageBox::warning(this,
+                                     tr("Warning"),
+                                     tr("The firmware upload is now ongoing. After the upload has finished you must wait at least "
+                                        "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
+                                        "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
+            }
         }
     }
 }

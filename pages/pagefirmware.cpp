@@ -32,7 +32,7 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
     ui->cancelButton->setEnabled(false);
-    mVesc = 0;
+    mVesc = nullptr;
 
     updateHwList();
     updateBlList();
@@ -112,6 +112,7 @@ void PageFirmware::fwUploadStatus(const QString &status, double progress, bool i
 
     ui->display->setValue(progress * 100.0);
     ui->uploadButton->setEnabled(!isOngoing);
+    ui->uploadAllButton->setEnabled(!isOngoing);
     ui->cancelButton->setEnabled(isOngoing);
 }
 
@@ -177,7 +178,7 @@ void PageFirmware::updateFwList()
 {
     ui->fwList->clear();
     QListWidgetItem *item = ui->hwList->currentItem();
-    if (item != 0) {
+    if (item != nullptr) {
         QString hw = item->data(Qt::UserRole).toString();
 
         QDirIterator it(hw);

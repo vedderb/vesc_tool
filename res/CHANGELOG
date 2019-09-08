@@ -1,3 +1,17 @@
+== 1.18 ==
+* Native CAN-bus fixes.
+* Don't build with can-bus support in static mode as it breaks the linux serial port.
+* FW 3.60 support:
+ - Fixed IMU9x50 bug.
+ - Unrigester ICM20948 terminal callbacks when unused.
+ - Added experiment plot functions.
+ - Added D and Q axis voltage to RT data.
+ - Added smart reverse function to nunchuk app.
+* Added experiment plots to RT data page.
+* D and Q axis voltage in FOC RT plot.
+* Updated wand firmware.
+* More debug information from input reset CAN function.
+
 == 1.17 ==
 * FOC wizard motor pole setting now only allows multiples of two.
 * Native CAN-bus support.

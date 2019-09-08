@@ -5,12 +5,12 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.17
+VT_VERSION = 1.18
 VT_INTRO_VERSION = 1
 
-VT_ANDROID_VERSION_ARMV7 = 25
-VT_ANDROID_VERSION_ARM64 = 26
-VT_ANDROID_VERSION_X86 = 27
+VT_ANDROID_VERSION_ARMV7 = 28
+VT_ANDROID_VERSION_ARM64 = 29
+VT_ANDROID_VERSION_X86 = 30
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -28,15 +28,16 @@ CONFIG += c++11
 # Bluetooth available
 DEFINES += HAS_BLUETOOTH
 
+# CAN bus available
+# Adding serialbus to Qt seems to break the serial port on static builds. TODO: Figure out why.
+#DEFINES += HAS_CANBUS
+
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
 
 !android: {
     # Serial port available
     DEFINES += HAS_SERIALPORT
-
-    # CAN bus available
-    DEFINES += HAS_CANBUS
 }
 
 # Options

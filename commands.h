@@ -92,6 +92,10 @@ signals:
     void bmRebootRes(int res);
     void bmMapPinsDefaultRes(bool ok);
     void bmMapPinsNrf5xRes(bool ok);
+    void plotInitReceived(QString xLabel, QString yLabel);
+    void plotDataReceived(double x, double y);
+    void plotAddGraphReceived(QString name);
+    void plotSetGraphReceived(int graph);
 
 public slots:
     void processPacket(QByteArray data);

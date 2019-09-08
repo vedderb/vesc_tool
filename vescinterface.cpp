@@ -93,7 +93,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastCanDeviceInterface = mSettings.value("CANbusDeviceInterface", "can0").toString();
     mLastCanDeviceBitrate = mSettings.value("CANbusDeviceBitrate", 500000).toInt();
     mLastCanBackend = mSettings.value("CANbusBackend", "socketcan").toString();
-    mLastCanDeviceID = mSettings.value("CANbusLastDeviceID", 01).toInt();
+    mLastCanDeviceID = mSettings.value("CANbusLastDeviceID", 0).toInt();
     mCANbusScanning = false;
 #endif
 
@@ -1231,7 +1231,9 @@ bool VescInterface::connectCANbus(QString backend, QString interface, int bitrat
     mCANbusScanning = false;
     mCanDevice = QCanBus::instance()->createDevice(backend, interface, &errorString);
     if (!mCanDevice) {
-        emit statusMessage(tr("Error creating device '%1' using backend '%2', reason: '%3'").arg(mLastCanDeviceInterface).arg(mLastCanBackend).arg(errorString), false);
+        QString msg = tr("Error creating device '%1' using backend '%2', reason: '%3'").arg(mLastCanDeviceInterface).arg(mLastCanBackend).arg(errorString);
+        emit statusMessage(msg, false);
+        qWarning() << msg;
         return false;
     }
 
@@ -1247,14 +1249,16 @@ bool VescInterface::connectCANbus(QString backend, QString interface, int bitrat
     mCanDevice->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, false);
 
     if (!mCanDevice->connectDevice()) {
-        emit statusMessage(tr("Connection error: %1").arg(mCanDevice->errorString()), false);
+        QString msg = tr("Connection error: %1").arg(mCanDevice->errorString());
+        emit statusMessage(msg, false);
+        qWarning() << msg;
 
         delete mCanDevice;
         mCanDevice = nullptr;
         return false;
     }
 
-    QThread::msleep(100);
+    QThread::msleep(10);
 
     mLastCanBackend = backend;
     mLastCanDeviceInterface = interface;
@@ -1263,6 +1267,7 @@ bool VescInterface::connectCANbus(QString backend, QString interface, int bitrat
     mSettings.setValue("CANbusBackend", mLastCanBackend);
     mSettings.setValue("CANbusDeviceInterface", mLastCanDeviceInterface);
     mSettings.setValue("CANbusDeviceBitrate", mLastCanDeviceBitrate);
+    mSettings.setValue("CANbusLastDeviceID", mLastCanDeviceID);
     setLastConnectionType(CONN_CANBUS);
     return true;
 #else
@@ -1614,6 +1619,12 @@ void VescInterface::timerSlot()
 #ifdef HAS_SERIALPORT
     serialDataAvailable();
 #endif
+#ifdef HAS_CANBUS
+    if (mCanDevice != nullptr) {
+        CANbusDataAvailable();
+    }
+#endif
+
 
 #ifdef HAS_CANBUS
     if (mCanDeviceInterfaces != listCANbusInterfaces()) {
@@ -1704,6 +1715,12 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
 #ifdef HAS_CANBUS
     if (isCANbusConnected()) {
+        // Sending a frame while a frame is received seems to cause problems,
+        // so always delay sending a bit in case a frame that expects a reply
+        // was sent just previously. TODO: Figure out what the problem is.
+        // Guess: Something in the CANable firmware.
+        QThread::msleep(5);
+
         QCanBusFrame frame;
         frame.setExtendedFrameFormat(true);
         frame.setFrameType(QCanBusFrame::UnknownFrame);
@@ -1739,6 +1756,7 @@ void VescInterface::packetDataToSend(QByteArray &data)
             frame.setPayload(data);
 
             mCanDevice->writeFrame(frame);
+            mCanDevice->waitForFramesWritten(5);
         } else {
             int len = data.size();
             QByteArray payload;
@@ -1764,7 +1782,7 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
                 mCanDevice->writeFrame(frame);
                 mCanDevice->waitForFramesWritten(5);
-                QThread::msleep(5);
+//                QThread::msleep(5);
                 payload.clear();
             }
 
@@ -1780,7 +1798,7 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
                 mCanDevice->writeFrame(frame);
                 mCanDevice->waitForFramesWritten(5);
-                QThread::msleep(5);
+//                QThread::msleep(5);
                 payload.clear();
             }
 
@@ -1795,6 +1813,7 @@ void VescInterface::packetDataToSend(QByteArray &data)
                              uint32_t(CAN_PACKET_PROCESS_RX_BUFFER << 8));
 
             mCanDevice->writeFrame(frame);
+            mCanDevice->waitForFramesWritten(5);
         }
     }
 #endif
@@ -1908,6 +1927,13 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
     if (fw_connected >= qMakePair(3, 59)) {
         compCommands.append(int(COMM_BM_MAP_PINS_DEFAULT));
         compCommands.append(int(COMM_BM_MAP_PINS_NRF5X));
+    }
+
+    if (fw_connected >= qMakePair(3, 60)) {
+        compCommands.append(int(COMM_PLOT_INIT));
+        compCommands.append(int(COMM_PLOT_DATA));
+        compCommands.append(int(COMM_PLOT_ADD_GRAPH));
+        compCommands.append(int(COMM_PLOT_SET_GRAPH));
     }
 
     mCommands->setLimitedCompatibilityCommands(compCommands);

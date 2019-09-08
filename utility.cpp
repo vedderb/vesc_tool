@@ -436,11 +436,16 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
                                 "All VESCs must have the latest firmware to perform this operation.",
                                 false, false);
         res = false;
+        qWarning() << "Incompatible firmware";
     }
 
     if (res) {
         vesc->commands()->getAppConf();
         res = waitSignal(ap, SIGNAL(updated()), 1500);
+
+        if (!res) {
+            qWarning() << "Appconf not received";
+        }
     }
 
     if (res) {
@@ -449,11 +454,19 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
         vesc->commands()->getAppConfDefault();
         res = waitSignal(ap, SIGNAL(updated()), 1500);
 
+        if (!res) {
+            qWarning() << "Default appconf not received";
+        }
+
         if (res) {
             ap->updateParamInt("controller_id", canId);
             ap->updateParamEnum("send_can_status", canStatus);
             vesc->commands()->setAppConf();
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 3000);
+
+            if (!res) {
+                qWarning() << "Appconf set no ack received";
+            }
         }
     }
 
@@ -470,6 +483,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             if (!res) {
+                qWarning() << "Incompatible firmware";
                 break;
             }
 
@@ -477,6 +491,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             res = waitSignal(ap, SIGNAL(updated()), 1500);
 
             if (!res) {
+                qWarning() << "Appconf not received";
                 break;
             }
 
@@ -486,15 +501,17 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             res = waitSignal(ap, SIGNAL(updated()), 1500);
 
             if (!res) {
+                qWarning() << "Default appconf not received";
                 break;
             }
 
             ap->updateParamInt("controller_id", canId);
             ap->updateParamEnum("send_can_status", canStatus);
             vesc->commands()->setAppConf();
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 3000);
 
             if (!res) {
+                qWarning() << "Appconf set no ack received";
                 break;
             }
         }
@@ -503,6 +520,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
     vesc->commands()->setSendCan(canLastFwd, canLastId);
     vesc->commands()->getAppConf();
     if (!waitSignal(ap, SIGNAL(updated()), 1500)) {
+        qWarning() << "Appconf not received";
         res = false;
     }
 

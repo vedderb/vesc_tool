@@ -133,6 +133,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="connectButton">
+       <property name="toolTip">
+        <string>Connect to external MCU over SWD.</string>
+       </property>
        <property name="text">
         <string>Connect</string>
        </property>
@@ -144,6 +147,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="connectNrf5xButton">
+       <property name="toolTip">
+        <string>Connect to internal NRF5x MCU</string>
+       </property>
        <property name="text">
         <string>Connect NRF5X</string>
        </property>

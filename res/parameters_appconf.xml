@@ -2424,7 +2424,6 @@ p, li { white-space: pre-wrap; }
             <suffix> °/s</suffix>
             <vTx>9</vTx>
         </imu_conf.gyro_offset_comp_clamp>
-
     </Params>
     <SerOrder>
         <ser>controller_id</ser>

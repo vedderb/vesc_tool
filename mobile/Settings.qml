@@ -37,7 +37,6 @@ Item {
         title: "VESC Tool Settings"
 
         width: parent.width - 20
-        height: column.height - 40
         closePolicy: Popup.CloseOnEscape
 
         x: 10

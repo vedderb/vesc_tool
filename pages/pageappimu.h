@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -21,8 +21,6 @@
 #define PAGEAPPIMU_H
 
 #include <QWidget>
-#include <QVector>
-#include <QTimer>
 #include "vescinterface.h"
 
 namespace Ui {
@@ -34,7 +32,7 @@ class PageAppImu : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageAppImu(QWidget *parent = 0);
+    explicit PageAppImu(QWidget *parent = nullptr);
     ~PageAppImu();
 
     VescInterface *vesc() const;
@@ -55,6 +53,14 @@ private:
     QVector<double> mRollVec;
     QVector<double> mPitchVec;
     QVector<double> mYawVec;
+
+    QVector<double> mAccXVec;
+    QVector<double> mAccYVec;
+    QVector<double> mAccZVec;
+
+    QVector<double> mGyroXVec;
+    QVector<double> mGyroYVec;
+    QVector<double> mGyroZVec;
 
     QVector<double> mSeconds;
 

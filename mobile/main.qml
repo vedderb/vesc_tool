@@ -614,12 +614,13 @@ ApplicationWindow {
         standardButtons: Dialog.Ok
         modal: true
         focus: true
-        width: parent.width - 20
-        height: Math.min(implicitHeight, parent.height - 40)
         closePolicy: Popup.CloseOnEscape
 
+        width: parent.width - 20
+        height: Math.min(implicitHeight, parent.height - 40)
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
+        parent: ApplicationWindow.overlay
 
         ScrollView {
             anchors.fill: parent
@@ -666,8 +667,12 @@ ApplicationWindow {
         onFwRxChanged: {
             if (rx) {
                 if (limited) {
+                    confPageMotor.enabled = false
+                    confPageApp.enabled = false
                     swipeView.setCurrentIndex(5)
                 } else {
+                    confPageMotor.enabled = true
+                    confPageApp.enabled = true
                     mCommands.getMcconf()
                     mCommands.getAppConf()
                 }

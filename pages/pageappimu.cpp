@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -19,13 +19,13 @@
 
 #include "pageappimu.h"
 #include "ui_pageappimu.h"
+#include <QDateTime>
 
 PageAppImu::PageAppImu(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageAppImu)
 {
     ui->setupUi(this);
-    layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
 
     mTimer = new QTimer(this);
@@ -38,6 +38,7 @@ PageAppImu::PageAppImu(QWidget *parent) :
             this, SLOT(timerSlot()));
 
     ui->rpyPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    ui->gyroPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 
     int graphIndex = 0;
 
@@ -56,8 +57,49 @@ PageAppImu::PageAppImu(QWidget *parent) :
     ui->rpyPlot->graph(graphIndex)->setName("Yaw");
     graphIndex++;
 
+    graphIndex = 0;
+
+    ui->accelPlot->addGraph();
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+    ui->accelPlot->graph(graphIndex)->setName("Acc X");
+    graphIndex++;
+
+    ui->accelPlot->addGraph();
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Qt::red));
+    ui->accelPlot->graph(graphIndex)->setName("Acc Y");
+    graphIndex++;
+
+    ui->accelPlot->addGraph();
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+    ui->accelPlot->graph(graphIndex)->setName("Acc Z");
+    graphIndex++;
+
+    graphIndex = 0;
+
+    ui->gyroPlot->addGraph();
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+    ui->gyroPlot->graph(graphIndex)->setName("Gyro X");
+    graphIndex++;
+
+    ui->gyroPlot->addGraph();
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Qt::red));
+    ui->gyroPlot->graph(graphIndex)->setName("Gyro Y");
+    graphIndex++;
+
+    ui->gyroPlot->addGraph();
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+    ui->gyroPlot->graph(graphIndex)->setName("Gyro Z");
+    graphIndex++;
+
     QFont legendFont = font();
     legendFont.setPointSize(9);
+
+    ui->accelPlot->legend->setVisible(true);
+    ui->accelPlot->legend->setFont(legendFont);
+    ui->accelPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
+    ui->accelPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
+    ui->accelPlot->xAxis->setLabel("Seconds (s)");
+    ui->accelPlot->yAxis->setLabel("Acceleration (G)");
 
     ui->rpyPlot->legend->setVisible(true);
     ui->rpyPlot->legend->setFont(legendFont);
@@ -66,6 +108,12 @@ PageAppImu::PageAppImu(QWidget *parent) :
     ui->rpyPlot->xAxis->setLabel("Seconds (s)");
     ui->rpyPlot->yAxis->setLabel("Angle (Deg)");
 
+    ui->gyroPlot->legend->setVisible(true);
+    ui->gyroPlot->legend->setFont(legendFont);
+    ui->gyroPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
+    ui->gyroPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
+    ui->gyroPlot->xAxis->setLabel("Seconds (s)");
+    ui->gyroPlot->yAxis->setLabel("Angular Velocity (Deg/s)");
 }
 
 PageAppImu::~PageAppImu()
@@ -83,21 +131,32 @@ void PageAppImu::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->configPane->addRowSeparator(tr("Input Source"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.use_peripheral");
-        ui->configPane->addRowSeparator(tr("Axes"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.pitch_axis");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.roll_axis");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.yaw_axis");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.flip");
-        ui->configPane->addRowSeparator(tr("AHRS"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.hertz");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_acd");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.m_b");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.startup_time");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.startup_m_acd");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.startup_m_b");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_imu_conf.cal_type");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.type");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.sample_rate_hz");
+
+        ui->tableWidget->addRowSeparator("Filters");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.mode");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.accel_confidence_decay");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.mahony_kp");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.mahony_ki");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.madgwick_beta");
+
+        ui->tableWidget->addRowSeparator("Rotation");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.rot_roll");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.rot_pitch");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.rot_yaw");
+
+        ui->tableWidget->addRowSeparator("Offsets");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.accel_offsets__0");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.accel_offsets__1");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.accel_offsets__2");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offsets__0");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offsets__1");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offsets__2");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offset_comp_fact__0");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offset_comp_fact__1");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offset_comp_fact__2");
+        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offset_comp_clamp");
 
         connect(mVesc->commands(), SIGNAL(valuesImuReceived(IMU_VALUES,uint)),
                 this, SLOT(valuesReceived(IMU_VALUES,uint)));
@@ -121,9 +180,23 @@ void PageAppImu::timerSlot()
         ui->rpyPlot->graph(graphIndex++)->setData(xAxis, mPitchVec);
         ui->rpyPlot->graph(graphIndex++)->setData(xAxis, mYawVec);
 
+        graphIndex = 0;
+        ui->accelPlot->graph(graphIndex++)->setData(xAxis, mAccXVec);
+        ui->accelPlot->graph(graphIndex++)->setData(xAxis, mAccYVec);
+        ui->accelPlot->graph(graphIndex++)->setData(xAxis, mAccZVec);
+
+        graphIndex = 0;
+        ui->gyroPlot->graph(graphIndex++)->setData(xAxis, mGyroXVec);
+        ui->gyroPlot->graph(graphIndex++)->setData(xAxis, mGyroYVec);
+        ui->gyroPlot->graph(graphIndex++)->setData(xAxis, mGyroZVec);
+
         ui->rpyPlot->rescaleAxes();
+        ui->accelPlot->rescaleAxes();
+        ui->gyroPlot->rescaleAxes();
 
         ui->rpyPlot->replot();
+        ui->accelPlot->replot();
+        ui->gyroPlot->replot();
     }
 }
 
@@ -137,19 +210,25 @@ void PageAppImu::valuesReceived(IMU_VALUES values, unsigned int mask)
     appendDoubleAndTrunc(&mPitchVec, values.pitch * 180.0 / M_PI, maxS);
     appendDoubleAndTrunc(&mYawVec, values.yaw * 180.0 / M_PI, maxS);
 
+    appendDoubleAndTrunc(&mAccXVec, values.accX, maxS);
+    appendDoubleAndTrunc(&mAccYVec, values.accY, maxS);
+    appendDoubleAndTrunc(&mAccZVec, values.accZ, maxS);
+
+    appendDoubleAndTrunc(&mGyroXVec, values.gyroX, maxS);
+    appendDoubleAndTrunc(&mGyroYVec, values.gyroY, maxS);
+    appendDoubleAndTrunc(&mGyroZVec, values.gyroZ, maxS);
+
     qint64 tNow = QDateTime::currentMSecsSinceEpoch();
 
-    double elapsed = (double)(tNow - mLastUpdateTime) / 1000.0;
+    double elapsed = double((tNow - mLastUpdateTime)) / 1000.0;
     if (elapsed > 1.0) {
         elapsed = 1.0;
     }
 
     mSecondCounter += elapsed;
-
     appendDoubleAndTrunc(&mSeconds, mSecondCounter, maxS);
 
     mLastUpdateTime = tNow;
-
     mUpdatePlots = true;
 }
 

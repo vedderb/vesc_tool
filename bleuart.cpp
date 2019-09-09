@@ -96,7 +96,7 @@ void BleUart::disconnectBle()
     }
 
     if (mControl) {
-        mControl->disconnectFromDevice();
+//        mControl->disconnectFromDevice();
         mControl->deleteLater();
         mControl = 0;
     }

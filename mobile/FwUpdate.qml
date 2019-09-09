@@ -586,11 +586,16 @@ Item {
             }
 
             uploadDialog.title = "Warning"
+
+            var msgBl2 = ""
+            if (!mCommands.getLimitedSupportsEraseBootloader()) {
+                msgBl2 = "If the VESC already has a bootloader this will destroy " +
+                        "the bootloader and firmware updates cannot be done anymore. "
+            }
+
             uploadDialogLabel.text =
-                    msgBl + "\n\n" +
-                    "If the VESC already has a bootloader this will destroy " +
-                    "the bootloader and firmware updates cannot be done anymore. Do " +
-                    "you want to continue?"
+                    msgBl + "\n\n" + msgBl2 +
+                    "Do you want to continue?"
             uploadDialog.open()
         }
     }

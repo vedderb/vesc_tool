@@ -951,6 +951,12 @@ void MainWindow::reloadPages()
     addPageItem(tr("Nrf"), "://res/icons/Online-96.png",
                 "://res/icons/appconf.png", false, true);
 
+    mPageAppImu = new PageAppImu(this);
+    mPageAppImu->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppImu);
+    addPageItem(tr("IMU"), "://res/icons/Gyroscope-96.png",
+                "://res/icons/appconf.png", false, true);
+
     mPageDataAnalysis = new PageDataAnalysis(this);
     mPageDataAnalysis->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageDataAnalysis);

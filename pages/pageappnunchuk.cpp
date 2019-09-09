@@ -58,6 +58,9 @@ void PageAppNunchuk::setVesc(VescInterface *vesc)
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ramp_time_neg");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.stick_erpm_per_s_in_cc");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.hyst");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.use_smart_rev");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_max_duty");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_ramp_time");
         ui->generalTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.multi_esc");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc");

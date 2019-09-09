@@ -119,6 +119,8 @@ struct MC_VALUES {
     Q_PROPERTY(mc_fault_code fault_code MEMBER fault_code)
     Q_PROPERTY(int vesc_id MEMBER vesc_id)
     Q_PROPERTY(QString fault_str MEMBER fault_str)
+    Q_PROPERTY(double vd MEMBER vd)
+    Q_PROPERTY(double vq MEMBER vq)
 
 public:
     MC_VALUES() {
@@ -143,6 +145,8 @@ public:
         position = 0.0;
         fault_code = FAULT_CODE_NONE;
         vesc_id = 0;
+        vd = 0.0;
+        vq = 0.0;
     }
 
     double v_in;
@@ -167,6 +171,8 @@ public:
     mc_fault_code fault_code;
     int vesc_id;
     QString fault_str;
+    double vd;
+    double vq;
 };
 
 Q_DECLARE_METATYPE(MC_VALUES)
@@ -411,7 +417,15 @@ typedef enum {
     COMM_BM_ERASE_FLASH_ALL,
     COMM_BM_WRITE_FLASH,
     COMM_BM_REBOOT,
-    COMM_BM_DISCONNECT
+    COMM_BM_DISCONNECT,
+    COMM_BM_MAP_PINS_DEFAULT,
+    COMM_BM_MAP_PINS_NRF5X,
+    COMM_ERASE_BOOTLOADER,
+    COMM_ERASE_BOOTLOADER_ALL_CAN,
+    COMM_PLOT_INIT,
+    COMM_PLOT_DATA,
+    COMM_PLOT_ADD_GRAPH,
+    COMM_PLOT_SET_GRAPH,
 } COMM_PACKET_ID;
 
 typedef enum {

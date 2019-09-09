@@ -25,6 +25,8 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mSendCan = false;
     mCanId = -1;
     mIsLimitedMode = false;
+    mLimitedSupportsFwdAllCan = false;
+    mLimitedSupportsEraseBootloader = false;
 
     // Firmware state
     mFirmwareIsUploading = false;
@@ -102,7 +104,7 @@ int Commands::getCanSendId()
 void Commands::processPacket(QByteArray data)
 {
     VByteArray vb(data);
-    COMM_PACKET_ID id = (COMM_PACKET_ID)vb.vbPopFrontUint8();
+    COMM_PACKET_ID id = COMM_PACKET_ID(vb.vbPopFrontUint8());
 
     switch (id) {
     case COMM_FW_VERSION: {
@@ -133,6 +135,7 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_ERASE_NEW_APP:
     case COMM_WRITE_NEW_APP_DATA:
+    case COMM_ERASE_BOOTLOADER:
         firmwareUploadUpdate(!vb.at(0));
         break;
 
@@ -146,58 +149,58 @@ void Commands::processPacket(QByteArray data)
             mask = vb.vbPopFrontUint32();
         }
 
-        if (mask & ((uint32_t)1 << 0)) {
+        if (mask & (uint32_t(1) << 0)) {
             values.temp_mos = vb.vbPopFrontDouble16(1e1);
         }
-        if (mask & ((uint32_t)1 << 1)) {
+        if (mask & (uint32_t(1) << 1)) {
             values.temp_motor = vb.vbPopFrontDouble16(1e1);
         }
-        if (mask & ((uint32_t)1 << 2)) {
+        if (mask & (uint32_t(1) << 2)) {
             values.current_motor = vb.vbPopFrontDouble32(1e2);
         }
-        if (mask & ((uint32_t)1 << 3)) {
+        if (mask & (uint32_t(1) << 3)) {
             values.current_in = vb.vbPopFrontDouble32(1e2);
         }
-        if (mask & ((uint32_t)1 << 4)) {
+        if (mask & (uint32_t(1) << 4)) {
             values.id = vb.vbPopFrontDouble32(1e2);
         }
-        if (mask & ((uint32_t)1 << 5)) {
+        if (mask & (uint32_t(1) << 5)) {
             values.iq = vb.vbPopFrontDouble32(1e2);
         }
-        if (mask & ((uint32_t)1 << 6)) {
+        if (mask & (uint32_t(1) << 6)) {
             values.duty_now = vb.vbPopFrontDouble16(1e3);
         }
-        if (mask & ((uint32_t)1 << 7)) {
+        if (mask & (uint32_t(1) << 7)) {
             values.rpm = vb.vbPopFrontDouble32(1e0);
         }
-        if (mask & ((uint32_t)1 << 8)) {
+        if (mask & (uint32_t(1) << 8)) {
             values.v_in = vb.vbPopFrontDouble16(1e1);
         }
-        if (mask & ((uint32_t)1 << 9)) {
+        if (mask & (uint32_t(1) << 9)) {
             values.amp_hours = vb.vbPopFrontDouble32(1e4);
         }
-        if (mask & ((uint32_t)1 << 10)) {
+        if (mask & (uint32_t(1) << 10)) {
             values.amp_hours_charged = vb.vbPopFrontDouble32(1e4);
         }
-        if (mask & ((uint32_t)1 << 11)) {
+        if (mask & (uint32_t(1) << 11)) {
             values.watt_hours = vb.vbPopFrontDouble32(1e4);
         }
-        if (mask & ((uint32_t)1 << 12)) {
+        if (mask & (uint32_t(1) << 12)) {
             values.watt_hours_charged = vb.vbPopFrontDouble32(1e4);
         }
-        if (mask & ((uint32_t)1 << 13)) {
+        if (mask & (uint32_t(1) << 13)) {
             values.tachometer = vb.vbPopFrontInt32();
         }
-        if (mask & ((uint32_t)1 << 14)) {
+        if (mask & (uint32_t(1) << 14)) {
             values.tachometer_abs = vb.vbPopFrontInt32();
         }
-        if (mask & ((uint32_t)1 << 15)) {
-            values.fault_code = (mc_fault_code)vb.vbPopFrontInt8();
+        if (mask & (uint32_t(1) << 15)) {
+            values.fault_code = mc_fault_code(vb.vbPopFrontInt8());
             values.fault_str = faultToStr(values.fault_code);
         }
 
         if (vb.size() >= 4) {
-            if (mask & ((uint32_t)1 << 16)) {
+            if (mask & (uint32_t(1) << 16)) {
                 values.position = vb.vbPopFrontDouble32(1e6);
             }
         } else {
@@ -205,7 +208,7 @@ void Commands::processPacket(QByteArray data)
         }
 
         if (vb.size() >= 1) {
-            if (mask & ((uint32_t)1 << 17)) {
+            if (mask & (uint32_t(1) << 17)) {
                 values.vesc_id = vb.vbPopFrontUint8();
             }
         } else {
@@ -213,10 +216,19 @@ void Commands::processPacket(QByteArray data)
         }
 
         if (vb.size() >= 6) {
-            if (mask & ((uint32_t)1 << 18)) {
+            if (mask & (uint32_t(1) << 18)) {
                 values.temp_mos_1 = vb.vbPopFrontDouble16(1e1);
                 values.temp_mos_2 = vb.vbPopFrontDouble16(1e1);
                 values.temp_mos_3 = vb.vbPopFrontDouble16(1e1);
+            }
+        }
+
+        if (vb.size() >= 8) {
+            if (mask & (uint32_t(1) << 19)) {
+                values.vd = vb.vbPopFrontDouble32(1e3);
+            }
+            if (mask & (uint32_t(1) << 20)) {
+                values.vq = vb.vbPopFrontDouble32(1e3);
             }
         }
 
@@ -271,9 +283,9 @@ void Commands::processPacket(QByteArray data)
         param.cycle_int_limit = vb.vbPopFrontDouble32(1e3);
         param.bemf_coupling_k = vb.vbPopFrontDouble32(1e3);
         for (int i = 0;i < 8;i++) {
-            param.hall_table.append((int)vb.vbPopFrontUint8());
+            param.hall_table.append(int(vb.vbPopFrontUint8()));
         }
-        param.hall_res = (int)vb.vbPopFrontUint8();
+        param.hall_res = int(vb.vbPopFrontUint8());
         emit bldcDetectReceived(param);
     } break;
 
@@ -337,7 +349,7 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_NRF_START_PAIRING:
-        emit nrfPairingRes((NRF_PAIR_RES)vb.vbPopFrontInt8());
+        emit nrfPairingRes(NRF_PAIR_RES(vb.vbPopFrontInt8()));
         break;
 
     case COMM_GPD_BUFFER_NOTIFY:
@@ -358,65 +370,65 @@ void Commands::processPacket(QByteArray data)
             mask = vb.vbPopFrontUint32();
         }
 
-        if (mask & ((uint32_t)1 << 0)) {
+        if (mask & (uint32_t(1) << 0)) {
             values.temp_mos = vb.vbPopFrontDouble16(1e1);
         }
-        if (mask & ((uint32_t)1 << 1)) {
+        if (mask & (uint32_t(1) << 1)) {
             values.temp_motor = vb.vbPopFrontDouble16(1e1);
         }
-        if (mask & ((uint32_t)1 << 2)) {
+        if (mask & (uint32_t(1) << 2)) {
             values.current_motor = vb.vbPopFrontDouble32(1e2);
         }
-        if (mask & ((uint32_t)1 << 3)) {
+        if (mask & (uint32_t(1) << 3)) {
             values.current_in = vb.vbPopFrontDouble32(1e2);
         }
-        if (mask & ((uint32_t)1 << 4)) {
+        if (mask & (uint32_t(1) << 4)) {
             values.duty_now = vb.vbPopFrontDouble16(1e3);
         }
-        if (mask & ((uint32_t)1 << 5)) {
+        if (mask & (uint32_t(1) << 5)) {
             values.rpm = vb.vbPopFrontDouble32(1e0);
         }
-        if (mask & ((uint32_t)1 << 6)) {
+        if (mask & (uint32_t(1) << 6)) {
             values.speed = vb.vbPopFrontDouble32(1e3);
         }
-        if (mask & ((uint32_t)1 << 7)) {
+        if (mask & (uint32_t(1) << 7)) {
             values.v_in = vb.vbPopFrontDouble16(1e1);
         }
-        if (mask & ((uint32_t)1 << 8)) {
+        if (mask & (uint32_t(1) << 8)) {
             values.battery_level = vb.vbPopFrontDouble16(1e3);
         }
-        if (mask & ((uint32_t)1 << 9)) {
+        if (mask & (uint32_t(1) << 9)) {
             values.amp_hours = vb.vbPopFrontDouble32(1e4);
         }
-        if (mask & ((uint32_t)1 << 10)) {
+        if (mask & (uint32_t(1) << 10)) {
             values.amp_hours_charged = vb.vbPopFrontDouble32(1e4);
         }
-        if (mask & ((uint32_t)1 << 11)) {
+        if (mask & (uint32_t(1) << 11)) {
             values.watt_hours = vb.vbPopFrontDouble32(1e4);
         }
-        if (mask & ((uint32_t)1 << 12)) {
+        if (mask & (uint32_t(1) << 12)) {
             values.watt_hours_charged = vb.vbPopFrontDouble32(1e4);
         }
-        if (mask & ((uint32_t)1 << 13)) {
+        if (mask & (uint32_t(1) << 13)) {
             values.tachometer = vb.vbPopFrontDouble32(1e3);
         }
-        if (mask & ((uint32_t)1 << 14)) {
+        if (mask & (uint32_t(1) << 14)) {
             values.tachometer_abs = vb.vbPopFrontDouble32(1e3);
         }
-        if (mask & ((uint32_t)1 << 15)) {
+        if (mask & (uint32_t(1) << 15)) {
             values.position = vb.vbPopFrontDouble32(1e6);
         }
-        if (mask & ((uint32_t)1 << 16)) {
-            values.fault_code = (mc_fault_code)vb.vbPopFrontInt8();
+        if (mask & (uint32_t(1) << 16)) {
+            values.fault_code = mc_fault_code(vb.vbPopFrontInt8());
             values.fault_str = faultToStr(values.fault_code);
         }
-        if (mask & ((uint32_t)1 << 17)) {
+        if (mask & (uint32_t(1) << 17)) {
             values.vesc_id = vb.vbPopFrontUint8();
         }
-        if (mask & ((uint32_t)1 << 18)) {
+        if (mask & (uint32_t(1) << 18)) {
             values.num_vescs = vb.vbPopFrontUint8();
         }
-        if (mask & ((uint32_t)1 << 19)) {
+        if (mask & (uint32_t(1) << 19)) {
             values.battery_wh = vb.vbPopFrontDouble32(1e3);
         }
 
@@ -455,56 +467,56 @@ void Commands::processPacket(QByteArray data)
 
         uint32_t mask = vb.vbPopFrontUint16();
 
-        if (mask & ((uint32_t)1 << 0)) {
+        if (mask & (uint32_t(1) << 0)) {
             values.roll = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 1)) {
+        if (mask & (uint32_t(1) << 1)) {
             values.pitch = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 2)) {
+        if (mask & (uint32_t(1) << 2)) {
             values.yaw = vb.vbPopFrontDouble32Auto();
         }
 
-        if (mask & ((uint32_t)1 << 3)) {
+        if (mask & (uint32_t(1) << 3)) {
             values.accX = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 4)) {
+        if (mask & (uint32_t(1) << 4)) {
             values.accY = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 5)) {
+        if (mask & (uint32_t(1) << 5)) {
             values.accZ = vb.vbPopFrontDouble32Auto();
         }
 
-        if (mask & ((uint32_t)1 << 6)) {
+        if (mask & (uint32_t(1) << 6)) {
             values.gyroX = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 7)) {
+        if (mask & (uint32_t(1) << 7)) {
             values.gyroY = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 8)) {
+        if (mask & (uint32_t(1) << 8)) {
             values.gyroZ = vb.vbPopFrontDouble32Auto();
         }
 
-        if (mask & ((uint32_t)1 << 9)) {
+        if (mask & (uint32_t(1) << 9)) {
             values.magX = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 10)) {
+        if (mask & (uint32_t(1) << 10)) {
             values.magY = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 11)) {
+        if (mask & (uint32_t(1) << 11)) {
             values.magZ = vb.vbPopFrontDouble32Auto();
         }
 
-        if (mask & ((uint32_t)1 << 12)) {
+        if (mask & (uint32_t(1) << 12)) {
             values.q0 = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 13)) {
+        if (mask & (uint32_t(1) << 13)) {
             values.q1 = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 14)) {
+        if (mask & (uint32_t(1) << 14)) {
             values.q2 = vb.vbPopFrontDouble32Auto();
         }
-        if (mask & ((uint32_t)1 << 15)) {
+        if (mask & (uint32_t(1) << 15)) {
             values.q3 = vb.vbPopFrontDouble32Auto();
         }
 
@@ -530,6 +542,34 @@ void Commands::processPacket(QByteArray data)
     case COMM_BM_DISCONNECT:
         emit ackReceived("COMM_BM_DISCONNECT OK");
         break;
+
+    case COMM_BM_MAP_PINS_DEFAULT:
+        emit bmMapPinsDefaultRes(vb.vbPopFrontInt16());
+        break;
+
+    case COMM_BM_MAP_PINS_NRF5X:
+        emit bmMapPinsNrf5xRes(vb.vbPopFrontInt16());
+        break;
+
+    case COMM_PLOT_INIT: {
+        QString xL = vb.vbPopFrontString();
+        QString yL = vb.vbPopFrontString();
+        emit plotInitReceived(xL, yL);
+    } break;
+
+    case COMM_PLOT_DATA: {
+        double x = vb.vbPopFrontDouble32Auto();
+        double y = vb.vbPopFrontDouble32Auto();
+        emit plotDataReceived(x, y);
+    } break;
+
+    case COMM_PLOT_ADD_GRAPH: {
+        emit plotAddGraphReceived(vb.vbPopFrontString());
+    } break;
+
+    case COMM_PLOT_SET_GRAPH: {
+        emit plotSetGraphReceived(vb.vbPopFrontInt8());
+    } break;
 
     default:
         break;
@@ -1138,6 +1178,20 @@ void Commands::bmDisconnect()
     emitData(vb);
 }
 
+void Commands::bmMapPinsDefault()
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_MAP_PINS_DEFAULT);
+    emitData(vb);
+}
+
+void Commands::bmMapPinsNrf5x()
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_MAP_PINS_NRF5X);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mFirmwareIsUploading) {
@@ -1180,7 +1234,14 @@ void Commands::emitData(QByteArray data)
                 (data.at(0) != COMM_JUMP_TO_BOOTLOADER_ALL_CAN &&
                 data.at(0) != COMM_ERASE_NEW_APP_ALL_CAN &&
                 data.at(0) != COMM_WRITE_NEW_APP_DATA_ALL_CAN)) {
-            return;
+            if (!mLimitedSupportsEraseBootloader ||
+                    (data.at(0) != COMM_ERASE_BOOTLOADER &&
+                     data.at(0) != COMM_ERASE_BOOTLOADER_ALL_CAN)) {
+
+                if (!mCompatibilityCommands.contains(int(data.at(0)))) {
+                    return;
+                }
+            }
         }
     }
 
@@ -1211,6 +1272,11 @@ void Commands::firmwareUploadUpdate(bool isTimeout)
             mFirmwareUploadStatus = "Buffer Erase Timeout";
         } else {
             mFirmwareState++;
+
+            if (mFirmwareIsBootloader) {
+                mFirmwareState++;
+            }
+
             mFirmwareRetries = retries;
             mFirmwareTimer = timeout;
             firmwareUploadUpdate(true);
@@ -1334,6 +1400,26 @@ void Commands::setLimitedSupportsFwdAllCan(bool limitedSupportsFwdAllCan)
     mLimitedSupportsFwdAllCan = limitedSupportsFwdAllCan;
 }
 
+bool Commands::getLimitedSupportsEraseBootloader() const
+{
+    return mLimitedSupportsEraseBootloader;
+}
+
+void Commands::setLimitedSupportsEraseBootloader(bool limitedSupportsEraseBootloader)
+{
+    mLimitedSupportsEraseBootloader = limitedSupportsEraseBootloader;
+}
+
+QVector<int> Commands::getLimitedCompatibilityCommands() const
+{
+    return mCompatibilityCommands;
+}
+
+void Commands::setLimitedCompatibilityCommands(QVector<int> compatibilityCommands)
+{
+    mCompatibilityCommands = compatibilityCommands;
+}
+
 void Commands::setAppConfig(ConfigParams *appConfig)
 {
     mAppConfig = appConfig;
@@ -1362,7 +1448,15 @@ void Commands::startFirmwareUpload(QByteArray &newFirmware, bool isBootloader, b
     mFirmwareUploadStatus = "Buffer Erase";
 
     if (mFirmwareIsBootloader) {
-        firmwareUploadUpdate(true);
+        if (mLimitedSupportsEraseBootloader) {
+            mFirmwareState = 0;
+            VByteArray vb;
+            vb.vbAppendInt8(mFirmwareFwdAllCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
+                                                 COMM_ERASE_BOOTLOADER);
+            emitData(vb);
+        } else {
+            firmwareUploadUpdate(true);
+        }
     } else {
         VByteArray vb;
         vb.vbAppendInt8(mFirmwareFwdAllCan ? COMM_ERASE_NEW_APP_ALL_CAN :
@@ -1375,7 +1469,7 @@ void Commands::startFirmwareUpload(QByteArray &newFirmware, bool isBootloader, b
 double Commands::getFirmwareUploadProgress()
 {
     if (mFirmwareIsUploading) {
-        return (double)mFimwarePtr / (double)mNewFirmware.size();
+        return double(mFimwarePtr) / double(mNewFirmware.size());
     } else {
         return -1.0;
     }
@@ -1394,6 +1488,11 @@ void Commands::cancelFirmwareUpload()
         mFirmwareState = 0;
         mFirmwareUploadStatus = "Cancelled";
     }
+}
+
+bool Commands::isCurrentFiwmwareBootloader()
+{
+    return mFirmwareIsBootloader;
 }
 
 void Commands::checkMcConfig()

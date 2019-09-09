@@ -48,12 +48,12 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
 
     ui->balancePlot->addGraph();
     ui->balancePlot->graph(graphIndex)->setPen(QPen(Qt::blue));
-    ui->balancePlot->graph(graphIndex)->setName("Pitch");
+    ui->balancePlot->graph(graphIndex)->setName("Main Angle");
     graphIndex++;
 
     ui->balancePlot->addGraph();
     ui->balancePlot->graph(graphIndex)->setPen(QPen(Qt::cyan));
-    ui->balancePlot->graph(graphIndex)->setName("Roll");
+    ui->balancePlot->graph(graphIndex)->setName("Cross Angle");
     graphIndex++;
 
     ui->balancePlot->addGraph();
@@ -136,8 +136,8 @@ void PageAppBalance::timerSlot()
 
         int graphIndex = 0;
         ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppPidOutputVec);
-        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppPitchVec);
-        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppRollVec);
+        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppMAngleVec);
+        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppCAngleVec);
         ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppMotorCurrentVec);
 
         ui->balancePlot->rescaleAxes();
@@ -148,13 +148,13 @@ void PageAppBalance::timerSlot()
     }
 }
 
-void PageAppBalance::appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state) {
+void PageAppBalance::appValuesReceived(double pid_outpout, double m_angle, double c_angle, uint32_t diff_time, double motor_current, double motor_position, uint16_t state) {
 
     const int maxS = 250;
 
     appendDoubleAndTrunc(&mAppPidOutputVec, pid_outpout, maxS);
-    appendDoubleAndTrunc(&mAppPitchVec, pitch, maxS);
-    appendDoubleAndTrunc(&mAppRollVec, roll, maxS);
+    appendDoubleAndTrunc(&mAppMAngleVec, m_angle, maxS);
+    appendDoubleAndTrunc(&mAppCAngleVec, c_angle, maxS);
     mAppDiffTime = diff_time;
     appendDoubleAndTrunc(&mAppMotorCurrentVec, motor_current, maxS);
     appendDoubleAndTrunc(&mAppMotorPositionVec, motor_position, maxS);

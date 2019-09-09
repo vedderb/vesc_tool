@@ -42,7 +42,7 @@ public:
 
 private slots:
     void timerSlot();
-    void appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state);
+    void appValuesReceived(double pid_outpout, double m_angle, double c_angle, uint32_t diff_time, double motor_current, double motor_position, uint16_t state);
 
 private:
     Ui::PageAppBalance *ui;
@@ -53,8 +53,8 @@ private:
     bool mUpdatePlots;
 
     QVector<double> mAppPidOutputVec;
-    QVector<double> mAppPitchVec;
-    QVector<double> mAppRollVec;
+    QVector<double> mAppMAngleVec;
+    QVector<double> mAppCAngleVec;
     uint32_t mAppDiffTime = 0;
     QVector<double> mAppMotorCurrentVec;
     QVector<double> mAppMotorPositionVec;

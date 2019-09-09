@@ -207,6 +207,31 @@ Item {
                         }
                     }
 
+                    Button {
+                        id: nrfPairButton
+                        text: "NRF Quick Pair"
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 500
+
+                        onClicked: {
+                            if (!VescIf.isPortConnected()) {
+                                VescIf.emitMessageDialog("NRF Quick Pair",
+                                                         "You are not connected to the VESC. Please connect in order " +
+                                                         "to quick pair an NRF-based remote.", false, false)
+                            } else {
+                                nrfPairStartDialog.open()
+                            }
+                        }
+                    }
+
+                    NrfPair {
+                        id: nrfPair
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 500
+                        visible: false
+                        hideAfterPair: true
+                    }
+
                     Item {
                         visible: isHorizontal
                         Layout.fillHeight: true
@@ -443,6 +468,12 @@ Item {
             canScanBar.visible = false
             canScanBar.indeterminate = false
         }
+
+        onNrfPairingRes: {
+            if (res != 0) {
+                nrfPairButton.visible = true
+            }
+        }
     }
 
     Dialog {
@@ -507,6 +538,37 @@ Item {
         DirectionSetup {
             id: directionSetup
             anchors.fill: parent
+        }
+    }
+
+    Dialog {
+        id: nrfPairStartDialog
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        modal: true
+        focus: true
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        title: "NRF Pairing"
+
+        parent: ApplicationWindow.overlay
+        x: 10
+        y: topItem.y + topItem.height / 2 - height / 2
+
+        Text {
+            id: detectLambdaLabel
+            color: "white"
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text:
+                "After clicking OK the VESC will be put in pairing mode for 10 seconds. Switch" +
+                "on your remote during this time to complete the pairing process."
+        }
+
+        onAccepted: {
+            nrfPair.visible = true
+            nrfPairButton.visible = false
+            nrfPair.startPairing()
         }
     }
 }

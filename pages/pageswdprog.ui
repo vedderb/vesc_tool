@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
+    <width>671</width>
     <height>427</height>
    </rect>
   </property>
@@ -133,8 +133,25 @@
      </item>
      <item>
       <widget class="QPushButton" name="connectButton">
+       <property name="toolTip">
+        <string>Connect to external MCU over SWD.</string>
+       </property>
        <property name="text">
         <string>Connect</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../res.qrc">
+         <normaloff>:/res/icons/Connected-96.png</normaloff>:/res/icons/Connected-96.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="connectNrf5xButton">
+       <property name="toolTip">
+        <string>Connect to internal NRF5x MCU</string>
+       </property>
+       <property name="text">
+        <string>Connect NRF5X</string>
        </property>
        <property name="icon">
         <iconset resource="../res.qrc">

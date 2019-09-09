@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -17,48 +17,50 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#ifndef PAGEAPPBALANCE_H
-#define PAGEAPPBALANCE_H
+#ifndef PAGEAPPIMU_H
+#define PAGEAPPIMU_H
 
 #include <QWidget>
-#include <QVector>
-#include <QTimer>
 #include "vescinterface.h"
 
 namespace Ui {
-class PageAppBalance;
+class PageAppImu;
 }
 
-class PageAppBalance : public QWidget
+class PageAppImu : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit PageAppBalance(QWidget *parent = 0);
-    ~PageAppBalance();
+    explicit PageAppImu(QWidget *parent = nullptr);
+    ~PageAppImu();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
 
 private slots:
     void timerSlot();
-    void appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state);
+    void valuesReceived(IMU_VALUES values, unsigned int mask);
 
 private:
-    Ui::PageAppBalance *ui;
+    Ui::PageAppImu *ui;
     VescInterface *mVesc;
 
     QTimer *mTimer;
 
     bool mUpdatePlots;
 
-    QVector<double> mAppPidOutputVec;
-    QVector<double> mAppPitchVec;
-    QVector<double> mAppRollVec;
-    uint32_t mAppDiffTime = 0;
-    QVector<double> mAppMotorCurrentVec;
-    QVector<double> mAppMotorPositionVec;
-    uint16_t mAppState;
+    QVector<double> mRollVec;
+    QVector<double> mPitchVec;
+    QVector<double> mYawVec;
+
+    QVector<double> mAccXVec;
+    QVector<double> mAccYVec;
+    QVector<double> mAccZVec;
+
+    QVector<double> mGyroXVec;
+    QVector<double> mGyroYVec;
+    QVector<double> mGyroZVec;
 
     QVector<double> mSeconds;
 
@@ -66,8 +68,6 @@ private:
     qint64 mLastUpdateTime;
 
     void appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize);
-    void updateTextOutput();
-
 };
 
-#endif // PAGEAPPBALANCE_H
+#endif // PAGEAPPIMU_H

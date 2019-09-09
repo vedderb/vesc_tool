@@ -92,22 +92,16 @@ void PageAppBalance::setVesc(VescInterface *vesc)
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.ki");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.kd");
         ui->tunePane->addRowSeparator(tr("Main loop"));
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.loop_delay");
-        ui->tunePane->addRowSeparator(tr("Gyro Calibration"));
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_offset");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_offset");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.m_acd");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.m_b");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.cal_delay");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.cal_m_acd");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.cal_m_b");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.use_peripheral");
+        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.hertz");
+        ui->tunePane->addRowSeparator(tr("Gyro Orientation"));
+        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.m_axis");
+        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.c_axis");
         ui->tunePane->addRowSeparator(tr("Experimental"));
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.deadzone");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.current_boost");
         ui->configPane->addRowSeparator(tr("Startup"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_pitch");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_roll");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_m_tolerance");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_c_tolerance");
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_speed");
         ui->configPane->addRowSeparator(tr("Tiltback"));
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_duty");
@@ -116,8 +110,8 @@ void PageAppBalance::setVesc(VescInterface *vesc)
         ui->configPane->addRowSeparator(tr("Overspeed"));
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.overspeed_duty");
         ui->configPane->addRowSeparator(tr("Fault"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_fault");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_fault");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.m_fault");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.c_fault");
 
         updateTextOutput();
 
@@ -156,7 +150,7 @@ void PageAppBalance::timerSlot()
 
 void PageAppBalance::appValuesReceived(double pid_outpout, double pitch, double roll, uint32_t diff_time, double motor_current, double motor_position, uint16_t state) {
 
-    const int maxS = 500;
+    const int maxS = 250;
 
     appendDoubleAndTrunc(&mAppPidOutputVec, pid_outpout, maxS);
     appendDoubleAndTrunc(&mAppPitchVec, pitch, maxS);

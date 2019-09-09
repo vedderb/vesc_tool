@@ -29,10 +29,12 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QFileInfo>
+#include <QtGlobal>
 
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
 #include <QAndroidJniObject>
+#include <QAndroidJniEnvironment>
 #endif
 
 Utility::Utility(QObject *parent) : QObject(parent)
@@ -214,19 +216,51 @@ QString Utility::uuid2Str(QByteArray uuid, bool space)
 bool Utility::requestFilePermission()
 {
 #ifdef Q_OS_ANDROID
-    // Note: The following should work on Qt 5.10
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     // https://codereview.qt-project.org/#/c/199162/
-//    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-//    if(r == QtAndroid::PermissionResult::Denied) {
-//        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE" );
-//        r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-//        if(r == QtAndroid::PermissionResult::Denied) {
-//            return false;
-//        }
-//    }
+    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+    if(r == QtAndroid::PermissionResult::Denied) {
+        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE", 5000);
+        r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+        if(r == QtAndroid::PermissionResult::Denied) {
+            return false;
+        }
+    }
+
     return true;
 #else
     return true;
+#endif
+#else
+    return true;
+#endif
+}
+
+void Utility::keepScreenOn(bool on)
+{
+#ifdef Q_OS_ANDROID
+    QtAndroid::runOnAndroidThread([on]{
+        QAndroidJniObject activity = QtAndroid::androidActivity();
+        if (activity.isValid()) {
+            QAndroidJniObject window =
+                    activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+
+            if (window.isValid()) {
+                const int FLAG_KEEP_SCREEN_ON = 128;
+                if (on) {
+                    window.callMethod<void>("addFlags", "(I)V", FLAG_KEEP_SCREEN_ON);
+                } else {
+                    window.callMethod<void>("clearFlags", "(I)V", FLAG_KEEP_SCREEN_ON);
+                }
+            }
+        }
+        QAndroidJniEnvironment env;
+        if (env->ExceptionCheck()) {
+            env->ExceptionClear();
+        }
+    });
+#else
+    (void)on;
 #endif
 }
 
@@ -402,11 +436,16 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
                                 "All VESCs must have the latest firmware to perform this operation.",
                                 false, false);
         res = false;
+        qWarning() << "Incompatible firmware";
     }
 
     if (res) {
         vesc->commands()->getAppConf();
         res = waitSignal(ap, SIGNAL(updated()), 1500);
+
+        if (!res) {
+            qWarning() << "Appconf not received";
+        }
     }
 
     if (res) {
@@ -415,11 +454,19 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
         vesc->commands()->getAppConfDefault();
         res = waitSignal(ap, SIGNAL(updated()), 1500);
 
+        if (!res) {
+            qWarning() << "Default appconf not received";
+        }
+
         if (res) {
             ap->updateParamInt("controller_id", canId);
             ap->updateParamEnum("send_can_status", canStatus);
             vesc->commands()->setAppConf();
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 3000);
+
+            if (!res) {
+                qWarning() << "Appconf set no ack received";
+            }
         }
     }
 
@@ -436,6 +483,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             if (!res) {
+                qWarning() << "Incompatible firmware";
                 break;
             }
 
@@ -443,6 +491,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             res = waitSignal(ap, SIGNAL(updated()), 1500);
 
             if (!res) {
+                qWarning() << "Appconf not received";
                 break;
             }
 
@@ -452,15 +501,17 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             res = waitSignal(ap, SIGNAL(updated()), 1500);
 
             if (!res) {
+                qWarning() << "Default appconf not received";
                 break;
             }
 
             ap->updateParamInt("controller_id", canId);
             ap->updateParamEnum("send_can_status", canStatus);
             vesc->commands()->setAppConf();
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 3000);
 
             if (!res) {
+                qWarning() << "Appconf set no ack received";
                 break;
             }
         }
@@ -469,6 +520,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
     vesc->commands()->setSendCan(canLastFwd, canLastId);
     vesc->commands()->getAppConf();
     if (!waitSignal(ap, SIGNAL(updated()), 1500)) {
+        qWarning() << "Appconf not received";
         res = false;
     }
 
@@ -501,6 +553,11 @@ bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
     if (res) {
         vesc->commands()->getMcconf();
         res = waitSignal(p, SIGNAL(updated()), 1500);
+        if (!res) {
+            vesc->emitMessageDialog("Read Motor Configuration",
+                                    "Could not read motor configuration.",
+                                    false, false);
+        }
     }
 
     if (res) {
@@ -508,6 +565,12 @@ bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
         p->updateParamDouble("l_battery_cut_end", cutEnd);
         vesc->commands()->setMcconf(false);
         res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+
+        if (!res) {
+            vesc->emitMessageDialog("Write Motor Configuration",
+                                    "Could not write motor configuration.",
+                                    false, false);
+        }
     }
 
     // All VESCs on CAN-bus
@@ -520,9 +583,6 @@ bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
                                         "All VESCs must have the latest firmware to perform this operation.",
                                         false, false);
                 res = false;
-            }
-
-            if (!res) {
                 break;
             }
 
@@ -530,6 +590,10 @@ bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
             res = waitSignal(p, SIGNAL(updated()), 1500);
 
             if (!res) {
+                vesc->emitMessageDialog("Read Motor Configuration",
+                                        "Could not read motor configuration.",
+                                        false, false);
+
                 break;
             }
 
@@ -539,6 +603,10 @@ bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
             res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
 
             if (!res) {
+                vesc->emitMessageDialog("Write Motor Configuration",
+                                        "Could not write motor configuration.",
+                                        false, false);
+
                 break;
             }
         }
@@ -548,6 +616,12 @@ bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
     vesc->commands()->getMcconf();
     if (!waitSignal(p, SIGNAL(updated()), 1500)) {
         res = false;
+
+        if (!res) {
+            vesc->emitMessageDialog("Read Motor Configuration",
+                                    "Could not read motor configuration.",
+                                    false, false);
+        }
     }
 
     vesc->ignoreCanChange(false);
@@ -1112,7 +1186,7 @@ bool Utility::createParamParserC(VescInterface *vesc, QString filename)
 
     outSource << "// This file is autogenerated by VESC Tool\n\n";
     outSource << "#include \"buffer.h\"\n";
-    outSource << "#include \"conf_mc_app_default.h\"\n";
+    outSource << "#include \"conf_general.h\"\n";
     outSource << "#include \"" << headerInfo.fileName() << "\"\n\n";
 
     outSource << "int32_t " << prefix << "_serialize_mcconf(uint8_t *buffer, const mc_configuration *conf) {\n";

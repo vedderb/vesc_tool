@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -19,6 +19,10 @@
 
 #include "pagertdata.h"
 #include "ui_pagertdata.h"
+#include "widgets/helpdialog.h"
+
+#include <QXmlStreamWriter>
+#include <QXmlStreamReader>
 
 PageRtData::PageRtData(QWidget *parent) :
     QWidget(parent),
@@ -37,11 +41,15 @@ PageRtData::PageRtData(QWidget *parent) :
     mUpdateValPlot = false;
     mUpdatePosPlot = false;
 
+    mExperimentReplot = false;
+    mExperimentPlotNow = 0;
+
     ui->currentPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     ui->tempPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     ui->rpmPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     ui->focPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     ui->posPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    ui->experimentPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 
     // Current and duty
     int graphIndex = 0;
@@ -79,6 +87,16 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->focPlot->graph(graphIndex)->setName("Q Current");
     graphIndex++;
 
+    ui->focPlot->addGraph(ui->focPlot->xAxis, ui->focPlot->yAxis2);
+    ui->focPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+    ui->focPlot->graph(graphIndex)->setName("D Voltage");
+    graphIndex++;
+
+    ui->focPlot->addGraph(ui->focPlot->xAxis, ui->focPlot->yAxis2);
+    ui->focPlot->graph(graphIndex)->setPen(QPen(Qt::darkGreen));
+    ui->focPlot->graph(graphIndex)->setName("Q Voltage");
+    graphIndex++;
+
     QFont legendFont = font();
     legendFont.setPointSize(9);
 
@@ -111,6 +129,7 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->focPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->focPlot->xAxis->setLabel("Seconds (s)");
     ui->focPlot->yAxis->setLabel("Current");
+    ui->focPlot->yAxis2->setLabel("Voltage");
 
     ui->currentPlot->yAxis->setRange(-20, 130);
     ui->currentPlot->yAxis2->setRange(-0.2, 1.3);
@@ -120,6 +139,7 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->tempPlot->yAxis2->setVisible(true);
     ui->rpmPlot->yAxis->setRange(0, 120);
     ui->focPlot->yAxis->setRange(0, 120);
+    ui->focPlot->yAxis2->setRange(0, 120);
 
     ui->posPlot->addGraph();
     ui->posPlot->graph(0)->setPen(QPen(Qt::blue));
@@ -130,6 +150,39 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->posPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->posPlot->xAxis->setLabel("Sample");
     ui->posPlot->yAxis->setLabel("Degrees");
+
+    // Experiment
+    ui->experimentPlot->xAxis->grid()->setSubGridVisible(true);
+    ui->experimentPlot->yAxis->grid()->setSubGridVisible(true);
+
+    connect(ui->experimentGraph1Button, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
+    connect(ui->experimentGraph2Button, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
+    connect(ui->experimentGraph3Button, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
+    connect(ui->experimentGraph4Button, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
+    connect(ui->experimentGraph5Button, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
+    connect(ui->experimentScatterButton, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
+
+    connect(ui->experimentHZoomButton, &QPushButton::toggled,
+            [=]() {
+        Qt::Orientations plotOrientations = Qt::Orientations(
+                ((ui->experimentHZoomButton->isChecked() ? Qt::Horizontal : 0) |
+                 (ui->experimentVZoomButton->isChecked() ? Qt::Vertical : 0)));
+        ui->experimentPlot->axisRect()->setRangeZoom(plotOrientations);
+    });
+
+    connect(ui->experimentVZoomButton, &QPushButton::toggled,
+            [=]() {
+        Qt::Orientations plotOrientations = Qt::Orientations(
+                ((ui->experimentHZoomButton->isChecked() ? Qt::Horizontal : 0) |
+                 (ui->experimentVZoomButton->isChecked() ? Qt::Vertical : 0)));
+        ui->experimentPlot->axisRect()->setRangeZoom(plotOrientations);
+    });
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
@@ -154,6 +207,14 @@ void PageRtData::setVesc(VescInterface *vesc)
                 this, SLOT(valuesReceived(MC_VALUES, unsigned int)));
         connect(mVesc->commands(), SIGNAL(rotorPosReceived(double)),
                 this, SLOT(rotorPosReceived(double)));
+        connect(mVesc->commands(), SIGNAL(plotInitReceived(QString,QString)),
+                this, SLOT(plotInitReceived(QString,QString)));
+        connect(mVesc->commands(), SIGNAL(plotDataReceived(double,double)),
+                this, SLOT(plotDataReceived(double,double)));
+        connect(mVesc->commands(), SIGNAL(plotAddGraphReceived(QString)),
+                this, SLOT(plotAddGraphReceived(QString)));
+        connect(mVesc->commands(), SIGNAL(plotSetGraphReceived(int)),
+                this, SLOT(plotSetGraphReceived(int)));
     }
 }
 
@@ -223,6 +284,8 @@ void PageRtData::timerSlot()
         graphIndex = 0;
         ui->focPlot->graph(graphIndex++)->setData(xAxis, mIdVec);
         ui->focPlot->graph(graphIndex++)->setData(xAxis, mIqVec);
+        ui->focPlot->graph(graphIndex++)->setData(xAxis, mVdVec);
+        ui->focPlot->graph(graphIndex++)->setData(xAxis, mVqVec);
 
         if (ui->autoscaleButton->isChecked()) {
             ui->currentPlot->rescaleAxes();
@@ -242,10 +305,10 @@ void PageRtData::timerSlot()
     if (mUpdatePosPlot) {
         QVector<double> xAxis(mPositionVec.size());
         for (int i = 0;i < mPositionVec.size();i++) {
-            xAxis[i] = (double)i;
+            xAxis[i] = double(i);
         }
 
-        ui->posBar->setValue((int)fabs(mPositionVec.last()));
+        ui->posBar->setValue(int(fabs(mPositionVec.last())));
         ui->posPlot->graph(0)->setData(xAxis, mPositionVec);
 
         if (ui->autoscaleButton->isChecked()) {
@@ -255,6 +318,38 @@ void PageRtData::timerSlot()
         ui->posPlot->replot();
 
         mUpdatePosPlot = false;
+    }
+
+    if (mExperimentReplot) {
+        ui->experimentPlot->clearGraphs();
+
+        for (int i = 0;i < mExperimentPlots.size();i++) {
+            switch (i) {
+            case 0: if (!ui->experimentGraph1Button->isChecked()) {continue;} break;
+            case 1: if (!ui->experimentGraph2Button->isChecked()) {continue;} break;
+            case 2: if (!ui->experimentGraph3Button->isChecked()) {continue;} break;
+            case 3: if (!ui->experimentGraph4Button->isChecked()) {continue;} break;
+            case 4: if (!ui->experimentGraph5Button->isChecked()) {continue;} break;
+            default: break;
+            }
+
+            ui->experimentPlot->addGraph();
+            ui->experimentPlot->graph()->setData(mExperimentPlots.at(i).xData, mExperimentPlots.at(i).yData);
+            ui->experimentPlot->graph()->setName(mExperimentPlots.at(i).label);
+            ui->experimentPlot->graph()->setPen(QPen(mExperimentPlots.at(i).color));
+            if (ui->experimentScatterButton->isChecked()) {
+                ui->experimentPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
+            }
+        }
+
+        ui->experimentPlot->legend->setVisible(mExperimentPlots.size() > 1);
+
+        if (ui->experimentAutoScaleButton->isChecked()) {
+            ui->experimentPlot->rescaleAxes();
+        }
+
+        ui->experimentPlot->replot();
+        mExperimentReplot = false;
     }
 }
 
@@ -276,10 +371,12 @@ void PageRtData::valuesReceived(MC_VALUES values, unsigned int mask)
     appendDoubleAndTrunc(&mIqVec, values.iq, maxS);
     appendDoubleAndTrunc(&mDutyVec, values.duty_now, maxS);
     appendDoubleAndTrunc(&mRpmVec, values.rpm, maxS);
+    appendDoubleAndTrunc(&mVdVec, values.vd, maxS);
+    appendDoubleAndTrunc(&mVqVec, values.vq, maxS);
 
     qint64 tNow = QDateTime::currentMSecsSinceEpoch();
 
-    double elapsed = (double)(tNow - mLastUpdateTime) / 1000.0;
+    double elapsed = double((tNow - mLastUpdateTime)) / 1000.0;
     if (elapsed > 1.0) {
         elapsed = 1.0;
     }
@@ -299,6 +396,55 @@ void PageRtData::rotorPosReceived(double pos)
     mUpdatePosPlot = true;
 }
 
+void PageRtData::plotInitReceived(QString xLabel, QString yLabel)
+{
+    mExperimentPlots.clear();
+
+    ui->experimentPlot->clearGraphs();
+    ui->experimentPlot->xAxis->setLabel(xLabel);
+    ui->experimentPlot->yAxis->setLabel(yLabel);
+
+    mExperimentReplot = true;
+}
+
+void PageRtData::plotDataReceived(double x, double y)
+{
+    if (mExperimentPlots.size() <= mExperimentPlotNow) {
+        mExperimentPlots.resize(mExperimentPlotNow + 1);
+    }
+
+    mExperimentPlots[mExperimentPlotNow].xData.append(x);
+    mExperimentPlots[mExperimentPlotNow].yData.append(y);
+    mExperimentReplot = true;
+}
+
+void PageRtData::plotAddGraphReceived(QString name)
+{
+    mExperimentPlots.resize(mExperimentPlots.size() + 1);
+    mExperimentPlots.last().label = name;
+
+    if (mExperimentPlots.size() == 1) {
+        mExperimentPlots.last().color = "blue";
+    } else if (mExperimentPlots.size() == 2) {
+        mExperimentPlots.last().color = "red";
+    } else if (mExperimentPlots.size() == 3) {
+        mExperimentPlots.last().color = "magenta";
+    } else if (mExperimentPlots.size() == 4) {
+        mExperimentPlots.last().color = "darkgreen";
+    } else if (mExperimentPlots.size() == 5) {
+        mExperimentPlots.last().color = "cyan";
+    } else {
+        mExperimentPlots.last().color = "blue";
+    }
+
+    mExperimentReplot = true;
+}
+
+void PageRtData::plotSetGraphReceived(int graph)
+{
+    mExperimentPlotNow = graph;
+}
+
 void PageRtData::appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize)
 {
     vec->append(num);
@@ -310,9 +456,9 @@ void PageRtData::appendDoubleAndTrunc(QVector<double> *vec, double num, int maxS
 
 void PageRtData::updateZoom()
 {
-    Qt::Orientations plotOrientations = (Qt::Orientations)
+    Qt::Orientations plotOrientations = Qt::Orientations(
             ((ui->zoomHButton->isChecked() ? Qt::Horizontal : 0) |
-             (ui->zoomVButton->isChecked() ? Qt::Vertical : 0));
+             (ui->zoomVButton->isChecked() ? Qt::Vertical : 0)));
 
     ui->currentPlot->axisRect()->setRangeZoom(plotOrientations);
     ui->tempPlot->axisRect()->setRangeZoom(plotOrientations);
@@ -421,5 +567,182 @@ void PageRtData::on_csvEnableLogBox_clicked(bool checked)
         }
     } else {
         mVesc->closeRtLogFile();
+    }
+}
+
+void PageRtData::on_csvHelpButton_clicked()
+{
+    HelpDialog::showHelp(this, mVesc->infoConfig(), "help_rt_logging");
+}
+
+void PageRtData::on_experimentLoadXmlButton_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("Load Plot"), "",
+                                                    tr("Xml files (*.xml)"));
+
+    if (!filename.isEmpty()) {
+        QFile file(filename);
+        if (!file.open(QIODevice::ReadOnly)) {
+            QMessageBox::critical(this, "Load Plot",
+                                  "Could not open\n" + filename + "\nfor reading");
+            return;
+        }
+
+        QXmlStreamReader stream(&file);
+
+        // Look for plot tag
+        bool plots_found = false;
+        while (stream.readNextStartElement()) {
+            if (stream.name() == "plot") {
+                plots_found = true;
+                break;
+            }
+        }
+
+        if (plots_found) {
+            mExperimentPlots.clear();
+
+            while (stream.readNextStartElement()) {
+                QString name = stream.name().toString();
+
+                if (name == "xlabel") {
+                    ui->experimentPlot->xAxis->setLabel(stream.readElementText());
+                } else if (name == "ylabel") {
+                    ui->experimentPlot->yAxis->setLabel(stream.readElementText());
+                } else if (name == "graph") {
+                    EXPERIMENT_PLOT p;
+
+                    while (stream.readNextStartElement()) {
+                        QString name2 = stream.name().toString();
+
+                        if (name2 == "label") {
+                            p.label = stream.readElementText();
+                        } else if (name2 == "color") {
+                            p.color = stream.readElementText();
+                        } else if (name2 == "point") {
+                            while (stream.readNextStartElement()) {
+                                QString name3 = stream.name().toString();
+
+                                if (name3 == "x") {
+                                    p.xData.append(stream.readElementText().toDouble());
+                                } else if (name3 == "y") {
+                                    p.yData.append(stream.readElementText().toDouble());
+                                } else {
+                                    qWarning() << ": Unknown XML element :" << name2;
+                                    stream.skipCurrentElement();
+                                }
+                            }
+                        } else {
+                            qWarning() << ": Unknown XML element :" << name2;
+                            stream.skipCurrentElement();
+                        }
+
+                        if (stream.hasError()) {
+                            qWarning() << " : XML ERROR :" << stream.errorString();
+                        }
+                    }
+
+                    mExperimentPlots.append(p);
+                }
+
+                if (stream.hasError()) {
+                    qWarning() << "XML ERROR :" << stream.errorString();
+                    qWarning() << stream.lineNumber() << stream.columnNumber();
+                }
+            }
+
+            mExperimentReplot = true;
+
+            file.close();
+            if (mVesc) {
+                mVesc->emitStatusMessage("Loaded plot", true);
+            }
+        } else {
+            QMessageBox::critical(this, "Load Plot",
+                                  "plot tag not found in " + filename);
+        }
+    }
+}
+
+void PageRtData::on_experimentSaveXmlButton_clicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this,
+                                                    tr("Save Plot"), "",
+                                                    tr("Xml files (*.xml)"));
+
+    if (filename.isEmpty()) {
+        return;
+    }
+
+    if (!filename.toLower().endsWith(".xml")) {
+        filename.append(".xml");
+    }
+
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Save Plot",
+                              "Could not open\n" + filename + "\nfor writing");
+        return;
+    }
+
+    QXmlStreamWriter stream(&file);
+    stream.setCodec("UTF-8");
+    stream.setAutoFormatting(true);
+    stream.writeStartDocument();
+
+    stream.writeStartElement("plot");
+    stream.writeTextElement("xlabel", ui->experimentPlot->xAxis->label());
+    stream.writeTextElement("ylabel", ui->experimentPlot->yAxis->label());
+
+    for (EXPERIMENT_PLOT p: mExperimentPlots) {
+        stream.writeStartElement("graph");
+        stream.writeTextElement("label", p.label);
+        stream.writeTextElement("color", p.color);
+        for (int i = 0;i < p.xData.size();i++) {
+            stream.writeStartElement("point");
+            stream.writeTextElement("x", QString::number(p.xData.at(i)));
+            stream.writeTextElement("y", QString::number(p.yData.at(i)));
+            stream.writeEndElement();
+        }
+        stream.writeEndElement();
+    }
+
+    stream.writeEndDocument();
+    file.close();
+}
+
+void PageRtData::on_experimentSavePngButton_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save Image"), "",
+                                                    tr("PNG Files (*.png)"));
+
+    if (!fileName.isEmpty()) {
+        if (!fileName.toLower().endsWith(".png")) {
+            fileName.append(".png");
+        }
+
+        ui->experimentPlot->savePng(fileName,
+                                    ui->experimentWBox->value(),
+                                    ui->experimentHBox->value(),
+                                    ui->experimentScaleBox->value());
+    }
+}
+
+void PageRtData::on_experimentSavePdfButton_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save PDF"), "",
+                                                    tr("PDF Files (*.pdf)"));
+
+    if (!fileName.isEmpty()) {
+        if (!fileName.toLower().endsWith(".pdf")) {
+            fileName.append(".pdf");
+        }
+
+        ui->experimentPlot->savePdf(fileName,
+                                    ui->experimentWBox->value(),
+                                    ui->experimentHBox->value());
     }
 }

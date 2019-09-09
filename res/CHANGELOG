@@ -1,3 +1,53 @@
+== 1.18 ==
+* Native CAN-bus fixes.
+* Don't build with can-bus support in static mode as it breaks the linux serial port.
+* FW 3.60 support:
+ - Fixed IMU9x50 bug.
+ - Unrigester ICM20948 terminal callbacks when unused.
+ - Added experiment plot functions.
+ - Added D and Q axis voltage to RT data.
+ - Added smart reverse function to nunchuk app.
+* Added experiment plots to RT data page.
+* D and Q axis voltage in FOC RT plot.
+* Updated wand firmware.
+* More debug information from input reset CAN function.
+
+== 1.17 ==
+* FOC wizard motor pole setting now only allows multiples of two.
+* Native CAN-bus support.
+* Added support for multiple SWD interfaces.
+* FW 3.59 support.
+* Added wand firmware and NRF52840 firmware for VESC HD.
+* Added header to RT CSV log.
+* Added VESC HD and UAVC Omega firmwares.
+* Added NRF quick pair button.
+* Support as many commands as possible in limited mode. This will make the app quite useful even if the FW is out of date.
+* Ble improvements for NRF52 firmwares.
+* Do not disconnect after bootloader update and show different message.
+* Added IMU page with many IMU settings and live plots to adjust them.
+
+== 1.16 ==
+* Added support to export sampled data as CSV.
+* Added erase only button to SWD prog.
+
+== 1.15 ==
+* Keep screen on setting on android.
+* Added support for imperial units.
+* Added battery current warning.
+
+== 1.14 ==
+* FW 3.58 support:
+ - Set motor to FOC mode after successful FOC detection instead of the default type for the hardware.
+ - APP_ADC: Do not send brake command over CAN if config.multi_esc is not set.
+ - APP_PPM: Make pulses invalid if they are above 150 % instead of 120 %.
+ - APP_PPM: Introduced a new control mode that allows reverse with hysteria (@ackmaniac port).
+* Moved to Qt 5.12 for the mobile version.
+* Added arm64_v8a and x86 builds.
+* Request file permission when opening log and fw files.
+* Enable RT logging without having the RT data page active.
+* Added help text about RT logging.
+* Try to create RT logging path if it does not exist.
+
 == 1.13 ==
 * FW 3.57 support:
  - Added CAN status message 5 with input voltage and tachometer data.

@@ -44,6 +44,10 @@ private slots:
     void timerSlot();
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void rotorPosReceived(double pos);
+    void plotInitReceived(QString xLabel, QString yLabel);
+    void plotDataReceived(double x, double y);
+    void plotAddGraphReceived(QString name);
+    void plotSetGraphReceived(int graph);
 
     void on_zoomHButton_toggled(bool checked);
     void on_zoomVButton_toggled(bool checked);
@@ -59,6 +63,11 @@ private slots:
     void on_tempShowMotorBox_toggled(bool checked);
     void on_csvChooseDirButton_clicked();
     void on_csvEnableLogBox_clicked(bool checked);
+    void on_csvHelpButton_clicked();
+    void on_experimentLoadXmlButton_clicked();
+    void on_experimentSaveXmlButton_clicked();
+    void on_experimentSavePngButton_clicked();
+    void on_experimentSavePdfButton_clicked();
 
 private:
     Ui::PageRtData *ui;
@@ -78,12 +87,25 @@ private:
     QVector<double> mRpmVec;
     QVector<double> mPositionVec;
     QVector<double> mSeconds;
+    QVector<double> mVdVec;
+    QVector<double> mVqVec;
 
     double mSecondCounter;
     qint64 mLastUpdateTime;
 
     bool mUpdateValPlot;
     bool mUpdatePosPlot;
+
+    typedef struct {
+        QString label;
+        QString color;
+        QVector<double> xData;
+        QVector<double> yData;
+    } EXPERIMENT_PLOT;
+
+    QVector<EXPERIMENT_PLOT> mExperimentPlots;
+    int mExperimentPlotNow;
+    bool mExperimentReplot;
 
     void appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize);
     void updateZoom();

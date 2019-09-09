@@ -69,7 +69,7 @@ void SetupWizardApp::idChanged(int id)
         setSideWidget(mSideLabel);
         mSideLabel->setVisible(true);
     } else {
-        setSideWidget(0);
+        setSideWidget(nullptr);
     }
 }
 
@@ -254,7 +254,7 @@ void AppMultiPage::initializePage()
         mCanFwdList->addItem(item);
     }
 
-    mCanFwdList->setCurrentItem(0);
+    mCanFwdList->setCurrentItem(nullptr);
 }
 
 int AppMultiPage::nextId() const
@@ -325,7 +325,7 @@ AppGeneralPage::AppGeneralPage(VescInterface *vesc, QWidget *parent)
     mInputList->addItem(item);
 
     mInputList->setIconSize(QSize(60, 60));
-    mInputList->setCurrentItem(0);
+    mInputList->setCurrentItem(nullptr);
 
     registerField("Input", this, "inputType", SIGNAL(inputTypeChanged));
     connect(mInputList, SIGNAL(currentRowChanged(int)),
@@ -342,15 +342,12 @@ int AppGeneralPage::nextId() const
     case SetupWizardApp::Input_Nunchuk:
     case SetupWizardApp::Input_NunchukNrf:
         return SetupWizardApp::Page_Nunchuk;
-        break;
 
     case SetupWizardApp::Input_Ppm:
         return SetupWizardApp::Page_Ppm_Map;
-        break;
 
     case SetupWizardApp::Input_Adc:
         return SetupWizardApp::Page_Adc_Map;
-        break;
 
     default:
         break;
@@ -433,6 +430,9 @@ void AppNunchukPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ramp_time_neg");
     mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.stick_erpm_per_s_in_cc");
     mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.hyst");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.use_smart_rev");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_max_duty");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_ramp_time");
 
     mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
     mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc");
@@ -608,6 +608,7 @@ void AppPpmPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_pos");
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_neg");
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pid_max_erpm");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.max_erpm_for_dir");
 
     mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc");

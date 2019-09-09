@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
-#if USE_MOBILE
+#ifdef USE_MOBILE
 #ifndef DEBUG_BUILD
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif

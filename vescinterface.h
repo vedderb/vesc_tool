@@ -32,6 +32,10 @@
 #include <QSerialPort>
 #endif
 
+#ifdef HAS_CANBUS
+#include <QCanBus>
+#endif
+
 #include "datatypes.h"
 #include "configparams.h"
 #include "commands.h"
@@ -83,6 +87,10 @@ public:
     Q_INVOKABLE QString getLastSerialPort() const;
     Q_INVOKABLE int getLastSerialBaud() const;
 #endif
+#ifdef HAS_CANBUS
+    Q_INVOKABLE QString getLastCANbusInterface() const;
+    Q_INVOKABLE int getLastCANbusBitrate() const;
+#endif
     bool swdEraseFlash();
     bool swdUploadFw(QByteArray newFirmware, uint32_t startAddr = 0);
     void swdCancel();
@@ -91,6 +99,11 @@ public:
     Q_INVOKABLE bool openRtLogFile(QString outDirectory);
     Q_INVOKABLE void closeRtLogFile();
     Q_INVOKABLE bool isRtLogOpen();
+
+    Q_INVOKABLE bool useImperialUnits();
+    Q_INVOKABLE void setUseImperialUnits(bool useImperialUnits);
+    Q_INVOKABLE bool keepScreenOn();
+    Q_INVOKABLE void setKeepScreenOn(bool on);
 
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
@@ -107,6 +120,12 @@ public:
     Q_INVOKABLE QString getConnectedPortName();
     bool connectSerial(QString port, int baudrate = 115200);
     QList<VSerialInfo_t> listSerialPorts();
+    QList<QString> listCANbusInterfaces();
+    Q_INVOKABLE bool connectCANbus(QString backend, QString interface, int bitrate);
+    Q_INVOKABLE bool isCANbusConnected();
+    Q_INVOKABLE void setCANbusReceiverID(int node_ID);
+    Q_INVOKABLE void scanCANbus();
+
     Q_INVOKABLE void connectTcp(QString server, int port);
     Q_INVOKABLE void connectBle(QString address);
     Q_INVOKABLE bool isAutoconnectOngoing() const;
@@ -126,6 +145,8 @@ signals:
     void autoConnectFinished();
     void profilesUpdated();
     void pairingListUpdated();
+    void CANbusNewNode(int node);
+    void CANbusInterfaceListUpdated();
 
 public slots:
 
@@ -133,6 +154,11 @@ private slots:
 #ifdef HAS_SERIALPORT
     void serialDataAvailable();
     void serialPortError(QSerialPort::SerialPortError error);
+#endif
+
+#ifdef HAS_CANBUS
+    void CANbusDataAvailable();
+    void CANbusError(QCanBusDevice::CanBusError error);
 #endif
 
     void tcpInputConnected();
@@ -157,6 +183,7 @@ private:
     typedef enum {
         CONN_NONE = 0,
         CONN_SERIAL,
+        CONN_CANBUS,
         CONN_TCP,
         CONN_BLE
     } conn_t;
@@ -181,6 +208,7 @@ private:
     QString mHwTxt;
     QString mUuidStr;
     bool mIsUploadingFw;
+    bool mIsLastFwBootloader;
 
     bool mCancelSwdUpload;
 
@@ -191,6 +219,18 @@ private:
     QSerialPort *mSerialPort;
     QString mLastSerialPort;
     int mLastSerialBaud;
+#endif
+
+#ifdef HAS_CANBUS
+    QCanBusDevice *mCanDevice;
+    QString mLastCanDeviceInterface;
+    int mLastCanDeviceBitrate;
+    QString mLastCanBackend;
+    int mLastCanDeviceID;
+    QByteArray mCanRxBuffer;
+    QVector<int> mCanNodesID;
+    QList<QString> mCanDeviceInterfaces;
+    bool mCANbusScanning;
 #endif
 
     QTcpSocket *mTcpSocket;
@@ -211,6 +251,10 @@ private:
     bool mIgnoreCanChange;
 
     QVector<int> mCanDevsLast;
+
+    // Other settings
+    bool mUseImperialUnits;
+    bool mKeepScreenOn;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

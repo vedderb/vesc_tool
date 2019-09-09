@@ -99,7 +99,7 @@ Item {
             maxAngle: 70
             labelStep: maximumValue > 60 ? 20 : 10
             value: 20
-            unitText: "km/h"
+            unitText: VescIf.useImperialUnits() ? "mph" : "km/h"
             typeText: "Speed"
         }
 
@@ -195,20 +195,23 @@ Item {
             dutyGauge.value = values.duty_now * 100.0
             batteryGauge.value = values.battery_level * 100.0
 
+            var useImperial = VescIf.useImperialUnits()
             var fl = mMcConf.getParamDouble("foc_motor_flux_linkage")
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var speedFact = ((mMcConf.getParamInt("si_motor_poles") / 2.0) * 60.0 *
                     mMcConf.getParamDouble("si_gear_ratio")) /
                     (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
             var speedMax = 3.6 * rpmMax / speedFact
-            var speedMaxRound = (Math.ceil(speedMax / 10.0) * 10.0)
+            var impFact = useImperial ? 0.621371192 : 1.0
+            var speedMaxRound = (Math.ceil((speedMax * impFact) / 10.0) * 10.0)
 
             if (Math.abs(speedGauge.maximumValue - speedMaxRound) > 6.0) {
                 speedGauge.maximumValue = speedMaxRound
                 speedGauge.minimumValue = -speedMaxRound
             }
 
-            speedGauge.value = values.speed * 3.6
+            speedGauge.value = values.speed * 3.6 * impFact
+            speedGauge.unitText = useImperial ? "mph" : "km/h"
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
                                                            mMcConf.getParamDouble("l_current_max")),
@@ -230,10 +233,14 @@ Item {
 
             var wh_km = (values.watt_hours - values.watt_hours_charged) / (values.tachometer_abs / 1000.0)
 
+            var l1Txt = useImperial ? "Mi Trip : " : "Km Trip : "
+            var l2Txt = useImperial ? "Wh/Mi   : " : "Wh/Km   : "
+            var l3Txt = useImperial ? "Mi Range: " : "Km Range: "
+
             valText2.text =
-                    "Km Trip : " + parseFloat(values.tachometer_abs / 1000.0).toFixed(3) + "\n" +
-                    "Wh/Km   : " + parseFloat(wh_km).toFixed(1) + "\n" +
-                    "Km Range: " + parseFloat(values.battery_wh / wh_km).toFixed(2) + "\n" +
+                    l1Txt + parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(3) + "\n" +
+                    l2Txt + parseFloat(wh_km / impFact).toFixed(1) + "\n" +
+                    l3Txt + parseFloat(values.battery_wh / (wh_km / impFact)).toFixed(2) + "\n" +
                     "VESCs   : " + values.num_vescs
         }
     }

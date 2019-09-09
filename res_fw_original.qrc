@@ -27,5 +27,10 @@
         <file>res/firmwares/75_300_R2/VESC_default_no_hw_limits.bin</file>
         <file>res/firmwares/75_300_R2/VESC_servoout.bin</file>
         <file>res/firmwares/75_300_R2/VESC_ws2811.bin</file>
+        <file>res/firmwares/UAVC_OMEGA/VESC_default.bin</file>
+        <file>res/firmwares/HD/VESC_default.bin</file>
+        <file>res/firmwares/HD/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/HD/VESC_servoout.bin</file>
+        <file>res/firmwares/HD/VESC_ws2811.bin</file>
     </qresource>
 </RCC>

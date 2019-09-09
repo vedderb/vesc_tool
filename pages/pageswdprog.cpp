@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include "pageswdprog.h"
 #include "ui_pageswdprog.h"
+#include "utility.h"
 
 PageSwdProg::PageSwdProg(QWidget *parent) :
     QWidget(parent),
@@ -65,6 +66,10 @@ void PageSwdProg::on_chooseButton_clicked()
 void PageSwdProg::on_connectButton_clicked()
 {
     if (mVesc) {
+        mVesc->commands()->bmMapPinsDefault();
+        ui->connectButton->setEnabled(false);
+        Utility::waitSignal(mVesc->commands(), SIGNAL(bmMapPinsDefaultRes(bool)), 100);
+        ui->connectButton->setEnabled(true);
         mVesc->commands()->bmConnect();
     }
 }
@@ -173,6 +178,15 @@ void PageSwdProg::setVesc(VescInterface *vesc)
             this, SLOT(fwUploadStatus(QString,double,bool)));
     connect(mVesc->commands(), SIGNAL(bmConnRes(int)),
             this, SLOT(bmConnRes(int)));
+
+    connect(mVesc->commands(), &Commands::bmMapPinsNrf5xRes, [this](bool res) {
+        if (!res) {
+            mVesc->emitMessageDialog("Connect NRF5X",
+                                     "This hardware version does not have a SWD connection to the "
+                                     "NRF5X module.",
+                                     false, false);
+        }
+    });
 }
 
 void PageSwdProg::timerSlot()
@@ -196,6 +210,8 @@ void PageSwdProg::fwUploadStatus(const QString &status, double progress, bool is
     ui->display->setValue(progress * 100.0);
 
     ui->connectButton->setEnabled(!isOngoing);
+    ui->connectNrf5xButton->setEnabled(!isOngoing);
+    ui->eraseFlashButton->setEnabled(!isOngoing);
     ui->disconnectButton->setEnabled(!isOngoing);
     ui->uploadButton->setEnabled(!isOngoing);
 }
@@ -277,6 +293,10 @@ void PageSwdProg::bmConnRes(int res)
     case 8:
         addSwdFw("BLE Sparkfun Mini - RX: 11 TX: 8 LED: 7",
                  "://res/other_fw/nrf52840_vesc_ble_rx11_tx8_led7.bin");
+        addSwdFw("VESC HD Builtin - RX: 26 TX: 25 LED: 27",
+                 "://res/other_fw/nrf52840_vesc_ble_rx26_tx25_led27.bin");
+        addSwdFw("Wand Remote",
+                 "://res/other_fw/nrf52840_stick_remote.bin");
         break;
 
     default:
@@ -311,4 +331,33 @@ void PageSwdProg::addSwdFw(QString name, QString path, uint32_t addr, QString bl
     fw.bootloaderAddr = blAddr;
     item->setData(Qt::UserRole, QVariant::fromValue(fw));
     ui->fwList->insertItem(ui->fwList->count(), item);
+}
+
+void PageSwdProg::on_eraseFlashButton_clicked()
+{
+    if (mVesc) {
+        if (!mVesc->isPortConnected()) {
+            QMessageBox::critical(this,
+                                  tr("Connection Error"),
+                                  tr("The VESC is not connected."));
+            return;
+        }
+
+        if (mVesc->swdEraseFlash()) {
+            QMessageBox::information(this,
+                                  tr("Erase Flash"),
+                                  tr("The flash memory on the target was erased successfully!"));
+        }
+    }
+}
+
+void PageSwdProg::on_connectNrf5xButton_clicked()
+{
+    if (mVesc) {
+        mVesc->commands()->bmMapPinsNrf5x();
+        ui->connectNrf5xButton->setEnabled(false);
+        Utility::waitSignal(mVesc->commands(), SIGNAL(bmMapPinsNrf5xRes(bool)), 100);
+        ui->connectNrf5xButton->setEnabled(true);
+        mVesc->commands()->bmConnect();
+    }
 }

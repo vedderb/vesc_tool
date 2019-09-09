@@ -548,6 +548,7 @@ Item {
                                 paramsConf.addEditorApp("app_ppm_conf.ramp_time_pos")
                                 paramsConf.addEditorApp("app_ppm_conf.ramp_time_neg")
                                 paramsConf.addEditorApp("app_ppm_conf.pid_max_erpm")
+                                paramsConf.addEditorApp("app_ppm_conf.max_erpm_for_dir")
                                 paramsConf.addSeparator("Multiple VESCs over CAN-bus")
                                 paramsConf.addEditorApp("app_ppm_conf.tc")
                                 paramsConf.addEditorApp("app_ppm_conf.tc_max_diff")
@@ -559,6 +560,9 @@ Item {
                                 paramsConf.addEditorApp("app_chuk_conf.ramp_time_neg")
                                 paramsConf.addEditorApp("app_chuk_conf.stick_erpm_per_s_in_cc")
                                 paramsConf.addEditorApp("app_chuk_conf.hyst")
+                                paramsConf.addEditorApp("app_chuk_conf.use_smart_rev")
+                                paramsConf.addEditorApp("app_chuk_conf.smart_rev_max_duty")
+                                paramsConf.addEditorApp("app_chuk_conf.smart_rev_ramp_time")
                                 paramsConf.addSeparator("Multiple VESCs over CAN-bus")
                                 paramsConf.addEditorApp("app_chuk_conf.tc")
                                 paramsConf.addEditorApp("app_chuk_conf.tc_max_diff")
@@ -609,8 +613,8 @@ Item {
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
-        parent: ApplicationWindow.overlay
 
+        parent: ApplicationWindow.overlay
         x: 10
         y: dialog.y + dialog.height / 2 - height / 2
 

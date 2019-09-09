@@ -27,7 +27,6 @@ import Vedder.vesc.configparams 1.0
 
 Item {
     property Commands mCommands: VescIf.commands()
-    property var editorsVisible: []
     property bool isHorizontal: width > height
 
     ParamEditors {
@@ -44,7 +43,7 @@ Item {
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         x: 10
-        y: parent.height / 2 - height / 2
+        y: (parent.height - height) / 2
         parent: ApplicationWindow.overlay
 
         PpmMap {
@@ -93,21 +92,20 @@ Item {
     }
 
     function addSeparator(text) {
-        editorsVisible.push(editors.createSeparator(scrollCol, text))
-        editorsVisible[editorsVisible.length - 1].Layout.columnSpan = isHorizontal ? 2 : 1
+        var e = editors.createSeparator(scrollCol, text)
+        e.Layout.columnSpan = isHorizontal ? 2 : 1
     }
 
     function destroyEditors() {
-        for (var i = 0;i < editorsVisible.length;i++) {
-            editorsVisible[i].destroy();
+        for(var i = scrollCol.children.length;i > 0;i--) {
+            scrollCol.children[i - 1].destroy(1) // Only works with delay on android, seems to be a bug
         }
-        editorsVisible = []
     }
 
     function createEditorApp(param) {
-        editorsVisible.push(editors.createEditorApp(scrollCol, param))
-        editorsVisible[editorsVisible.length - 1].Layout.preferredWidth = 500
-        editorsVisible[editorsVisible.length - 1].Layout.fillsWidth = true
+        var e = editors.createEditorApp(scrollCol, param)
+        e.Layout.preferredWidth = 500
+        e.Layout.fillsWidth = true
     }
 
     function updateEditors() {
@@ -124,6 +122,7 @@ Item {
             createEditorApp("can_baud_rate")
             createEditorApp("pairing_done")
             createEditorApp("permanent_uart_enabled")
+            createEditorApp("shutdown_mode")
             createEditorApp("uavcan_enable")
             createEditorApp("uavcan_esc_index")
             break;
@@ -137,6 +136,7 @@ Item {
                 createEditorApp("app_ppm_conf.pid_max_erpm")
                 createEditorApp("app_ppm_conf.ramp_time_pos")
                 createEditorApp("app_ppm_conf.ramp_time_neg")
+                createEditorApp("app_ppm_conf.max_erpm_for_dir")
                 addSeparator("Multiple VESCs over CAN-bus")
                 createEditorApp("app_ppm_conf.multi_esc")
                 createEditorApp("app_ppm_conf.tc")
@@ -208,6 +208,9 @@ Item {
                 createEditorApp("app_chuk_conf.ramp_time_neg")
                 createEditorApp("app_chuk_conf.stick_erpm_per_s_in_cc")
                 createEditorApp("app_chuk_conf.hyst")
+                createEditorApp("app_chuk_conf.use_smart_rev")
+                createEditorApp("app_chuk_conf.smart_rev_max_duty")
+                createEditorApp("app_chuk_conf.smart_rev_ramp_time")
                 addSeparator("Multiple VESCs over CAN-bus")
                 createEditorApp("app_chuk_conf.multi_esc")
                 createEditorApp("app_chuk_conf.tc")
@@ -239,6 +242,32 @@ Item {
             createEditorApp("app_nrf_conf.address__2")
             break;
 
+        case "IMU":
+            createEditorApp("imu_conf.type")
+            createEditorApp("imu_conf.sample_rate_hz")
+            addSeparator("Filters")
+            createEditorApp("imu_conf.mode")
+            createEditorApp("imu_conf.accel_confidence_decay")
+            createEditorApp("imu_conf.mahony_kp")
+            createEditorApp("imu_conf.mahony_ki")
+            createEditorApp("imu_conf.madgwick_beta")
+            addSeparator("Rotation")
+            createEditorApp("imu_conf.rot_roll")
+            createEditorApp("imu_conf.rot_pitch")
+            createEditorApp("imu_conf.rot_yaw")
+            addSeparator("Offsets")
+            createEditorApp("imu_conf.accel_offsets__0")
+            createEditorApp("imu_conf.accel_offsets__1")
+            createEditorApp("imu_conf.accel_offsets__2")
+            createEditorApp("imu_conf.gyro_offsets__0")
+            createEditorApp("imu_conf.gyro_offsets__1")
+            createEditorApp("imu_conf.gyro_offsets__2")
+            createEditorApp("imu_conf.gyro_offset_comp_fact__0")
+            createEditorApp("imu_conf.gyro_offset_comp_fact__1")
+            createEditorApp("imu_conf.gyro_offset_comp_fact__2")
+            createEditorApp("imu_conf.gyro_offset_comp_clamp")
+            break;
+
         default:
             break;
         }
@@ -262,7 +291,8 @@ Item {
                     "ADC",
                     "UART",
                     "Nunchuk",
-                    "NRF"
+                    "NRF",
+                    "IMU"
                 ]
 
                 onCurrentTextChanged: {
@@ -301,6 +331,10 @@ Item {
                         break;
 
                     case "NRF":
+                        tabBox.model = []
+                        break;
+
+                    case "IMU":
                         tabBox.model = []
                         break;
 

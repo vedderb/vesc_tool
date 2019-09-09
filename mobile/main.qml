@@ -39,13 +39,15 @@ ApplicationWindow {
     title: qsTr("VESC Tool")
 
     Component.onCompleted: {
-//        Utility.checkVersion(VescIf)
-//        swipeView.setCurrentIndex(1)
-//        rtSwipeView.setCurrentIndex(1)
+        //        Utility.checkVersion(VescIf)
+        //        swipeView.setCurrentIndex(1)
+        //        rtSwipeView.setCurrentIndex(1)
 
         if (!VescIf.isIntroDone()) {
             introWizard.openDialog()
         }
+
+        Utility.keepScreenOn(VescIf.keepScreenOn())
     }
 
     SetupWizardIntro {
@@ -56,6 +58,10 @@ ApplicationWindow {
         id: controls
         parentWidth: appWindow.width
         parentHeight: appWindow.height - footer.height - tabBar.height
+    }
+
+    Settings {
+        id: settings
     }
 
     Drawer {
@@ -117,6 +123,17 @@ ApplicationWindow {
                 // Spacer
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: "Settings"
+                flat: true
+
+                onClicked: {
+                    drawer.close()
+                    settings.openDialog()
+                }
             }
 
             Button {
@@ -303,49 +320,97 @@ ApplicationWindow {
                 anchors.rightMargin: 10
                 anchors.topMargin: 10
 
-                TextInput {
-                    color: "white"
-                    id: rtLogFileText
+                GroupBox {
+                    id: bleConnBox
+                    title: qsTr("Realtime Data Logging")
                     Layout.fillWidth: true
-                }
+                    Layout.columnSpan: 1
 
-                Button {
-                    text: "Choose Log File..."
-                    Layout.fillWidth: true
+                    GridLayout {
+                        anchors.topMargin: -5
+                        anchors.bottomMargin: -5
+                        anchors.fill: parent
 
-                    onClicked: {
-                        if (Utility.requestFilePermission()) {
-                            logFilePicker.enabled = true
-                            logFilePicker.visible = true
-                        } else {
-                            VescIf.emitMessageDialog(
-                                        "File Permissions",
-                                        "Unable to request file system permission.",
-                                        false, false)
+                        clip: false
+                        visible: true
+                        rowSpacing: -10
+                        columnSpacing: 5
+                        rows: 3
+                        columns: 2
+
+                        Button {
+                            text: "Help"
+                            Layout.fillWidth: true
+
+                            onClicked: {
+                                VescIf.emitMessageDialog(
+                                            mInfoConf.getLongName("help_rt_logging"),
+                                            mInfoConf.getDescription("help_rt_logging"),
+                                            true, true)
+                            }
                         }
-                    }
-                }
 
-                CheckBox {
-                    id: rtLogEnBox
-                    text: "Enable RT Data Logging"
-                    Layout.fillWidth: true
+                        Button {
+                            text: "Choose Log Directory..."
+                            Layout.fillWidth: true
 
-                    onClicked: {
-                        if (checked) {
-                            VescIf.openRtLogFile(rtLogFileText.text)
-                        } else {
-                            VescIf.closeRtLogFile()
+                            onClicked: {
+                                if (Utility.requestFilePermission()) {
+                                    logFilePicker.enabled = true
+                                    logFilePicker.visible = true
+                                } else {
+                                    VescIf.emitMessageDialog(
+                                                "File Permissions",
+                                                "Unable to request file system permission.",
+                                                false, false)
+                                }
+                            }
                         }
-                    }
 
-                    Timer {
-                        repeat: true
-                        running: true
-                        interval: 500
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            Layout.topMargin: 6
+                            Layout.bottomMargin: 6
+                            height: rtLogFileText.implicitHeight + 14
+                            border.width: 2
+                            border.color: "#8d8d8d"
+                            color: "#33a8a8a8"
+                            radius: 3
 
-                        onTriggered: {
-                            rtLogEnBox.checked = VescIf.isRtLogOpen()
+                            TextInput {
+                                color: "white"
+                                id: rtLogFileText
+                                anchors.fill: parent
+                                anchors.margins: 7
+                                font.pointSize: 12
+                                text: "./log"
+                            }
+                        }
+
+                        CheckBox {
+                            id: rtLogEnBox
+                            text: "Enable RT Data Logging"
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+
+                            onClicked: {
+                                if (checked) {
+                                    VescIf.openRtLogFile(rtLogFileText.text)
+                                } else {
+                                    VescIf.closeRtLogFile()
+                                }
+                            }
+
+                            Timer {
+                                repeat: true
+                                running: true
+                                interval: 500
+
+                                onTriggered: {
+                                    rtLogEnBox.checked = VescIf.isRtLogOpen()
+                                }
+                            }
                         }
                     }
                 }
@@ -355,17 +420,17 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                 }
+            }
 
-                DirectoryPicker {
-                    id: logFilePicker
-                    anchors.fill: parent
-                    showDotAndDotDot: true
-                    visible: false
-                    enabled: false
+            DirectoryPicker {
+                id: logFilePicker
+                anchors.fill: parent
+                showDotAndDotDot: true
+                visible: false
+                enabled: false
 
-                    onDirSelected: {
-                        rtLogFileText.text = fileName
-                    }
+                onDirSelected: {
+                    rtLogFileText.text = fileName
                 }
             }
         }
@@ -521,15 +586,22 @@ ApplicationWindow {
         repeat: true
 
         onTriggered: {
-            if (VescIf.isPortConnected() && tabBar.currentIndex == 1) {
-                // Sample RT data when the RT page is selected
-                if (rtSwipeView.currentIndex == 0) {
+            if (VescIf.isPortConnected()) {
+                // Sample RT data when the corresponding page is selected, or when
+                // RT logging is active.
+
+                if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0) ||
+                        VescIf.isRtLogOpen()) {
                     interval = 50
                     mCommands.getValues()
-                } else if (rtSwipeView.currentIndex == 1) {
+                }
+
+                if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 1) {
                     interval = 50
                     mCommands.getValuesSetup()
-                } else if (rtSwipeView.currentIndex == 2) {
+                }
+
+                if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
                     interval = 20
                     mCommands.getImuData(0x7)
                 }
@@ -542,12 +614,13 @@ ApplicationWindow {
         standardButtons: Dialog.Ok
         modal: true
         focus: true
-        width: parent.width - 20
-        height: Math.min(implicitHeight, parent.height - 40)
         closePolicy: Popup.CloseOnEscape
 
+        width: parent.width - 20
+        height: Math.min(implicitHeight, parent.height - 40)
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
+        parent: ApplicationWindow.overlay
 
         ScrollView {
             anchors.fill: parent
@@ -594,8 +667,12 @@ ApplicationWindow {
         onFwRxChanged: {
             if (rx) {
                 if (limited) {
+                    confPageMotor.enabled = false
+                    confPageApp.enabled = false
                     swipeView.setCurrentIndex(5)
                 } else {
+                    confPageMotor.enabled = true
+                    confPageApp.enabled = true
                     mCommands.getMcconf()
                     mCommands.getAppConf()
                 }

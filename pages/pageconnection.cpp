@@ -83,8 +83,25 @@ void PageConnection::setVesc(VescInterface *vesc)
     ui->serialBaudBox->setValue(mVesc->getLastSerialBaud());
 #endif
 
+#ifdef HAS_CANBUS
+    ui->CANbusBitrateBox->setValue(mVesc->getLastCANbusBitrate());
+
+    ui->CANbusInterfaceBox->clear();
+    QList<QString> interfaces = mVesc->listCANbusInterfaces();
+
+    for(int i = 0;i < interfaces.size();i++) {
+        ui->CANbusInterfaceBox->addItem(interfaces.at(i), interfaces.at(i));
+    }
+
+    ui->CANbusInterfaceBox->setCurrentIndex(0);
+#endif
+
     connect(mVesc->commands(), SIGNAL(pingCanRx(QVector<int>,bool)),
             this, SLOT(pingCanRx(QVector<int>,bool)));
+    connect(mVesc, SIGNAL(CANbusNewNode(int)),
+            this, SLOT(CANbusNewNode(int)));
+    connect(mVesc, SIGNAL(CANbusInterfaceListUpdated()),
+            this, SLOT(CANbusInterfaceListUpdated()));
     connect(mVesc, SIGNAL(pairingListUpdated()),
             this, SLOT(pairingListUpdated()));
 
@@ -173,6 +190,23 @@ void PageConnection::pingCanRx(QVector<int> devs, bool isTimeout)
     }
 }
 
+void PageConnection::CANbusNewNode(int node)
+{
+    ui->CANbusTargetIdBox->addItem(QString::number(node), QString::number(node));
+}
+
+void PageConnection::CANbusInterfaceListUpdated()
+{
+    ui->CANbusInterfaceBox->clear();
+    QList<QString> interfaces = mVesc->listCANbusInterfaces();
+
+    for(int i = 0; i<interfaces.size(); i++) {
+        ui->CANbusInterfaceBox->addItem(interfaces.at(i), interfaces.at(i));
+    }
+
+    ui->CANbusInterfaceBox->setCurrentIndex(0);
+}
+
 void PageConnection::pairingListUpdated()
 {
     ui->pairedListWidget->clear();
@@ -214,6 +248,35 @@ void PageConnection::on_serialConnectButton_clicked()
     if (mVesc) {
         mVesc->connectSerial(ui->serialPortBox->currentData().toString(),
                              ui->serialBaudBox->value());
+    }
+}
+
+void PageConnection::on_CANbusScanButton_clicked()
+{
+    if (mVesc) {
+        ui->CANbusScanButton->setEnabled(false);
+        mVesc->connectCANbus("socketcan", ui->CANbusInterfaceBox->currentData().toString(),
+                             ui->CANbusBitrateBox->value());
+
+        ui->CANbusTargetIdBox->clear();
+        mVesc->scanCANbus();
+        ui->CANbusScanButton->setEnabled(true);
+    }
+}
+
+void PageConnection::on_CANbusDisconnectButton_clicked()
+{
+    if (mVesc) {
+        mVesc->disconnectPort();
+    }
+}
+
+void PageConnection::on_CANbusConnectButton_clicked()
+{
+    if (mVesc) {
+        mVesc->setCANbusReceiverID(ui->CANbusTargetIdBox->currentData().toInt());
+        mVesc->connectCANbus("socketcan", ui->CANbusInterfaceBox->currentData().toString(),
+                             ui->CANbusBitrateBox->value());
     }
 }
 

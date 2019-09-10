@@ -339,14 +339,18 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_GET_DECODED_BALANCE: {
         mTimeoutDecBalance = 0;
-        double dec_balance_pid_output = vb.vbPopFrontDouble32(1e6);
-        double dec_balance_m_angle = vb.vbPopFrontDouble32(1e6);
-        double dec_balance_c_angle = vb.vbPopFrontDouble32(1e6);
-        uint32_t dec_balance_diff_time = vb.vbPopFrontUint32();
-        double dec_balance_motor_current = vb.vbPopFrontDouble32(1e6);
-        double dec_balance_motor_position = vb.vbPopFrontDouble32(1e6);
-        uint16_t dec_balance_state = vb.vbPopFrontUint16();
-        emit decodedBalanceReceived(dec_balance_pid_output, dec_balance_m_angle, dec_balance_c_angle, dec_balance_diff_time, dec_balance_motor_current, dec_balance_motor_position, dec_balance_state);
+
+        BALANCE_VALUES values;
+
+        values.pid_output = vb.vbPopFrontDouble32(1e6);
+        values.m_angle = vb.vbPopFrontDouble32(1e6);
+        values.c_angle = vb.vbPopFrontDouble32(1e6);
+        values.diff_time = vb.vbPopFrontUint32();
+        values.motor_current = vb.vbPopFrontDouble32(1e6);
+        values.motor_position = vb.vbPopFrontDouble32(1e6);
+        values.state = vb.vbPopFrontUint16();
+        values.switch_value = vb.vbPopFrontUint16();
+        emit decodedBalanceReceived(values);
     } break;
 
     case COMM_SET_MCCONF:

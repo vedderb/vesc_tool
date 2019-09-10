@@ -112,12 +112,13 @@ void PageAppBalance::setVesc(VescInterface *vesc)
         ui->configPane->addRowSeparator(tr("Fault"));
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.m_fault");
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.c_fault");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.use_switches");
 
         updateTextOutput();
 
 
-        connect(mVesc->commands(), SIGNAL(decodedBalanceReceived(double, double, double, uint32_t, double, double, uint16_t)),
-                this, SLOT(appValuesReceived(double, double, double, uint32_t, double, double, uint16_t)));
+        connect(mVesc->commands(), SIGNAL(decodedBalanceReceived(BALANCE_VALUES)),
+                this, SLOT(appValuesReceived(BALANCE_VALUES)));
     }
 }
 
@@ -148,17 +149,18 @@ void PageAppBalance::timerSlot()
     }
 }
 
-void PageAppBalance::appValuesReceived(double pid_outpout, double m_angle, double c_angle, uint32_t diff_time, double motor_current, double motor_position, uint16_t state) {
+void PageAppBalance::appValuesReceived(BALANCE_VALUES values) {
 
     const int maxS = 250;
 
-    appendDoubleAndTrunc(&mAppPidOutputVec, pid_outpout, maxS);
-    appendDoubleAndTrunc(&mAppMAngleVec, m_angle, maxS);
-    appendDoubleAndTrunc(&mAppCAngleVec, c_angle, maxS);
-    mAppDiffTime = diff_time;
-    appendDoubleAndTrunc(&mAppMotorCurrentVec, motor_current, maxS);
-    appendDoubleAndTrunc(&mAppMotorPositionVec, motor_position, maxS);
-    mAppState = state;
+    appendDoubleAndTrunc(&mAppPidOutputVec, values.pid_output, maxS);
+    appendDoubleAndTrunc(&mAppMAngleVec, values.m_angle, maxS);
+    appendDoubleAndTrunc(&mAppCAngleVec, values.c_angle, maxS);
+    mAppDiffTime = values.diff_time;
+    appendDoubleAndTrunc(&mAppMotorCurrentVec, values.motor_current, maxS);
+    appendDoubleAndTrunc(&mAppMotorPositionVec, values.motor_position, maxS);
+    mAppState = values.state;
+    mAppSwitchValue = values.switch_value;
 
 
     qint64 tNow = QDateTime::currentMSecsSinceEpoch();
@@ -202,6 +204,8 @@ void PageAppBalance::updateTextOutput(){
     }else{
         output = output + "Unknown";
     }
+
+    output = output + "\tSwitch Value: " + QString::number(mAppSwitchValue);
 
     output = output + "\tMotor Position: ";
     if(mAppMotorPositionVec.empty() == false){

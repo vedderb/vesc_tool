@@ -91,7 +91,7 @@ void PageAppBalance::setVesc(VescInterface *vesc)
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.kp");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.ki");
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.kd");
-        ui->tunePane->addRowSeparator(tr("Main loop"));
+        ui->tunePane->addRowSeparator(tr("Main Loop"));
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.hertz");
         ui->tunePane->addRowSeparator(tr("Gyro Orientation"));
         ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.m_axis");

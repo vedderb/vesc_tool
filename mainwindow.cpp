@@ -955,7 +955,7 @@ void MainWindow::reloadPages()
     mPageAppBalance = new PageAppBalance(this);
     mPageAppBalance->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppBalance);
-    addPageItem(tr("Balance"), "://res/icons/Gyroscope-96.png",
+    addPageItem(tr("Balance"), "://res/icons/EUC-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageAppImu = new PageAppImu(this);

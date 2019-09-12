@@ -230,8 +230,8 @@ p, li { white-space: pre-wrap; }
             <enumNames>ADC and UART</enumNames>
             <enumNames>Nunchuk (I2C, Nyko Kama)</enumNames>
             <enumNames>NRF</enumNames>
-            <enumNames>BALANCE</enumNames>
             <enumNames>Custom User App</enumNames>
+            <enumNames>Balance</enumNames>
         </app_to_use>
         <app_ppm_conf.ctrl_type>
             <longName>Control Type</longName>

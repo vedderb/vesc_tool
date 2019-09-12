@@ -107,7 +107,8 @@ void PageAppBalance::setVesc(VescInterface *vesc)
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_duty");
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_angle");
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_speed");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_voltage");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_high_voltage");
+        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_low_voltage");
         ui->configPane->addRowSeparator(tr("Overspeed"));
         ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.overspeed_duty");
         ui->configPane->addRowSeparator(tr("Fault"));

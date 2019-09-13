@@ -609,6 +609,8 @@ void AppPpmPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_neg");
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pid_max_erpm");
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.max_erpm_for_dir");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_max_duty");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_ramp_time");
 
     mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc");

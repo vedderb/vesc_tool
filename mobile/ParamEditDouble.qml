@@ -45,16 +45,16 @@ Item {
             valueBox.decimals = params.getParamDecimalsDouble(paramName)
             valueBox.realFrom = params.getParamMinDouble(paramName) * params.getParamEditorScale(paramName)
             valueBox.realTo = params.getParamMaxDouble(paramName) * params.getParamEditorScale(paramName)
-            valueBox.realValue = params.getParamDouble(paramName) * params.getParamEditorScale(paramName)
             valueBox.realStepSize = params.getParamStepDouble(paramName)
             valueBox.visible = !params.getParamEditAsPercentage(paramName)
             valueBox.suffix = params.getParamSuffix(paramName)
+            valueBox.realValue = params.getParamDouble(paramName) * params.getParamEditorScale(paramName)
 
             var p = (params.getParamDouble(paramName) * 100.0) / maxVal
             percentageBox.from = (100.0 * params.getParamMinDouble(paramName)) / maxVal
             percentageBox.to = (100.0 * params.getParamMaxDouble(paramName)) / maxVal
-            percentageBox.value = p
             percentageBox.visible = params.getParamEditAsPercentage(paramName)
+            percentageBox.value = p
 
             if (params.getParamTransmittable(paramName)) {
                 nowButton.visible = true

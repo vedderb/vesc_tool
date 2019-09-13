@@ -44,16 +44,18 @@ Item {
             nameText.text = params.getLongName(paramName)
             valueBox.from = params.getParamMinInt(paramName) * params.getParamEditorScale(paramName)
             valueBox.to = params.getParamMaxInt(paramName) * params.getParamEditorScale(paramName)
-            valueBox.value = params.getParamInt(paramName) * params.getParamEditorScale(paramName)
             valueBox.stepSize = params.getParamStepInt(paramName)
             valueBox.visible = !params.getParamEditAsPercentage(paramName)
             valueBox.suffix = params.getParamSuffix(paramName)
+            // Make sure that the prefix is updated too.
+            valueBox.value = params.getParamInt(paramName) * params.getParamEditorScale(paramName) + 1
+            valueBox.value = params.getParamInt(paramName) * params.getParamEditorScale(paramName)
 
             var p = (params.getParamInt(paramName) * 100.0) / maxVal
             percentageBox.from = (100.0 * params.getParamMinInt(paramName)) / maxVal
             percentageBox.to = (100.0 * params.getParamMaxInt(paramName)) / maxVal
-            percentageBox.value = p
             percentageBox.visible = params.getParamEditAsPercentage(paramName)
+            percentageBox.value = p
 
             if (params.getParamTransmittable(paramName)) {
                 nowButton.visible = true

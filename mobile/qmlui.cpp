@@ -22,6 +22,9 @@
 
 #include <QQuickStyle>
 #include <QApplication>
+#include <QQuickWindow>
+
+VescInterface *QmlUi::mVesc = 0;
 
 QmlUi::QmlUi(QObject *parent) : QObject(parent)
 {
@@ -72,12 +75,27 @@ bool QmlUi::eventFilter(QObject *object, QEvent *e)
     return false;
 }
 
+void QmlUi::setVisible(bool visible)
+{
+    QObject *rootObject = mEngine->rootObjects().first();
+    QQuickWindow *window = qobject_cast<QQuickWindow *>(rootObject);
+    if (window) {
+        window->setVisible(visible);
+    }
+}
+
+VescInterface *QmlUi::vesc()
+{
+    return mVesc;
+}
+
 QObject *QmlUi::vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     (void)engine;
     (void)scriptEngine;
 
     VescInterface *vesc = new VescInterface();
+    mVesc = vesc;
 
     vesc->mcConfig()->loadParamsXml("://res/parameters_mcconf.xml");
     vesc->appConfig()->loadParamsXml("://res/parameters_appconf.xml");

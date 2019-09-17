@@ -157,5 +157,6 @@
         <file>res/other_fw/nrf52840_stick_remote.bin</file>
         <file>res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA.bin</file>
         <file>res/icons/Polyline-96.png</file>
+        <file>res/icons/Waypoint Map-96.png</file>
     </qresource>
 </RCC>

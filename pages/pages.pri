@@ -27,7 +27,8 @@ FORMS += \
     $$PWD/pageexperiments.ui \
     $$PWD/pageimu.ui \
     $$PWD/pageswdprog.ui \
-    $$PWD/pageappimu.ui
+    $$PWD/pageappimu.ui \
+    $$PWD/pageloganalysis.ui
 
 HEADERS += \
     $$PWD/pageconnection.h \
@@ -58,7 +59,8 @@ HEADERS += \
     $$PWD/pageexperiments.h \
     $$PWD/pageimu.h \
     $$PWD/pageswdprog.h \
-    $$PWD/pageappimu.h
+    $$PWD/pageappimu.h \
+    $$PWD/pageloganalysis.h
 
 SOURCES += \
     $$PWD/pageconnection.cpp \
@@ -89,4 +91,5 @@ SOURCES += \
     $$PWD/pageexperiments.cpp \
     $$PWD/pageimu.cpp \
     $$PWD/pageswdprog.cpp \
-    $$PWD/pageappimu.cpp
+    $$PWD/pageappimu.cpp \
+    $$PWD/pageloganalysis.cpp

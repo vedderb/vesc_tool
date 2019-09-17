@@ -375,7 +375,7 @@
               <string/>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="../res.qrc">
                <normaloff>:/res/icons/Polyline-96.png</normaloff>:/res/icons/Polyline-96.png</iconset>
              </property>
              <property name="checkable">

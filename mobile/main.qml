@@ -20,6 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+ import Qt.labs.settings 1.0 as QSettings
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -385,6 +386,10 @@ ApplicationWindow {
                                 anchors.margins: 7
                                 font.pointSize: 12
                                 text: "./log"
+
+                                QSettings.Settings {
+                                    property alias rtLog: rtLogFileText.text
+                                }
                             }
                         }
 
@@ -411,6 +416,105 @@ ApplicationWindow {
                                     rtLogEnBox.checked = VescIf.isRtLogOpen()
                                 }
                             }
+                        }
+                    }
+                }
+
+                GroupBox {
+                    id: tcpServerBox
+                    title: qsTr("TCP Server")
+                    Layout.fillWidth: true
+                    Layout.columnSpan: 1
+
+                    GridLayout {
+                        anchors.topMargin: -5
+                        anchors.bottomMargin: -5
+                        anchors.fill: parent
+
+                        clip: false
+                        visible: true
+                        rowSpacing: -10
+                        columnSpacing: 5
+                        rows: 3
+                        columns: 2
+
+                        CheckBox {
+                            id: tcpServerEnBox
+                            text: "Run TCP Server"
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+
+                            onClicked: {
+                                if (checked) {
+                                    VescIf.tcpServerStart(tcpServerPortBox.value)
+                                } else {
+                                    VescIf.tcpServerStop()
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: "TCP Port"
+                            color: "white"
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 5000
+                        }
+
+                        SpinBox {
+                            id: tcpServerPortBox
+                            from: 0
+                            to: 65535
+                            value: 65102
+                            enabled: !tcpServerEnBox.checked
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 5000
+                            editable: true
+                        }
+
+                        Timer {
+                            repeat: true
+                            running: true
+                            interval: 500
+
+                            onTriggered: {
+                                tcpServerEnBox.checked = VescIf.tcpServerIsRunning()
+
+                                if (VescIf.tcpServerIsRunning()) {
+                                    var ipTxt = "IP(s)\n"
+                                    var addresses = Utility.getNetworkAddresses()
+                                    for (var i = 0;i < addresses.length;i++) {
+                                        ipTxt += addresses[i]
+                                        if (i < (addresses.length - 1)) {
+                                            ipTxt += "\n"
+                                        }
+                                    }
+                                    tcpLocalAddress.text = ipTxt
+                                } else {
+                                    tcpLocalAddress.text = "IP(s)"
+                                }
+
+                                tcpRemoteAddress.text = "Connected Client"
+
+                                if (VescIf.tcpServerIsClientConnected()) {
+                                    tcpRemoteAddress.text += "\n" + VescIf.tcpServerClientIp()
+                                }
+                            }
+                        }
+
+                        Text {
+                            id: tcpLocalAddress
+                            Layout.fillWidth: true
+                            Layout.topMargin: 10
+                            Layout.bottomMargin: 10
+                            color: "white"
+                        }
+
+                        Text {
+                            id: tcpRemoteAddress
+                            Layout.fillWidth: true
+                            Layout.topMargin: 10
+                            Layout.bottomMargin: 10
+                            color: "white"
                         }
                     }
                 }
@@ -648,6 +752,10 @@ ApplicationWindow {
             connectedText.text = VescIf.getConnectedPortName()
             if (VescIf.isPortConnected()) {
                 reconnectButton.enabled = true
+            }
+
+            if (VescIf.useWakeLock()) {
+                VescIf.setWakeLock(VescIf.isPortConnected())
             }
         }
 

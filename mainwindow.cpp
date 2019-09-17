@@ -977,6 +977,11 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageImu);
     addPageItem(tr("IMU Data"), "://res/icons/Line Chart-96.png", "", false, true);
 
+    mPageLogAnalysis = new PageLogAnalysis(this);
+    mPageLogAnalysis->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageLogAnalysis);
+    addPageItem(tr("Log Analysis"), "://res/icons/Waypoint Map-96.png", "", false, true);
+
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);

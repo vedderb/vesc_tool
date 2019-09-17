@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -17,37 +17,39 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#ifndef QMLUI_H
-#define QMLUI_H
 
-#include <QObject>
-#include <QQmlApplicationEngine>
+#ifndef PAGELOGANALYSIS_H
+#define PAGELOGANALYSIS_H
 
-#include "vescinterface.h"
-#include "utility.h"
+#include <QWidget>
+#include <vescinterface.h>
 
-class QmlUi : public QObject
+namespace Ui {
+class PageLogAnalysis;
+}
+
+class PageLogAnalysis : public QWidget
 {
     Q_OBJECT
+
 public:
-    explicit QmlUi(QObject *parent = nullptr);
-    bool startQmlUi();
-    bool eventFilter(QObject *object, QEvent *e);
-    void setVisible(bool visible);
+    explicit PageLogAnalysis(QWidget *parent = nullptr);
+    ~PageLogAnalysis();
 
-    static VescInterface *vesc();
+    VescInterface *vesc() const;
+    void setVesc(VescInterface *vesc);
 
-signals:
-
-public slots:
+private slots:
+    void on_openCsvButton_clicked();
+    void on_openCurrentButton_clicked();
+    void on_gridBox_toggled(bool checked);
+    void on_tilesHiResButton_toggled(bool checked);
+    void on_tilesOsmButton_toggled(bool checked);
 
 private:
-    QQmlApplicationEngine *mEngine;
-
-    static VescInterface *mVesc;
-    static QObject *vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
-    static QObject *utility_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
+    Ui::PageLogAnalysis *ui;
+    VescInterface *mVesc;
 
 };
 
-#endif // QMLUI_H
+#endif // PAGELOGANALYSIS_H

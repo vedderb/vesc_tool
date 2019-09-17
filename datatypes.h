@@ -149,6 +149,16 @@ public:
         vq = 0.0;
     }
 
+    bool operator==(const MC_VALUES &other) const {
+        (void)other;
+        // compare members
+        return true;
+    }
+
+    bool operator!=(MC_VALUES const &other) const {
+        return !(*this == other);
+    }
+
     double v_in;
     double temp_mos;
     double temp_mos_1;
@@ -226,6 +236,16 @@ public:
         battery_wh = 0.0;
     }
 
+    bool operator==(const SETUP_VALUES &other) const {
+        (void)other;
+        // compare members
+        return true;
+    }
+
+    bool operator!=(SETUP_VALUES const &other) const {
+        return !(*this == other);
+    }
+
     double temp_mos;
     double temp_motor;
     double current_motor;
@@ -284,6 +304,16 @@ public:
         q0 = 1; q1 = 0; q2 = 0; q3 = 0;
     }
 
+    bool operator==(const IMU_VALUES &other) const {
+        (void)other;
+        // compare members
+        return true;
+    }
+
+    bool operator!=(IMU_VALUES const &other) const {
+        return !(*this == other);
+    }
+
     double roll;
     double pitch;
     double yaw;
@@ -307,6 +337,54 @@ public:
 };
 
 Q_DECLARE_METATYPE(IMU_VALUES)
+
+struct LOG_DATA {
+    Q_GADGET
+
+    Q_PROPERTY(MC_VALUES values MEMBER values)
+    Q_PROPERTY(SETUP_VALUES setupValues MEMBER setupValues)
+    Q_PROPERTY(IMU_VALUES imuValues MEMBER imuValues)
+    Q_PROPERTY(int valTime MEMBER valTime)
+    Q_PROPERTY(int posTime MEMBER posTime)
+    Q_PROPERTY(double lat MEMBER lat)
+    Q_PROPERTY(double lon MEMBER lon)
+    Q_PROPERTY(double alt MEMBER alt)
+    Q_PROPERTY(double gVel MEMBER gVel)
+    Q_PROPERTY(double vVel MEMBER vVel)
+    Q_PROPERTY(double hAcc MEMBER hAcc)
+    Q_PROPERTY(double vAcc MEMBER vAcc)
+
+public:
+    LOG_DATA() {
+        posTime = -1;
+        setupValTime = -1;
+        imuValTime = -1;
+        lat = 0.0;
+        lon = 0.0;
+        alt = 0.0;
+        gVel = 0.0;
+        vVel = 0.0;
+        hAcc = 0.0;
+        vAcc = 0.0;
+    }
+
+    MC_VALUES values;
+    SETUP_VALUES setupValues;
+    IMU_VALUES imuValues;
+    int valTime;
+    int setupValTime;
+    int imuValTime;
+    int posTime;
+    double lat;
+    double lon;
+    double alt;
+    double gVel;
+    double vVel;
+    double hAcc;
+    double vAcc;
+};
+
+Q_DECLARE_METATYPE(LOG_DATA)
 
 struct MCCONF_TEMP {
     Q_GADGET

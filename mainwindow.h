@@ -56,6 +56,7 @@
 #include "pages/pageimu.h"
 #include "pages/pageswdprog.h"
 #include "pages/pageappimu.h"
+#include "pages/pageloganalysis.h"
 
 namespace Ui {
 class MainWindow;
@@ -171,6 +172,7 @@ private:
     PageSettings *mPageSettings;
     PageSwdProg *mPageSwdProg;
     PageAppImu *mPageAppImu;
+    PageLogAnalysis *mPageLogAnalysis;
 
     void addPageItem(QString name,
                      QString icon = "",

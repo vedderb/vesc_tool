@@ -60,6 +60,13 @@ Item {
                 checked: VescIf.keepScreenOn()
             }
 
+            CheckBox {
+                id: wakeLockBox
+                Layout.fillWidth: true
+                text: "Use Wake Lock (experimental)"
+                checked: VescIf.useWakeLock()
+            }
+
             Item {
                 // Spacer
                 Layout.fillWidth: true
@@ -72,6 +79,10 @@ Item {
             VescIf.setKeepScreenOn(screenOnBox.checked)
             VescIf.storeSettings()
             Utility.keepScreenOn(VescIf.keepScreenOn())
+
+            if (VescIf.useWakeLock()) {
+                VescIf.setWakeLock(VescIf.isPortConnected())
+            }
         }
     }
 }

@@ -39,9 +39,13 @@ Item {
     function setFromMcConfTemp(cfg) {
         name = cfg.name
 
+        var useImperial = VescIf.useImperialUnits()
+        var impFact = useImperial ? 0.621371192 : 1.0
+        var speedUnit = useImperial ? "mph\n" : "km/h\n"
+
         infoText.text =
-                "Speed Forward   : " + parseFloat(cfg.erpm_or_speed_max * 3.6).toFixed(1) + " km/h\n" +
-                "Speed Reverse   : " + parseFloat(-cfg.erpm_or_speed_min * 3.6).toFixed(1) + " km/h\n" +
+                "Speed Forward   : " + parseFloat(cfg.erpm_or_speed_max * 3.6 * impFact).toFixed(1) + speedUnit +
+                "Speed Reverse   : " + parseFloat(-cfg.erpm_or_speed_min * 3.6 * impFact).toFixed(1) + speedUnit +
                 "Current Accel   : " + parseFloat(cfg.current_max_scale * 100).toFixed(0) + " %\n" +
                 "Current Brake   : " + parseFloat(cfg.current_min_scale * 100).toFixed(0) + " %"
 
@@ -210,6 +214,14 @@ Item {
 
         onParamChangedDouble: {
             checkActive()
+        }
+    }
+
+    Connections {
+        target: VescIf
+
+        onUseImperialUnitsChanged: {
+            setFromMcConfTemp(VescIf.getProfile(index))
         }
     }
 }

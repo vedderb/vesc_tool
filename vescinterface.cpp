@@ -28,6 +28,7 @@
 #include <QRegularExpression>
 #include <QDateTime>
 #include <QDir>
+#include <cmath>
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
@@ -44,6 +45,7 @@
 VescInterface::VescInterface(QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<MCCONF_TEMP>();
+    qRegisterMetaType<MC_VALUES>();
 
     mMcConfig = new ConfigParams(this);
     mAppConfig = new ConfigParams(this);
@@ -75,6 +77,28 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mAutoconnectProgress = 0.0;
     mIgnoreCanChange = false;
 
+#ifdef Q_OS_ANDROID
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
+                "org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+
+    if (activity.isValid()) {
+        QAndroidJniObject serviceName = QAndroidJniObject::getStaticObjectField<jstring>(
+                    "android/content/Context","POWER_SERVICE");
+        if (serviceName.isValid()) {
+            QAndroidJniObject powerMgr = activity.callObjectMethod(
+                        "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;",serviceName.object<jobject>());
+            if (powerMgr.isValid()) {
+                jint levelAndFlags = QAndroidJniObject::getStaticField<jint>(
+                            "android/os/PowerManager","PARTIAL_WAKE_LOCK");
+                QAndroidJniObject tag = QAndroidJniObject::fromString( "VESC Tool" );
+                mWakeLock = powerMgr.callObjectMethod("newWakeLock",
+                                                       "(ILjava/lang/String;)Landroid/os/PowerManager$WakeLock;",
+                                                       levelAndFlags,tag.object<jstring>());
+            }
+        }
+    }
+#endif
+
     // Serial
 #ifdef HAS_SERIALPORT
     mSerialPort = new QSerialPort(this);
@@ -95,6 +119,10 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastCanBackend = mSettings.value("CANbusBackend", "socketcan").toString();
     mLastCanDeviceID = mSettings.value("CANbusLastDeviceID", 0).toInt();
     mCANbusScanning = false;
+#endif
+
+#ifdef HAS_POS
+    mPosSource = nullptr;
 #endif
 
     // TCP
@@ -133,6 +161,15 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     });
 #endif
 
+    mTcpServer = new TcpServerSimple(this);
+    mTcpServer->setUsePacket(true);
+    connect(mTcpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
+        mPacket->sendPacket(packet);
+    });
+    connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
+        mTcpServer->packet()->sendPacket(packet);
+    });
+
     {
         int size = mSettings.beginReadArray("profiles");
         for (int i = 0; i < size; ++i) {
@@ -164,6 +201,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     mUseImperialUnits = mSettings.value("useImperialUnits", false).toBool();
     mKeepScreenOn = mSettings.value("keepScreenOn", true).toBool();
+    mUseWakeLock = mSettings.value("useWakeLock", false).toBool();
 
     mCommands->setAppConfig(mAppConfig);
     mCommands->setMcConfig(mMcConfig);
@@ -182,10 +220,59 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
 
+    connect(mCommands, &Commands::valuesSetupReceived, [this](SETUP_VALUES v) {
+        mLastSetupValues = v;
+        mLastSetupTime = QDateTime::currentDateTimeUtc();
+    });
+
+    connect(mCommands, &Commands::valuesImuReceived, [this](IMU_VALUES v) {
+        mLastImuValues = v;
+        mLastImuTime = QDateTime::currentDateTimeUtc();
+    });
+
     connect(mCommands, &Commands::valuesReceived, [this](MC_VALUES v) {
         if (mRtLogFile.isOpen()) {
-            auto t = QTime::currentTime();
+            int posTime = -1;
+            double lat = 0.0;
+            double lon = 0.0;
+            double alt = 0.0;
+            double gVel = 0.0;
+            double vVel = 0.0;
+            double hAcc = 0.0;
+            double vAcc = 0.0;
+
+#ifdef HAS_POS
+            if (mLastPos.isValid() && mLastPosTime.isValid() &&
+                    mLastPosTime.secsTo(QDateTime::currentDateTime()) < 3) {
+                posTime = mLastPos.timestamp().time().msecsSinceStartOfDay();
+                lat = mLastPos.coordinate().latitude();
+                lon = mLastPos.coordinate().longitude();
+
+                if (!std::isnan(mLastPos.coordinate().altitude())) {
+                    alt = mLastPos.coordinate().altitude();
+                }
+
+                if (mLastPos.hasAttribute(QGeoPositionInfo::GroundSpeed)) {
+                    gVel = mLastPos.attribute(QGeoPositionInfo::GroundSpeed);
+                }
+
+                if (mLastPos.hasAttribute(QGeoPositionInfo::VerticalSpeed)) {
+                    vVel = mLastPos.attribute(QGeoPositionInfo::VerticalSpeed);
+                }
+
+                if (mLastPos.hasAttribute(QGeoPositionInfo::HorizontalAccuracy)) {
+                    hAcc = mLastPos.attribute(QGeoPositionInfo::HorizontalAccuracy);
+                }
+
+                if (mLastPos.hasAttribute(QGeoPositionInfo::VerticalAccuracy)) {
+                    vAcc = mLastPos.attribute(QGeoPositionInfo::VerticalAccuracy);
+                }
+            }
+#endif
+
+            auto t = QDateTime::currentDateTimeUtc().time();
             QTextStream os(&mRtLogFile);
+
             os << t.msecsSinceStartOfDay() << ";";
             os << v.v_in << ";";
             os << v.temp_mos << ";";
@@ -208,8 +295,35 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             os << v.position << ";";
             os << v.fault_code << ";";
             os << v.vesc_id << ";";
+            os << v.vd << ";";
+            os << v.vq << ";";
+            os << posTime << ";";
+            os << fixed << qSetRealNumberPrecision(8) << lat << ";";
+            os << fixed << qSetRealNumberPrecision(8) << lon << ";";
+            os << alt << ";";
+            os << gVel << ";";
+            os << vVel << ";";
+            os << hAcc << ";";
+            os << vAcc << ";";
             os << "\n";
             os.flush();
+
+            LOG_DATA d;
+            d.values = v;
+            d.setupValues = mLastSetupValues;
+            d.imuValues = mLastImuValues;
+            d.valTime = t.msecsSinceStartOfDay();
+            d.setupValTime = mLastSetupTime.time().msecsSinceStartOfDay();
+            d.imuValTime = mLastImuTime.time().msecsSinceStartOfDay();
+            d.posTime = posTime;
+            d.lat = lat;
+            d.lon = lon;
+            d.alt = alt;
+            d.gVel = gVel;
+            d.vVel = vVel;
+            d.hAcc = hAcc;
+            d.vAcc = vAcc;
+            mRtLogData.append(d);
         }
     });
 }
@@ -331,6 +445,7 @@ void VescInterface::storeSettings()
 
     mSettings.setValue("useImperialUnits", mUseImperialUnits);
     mSettings.setValue("keepScreenOn", mKeepScreenOn);
+    mSettings.setValue("keepScreenOn", mUseWakeLock);
 }
 
 QVariantList VescInterface::getProfiles()
@@ -463,7 +578,7 @@ MCCONF_TEMP VescInterface::createMcconfTemp()
 
 void VescInterface::updateMcconfFromProfile(MCCONF_TEMP profile)
 {
-    double speedFact = (((double)mMcConfig->getParamInt("si_motor_poles") / 2.0) * 60.0 *
+    double speedFact = ((double(mMcConfig->getParamInt("si_motor_poles")) / 2.0) * 60.0 *
             mMcConfig->getParamDouble("si_gear_ratio")) /
             (mMcConfig->getParamDouble("si_wheel_diameter") * M_PI);
 
@@ -818,6 +933,16 @@ bool VescInterface::openRtLogFile(QString outDirectory)
         os << "encoder_position" << ";";
         os << "fault_code" << ";";
         os << "vesc_id" << ";";
+        os << "d_axis_voltage" << ";";
+        os << "q_axis_voltage" << ";";
+        os << "gnss_posTime" << ";";
+        os << "gnss_lat" << ";";
+        os << "gnss_lon" << ";";
+        os << "gnss_alt" << ";";
+        os << "gnss_gVel" << ";";
+        os << "gnss_vVel" << ";";
+        os << "gnss_hAcc" << ";";
+        os << "gnss_vAcc" << ";";
         os << "\n";
         os.flush();
     }
@@ -826,6 +951,28 @@ bool VescInterface::openRtLogFile(QString outDirectory)
         emitMessageDialog("Log to file",
                           "Could not open file for writing.",
                           false, false);
+    }
+
+    mRtLogData.clear();
+
+    if (res) {
+#ifdef HAS_POS
+        if (mPosSource != nullptr) {
+            mPosSource->deleteLater();
+        }
+
+        mPosSource = QGeoPositionInfoSource::createDefaultSource(this);
+
+        if (mPosSource) {
+            connect(mPosSource, &QGeoPositionInfoSource::positionUpdated,
+                    [this](QGeoPositionInfo info) {
+                mLastPos = info;
+                mLastPosTime = QDateTime::currentDateTimeUtc();
+            });
+            mPosSource->setUpdateInterval(5);
+            mPosSource->startUpdates();
+        }
+#endif
     }
 
     return res;
@@ -843,6 +990,88 @@ bool VescInterface::isRtLogOpen()
     return mRtLogFile.isOpen();
 }
 
+QVector<LOG_DATA> VescInterface::getRtLogData()
+{
+    return mRtLogData;
+}
+
+bool VescInterface::loadRtLogFile(QString file)
+{
+    bool res = false;
+
+    QFile inFile(file);
+
+    if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&inFile);
+        int lineNum = 0;
+
+        mRtLogData.clear();
+        while (!in.atEnd()) {
+            QStringList tokens = in.readLine().split(";");
+
+            if (tokens.size() < 22) {
+                continue;
+            }
+
+            if (lineNum > 0) {
+                LOG_DATA d;
+                d.valTime = tokens.at(0).toInt();
+                d.values.v_in = tokens.at(1).toDouble();
+                d.values.temp_mos = tokens.at(2).toDouble();
+                d.values.temp_mos_1 = tokens.at(3).toDouble();
+                d.values.temp_mos_2 = tokens.at(4).toDouble();
+                d.values.temp_mos_3 = tokens.at(5).toDouble();
+                d.values.temp_motor = tokens.at(6).toDouble();
+                d.values.current_motor = tokens.at(7).toDouble();
+                d.values.current_in = tokens.at(8).toDouble();
+                d.values.id = tokens.at(9).toDouble();
+                d.values.iq = tokens.at(10).toDouble();
+                d.values.rpm = tokens.at(11).toDouble();
+                d.values.duty_now = tokens.at(12).toDouble();
+                d.values.amp_hours = tokens.at(13).toDouble();
+                d.values.amp_hours_charged = tokens.at(14).toDouble();
+                d.values.watt_hours = tokens.at(15).toDouble();
+                d.values.watt_hours_charged = tokens.at(16).toDouble();
+                d.values.tachometer = tokens.at(17).toInt();
+                d.values.tachometer_abs = tokens.at(18).toInt();
+                d.values.position = tokens.at(19).toDouble();
+                d.values.fault_code = mc_fault_code(tokens.at(20).toInt());
+                d.values.vesc_id = tokens.at(21).toInt();
+
+                if (tokens.size() >= 30) {
+                    d.values.vd = tokens.at(9).toDouble();
+                    d.values.vq = tokens.at(10).toDouble();
+                    d.posTime = tokens.at(22).toInt();
+                    d.lat = tokens.at(23).toDouble();
+                    d.lon = tokens.at(24).toDouble();
+                    d.alt = tokens.at(25).toDouble();
+                    d.gVel = tokens.at(26).toDouble();
+                    d.vVel = tokens.at(27).toDouble();
+                    d.hAcc = tokens.at(28).toDouble();
+                    d.vAcc = tokens.at(29).toDouble();
+                }
+
+                mRtLogData.append(d);
+            }
+
+            lineNum++;
+        }
+
+        inFile.close();
+        res = true;
+
+        emitStatusMessage(QString("Loaded %1 log entries").arg(lineNum - 1), true);
+    } else {
+        emitMessageDialog("Read Log File",
+                          "Could not open\n" +
+                          file +
+                          "\nfor reading.",
+                          false, false);
+    }
+
+    return res;
+}
+
 bool VescInterface::useImperialUnits()
 {
     return mUseImperialUnits;
@@ -850,7 +1079,11 @@ bool VescInterface::useImperialUnits()
 
 void VescInterface::setUseImperialUnits(bool useImperialUnits)
 {
+    bool changed = useImperialUnits != mUseImperialUnits;
     mUseImperialUnits = useImperialUnits;
+    if (changed) {
+        emit useImperialUnitsChanged(mUseImperialUnits);
+    }
 }
 
 bool VescInterface::keepScreenOn()
@@ -861,6 +1094,39 @@ bool VescInterface::keepScreenOn()
 void VescInterface::setKeepScreenOn(bool on)
 {
     mKeepScreenOn = on;
+}
+
+bool VescInterface::useWakeLock()
+{
+    return mUseWakeLock;
+}
+
+void VescInterface::setUseWakeLock(bool on)
+{
+    mUseWakeLock = on;
+}
+
+bool VescInterface::setWakeLock(bool lock)
+{
+#ifdef Q_OS_ANDROID
+    if (mWakeLock.isValid()) {
+        mWakeLock.callMethod<void>("setReferenceCounted", "(Z)V", false);
+
+        if (lock) {
+            mWakeLock.callMethod<void>("acquire", "()V");
+        } else {
+            mWakeLock.callMethod<void>("release", "()V");
+        }
+
+        return true;
+    } else {
+        emitMessageDialog("Wake Lock", "Could not aquire wake lock", false, false);
+        return false;
+    }
+#else
+    (void)lock;
+    return true;
+#endif
 }
 
 #ifdef HAS_SERIALPORT
@@ -1423,6 +1689,39 @@ QVector<int> VescInterface::getCanDevsLast() const
 void VescInterface::ignoreCanChange(bool ignore)
 {
     mIgnoreCanChange = ignore;
+}
+
+bool VescInterface::tcpServerStart(int port)
+{
+    bool res = mTcpServer->startServer(port);
+
+    if (!res) {
+        emitMessageDialog("Start TCP Server",
+                          "Could not start TCP server: " + mTcpServer->errorString(),
+                          false, false);
+    }
+
+    return res;
+}
+
+void VescInterface::tcpServerStop()
+{
+    mTcpServer->stopServer();
+}
+
+bool VescInterface::tcpServerIsRunning()
+{
+    return mTcpServer->isServerRunning();
+}
+
+bool VescInterface::tcpServerIsClientConnected()
+{
+    return mTcpServer->isClientConnected();
+}
+
+QString VescInterface::tcpServerClientIp()
+{
+    return mTcpServer->getConnectedClientIp();
 }
 
 #ifdef HAS_SERIALPORT

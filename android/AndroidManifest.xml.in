@@ -42,7 +42,7 @@
                           application still try to draw after
                           '"applicationStateChanged(Qt::ApplicationSuspended)"'
                           signal is sent! -->
-            <meta-data android:name='"android.app.background_running"' android:value='"false"'/>
+            <meta-data android:name='"android.app.background_running"' android:value='"true"'/>
             <!-- Background running -->
 
             <!-- auto screen scale factor -->
@@ -74,9 +74,10 @@
          Remove the comment if you do not require these default features. -->
     <!-- %%INSERT_FEATURES -->
 
-<uses-permission android:name='"android.permission.BLUETOOTH"'/>
+    <uses-permission android:name='"android.permission.BLUETOOTH"'/>
     <uses-permission android:name='"android.permission.SET_ORIENTATION"'/>
     <uses-permission android:name='"android.permission.VIBRATE"'/>
-<uses-permission android:name='"android.permission.READ_EXTERNAL_STORAGE"'/>
+    <uses-permission android:name='"android.permission.READ_EXTERNAL_STORAGE"'/>
     <uses-permission android:name='"android.permission.WRITE_EXTERNAL_STORAGE"'/>
+    <uses-permission android:name='"android.permission.WAKE_LOCK"'/>
 </manifest>

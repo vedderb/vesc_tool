@@ -186,10 +186,17 @@ PageRtData::PageRtData(QWidget *parent) :
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
+
+    QSettings set;
+    if (set.contains("pagertdata/lastcsvfile")) {
+        ui->csvFileEdit->setText(set.value("pagertdata/lastcsvfile").toString());
+    }
 }
 
 PageRtData::~PageRtData()
 {
+    QSettings set;
+    set.setValue("pagertdata/lastcsvfile", ui->csvFileEdit->text());
     delete ui;
 }
 

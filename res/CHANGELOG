@@ -1,3 +1,12 @@
+== 1.20 ==
+* Added TCP server to mobile version.
+* Remember log files location.
+* Added log analysis page.
+* Added GNSS coordinates to RT log.
+* Use imperial units in profiles as well when selected.
+* Allow running in background.
+* Added wake lock when VESC is connected on Android.
+
 == 1.19 ==
 * Display prefix and suffix correctly in mobile app.
 * FW 3.61 support:

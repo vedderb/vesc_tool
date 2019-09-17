@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -17,37 +17,37 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#ifndef QMLUI_H
-#define QMLUI_H
+#ifndef PERSPECTIVEPIXMAP_H
+#define PERSPECTIVEPIXMAP_H
 
-#include <QObject>
-#include <QQmlApplicationEngine>
+#include <QPixmap>
+#include <QPainter>
 
-#include "vescinterface.h"
-#include "utility.h"
-
-class QmlUi : public QObject
+class PerspectivePixmap
 {
-    Q_OBJECT
-public:
-    explicit QmlUi(QObject *parent = nullptr);
-    bool startQmlUi();
-    bool eventFilter(QObject *object, QEvent *e);
-    void setVisible(bool visible);
 
-    static VescInterface *vesc();
+public:
+    explicit PerspectivePixmap();
+    void setPixmap(QPixmap pixmap);
+    void setXOffset(double offset);
+    void setYOffset(double offset);
+    void setScale(double scale);
+    QPixmap getPixmap();
+    double getXOffset();
+    double getYOffset();
+    double getScale();
+    void drawUsingPainter(QPainter &painter);
 
 signals:
-
+    
 public slots:
 
 private:
-    QQmlApplicationEngine *mEngine;
-
-    static VescInterface *mVesc;
-    static QObject *vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
-    static QObject *utility_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
-
+    QPixmap mPixMap;
+    double mXOffset;
+    double mYOffset;
+    double mScale;
+    
 };
 
-#endif // QMLUI_H
+#endif // PERSPECTIVEPIXMAP_H

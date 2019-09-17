@@ -110,6 +110,16 @@ int main(int argc, char *argv[])
 #ifdef USE_MOBILE
     QmlUi q;
     q.startQmlUi();
+
+    // As background running is allowed, make sure to not update the GUI when
+    // running in the background.
+    QObject::connect(&a, &QApplication::applicationStateChanged, [&q](Qt::ApplicationState state) {
+        if(state != Qt::ApplicationActive) {
+            q.setVisible(false);
+        } else {
+            q.setVisible(true);
+        }
+    });
 #else
     MainWindow w;
     w.show();

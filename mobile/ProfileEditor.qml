@@ -30,8 +30,8 @@ Item {
     property alias profileName: nameInput.text
     property double current: currentBox.realValue / 100
     property double currentBrake: currentBrakeBox.realValue / 100
-    property alias speedKmh: speedKmhBox.realValue
-    property alias speedKmhRev: speedKmhRevBox.realValue
+    property double speedKmh: 0.0
+    property double speedKmhRev: 0.0
     property alias powerMax: powerMaxBox.realValue
     property alias powerMin: powerMinBox.realValue
     signal closed(bool ok)
@@ -61,6 +61,7 @@ Item {
         powerMin = conf.watt_min
         profileName = conf.name
         updatePowerChecked()
+        updateSpeedBoxes()
     }
 
     function openDialog() {
@@ -77,9 +78,10 @@ Item {
                 mMcConf.getParamDouble("si_gear_ratio")) /
                 (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
 
-        speedKmhBox.realValue = 3.6 * mMcConf.getParamDouble("l_max_erpm") / speedFact
-        speedKmhRevBox.realValue = 3.6 * -mMcConf.getParamDouble("l_min_erpm") / speedFact
+        speedKmh = 3.6 * mMcConf.getParamDouble("l_max_erpm") / speedFact
+        speedKmhRev = 3.6 * -mMcConf.getParamDouble("l_min_erpm") / speedFact
         updatePowerChecked()
+        updateSpeedBoxes()
     }
 
     function testConnected() {
@@ -106,9 +108,29 @@ Item {
         powerBox.checked = powerMax < 1400000 || powerMin > -1400000
     }
 
+    function updateSpeedBoxes() {
+        var useImperial = VescIf.useImperialUnits()
+        var impFact = useImperial ? 0.621371192 : 1.0
+        var speedUnit = useImperial ? " mph" : " km/h"
+
+        speedKmhBox.realValue = speedKmh * impFact
+        speedKmhRevBox.realValue = speedKmhRev * impFact
+        speedKmhBox.suffix = speedUnit
+        speedKmhRevBox.suffix = speedUnit
+    }
+
     Component.onCompleted: {
         setupSpinboxFromConfig(powerMaxBox, mMcConf, "l_watt_max")
         setupSpinboxFromConfig(powerMinBox, mMcConf, "l_watt_min")
+        updateSpeedBoxes()
+    }
+
+    Connections {
+        target: VescIf
+
+        onUseImperialUnitsChanged: {
+            updateSpeedBoxes()
+        }
     }
 
     Dialog {
@@ -176,20 +198,26 @@ Item {
                     DoubleSpinBox {
                         id: speedKmhBox
                         prefix: "Forward: "
-                        suffix: " km/h"
                         realFrom: 0.0
                         realTo: 400.0
                         Layout.fillWidth: true
+
+                        onRealValueChanged: {
+                            speedKmh = realValue / (VescIf.useImperialUnits() ? 0.621371192 : 1.0)
+                        }
                     }
 
                     DoubleSpinBox {
                         id: speedKmhRevBox
                         prefix: "Reverse: "
-                        suffix: " km/h"
                         realFrom: 0.0
                         realTo: 400.0
                         Layout.fillWidth: true
                         Layout.bottomMargin: 20
+
+                        onRealValueChanged: {
+                            speedKmhRev = realValue / (VescIf.useImperialUnits() ? 0.621371192 : 1.0)
+                        }
                     }
 
                     Text {

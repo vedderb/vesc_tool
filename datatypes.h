@@ -504,6 +504,7 @@ typedef enum {
     COMM_PLOT_DATA,
     COMM_PLOT_ADD_GRAPH,
     COMM_PLOT_SET_GRAPH,
+    COMM_GET_DECODED_BALANCE,
 } COMM_PACKET_ID;
 
 typedef enum {
@@ -569,5 +570,41 @@ typedef enum {
     NRF_PAIR_OK,
     NRF_PAIR_FAIL
 } NRF_PAIR_RES;
+
+struct BALANCE_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(double pid_output MEMBER pid_output)
+    Q_PROPERTY(double m_angle MEMBER m_angle)
+    Q_PROPERTY(double c_angle MEMBER c_angle)
+    Q_PROPERTY(uint32_t diff_time MEMBER diff_time)
+    Q_PROPERTY(double motor_current MEMBER motor_current)
+    Q_PROPERTY(double motor_position MEMBER motor_position)
+    Q_PROPERTY(uint16_t state MEMBER state)
+    Q_PROPERTY(uint16_t switch_value MEMBER switch_value)
+
+public:
+    BALANCE_VALUES() {
+        pid_output = 0;
+        m_angle = 0;
+        c_angle = 0;
+        diff_time = 0;
+        motor_current = 0;
+        motor_position = 0;
+        state = 0;
+        switch_value = 0;
+    }
+
+    double pid_output;
+    double m_angle;
+    double c_angle;
+    uint32_t diff_time;
+    double motor_current;
+    double motor_position;
+    uint16_t state;
+    uint16_t switch_value;
+};
+
+Q_DECLARE_METATYPE(BALANCE_VALUES)
 
 #endif // DATATYPES_H

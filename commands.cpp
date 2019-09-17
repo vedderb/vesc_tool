@@ -56,6 +56,7 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mTimeoutDecPpm = 0;
     mTimeoutDecAdc = 0;
     mTimeoutDecChuk = 0;
+    mTimeoutDecBalance = 0;
     mTimeoutPingCan = 0;
 
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
@@ -335,6 +336,22 @@ void Commands::processPacket(QByteArray data)
         mTimeoutDecChuk = 0;
         emit decodedChukReceived(vb.vbPopFrontDouble32(1000000.0));
         break;
+
+    case COMM_GET_DECODED_BALANCE: {
+        mTimeoutDecBalance = 0;
+
+        BALANCE_VALUES values;
+
+        values.pid_output = vb.vbPopFrontDouble32(1e6);
+        values.m_angle = vb.vbPopFrontDouble32(1e6);
+        values.c_angle = vb.vbPopFrontDouble32(1e6);
+        values.diff_time = vb.vbPopFrontUint32();
+        values.motor_current = vb.vbPopFrontDouble32(1e6);
+        values.motor_position = vb.vbPopFrontDouble32(1e6);
+        values.state = vb.vbPopFrontUint16();
+        values.switch_value = vb.vbPopFrontUint16();
+        emit decodedBalanceReceived(values);
+    } break;
 
     case COMM_SET_MCCONF:
         emit ackReceived("MCCONF Write OK");
@@ -826,6 +843,19 @@ void Commands::getDecodedChuk()
     emitData(vb);
 }
 
+void Commands::getDecodedBalance()
+{
+    if (mTimeoutDecBalance > 0) {
+        return;
+    }
+
+    mTimeoutDecBalance = mTimeoutCount;
+
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_DECODED_BALANCE);
+    emitData(vb);
+}
+
 void Commands::setServoPos(double pos)
 {
     VByteArray vb;
@@ -1216,6 +1246,7 @@ void Commands::timerSlot()
     if (mTimeoutDecPpm > 0) mTimeoutDecPpm--;
     if (mTimeoutDecAdc > 0) mTimeoutDecAdc--;
     if (mTimeoutDecChuk > 0) mTimeoutDecChuk--;
+    if (mTimeoutDecBalance > 0) mTimeoutDecBalance--;
 
     if (mTimeoutPingCan > 0) {
         mTimeoutPingCan--;

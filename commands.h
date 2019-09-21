@@ -73,6 +73,7 @@ signals:
     void decodedPpmReceived(double value, double last_len);
     void decodedAdcReceived(double value, double voltage, double value2, double voltage2);
     void decodedChukReceived(double value);
+    void decodedBalanceReceived(BALANCE_VALUES values);
     void motorRLReceived(double r, double l);
     void motorLinkageReceived(double flux_linkage);
     void encoderParamReceived(double offset, double ratio, bool inverted);
@@ -124,6 +125,7 @@ public slots:
     void getDecodedPpm();
     void getDecodedAdc();
     void getDecodedChuk();
+    void getDecodedBalance();
     void setServoPos(double pos);
     void measureRL();
     void measureLinkage(double current, double min_rpm, double low_duty, double resistance);
@@ -202,6 +204,7 @@ private:
     int mTimeoutDecPpm;
     int mTimeoutDecAdc;
     int mTimeoutDecChuk;
+    int mTimeoutDecBalance;
     int mTimeoutPingCan;
 
 };

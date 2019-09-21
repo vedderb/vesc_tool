@@ -50,6 +50,7 @@
 #include "pages/pageappuart.h"
 #include "pages/pageappnunchuk.h"
 #include "pages/pageappnrf.h"
+#include "pages/pageappbalance.h"
 #include "pages/pagesettings.h"
 #include "pages/pagegpd.h"
 #include "pages/pageexperiments.h"
@@ -168,6 +169,7 @@ private:
     PageAppUart *mPageAppUart;
     PageAppNunchuk *mPageAppNunchuk;
     PageAppNrf *mPageAppNrf;
+    PageAppBalance *mPageAppBalance;
     PageSettings *mPageSettings;
     PageSwdProg *mPageSwdProg;
     PageAppImu *mPageAppImu;

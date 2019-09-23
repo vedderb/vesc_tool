@@ -53,7 +53,8 @@ void PageAppAdc::setVesc(VescInterface *vesc)
 
     if (mVesc) {
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ctrl_type");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.use_filter");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.filter_to_use");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.filter_smoothing_constant");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.safe_start");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.cc_button_inverted");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.rev_button_inverted");

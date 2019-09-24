@@ -1,3 +1,8 @@
+== 1.19 ==
+* Display prefix and suffix correctly in mobile app.
+* FW 3.61 support:
+ - Added PPM_CTRL_TYPE_CURRENT_SMART_REV mode.
+
 == 1.18 ==
 * Native CAN-bus fixes.
 * Don't build with can-bus support in static mode as it breaks the linux serial port.

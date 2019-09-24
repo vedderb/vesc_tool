@@ -137,6 +137,8 @@ Item {
                 createEditorApp("app_ppm_conf.ramp_time_pos")
                 createEditorApp("app_ppm_conf.ramp_time_neg")
                 createEditorApp("app_ppm_conf.max_erpm_for_dir")
+                createEditorApp("app_ppm_conf.smart_rev_max_duty")
+                createEditorApp("app_ppm_conf.smart_rev_ramp_time")
                 addSeparator("Multiple VESCs over CAN-bus")
                 createEditorApp("app_ppm_conf.multi_esc")
                 createEditorApp("app_ppm_conf.tc")
@@ -243,6 +245,45 @@ Item {
             createEditorApp("app_nrf_conf.address__2")
             break;
 
+        case "Balance":
+            switch(tabBox.currentText) {
+            case "Config":
+                addSeparator("Startup")
+                createEditorApp("app_balance_conf.startup_m_tolerance")
+                createEditorApp("app_balance_conf.startup_c_tolerance")
+                createEditorApp("app_balance_conf.startup_speed")
+                addSeparator("Tiltback")
+                createEditorApp("app_balance_conf.tiltback_duty")
+                createEditorApp("app_balance_conf.tiltback_angle")
+                createEditorApp("app_balance_conf.tiltback_speed")
+                createEditorApp("app_balance_conf.tiltback_high_voltage")
+                createEditorApp("app_balance_conf.tiltback_low_voltage")
+                addSeparator("Overspeed")
+                createEditorApp("app_balance_conf.overspeed_duty")
+                addSeparator("Fault")
+                createEditorApp("app_balance_conf.m_fault")
+                createEditorApp("app_balance_conf.c_fault")
+                createEditorApp("app_balance_conf.use_switches")
+                break;
+            case "Tune":
+                addSeparator("PID")
+                createEditorApp("app_balance_conf.kp")
+                createEditorApp("app_balance_conf.ki")
+                createEditorApp("app_balance_conf.kd")
+                addSeparator("Main Loop")
+                createEditorApp("app_balance_conf.hertz")
+                addSeparator("Gyro Orientation")
+                createEditorApp("app_balance_conf.m_axis")
+                createEditorApp("app_balance_conf.c_axis")
+                addSeparator("Experimental")
+                createEditorApp("app_balance_conf.deadzone")
+                createEditorApp("app_balance_conf.current_boost")
+                break;
+            default:
+                break;
+            }
+            break;
+
         case "IMU":
             createEditorApp("imu_conf.type")
             createEditorApp("imu_conf.sample_rate_hz")
@@ -293,6 +334,7 @@ Item {
                     "UART",
                     "Nunchuk",
                     "NRF",
+                    "Balance",
                     "IMU"
                 ]
 
@@ -333,6 +375,13 @@ Item {
 
                     case "NRF":
                         tabBox.model = []
+                        break;
+
+                    case "Balance":
+                        tabBox.model = [
+                                    "Config",
+                                    "Tune"
+                                ]
                         break;
 
                     case "IMU":

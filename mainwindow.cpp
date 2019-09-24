@@ -299,6 +299,7 @@ void MainWindow::timerSlot()
         mVesc->commands()->getDecodedAdc();
         mVesc->commands()->getDecodedChuk();
         mVesc->commands()->getDecodedPpm();
+        mVesc->commands()->getDecodedBalance();
     }
 
     // IMU Data
@@ -949,6 +950,12 @@ void MainWindow::reloadPages()
     mPageAppNrf->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNrf);
     addPageItem(tr("Nrf"), "://res/icons/Online-96.png",
+                "://res/icons/appconf.png", false, true);
+
+    mPageAppBalance = new PageAppBalance(this);
+    mPageAppBalance->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppBalance);
+    addPageItem(tr("Balance"), "://res/icons/EUC-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageAppImu = new PageAppImu(this);

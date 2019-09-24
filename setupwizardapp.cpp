@@ -751,7 +751,7 @@ void AppAdcPage::initializePage()
 
     mParamTab->addRowSeparator(tr("General"));
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ctrl_type");
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.filter_to_use");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.filter_type");
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.filter_smoothing_constant");
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.safe_start");
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.cc_button_inverted");

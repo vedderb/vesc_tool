@@ -164,8 +164,10 @@ Item {
             switch(tabBox.currentText) {
             case "General":
                 createEditorApp("app_adc_conf.ctrl_type")
-                createEditorApp("app_adc_conf.filter_type")
-                createEditorApp("app_adc_conf.filter_smoothing_constant")
+                createEditorApp("app_adc_conf.adc_filter_type")
+                createEditorApp("app_adc_conf.adc_filter_smoothing_constant")
+                createEditorApp("app_adc_conf.adc2_filter_type")
+                createEditorApp("app_adc_conf.adc2_filter_smoothing_constant")
                 createEditorApp("app_adc_conf.safe_start")
                 createEditorApp("app_adc_conf.cc_button_inverted")
                 createEditorApp("app_adc_conf.rev_button_inverted")

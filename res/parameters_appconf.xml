@@ -876,8 +876,8 @@ p, li { white-space: pre-wrap; }
             <suffix> V</suffix>
             <vTx>9</vTx>
         </app_adc_conf.voltage2_end>
-        <app_adc_conf.filter_type>
-            <longName>Filter to Use</longName>
+        <app_adc_conf.adc_filter_type>
+            <longName>ADC Filter to Use</longName>
             <type>4</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -890,9 +890,9 @@ p, li { white-space: pre-wrap; }
             <enumNames>None</enumNames>
             <enumNames>Avarage</enumNames>
             <enumNames>Exponential</enumNames>
-        </app_adc_conf.filter_type>
-        <app_adc_conf.filter_smoothing_constant>
-            <longName>Filter Smoothing Constant</longName>
+        </app_adc_conf.adc_filter_type>
+        <app_adc_conf.adc_filter_smoothing_constant>
+            <longName>ADC Filter Smoothing Constant</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -912,7 +912,44 @@ p, li { white-space: pre-wrap; }
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
-        </app_adc_conf.filter_smoothing_constant>
+        </app_adc_conf.adc_filter_smoothing_constant>
+        <app_adc_conf.adc2_filter_type>
+            <longName>ADC2 Filter to Use</longName>
+            <type>4</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The Filter to use. Define how the adc input should be filtered.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_ADC2_FILTER_TYPE</cDefine>
+            <valInt>0</valInt>
+            <enumNames>None</enumNames>
+            <enumNames>Avarage</enumNames>
+            <enumNames>Exponential</enumNames>
+        </app_adc_conf.adc2_filter_type>
+        <app_adc_conf.adc2_filter_smoothing_constant>
+            <longName>ADC2 Filter Smoothing Constant</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Filter smoothing constant. Is a constant between 0.0 and 1.0, normally between 0.8 and 0.99, used in exponential filter.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_ADC2_FILTER_SMOOTHING_CONSTANT</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.9</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_adc_conf.adc2_filter_smoothing_constant>
         <app_adc_conf.safe_start>
             <longName>Safe Start</longName>
             <type>5</type>
@@ -2590,8 +2627,10 @@ p, li { white-space: pre-wrap; }
         <ser>app_adc_conf.voltage_center</ser>
         <ser>app_adc_conf.voltage2_start</ser>
         <ser>app_adc_conf.voltage2_end</ser>
-        <ser>app_adc_conf.filter_type</ser>
-        <ser>app_adc_conf.filter_smoothing_constant</ser>
+        <ser>app_adc_conf.adc_filter_type</ser>
+        <ser>app_adc_conf.adc_filter_smoothing_constant</ser>
+        <ser>app_adc_conf.adc2_filter_type</ser>
+        <ser>app_adc_conf.adc2_filter_smoothing_constant</ser>
         <ser>app_adc_conf.safe_start</ser>
         <ser>app_adc_conf.cc_button_inverted</ser>
         <ser>app_adc_conf.rev_button_inverted</ser>

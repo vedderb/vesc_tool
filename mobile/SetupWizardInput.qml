@@ -572,8 +572,10 @@ Item {
                                 // ADC and UART
                                 paramsConf.addSeparator("General")
                                 paramsConf.addEditorApp("app_adc_conf.ctrl_type")
-                                paramsConf.addEditorApp("app_adc_conf.filter_type")
-                                paramsConf.addEditorApp("app_adc_conf.filter_smoothing_constant")
+                                paramsConf.addEditorApp("app_adc_conf.adc_filter_type")
+                                paramsConf.addEditorApp("app_adc_conf.adc_filter_smoothing_constant")
+                                paramsConf.addEditorApp("app_adc_conf.adc2_filter_type")
+                                paramsConf.addEditorApp("app_adc_conf.adc2_filter_smoothing_constant")
                                 paramsConf.addEditorApp("app_adc_conf.safe_start")
                                 paramsConf.addEditorApp("app_adc_conf.cc_button_inverted")
                                 paramsConf.addEditorApp("app_adc_conf.rev_button_inverted")

@@ -505,6 +505,7 @@ typedef enum {
     COMM_PLOT_ADD_GRAPH,
     COMM_PLOT_SET_GRAPH,
     COMM_GET_DECODED_BALANCE,
+    COMM_BM_MEM_READ,
 } COMM_PACKET_ID;
 
 typedef enum {

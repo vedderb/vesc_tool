@@ -91,8 +91,10 @@ void PageFirmware::setVesc(VescInterface *vesc)
 void PageFirmware::timerSlot()
 {
     if (mVesc) {
-        ui->uploadAllButton->setEnabled(mVesc->commands()->getLimitedSupportsFwdAllCan() &&
-                                        !mVesc->commands()->getSendCan());
+        if (mVesc->commands()->getFirmwareUploadProgress() >= 0.0) {
+            ui->uploadAllButton->setEnabled(mVesc->commands()->getLimitedSupportsFwdAllCan() &&
+                                            !mVesc->commands()->getSendCan());
+        }
 
         if (!mVesc->isPortConnected()) {
             ui->currentLabel->clear();

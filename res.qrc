@@ -159,5 +159,7 @@
         <file>res/icons/Polyline-96.png</file>
         <file>res/icons/Waypoint Map-96.png</file>
         <file>res/icons/EUC-96.png</file>
+        <file>res/images/slider1.png</file>
+        <file>res/icons/icons8-target-96.png</file>
     </qresource>
 </RCC>

@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 

@@ -588,6 +588,11 @@ void Commands::processPacket(QByteArray data)
         emit plotSetGraphReceived(vb.vbPopFrontInt8());
     } break;
 
+    case COMM_BM_MEM_READ: {
+        int res = vb.vbPopFrontInt16();
+        emit bmReadMemRes(res, vb);
+    } break;
+
     default:
         break;
     }
@@ -1222,6 +1227,15 @@ void Commands::bmMapPinsNrf5x()
     emitData(vb);
 }
 
+void Commands::bmReadMem(uint32_t addr, quint16 size)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_MEM_READ);
+    vb.vbAppendUint32(addr);
+    vb.vbAppendUint16(size);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mFirmwareIsUploading) {
@@ -1395,32 +1409,6 @@ void Commands::firmwareUploadUpdate(bool isTimeout)
     }
 }
 
-QString Commands::faultToStr(mc_fault_code fault)
-{
-    switch (fault) {
-    case FAULT_CODE_NONE: return "FAULT_CODE_NONE";
-    case FAULT_CODE_OVER_VOLTAGE: return "FAULT_CODE_OVER_VOLTAGE";
-    case FAULT_CODE_UNDER_VOLTAGE: return "FAULT_CODE_UNDER_VOLTAGE";
-    case FAULT_CODE_DRV: return "FAULT_CODE_DRV";
-    case FAULT_CODE_ABS_OVER_CURRENT: return "FAULT_CODE_ABS_OVER_CURRENT";
-    case FAULT_CODE_OVER_TEMP_FET: return "FAULT_CODE_OVER_TEMP_FET";
-    case FAULT_CODE_OVER_TEMP_MOTOR: return "FAULT_CODE_OVER_TEMP_MOTOR";
-    case FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE";
-    case FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE";
-    case FAULT_CODE_MCU_UNDER_VOLTAGE: return "FAULT_CODE_MCU_UNDER_VOLTAGE";
-    case FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: return "FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET";
-    case FAULT_CODE_ENCODER_SPI: return "FAULT_CODE_ENCODER_SPI";
-    case FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE: return "FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE";
-    case FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE: return "FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE";
-    case FAULT_CODE_FLASH_CORRUPTION: return "FAULT_CODE_FLASH_CORRUPTION";
-    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1";
-    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2";
-    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3";
-    case FAULT_CODE_UNBALANCED_CURRENTS: return "FAULT_CODE_UNBALANCED_CURRENTS";
-    default: return "Unknown fault";
-    }
-}
-
 bool Commands::getLimitedSupportsFwdAllCan() const
 {
     return mLimitedSupportsFwdAllCan;
@@ -1449,6 +1437,32 @@ QVector<int> Commands::getLimitedCompatibilityCommands() const
 void Commands::setLimitedCompatibilityCommands(QVector<int> compatibilityCommands)
 {
     mCompatibilityCommands = compatibilityCommands;
+}
+
+QString Commands::faultToStr(mc_fault_code fault)
+{
+    switch (fault) {
+    case FAULT_CODE_NONE: return "FAULT_CODE_NONE";
+    case FAULT_CODE_OVER_VOLTAGE: return "FAULT_CODE_OVER_VOLTAGE";
+    case FAULT_CODE_UNDER_VOLTAGE: return "FAULT_CODE_UNDER_VOLTAGE";
+    case FAULT_CODE_DRV: return "FAULT_CODE_DRV";
+    case FAULT_CODE_ABS_OVER_CURRENT: return "FAULT_CODE_ABS_OVER_CURRENT";
+    case FAULT_CODE_OVER_TEMP_FET: return "FAULT_CODE_OVER_TEMP_FET";
+    case FAULT_CODE_OVER_TEMP_MOTOR: return "FAULT_CODE_OVER_TEMP_MOTOR";
+    case FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE";
+    case FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE";
+    case FAULT_CODE_MCU_UNDER_VOLTAGE: return "FAULT_CODE_MCU_UNDER_VOLTAGE";
+    case FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: return "FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET";
+    case FAULT_CODE_ENCODER_SPI: return "FAULT_CODE_ENCODER_SPI";
+    case FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE: return "FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE";
+    case FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE: return "FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE";
+    case FAULT_CODE_FLASH_CORRUPTION: return "FAULT_CODE_FLASH_CORRUPTION";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3";
+    case FAULT_CODE_UNBALANCED_CURRENTS: return "FAULT_CODE_UNBALANCED_CURRENTS";
+    default: return "Unknown fault";
+    }
 }
 
 void Commands::setAppConfig(ConfigParams *appConfig)

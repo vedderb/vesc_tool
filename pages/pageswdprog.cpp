@@ -109,7 +109,7 @@ void PageSwdProg::on_uploadButton_clicked()
                     return;
                 }
 
-                mVesc->swdUploadFw(file.readAll(), mFlashOffset + fw.addr);
+                mVesc->swdUploadFw(file.readAll(), mFlashOffset + fw.addr, ui->verifyBox->isChecked());
 
                 if (!fw.bootloaderPath.isEmpty()) {
                     QFile file2(fw.bootloaderPath);
@@ -127,7 +127,7 @@ void PageSwdProg::on_uploadButton_clicked()
                         return;
                     }
 
-                    mVesc->swdUploadFw(file2.readAll(), mFlashOffset + fw.bootloaderAddr);
+                    mVesc->swdUploadFw(file2.readAll(), mFlashOffset + fw.bootloaderAddr, ui->verifyBox->isChecked());
                 }
             } else {
                 QMessageBox::critical(this,
@@ -158,7 +158,7 @@ void PageSwdProg::on_uploadButton_clicked()
             if (!mVesc->swdEraseFlash()) {
                 return;
             }
-            mVesc->swdUploadFw(file.readAll(), mFlashOffset);
+            mVesc->swdUploadFw(file.readAll(), mFlashOffset, ui->verifyBox->isChecked());
         }
 
         mVesc->swdReboot();
@@ -255,11 +255,13 @@ void PageSwdProg::bmConnRes(int res)
         addSwdFw("VESC 4.10 - 4.12", "://res/firmwares/410_o_411_o_412/VESC_default.bin",
                  0, "://res/bootloaders/40_o_47_o_48_o_410_o_411_o_412_o_DAS_RS.bin");
         addSwdFw("VESC SIX", "://res/firmwares/60/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA.bin");
         addSwdFw("VESC 75/300 R1", "://res/firmwares/75_300/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA.bin");
         addSwdFw("VESC 75/300 R2", "://res/firmwares/75_300_R2/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA.bin");
+        addSwdFw("VESC HD", "://res/firmwares/HD/VESC_default.bin",
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA.bin");
         break;
 
     case 2:

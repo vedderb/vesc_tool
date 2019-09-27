@@ -103,7 +103,7 @@ public:
     Q_INVOKABLE int getLastCANbusBitrate() const;
 #endif
     bool swdEraseFlash();
-    bool swdUploadFw(QByteArray newFirmware, uint32_t startAddr = 0);
+    bool swdUploadFw(QByteArray newFirmware, uint32_t startAddr = 0, bool verify = false);
     void swdCancel();
     bool swdReboot();
 
@@ -112,6 +112,8 @@ public:
     Q_INVOKABLE bool isRtLogOpen();
     Q_INVOKABLE QVector<LOG_DATA> getRtLogData();
     Q_INVOKABLE bool loadRtLogFile(QString file);
+    Q_INVOKABLE LOG_DATA getRtLogSample(double progress);
+    Q_INVOKABLE LOG_DATA getRtLogSampleAtValTimeFromStart(int time);
 
     Q_INVOKABLE bool useImperialUnits();
     Q_INVOKABLE void setUseImperialUnits(bool useImperialUnits);

@@ -47,7 +47,9 @@ HEADERS += \
     $$PWD/aspectimglabel.h \
     $$PWD/historylineedit.h \
     $$PWD/detectallfocdialog.h \
-    $$PWD/dirsetup.h
+    $$PWD/dirsetup.h \
+    $$PWD/vesc3dview.h \
+    $$PWD/superslider.h
 
 SOURCES += \
     $$PWD/parameditbool.cpp \
@@ -78,5 +80,7 @@ SOURCES += \
     $$PWD/aspectimglabel.cpp \
     $$PWD/historylineedit.cpp \
     $$PWD/detectallfocdialog.cpp \
-    $$PWD/dirsetup.cpp
+    $$PWD/dirsetup.cpp \
+    $$PWD/vesc3dview.cpp \
+    $$PWD/superslider.cpp
 

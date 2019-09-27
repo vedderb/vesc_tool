@@ -23,6 +23,8 @@
 
 #include <QWidget>
 #include <vescinterface.h>
+#include "widgets/qcustomplot.h"
+#include "widgets/vesc3dview.h"
 
 namespace Ui {
 class PageLogAnalysis;
@@ -45,10 +47,29 @@ private slots:
     void on_gridBox_toggled(bool checked);
     void on_tilesHiResButton_toggled(bool checked);
     void on_tilesOsmButton_toggled(bool checked);
+    void on_saveMapPdfButton_clicked();
+    void on_saveMapPngButton_clicked();
+    void on_savePlotPdfButton_clicked();
+    void on_savePlotPngButton_clicked();
+    void on_centerButton_clicked();
 
 private:
     Ui::PageLogAnalysis *ui;
     VescInterface *mVesc;
+    QCPCurve *mVerticalLine;
+    Vesc3DView *m3dView;
+    QCheckBox *mUseYawBox;
+    QVector<LOG_DATA> mLogData;
+    QVector<LOG_DATA> mLogDataTruncated;
+    QTimer *mPlayTimer;
+    double mPlayPosNow;
+
+    void truncateDataAndPlot();
+    void updateGraphs();
+    void updateStats();
+    void updateDataAndPlot(double time);
+    LOG_DATA getLogSample(int timeMs);
+    double getDistGnssSample(int timeMs);
 
 };
 

@@ -53,7 +53,7 @@ void CopterInfo::setName(const QString &name)
     mName = name;
 }
 
-LocPoint CopterInfo::getLocation() const
+LocPoint &CopterInfo::getLocation()
 {
     return mLocation;
 }
@@ -63,7 +63,7 @@ void CopterInfo::setLocation(const LocPoint &location)
     mLocation = location;
 }
 
-LocPoint CopterInfo::getLocationGps() const
+LocPoint &CopterInfo::getLocationGps()
 {
     return mLocationGps;
 }

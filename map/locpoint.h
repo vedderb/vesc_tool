@@ -28,7 +28,7 @@ class LocPoint
 {
 public:
     LocPoint(double x = 0, double y = 0, double height = 0, double roll = 0, double pitch = 0, double yaw = 0,
-             double speed = 0.5, double radius = 5.0, double sigma = 0.0,
+             double speed = 0.5, double radius = -1.0, double sigma = 0.0,
              QColor color = Qt::darkGreen, qint32 time = 0, int id = 0, bool drawLine = true);
     LocPoint(const LocPoint &point);
 

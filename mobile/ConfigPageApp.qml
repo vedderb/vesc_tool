@@ -248,8 +248,8 @@ Item {
             switch(tabBox.currentText) {
             case "Config":
                 addSeparator("Startup")
-                createEditorApp("app_balance_conf.startup_m_tolerance")
-                createEditorApp("app_balance_conf.startup_c_tolerance")
+                createEditorApp("app_balance_conf.startup_pitch_tolerance")
+                createEditorApp("app_balance_conf.startup_roll_tolerance")
                 createEditorApp("app_balance_conf.startup_speed")
                 addSeparator("Tiltback")
                 createEditorApp("app_balance_conf.tiltback_duty")
@@ -260,8 +260,8 @@ Item {
                 addSeparator("Overspeed")
                 createEditorApp("app_balance_conf.overspeed_duty")
                 addSeparator("Fault")
-                createEditorApp("app_balance_conf.m_fault")
-                createEditorApp("app_balance_conf.c_fault")
+                createEditorApp("app_balance_conf.pitch_fault")
+                createEditorApp("app_balance_conf.roll_fault")
                 createEditorApp("app_balance_conf.use_switches")
                 break;
             case "Tune":
@@ -271,9 +271,6 @@ Item {
                 createEditorApp("app_balance_conf.kd")
                 addSeparator("Main Loop")
                 createEditorApp("app_balance_conf.hertz")
-                addSeparator("Gyro Orientation")
-                createEditorApp("app_balance_conf.m_axis")
-                createEditorApp("app_balance_conf.c_axis")
                 addSeparator("Experimental")
                 createEditorApp("app_balance_conf.deadzone")
                 createEditorApp("app_balance_conf.current_boost")

@@ -32,9 +32,9 @@ public:
     void setId(int id, bool changeName = false);
     QString getName() const;
     void setName(const QString &name);
-    LocPoint getLocation() const;
+    LocPoint &getLocation();
     void setLocation(const LocPoint &location);
-    LocPoint getLocationGps() const;
+    LocPoint &getLocationGps();
     void setLocationGps(const LocPoint &locationGps);
     LocPoint getApGoal() const;
     void setApGoal(const LocPoint &apGoal);

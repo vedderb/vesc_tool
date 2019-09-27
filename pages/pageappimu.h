@@ -20,8 +20,11 @@
 #ifndef PAGEAPPIMU_H
 #define PAGEAPPIMU_H
 
-#include <QWidget>
 #include "vescinterface.h"
+#include "widgets/vesc3dview.h"
+
+#include <QWidget>
+#include <QCheckBox>
 
 namespace Ui {
 class PageAppImu;
@@ -66,6 +69,9 @@ private:
 
     double mSecondCounter;
     qint64 mLastUpdateTime;
+
+    Vesc3DView *m3dView;
+    QCheckBox *mUseYawBox;
 
     void appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize);
 };

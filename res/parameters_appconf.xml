@@ -1688,14 +1688,14 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.00</valDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.kp>
         <app_balance_conf.ki>
             <longName>I</longName>
@@ -1710,14 +1710,14 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.00</valDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.ki>
         <app_balance_conf.kd>
             <longName>D</longName>
@@ -1732,14 +1732,14 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.00</valDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.kd>
         <app_balance_conf.hertz>
             <longName>Loop Hertz</longName>
@@ -1761,57 +1761,16 @@ p, li { white-space: pre-wrap; }
             <suffix> Hz</suffix>
             <vTx>3</vTx>
         </app_balance_conf.hertz>
-        <app_chuk_conf.throttle_exp_mode>
-            <longName>Throttle Expo Mode</longName>
-            <type>4</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//D:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The curve parameter, offsets and signs are mapped accordingly for each mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_CHUK_THROTTLE_EXP_MODE</cDefine>
-            <valInt>2</valInt>
-            <enumNames>Exponential</enumNames>
-            <enumNames>Natural</enumNames>
-            <enumNames>Polynomial</enumNames>
-        </app_chuk_conf.throttle_exp_mode>
-        <app_balance_conf.m_axis>
-            <longName>Main Axis</longName>
-            <type>4</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Main axis: This is the axis that will be balanced by the motor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_M_AXIS</cDefine>
-            <valInt>0</valInt>
-            <enumNames>Pitch</enumNames>
-            <enumNames>Roll</enumNames>
-            <enumNames>Yaw</enumNames>
-        </app_balance_conf.m_axis>
-        <app_balance_conf.c_axis>
-            <longName>Cross Axis</longName>
-            <type>4</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Cross axis: This is the axis perpendicular to the main axis, used to detect wheel tipping over (not the axis which would be turning).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_C_AXIS</cDefine>
-            <valInt>1</valInt>
-            <enumNames>Pitch</enumNames>
-            <enumNames>Roll</enumNames>
-            <enumNames>Yaw</enumNames>
-        </app_balance_conf.c_axis>
-        <app_balance_conf.m_fault>
-            <longName>Main Axis Fault Cutoff</longName>
+        <app_balance_conf.pitch_fault>
+            <longName>Pitch Axis Fault Cutoff</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Angle to turn off driving (on the main axis).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_M_FAULT</cDefine>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Angle to turn off driving (on the pitch axis).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_PITCH_FAULT</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -1820,20 +1779,20 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>20</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> degrees</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-        </app_balance_conf.m_fault>
-        <app_balance_conf.c_fault>
-            <longName>Cross Axis Fault Cutoff</longName>
+        </app_balance_conf.pitch_fault>
+        <app_balance_conf.roll_fault>
+            <longName>Roll Axis Fault Cutoff</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Angle to turn off driving (on the cross axis).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_C_FAULT</cDefine>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Angle to turn off driving (on the roll axis).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_ROLL_FAULT</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -1842,10 +1801,10 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>45</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> degrees</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-        </app_balance_conf.c_fault>
+        </app_balance_conf.roll_fault>
         <app_balance_conf.use_switches>
             <longName>Use Switches</longName>
             <type>5</type>
@@ -1865,8 +1824,8 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Duty cycle value to trigger a safety cutoff 0-1% (This cutoff will require a reboot).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Duty cycle value to trigger a safety cutoff 0-1% (This cutoff will require a reboot).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_BALANCE_OVERSPEED_DUTY</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -1874,11 +1833,11 @@ p, li { white-space: pre-wrap; }
             <maxDouble>1</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.01</stepDouble>
-            <valDouble>.9</valDouble>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.9</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.overspeed_duty>
         <app_balance_conf.tiltback_duty>
             <longName>Tiltback Duty Cycle</longName>
@@ -1896,11 +1855,11 @@ p, li { white-space: pre-wrap; }
             <maxDouble>1</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.01</stepDouble>
-            <valDouble>.75</valDouble>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.75</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.tiltback_duty>
         <app_balance_conf.tiltback_angle>
             <longName>Tiltback Angle</longName>
@@ -1918,11 +1877,11 @@ p, li { white-space: pre-wrap; }
             <maxDouble>45</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.1</stepDouble>
-            <valDouble>15.0</valDouble>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>15</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> degrees</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.tiltback_angle>
         <app_balance_conf.tiltback_speed>
             <longName>Tiltback Speed</longName>
@@ -1940,11 +1899,11 @@ p, li { white-space: pre-wrap; }
             <maxDouble>100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.1</stepDouble>
+            <stepDouble>0.1</stepDouble>
             <valDouble>5</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> degrees/s</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.tiltback_speed>
         <app_balance_conf.tiltback_high_voltage>
             <longName>High Voltage Tiltback</longName>
@@ -1962,11 +1921,11 @@ p, li { white-space: pre-wrap; }
             <maxDouble>700</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.01</stepDouble>
-            <valDouble>100.00</valDouble>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>100</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.tiltback_high_voltage>
         <app_balance_conf.tiltback_low_voltage>
             <longName>Low Voltage Tiltback</longName>
@@ -1984,56 +1943,56 @@ p, li { white-space: pre-wrap; }
             <maxDouble>700</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.01</stepDouble>
-            <valDouble>0.00</valDouble>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.tiltback_low_voltage>
-        <app_balance_conf.startup_m_tolerance>
-            <longName>Startup Main Axis Angle Tolerance</longName>
+        <app_balance_conf.startup_pitch_tolerance>
+            <longName>Startup Pitch Axis Angle Tolerance</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Angle at which balancing will start (on the main axis). Measured in degrees from upright (0).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_STARTUP_M_TOLERANCE</cDefine>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Angle at which balancing will start (on the main axis). Measured in degrees from upright (0).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_STARTUP_PITCH_TOLERANCE</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>80</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.1</stepDouble>
+            <stepDouble>0.1</stepDouble>
             <valDouble>20</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> degrees</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-        </app_balance_conf.startup_m_tolerance>
-        <app_balance_conf.startup_c_tolerance>
-            <longName>Startup Cross Axis Angle Tolerance</longName>
+        </app_balance_conf.startup_pitch_tolerance>
+        <app_balance_conf.startup_roll_tolerance>
+            <longName>Startup Roll Axis Angle Tolerance</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Angle at which balancing will start (on the cross axis). Measured in degrees from upright (0).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_STARTUP_C_TOLERANCE</cDefine>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Angle at which balancing will start (on the cross axis). Measured in degrees from upright (0).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_STARTUP_ROLL_TOLERANCE</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>80</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.1</stepDouble>
+            <stepDouble>0.1</stepDouble>
             <valDouble>8</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> degrees</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-        </app_balance_conf.startup_c_tolerance>
+        </app_balance_conf.startup_roll_tolerance>
         <app_balance_conf.startup_speed>
             <longName>Startup Centering Speed</longName>
             <type>1</type>
@@ -2050,11 +2009,11 @@ p, li { white-space: pre-wrap; }
             <maxDouble>100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.1</stepDouble>
+            <stepDouble>0.1</stepDouble>
             <valDouble>30</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> degrees/s</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.startup_speed>
         <app_balance_conf.deadzone>
             <longName>Deadzone</longName>
@@ -2072,11 +2031,11 @@ p, li { white-space: pre-wrap; }
             <maxDouble>5</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.01</stepDouble>
+            <stepDouble>0.01</stepDouble>
             <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> degrees</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.deadzone>
         <app_balance_conf.current_boost>
             <longName>Current Boost</longName>
@@ -2094,11 +2053,11 @@ p, li { white-space: pre-wrap; }
             <maxDouble>10</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>.01</stepDouble>
+            <stepDouble>0.01</stepDouble>
             <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> A</suffix>
             <vTx>9</vTx>
-            <vTxDoubleScale>1000</vTxDoubleScale>
         </app_balance_conf.current_boost>
         <imu_conf.type>
             <longName>IMU Type</longName>
@@ -2609,10 +2568,8 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.ki</ser>
         <ser>app_balance_conf.kd</ser>
         <ser>app_balance_conf.hertz</ser>
-        <ser>app_balance_conf.m_axis</ser>
-        <ser>app_balance_conf.c_axis</ser>
-        <ser>app_balance_conf.m_fault</ser>
-        <ser>app_balance_conf.c_fault</ser>
+        <ser>app_balance_conf.pitch_fault</ser>
+        <ser>app_balance_conf.roll_fault</ser>
         <ser>app_balance_conf.use_switches</ser>
         <ser>app_balance_conf.overspeed_duty</ser>
         <ser>app_balance_conf.tiltback_duty</ser>
@@ -2620,8 +2577,8 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.tiltback_speed</ser>
         <ser>app_balance_conf.tiltback_high_voltage</ser>
         <ser>app_balance_conf.tiltback_low_voltage</ser>
-        <ser>app_balance_conf.startup_m_tolerance</ser>
-        <ser>app_balance_conf.startup_c_tolerance</ser>
+        <ser>app_balance_conf.startup_pitch_tolerance</ser>
+        <ser>app_balance_conf.startup_roll_tolerance</ser>
         <ser>app_balance_conf.startup_speed</ser>
         <ser>app_balance_conf.deadzone</ser>
         <ser>app_balance_conf.current_boost</ser>

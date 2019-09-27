@@ -59,6 +59,8 @@ public:
     Q_INVOKABLE QVector<int> getLimitedCompatibilityCommands() const;
     void setLimitedCompatibilityCommands(QVector<int> compatibilityCommands);
 
+    Q_INVOKABLE static QString faultToStr(mc_fault_code fault);
+
 signals:
     void dataToSend(QByteArray &data);
 
@@ -97,6 +99,7 @@ signals:
     void plotDataReceived(double x, double y);
     void plotAddGraphReceived(QString name);
     void plotSetGraphReceived(int graph);
+    void bmReadMemRes(int res, QByteArray data);
 
 public slots:
     void processPacket(QByteArray data);
@@ -161,6 +164,7 @@ public slots:
     void bmDisconnect();
     void bmMapPinsDefault();
     void bmMapPinsNrf5x();
+    void bmReadMem(uint32_t addr, quint16 size);
 
 private slots:
     void timerSlot();
@@ -168,7 +172,6 @@ private slots:
 private:
     void emitData(QByteArray data);
     void firmwareUploadUpdate(bool isTimeout);
-    QString faultToStr(mc_fault_code fault);
 
     QTimer *mTimer;
     bool mSendCan;

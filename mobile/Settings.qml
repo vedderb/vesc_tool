@@ -77,7 +77,9 @@ Item {
         onClosed: {
             VescIf.setUseImperialUnits(imperialBox.checked)
             VescIf.setKeepScreenOn(screenOnBox.checked)
+            VescIf.setUseWakeLock(wakeLockBox.checked)
             VescIf.storeSettings()
+
             Utility.keepScreenOn(VescIf.keepScreenOn())
 
             if (VescIf.useWakeLock()) {

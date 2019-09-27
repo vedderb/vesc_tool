@@ -232,7 +232,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     connect(mCommands, &Commands::valuesReceived, [this](MC_VALUES v) {
         if (mRtLogFile.isOpen()) {
-            int posTime = -1;
+            int msPos = -1;
             double lat = 0.0;
             double lon = 0.0;
             double alt = 0.0;
@@ -244,7 +244,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 #ifdef HAS_POS
             if (mLastPos.isValid() && mLastPosTime.isValid() &&
                     mLastPosTime.secsTo(QDateTime::currentDateTime()) < 3) {
-                posTime = mLastPos.timestamp().time().msecsSinceStartOfDay();
+                msPos = mLastPos.timestamp().time().msecsSinceStartOfDay();
                 lat = mLastPos.coordinate().latitude();
                 lon = mLastPos.coordinate().longitude();
 
@@ -273,6 +273,16 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             auto t = QDateTime::currentDateTimeUtc().time();
             QTextStream os(&mRtLogFile);
 
+            int msSetup = -1;
+            if (mLastSetupTime.isValid()) {
+                msSetup = mLastSetupTime.time().msecsSinceStartOfDay();
+            }
+
+            int msImu = -1;
+            if (mLastImuTime.isValid()) {
+                msImu = mLastImuTime.time().msecsSinceStartOfDay();
+            }
+
             os << t.msecsSinceStartOfDay() << ";";
             os << v.v_in << ";";
             os << v.temp_mos << ";";
@@ -297,7 +307,33 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             os << v.vesc_id << ";";
             os << v.vd << ";";
             os << v.vq << ";";
-            os << posTime << ";";
+
+            os << msSetup << ";";
+            os << mLastSetupValues.amp_hours << ";";
+            os << mLastSetupValues.amp_hours_charged << ";";
+            os << mLastSetupValues.watt_hours << ";";
+            os << mLastSetupValues.watt_hours_charged << ";";
+            os << mLastSetupValues.battery_level << ";";
+            os << mLastSetupValues.battery_wh << ";";
+            os << mLastSetupValues.current_in << ";";
+            os << mLastSetupValues.current_motor << ";";
+            os << mLastSetupValues.speed << ";";
+            os << mLastSetupValues.tachometer << ";";
+            os << mLastSetupValues.tachometer_abs << ";";
+            os << mLastSetupValues.num_vescs << ";";
+
+            os << msImu << ";";
+            os << mLastImuValues.roll << ";";
+            os << mLastImuValues.pitch << ";";
+            os << mLastImuValues.yaw << ";";
+            os << mLastImuValues.accX << ";";
+            os << mLastImuValues.accY << ";";
+            os << mLastImuValues.accZ << ";";
+            os << mLastImuValues.gyroX << ";";
+            os << mLastImuValues.gyroY << ";";
+            os << mLastImuValues.gyroZ << ";";
+
+            os << msPos << ";";
             os << fixed << qSetRealNumberPrecision(8) << lat << ";";
             os << fixed << qSetRealNumberPrecision(8) << lon << ";";
             os << alt << ";";
@@ -313,9 +349,9 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             d.setupValues = mLastSetupValues;
             d.imuValues = mLastImuValues;
             d.valTime = t.msecsSinceStartOfDay();
-            d.setupValTime = mLastSetupTime.time().msecsSinceStartOfDay();
-            d.imuValTime = mLastImuTime.time().msecsSinceStartOfDay();
-            d.posTime = posTime;
+            d.setupValTime = msSetup;
+            d.imuValTime = msImu;
+            d.posTime = msPos;
             d.lat = lat;
             d.lon = lon;
             d.alt = alt;
@@ -445,7 +481,7 @@ void VescInterface::storeSettings()
 
     mSettings.setValue("useImperialUnits", mUseImperialUnits);
     mSettings.setValue("keepScreenOn", mKeepScreenOn);
-    mSettings.setValue("keepScreenOn", mUseWakeLock);
+    mSettings.setValue("useWakeLock", mUseWakeLock);
 }
 
 QVariantList VescInterface::getProfiles()
@@ -757,7 +793,7 @@ bool VescInterface::swdEraseFlash()
     return true;
 }
 
-bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr)
+bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr, bool verify)
 {
     auto waitBmWriteRes = [this]() {
         int res = -10;
@@ -778,10 +814,48 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr)
         return res;
     };
 
-    auto writeChunk = [this, &waitBmWriteRes](uint32_t addr, QByteArray chunk) {
+    auto waitBmReadRes = [this]() {
+        int res = -10;
+        QByteArray resData;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(3000);
+        auto conn = connect(mCommands, &Commands::bmReadMemRes, [&res,&resData,&loop]
+                            (int rdRes, QByteArray data) {
+            res = rdRes;
+            resData = data;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return resData;
+    };
+
+    auto writeChunk = [this, &waitBmWriteRes, &waitBmReadRes, &verify]
+            (uint32_t addr, QByteArray chunk) {
         for (int i = 0;i < 3;i++) {
             mCommands->bmWriteFlash(addr, chunk);
             int res = waitBmWriteRes();
+
+            if (verify && (!mCommands->isLimitedMode() ||
+                           mCommands->getLimitedCompatibilityCommands().
+                           contains(int(COMM_BM_MEM_READ)))) {
+                mCommands->bmReadMem(addr, chunk.size());
+                QByteArray rdData = waitBmReadRes();
+
+                if (rdData.size() != chunk.size()) {
+                    return -11;
+                }
+
+                if (rdData != chunk) {
+                    return -12;
+                }
+            }
 
             if (res != -10) {
                 return res;
@@ -813,6 +887,10 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr)
                 msg = "Write failed";
             } else if (res == -1) {
                 msg = "Not connected to target";
+            } else if (res == -11) {
+                msg = "Verification failed (-11)";
+            } else if (res == -12) {
+                msg = "Verification failed (-12)";
             }
 
             emitMessageDialog("SWD Upload", msg, false, false);
@@ -935,6 +1013,32 @@ bool VescInterface::openRtLogFile(QString outDirectory)
         os << "vesc_id" << ";";
         os << "d_axis_voltage" << ";";
         os << "q_axis_voltage" << ";";
+
+        os << "ms_today_setup" << ";";
+        os << "amp_hours_setup" << ";";
+        os << "amp_hours_charged_setup" << ";";
+        os << "watt_hours_setup" << ";";
+        os << "watt_hours_charged_setup" << ";";
+        os << "battery_level" << ";";
+        os << "battery_wh_tot" << ";";
+        os << "current_in_setup" << ";";
+        os << "current_motor_setup" << ";";
+        os << "speed_meters_per_sec" << ";";
+        os << "tacho_meters" << ";";
+        os << "tacho_abs_meters" << ";";
+        os << "num_vescs" << ";";
+
+        os << "ms_today_imu" << ";";
+        os << "roll" << ";";
+        os << "pitch" << ";";
+        os << "yaw" << ";";
+        os << "accX" << ";";
+        os << "accY" << ";";
+        os << "accZ" << ";";
+        os << "gyroX" << ";";
+        os << "gyroY" << ";";
+        os << "gyroZ" << ";";
+
         os << "gnss_posTime" << ";";
         os << "gnss_lat" << ";";
         os << "gnss_lon" << ";";
@@ -1038,17 +1142,52 @@ bool VescInterface::loadRtLogFile(QString file)
                 d.values.fault_code = mc_fault_code(tokens.at(20).toInt());
                 d.values.vesc_id = tokens.at(21).toInt();
 
-                if (tokens.size() >= 30) {
-                    d.values.vd = tokens.at(9).toDouble();
-                    d.values.vq = tokens.at(10).toDouble();
-                    d.posTime = tokens.at(22).toInt();
-                    d.lat = tokens.at(23).toDouble();
-                    d.lon = tokens.at(24).toDouble();
-                    d.alt = tokens.at(25).toDouble();
-                    d.gVel = tokens.at(26).toDouble();
-                    d.vVel = tokens.at(27).toDouble();
-                    d.hAcc = tokens.at(28).toDouble();
-                    d.vAcc = tokens.at(29).toDouble();
+                // Possibly populate setup values too, but these values would
+                // not correspond to setupValTime.
+//                d.setupValues.v_in = d.values.v_in;
+//                d.setupValues.duty_now = d.values.duty_now;
+//                d.setupValues.temp_mos = d.values.temp_mos;
+//                d.setupValues.temp_motor = d.values.temp_motor;
+//                d.setupValues.fault_code = d.values.fault_code;
+//                d.setupValues.vesc_id = d.values.vesc_id;
+
+                if (tokens.size() >= 55) {
+                    d.values.vd = tokens.at(22).toDouble();
+                    d.values.vq = tokens.at(23).toDouble();
+
+                    d.setupValTime = tokens.at(24).toInt();
+                    d.setupValues.amp_hours = tokens.at(25).toDouble();
+                    d.setupValues.amp_hours_charged = tokens.at(26).toDouble();
+                    d.setupValues.watt_hours = tokens.at(27).toDouble();
+                    d.setupValues.watt_hours_charged = tokens.at(28).toDouble();
+                    d.setupValues.battery_level = tokens.at(29).toDouble();
+                    d.setupValues.battery_wh = tokens.at(30).toDouble();
+                    d.setupValues.current_in = tokens.at(31).toDouble();
+                    d.setupValues.current_motor = tokens.at(32).toDouble();
+                    d.setupValues.speed = tokens.at(33).toDouble();
+                    d.setupValues.tachometer = tokens.at(34).toDouble();
+                    d.setupValues.tachometer_abs = tokens.at(35).toDouble();
+                    d.setupValues.num_vescs = tokens.at(36).toInt();
+
+                    d.imuValTime = tokens.at(37).toInt();
+                    d.imuValues.roll = tokens.at(38).toDouble();
+                    d.imuValues.pitch = tokens.at(39).toDouble();
+                    d.imuValues.yaw = tokens.at(40).toDouble();
+                    d.imuValues.accX = tokens.at(41).toDouble();
+                    d.imuValues.accY = tokens.at(42).toDouble();
+                    d.imuValues.accZ = tokens.at(43).toDouble();
+                    d.imuValues.gyroX = tokens.at(44).toDouble();
+                    d.imuValues.gyroY = tokens.at(45).toDouble();
+                    d.imuValues.gyroZ = tokens.at(46).toDouble();
+
+                    d.posTime = tokens.at(47).toInt();
+                    d.lat = tokens.at(48).toDouble();
+                    d.lon = tokens.at(49).toDouble();
+                    d.alt = tokens.at(50).toDouble();
+                    d.gVel = tokens.at(51).toDouble();
+                    d.vVel = tokens.at(52).toDouble();
+                    d.hAcc = tokens.at(53).toDouble();
+                    d.vAcc = tokens.at(54).toDouble();
                 }
 
                 mRtLogData.append(d);
@@ -1070,6 +1209,42 @@ bool VescInterface::loadRtLogFile(QString file)
     }
 
     return res;
+}
+
+LOG_DATA VescInterface::getRtLogSample(double progress)
+{
+    LOG_DATA d;
+
+    int sample = int(double(mRtLogData.size() - 1) * progress);
+    if (sample >= 0 && sample < mRtLogData.size()) {
+        d = mRtLogData.at(sample);
+    }
+
+    return d;
+}
+
+LOG_DATA VescInterface::getRtLogSampleAtValTimeFromStart(int time)
+{
+    LOG_DATA d;
+
+    if (mRtLogData.size() > 0) {
+        d = mRtLogData.first();
+        int startTime = d.valTime;
+
+        for (LOG_DATA dn: mRtLogData) {
+            int timeMs = dn.valTime - startTime;
+            if (timeMs < 0) { // Handle midnight
+                timeMs += 60 * 60 * 24;
+            }
+
+            if (timeMs >= time) {
+                d = dn;
+                break;
+            }
+        }
+    }
+
+    return d;
 }
 
 bool VescInterface::useImperialUnits()
@@ -2233,6 +2408,10 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         compCommands.append(int(COMM_PLOT_DATA));
         compCommands.append(int(COMM_PLOT_ADD_GRAPH));
         compCommands.append(int(COMM_PLOT_SET_GRAPH));
+    }
+
+    if (fw_connected >= qMakePair(3, 62)) {
+        compCommands.append(int(COMM_BM_MEM_READ));
     }
 
     mCommands->setLimitedCompatibilityCommands(compCommands);

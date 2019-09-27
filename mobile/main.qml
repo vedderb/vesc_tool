@@ -20,7 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
- import Qt.labs.settings 1.0 as QSettings
+import Qt.labs.settings 1.0 as QSettings
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -694,20 +694,26 @@ ApplicationWindow {
                 // Sample RT data when the corresponding page is selected, or when
                 // RT logging is active.
 
-                if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0) ||
-                        VescIf.isRtLogOpen()) {
+                if (VescIf.isRtLogOpen()) {
                     interval = 50
                     mCommands.getValues()
-                }
-
-                if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 1) {
-                    interval = 50
                     mCommands.getValuesSetup()
-                }
+                    mCommands.getImuData(0xFFFF)
+                } else {
+                    if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0)) {
+                        interval = 50
+                        mCommands.getValues()
+                    }
 
-                if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
-                    interval = 20
-                    mCommands.getImuData(0x7)
+                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 1) {
+                        interval = 50
+                        mCommands.getValuesSetup()
+                    }
+
+                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
+                        interval = 20
+                        mCommands.getImuData(0x7)
+                    }
                 }
             }
         }

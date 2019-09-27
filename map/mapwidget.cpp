@@ -801,6 +801,10 @@ void MapWidget::mousePressEvent(QMouseEvent *e)
         }
 
         update();
+    } else {
+        if (e->buttons() & Qt::LeftButton && mClosestInfo.getInfo().size() > 0) {
+            emit infoPointClicked(mClosestInfo);
+        }
     }
 }
 
@@ -1428,6 +1432,66 @@ void MapWidget::zoomInOnRoute(int id, double margins, double wWidth, double wHei
         route = getRoute(id);
     } else {
         for (auto r: mRoutes) {
+            route.append(r);
+        }
+    }
+
+    if (route.size() > 0) {
+        double xMin = 1e12;
+        double xMax = -1e12;
+        double yMin = 1e12;
+        double yMax = -1e12;
+
+        for (auto p: route) {
+            if (p.getX() < xMin) {
+                xMin = p.getX();
+            }
+            if (p.getX() > xMax) {
+                xMax = p.getX();
+            }
+            if (p.getY() < yMin) {
+                yMin = p.getY();
+            }
+            if (p.getY() > yMax) {
+                yMax = p.getY();
+            }
+        }
+
+        double width = xMax - xMin;
+        double height = yMax - yMin;
+
+        if (wWidth <= 0 || wHeight <= 0) {
+            wWidth = this->width();
+            wHeight = this->height();
+        }
+
+        xMax += width * margins * 0.5;
+        xMin -= width * margins * 0.5;
+        yMax += height * margins * 0.5;
+        yMin -= height * margins * 0.5;
+
+        width = xMax - xMin;
+        height = yMax - yMin;
+
+        double scaleX = 1.0 / ((width * 1000) / wWidth);
+        double scaleY = 1.0 / ((height * 1000) / wHeight);
+
+        mScaleFactor = qMin(scaleX, scaleY);
+        mXOffset = -(xMin + width / 2.0) * mScaleFactor * 1000.0;
+        mYOffset = -(yMin + height / 2.0) * mScaleFactor * 1000.0;
+
+        update();
+    }
+}
+
+void MapWidget::zoomInOnInfoTrace(int id, double margins, double wWidth, double wHeight)
+{
+    QList<LocPoint> route;
+
+    if (id >= 0) {
+        route = mInfoTraces[id];
+    } else {
+        for (auto r: mInfoTraces) {
             route.append(r);
         }
     }
@@ -2264,7 +2328,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
 
     double start_txt = 30.0;
     const double txt_row_h = 20.0;
-    const double txtOffset = 145.0;
+    const double txtOffset = 250.0;
 
     painter.setTransform(txtTrans);
 
@@ -2326,6 +2390,10 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
             painter.drawText(width - txtOffset, start_txt, txt);
             start_txt += txt_row_h;
         }
+
+        txt.sprintf("© OpenStreetMap Contributors");
+        painter.drawText(width - txtOffset, start_txt, txt);
+        start_txt += txt_row_h;
     }
 
     if (mInteractionMode != InteractionModeDefault) {

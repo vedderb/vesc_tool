@@ -28,6 +28,7 @@ Scene3D {
     cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
     focus: true
     multisample: true
+    property alias fielfOfView: camera.fieldOfView
 
     function setRotation(roll, pitch, yaw) {
         var cr = Math.cos(-roll * 0.5)

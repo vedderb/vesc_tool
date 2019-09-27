@@ -122,6 +122,7 @@ public:
     void setAnchorHeight(double height);
     void removeLastRoutePoint();
     void zoomInOnRoute(int id, double margins, double wWidth = -1, double wHeight = -1);
+    void zoomInOnInfoTrace(int id, double margins, double wWidth = -1, double wHeight = -1);
 
     int getOsmMaxZoomLevel() const;
     void setOsmMaxZoomLevel(int osmMaxZoomLevel);
@@ -181,6 +182,7 @@ signals:
     void routePointAdded(LocPoint pos);
     void lastRoutePointRemoved(LocPoint pos);
     void infoTraceChanged(int traceNow);
+    void infoPointClicked(LocPoint info);
 
 private slots:
     void tileReady(OsmTile tile);

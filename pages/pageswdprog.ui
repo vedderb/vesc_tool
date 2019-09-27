@@ -101,6 +101,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="verifyBox">
+     <property name="text">
+      <string>Verify flash while programming</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <property name="spacing">
       <number>3</number>

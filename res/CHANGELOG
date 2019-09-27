@@ -1,3 +1,7 @@
+== 1.21 ==
+* Only hide GUI when the application enters the hidden state.
+* Opengl ES2 for static linux build.
+
 == 1.20 ==
 * Added TCP server to mobile version.
 * Remember log files location.

@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     // As background running is allowed, make sure to not update the GUI when
     // running in the background.
     QObject::connect(&a, &QApplication::applicationStateChanged, [&q](Qt::ApplicationState state) {
-        if(state != Qt::ApplicationActive) {
+        if(state == Qt::ApplicationHidden) {
             q.setVisible(false);
         } else {
             q.setVisible(true);

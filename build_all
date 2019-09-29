@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ./build_cp_fw
 ./build_lin
 ./build_win

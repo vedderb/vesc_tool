@@ -98,6 +98,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
     }
 #endif
+    mWakeLockActive = false;
 
     // Serial
 #ifdef HAS_SERIALPORT
@@ -368,6 +369,12 @@ VescInterface::~VescInterface()
 {
     storeSettings();
     closeRtLogFile();
+
+    if (mWakeLockActive) {
+        setWakeLock(false);
+    }
+
+    Utility::stopGnssForegroundService();
 }
 
 Commands *VescInterface::commands() const
@@ -1289,8 +1296,10 @@ bool VescInterface::setWakeLock(bool lock)
 
         if (lock) {
             mWakeLock.callMethod<void>("acquire", "()V");
+            mWakeLockActive = true;
         } else {
             mWakeLock.callMethod<void>("release", "()V");
+            mWakeLockActive = false;
         }
 
         return true;

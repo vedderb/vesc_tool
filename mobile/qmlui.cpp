@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 - 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -24,7 +24,7 @@
 #include <QApplication>
 #include <QQuickWindow>
 
-VescInterface *QmlUi::mVesc = 0;
+VescInterface *QmlUi::mVesc = nullptr;
 
 QmlUi::QmlUi(QObject *parent) : QObject(parent)
 {
@@ -64,7 +64,6 @@ bool QmlUi::eventFilter(QObject *object, QEvent *e)
                 mEngine = new QQmlApplicationEngine(this);
                 mEngine->load(QUrl(QLatin1String("mobile/main.qml")));
                 return true;
-                break;
 
             default:
                 break;

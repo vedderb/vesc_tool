@@ -1,3 +1,7 @@
+== 1.22 ==
+* Use foregroud service to keep GNSS alive during logging.
+* Always use wake lock during logging.
+
 == 1.21 ==
 * Only hide GUI when the application enters the hidden state.
 * Opengl ES2 for static linux build.

@@ -5,12 +5,12 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.21
+VT_VERSION = 1.22
 VT_INTRO_VERSION = 1
 
-VT_ANDROID_VERSION_ARMV7 = 43
-VT_ANDROID_VERSION_ARM64 = 44
-VT_ANDROID_VERSION_X86 = 45
+VT_ANDROID_VERSION_ARMV7 = 46
+VT_ANDROID_VERSION_ARM64 = 47
+VT_ANDROID_VERSION_X86 = 48
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -225,6 +225,8 @@ DISTFILES += \
     android/gradlew \
     android/res/values/libs.xml \
     android/build.gradle \
-    android/gradle/wrapper/gradle-wrapper.properties
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/src/com/vedder/vesc/VForegroundService.java \
+    android/src/com/vedder/vesc/Utils.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

@@ -277,6 +277,7 @@ private:
 #ifdef Q_OS_ANDROID
     QAndroidJniObject mWakeLock;
 #endif
+    bool mWakeLockActive;
 
     QFile mRtLogFile;
     QVector<LOG_DATA> mRtLogData;

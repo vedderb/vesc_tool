@@ -1298,6 +1298,26 @@ QVariantList Utility::getNetworkAddresses()
     return res;
 }
 
+void Utility::startGnssForegroundService()
+{
+#ifdef Q_OS_ANDROID
+    QAndroidJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
+                                              "startVForegroundService",
+                                              "(Landroid/content/Context;)V",
+                                              QtAndroid::androidActivity().object());
+#endif
+}
+
+void Utility::stopGnssForegroundService()
+{
+#ifdef Q_OS_ANDROID
+    QAndroidJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
+                                              "stopVForegroundService",
+                                              "(Landroid/content/Context;)V",
+                                              QtAndroid::androidActivity().object());
+#endif
+}
+
 void Utility::llhToXyz(double lat, double lon, double height, double *x, double *y, double *z)
 {
     double sinp = sin(lat * M_PI / 180.0);

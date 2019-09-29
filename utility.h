@@ -62,6 +62,8 @@ public:
     static uint32_t crc32c(uint8_t *data, uint32_t len);
     static bool checkFwCompatibility(VescInterface *vesc);
     Q_INVOKABLE static QVariantList getNetworkAddresses();
+    Q_INVOKABLE static void startGnssForegroundService();
+    Q_INVOKABLE static void stopGnssForegroundService();
 
     static void llhToXyz(double lat, double lon, double height, double *x, double *y, double *z);
     static void xyzToLlh(double x, double y, double z, double *lat, double *lon, double *height);

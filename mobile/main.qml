@@ -49,6 +49,7 @@ ApplicationWindow {
         }
 
         Utility.keepScreenOn(VescIf.keepScreenOn())
+        Utility.stopGnssForegroundService()
     }
 
     SetupWizardIntro {
@@ -401,9 +402,17 @@ ApplicationWindow {
 
                             onClicked: {
                                 if (checked) {
-                                    VescIf.openRtLogFile(rtLogFileText.text)
+                                    if (VescIf.openRtLogFile(rtLogFileText.text)) {
+                                        Utility.startGnssForegroundService()
+                                        VescIf.setWakeLock(true)
+                                    }
                                 } else {
                                     VescIf.closeRtLogFile()
+                                    Utility.stopGnssForegroundService()
+
+                                    if (!VescIf.useWakeLock()) {
+                                        VescIf.setWakeLock(false)
+                                    }
                                 }
                             }
 
@@ -413,6 +422,14 @@ ApplicationWindow {
                                 interval: 500
 
                                 onTriggered: {
+                                    if (rtLogEnBox.checked && !VescIf.isRtLogOpen()) {
+                                        Utility.stopGnssForegroundService()
+
+                                        if (!VescIf.useWakeLock()) {
+                                            VescIf.setWakeLock(false)
+                                        }
+                                    }
+
                                     rtLogEnBox.checked = VescIf.isRtLogOpen()
                                 }
                             }

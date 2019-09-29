@@ -1,3 +1,11 @@
+== 1.23 ==
+* Added more data to log analysis:
+ - GNSS Accuracy.
+ - Values for first VESC on CAN-bus.
+ - Latitude and longitude.
+ - GNSS vertical speed and accuracy.
+ - Number of VESCs.
+
 == 1.22 ==
 * Use foregroud service to keep GNSS alive during logging.
 * Always use wake lock during logging.

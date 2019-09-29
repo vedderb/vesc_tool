@@ -33,7 +33,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->spanSlider->setMaximum(10000);
     ui->spanSlider->setValue(10000);
 
-    ui->mapSplitter->setStretchFactor(0, 5);
+    ui->mapSplitter->setStretchFactor(0, 4);
     ui->mapSplitter->setStretchFactor(1, 1);
 
     ui->statSplitter->setStretchFactor(0, 6);
@@ -44,6 +44,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->plot->axisRect()->setRangeDrag(nullptr);
 
     ui->dataTable->setColumnWidth(0, 140);
+    ui->dataTable->setColumnWidth(1, 120);
     ui->statTable->setColumnWidth(0, 140);
 
     m3dView = new Vesc3DView(this);
@@ -142,6 +143,19 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     addDataItem("Gyro X");          // 36
     addDataItem("Gyro Y");          // 37
     addDataItem("Gyro Z");          // 38
+    addDataItem("GNSS Accuracy");   // 39
+    addDataItem("V1 Current");      // 40
+    addDataItem("V1 Current In");   // 41
+    addDataItem("V1 Power");        // 42
+    addDataItem("V1 Ah Used");      // 43
+    addDataItem("V1 Ah Charged");   // 44
+    addDataItem("V1 Wh Used");      // 45
+    addDataItem("V1 Wh Charged");   // 46
+    addDataItem("Latitude");        // 47
+    addDataItem("Longitude");       // 48
+    addDataItem("V. Speed GNSS");   // 49
+    addDataItem("GNSS V. Acc.");    // 50
+    addDataItem("VESC num");        // 51
 
     mVerticalLine = new QCPCurve(ui->plot->xAxis, ui->plot->yAxis);
     mVerticalLine->removeFromLegend();
@@ -569,6 +583,71 @@ void PageLogAnalysis::updateGraphs()
                 yAxes[rowInd].append(d.imuValues.gyroZ * rowScale);
                 names.append(QString("Gyro Z (°/s * %1)").arg(rowScale));
                 rowInd++;
+            } else if (row == 39) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.hAcc * rowScale);
+                names.append(QString("GNSS Accuracy (m * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 40) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.values.current_motor * rowScale);
+                names.append(QString("V1 Current (A * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 41) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.values.current_in * rowScale);
+                names.append(QString("V1 Current In (A * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 42) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.values.current_in * d.values.v_in * rowScale);
+                names.append(QString("Power (W * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 43) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.values.amp_hours * rowScale);
+                names.append(QString("V1 Ah Used (Ah * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 44) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.values.amp_hours_charged * rowScale);
+                names.append(QString("V1 Ah Charged (Ah * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 45) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.values.watt_hours * rowScale);
+                names.append(QString("V1 Wh Used (Wh * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 46) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.values.watt_hours_charged * rowScale);
+                names.append(QString("V1 Wh Charged (Wh * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 47) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.lat * rowScale);
+                names.append(QString("Latitude (° * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 48) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.lon * rowScale);
+                names.append(QString("Longitude (° * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 49) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.vVel * 3.6 * rowScale);
+                names.append(QString("V. Speed GNSS (km/h * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 50) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(d.vAcc * rowScale);
+                names.append(QString("GNSS V. Accuracy (m * %1)").arg(rowScale));
+                rowInd++;
+            } else if (row == 51) {
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(double(d.setupValues.num_vescs) * rowScale);
+                names.append(QString("VESC num (* %1)").arg(rowScale));
+                rowInd++;
             }
         }
     }
@@ -792,6 +871,19 @@ void PageLogAnalysis::updateDataAndPlot(double time)
     ui->dataTable->item(36, 1)->setText(QString::number(d.imuValues.gyroX, 'f', 2) + " °/s");
     ui->dataTable->item(37, 1)->setText(QString::number(d.imuValues.gyroY, 'f', 2) + " °/s");
     ui->dataTable->item(38, 1)->setText(QString::number(d.imuValues.gyroZ, 'f', 2) + " °/s");
+    ui->dataTable->item(39, 1)->setText(QString::number(d.hAcc, 'f', 2) + " m");
+    ui->dataTable->item(40, 1)->setText(QString::number(d.values.current_motor, 'f', 2) + " A");
+    ui->dataTable->item(41, 1)->setText(QString::number(d.values.current_in, 'f', 2) + " A");
+    ui->dataTable->item(42, 1)->setText(QString::number(d.values.current_in * d.values.v_in, 'f', 2) + " w");
+    ui->dataTable->item(43, 1)->setText(QString::number(d.values.amp_hours, 'f', 2) + " Ah");
+    ui->dataTable->item(44, 1)->setText(QString::number(d.values.amp_hours_charged, 'f', 2) + " Ah");
+    ui->dataTable->item(45, 1)->setText(QString::number(d.values.watt_hours, 'f', 2) + " Wh");
+    ui->dataTable->item(46, 1)->setText(QString::number(d.values.watt_hours_charged, 'f', 2) + " Wh");
+    ui->dataTable->item(47, 1)->setText(QString::number(d.lat, 'f', 7) + " °");
+    ui->dataTable->item(48, 1)->setText(QString::number(d.lon, 'f', 7) + " °");
+    ui->dataTable->item(49, 1)->setText(QString::number(d.vVel * 3.6, 'f', 2) + " km/h");
+    ui->dataTable->item(50, 1)->setText(QString::number(d.vAcc, 'f', 2) + " m");
+    ui->dataTable->item(51, 1)->setText(QString::number(d.setupValues.num_vescs));
 
     if (d.posTime >= 0) {
         double i_llh[3];

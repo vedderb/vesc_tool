@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.23
+VT_VERSION = 1.24
 VT_INTRO_VERSION = 1
 
 VT_ANDROID_VERSION_ARMV7 = 47
@@ -24,6 +24,9 @@ CONFIG += c++11
 
 # Build mobile GUI
 #CONFIG += build_mobile
+
+# If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
+# sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'
 
 # Bluetooth available
 DEFINES += HAS_BLUETOOTH

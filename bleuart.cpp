@@ -25,8 +25,8 @@
 
 BleUart::BleUart(QObject *parent) : QObject(parent)
 {
-    mControl = 0;
-    mService = 0;
+    mControl = nullptr;
+    mService = nullptr;
     mUartServiceFound = false;
     mConnectDone = false;
 
@@ -92,19 +92,19 @@ void BleUart::disconnectBle()
 {
     if (mService) {
         mService->deleteLater();
-        mService = 0;
+        mService = nullptr;
     }
 
     if (mControl) {
 //        mControl->disconnectFromDevice();
         mControl->deleteLater();
-        mControl = 0;
+        mControl = nullptr;
     }
 }
 
 bool BleUart::isConnected()
 {
-    return mControl != 0 && mConnectDone;
+    return mControl != nullptr && mConnectDone;
 }
 
 bool BleUart::isConnecting()
@@ -172,7 +172,7 @@ void BleUart::serviceScanDone()
 {
     if (mService) {
         mService->deleteLater();
-        mService = 0;
+        mService = nullptr;
     }
 
     if (mUartServiceFound) {

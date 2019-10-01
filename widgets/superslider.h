@@ -71,12 +71,14 @@ public:
 
     int value();
     int mapValue();
+    void moveAndUptade(QPoint p);
 
     SuperSlider *parent;
 
 private:
     SliderEventFilter *filter;
+    int valueNow;
 
 public slots:
-    void setValue(double value);
+    void setValue(int value);
 };

@@ -72,13 +72,14 @@ SuperSlider::SuperSlider(QWidget *parent)
     setStyle(aSliderProxy);
     alt_handle = new SuperSliderHandle(this);
     addAction(new QWidgetAction(alt_handle));
-    alt_handle->move(this->pos().x() + this->width() - alt_handle->width(), this->pos().y());
+    alt_handle->move(0, this->pos().y());
 }
 
 SuperSliderHandle::SuperSliderHandle(SuperSlider *_parent) : QLabel(_parent)
 {
     parent = _parent;
     filter = new SliderEventFilter(parent);
+    valueNow = 0;
 
     QPixmap pix = QPixmap("://res/images/slider1.png");
     pix =  pix.scaled(14, 20, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
@@ -92,22 +93,18 @@ int SuperSlider::alt_value()
 
 void SuperSlider::alt_setValue(int value)
 {
+    int valOld = alt_handle->value();
     alt_handle->setValue(value);
+
+    if (valOld != alt_handle->value()) {
+        emit alt_valueChanged(alt_value());
+    }
 }
 
 void SuperSlider::resizeEvent(QResizeEvent *event)
 {
-    double width = event->oldSize().width() - 15;
-    double range = maximum() - minimum();
-    double val = minimum() + ((alt_handle->pos().x() / width) * range);
-
-    if (val < minimum()) {
-        val = minimum();
-    } else if (val > maximum()) {
-        val = maximum();
-    }
-
-    int location = int(double(((event->size().width() - 15) * (val - minimum()))) / range);
+    double range = double(maximum() - minimum());
+    int location = int(double((event->size().width() - 14) * (alt_handle->value() - minimum())) / range);
     alt_handle->move(location, alt_handle->y());
 }
 
@@ -117,14 +114,14 @@ void SuperSlider::alt_update()
     int w = (alt_handle->width());
     point.setX(point.x() - w / 2);
 
-    if (mapToParent(point).x() >= pos().x() + width() - w) {
-        point.setX(mapFromParent(pos()).x() + width() - w - 1);
+    if (mapToParent(point).x() > pos().x() + width() - w) {
+        point.setX(mapFromParent(pos()).x() + width() - w);
     }
     if (mapToParent(point).x() < pos().x()) {
         point.setX(mapFromParent(pos()).x());
     }
 
-    alt_handle->move(point);
+    alt_handle->moveAndUptade(point);
     emit alt_valueChanged(alt_value());
 }
 
@@ -149,17 +146,31 @@ bool SliderEventFilter::eventFilter(QObject* obj, QEvent* event)
     }
 }
 
-void SuperSliderHandle::setValue(double value)
+void SuperSliderHandle::setValue(int value)
 {
-    int range = parent->maximum() - parent->minimum();
-    int location = int(double(((parent->width() - 15) * (value - parent->minimum()))) / range);
+    if (value < parent->minimum()) {
+        value = parent->minimum();
+    } else if (value > parent->maximum()) {
+        value = parent->maximum();
+    }
+
+    valueNow = value;
+
+    double range = double(parent->maximum() - parent->minimum());
+    int location = int(double((parent->width() - 14) * (value - parent->minimum())) / range);
     move(location, y());
 }
 
 int SuperSliderHandle::value()
 {
-    double width = parent->width() - 15;
+    return valueNow;
+}
+
+void SuperSliderHandle::moveAndUptade(QPoint p)
+{
+    move(p);
+    double width = parent->width() - 14;
     double value = pos().x() / width;
     double range = parent->maximum() - parent->minimum();
-    return int(parent->minimum() + (value * range));
+    valueNow = int(parent->minimum() + (value * range));
 }

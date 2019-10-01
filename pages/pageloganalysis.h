@@ -57,6 +57,7 @@ private:
     Ui::PageLogAnalysis *ui;
     VescInterface *mVesc;
     QCPCurve *mVerticalLine;
+    int mVerticalLineMsLast;
     Vesc3DView *m3dView;
     QCheckBox *mUseYawBox;
     QVector<LOG_DATA> mLogData;

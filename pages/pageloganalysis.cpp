@@ -63,9 +63,14 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     connect(mPlayTimer, &QTimer::timeout, [this]() {
         if (ui->playButton->isChecked()) {
             mPlayPosNow += double(mPlayTimer->interval()) / 1000.0;
+
+            int timeMs = mLogDataTruncated.last().valTime - mLogDataTruncated.first().valTime;
+            if (timeMs < 0) { // Handle midnight
+                timeMs += 60 * 60 * 24 * 1000;
+            }
+
             if (mLogDataTruncated.size() > 0 &&
-                    mPlayPosNow <= (mLogDataTruncated.last().valTime -
-                    mLogDataTruncated.first().valTime) / 1000.0) {
+                    mPlayPosNow <= double(timeMs) / 1000.0) {
                 updateDataAndPlot(mPlayPosNow);
             } else {
                 ui->playButton->setChecked(false);
@@ -160,6 +165,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     mVerticalLine = new QCPCurve(ui->plot->xAxis, ui->plot->yAxis);
     mVerticalLine->removeFromLegend();
     mVerticalLine->setPen(QPen(Qt::black));
+    mVerticalLineMsLast = -1;
 
     auto updateMouse = [this](QMouseEvent *event) {
         if (event->modifiers() == Qt::ShiftModifier) {
@@ -186,6 +192,25 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     connect(ui->plot, &QCustomPlot::mouseMove, [updateMouse](QMouseEvent *event) {
         updateMouse(event);
+    });
+
+    connect(ui->plot, &QCustomPlot::mouseWheel, [this](QWheelEvent *event) {
+        if (event->modifiers() == Qt::ShiftModifier) {
+            ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
+            ui->plot->axisRect()->setRangeDrag(Qt::Vertical);
+        } else {
+            ui->plot->axisRect()->setRangeZoom(nullptr);
+            ui->plot->axisRect()->setRangeDrag(nullptr);
+
+            double upper = ui->plot->xAxis->range().upper;
+            double progress = ui->plot->xAxis->pixelToCoord(event->x()) / upper;
+            double diff = event->delta();
+            double d1 = diff * progress;
+            double d2 = diff * (1.0 - progress);
+
+            ui->spanSlider->alt_setValue(ui->spanSlider->alt_value() + int(d1));
+            ui->spanSlider->setValue(ui->spanSlider->value() - int(d2));
+        }
     });
 
     connect(ui->spanSlider, &SuperSlider::alt_valueChanged, [this](int value) {
@@ -272,15 +297,17 @@ void PageLogAnalysis::on_tilesOsmButton_toggled(bool checked)
 
 void PageLogAnalysis::truncateDataAndPlot()
 {
+    double start = double(ui->spanSlider->alt_value()) / 10000.0;
+    double end = double(ui->spanSlider->value()) / 10000.0;
+
     ui->map->setInfoTraceNow(0);
     ui->map->clearAllInfoTraces();
 
+    int ind = 0;
     double i_llh[3];
     bool i_llh_set = false;
+    int posTimeLast = -1;
 
-    int ind = 0;
-    double start = double(ui->spanSlider->alt_value()) / 10000.0;
-    double end = double(ui->spanSlider->value()) / 10000.0;
     mLogDataTruncated.clear();
 
     for (auto d: mLogData) {
@@ -292,7 +319,7 @@ void PageLogAnalysis::truncateDataAndPlot()
 
         mLogDataTruncated.append(d);
 
-        if (d.posTime >= 0) {
+        if (d.posTime >= 0 && posTimeLast != d.posTime) {
             if (!i_llh_set) {
                 i_llh[0] = d.lat;
                 i_llh[1] = d.lon;
@@ -317,6 +344,7 @@ void PageLogAnalysis::truncateDataAndPlot()
             p.setInfo(info);
 
             ui->map->addInfoPoint(p, false);
+            posTimeLast = d.posTime;
         }
     }
 
@@ -344,6 +372,8 @@ void PageLogAnalysis::updateGraphs()
         firstData = mLogDataTruncated.first();
     }
 
+    double verticalTime = -1.0;
+
     for (LOG_DATA d: mLogDataTruncated) {
         if (startTime < 0) {
             startTime = d.valTime;
@@ -351,7 +381,11 @@ void PageLogAnalysis::updateGraphs()
 
         int timeMs = d.valTime - startTime;
         if (timeMs < 0) { // Handle midnight
-            timeMs += 60 * 60 * 24;
+            timeMs += 60 * 60 * 24 * 1000;
+        }
+
+        if (mVerticalLineMsLast == d.valTime) {
+            verticalTime = double(timeMs) / 1000.0;
         }
 
         xAxis.append(double(timeMs) / 1000.0);
@@ -684,6 +718,14 @@ void PageLogAnalysis::updateGraphs()
         ui->plot->xAxis->setRangeUpper(xAxis.last());
     }
 
+    if (verticalTime >= 0) {
+        QVector<double> x(2) , y(2);
+        x[0] = verticalTime; y[0] = ui->plot->yAxis->range().lower;
+        x[1] = verticalTime; y[1] = ui->plot->yAxis->range().upper;
+        mVerticalLine->setData(x, y);
+        mVerticalLine->setVisible(true);
+    }
+
     ui->plot->replot();
 }
 
@@ -750,7 +792,7 @@ void PageLogAnalysis::updateStats()
 
     timeTotMs = endSample.valTime - startSample.valTime;
     if (timeTotMs < 0) { // Handle midnight
-        timeTotMs += 60 * 60 * 24;
+        timeTotMs += 60 * 60 * 24 * 1000;
     }
 
     meters = endSample.setupValues.tachometer - startSample.setupValues.tachometer;
@@ -822,10 +864,11 @@ void PageLogAnalysis::updateDataAndPlot(double time)
     ui->plot->replot();
 
     LOG_DATA d = getLogSample(int(time * 1000));
+    mVerticalLineMsLast = d.valTime;
 
     int timeTotMs = d.valTime - getLogSample(0).valTime;
     if (timeTotMs < 0) { // Handle midnight
-        timeTotMs += 60 * 60 * 24;
+        timeTotMs += 60 * 60 * 24 * 1000;
     }
 
     ui->dataTable->item(0, 1)->setText(QString::number(d.setupValues.speed * 3.6, 'f', 2) + " km/h");
@@ -923,7 +966,7 @@ LOG_DATA PageLogAnalysis::getLogSample(int timeMs)
         for (LOG_DATA dn: mLogDataTruncated) {
             int timeMsNow = dn.valTime - startTime;
             if (timeMsNow < 0) { // Handle midnight
-                timeMsNow += 60 * 60 * 24;
+                timeMsNow += 60 * 60 * 24 * 1000;
             }
 
             if (timeMsNow >= timeMs) {
@@ -949,7 +992,7 @@ double PageLogAnalysis::getDistGnssSample(int timeMs)
     for (LOG_DATA d: mLogDataTruncated) {
         int timeMsNow = d.valTime - mLogDataTruncated.first().valTime;
         if (timeMsNow < 0) { // Handle midnight
-            timeMsNow += 60 * 60 * 24;
+            timeMsNow += 60 * 60 * 24 * 1000;
         }
 
         if (d.posTime < 0) {

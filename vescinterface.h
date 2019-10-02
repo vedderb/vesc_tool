@@ -21,6 +21,7 @@
 #define VESCINTERFACE_H
 
 #include <QObject>
+#include <QDateTime>
 #include <QTimer>
 #include <QByteArray>
 #include <QList>

@@ -161,5 +161,6 @@
         <file>res/icons/EUC-96.png</file>
         <file>res/images/slider1.png</file>
         <file>res/icons/icons8-target-96.png</file>
+        <file>res/icons/icons8-fantasy-96.png</file>
     </qresource>
 </RCC>

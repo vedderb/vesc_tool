@@ -1,3 +1,11 @@
+== 1.25 ==
+* Renamed Nunchuk to VESC Remote.
+* Log analysis:
+ - Improved tile caching.
+ - Option to not autozoom map when zooming data.
+ - Only update ENU reference when loading data.
+* Use statically linked openssl on linux build.
+
 == 1.24 ==
 * Log:
  - Fixed midnight bug.

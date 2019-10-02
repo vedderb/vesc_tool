@@ -943,7 +943,7 @@ void MainWindow::reloadPages()
     mPageAppNunchuk = new PageAppNunchuk(this);
     mPageAppNunchuk->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNunchuk);
-    addPageItem(tr("Nunchuk"), "://res/icons/Wii-96.png",
+    addPageItem(tr("VESC Remote"), "://res/icons/icons8-fantasy-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageAppNrf = new PageAppNrf(this);

@@ -65,12 +65,13 @@ private:
     QTimer *mPlayTimer;
     double mPlayPosNow;
 
-    void truncateDataAndPlot();
+    void truncateDataAndPlot(bool zoomGraph = true);
     void updateGraphs();
     void updateStats();
     void updateDataAndPlot(double time);
     LOG_DATA getLogSample(int timeMs);
     double getDistGnssSample(int timeMs);
+    void updateTileServers();
 
 };
 

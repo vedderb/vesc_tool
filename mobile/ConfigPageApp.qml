@@ -202,7 +202,7 @@ Item {
             createEditorApp("app_uart_baudrate")
             break;
 
-        case "Nunchuk":
+        case "VESC Remote":
             switch(tabBox.currentText) {
             case "General":
                 createEditorApp("app_chuk_conf.ctrl_type")
@@ -328,7 +328,7 @@ Item {
                     "PPM",
                     "ADC",
                     "UART",
-                    "Nunchuk",
+                    "VESC Remote",
                     "NRF",
                     "Balance",
                     "IMU"
@@ -362,7 +362,7 @@ Item {
                         tabBox.model = []
                         break;
 
-                    case "Nunchuk":
+                    case "VESC Remote":
                         tabBox.model = [
                                     "General",
                                     "Throttle Curve"

@@ -38,15 +38,8 @@ public:
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
-    void setRollPitchYaw(float roll, float pitch, float yaw);
+    void setRollPitchYaw(double roll, double pitch, double yaw);
     void setQuanternions(float q0, float q1, float q2, float q3);
-
-signals:
-
-public slots:
-    void setXRotation(float angle);
-    void setYRotation(float angle);
-    void setZRotation(float angle);
 
 protected:
     void initializeGL();

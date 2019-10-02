@@ -256,7 +256,7 @@ CarInfo *MapWidget::getCarInfo(int car)
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 CopterInfo *MapWidget::getCopterInfo(int copter)
@@ -267,7 +267,7 @@ CopterInfo *MapWidget::getCopterInfo(int copter)
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 void MapWidget::addCar(const CarInfo &car)
@@ -326,7 +326,7 @@ LocPoint *MapWidget::getAnchor(int id)
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 void MapWidget::addAnchor(const LocPoint &anchor)
@@ -520,8 +520,8 @@ void MapWidget::clearPerspectivePixmaps()
 QPoint MapWidget::getMousePosRelative()
 {
     QPoint p = this->mapFromGlobal(QCursor::pos());
-    p.setX((p.x() - mXOffset - width() / 2) / mScaleFactor);
-    p.setY((-p.y() - mYOffset + height() / 2) / mScaleFactor);
+    p.setX(int(double(p.x() - mXOffset - width() / 2) / mScaleFactor));
+    p.setY(int(double(-p.y() - mYOffset + height() / 2) / mScaleFactor));
     return p;
 }
 
@@ -897,7 +897,7 @@ void MapWidget::wheelEvent(QWheelEvent *e)
             CarInfo &carInfo = mCarInfo[i];
             if (carInfo.getId() == mSelectedCar) {
                 LocPoint pos = carInfo.getLocation();
-                double angle = pos.getYaw() + (double)e->angleDelta().y() * 0.0005;
+                double angle = pos.getYaw() + double(e->angleDelta().y()) * 0.0005;
                 normalizeAngleRad(angle);
                 pos.setYaw(angle);
                 carInfo.setLocation(pos);
@@ -910,7 +910,7 @@ void MapWidget::wheelEvent(QWheelEvent *e)
             CopterInfo &copterInfo = mCopterInfo[i];
             if (copterInfo.getId() == mSelectedCar) {
                 LocPoint pos = copterInfo.getLocation();
-                double angle = pos.getYaw() + (double)e->angleDelta().y() * 0.0005;
+                double angle = pos.getYaw() + double(e->angleDelta().y()) * 0.0005;
                 normalizeAngleRad(angle);
                 pos.setYaw(angle);
                 copterInfo.setLocation(pos);
@@ -919,7 +919,7 @@ void MapWidget::wheelEvent(QWheelEvent *e)
             }
         }
     } else {
-        double scaleDiff = ((double)e->angleDelta().y() / 600.0);
+        double scaleDiff = (double(e->angleDelta().y()) / 600.0);
         if (scaleDiff > 0.8)
         {
             scaleDiff = 0.8;
@@ -967,7 +967,7 @@ bool MapWidget::event(QEvent *event)
                            QPointF(0, 0),
                            QPoint(0, 0),
                            QPoint(0, 120),
-                           0, Qt::Vertical, 0,
+                           0, Qt::Vertical, nullptr,
                            ke->modifiers());
             wheelEvent(&we);
             return true;
@@ -976,7 +976,7 @@ bool MapWidget::event(QEvent *event)
                            QPointF(0, 0),
                            QPoint(0, 0),
                            QPoint(0, -120),
-                           0, Qt::Vertical, 0,
+                           0, Qt::Vertical, nullptr,
                            ke->modifiers());
             wheelEvent(&we);
             return true;
@@ -1321,8 +1321,8 @@ int MapWidget::getClosestPoint(LocPoint p, QList<LocPoint> points, double &dist)
 
 void MapWidget::drawCircleFast(QPainter &painter, QPointF center, double radius, int type)
 {
-    painter.drawPixmap(center.x() - radius, center.y() - radius,
-                       2.0 * radius, 2.0 * radius, mPixmaps.at(type));
+    painter.drawPixmap(int(center.x() - radius), int(center.y() - radius),
+                       int(2.0 * radius), int(2.0 * radius), mPixmaps.at(type));
 }
 
 int MapWidget::getOsmZoomLevel() const
@@ -1718,8 +1718,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         i_llh[1] = mRefLon;
         i_llh[2] = mRefHeight;
 
-        mOsmZoomLevel = (int)round(log(mScaleFactor * mOsmRes * 100000000.0 *
-                                        cos(i_llh[0] * M_PI / 180.0)) / log(2.0));
+        mOsmZoomLevel = int(round(log(mScaleFactor * mOsmRes * 100000000.0 *
+                                        cos(i_llh[0] * M_PI / 180.0)) / log(2.0)));
         if (mOsmZoomLevel > mOsmMaxZoomLevel) {
             mOsmZoomLevel = mOsmMaxZoomLevel;
         } else if (mOsmZoomLevel < 0) {
@@ -1740,8 +1740,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         // Calculate scale at ENU origin
         double w = OsmTile::lat2width(i_llh[0], mOsmZoomLevel);
 
-        int t_ofs_x = (int)ceil(-(cx - view_w / 2.0) / w);
-        int t_ofs_y = (int)ceil((cy + view_h / 2.0) / w);
+        int t_ofs_x = int(ceil(-(cx - view_w / 2.0) / w));
+        int t_ofs_y = int(ceil((cy + view_h / 2.0) / w));
 
         if (!highQuality) {
             painter.setRenderHint(QPainter::SmoothPixmapTransform, mAntialiasOsm);
@@ -1756,8 +1756,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
             for (int i = 0;i < 40;i++) {
                 int xt_i = xt + i - t_ofs_x;
                 int yt_i = yt + j - t_ofs_y;
-                double ts_x = xyz[0] + w * i - (double)t_ofs_x * w;
-                double ts_y = -xyz[1] + w * j - (double)t_ofs_y * w;
+                double ts_x = xyz[0] + w * i - double(t_ofs_x) * w;
+                double ts_y = -xyz[1] + w * j - double(t_ofs_y) * w;
 
                 // We are outside the view
                 if (ts_x > (cx + view_w / 2.0)) {
@@ -1773,8 +1773,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
                     w = t.getWidthTop();
                 }
 
-                painter.drawPixmap(ts_x * 1000.0, ts_y * 1000.0,
-                                   w * 1000.0, w * 1000.0, t.pixmap());
+                painter.drawPixmap(int(ts_x * 1000.0), int(ts_y * 1000.0),
+                                   int(w * 1000.0), int(w * 1000.0), t.pixmap());
 
                 if (res == 0 && !mOsm->downloadQueueFull()) {
                     mOsm->downloadTile(mOsmZoomLevel, xt_i, yt_i);
@@ -1799,7 +1799,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
                 i = 0.0;
             }
 
-            if ((int)(i / stepGrid) % 2) {
+            if (int(i / stepGrid) % 2) {
                 pen.setWidth(0);
                 pen.setColor(firstAxisColor);
                 painter.setPen(pen);
@@ -1841,7 +1841,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
                 i = 0.0;
             }
 
-            if ((int)(i / stepGrid) % 2) {
+            if (int(i / stepGrid) % 2) {
                 pen.setWidth(0);
                 pen.setColor(firstAxisColor);
                 painter.setPen(pen);
@@ -1981,8 +1981,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
     painter.setPen(pen);
     painter.setTransform(drawTrans);
     for (int i = 1;i < mCarTrace.size();i++) {
-        painter.drawLine(mCarTrace[i - 1].getX() * 1000.0, mCarTrace[i - 1].getY() * 1000.0,
-                mCarTrace[i].getX() * 1000.0, mCarTrace[i].getY() * 1000.0);
+        painter.drawLine(int(mCarTrace[i - 1].getX() * 1000.0), int(mCarTrace[i - 1].getY() * 1000.0),
+                int(mCarTrace[i].getX() * 1000.0), int(mCarTrace[i].getY() * 1000.0));
     }
 
     // Draw GPS trace for the selected car
@@ -1991,8 +1991,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
     painter.setPen(pen);
     painter.setTransform(drawTrans);
     for (int i = 1;i < mCarTraceGps.size();i++) {
-        painter.drawLine(mCarTraceGps[i - 1].getX() * 1000.0, mCarTraceGps[i - 1].getY() * 1000.0,
-                mCarTraceGps[i].getX() * 1000.0, mCarTraceGps[i].getY() * 1000.0);
+        painter.drawLine(int(mCarTraceGps[i - 1].getX() * 1000.0), int(mCarTraceGps[i - 1].getY() * 1000.0),
+                int(mCarTraceGps[i].getX() * 1000.0), int(mCarTraceGps[i].getY() * 1000.0));
     }
 
     // Draw UWB trace for the selected car
@@ -2002,8 +2002,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         painter.setPen(pen);
         painter.setTransform(drawTrans);
         for (int i = 1;i < mCarTraceUwb.size();i++) {
-            painter.drawLine(mCarTraceUwb[i - 1].getX() * 1000.0, mCarTraceUwb[i - 1].getY() * 1000.0,
-                    mCarTraceUwb[i].getX() * 1000.0, mCarTraceUwb[i].getY() * 1000.0);
+            painter.drawLine(int(mCarTraceUwb[i - 1].getX() * 1000.0), int(mCarTraceUwb[i - 1].getY() * 1000.0),
+                    int(mCarTraceUwb[i].getX() * 1000.0), int(mCarTraceUwb[i].getY() * 1000.0));
         }
     }
 
@@ -2025,8 +2025,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
 
         for (int i = 1;i < routeNow.size();i++) {
             painter.setOpacity(0.7);
-            painter.drawLine(routeNow[i - 1].getX() * 1000.0, routeNow[i - 1].getY() * 1000.0,
-                    routeNow[i].getX() * 1000.0, routeNow[i].getY() * 1000.0);
+            painter.drawLine(int(routeNow[i - 1].getX() * 1000.0), int(routeNow[i - 1].getY() * 1000.0),
+                    int(routeNow[i].getX() * 1000.0), int(routeNow[i].getY() * 1000.0));
             painter.setOpacity(1.0);
         }
 
@@ -2141,14 +2141,18 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         painter.translate(x, y);
         painter.rotate(-angle);
         // Wheels
-        painter.drawRoundedRect(-car_len / 12.0,-(car_w / 2), car_len / 6.0, car_w, car_corner / 3, car_corner / 3);
-        painter.drawRoundedRect(car_len - car_len / 2.5,-(car_w / 2), car_len / 6.0, car_w, car_corner / 3, car_corner / 3);
+        painter.drawRoundedRect(int(-car_len / 12.0), int(-(car_w / 2.0)), int(car_len / 6.0),
+                                int(car_w), car_corner / 3, car_corner / 3);
+        painter.drawRoundedRect(int(car_len - car_len / 2.5), int(-(car_w / 2)), int(car_len / 6.0),
+                                int(car_w), car_corner / 3, car_corner / 3);
         // Front bumper
         painter.setBrush(col_bumper);
-        painter.drawRoundedRect(-car_len / 6.0, -((car_w - car_len / 20.0) / 2.0), car_len, car_w - car_len / 20.0, car_corner, car_corner);
+        painter.drawRoundedRect(int(-car_len / 6.0), int(-((car_w - car_len / 20.0) / 2.0)),
+                                int(car_len), int(car_w - car_len / 20.0), car_corner, car_corner);
         // Hull
         painter.setBrush(col_hull);
-        painter.drawRoundedRect(-car_len / 6.0, -((car_w - car_len / 20.0) / 2.0), car_len - (car_len / 20.0), car_w - car_len / 20.0, car_corner, car_corner);
+        painter.drawRoundedRect(int(-car_len / 6.0), int(-((car_w - car_len / 20.0) / 2.0)),
+                                int(car_len - (car_len / 20.0)), int(car_w - car_len / 20.0), car_corner, car_corner);
         painter.restore();
 
         // Center
@@ -2306,8 +2310,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         painter.setTransform(txtTrans);
         pt_txt = drawTrans.map(pt_txt);
 
-        painter.drawRoundedRect(pt_txt.x() - 10,
-                                pt_txt.y() - 10,
+        painter.drawRoundedRect(int(pt_txt.x() - 10.0),
+                                int(pt_txt.y() - 10.0),
                                 20, 20, 10, 10);
 
         // Print data
@@ -2333,9 +2337,9 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
     painter.setTransform(txtTrans);
 
     if (!mLastCameraImage.isNull() && mCameraImageWidth > 0.001) {
-        double imgWidth = (double)width * mCameraImageWidth;
-        double imgHeight = (double)mLastCameraImage.height() *
-                (imgWidth / (double)mLastCameraImage.width());
+        double imgWidth = double(width) * mCameraImageWidth;
+        double imgHeight = double(mLastCameraImage.height()) *
+                (imgWidth / double(mLastCameraImage.width()));
 
         QRectF target(width - imgWidth, 0.0, imgWidth, imgHeight);
         QRectF source(0.0, 0.0, mLastCameraImage.width(), mLastCameraImage.height());
@@ -2362,56 +2366,56 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         } else {
             txt.sprintf("Grid res: %.0f cm", res * 100.0);
         }
-        painter.drawText(width - txtOffset, start_txt, txt);
+        painter.drawText(int(width - txtOffset), int(start_txt), txt);
         start_txt += txt_row_h;
     }
 
     // Draw zoom level
     txt.sprintf("Zoom: %.7f", mScaleFactor);
-    painter.drawText(width - txtOffset, start_txt, txt);
+    painter.drawText(int(width - txtOffset), int(start_txt), txt);
     start_txt += txt_row_h;
 
     // Draw OSM zoom level
     if (mDrawOpenStreetmap) {
         txt.sprintf("OSM zoom: %d", mOsmZoomLevel);
-        painter.drawText(width - txtOffset, start_txt, txt);
+        painter.drawText(int(width - txtOffset), int(start_txt), txt);
         start_txt += txt_row_h;
 
         if (mDrawOsmStats) {
             txt.sprintf("DL Tiles: %d", mOsm->getTilesDownloaded());
-            painter.drawText(width - txtOffset, start_txt, txt);
+            painter.drawText(int(width - txtOffset), int(start_txt), txt);
             start_txt += txt_row_h;
 
             txt.sprintf("HDD Tiles: %d", mOsm->getHddTilesLoaded());
-            painter.drawText(width - txtOffset, start_txt, txt);
+            painter.drawText(int(width - txtOffset), int(start_txt), txt);
             start_txt += txt_row_h;
 
             txt.sprintf("RAM Tiles: %d", mOsm->getRamTilesLoaded());
-            painter.drawText(width - txtOffset, start_txt, txt);
+            painter.drawText(int(width - txtOffset), int(start_txt), txt);
             start_txt += txt_row_h;
         }
 
         txt.sprintf("© OpenStreetMap Contributors");
-        painter.drawText(width - txtOffset, start_txt, txt);
+        painter.drawText(int(width - txtOffset), int(start_txt), txt);
         start_txt += txt_row_h;
     }
 
     if (mInteractionMode != InteractionModeDefault) {
         txt.sprintf("IMode: %d", mInteractionMode);
-        painter.drawText(width - txtOffset, start_txt, txt);
+        painter.drawText(int(width - txtOffset), int(start_txt), txt);
         start_txt += txt_row_h;
     }
 
     // Some info
     if (info_segments > 0) {
         txt.sprintf("Info seg: %d", info_segments);
-        painter.drawText(width - txtOffset, start_txt, txt);
+        painter.drawText(int(width - txtOffset), int(start_txt), txt);
         start_txt += txt_row_h;
     }
 
     if (info_points > 0) {
         txt.sprintf("Info pts: %d", info_points);
-        painter.drawText(width - txtOffset, start_txt, txt);
+        painter.drawText(int(width - txtOffset), int(start_txt), txt);
         start_txt += txt_row_h;
     }
 
@@ -2425,11 +2429,11 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         }
 
         txt.sprintf("RP: %d", mRoutes.at(mRouteNow).size());
-        painter.drawText(width - txtOffset, start_txt, txt);
+        painter.drawText(int(width - txtOffset), int(start_txt), txt);
         start_txt += txt_row_h;
 
         txt.sprintf("RLen: %.2f m", len);
-        painter.drawText(width - txtOffset, start_txt, txt);
+        painter.drawText(int(width - txtOffset), int(start_txt), txt);
         start_txt += txt_row_h;
     }
 

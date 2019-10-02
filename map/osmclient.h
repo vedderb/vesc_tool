@@ -85,6 +85,7 @@ public:
     int downloadTile(int zoom, int x, int y);
     bool downloadQueueFull();
     void clearCache();
+    void clearCacheMemory();
 
     int getMaxMemoryTiles() const;
     void setMaxMemoryTiles(int maxMemoryTiles);

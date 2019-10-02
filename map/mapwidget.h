@@ -63,7 +63,7 @@ public:
         InteractionModeCtrlShiftDown
     } InteractionMode;
 
-    explicit MapWidget(QWidget *parent = 0);
+    explicit MapWidget(QWidget *parent = nullptr);
     CarInfo* getCarInfo(int car);
     CopterInfo* getCopterInfo(int copter);
     void setFollowCar(int car);
@@ -178,7 +178,7 @@ public:
 signals:
     void scaleChanged(double newScale);
     void offsetChanged(double newXOffset, double newYOffset);
-    void posSet(quint8 id, LocPoint pos);
+    void posSet(int id, LocPoint pos);
     void routePointAdded(LocPoint pos);
     void lastRoutePointRemoved(LocPoint pos);
     void infoTraceChanged(int traceNow);

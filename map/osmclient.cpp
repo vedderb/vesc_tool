@@ -266,6 +266,12 @@ void OsmClient::clearCache()
     mMemoryTilesOrder.clear();
 }
 
+void OsmClient::clearCacheMemory()
+{
+    mMemoryTiles.clear();
+    mMemoryTilesOrder.clear();
+}
+
 void OsmClient::fileDownloaded(QNetworkReply *pReply)
 {
     QString path = pReply->url().toString();

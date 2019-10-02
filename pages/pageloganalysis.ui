@@ -57,6 +57,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="autoZoomBox">
+           <property name="toolTip">
+            <string>Zoom in on trajectory when zooming in on data.</string>
+           </property>
+           <property name="text">
+            <string>AutoZoom</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QRadioButton" name="tilesOsmButton">
            <property name="toolTip">
             <string>Use tiles from https://www.openstreetmap.org</string>

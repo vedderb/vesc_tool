@@ -69,11 +69,11 @@ QSize Vesc3DView::sizeHint() const
     return QSize(0, 0);
 }
 
-void Vesc3DView::setRollPitchYaw(float roll, float pitch, float yaw)
+void Vesc3DView::setRollPitchYaw(double roll, double pitch, double yaw)
 {
-    mXRot = roll;
-    mYRot = pitch;
-    mZRot = yaw;
+    mXRot = float(roll);
+    mYRot = float(pitch);
+    mZRot = float(yaw);
     mUseQuaternions = false;
     updateUsingTimer();
 }
@@ -86,30 +86,6 @@ void Vesc3DView::setQuanternions(float q0, float q1, float q2, float q3)
     mQ3 = q3;
     mUseQuaternions = true;
     updateUsingTimer();
-}
-
-void Vesc3DView::setXRotation(float angle)
-{
-    if (angle != mXRot) {
-        mXRot = angle;
-        updateUsingTimer();
-    }
-}
-
-void Vesc3DView::setYRotation(float angle)
-{
-    if (angle != mYRot) {
-        mYRot = angle;
-        updateUsingTimer();
-    }
-}
-
-void Vesc3DView::setZRotation(float angle)
-{
-    if (angle != mZRot) {
-        mZRot = angle;
-        updateUsingTimer();
-    }
 }
 
 void Vesc3DView::initializeGL()

@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.24
+VT_VERSION = 1.25
 VT_INTRO_VERSION = 1
 
 VT_ANDROID_VERSION_ARMV7 = 47

@@ -29,6 +29,9 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 {
     ui->setupUi(this);
     mVesc = nullptr;
+
+    updateTileServers();
+
     ui->spanSlider->setMinimum(0);
     ui->spanSlider->setMaximum(10000);
     ui->spanSlider->setValue(10000);
@@ -217,14 +220,14 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
         if (value >= ui->spanSlider->value()) {
             ui->spanSlider->setValue(value);
         }
-        truncateDataAndPlot();
+        truncateDataAndPlot(ui->autoZoomBox->isChecked());
     });
 
     connect(ui->spanSlider, &SuperSlider::valueChanged, [this](int value) {
         if (value <= ui->spanSlider->alt_value()) {
             ui->spanSlider->alt_setValue(value);
         }
-        truncateDataAndPlot();
+        truncateDataAndPlot(ui->autoZoomBox->isChecked());
     });
 
     connect(ui->dataTable, &QTableWidget::itemSelectionChanged, [this]() {
@@ -268,6 +271,18 @@ void PageLogAnalysis::on_openCurrentButton_clicked()
 {
     if (mVesc) {
         mLogData = mVesc->getRtLogData();
+
+        double i_llh[3];
+        for (auto d: mLogData) {
+            if (d.posTime >= 0) {
+                i_llh[0] = d.lat;
+                i_llh[1] = d.lon;
+                i_llh[2] = d.alt;
+                ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
+                break;
+            }
+        }
+
         truncateDataAndPlot();
     }
 }
@@ -279,23 +294,19 @@ void PageLogAnalysis::on_gridBox_toggled(bool checked)
 
 void PageLogAnalysis::on_tilesHiResButton_toggled(bool checked)
 {
-    if (checked) {
-        ui->map->osmClient()->setTileServerUrl("http://c.osm.rrze.fau.de/osmhd");
-        ui->map->osmClient()->clearCache();
-        ui->map->update();
-    }
+    (void)checked;
+    updateTileServers();
+    ui->map->update();
 }
 
 void PageLogAnalysis::on_tilesOsmButton_toggled(bool checked)
 {
-    if (checked) {
-        ui->map->osmClient()->setTileServerUrl("http://tile.openstreetmap.org");
-        ui->map->osmClient()->clearCache();
-        ui->map->update();
-    }
+    (void)checked;
+    updateTileServers();
+    ui->map->update();
 }
 
-void PageLogAnalysis::truncateDataAndPlot()
+void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
 {
     double start = double(ui->spanSlider->alt_value()) / 10000.0;
     double end = double(ui->spanSlider->value()) / 10000.0;
@@ -305,9 +316,9 @@ void PageLogAnalysis::truncateDataAndPlot()
 
     int ind = 0;
     double i_llh[3];
-    bool i_llh_set = false;
     int posTimeLast = -1;
 
+    ui->map->getEnuRef(i_llh);
     mLogDataTruncated.clear();
 
     for (auto d: mLogData) {
@@ -320,14 +331,6 @@ void PageLogAnalysis::truncateDataAndPlot()
         mLogDataTruncated.append(d);
 
         if (d.posTime >= 0 && posTimeLast != d.posTime) {
-            if (!i_llh_set) {
-                i_llh[0] = d.lat;
-                i_llh[1] = d.lon;
-                i_llh[2] = d.alt;
-                ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
-                i_llh_set = true;
-            }
-
             double llh[3];
             double xyz[3];
 
@@ -348,7 +351,10 @@ void PageLogAnalysis::truncateDataAndPlot()
         }
     }
 
-    ui->map->zoomInOnInfoTrace(-1, 0.1);
+    if (zoomGraph) {
+        ui->map->zoomInOnInfoTrace(-1, 0.1);
+    }
+
     ui->map->update();
     updateGraphs();
     updateStats();
@@ -373,6 +379,7 @@ void PageLogAnalysis::updateGraphs()
     }
 
     double verticalTime = -1.0;
+    LocPoint p, p2;
 
     for (LOG_DATA d: mLogDataTruncated) {
         if (startTime < 0) {
@@ -402,7 +409,6 @@ void PageLogAnalysis::updateGraphs()
                 llh[2] = d.alt;
                 Utility::llhToEnu(i_llh, llh, xyz);
 
-                LocPoint p;
                 p.setXY(xyz[0], xyz[1]);
                 p.setRadius(10);
 
@@ -411,7 +417,6 @@ void PageLogAnalysis::updateGraphs()
                 llh[2] = prevSampleGnss.alt;
                 Utility::llhToEnu(i_llh, llh, xyz);
 
-                LocPoint p2;
                 p2.setXY(xyz[0], xyz[1]);
                 p2.setRadius(10);
 
@@ -1044,6 +1049,19 @@ double PageLogAnalysis::getDistGnssSample(int timeMs)
     }
 
     return metersGnss;
+}
+
+void PageLogAnalysis::updateTileServers()
+{
+    if (ui->tilesOsmButton->isChecked()) {
+        ui->map->osmClient()->setTileServerUrl("http://tile.openstreetmap.org");
+        ui->map->osmClient()->setCacheDir("osm_tiles/osm");
+        ui->map->osmClient()->clearCacheMemory();
+    } else if (ui->tilesHiResButton->isChecked()) {
+        ui->map->osmClient()->setTileServerUrl("http://c.osm.rrze.fau.de/osmhd");
+        ui->map->osmClient()->setCacheDir("osm_tiles/hd");
+        ui->map->osmClient()->clearCacheMemory();
+    }
 }
 
 void PageLogAnalysis::on_saveMapPdfButton_clicked()

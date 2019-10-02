@@ -223,6 +223,8 @@ void DetectFoc::on_applyAllButton_clicked()
 
         mVesc->mcConfig()->updateParamDouble("foc_motor_r", r);
         mVesc->mcConfig()->updateParamDouble("foc_motor_l", l / 1e6);
+        mVesc->mcConfig()->updateParamDouble("foc_motor_ld", l / 1e6);
+        mVesc->mcConfig()->updateParamDouble("foc_motor_lq", l / 1e6);
         mVesc->mcConfig()->updateParamDouble("foc_motor_flux_linkage", lambda);
 
         mVesc->emitStatusMessage(tr("R, L and \u03BB Applied"), true);

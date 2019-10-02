@@ -54,7 +54,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif'; font-weight:600;&quot;&gt;GPD&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;General Purpose Drive between phase 1 and 3. Should be used with a custom application on the VESC, or on the computer with the VESC Tool backend providing samples.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_DEFAULT_MOTOR_TYPE</cDefine>
-            <valInt>0</valInt>
+            <valInt>2</valInt>
             <enumNames>BLDC</enumNames>
             <enumNames>DC</enumNames>
             <enumNames>FOC</enumNames>
@@ -92,7 +92,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>60</valDouble>
+            <valDouble>200</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> A</suffix>
             <vTx>9</vTx>
@@ -114,7 +114,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-1000</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>-60</valDouble>
+            <valDouble>-200</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> A</suffix>
             <vTx>9</vTx>
@@ -136,7 +136,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>60</valDouble>
+            <valDouble>99</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> A</suffix>
             <vTx>9</vTx>
@@ -158,7 +158,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-1000</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>-20</valDouble>
+            <valDouble>-60</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> A</suffix>
             <vTx>9</vTx>
@@ -199,7 +199,7 @@ p, li { white-space: pre-wrap; }
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>0</maxDouble>
-            <minDouble>-1e+6</minDouble>
+            <minDouble>-1e+06</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
             <valDouble>-100000</valDouble>
@@ -220,7 +220,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -247,7 +247,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>0.8</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </l_erpm_start>
@@ -264,7 +264,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -286,7 +286,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -412,7 +412,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>80</valDouble>
+            <valDouble>85</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> °C</suffix>
             <vTx>9</vTx>
@@ -456,7 +456,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>80</valDouble>
+            <valDouble>85</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> °C</suffix>
             <vTx>9</vTx>
@@ -523,7 +523,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.5</stepDouble>
             <valDouble>0.005</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix> %</suffix>
             <vTx>9</vTx>
         </l_min_duty>
@@ -545,7 +545,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.5</stepDouble>
             <valDouble>0.95</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix> %</suffix>
             <vTx>9</vTx>
         </l_max_duty>
@@ -564,11 +564,11 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>2e+6</maxDouble>
+            <maxDouble>2e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>1.5e+6</valDouble>
+            <valDouble>1.5e+06</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix> W</suffix>
             <vTx>9</vTx>
@@ -589,10 +589,10 @@ p, li { white-space: pre-wrap; }
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>0</maxDouble>
-            <minDouble>-2e+6</minDouble>
+            <minDouble>-2e+06</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>-1.5e+6</valDouble>
+            <valDouble>-1.5e+06</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix> W</suffix>
             <vTx>9</vTx>
@@ -654,7 +654,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -676,7 +676,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -764,7 +764,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -968,7 +968,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -994,7 +994,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.03</valDouble>
+            <valDouble>0.007</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1016,7 +1016,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>50</valDouble>
+            <valDouble>20</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1040,7 +1040,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>20000</valDouble>
+            <valDouble>10000</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> kHz</suffix>
             <vTx>9</vTx>
@@ -1063,7 +1063,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>0.08</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix> µS</suffix>
             <vTx>9</vTx>
         </foc_dt_us>
@@ -1096,7 +1096,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>180</valDouble>
+            <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1118,7 +1118,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>7</valDouble>
+            <valDouble>1</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1252,7 +1252,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Hall Sensors&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use hall sensors with 60 or 120 degree spacing in the motor. Gives starts without any delay at all, but does not work that well for most position control applications.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_SENSOR_MODE</cDefine>
-            <valInt>0</valInt>
+            <valInt>1</valInt>
             <enumNames>Sensorless</enumNames>
             <enumNames>Encoder</enumNames>
             <enumNames>Hall Sensors</enumNames>
@@ -1270,7 +1270,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
@@ -1292,11 +1292,11 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>40000</valDouble>
+            <valDouble>30000</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1312,17 +1312,61 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The average of LD and LQ inductance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_MOTOR_L</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
-            <editorScale>1e+6</editorScale>
+            <editorScale>1e+06</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>10</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>7e-6</valDouble>
-            <vTxDoubleScale>1e+8</vTxDoubleScale>
+            <valDouble>7e-06</valDouble>
+            <vTxDoubleScale>1e+08</vTxDoubleScale>
             <suffix> µH</suffix>
             <vTx>9</vTx>
         </foc_motor_l>
+        <foc_motor_ld>
+            <longName>Motor Inductance Ld</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;LD inductance.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_MOTOR_LD</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1e+06</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>10</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1e-06</stepDouble>
+            <valDouble>3e-05</valDouble>
+            <vTxDoubleScale>1e+08</vTxDoubleScale>
+            <suffix> µH</suffix>
+            <vTx>9</vTx>
+        </foc_motor_ld>
+        <foc_motor_lq>
+            <longName>Motor Inductance Lq</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;LQ inductance.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_MOTOR_LQ</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1e+06</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>10</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1e-06</stepDouble>
+            <valDouble>4e-05</valDouble>
+            <vTxDoubleScale>1e+08</vTxDoubleScale>
+            <suffix> µH</suffix>
+            <vTx>9</vTx>
+        </foc_motor_lq>
         <foc_motor_r>
             <longName>Motor Resistance (R)</longName>
             <type>1</type>
@@ -1340,7 +1384,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.015</valDouble>
+            <valDouble>0.02</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix> mΩ</suffix>
             <vTx>9</vTx>
@@ -1362,7 +1406,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.00245</valDouble>
+            <valDouble>0.005</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix> mWb</suffix>
             <vTx>9</vTx>
@@ -1378,13 +1422,13 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The observer gain. If the motor does not run smoothly with the calculated value, this value can be tweaked. Try with doubling or halving it in that case.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_OBSERVER_GAIN</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
-            <editorScale>1e-6</editorScale>
+            <editorScale>1e-06</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>2e+10</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>9e+7</valDouble>
+            <valDouble>1e+07</valDouble>
             <vTxDoubleScale>0.01</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1406,7 +1450,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.2</valDouble>
+            <valDouble>0.3</valDouble>
             <vTxDoubleScale>0.01</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1424,7 +1468,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
@@ -1446,7 +1490,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
@@ -1468,7 +1512,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -1543,6 +1587,50 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </foc_sl_d_current_duty>
+        <foc_field_weakening_kp>
+            <longName>Field Weakening Kp</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Field Weakening Proportional Gain&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_FIELD_WEAKENING_KP</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>100</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.001</stepDouble>
+            <valDouble>0.02</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </foc_field_weakening_kp>
+        <foc_field_weakening_ki>
+            <longName>Field Weakening Ki</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Field Weakening Integral Gain&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_FIELD_WEAKENING_KI</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>100</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.001</stepDouble>
+            <valDouble>0.02</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </foc_field_weakening_ki>
         <foc_sl_d_current_factor>
             <longName>D Current Injection Factor</longName>
             <type>1</type>
@@ -1581,7 +1669,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>-1</valInt>
+            <valInt>255</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </foc_hall_table__0>
@@ -1601,7 +1689,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>-1</valInt>
+            <valInt>255</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </foc_hall_table__1>
@@ -1621,7 +1709,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>-1</valInt>
+            <valInt>255</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </foc_hall_table__2>
@@ -1641,7 +1729,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>-1</valInt>
+            <valInt>255</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </foc_hall_table__3>
@@ -1661,7 +1749,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>-1</valInt>
+            <valInt>255</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </foc_hall_table__4>
@@ -1681,7 +1769,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>-1</valInt>
+            <valInt>255</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </foc_hall_table__5>
@@ -1701,7 +1789,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>-1</valInt>
+            <valInt>255</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </foc_hall_table__6>
@@ -1721,7 +1809,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>-1</valInt>
+            <valInt>255</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </foc_hall_table__7>
@@ -1738,11 +1826,11 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
-            <valDouble>2500</valDouble>
+            <valDouble>250099</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1865,6 +1953,30 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </foc_current_filter_const>
+        <foc_mtpa_enable>
+            <longName>MTPA Enable</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Enables or disables maximum torque per ampere algorithm (MTPA)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_MTPA_ENABLE</cDefine>
+            <valInt>0</valInt>
+        </foc_mtpa_enable>
+        <foc_field_weakening_enable>
+            <longName>Field Weakening Enable</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Enables or disables field weakening algorithm.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_FIELD_WEAKENING_ENABLE</cDefine>
+            <valInt>0</valInt>
+        </foc_field_weakening_enable>
         <gpd_buffer_notify_left>
             <longName>Buffer Notification Length</longName>
             <type>2</type>
@@ -1988,8 +2100,8 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0001</stepDouble>
-            <valDouble>0.004</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <valDouble>0.0003</valDouble>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </s_pid_kp>
@@ -2010,8 +2122,8 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0001</stepDouble>
-            <valDouble>0.004</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <valDouble>0.003</valDouble>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </s_pid_ki>
@@ -2032,8 +2144,8 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0001</stepDouble>
-            <valDouble>0.0001</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <valDouble>1e-05</valDouble>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </s_pid_kd>
@@ -2055,7 +2167,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>0.2</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </s_pid_kd_filter>
@@ -2072,7 +2184,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -2111,7 +2223,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.001</stepDouble>
             <valDouble>0.03</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </p_pid_kp>
@@ -2133,7 +2245,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.001</stepDouble>
             <valDouble>0</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </p_pid_ki>
@@ -2155,7 +2267,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.0001</stepDouble>
             <valDouble>0.0004</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </p_pid_kd>
@@ -2177,7 +2289,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>0.2</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </p_pid_kd_filter>
@@ -2221,7 +2333,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.005</stepDouble>
             <valDouble>0.01</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </cc_startup_boost_duty>
@@ -2265,7 +2377,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
             <valDouble>0.0046</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </cc_gain>
@@ -2287,7 +2399,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.005</stepDouble>
             <valDouble>0.04</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </cc_ramp_step_max>
@@ -2307,7 +2419,7 @@ p, li { white-space: pre-wrap; }
             <minInt>-1</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>500</stepInt>
-            <valInt>3000</valInt>
+            <valInt>500</valInt>
             <suffix> ms</suffix>
             <vTx>6</vTx>
         </m_fault_stop_time_ms>
@@ -2329,7 +2441,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.005</stepDouble>
             <valDouble>0.02</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </m_duty_ramp_step>
@@ -2351,7 +2463,7 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>0.5</valDouble>
-            <vTxDoubleScale>1e+6</vTxDoubleScale>
+            <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
         </m_current_backoff_gain>
@@ -2401,7 +2513,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif'; font-weight:600;&quot;&gt;SIN/COS Encoder&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;A Sin/Cos encoder is a position feedback device similar to a quadrature encoder, except instead of outputting digital pulses, it outputs analog voltages with sinusoidal shapes offset by 90°. Provides absolute positions from the start, but its sensitive to EMI and requires special filtering,  transient protections and shielded wiring.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_M_SENSOR_PORT_MODE</cDefine>
-            <valInt>4</valInt>
+            <valInt>2</valInt>
             <enumNames>Hall Sensors</enumNames>
             <enumNames>ABI Encoder</enumNames>
             <enumNames>AS5047 Encoder</enumNames>
@@ -2501,7 +2613,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>3000</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>40000</valDouble>
+            <valDouble>35000</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix> kHz</suffix>
             <vTx>9</vTx>
@@ -2674,7 +2786,7 @@ p, li { white-space: pre-wrap; }
             <minInt>1</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>10</valInt>
+            <valInt>3</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </si_battery_cells>
@@ -2954,6 +3066,8 @@ p, li { white-space: pre-wrap; }
         <ser>foc_pll_kp</ser>
         <ser>foc_pll_ki</ser>
         <ser>foc_motor_l</ser>
+        <ser>foc_motor_ld</ser>
+        <ser>foc_motor_lq</ser>
         <ser>foc_motor_r</ser>
         <ser>foc_motor_flux_linkage</ser>
         <ser>foc_observer_gain</ser>
@@ -2980,6 +3094,10 @@ p, li { white-space: pre-wrap; }
         <ser>foc_temp_comp</ser>
         <ser>foc_temp_comp_base_temp</ser>
         <ser>foc_current_filter_const</ser>
+        <ser>foc_mtpa_enable</ser>
+        <ser>foc_field_weakening_enable</ser>
+        <ser>foc_field_weakening_kp</ser>
+        <ser>foc_field_weakening_ki</ser>
         <ser>gpd_buffer_notify_left</ser>
         <ser>gpd_buffer_interpol</ser>
         <ser>gpd_current_filter_const</ser>

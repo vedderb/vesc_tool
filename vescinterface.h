@@ -57,6 +57,8 @@
 #include <QAndroidJniEnvironment>
 #endif
 
+#include "lzo/minilzo.h"
+
 class VescInterface : public QObject
 {
     Q_OBJECT
@@ -104,9 +106,18 @@ public:
     Q_INVOKABLE int getLastCANbusBitrate() const;
 #endif
     bool swdEraseFlash();
-    bool swdUploadFw(QByteArray newFirmware, uint32_t startAddr = 0, bool verify = false);
+    bool swdUploadFw(QByteArray newFirmware, uint32_t startAddr = 0,
+                     bool verify = false, bool isLzo = true);
     void swdCancel();
     bool swdReboot();
+
+    bool fwEraseNewApp(bool fwdCan, quint32 fwSize);
+    bool fwEraseBootloader(bool fwdCan);
+    bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true);
+    Q_INVOKABLE void fwUploadCancel();
+    Q_INVOKABLE double getFwUploadProgress();
+    Q_INVOKABLE QString getFwUploadStatus();
+    Q_INVOKABLE bool isCurrentFwBootloader();
 
     Q_INVOKABLE bool openRtLogFile(QString outDirectory);
     Q_INVOKABLE void closeRtLogFile();
@@ -236,7 +247,12 @@ private:
     bool mIsUploadingFw;
     bool mIsLastFwBootloader;
 
+    // FW Upload
     bool mCancelSwdUpload;
+    bool mCancelFwUpload;
+    double mFwUploadProgress;
+    QString mFwUploadStatus;
+    bool mFwIsBootloader;
 
     // Connections
     conn_t mLastConnType;
@@ -295,6 +311,7 @@ private:
     bool mIgnoreCanChange;
 
     QVector<int> mCanDevsLast;
+    lzo_align_t *mLzoWrkMem;
 
     // Other settings
     bool mUseImperialUnits;

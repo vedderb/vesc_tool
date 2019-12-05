@@ -27,24 +27,14 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mIsLimitedMode = false;
     mLimitedSupportsFwdAllCan = false;
     mLimitedSupportsEraseBootloader = false;
-
-    // Firmware state
-    mFirmwareIsUploading = false;
-    mFirmwareState = 0;
-    mFimwarePtr = 0;
-    mFirmwareTimer = 0;
-    mFirmwareRetries = 0;
-    mFirmwareIsBootloader = false;
-    mFirmwareFwdAllCan = false;
-    mFirmwareUploadStatus = "FW Upload Status";
     mCheckNextMcConfig = false;
 
     mTimer = new QTimer(this);
     mTimer->setInterval(10);
     mTimer->start();
 
-    mMcConfig = 0;
-    mAppConfig = 0;
+    mMcConfig = nullptr;
+    mAppConfig = nullptr;
 
     mTimeoutCount = 100;
     mTimeoutFwVer = 0;
@@ -94,7 +84,7 @@ bool Commands::getSendCan()
 
 void Commands::setCanSendId(unsigned int id)
 {
-    mCanId = id;
+    mCanId = int(id);
 }
 
 int Commands::getCanSendId()
@@ -135,9 +125,15 @@ void Commands::processPacket(QByteArray data)
     } break;
 
     case COMM_ERASE_NEW_APP:
+        emit eraseNewAppResReceived(vb.at(0));
+        break;
+
     case COMM_WRITE_NEW_APP_DATA:
+        emit writeNewAppDataResReceived(vb.at(0));
+        break;
+
     case COMM_ERASE_BOOTLOADER:
-        firmwareUploadUpdate(!vb.at(0));
+        emit eraseBootloaderResReceived(vb.at(0));
         break;
 
     case COMM_GET_VALUES:
@@ -549,6 +545,7 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_BM_WRITE_FLASH:
+    case COMM_BM_WRITE_FLASH_LZO:
         emit bmWriteFlashRes(vb.vbPopFrontInt16());
         break;
 
@@ -608,6 +605,52 @@ void Commands::getFwVersion()
 
     VByteArray vb;
     vb.vbAppendInt8(COMM_FW_VERSION);
+    emitData(vb);
+}
+
+void Commands::eraseNewApp(bool fwdCan, quint32 fwSize)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_ERASE_NEW_APP_ALL_CAN :
+                             COMM_ERASE_NEW_APP);
+    vb.vbAppendUint32(fwSize);
+    emitData(vb);
+}
+
+void Commands::eraseBootloader(bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
+                             COMM_ERASE_BOOTLOADER);
+    emitData(vb);
+}
+
+void Commands::writeNewAppData(QByteArray data, quint32 offset, bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_WRITE_NEW_APP_DATA_ALL_CAN :
+                             COMM_WRITE_NEW_APP_DATA);
+    vb.vbAppendUint32(offset);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::writeNewAppDataLzo(QByteArray data, quint32 offset, quint16 decompressedLen, bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_WRITE_NEW_APP_DATA_ALL_CAN_LZO :
+                             COMM_WRITE_NEW_APP_DATA_LZO);
+    vb.vbAppendUint32(offset);
+    vb.vbAppendUint16(decompressedLen);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::jumpToBootloader(bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_JUMP_TO_BOOTLOADER_ALL_CAN :
+                             COMM_JUMP_TO_BOOTLOADER);
     emitData(vb);
 }
 
@@ -1199,6 +1242,16 @@ void Commands::bmWriteFlash(uint32_t addr, QByteArray data)
     emitData(vb);
 }
 
+void Commands::bmWriteFlashLzo(uint32_t addr, quint16 decompressedLen, QByteArray data)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_WRITE_FLASH_LZO);
+    vb.vbAppendUint32(addr);
+    vb.vbAppendUint16(decompressedLen);
+    vb.append(data);
+    emitData(vb);
+}
+
 void Commands::bmReboot()
 {
     VByteArray vb;
@@ -1238,14 +1291,6 @@ void Commands::bmReadMem(uint32_t addr, quint16 size)
 
 void Commands::timerSlot()
 {
-    if (mFirmwareIsUploading) {
-        if (mFirmwareTimer) {
-            mFirmwareTimer--;
-        } else {
-            firmwareUploadUpdate(true);
-        }
-    }
-
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;
     if (mTimeoutMcconf > 0) {
         mTimeoutMcconf--;
@@ -1296,117 +1341,6 @@ void Commands::emitData(QByteArray data)
     }
 
     emit dataToSend(data);
-}
-
-void Commands::firmwareUploadUpdate(bool isTimeout)
-{
-    if (!mFirmwareIsUploading) {
-        return;
-    }
-
-    const int app_packet_size = 200;
-    const int retries = 5;
-    const int timeout = 120;
-
-    if (mFirmwareState == 0) {
-        mFirmwareUploadStatus = "Buffer Erase";
-        if (isTimeout) {
-            // Erase timed out, abort.
-            mFirmwareIsUploading = false;
-            mFimwarePtr = 0;
-            mFirmwareUploadStatus = "Buffer Erase Timeout";
-        } else {
-            mFirmwareState++;
-
-            if (mFirmwareIsBootloader) {
-                mFirmwareState++;
-            }
-
-            mFirmwareRetries = retries;
-            mFirmwareTimer = timeout;
-            firmwareUploadUpdate(true);
-        }
-    } else if (mFirmwareState == 1) {
-        mFirmwareUploadStatus = "CRC/Size Write";
-        if (isTimeout) {
-            if (mFirmwareRetries > 0) {
-                mFirmwareRetries--;
-                mFirmwareTimer = timeout;
-            } else {
-                mFirmwareIsUploading = false;
-                mFimwarePtr = 0;
-                mFirmwareState = 0;
-                mFirmwareUploadStatus = "CRC/Size Write Timeout";
-                return;
-            }
-
-            quint16 crc = Packet::crc16((const unsigned char*)mNewFirmware.constData(), mNewFirmware.size());
-
-            VByteArray vb;
-            vb.append(mFirmwareFwdAllCan ? (char)COMM_WRITE_NEW_APP_DATA_ALL_CAN :
-                                           (char)COMM_WRITE_NEW_APP_DATA);
-            vb.vbAppendUint32(0);
-            vb.vbAppendUint32(mNewFirmware.size());
-            vb.vbAppendUint16(crc);
-            emitData(vb);
-        } else {
-            mFirmwareState++;
-            mFirmwareRetries = retries;
-            mFirmwareTimer = timeout;
-            firmwareUploadUpdate(true);
-        }
-    } else if (mFirmwareState == 2) {
-        mFirmwareUploadStatus = "FW Data Write";
-        if (isTimeout) {
-            if (mFirmwareRetries > 0) {
-                mFirmwareRetries--;
-                mFirmwareTimer = timeout;
-            } else {
-                mFirmwareIsUploading = false;
-                mFimwarePtr = 0;
-                mFirmwareState = 0;
-                mFirmwareUploadStatus = "FW Data Write Timeout";
-                return;
-            }
-
-            int fw_size_left = mNewFirmware.size() - mFimwarePtr;
-            int send_size = fw_size_left > app_packet_size ? app_packet_size : fw_size_left;
-
-            VByteArray vb;
-            vb.append(mFirmwareFwdAllCan ? (char)COMM_WRITE_NEW_APP_DATA_ALL_CAN :
-                                           (char)COMM_WRITE_NEW_APP_DATA);
-
-            if (mFirmwareIsBootloader) {
-                vb.vbAppendUint32(mFimwarePtr + (1024 * 128 * 3));
-            } else {
-                vb.vbAppendUint32(mFimwarePtr + 6);
-            }
-
-            vb.append(mNewFirmware.mid(mFimwarePtr, send_size));
-            emitData(vb);
-        } else {
-            mFirmwareRetries = retries;
-            mFirmwareTimer = timeout;
-            mFimwarePtr += app_packet_size;
-
-            if (mFimwarePtr >= mNewFirmware.size()) {
-                mFirmwareIsUploading = false;
-                mFimwarePtr = 0;
-                mFirmwareState = 0;
-                mFirmwareUploadStatus = "FW Upload Done";
-
-                // Upload done. Enter bootloader!
-                if (!mFirmwareIsBootloader) {
-                    QByteArray buffer;
-                    buffer.append(mFirmwareFwdAllCan ? (char)COMM_JUMP_TO_BOOTLOADER_ALL_CAN :
-                                                       (char)COMM_JUMP_TO_BOOTLOADER);
-                    emitData(buffer);
-                }
-            } else {
-                firmwareUploadUpdate(true);
-            }
-        }
-    }
 }
 
 bool Commands::getLimitedSupportsFwdAllCan() const
@@ -1477,67 +1411,6 @@ void Commands::setMcConfig(ConfigParams *mcConfig)
     mMcConfig = mcConfig;
     connect(mMcConfig, SIGNAL(updateRequested()), this, SLOT(getMcconf()));
     connect(mMcConfig, SIGNAL(updateRequestDefault()), this, SLOT(getMcconfDefault()));
-}
-
-void Commands::startFirmwareUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan)
-{
-    mFirmwareIsBootloader = isBootloader;
-    mFirmwareFwdAllCan = mLimitedSupportsFwdAllCan ? fwdCan : false;
-    mFirmwareIsUploading = true;
-    mFirmwareState = mFirmwareIsBootloader ? 2 : 0;
-    mFimwarePtr = 0;
-    mFirmwareTimer = 600;
-    mFirmwareRetries = 5;
-    mNewFirmware.clear();
-    mNewFirmware.append(newFirmware);
-    mFirmwareUploadStatus = "Buffer Erase";
-
-    if (mFirmwareIsBootloader) {
-        if (mLimitedSupportsEraseBootloader) {
-            mFirmwareState = 0;
-            VByteArray vb;
-            vb.vbAppendInt8(mFirmwareFwdAllCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
-                                                 COMM_ERASE_BOOTLOADER);
-            emitData(vb);
-        } else {
-            firmwareUploadUpdate(true);
-        }
-    } else {
-        VByteArray vb;
-        vb.vbAppendInt8(mFirmwareFwdAllCan ? COMM_ERASE_NEW_APP_ALL_CAN :
-                                             COMM_ERASE_NEW_APP);
-        vb.vbAppendUint32(mNewFirmware.size());
-        emitData(vb);
-    }
-}
-
-double Commands::getFirmwareUploadProgress()
-{
-    if (mFirmwareIsUploading) {
-        return double(mFimwarePtr) / double(mNewFirmware.size());
-    } else {
-        return -1.0;
-    }
-}
-
-QString Commands::getFirmwareUploadStatus()
-{
-    return mFirmwareUploadStatus;
-}
-
-void Commands::cancelFirmwareUpload()
-{
-    if (mFirmwareIsUploading) {
-        mFirmwareIsUploading = false;
-        mFimwarePtr = 0;
-        mFirmwareState = 0;
-        mFirmwareUploadStatus = "Cancelled";
-    }
-}
-
-bool Commands::isCurrentFiwmwareBootloader()
-{
-    return mFirmwareIsBootloader;
 }
 
 void Commands::checkMcConfig()

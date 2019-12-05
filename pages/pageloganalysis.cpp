@@ -36,7 +36,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->spanSlider->setMaximum(10000);
     ui->spanSlider->setValue(10000);
 
-    ui->mapSplitter->setStretchFactor(0, 4);
+    ui->mapSplitter->setStretchFactor(0, 2);
     ui->mapSplitter->setStretchFactor(1, 1);
 
     ui->statSplitter->setStretchFactor(0, 6);
@@ -49,6 +49,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->dataTable->setColumnWidth(0, 140);
     ui->dataTable->setColumnWidth(1, 120);
     ui->statTable->setColumnWidth(0, 140);
+    ui->logTable->setColumnWidth(0, 250);
 
     m3dView = new Vesc3DView(this);
     m3dView->setMinimumWidth(200);
@@ -234,6 +235,23 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
         updateGraphs();
     });
 
+    connect(ui->filterOutlierBox, &QGroupBox::toggled, [this]() {
+        truncateDataAndPlot(ui->autoZoomBox->isChecked());
+    });
+
+    connect(ui->filterhAccBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double newVal) {
+        (void)newVal;
+        if (ui->filterOutlierBox->isChecked()) {
+            truncateDataAndPlot(ui->autoZoomBox->isChecked());
+        }
+    });
+
+    connect(ui->tabWidget, &QTabWidget::currentChanged, [this](int index) {
+        (void)index;
+        logListRefresh();
+    });
+
     on_gridBox_toggled(ui->gridBox->isChecked());
 }
 
@@ -259,10 +277,16 @@ void PageLogAnalysis::on_openCsvButton_clicked()
                                                         tr("Load CSV File"), "",
                                                         tr("CSV files (*.csv)"));
 
-        if (!fileName.isEmpty()) {
+        if (!fileName.isEmpty()) {            
+            QSettings set;
+            set.setValue("pageloganalysis/lastdir",
+                         QFileInfo(fileName).absolutePath());
+
             if (mVesc->loadRtLogFile(fileName)) {
                 on_openCurrentButton_clicked();
             }
+
+            logListRefresh();
         }
     }
 }
@@ -274,7 +298,8 @@ void PageLogAnalysis::on_openCurrentButton_clicked()
 
         double i_llh[3];
         for (auto d: mLogData) {
-            if (d.posTime >= 0) {
+            if (d.posTime >= 0 && (!ui->filterOutlierBox->isChecked() ||
+                                   d.hAcc < ui->filterhAccBox->value())) {
                 i_llh[0] = d.lat;
                 i_llh[1] = d.lon;
                 i_llh[2] = d.alt;
@@ -330,7 +355,10 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
 
         mLogDataTruncated.append(d);
 
-        if (d.posTime >= 0 && posTimeLast != d.posTime) {
+        if (d.posTime >= 0 &&
+                (!ui->filterOutlierBox->isChecked() ||
+                 d.hAcc < ui->filterhAccBox->value()) &&
+                posTimeLast != d.posTime) {
             double llh[3];
             double xyz[3];
 
@@ -397,7 +425,9 @@ void PageLogAnalysis::updateGraphs()
 
         xAxis.append(double(timeMs) / 1000.0);
 
-        if (d.posTime >= 0) {
+        if (d.posTime >= 0 &&
+                (!ui->filterOutlierBox->isChecked() ||
+                 d.hAcc < ui->filterhAccBox->value())) {
             if (prevSampleGnssSet) {
                 double i_llh[3];
                 double llh[3];
@@ -760,7 +790,9 @@ void PageLogAnalysis::updateStats()
 
         samples++;
 
-        if (d.posTime >= 0) {
+        if (d.posTime >= 0 &&
+                (!ui->filterOutlierBox->isChecked() ||
+                 d.hAcc < ui->filterhAccBox->value())) {
             if (prevSampleGnssSet) {
                 double i_llh[3];
                 double llh[3];
@@ -933,7 +965,9 @@ void PageLogAnalysis::updateDataAndPlot(double time)
     ui->dataTable->item(50, 1)->setText(QString::number(d.vAcc, 'f', 2) + " m");
     ui->dataTable->item(51, 1)->setText(QString::number(d.setupValues.num_vescs));
 
-    if (d.posTime >= 0) {
+    if (d.posTime >= 0 &&
+            (!ui->filterOutlierBox->isChecked() ||
+             d.hAcc < ui->filterhAccBox->value())) {
         double i_llh[3];
         double llh[3];
         double xyz[3];
@@ -1064,6 +1098,32 @@ void PageLogAnalysis::updateTileServers()
     }
 }
 
+void PageLogAnalysis::logListRefresh()
+{
+    if (ui->tabWidget->currentIndex() == 3) {
+        ui->logTable->setRowCount(0);
+        QSettings set;
+        if (set.contains("pageloganalysis/lastdir")) {
+            QString dirPath = set.value("pageloganalysis/lastdir").toString();
+            QDir dir(dirPath);
+            if (dir.exists()) {
+                for (QFileInfo f: dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
+                                              QDir::Files, QDir::Name)) {
+                    QTableWidgetItem *itName = new QTableWidgetItem(f.fileName());
+                    itName->setData(Qt::UserRole, f.absoluteFilePath());
+                    ui->logTable->setRowCount(ui->logTable->rowCount() + 1);
+                    ui->logTable->setItem(ui->logTable->rowCount() - 1, 0, itName);
+                    ui->logTable->setItem(ui->logTable->rowCount() - 1, 1,
+                                          new QTableWidgetItem(QString("%1 MB").
+                                                               arg(double(f.size())
+                                                                   / 1024.0 / 1024.0,
+                                                                   0, 'f', 2)));
+                }
+            }
+        }
+    }
+}
+
 void PageLogAnalysis::on_saveMapPdfButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -1135,4 +1195,24 @@ void PageLogAnalysis::on_savePlotPngButton_clicked()
 void PageLogAnalysis::on_centerButton_clicked()
 {
     ui->map->zoomInOnInfoTrace(-1, 0.1);
+}
+
+void PageLogAnalysis::on_logListOpenButton_clicked()
+{
+    auto items = ui->logTable->selectedItems();
+
+    if (items.size() > 0) {
+        QString fileName = items.
+                first()->data(Qt::UserRole).toString();
+        if (mVesc->loadRtLogFile(fileName)) {
+            on_openCurrentButton_clicked();
+        }
+    } else {
+        mVesc->emitMessageDialog("Open Log", "No Log Selected", false);
+    }
+}
+
+void PageLogAnalysis::on_logListRefreshButton_clicked()
+{
+    logListRefresh();
 }

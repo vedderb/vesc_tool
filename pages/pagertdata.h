@@ -68,6 +68,7 @@ private slots:
     void on_experimentSaveXmlButton_clicked();
     void on_experimentSavePngButton_clicked();
     void on_experimentSavePdfButton_clicked();
+    void on_experimentClearDataButton_clicked();
 
 private:
     Ui::PageRtData *ui;

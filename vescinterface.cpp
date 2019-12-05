@@ -61,6 +61,10 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mIsUploadingFw = false;
 
     mCancelSwdUpload = false;
+    mCancelFwUpload = false;
+    mFwUploadStatus = "FW Upload Status";
+    mFwUploadProgress = -1.0;
+    mFwIsBootloader = false;
 
     mTimer = new QTimer(this);
     mTimer->setInterval(20);
@@ -76,6 +80,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mAutoconnectOngoing = false;
     mAutoconnectProgress = 0.0;
     mIgnoreCanChange = false;
+
+    mLzoWrkMem = new lzo_align_t[((LZO1X_1_MEM_COMPRESS) + (sizeof(lzo_align_t) - 1)) / sizeof(lzo_align_t)];
 
 #ifdef Q_OS_ANDROID
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
@@ -373,6 +379,8 @@ VescInterface::~VescInterface()
     if (mWakeLockActive) {
         setWakeLock(false);
     }
+
+    delete[] mLzoWrkMem;
 
     Utility::stopGnssForegroundService();
 }
@@ -800,8 +808,12 @@ bool VescInterface::swdEraseFlash()
     return true;
 }
 
-bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr, bool verify)
+bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
+                                bool verify, bool isLzo)
 {
+    bool supportsLzo = mCommands->getLimitedCompatibilityCommands().
+            contains(int(COMM_BM_WRITE_FLASH_LZO));
+
     auto waitBmWriteRes = [this]() {
         int res = -10;
 
@@ -844,9 +856,14 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr, bool
     };
 
     auto writeChunk = [this, &waitBmWriteRes, &waitBmReadRes, &verify]
-            (uint32_t addr, QByteArray chunk) {
+            (uint32_t addr, QByteArray chunk, QByteArray chunkLzo) {
         for (int i = 0;i < 3;i++) {
-            mCommands->bmWriteFlash(addr, chunk);
+            if (chunkLzo.isEmpty()) {
+                mCommands->bmWriteFlash(addr, chunk);
+            } else {
+                mCommands->bmWriteFlashLzo(addr, quint16(chunk.size()), chunkLzo);
+            }
+
             int res = waitBmWriteRes();
 
             if (verify && (!mCommands->isLimitedMode() ||
@@ -873,18 +890,39 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr, bool
     };
 
     mCancelSwdUpload = false;
-    uint32_t addr = startAddr;
-    uint32_t szTot = newFirmware.size();
-    while (newFirmware.size() > 0) {
-        int chunkSize = 256;
+    int addr = int(startAddr);
+    int szTot = newFirmware.size();
+    int uploadSize = 2;
+    int compChunks = 0;
+    int nonCompChunks = 0;
 
-        uint32_t sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
-        int res = writeChunk(addr, newFirmware.mid(0, sz));
+    while (newFirmware.size() > 0) {
+        const int chunkSize = 400;
+
+        int sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
+
+        QByteArray in = newFirmware.mid(0, sz);
+        unsigned char out[chunkSize + chunkSize / 16 + 64 + 3];
+        lzo_uint out_len;
+
+        lzo1x_1_compress((const uint8_t*)in.constData(), lzo_uint(sz), out, &out_len, mLzoWrkMem);
+
+        int res = 1;
+        if ((out_len + 2) < uint32_t(sz) && supportsLzo && isLzo) {
+            compChunks++;
+            uploadSize += out_len + 2;
+            res = writeChunk(uint32_t(addr), in, QByteArray((const char*)out, int(out_len)));
+        } else {
+            nonCompChunks++;
+            uploadSize += sz;
+            res = writeChunk(uint32_t(addr), in, QByteArray());
+        }
+
         newFirmware.remove(0, sz);
         addr += sz;
 
         if (res == 1) {
-            emit fwUploadStatus("Uploading firmware over SWD", (double)(addr - startAddr) / (double)szTot, true);
+            emit fwUploadStatus("Uploading firmware over SWD", double(addr - startAddr) / double(szTot), true);
         } else {
             QString msg = "Unknown failure";
 
@@ -910,6 +948,12 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr, bool
             emit fwUploadStatus("Upload cancelled", 0.0, false);
             return false;
         }
+    }
+
+    if (supportsLzo && isLzo) {
+        qDebug() << "Uploaded:" << uploadSize << "Initial Size:" << szTot << "Compression Ratio:"
+                 << double(uploadSize) / double(szTot) << "Compressed chunks:" << compChunks
+                 << "Incompressible chunks:" << nonCompChunks;
     }
 
     emit fwUploadStatus("Upload done", 1.0, false);
@@ -965,6 +1009,277 @@ bool VescInterface::swdReboot()
     return true;
 }
 
+bool VescInterface::fwEraseNewApp(bool fwdCan, quint32 fwSize)
+{
+    auto waitEraseRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(20000);
+        auto conn = connect(mCommands, &Commands::eraseNewAppResReceived,
+                            [&res,&loop](bool erRes) {
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    mCommands->eraseNewApp(fwdCan, fwSize);
+    emit fwUploadStatus("Erasing buffer...", 0.0, true);
+    int erRes = waitEraseRes();
+    if (erRes != 1) {
+        QString msg = "Unknown failure";
+
+        if (erRes == -10) {
+            msg = "Erase timed out";
+        } else if (erRes == -1) {
+            msg = "Erasing buffer failed";
+        }
+
+        emitMessageDialog("Firmware Upload", msg, false, false);
+        emit fwUploadStatus(msg, 0.0, false);
+
+        return false;
+    }
+
+    emit fwUploadStatus("Erase done", 0.0, false);
+
+    return true;
+}
+
+bool VescInterface::fwEraseBootloader(bool fwdCan)
+{
+    auto waitEraseRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(20000);
+        auto conn = connect(mCommands, &Commands::eraseBootloaderResReceived,
+                            [&res,&loop](bool erRes) {
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    mCommands->eraseBootloader(fwdCan);
+    emit fwUploadStatus("Erasing bootloader...", 0.0, true);
+    int erRes = waitEraseRes();
+    if (erRes != 1) {
+        QString msg = "Unknown failure";
+
+        if (erRes == -10) {
+            msg = "Erase timed out";
+        } else if (erRes == -1) {
+            msg = "Erasing bootloader failed";
+        }
+
+        emitMessageDialog("Firmware Upload", msg, false, false);
+        emit fwUploadStatus(msg, 0.0, false);
+
+        return false;
+    }
+
+    emit fwUploadStatus("Erase done", 0.0, false);
+
+    return true;
+}
+
+bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan, bool isLzo)
+{
+    mIsLastFwBootloader = isBootloader;
+    mFwUploadProgress = 0.0;
+    mCancelFwUpload = false;
+
+    if (isBootloader) {
+        if (mCommands->getLimitedSupportsEraseBootloader()) {
+            mFwUploadStatus = "Erasing bootloader";
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+            if (!fwEraseBootloader(fwdCan)) {
+                mFwUploadStatus = "Erasing bootloader failed";
+                mFwUploadProgress = -1.0;
+                return false;
+            }
+        }
+    } else {
+        mFwUploadStatus = "Erasing buffer";
+        emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+        if (!fwEraseNewApp(fwdCan, quint32(newFirmware.size()))) {
+            mFwUploadStatus = "Erasing buffer failed";
+            mFwUploadProgress = -1.0;
+            return false;
+        }
+    }
+
+    bool supportsLzo = mCommands->getLimitedCompatibilityCommands().
+            contains(int(COMM_WRITE_NEW_APP_DATA_LZO));
+
+    auto waitWriteRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(3000);
+        auto conn = connect(mCommands, &Commands::writeNewAppDataResReceived,
+                            [&res,&loop](bool wrRes) {
+            res = wrRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    auto writeChunk = [this, &waitWriteRes, &fwdCan]
+            (uint32_t addr, QByteArray chunk, bool fwIsLzo, quint16 decompressedLen) {
+        for (int i = 0;i < 3;i++) {
+            if (fwIsLzo) {
+                mCommands->writeNewAppDataLzo(chunk, addr, decompressedLen, fwdCan);
+            } else {
+                mCommands->writeNewAppData(chunk, addr, fwdCan);
+            }
+
+            int res = waitWriteRes();
+
+            if (res != -10) {
+                return res;
+            }
+        }
+
+        return -20;
+    };
+
+    int addr = isBootloader ? (1024 * 128 * 3) : 0;
+    int startAddr = addr;
+    int szTot = newFirmware.size();
+    int uploadSize = 2;
+    int compChunks = 0;
+    int nonCompChunks = 0;
+
+    if (!isBootloader) {
+        quint16 crc = Packet::crc16((const unsigned char*)newFirmware.constData(),
+                                    uint32_t(newFirmware.size()));
+        VByteArray sizeCrc;
+        sizeCrc.vbAppendInt32(szTot);
+        sizeCrc.vbAppendUint16(crc);
+        writeChunk(uint32_t(addr), sizeCrc, false, 0);
+        addr += sizeCrc.size();
+    }
+
+    while (newFirmware.size() > 0) {
+        if (mCancelFwUpload) {
+            emit fwUploadStatus("Upload cancelled", 0.0, false);
+            mFwUploadProgress = -1.0;
+            mFwUploadStatus = "Upload cancelled";
+            return false;
+        }
+
+        const int chunkSize = 400;
+
+        int sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
+
+        QByteArray in = newFirmware.mid(0, sz);
+        unsigned char out[chunkSize + chunkSize / 16 + 64 + 3];
+        lzo_uint out_len;
+
+        lzo1x_1_compress((const uint8_t*)in.constData(), lzo_uint(sz), out, &out_len, mLzoWrkMem);
+
+        int res = 1;
+        if ((out_len + 2) < uint32_t(sz) && supportsLzo && isLzo) {
+            compChunks++;
+            uploadSize += out_len + 2;
+            res = writeChunk(uint32_t(addr), QByteArray((const char*)out, int(out_len)),
+                             true, uint16_t(sz));
+        } else {
+            nonCompChunks++;
+            uploadSize += sz;
+            res = writeChunk(uint32_t(addr), in, false, 0);
+        }
+
+        newFirmware.remove(0, sz);
+        addr += sz;
+
+        if (res == 1) {
+            mFwUploadProgress = double(addr - startAddr) / double(szTot);
+            mFwUploadStatus = "Uploading ";
+            if (isBootloader) {
+                mFwUploadStatus += "Bootloader";
+            } else {
+                mFwUploadStatus += "Firmware";
+            }
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+        } else {
+            QString msg = "Unknown failure";
+
+            if (res == -20) {
+                msg = "Firmware upload timed out";
+            } else if (res == -2) {
+                msg = "Write failed";
+            }
+
+            emitMessageDialog("Firmware Upload", msg, false, false);
+            emit fwUploadStatus(msg, 0.0, false);
+            mFwUploadProgress = -1.0;
+            mFwUploadStatus = msg;
+            return false;
+        }
+    }
+
+    mFwUploadProgress = -1.0;
+    mFwUploadStatus = "Upload done";
+    emit fwUploadStatus(mFwUploadStatus, 1.0, false);
+
+    if (supportsLzo && isLzo) {
+        qDebug() << "Uploaded:" << uploadSize << "Initial Size:" << szTot << "Compression Ratio:"
+                 << double(uploadSize) / double(szTot) << "Compressed chunks:" << compChunks
+                 << "Incompressible chunks:" << nonCompChunks;
+    }
+
+    if (!isBootloader) {
+        mCommands->jumpToBootloader(fwdCan);
+    }
+
+    return true;
+}
+
+void VescInterface::fwUploadCancel()
+{
+    mCancelFwUpload = true;
+}
+
+double VescInterface::getFwUploadProgress()
+{
+    return mFwUploadProgress;
+}
+
+QString VescInterface::getFwUploadStatus()
+{
+    return mFwUploadStatus;
+}
+
+bool VescInterface::isCurrentFwBootloader()
+{
+    return mIsLastFwBootloader;
+}
+
 bool VescInterface::openRtLogFile(QString outDirectory)
 {
     if (outDirectory.startsWith("file:/")) {
@@ -983,7 +1298,7 @@ bool VescInterface::openRtLogFile(QString outDirectory)
     }
 
     QDateTime d = QDateTime::currentDateTime();
-    mRtLogFile.setFileName(QString("%1/%2-%3-%4_%5:%6:%7.csv").
+    mRtLogFile.setFileName(QString("%1/%2-%3-%4_%5-%6-%7.csv").
                            arg(outDirectory).
                            arg(d.date().year(), 2, 10, QChar('0')).
                            arg(d.date().month(), 2, 10, QChar('0')).
@@ -2151,11 +2466,11 @@ void VescInterface::timerSlot()
     }
 
     // Update fw upload bar and label
-    double fwProg = mCommands->getFirmwareUploadProgress();
-    QString fwStatus = mCommands->getFirmwareUploadStatus();
+    double fwProg = getFwUploadProgress();
+    QString fwStatus = getFwUploadStatus();
     if (fwProg > -0.1) {
         mIsUploadingFw = true;
-        mIsLastFwBootloader = mCommands->isCurrentFiwmwareBootloader();
+        mIsLastFwBootloader = isCurrentFwBootloader();
         emit fwUploadStatus(fwStatus, fwProg, true);
     } else {
         // The firmware upload just finished or failed
@@ -2421,6 +2736,12 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
 
     if (fw_connected >= qMakePair(3, 62)) {
         compCommands.append(int(COMM_BM_MEM_READ));
+    }
+
+    if (fw_connected >= qMakePair(3, 63)) {
+        compCommands.append(int(COMM_WRITE_NEW_APP_DATA_LZO));
+        compCommands.append(int(COMM_WRITE_NEW_APP_DATA_ALL_CAN_LZO));
+        compCommands.append(int(COMM_BM_WRITE_FLASH_LZO));
     }
 
     mCommands->setLimitedCompatibilityCommands(compCommands);

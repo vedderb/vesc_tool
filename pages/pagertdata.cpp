@@ -753,3 +753,12 @@ void PageRtData::on_experimentSavePdfButton_clicked()
                                     ui->experimentHBox->value());
     }
 }
+
+void PageRtData::on_experimentClearDataButton_clicked()
+{
+    for (auto &d: mExperimentPlots) {
+        d.xData.clear();
+        d.yData.clear();
+    }
+    mExperimentReplot = true;
+}

@@ -52,6 +52,8 @@ private slots:
     void on_savePlotPdfButton_clicked();
     void on_savePlotPngButton_clicked();
     void on_centerButton_clicked();
+    void on_logListOpenButton_clicked();
+    void on_logListRefreshButton_clicked();
 
 private:
     Ui::PageLogAnalysis *ui;
@@ -72,6 +74,7 @@ private:
     LOG_DATA getLogSample(int timeMs);
     double getDistGnssSample(int timeMs);
     void updateTileServers();
+    void logListRefresh();
 
 };
 

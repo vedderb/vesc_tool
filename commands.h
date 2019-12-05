@@ -31,7 +31,7 @@ class Commands : public QObject
 {
     Q_OBJECT
 public:
-    explicit Commands(QObject *parent = 0);
+    explicit Commands(QObject *parent = nullptr);
 
     void setLimitedMode(bool is_limited);
     Q_INVOKABLE bool isLimitedMode();
@@ -41,11 +41,6 @@ public:
     Q_INVOKABLE int getCanSendId();
     void setMcConfig(ConfigParams *mcConfig);
     void setAppConfig(ConfigParams *appConfig);
-    Q_INVOKABLE void startFirmwareUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false);
-    Q_INVOKABLE double getFirmwareUploadProgress();
-    Q_INVOKABLE QString getFirmwareUploadStatus();
-    Q_INVOKABLE void cancelFirmwareUpload();
-    Q_INVOKABLE bool isCurrentFiwmwareBootloader();
     void checkMcConfig();
     Q_INVOKABLE void emitEmptyValues();
     Q_INVOKABLE void emitEmptySetupValues();
@@ -65,6 +60,9 @@ signals:
     void dataToSend(QByteArray &data);
 
     void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired);
+    void eraseNewAppResReceived(bool ok);
+    void eraseBootloaderResReceived(bool ok);
+    void writeNewAppDataResReceived(bool ok);
     void ackReceived(QString ackType);
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void printReceived(QString str);
@@ -105,6 +103,11 @@ public slots:
     void processPacket(QByteArray data);
 
     void getFwVersion();
+    void eraseNewApp(bool fwdCan, quint32 fwSize);
+    void eraseBootloader(bool fwdCan);
+    void writeNewAppData(QByteArray data, quint32 offset, bool fwdCan);
+    void writeNewAppDataLzo(QByteArray data, quint32 offset, quint16 decompressedLen, bool fwdCan);
+    void jumpToBootloader(bool fwdCan);
     void getValues();
     void sendTerminalCmd(QString cmd);
     void sendTerminalCmdSync(QString cmd);
@@ -160,6 +163,7 @@ public slots:
     void bmConnect();
     void bmEraseFlashAll();
     void bmWriteFlash(uint32_t addr, QByteArray data);
+    void bmWriteFlashLzo(uint32_t addr, quint16 decompressedLen, QByteArray data);
     void bmReboot();
     void bmDisconnect();
     void bmMapPinsDefault();
@@ -171,7 +175,6 @@ private slots:
 
 private:
     void emitData(QByteArray data);
-    void firmwareUploadUpdate(bool isTimeout);
 
     QTimer *mTimer;
     bool mSendCan;
@@ -180,17 +183,6 @@ private:
     bool mLimitedSupportsFwdAllCan;
     bool mLimitedSupportsEraseBootloader;
     QVector<int> mCompatibilityCommands; // int to be QML-compatible
-
-    // FW upload state
-    QByteArray mNewFirmware;
-    bool mFirmwareIsUploading;
-    int mFirmwareState;
-    int mFimwarePtr;
-    int mFirmwareTimer;
-    int mFirmwareRetries;
-    bool mFirmwareIsBootloader;
-    bool mFirmwareFwdAllCan;
-    QString mFirmwareUploadStatus;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;

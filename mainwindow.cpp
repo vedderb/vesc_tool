@@ -334,7 +334,7 @@ void MainWindow::timerSlot()
     }
 
     // Disable all data streaming when uploading firmware
-    if (mVesc->commands()->getFirmwareUploadProgress() > 0.1) {
+    if (mVesc->getFwUploadProgress() > 0.1) {
         ui->actionSendAlive->setChecked(false);
         ui->actionRtData->setChecked(false);
         ui->actionRtDataApp->setChecked(false);

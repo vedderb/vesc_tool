@@ -367,6 +367,20 @@
             </spacer>
            </item>
            <item>
+            <widget class="QPushButton" name="experimentClearDataButton">
+             <property name="toolTip">
+              <string>Clear data from plots</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="experimentScatterButton">
              <property name="toolTip">
               <string>Use Scatterplot</string>

@@ -43,6 +43,18 @@ BleUart::BleUart(QObject *parent) : QObject(parent)
     connect(mDeviceDiscoveryAgent, SIGNAL(finished()), this, SLOT(scanFinished()));
 }
 
+BleUart::~BleUart() {
+    if (mService) {
+        delete mService;
+        mService = nullptr;
+    }
+
+    if (mControl) {
+        delete mControl;
+        mControl = nullptr;
+    }
+}
+
 void BleUart::startScan()
 {
     mDevs.clear();
@@ -96,7 +108,6 @@ void BleUart::disconnectBle()
     }
 
     if (mControl) {
-//        mControl->disconnectFromDevice();
         mControl->deleteLater();
         mControl = nullptr;
     }
@@ -117,10 +128,11 @@ void BleUart::writeData(QByteArray data)
     if (isConnected()) {
         const QLowEnergyCharacteristic  rxChar = mService->characteristic(QBluetoothUuid(QUuid(mRxUuid)));
         if (rxChar.isValid()) {
-            while(data.size() > 20) {
-                mService->writeCharacteristic(rxChar, data.mid(0, 20),
+            int chunk = 20;
+            while(data.size() > chunk) {
+                mService->writeCharacteristic(rxChar, data.mid(0, chunk),
                                               QLowEnergyService::WriteWithoutResponse);
-                data.remove(0, 20);
+                data.remove(0, chunk);
             }
 
             mService->writeCharacteristic(rxChar, data, QLowEnergyService::WriteWithoutResponse);
@@ -130,8 +142,11 @@ void BleUart::writeData(QByteArray data)
 
 void BleUart::addDevice(const QBluetoothDeviceInfo &dev)
 {
-    if (dev.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration) {
-        qDebug() << "BLE scan found device:" << dev.name();
+    if ((dev.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration)) {
+        qDebug() << "BLE scan found device:" << dev.name() <<
+                    "Valid:" << dev.isValid() <<
+                    "Cached:" << dev.isCached() <<
+                    "rssi:" << dev.rssi();
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
         // macOS and iOS do not expose the hardware address of BLTE devices, must use

@@ -1,3 +1,14 @@
+== 1.26 ==
+* Log analysis:
+ - Added ability to filter out outliers from map plot.
+ - Added file browser tab.
+* Renamed 75/300 bootloader so that it also matches with the R2.
+* Added FW upload compression support for faster firmware uploads.
+* Added clear data button to experiment plot.
+* Added support for TS5700N8501 encoder.
+* Better observer gain calculation.
+* Disconnect BLE in destructor.
+
 == 1.25 ==
 * Renamed Nunchuk to VESC Remote.
 * Log analysis:

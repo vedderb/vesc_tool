@@ -34,10 +34,12 @@ class PageTerminal : public QWidget
 public:
     explicit PageTerminal(QWidget *parent = 0);
     ~PageTerminal();
-    void clearTerminal();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+
+public slots:
+    void clearTerminal();
 
 private slots:
     void printReceived(QString str);
@@ -45,6 +47,8 @@ private slots:
     void on_sendButton_clicked();
     void on_helpButton_clicked();
 
+protected:
+    virtual void showEvent(QShowEvent *event);
 private:
     Ui::PageTerminal *ui;
     VescInterface *mVesc;

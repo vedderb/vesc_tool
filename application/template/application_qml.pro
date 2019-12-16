@@ -28,32 +28,22 @@ contains(DEFINES, HAS_BLUETOOTH) {
     QT += bluetooth
 }
 
-SOURCES += main.cpp\
-    commands.cpp \
-    configparam.cpp \
-    configparams.cpp \
-    packet.cpp \
-    vescinterface.cpp \
-    vbytearray.cpp \
-    utility.cpp
+INCLUDEPATH += ../..
 
-HEADERS  += commands.h \
-    configparam.h \
-    configparams.h \
-    datatypes.h \
-    packet.h \
-    vescinterface.h \
-    vbytearray.h \
-    utility.h
+SOURCES += main.cpp
+
+HEADERS += 
     
 contains(DEFINES, HAS_BLUETOOTH) {
     SOURCES += bleuart.cpp
     HEADERS += bleuart.h
 }
 
-include(widgets/widgets.pri)
+include(../../application.pri)
+include(../../widgets/widgets.pri)
+include(../../lzo/lzo.pri)
 
 RESOURCES += \
-    res.qrc \
-    qml.qrc
+    qml.qrc \
+    ../../res.qrc \
 

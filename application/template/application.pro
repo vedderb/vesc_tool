@@ -27,25 +27,12 @@ contains(DEFINES, HAS_BLUETOOTH) {
     QT += bluetooth
 }
 
-SOURCES += main.cpp\
-    mainwindow.cpp \
-    commands.cpp \
-    configparam.cpp \
-    configparams.cpp \
-    packet.cpp \
-    vescinterface.cpp \
-    vbytearray.cpp \
-    utility.cpp
+INCLUDEPATH += ../..
 
-HEADERS  += mainwindow.h \
-    commands.h \
-    configparam.h \
-    configparams.h \
-    datatypes.h \
-    packet.h \
-    vescinterface.h \
-    vbytearray.h \
-    utility.h
+SOURCES += main.cpp \
+    mainwindow.cpp
+
+HEADERS  += mainwindow.h 
 
 FORMS += mainwindow.ui
     
@@ -54,8 +41,10 @@ contains(DEFINES, HAS_BLUETOOTH) {
     HEADERS += bleuart.h
 }
 
-include(widgets/widgets.pri)
+include(../../widgets/widgets.pri)
+include(../../lzo/lzo.pri)
+include(../../application.pri)
 
 RESOURCES += \
-    res.qrc
+    ../../res.qrc
 

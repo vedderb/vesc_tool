@@ -35,8 +35,8 @@ SOURCES += main.cpp
 HEADERS += 
     
 contains(DEFINES, HAS_BLUETOOTH) {
-    SOURCES += bleuart.cpp
-    HEADERS += bleuart.h
+    SOURCES += ../../bleuart.cpp
+    HEADERS += ../../bleuart.h
 }
 
 include(../../application.pri)

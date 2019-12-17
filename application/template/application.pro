@@ -37,8 +37,8 @@ HEADERS  += mainwindow.h
 FORMS += mainwindow.ui
     
 contains(DEFINES, HAS_BLUETOOTH) {
-    SOURCES += bleuart.cpp
-    HEADERS += bleuart.h
+    SOURCES += ../../bleuart.cpp
+    HEADERS += ../../bleuart.h
 }
 
 include(../../widgets/widgets.pri)

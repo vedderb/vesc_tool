@@ -31,6 +31,10 @@
  *   http://www.oberhumer.com/opensource/lzo/
  */
 
+#ifdef Q_OS_ANDROID
+#pragma clang optimize off
+#endif
+
 #define __LZO_IN_MINILZO 1
 
 #if defined(LZO_CFG_FREESTANDING)
@@ -6360,6 +6364,10 @@ lookbehind_overrun:
 #endif
 }
 
+#endif
+
+#ifdef Q_OS_ANDROID
+#pragma clang optimize on
 #endif
 
 /***** End of minilzo.c *****/

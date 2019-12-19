@@ -2570,6 +2570,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>On after 2 seconds</enumNames>
             <enumNames>On after 5 seconds</enumNames>
             <enumNames>On after 10 seconds</enumNames>
+            <enumNames>Unused</enumNames>
         </m_out_aux_mode>
         <si_motor_poles>
             <longName>Motor Poles</longName>

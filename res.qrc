@@ -161,6 +161,6 @@
         <file>res/images/slider1.png</file>
         <file>res/icons/icons8-target-96.png</file>
         <file>res/icons/icons8-fantasy-96.png</file>
-        <file>res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2.bin</file>
+        <file>res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3.bin</file>
     </qresource>
 </RCC>

@@ -1,3 +1,9 @@
+== 1.27 ==
+* Added option to truncate history in experiment plot.
+* Disable optimization for LZO on android to prevent crash during FW update on 32-bit devices.
+* Added HW60_MK3 FW.
+* New wand firmware.
+
 == 1.26 ==
 * Log analysis:
  - Added ability to filter out outliers from map plot.

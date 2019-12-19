@@ -255,13 +255,15 @@ void PageSwdProg::bmConnRes(int res)
         addSwdFw("VESC 4.10 - 4.12", "://res/firmwares/410_o_411_o_412/VESC_default.bin",
                  0, "://res/bootloaders/40_o_47_o_48_o_410_o_411_o_412_o_DAS_RS.bin");
         addSwdFw("VESC SIX", "://res/firmwares/60/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA.bin");
+                 0, "60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3.bin");
         addSwdFw("VESC 75/300 R1", "://res/firmwares/75_300/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA.bin");
+                 0, "60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3.bin");
         addSwdFw("VESC 75/300 R2", "://res/firmwares/75_300_R2/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA.bin");
+                 0, "60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3.bin");
         addSwdFw("VESC HD", "://res/firmwares/HD/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA.bin");
+                 0, "60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3.bin");
+        addSwdFw("VESC SIX MK3", "://res/firmwares/60_MK3/VESC_default.bin",
+                 0, "60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3.bin");
         break;
 
     case 2:
@@ -275,7 +277,7 @@ void PageSwdProg::bmConnRes(int res)
     case 4:
         addSwdFw("BLE - Xtal: 16M RX: 11 TX: 9 LED: 3",
                  "://res/other_fw/nrf51_vesc_ble_32k_16m_rx11_tx9_led3.bin");
-        addSwdFw("BLE TRAMPA - Xtal: 32M RX: 1 TX: 2 LED: 3",
+        addSwdFw("BLE TRAMPA - Xtal: 32M RX: 2 TX: 1 LED: 3",
                  "://res/other_fw/nrf51_vesc_ble_32k_32m_rx2_tx1_led3.bin");
         addSwdFw("BLE VESC Builtin - Xtal: 32M RX: 1 TX: 2 LED: 3",
                  "://res/other_fw/nrf51_vesc_ble_32k_32m_rx1_tx2_led3.bin");

@@ -169,6 +169,7 @@ public slots:
     void bmMapPinsDefault();
     void bmMapPinsNrf5x();
     void bmReadMem(uint32_t addr, quint16 size);
+    void setCurrentRel(double current);
 
 private slots:
     void timerSlot();

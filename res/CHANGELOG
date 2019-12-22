@@ -1,3 +1,8 @@
+== 1.28 ==
+* FW 3.65:
+ - Added support for PTC motor thermistors (such as the KTY84).
+ - APP_PPM sleep fix. Should solve CAN issues.
+
 == 1.27 ==
 * Added option to truncate history in experiment plot.
 * Disable optimization for LZO on android to prevent crash during FW update on 32-bit devices.

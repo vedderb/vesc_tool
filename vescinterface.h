@@ -57,8 +57,6 @@
 #include <QAndroidJniEnvironment>
 #endif
 
-#include "lzo/minilzo.h"
-
 class VescInterface : public QObject
 {
     Q_OBJECT
@@ -311,7 +309,6 @@ private:
     bool mIgnoreCanChange;
 
     QVector<int> mCanDevsLast;
-    lzo_align_t *mLzoWrkMem;
 
     // Other settings
     bool mUseImperialUnits;

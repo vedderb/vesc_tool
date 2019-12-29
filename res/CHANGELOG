@@ -1,3 +1,6 @@
+== 1.29 ==
+* Replaced miniLZO with lzokay to resolve crash on Android, and to get a bit better compression ratio.
+
 == 1.28 ==
 * FW 3.65:
  - Added support for PTC motor thermistors (such as the KTY84).

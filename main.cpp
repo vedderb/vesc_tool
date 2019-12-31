@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -18,14 +18,13 @@
     */
 
 #include "mainwindow.h"
+#include "mobile/qmlui.h"
 
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
 #include <QDesktopWidget>
 #include <QFontDatabase>
-
-#include "mobile/qmlui.h"
 
 int main(int argc, char *argv[])
 {
@@ -40,7 +39,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
 #ifdef USE_MOBILE
+#ifndef DEBUG_BUILD
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
 #else
     QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
 
@@ -109,6 +110,16 @@ int main(int argc, char *argv[])
 #ifdef USE_MOBILE
     QmlUi q;
     q.startQmlUi();
+
+    // As background running is allowed, make sure to not update the GUI when
+    // running in the background.
+    QObject::connect(&a, &QApplication::applicationStateChanged, [&q](Qt::ApplicationState state) {
+        if(state == Qt::ApplicationHidden) {
+            q.setVisible(false);
+        } else {
+            q.setVisible(true);
+        }
+    });
 #else
     MainWindow w;
     w.show();

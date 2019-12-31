@@ -1,3 +1,287 @@
+== 1.29 ==
+* Replaced miniLZO with lzokay to resolve crash on Android, and to get a bit better compression ratio.
+
+== 1.28 ==
+* FW 3.65:
+ - Added support for PTC motor thermistors (such as the KTY84).
+ - APP_PPM sleep fix. Should solve CAN issues.
+
+== 1.27 ==
+* Added option to truncate history in experiment plot.
+* Disable optimization for LZO on android to prevent crash during FW update on 32-bit devices.
+* Added HW60_MK3 FW.
+* New wand firmware.
+
+== 1.26 ==
+* Log analysis:
+ - Added ability to filter out outliers from map plot.
+ - Added file browser tab.
+* Renamed 75/300 bootloader so that it also matches with the R2.
+* Added FW upload compression support for faster firmware uploads.
+* Added clear data button to experiment plot.
+* Added support for TS5700N8501 encoder.
+* Better observer gain calculation.
+* Disconnect BLE in destructor.
+
+== 1.25 ==
+* Renamed Nunchuk to VESC Remote.
+* Log analysis:
+ - Improved tile caching.
+ - Option to not autozoom map when zooming data.
+ - Only update ENU reference when loading data.
+* Use statically linked openssl on linux build.
+
+== 1.24 ==
+* Log:
+ - Fixed midnight bug.
+ - Improved spanslider behavior.
+ - Implemented scroll-to-zoom.
+ - Improved performance when analyzing large logs.
+ - Remember vertical line position.
+
+== 1.23 ==
+* Added more data to log analysis:
+ - GNSS Accuracy.
+ - Values for first VESC on CAN-bus.
+ - Latitude and longitude.
+ - GNSS vertical speed and accuracy.
+ - Number of VESCs.
+
+== 1.22 ==
+* Use foregroud service to keep GNSS alive during logging.
+* Always use wake lock during logging.
+
+== 1.21 ==
+* Only hide GUI when the application enters the hidden state.
+* Opengl ES2 for static linux build.
+
+== 1.20 ==
+* Added TCP server to mobile version.
+* Remember log files location.
+* Added comperhensive log analysis page.
+* Added GNSS data to RT log.
+* Added setup data to RT log.
+* Added IMU data to RT log.
+* Use imperial units in profiles as well when selected.
+* Allow running in background.
+* Added wake lock when VESC is connected on Android.
+* Added flash verification option to SWD programming.
+* Added IMU 3D view to desktop version.
+* Fixed FW upload button flickering bug.
+* EUC app support.
+* FW 3.62 support:
+ - EUC app.
+ - Fixed NRF remote reverse bug.
+ - Added COMM_BM_MEM_READ.
+* New Wand firmware:
+ - Possible freeze fix.
+ - Added joystick error detection.
+ - Switch between imperial and metric by holding both buttons.
+
+== 1.19 ==
+* Display prefix and suffix correctly in mobile app.
+* FW 3.61 support:
+ - Added PPM_CTRL_TYPE_CURRENT_SMART_REV mode.
+
+== 1.18 ==
+* Native CAN-bus fixes.
+* Don't build with can-bus support in static mode as it breaks the linux serial port.
+* FW 3.60 support:
+ - Fixed IMU9x50 bug.
+ - Unrigester ICM20948 terminal callbacks when unused.
+ - Added experiment plot functions.
+ - Added D and Q axis voltage to RT data.
+ - Added smart reverse function to nunchuk app.
+* Added experiment plots to RT data page.
+* D and Q axis voltage in FOC RT plot.
+* Updated wand firmware.
+* More debug information from input reset CAN function.
+
+== 1.17 ==
+* FOC wizard motor pole setting now only allows multiples of two.
+* Native CAN-bus support.
+* Added support for multiple SWD interfaces.
+* FW 3.59 support.
+* Added wand firmware and NRF52840 firmware for VESC HD.
+* Added header to RT CSV log.
+* Added VESC HD and UAVC Omega firmwares.
+* Added NRF quick pair button.
+* Support as many commands as possible in limited mode. This will make the app quite useful even if the FW is out of date.
+* Ble improvements for NRF52 firmwares.
+* Do not disconnect after bootloader update and show different message.
+* Added IMU page with many IMU settings and live plots to adjust them.
+
+== 1.16 ==
+* Added support to export sampled data as CSV.
+* Added erase only button to SWD prog.
+
+== 1.15 ==
+* Keep screen on setting on android.
+* Added support for imperial units.
+* Added battery current warning.
+
+== 1.14 ==
+* FW 3.58 support:
+ - Set motor to FOC mode after successful FOC detection instead of the default type for the hardware.
+ - APP_ADC: Do not send brake command over CAN if config.multi_esc is not set.
+ - APP_PPM: Make pulses invalid if they are above 150 % instead of 120 %.
+ - APP_PPM: Introduced a new control mode that allows reverse with hysteria (@ackmaniac port).
+* Moved to Qt 5.12 for the mobile version.
+* Added arm64_v8a and x86 builds.
+* Request file permission when opening log and fw files.
+* Enable RT logging without having the RT data page active.
+* Added help text about RT logging.
+* Try to create RT logging path if it does not exist.
+
+== 1.13 ==
+* FW 3.57 support:
+ - Added CAN status message 5 with input voltage and tachometer data.
+ - Fix github issue #94.
+ - Use default F_SW for HW after autodetect FOC.
+
+== 1.12 ==
+* Fixed 16k_16m_rx11_tx9 NRF51 fw as well.
+
+== 1.11 ==
+* Added RT data logging to CSV file (desktop and mobile).
+* Fixed 16K NRF51 firmware (again).
+
+== 1.10 ==
+* FW 3.56 support.
+ - Fixed current offset fault in BLDC mode.
+ - Support for multiple IMUs and ICM-20948.
+* Include working firmwares for 16K NRF51 modules.
+
+== 1.09 ==
+* FW 3.55 support.
+ - New ADC control mode.
+ - Initial support for sin/cos encoders.
+ - Nunchuk CC fixes.
+ - PPM multi duty mode fix.
+* Added more fault codes.
+
+== 1.08 ==
+* FW 3.54 support.
+* SWD programming support, using the VESC as a programmer.
+ - Can be used to flash bricked VESCs from a working one.
+ - Can be used to make a custom NRF5x module.
+* Remember last custom firmware file path.
+
+== 1.07 ==
+* FW 3.53 support.
+* Updated parameters in default FOC detection.
+* Added missing l_max_erpm_fbrake parameter.
+
+== 1.06 ==
+* FW 3.52 support.
+* Added setting to disable permanent UART.
+* Added IMU page.
+* Added 3D orientation visualization to mobile interface.
+
+== 1.05 ==
+* Fixed bug with encoder detection command.
+* FW 3.51 support.
+
+== 1.04 ==
+* Fixed crash when turning off BLE module while connected.
+
+== 1.03 ==
+* FW compatibility check on all devices on CAN-bus when performing simultaneous configurations.
+
+== 1.02 ==
+* FW 3.50 support
+* Signature in app and motor configuration.
+* Generate parameter parser for firmware.
+* Signature checks on configurations.
+
+== 1.01 ==
+* Save last connected port.
+* Show UUID after pairing, and ask user to write it down.
+* Clear version text on FW page when disconnected.
+
+== 1.00 ==
+* First build for VESC Tool on google play.
+* Added direction setup to desktop version.
+* Added direction setup to QML start tools.
+
+== 0.99 ==
+* FW 3.48 support.
+* Added (non-secure) BLE pairing support.
+* Color adjustments.
+* Highlight active profile.
+* Several qml style improvements.
+
+== 0.98 ==
+* FW 3.47 support.
+* Profiles based on current percentages.
+* Removed input current from profiles.
+* Made watt limit optional for profiles.
+
+== 0.97 ==
+* FW 3.46 support.
+* CAN-bus scan support.
+* New motor setup wizard.
+* New QML connection page, with scroll and horizontal layout support.
+* Horizontal screen support for motor cfg and app cfg.
+* Invert direction setup tool.
+
+== 0.96 ==
+* Experiment page.
+* Shorter FW Upload timeout.
+* FW 3.44 support.
+* FW 3.43 support.
+* General Purpose Drive support.
+* Setup info and profile support.
+* Dark QML theme.
+* Setup realtime data support.
+* New style for gauges.
+* Fixed bug in VByteArray.
+* Some horizontal screen orientation support.
+* Many QML changes and improvements in general.
+* General purpose drive support.
+* Added calc apply old settings button to FOC detection.
+
+== 0.95 ==
+* FW 3.39: auxiliary output support.
+
+== 0.94 ==
+* Map detected BLE devices by address instead of by name to show multiple devices with the same name.
+
+== 0.93 ==
+* BLE device naming support.
+
+== 0.92 ==
+* Added generic bootloader for all hardwares.
+* FW 3.38 support.
+
+== 0.91 ==
+* Mobile: Added controls dialog, which can be opened from drawer menu.
+* FW 3.37 support.
+* Current value ranges to 1000 A.
+
+== 0.90 ==
+* Mobile:
+ - Added NRF pairing to mobile UI.
+ - Added terminal page.
+* FW 3.36 support: D term filter for position and speed controllers.
+
+== 0.89 ==
+* Added history to terminal text edit that can be accessed with the up and down arrows.
+* Major mobile UI update:
+ - MC configuration.
+ - App configuration.
+ - FOC parameter detection.
+ - BLDC parameter detection.
+ - FOC encoder detection.
+ - FOC hall sensor detection.
+ - PPM pulselength mapping.
+ - ADC voltage mapping.
+ - At this point the mobile UI should be able to do a full configuration.
+
+== 0.88 ==
+* Added Option in APP > NRF > Transmit Power for powering off the nRF module.
+* Mobile: reload mc_config and app_config on fw rx change to rescale meters.
+
 == 0.87 ==
 * RT plot time measurement improvement.
 * First implementation of BLE support.

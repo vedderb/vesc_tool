@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -20,16 +20,20 @@
 #include "setupwizardapp.h"
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QProgressDialog>
 #include "utility.h"
 
 SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     : QWizard(parent)
 {
+    mVesc = vesc;
+    mCanLastFwd = mVesc->commands()->getSendCan();
+    mCanLastId = mVesc->commands()->getCanSendId();
+
     setPage(Page_Intro, new AppIntroPage(vesc));
     setPage(Page_Connection, new AppConnectionPage(vesc));
     setPage(Page_Firmware, new AppFirmwarePage(vesc));
     setPage(Page_Multi, new AppMultiPage(vesc));
-    setPage(Page_MultiId, new AppMultiIdPage(vesc));
     setPage(Page_General, new AppGeneralPage(vesc));
     setPage(Page_Nunchuk, new AppNunchukPage(vesc));
     setPage(Page_Ppm_Map, new AppPpmMapPage(vesc));
@@ -55,6 +59,8 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
 
     connect(this, SIGNAL(currentIdChanged(int)),
             this, SLOT(idChanged(int)));
+    connect(this, SIGNAL(rejected()), this, SLOT(ended()));
+    connect(this, SIGNAL(accepted()), this, SLOT(ended()));
 }
 
 void SetupWizardApp::idChanged(int id)
@@ -63,8 +69,14 @@ void SetupWizardApp::idChanged(int id)
         setSideWidget(mSideLabel);
         mSideLabel->setVisible(true);
     } else {
-        setSideWidget(0);
+        setSideWidget(nullptr);
     }
+}
+
+void SetupWizardApp::ended()
+{
+    mVesc->commands()->setSendCan(mCanLastFwd, mCanLastId);
+    mVesc->commands()->getAppConf();
 }
 
 AppIntroPage::AppIntroPage(VescInterface *vesc, QWidget *parent)
@@ -89,14 +101,17 @@ AppIntroPage::AppIntroPage(VescInterface *vesc, QWidget *parent)
 int AppIntroPage::nextId() const
 {
     if (mVesc->isPortConnected()) {
-        if (mVesc->commands()->isLimitedMode()) {
+        if (mVesc->commands()->isLimitedMode() || !mResetInputOk) {
             return SetupWizardApp::Page_Firmware;
         } else {
-            return SetupWizardApp::Page_Multi;
+            if (mVesc->getCanDevsLast().size() == 0) {
+                return SetupWizardApp::Page_General;
+            } else {
+                return SetupWizardApp::Page_Multi;
+            }
         }
     } else {
         return SetupWizardApp::Page_Connection;
-//        return SetupWizardApp::Page_Multi;
     }
 }
 
@@ -108,7 +123,8 @@ bool AppIntroPage::validatePage()
         QMessageBox::StandardButton reply;
         reply = QMessageBox::information(this,
                                          tr("Connection"),
-                                         tr("You are not connected to the VESC. Would you like to try to automatically connect?<br><br>"
+                                         tr("You are not connected to the VESC. Would you like to try to "
+                                            "automatically connect?<br><br>"
                                             ""
                                             "<i>Notice that the USB cable must be plugged in and that the VESC "
                                             "must be powered for the connection to work.</i>"),
@@ -118,6 +134,19 @@ bool AppIntroPage::validatePage()
             Utility::autoconnectBlockingWithProgress(mVesc, this);
             res = true;
         }
+    } else {
+        mVesc->commands()->getAppConf();
+
+        QProgressDialog dialog("Scanning CAN-Bus...", QString(), 0, 0, this);
+        dialog.setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+        dialog.setWindowModality(Qt::WindowModal);
+        dialog.setAttribute(Qt::WA_DeleteOnClose);
+        dialog.show();
+
+        setEnabled(false);
+        auto devs = mVesc->scanCan();
+        mResetInputOk = Utility::resetInputCan(mVesc, devs);
+        setEnabled(true);
     }
 
     return !res;
@@ -167,10 +196,9 @@ AppFirmwarePage::AppFirmwarePage(VescInterface *vesc, QWidget *parent)
     setSubTitle(tr("You need to update the firmware on the VESC in order "
                    "to use it with this version of VESC Tool."));
 
-    mLabel = new QLabel(tr("Your VESC has old firmware, and needs to be updated. After that, "
-                           "the motor configuration has to be done again. Please run the "
-                           "motor configuration wizard to update the firmware and to configure "
-                           "the motor."));
+    mLabel = new QLabel(tr("Your VESC (or one of the VESCs on the CAN-bus) has old firmware, "
+                           "and needs to be updated. After that, "
+                           "the motor configuration has to be done again."));
 
     mLabel->setWordWrap(true);
 
@@ -188,88 +216,64 @@ AppMultiPage::AppMultiPage(VescInterface *vesc, QWidget *parent)
     : QWizardPage(parent)
 {
     mVesc = vesc;
-    mLoadDefaultAsked = false;
 
     setTitle(tr("Multiple VESCs"));
-    setSubTitle(tr("Do you have more than one VESC on your setup?"));
+    setSubTitle(tr("Found multiple VESCs on the CAN-bus, choose "
+                   "which one the input is connected to."));
 
-    mModeList = new QListWidget;
-    QListWidgetItem *item = new QListWidgetItem;
-    item->setText(tr("My setup has a single VESC."));
-    item->setIcon(QIcon("://res/images/multi_single.png"));
-    item->setData(Qt::UserRole, SetupWizardApp::Multi_Single);
-    mModeList->addItem(item);
+    mCanFwdList = new QListWidget;
+    mCanFwdList->setIconSize(QSize(50, 50));
+    mCanFwdList->setWordWrap(true);
+    mCanFwdList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    item = new QListWidgetItem;
-    item->setText(tr("My setup has more than one VESC, and I'm configuring the master VESC now. The "
-                  "master VESC is the one that is connected to the input."));
-    item->setIcon(QIcon("://res/images/multi_master.png"));
-    item->setData(Qt::UserRole, SetupWizardApp::Multi_Master);
-    mModeList->addItem(item);
-
-    item = new QListWidgetItem;
-    item->setText(tr("My setup has more than one VESC, and I'm configuring one of the slave VESCs now. "
-                  "A slave VESC is not connected to any input, only to the other VESCs over CAN-bus."));
-    item->setIcon(QIcon("://res/images/multi_slave.png"));
-    item->setData(Qt::UserRole, SetupWizardApp::Multi_Slave);
-    mModeList->addItem(item);
-
-    mModeList->setIconSize(QSize(200, 200));
-    mModeList->setCurrentItem(0);
-    mModeList->setWordWrap(true);
-    mModeList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    registerField("Multi", mModeList, "currentRow");
+    registerField("CanFwd", this, "canFwd", SIGNAL(canFwdChanged));
+    connect(mCanFwdList, SIGNAL(currentRowChanged(int)),
+            this, SIGNAL(canFwdChanged()));
 
     QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(mModeList);
+    layout->addWidget(mCanFwdList);
     setLayout(layout);
+}
+
+void AppMultiPage::initializePage()
+{
+    mCanFwdList->clear();
+
+    QListWidgetItem *item = new QListWidgetItem;
+    item->setText(tr("This VESC (ID: %1)").
+                  arg(mVesc->appConfig()->getParamInt("controller_id")));
+    item->setIcon(QIcon("://res/icons/Connected-96.png"));
+    item->setData(Qt::UserRole, -1);
+    mCanFwdList->addItem(item);
+
+    for (int dev: mVesc->getCanDevsLast()) {
+        item = new QListWidgetItem;
+        item->setText(tr("VESC with ID: %1").arg(dev));
+        item->setIcon(QIcon("://res/icons/can_off.png"));
+        item->setData(Qt::UserRole, dev);
+        mCanFwdList->addItem(item);
+    }
+
+    mCanFwdList->setCurrentItem(nullptr);
 }
 
 int AppMultiPage::nextId() const
 {
-    if (field("Multi").toInt() == SetupWizardApp::Multi_Single) {
-        return SetupWizardApp::Page_General;
-    } else {
-        return SetupWizardApp::Page_MultiId;
-    }
+    return SetupWizardApp::Page_General;
 }
 
 bool AppMultiPage::validatePage()
 {
-    if (field("Multi").toInt() == SetupWizardApp::Multi_Single) {
-        mVesc->appConfig()->updateParamBool("send_can_status", false);
+    if (field("CanFwd").toInt() >= 0) {
+        mVesc->commands()->setSendCan(true, field("CanFwd").toInt());
     } else {
-        mVesc->appConfig()->updateParamBool("send_can_status", true);
-        mVesc->appConfig()->updateParamInt("send_can_status_rate_hz", 200);
+        mVesc->commands()->setSendCan(false);
     }
 
-    if (field("Multi").toInt() == SetupWizardApp::Multi_Slave) {
-        mVesc->appConfig()->updateParamEnum("app_to_use", 3); // Use UART app on slave VESCs
-    }
+    mVesc->commands()->getAppConf();
+    Utility::waitSignal(mVesc->appConfig(), SIGNAL(updated()), 2000);
 
-    mVesc->commands()->setAppConf();
     return true;
-}
-
-void AppMultiPage::showEvent(QShowEvent *event)
-{
-    if (!mLoadDefaultAsked) {
-        mLoadDefaultAsked = true;
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::information(this,
-                                         tr("Load Default Configuration"),
-                                         tr("Would you like to load the default configuration from "
-                                            "the connected VESC before proceeding with the setup?"),
-                                         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-
-        if (reply == QMessageBox::Yes) {
-            mVesc->commands()->getAppConfDefault();
-        }
-    }
-
-    QWidget::showEvent(event);
 }
 
 void AppMultiPage::cleanupPage()
@@ -277,51 +281,14 @@ void AppMultiPage::cleanupPage()
     // Do nothing here, but override so that fields are not reset.
 }
 
-AppMultiIdPage::AppMultiIdPage(VescInterface *vesc, QWidget *parent)
-    : QWizardPage(parent)
+int AppMultiPage::getCanFwd()
 {
-    mVesc = vesc;
-
-    setTitle(tr("Set VESC ID"));
-    setSubTitle(tr("Make sure that your connected VESCs have unique IDs."));
-
-    mParamTab = new ParamTable;
-    mLabel = new QLabel(tr("TIP: After this setup you can connect the USB cable to any of the VESCs "
-                           "connected over CAN-bus and access all of them with the CAN forwarding "
-                           "function."));
-    mLabel->setWordWrap(true);
-
-    mParamTab->addParamRow(mVesc->appConfig(), "controller_id");
-
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(mParamTab);
-    layout->addWidget(mLabel);
-
-    setLayout(layout);
-}
-
-int AppMultiIdPage::nextId() const
-{
-    if (field("Multi").toInt() == SetupWizardApp::Multi_Slave) {
-        return SetupWizardApp::Page_Conclusion;
-    } else {
-        return SetupWizardApp::Page_General;
+    QListWidgetItem *item = mCanFwdList->currentItem();
+    int canFwd = 0;
+    if (item) {
+        canFwd = item->data(Qt::UserRole).toInt();
     }
-}
-
-bool AppMultiIdPage::validatePage()
-{
-    mVesc->commands()->setAppConf();
-    return true;
-}
-
-void AppMultiIdPage::initializePage()
-{
-    if (field("Multi").toInt() == SetupWizardApp::Multi_Slave) {
-        mVesc->appConfig()->updateParamInt("controller_id", 1);
-    } else {
-        mVesc->appConfig()->updateParamInt("controller_id", 0);
-    }
+    return canFwd;
 }
 
 AppGeneralPage::AppGeneralPage(VescInterface *vesc, QWidget *parent)
@@ -340,6 +307,12 @@ AppGeneralPage::AppGeneralPage(VescInterface *vesc, QWidget *parent)
     mInputList->addItem(item);
 
     item = new QListWidgetItem;
+    item->setText(tr("NRF controller."));
+    item->setIcon(QIcon("://res/images/vedder_nunchuk.jpg"));
+    item->setData(Qt::UserRole, SetupWizardApp::Input_NunchukNrf);
+    mInputList->addItem(item);
+
+    item = new QListWidgetItem;
     item->setText(tr("ADC input, such as conventional ebike throttles."));
     item->setIcon(QIcon("://res/images/ebike_throttle.jpg"));
     item->setData(Qt::UserRole, SetupWizardApp::Input_Adc);
@@ -351,16 +324,12 @@ AppGeneralPage::AppGeneralPage(VescInterface *vesc, QWidget *parent)
     item->setData(Qt::UserRole, SetupWizardApp::Input_Nunchuk);
     mInputList->addItem(item);
 
-    item = new QListWidgetItem;
-    item->setText(tr("NRF nunchuk."));
-    item->setIcon(QIcon("://res/images/vedder_nunchuk.jpg"));
-    item->setData(Qt::UserRole, SetupWizardApp::Input_NunchukNrf);
-    mInputList->addItem(item);
-
     mInputList->setIconSize(QSize(60, 60));
-    mInputList->setCurrentItem(0);
+    mInputList->setCurrentItem(nullptr);
 
-    registerField("Input", mInputList, "currentRow");
+    registerField("Input", this, "inputType", SIGNAL(inputTypeChanged));
+    connect(mInputList, SIGNAL(currentRowChanged(int)),
+            this, SIGNAL(inputTypeChanged()));
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mInputList);
@@ -373,15 +342,12 @@ int AppGeneralPage::nextId() const
     case SetupWizardApp::Input_Nunchuk:
     case SetupWizardApp::Input_NunchukNrf:
         return SetupWizardApp::Page_Nunchuk;
-        break;
 
     case SetupWizardApp::Input_Ppm:
         return SetupWizardApp::Page_Ppm_Map;
-        break;
 
     case SetupWizardApp::Input_Adc:
         return SetupWizardApp::Page_Adc_Map;
-        break;
 
     default:
         break;
@@ -398,6 +364,16 @@ bool AppGeneralPage::validatePage()
 void AppGeneralPage::cleanupPage()
 {
     // Do nothing here, but override so that fields are not reset.
+}
+
+int AppGeneralPage::getInputType()
+{
+    QListWidgetItem *item = mInputList->currentItem();
+    int input = 0;
+    if (item) {
+        input = item->data(Qt::UserRole).toInt();
+    }
+    return input;
 }
 
 AppNunchukPage::AppNunchukPage(VescInterface *vesc, QWidget *parent)
@@ -454,26 +430,34 @@ void AppNunchukPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ramp_time_neg");
     mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.stick_erpm_per_s_in_cc");
     mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.hyst");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.use_smart_rev");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_max_duty");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_ramp_time");
 
-    if (field("Multi").toInt() == SetupWizardApp::Multi_Master) {
-        mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
-        mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc");
-        mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc_max_diff");
-        mVesc->appConfig()->updateParamBool("app_chuk_conf.multi_esc", true);
-    } else {
-        mVesc->appConfig()->updateParamBool("app_chuk_conf.multi_esc", false);
-    }
+    mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc_max_diff");
+    mVesc->appConfig()->updateParamBool("app_chuk_conf.multi_esc", true);
 
     if (field("Input").toInt() == SetupWizardApp::Input_Nunchuk) {
         setSubTitle(tr("Configure your nyko kama nunchuk."));
-        mNrfPair->setVisible(false);
+        mNrfPair->setVisible(false);        
         mVesc->appConfig()->updateParamEnum("app_to_use", 6);
         mVesc->commands()->setAppConf();
+        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+        // TODO: Figure out why setting the conf twice is required...
+        mVesc->commands()->setAppConf();
+        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
     } else {
         setSubTitle(tr("Pair and configure your NRF nunchuk."));
         mNrfPair->setVisible(true);
-        mVesc->appConfig()->updateParamEnum("app_to_use", 7);
+//        mVesc->appConfig()->updateParamEnum("app_to_use", 7);
+        mVesc->appConfig()->updateParamEnum("app_to_use", 3); // Assume permanent NRF or NRF51 on UART
         mVesc->commands()->setAppConf();
+        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+        // TODO: Figure out why setting the conf twice is required...
+        mVesc->commands()->setAppConf();
+        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
 
         QMessageBox::information(this,
                                  tr("NRF Pairing"),
@@ -492,7 +476,7 @@ void AppNunchukPage::initializePage()
         mNrfPair->startPairing();
     }
 
-    mTimer->start(20);
+    mTimer->start(40);
 }
 
 void AppNunchukPage::decodedChukReceived(double value)
@@ -555,8 +539,11 @@ void AppPpmMapPage::initializePage()
     mVesc->appConfig()->updateParamEnum("app_ppm_conf.ctrl_type", 0);
     mVesc->appConfig()->updateParamEnum("app_to_use", 4);
     mVesc->commands()->setAppConf();
-
-    mTimer->start(20);
+    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    // TODO: Figure out why setting the conf twice is required...
+    mVesc->commands()->setAppConf();
+    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    mTimer->start(40);
 }
 
 void AppPpmMapPage::paramChangedDouble(QObject *src, QString name, double newParam)
@@ -621,15 +608,14 @@ void AppPpmPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_pos");
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_neg");
     mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pid_max_erpm");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.max_erpm_for_dir");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_max_duty");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_ramp_time");
 
-    if (field("Multi").toInt() == SetupWizardApp::Multi_Master) {
-        mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
-        mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc");
-        mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc_max_diff");
-        mVesc->appConfig()->updateParamBool("app_ppm_conf.multi_esc", true);
-    } else {
-        mVesc->appConfig()->updateParamBool("app_ppm_conf.multi_esc", false);
-    }
+    mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc_max_diff");
+    mVesc->appConfig()->updateParamBool("app_ppm_conf.multi_esc", true);
 
     mVesc->appConfig()->updateParamEnum("app_ppm_conf.ctrl_type", 3);
     mVesc->commands()->setAppConf();
@@ -685,11 +671,14 @@ void AppAdcMapPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_inverted");
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.hyst");
 
-    mVesc->appConfig()->updateParamEnum("app_to_use", 2);
+    mVesc->appConfig()->updateParamEnum("app_to_use", 5);
     mVesc->appConfig()->updateParamEnum("app_adc_conf.ctrl_type", 0);
     mVesc->commands()->setAppConf();
-
-    mTimer->start(20);
+    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    // TODO: Figure out why setting the conf twice is required...
+    mVesc->commands()->setAppConf();
+    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    mTimer->start(40);
 }
 
 void AppAdcMapPage::paramChangedDouble(QObject *src, QString name, double newParam)
@@ -769,14 +758,10 @@ void AppAdcPage::initializePage()
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_pos");
     mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_neg");
 
-    if (field("Multi").toInt() == SetupWizardApp::Multi_Master) {
-        mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
-        mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc");
-        mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc_max_diff");
-        mVesc->appConfig()->updateParamBool("app_adc_conf.multi_esc", true);
-    } else {
-        mVesc->appConfig()->updateParamBool("app_adc_conf.multi_esc", false);
-    }
+    mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc_max_diff");
+    mVesc->appConfig()->updateParamBool("app_adc_conf.multi_esc", true);
 
     mVesc->appConfig()->updateParamEnum("app_adc_conf.ctrl_type", 1);
     mVesc->commands()->setAppConf();
@@ -803,21 +788,6 @@ int AppConclusionPage::nextId() const
 
 void AppConclusionPage::initializePage()
 {
-    switch (field("Multi").toInt()) {
-    case SetupWizardApp::Multi_Master:
-        mLabel->setText(tr("You have finished the app setup for the VESC. After configuring "
-                           "all the VESCs in your setup you are done."));
-        break;
-
-    case SetupWizardApp::Multi_Slave:
-        mLabel->setText(tr("You have finished the setup for this VESC. Since this is not the "
-                           "master VESC you don't have to configure any app on it. After configuring "
-                           "all the VESCs in your setup you are done."));
-        break;
-
-    default:
-        mLabel->setText(tr("You have finished the app setup for the VESC. At this point "
-                           "everything should be ready to run."));
-        break;
-    }
+    mLabel->setText(tr("You have finished the app setup. At this point "
+                       "everything should be ready to run."));
 }

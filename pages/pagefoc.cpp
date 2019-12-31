@@ -64,19 +64,24 @@ void PageFoc::setVesc(VescInterface *vesc)
         ui->sensorlessTab->addParamRow(mVesc->mcConfig(), "foc_temp_comp_base_temp");
 
         ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_sl_erpm");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_0");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_1");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_2");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_3");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_4");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_5");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_6");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_7");
+        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__0");
+        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__1");
+        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__2");
+        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__3");
+        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__4");
+        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__5");
+        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__6");
+        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__7");
 
         ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_sl_erpm");
         ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_offset");
         ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_ratio");
         ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_inverted");
+        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_sin_gain");
+        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_sin_offset");
+        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_cos_gain");
+        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_cos_offset");
+        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_sincos_filter_constant");
 
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_f_sw");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_dt_us");
@@ -89,5 +94,6 @@ void PageFoc::setVesc(VescInterface *vesc)
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_sample_v0_v7");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_sample_high_current");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_observer_gain_slow");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_current_filter_const");
     }
 }

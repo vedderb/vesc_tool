@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -17,197 +17,123 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.0
+import QtQuick 2.5
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import QtQuick.Extras 1.4
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
 Item {
+    id: rtData
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
-    property int gaugeSize: height / 4
+    property bool isHorizontal: rtData.width > rtData.height
+    property int gaugeSize: Math.min(width / 2 - 10,
+                                     (height - valMetrics.height * 10) /
+                                     (isHorizontal ? 1 : 2) - (isHorizontal ? 30 : 20))
 
-    width: 400
-    height: 620
+    Component.onCompleted: {
+        currentGauge.minimumValue = -mMcConf.getParamDouble("l_current_max")
+        currentGauge.maximumValue = mMcConf.getParamDouble("l_current_max")
+        mCommands.emitEmptyValues()
+    }
 
     ColumnLayout {
         anchors.fill: parent
         anchors.topMargin: 5
 
-        RowLayout {
+        GridLayout {
             Layout.fillWidth: true
+            Layout.fillHeight: true
+            columns: isHorizontal ? 4 : 2
 
-            ColumnLayout {
+            CustomGauge {
+                id: currentGauge
                 Layout.fillWidth: true
-
-                CircularGauge {
-                    id: currentGauge
-                    Layout.fillWidth: true
-                    minimumValue: 0
-                    value: 0
-                    Layout.preferredWidth: gaugeSize
-                    Layout.preferredHeight: gaugeSize
-
-                    Behavior on value {
-                        NumberAnimation {
-                            easing.type: Easing.OutCirc
-                            duration: 100
-                        }
-                    }
-                }
-
-                Text {
-                    id: currentText
-                    text: qsTr("Motor 0 A")
-                    horizontalAlignment: Text.AlignHCenter
-                    Layout.preferredWidth: 27
-                    font.pixelSize: 12
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    Layout.preferredHeight: 15
-                    Layout.fillWidth: true
-                }
+                maximumValue: 100
+                minimumValue: -100
+                labelStep: maximumValue > 60 ? 20 : 10
+                value: 0
+                unitText: "A"
+                typeText: "Current"
+                Layout.preferredWidth: gaugeSize
+                Layout.preferredHeight: gaugeSize
             }
 
-            ColumnLayout {
+            CustomGauge {
+                id: dutyGauge
                 Layout.fillWidth: true
-
-                CircularGauge {
-                    id: dutyGauge
-                    Layout.fillWidth: true
-                    minimumValue: -100
-                    value: 0
-                    Layout.preferredWidth: gaugeSize
-                    Layout.preferredHeight: gaugeSize
-
-                    Behavior on value {
-                        NumberAnimation {
-                            easing.type: Easing.OutCirc
-                            duration: 100
-                        }
-                    }
-                }
-
-                Text {
-                    id: dutyText
-                    text: qsTr("Duty 0 %")
-                    horizontalAlignment: Text.AlignHCenter
-                    Layout.preferredWidth: 27
-                    font.pixelSize: 12
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    Layout.preferredHeight: 15
-                    Layout.fillWidth: true
-                }
-            }
-        }
-
-        Rectangle {
-            color: "#aaaaaa"
-            Layout.fillWidth: true
-            height: 2
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            ColumnLayout {
-                Layout.fillWidth: true
-
-                CircularGauge {
-                    id: rpmGauge
-                    Layout.fillWidth: true
-                    minimumValue: 0
-                    value: 0
-                    Layout.preferredWidth: gaugeSize
-                    Layout.preferredHeight: gaugeSize
-
-                    Behavior on value {
-                        NumberAnimation {
-                            easing.type: Easing.OutCirc
-                            duration: 100
-                        }
-                    }
-                }
-
-                Text {
-                    id: rpmText
-                    text: qsTr("0 ERPM")
-                    horizontalAlignment: Text.AlignHCenter
-                    Layout.preferredWidth: 27
-                    font.pixelSize: 12
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    Layout.preferredHeight: 15
-                    Layout.fillWidth: true
-                }
+                maximumValue: 100
+                minimumValue: -100
+                labelStep: 20
+                value: 0
+                unitText: "%"
+                typeText: "Duty"
+                Layout.preferredWidth: gaugeSize
+                Layout.preferredHeight: gaugeSize
             }
 
-            ColumnLayout {
+            CustomGauge {
+                id: rpmGauge
                 Layout.fillWidth: true
+                maximumValue: 100
+                minimumValue: -100
+                labelStep: 20
+                value: -10
+                unitText: "x1000"
+                typeText: "ERPM"
+                Layout.preferredWidth: gaugeSize
+                Layout.preferredHeight: gaugeSize
+            }
 
-                CircularGauge {
-                    id: powerGauge
-                    Layout.fillWidth: true
-                    minimumValue: -100
-                    value: 0
-                    Layout.preferredWidth: gaugeSize
-                    Layout.preferredHeight: gaugeSize
-
-                    Behavior on value {
-                        NumberAnimation {
-                            easing.type: Easing.OutCirc
-                            duration: 100
-                        }
-                    }
-                }
-
-                Text {
-                    id: powerText
-                    text: qsTr("Power 0 W")
-                    horizontalAlignment: Text.AlignHCenter
-                    Layout.preferredWidth: 27
-                    font.pixelSize: 12
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    Layout.preferredHeight: 15
-                    Layout.fillWidth: true
-                }
+            CustomGauge {
+                id: powerGauge
+                Layout.fillWidth: true
+                maximumValue: 10000
+                minimumValue: -10000
+                tickmarkScale: 0.001
+                tickmarkSuffix: "k"
+                labelStep: 1000
+                value: 0
+                unitText: "W"
+                typeText: "Power"
+                Layout.preferredWidth: gaugeSize
+                Layout.preferredHeight: gaugeSize
             }
         }
 
         Rectangle {
             id: textRect
-            gradient: Gradient {
-                GradientStop {
-                    position: 0.00;
-                    color: "#008fbe78"
-                }
-                GradientStop {
-                    position: 0.146
-                    color: "#e4eaff"
-                }
-                GradientStop {
-                    position: 0.905
-                    color: "#d8e4d2"
-                }
-                GradientStop {
-                    position: 1
-                    color: "#a4c096";
-                }
+            color: "#272727"
+
+            Rectangle {
+                anchors.bottom: valText.top
+                width: parent.width
+                height: 2
+                color: "#81D4FA"
             }
 
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: valMetrics.height * 10 + 20
+            Layout.alignment: Qt.AlignBottom
 
             Text {
                 id: valText
-                color: "black"
+                color: "white"
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
-                anchors.margins: 10
+                anchors.leftMargin: 10
+                anchors.topMargin: 5
+            }
+
+            TextMetrics {
+                id: valMetrics
+                font: valText.font
+                text: valText.text
             }
         }
     }
@@ -216,8 +142,8 @@ Item {
         target: mMcConf
 
         onUpdated: {
-            currentGauge.minimumValue = -mMcConf.getParamDouble("l_current_max")
-            currentGauge.maximumValue = mMcConf.getParamDouble("l_current_max")
+            currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5
+            currentGauge.minimumValue = -currentGauge.maximumValue
         }
     }
 
@@ -226,34 +152,30 @@ Item {
 
         onValuesReceived: {
             currentGauge.value = values.current_motor
-            currentText.text = "Motor " + parseFloat(values.current_motor).toFixed(2) + " A"
             dutyGauge.value = values.duty_now * 100.0
-            dutyText.text = "Duty " + parseFloat(values.duty_now * 100.0).toFixed(2) + " %"
 
             var fl = mMcConf.getParamDouble("foc_motor_flux_linkage")
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
-            var rpmMaxRound = (Math.ceil(rpmMax / 5000.0) * 5000.0) / 1000.0
+            var rpmMaxRound = (Math.ceil(rpmMax / 5000.0) * 5000.0) / 1000
 
             if (Math.abs(rpmGauge.maximumValue - rpmMaxRound) > 6) {
                 rpmGauge.maximumValue = rpmMaxRound
                 rpmGauge.minimumValue = -rpmMaxRound
             }
 
-            rpmGauge.value = values.rpm / 1000.0
-            rpmText.text = parseFloat(values.rpm) + " ERPM"
+            rpmGauge.value = values.rpm / 1000
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
                                                            mMcConf.getParamDouble("l_current_max")),
                                     mMcConf.getParamDouble("l_watt_max"))
-            var powerMaxRound = (Math.ceil(powerMax / 100.0) * 100.0) / 100
+            var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
             if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
                 powerGauge.maximumValue = powerMaxRound
                 powerGauge.minimumValue = -powerMaxRound
             }
 
-            powerGauge.value = (values.current_in * values.v_in) / 100
-            powerText.text = "Power " + parseFloat(values.current_in * values.v_in).toFixed(1) + " W"
+            powerGauge.value = (values.current_in * values.v_in)
 
             valText.text =
                     "Battery    : " + parseFloat(values.v_in).toFixed(2) + " V\n" +

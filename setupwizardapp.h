@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -45,7 +45,6 @@ public:
         Page_Connection,
         Page_Firmware,
         Page_Multi,
-        Page_MultiId,
         Page_General,
         Page_Nunchuk,
         Page_Ppm_Map,
@@ -62,19 +61,17 @@ public:
         Input_NunchukNrf
     };
 
-    enum {
-        Multi_Single = 0,
-        Multi_Master,
-        Multi_Slave
-    };
-
     SetupWizardApp(VescInterface *vesc, QWidget *parent = 0);
 
 private slots:
     void idChanged(int id);
+    void ended();
 
 private:
     AspectImgLabel *mSideLabel;
+    VescInterface *mVesc;
+    bool mCanLastFwd;
+    int mCanLastId;
 
 };
 
@@ -90,6 +87,7 @@ public:
 private:
     VescInterface *mVesc;
     QLabel *mLabel;
+    bool mResetInputOk;
 
 };
 
@@ -128,32 +126,21 @@ class AppMultiPage : public QWizardPage
 
 public:
     AppMultiPage(VescInterface *vesc, QWidget *parent = 0);
+    void initializePage() Q_DECL_OVERRIDE;
     int nextId() const Q_DECL_OVERRIDE;
     bool validatePage() Q_DECL_OVERRIDE;
-    void showEvent(QShowEvent *event) Q_DECL_OVERRIDE;
     void cleanupPage() Q_DECL_OVERRIDE;
 
-private:
-    VescInterface *mVesc;
-    QListWidget *mModeList;
-    bool mLoadDefaultAsked;
+    Q_PROPERTY(int canFwd READ getCanFwd NOTIFY canFwdChanged)
 
-};
+    int getCanFwd();
 
-class AppMultiIdPage : public QWizardPage
-{
-    Q_OBJECT
-
-public:
-    AppMultiIdPage(VescInterface *vesc, QWidget *parent = 0);
-    int nextId() const Q_DECL_OVERRIDE;
-    bool validatePage() Q_DECL_OVERRIDE;
-    void initializePage() Q_DECL_OVERRIDE;
+signals:
+    int canFwdChanged();
 
 private:
     VescInterface *mVesc;
-    ParamTable *mParamTab;
-    QLabel *mLabel;
+    QListWidget *mCanFwdList;
 
 };
 
@@ -166,6 +153,13 @@ public:
     int nextId() const Q_DECL_OVERRIDE;
     bool validatePage() Q_DECL_OVERRIDE;
     void cleanupPage() Q_DECL_OVERRIDE;
+
+    Q_PROPERTY(int inputType READ getInputType NOTIFY inputTypeChanged)
+
+    int getInputType();
+
+signals:
+    void inputTypeChanged();
 
 private:
     VescInterface *mVesc;

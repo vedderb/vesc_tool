@@ -120,7 +120,6 @@
         <file>res/images/multi_slave.png</file>
         <file>res/icons/User Group Man Man-96.png</file>
         <file>res/icons/Settings-96.png</file>
-        <file>res/bootloaders/60.bin</file>
         <file>res/bootloaders/40_o_47_o_48_o_410_o_411_o_412_o_DAS_RS.bin</file>
         <file>res/fonts/DejaVuSans.ttf</file>
         <file>res/fonts/DejaVuSans-Oblique.ttf</file>
@@ -132,5 +131,36 @@
         <file>res/fonts/DejaVuSans-Bold.ttf</file>
         <file>res/icons/ic_folder_open_black_48dp.png</file>
         <file>res/icons/ic_insert_drive_file_black_48dp.png</file>
+        <file>res/bootloaders/generic.bin</file>
+        <file>res/logo_white.png</file>
+        <file>res/images/motors/6374.jpg</file>
+        <file>res/images/motors/ebike_dd_1kw.jpg</file>
+        <file>res/images/motors/edf_small.jpg</file>
+        <file>res/images/motors/inrunner_medium.jpg</file>
+        <file>res/images/motors/inrunner_small.jpg</file>
+        <file>res/images/motors/outrunner_mini.jpg</file>
+        <file>res/images/motors/outrunner_small.jpg</file>
+        <file>res/icons/Gyroscope-96.png</file>
+        <file>res/icons/imu_off.png</file>
+        <file>res/icons/imu_on.png</file>
+        <file>res/images/v6plus_top.png</file>
+        <file>res/other_fw/nrf51_remote_mt_32k_32m.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_16k_16m_rx1_tx2_led3.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_16k_16m_rx11_tx9_led3.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_32k_16m_rx11_tx9_led3.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_32k_32m_rx1_tx2_led3.bin</file>
+        <file>res/other_fw/nrf51_vesc_ble_32k_32m_rx2_tx1_led3.bin</file>
+        <file>res/other_fw/nrf52840_vesc_ble_rx11_tx8_led7.bin</file>
+        <file>res/other_fw/nrf52832_vesc_ble_rx6_tx7_led8.bin</file>
+        <file>res/other_fw/nrf52832_vesc_ble_rx7_tx6_led8.bin</file>
+        <file>res/other_fw/nrf52840_vesc_ble_rx26_tx25_led27.bin</file>
+        <file>res/other_fw/nrf52840_stick_remote.bin</file>
+        <file>res/icons/Polyline-96.png</file>
+        <file>res/icons/Waypoint Map-96.png</file>
+        <file>res/icons/EUC-96.png</file>
+        <file>res/images/slider1.png</file>
+        <file>res/icons/icons8-target-96.png</file>
+        <file>res/icons/icons8-fantasy-96.png</file>
+        <file>res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3.bin</file>
     </qresource>
 </RCC>

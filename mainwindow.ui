@@ -14,7 +14,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_original.qrc">
+   <iconset resource="res_silver.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -44,7 +44,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_original.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_silver.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -303,7 +303,7 @@
          <double>360.000000000000000</double>
         </property>
         <property name="singleStep">
-         <double>10.000000000000000</double>
+         <double>0.100000000000000</double>
         </property>
         <property name="value">
          <double>0.000000000000000</double>
@@ -493,9 +493,6 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionMotorSetupWizard"/>
-    <addaction name="actionAppSetupWizard"/>
-    <addaction name="separator"/>
     <addaction name="actionVESCProjectForums"/>
     <addaction name="separator"/>
     <addaction name="actionVESCToolChangelog"/>
@@ -516,6 +513,7 @@
     <addaction name="actionParameterEditorMcconf"/>
     <addaction name="actionParameterEditorAppconf"/>
     <addaction name="actionParameterEditorInfo"/>
+    <addaction name="actionExportConfigurationParser"/>
    </widget>
    <widget class="QMenu" name="menuTerminal">
     <property name="title">
@@ -535,7 +533,16 @@
     </property>
     <addaction name="actionReboot"/>
    </widget>
+   <widget class="QMenu" name="menuWizards">
+    <property name="title">
+     <string>Wizards</string>
+    </property>
+    <addaction name="actionAutoSetupFOC"/>
+    <addaction name="actionAppSetupWizard"/>
+    <addaction name="actionMotorSetupWizard"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuWizards"/>
    <addaction name="menuCommands"/>
    <addaction name="menuTerminal"/>
    <addaction name="menuTools"/>
@@ -577,6 +584,7 @@
    <addaction name="actionKeyboardControl"/>
    <addaction name="actionRtData"/>
    <addaction name="actionRtDataApp"/>
+   <addaction name="actionIMU"/>
    <addaction name="actionSendAlive"/>
    <addaction name="actionCanFwd"/>
   </widget>
@@ -934,7 +942,7 @@
      <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
    </property>
    <property name="text">
-    <string>Motor Setup Wizard [MOTOR]</string>
+    <string>Setup Other Motors</string>
    </property>
    <property name="toolTip">
     <string>Start the Motor Setup Wizard</string>
@@ -946,7 +954,7 @@
      <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
    </property>
    <property name="text">
-    <string>Input Setup Wizard [APP]</string>
+    <string>Setup Input</string>
    </property>
    <property name="toolTip">
     <string>Start the App Setup Wizard</string>
@@ -1039,6 +1047,40 @@
     <string>License</string>
    </property>
   </action>
+  <action name="actionAutoSetupFOC">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Setup Motors FOC</string>
+   </property>
+  </action>
+  <action name="actionExportConfigurationParser">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Configuration Parser</string>
+   </property>
+  </action>
+  <action name="actionIMU">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/imu_off.png</normaloff>
+     <normalon>:/res/icons/imu_on.png</normalon>:/res/icons/imu_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>IMU</string>
+   </property>
+   <property name="toolTip">
+    <string>Activate IMU Sampling</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1050,7 +1092,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_original.qrc"/>
+  <include location="res_silver.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

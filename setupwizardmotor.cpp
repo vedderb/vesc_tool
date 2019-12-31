@@ -438,6 +438,18 @@ bool SensorsPage::validatePage()
         mVesc->mcConfig()->updateParamEnum("foc_sensor_mode", 1);
         break;
 
+    case SetupWizardMotor::Sensor_Resolver_AD2S1205:
+        mVesc->mcConfig()->updateParamEnum("m_sensor_port_mode", 3);
+        mVesc->mcConfig()->updateParamEnum("sensor_mode", 0);
+        mVesc->mcConfig()->updateParamEnum("foc_sensor_mode", 1);
+        break;
+
+    case SetupWizardMotor::Sensor_Encoder_SinCos:
+        mVesc->mcConfig()->updateParamEnum("m_sensor_port_mode", 4);
+        mVesc->mcConfig()->updateParamEnum("sensor_mode", 0);
+        mVesc->mcConfig()->updateParamEnum("foc_sensor_mode", 1);
+        break;
+
     default:
         break;
     }
@@ -469,6 +481,9 @@ void SensorsPage::initializePage()
             mSensorMode->addItem("Hall Sensors", SetupWizardMotor::Sensor_Hall);
             mSensorMode->addItem("ABI Encoder", SetupWizardMotor::Sensor_EncoderAbi);
             mSensorMode->addItem("AS5047 Encoder", SetupWizardMotor::Sensor_EncoderAs);
+            mSensorMode->addItem("Resolver", SetupWizardMotor::Sensor_Resolver_AD2S1205);
+            mSensorMode->addItem("Sin/Cos Encoder", SetupWizardMotor::Sensor_Encoder_SinCos);
+            mSensorMode->addItem("BiSS Encoder", SetupWizardMotor::Sensor_EncoderBiSS);
             break;
 
         default:
@@ -580,6 +595,9 @@ int FocPage::nextId() const
         break;
 
     case SetupWizardMotor::Sensor_EncoderAbi:
+    case SetupWizardMotor::Sensor_EncoderBiSS:
+    case SetupWizardMotor::Sensor_Resolver_AD2S1205:
+    case SetupWizardMotor::Sensor_Encoder_SinCos:
     case SetupWizardMotor::Sensor_EncoderAs:
         retval = SetupWizardMotor::Page_FocEncoder;
         break;
@@ -681,14 +699,14 @@ FocHallPage::FocHallPage(VescInterface *vesc, QWidget *parent)
     mDetect->setVesc(vesc);
 
     mParamTab->addParamRow(mVesc->mcConfig(), "foc_sl_erpm");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_0");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_1");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_2");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_3");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_4");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_5");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_6");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table_7");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__0");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__1");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__2");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__3");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__4");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__5");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__6");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__7");
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mParamTab);

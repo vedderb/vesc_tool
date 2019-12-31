@@ -31,6 +31,7 @@
 #include "widgets/helpdialog.h"
 #include "utility.h"
 #include "widgets/paramdialog.h"
+#include "widgets/detectallfocdialog.h"
 
 namespace {
 void stepTowards(double &value, double goal, double step) {
@@ -112,8 +113,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(showMessageDialog(QString,QString,bool,bool)));
     connect(mVesc, SIGNAL(serialPortNotWritable(QString)),
             this, SLOT(serialPortNotWritable(QString)));
-    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES)),
-            this, SLOT(valuesReceived(MC_VALUES)));
+    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,unsigned int)),
+            this, SLOT(valuesReceived(MC_VALUES,unsigned int)));
     connect(mVesc->commands(), SIGNAL(mcConfigCheckResult(QStringList)),
             this, SLOT(mcConfigCheckResult(QStringList)));
     connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
@@ -298,6 +299,12 @@ void MainWindow::timerSlot()
         mVesc->commands()->getDecodedAdc();
         mVesc->commands()->getDecodedChuk();
         mVesc->commands()->getDecodedPpm();
+        mVesc->commands()->getDecodedBalance();
+    }
+
+    // IMU Data
+    if (ui->actionIMU->isChecked()) {
+        mVesc->commands()->getImuData(0xFFFF);
     }
 
     // Send alive command once every 10 iterations
@@ -327,10 +334,11 @@ void MainWindow::timerSlot()
     }
 
     // Disable all data streaming when uploading firmware
-    if (mVesc->commands()->getFirmwareUploadProgress() > 0.1) {
+    if (mVesc->getFwUploadProgress() > 0.1) {
         ui->actionSendAlive->setChecked(false);
         ui->actionRtData->setChecked(false);
         ui->actionRtDataApp->setChecked(false);
+        ui->actionIMU->setChecked(false);
         ui->actionKeyboardControl->setChecked(false);
     }
 
@@ -499,8 +507,9 @@ void MainWindow::serialPortNotWritable(const QString &port)
 #endif
 }
 
-void MainWindow::valuesReceived(MC_VALUES values)
+void MainWindow::valuesReceived(MC_VALUES values, unsigned int mask)
 {
+    (void)mask;
     ui->dispCurrent->setVal(values.current_motor);
     ui->dispDuty->setVal(values.duty_now * 100.0);
 }
@@ -553,6 +562,7 @@ void MainWindow::on_actionReboot_triggered()
 void MainWindow::on_stopButton_clicked()
 {
     mVesc->commands()->setCurrent(0);
+    mPageExperiments->stop();
     ui->actionSendAlive->setChecked(false);
 }
 
@@ -831,6 +841,8 @@ void MainWindow::reloadPages()
     mPageWelcome->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageWelcome);
     addPageItem(tr("Welcome & Wizards"), "://res/icons/Home-96.png", "", true);
+    connect(ui->actionAutoSetupFOC, SIGNAL(triggered(bool)),
+            mPageWelcome, SLOT(startSetupWizardFocSimple()));
     connect(ui->actionMotorSetupWizard, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardMotor()));
     connect(ui->actionAppSetupWizard, SIGNAL(triggered(bool)),
@@ -875,6 +887,12 @@ void MainWindow::reloadPages()
     addPageItem(tr("FOC"), "://res/icons/3ph_sine.png",
                 "://res/icons/mcconf.png", false, true);
 
+    mPageGpd = new PageGPD(this);
+    mPageGpd->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageGpd);
+    addPageItem(tr("GPDrive"), "://res/icons/3ph_sine.png",
+                "://res/icons/mcconf.png", false, true);
+
     mPageControllers = new PageControllers(this);
     mPageControllers->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageControllers);
@@ -885,6 +903,12 @@ void MainWindow::reloadPages()
     mPageMotorInfo->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotorInfo);
     addPageItem(tr("Additional Info"), "://res/icons/About-96.png",
+                "://res/icons/mcconf.png", false, true);
+
+    mPageExperiments = new PageExperiments(this);
+    mPageExperiments->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageExperiments);
+    addPageItem(tr("Experiments"), "://res/icons/Calculator-96.png",
                 "://res/icons/mcconf.png", false, true);
 
     mPageAppSettings = new PageAppSettings(this);
@@ -919,13 +943,25 @@ void MainWindow::reloadPages()
     mPageAppNunchuk = new PageAppNunchuk(this);
     mPageAppNunchuk->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNunchuk);
-    addPageItem(tr("Nunchuk"), "://res/icons/Wii-96.png",
+    addPageItem(tr("VESC Remote"), "://res/icons/icons8-fantasy-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageAppNrf = new PageAppNrf(this);
     mPageAppNrf->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNrf);
     addPageItem(tr("Nrf"), "://res/icons/Online-96.png",
+                "://res/icons/appconf.png", false, true);
+
+    mPageAppBalance = new PageAppBalance(this);
+    mPageAppBalance->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppBalance);
+    addPageItem(tr("Balance"), "://res/icons/EUC-96.png",
+                "://res/icons/appconf.png", false, true);
+
+    mPageAppImu = new PageAppImu(this);
+    mPageAppImu->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppImu);
+    addPageItem(tr("IMU"), "://res/icons/Gyroscope-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageDataAnalysis = new PageDataAnalysis(this);
@@ -941,12 +977,27 @@ void MainWindow::reloadPages()
     mPageSampledData = new PageSampledData(this);
     mPageSampledData->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSampledData);
-    addPageItem(tr("Sampled Data"), "://res/icons/Line Chart-96.png", "", false, true);
+    addPageItem(tr("Sampled Data"), "://res/icons/Gyroscope-96.png", "", false, true);
+
+    mPageImu = new PageImu(this);
+    mPageImu->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageImu);
+    addPageItem(tr("IMU Data"), "://res/icons/Line Chart-96.png", "", false, true);
+
+    mPageLogAnalysis = new PageLogAnalysis(this);
+    mPageLogAnalysis->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageLogAnalysis);
+    addPageItem(tr("Log Analysis"), "://res/icons/Waypoint Map-96.png", "", false, true);
 
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
     addPageItem(tr("VESC Terminal"), "://res/icons/Console-96.png", "", true);
+
+    mPageSwdProg = new PageSwdProg(this);
+    mPageSwdProg->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageSwdProg);
+    addPageItem(tr("SWD Prog"), "://res/icons/Electronics-96.png", "", true);
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
@@ -1184,7 +1235,14 @@ void MainWindow::on_actionTerminalDRV8301ResetLatchedFaults_triggered()
 
 void MainWindow::on_actionCanFwd_toggled(bool arg1)
 {
-    mVesc->commands()->setSendCan(arg1);
+    if (arg1 && mVesc->commands()->getCanSendId() < 0) {
+        ui->actionCanFwd->setChecked(false);
+        mVesc->emitMessageDialog("CAN Forward",
+                                 "No CAN device is selected. Go to the connection page and select one.",
+                                 false, false);
+    } else {
+        mVesc->commands()->setSendCan(arg1);
+    }
 }
 
 void MainWindow::on_actionSafetyInformation_triggered()
@@ -1215,4 +1273,30 @@ void MainWindow::on_actionVESCProjectForums_triggered()
 void MainWindow::on_actionLicense_triggered()
 {
     HelpDialog::showHelp(this, mVesc->infoConfig(), "gpl_text");
+}
+
+void MainWindow::on_posBox_editingFinished()
+{
+    on_posButton_clicked();
+}
+
+void MainWindow::on_posBox_valueChanged(double arg1)
+{
+    (void)arg1;
+//    on_posButton_clicked();
+}
+
+void MainWindow::on_actionExportConfigurationParser_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the parser C source and header file"),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    Utility::createParamParserC(mVesc, path);
 }

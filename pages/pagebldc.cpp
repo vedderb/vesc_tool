@@ -58,12 +58,13 @@ void PageBldc::setVesc(VescInterface *vesc)
         ui->sensorTab->addParamRow(mVesc->mcConfig(), "hall_sl_erpm");
         for (int i = 0;i < 8;i++) {
             QString str;
-            str.sprintf("hall_table_%d", i);
+            str.sprintf("hall_table__%d", i);
             ui->sensorTab->addParamRow(mVesc->mcConfig(), str);
         }
 
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "sl_phase_advance_at_br");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "sl_cycle_int_rpm_br");
+        ui->advancedTab->addParamRow(mVesc->mcConfig(), "l_max_erpm_fbrake");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "pwm_mode");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "cc_gain");
         ui->advancedTab->addParamRow(mVesc->mcConfig(), "cc_ramp_step_max");

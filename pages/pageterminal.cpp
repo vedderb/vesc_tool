@@ -37,6 +37,7 @@ PageTerminal::~PageTerminal()
 void PageTerminal::clearTerminal()
 {
     ui->terminalBrowser->clear();
+    ui->terminalEdit->setFocus();
 }
 
 VescInterface *PageTerminal::vesc() const
@@ -61,15 +62,25 @@ void PageTerminal::printReceived(QString str)
 
 void PageTerminal::on_sendButton_clicked()
 {
-    if (mVesc) {
+    if (mVesc && mVesc->isPortConnected()) {
         mVesc->commands()->sendTerminalCmd(ui->terminalEdit->text());
         ui->terminalEdit->clear();
     }
+    else {
+        ui->terminalBrowser->append("VESC not connected");
+    }
+
+    ui->terminalEdit->setFocus();
 }
 
 void PageTerminal::on_helpButton_clicked()
 {
-    if (mVesc) {
-        mVesc->commands()->sendTerminalCmd("help");
-    }
+    ui->terminalEdit->setText("help");
+    on_sendButton_clicked();
+}
+
+void PageTerminal::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent( event );
+    ui->terminalEdit->setFocus();
 }

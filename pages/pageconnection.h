@@ -42,19 +42,35 @@ public:
 private slots:
     void timerSlot();
     void bleScanDone(QVariantMap devs, bool done);
+    void pingCanRx(QVector<int> devs, bool isTimeout);
+    void CANbusNewNode(int node);
+    void CANbusInterfaceListUpdated();
+    void pairingListUpdated();
 
     void on_serialRefreshButton_clicked();
     void on_serialDisconnectButton_clicked();
     void on_serialConnectButton_clicked();
+    void on_CANbusScanButton_clicked();
+    void on_CANbusDisconnectButton_clicked();
+    void on_CANbusConnectButton_clicked();
     void on_tcpDisconnectButton_clicked();
     void on_tcpConnectButton_clicked();
-    void on_canFwdBox_valueChanged(int arg1);
     void on_helpButton_clicked();
     void on_canFwdButton_toggled(bool checked);
     void on_autoConnectButton_clicked();
     void on_bleScanButton_clicked();
     void on_bleDisconnectButton_clicked();
     void on_bleConnectButton_clicked();
+    void on_bleSetNameButton_clicked();
+    void on_canFwdBox_currentIndexChanged(const QString &arg1);
+    void on_canRefreshButton_clicked();
+    void on_canDefaultButton_clicked();
+    void on_pairConnectedButton_clicked();
+    void on_addConnectedButton_clicked();
+    void on_deletePairedButton_clicked();
+    void on_clearPairedButton_clicked();
+    void on_addUuidButton_clicked();
+    void on_unpairButton_clicked();
 
 private:
     Ui::PageConnection *ui;

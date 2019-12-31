@@ -230,6 +230,26 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="uploadAllButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upload firmware to the connected VESC, as well as to the VESCs connected over CAN-bus. Only available in FW3.45+.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#cc0000;&quot;&gt;WARNING&lt;/span&gt;: This function should &lt;span style=&quot; font-weight:600;&quot;&gt;only&lt;/span&gt; be used if all VESCs on the CAN-bus have the same hardware version. Otherwise, the firmware has to be updated on them individually.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>All</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../res.qrc">
+            <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>

@@ -79,12 +79,19 @@ QVariantMap FwHelper::getBootloaders(QString hw)
         }
     }
 
+    if (bls.isEmpty()) {
+        QFileInfo generic("://res/bootloaders/generic.bin");
+        if (generic.exists()) {
+            bls.insert("generic", generic.absoluteFilePath());
+        }
+    }
+
     return bls;
 }
 
-bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc, bool isBootloader, bool checkName)
+bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
+                              bool isBootloader, bool checkName, bool fwdCan)
 {
-    // TODO: Should this be removed on android?
     if (filename.startsWith("file:/")) {
         filename.remove(0, 6);
     }
@@ -120,7 +127,7 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc, bool isBoot
     }
 
     QByteArray data = file.readAll();
-    vesc->commands()->startFirmwareUpload(data, isBootloader);
+    vesc->fwUpload(data, isBootloader, fwdCan);
 
     return true;
 }

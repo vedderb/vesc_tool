@@ -58,6 +58,9 @@ void PageAppPpm::setVesc(VescInterface *vesc)
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pid_max_erpm");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_pos");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_neg");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.max_erpm_for_dir");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_max_duty");
+        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_ramp_time");
         ui->generalTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.multi_esc");
         ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc");
@@ -79,7 +82,7 @@ void PageAppPpm::setVesc(VescInterface *vesc)
         connect(mVesc->appConfig(), SIGNAL(paramChangedEnum(QObject*,QString,int)),
                 this, SLOT(paramChangedEnum(QObject*,QString,int)));
 
-        paramChangedEnum(0, "app_ppm_conf.throttle_exp_mode", 0);
+        paramChangedEnum(nullptr, "app_ppm_conf.throttle_exp_mode", 0);
     }
 }
 

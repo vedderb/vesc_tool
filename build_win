@@ -3,22 +3,26 @@
 # http://stackoverflow.com/questions/14170590/building-qt-5-on-linux-for-windows
 
 # cd /opt
-# sudo mkdir mxe
-# sudo chown $USER mxe
-# git clone https://github.com/mxe/mxe.git
-# sudo apt-get install autoconf automake autopoint bash bison bzip2 flex gettext git g++ gperf intltool libffi-dev libgdk-pixbuf2.0-dev libtool libltdl-dev libssl-dev libxml-parser-perl make openssl p7zip-full patch perl pkg-config python ruby scons sed unzip wget xz-utils g++-multilib libc6-dev-i386 libtool-bin
-# cd mxe
+# sudo mkdir mxe2
+# sudo chown $USER mxe2
+# git clone https://github.com/mxe/mxe.git mxe2
+# sudo apt-get install autoconf automake autopoint bash bison bzip2 flex gettext git g++ gperf intltool libffi-dev libgdk-pixbuf2.0-dev libtool libltdl-dev libssl-dev libxml-parser-perl make openssl p7zip-full patch perl pkg-config python ruby scons sed unzip wget xz-utils g++-multilib libc6-dev-i386 libtool-bin lzip
+# cd mxe2
 # make qtbase
 # make qtserialport
 # make qtconnectivity
 # make qtquickcontrols
 # make qtquickcontrols2
+# make qtserialbus
+# make qtlocation
 
-export PATH=/opt/mxe/usr/bin/:$PATH
+set -e
+
+export PATH=/opt/mxe2/usr/bin/:$PATH
 rm -rf build/win/*
 
 # Original
-/opt/mxe/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_original"
+/opt/mxe2/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_original"
 make clean
 make -j8
 rm -rf build/win/obj
@@ -28,7 +32,7 @@ ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Platinum
-/opt/mxe/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_platinum"
+/opt/mxe2/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_platinum"
 make clean
 make -j8
 rm -rf build/win/obj
@@ -38,7 +42,7 @@ ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Gold
-/opt/mxe/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_gold"
+/opt/mxe2/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_gold"
 make clean
 make -j8
 rm -rf build/win/obj
@@ -48,7 +52,7 @@ ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Silver
-/opt/mxe/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_silver"
+/opt/mxe2/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_silver"
 make clean
 make -j8
 rm -rf build/win/obj
@@ -58,7 +62,7 @@ ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Bronze
-/opt/mxe/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_bronze"
+/opt/mxe2/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_bronze"
 make clean
 make -j8
 rm -rf build/win/obj
@@ -68,7 +72,7 @@ ls | grep -v '\.zip$' | xargs rm
 cd ../..
 
 # Free of charge
-/opt/mxe/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_free"
+/opt/mxe2/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG+=release_win build_free"
 make clean
 make -j8
 rm -rf build/win/obj

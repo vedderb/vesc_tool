@@ -49,5 +49,7 @@ void PageDc::setVesc(VescInterface *vesc)
         ui->paramTab->addParamRow(mVesc->mcConfig(), "m_duty_ramp_step");
         ui->paramTab->addParamRow(mVesc->mcConfig(), "m_current_backoff_gain");
         ui->paramTab->addParamRow(mVesc->mcConfig(), "m_dc_f_sw");
+        ui->paramTab->addParamRow(mVesc->mcConfig(), "foc_pll_kp");
+        ui->paramTab->addParamRow(mVesc->mcConfig(), "foc_pll_ki");
     }
 }

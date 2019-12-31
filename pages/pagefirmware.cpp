@@ -32,19 +32,30 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
     ui->cancelButton->setEnabled(false);
-    mVesc = 0;
+    mVesc = nullptr;
 
     updateHwList();
     updateBlList();
+
+    mTimer = new QTimer(this);
+    mTimer->start(500);
 
     connect(ui->hwList, SIGNAL(currentRowChanged(int)),
             this, SLOT(updateFwList()));
     connect(ui->showNonDefaultBox, SIGNAL(toggled(bool)),
             this, SLOT(updateFwList()));
+    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+
+    QSettings set;
+    if (set.contains("pagefirmware/lastcustomfile")) {
+        ui->fwEdit->setText(set.value("pagefirmware/lastcustomfile").toString());
+    }
 }
 
 PageFirmware::~PageFirmware()
 {
+    QSettings set;
+    set.setValue("pagefirmware/lastcustomfile", ui->fwEdit->text());
     delete ui;
 }
 
@@ -58,7 +69,7 @@ void PageFirmware::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->display->setText(mVesc->commands()->getFirmwareUploadStatus());
+        ui->display->setText(mVesc->getFwUploadStatus());
 
         QStringList fws = mVesc->getSupportedFirmwares();
         QString str;
@@ -72,8 +83,22 @@ void PageFirmware::setVesc(VescInterface *vesc)
 
         connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
                 this, SLOT(fwUploadStatus(QString,double,bool)));
-        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray)),
-                this, SLOT(fwVersionReceived(int,int,QString,QByteArray)));
+        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+    }
+}
+
+void PageFirmware::timerSlot()
+{
+    if (mVesc) {
+        if (mVesc->getFwUploadProgress() >= 0.0) {
+            ui->uploadAllButton->setEnabled(mVesc->commands()->getLimitedSupportsFwdAllCan() &&
+                                            !mVesc->commands()->getSendCan() && mVesc->getFwUploadProgress() < 0.0);
+        }
+
+        if (!mVesc->isPortConnected()) {
+            ui->currentLabel->clear();
+        }
     }
 }
 
@@ -89,10 +114,11 @@ void PageFirmware::fwUploadStatus(const QString &status, double progress, bool i
 
     ui->display->setValue(progress * 100.0);
     ui->uploadButton->setEnabled(!isOngoing);
+    ui->uploadAllButton->setEnabled(!isOngoing);
     ui->cancelButton->setEnabled(isOngoing);
 }
 
-void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid)
+void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired)
 {
     QString fwStr;
     QString strUuid = Utility::uuid2Str(uuid, true);
@@ -111,6 +137,8 @@ void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArra
             fwStr += "\n" + strUuid;
         }
     }
+
+    fwStr += "\n" + QString("Paired: %1").arg(isPaired ? "true" : "false");
 
     ui->currentLabel->setText(fwStr);
     updateHwList(hw);
@@ -152,7 +180,7 @@ void PageFirmware::updateFwList()
 {
     ui->fwList->clear();
     QListWidgetItem *item = ui->hwList->currentItem();
-    if (item != 0) {
+    if (item != nullptr) {
         QString hw = item->data(Qt::UserRole).toString();
 
         QDirIterator it(hw);
@@ -196,6 +224,16 @@ void PageFirmware::updateBlList(QString hw)
         }
     }
 
+    if (ui->blList->count() == 0) {
+        QFileInfo generic("://res/bootloaders/generic.bin");
+        if (generic.exists()) {
+            QListWidgetItem *item = new QListWidgetItem;
+            item->setText("generic");
+            item->setData(Qt::UserRole, generic.absoluteFilePath());
+            ui->blList->insertItem(ui->blList->count(), item);
+        }
+    }
+
     if (ui->blList->count() > 0) {
         ui->blList->setCurrentRow(0);
     }
@@ -215,6 +253,35 @@ void PageFirmware::on_chooseButton_clicked()
 }
 
 void PageFirmware::on_uploadButton_clicked()
+{
+    uploadFw(false);
+}
+
+void PageFirmware::on_readVersionButton_clicked()
+{
+    if (mVesc) {
+        mVesc->commands()->getFwVersion();
+    }
+}
+
+void PageFirmware::on_cancelButton_clicked()
+{
+    if (mVesc) {
+        mVesc->fwUploadCancel();
+    }
+}
+
+void PageFirmware::on_changelogButton_clicked()
+{
+    HelpDialog::showHelp(this, "Firmware Changelog", Utility::fwChangeLog());
+}
+
+void PageFirmware::on_uploadAllButton_clicked()
+{
+    uploadFw(true);
+}
+
+void PageFirmware::uploadFw(bool allOverCan)
 {
     if (mVesc) {
         if (!mVesc->isPortConnected()) {
@@ -310,13 +377,21 @@ void PageFirmware::on_uploadButton_clicked()
                                             "chosen the correct hardware version?"),
                                          QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         } else if (ui->fwTabWidget->currentIndex() == 2) {
-            reply = QMessageBox::warning(this,
-                                         tr("Warning"),
-                                         tr("This will attempt to upload a bootloader to the connected VESC. "
-                                            "If the connected VESC already has a bootloader this will destroy "
-                                            "the bootloader and firmware updates cannot be done anymore. Do "
-                                            "you want to continue?"),
-                                         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (mVesc->commands()->getLimitedSupportsEraseBootloader()) {
+                reply = QMessageBox::warning(this,
+                                             tr("Warning"),
+                                             tr("This will attempt to upload a bootloader to the connected VESC. "
+                                                "Do you want to continue?"),
+                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            } else {
+                reply = QMessageBox::warning(this,
+                                             tr("Warning"),
+                                             tr("This will attempt to upload a bootloader to the connected VESC. "
+                                                "If the connected VESC already has a bootloader this will destroy "
+                                                "the bootloader and firmware updates cannot be done anymore. Do "
+                                                "you want to continue?"),
+                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            }
             isBootloader = true;
         } else {
             reply = QMessageBox::No;
@@ -324,32 +399,15 @@ void PageFirmware::on_uploadButton_clicked()
 
         if (reply == QMessageBox::Yes) {
             QByteArray data = file.readAll();
-            mVesc->commands()->startFirmwareUpload(data, isBootloader);
+            bool fwRes = mVesc->fwUpload(data, isBootloader, allOverCan);
 
-            QMessageBox::warning(this,
-                                 tr("Warning"),
-                                 tr("The firmware upload is now ongoing. After the upload has finished you must wait at least "
-                                    "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
-                                    "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
+            if (!isBootloader && fwRes) {
+                QMessageBox::warning(this,
+                                     tr("Warning"),
+                                     tr("The firmware upload is done. You must wait at least "
+                                        "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
+                                        "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
+            }
         }
     }
-}
-
-void PageFirmware::on_readVersionButton_clicked()
-{
-    if (mVesc) {
-        mVesc->commands()->getFwVersion();
-    }
-}
-
-void PageFirmware::on_cancelButton_clicked()
-{
-    if (mVesc) {
-        mVesc->commands()->cancelFirmwareUpload();
-    }
-}
-
-void PageFirmware::on_changelogButton_clicked()
-{
-    HelpDialog::showHelp(this, "Firmware Changelog", Utility::fwChangeLog());
 }

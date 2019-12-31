@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -28,8 +28,8 @@ class Packet : public QObject
     Q_OBJECT
 public:
     explicit Packet(QObject *parent = 0);
+    ~Packet();
     void sendPacket(const QByteArray &data);
-
     static unsigned short crc16(const unsigned char *buf, unsigned int len);
 
 signals:
@@ -45,12 +45,16 @@ private slots:
 private:
     QTimer *mTimer;
     int mRxTimer;
-    int mRxState;
-    unsigned int mPayloadLength;
-    unsigned char mCrcLow;
-    unsigned char mCrcHigh;
-    QByteArray mRxBuffer;
     int mByteTimeout;
+    unsigned int mRxReadPtr;
+    unsigned int mRxWritePtr;
+    int mBytesLeft;
+    unsigned int mMaxPacketLen;
+    unsigned int mBufferLen;
+    unsigned char *mRxBuffer;
+
+    int try_decode_packet(unsigned char *buffer, unsigned int in_len,
+                          int *bytes_left, QVector<QByteArray> &decodedPackets);
 
 };
 

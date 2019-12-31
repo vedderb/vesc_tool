@@ -11,7 +11,7 @@ make clean
 make -j8
 rm -rf build/macos/obj
 cd build/macos
-zip vesc_tool_original_macos.zip `ls | grep -v '\.zip$'`
+zip -qr vesc_tool_original_macos.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm -rf
 cd ../..
 
@@ -21,7 +21,7 @@ make clean
 make -j8
 rm -rf build/macos/obj
 cd build/macos
-zip vesc_tool_platinum_macos.zip `ls | grep -v '\.zip$'`
+zip -qr vesc_tool_platinum_macos.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm -rf
 cd ../..
 
@@ -31,7 +31,7 @@ make clean
 make -j8
 rm -rf build/macos/obj
 cd build/macos
-zip vesc_tool_gold_macos.zip `ls | grep -v '\.zip$'`
+zip -qr vesc_tool_gold_macos.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm -rf
 cd ../..
 
@@ -41,7 +41,7 @@ make clean
 make -j8
 rm -rf build/macos/obj
 cd build/macos
-zip vesc_tool_silver_macos.zip `ls | grep -v '\.zip$'`
+zip -qr vesc_tool_silver_macos.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm -rf
 cd ../..
 
@@ -51,7 +51,7 @@ make clean
 make -j8
 rm -rf build/macos/obj
 cd build/macos
-zip vesc_tool_bronze_macos.zip `ls | grep -v '\.zip$'`
+zip -qr vesc_tool_bronze_macos.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm -rf
 cd ../..
 
@@ -61,6 +61,6 @@ make clean
 make -j8
 rm -rf build/macos/obj
 cd build/macos
-zip vesc_tool_free_macos.zip `ls | grep -v '\.zip$'`
+zip -qr vesc_tool_free_macos.zip `ls | grep -v '\.zip$'`
 ls | grep -v '\.zip$' | xargs rm -rf
 cd ../..

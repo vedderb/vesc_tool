@@ -18,8 +18,7 @@ export ANDROID_SDK_ROOT=$ANDROID_HOME
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_161.jdk/Contents/Home
 export PATH=$JAVA_HOME/bin:$PATH
 
-# ANDROID_BUILD_TOOLS_VERSION=29.0.2
-ANDROID_BUILD_TOOLS_VERSION=23.0.1
+ANDROID_BUILD_TOOLS_VERSION=29.0.2
 export PATH=$ANDROID_SDK_ROOT/emulator:$PATH
 export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/tools/bin:$ANDROID_SDK_ROOT/tools/proguard/bin:$ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$ANDROID_NDK_ROOT:$PATH
 
@@ -27,10 +26,16 @@ export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/tools:$ANDROID_SD
 rm -rf build/android/*
 
 # armv7
-# export QT_VERSION=5.12.3
-export PATH=$HOME/Qt5.12.3/5.12.3/android_armv7/bin/:$PATH
-export ANDROID_NDK_TOOLCHAIN_PREFIX=arm-linux-androideabi
-export ANDROID_NDK_TOOLS_PREFIX=arm-linux-androideabi
+# ANDROID_ARCH=arm
+# export PATH=$HOME/Qt5.12.3/5.12.3/android_armv7/bin/:$PATH
+# export ANDROID_NDK_TOOLCHAIN_PREFIX=arm-linux-androideabi
+# export ANDROID_NDK_TOOLS_PREFIX=arm-linux-androideabi
+
+# armv8
+ANDROID_ARCH=arm64
+export PATH=$HOME/Qt5.12.3/5.12.3/android_arm64_v8a/bin/:$PATH
+export ANDROID_NDK_TOOLCHAIN_PREFIX=aarch64-linux-android
+export ANDROID_NDK_TOOLS_PREFIX=aarch64-linux-android
 
 # Mobile
 qmake -config release "CONFIG += release_android build_mobile"
@@ -56,7 +61,7 @@ rm -f build/android/libvesc_tool.so
 
 # Zip APKs
 cd build/android
-zip vesc_tool_android.zip vesc_tool_mobile.apk vesc_tool_full.apk
+zip vesc_tool_android-$ANDROID_ARCH.zip vesc_tool_mobile.apk vesc_tool_full.apk
 rm -f vesc_tool_mobile.apk
 rm -f vesc_tool_full.apk
 cd ../..

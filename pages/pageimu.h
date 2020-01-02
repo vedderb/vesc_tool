@@ -24,6 +24,7 @@
 #include <QVector>
 #include <QTimer>
 #include "vescinterface.h"
+#include "widgets/vesc3dview.h"
 
 namespace Ui {
 class PageImu;
@@ -72,6 +73,7 @@ private:
 
     double mSecondCounter;
     qint64 mLastUpdateTime;
+    Vesc3DView *m3dView;
 
     void appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize);
 };

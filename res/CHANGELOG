@@ -1,3 +1,83 @@
+== 1.29 ==
+* Replaced miniLZO with lzokay to resolve crash on Android, and to get a bit better compression ratio.
+
+== 1.28 ==
+* FW 3.65:
+ - Added support for PTC motor thermistors (such as the KTY84).
+ - APP_PPM sleep fix. Should solve CAN issues.
+
+== 1.27 ==
+* Added option to truncate history in experiment plot.
+* Disable optimization for LZO on android to prevent crash during FW update on 32-bit devices.
+* Added HW60_MK3 FW.
+* New wand firmware.
+
+== 1.26 ==
+* Log analysis:
+ - Added ability to filter out outliers from map plot.
+ - Added file browser tab.
+* Renamed 75/300 bootloader so that it also matches with the R2.
+* Added FW upload compression support for faster firmware uploads.
+* Added clear data button to experiment plot.
+* Added support for TS5700N8501 encoder.
+* Better observer gain calculation.
+* Disconnect BLE in destructor.
+
+== 1.25 ==
+* Renamed Nunchuk to VESC Remote.
+* Log analysis:
+ - Improved tile caching.
+ - Option to not autozoom map when zooming data.
+ - Only update ENU reference when loading data.
+* Use statically linked openssl on linux build.
+
+== 1.24 ==
+* Log:
+ - Fixed midnight bug.
+ - Improved spanslider behavior.
+ - Implemented scroll-to-zoom.
+ - Improved performance when analyzing large logs.
+ - Remember vertical line position.
+
+== 1.23 ==
+* Added more data to log analysis:
+ - GNSS Accuracy.
+ - Values for first VESC on CAN-bus.
+ - Latitude and longitude.
+ - GNSS vertical speed and accuracy.
+ - Number of VESCs.
+
+== 1.22 ==
+* Use foregroud service to keep GNSS alive during logging.
+* Always use wake lock during logging.
+
+== 1.21 ==
+* Only hide GUI when the application enters the hidden state.
+* Opengl ES2 for static linux build.
+
+== 1.20 ==
+* Added TCP server to mobile version.
+* Remember log files location.
+* Added comperhensive log analysis page.
+* Added GNSS data to RT log.
+* Added setup data to RT log.
+* Added IMU data to RT log.
+* Use imperial units in profiles as well when selected.
+* Allow running in background.
+* Added wake lock when VESC is connected on Android.
+* Added flash verification option to SWD programming.
+* Added IMU 3D view to desktop version.
+* Fixed FW upload button flickering bug.
+* EUC app support.
+* FW 3.62 support:
+ - EUC app.
+ - Fixed NRF remote reverse bug.
+ - Added COMM_BM_MEM_READ.
+* New Wand firmware:
+ - Possible freeze fix.
+ - Added joystick error detection.
+ - Switch between imperial and metric by holding both buttons.
+
 == 1.19 ==
 * Display prefix and suffix correctly in mobile app.
 * FW 3.61 support:

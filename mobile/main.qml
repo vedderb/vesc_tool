@@ -20,6 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import Qt.labs.settings 1.0 as QSettings
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -48,6 +49,7 @@ ApplicationWindow {
         }
 
         Utility.keepScreenOn(VescIf.keepScreenOn())
+        Utility.stopGnssForegroundService()
     }
 
     SetupWizardIntro {
@@ -385,6 +387,10 @@ ApplicationWindow {
                                 anchors.margins: 7
                                 font.pointSize: 12
                                 text: "./log"
+
+                                QSettings.Settings {
+                                    property alias rtLog: rtLogFileText.text
+                                }
                             }
                         }
 
@@ -396,9 +402,17 @@ ApplicationWindow {
 
                             onClicked: {
                                 if (checked) {
-                                    VescIf.openRtLogFile(rtLogFileText.text)
+                                    if (VescIf.openRtLogFile(rtLogFileText.text)) {
+                                        Utility.startGnssForegroundService()
+                                        VescIf.setWakeLock(true)
+                                    }
                                 } else {
                                     VescIf.closeRtLogFile()
+                                    Utility.stopGnssForegroundService()
+
+                                    if (!VescIf.useWakeLock()) {
+                                        VescIf.setWakeLock(false)
+                                    }
                                 }
                             }
 
@@ -408,9 +422,116 @@ ApplicationWindow {
                                 interval: 500
 
                                 onTriggered: {
+                                    if (rtLogEnBox.checked && !VescIf.isRtLogOpen()) {
+                                        Utility.stopGnssForegroundService()
+
+                                        if (!VescIf.useWakeLock()) {
+                                            VescIf.setWakeLock(false)
+                                        }
+                                    }
+
                                     rtLogEnBox.checked = VescIf.isRtLogOpen()
                                 }
                             }
+                        }
+                    }
+                }
+
+                GroupBox {
+                    id: tcpServerBox
+                    title: qsTr("TCP Server")
+                    Layout.fillWidth: true
+                    Layout.columnSpan: 1
+
+                    GridLayout {
+                        anchors.topMargin: -5
+                        anchors.bottomMargin: -5
+                        anchors.fill: parent
+
+                        clip: false
+                        visible: true
+                        rowSpacing: -10
+                        columnSpacing: 5
+                        rows: 3
+                        columns: 2
+
+                        CheckBox {
+                            id: tcpServerEnBox
+                            text: "Run TCP Server"
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+
+                            onClicked: {
+                                if (checked) {
+                                    VescIf.tcpServerStart(tcpServerPortBox.value)
+                                } else {
+                                    VescIf.tcpServerStop()
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: "TCP Port"
+                            color: "white"
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 5000
+                        }
+
+                        SpinBox {
+                            id: tcpServerPortBox
+                            from: 0
+                            to: 65535
+                            value: 65102
+                            enabled: !tcpServerEnBox.checked
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 5000
+                            editable: true
+                        }
+
+                        Timer {
+                            repeat: true
+                            running: true
+                            interval: 500
+
+                            onTriggered: {
+                                tcpServerEnBox.checked = VescIf.tcpServerIsRunning()
+
+                                if (VescIf.tcpServerIsRunning()) {
+                                    var ipTxt = "IP(s)\n"
+                                    var addresses = Utility.getNetworkAddresses()
+                                    for (var i = 0;i < addresses.length;i++) {
+                                        ipTxt += addresses[i]
+                                        if (i < (addresses.length - 1)) {
+                                            ipTxt += "\n"
+                                        }
+                                    }
+                                    tcpLocalAddress.text = ipTxt
+                                } else {
+                                    tcpLocalAddress.text = "IP(s)"
+                                }
+
+                                tcpRemoteAddress.text = "Connected Client"
+
+                                if (VescIf.tcpServerIsClientConnected()) {
+                                    tcpRemoteAddress.text += "\n" + VescIf.tcpServerClientIp()
+                                }
+                            }
+                        }
+
+                        Text {
+                            id: tcpLocalAddress
+                            Layout.fillWidth: true
+                            Layout.topMargin: 10
+                            Layout.bottomMargin: 10
+                            color: "white"
+                        }
+
+                        Text {
+                            id: tcpRemoteAddress
+                            Layout.fillWidth: true
+                            Layout.topMargin: 10
+                            Layout.bottomMargin: 10
+                            color: "white"
                         }
                     }
                 }
@@ -590,20 +711,26 @@ ApplicationWindow {
                 // Sample RT data when the corresponding page is selected, or when
                 // RT logging is active.
 
-                if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0) ||
-                        VescIf.isRtLogOpen()) {
+                if (VescIf.isRtLogOpen()) {
                     interval = 50
                     mCommands.getValues()
-                }
-
-                if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 1) {
-                    interval = 50
                     mCommands.getValuesSetup()
-                }
+                    mCommands.getImuData(0xFFFF)
+                } else {
+                    if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0)) {
+                        interval = 50
+                        mCommands.getValues()
+                    }
 
-                if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
-                    interval = 20
-                    mCommands.getImuData(0x7)
+                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 1) {
+                        interval = 50
+                        mCommands.getValuesSetup()
+                    }
+
+                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
+                        interval = 20
+                        mCommands.getImuData(0x7)
+                    }
                 }
             }
         }
@@ -648,6 +775,10 @@ ApplicationWindow {
             connectedText.text = VescIf.getConnectedPortName()
             if (VescIf.isPortConnected()) {
                 reconnectButton.enabled = true
+            }
+
+            if (VescIf.useWakeLock()) {
+                VescIf.setWakeLock(VescIf.isPortConnected())
             }
         }
 

@@ -42,7 +42,7 @@
                           application still try to draw after
                           '"applicationStateChanged(Qt::ApplicationSuspended)"'
                           signal is sent! -->
-            <meta-data android:name='"android.app.background_running"' android:value='"false"'/>
+            <meta-data android:name='"android.app.background_running"' android:value='"true"'/>
             <!-- Background running -->
 
             <!-- auto screen scale factor -->
@@ -58,6 +58,11 @@
             <meta-data android:name='"android.app.extract_android_style"' android:value='"full"'/>
             <!-- extract android style -->
     </activity>
+    
+    <service
+            android:name='"com.vedder.vesc.VForegroundService"'
+            android:enabled='"true"'
+            android:exported='"true"' />
 
     <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
 
@@ -74,9 +79,14 @@
          Remove the comment if you do not require these default features. -->
     <!-- %%INSERT_FEATURES -->
 
-<uses-permission android:name='"android.permission.BLUETOOTH"'/>
+    <uses-permission android:name='"android.permission.BLUETOOTH"'/>
     <uses-permission android:name='"android.permission.SET_ORIENTATION"'/>
     <uses-permission android:name='"android.permission.VIBRATE"'/>
-<uses-permission android:name='"android.permission.READ_EXTERNAL_STORAGE"'/>
+    <uses-permission android:name='"android.permission.READ_EXTERNAL_STORAGE"'/>
     <uses-permission android:name='"android.permission.WRITE_EXTERNAL_STORAGE"'/>
+    <uses-permission android:name='"android.permission.WAKE_LOCK"'/>
+    <uses-permission android:name='"android.permission.ACCESS_COARSE_LOCATION"' />
+    <uses-permission android:name='"android.permission.ACCESS_FINE_LOCATION"' />
+    <uses-permission android:name='"android.permission.ACCESS_BACKGROUND_LOCATION"' />
+    <uses-permission android:name='"android.permission.FOREGROUND_SERVICE"' />
 </manifest>

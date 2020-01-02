@@ -20,6 +20,8 @@
 #include "pageappimu.h"
 #include "ui_pageappimu.h"
 #include <QDateTime>
+#include <QQuickItem>
+#include <cmath>
 
 PageAppImu::PageAppImu(QWidget *parent) :
     QWidget(parent),
@@ -114,6 +116,14 @@ PageAppImu::PageAppImu(QWidget *parent) :
     ui->gyroPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->gyroPlot->xAxis->setLabel("Seconds (s)");
     ui->gyroPlot->yAxis->setLabel("Angular Velocity (Deg/s)");
+
+    m3dView = new Vesc3DView(this);
+    m3dView->setMinimumWidth(200);
+    m3dView->setRollPitchYaw(20, 20, 0);
+    m3dView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+    mUseYawBox = new QCheckBox("Use Yaw (will drift)");
+    ui->cornerWidget->layout()->addWidget(mUseYawBox);
+    ui->cornerWidget->layout()->addWidget(m3dView);
 }
 
 PageAppImu::~PageAppImu()
@@ -205,6 +215,9 @@ void PageAppImu::valuesReceived(IMU_VALUES values, unsigned int mask)
     (void)mask;
 
     const int maxS = 500;
+
+    m3dView->setRollPitchYaw(values.roll * 180.0 / M_PI, values.pitch * 180.0 / M_PI,
+                             mUseYawBox->isChecked() ? values.yaw * 180.0 / M_PI : 0.0);
 
     appendDoubleAndTrunc(&mRollVec, values.roll * 180.0 / M_PI, maxS);
     appendDoubleAndTrunc(&mPitchVec, values.pitch * 180.0 / M_PI, maxS);

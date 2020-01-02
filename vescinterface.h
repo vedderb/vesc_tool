@@ -21,6 +21,7 @@
 #define VESCINTERFACE_H
 
 #include <QObject>
+#include <QDateTime>
 #include <QTimer>
 #include <QByteArray>
 #include <QList>
@@ -40,9 +41,20 @@
 #include "configparams.h"
 #include "commands.h"
 #include "packet.h"
+#include "tcpserversimple.h"
 
 #ifdef HAS_BLUETOOTH
 #include "bleuart.h"
+#endif
+
+#ifdef HAS_POS
+#include <QGeoPositionInfoSource>
+#endif
+
+#ifdef Q_OS_ANDROID
+#include <QtAndroid>
+#include <QAndroidJniObject>
+#include <QAndroidJniEnvironment>
 #endif
 
 class VescInterface : public QObject
@@ -92,18 +104,34 @@ public:
     Q_INVOKABLE int getLastCANbusBitrate() const;
 #endif
     bool swdEraseFlash();
-    bool swdUploadFw(QByteArray newFirmware, uint32_t startAddr = 0);
+    bool swdUploadFw(QByteArray newFirmware, uint32_t startAddr = 0,
+                     bool verify = false, bool isLzo = true);
     void swdCancel();
     bool swdReboot();
+
+    bool fwEraseNewApp(bool fwdCan, quint32 fwSize);
+    bool fwEraseBootloader(bool fwdCan);
+    bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true);
+    Q_INVOKABLE void fwUploadCancel();
+    Q_INVOKABLE double getFwUploadProgress();
+    Q_INVOKABLE QString getFwUploadStatus();
+    Q_INVOKABLE bool isCurrentFwBootloader();
 
     Q_INVOKABLE bool openRtLogFile(QString outDirectory);
     Q_INVOKABLE void closeRtLogFile();
     Q_INVOKABLE bool isRtLogOpen();
+    Q_INVOKABLE QVector<LOG_DATA> getRtLogData();
+    Q_INVOKABLE bool loadRtLogFile(QString file);
+    Q_INVOKABLE LOG_DATA getRtLogSample(double progress);
+    Q_INVOKABLE LOG_DATA getRtLogSampleAtValTimeFromStart(int time);
 
     Q_INVOKABLE bool useImperialUnits();
     Q_INVOKABLE void setUseImperialUnits(bool useImperialUnits);
     Q_INVOKABLE bool keepScreenOn();
     Q_INVOKABLE void setKeepScreenOn(bool on);
+    Q_INVOKABLE bool useWakeLock();
+    Q_INVOKABLE void setUseWakeLock(bool on);
+    Q_INVOKABLE bool setWakeLock(bool lock);
 
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
@@ -134,6 +162,12 @@ public:
     Q_INVOKABLE QVector<int> getCanDevsLast() const;
     Q_INVOKABLE void ignoreCanChange(bool ignore);
 
+    Q_INVOKABLE bool tcpServerStart(int port);
+    Q_INVOKABLE void tcpServerStop();
+    Q_INVOKABLE bool tcpServerIsRunning();
+    Q_INVOKABLE bool tcpServerIsClientConnected();
+    Q_INVOKABLE QString tcpServerClientIp();
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -147,6 +181,7 @@ signals:
     void pairingListUpdated();
     void CANbusNewNode(int node);
     void CANbusInterfaceListUpdated();
+    void useImperialUnitsChanged(bool useImperialUnits);
 
 public slots:
 
@@ -192,7 +227,7 @@ private:
     QHash<QString, QString> mBleNames;
     QVariantList mProfiles;
     QStringList mPairedUuids;
-    QFile mRtLogFile;
+    TcpServerSimple *mTcpServer;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;
@@ -210,7 +245,12 @@ private:
     bool mIsUploadingFw;
     bool mIsLastFwBootloader;
 
+    // FW Upload
     bool mCancelSwdUpload;
+    bool mCancelFwUpload;
+    double mFwUploadProgress;
+    QString mFwUploadStatus;
+    bool mFwIsBootloader;
 
     // Connections
     conn_t mLastConnType;
@@ -243,6 +283,24 @@ private:
     QString mLastBleAddr;
 #endif
 
+#ifdef HAS_POS
+    QGeoPositionInfoSource *mPosSource;
+    QGeoPositionInfo mLastPos;
+    QDateTime mLastPosTime;
+#endif
+
+#ifdef Q_OS_ANDROID
+    QAndroidJniObject mWakeLock;
+#endif
+    bool mWakeLockActive;
+
+    QFile mRtLogFile;
+    QVector<LOG_DATA> mRtLogData;
+    IMU_VALUES mLastImuValues;
+    QDateTime mLastImuTime;
+    SETUP_VALUES mLastSetupValues;
+    QDateTime mLastSetupTime;
+
     bool mSendCanBefore = false;
     int mCanIdBefore = 0;
     bool mWasConnected;
@@ -255,6 +313,7 @@ private:
     // Other settings
     bool mUseImperialUnits;
     bool mKeepScreenOn;
+    bool mUseWakeLock;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

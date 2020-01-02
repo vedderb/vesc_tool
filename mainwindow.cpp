@@ -299,6 +299,7 @@ void MainWindow::timerSlot()
         mVesc->commands()->getDecodedAdc();
         mVesc->commands()->getDecodedChuk();
         mVesc->commands()->getDecodedPpm();
+        mVesc->commands()->getDecodedBalance();
     }
 
     // IMU Data
@@ -333,7 +334,7 @@ void MainWindow::timerSlot()
     }
 
     // Disable all data streaming when uploading firmware
-    if (mVesc->commands()->getFirmwareUploadProgress() > 0.1) {
+    if (mVesc->getFwUploadProgress() > 0.1) {
         ui->actionSendAlive->setChecked(false);
         ui->actionRtData->setChecked(false);
         ui->actionRtDataApp->setChecked(false);
@@ -942,13 +943,19 @@ void MainWindow::reloadPages()
     mPageAppNunchuk = new PageAppNunchuk(this);
     mPageAppNunchuk->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNunchuk);
-    addPageItem(tr("Nunchuk"), "://res/icons/Wii-96.png",
+    addPageItem(tr("VESC Remote"), "://res/icons/icons8-fantasy-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageAppNrf = new PageAppNrf(this);
     mPageAppNrf->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNrf);
     addPageItem(tr("Nrf"), "://res/icons/Online-96.png",
+                "://res/icons/appconf.png", false, true);
+
+    mPageAppBalance = new PageAppBalance(this);
+    mPageAppBalance->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppBalance);
+    addPageItem(tr("Balance"), "://res/icons/EUC-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageAppImu = new PageAppImu(this);
@@ -976,6 +983,11 @@ void MainWindow::reloadPages()
     mPageImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageImu);
     addPageItem(tr("IMU Data"), "://res/icons/Line Chart-96.png", "", false, true);
+
+    mPageLogAnalysis = new PageLogAnalysis(this);
+    mPageLogAnalysis->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageLogAnalysis);
+    addPageItem(tr("Log Analysis"), "://res/icons/Waypoint Map-96.png", "", false, true);
 
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);

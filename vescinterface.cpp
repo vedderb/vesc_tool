@@ -28,6 +28,8 @@
 #include <QRegularExpression>
 #include <QDateTime>
 #include <QDir>
+#include <cmath>
+#include "lzokay/lzokay.hpp"
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
@@ -44,6 +46,7 @@
 VescInterface::VescInterface(QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<MCCONF_TEMP>();
+    qRegisterMetaType<MC_VALUES>();
 
     mMcConfig = new ConfigParams(this);
     mAppConfig = new ConfigParams(this);
@@ -59,6 +62,10 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mIsUploadingFw = false;
 
     mCancelSwdUpload = false;
+    mCancelFwUpload = false;
+    mFwUploadStatus = "FW Upload Status";
+    mFwUploadProgress = -1.0;
+    mFwIsBootloader = false;
 
     mTimer = new QTimer(this);
     mTimer->setInterval(20);
@@ -74,6 +81,29 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mAutoconnectOngoing = false;
     mAutoconnectProgress = 0.0;
     mIgnoreCanChange = false;
+
+#ifdef Q_OS_ANDROID
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
+                "org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+
+    if (activity.isValid()) {
+        QAndroidJniObject serviceName = QAndroidJniObject::getStaticObjectField<jstring>(
+                    "android/content/Context","POWER_SERVICE");
+        if (serviceName.isValid()) {
+            QAndroidJniObject powerMgr = activity.callObjectMethod(
+                        "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;",serviceName.object<jobject>());
+            if (powerMgr.isValid()) {
+                jint levelAndFlags = QAndroidJniObject::getStaticField<jint>(
+                            "android/os/PowerManager","PARTIAL_WAKE_LOCK");
+                QAndroidJniObject tag = QAndroidJniObject::fromString( "VESC Tool" );
+                mWakeLock = powerMgr.callObjectMethod("newWakeLock",
+                                                       "(ILjava/lang/String;)Landroid/os/PowerManager$WakeLock;",
+                                                       levelAndFlags,tag.object<jstring>());
+            }
+        }
+    }
+#endif
+    mWakeLockActive = false;
 
     // Serial
 #ifdef HAS_SERIALPORT
@@ -95,6 +125,10 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastCanBackend = mSettings.value("CANbusBackend", "socketcan").toString();
     mLastCanDeviceID = mSettings.value("CANbusLastDeviceID", 0).toInt();
     mCANbusScanning = false;
+#endif
+
+#ifdef HAS_POS
+    mPosSource = nullptr;
 #endif
 
     // TCP
@@ -133,6 +167,15 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     });
 #endif
 
+    mTcpServer = new TcpServerSimple(this);
+    mTcpServer->setUsePacket(true);
+    connect(mTcpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
+        mPacket->sendPacket(packet);
+    });
+    connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
+        mTcpServer->packet()->sendPacket(packet);
+    });
+
     {
         int size = mSettings.beginReadArray("profiles");
         for (int i = 0; i < size; ++i) {
@@ -164,6 +207,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     mUseImperialUnits = mSettings.value("useImperialUnits", false).toBool();
     mKeepScreenOn = mSettings.value("keepScreenOn", true).toBool();
+    mUseWakeLock = mSettings.value("useWakeLock", false).toBool();
 
     mCommands->setAppConfig(mAppConfig);
     mCommands->setMcConfig(mMcConfig);
@@ -182,10 +226,69 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
 
+    connect(mCommands, &Commands::valuesSetupReceived, [this](SETUP_VALUES v) {
+        mLastSetupValues = v;
+        mLastSetupTime = QDateTime::currentDateTimeUtc();
+    });
+
+    connect(mCommands, &Commands::valuesImuReceived, [this](IMU_VALUES v) {
+        mLastImuValues = v;
+        mLastImuTime = QDateTime::currentDateTimeUtc();
+    });
+
     connect(mCommands, &Commands::valuesReceived, [this](MC_VALUES v) {
         if (mRtLogFile.isOpen()) {
-            auto t = QTime::currentTime();
+            int msPos = -1;
+            double lat = 0.0;
+            double lon = 0.0;
+            double alt = 0.0;
+            double gVel = 0.0;
+            double vVel = 0.0;
+            double hAcc = 0.0;
+            double vAcc = 0.0;
+
+#ifdef HAS_POS
+            if (mLastPos.isValid() && mLastPosTime.isValid() &&
+                    mLastPosTime.secsTo(QDateTime::currentDateTime()) < 3) {
+                msPos = mLastPos.timestamp().time().msecsSinceStartOfDay();
+                lat = mLastPos.coordinate().latitude();
+                lon = mLastPos.coordinate().longitude();
+
+                if (!std::isnan(mLastPos.coordinate().altitude())) {
+                    alt = mLastPos.coordinate().altitude();
+                }
+
+                if (mLastPos.hasAttribute(QGeoPositionInfo::GroundSpeed)) {
+                    gVel = mLastPos.attribute(QGeoPositionInfo::GroundSpeed);
+                }
+
+                if (mLastPos.hasAttribute(QGeoPositionInfo::VerticalSpeed)) {
+                    vVel = mLastPos.attribute(QGeoPositionInfo::VerticalSpeed);
+                }
+
+                if (mLastPos.hasAttribute(QGeoPositionInfo::HorizontalAccuracy)) {
+                    hAcc = mLastPos.attribute(QGeoPositionInfo::HorizontalAccuracy);
+                }
+
+                if (mLastPos.hasAttribute(QGeoPositionInfo::VerticalAccuracy)) {
+                    vAcc = mLastPos.attribute(QGeoPositionInfo::VerticalAccuracy);
+                }
+            }
+#endif
+
+            auto t = QDateTime::currentDateTimeUtc().time();
             QTextStream os(&mRtLogFile);
+
+            int msSetup = -1;
+            if (mLastSetupTime.isValid()) {
+                msSetup = mLastSetupTime.time().msecsSinceStartOfDay();
+            }
+
+            int msImu = -1;
+            if (mLastImuTime.isValid()) {
+                msImu = mLastImuTime.time().msecsSinceStartOfDay();
+            }
+
             os << t.msecsSinceStartOfDay() << ";";
             os << v.v_in << ";";
             os << v.temp_mos << ";";
@@ -208,8 +311,61 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             os << v.position << ";";
             os << v.fault_code << ";";
             os << v.vesc_id << ";";
+            os << v.vd << ";";
+            os << v.vq << ";";
+
+            os << msSetup << ";";
+            os << mLastSetupValues.amp_hours << ";";
+            os << mLastSetupValues.amp_hours_charged << ";";
+            os << mLastSetupValues.watt_hours << ";";
+            os << mLastSetupValues.watt_hours_charged << ";";
+            os << mLastSetupValues.battery_level << ";";
+            os << mLastSetupValues.battery_wh << ";";
+            os << mLastSetupValues.current_in << ";";
+            os << mLastSetupValues.current_motor << ";";
+            os << mLastSetupValues.speed << ";";
+            os << mLastSetupValues.tachometer << ";";
+            os << mLastSetupValues.tachometer_abs << ";";
+            os << mLastSetupValues.num_vescs << ";";
+
+            os << msImu << ";";
+            os << mLastImuValues.roll << ";";
+            os << mLastImuValues.pitch << ";";
+            os << mLastImuValues.yaw << ";";
+            os << mLastImuValues.accX << ";";
+            os << mLastImuValues.accY << ";";
+            os << mLastImuValues.accZ << ";";
+            os << mLastImuValues.gyroX << ";";
+            os << mLastImuValues.gyroY << ";";
+            os << mLastImuValues.gyroZ << ";";
+
+            os << msPos << ";";
+            os << fixed << qSetRealNumberPrecision(8) << lat << ";";
+            os << fixed << qSetRealNumberPrecision(8) << lon << ";";
+            os << alt << ";";
+            os << gVel << ";";
+            os << vVel << ";";
+            os << hAcc << ";";
+            os << vAcc << ";";
             os << "\n";
             os.flush();
+
+            LOG_DATA d;
+            d.values = v;
+            d.setupValues = mLastSetupValues;
+            d.imuValues = mLastImuValues;
+            d.valTime = t.msecsSinceStartOfDay();
+            d.setupValTime = msSetup;
+            d.imuValTime = msImu;
+            d.posTime = msPos;
+            d.lat = lat;
+            d.lon = lon;
+            d.alt = alt;
+            d.gVel = gVel;
+            d.vVel = vVel;
+            d.hAcc = hAcc;
+            d.vAcc = vAcc;
+            mRtLogData.append(d);
         }
     });
 }
@@ -218,6 +374,12 @@ VescInterface::~VescInterface()
 {
     storeSettings();
     closeRtLogFile();
+
+    if (mWakeLockActive) {
+        setWakeLock(false);
+    }
+
+    Utility::stopGnssForegroundService();
 }
 
 Commands *VescInterface::commands() const
@@ -331,6 +493,7 @@ void VescInterface::storeSettings()
 
     mSettings.setValue("useImperialUnits", mUseImperialUnits);
     mSettings.setValue("keepScreenOn", mKeepScreenOn);
+    mSettings.setValue("useWakeLock", mUseWakeLock);
 }
 
 QVariantList VescInterface::getProfiles()
@@ -463,7 +626,7 @@ MCCONF_TEMP VescInterface::createMcconfTemp()
 
 void VescInterface::updateMcconfFromProfile(MCCONF_TEMP profile)
 {
-    double speedFact = (((double)mMcConfig->getParamInt("si_motor_poles") / 2.0) * 60.0 *
+    double speedFact = ((double(mMcConfig->getParamInt("si_motor_poles")) / 2.0) * 60.0 *
             mMcConfig->getParamDouble("si_gear_ratio")) /
             (mMcConfig->getParamDouble("si_wheel_diameter") * M_PI);
 
@@ -642,8 +805,12 @@ bool VescInterface::swdEraseFlash()
     return true;
 }
 
-bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr)
+bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
+                                bool verify, bool isLzo)
 {
+    bool supportsLzo = mCommands->getLimitedCompatibilityCommands().
+            contains(int(COMM_BM_WRITE_FLASH_LZO));
+
     auto waitBmWriteRes = [this]() {
         int res = -10;
 
@@ -663,10 +830,53 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr)
         return res;
     };
 
-    auto writeChunk = [this, &waitBmWriteRes](uint32_t addr, QByteArray chunk) {
+    auto waitBmReadRes = [this]() {
+        int res = -10;
+        QByteArray resData;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(3000);
+        auto conn = connect(mCommands, &Commands::bmReadMemRes, [&res,&resData,&loop]
+                            (int rdRes, QByteArray data) {
+            res = rdRes;
+            resData = data;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return resData;
+    };
+
+    auto writeChunk = [this, &waitBmWriteRes, &waitBmReadRes, &verify]
+            (uint32_t addr, QByteArray chunk, QByteArray chunkLzo) {
         for (int i = 0;i < 3;i++) {
-            mCommands->bmWriteFlash(addr, chunk);
+            if (chunkLzo.isEmpty()) {
+                mCommands->bmWriteFlash(addr, chunk);
+            } else {
+                mCommands->bmWriteFlashLzo(addr, quint16(chunk.size()), chunkLzo);
+            }
+
             int res = waitBmWriteRes();
+
+            if (verify && (!mCommands->isLimitedMode() ||
+                           mCommands->getLimitedCompatibilityCommands().
+                           contains(int(COMM_BM_MEM_READ)))) {
+                mCommands->bmReadMem(addr, chunk.size());
+                QByteArray rdData = waitBmReadRes();
+
+                if (rdData.size() != chunk.size()) {
+                    return -11;
+                }
+
+                if (rdData != chunk) {
+                    return -12;
+                }
+            }
 
             if (res != -10) {
                 return res;
@@ -677,18 +887,46 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr)
     };
 
     mCancelSwdUpload = false;
-    uint32_t addr = startAddr;
-    uint32_t szTot = newFirmware.size();
-    while (newFirmware.size() > 0) {
-        int chunkSize = 256;
+    int addr = int(startAddr);
+    int szTot = newFirmware.size();
+    int uploadSize = 2;
+    int compChunks = 0;
+    int nonCompChunks = 0;
 
-        uint32_t sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
-        int res = writeChunk(addr, newFirmware.mid(0, sz));
+    while (newFirmware.size() > 0) {
+        const int chunkSize = 400;
+
+        int sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
+
+        QByteArray in = newFirmware.mid(0, sz);
+        std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
+        unsigned char out[outMaxSize];
+        std::size_t out_len = sz;
+
+        if (supportsLzo && isLzo) {
+            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out, outMaxSize, out_len);
+            if (error < lzokay::EResult::Success) {
+                qWarning() << "LZO Compress Error" << int(error);
+                isLzo = false;
+            }
+        }
+
+        int res = 1;
+        if (supportsLzo && isLzo && (out_len + 2) < uint32_t(sz)) {
+            compChunks++;
+            uploadSize += out_len + 2;
+            res = writeChunk(uint32_t(addr), in, QByteArray((const char*)out, int(out_len)));
+        } else {
+            nonCompChunks++;
+            uploadSize += sz;
+            res = writeChunk(uint32_t(addr), in, QByteArray());
+        }
+
         newFirmware.remove(0, sz);
         addr += sz;
 
         if (res == 1) {
-            emit fwUploadStatus("Uploading firmware over SWD", (double)(addr - startAddr) / (double)szTot, true);
+            emit fwUploadStatus("Uploading firmware over SWD", double(addr - startAddr) / double(szTot), true);
         } else {
             QString msg = "Unknown failure";
 
@@ -698,6 +936,10 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr)
                 msg = "Write failed";
             } else if (res == -1) {
                 msg = "Not connected to target";
+            } else if (res == -11) {
+                msg = "Verification failed (-11)";
+            } else if (res == -12) {
+                msg = "Verification failed (-12)";
             }
 
             emitMessageDialog("SWD Upload", msg, false, false);
@@ -710,6 +952,12 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr)
             emit fwUploadStatus("Upload cancelled", 0.0, false);
             return false;
         }
+    }
+
+    if (supportsLzo && isLzo) {
+        qDebug() << "Uploaded:" << uploadSize << "Initial Size:" << szTot << "Compression Ratio:"
+                 << double(uploadSize) / double(szTot) << "Compressed chunks:" << compChunks
+                 << "Incompressible chunks:" << nonCompChunks;
     }
 
     emit fwUploadStatus("Upload done", 1.0, false);
@@ -765,6 +1013,284 @@ bool VescInterface::swdReboot()
     return true;
 }
 
+bool VescInterface::fwEraseNewApp(bool fwdCan, quint32 fwSize)
+{
+    auto waitEraseRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(20000);
+        auto conn = connect(mCommands, &Commands::eraseNewAppResReceived,
+                            [&res,&loop](bool erRes) {
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    mCommands->eraseNewApp(fwdCan, fwSize);
+    emit fwUploadStatus("Erasing buffer...", 0.0, true);
+    int erRes = waitEraseRes();
+    if (erRes != 1) {
+        QString msg = "Unknown failure";
+
+        if (erRes == -10) {
+            msg = "Erase timed out";
+        } else if (erRes == -1) {
+            msg = "Erasing buffer failed";
+        }
+
+        emitMessageDialog("Firmware Upload", msg, false, false);
+        emit fwUploadStatus(msg, 0.0, false);
+
+        return false;
+    }
+
+    emit fwUploadStatus("Erase done", 0.0, false);
+
+    return true;
+}
+
+bool VescInterface::fwEraseBootloader(bool fwdCan)
+{
+    auto waitEraseRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(20000);
+        auto conn = connect(mCommands, &Commands::eraseBootloaderResReceived,
+                            [&res,&loop](bool erRes) {
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    mCommands->eraseBootloader(fwdCan);
+    emit fwUploadStatus("Erasing bootloader...", 0.0, true);
+    int erRes = waitEraseRes();
+    if (erRes != 1) {
+        QString msg = "Unknown failure";
+
+        if (erRes == -10) {
+            msg = "Erase timed out";
+        } else if (erRes == -1) {
+            msg = "Erasing bootloader failed";
+        }
+
+        emitMessageDialog("Firmware Upload", msg, false, false);
+        emit fwUploadStatus(msg, 0.0, false);
+
+        return false;
+    }
+
+    emit fwUploadStatus("Erase done", 0.0, false);
+
+    return true;
+}
+
+bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan, bool isLzo)
+{
+    mIsLastFwBootloader = isBootloader;
+    mFwUploadProgress = 0.0;
+    mCancelFwUpload = false;
+
+    if (isBootloader) {
+        if (mCommands->getLimitedSupportsEraseBootloader()) {
+            mFwUploadStatus = "Erasing bootloader";
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+            if (!fwEraseBootloader(fwdCan)) {
+                mFwUploadStatus = "Erasing bootloader failed";
+                mFwUploadProgress = -1.0;
+                return false;
+            }
+        }
+    } else {
+        mFwUploadStatus = "Erasing buffer";
+        emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+        if (!fwEraseNewApp(fwdCan, quint32(newFirmware.size()))) {
+            mFwUploadStatus = "Erasing buffer failed";
+            mFwUploadProgress = -1.0;
+            return false;
+        }
+    }
+
+    bool supportsLzo = mCommands->getLimitedCompatibilityCommands().
+            contains(int(COMM_WRITE_NEW_APP_DATA_LZO));
+
+    auto waitWriteRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(3000);
+        auto conn = connect(mCommands, &Commands::writeNewAppDataResReceived,
+                            [&res,&loop](bool wrRes) {
+            res = wrRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    auto writeChunk = [this, &waitWriteRes, &fwdCan]
+            (uint32_t addr, QByteArray chunk, bool fwIsLzo, quint16 decompressedLen) {
+        for (int i = 0;i < 3;i++) {
+            if (fwIsLzo) {
+                mCommands->writeNewAppDataLzo(chunk, addr, decompressedLen, fwdCan);
+            } else {
+                mCommands->writeNewAppData(chunk, addr, fwdCan);
+            }
+
+            int res = waitWriteRes();
+
+            if (res != -10) {
+                return res;
+            }
+        }
+
+        return -20;
+    };
+
+    int addr = isBootloader ? (1024 * 128 * 3) : 0;
+    int startAddr = addr;
+    int szTot = newFirmware.size();
+    int uploadSize = 2;
+    int compChunks = 0;
+    int nonCompChunks = 0;
+
+    if (!isBootloader) {
+        quint16 crc = Packet::crc16((const unsigned char*)newFirmware.constData(),
+                                    uint32_t(newFirmware.size()));
+        VByteArray sizeCrc;
+        sizeCrc.vbAppendInt32(szTot);
+        sizeCrc.vbAppendUint16(crc);
+        writeChunk(uint32_t(addr), sizeCrc, false, 0);
+        addr += sizeCrc.size();
+    }
+
+    while (newFirmware.size() > 0) {
+        if (mCancelFwUpload) {
+            emit fwUploadStatus("Upload cancelled", 0.0, false);
+            mFwUploadProgress = -1.0;
+            mFwUploadStatus = "Upload cancelled";
+            return false;
+        }
+
+        const int chunkSize = 400;
+
+        int sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
+
+        QByteArray in = newFirmware.mid(0, sz);
+        std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
+        unsigned char out[outMaxSize];
+        std::size_t out_len = sz;
+
+        if (isLzo && supportsLzo) {
+            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out,outMaxSize, out_len);
+            if (error < lzokay::EResult::Success) {
+                qWarning() << "LZO Compress Error" << int(error);
+                isLzo = false;
+            }
+        }
+
+        int res = 1;
+        if (isLzo && supportsLzo && (out_len + 2) < uint32_t(sz)) {
+            compChunks++;
+            uploadSize += out_len + 2;
+            res = writeChunk(uint32_t(addr), QByteArray((const char*)out, int(out_len)),
+                             true, uint16_t(sz));
+        } else {
+            nonCompChunks++;
+            uploadSize += sz;
+            res = writeChunk(uint32_t(addr), in, false, 0);
+        }
+
+        newFirmware.remove(0, sz);
+        addr += sz;
+
+        if (res == 1) {
+            mFwUploadProgress = double(addr - startAddr) / double(szTot);
+            mFwUploadStatus = "Uploading ";
+            if (isBootloader) {
+                mFwUploadStatus += "Bootloader";
+            } else {
+                mFwUploadStatus += "Firmware";
+            }
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+        } else {
+            QString msg = "Unknown failure";
+
+            if (res == -20) {
+                msg = "Firmware upload timed out";
+            } else if (res == -2) {
+                msg = "Write failed";
+            }
+
+            emitMessageDialog("Firmware Upload", msg, false, false);
+            emit fwUploadStatus(msg, 0.0, false);
+            mFwUploadProgress = -1.0;
+            mFwUploadStatus = msg;
+            return false;
+        }
+    }
+
+    mFwUploadProgress = -1.0;
+    mFwUploadStatus = "Upload done";
+    emit fwUploadStatus(mFwUploadStatus, 1.0, false);
+
+    if (supportsLzo && isLzo) {
+        qDebug() << "Uploaded:" << uploadSize << "Initial Size:" << szTot << "Compression Ratio:"
+                 << double(uploadSize) / double(szTot) << "Compressed chunks:" << compChunks
+                 << "Incompressible chunks:" << nonCompChunks;
+    }
+
+    if (!isBootloader) {
+        mCommands->jumpToBootloader(fwdCan);
+    }
+
+    return true;
+}
+
+void VescInterface::fwUploadCancel()
+{
+    mCancelFwUpload = true;
+}
+
+double VescInterface::getFwUploadProgress()
+{
+    return mFwUploadProgress;
+}
+
+QString VescInterface::getFwUploadStatus()
+{
+    return mFwUploadStatus;
+}
+
+bool VescInterface::isCurrentFwBootloader()
+{
+    return mIsLastFwBootloader;
+}
+
 bool VescInterface::openRtLogFile(QString outDirectory)
 {
     if (outDirectory.startsWith("file:/")) {
@@ -783,7 +1309,7 @@ bool VescInterface::openRtLogFile(QString outDirectory)
     }
 
     QDateTime d = QDateTime::currentDateTime();
-    mRtLogFile.setFileName(QString("%1/%2-%3-%4_%5:%6:%7.csv").
+    mRtLogFile.setFileName(QString("%1/%2-%3-%4_%5-%6-%7.csv").
                            arg(outDirectory).
                            arg(d.date().year(), 2, 10, QChar('0')).
                            arg(d.date().month(), 2, 10, QChar('0')).
@@ -818,6 +1344,42 @@ bool VescInterface::openRtLogFile(QString outDirectory)
         os << "encoder_position" << ";";
         os << "fault_code" << ";";
         os << "vesc_id" << ";";
+        os << "d_axis_voltage" << ";";
+        os << "q_axis_voltage" << ";";
+
+        os << "ms_today_setup" << ";";
+        os << "amp_hours_setup" << ";";
+        os << "amp_hours_charged_setup" << ";";
+        os << "watt_hours_setup" << ";";
+        os << "watt_hours_charged_setup" << ";";
+        os << "battery_level" << ";";
+        os << "battery_wh_tot" << ";";
+        os << "current_in_setup" << ";";
+        os << "current_motor_setup" << ";";
+        os << "speed_meters_per_sec" << ";";
+        os << "tacho_meters" << ";";
+        os << "tacho_abs_meters" << ";";
+        os << "num_vescs" << ";";
+
+        os << "ms_today_imu" << ";";
+        os << "roll" << ";";
+        os << "pitch" << ";";
+        os << "yaw" << ";";
+        os << "accX" << ";";
+        os << "accY" << ";";
+        os << "accZ" << ";";
+        os << "gyroX" << ";";
+        os << "gyroY" << ";";
+        os << "gyroZ" << ";";
+
+        os << "gnss_posTime" << ";";
+        os << "gnss_lat" << ";";
+        os << "gnss_lon" << ";";
+        os << "gnss_alt" << ";";
+        os << "gnss_gVel" << ";";
+        os << "gnss_vVel" << ";";
+        os << "gnss_hAcc" << ";";
+        os << "gnss_vAcc" << ";";
         os << "\n";
         os.flush();
     }
@@ -826,6 +1388,28 @@ bool VescInterface::openRtLogFile(QString outDirectory)
         emitMessageDialog("Log to file",
                           "Could not open file for writing.",
                           false, false);
+    }
+
+    mRtLogData.clear();
+
+    if (res) {
+#ifdef HAS_POS
+        if (mPosSource != nullptr) {
+            mPosSource->deleteLater();
+        }
+
+        mPosSource = QGeoPositionInfoSource::createDefaultSource(this);
+
+        if (mPosSource) {
+            connect(mPosSource, &QGeoPositionInfoSource::positionUpdated,
+                    [this](QGeoPositionInfo info) {
+                mLastPos = info;
+                mLastPosTime = QDateTime::currentDateTimeUtc();
+            });
+            mPosSource->setUpdateInterval(5);
+            mPosSource->startUpdates();
+        }
+#endif
     }
 
     return res;
@@ -843,6 +1427,159 @@ bool VescInterface::isRtLogOpen()
     return mRtLogFile.isOpen();
 }
 
+QVector<LOG_DATA> VescInterface::getRtLogData()
+{
+    return mRtLogData;
+}
+
+bool VescInterface::loadRtLogFile(QString file)
+{
+    bool res = false;
+
+    QFile inFile(file);
+
+    if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&inFile);
+        int lineNum = 0;
+
+        mRtLogData.clear();
+        while (!in.atEnd()) {
+            QStringList tokens = in.readLine().split(";");
+
+            if (tokens.size() < 22) {
+                continue;
+            }
+
+            if (lineNum > 0) {
+                LOG_DATA d;
+                d.valTime = tokens.at(0).toInt();
+                d.values.v_in = tokens.at(1).toDouble();
+                d.values.temp_mos = tokens.at(2).toDouble();
+                d.values.temp_mos_1 = tokens.at(3).toDouble();
+                d.values.temp_mos_2 = tokens.at(4).toDouble();
+                d.values.temp_mos_3 = tokens.at(5).toDouble();
+                d.values.temp_motor = tokens.at(6).toDouble();
+                d.values.current_motor = tokens.at(7).toDouble();
+                d.values.current_in = tokens.at(8).toDouble();
+                d.values.id = tokens.at(9).toDouble();
+                d.values.iq = tokens.at(10).toDouble();
+                d.values.rpm = tokens.at(11).toDouble();
+                d.values.duty_now = tokens.at(12).toDouble();
+                d.values.amp_hours = tokens.at(13).toDouble();
+                d.values.amp_hours_charged = tokens.at(14).toDouble();
+                d.values.watt_hours = tokens.at(15).toDouble();
+                d.values.watt_hours_charged = tokens.at(16).toDouble();
+                d.values.tachometer = tokens.at(17).toInt();
+                d.values.tachometer_abs = tokens.at(18).toInt();
+                d.values.position = tokens.at(19).toDouble();
+                d.values.fault_code = mc_fault_code(tokens.at(20).toInt());
+                d.values.vesc_id = tokens.at(21).toInt();
+
+                // Possibly populate setup values too, but these values would
+                // not correspond to setupValTime.
+//                d.setupValues.v_in = d.values.v_in;
+//                d.setupValues.duty_now = d.values.duty_now;
+//                d.setupValues.temp_mos = d.values.temp_mos;
+//                d.setupValues.temp_motor = d.values.temp_motor;
+//                d.setupValues.fault_code = d.values.fault_code;
+//                d.setupValues.vesc_id = d.values.vesc_id;
+
+                if (tokens.size() >= 55) {
+                    d.values.vd = tokens.at(22).toDouble();
+                    d.values.vq = tokens.at(23).toDouble();
+
+                    d.setupValTime = tokens.at(24).toInt();
+                    d.setupValues.amp_hours = tokens.at(25).toDouble();
+                    d.setupValues.amp_hours_charged = tokens.at(26).toDouble();
+                    d.setupValues.watt_hours = tokens.at(27).toDouble();
+                    d.setupValues.watt_hours_charged = tokens.at(28).toDouble();
+                    d.setupValues.battery_level = tokens.at(29).toDouble();
+                    d.setupValues.battery_wh = tokens.at(30).toDouble();
+                    d.setupValues.current_in = tokens.at(31).toDouble();
+                    d.setupValues.current_motor = tokens.at(32).toDouble();
+                    d.setupValues.speed = tokens.at(33).toDouble();
+                    d.setupValues.tachometer = tokens.at(34).toDouble();
+                    d.setupValues.tachometer_abs = tokens.at(35).toDouble();
+                    d.setupValues.num_vescs = tokens.at(36).toInt();
+
+                    d.imuValTime = tokens.at(37).toInt();
+                    d.imuValues.roll = tokens.at(38).toDouble();
+                    d.imuValues.pitch = tokens.at(39).toDouble();
+                    d.imuValues.yaw = tokens.at(40).toDouble();
+                    d.imuValues.accX = tokens.at(41).toDouble();
+                    d.imuValues.accY = tokens.at(42).toDouble();
+                    d.imuValues.accZ = tokens.at(43).toDouble();
+                    d.imuValues.gyroX = tokens.at(44).toDouble();
+                    d.imuValues.gyroY = tokens.at(45).toDouble();
+                    d.imuValues.gyroZ = tokens.at(46).toDouble();
+
+                    d.posTime = tokens.at(47).toInt();
+                    d.lat = tokens.at(48).toDouble();
+                    d.lon = tokens.at(49).toDouble();
+                    d.alt = tokens.at(50).toDouble();
+                    d.gVel = tokens.at(51).toDouble();
+                    d.vVel = tokens.at(52).toDouble();
+                    d.hAcc = tokens.at(53).toDouble();
+                    d.vAcc = tokens.at(54).toDouble();
+                }
+
+                mRtLogData.append(d);
+            }
+
+            lineNum++;
+        }
+
+        inFile.close();
+        res = true;
+
+        emitStatusMessage(QString("Loaded %1 log entries").arg(lineNum - 1), true);
+    } else {
+        emitMessageDialog("Read Log File",
+                          "Could not open\n" +
+                          file +
+                          "\nfor reading.",
+                          false, false);
+    }
+
+    return res;
+}
+
+LOG_DATA VescInterface::getRtLogSample(double progress)
+{
+    LOG_DATA d;
+
+    int sample = int(double(mRtLogData.size() - 1) * progress);
+    if (sample >= 0 && sample < mRtLogData.size()) {
+        d = mRtLogData.at(sample);
+    }
+
+    return d;
+}
+
+LOG_DATA VescInterface::getRtLogSampleAtValTimeFromStart(int time)
+{
+    LOG_DATA d;
+
+    if (mRtLogData.size() > 0) {
+        d = mRtLogData.first();
+        int startTime = d.valTime;
+
+        for (LOG_DATA dn: mRtLogData) {
+            int timeMs = dn.valTime - startTime;
+            if (timeMs < 0) { // Handle midnight
+                timeMs += 60 * 60 * 24;
+            }
+
+            if (timeMs >= time) {
+                d = dn;
+                break;
+            }
+        }
+    }
+
+    return d;
+}
+
 bool VescInterface::useImperialUnits()
 {
     return mUseImperialUnits;
@@ -850,7 +1587,11 @@ bool VescInterface::useImperialUnits()
 
 void VescInterface::setUseImperialUnits(bool useImperialUnits)
 {
+    bool changed = useImperialUnits != mUseImperialUnits;
     mUseImperialUnits = useImperialUnits;
+    if (changed) {
+        emit useImperialUnitsChanged(mUseImperialUnits);
+    }
 }
 
 bool VescInterface::keepScreenOn()
@@ -861,6 +1602,41 @@ bool VescInterface::keepScreenOn()
 void VescInterface::setKeepScreenOn(bool on)
 {
     mKeepScreenOn = on;
+}
+
+bool VescInterface::useWakeLock()
+{
+    return mUseWakeLock;
+}
+
+void VescInterface::setUseWakeLock(bool on)
+{
+    mUseWakeLock = on;
+}
+
+bool VescInterface::setWakeLock(bool lock)
+{
+#ifdef Q_OS_ANDROID
+    if (mWakeLock.isValid()) {
+        mWakeLock.callMethod<void>("setReferenceCounted", "(Z)V", false);
+
+        if (lock) {
+            mWakeLock.callMethod<void>("acquire", "()V");
+            mWakeLockActive = true;
+        } else {
+            mWakeLock.callMethod<void>("release", "()V");
+            mWakeLockActive = false;
+        }
+
+        return true;
+    } else {
+        emitMessageDialog("Wake Lock", "Could not aquire wake lock", false, false);
+        return false;
+    }
+#else
+    (void)lock;
+    return true;
+#endif
 }
 
 #ifdef HAS_SERIALPORT
@@ -1425,6 +2201,39 @@ void VescInterface::ignoreCanChange(bool ignore)
     mIgnoreCanChange = ignore;
 }
 
+bool VescInterface::tcpServerStart(int port)
+{
+    bool res = mTcpServer->startServer(port);
+
+    if (!res) {
+        emitMessageDialog("Start TCP Server",
+                          "Could not start TCP server: " + mTcpServer->errorString(),
+                          false, false);
+    }
+
+    return res;
+}
+
+void VescInterface::tcpServerStop()
+{
+    mTcpServer->stopServer();
+}
+
+bool VescInterface::tcpServerIsRunning()
+{
+    return mTcpServer->isServerRunning();
+}
+
+bool VescInterface::tcpServerIsClientConnected()
+{
+    return mTcpServer->isClientConnected();
+}
+
+QString VescInterface::tcpServerClientIp()
+{
+    return mTcpServer->getConnectedClientIp();
+}
+
 #ifdef HAS_SERIALPORT
 void VescInterface::serialDataAvailable()
 {
@@ -1668,11 +2477,11 @@ void VescInterface::timerSlot()
     }
 
     // Update fw upload bar and label
-    double fwProg = mCommands->getFirmwareUploadProgress();
-    QString fwStatus = mCommands->getFirmwareUploadStatus();
+    double fwProg = getFwUploadProgress();
+    QString fwStatus = getFwUploadStatus();
     if (fwProg > -0.1) {
         mIsUploadingFw = true;
-        mIsLastFwBootloader = mCommands->isCurrentFiwmwareBootloader();
+        mIsLastFwBootloader = isCurrentFwBootloader();
         emit fwUploadStatus(fwStatus, fwProg, true);
     } else {
         // The firmware upload just finished or failed
@@ -1934,6 +2743,16 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         compCommands.append(int(COMM_PLOT_DATA));
         compCommands.append(int(COMM_PLOT_ADD_GRAPH));
         compCommands.append(int(COMM_PLOT_SET_GRAPH));
+    }
+
+    if (fw_connected >= qMakePair(3, 62)) {
+        compCommands.append(int(COMM_BM_MEM_READ));
+    }
+
+    if (fw_connected >= qMakePair(3, 63)) {
+        compCommands.append(int(COMM_WRITE_NEW_APP_DATA_LZO));
+        compCommands.append(int(COMM_WRITE_NEW_APP_DATA_ALL_CAN_LZO));
+        compCommands.append(int(COMM_BM_WRITE_FLASH_LZO));
     }
 
     mCommands->setLimitedCompatibilityCommands(compCommands);

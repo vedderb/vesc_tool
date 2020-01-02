@@ -142,6 +142,12 @@ PageImu::PageImu(QWidget *parent) :
     ui->magPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->magPlot->xAxis->setLabel("Seconds (s)");
     ui->magPlot->yAxis->setLabel("Magnetic Field (µT)");
+
+    m3dView = new Vesc3DView(this);
+    m3dView->setMinimumWidth(200);
+    m3dView->setRollPitchYaw(20, 20, 0);
+    m3dView->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    ui->tab_3->layout()->addWidget(m3dView);
 }
 
 PageImu::~PageImu()
@@ -213,6 +219,9 @@ void PageImu::valuesReceived(IMU_VALUES values, unsigned int mask)
     (void)mask;
 
     const int maxS = 500;
+
+    m3dView->setRollPitchYaw(values.roll * 180.0 / M_PI, values.pitch * 180.0 / M_PI,
+                             ui->useYawBox->isChecked() ? values.yaw * 180.0 / M_PI : 0.0);
 
     appendDoubleAndTrunc(&mRollVec, values.roll * 180.0 / M_PI, maxS);
     appendDoubleAndTrunc(&mPitchVec, values.pitch * 180.0 / M_PI, maxS);

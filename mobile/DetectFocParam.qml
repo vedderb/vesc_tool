@@ -83,7 +83,14 @@ Item {
             return;
         }
 
-        gain = 0.001 / (lambda * lambda)
+        if (res < 1e-10) {
+            VescIf.emitMessageDialog("Calculate Error",
+                                     "R is 0. Please measure it first.",
+                                     false, false)
+            return;
+        }
+
+        gain = (0.00001 / res) / (lambda * lambda)
 
         updateDisplay()
     }

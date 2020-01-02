@@ -147,8 +147,10 @@ Item {
                 createEditorMc("l_max_duty")
                 createEditorMc("cc_min_current")
                 createEditorMc("m_fault_stop_time_ms")
-                createEditorMc("m_ntc_motor_beta")
                 createEditorMc("m_out_aux_mode")
+                createEditorMc("m_motor_temp_sens_type")
+                createEditorMc("m_ntc_motor_beta")
+                createEditorMc("m_ptc_motor_coeff")
                 break;
             default:
                 break;

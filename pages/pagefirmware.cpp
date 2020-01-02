@@ -69,7 +69,7 @@ void PageFirmware::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->display->setText(mVesc->commands()->getFirmwareUploadStatus());
+        ui->display->setText(mVesc->getFwUploadStatus());
 
         QStringList fws = mVesc->getSupportedFirmwares();
         QString str;
@@ -91,8 +91,10 @@ void PageFirmware::setVesc(VescInterface *vesc)
 void PageFirmware::timerSlot()
 {
     if (mVesc) {
-        ui->uploadAllButton->setEnabled(mVesc->commands()->getLimitedSupportsFwdAllCan() &&
-                                        !mVesc->commands()->getSendCan());
+        if (mVesc->getFwUploadProgress() >= 0.0) {
+            ui->uploadAllButton->setEnabled(mVesc->commands()->getLimitedSupportsFwdAllCan() &&
+                                            !mVesc->commands()->getSendCan() && mVesc->getFwUploadProgress() < 0.0);
+        }
 
         if (!mVesc->isPortConnected()) {
             ui->currentLabel->clear();
@@ -265,7 +267,7 @@ void PageFirmware::on_readVersionButton_clicked()
 void PageFirmware::on_cancelButton_clicked()
 {
     if (mVesc) {
-        mVesc->commands()->cancelFirmwareUpload();
+        mVesc->fwUploadCancel();
     }
 }
 
@@ -397,12 +399,12 @@ void PageFirmware::uploadFw(bool allOverCan)
 
         if (reply == QMessageBox::Yes) {
             QByteArray data = file.readAll();
-            mVesc->commands()->startFirmwareUpload(data, isBootloader, allOverCan);
+            bool fwRes = mVesc->fwUpload(data, isBootloader, allOverCan);
 
-            if (!isBootloader) {
+            if (!isBootloader && fwRes) {
                 QMessageBox::warning(this,
                                      tr("Warning"),
-                                     tr("The firmware upload is now ongoing. After the upload has finished you must wait at least "
+                                     tr("The firmware upload is done. You must wait at least "
                                         "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
                                         "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
             }

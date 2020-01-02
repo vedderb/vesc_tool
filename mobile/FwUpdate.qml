@@ -423,7 +423,7 @@ Item {
                         enabled: false
 
                         onClicked: {
-                            mCommands.cancelFirmwareUpload()
+                            VescIf.fwUploadCancel()
                         }
                     }
                 }
@@ -607,7 +607,7 @@ Item {
 
         onTriggered: {
             uploadAllButton.enabled = mCommands.getLimitedSupportsFwdAllCan() &&
-                    !mCommands.getSendCan() && mCommands.getFirmwareUploadProgress() < 0
+                    !mCommands.getSendCan() && VescIf.getFwUploadProgress() < 0
 
             if (!VescIf.isPortConnected()) {
                 versionText.text =

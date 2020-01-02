@@ -27,24 +27,14 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mIsLimitedMode = false;
     mLimitedSupportsFwdAllCan = false;
     mLimitedSupportsEraseBootloader = false;
-
-    // Firmware state
-    mFirmwareIsUploading = false;
-    mFirmwareState = 0;
-    mFimwarePtr = 0;
-    mFirmwareTimer = 0;
-    mFirmwareRetries = 0;
-    mFirmwareIsBootloader = false;
-    mFirmwareFwdAllCan = false;
-    mFirmwareUploadStatus = "FW Upload Status";
     mCheckNextMcConfig = false;
 
     mTimer = new QTimer(this);
     mTimer->setInterval(10);
     mTimer->start();
 
-    mMcConfig = 0;
-    mAppConfig = 0;
+    mMcConfig = nullptr;
+    mAppConfig = nullptr;
 
     mTimeoutCount = 100;
     mTimeoutFwVer = 0;
@@ -56,6 +46,7 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mTimeoutDecPpm = 0;
     mTimeoutDecAdc = 0;
     mTimeoutDecChuk = 0;
+    mTimeoutDecBalance = 0;
     mTimeoutPingCan = 0;
 
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
@@ -93,7 +84,7 @@ bool Commands::getSendCan()
 
 void Commands::setCanSendId(unsigned int id)
 {
-    mCanId = id;
+    mCanId = int(id);
 }
 
 int Commands::getCanSendId()
@@ -134,9 +125,15 @@ void Commands::processPacket(QByteArray data)
     } break;
 
     case COMM_ERASE_NEW_APP:
+        emit eraseNewAppResReceived(vb.at(0));
+        break;
+
     case COMM_WRITE_NEW_APP_DATA:
+        emit writeNewAppDataResReceived(vb.at(0));
+        break;
+
     case COMM_ERASE_BOOTLOADER:
-        firmwareUploadUpdate(!vb.at(0));
+        emit eraseBootloaderResReceived(vb.at(0));
         break;
 
     case COMM_GET_VALUES:
@@ -336,6 +333,22 @@ void Commands::processPacket(QByteArray data)
         emit decodedChukReceived(vb.vbPopFrontDouble32(1000000.0));
         break;
 
+    case COMM_GET_DECODED_BALANCE: {
+        mTimeoutDecBalance = 0;
+
+        BALANCE_VALUES values;
+
+        values.pid_output = vb.vbPopFrontDouble32(1e6);
+        values.m_angle = vb.vbPopFrontDouble32(1e6);
+        values.c_angle = vb.vbPopFrontDouble32(1e6);
+        values.diff_time = vb.vbPopFrontUint32();
+        values.motor_current = vb.vbPopFrontDouble32(1e6);
+        values.motor_position = vb.vbPopFrontDouble32(1e6);
+        values.state = vb.vbPopFrontUint16();
+        values.switch_value = vb.vbPopFrontUint16();
+        emit decodedBalanceReceived(values);
+    } break;
+
     case COMM_SET_MCCONF:
         emit ackReceived("MCCONF Write OK");
         break;
@@ -532,6 +545,7 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_BM_WRITE_FLASH:
+    case COMM_BM_WRITE_FLASH_LZO:
         emit bmWriteFlashRes(vb.vbPopFrontInt16());
         break;
 
@@ -571,6 +585,11 @@ void Commands::processPacket(QByteArray data)
         emit plotSetGraphReceived(vb.vbPopFrontInt8());
     } break;
 
+    case COMM_BM_MEM_READ: {
+        int res = vb.vbPopFrontInt16();
+        emit bmReadMemRes(res, vb);
+    } break;
+
     default:
         break;
     }
@@ -586,6 +605,52 @@ void Commands::getFwVersion()
 
     VByteArray vb;
     vb.vbAppendInt8(COMM_FW_VERSION);
+    emitData(vb);
+}
+
+void Commands::eraseNewApp(bool fwdCan, quint32 fwSize)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_ERASE_NEW_APP_ALL_CAN :
+                             COMM_ERASE_NEW_APP);
+    vb.vbAppendUint32(fwSize);
+    emitData(vb);
+}
+
+void Commands::eraseBootloader(bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
+                             COMM_ERASE_BOOTLOADER);
+    emitData(vb);
+}
+
+void Commands::writeNewAppData(QByteArray data, quint32 offset, bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_WRITE_NEW_APP_DATA_ALL_CAN :
+                             COMM_WRITE_NEW_APP_DATA);
+    vb.vbAppendUint32(offset);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::writeNewAppDataLzo(QByteArray data, quint32 offset, quint16 decompressedLen, bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_WRITE_NEW_APP_DATA_ALL_CAN_LZO :
+                             COMM_WRITE_NEW_APP_DATA_LZO);
+    vb.vbAppendUint32(offset);
+    vb.vbAppendUint16(decompressedLen);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::jumpToBootloader(bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(fwdCan ? COMM_JUMP_TO_BOOTLOADER_ALL_CAN :
+                             COMM_JUMP_TO_BOOTLOADER);
     emitData(vb);
 }
 
@@ -823,6 +888,19 @@ void Commands::getDecodedChuk()
 
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_DECODED_CHUK);
+    emitData(vb);
+}
+
+void Commands::getDecodedBalance()
+{
+    if (mTimeoutDecBalance > 0) {
+        return;
+    }
+
+    mTimeoutDecBalance = mTimeoutCount;
+
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_DECODED_BALANCE);
     emitData(vb);
 }
 
@@ -1164,6 +1242,16 @@ void Commands::bmWriteFlash(uint32_t addr, QByteArray data)
     emitData(vb);
 }
 
+void Commands::bmWriteFlashLzo(uint32_t addr, quint16 decompressedLen, QByteArray data)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_WRITE_FLASH_LZO);
+    vb.vbAppendUint32(addr);
+    vb.vbAppendUint16(decompressedLen);
+    vb.append(data);
+    emitData(vb);
+}
+
 void Commands::bmReboot()
 {
     VByteArray vb;
@@ -1192,16 +1280,25 @@ void Commands::bmMapPinsNrf5x()
     emitData(vb);
 }
 
+void Commands::bmReadMem(uint32_t addr, quint16 size)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_BM_MEM_READ);
+    vb.vbAppendUint32(addr);
+    vb.vbAppendUint16(size);
+    emitData(vb);
+}
+
+void Commands::setCurrentRel(double current)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_SET_CURRENT_REL);
+    vb.vbAppendDouble32(current, 1e5);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
-    if (mFirmwareIsUploading) {
-        if (mFirmwareTimer) {
-            mFirmwareTimer--;
-        } else {
-            firmwareUploadUpdate(true);
-        }
-    }
-
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;
     if (mTimeoutMcconf > 0) {
         mTimeoutMcconf--;
@@ -1216,6 +1313,7 @@ void Commands::timerSlot()
     if (mTimeoutDecPpm > 0) mTimeoutDecPpm--;
     if (mTimeoutDecAdc > 0) mTimeoutDecAdc--;
     if (mTimeoutDecChuk > 0) mTimeoutDecChuk--;
+    if (mTimeoutDecBalance > 0) mTimeoutDecBalance--;
 
     if (mTimeoutPingCan > 0) {
         mTimeoutPingCan--;
@@ -1253,143 +1351,6 @@ void Commands::emitData(QByteArray data)
     emit dataToSend(data);
 }
 
-void Commands::firmwareUploadUpdate(bool isTimeout)
-{
-    if (!mFirmwareIsUploading) {
-        return;
-    }
-
-    const int app_packet_size = 200;
-    const int retries = 5;
-    const int timeout = 120;
-
-    if (mFirmwareState == 0) {
-        mFirmwareUploadStatus = "Buffer Erase";
-        if (isTimeout) {
-            // Erase timed out, abort.
-            mFirmwareIsUploading = false;
-            mFimwarePtr = 0;
-            mFirmwareUploadStatus = "Buffer Erase Timeout";
-        } else {
-            mFirmwareState++;
-
-            if (mFirmwareIsBootloader) {
-                mFirmwareState++;
-            }
-
-            mFirmwareRetries = retries;
-            mFirmwareTimer = timeout;
-            firmwareUploadUpdate(true);
-        }
-    } else if (mFirmwareState == 1) {
-        mFirmwareUploadStatus = "CRC/Size Write";
-        if (isTimeout) {
-            if (mFirmwareRetries > 0) {
-                mFirmwareRetries--;
-                mFirmwareTimer = timeout;
-            } else {
-                mFirmwareIsUploading = false;
-                mFimwarePtr = 0;
-                mFirmwareState = 0;
-                mFirmwareUploadStatus = "CRC/Size Write Timeout";
-                return;
-            }
-
-            quint16 crc = Packet::crc16((const unsigned char*)mNewFirmware.constData(), mNewFirmware.size());
-
-            VByteArray vb;
-            vb.append(mFirmwareFwdAllCan ? (char)COMM_WRITE_NEW_APP_DATA_ALL_CAN :
-                                           (char)COMM_WRITE_NEW_APP_DATA);
-            vb.vbAppendUint32(0);
-            vb.vbAppendUint32(mNewFirmware.size());
-            vb.vbAppendUint16(crc);
-            emitData(vb);
-        } else {
-            mFirmwareState++;
-            mFirmwareRetries = retries;
-            mFirmwareTimer = timeout;
-            firmwareUploadUpdate(true);
-        }
-    } else if (mFirmwareState == 2) {
-        mFirmwareUploadStatus = "FW Data Write";
-        if (isTimeout) {
-            if (mFirmwareRetries > 0) {
-                mFirmwareRetries--;
-                mFirmwareTimer = timeout;
-            } else {
-                mFirmwareIsUploading = false;
-                mFimwarePtr = 0;
-                mFirmwareState = 0;
-                mFirmwareUploadStatus = "FW Data Write Timeout";
-                return;
-            }
-
-            int fw_size_left = mNewFirmware.size() - mFimwarePtr;
-            int send_size = fw_size_left > app_packet_size ? app_packet_size : fw_size_left;
-
-            VByteArray vb;
-            vb.append(mFirmwareFwdAllCan ? (char)COMM_WRITE_NEW_APP_DATA_ALL_CAN :
-                                           (char)COMM_WRITE_NEW_APP_DATA);
-
-            if (mFirmwareIsBootloader) {
-                vb.vbAppendUint32(mFimwarePtr + (1024 * 128 * 3));
-            } else {
-                vb.vbAppendUint32(mFimwarePtr + 6);
-            }
-
-            vb.append(mNewFirmware.mid(mFimwarePtr, send_size));
-            emitData(vb);
-        } else {
-            mFirmwareRetries = retries;
-            mFirmwareTimer = timeout;
-            mFimwarePtr += app_packet_size;
-
-            if (mFimwarePtr >= mNewFirmware.size()) {
-                mFirmwareIsUploading = false;
-                mFimwarePtr = 0;
-                mFirmwareState = 0;
-                mFirmwareUploadStatus = "FW Upload Done";
-
-                // Upload done. Enter bootloader!
-                if (!mFirmwareIsBootloader) {
-                    QByteArray buffer;
-                    buffer.append(mFirmwareFwdAllCan ? (char)COMM_JUMP_TO_BOOTLOADER_ALL_CAN :
-                                                       (char)COMM_JUMP_TO_BOOTLOADER);
-                    emitData(buffer);
-                }
-            } else {
-                firmwareUploadUpdate(true);
-            }
-        }
-    }
-}
-
-QString Commands::faultToStr(mc_fault_code fault)
-{
-    switch (fault) {
-    case FAULT_CODE_NONE: return "FAULT_CODE_NONE";
-    case FAULT_CODE_OVER_VOLTAGE: return "FAULT_CODE_OVER_VOLTAGE";
-    case FAULT_CODE_UNDER_VOLTAGE: return "FAULT_CODE_UNDER_VOLTAGE";
-    case FAULT_CODE_DRV: return "FAULT_CODE_DRV";
-    case FAULT_CODE_ABS_OVER_CURRENT: return "FAULT_CODE_ABS_OVER_CURRENT";
-    case FAULT_CODE_OVER_TEMP_FET: return "FAULT_CODE_OVER_TEMP_FET";
-    case FAULT_CODE_OVER_TEMP_MOTOR: return "FAULT_CODE_OVER_TEMP_MOTOR";
-    case FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE";
-    case FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE";
-    case FAULT_CODE_MCU_UNDER_VOLTAGE: return "FAULT_CODE_MCU_UNDER_VOLTAGE";
-    case FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: return "FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET";
-    case FAULT_CODE_ENCODER_SPI: return "FAULT_CODE_ENCODER_SPI";
-    case FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE: return "FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE";
-    case FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE: return "FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE";
-    case FAULT_CODE_FLASH_CORRUPTION: return "FAULT_CODE_FLASH_CORRUPTION";
-    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1";
-    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2";
-    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3";
-    case FAULT_CODE_UNBALANCED_CURRENTS: return "FAULT_CODE_UNBALANCED_CURRENTS";
-    default: return "Unknown fault";
-    }
-}
-
 bool Commands::getLimitedSupportsFwdAllCan() const
 {
     return mLimitedSupportsFwdAllCan;
@@ -1420,6 +1381,32 @@ void Commands::setLimitedCompatibilityCommands(QVector<int> compatibilityCommand
     mCompatibilityCommands = compatibilityCommands;
 }
 
+QString Commands::faultToStr(mc_fault_code fault)
+{
+    switch (fault) {
+    case FAULT_CODE_NONE: return "FAULT_CODE_NONE";
+    case FAULT_CODE_OVER_VOLTAGE: return "FAULT_CODE_OVER_VOLTAGE";
+    case FAULT_CODE_UNDER_VOLTAGE: return "FAULT_CODE_UNDER_VOLTAGE";
+    case FAULT_CODE_DRV: return "FAULT_CODE_DRV";
+    case FAULT_CODE_ABS_OVER_CURRENT: return "FAULT_CODE_ABS_OVER_CURRENT";
+    case FAULT_CODE_OVER_TEMP_FET: return "FAULT_CODE_OVER_TEMP_FET";
+    case FAULT_CODE_OVER_TEMP_MOTOR: return "FAULT_CODE_OVER_TEMP_MOTOR";
+    case FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE";
+    case FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: return "FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE";
+    case FAULT_CODE_MCU_UNDER_VOLTAGE: return "FAULT_CODE_MCU_UNDER_VOLTAGE";
+    case FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: return "FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET";
+    case FAULT_CODE_ENCODER_SPI: return "FAULT_CODE_ENCODER_SPI";
+    case FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE: return "FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE";
+    case FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE: return "FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE";
+    case FAULT_CODE_FLASH_CORRUPTION: return "FAULT_CODE_FLASH_CORRUPTION";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3";
+    case FAULT_CODE_UNBALANCED_CURRENTS: return "FAULT_CODE_UNBALANCED_CURRENTS";
+    default: return "Unknown fault";
+    }
+}
+
 void Commands::setAppConfig(ConfigParams *appConfig)
 {
     mAppConfig = appConfig;
@@ -1432,67 +1419,6 @@ void Commands::setMcConfig(ConfigParams *mcConfig)
     mMcConfig = mcConfig;
     connect(mMcConfig, SIGNAL(updateRequested()), this, SLOT(getMcconf()));
     connect(mMcConfig, SIGNAL(updateRequestDefault()), this, SLOT(getMcconfDefault()));
-}
-
-void Commands::startFirmwareUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan)
-{
-    mFirmwareIsBootloader = isBootloader;
-    mFirmwareFwdAllCan = mLimitedSupportsFwdAllCan ? fwdCan : false;
-    mFirmwareIsUploading = true;
-    mFirmwareState = mFirmwareIsBootloader ? 2 : 0;
-    mFimwarePtr = 0;
-    mFirmwareTimer = 600;
-    mFirmwareRetries = 5;
-    mNewFirmware.clear();
-    mNewFirmware.append(newFirmware);
-    mFirmwareUploadStatus = "Buffer Erase";
-
-    if (mFirmwareIsBootloader) {
-        if (mLimitedSupportsEraseBootloader) {
-            mFirmwareState = 0;
-            VByteArray vb;
-            vb.vbAppendInt8(mFirmwareFwdAllCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
-                                                 COMM_ERASE_BOOTLOADER);
-            emitData(vb);
-        } else {
-            firmwareUploadUpdate(true);
-        }
-    } else {
-        VByteArray vb;
-        vb.vbAppendInt8(mFirmwareFwdAllCan ? COMM_ERASE_NEW_APP_ALL_CAN :
-                                             COMM_ERASE_NEW_APP);
-        vb.vbAppendUint32(mNewFirmware.size());
-        emitData(vb);
-    }
-}
-
-double Commands::getFirmwareUploadProgress()
-{
-    if (mFirmwareIsUploading) {
-        return double(mFimwarePtr) / double(mNewFirmware.size());
-    } else {
-        return -1.0;
-    }
-}
-
-QString Commands::getFirmwareUploadStatus()
-{
-    return mFirmwareUploadStatus;
-}
-
-void Commands::cancelFirmwareUpload()
-{
-    if (mFirmwareIsUploading) {
-        mFirmwareIsUploading = false;
-        mFimwarePtr = 0;
-        mFirmwareState = 0;
-        mFirmwareUploadStatus = "Cancelled";
-    }
-}
-
-bool Commands::isCurrentFiwmwareBootloader()
-{
-    return mFirmwareIsBootloader;
 }
 
 void Commands::checkMcConfig()

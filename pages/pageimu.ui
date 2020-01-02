@@ -46,6 +46,20 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>3D Plot</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="layout3d">
+       <item>
+        <widget class="QCheckBox" name="useYawBox">
+         <property name="text">
+          <string>Use Yaw (will drift)</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>

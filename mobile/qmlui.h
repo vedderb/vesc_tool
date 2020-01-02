@@ -33,6 +33,9 @@ public:
     explicit QmlUi(QObject *parent = nullptr);
     bool startQmlUi();
     bool eventFilter(QObject *object, QEvent *e);
+    void setVisible(bool visible);
+
+    static VescInterface *vesc();
 
 signals:
 
@@ -41,6 +44,7 @@ public slots:
 private:
     QQmlApplicationEngine *mEngine;
 
+    static VescInterface *mVesc;
     static QObject *vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
     static QObject *utility_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
 

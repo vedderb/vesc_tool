@@ -367,6 +367,42 @@
             </spacer>
            </item>
            <item>
+            <widget class="QSpinBox" name="experimentHistoryBox">
+             <property name="toolTip">
+              <string>Drop old samples when the plot grows larger than this</string>
+             </property>
+             <property name="prefix">
+              <string>History: </string>
+             </property>
+             <property name="minimum">
+              <number>2</number>
+             </property>
+             <property name="maximum">
+              <number>10000</number>
+             </property>
+             <property name="singleStep">
+              <number>50</number>
+             </property>
+             <property name="value">
+              <number>500</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="experimentClearDataButton">
+             <property name="toolTip">
+              <string>Clear data from plots</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="experimentScatterButton">
              <property name="toolTip">
               <string>Use Scatterplot</string>
@@ -375,7 +411,7 @@
               <string/>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="../res.qrc">
                <normaloff>:/res/icons/Polyline-96.png</normaloff>:/res/icons/Polyline-96.png</iconset>
              </property>
              <property name="checkable">

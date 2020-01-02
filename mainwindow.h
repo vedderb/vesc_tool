@@ -50,12 +50,14 @@
 #include "pages/pageappuart.h"
 #include "pages/pageappnunchuk.h"
 #include "pages/pageappnrf.h"
+#include "pages/pageappbalance.h"
 #include "pages/pagesettings.h"
 #include "pages/pagegpd.h"
 #include "pages/pageexperiments.h"
 #include "pages/pageimu.h"
 #include "pages/pageswdprog.h"
 #include "pages/pageappimu.h"
+#include "pages/pageloganalysis.h"
 
 namespace Ui {
 class MainWindow;
@@ -168,9 +170,11 @@ private:
     PageAppUart *mPageAppUart;
     PageAppNunchuk *mPageAppNunchuk;
     PageAppNrf *mPageAppNrf;
+    PageAppBalance *mPageAppBalance;
     PageSettings *mPageSettings;
     PageSwdProg *mPageSwdProg;
     PageAppImu *mPageAppImu;
+    PageLogAnalysis *mPageLogAnalysis;
 
     void addPageItem(QString name,
                      QString icon = "",

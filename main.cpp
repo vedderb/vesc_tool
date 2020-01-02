@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -110,6 +110,16 @@ int main(int argc, char *argv[])
 #ifdef USE_MOBILE
     QmlUi q;
     q.startQmlUi();
+
+    // As background running is allowed, make sure to not update the GUI when
+    // running in the background.
+    QObject::connect(&a, &QApplication::applicationStateChanged, [&q](Qt::ApplicationState state) {
+        if(state == Qt::ApplicationHidden) {
+            q.setVisible(false);
+        } else {
+            q.setVisible(true);
+        }
+    });
 #else
     MainWindow w;
     w.show();

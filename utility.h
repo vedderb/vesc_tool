@@ -25,6 +25,9 @@
 #include <cstdint>
 #include "vescinterface.h"
 
+#define FE_WGS84        (1.0/298.257223563) // earth flattening (WGS84)
+#define RE_WGS84        6378137.0           // earth semimajor axis (WGS84) (m)
+
 class Utility : public QObject
 {
     Q_OBJECT
@@ -58,6 +61,15 @@ public:
     static bool createParamParserC(VescInterface *vesc, QString filename);
     static uint32_t crc32c(uint8_t *data, uint32_t len);
     static bool checkFwCompatibility(VescInterface *vesc);
+    Q_INVOKABLE static QVariantList getNetworkAddresses();
+    Q_INVOKABLE static void startGnssForegroundService();
+    Q_INVOKABLE static void stopGnssForegroundService();
+
+    static void llhToXyz(double lat, double lon, double height, double *x, double *y, double *z);
+    static void xyzToLlh(double x, double y, double z, double *lat, double *lon, double *height);
+    static void createEnuMatrix(double lat, double lon, double *enuMat);
+    static void llhToEnu(const double *iLlh, const double *llh, double *xyz);
+    static void enuToLlh(const double *iLlh, const double *xyz, double *llh);
 
     template<typename QEnum>
     static QString QEnumToQString (const QEnum value) {

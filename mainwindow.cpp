@@ -1112,6 +1112,7 @@ void MainWindow::checkUdev()
 #endif
 }
 
+#ifdef Q_OS_LINUX
 bool MainWindow::waitProcess(QProcess &process, bool block, int timeoutMs)
 {
     bool wasEnables = isEnabled();
@@ -1152,6 +1153,7 @@ QString MainWindow::runCmd(QString cmd, QStringList args)
     process.close();
     return res;
 }
+#endif
 
 void MainWindow::on_pageList_currentRowChanged(int currentRow)
 {

@@ -23,7 +23,9 @@
 #include <QPrinter>
 #include <QPrintEngine>
 #include <QTime>
-
+#ifdef __ios__
+#include <QPdfWriter>
+#endif
 #include "mapwidget.h"
 #include "utility.h"
 
@@ -1158,14 +1160,6 @@ void MapWidget::printPdf(QString path, int width, int height)
         height = this->height();
     }
 
-    QPrinter printer(QPrinter::ScreenResolution);
-    printer.setOutputFileName(path);
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setColorMode(QPrinter::Color);
-
-    printer.printEngine()->setProperty(QPrintEngine::PPK_Creator, "VESC Tool");
-    printer.printEngine()->setProperty(QPrintEngine::PPK_DocumentName, "Map");
-
     QPageLayout pageLayout;
     pageLayout.setMode(QPageLayout::FullPageMode);
     pageLayout.setOrientation(QPageLayout::Portrait);
@@ -1173,10 +1167,30 @@ void MapWidget::printPdf(QString path, int width, int height)
     pageLayout.setPageSize(QPageSize(QSize(width, height),
                                      QPageSize::Point, QString(),
                                      QPageSize::ExactMatch));
-    printer.setPageLayout(pageLayout);
 
-    QPainter painter(&printer);
-    paint(painter, printer.pageRect().width(), printer.pageRect().height(), true);
+    #ifdef __ios__
+        QPdfWriter pdfWriter(path);
+
+        pdfWriter.setCreator("VESC Tool");
+        pdfWriter.setTitle("Map");
+
+        pdfWriter.setPageLayout(pageLayout);
+        QPainter painter(&pdfWriter);
+        paint(painter, pdfWriter.width(), pdfWriter.height(), true);
+    #else
+        QPrinter printer(QPrinter::ScreenResolution);
+        printer.setOutputFileName(path);
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setColorMode(QPrinter::Color);
+
+        printer.printEngine()->setProperty(QPrintEngine::PPK_Creator, "VESC Tool");
+        printer.printEngine()->setProperty(QPrintEngine::PPK_DocumentName, "Map");
+
+        printer.setPageLayout(pageLayout);
+
+        QPainter painter(&printer);
+        paint(painter, printer.pageRect().width(), printer.pageRect().height(), true);
+    #endif
 }
 
 void MapWidget::printPng(QString path, int width, int height)

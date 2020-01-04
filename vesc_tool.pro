@@ -45,7 +45,27 @@ DEFINES += HAS_BLUETOOTH
 # Positioning
 DEFINES += HAS_POS
 
-!android: {
+ios {
+    CONFIG  += iOSBuild
+    CONFIG  -= bitcode
+    DEFINES += __ios__
+    DEFINES += NO_SERIAL_LINK
+    QMAKE_IOS_DEPLOYMENT_TARGET = 11.0
+    QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1,2 # Universal
+    QMAKE_LFLAGS += -Wl,-no_pie
+}
+
+iOSBuild {
+    QMAKE_INFO_PLIST  = $${PWD}/ios/iOS-Info.plist
+    OTHER_FILES      += $${PWD}/ios/iOS-Info.plist
+    QMAKE_ASSET_CATALOGS += ios/Images.xcassets
+    BUNDLE.files          = ios/VTLaunchScreen.xib $$QMAKE_INFO_PLIST
+    QMAKE_BUNDLE_DATA    += BUNDLE
+}
+
+android || ios {
+    # Android and iOS don't unclude these
+} else {
     # Serial port available
     DEFINES += HAS_SERIALPORT
 }
@@ -83,8 +103,14 @@ contains(DEFINES, HAS_POS) {
 
 android: QT += androidextras
 
-android: TARGET = vesc_tool
-!android: TARGET = vesc_tool_$$VT_VERSION
+# android: TARGET = vesc_tool
+# !android: TARGET = vesc_tool_$$VT_VERSION
+
+android || ios {
+    TARGET = vesc_tool
+} else {
+    TARGET = vesc_tool_$$VT_VERSION
+}
 
 
 ANDROID_VERSION = 1
@@ -143,6 +169,14 @@ release_android {
     MOC_DIR = build/android/obj
     RCC_DIR = build/android/obj
     UI_DIR = build/android/obj
+}
+
+release_ios {
+    DESTDIR = build/ios
+    OBJECTS_DIR = build/ios/obj
+    MOC_DIR = build/ios/obj
+    RCC_DIR = build/ios/obj
+    UI_DIR = build/ios/obj
 }
 
 build_mobile {

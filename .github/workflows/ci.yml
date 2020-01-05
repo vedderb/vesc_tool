@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: 0 0 * * 0
+            
+jobs:
+  Qt:
+    runs-on: ${{ matrix.os }}
+
+    strategy: 
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        qt: [5.13.2, 5.10.1]
+        os: [ubuntu-latest, macos-latest, windows-2016]
+
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v1
+    - name: Install Qt (Linux|MacOS)
+      if: (matrix.os == 'ubuntu-latest') || (matrix.os == 'macos-latest')
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ matrix.qt }}
+    - name: Install Qt (Windows)
+      if: matrix.os == 'windows-2016'
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ matrix.qt }}
+        arch: win64_msvc2017_64
+    - name: Install jom (Windows)
+      if: matrix.os == 'windows-2016'
+      run: |
+        Invoke-WebRequest http://download.qt.io/official_releases/jom/jom.zip -OutFile .\jom.zip
+        expand-archive -path "jom.zip" -destinationpath "$HOME\jom"
+        echo "::add-path::$HOME\jom"
+    - name: Configure and compile VESC Tool (MacOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        qmake -config release "CONFIG += release_macos build_original"
+        make -j2
+    - name: Configure and compile VESC Tool (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        qmake -config release "CONFIG += release_lin build_original"
+        make -j2        
+    - name: Configure and compile VESC Tool (Windows)
+      if: matrix.os == 'windows-2016'
+      run: |
+        # Setup VS compiler   
+        cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat`" && set > %temp%\vcvars.txt"
+        Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
+        qmake -config release "CONFIG += release_macos build_original"
+        jom -j2

@@ -2570,7 +2570,44 @@ p, li { white-space: pre-wrap; }
             <enumNames>On after 2 seconds</enumNames>
             <enumNames>On after 5 seconds</enumNames>
             <enumNames>On after 10 seconds</enumNames>
+            <enumNames>Unused</enumNames>
         </m_out_aux_mode>
+        <m_motor_temp_sens_type>
+            <longName>Motor Temperature Sensor Type</longName>
+            <type>4</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Motor temperature sensor type. Most small hobby motors have a 10K NTC thermistor, whereas some larger motors have 1K PTC thermistors (such as the KTY84).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_MOTOR_TEMP_SENS_TYPE</cDefine>
+            <valInt>0</valInt>
+            <enumNames>NTC 10K at 25°C</enumNames>
+            <enumNames>PTC 1K at 100 °C</enumNames>
+        </m_motor_temp_sens_type>
+        <m_ptc_motor_coeff>
+            <longName>Coefficient for PTC Motor Thermistor</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Coefficient for PTC Motor Thermistor. Unit: %/K&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_PTC_MOTOR_COEFF</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>100</maxDouble>
+            <minDouble>0.05</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.61</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix> %/K</suffix>
+            <vTx>9</vTx>
+        </m_ptc_motor_coeff>
         <si_motor_poles>
             <longName>Motor Poles</longName>
             <type>2</type>
@@ -3018,6 +3055,8 @@ p, li { white-space: pre-wrap; }
         <ser>m_dc_f_sw</ser>
         <ser>m_ntc_motor_beta</ser>
         <ser>m_out_aux_mode</ser>
+        <ser>m_motor_temp_sens_type</ser>
+        <ser>m_ptc_motor_coeff</ser>
         <ser>si_motor_poles</ser>
         <ser>si_gear_ratio</ser>
         <ser>si_wheel_diameter</ser>

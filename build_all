@@ -2,7 +2,7 @@
 
 set -e
 
-./build_cp_fw
+#./build_cp_fw
 ./build_lin
 ./build_win
 ./build_android

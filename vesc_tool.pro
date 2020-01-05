@@ -5,12 +5,12 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.26
+VT_VERSION = 1.29
 VT_INTRO_VERSION = 1
 
-VT_ANDROID_VERSION_ARMV7 = 50
-VT_ANDROID_VERSION_ARM64 = 51
-VT_ANDROID_VERSION_X86 = 52
+VT_ANDROID_VERSION_ARMV7 = 59
+VT_ANDROID_VERSION_ARM64 = 60
+VT_ANDROID_VERSION_X86 = 61
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -177,7 +177,7 @@ include(pages/pages.pri)
 include(widgets/widgets.pri)
 include(mobile/mobile.pri)
 include(map/map.pri)
-include(lzo/lzo.pri)
+include(lzokay/lzokay.pri)
 
 RESOURCES += res.qrc
 

@@ -1163,7 +1163,7 @@ void MapWidget::printPdf(QString path, int width, int height)
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setColorMode(QPrinter::Color);
 
-    printer.printEngine()->setProperty(QPrintEngine::PPK_Creator, "RControlStation");
+    printer.printEngine()->setProperty(QPrintEngine::PPK_Creator, "VESC Tool");
     printer.printEngine()->setProperty(QPrintEngine::PPK_DocumentName, "Map");
 
     QPageLayout pageLayout;
@@ -1596,7 +1596,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
     const double scaleMax = 20;
     const double scaleMin = 0.000001;
 
-    // Make sure scale and offsetappend is reasonable
+    // Make sure scale and offset is reasonable
     if (mScaleFactor < scaleMin) {
         double scaleDiff = scaleMin / mScaleFactor;
         mScaleFactor = scaleMin;

@@ -29,6 +29,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <cmath>
+#include "lzokay/lzokay.hpp"
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
@@ -80,8 +81,6 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mAutoconnectOngoing = false;
     mAutoconnectProgress = 0.0;
     mIgnoreCanChange = false;
-
-    mLzoWrkMem = new lzo_align_t[((LZO1X_1_MEM_COMPRESS) + (sizeof(lzo_align_t) - 1)) / sizeof(lzo_align_t)];
 
 #ifdef Q_OS_ANDROID
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
@@ -379,8 +378,6 @@ VescInterface::~VescInterface()
     if (mWakeLockActive) {
         setWakeLock(false);
     }
-
-    delete[] mLzoWrkMem;
 
     Utility::stopGnssForegroundService();
 }
@@ -902,13 +899,20 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
         int sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
 
         QByteArray in = newFirmware.mid(0, sz);
-        unsigned char out[chunkSize + chunkSize / 16 + 64 + 3];
-        lzo_uint out_len;
+        std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
+        unsigned char out[outMaxSize];
+        std::size_t out_len = sz;
 
-        lzo1x_1_compress((const uint8_t*)in.constData(), lzo_uint(sz), out, &out_len, mLzoWrkMem);
+        if (supportsLzo && isLzo) {
+            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out, outMaxSize, out_len);
+            if (error < lzokay::EResult::Success) {
+                qWarning() << "LZO Compress Error" << int(error);
+                isLzo = false;
+            }
+        }
 
         int res = 1;
-        if ((out_len + 2) < uint32_t(sz) && supportsLzo && isLzo) {
+        if (supportsLzo && isLzo && (out_len + 2) < uint32_t(sz)) {
             compChunks++;
             uploadSize += out_len + 2;
             res = writeChunk(uint32_t(addr), in, QByteArray((const char*)out, int(out_len)));
@@ -1197,13 +1201,20 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         int sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
 
         QByteArray in = newFirmware.mid(0, sz);
-        unsigned char out[chunkSize + chunkSize / 16 + 64 + 3];
-        lzo_uint out_len;
+        std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
+        unsigned char out[outMaxSize];
+        std::size_t out_len = sz;
 
-        lzo1x_1_compress((const uint8_t*)in.constData(), lzo_uint(sz), out, &out_len, mLzoWrkMem);
+        if (isLzo && supportsLzo) {
+            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out,outMaxSize, out_len);
+            if (error < lzokay::EResult::Success) {
+                qWarning() << "LZO Compress Error" << int(error);
+                isLzo = false;
+            }
+        }
 
         int res = 1;
-        if ((out_len + 2) < uint32_t(sz) && supportsLzo && isLzo) {
+        if (isLzo && supportsLzo && (out_len + 2) < uint32_t(sz)) {
             compChunks++;
             uploadSize += out_len + 2;
             res = writeChunk(uint32_t(addr), QByteArray((const char*)out, int(out_len)),

@@ -1289,6 +1289,14 @@ void Commands::bmReadMem(uint32_t addr, quint16 size)
     emitData(vb);
 }
 
+void Commands::setCurrentRel(double current)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_SET_CURRENT_REL);
+    vb.vbAppendDouble32(current, 1e5);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;

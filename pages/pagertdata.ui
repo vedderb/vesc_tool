@@ -367,6 +367,28 @@
             </spacer>
            </item>
            <item>
+            <widget class="QSpinBox" name="experimentHistoryBox">
+             <property name="toolTip">
+              <string>Drop old samples when the plot grows larger than this</string>
+             </property>
+             <property name="prefix">
+              <string>History: </string>
+             </property>
+             <property name="minimum">
+              <number>2</number>
+             </property>
+             <property name="maximum">
+              <number>10000</number>
+             </property>
+             <property name="singleStep">
+              <number>50</number>
+             </property>
+             <property name="value">
+              <number>500</number>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="experimentClearDataButton">
              <property name="toolTip">
               <string>Clear data from plots</string>

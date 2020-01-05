@@ -28,22 +28,35 @@ contains(DEFINES, HAS_BLUETOOTH) {
     QT += bluetooth
 }
 
-INCLUDEPATH += ../..
+SOURCES += main.cpp\
+    commands.cpp \
+    configparam.cpp \
+    configparams.cpp \
+    packet.cpp \
+    vescinterface.cpp \
+    vbytearray.cpp \
+    utility.cpp \
+    tcpserversimple.cpp
 
-SOURCES += main.cpp
-
-HEADERS += 
+HEADERS  += commands.h \
+    configparam.h \
+    configparams.h \
+    datatypes.h \
+    packet.h \
+    vescinterface.h \
+    vbytearray.h \
+    utility.h \
+    tcpserversimple.h
     
 contains(DEFINES, HAS_BLUETOOTH) {
-    SOURCES += ../../bleuart.cpp
-    HEADERS += ../../bleuart.h
+    SOURCES += bleuart.cpp
+    HEADERS += bleuart.h
 }
 
-include(../../application.pri)
-include(../../widgets/widgets.pri)
-include(../../lzo/lzo.pri)
+include(widgets/widgets.pri)
+include(lzokay/lzokay.pri)
 
 RESOURCES += \
-    qml.qrc \
-    ../../res.qrc \
+    res.qrc \
+    qml.qrc
 

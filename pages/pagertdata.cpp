@@ -422,6 +422,14 @@ void PageRtData::plotDataReceived(double x, double y)
 
     mExperimentPlots[mExperimentPlotNow].xData.append(x);
     mExperimentPlots[mExperimentPlotNow].yData.append(y);
+
+    int samples = mExperimentPlots[mExperimentPlotNow].xData.size();
+    int historyMax = ui->experimentHistoryBox->value();
+    if (samples > historyMax) {
+        mExperimentPlots[mExperimentPlotNow].xData.remove(0, samples - historyMax);
+        mExperimentPlots[mExperimentPlotNow].yData.remove(0, samples - historyMax);
+    }
+
     mExperimentReplot = true;
 }
 

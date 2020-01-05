@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-	      qt: [5.13.2, 5.10.1]
+        qt: 5.13.2
         os: [ubuntu-latest, macos-latest, windows-2016]
 
     steps:

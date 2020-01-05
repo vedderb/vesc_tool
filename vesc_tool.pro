@@ -45,6 +45,8 @@ DEFINES += HAS_BLUETOOTH
 # Positioning
 DEFINES += HAS_POS
 
+CONFIG += resources_big
+
 ios {
     CONFIG  += iOSBuild
     CONFIG  -= bitcode
@@ -134,6 +136,10 @@ android: {
 }
 
 TEMPLATE = app
+
+win32|win64 {
+    DEFINES += _USE_MATH_DEFINES
+}
 
 release_win {
     DESTDIR = build/win

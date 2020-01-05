@@ -900,7 +900,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
 
         QByteArray in = newFirmware.mid(0, sz);
         std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
-        unsigned char out[outMaxSize];
+        unsigned char *out = new unsigned char[outMaxSize];
         std::size_t out_len = sz;
 
         if (supportsLzo && isLzo) {
@@ -921,6 +921,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
             uploadSize += sz;
             res = writeChunk(uint32_t(addr), in, QByteArray());
         }
+        delete out;
 
         newFirmware.remove(0, sz);
         addr += sz;
@@ -1202,7 +1203,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
 
         QByteArray in = newFirmware.mid(0, sz);
         std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
-        unsigned char out[outMaxSize];
+        unsigned char *out = new unsigned char[outMaxSize];
         std::size_t out_len = sz;
 
         if (isLzo && supportsLzo) {
@@ -1224,6 +1225,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             uploadSize += sz;
             res = writeChunk(uint32_t(addr), in, false, 0);
         }
+        delete out;
 
         newFirmware.remove(0, sz);
         addr += sz;

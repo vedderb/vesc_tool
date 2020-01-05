@@ -60,16 +60,19 @@ jobs:
         qmake -config release "CONFIG += release_win build_original"
         jom -j2
     - name: Upload vesc_tool_1.29.app
+      if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v1
       with:
         name: vesc_tool-mac
         path: build/macos/vesc_tool_1.29.app
     - name: Upload vesc_tool_1.29
+      if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v1
       with:
         name: vesc_tool-lin
         path: build/lin/vesc_tool_1.29
     - name: Upload vesc_tool_1.29.exe
+      if: matrix.os == 'windows-2016'
       uses: actions/upload-artifact@v1
       with:
         name: vesc_tool-win

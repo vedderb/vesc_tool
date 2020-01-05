@@ -72,5 +72,5 @@ jobs:
     - name: Upload vesc_tool_1.29.exe
       uses: actions/upload-artifact@v1
       with:
-        name: vesc_tool-mac
+        name: vesc_tool-win
         path: build\win\vesc_tool_1.29.exe

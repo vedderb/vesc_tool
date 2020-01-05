@@ -2585,6 +2585,7 @@ p, li { white-space: pre-wrap; }
             <valInt>0</valInt>
             <enumNames>NTC 10K at 25°C</enumNames>
             <enumNames>PTC 1K at 100 °C</enumNames>
+	    <enumNames>KTY83/122</enumNames>
         </m_motor_temp_sens_type>
         <m_ptc_motor_coeff>
             <longName>Coefficient for PTC Motor Thermistor</longName>

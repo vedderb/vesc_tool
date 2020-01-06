@@ -111,7 +111,7 @@ function Main
     $VTVer = Select-String -Path vesc_tool.pro -Pattern 'VT_VERSION\s=\s(.*)' | %{$_.Matches.Groups[1].value}
 
     # Set-VsVars $MSVC $Arch
-    Set-VsVars 2019 $Arch
+    # Set-VsVars 2019 $Arch
 
     $VTInstallDir = "build\win"
     Write-Output "Install Location       : $VTInstallDir"

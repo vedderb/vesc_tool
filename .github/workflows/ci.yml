@@ -51,7 +51,9 @@ jobs:
         make -j2
     - name: Configure and compile VESC Tool (Windows)
       if: matrix.os == 'windows-latest'
-      run: ./build_win4CI.ps1
+      run: ｜
+        call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        ./build_win4CI.ps1
     - name: Upload vesc tool macOS dmg
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v1

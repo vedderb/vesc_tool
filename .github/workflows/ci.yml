@@ -52,25 +52,203 @@ jobs:
     - name: Configure and compile VESC Tool (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        $vcBaseDir = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC"
-        $env:Path += ";$vcBaseDir\Common7\Tools"
-        # Using vcvarsall.bat from PowerShell is not straightforward - see
-        # https://stackoverflow.com/questions/41399692/running-a-build-script-after-calling-vcvarsall-bat-from-powershell
-        # Invokes a Cmd.exe shell script and updates the environment.
-        function Invoke-CmdScript {
-            param(
-              [String] $scriptName
-            )
-            $cmdLine = """$scriptName"" $args & set"
-            & $Env:SystemRoot\system32\cmd.exe /c $cmdLine |
-            select-string '^([^=]*)=(.*)$' | foreach-object {
-              $varName = $_.Matches[0].Groups[1].Value
-              $varValue = $_.Matches[0].Groups[2].Value
-              set-item Env:$varName $varValue
+        [CmdletBinding()]
+        param(
+            $NumJobs = 8,
+            $MSVC = 2017,
+            $Arch = "amd64",
+            [switch]$NoPause = $true
+        )
+        
+        # PowerShell execution policy.
+        Set-StrictMode -Version 3
+        
+        #Import-Module Pscx
+        
+        #-----------------------------------------------------------------------------
+        # Main code
+        #-----------------------------------------------------------------------------
+        
+        function Main
+        {
+            # Initialize Visual Studio environment
+        
+            $VTVer = Select-String -Path vesc_tool.pro -Pattern 'VT_VERSION\s=\s(.*)' | %{$_.Matches.Groups[1].value}
+        
+            # Set-VsVars $MSVC $Arch
+            Set-VsVars 2019 $Arch
+        
+            $VTInstallDir = "build\win"
+            Write-Output "Install Location       : $VTInstallDir"
+            Write-Output "VESC Tool Version      : $VTVer"
+        
+            # $env:Path = "$HOME\jom;$env:Path"
+        
+            Remove-Item -Force -Recurse $VTInstallDir\* -ErrorAction Ignore
+        
+            Build-VESCTool original
+            Build-VESCTool platinum
+            Build-VESCTool gold
+            Build-VESCTool silver
+            Build-VESCTool bronze
+            Build-VESCTool free
+        
+            Exit-Script
+        }
+        
+        #-----------------------------------------------------------------------------
+        # A function to exit this script. The Message parameter is used on error.
+        #-----------------------------------------------------------------------------
+        
+        function Exit-Script ([string]$Message = "")
+        {
+            $Code = 0
+            if ($Message -ne "") {
+                Write-Output "ERROR: $Message"
+                $Code = 1
+            }
+            if (-not $NoPause) {
+                pause
+            }
+            exit $Code
+        }
+        
+        #-----------------------------------------------------------------------------
+        # Silently create a directory.
+        #-----------------------------------------------------------------------------
+        
+        function Create-Directory ([string]$Directory)
+        {
+            [void] (New-Item -Path $Directory -ItemType "directory" -Force)
+        }
+        
+        #-----------------------------------------------------------------------------
+        # Download a file if not yet present.
+        # Warning: If file is present but incomplete, do not download it again.
+        #-----------------------------------------------------------------------------
+        
+        function Download-File ([string]$Url, [string]$OutputFile)
+        {
+            $FileName = Split-Path $Url -Leaf
+            if (-not (Test-Path $OutputFile)) {
+                # Local file not present, start download.
+                Write-Output "Downloading $Url ..."
+                try {
+                    $webclient = New-Object System.Net.WebClient
+                    $webclient.DownloadFile($Url, $OutputFile)
+                }
+                catch {
+                    # Display exception.
+                    $_
+                    # Delete partial file, if any.
+                    if (Test-Path $OutputFile) {
+                        Remove-Item -Force $OutputFile
+                    }
+                    # Abort
+                    Exit-Script "Error downloading $FileName"
+                }
+                # Check that the file is present.
+                if (-not (Test-Path $OutputFile)) {
+                    Exit-Script "Error downloading $FileName"
+                }
             }
         }
-        Invoke-CmdScript "$vcBaseDir\Auxiliary\Build\vcvarsall.bat" amd64
-        source ./build_win4CI.ps1
+        
+        #-----------------------------------------------------------------------------
+        # Get path name of 7zip, abort if not found.
+        #-----------------------------------------------------------------------------
+        
+        function Get-7zip
+        {
+            $Exe = "C:\Program Files\7-Zip\7z.exe"
+            if (-not (Test-Path $Exe)) {
+                $Exe = "C:\Program Files (x86)\7-Zip\7z.exe"
+            }
+            if (-not (Test-Path $Exe)) {
+                Exit-Script "7-zip not found, install it first, see http://www.7-zip.org/"
+            }
+            $Exe
+        }
+        
+        #-----------------------------------------------------------------------------
+        # Expand an archive file if not yet done.
+        #-----------------------------------------------------------------------------
+        
+        function Expand-Archive ([string]$ZipFile, [string]$OutDir, [string]$CheckFile)
+        {
+            # Check presence of expected expanded file or directory.
+            if (-not (Test-Path $CheckFile)) {
+                Write-Output "Expanding $ZipFile ..."
+                & (Get-7zip) x $ZipFile "-o$OutDir" | Select-String -Pattern "^Extracting " -CaseSensitive -NotMatch
+                if (-not (Test-Path $CheckFile)) {
+                    Exit-Script "Error expanding $ZipFile, $OutDir\$CheckFile not found"
+                }
+            }
+        }
+        
+        function Get-Batchfile ($file, $params)
+        {
+            $cmd = "`"$file`" $params & set"
+            cmd /c $cmd | Foreach-Object {
+                $p, $v = $_.split('=')
+                Set-Item -path env:$p -value $v
+            }
+        }
+        
+        
+        function Set-VsVars($vsYear, $arch)
+        {
+            $vstools = ""
+        
+            switch ($vsYear)
+            {
+                2017 { $vstools = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" }
+                2019 { $vstools = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" }
+            }
+        
+            #$batchFile = [System.IO.Path]::Combine($vstools, "vsvars32.bat")
+        
+            if (-not (Test-Path $vstools)) {
+                Exit-Script "Visual Studio environment could not be found."
+            }
+        
+            Get-Batchfile -file $vstools -params $arch
+        
+        
+            Write-Host -ForegroundColor 'Yellow' "VsVars has been loaded from: $vstools ($arch)"
+        }
+        
+        function Build-VESCTool ([string]$type)
+        {
+            # qmake -config release -tp vc "CONFIG+=release_win build_$type" -o $VTInstallDir\vesc_tool.vcxproj
+        
+            qmake -config release "CONFIG+=release_win build_$type"
+            jom clean
+            jom -j $NumJobs
+        
+            # msbuild $VTInstallDir\vesc_tool.vcxproj /Zm:1000 /t:Build /p:Configuration=Release
+            Remove-Item -Path $VTInstallDir\obj -Force -Recurse -ErrorAction Ignore
+        
+            Push-Location $VTInstallDir
+            $DeployDir="vesc_tool_" + $type + "_win-" + "$Arch"
+            $ZipFile=$DeployDir + ".zip"
+            Create-Directory $DeployDir
+        
+            $VTApp = "vesc_tool_" + ${VTVer} + ".exe"
+            Move-Item $VTApp $DeployDir
+            windeployqt $DeployDir\$VTApp -qmldir=.
+            Compress-Archive $DeployDir -DestinationPath $ZipFile
+        
+            Remove-Item * -Exclude *.zip -Recurse -ErrorAction Ignore
+            # Remove-Item * -Include *.exe, *.dll -Exclude *.zip -Recurse -ErrorAction Ignore
+            Pop-Location
+        }
+        
+        #-----------------------------------------------------------------------------
+        # Execute main code.
+        #-----------------------------------------------------------------------------
+        
+        . Main
       shell: powershell
     - name: Upload vesc tool macOS dmg
       if: matrix.os == 'macos-latest'

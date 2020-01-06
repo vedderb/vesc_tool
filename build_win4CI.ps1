@@ -236,8 +236,8 @@ function Set-VsVars($vsYear, $arch)
     switch ($vsYear)
     {
         2017 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" }
-        2019 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" }
-        # 2019 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" }
+        # 2019 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" }
+        2019 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" }
     }
 
     #$batchFile = [System.IO.Path]::Combine($vstools, "vsvars32.bat")

@@ -95,8 +95,6 @@ function Main
     Write-Output "Install Location       : $VTInstallDir"
     Write-Output "VESC Tool Version      : $VTVer"
 
-    # $env:Path = "$HOME\jom;$env:Path"
-
     Remove-Item -Force -Recurse $VTInstallDir\* -ErrorAction Ignore
 
     Build-VESCTool original
@@ -236,7 +234,7 @@ function Build-VESCTool ([string]$type)
     # qmake -config release -tp vc "CONFIG+=release_win build_$type" -o $VTInstallDir\vesc_tool.vcxproj
 
     qmake -config release "CONFIG+=release_win build_$type"
-    jom clean
+    # jom clean
     jom -j $NumJobs
 
     # msbuild $VTInstallDir\vesc_tool.vcxproj /Zm:1000 /t:Build /p:Configuration=Release

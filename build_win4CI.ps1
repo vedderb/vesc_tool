@@ -200,8 +200,12 @@ function Expand-Archive ([string]$ZipFile, [string]$OutDir, [string]$CheckFile)
 function Get-Batchfile ($file, $params)
 {
     $cmd = "`"$file`" $params & set"
+
+    Write-Output "11111      : $cmd"
+
     cmd /c $cmd | Foreach-Object {
         $p, $v = $_.split('=')
+	Write-Output "2222     : $p $v"
         Set-Item -path env:$p -value $v
     }
 }
@@ -217,8 +221,6 @@ function Set-VsVars($vsYear, $arch)
         2019 { $vstools = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" }
     }
 
-    Write-Output "env      : $env"
-
     #$batchFile = [System.IO.Path]::Combine($vstools, "vsvars32.bat")
 
     if (-not (Test-Path $vstools)) {
@@ -227,7 +229,6 @@ function Set-VsVars($vsYear, $arch)
 
     Get-Batchfile -file $vstools -params $arch
 
-    Write-Output "env      : $env"
 
     Write-Host -ForegroundColor 'Yellow' "VsVars has been loaded from: $vstools ($arch)"
 }

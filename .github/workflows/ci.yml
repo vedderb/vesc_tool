@@ -57,12 +57,11 @@ jobs:
         $Arch = "amd64"
         $VTInstallDir = "build\win"
 
-        cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\bin\amd64\vcvars64.bat`" && set > %temp%\vcvars.txt"
+        cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat`" && set > %temp%\vcvars.txt"
         Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
-        # qmake -config release -tp vc "CONFIG+=release_win build_$type" -o $VTInstallDir\vesc_tool.vcxproj
         
         $type = "original"
-        qmake -config release "CONFIG+=release_win build_$type"
+        qmake -config release "CONFIG+=release_win build_original"
         # jom clean
         jom -j $NumJobs
 

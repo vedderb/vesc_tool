@@ -104,15 +104,13 @@ Set-StrictMode -Version 3
 
 function Main
 {
-    # Check that 7zip is installed. We use it to expand the downloaded archive.
-    [void] (Get-7zip)
-
     Write-Output "Building vesc tool Qt version:   $QtVersion"
 
     # Qt installation directory.
     $QtDir = "$QtRoot\Qt$QtVersion\$QtVersion"
     # Initialize Visual Studio environment
 
+    $VTVer = Select-String -Path vesc_tool.pro -Pattern 'VT_VERSION\s=\s(.*)' | %{$_.Matches.Groups[1].value}
     $BuildName = ""
 
     if ($Arch -eq "x86") {
@@ -128,10 +126,11 @@ function Main
     # Set-VsVars $MSVC $Arch
     Set-VsVars 2019 $Arch
 
-    Write-Output "Build:                $BuildName"
+    Write-Output "Build                  : $BuildName"
 
     $VTInstallDir = "build\win"
-    Write-Output "Install Location:     $VTInstallDir"
+    Write-Output "Install Location       : $VTInstallDir"
+    Write-Output "VESC Tool Version      : $VTVer"
 
     # Set a clean path.
     $env:Path = "$QtDir\$BuildName\bin;$QtToolsDir\QtCreator\bin;$env:Path"
@@ -274,33 +273,29 @@ function Set-VsVars($vsYear, $arch)
     Write-Host -ForegroundColor 'Yellow' "VsVars has been loaded from: $vstools ($arch)"
 }
 
-function Copy-QtDepsDll ($file, $srcDir, $dstDir)
-{
-    $binDeps = $(dumpbin.exe /dependents /nologo $file |  ? { $_ -match "^    [^ ].*\.dll" } | % { $_ -replace "^    ","" })
-    $binDeps | % {
-        if ($_.startswith('Qt')) {
-	    Write-Output "Copy Item $srcDir\$_ -> $dstDir"
-	    Copy-Item $srcDir\$_ $dstDir
-        }
-    }
-}
-
 function Build-VESCTool ([string]$type)
 {
+    # qmake -config release -tp vc "CONFIG+=release_win build_$type" -o $VTInstallDir\vesc_tool.vcxproj
+
     qmake -config release "CONFIG+=release_win build_$type"
     jom clean
     jom -j $NumJobs
 
+    # msbuild $VTInstallDir\vesc_tool.vcxproj /Zm:1000 /t:Build /p:Configuration=Release
     Remove-Item -Path $VTInstallDir\obj -Force -Recurse -ErrorAction Ignore
 
-    Copy-QtDepsDll "$VTInstallDir\vesc_tool_*.exe" $QtDir\$BuildName\bin $VTInstallDir
-
     Push-Location $VTInstallDir
-    $zipFile="vesc_tool_" + $type + "_windows-" + "$Arch" + ".zip"
-    & (Get-7zip) a -tzip $zipFile vesc_tool*.exe *.dll
+    $DeployDir="vesc_tool_" + $type + "_win-" + "$Arch"
+    $ZipFile=$DeployDir + ".zip"
+    Create-Directory $DeployDir
 
-    # Remove-Item * -Exclude *.zip -ErrorAction Ignore
-    Remove-Item * -Include *.exe, *.dll -Exclude *.zip -Recurse -ErrorAction Ignore
+    $VTApp = "vesc_tool_" + ${VTVer} + ".exe"
+    Move-Item $VTApp $DeployDir
+    windeployqt $DeployDir\$VTApp -qmldir=.
+    Compress-Archive $DeployDir -DestinationPath $ZipFile
+
+    Remove-Item * -Exclude *.zip -Recurse -ErrorAction Ignore
+    # Remove-Item * -Include *.exe, *.dll -Exclude *.zip -Recurse -ErrorAction Ignore
     Pop-Location
 }
 

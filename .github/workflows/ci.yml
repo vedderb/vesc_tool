@@ -56,7 +56,8 @@ jobs:
         $MSVC = 2017
         $Arch = "amd64"
         $VTInstallDir = "build\win"
-        call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" $Arch
+
+        Set-VsVars 2019 $Arch
         # qmake -config release -tp vc "CONFIG+=release_win build_$type" -o $VTInstallDir\vesc_tool.vcxproj
         
         $type = original
@@ -80,6 +81,27 @@ jobs:
         Remove-Item * -Exclude *.zip -Recurse -ErrorAction Ignore
         # Remove-Item * -Include *.exe, *.dll -Exclude *.zip -Recurse -ErrorAction Ignore
         Pop-Location
+        function Set-VsVars($vsYear, $arch)
+        {
+            $vstools = ""
+
+            switch ($vsYear)
+            {
+                2017 { $vstools = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" }
+                2019 { $vstools = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" }
+            }
+
+            #$batchFile = [System.IO.Path]::Combine($vstools, "vsvars32.bat")
+
+            if (-not (Test-Path $vstools)) {
+                Exit-Script "Visual Studio environment could not be found."
+            }
+
+            Get-Batchfile -file $vstools -params $arch
+
+
+            Write-Host -ForegroundColor 'Yellow' "VsVars has been loaded from: $vstools ($arch)"
+        }
 
       shell: powershell
     - name: Upload vesc tool macOS dmg

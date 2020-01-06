@@ -153,7 +153,7 @@ jobs:
             # qmake -config release -tp vc "CONFIG+=release_win build_$type" -o $VTInstallDir\vesc_tool.vcxproj
         
             qmake -config release "CONFIG+=release_win build_$type"
-            jom clean
+            # jom clean
             jom -j $NumJobs
         
             # msbuild $VTInstallDir\vesc_tool.vcxproj /Zm:1000 /t:Build /p:Configuration=Release

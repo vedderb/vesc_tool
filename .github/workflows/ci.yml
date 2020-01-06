@@ -52,13 +52,10 @@ jobs:
     - name: Configure and compile VESC Tool (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        [CmdletBinding()]
-        param(
-            $NumJobs = 8,
-            $MSVC = 2017,
-            $Arch = "amd64",
-            [switch]$NoPause = $true
-        )
+        $NumJobs = 8,
+        $MSVC = 2017,
+        $Arch = "amd64",
+        [switch]$NoPause = $true
         
         # PowerShell execution policy.
         Set-StrictMode -Version 3
@@ -122,70 +119,7 @@ jobs:
             [void] (New-Item -Path $Directory -ItemType "directory" -Force)
         }
         
-        #-----------------------------------------------------------------------------
-        # Download a file if not yet present.
-        # Warning: If file is present but incomplete, do not download it again.
-        #-----------------------------------------------------------------------------
-        
-        function Download-File ([string]$Url, [string]$OutputFile)
-        {
-            $FileName = Split-Path $Url -Leaf
-            if (-not (Test-Path $OutputFile)) {
-                # Local file not present, start download.
-                Write-Output "Downloading $Url ..."
-                try {
-                    $webclient = New-Object System.Net.WebClient
-                    $webclient.DownloadFile($Url, $OutputFile)
-                }
-                catch {
-                    # Display exception.
-                    $_
-                    # Delete partial file, if any.
-                    if (Test-Path $OutputFile) {
-                        Remove-Item -Force $OutputFile
-                    }
-                    # Abort
-                    Exit-Script "Error downloading $FileName"
-                }
-                # Check that the file is present.
-                if (-not (Test-Path $OutputFile)) {
-                    Exit-Script "Error downloading $FileName"
-                }
-            }
-        }
-        
-        #-----------------------------------------------------------------------------
-        # Get path name of 7zip, abort if not found.
-        #-----------------------------------------------------------------------------
-        
-        function Get-7zip
-        {
-            $Exe = "C:\Program Files\7-Zip\7z.exe"
-            if (-not (Test-Path $Exe)) {
-                $Exe = "C:\Program Files (x86)\7-Zip\7z.exe"
-            }
-            if (-not (Test-Path $Exe)) {
-                Exit-Script "7-zip not found, install it first, see http://www.7-zip.org/"
-            }
-            $Exe
-        }
-        
-        #-----------------------------------------------------------------------------
-        # Expand an archive file if not yet done.
-        #-----------------------------------------------------------------------------
-        
-        function Expand-Archive ([string]$ZipFile, [string]$OutDir, [string]$CheckFile)
-        {
-            # Check presence of expected expanded file or directory.
-            if (-not (Test-Path $CheckFile)) {
-                Write-Output "Expanding $ZipFile ..."
-                & (Get-7zip) x $ZipFile "-o$OutDir" | Select-String -Pattern "^Extracting " -CaseSensitive -NotMatch
-                if (-not (Test-Path $CheckFile)) {
-                    Exit-Script "Error expanding $ZipFile, $OutDir\$CheckFile not found"
-                }
-            }
-        }
-        
+                
         function Get-Batchfile ($file, $params)
         {
             $cmd = "`"$file`" $params & set"
@@ -194,8 +128,7 @@ jobs:
                 Set-Item -path env:$p -value $v
             }
         }
-        
-        
+               
         function Set-VsVars($vsYear, $arch)
         {
             $vstools = ""

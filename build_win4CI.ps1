@@ -89,13 +89,13 @@ function Main
     $VTVer = Select-String -Path vesc_tool.pro -Pattern 'VT_VERSION\s=\s(.*)' | %{$_.Matches.Groups[1].value}
 
     # Set-VsVars $MSVC $Arch
-    Set-VsVars 2019 $Arch
+    # Set-VsVars 2019 $Arch
 
     $VTInstallDir = "build\win"
     Write-Output "Install Location       : $VTInstallDir"
     Write-Output "VESC Tool Version      : $VTVer"
 
-    $env:Path = "$HOME\jom;$env:Path"
+    # $env:Path = "$HOME\jom;$env:Path"
 
     Remove-Item -Force -Recurse $VTInstallDir\* -ErrorAction Ignore
 

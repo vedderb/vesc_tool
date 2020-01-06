@@ -51,36 +51,8 @@ jobs:
         make -j2
     - name: Configure and compile VESC Tool (Windows)
       if: matrix.os == 'windows-2016'
-      run: |
-        $NumJobs = 2
-        $MSVC = 2017
-        $Arch = "amd64"
-        $VTInstallDir = "build\win"
+      run: .\build_win4CI.ps1
 
-        cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat`" && set > %temp%\vcvars.txt"
-        Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
-        
-        $type = "original"
-        qmake -config release "CONFIG+=release_win build_original"
-        #jom clean
-        jom -j2
-
-        # msbuild $VTInstallDir\vesc_tool.vcxproj /Zm:1000 /t:Build /p:Configuration=Release
-        Remove-Item -Path $VTInstallDir\obj -Force -Recurse -ErrorAction Ignore
-
-        Push-Location $VTInstallDir
-        $DeployDir="vesc_tool_" + $type + "_win-" + "$Arch"
-        $ZipFile=$DeployDir + ".zip"
-        Create-Directory $DeployDir
-
-        $VTApp = "vesc_tool_" + ${VTVer} + ".exe"
-        Move-Item $VTApp $DeployDir
-        windeployqt $DeployDir\$VTApp -qmldir=.
-        Compress-Archive $DeployDir -DestinationPath $ZipFile
-
-        Remove-Item * -Exclude *.zip -Recurse -ErrorAction Ignore
-        # Remove-Item * -Include *.exe, *.dll -Exclude *.zip -Recurse -ErrorAction Ignore
-        Pop-Location
       shell: powershell
     - name: Upload vesc tool macOS dmg
       if: matrix.os == 'macos-latest'

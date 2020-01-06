@@ -63,7 +63,7 @@ jobs:
         $type = "original"
         qmake -config release "CONFIG+=release_win build_original"
         #jom clean
-        jom -j8
+        jom -j2
 
         # msbuild $VTInstallDir\vesc_tool.vcxproj /Zm:1000 /t:Build /p:Configuration=Release
         Remove-Item -Path $VTInstallDir\obj -Force -Recurse -ErrorAction Ignore

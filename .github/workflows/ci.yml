@@ -51,8 +51,10 @@ jobs:
         make -j2
     - name: Configure and compile VESC Tool (Windows)
       if: matrix.os == 'windows-2016'
-      run: .\build_win4CI.ps1
-
+      run: |
+        cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat`" && set > %temp%\vcvars.txt"
+        Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
+        .\build_win4CI.ps1
       shell: powershell
     - name: Upload vesc tool macOS dmg
       if: matrix.os == 'macos-latest'

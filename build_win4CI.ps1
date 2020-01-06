@@ -95,6 +95,8 @@ function Main
     Write-Output "Install Location       : $VTInstallDir"
     Write-Output "VESC Tool Version      : $VTVer"
 
+    $env:Path = "$HOME\jom;$env:Path"
+
     Remove-Item -Force -Recurse $VTInstallDir\* -ErrorAction Ignore
 
     Build-VESCTool original
@@ -200,12 +202,8 @@ function Expand-Archive ([string]$ZipFile, [string]$OutDir, [string]$CheckFile)
 function Get-Batchfile ($file, $params)
 {
     $cmd = "`"$file`" $params & set"
-
-    Write-Output "11111      : $cmd"
-
     cmd /c $cmd | Foreach-Object {
         $p, $v = $_.split('=')
-	Write-Output "2222     : $p $v"
         Set-Item -path env:$p -value $v
     }
 }

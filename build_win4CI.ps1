@@ -83,10 +83,6 @@
 
 [CmdletBinding()]
 param(
-    $QtVersion = "5.12.3",
-    $QtRoot = "C:\Qt",
-    $QtToolsDir = "$QtRoot\Qt$QtVersion\Tools",
-    $QtCreatorDir = "$QtToolsDir\QtCreator",
     $NumJobs = 8,
     $MSVC = 2017,
     $Arch = "amd64",
@@ -239,6 +235,9 @@ function Set-VsVars($vsYear, $arch)
         # 2019 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" }
         2019 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" }
     }
+
+    Write-Output "vstools      : $vstools"
+    Get-Item $vstools
 
     #$batchFile = [System.IO.Path]::Combine($vstools, "vsvars32.bat")
 

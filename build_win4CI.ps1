@@ -234,10 +234,8 @@ function Build-VESCTool ([string]$type)
     # qmake -config release -tp vc "CONFIG+=release_win build_$type" -o $VTInstallDir\vesc_tool.vcxproj
 
     qmake -config release "CONFIG+=release_win build_$type"
-    # jom clean
-    # jom -j $NumJobs
-    nmake clean
-    nmake
+    jom /S clean
+    jom /S -j $NumJobs
 
     # msbuild $VTInstallDir\vesc_tool.vcxproj /Zm:1000 /t:Build /p:Configuration=Release
     Remove-Item -Path $VTInstallDir\obj -Force -Recurse -ErrorAction Ignore

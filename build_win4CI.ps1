@@ -89,7 +89,7 @@ function Main
     $VTVer = Select-String -Path vesc_tool.pro -Pattern 'VT_VERSION\s=\s(.*)' | %{$_.Matches.Groups[1].value}
 
     # Set-VsVars $MSVC $Arch
-    # Set-VsVars 2019 $Arch
+    Set-VsVars 2019 $Arch
 
     $VTInstallDir = "build\win"
     Write-Output "Install Location       : $VTInstallDir"
@@ -214,10 +214,10 @@ function Set-VsVars($vsYear, $arch)
     switch ($vsYear)
     {
         2017 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" }
-        # 2019 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" }
         2019 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" }
     }
 
+    # 2019 { $vstools = "%programfiles(x86)%\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat" }
     Write-Output "vstools      : $vstools"
     Get-Item $vstools
 

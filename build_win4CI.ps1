@@ -33,12 +33,9 @@
 
  .DESCRIPTION
 
-  This scripts downloads Qt source code, compiles and installs a static version
-  of Qt. It assumes that a prebuilt Qt / MSVC environment is already installed,
-  typically in C:\Qt. This prebuilt environment uses shared libraries. It is
-  supposed to remain the main development environment for Qt. This script adds
-  a static version of the Qt libraries in order to allow the construction of
-  standalone and self-sufficient executable.
+  This scripts compiles and installs vesc tool. It assumes that a prebuilt
+  Qt / MSVC environment is already installed, typically in C:\Qt. This prebuilt
+  environment uses shared libraries.
 
   This script is typically run from the Windows Explorer.
 
@@ -49,19 +46,6 @@
   - Qt C:\Qt\Qt5.12.3
   - 7-zip.
   - Open PowerShell Run "powershell.exe .\MSVC-build-vesc_tool-release.ps1"
- .PARAMETER QtRoot
-
-  Qt root. By default, C:\Qt
-
- .PARAMETER QtVersion
-
-  The Qt version. By default, this script tries to extract the version number
-  from the Qt source file name.
-
- .PARAMETER QtToolsDir
-
-  The Qt tools path. By default, $QtRoot\Tools.
-
  .PARAMETER NumJobs
 
   The number of jobs to run jom.exe with. Use your # CPU cores or higher. Default 8.
@@ -100,8 +84,6 @@ Set-StrictMode -Version 3
 
 function Main
 {
-    Write-Output "Building vesc tool Qt version:   $QtVersion"
-
     # Initialize Visual Studio environment
 
     $VTVer = Select-String -Path vesc_tool.pro -Pattern 'VT_VERSION\s=\s(.*)' | %{$_.Matches.Groups[1].value}

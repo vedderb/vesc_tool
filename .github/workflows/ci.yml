@@ -65,7 +65,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: vesc_tool-macOS
-        path: build/macos/*.dmg
+        path: build/macos/vesc_tool_1.29.dmg
     - name: Upload vesc_tool_1.29
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v1

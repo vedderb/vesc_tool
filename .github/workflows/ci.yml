@@ -64,12 +64,9 @@ jobs:
       with:
         name: vesc_tool-lin
         path: build/lin/vesc_tool_1.29
-    - name: Upload vesc_tool_1.29.exe
+    - name: Upload vesc_tool_win-amd64
       if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v1
       with:
-        name: vesc_tool_original_win-amd64
-        path: build\win\vesc_tool_original_win-amd64.zip
-      with:
-        name: vesc_tool_platinum_win-amd64
-        path: vesc_tool_platinum_win-amd64.zip
+        name: vesc_tool_win-amd64
+        path: build\win

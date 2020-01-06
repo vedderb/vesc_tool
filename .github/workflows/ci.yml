@@ -52,16 +52,14 @@ jobs:
     - name: Configure and compile VESC Tool (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        $NumJobs = 8,
-        $MSVC = 2017,
-        $Arch = "amd64",
+        $NumJobs = 8
+        $MSVC = 2017
+        $Arch = "amd64"
         [switch]$NoPause = $true
         
         # PowerShell execution policy.
         Set-StrictMode -Version 3
-        
-        #Import-Module Pscx
-        
+              
         #-----------------------------------------------------------------------------
         # Main code
         #-----------------------------------------------------------------------------
@@ -118,8 +116,7 @@ jobs:
         {
             [void] (New-Item -Path $Directory -ItemType "directory" -Force)
         }
-        
-                
+
         function Get-Batchfile ($file, $params)
         {
             $cmd = "`"$file`" $params & set"

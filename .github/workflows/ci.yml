@@ -19,7 +19,7 @@ jobs:
       max-parallel: 6
       matrix:
         qt: [5.13.2]
-        os: [ubuntu-latest, macos-latest, windows-2016]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
     - name: Clone repository
@@ -30,13 +30,13 @@ jobs:
       with:
         version: ${{ matrix.qt }}
     - name: Install Qt (Windows)
-      if: matrix.os == 'windows-2016'
+      if: matrix.os == 'windows-latest'
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ matrix.qt }}
         arch: win64_msvc2017_64
     - name: Install jom (Windows)
-      if: matrix.os == 'windows-2016'
+      if: matrix.os == 'windows-latest'
       run: |
         Invoke-WebRequest http://download.qt.io/official_releases/jom/jom.zip -OutFile .\jom.zip
         expand-archive -path "jom.zip" -destinationpath "$HOME\jom"
@@ -50,11 +50,8 @@ jobs:
         qmake -config release "CONFIG += release_lin build_original"
         make -j2
     - name: Configure and compile VESC Tool (Windows)
-      if: matrix.os == 'windows-2016'
-      run: |
-        cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat`" && set > %temp%\vcvars.txt"
-        Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
-        .\build_win4CI.ps1
+      if: matrix.os == 'windows-latest'
+      run: .\build_win4CI.ps1
       shell: powershell
     - name: Upload vesc tool macOS dmg
       if: matrix.os == 'macos-latest'
@@ -69,7 +66,7 @@ jobs:
         name: vesc_tool-lin
         path: build/lin/vesc_tool_1.29
     - name: Upload vesc_tool_win-amd64
-      if: matrix.os == 'windows-2016'
+      if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v1
       with:
         name: vesc_tool_win-amd64

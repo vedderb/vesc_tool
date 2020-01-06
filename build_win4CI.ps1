@@ -89,7 +89,7 @@ function Main
     $VTVer = Select-String -Path vesc_tool.pro -Pattern 'VT_VERSION\s=\s(.*)' | %{$_.Matches.Groups[1].value}
 
     # Set-VsVars $MSVC $Arch
-    # Set-VsVars 2019 $Arch
+    Set-VsVars 2019 $Arch
 
     $VTInstallDir = "build\win"
     Write-Output "Install Location       : $VTInstallDir"
@@ -235,7 +235,9 @@ function Build-VESCTool ([string]$type)
 
     qmake -config release "CONFIG+=release_win build_$type"
     # jom clean
-    jom -j $NumJobs
+    # jom -j $NumJobs
+    nmake clean
+    nmake
 
     # msbuild $VTInstallDir\vesc_tool.vcxproj /Zm:1000 /t:Build /p:Configuration=Release
     Remove-Item -Path $VTInstallDir\obj -Force -Recurse -ErrorAction Ignore

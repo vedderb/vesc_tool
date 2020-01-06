@@ -57,7 +57,8 @@ jobs:
         $Arch = "amd64"
         $VTInstallDir = "build\win"
 
-        cmd /c "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" $Arch
+        cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\bin\amd64\vcvars64.bat`" && set > %temp%\vcvars.txt"
+        Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
         # qmake -config release -tp vc "CONFIG+=release_win build_$type" -o $VTInstallDir\vesc_tool.vcxproj
         
         $type = "original"

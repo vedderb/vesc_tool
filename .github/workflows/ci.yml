@@ -46,6 +46,7 @@ jobs:
       run: |
         qmake -config release "CONFIG += release_macos build_original"
         make -j2
+        macdeployqt build/macos/*.app -qmldir=. -verbose=1 -dmg
     - name: Configure and compile VESC Tool (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -59,12 +60,12 @@ jobs:
         Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
         qmake -config release "CONFIG += release_win build_original"
         jom -j2
-    - name: Upload vesc_tool_1.29.app
+    - name: Upload vesc_tool-macOS dmg
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v1
       with:
-        name: vesc_tool-mac
-        path: build/macos/vesc_tool_1.29.app
+        name: vesc_tool-macOS
+        path: build/macos/*.dmg
     - name: Upload vesc_tool_1.29
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v1

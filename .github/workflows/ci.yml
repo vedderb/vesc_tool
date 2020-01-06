@@ -60,7 +60,7 @@ jobs:
         cmd /c "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" $Arch
         # qmake -config release -tp vc "CONFIG+=release_win build_$type" -o $VTInstallDir\vesc_tool.vcxproj
         
-        $type = original
+        $type = "original"
         qmake -config release "CONFIG+=release_win build_$type"
         # jom clean
         jom -j $NumJobs

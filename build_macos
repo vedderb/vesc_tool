@@ -2,65 +2,21 @@
 
 set -e
 
+VT_VERSION=$(grep -m1 VT_VERSION vesc_tool.pro  | awk -F= '{ print $2 }' | sed 's/[ ",]//g')
+
 export PATH=/opt/Qt/5.9-static/bin:$PATH
 rm -rf build/macos/*
 
-# Original
-qmake -config release "CONFIG += release_macos build_original"
-make clean
-make -j8
-rm -rf build/macos/obj
-cd build/macos
-zip -qr vesc_tool_original_macos.zip `ls | grep -v '\.zip$'`
-ls | grep -v '\.zip$' | xargs rm -rf
-cd ../..
+BuildType=(original platinum gold silver bronze free)
 
-# Platinum
-qmake -config release "CONFIG += release_macos build_platinum"
-make clean
-make -j8
-rm -rf build/macos/obj
-cd build/macos
-zip -qr vesc_tool_platinum_macos.zip `ls | grep -v '\.zip$'`
-ls | grep -v '\.zip$' | xargs rm -rf
-cd ../..
-
-# Gold
-qmake -config release "CONFIG += release_macos build_gold"
-make clean
-make -j8
-rm -rf build/macos/obj
-cd build/macos
-zip -qr vesc_tool_gold_macos.zip `ls | grep -v '\.zip$'`
-ls | grep -v '\.zip$' | xargs rm -rf
-cd ../..
-
-# Silver
-qmake -config release "CONFIG += release_macos build_silver"
-make clean
-make -j8
-rm -rf build/macos/obj
-cd build/macos
-zip -qr vesc_tool_silver_macos.zip `ls | grep -v '\.zip$'`
-ls | grep -v '\.zip$' | xargs rm -rf
-cd ../..
-
-# Bronze
-qmake -config release "CONFIG += release_macos build_bronze"
-make clean
-make -j8
-rm -rf build/macos/obj
-cd build/macos
-zip -qr vesc_tool_bronze_macos.zip `ls | grep -v '\.zip$'`
-ls | grep -v '\.zip$' | xargs rm -rf
-cd ../..
-
-# Free of charge
-qmake -config release "CONFIG += release_macos build_free"
-make clean
-make -j8
-rm -rf build/macos/obj
-cd build/macos
-zip -qr vesc_tool_free_macos.zip `ls | grep -v '\.zip$'`
-ls | grep -v '\.zip$' | xargs rm -rf
-cd ../..
+for type in ${BuildType[@]}; do
+    qmake -config release "CONFIG += release_macos build_${type}"
+    make clean
+    make -j8
+    rm -rf build/macos/obj
+    macdeployqt build/macos/vesc_tool_${VT_VERSION}.app -qmldir=. -verbose=1 -dmg
+    rm -rf build/macos/vesc_tool_${VT_VERSION}.app
+    pushd build/macos
+    mv -f vesc_tool_${VT_VERSION}.dmg vesc_tool_${type}-macOS.dmg
+    popd
+done

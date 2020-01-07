@@ -52,11 +52,11 @@
 
  .PARAMETER MSVC
 
-  Imports command prompt environment for this MSVC.  Default 2012
+  Imports command prompt environment for this MSVC.  Default 2017
 
  .PARAMETER Arch
 
-  Set to amd64 to compile with MSVC 64-bit.  Default: x86
+  Set to amd64/x64 to compile with MSVC 64-bit.  Default: x64
 
  .PARAMETER NoPause
 
@@ -69,7 +69,7 @@
 param(
     $NumJobs = 8,
     $MSVC = 2017,
-    $Arch = "amd64",
+    $Arch = "x64",
     [switch]$NoPause = $true
 )
 
@@ -96,12 +96,12 @@ function Main
 
     Remove-Item -Force -Recurse $VTInstallDir\* -ErrorAction Ignore
 
-    Build-VESCTool original
+    # Build-VESCTool original
     Build-VESCTool platinum
-    Build-VESCTool gold
-    Build-VESCTool silver
-    Build-VESCTool bronze
-    Build-VESCTool free
+    # Build-VESCTool gold
+    # Build-VESCTool silver
+    # Build-VESCTool bronze
+    # Build-VESCTool free
 
     Exit-Script
 }
@@ -130,70 +130,6 @@ function Exit-Script ([string]$Message = "")
 function Create-Directory ([string]$Directory)
 {
     [void] (New-Item -Path $Directory -ItemType "directory" -Force)
-}
-
-#-----------------------------------------------------------------------------
-# Download a file if not yet present.
-# Warning: If file is present but incomplete, do not download it again.
-#-----------------------------------------------------------------------------
-
-function Download-File ([string]$Url, [string]$OutputFile)
-{
-    $FileName = Split-Path $Url -Leaf
-    if (-not (Test-Path $OutputFile)) {
-        # Local file not present, start download.
-        Write-Output "Downloading $Url ..."
-        try {
-            $webclient = New-Object System.Net.WebClient
-            $webclient.DownloadFile($Url, $OutputFile)
-        }
-        catch {
-            # Display exception.
-            $_
-            # Delete partial file, if any.
-            if (Test-Path $OutputFile) {
-                Remove-Item -Force $OutputFile
-            }
-            # Abort
-            Exit-Script "Error downloading $FileName"
-        }
-        # Check that the file is present.
-        if (-not (Test-Path $OutputFile)) {
-            Exit-Script "Error downloading $FileName"
-        }
-    }
-}
-
-#-----------------------------------------------------------------------------
-# Get path name of 7zip, abort if not found.
-#-----------------------------------------------------------------------------
-
-function Get-7zip
-{
-    $Exe = "C:\Program Files\7-Zip\7z.exe"
-    if (-not (Test-Path $Exe)) {
-        $Exe = "C:\Program Files (x86)\7-Zip\7z.exe"
-    }
-    if (-not (Test-Path $Exe)) {
-        Exit-Script "7-zip not found, install it first, see http://www.7-zip.org/"
-    }
-    $Exe
-}
-
-#-----------------------------------------------------------------------------
-# Expand an archive file if not yet done.
-#-----------------------------------------------------------------------------
-
-function Expand-Archive ([string]$ZipFile, [string]$OutDir, [string]$CheckFile)
-{
-    # Check presence of expected expanded file or directory.
-    if (-not (Test-Path $CheckFile)) {
-        Write-Output "Expanding $ZipFile ..."
-        & (Get-7zip) x $ZipFile "-o$OutDir" | Select-String -Pattern "^Extracting " -CaseSensitive -NotMatch
-        if (-not (Test-Path $CheckFile)) {
-            Exit-Script "Error expanding $ZipFile, $OutDir\$CheckFile not found"
-        }
-    }
 }
 
 function Get-Batchfile ($file, $params)
@@ -240,7 +176,7 @@ function Build-VESCTool ([string]$type)
     Remove-Item -Path $VTInstallDir\obj -Force -Recurse -ErrorAction Ignore
 
     Push-Location $VTInstallDir
-    $DeployDir="vesc_tool_" + $type + "_win-" + "$Arch"
+    $DeployDir="vesc_tool_" + $type + "-win"
     $ZipFile=$DeployDir + ".zip"
     Create-Directory $DeployDir
 

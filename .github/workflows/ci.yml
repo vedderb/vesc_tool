@@ -47,27 +47,27 @@ jobs:
     - name: Configure and compile VESC Tool (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        qmake -config release "CONFIG += release_lin build_original"
+        qmake -config release "CONFIG += release_lin build_platinum"
         make -j2
     - name: Configure and compile VESC Tool (Windows)
       if: matrix.os == 'windows-2016'
       run: .\build_win4CI.ps1
       shell: powershell
-    - name: Upload vesc tool macOS dmg
+    - name: Upload vesc_tool-macOS
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v1
       with:
         name: vesc_tool-macOS
         path: build/macos
-    - name: Upload vesc_tool_1.29
+    - name: Upload vesc_tool-linux
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v1
       with:
-        name: vesc_tool-lin
+        name: vesc_tool-linux
         path: build/lin/vesc_tool_1.29
-    - name: Upload vesc_tool_win-amd64
+    - name: Upload vesc_tool-win
       if: matrix.os == 'windows-2016'
       uses: actions/upload-artifact@v1
       with:
-        name: vesc_tool_win-amd64
+        name: vesc_tool-win
         path: build\win

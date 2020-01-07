@@ -72,7 +72,7 @@
 
  .PARAMETER Arch
 
-  Set to amd64 to compile with MSVC 64-bit.  Default: x86
+  Set to x64 to compile with MSVC 64-bit.  Default: x64
 
  .PARAMETER NoPause
 
@@ -89,7 +89,7 @@ param(
     $QtCreatorDir = "$QtToolsDir\QtCreator",
     $NumJobs = 8,
     $MSVC = 2017,
-    $Arch = "amd64",
+    $Arch = "x64",
     [switch]$NoPause = $true
 )
 
@@ -116,7 +116,7 @@ function Main
     if ($Arch -eq "x86") {
         $BuildName = "msvc${MSVC}"
     }
-    elseif ($Arch -eq "amd64") {
+    elseif ($Arch -eq "x64") {
         $BuildName = "msvc${MSVC}_64"
     }
     else {
@@ -140,12 +140,12 @@ function Main
 
     Remove-Item -Force -Recurse $VTInstallDir\* -ErrorAction Ignore
 
-    Build-VESCTool original
+    # Build-VESCTool original
     Build-VESCTool platinum
-    Build-VESCTool gold
-    Build-VESCTool silver
-    Build-VESCTool bronze
-    Build-VESCTool free
+    # Build-VESCTool gold
+    # Build-VESCTool silver
+    # Build-VESCTool bronze
+    # Build-VESCTool free
 
     Exit-Script
 }
@@ -285,7 +285,7 @@ function Build-VESCTool ([string]$type)
     Remove-Item -Path $VTInstallDir\obj -Force -Recurse -ErrorAction Ignore
 
     Push-Location $VTInstallDir
-    $DeployDir="vesc_tool_" + $type + "_win-" + "$Arch"
+    $DeployDir="vesc_tool_" + $type + "-win"
     $ZipFile=$DeployDir + ".zip"
     # Create-Directory $DeployDir
 

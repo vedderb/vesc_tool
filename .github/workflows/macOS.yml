@@ -30,9 +30,9 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ matrix.qt }}
-    - name: Configure and compile VESC Tool (MacOS)
+    - name: Configure and compile
       run: ./build_macos
-    - name: Upload vesc_tool-macOS
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v1
       with:
         name: vesc_tool-macOS
@@ -110,6 +110,6 @@ jobs:
       uses: actions/upload-release-asset@v1.0.1
       with:
         upload_url: ${{ env.uploadUrl }}
-        asset_path: .\build\win\vesc_tool-macOS.dmg
-        asset_name: vesc_tool_platinum-macOS.dmg
+        asset_path: .\build\win\vesc_tool_platinum-macOS.dmg
+        asset_name: vesc_tool-macOS.dmg
         asset_content_type: application/applefile

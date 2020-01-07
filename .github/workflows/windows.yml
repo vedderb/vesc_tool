@@ -103,7 +103,7 @@ jobs:
       if: startsWith(github.event.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: actions/upload-release-asset@v1.0.1
+      uses: actions/upload-release-asset@v1.0.1
       with:
         upload_url: ${{ env.uploadUrl }}
         asset_path: .\build\win

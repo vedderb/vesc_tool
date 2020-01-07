@@ -19,7 +19,7 @@ jobs:
       max-parallel: 6
       matrix:
         qt: [5.13.2]
-        os: [ubuntu-latest, macos-latest, windows-2016]
+        os: [ubuntu-latest, macos-latest]
 
     steps:
     - name: Clone repository
@@ -71,35 +71,3 @@ jobs:
       with:
         name: vesc_tool-win
         path: build\win
-
-    - name: Get Latest Tage Name
-      if: startsWith(github.event.ref, 'refs/tags/')
-      shell: pwsh
-      env:
-        githubFullName: ${{ github.event.repository.full_name }}
-        upUrl: ${{ steps.queryReleaseMacos.outputs.upload_url }}
-        ref: ${{ github.event.ref }}
-      run: |
-        if (${env:upUrl}.Length -gt 0) {
-            $v=${env:upUrl}
-            echo "::set-env name=uploadUrl::$v"
-            return
-        } 
-        [string]$tag = ${env:ref}.Substring(${env:ref}.LastIndexOf('/') + 1)
-        [string]$url = 'https://api.github.com/repos/' + ${env:githubFullName} + '/releases/tags/' + ${tag}
-        $response = Invoke-RestMethod -Uri $url -Method Get
-        [string]$latestUpUrl = $response.upload_url
-        Write-Host 'latestUpUrl:'$latestUpUrl
-        echo "::set-env name=uploadUrl::$latestUpUrl"
-        Write-Host 'env uploadUrl:'${env:uploadUrl}
-    - name: Upload Windows Asset
-      id: upload-release-asset-win
-      if: success() && startsWith(matrix.os, 'windows-') && startsWith(github.event.ref, 'refs/tags/')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      uses: actions/upload-release-asset@v1.0.1
-      with:
-        upload_url: ${{ env.uploadUrl }}
-        asset_path: .\build\win
-        asset_name: vesc_tool-win.zip
-        asset_content_type: application/zip

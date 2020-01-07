@@ -61,7 +61,8 @@ rm -f build/android/libvesc_tool.so
 
 # Zip APKs
 cd build/android
-zip vesc_tool_android-$ANDROID_ARCH.zip vesc_tool_mobile.apk vesc_tool_full.apk
+# zip vesc_tool_android-$ANDROID_ARCH.zip vesc_tool_mobile.apk vesc_tool_full.apk
+zip vesc_tool-android.zip vesc_tool_mobile.apk vesc_tool_full.apk
 rm -f vesc_tool_mobile.apk
 rm -f vesc_tool_full.apk
 cd ../..

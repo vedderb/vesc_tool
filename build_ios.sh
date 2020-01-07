@@ -38,6 +38,6 @@ rm -rf ${SHADOW_BUILD_DIR}/*
 rm -rf ${TRAVIS_BUILD_DIR}/build/ios/obj
 
 cd ${TRAVIS_BUILD_DIR}/build/ios
-zip -r vesc_tool_ios.zip vesc_tool_mobile.app vesc_tool_full.app
+zip -r vesc_tool-iOS.zip vesc_tool_mobile.app vesc_tool_full.app
 rm -rf vesc_tool_mobile.app
 rm -rf vesc_tool_full.app

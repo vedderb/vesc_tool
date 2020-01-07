@@ -30,7 +30,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ matrix.qt }}
-    - name: Configure and compile VESC Tool (Linux)
+    - name: Configure and compile
       run: |
         qmake -config release "CONFIG += release_lin build_platinum"
         make -j2

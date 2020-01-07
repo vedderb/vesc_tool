@@ -31,7 +31,7 @@ jobs:
       with:
         version: ${{ matrix.qt }}
         arch: win64_msvc2017_64
-    - name: Install jom (Windows)
+    - name: Install jom
       run: |
         Invoke-WebRequest http://download.qt.io/official_releases/jom/jom.zip -OutFile .\jom.zip
         expand-archive -path "jom.zip" -destinationpath "$HOME\jom"

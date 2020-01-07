@@ -110,6 +110,6 @@ jobs:
       uses: actions/upload-release-asset@v1.0.1
       with:
         upload_url: ${{ env.uploadUrl }}
-        asset_path: .\build\macos\vesc_tool_platinum-macOS.dmg
+        asset_path: ./build/macos/vesc_tool_platinum-macOS.dmg
         asset_name: vesc_tool-macOS.dmg
         asset_content_type: application/applefile

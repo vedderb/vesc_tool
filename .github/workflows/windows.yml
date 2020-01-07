@@ -1,12 +1,14 @@
-name: CI
+name: Windows
 
 on:
   push:
-    branches:
-      - master
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
   pull_request:
-    branches:
-      - master
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
   schedule:
       - cron: 0 0 * * 0
 

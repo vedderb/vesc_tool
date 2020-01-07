@@ -15,9 +15,9 @@ for type in ${BuildType[@]}; do
     make clean
     make -j8
     rm -rf build/macos/obj
-    macdeployqt build/macos/vesc_tool_${VT_VERSION}.app -qmldir=. -verbose=1 -dmg
-    rm -rf build/macos/vesc_tool_${VT_VERSION}.app
     pushd build/macos
+    macdeployqt vesc_tool_${VT_VERSION}.app -qmldir=. -verbose=1 -dmg
+    rm -rf vesc_tool_${VT_VERSION}.app
     mv -f vesc_tool_${VT_VERSION}.dmg vesc_tool_${type}-macOS.dmg
     popd
 done

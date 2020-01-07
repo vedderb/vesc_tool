@@ -108,6 +108,6 @@ jobs:
       uses: actions/upload-release-asset@v1.0.1
       with:
         upload_url: ${{ env.uploadUrl }}
-        asset_path: .\build\win
+        asset_path: .\build\win\vesc_tool_platinum-win.zip
         asset_name: vesc_tool-win.zip
         asset_content_type: application/zip

@@ -1,0 +1,42 @@
+name: Linux
+
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+  schedule:
+      - cron: 0 0 * * 0
+
+jobs:
+  Qt:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        qt: [5.13.2]
+        os: [ubuntu-latest]
+
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Install Qt (Linux)
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ matrix.qt }}
+    - name: Configure and compile VESC Tool (Linux)
+      run: |
+        qmake -config release "CONFIG += release_lin build_platinum"
+        make -j2
+    - name: Upload vesc_tool-linux
+      uses: actions/upload-artifact@v1
+      with:
+        name: vesc_tool-linux
+        path: build/lin/vesc_tool_1.29
+

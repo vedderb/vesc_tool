@@ -8,7 +8,7 @@ on:
     branches:
       - master
   schedule:
-    - cron: 0 0 * * 0
+      - cron: 0 0 * * 0
 
 jobs:
   Qt:
@@ -22,90 +22,90 @@ jobs:
         os: [windows-2016]
 
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v2
-      - name: Install Qt (Windows)
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: ${{ matrix.qt }}
-          arch: win64_msvc2017_64
-      - name: Install jom (Windows)
-        run: |
-          Invoke-WebRequest http://download.qt.io/official_releases/jom/jom.zip -OutFile .\jom.zip
-          expand-archive -path "jom.zip" -destinationpath "$HOME\jom"
-          echo "::add-path::$HOME\jom"
-      - name: Configure and compile VESC Tool (Windows)
-        run: .\build_win4CI.ps1
-        shell: powershell
-      - name: Upload vesc_tool-win
-        uses: actions/upload-artifact@v1
-        with:
-          name: vesc_tool-win
-          path: build\win
-      - name: queryReleaseWin
-        id: queryReleaseWin
-        if: startsWith(github.event.ref, 'refs/tags/')
-        shell: pwsh
-        env:
-          githubFullName: ${{ github.event.repository.full_name }}
-          ref: ${{ github.event.ref }}
-        run: |
-          [string]$tag = ${env:ref}.Substring(${env:ref}.LastIndexOf('/') + 1)
-          [string]$url = 'https://api.github.com/repos/' + ${env:githubFullName} + '/releases/tags/' + ${tag}
-          $response={}
-          try {
-            $response = Invoke-RestMethod -Uri $url -Method Get
-          } catch {
-            Write-Host "StatusCode:" $_.Exception.Response.StatusCode.value__ 
-            Write-Host "StatusDescription:" $_.Exception.Response.StatusDescription
-            echo "::set-output name=needCreateRelease::true"  
-            return
-          }
-          [string]$latestUpUrl = $response.upload_url
-          Write-Host 'latestUpUrl:'$latestUpUrl
-          if ($latestUpUrl.Length -eq 0) {
-            echo "::set-output name=needCreateRelease::true"  
-          }
-      - name: createReleaseWin
-        id: createReleaseWin
-        if: startsWith(github.event.ref, 'refs/tags/') && steps.queryReleaseWin.outputs.needCreateRelease == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: actions/create-release@v1.0.0
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: ${{ github.event.head_commit.message }}
-          draft: false
-          prerelease: false
-      - name: getLatestTagRelease
-        if: startsWith(github.event.ref, 'refs/tags/')
-        shell: pwsh
-        env:
-          githubFullName: ${{ github.event.repository.full_name }}
-          upUrl: ${{ steps.createReleaseWin.outputs.upload_url }}
-          ref: ${{ github.event.ref }}
-        run: |
-          if (${env:upUrl}.Length -gt 0) {
-              $v=${env:upUrl}
-              echo "::set-env name=uploadUrl::$v"
-              return
-          } 
-          [string]$tag = ${env:ref}.Substring(${env:ref}.LastIndexOf('/') + 1)
-          [string]$url = 'https://api.github.com/repos/' + ${env:githubFullName} + '/releases/tags/' + ${tag}
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Install Qt (Windows)
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ matrix.qt }}
+        arch: win64_msvc2017_64
+    - name: Install jom (Windows)
+      run: |
+        Invoke-WebRequest http://download.qt.io/official_releases/jom/jom.zip -OutFile .\jom.zip
+        expand-archive -path "jom.zip" -destinationpath "$HOME\jom"
+        echo "::add-path::$HOME\jom"
+    - name: Configure and compile VESC Tool (Windows)
+      run: .\build_win4CI.ps1
+      shell: powershell
+    - name: Upload vesc_tool-win
+      uses: actions/upload-artifact@v1
+      with:
+        name: vesc_tool-win
+        path: build\win
+    - name: queryReleaseWin
+      id: queryReleaseWin
+      if: startsWith(github.event.ref, 'refs/tags/')
+      shell: pwsh
+      env:
+        githubFullName: ${{ github.event.repository.full_name }}
+        ref: ${{ github.event.ref }}
+      run: |
+        [string]$tag = ${env:ref}.Substring(${env:ref}.LastIndexOf('/') + 1)
+        [string]$url = 'https://api.github.com/repos/' + ${env:githubFullName} + '/releases/tags/' + ${tag}
+        $response={}
+        try {
           $response = Invoke-RestMethod -Uri $url -Method Get
-          [string]$latestUpUrl = $response.upload_url
-          Write-Host 'latestUpUrl:'$latestUpUrl
-          echo "::set-env name=uploadUrl::$latestUpUrl"
-          Write-Host 'env uploadUrl:'${env:uploadUrl}
-      - name: uploadRelease
-        id: uploadRelease
-        if: startsWith(github.event.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          uses: actions/upload-release-asset@v1.0.1
-        with:
-          upload_url: ${{ env.uploadUrl }}
-          asset_path: .\build\win
-          asset_name: vesc_tool-win.zip
-          asset_content_type: application/zip
+        } catch {
+          Write-Host "StatusCode:" $_.Exception.Response.StatusCode.value__ 
+          Write-Host "StatusDescription:" $_.Exception.Response.StatusDescription
+          echo "::set-output name=needCreateRelease::true"  
+          return
+        }
+        [string]$latestUpUrl = $response.upload_url
+        Write-Host 'latestUpUrl:'$latestUpUrl
+        if ($latestUpUrl.Length -eq 0) {
+          echo "::set-output name=needCreateRelease::true"  
+        }
+    - name: createReleaseWin
+      id: createReleaseWin
+      if: startsWith(github.event.ref, 'refs/tags/') && steps.queryReleaseWin.outputs.needCreateRelease == 'true'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: actions/create-release@v1.0.0
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: ${{ github.event.head_commit.message }}
+        draft: false
+        prerelease: false
+    - name: getLatestTagRelease
+      if: startsWith(github.event.ref, 'refs/tags/')
+      shell: pwsh
+      env:
+        githubFullName: ${{ github.event.repository.full_name }}
+        upUrl: ${{ steps.createReleaseWin.outputs.upload_url }}
+        ref: ${{ github.event.ref }}
+      run: |
+        if (${env:upUrl}.Length -gt 0) {
+            $v=${env:upUrl}
+            echo "::set-env name=uploadUrl::$v"
+            return
+        } 
+        [string]$tag = ${env:ref}.Substring(${env:ref}.LastIndexOf('/') + 1)
+        [string]$url = 'https://api.github.com/repos/' + ${env:githubFullName} + '/releases/tags/' + ${tag}
+        $response = Invoke-RestMethod -Uri $url -Method Get
+        [string]$latestUpUrl = $response.upload_url
+        Write-Host 'latestUpUrl:'$latestUpUrl
+        echo "::set-env name=uploadUrl::$latestUpUrl"
+        Write-Host 'env uploadUrl:'${env:uploadUrl}
+    - name: uploadRelease
+      id: uploadRelease
+      if: startsWith(github.event.ref, 'refs/tags/')
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ env.uploadUrl }}
+        asset_path: .\build\win
+        asset_name: vesc_tool-win.zip
+        asset_content_type: application/zip

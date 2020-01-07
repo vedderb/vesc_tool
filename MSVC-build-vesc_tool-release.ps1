@@ -43,7 +43,7 @@
   This script is typically run from the Windows Explorer.
 
   Requirements:
-  - Windows PowerShell 3.0 or higher.
+  - Windows 10
   - Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
   - vs2019 C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional
   - Qt C:\Qt\Qt5.12.3
@@ -287,11 +287,11 @@ function Build-VESCTool ([string]$type)
     Push-Location $VTInstallDir
     $DeployDir="vesc_tool_" + $type + "_win-" + "$Arch"
     $ZipFile=$DeployDir + ".zip"
-    Create-Directory $DeployDir
+    # Create-Directory $DeployDir
 
     $VTApp = "vesc_tool_" + ${VTVer} + ".exe"
+    windeployqt $VTApp -qmldir=. --dir $DeployDir
     Move-Item $VTApp $DeployDir
-    windeployqt $DeployDir\$VTApp -qmldir=.
     Compress-Archive $DeployDir -DestinationPath $ZipFile
 
     Remove-Item * -Exclude *.zip -Recurse -ErrorAction Ignore

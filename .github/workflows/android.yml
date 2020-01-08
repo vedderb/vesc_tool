@@ -55,9 +55,9 @@ jobs:
           cd ..
           curl -L https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -o sdk.zip
           unzip sdk.zip
-          yes | ./tools/bin/sdkmanager --licenses --sdk_root=${ANDROID_SDK_HOME}
-          ./tools/bin/sdkmanager --update
-          yes | ./tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "platforms;android-${ANDROID_VERSION}" "platform-tools" --sdk_root=${ANDROID_SDK_HOME}
+          echo y | ./tools/bin/sdkmanager --licenses --sdk_root=${ANDROID_SDK_HOME}
+          echo y | ./tools/bin/sdkmanager --update
+          echo y | ./tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "platforms;android-${ANDROID_VERSION}" "platform-tools" --sdk_root=${ANDROID_SDK_HOME}
 
       - name: Install Gradle
         run: |

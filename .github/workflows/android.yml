@@ -26,9 +26,8 @@ jobs:
       - name: Setup
         run: |
           cd ..
-          ls ${PWD}
-          WROOT=${GITHUB_WORKSPACE}
-          ls ${WROOT}
+          # WROOT=${GITHUB_WORKSPACE}
+          WROOT=$(readlink -f .)
           echo "::set-env name=WORK::${WROOT}"
           echo "::set-env name=ANDROID_SDK_HOME::${WROOT}/sdk"
           echo "::set-env name=ANDROID_NDK_HOME::${WROOT}/ndk"
@@ -37,8 +36,6 @@ jobs:
           echo "::set-env name=ANDROID_BUILD_TOOLS_VERSION::28.0.3"
           echo "::set-env name=GRADLE_VERSION::4.10.3"    
 
-          ls ${ANDROID_SDK_HOME}  
-          ls ${ANDROID_NDK_HOME}
       - name: Install Qt
         # if: steps.cacheqt.outputs.cache-hit != 'true'
         uses: jurplel/install-qt-action@v2.2.1

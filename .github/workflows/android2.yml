@@ -1,4 +1,4 @@
-name: Android
+name: Android-macOS
 on:
   push:
     paths-ignore:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [macos-latest]
         qt_ver: [5.12.3]
         qt_target: [android]
         qt_arch: [android_arm64_v8a]
@@ -46,14 +46,14 @@ jobs:
       - name: Install Android NDK
         run: |
           cd ..
-          curl -L https://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.zip -o ndk.zip
+          curl -L https://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-darwin-x86_64.zip -o ndk.zip
           unzip ndk.zip
           mv android-ndk-${ANDROID_NDK_VERSION} ndk
           
       - name: Install Android SDK
         run: |
           cd ..
-          curl -L https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -o sdk.zip
+          curl -L https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip -o sdk.zip
           unzip sdk.zip
           yes | ./tools/bin/sdkmanager --licenses --sdk_root=${ANDROID_SDK_HOME}
           ./tools/bin/sdkmanager --update
@@ -79,11 +79,11 @@ jobs:
           echo "::set-env name=ANDROID_SDK_ROOT::${ANDROID_SDK_HOME}"
           echo "::set-env name=ANDROID_NDK_ROOT::${ANDROID_NDK_HOME}"
           echo "${ANDROID_NDK_ROOT}"
-          #echo "::set-env name=ANDROID_NDK_HOST::linux-x86_64"
+          #echo "::set-env name=ANDROID_NDK_HOST::darwin-x86_64"
           #echo "::set-env name=ANDROID_NDK_PLATFORM::android-28"
-          #echo "::set-env name=ANDROID_NDK_TOOLCHAIN_PREFIX::aarch64-linux-androideabi"
+          #echo "::set-env name=ANDROID_NDK_TOOLCHAIN_PREFIX::aarch64-darwin-androideabi"
           #echo "::set-env name=ANDROID_NDK_TOOLCHAIN_VERSION::4.9"
-          #echo "::set-env name=ANDROID_NDK_TOOLS_PREFIX::aarch64-linux-androideabi"
+          #echo "::set-env name=ANDROID_NDK_TOOLS_PREFIX::aarch64-darwin-androideabi"
 
       - name: Compile APP
         run: |
@@ -171,5 +171,5 @@ jobs:
         with:
           upload_url: ${{ env.uploadUrl }}
           asset_path: build/android/vesc_tool-android.zip
-          asset_name: vesc_tool-android.zip
+          asset_name: vesc_tool-android2.zip
           asset_content_type: application/zip

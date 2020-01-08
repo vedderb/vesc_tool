@@ -32,11 +32,11 @@ jobs:
         version: ${{ matrix.qt }}
     - name: Configure and compile
       run: ./build_macos
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v1
-      with:
-        name: vesc_tool-macOS
-        path: build/macos
+    # - name: Upload Artifacts
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: vesc_tool-macOS
+    #     path: build/macos
    
     # tag 查询github-Release
     - name: queryRelease

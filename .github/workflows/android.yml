@@ -101,11 +101,11 @@ jobs:
           zip vesc_tool-android.zip vesc_tool_mobile.apk
           # rm -f vesc_tool_mobile.apk
           popd            
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v1
-        with:
-          name: vesc_tool-android
-          path: build/android/vesc_tool_mobile.apk
+      # - name: Upload Artifacts
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: vesc_tool-android
+      #     path: build/android/vesc_tool_mobile.apk
       - name: queryReleaseWin
         id: queryReleaseWin
         if: startsWith(github.event.ref, 'refs/tags/')
@@ -171,5 +171,5 @@ jobs:
         with:
           upload_url: ${{ env.uploadUrl }}
           asset_path: build/android/vesc_tool-android.zip
-          asset_name: vesc_tool-win.zip
+          asset_name: vesc_tool-android.zip
           asset_content_type: application/zip

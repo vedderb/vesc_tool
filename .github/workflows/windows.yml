@@ -39,11 +39,11 @@ jobs:
     - name: Configure and compile
       run: .\build_win4CI.ps1
       shell: powershell
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v1
-      with:
-        name: vesc_tool-win
-        path: build\win
+    # - name: Upload Artifacts
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: vesc_tool-win
+    #     path: build\win
     - name: queryReleaseWin
       id: queryReleaseWin
       if: startsWith(github.event.ref, 'refs/tags/')

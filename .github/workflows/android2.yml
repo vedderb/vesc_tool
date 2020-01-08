@@ -23,8 +23,7 @@ jobs:
       - name: Setup
         run: |
           cd ..
-          # WROOT=${GITHUB_WORKSPACE}
-          WROOT=$(readlink -f .)
+          WROOT=${GITHUB_WORKSPACE}/..
           echo "::set-env name=WORK::${WROOT}"
           echo "::set-env name=ANDROID_SDK_HOME::${WROOT}/sdk"
           echo "::set-env name=ANDROID_NDK_HOME::${WROOT}/ndk"

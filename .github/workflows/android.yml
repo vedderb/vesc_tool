@@ -22,10 +22,21 @@ jobs:
         # exclude:
         #   - qt_ver: 5.9.8
         #     qt_arch: android_arm64_v8a
-    steps:
+    steps:    
+      - name: Setup
+        run: |
+          cd ..
+          WROOT=${GITHUB_WORKSPACE}
+          echo "::set-env name=WORK::${WROOT}"
+          echo "::set-env name=ANDROID_SDK_HOME::${WROOT}/sdk"
+          echo "::set-env name=ANDROID_NDK_HOME::${WROOT}/ndk"
+          echo "::set-env name=ANDROID_NDK_VERSION::r20b"
+          echo "::set-env name=ANDROID_VERSION::28"
+          echo "::set-env name=ANDROID_BUILD_TOOLS_VERSION::28.0.3"
+          echo "::set-env name=GRADLE_VERSION::4.10.3"      
       - name: Install Qt
         # if: steps.cacheqt.outputs.cache-hit != 'true'
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v2.2.1
         with:
           # Version of Qt to install
           version: ${{ matrix.qt_ver }}
@@ -33,13 +44,35 @@ jobs:
           target: ${{ matrix.qt_target }}
           # Architecture for Windows/Android
           arch: ${{ matrix.qt_arch }}
-      - uses: actions/checkout@v1
+      - name: Install Android NDK
+        run: |
+          cd ..
+          curl -L https://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.zip -o ndk.zip
+          unzip ndk.zip
+          mv android-ndk-${ANDROID_NDK_VERSION} ndk
+          
+      - name: Install Android SDK
+        run: |
+          cd ..
+          curl -L https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -o sdk.zip
+          unzip sdk.zip
+          yes | ./tools/bin/sdkmanager --licenses --sdk_root=${ANDROID_SDK_HOME}
+          ./tools/bin/sdkmanager --update
+          yes | ./tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "platforms;android-${ANDROID_VERSION}" "platform-tools" --sdk_root=${ANDROID_SDK_HOME}
+
+      - name: Install Gradle
+        run: |
+          cd ..
+          curl -L https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-all.zip -o gradle.zip
+          unzip gradle.zip
+          mv gradle-${GRADLE_VERSION} gradle
+          
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: build android
+
+      - name: Compile APP
         run: |
-          export ANDROID_SDK_ROOT=$ANDROID_HOME
-          export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk-bundle
           qmake -config release "CONFIG += release_android build_mobile"
           make clean
           make -j8

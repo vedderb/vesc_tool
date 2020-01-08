@@ -94,8 +94,12 @@ jobs:
           make install INSTALL_ROOT=build/android/build
           androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-libvesc_tool.so-deployment-settings.json --android-platform android-28
           mv build/android/build/build/outputs/apk/build-debug.apk build/android/vesc_tool_mobile.apk
+          rm -rf build/android/build
+          rm -rf build/android/obj
+          rm -f build/android/libvesc_tool.so
           pushd build/android
           zip vesc_tool-android.zip vesc_tool_mobile.apk
+          rm -f vesc_tool_mobile.apk
           popd            
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1

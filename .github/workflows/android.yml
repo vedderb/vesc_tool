@@ -32,7 +32,7 @@ jobs:
           echo "::set-env name=WORK::${WROOT}"
           echo "::set-env name=ANDROID_SDK_HOME::${WROOT}/sdk"
           echo "::set-env name=ANDROID_NDK_HOME::${WROOT}/ndk"
-          echo "::set-env name=ANDROID_NDK_VERSION::r20b"
+          echo "::set-env name=ANDROID_NDK_VERSION::r18b"
           echo "::set-env name=ANDROID_VERSION::28"
           echo "::set-env name=ANDROID_BUILD_TOOLS_VERSION::28.0.3"
           echo "::set-env name=GRADLE_VERSION::4.10.3"    
@@ -76,11 +76,28 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup ENV
+        run: |
+          echo "--- Setup PATH ---"
+          PATH=${PATH}:${WORK}/gradle/bin:${WORK}/ndk
+          echo "::set-env name=PATH::${PATH}"
+          echo "PATH: ${PATH}"
+          
+          echo "--- Set ANDROID ENV ---"
+          
+          echo "::set-env name=ANDROID_HOME::${ANDROID_SDK_HOME}"
+          echo "::set-env name=ANDROID_SDK_ROOT::${ANDROID_SDK_HOME}"
+          echo "::set-env name=ANDROID_NDK_ROOT::${ANDROID_NDK_HOME}"
+          echo "${ANDROID_NDK_ROOT}"
+          #echo "::set-env name=ANDROID_NDK_HOST::linux-x86_64"
+          #echo "::set-env name=ANDROID_NDK_PLATFORM::android-28"
+          #echo "::set-env name=ANDROID_NDK_TOOLCHAIN_PREFIX::arm-linux-androideabi"
+          #echo "::set-env name=ANDROID_NDK_TOOLCHAIN_VERSION::4.9"
+          #echo "::set-env name=ANDROID_NDK_TOOLS_PREFIX::arm-linux-androideabi"
+
       - name: Compile APP
         run: |
 
-          export ANDROID_SDK_ROOT=$ANDROID_SDK_HOME
-          export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
           qmake -config release "CONFIG += release_android build_mobile"
           make clean
           make -j8

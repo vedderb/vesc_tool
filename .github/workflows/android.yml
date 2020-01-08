@@ -18,11 +18,8 @@ jobs:
         qt_ver: [5.12.3]
         qt_target: [android]
         qt_arch: [android_arm64_v8a]
-        # qt_arch: [android_x86,android_armv7]
-        # exclude:
-        #   - qt_ver: 5.9.8
-        #     qt_arch: android_arm64_v8a
-    steps:    
+    steps:
+      - uses: actions/checkout@v2    
       - name: Setup
         run: |
           cd ..
@@ -69,10 +66,6 @@ jobs:
           unzip gradle.zip
           mv gradle-${GRADLE_VERSION} gradle
           
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-
       - name: Setup ENV
         run: |
           echo "--- Setup PATH ---"
@@ -101,3 +94,78 @@ jobs:
           make install INSTALL_ROOT=build/android/build
           androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-libvesc_tool.so-deployment-settings.json --android-platform android-28
           mv build/android/build/build/outputs/apk/build-debug.apk build/android/vesc_tool_mobile.apk
+          pushd build/android
+          zip vesc_tool-android.zip vesc_tool_mobile.apk
+          popd            
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: vesc_tool-android
+          path: build/android
+      - name: queryReleaseWin
+        id: queryReleaseWin
+        if: startsWith(github.event.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          githubFullName: ${{ github.event.repository.full_name }}
+          ref: ${{ github.event.ref }}
+        run: |
+          [string]$tag = ${env:ref}.Substring(${env:ref}.LastIndexOf('/') + 1)
+          [string]$url = 'https://api.github.com/repos/' + ${env:githubFullName} + '/releases/tags/' + ${tag}
+          $response={}
+          try {
+            $response = Invoke-RestMethod -Uri $url -Method Get
+          } catch {
+            Write-Host "StatusCode:" $_.Exception.Response.StatusCode.value__ 
+            Write-Host "StatusDescription:" $_.Exception.Response.StatusDescription
+            echo "::set-output name=needCreateRelease::true"  
+            return
+          }
+          [string]$latestUpUrl = $response.upload_url
+          Write-Host 'latestUpUrl:'$latestUpUrl
+          if ($latestUpUrl.Length -eq 0) {
+            echo "::set-output name=needCreateRelease::true"  
+          }
+      - name: createReleaseWin
+        id: createReleaseWin
+        if: startsWith(github.event.ref, 'refs/tags/') && steps.queryReleaseWin.outputs.needCreateRelease == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/create-release@v1.0.0
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+      - name: getLatestTagRelease
+        if: startsWith(github.event.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          githubFullName: ${{ github.event.repository.full_name }}
+          upUrl: ${{ steps.createReleaseWin.outputs.upload_url }}
+          ref: ${{ github.event.ref }}
+        run: |
+          if (${env:upUrl}.Length -gt 0) {
+              $v=${env:upUrl}
+              echo "::set-env name=uploadUrl::$v"
+              return
+          } 
+          [string]$tag = ${env:ref}.Substring(${env:ref}.LastIndexOf('/') + 1)
+          [string]$url = 'https://api.github.com/repos/' + ${env:githubFullName} + '/releases/tags/' + ${tag}
+          $response = Invoke-RestMethod -Uri $url -Method Get
+          [string]$latestUpUrl = $response.upload_url
+          Write-Host 'latestUpUrl:'$latestUpUrl
+          echo "::set-env name=uploadUrl::$latestUpUrl"
+          Write-Host 'env uploadUrl:'${env:uploadUrl}
+      - name: uploadRelease
+        id: uploadRelease
+        if: startsWith(github.event.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/upload-release-asset@v1.0.1
+        with:
+          upload_url: ${{ env.uploadUrl }}
+          asset_path: build/android/vesc_tool-android.zip
+          asset_name: vesc_tool-win.zip
+          asset_content_type: application/zip

@@ -38,6 +38,7 @@ public:
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private slots:
     void timerSlot();

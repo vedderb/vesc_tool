@@ -26,7 +26,7 @@ PageAppNrf::PageAppNrf(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageAppNrf::~PageAppNrf()
@@ -45,19 +45,14 @@ void PageAppNrf::setVesc(VescInterface *vesc)
 
     if (mVesc) {
         ui->nrfPair->setVesc(mVesc);
+        reloadParams();
+    }
+}
 
-        ui->generalTab->addRowSeparator(tr("Radio"));
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.power");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.speed");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.channel");
-        ui->generalTab->addRowSeparator(tr("Integrity"));
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.crc_type");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.send_crc_ack");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.retry_delay");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.retries");
-        ui->generalTab->addRowSeparator(tr("Address"));
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.address__0");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.address__1");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_nrf_conf.address__2");
+void PageAppNrf::reloadParams()
+{
+    if (mVesc) {
+        ui->generalTab->clearParams();
+        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "nrf", "general");
     }
 }

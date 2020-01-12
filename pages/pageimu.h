@@ -35,11 +35,12 @@ class PageImu : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageImu(QWidget *parent = 0);
+    explicit PageImu(QWidget *parent = nullptr);
     ~PageImu();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+
 
 private slots:
     void timerSlot();

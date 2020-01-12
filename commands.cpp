@@ -256,12 +256,15 @@ void Commands::processPacket(QByteArray data)
     case COMM_GET_MCCONF_DEFAULT:
         mTimeoutMcconf = 0;
         if (mMcConfig) {
-            mMcConfig->deSerialize(vb);
-            mMcConfig->updateDone();
+            if (mMcConfig->deSerialize(vb)) {
+                mMcConfig->updateDone();
 
-            if (mCheckNextMcConfig) {
-                mCheckNextMcConfig = false;
-                emit mcConfigCheckResult(mMcConfig->checkDifference(&mMcConfigLast));
+                if (mCheckNextMcConfig) {
+                    mCheckNextMcConfig = false;
+                    emit mcConfigCheckResult(mMcConfig->checkDifference(&mMcConfigLast));
+                }
+            } else {
+                emit deserializeConfigFailed(true, false);
             }
         }
         break;
@@ -270,8 +273,11 @@ void Commands::processPacket(QByteArray data)
     case COMM_GET_APPCONF_DEFAULT:
         mTimeoutAppconf = 0;
         if (mAppConfig) {
-            mAppConfig->deSerialize(vb);
-            mAppConfig->updateDone();
+            if (mAppConfig->deSerialize(vb)) {
+                mAppConfig->updateDone();
+            } else {
+                emit deserializeConfigFailed(false, true);
+            }
         }
         break;
 

@@ -413,6 +413,23 @@ public:
 
 Q_DECLARE_METATYPE(MCCONF_TEMP)
 
+struct CONFIG_BACKUP {
+    Q_GADGET
+
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString vesc_uuid MEMBER vesc_uuid)
+    Q_PROPERTY(QString mcconf_xml_compressed MEMBER mcconf_xml_compressed)
+    Q_PROPERTY(QString appconf_xml_compressed MEMBER appconf_xml_compressed)
+
+public:
+    QString name;
+    QString vesc_uuid;
+    QString mcconf_xml_compressed;
+    QString appconf_xml_compressed;
+};
+
+Q_DECLARE_METATYPE(CONFIG_BACKUP)
+
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,
     DEBUG_SAMPLING_NOW,

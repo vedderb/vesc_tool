@@ -42,11 +42,12 @@ void PageGPD::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "pwm_mode");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "gpd_buffer_notify_left");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "gpd_buffer_interpol");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "gpd_current_filter_const");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "gpd_current_kp");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "gpd_current_ki");
+        reloadParams();
     }
+}
+
+void PageGPD::reloadParams()
+{
+    ui->paramTab->clearParams();
+    ui->paramTab->addParamSubgroup(mVesc->mcConfig(), "gpd", "general");
 }

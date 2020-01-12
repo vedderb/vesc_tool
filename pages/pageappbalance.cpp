@@ -87,37 +87,23 @@ void PageAppBalance::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->tunePane->addRowSeparator(tr("PID"));
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.kp");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.ki");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.kd");
-        ui->tunePane->addRowSeparator(tr("Main Loop"));
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.hertz");
-        ui->tunePane->addRowSeparator(tr("Experimental"));
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.deadzone");
-        ui->tunePane->addParamRow(mVesc->appConfig(), "app_balance_conf.current_boost");
-        ui->configPane->addRowSeparator(tr("Startup"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_pitch_tolerance");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_roll_tolerance");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.startup_speed");
-        ui->configPane->addRowSeparator(tr("Tiltback"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_duty");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_angle");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_speed");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_high_voltage");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.tiltback_low_voltage");
-        ui->configPane->addRowSeparator(tr("Overspeed"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.overspeed_duty");
-        ui->configPane->addRowSeparator(tr("Fault"));
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.pitch_fault");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.roll_fault");
-        ui->configPane->addParamRow(mVesc->appConfig(), "app_balance_conf.use_switches");
+        reloadParams();
 
         updateTextOutput();
 
-
         connect(mVesc->commands(), SIGNAL(decodedBalanceReceived(BALANCE_VALUES)),
                 this, SLOT(appValuesReceived(BALANCE_VALUES)));
+    }
+}
+
+void PageAppBalance::reloadParams()
+{
+    if (mVesc) {
+        ui->tunePane->clearParams();
+        ui->configPane->clearParams();
+
+        ui->tunePane->addParamSubgroup(mVesc->appConfig(), "balance", "tune");
+        ui->configPane->addParamSubgroup(mVesc->appConfig(), "balance", "config");
     }
 }
 

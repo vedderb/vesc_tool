@@ -76,6 +76,9 @@
              <property name="text">
               <string>OSM</string>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
@@ -87,7 +90,7 @@
               <string>HiRes</string>
              </property>
              <property name="checked">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
            </item>

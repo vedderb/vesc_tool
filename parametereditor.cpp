@@ -41,6 +41,16 @@ ParameterEditor::ParameterEditor(QWidget *parent) :
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
+
+    connect(ui->groupList, &QListWidget::currentRowChanged, [this](int row) {
+        (void)row;
+        updateSubgroupList();
+    });
+
+    connect(ui->subgroupList, &QListWidget::currentRowChanged, [this](int row) {
+        (void)row;
+        updateGroupParamList();
+    });
 }
 
 ParameterEditor::~ParameterEditor()
@@ -53,6 +63,7 @@ void ParameterEditor::setParams(const ConfigParams *params)
     QStringList paramList = params->getParamOrder();
     mParams.clearParams();
     mParams.setSerializeOrder(params->getSerializeOrder());
+    mParams.setGrouping(params->getGrouping());
 
     for (int i = 0;i < paramList.size();i++) {
         QString name = paramList.at(i);
@@ -409,6 +420,7 @@ void ParameterEditor::updateUi()
     ui->paramList->addItems(mParams.getParamOrder());
     ui->paramSerialOrderList->clear();
     ui->paramSerialOrderList->addItems(mParams.getSerializeOrder());
+    updateGroupList();
 }
 
 void ParameterEditor::setEditorValues(QString name, ConfigParam p)
@@ -482,7 +494,7 @@ QString ParameterEditor::getEditorValues(ConfigParam *p)
 {
     if (p) {
         p->longName = ui->longNameEdit->text();
-        p->type = (CFG_T)ui->typeBox->currentIndex();
+        p->type = CFG_T(ui->typeBox->currentIndex());
         p->transmittable = ui->transmittableBox->currentIndex() == 0;
         p->description = ui->descriptionEdit->toHtmlNoFontSize();
         p->cDefine = ui->cDefineEdit->text();
@@ -499,7 +511,7 @@ QString ParameterEditor::getEditorValues(ConfigParam *p)
             p->suffix = ui->doubleSuffixEdit->text();
             p->vTxDoubleScale = ui->doubleTxScaleBaseBox->value() *
                     pow(10, ui->doubleTxScaleExpBox->value());
-            p->vTx = (VESC_TX_T)(ui->doubleTxTypeBox->currentIndex() + 7);
+            p->vTx = VESC_TX_T(ui->doubleTxTypeBox->currentIndex() + 7);
             p->valDouble = ui->doubleValBox->value();
             break;
 
@@ -511,7 +523,7 @@ QString ParameterEditor::getEditorValues(ConfigParam *p)
             p->showDisplay = ui->intShowDisplayBox->isChecked();
             p->stepInt = ui->intStepBox->value();
             p->suffix = ui->intSuffixEdit->text();
-            p->vTx = (VESC_TX_T)(ui->intTxTypeBox->currentIndex() + 1);
+            p->vTx = VESC_TX_T(ui->intTxTypeBox->currentIndex() + 1);
             p->valInt = ui->intValBox->value();
             break;
 
@@ -558,6 +570,61 @@ void ParameterEditor::showStatusInfo(QString info, bool isGood)
     mStatusLabel->setText(info);
 }
 
+void ParameterEditor::updateGroupList()
+{
+    int index = -1;
+    if (ui->groupList->selectedItems().size() > 0) {
+        index = ui->groupList->currentRow();
+    }
+
+    ui->groupList->clearSelection();
+    ui->groupList->clear();
+    ui->groupList->addItems(mParams.getParamGroups());
+    if (index >= 0 && index < ui->groupList->count()) {
+        ui->groupList->setCurrentRow(index);
+    }
+}
+
+void ParameterEditor::updateSubgroupList()
+{
+    int index = -1;
+    if (ui->subgroupList->selectedItems().size() > 0) {
+        index = ui->subgroupList->currentRow();
+    }
+
+    ui->subgroupList->clearSelection();
+    ui->subgroupList->clear();
+
+    QListWidgetItem *item = ui->groupList->currentItem();
+    if (item) {
+        ui->subgroupList->addItems(mParams.getParamSubgroups(item->text()));
+        if (index >= 0 && index < ui->subgroupList->count()) {
+            ui->subgroupList->setCurrentRow(index);
+        }
+    }
+}
+
+void ParameterEditor::updateGroupParamList()
+{
+    int index = -1;
+    if (ui->groupParamList->selectedItems().size() > 0) {
+        index = ui->groupParamList->currentRow();
+    }
+
+    ui->groupParamList->clearSelection();
+    ui->groupParamList->clear();
+
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+
+    if (itemGroup && itemSubgroup) {
+        ui->groupParamList->addItems(mParams.getParamsFromSubgroup(itemGroup->text(), itemSubgroup->text()));
+        if (index >= 0 && index < ui->groupParamList->count()) {
+            ui->groupParamList->setCurrentRow(index);
+        }
+    }
+}
+
 void ParameterEditor::on_doubleTxTypeBox_currentIndexChanged(int index)
 {
     if (index == 2) {
@@ -580,4 +647,230 @@ void ParameterEditor::on_actionCalculatePacketSize_triggered()
     QMessageBox::information(this,
                              tr("Packet Size"),
                              tr("%1 Bytes").arg(bytes.size()));
+}
+
+void ParameterEditor::on_groupRemoveButton_clicked()
+{
+    QListWidgetItem *item = ui->groupList->currentItem();
+
+    if (item) {
+        mParams.removeParamGroup(item->text());
+        ui->groupList->clearSelection();
+        updateGroupList();
+    }
+}
+
+void ParameterEditor::on_groupDownButton_clicked()
+{
+    QListWidgetItem *item = ui->groupList->currentItem();
+
+    if (item) {
+        if (ui->groupList->currentRow() < (ui->groupList->count() - 1)) {
+            mParams.moveGroupDown(item->text());
+            ui->groupList->setCurrentRow(ui->groupList->currentRow() + 1);
+            updateGroupList();
+        }
+    }
+}
+
+void ParameterEditor::on_groupUpButton_clicked()
+{
+    QListWidgetItem *item = ui->groupList->currentItem();
+
+    if (item) {
+        if (ui->groupList->currentRow() > 0) {
+            mParams.moveGroupUp(item->text());
+            ui->groupList->setCurrentRow(ui->groupList->currentRow() - 1);
+            updateGroupList();
+        }
+    }
+}
+
+void ParameterEditor::on_groupAddButton_clicked()
+{
+    bool ok;
+    QString text = QInputDialog::getText(this, "Add Group",
+                                         "Name:", QLineEdit::Normal,
+                                         "", &ok);
+    if (ok && text.size() > 0) {
+        mParams.addParamGroup(text);
+        updateGroupList();
+        ui->groupList->setCurrentRow(ui->groupList->count() - 1);
+    }
+}
+
+void ParameterEditor::on_groupEditButton_clicked()
+{
+    QListWidgetItem *item = ui->groupList->currentItem();
+
+    if (item) {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Rename Group",
+                                             "New name:", QLineEdit::Normal,
+                                             item->text(), &ok);
+        if (ok && text.size() > 0) {
+            mParams.renameGroup(item->text(), text);
+            updateGroupList();
+        }
+    }
+}
+
+void ParameterEditor::on_subgroupRemoveButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+
+    if (itemGroup && itemSubgroup) {
+        mParams.removeParamSubgroup(itemGroup->text(), itemSubgroup->text());
+        ui->subgroupList->clearSelection();
+        updateSubgroupList();
+    }
+}
+
+void ParameterEditor::on_subgroupDownButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+
+    if (itemGroup && itemSubgroup) {
+        if (ui->subgroupList->currentRow() < (ui->subgroupList->count() - 1)) {
+            mParams.moveSubgroupDown(itemGroup->text(), itemSubgroup->text());
+            ui->subgroupList->setCurrentRow(ui->subgroupList->currentRow() + 1);
+            updateSubgroupList();
+        }
+    }
+}
+
+void ParameterEditor::on_subgroupUpButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+
+    if (itemGroup && itemSubgroup) {
+        if (ui->subgroupList->currentRow() > 0) {
+            mParams.moveSubgroupUp(itemGroup->text(), itemSubgroup->text());
+            ui->subgroupList->setCurrentRow(ui->subgroupList->currentRow() - 1);
+            updateSubgroupList();
+        }
+    }
+}
+
+void ParameterEditor::on_subgroupAddButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+
+    if (itemGroup) {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Add Subgroup",
+                                             "Name:", QLineEdit::Normal,
+                                             "", &ok);
+        if (ok && text.size() > 0) {
+            mParams.addParamSubgroup(itemGroup->text(), text);
+            updateSubgroupList();
+            ui->subgroupList->setCurrentRow(ui->subgroupList->count() - 1);
+        }
+    }
+}
+
+void ParameterEditor::on_subgroupEditButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+
+    if (itemGroup && itemSubgroup) {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Rename Subgroup",
+                                             "Name:", QLineEdit::Normal,
+                                             itemSubgroup->text(), &ok);
+        if (ok && text.size() > 0) {
+            mParams.renameSubgroup(itemGroup->text(), itemSubgroup->text(), text);
+            updateSubgroupList();
+        }
+    }
+}
+
+void ParameterEditor::on_groupParamRemoveButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+    QListWidgetItem *itemGroupParam = ui->groupParamList->currentItem();
+
+    if (itemGroup && itemSubgroup && itemGroupParam) {
+        mParams.removeParamFromSubgroup(itemGroup->text(), itemSubgroup->text(), itemGroupParam->text());
+        ui->groupParamList->clearSelection();
+        updateGroupParamList();
+    }
+}
+
+void ParameterEditor::on_groupParamDownButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+    QListWidgetItem *itemGroupParam = ui->groupParamList->currentItem();
+
+    if (itemGroup && itemSubgroup && itemGroupParam) {
+        if (ui->groupParamList->currentRow() < (ui->groupParamList->count() - 1)) {
+            mParams.moveSubgroupParamDown(itemGroup->text(), itemSubgroup->text(), itemGroupParam->text());
+            ui->groupParamList->setCurrentRow(ui->groupParamList->currentRow() + 1);
+            updateGroupParamList();
+        }
+    }
+}
+
+void ParameterEditor::on_groupParamUpButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+    QListWidgetItem *itemGroupParam = ui->groupParamList->currentItem();
+
+    if (itemGroup && itemSubgroup && itemGroupParam) {
+        if (ui->groupParamList->currentRow() > 0) {
+            mParams.moveSubgroupParamUp(itemGroup->text(), itemSubgroup->text(), itemGroupParam->text());
+            ui->groupParamList->setCurrentRow(ui->groupParamList->currentRow() - 1);
+            updateGroupParamList();
+        }
+    }
+}
+
+void ParameterEditor::on_groupParamAddButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+
+    if (itemGroup && itemSubgroup) {
+        QListWidgetItem *item = ui->paramList->currentItem();
+        QString selected = "";
+
+        if (item) {
+            selected = item->text();
+        }
+
+        bool ok;
+        QString text = QInputDialog::getText(this, "Add Parameter",
+                                             "Name:", QLineEdit::Normal,
+                                             selected, &ok);
+        if (ok && text.size() > 0) {
+            mParams.addParamToSubgroup(itemGroup->text(), itemSubgroup->text(), text);
+            updateGroupParamList();
+            ui->groupParamList->setCurrentRow(ui->groupParamList->count() - 1);
+        }
+    }
+}
+
+void ParameterEditor::on_groupParamEditButton_clicked()
+{
+    QListWidgetItem *itemGroup = ui->groupList->currentItem();
+    QListWidgetItem *itemSubgroup = ui->subgroupList->currentItem();
+    QListWidgetItem *itemGroupParam = ui->groupParamList->currentItem();
+
+    if (itemGroup && itemSubgroup && itemGroupParam) {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Change Parameter",
+                                             "Name:", QLineEdit::Normal,
+                                             itemGroupParam->text(), &ok);
+        if (ok && text.size() > 0) {
+            mParams.renameSubgroupParam(itemGroup->text(), itemSubgroup->text(), itemGroupParam->text(), text);
+            updateGroupParamList();
+        }
+    }
 }

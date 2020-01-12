@@ -33,11 +33,12 @@ class PageAppGeneral : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageAppGeneral(QWidget *parent = 0);
+    explicit PageAppGeneral(QWidget *parent = nullptr);
     ~PageAppGeneral();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private:
     Ui::PageAppGeneral *ui;

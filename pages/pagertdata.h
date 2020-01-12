@@ -34,7 +34,7 @@ class PageRtData : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageRtData(QWidget *parent = 0);
+    explicit PageRtData(QWidget *parent = nullptr);
     ~PageRtData();
 
     VescInterface *vesc() const;

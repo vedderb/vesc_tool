@@ -296,7 +296,7 @@
      <item>
       <widget class="QGroupBox" name="groupBox_3">
        <property name="title">
-        <string>Supported Firmwares</string>
+        <string>Supported Firmwares Loaded</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>

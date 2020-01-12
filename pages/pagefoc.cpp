@@ -48,52 +48,23 @@ void PageFoc::setVesc(VescInterface *vesc)
         ui->detectFocHall->setVesc(mVesc);
         ui->detectFocEncoder->setVesc(mVesc);
 
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_sensor_mode");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_motor_r");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_motor_l");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_motor_flux_linkage");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_current_kp");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_current_ki");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "foc_observer_gain");
+        reloadParams();
+    }
+}
 
-        ui->sensorlessTab->addParamRow(mVesc->mcConfig(), "foc_openloop_rpm");
-        ui->sensorlessTab->addParamRow(mVesc->mcConfig(), "foc_sl_openloop_hyst");
-        ui->sensorlessTab->addParamRow(mVesc->mcConfig(), "foc_sl_openloop_time");
-        ui->sensorlessTab->addParamRow(mVesc->mcConfig(), "foc_sat_comp");
-        ui->sensorlessTab->addParamRow(mVesc->mcConfig(), "foc_temp_comp");
-        ui->sensorlessTab->addParamRow(mVesc->mcConfig(), "foc_temp_comp_base_temp");
+void PageFoc::reloadParams()
+{
+    if (mVesc) {
+        ui->generalTab->clearParams();
+        ui->sensorlessTab->clearParams();
+        ui->hallTab->clearParams();
+        ui->encoderTab->clearParams();
+        ui->advancedTab->clearParams();
 
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_sl_erpm");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__0");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__1");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__2");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__3");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__4");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__5");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__6");
-        ui->hallTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__7");
-
-        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_sl_erpm");
-        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_offset");
-        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_ratio");
-        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_inverted");
-        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_sin_gain");
-        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_sin_offset");
-        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_cos_gain");
-        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_cos_offset");
-        ui->encoderTab->addParamRow(mVesc->mcConfig(), "foc_encoder_sincos_filter_constant");
-
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_f_sw");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_dt_us");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_pll_kp");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_pll_ki");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_duty_dowmramp_kp");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_duty_dowmramp_ki");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_sl_d_current_duty");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_sl_d_current_factor");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_sample_v0_v7");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_sample_high_current");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_observer_gain_slow");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "foc_current_filter_const");
+        ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "foc", "general");
+        ui->sensorlessTab->addParamSubgroup(mVesc->mcConfig(), "foc", "sensorless");
+        ui->hallTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hall sensors");
+        ui->encoderTab->addParamSubgroup(mVesc->mcConfig(), "foc", "encoder");
+        ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "foc", "advanced");
     }
 }

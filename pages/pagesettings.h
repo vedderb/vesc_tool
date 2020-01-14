@@ -32,12 +32,11 @@ class PageSettings : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageSettings(QWidget *parent = 0);
+    explicit PageSettings(QWidget *parent = nullptr);
     ~PageSettings();
 
 private slots:
     void on_uiScaleBox_valueChanged(double arg1);
-
     void on_uiAutoScaleBox_toggled(bool checked);
 
 private:

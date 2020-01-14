@@ -32,7 +32,7 @@ class DetectFoc : public QWidget
     Q_OBJECT
 
 public:
-    explicit DetectFoc(QWidget *parent = 0);
+    explicit DetectFoc(QWidget *parent = nullptr);
     ~DetectFoc();
 
     VescInterface *vesc() const;

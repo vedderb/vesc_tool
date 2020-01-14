@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -31,7 +31,7 @@ class ConfigParams : public QObject
 {
     Q_OBJECT
 public:
-    explicit ConfigParams(QObject *parent = 0);
+    explicit ConfigParams(QObject *parent = nullptr);
     void addParam(const QString &name, ConfigParam param);
     void deleteParam(const QString &name);
     Q_INVOKABLE void setUpdateOnly(const QString &name);
@@ -76,23 +76,25 @@ public:
     QStringList getParamOrder() const;
     void setParamOrder(const QStringList &order);
 
-    QWidget *getEditor(const QString &name, QWidget *parent = 0);
+    QWidget *getEditor(const QString &name, QWidget *parent = nullptr);
 
     void getParamSerial(VByteArray &vb, const QString &name);
-    void setParamSerial(VByteArray &vb, const QString &name, QObject *src = 0);
+    void setParamSerial(VByteArray &vb, const QString &name, QObject *src = nullptr);
 
     QStringList getSerializeOrder() const;
     void setSerializeOrder(const QStringList &serializeOrder);
     void clearSerializeOrder();
 
     void serialize(VByteArray &vb);
-    void deSerialize(VByteArray &vb);
+    bool deSerialize(VByteArray &vb);
 
     void getXML(QXmlStreamWriter &stream, QString configName);
     bool setXML(QXmlStreamReader &stream, QString configName);
     bool saveXml(QString fileName, QString configName);
     bool loadXml(QString fileName, QString configName);
     QString xmlStatus();
+    QString saveCompressed(QString configName);
+    bool loadCompressed(QString data, QString configName);
 
     void getParamsXML(QXmlStreamWriter &stream);
     bool setParamsXML(QXmlStreamReader &stream);
@@ -104,6 +106,31 @@ public:
     QStringList checkDifference(ConfigParams *config);
 
     quint32 getSignature();
+
+    // Parameter grouping
+    void setGrouping(QList<QPair<QString, QList<QPair<QString, QStringList>>>> grouping);
+    QList<QPair<QString, QList<QPair<QString, QStringList>>>> getGrouping() const;
+    Q_INVOKABLE QStringList getParamGroups();
+    Q_INVOKABLE QStringList getParamSubgroups(QString group);
+    Q_INVOKABLE QStringList getParamsFromSubgroup(QString group, QString subgroup);
+    void clearParamGroups();
+    bool removeParamGroup(QString group);
+    bool clearParamGroup(QString group);
+    bool removeParamSubgroup(QString group, QString subgroup);
+    bool clearParamSubgroup(QString group, QString subgroup);
+    bool removeParamFromSubgroup(QString group, QString subgroup, QString param);
+    void addParamGroup(QString groupName);
+    bool addParamSubgroup(QString group, QString subgroupName);
+    bool addParamToSubgroup(QString group, QString subgroup, QString param);
+    bool moveGroupUp(QString group);
+    bool moveGroupDown(QString group);
+    bool moveSubgroupUp(QString group, QString subgroup);
+    bool moveSubgroupDown(QString group, QString subgroup);
+    bool moveSubgroupParamUp(QString group, QString subgroup, QString param);
+    bool moveSubgroupParamDown(QString group, QString subgroup, QString param);
+    bool renameGroup(QString group, QString newName);
+    bool renameSubgroup(QString group, QString subgroup, QString newName);
+    bool renameSubgroupParam(QString group, QString subgroup, QString param, QString newName);
 
     // Operators
     ConfigParams& operator=(const ConfigParams &other);
@@ -120,11 +147,11 @@ signals:
     void savingXml();
 
 public slots:
-    void updateParamDouble(QString name, double param, QObject *src = 0);
-    void updateParamInt(QString name, int param, QObject *src = 0);
-    void updateParamEnum(QString name, int param, QObject *src = 0);
-    void updateParamString(QString name, QString param, QObject *src = 0);
-    void updateParamBool(QString name, bool param, QObject *src = 0);
+    void updateParamDouble(QString name, double param, QObject *src = nullptr);
+    void updateParamInt(QString name, int param, QObject *src = nullptr);
+    void updateParamEnum(QString name, int param, QObject *src = nullptr);
+    void updateParamString(QString name, QString param, QObject *src = nullptr);
+    void updateParamBool(QString name, bool param, QObject *src = nullptr);
     void requestUpdate();
     void requestUpdateDefault();
     void updateDone();
@@ -136,6 +163,7 @@ private:
     bool mUpdatesEnabled;
     QStringList mSerializeOrder;
     QString mXmlStatus;
+    QList<QPair<QString, QList<QPair<QString, QStringList>>>> mParamGrouping;
 
     bool almostEqual(float A, float B, float eps);
 

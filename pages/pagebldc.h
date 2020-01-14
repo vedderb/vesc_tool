@@ -33,11 +33,12 @@ class PageBldc : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageBldc(QWidget *parent = 0);
+    explicit PageBldc(QWidget *parent = nullptr);
     ~PageBldc();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private:
     Ui::PageBldc *ui;

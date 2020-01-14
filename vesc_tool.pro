@@ -5,12 +5,12 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.29
+VT_VERSION = 2.00
 VT_INTRO_VERSION = 1
 
-VT_ANDROID_VERSION_ARMV7 = 59
-VT_ANDROID_VERSION_ARM64 = 60
-VT_ANDROID_VERSION_X86 = 61
+VT_ANDROID_VERSION_ARMV7 = 62
+VT_ANDROID_VERSION_ARM64 = 63
+VT_ANDROID_VERSION_X86 = 64
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -25,6 +25,9 @@ CONFIG += c++11
 # Build mobile GUI
 #CONFIG += build_mobile
 
+# Debug build (e.g. F5 to reload QML files)
+#DEFINES += DEBUG_BUILD
+
 # If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
 # sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'
 
@@ -38,9 +41,6 @@ DEFINES += HAS_BLUETOOTH
 # CAN bus available
 # Adding serialbus to Qt seems to break the serial port on static builds. TODO: Figure out why.
 #DEFINES += HAS_CANBUS
-
-# Debug build (e.g. F5 to reload QML files)
-#DEFINES += DEBUG_BUILD
 
 # Positioning
 DEFINES += HAS_POS
@@ -180,6 +180,7 @@ include(map/map.pri)
 include(lzokay/lzokay.pri)
 
 RESOURCES += res.qrc
+RESOURCES += res_config.qrc
 
 build_original {
     RESOURCES += res_original.qrc \

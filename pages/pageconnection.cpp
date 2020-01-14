@@ -32,7 +32,7 @@ PageConnection::PageConnection(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
 
-    mVesc = 0;
+    mVesc = nullptr;
     mTimer = new QTimer(this);
 
     connect(mTimer, SIGNAL(timeout()),
@@ -415,7 +415,7 @@ void PageConnection::on_pairConnectedButton_clicked()
                     bool res = Utility::waitSignal(ap, SIGNAL(updated()), 1500);
 
                     if (res) {
-                        mVesc->appConfig()->updateParamBool("pairing_done", true, 0);
+                        mVesc->appConfig()->updateParamBool("pairing_done", true, nullptr);
                         mVesc->commands()->setAppConf();
                     }
                 }
@@ -519,7 +519,7 @@ void PageConnection::on_unpairButton_clicked()
                         bool res = Utility::waitSignal(ap, SIGNAL(updated()), 1500);
 
                         if (res) {
-                            mVesc->appConfig()->updateParamBool("pairing_done", false, 0);
+                            mVesc->appConfig()->updateParamBool("pairing_done", false, nullptr);
                             mVesc->commands()->setAppConf();
                             mVesc->deletePairedUuid(mVesc->getConnectedUuid());
                             mVesc->storeSettings();

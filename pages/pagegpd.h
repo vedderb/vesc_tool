@@ -32,11 +32,12 @@ class PageGPD : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageGPD(QWidget *parent = 0);
+    explicit PageGPD(QWidget *parent = nullptr);
     ~PageGPD();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private:
     Ui::PageGPD *ui;

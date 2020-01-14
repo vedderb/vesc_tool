@@ -33,7 +33,7 @@ class PageConnection : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageConnection(QWidget *parent = 0);
+    explicit PageConnection(QWidget *parent = nullptr);
     ~PageConnection();
 
     VescInterface *vesc() const;

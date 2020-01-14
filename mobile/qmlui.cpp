@@ -51,7 +51,7 @@ bool QmlUi::startQmlUi()
 
 bool QmlUi::eventFilter(QObject *object, QEvent *e)
 {
-    Q_UNUSED(object);
+    (void)object;
 
     if (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
@@ -95,10 +95,8 @@ QObject *QmlUi::vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngi
 
     VescInterface *vesc = new VescInterface();
     mVesc = vesc;
-
-    vesc->mcConfig()->loadParamsXml("://res/parameters_mcconf.xml");
-    vesc->appConfig()->loadParamsXml("://res/parameters_appconf.xml");
-    vesc->infoConfig()->loadParamsXml("://res/info.xml");
+    vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    Utility::configLoadLatest(vesc);
 
     return vesc;
 }

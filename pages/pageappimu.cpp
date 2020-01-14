@@ -28,7 +28,7 @@ PageAppImu::PageAppImu(QWidget *parent) :
     ui(new Ui::PageAppImu)
 {
     ui->setupUi(this);
-    mVesc = 0;
+    mVesc = nullptr;
 
     mTimer = new QTimer(this);
     mTimer->start(20);
@@ -141,35 +141,18 @@ void PageAppImu::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.type");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.sample_rate_hz");
-
-        ui->tableWidget->addRowSeparator("Filters");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.mode");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.accel_confidence_decay");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.mahony_kp");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.mahony_ki");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.madgwick_beta");
-
-        ui->tableWidget->addRowSeparator("Rotation");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.rot_roll");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.rot_pitch");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.rot_yaw");
-
-        ui->tableWidget->addRowSeparator("Offsets");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.accel_offsets__0");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.accel_offsets__1");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.accel_offsets__2");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offsets__0");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offsets__1");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offsets__2");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offset_comp_fact__0");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offset_comp_fact__1");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offset_comp_fact__2");
-        ui->tableWidget->addParamRow(mVesc->appConfig(), "imu_conf.gyro_offset_comp_clamp");
+        reloadParams();
 
         connect(mVesc->commands(), SIGNAL(valuesImuReceived(IMU_VALUES,uint)),
                 this, SLOT(valuesReceived(IMU_VALUES,uint)));
+    }
+}
+
+void PageAppImu::reloadParams()
+{
+    if (mVesc) {
+        ui->tableWidget->clearParams();
+        ui->tableWidget->addParamSubgroup(mVesc->appConfig(), "imu", "general");
     }
 }
 

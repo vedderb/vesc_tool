@@ -26,7 +26,7 @@ PageDc::PageDc(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageDc::~PageDc()
@@ -44,12 +44,14 @@ void PageDc::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "cc_gain");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "cc_ramp_step_max");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "m_duty_ramp_step");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "m_current_backoff_gain");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "m_dc_f_sw");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "foc_pll_kp");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "foc_pll_ki");
+        reloadParams();
+    }
+}
+
+void PageDc::reloadParams()
+{
+    if (mVesc) {
+        ui->paramTab->clearParams();
+        ui->paramTab->addParamSubgroup(mVesc->mcConfig(), "dc", "general");
     }
 }

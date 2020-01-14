@@ -27,7 +27,7 @@ PageAppSettings::PageAppSettings(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageAppSettings::~PageAppSettings()
@@ -45,8 +45,15 @@ void PageAppSettings::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
+        reloadParams();
+    }
+}
+
+void PageAppSettings::reloadParams()
+{
+    if (mVesc) {
         ConfigParam *p = mVesc->infoConfig()->getParam("app_setting_description");
-        if (p != 0) {
+        if (p != nullptr) {
             ui->textEdit->setHtml(p->description);
         } else {
             ui->textEdit->setText("App Setting Description not found.");

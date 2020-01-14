@@ -32,11 +32,12 @@ class PageDc : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageDc(QWidget *parent = 0);
+    explicit PageDc(QWidget *parent = nullptr);
     ~PageDc();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private:
     Ui::PageDc *ui;

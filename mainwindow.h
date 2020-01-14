@@ -68,7 +68,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     bool eventFilter(QObject *object, QEvent *e);
 
@@ -79,8 +79,6 @@ private slots:
     void serialPortNotWritable(const QString &port);
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void paramChangedDouble(QObject *src, QString name, double newParam);
-    void mcconfUpdated();
-    void appconfUpdated();
     void mcConfigCheckResult(QStringList paramsNotSet);
 
     void on_actionReconnect_triggered();
@@ -130,6 +128,12 @@ private slots:
     void on_posBox_editingFinished();
     void on_posBox_valueChanged(double arg1);
     void on_actionExportConfigurationParser_triggered();
+    void on_actionBackupConfiguration_triggered();
+    void on_actionRestoreConfiguration_triggered();
+    void on_actionClearConfigurationBackups_triggered();
+    void on_actionParameterEditorFW_triggered();
+    void on_actionBackupConfigurationsCAN_triggered();
+    void on_actionRestoreConfigurationsCAN_triggered();
 
 private:
     Ui::MainWindow *ui;

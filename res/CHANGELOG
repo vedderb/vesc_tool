@@ -1,3 +1,23 @@
+== 2.00 ==
+* Focus for this release: increase backwards compatibility with old firmwares.
+ - Include XML files for old firmwares. Currently 3.60 - 3.66, but more will be added.
+ - Store grouping information in XML files to allow changing the GUI dynamically based on firmware version.
+ - Support for more commands in limited mode.
+ - Support for reading and writing motor and app configuration in limited mode.
+ - Updated _all_ configuration pages to use the grouping information, and to dynamically reload when the configuration changes.
+ - Keep a record of known issues with old firmwares, and warn if a problematic firmware is in use.
+ - Support for making/restoring backups of the motor and app configurations of all VESCs on the CAN Bus.
+* Other updates
+ - Store XML configurations with predefined parameter order instead of randomly.
+ - Use OSM tile server by default as the higher resolution one is quite slow.
+ - Added support for VESC 100/250.
+ - Clear arrays in settings before writing to them.
+ - Sync settings at end of write.
+ - Fixed temperature plot visibility boxes.
+ - Made yAxis2 visible on FOC RT data.
+ - Better tooltip on keyboard control button.
+ - Show message when configuration verification fails.
+
 == 1.29 ==
 * Replaced miniLZO with lzokay to resolve crash on Android, and to get a bit better compression ratio.
 

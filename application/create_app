@@ -17,6 +17,7 @@ fi
 
 mkdir $APP_NAME
 mkdir $APP_NAME/res
+mkdir $APP_NAME/res/config
 mkdir $APP_NAME/widgets
 mkdir $APP_NAME/lzokay
 
@@ -34,7 +35,7 @@ else
 	cp template/main.cpp $APP_NAME
 fi
 
-cp template/res.qrc $APP_NAME
+cp ../res_config.qrc $APP_NAME
 cp ../bleuart.cpp $APP_NAME
 cp ../bleuart.h $APP_NAME
 cp ../commands.cpp $APP_NAME
@@ -57,9 +58,7 @@ cp ../utility.h $APP_NAME
 cp ../tcpserversimple.cpp $APP_NAME
 cp ../tcpserversimple.h $APP_NAME
 
-cp ../res/info.xml $APP_NAME/res
-cp ../res/parameters_mcconf.xml $APP_NAME/res
-cp ../res/parameters_appconf.xml $APP_NAME/res
+cp -r ../res/config/* $APP_NAME/res/config
 
 cp ../widgets/displaypercentage.cpp $APP_NAME/widgets
 cp ../widgets/displaypercentage.h $APP_NAME/widgets

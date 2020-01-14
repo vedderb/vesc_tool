@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -29,6 +29,7 @@
 #include <QBuffer>
 #include <cmath>
 #include "utility.h"
+#include "lzokay/lzokay.hpp"
 
 ConfigParams::ConfigParams(QObject *parent) : QObject(parent)
 {
@@ -104,7 +105,7 @@ bool ConfigParams::hasParam(const QString &name)
 
 ConfigParam *ConfigParams::getParam(const QString &name)
 {
-    ConfigParam *retVal = 0;
+    ConfigParam *retVal = nullptr;
 
     if (mParams.contains(name)) {
         retVal = &mParams[name];
@@ -872,18 +873,20 @@ void ConfigParams::serialize(VByteArray &vb)
     }
 }
 
-void ConfigParams::deSerialize(VByteArray &vb)
+bool ConfigParams::deSerialize(VByteArray &vb)
 {
     auto signature = vb.vbPopFrontUint32();
 
     if (signature != getSignature()) {
         qWarning() << "Invalid signature";
-        return;
+        return false;
     }
 
     for (int i = 0;i < mSerializeOrder.size();i++) {
         setParamSerial(vb, mSerializeOrder.at(i));
     }
+
+    return true;
 }
 
 void ConfigParams::getXML(QXmlStreamWriter &stream, QString configName)
@@ -891,12 +894,9 @@ void ConfigParams::getXML(QXmlStreamWriter &stream, QString configName)
     stream.writeStartDocument();
     stream.writeStartElement(configName);
 
-    QHashIterator<QString, ConfigParam> i(mParams);
-    while (i.hasNext()) {
-        i.next();
-
-        const ConfigParam &p = i.value();
-        QString name = i.key();
+    for (QString s: mParamList) {
+        const ConfigParam p = mParams[s];
+        QString name = s;
 
         switch (p.type) {
         case CFG_T_BOOL:
@@ -915,10 +915,6 @@ void ConfigParams::getXML(QXmlStreamWriter &stream, QString configName)
 
         case CFG_T_UNDEFINED:
             // Undefined parameters have no value to save.
-            break;
-
-        default:
-            qWarning() << name << ": type not supported.";
             break;
         }
     }
@@ -950,35 +946,35 @@ bool ConfigParams::setXML(QXmlStreamReader &stream, QString configName)
                 case CFG_T_BOOL:
                     if (valInt != p.valInt) {
                         p.valInt = valInt;
-                        emit paramChangedBool(0, name, valInt);
+                        emit paramChangedBool(nullptr, name, valInt);
                     }
                     break;
 
                 case CFG_T_ENUM:
                     if (valInt != p.valInt) {
                         p.valInt = valInt;
-                        emit paramChangedEnum(0, name, valInt);
+                        emit paramChangedEnum(nullptr, name, valInt);
                     }
                     break;
 
                 case CFG_T_INT:
                     if (valInt != p.valInt) {
                         p.valInt = valInt;
-                        emit paramChangedInt(0, name, valInt);
+                        emit paramChangedInt(nullptr, name, valInt);
                     }
                     break;
 
                 case CFG_T_DOUBLE:
                     if (valDouble != p.valDouble) {
                         p.valDouble = valDouble;
-                        emit paramChangedDouble(0, name, valDouble);
+                        emit paramChangedDouble(nullptr, name, valDouble);
                     }
                     break;
 
                 case CFG_T_QSTRING:
                     if (text != p.valString) {
                         p.valString = text;
-                        emit paramChangedQString(0, name, text);
+                        emit paramChangedQString(nullptr, name, text);
                     }
                     break;
 
@@ -1048,6 +1044,55 @@ bool ConfigParams::loadXml(QString fileName, QString configName)
 QString ConfigParams::xmlStatus()
 {
     return mXmlStatus;
+}
+
+QString ConfigParams::saveCompressed(QString configName)
+{
+    QString result;
+
+    QByteArray data;
+    QXmlStreamWriter stream(&data);
+    stream.setCodec("UTF-8");
+    stream.setAutoFormatting(true);
+    getXML(stream, configName);
+
+    std::size_t outMaxSize = lzokay::compress_worst_size(data.size());
+    unsigned char *out = new unsigned char[outMaxSize];
+    std::size_t outLen = 0;
+
+    lzokay::EResult error = lzokay::compress((const uint8_t*)data.constData(), data.size(), out, outMaxSize, outLen);
+    if (error == lzokay::EResult::Success) {
+        QByteArray data((char*)out, outLen);
+        result = data.toBase64();
+    } else {
+        qWarning() << "Could not compress data.";
+    }
+
+    delete[] out;
+
+    return result;
+}
+
+bool ConfigParams::loadCompressed(QString data, QString configName)
+{
+    bool res = false;
+
+    QByteArray in = QByteArray::fromBase64(data.toLocal8Bit());
+
+    std::size_t outMaxSize = 2 * 1024 * 1024;
+    unsigned char *out = new unsigned char[outMaxSize];
+    std::size_t outLen = 0;
+
+    lzokay::EResult error = lzokay::decompress((const uint8_t*)in.constData(), in.size(), out, outMaxSize, outLen);
+    QByteArray xmlData((const char*)out, outLen);
+    delete[] out;
+
+    if (error == lzokay::EResult::Success) {
+        QXmlStreamReader stream(xmlData);
+        res = setXML(stream, configName);
+    }
+
+    return res;
 }
 
 void ConfigParams::getParamsXML(QXmlStreamWriter &stream)
@@ -1123,7 +1168,25 @@ void ConfigParams::getParamsXML(QXmlStreamWriter &stream)
     for (int i = 0;i < mSerializeOrder.size();i++) {
         stream.writeTextElement("ser", mSerializeOrder.at(i));
     }
+    stream.writeEndElement();
 
+    stream.writeStartElement("Grouping");
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        stream.writeStartElement("group");
+        stream.writeTextElement("groupName", mParamGrouping.at(i).first);
+        for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+            stream.writeStartElement("subgroup");
+            stream.writeTextElement("subgroupName", mParamGrouping.at(i).second.at(j).first);
+            stream.writeStartElement("subgroupParams");
+            for (int k = 0;k < mParamGrouping.at(i).second.at(j).second.size();k++) {
+                stream.writeTextElement("param", mParamGrouping.at(i).second.at(j).second.at(k));
+            }
+            stream.writeEndElement();
+            stream.writeEndElement();
+        }
+        stream.writeEndElement();
+    }
+    stream.writeEndElement();
     stream.writeEndDocument();
 }
 
@@ -1158,7 +1221,7 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
                         } else if (name == "cDefine") {
                             p.cDefine = stream.readElementText();
                         } else if (name == "editorDecimalsDouble") {
-                            p.editorDecimalsDouble = stream.readElementText().toDouble();
+                            p.editorDecimalsDouble = stream.readElementText().toInt();
                         } else if (name == "editorScale") {
                             p.editorScale = stream.readElementText().toDouble();
                         } else if (name == "editAsPercentage") {
@@ -1184,7 +1247,7 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
                         } else if (name == "suffix") {
                             p.suffix = stream.readElementText();
                         } else if (name == "type") {
-                            p.type = (CFG_T)stream.readElementText().toInt();
+                            p.type = CFG_T(stream.readElementText().toInt());
                         } else if (name == "transmittable") {
                             p.transmittable = stream.readElementText().toInt();
                         } else if (name == "valDouble") {
@@ -1194,7 +1257,7 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
                         } else if (name == "valString") {
                             p.valString = stream.readElementText();
                         } else if (name == "vTx") {
-                            p.vTx = (VESC_TX_T)stream.readElementText().toInt();
+                            p.vTx = VESC_TX_T(stream.readElementText().toInt());
                         } else if (name == "vTxDoubleScale") {
                             p.vTxDoubleScale = stream.readElementText().toDouble();
                         } else {
@@ -1219,6 +1282,50 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
                         mSerializeOrder.append(stream.readElementText());
                     } else {
                         qWarning() << "Parameter not found: " << name;
+                        stream.skipCurrentElement();
+                    }
+                }
+            } else if (nameFirst == "Grouping") {
+                // TODO: This can be done much more efficiently. Does probably not matter too much though.
+                mParamGrouping.clear();
+                while (stream.readNextStartElement()) {
+                    QString name0 = stream.name().toString();
+                    if (name0 == "group") {
+                        QString group = "unknownGroup";
+                        while (stream.readNextStartElement()) {
+                            QString name = stream.name().toString();
+                            if (name == "groupName") {
+                                group = stream.readElementText();
+                                addParamGroup(group);
+                            } else if (name == "subgroup") {
+                                QString subgroup = "unknownSubgroup";
+                                while (stream.readNextStartElement()) {
+                                    QString name2 = stream.name().toString();
+                                    if (name2 == "subgroupName") {
+                                        subgroup = stream.readElementText();
+                                        addParamSubgroup(group, subgroup);
+                                    } else if (name2 == "subgroupParams") {
+                                        while (stream.readNextStartElement()) {
+                                            QString name3 = stream.name().toString();
+                                            if (name3 == "param") {
+                                                addParamToSubgroup(group, subgroup, stream.readElementText());
+                                            } else {
+                                                qWarning() << "Parameter not found: " << name3;
+                                                stream.skipCurrentElement();
+                                            }
+                                        }
+                                    } else {
+                                        qWarning() << "Parameter not found: " << name2;
+                                        stream.skipCurrentElement();
+                                    }
+                                }
+                            } else {
+                                qWarning() << "Parameter not found: " << name;
+                                stream.skipCurrentElement();
+                            }
+                        }
+                    } else {
+                        qWarning() << "Parameter not found: " << name0;
                         stream.skipCurrentElement();
                     }
                 }
@@ -1404,8 +1511,8 @@ quint32 ConfigParams::getSignature()
         ConfigParam *p = getParam(s);
 
         if (p) {
-            sigStr.append(QString("%1").arg((int)p->type));
-            sigStr.append(QString("%1").arg((int)p->vTx));
+            sigStr.append(QString("%1").arg(int(p->type)));
+            sigStr.append(QString("%1").arg(int(p->vTx)));
             for (auto n: p->enumNames) {
                 sigStr.append(n);
             }
@@ -1414,6 +1521,333 @@ quint32 ConfigParams::getSignature()
 
     QByteArray bytes = sigStr.toUtf8();
     return Utility::crc32c((uint8_t*)bytes.data(), bytes.size());
+}
+
+void ConfigParams::setGrouping(QList<QPair<QString, QList<QPair<QString, QStringList>>>> grouping)
+{
+    mParamGrouping = grouping;
+}
+
+QList<QPair<QString, QList<QPair<QString, QStringList>>>> ConfigParams::getGrouping() const
+{
+    return mParamGrouping;
+}
+
+QStringList ConfigParams::getParamGroups()
+{
+    QStringList res;
+    for (auto g: mParamGrouping) {
+        res.append(g.first);
+    }
+    return res;
+}
+
+QStringList ConfigParams::getParamSubgroups(QString group)
+{
+    QStringList res;
+    for (auto g: mParamGrouping) {
+        if (g.first.toLower() == group.toLower()) {
+            for (auto s: g.second) {
+                res.append(s.first);
+            }
+            break;
+        }
+    }
+    return res;
+}
+
+QStringList ConfigParams::getParamsFromSubgroup(QString group, QString subgroup)
+{
+    bool groupFound = false;
+
+    for (auto g: mParamGrouping) {
+        if (g.first.toLower() == group.toLower()) {
+            groupFound = true;
+            for (auto s: g.second) {
+                if (s.first.toLower() == subgroup.toLower()) {
+                    return s.second;
+                }
+            }
+        }
+    }
+
+    if (groupFound) {
+        qWarning() << "Param subgroup" << subgroup << "not found.";
+    } else {
+        qWarning() << "Param group" << group << "not found.";
+    }
+
+    return QStringList();
+}
+
+void ConfigParams::clearParamGroups()
+{
+    mParamGrouping.clear();
+}
+
+bool ConfigParams::removeParamGroup(QString group)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            mParamGrouping.removeAt(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::clearParamGroup(QString group)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            mParamGrouping[i].second.clear();
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::removeParamSubgroup(QString group, QString subgroup)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    mParamGrouping[i].second.removeAt(j);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::clearParamSubgroup(QString group, QString subgroup)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    mParamGrouping[i].second[j].second.clear();
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::removeParamFromSubgroup(QString group, QString subgroup, QString param)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    for (int k = 0;k < mParamGrouping.at(i).second.at(j).second.size();k++) {
+                        if (mParamGrouping.at(i).second.at(j).second.at(k).toLower() == param.toLower()) {
+                            mParamGrouping[i].second[j].second.removeAt(k);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void ConfigParams::addParamGroup(QString groupName)
+{
+    QPair<QString, QList<QPair<QString, QStringList>>> group;
+    group.first = groupName;
+    mParamGrouping.append(group);
+}
+
+bool ConfigParams::addParamSubgroup(QString group, QString subgroupName)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            QPair<QString, QStringList> subgroup;
+            subgroup.first = subgroupName;
+            mParamGrouping[i].second.append(subgroup);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::addParamToSubgroup(QString group, QString subgroup, QString param)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    mParamGrouping[i].second[j].second.append(param);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::moveGroupUp(QString group)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            if (i > 0) {
+                mParamGrouping.swap(i, i - 1);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::moveGroupDown(QString group)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            if (i < (mParamGrouping.size() - 1)) {
+                mParamGrouping.swap(i, i + 1);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::moveSubgroupUp(QString group, QString subgroup)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    if (j > 0) {
+                        mParamGrouping[i].second.swap(j, j - 1);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::moveSubgroupDown(QString group, QString subgroup)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    if (j < (mParamGrouping.at(i).second.size() - 1)) {
+                        mParamGrouping[i].second.swap(j, j + 1);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::moveSubgroupParamUp(QString group, QString subgroup, QString param)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    for (int k = 0;k < mParamGrouping.at(i).second.at(j).second.size();k++) {
+                        if (mParamGrouping.at(i).second.at(j).second.at(k).toLower() == param.toLower()) {
+                            if (k > 0) {
+                                mParamGrouping[i].second[j].second.swap(k, k - 1);
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::moveSubgroupParamDown(QString group, QString subgroup, QString param)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    for (int k = 0;k < mParamGrouping.at(i).second.at(j).second.size();k++) {
+                        if (mParamGrouping.at(i).second.at(j).second.at(k).toLower() == param.toLower()) {
+                            if (k < (mParamGrouping.at(i).second.at(j).second.size() - 1)) {
+                                mParamGrouping[i].second[j].second.swap(k, k + 1);
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::renameGroup(QString group, QString newName)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            mParamGrouping[i].first = newName;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::renameSubgroup(QString group, QString subgroup, QString newName)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    mParamGrouping[i].second[j].first = newName;
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool ConfigParams::renameSubgroupParam(QString group, QString subgroup, QString param, QString newName)
+{
+    for (int i = 0;i < mParamGrouping.size();i++) {
+        if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
+            for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
+                if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
+                    for (int k = 0;k < mParamGrouping.at(i).second.at(j).second.size();k++) {
+                        if (mParamGrouping.at(i).second.at(j).second.at(k).toLower() == param.toLower()) {
+                            mParamGrouping[i].second[j].second[k] = newName;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 ConfigParams &ConfigParams::operator=(const ConfigParams &other)

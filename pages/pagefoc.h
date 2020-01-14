@@ -32,11 +32,12 @@ class PageFoc : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageFoc(QWidget *parent = 0);
+    explicit PageFoc(QWidget *parent = nullptr);
     ~PageFoc();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private:
     Ui::PageFoc *ui;

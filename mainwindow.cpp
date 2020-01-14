@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -26,6 +26,7 @@
 #include <cmath>
 #include <QEventLoop>
 #include <QDesktopServices>
+#include <QProgressDialog>
 #include "parametereditor.h"
 #include "startupwizard.h"
 #include "widgets/helpdialog.h"
@@ -94,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mVersion = QString::number(VT_VERSION);
+    mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
@@ -102,8 +103,6 @@ MainWindow::MainWindow(QWidget *parent) :
     mTimer = new QTimer(this);
     mKeyLeft = false;
     mKeyRight = false;
-    mMcConfRead = false;
-    mAppConfRead = false;
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
@@ -130,15 +129,85 @@ MainWindow::MainWindow(QWidget *parent) :
     // Remove the menu with the option to hide the toolbar
     ui->mainToolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
-    mVesc->mcConfig()->loadParamsXml("://res/parameters_mcconf.xml");
-    mVesc->appConfig()->loadParamsXml("://res/parameters_appconf.xml");
-    mVesc->infoConfig()->loadParamsXml("://res/info.xml");
+    mVesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    Utility::configLoadLatest(mVesc);
+
+    QMenu *fwMenu = new QMenu(this);
+    fwMenu->setTitle("Load Firmware Configs");
+    fwMenu->setIcon(QIcon("://res/icons/Electronics-96.png"));
+    for (auto fw: Utility::configSupportedFws()) {
+        QAction *action = new QAction(fwMenu);
+        action->setText(QString("%1.%2").arg(fw.first).arg(fw.second));
+        connect(action, &QAction::triggered, [this,fw]() {
+            Utility::configLoad(mVesc, fw.first, fw.second);
+        });
+        fwMenu->addAction(action);
+    }
+    ui->menuTools->addMenu(fwMenu);
+
+    QMenu *backupMenu = new QMenu(this);
+
+    auto reloadBackupMenu = [this, backupMenu]() {
+        backupMenu->clear();
+        backupMenu->setTitle("Load Configuration Backups for UUID");
+        backupMenu->setIcon(QIcon("://res/icons/Open Folder-96.png"));
+        for (auto uuid: mVesc->confListBackups()) {
+            QAction *action = new QAction(backupMenu);
+            action->setIcon(QIcon("://res/icons/Electronics-96.png"));
+            QString txt = uuid;
+            QString name = mVesc->confBackupName(uuid);
+            if (!name.isEmpty()) {
+                txt += " (" + name + ")";
+            }
+            action->setText(txt);
+            connect(action, &QAction::triggered, [this,uuid]() {
+                mVesc->confLoadBackup(uuid);
+            });
+            backupMenu->addAction(action);
+        }
+        ui->menuTools_2->addMenu(backupMenu);
+    };
+
+    reloadBackupMenu();
+    connect(mVesc, &VescInterface::configurationBackupsChanged, reloadBackupMenu);
+
     reloadPages();
 
-    connect(mVesc->mcConfig(), SIGNAL(updated()),
-            this, SLOT(mcconfUpdated()));
-    connect(mVesc->appConfig(), SIGNAL(updated()),
-            this, SLOT(appconfUpdated()));
+    mMcConfRead = false;
+    mAppConfRead = false;
+
+    connect(mVesc->mcConfig(), &ConfigParams::updated, [this]() {
+        mMcConfRead = true;
+    });
+    connect(mVesc->appConfig(), &ConfigParams::updated, [this]() {
+        mAppConfRead = true;
+    });
+
+    connect(mVesc, &VescInterface::configurationChanged, [this]() {
+        qDebug() << "Reloading user interface due to configuration change.";
+
+        mMcConfRead = false;
+        mAppConfRead = false;
+
+        mPageMotorSettings->reloadParams();
+        mPageMotor->reloadParams();
+        mPageBldc->reloadParams();
+        mPageDc->reloadParams();
+        mPageFoc->reloadParams();
+        mPageGpd->reloadParams();
+        mPageControllers->reloadParams();
+        mPageMotorInfo->reloadParams();
+        mPageAppSettings->reloadParams();
+        mPageAppGeneral->reloadParams();
+        mPageAppPpm->reloadParams();
+        mPageAppAdc->reloadParams();
+        mPageAppUart->reloadParams();
+        mPageAppNunchuk->reloadParams();
+        mPageAppNrf->reloadParams();
+        mPageAppBalance->reloadParams();
+        mPageAppImu->reloadParams();
+        mPageFirmware->reloadParams();
+    });
 
     qApp->installEventFilter(this);
     qInstallMessageHandler(myMessageOutput);
@@ -181,7 +250,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::eventFilter(QObject *object, QEvent *e)
 {
-    Q_UNUSED(object);
+    (void)object;
 
     if (!mVesc->isPortConnected() || !ui->actionKeyboardControl->isChecked()) {
         return false;
@@ -323,12 +392,15 @@ void MainWindow::timerSlot()
         conf_cnt++;
         if (conf_cnt >= 20) {
             conf_cnt = 0;
-            if (!mMcConfRead) {
-                mVesc->commands()->getMcconf();
-            }
 
-            if (!mAppConfRead) {
-                mVesc->commands()->getAppConf();
+            if (!mVesc->deserializeFailedSinceConnected()) {
+                if (!mMcConfRead) {
+                    mVesc->commands()->getMcconf();
+                }
+
+                if (!mAppConfRead) {
+                    mVesc->commands()->getAppConf();
+                }
             }
         }
     }
@@ -520,16 +592,6 @@ void MainWindow::paramChangedDouble(QObject *src, QString name, double newParam)
     if (name == "l_current_max") {
         ui->dispCurrent->setRange(fabs(newParam));
     }
-}
-
-void MainWindow::mcconfUpdated()
-{
-    mMcConfRead = true;
-}
-
-void MainWindow::appconfUpdated()
-{
-    mAppConfRead = true;
 }
 
 void MainWindow::mcConfigCheckResult(QStringList paramsNotSet)
@@ -739,7 +801,7 @@ void MainWindow::on_currentButton_clicked()
 
 void MainWindow::on_speedButton_clicked()
 {
-    mVesc->commands()->setRpm(ui->speedBox->value());
+    mVesc->commands()->setRpm(int(ui->speedBox->value()));
     ui->actionSendAlive->setChecked(true);
 }
 
@@ -773,7 +835,7 @@ void MainWindow::addPageItem(QString name, QString icon, QString groupIcon, bool
 
 void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
 {
-    ConfigParams *params = 0;
+    ConfigParams *params = nullptr;
 
     if (conf.toLower() == "mcconf") {
         params = mVesc->mcConfig();
@@ -819,7 +881,7 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
 void MainWindow::showPage(const QString &name)
 {
     for (int i = 0;i < ui->pageList->count();i++) {
-        PageListItem *p = (PageListItem*)(ui->pageList->itemWidget(ui->pageList->item(i)));
+        PageListItem *p = dynamic_cast<PageListItem*>(ui->pageList->itemWidget(ui->pageList->item(i)));
         if (p->name() == name) {
             ui->pageList->setCurrentRow(i);
             break;
@@ -1299,4 +1361,64 @@ void MainWindow::on_actionExportConfigurationParser_triggered()
     }
 
     Utility::createParamParserC(mVesc, path);
+}
+
+void MainWindow::on_actionBackupConfiguration_triggered()
+{
+    bool ok;
+    QString name = QInputDialog::getText(this, "Backup name (Optional)",
+                                         "Name (can be blank):", QLineEdit::Normal,
+                                         "", &ok);
+    if (ok) {
+        mVesc->confStoreBackup(false, name);
+    }
+}
+
+void MainWindow::on_actionRestoreConfiguration_triggered()
+{
+    mVesc->confRestoreBackup(false);
+}
+
+void MainWindow::on_actionClearConfigurationBackups_triggered()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this,
+                                 tr("Warning"),
+                                 tr("This is going to remove all configuration backups for "
+                                    "this instance of VESC Tool. Continue?"),
+                                 QMessageBox::Yes | QMessageBox::Cancel);
+
+    if (reply == QMessageBox::Yes) {
+        mVesc->confClearBackups();
+    }
+}
+
+void MainWindow::on_actionParameterEditorFW_triggered()
+{
+    ParameterEditor *p = new ParameterEditor(this);
+    p->setAttribute(Qt::WA_DeleteOnClose);
+    p->setParams(mVesc->fwConfig());
+    p->show();
+}
+
+void MainWindow::on_actionBackupConfigurationsCAN_triggered()
+{
+    bool ok;
+    QString name = QInputDialog::getText(this, "Backup name (Optional)",
+                                         "Name (can be blank):", QLineEdit::Normal,
+                                         "", &ok);
+    if (ok) {
+        QProgressDialog dialog("Backing up configurations...", QString(), 0, 0, this);
+        dialog.setWindowModality(Qt::WindowModal);
+        dialog.show();
+        mVesc->confStoreBackup(true, name);
+    }
+}
+
+void MainWindow::on_actionRestoreConfigurationsCAN_triggered()
+{
+    QProgressDialog dialog("Restoring configurations...", QString(), 0, 0, this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.show();
+    mVesc->confRestoreBackup(true);
 }

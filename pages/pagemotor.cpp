@@ -26,7 +26,7 @@ PageMotor::PageMotor(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageMotor::~PageMotor()
@@ -47,53 +47,25 @@ void PageMotor::setVesc(VescInterface *vesc)
         ui->dirSetup->setVesc(mVesc);
         ui->batteryCalc->setVesc(mVesc);
 
-        ui->motorTab->addParamRow(mVesc->mcConfig(), "motor_type");
-        ui->motorTab->addParamRow(mVesc->mcConfig(), "m_invert_direction");
-        ui->motorTab->addParamRow(mVesc->mcConfig(), "m_sensor_port_mode");
-        ui->motorTab->addParamRow(mVesc->mcConfig(), "m_encoder_counts");
-
-        ui->currentTab->addRowSeparator(tr("Motor"));
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_current_max");
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_current_min");
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_abs_current_max");
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_slow_abs_current");
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_current_max_scale");
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_current_min_scale");
-        ui->currentTab->addRowSeparator(tr("Battery"));
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_in_current_max");
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "l_in_current_min");
-        ui->currentTab->addRowSeparator(tr("DRV8301"));
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "m_drv8301_oc_mode");
-        ui->currentTab->addParamRow(mVesc->mcConfig(), "m_drv8301_oc_adj");
-
-        ui->voltageTab->addParamRow(mVesc->mcConfig(), "l_battery_cut_start");
-        ui->voltageTab->addParamRow(mVesc->mcConfig(), "l_battery_cut_end");
-
-        ui->rpmTab->addParamRow(mVesc->mcConfig(), "l_max_erpm");
-        ui->rpmTab->addParamRow(mVesc->mcConfig(), "l_min_erpm");
-        ui->rpmTab->addParamRow(mVesc->mcConfig(), "l_erpm_start");
-
-        ui->wattageTab->addParamRow(mVesc->mcConfig(), "l_watt_max");
-        ui->wattageTab->addParamRow(mVesc->mcConfig(), "l_watt_min");
-
-        ui->tempTab->addRowSeparator(tr("General"));
-        ui->tempTab->addParamRow(mVesc->mcConfig(), "l_temp_accel_dec");
-        ui->tempTab->addRowSeparator(tr("MOSFET"));
-        ui->tempTab->addParamRow(mVesc->mcConfig(), "l_temp_fet_start");
-        ui->tempTab->addParamRow(mVesc->mcConfig(), "l_temp_fet_end");
-        ui->tempTab->addRowSeparator(tr("Motor"));
-        ui->tempTab->addParamRow(mVesc->mcConfig(), "l_temp_motor_start");
-        ui->tempTab->addParamRow(mVesc->mcConfig(), "l_temp_motor_end");
-
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "l_min_vin");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "l_max_vin");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "l_min_duty");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "l_max_duty");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "cc_min_current");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_fault_stop_time_ms");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_out_aux_mode");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_motor_temp_sens_type");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_ntc_motor_beta");
-        ui->advancedTab->addParamRow(mVesc->mcConfig(), "m_ptc_motor_coeff");
+        reloadParams();
     }
+}
+
+void PageMotor::reloadParams()
+{
+    ui->motorTab->clearParams();
+    ui->currentTab->clearParams();
+    ui->voltageTab->clearParams();
+    ui->rpmTab->clearParams();
+    ui->wattageTab->clearParams();
+    ui->tempTab->clearParams();
+    ui->advancedTab->clearParams();
+
+    ui->motorTab->addParamSubgroup(mVesc->mcConfig(), "general", "general");
+    ui->currentTab->addParamSubgroup(mVesc->mcConfig(), "general", "current");
+    ui->voltageTab->addParamSubgroup(mVesc->mcConfig(), "general", "voltage");
+    ui->rpmTab->addParamSubgroup(mVesc->mcConfig(), "general", "rpm");
+    ui->wattageTab->addParamSubgroup(mVesc->mcConfig(), "general", "wattage");
+    ui->tempTab->addParamSubgroup(mVesc->mcConfig(), "general", "temperature");
+    ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "general", "advanced");
 }

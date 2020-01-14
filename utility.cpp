@@ -31,6 +31,7 @@
 #include <QFileInfo>
 #include <QtGlobal>
 #include <QNetworkInterface>
+#include <QDirIterator>
 
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
@@ -1034,7 +1035,6 @@ bool Utility::createParamParserC(VescInterface *vesc, QString filename)
                         break;
                     }
                     break;
-                    break;
 
                 case CFG_T_DOUBLE:
                     switch (p->vTx) {
@@ -1273,7 +1273,7 @@ bool Utility::checkFwCompatibility(VescInterface *vesc)
                vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)), 1000);
+    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)), 1500);
 
     disconnect(conn);
 
@@ -1407,4 +1407,168 @@ void Utility::enuToLlh(const double *iLlh, const double *xyz, double *llh)
     double z = enuMat[2] * xyz[0] + enuMat[5] * xyz[1] + enuMat[8] * xyz[2] + iz;
 
     xyzToLlh(x, y, z, &llh[0], &llh[1], &llh[2]);
+}
+
+bool Utility::configCheckCompatibility(int fwMajor, int fwMinor)
+{
+    QDirIterator it("://res/config");
+
+    while (it.hasNext()) {
+        QFileInfo fi(it.next());
+        QStringList names = fi.fileName().split("_o_");
+
+        if (fi.isDir()) {
+            for(auto name: names) {
+                auto parts = name.split(".");
+                if (parts.size() == 2) {
+                    int major = parts.at(0).toInt();
+                    int minor = parts.at(1).toInt();
+                    if (major == fwMajor && minor == fwMinor) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+bool Utility::configLoad(VescInterface *vesc, int fwMajor, int fwMinor)
+{
+    QDirIterator it("://res/config");
+
+    while (it.hasNext()) {
+        QFileInfo fi(it.next());
+        QStringList names = fi.fileName().split("_o_");
+
+        if (fi.isDir()) {
+            for(auto name: names) {
+                auto parts = name.split(".");
+                if (parts.size() == 2) {
+                    int major = parts.at(0).toInt();
+                    int minor = parts.at(1).toInt();
+                    if (major == fwMajor && minor == fwMinor) {
+                        QFileInfo fMc(it.filePath() + "/parameters_mcconf.xml");
+                        QFileInfo fApp(it.filePath() + "/parameters_appconf.xml");
+                        QFileInfo fInfo(it.filePath() + "/info.xml");
+
+                        if (fMc.exists() && fApp.exists() && fInfo.exists()) {
+                            vesc->mcConfig()->loadParamsXml(fMc.absoluteFilePath());
+                            vesc->appConfig()->loadParamsXml(fApp.absoluteFilePath());
+                            vesc->infoConfig()->loadParamsXml(fInfo.absoluteFilePath());
+                            vesc->emitConfigurationChanged();
+                            return true;
+                        } else {
+                            qWarning() << "Configurations not found in firmware directory" << it.path();
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+QPair<int, int> Utility::configLatestSupported()
+{
+    QPair<int, int> res = qMakePair(-1, -1);
+    QDirIterator it("://res/config");
+
+    while (it.hasNext()) {
+        QFileInfo fi(it.next());
+        QStringList names = fi.fileName().split("_o_");
+
+        if (fi.isDir()) {
+            for(auto name: names) {
+                auto parts = name.split(".");
+                if (parts.size() == 2) {
+                    QPair<int, int> ver = qMakePair(parts.at(0).toInt(), parts.at(1).toInt());
+                    if (ver > res) {
+                        res = ver;
+                    }
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+bool Utility::configLoadLatest(VescInterface *vesc)
+{
+    auto latestSupported = configLatestSupported();
+
+    if (latestSupported.first >= 0) {
+        configLoad(vesc, latestSupported.first, latestSupported.second);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+QVector<QPair<int, int> > Utility::configSupportedFws()
+{
+    QVector<QPair<int, int>> res;
+    QDirIterator it("://res/config");
+
+    while (it.hasNext()) {
+        QFileInfo fi(it.next());
+        QStringList names = fi.fileName().split("_o_");
+
+        if (fi.isDir()) {
+            for(auto name: names) {
+                auto parts = name.split(".");
+                if (parts.size() == 2) {
+                    int major = parts.at(0).toInt();
+                    int minor = parts.at(1).toInt();
+                    res.append(qMakePair(major, minor));
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
+{
+    bool res = false;
+
+    auto conn = connect(vesc->commands(), &Commands::fwVersionReceived,
+            [&res, &uuidRx, vesc](int major, int minor, QString hw, QByteArray uuid, bool isPaired) {
+        (void)hw;(void)uuid;(void)isPaired;
+
+        if (vesc->getSupportedFirmwarePairs().contains(qMakePair(major, minor))) {
+            res = true;
+        } else {
+            res = configLoad(vesc, major, minor);
+        }
+
+        QString uuidStr = uuid2Str(uuid, true);
+        uuidRx = uuidStr.toUpper();
+        uuidRx.replace(" ", "");
+
+        if (!res) {
+            vesc->emitMessageDialog("Load Config", "Could not load configuration parser.", false, false);
+        }
+    });
+
+    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+               vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+
+    vesc->commands()->getFwVersion();
+
+    if (!waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)), 1500)) {
+        vesc->emitMessageDialog("Load Config", "No response when reading firmware version.", false, false);
+    }
+
+    disconnect(conn);
+
+    connect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+            vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+
+    return res;
 }

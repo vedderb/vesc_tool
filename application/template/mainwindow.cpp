@@ -17,6 +17,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "utility.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -25,9 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 	
 	mVesc = new VescInterface(this);
-    mVesc->mcConfig()->loadParamsXml("://res/parameters_mcconf.xml");
-    mVesc->appConfig()->loadParamsXml("://res/parameters_appconf.xml");
-    mVesc->infoConfig()->loadParamsXml("://res/info.xml");
+    mVesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    Utility::configLoadLatest(mVesc);
 
     mTimer = new QTimer(this);
     mTimer->start(20);

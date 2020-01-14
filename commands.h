@@ -98,6 +98,7 @@ signals:
     void plotAddGraphReceived(QString name);
     void plotSetGraphReceived(int graph);
     void bmReadMemRes(int res, QByteArray data);
+    void deserializeConfigFailed(bool isMc, bool isApp);
 
 public slots:
     void processPacket(QByteArray data);

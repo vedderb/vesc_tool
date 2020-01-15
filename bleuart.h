@@ -31,7 +31,8 @@ class BleUart : public QObject
 {
     Q_OBJECT
 public:
-    explicit BleUart(QObject *parent = 0);
+    explicit BleUart(QObject *parent = nullptr);
+    ~BleUart();
 
     Q_INVOKABLE void startScan();
     Q_INVOKABLE void startConnect(QString addr);
@@ -42,6 +43,8 @@ public:
 signals:
     void dataRx(QByteArray data);
     void scanDone(QVariantMap devs, bool done);
+    void bleError(QString info);
+    void connected();
 
 public slots:
     void writeData(QByteArray data);

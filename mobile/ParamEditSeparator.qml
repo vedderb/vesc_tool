@@ -23,18 +23,19 @@ import QtQuick.Layouts 1.3
 
 Item {
     Layout.fillWidth: true
-    height: name.implicitHeight + 8
+    height: 25
 
     property string sepName: ""
 
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: "#b5e3ff"
+        color: "#9e0000"
         radius: 5
 
         Text {
             anchors.centerIn: parent
+            color: "white"
             id: name
             text: sepName
             font.bold: true

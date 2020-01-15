@@ -59,7 +59,10 @@ public:
         Sensor_Sensorless = 0,
         Sensor_Hall,
         Sensor_EncoderAbi,
-        Sensor_EncoderAs
+        Sensor_EncoderAs,
+        Sensor_Resolver_AD2S1205,
+        Sensor_Encoder_SinCos,
+        Sensor_EncoderBiSS
     };
 
     SetupWizardMotor(VescInterface *vesc, QWidget *parent = 0);

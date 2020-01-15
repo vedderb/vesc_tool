@@ -27,9 +27,11 @@
 class ParamTable : public QTableWidget
 {
 public:
-    ParamTable(QWidget *parent = 0);
+    ParamTable(QWidget *parent = nullptr);
     bool addParamRow(ConfigParams *params, QString paramName);
     void addRowSeparator(QString text);
+    void addParamSubgroup(ConfigParams *params, QString groupName, QString subgroupName);
+    void clearParams();
 
 };
 

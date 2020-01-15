@@ -32,11 +32,12 @@ class PageAppNrf : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageAppNrf(QWidget *parent = 0);
+    explicit PageAppNrf(QWidget *parent = nullptr);
     ~PageAppNrf();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private:
     Ui::PageAppNrf *ui;

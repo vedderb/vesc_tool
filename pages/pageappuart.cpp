@@ -26,7 +26,7 @@ PageAppUart::PageAppUart(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageAppUart::~PageAppUart()
@@ -44,6 +44,14 @@ void PageAppUart::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_uart_baudrate");
+        reloadParams();
+    }
+}
+
+void PageAppUart::reloadParams()
+{
+    if (mVesc) {
+        ui->generalTab->clearParams();
+        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "uart", "general");
     }
 }

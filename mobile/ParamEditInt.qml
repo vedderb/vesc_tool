@@ -28,7 +28,7 @@ Item {
     id: editor
     property string paramName: ""
     property ConfigParams params: null
-    height: column.implicitHeight + 2 * column.anchors.margins
+    height: 140
     Layout.fillWidth: true
     property real maxVal: 1.0
     property bool createReady: false
@@ -44,16 +44,18 @@ Item {
             nameText.text = params.getLongName(paramName)
             valueBox.from = params.getParamMinInt(paramName) * params.getParamEditorScale(paramName)
             valueBox.to = params.getParamMaxInt(paramName) * params.getParamEditorScale(paramName)
-            valueBox.value = params.getParamInt(paramName) * params.getParamEditorScale(paramName)
             valueBox.stepSize = params.getParamStepInt(paramName)
             valueBox.visible = !params.getParamEditAsPercentage(paramName)
             valueBox.suffix = params.getParamSuffix(paramName)
+            // Make sure that the prefix is updated too.
+            valueBox.value = params.getParamInt(paramName) * params.getParamEditorScale(paramName) + 1
+            valueBox.value = params.getParamInt(paramName) * params.getParamEditorScale(paramName)
 
             var p = (params.getParamInt(paramName) * 100.0) / maxVal
             percentageBox.from = (100.0 * params.getParamMinInt(paramName)) / maxVal
             percentageBox.to = (100.0 * params.getParamMaxInt(paramName)) / maxVal
-            percentageBox.value = p
             percentageBox.visible = params.getParamEditAsPercentage(paramName)
+            percentageBox.value = p
 
             if (params.getParamTransmittable(paramName)) {
                 nowButton.visible = true
@@ -74,18 +76,20 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: "#4cbfbfbf"
-        radius: 10
-        border.color: "#4c000000"
-        border.width: 3
+        color: "#4c5a5a5a"
+        radius: 5
+        border.color: "#919191"
+        border.width: 2
 
         ColumnLayout {
             id: column
             anchors.fill: parent
-            anchors.margins: 10
+            anchors.topMargin: 10
+            anchors.margins: 5
 
             Text {
                 id: nameText
+                color: "white"
                 text: paramName
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -126,6 +130,7 @@ Item {
                 id: percentageBox
                 Layout.fillWidth: true
                 editable: true
+                visible: false
 
                 onValueChanged: {
                     if (params.getParamEditAsPercentage(paramName)) {

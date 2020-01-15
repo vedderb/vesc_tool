@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2018 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -48,22 +48,6 @@ Item {
             }
         }
 
-        Rectangle {
-            Layout.fillWidth: true
-            height: stringInput.implicitHeight + 14
-            border.width: 2
-            border.color: "#8d8d8d"
-            color: "#33a8a8a8"
-            radius: 3
-            TextInput {
-                id: stringInput
-                anchors.fill: parent
-                anchors.margins: 7
-                font.pointSize: 12
-                focus: true
-            }
-        }
-
         RowLayout {
             Layout.fillWidth: true
             Button {
@@ -109,7 +93,31 @@ Item {
                             mCommands.sendTerminalCmd("threads")
                         }
                     }
+                    MenuItem {
+                        text: "Show Help"
+                        onTriggered: {
+                            mCommands.sendTerminalCmd("help")
+                        }
+                    }
                 }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.bottomMargin: 10
+            height: stringInput.implicitHeight + 14
+            border.width: 2
+            border.color: "#8d8d8d"
+            color: "#33a8a8a8"
+            radius: 3
+            TextInput {
+                id: stringInput
+                color: "white"
+                anchors.fill: parent
+                anchors.margins: 7
+                font.pointSize: 12
+                focus: true
             }
         }
     }

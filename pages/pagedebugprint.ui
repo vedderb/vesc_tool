@@ -84,5 +84,22 @@
  <resources>
   <include location="../res.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>clearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>consoleBrowser</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>646</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>547</x>
+     <y>75</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

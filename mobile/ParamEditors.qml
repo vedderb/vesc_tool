@@ -66,4 +66,11 @@ Item {
         var component = Qt.createComponent("ParamEditSeparator.qml");
         return component.createObject(parent, {"sepName": text});
     }
+
+    function createSpacer(parent) {
+        return Qt.createQmlObject(
+                    'import QtQuick 2.7; import QtQuick.Layouts 1.3; Rectangle {Layout.fillHeight: true}',
+                    parent,
+                    "spacer1")
+    }
 }

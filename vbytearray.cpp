@@ -90,7 +90,7 @@ void VByteArray::vbAppendDouble32(double number, double scale)
 
 void VByteArray::vbAppendDouble16(double number, double scale)
 {
-    vbAppendInt32((qint16)roundDouble(number * scale));
+    vbAppendInt16((qint16)roundDouble(number * scale));
 }
 
 void VByteArray::vbAppendDouble32Auto(double number)

@@ -32,11 +32,12 @@ class PageAppNunchuk : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageAppNunchuk(QWidget *parent = 0);
+    explicit PageAppNunchuk(QWidget *parent = nullptr);
     ~PageAppNunchuk();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private slots:
     void decodedChukReceived(double value);

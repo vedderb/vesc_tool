@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 FWPATH="../../ARM/STM_Eclipse/BLDC_4_ChibiOS/build_all"
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 

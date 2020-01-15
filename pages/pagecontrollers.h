@@ -32,11 +32,12 @@ class PageControllers : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageControllers(QWidget *parent = 0);
+    explicit PageControllers(QWidget *parent = nullptr);
     ~PageControllers();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private:
     Ui::PageControllers *ui;

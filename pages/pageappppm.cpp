@@ -52,25 +52,7 @@ void PageAppPpm::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ctrl_type");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.median_filter");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.safe_start");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pid_max_erpm");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_pos");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_neg");
-        ui->generalTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.multi_esc");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc_max_diff");
-
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_start");
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_end");
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_center");
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.hyst");
-
-        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.throttle_exp");
-        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.throttle_exp_brake");
-        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.throttle_exp_mode");
+        reloadParams();
 
         ui->ppmMap->setVesc(mVesc);
 
@@ -79,7 +61,20 @@ void PageAppPpm::setVesc(VescInterface *vesc)
         connect(mVesc->appConfig(), SIGNAL(paramChangedEnum(QObject*,QString,int)),
                 this, SLOT(paramChangedEnum(QObject*,QString,int)));
 
-        paramChangedEnum(0, "app_ppm_conf.throttle_exp_mode", 0);
+        paramChangedEnum(nullptr, "app_ppm_conf.throttle_exp_mode", 0);
+    }
+}
+
+void PageAppPpm::reloadParams()
+{
+    if (mVesc) {
+        ui->generalTab->clearParams();
+        ui->mappingTab->clearParams();
+        ui->throttleCurveTab->clearParams();
+
+        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "ppm", "general");
+        ui->mappingTab->addParamSubgroup(mVesc->appConfig(), "ppm", "mapping");
+        ui->throttleCurveTab->addParamSubgroup(mVesc->appConfig(), "ppm", "throttle curve");
     }
 }
 

@@ -28,7 +28,7 @@ Item {
     id: editor
     property string paramName: ""
     property ConfigParams params: null
-    height: column.implicitHeight + 2 * column.anchors.margins
+    height: 140
     Layout.fillWidth: true
     property real maxVal: 1.0
     property bool createReady: false
@@ -54,18 +54,20 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: "#4cbfbfbf"
-        radius: 10
-        border.color: "#4c000000"
-        border.width: 3
+        color: "#4c5a5a5a"
+        radius: 5
+        border.color: "#919191"
+        border.width: 2
 
         ColumnLayout {
             id: column
             anchors.fill: parent
+            anchors.bottomMargin: 2
             anchors.margins: 10
 
             Text {
                 id: nameText
+                color: "white"
                 text: paramName
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -75,6 +77,14 @@ Item {
             ComboBox {
                 id: enumBox
                 Layout.fillWidth: true
+
+                background: Rectangle {
+                    implicitHeight: 35
+                    color: enumBox.pressed ? "#606060" : "#505050"
+                    border.color: enumBox.hovered ? "#21be2b" : "#17a81a"
+                    border.width: enumBox.visualFocus ? 2 : 1
+                    radius: 5
+                }
 
                 onCurrentIndexChanged: {
                     if (params !== null && createReady) {

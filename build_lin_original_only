@@ -1,6 +1,8 @@
 #!/bin/bash
 
-export PATH=/opt/Qt/5.9-static/bin:$PATH
+set -e
+
+export PATH=/opt/Qt/5.12-static/bin:$PATH
 rm -rf build/lin/*
 
 # Original

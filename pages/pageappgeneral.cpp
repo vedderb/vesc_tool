@@ -26,7 +26,7 @@ PageAppGeneral::PageAppGeneral(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageAppGeneral::~PageAppGeneral()
@@ -44,12 +44,14 @@ void PageAppGeneral::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->appTab->addParamRow(mVesc->appConfig(), "app_to_use");
-        ui->appTab->addParamRow(mVesc->appConfig(), "controller_id");
-        ui->appTab->addParamRow(mVesc->appConfig(), "timeout_msec");
-        ui->appTab->addParamRow(mVesc->appConfig(), "timeout_brake_current");
-        ui->appTab->addParamRow(mVesc->appConfig(), "send_can_status");
-        ui->appTab->addParamRow(mVesc->appConfig(), "send_can_status_rate_hz");
-        ui->appTab->addParamRow(mVesc->appConfig(), "can_baud_rate");
+        reloadParams();
+    }
+}
+
+void PageAppGeneral::reloadParams()
+{
+    if (mVesc) {
+        ui->appTab->clearParams();
+        ui->appTab->addParamSubgroup(mVesc->appConfig(), "general", "general");
     }
 }

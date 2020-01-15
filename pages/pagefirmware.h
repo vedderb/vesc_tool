@@ -21,6 +21,7 @@
 #define PAGEFIRMWARE_H
 
 #include <QWidget>
+#include <QTimer>
 #include "vescinterface.h"
 
 namespace Ui {
@@ -37,10 +38,13 @@ public:
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private slots:
+    void timerSlot();
+
     void fwUploadStatus(const QString &status, double progress, bool isOngoing);
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid);
+    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired);
     void updateHwList(QString hw = "");
     void updateFwList();
     void updateBlList(QString hw = "");
@@ -50,10 +54,14 @@ private slots:
     void on_readVersionButton_clicked();
     void on_cancelButton_clicked();
     void on_changelogButton_clicked();
+    void on_uploadAllButton_clicked();
 
 private:
     Ui::PageFirmware *ui;
     VescInterface *mVesc;
+    QTimer *mTimer;
+
+    void uploadFw(bool allOverCan);
 
 };
 

@@ -50,7 +50,14 @@
 #include "pages/pageappuart.h"
 #include "pages/pageappnunchuk.h"
 #include "pages/pageappnrf.h"
+#include "pages/pageappbalance.h"
 #include "pages/pagesettings.h"
+#include "pages/pagegpd.h"
+#include "pages/pageexperiments.h"
+#include "pages/pageimu.h"
+#include "pages/pageswdprog.h"
+#include "pages/pageappimu.h"
+#include "pages/pageloganalysis.h"
 
 namespace Ui {
 class MainWindow;
@@ -61,7 +68,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     bool eventFilter(QObject *object, QEvent *e);
 
@@ -70,10 +77,8 @@ private slots:
     void showStatusInfo(QString info, bool isGood);
     void showMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
     void serialPortNotWritable(const QString &port);
-    void valuesReceived(MC_VALUES values);
+    void valuesReceived(MC_VALUES values, unsigned int mask);
     void paramChangedDouble(QObject *src, QString name, double newParam);
-    void mcconfUpdated();
-    void appconfUpdated();
     void mcConfigCheckResult(QStringList paramsNotSet);
 
     void on_actionReconnect_triggered();
@@ -122,6 +127,13 @@ private slots:
     void on_actionLicense_triggered();
     void on_posBox_editingFinished();
     void on_posBox_valueChanged(double arg1);
+    void on_actionExportConfigurationParser_triggered();
+    void on_actionBackupConfiguration_triggered();
+    void on_actionRestoreConfiguration_triggered();
+    void on_actionClearConfigurationBackups_triggered();
+    void on_actionParameterEditorFW_triggered();
+    void on_actionBackupConfigurationsCAN_triggered();
+    void on_actionRestoreConfigurationsCAN_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -142,6 +154,7 @@ private:
     PageDataAnalysis *mPageDataAnalysis;
     PageRtData *mPageRtData;
     PageSampledData *mPageSampledData;
+    PageImu *mPageImu;
     PageTerminal *mPageTerminal;
     PageFirmware *mPageFirmware;
     PageDebugPrint *mPageDebugPrint;
@@ -150,8 +163,10 @@ private:
     PageBldc *mPageBldc;
     PageDc *mPageDc;
     PageFoc *mPageFoc;
+    PageGPD *mPageGpd;
     PageControllers *mPageControllers;
     PageMotorInfo *mPageMotorInfo;
+    PageExperiments *mPageExperiments;
     PageAppSettings *mPageAppSettings;
     PageAppGeneral *mPageAppGeneral;
     PageAppPpm *mPageAppPpm;
@@ -159,7 +174,11 @@ private:
     PageAppUart *mPageAppUart;
     PageAppNunchuk *mPageAppNunchuk;
     PageAppNrf *mPageAppNrf;
+    PageAppBalance *mPageAppBalance;
     PageSettings *mPageSettings;
+    PageSwdProg *mPageSwdProg;
+    PageAppImu *mPageAppImu;
+    PageLogAnalysis *mPageLogAnalysis;
 
     void addPageItem(QString name,
                      QString icon = "",

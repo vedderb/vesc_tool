@@ -22,7 +22,7 @@
 #include <QDateTime>
 
 // Static member initialization
-PageDebugPrint *PageDebugPrint::currentMsgHandler = 0;
+PageDebugPrint *PageDebugPrint::currentMsgHandler = nullptr;
 
 PageDebugPrint::PageDebugPrint(QWidget *parent) :
     QWidget(parent),

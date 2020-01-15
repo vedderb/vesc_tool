@@ -14,7 +14,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_free.qrc">
+   <iconset resource="res_silver.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -44,7 +44,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_free.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_silver.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -493,9 +493,6 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionMotorSetupWizard"/>
-    <addaction name="actionAppSetupWizard"/>
-    <addaction name="separator"/>
     <addaction name="actionVESCProjectForums"/>
     <addaction name="separator"/>
     <addaction name="actionVESCToolChangelog"/>
@@ -516,6 +513,8 @@
     <addaction name="actionParameterEditorMcconf"/>
     <addaction name="actionParameterEditorAppconf"/>
     <addaction name="actionParameterEditorInfo"/>
+    <addaction name="actionParameterEditorFW"/>
+    <addaction name="actionExportConfigurationParser"/>
    </widget>
    <widget class="QMenu" name="menuTerminal">
     <property name="title">
@@ -535,7 +534,27 @@
     </property>
     <addaction name="actionReboot"/>
    </widget>
+   <widget class="QMenu" name="menuWizards">
+    <property name="title">
+     <string>Wizards</string>
+    </property>
+    <addaction name="actionAutoSetupFOC"/>
+    <addaction name="actionAppSetupWizard"/>
+    <addaction name="actionMotorSetupWizard"/>
+   </widget>
+   <widget class="QMenu" name="menuTools_2">
+    <property name="title">
+     <string>ConfBackup</string>
+    </property>
+    <addaction name="actionBackupConfiguration"/>
+    <addaction name="actionBackupConfigurationsCAN"/>
+    <addaction name="actionRestoreConfiguration"/>
+    <addaction name="actionRestoreConfigurationsCAN"/>
+    <addaction name="actionClearConfigurationBackups"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuTools_2"/>
+   <addaction name="menuWizards"/>
    <addaction name="menuCommands"/>
    <addaction name="menuTerminal"/>
    <addaction name="menuTools"/>
@@ -577,6 +596,7 @@
    <addaction name="actionKeyboardControl"/>
    <addaction name="actionRtData"/>
    <addaction name="actionRtDataApp"/>
+   <addaction name="actionIMU"/>
    <addaction name="actionSendAlive"/>
    <addaction name="actionCanFwd"/>
   </widget>
@@ -788,7 +808,24 @@
     <string>keyboardControl</string>
    </property>
    <property name="toolTip">
-    <string>Use arrow keys to control motor</string>
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Enable keyboard control.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Key functions:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-weight:600;&quot;&gt;Up and Down Arrow Keys&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Current control using the current value in the lower&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;left corner.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-weight:600;&quot;&gt;Right and Left Arrow Keys&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Duty cycle control. Slowly ramps up and down the cuty&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;cycle. When e.g. starting with right and then also holding&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;left, the duty cycle is ramped higher.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-weight:600;&quot;&gt;Page Down&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Brake with the current set in the lower left corner.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
   <action name="actionParameterEditorMcconf">
@@ -934,7 +971,7 @@
      <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
    </property>
    <property name="text">
-    <string>Motor Setup Wizard [MOTOR]</string>
+    <string>Setup Other Motors</string>
    </property>
    <property name="toolTip">
     <string>Start the Motor Setup Wizard</string>
@@ -946,7 +983,7 @@
      <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
    </property>
    <property name="text">
-    <string>Input Setup Wizard [APP]</string>
+    <string>Setup Input</string>
    </property>
    <property name="toolTip">
     <string>Start the App Setup Wizard</string>
@@ -1039,6 +1076,112 @@
     <string>License</string>
    </property>
   </action>
+  <action name="actionAutoSetupFOC">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Setup Motors FOC</string>
+   </property>
+  </action>
+  <action name="actionExportConfigurationParser">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Configuration Parser</string>
+   </property>
+  </action>
+  <action name="actionIMU">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/imu_off.png</normaloff>
+     <normalon>:/res/icons/imu_on.png</normalon>:/res/icons/imu_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>IMU</string>
+   </property>
+   <property name="toolTip">
+    <string>Activate IMU Sampling</string>
+   </property>
+  </action>
+  <action name="actionLoadFirmwareConfigs">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Electronics-96.png</normaloff>:/res/icons/Electronics-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Firmware Configs</string>
+   </property>
+  </action>
+  <action name="actionBackupConfiguration">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Backup Configuration</string>
+   </property>
+   <property name="toolTip">
+    <string>Backup Configuration (no CAN)</string>
+   </property>
+  </action>
+  <action name="actionRestoreConfiguration">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Restore Configuration</string>
+   </property>
+   <property name="toolTip">
+    <string>Restore Configuration</string>
+   </property>
+  </action>
+  <action name="actionClearConfigurationBackups">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear Configuration Backups</string>
+   </property>
+  </action>
+  <action name="actionParameterEditorFW">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Parameter Editor FW</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+  </action>
+  <action name="actionBackupConfigurationsCAN">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Backup Configurations (Including CAN)</string>
+   </property>
+  </action>
+  <action name="actionRestoreConfigurationsCAN">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Restore Configurations (Including CAN)</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1050,7 +1193,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_free.qrc"/>
+  <include location="res_silver.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

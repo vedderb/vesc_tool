@@ -5,7 +5,6 @@
     <qresource prefix="/mobile">
         <file>main.qml</file>
         <file>ConnectBle.qml</file>
-        <file>ConnectBleForm.ui.qml</file>
         <file>RtData.qml</file>
         <file>FwUpdate.qml</file>
         <file>FilePicker.qml</file>
@@ -28,5 +27,20 @@
         <file>NrfPair.qml</file>
         <file>Controls.qml</file>
         <file>Terminal.qml</file>
+        <file>Profiles.qml</file>
+        <file>ProfileEditor.qml</file>
+        <file>ProfileDisplay.qml</file>
+        <file>RtDataSetup.qml</file>
+        <file>CustomGauge.qml</file>
+        <file>SetupWizardFoc.qml</file>
+        <file>SetupWizardInput.qml</file>
+        <file>ParamList.qml</file>
+        <file>ParamListScroll.qml</file>
+        <file>DirectionSetup.qml</file>
+        <file>PairingDialog.qml</file>
+        <file>SetupWizardIntro.qml</file>
+        <file>Vesc3DView.qml</file>
+        <file>DirectoryPicker.qml</file>
+        <file>Settings.qml</file>
     </qresource>
 </RCC>

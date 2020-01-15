@@ -26,7 +26,6 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
 Item {
-    property int parentWidth: 10
     property real intLim: 0.0
     property real coupling: 0.0
     property var hallTable: []
@@ -43,6 +42,7 @@ Item {
 
     function updateDisplay() {
         var txt = ""
+        var i = 0
 
         txt +=
                 "Integrator limit : " + parseFloat(intLim).toFixed(2) + "\n" +
@@ -50,7 +50,7 @@ Item {
 
         if (hallRes == 0) {
             txt += "Detected hall sensor table:\n"
-            for (var i = 0;i < hallTable.length;i++) {
+            for (i = 0;i < hallTable.length;i++) {
                 txt += "" + hallTable[i]
 
                 if (i != hallTable.length - 1) {
@@ -59,7 +59,7 @@ Item {
             }
         } else if (hallRes == -1) {
             txt += "Hall sensor detection failed:\n"
-            for (var i = 0;i < hallTable.length;i++) {
+            for (i = 0;i < hallTable.length;i++) {
                 txt += "" + hallTable[i]
 
                 if (i != hallTable.length - 1) {
@@ -100,11 +100,13 @@ Item {
         standardButtons: Dialog.Close
         modal: true
         focus: true
-        width: parentWidth - 20
-        height: Math.min(implicitHeight, column.height - 40)
+        width: parent.width - 20
+        height: column.height - 40
         closePolicy: Popup.CloseOnEscape
+
         x: 10
-        y: 10
+        y: Math.max((parent.height - height) / 2, 10)
+        parent: ApplicationWindow.overlay
 
         ScrollView {
             anchors.fill: parent
@@ -200,7 +202,7 @@ Item {
 
                         if (hallRes == 0) {
                             for(var i = 0;i < 7;i++) {
-                                mMcConf.updateParamInt("hall_table_" + i, hallTable[i])
+                                mMcConf.updateParamInt("hall_table__" + i, hallTable[i])
                             }
                         }
 
@@ -216,15 +218,17 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parentWidth - 20
+        width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "Detect BLDC Parameters"
 
         x: 10
-        y: dialog.y + dialog.height / 2 - height / 2
+        y: Math.max((parent.height - height) / 2, 10)
+        parent: ApplicationWindow.overlay
 
         Text {
             id: detectLabel
+            color: "#ffffff"
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

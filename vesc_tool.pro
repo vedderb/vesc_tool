@@ -5,14 +5,50 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 0.92
+VT_VERSION = 2.00
 VT_INTRO_VERSION = 1
+
+VT_ANDROID_VERSION_ARMV7 = 62
+VT_ANDROID_VERSION_ARM64 = 63
+VT_ANDROID_VERSION_X86 = 64
+
+VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
+
+# Ubuntu 18.04 (should work on raspbian buster too)
+# sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev qtdeclarative5-dev qtconnectivity5-dev qtmultimedia5-dev
 
 DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
 
-# Serial port available
-DEFINES += HAS_SERIALPORT
+CONFIG += c++11
+
+# Build mobile GUI
+#CONFIG += build_mobile
+
+# Debug build (e.g. F5 to reload QML files)
+#DEFINES += DEBUG_BUILD
+
+# If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
+# sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'
+
+# Clear old bluetooth devices
+# sudo rm -rf /var/lib/bluetooth/*
+# sudo service bluetooth restart
+
+# Bluetooth available
+DEFINES += HAS_BLUETOOTH
+
+# CAN bus available
+# Adding serialbus to Qt seems to break the serial port on static builds. TODO: Figure out why.
+#DEFINES += HAS_CANBUS
+
+# Positioning
+DEFINES += HAS_POS
+
+!android: {
+    # Serial port available
+    DEFINES += HAS_SERIALPORT
+}
 
 # Options
 #CONFIG += build_original
@@ -22,16 +58,10 @@ DEFINES += HAS_SERIALPORT
 #CONFIG += build_bronze
 #CONFIG += build_free
 
-# Build mobile GUI
-#CONFIG += build_mobile
-
-#CONFIG += qtquickcompiler
-
 QT       += core gui
 QT       += widgets
 QT       += printsupport
 QT       += network
-QT       += bluetooth
 QT       += quick
 QT       += quickcontrols2
 
@@ -39,10 +69,43 @@ contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
 }
 
+contains(DEFINES, HAS_CANBUS) {
+    QT       += serialbus
+}
+
+contains(DEFINES, HAS_BLUETOOTH) {
+    QT       += bluetooth
+}
+
+contains(DEFINES, HAS_POS) {
+    QT       += positioning
+}
+
 android: QT += androidextras
 
 android: TARGET = vesc_tool
 !android: TARGET = vesc_tool_$$VT_VERSION
+
+
+ANDROID_VERSION = 1
+
+android:contains(QT_ARCH, i386) {
+    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
+}
+
+contains(ANDROID_TARGET_ARCH, arm64-v8a) {
+    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_ARM64
+}
+
+contains(ANDROID_TARGET_ARCH, armeabi-v7a) {
+    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_ARMV7
+}
+
+android: {
+    manifest.input = $$PWD/android/AndroidManifest.xml.in
+    manifest.output = $$PWD/android/AndroidManifest.xml
+    QMAKE_SUBSTITUTES += manifest
+}
 
 TEMPLATE = app
 
@@ -63,6 +126,15 @@ release_lin {
     MOC_DIR = build/lin/obj
     RCC_DIR = build/lin/obj
     UI_DIR = build/lin/obj
+}
+
+release_macos {
+    # brew install qt
+    DESTDIR = build/macos
+    OBJECTS_DIR = build/macos/obj
+    MOC_DIR = build/macos/obj
+    RCC_DIR = build/macos/obj
+    UI_DIR = build/macos/obj
 }
 
 release_android {
@@ -90,8 +162,8 @@ SOURCES += main.cpp\
     setupwizardapp.cpp \
     setupwizardmotor.cpp \
     startupwizard.cpp \
-    bleuart.cpp \
-    utility.cpp
+    utility.cpp \
+    tcpserversimple.cpp
 
 HEADERS  += mainwindow.h \
     packet.h \
@@ -106,17 +178,25 @@ HEADERS  += mainwindow.h \
     setupwizardapp.h \
     setupwizardmotor.h \
     startupwizard.h \
-    bleuart.h \
-    utility.h
+    utility.h \
+    tcpserversimple.h
 
 FORMS    += mainwindow.ui \
     parametereditor.ui
 
+contains(DEFINES, HAS_BLUETOOTH) {
+    SOURCES += bleuart.cpp
+    HEADERS += bleuart.h
+}
+
 include(pages/pages.pri)
 include(widgets/widgets.pri)
 include(mobile/mobile.pri)
+include(map/map.pri)
+include(lzokay/lzokay.pri)
 
 RESOURCES += res.qrc
+RESOURCES += res_config.qrc
 
 build_original {
     RESOURCES += res_original.qrc \
@@ -154,6 +234,8 @@ DISTFILES += \
     android/gradlew \
     android/res/values/libs.xml \
     android/build.gradle \
-    android/gradle/wrapper/gradle-wrapper.properties
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/src/com/vedder/vesc/VForegroundService.java \
+    android/src/com/vedder/vesc/Utils.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

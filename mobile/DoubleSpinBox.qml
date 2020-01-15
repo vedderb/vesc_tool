@@ -33,7 +33,16 @@ Item {
     property string suffix: ""
     property string prefix: ""
 
-    SpinBox{
+    onPrefixChanged: forceUpdate()
+    onSuffixChanged: forceUpdate()
+
+    function forceUpdate() {
+        var old = realValue
+        realValue += realStepSize
+        realValue = old
+    }
+
+    SpinBox {
         id: spinbox
         anchors.fill: parent
         editable: true
@@ -46,8 +55,8 @@ Item {
         from : realFrom * factor
 
         validator: DoubleValidator {
-            bottom: Math.min(spinbox.from, spinbox.to)*spinbox.factor
-            top:  Math.max(spinbox.from, spinbox.to)*spinbox.factor
+            bottom: Math.min(spinbox.from, spinbox.to) * spinbox.factor
+            top:  Math.max(spinbox.from, spinbox.to) * spinbox.factor
         }
 
         textFromValue: function(value, locale) {

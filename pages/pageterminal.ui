@@ -109,16 +109,16 @@
   <connection>
    <sender>clearButton</sender>
    <signal>clicked()</signal>
-   <receiver>terminalBrowser</receiver>
-   <slot>clear()</slot>
+   <receiver>PageTerminal</receiver>
+   <slot>clearTerminal()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>599</x>
      <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>577</x>
-     <y>368</y>
+     <x>315</x>
+     <y>225</y>
     </hint>
    </hints>
   </connection>
@@ -139,4 +139,7 @@
    </hints>
   </connection>
  </connections>
+ <slots>
+  <slot>clearTerminal()</slot>
+ </slots>
 </ui>

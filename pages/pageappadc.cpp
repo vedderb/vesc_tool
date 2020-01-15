@@ -27,7 +27,7 @@ PageAppAdc::PageAppAdc(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 
     ui->throttlePlot->addGraph();
     ui->throttlePlot->graph()->setName("Throttle Curve");
@@ -52,33 +52,7 @@ void PageAppAdc::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ctrl_type");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.use_filter");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.safe_start");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.cc_button_inverted");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.rev_button_inverted");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.update_rate_hz");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_pos");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_neg");
-        ui->generalTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.multi_esc");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc_max_diff");
-
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_adc_conf.hyst");
-        ui->mappingTab->addRowSeparator(tr("ADC 1"));
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_start");
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_end");
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_center");
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_inverted");
-        ui->mappingTab->addRowSeparator(tr("ADC 2"));
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_start");
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_end");
-        ui->mappingTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_inverted");
-
-        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_adc_conf.throttle_exp");
-        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_adc_conf.throttle_exp_brake");
-        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_adc_conf.throttle_exp_mode");
+        reloadParams();
 
         ui->adcMap->setVesc(mVesc);
 
@@ -87,7 +61,20 @@ void PageAppAdc::setVesc(VescInterface *vesc)
         connect(mVesc->appConfig(), SIGNAL(paramChangedEnum(QObject*,QString,int)),
                 this, SLOT(paramChangedEnum(QObject*,QString,int)));
 
-        paramChangedEnum(0, "app_adc_conf.throttle_exp_mode", 0);
+        paramChangedEnum(nullptr, "app_adc_conf.throttle_exp_mode", 0);
+    }
+}
+
+void PageAppAdc::reloadParams()
+{
+    if (mVesc) {
+        ui->generalTab->clearParams();
+        ui->mappingTab->clearParams();
+        ui->throttleCurveTab->clearParams();
+
+        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "adc", "general");
+        ui->mappingTab->addParamSubgroup(mVesc->appConfig(), "adc", "mapping");
+        ui->throttleCurveTab->addParamSubgroup(mVesc->appConfig(), "adc", "throttle curve");
     }
 }
 

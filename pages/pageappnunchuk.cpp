@@ -27,7 +27,7 @@ PageAppNunchuk::PageAppNunchuk(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
     ui->display->setDual(true);
 
     ui->throttlePlot->addGraph();
@@ -53,19 +53,7 @@ void PageAppNunchuk::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ctrl_type");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ramp_time_pos");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ramp_time_neg");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.stick_erpm_per_s_in_cc");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.hyst");
-        ui->generalTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.multi_esc");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc");
-        ui->generalTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc_max_diff");
-
-        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.throttle_exp");
-        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.throttle_exp_brake");
-        ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.throttle_exp_mode");
+        reloadParams();
 
         connect(mVesc->commands(), SIGNAL(decodedChukReceived(double)),
                 this, SLOT(decodedChukReceived(double)));
@@ -75,7 +63,18 @@ void PageAppNunchuk::setVesc(VescInterface *vesc)
         connect(mVesc->appConfig(), SIGNAL(paramChangedEnum(QObject*,QString,int)),
                 this, SLOT(paramChangedEnum(QObject*,QString,int)));
 
-        paramChangedEnum(0, "app_chuk_conf.throttle_exp_mode", 0);
+        paramChangedEnum(nullptr, "app_chuk_conf.throttle_exp_mode", 0);
+    }
+}
+
+void PageAppNunchuk::reloadParams()
+{
+    if (mVesc) {
+        ui->generalTab->clearParams();
+        ui->throttleCurveTab->clearParams();
+
+        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "vesc remote", "general");
+        ui->throttleCurveTab->addParamSubgroup(mVesc->appConfig(), "vesc remote", "throttle curve");
     }
 }
 
@@ -116,6 +115,6 @@ void PageAppNunchuk::paramChangedEnum(QObject *src, QString name, int newParam)
     (void)newParam;
 
     if (name == "app_chuk_conf.throttle_exp_mode") {
-        paramChangedDouble(0, "app_chuk_conf.throttle_exp", 0.0);
+        paramChangedDouble(nullptr, "app_chuk_conf.throttle_exp", 0.0);
     }
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -26,11 +26,13 @@
 #include <cmath>
 #include <QEventLoop>
 #include <QDesktopServices>
+#include <QProgressDialog>
 #include "parametereditor.h"
 #include "startupwizard.h"
 #include "widgets/helpdialog.h"
 #include "utility.h"
 #include "widgets/paramdialog.h"
+#include "widgets/detectallfocdialog.h"
 
 namespace {
 void stepTowards(double &value, double goal, double step) {
@@ -93,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mVersion = QString::number(VT_VERSION);
+    mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
@@ -101,8 +103,6 @@ MainWindow::MainWindow(QWidget *parent) :
     mTimer = new QTimer(this);
     mKeyLeft = false;
     mKeyRight = false;
-    mMcConfRead = false;
-    mAppConfRead = false;
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
@@ -112,8 +112,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(showMessageDialog(QString,QString,bool,bool)));
     connect(mVesc, SIGNAL(serialPortNotWritable(QString)),
             this, SLOT(serialPortNotWritable(QString)));
-    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES)),
-            this, SLOT(valuesReceived(MC_VALUES)));
+    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,unsigned int)),
+            this, SLOT(valuesReceived(MC_VALUES,unsigned int)));
     connect(mVesc->commands(), SIGNAL(mcConfigCheckResult(QStringList)),
             this, SLOT(mcConfigCheckResult(QStringList)));
     connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
@@ -129,15 +129,85 @@ MainWindow::MainWindow(QWidget *parent) :
     // Remove the menu with the option to hide the toolbar
     ui->mainToolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
-    mVesc->mcConfig()->loadParamsXml("://res/parameters_mcconf.xml");
-    mVesc->appConfig()->loadParamsXml("://res/parameters_appconf.xml");
-    mVesc->infoConfig()->loadParamsXml("://res/info.xml");
+    mVesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    Utility::configLoadLatest(mVesc);
+
+    QMenu *fwMenu = new QMenu(this);
+    fwMenu->setTitle("Load Firmware Configs");
+    fwMenu->setIcon(QIcon("://res/icons/Electronics-96.png"));
+    for (auto fw: Utility::configSupportedFws()) {
+        QAction *action = new QAction(fwMenu);
+        action->setText(QString("%1.%2").arg(fw.first).arg(fw.second));
+        connect(action, &QAction::triggered, [this,fw]() {
+            Utility::configLoad(mVesc, fw.first, fw.second);
+        });
+        fwMenu->addAction(action);
+    }
+    ui->menuTools->addMenu(fwMenu);
+
+    QMenu *backupMenu = new QMenu(this);
+
+    auto reloadBackupMenu = [this, backupMenu]() {
+        backupMenu->clear();
+        backupMenu->setTitle("Load Configuration Backups for UUID");
+        backupMenu->setIcon(QIcon("://res/icons/Open Folder-96.png"));
+        for (auto uuid: mVesc->confListBackups()) {
+            QAction *action = new QAction(backupMenu);
+            action->setIcon(QIcon("://res/icons/Electronics-96.png"));
+            QString txt = uuid;
+            QString name = mVesc->confBackupName(uuid);
+            if (!name.isEmpty()) {
+                txt += " (" + name + ")";
+            }
+            action->setText(txt);
+            connect(action, &QAction::triggered, [this,uuid]() {
+                mVesc->confLoadBackup(uuid);
+            });
+            backupMenu->addAction(action);
+        }
+        ui->menuTools_2->addMenu(backupMenu);
+    };
+
+    reloadBackupMenu();
+    connect(mVesc, &VescInterface::configurationBackupsChanged, reloadBackupMenu);
+
     reloadPages();
 
-    connect(mVesc->mcConfig(), SIGNAL(updated()),
-            this, SLOT(mcconfUpdated()));
-    connect(mVesc->appConfig(), SIGNAL(updated()),
-            this, SLOT(appconfUpdated()));
+    mMcConfRead = false;
+    mAppConfRead = false;
+
+    connect(mVesc->mcConfig(), &ConfigParams::updated, [this]() {
+        mMcConfRead = true;
+    });
+    connect(mVesc->appConfig(), &ConfigParams::updated, [this]() {
+        mAppConfRead = true;
+    });
+
+    connect(mVesc, &VescInterface::configurationChanged, [this]() {
+        qDebug() << "Reloading user interface due to configuration change.";
+
+        mMcConfRead = false;
+        mAppConfRead = false;
+
+        mPageMotorSettings->reloadParams();
+        mPageMotor->reloadParams();
+        mPageBldc->reloadParams();
+        mPageDc->reloadParams();
+        mPageFoc->reloadParams();
+        mPageGpd->reloadParams();
+        mPageControllers->reloadParams();
+        mPageMotorInfo->reloadParams();
+        mPageAppSettings->reloadParams();
+        mPageAppGeneral->reloadParams();
+        mPageAppPpm->reloadParams();
+        mPageAppAdc->reloadParams();
+        mPageAppUart->reloadParams();
+        mPageAppNunchuk->reloadParams();
+        mPageAppNrf->reloadParams();
+        mPageAppBalance->reloadParams();
+        mPageAppImu->reloadParams();
+        mPageFirmware->reloadParams();
+    });
 
     qApp->installEventFilter(this);
     qInstallMessageHandler(myMessageOutput);
@@ -180,7 +250,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::eventFilter(QObject *object, QEvent *e)
 {
-    Q_UNUSED(object);
+    (void)object;
 
     if (!mVesc->isPortConnected() || !ui->actionKeyboardControl->isChecked()) {
         return false;
@@ -298,6 +368,12 @@ void MainWindow::timerSlot()
         mVesc->commands()->getDecodedAdc();
         mVesc->commands()->getDecodedChuk();
         mVesc->commands()->getDecodedPpm();
+        mVesc->commands()->getDecodedBalance();
+    }
+
+    // IMU Data
+    if (ui->actionIMU->isChecked()) {
+        mVesc->commands()->getImuData(0xFFFF);
     }
 
     // Send alive command once every 10 iterations
@@ -316,21 +392,25 @@ void MainWindow::timerSlot()
         conf_cnt++;
         if (conf_cnt >= 20) {
             conf_cnt = 0;
-            if (!mMcConfRead) {
-                mVesc->commands()->getMcconf();
-            }
 
-            if (!mAppConfRead) {
-                mVesc->commands()->getAppConf();
+            if (!mVesc->deserializeFailedSinceConnected()) {
+                if (!mMcConfRead) {
+                    mVesc->commands()->getMcconf();
+                }
+
+                if (!mAppConfRead) {
+                    mVesc->commands()->getAppConf();
+                }
             }
         }
     }
 
     // Disable all data streaming when uploading firmware
-    if (mVesc->commands()->getFirmwareUploadProgress() > 0.1) {
+    if (mVesc->getFwUploadProgress() > 0.1) {
         ui->actionSendAlive->setChecked(false);
         ui->actionRtData->setChecked(false);
         ui->actionRtDataApp->setChecked(false);
+        ui->actionIMU->setChecked(false);
         ui->actionKeyboardControl->setChecked(false);
     }
 
@@ -499,8 +579,9 @@ void MainWindow::serialPortNotWritable(const QString &port)
 #endif
 }
 
-void MainWindow::valuesReceived(MC_VALUES values)
+void MainWindow::valuesReceived(MC_VALUES values, unsigned int mask)
 {
+    (void)mask;
     ui->dispCurrent->setVal(values.current_motor);
     ui->dispDuty->setVal(values.duty_now * 100.0);
 }
@@ -511,16 +592,6 @@ void MainWindow::paramChangedDouble(QObject *src, QString name, double newParam)
     if (name == "l_current_max") {
         ui->dispCurrent->setRange(fabs(newParam));
     }
-}
-
-void MainWindow::mcconfUpdated()
-{
-    mMcConfRead = true;
-}
-
-void MainWindow::appconfUpdated()
-{
-    mAppConfRead = true;
 }
 
 void MainWindow::mcConfigCheckResult(QStringList paramsNotSet)
@@ -553,6 +624,7 @@ void MainWindow::on_actionReboot_triggered()
 void MainWindow::on_stopButton_clicked()
 {
     mVesc->commands()->setCurrent(0);
+    mPageExperiments->stop();
     ui->actionSendAlive->setChecked(false);
 }
 
@@ -729,7 +801,7 @@ void MainWindow::on_currentButton_clicked()
 
 void MainWindow::on_speedButton_clicked()
 {
-    mVesc->commands()->setRpm(ui->speedBox->value());
+    mVesc->commands()->setRpm(int(ui->speedBox->value()));
     ui->actionSendAlive->setChecked(true);
 }
 
@@ -763,7 +835,7 @@ void MainWindow::addPageItem(QString name, QString icon, QString groupIcon, bool
 
 void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
 {
-    ConfigParams *params = 0;
+    ConfigParams *params = nullptr;
 
     if (conf.toLower() == "mcconf") {
         params = mVesc->mcConfig();
@@ -809,7 +881,7 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
 void MainWindow::showPage(const QString &name)
 {
     for (int i = 0;i < ui->pageList->count();i++) {
-        PageListItem *p = (PageListItem*)(ui->pageList->itemWidget(ui->pageList->item(i)));
+        PageListItem *p = dynamic_cast<PageListItem*>(ui->pageList->itemWidget(ui->pageList->item(i)));
         if (p->name() == name) {
             ui->pageList->setCurrentRow(i);
             break;
@@ -831,6 +903,8 @@ void MainWindow::reloadPages()
     mPageWelcome->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageWelcome);
     addPageItem(tr("Welcome & Wizards"), "://res/icons/Home-96.png", "", true);
+    connect(ui->actionAutoSetupFOC, SIGNAL(triggered(bool)),
+            mPageWelcome, SLOT(startSetupWizardFocSimple()));
     connect(ui->actionMotorSetupWizard, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardMotor()));
     connect(ui->actionAppSetupWizard, SIGNAL(triggered(bool)),
@@ -875,6 +949,12 @@ void MainWindow::reloadPages()
     addPageItem(tr("FOC"), "://res/icons/3ph_sine.png",
                 "://res/icons/mcconf.png", false, true);
 
+    mPageGpd = new PageGPD(this);
+    mPageGpd->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageGpd);
+    addPageItem(tr("GPDrive"), "://res/icons/3ph_sine.png",
+                "://res/icons/mcconf.png", false, true);
+
     mPageControllers = new PageControllers(this);
     mPageControllers->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageControllers);
@@ -885,6 +965,12 @@ void MainWindow::reloadPages()
     mPageMotorInfo->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotorInfo);
     addPageItem(tr("Additional Info"), "://res/icons/About-96.png",
+                "://res/icons/mcconf.png", false, true);
+
+    mPageExperiments = new PageExperiments(this);
+    mPageExperiments->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageExperiments);
+    addPageItem(tr("Experiments"), "://res/icons/Calculator-96.png",
                 "://res/icons/mcconf.png", false, true);
 
     mPageAppSettings = new PageAppSettings(this);
@@ -919,13 +1005,25 @@ void MainWindow::reloadPages()
     mPageAppNunchuk = new PageAppNunchuk(this);
     mPageAppNunchuk->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNunchuk);
-    addPageItem(tr("Nunchuk"), "://res/icons/Wii-96.png",
+    addPageItem(tr("VESC Remote"), "://res/icons/icons8-fantasy-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageAppNrf = new PageAppNrf(this);
     mPageAppNrf->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNrf);
     addPageItem(tr("Nrf"), "://res/icons/Online-96.png",
+                "://res/icons/appconf.png", false, true);
+
+    mPageAppBalance = new PageAppBalance(this);
+    mPageAppBalance->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppBalance);
+    addPageItem(tr("Balance"), "://res/icons/EUC-96.png",
+                "://res/icons/appconf.png", false, true);
+
+    mPageAppImu = new PageAppImu(this);
+    mPageAppImu->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppImu);
+    addPageItem(tr("IMU"), "://res/icons/Gyroscope-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageDataAnalysis = new PageDataAnalysis(this);
@@ -941,12 +1039,27 @@ void MainWindow::reloadPages()
     mPageSampledData = new PageSampledData(this);
     mPageSampledData->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSampledData);
-    addPageItem(tr("Sampled Data"), "://res/icons/Line Chart-96.png", "", false, true);
+    addPageItem(tr("Sampled Data"), "://res/icons/Gyroscope-96.png", "", false, true);
+
+    mPageImu = new PageImu(this);
+    mPageImu->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageImu);
+    addPageItem(tr("IMU Data"), "://res/icons/Line Chart-96.png", "", false, true);
+
+    mPageLogAnalysis = new PageLogAnalysis(this);
+    mPageLogAnalysis->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageLogAnalysis);
+    addPageItem(tr("Log Analysis"), "://res/icons/Waypoint Map-96.png", "", false, true);
 
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
     addPageItem(tr("VESC Terminal"), "://res/icons/Console-96.png", "", true);
+
+    mPageSwdProg = new PageSwdProg(this);
+    mPageSwdProg->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageSwdProg);
+    addPageItem(tr("SWD Prog"), "://res/icons/Electronics-96.png", "", true);
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
@@ -1184,7 +1297,14 @@ void MainWindow::on_actionTerminalDRV8301ResetLatchedFaults_triggered()
 
 void MainWindow::on_actionCanFwd_toggled(bool arg1)
 {
-    mVesc->commands()->setSendCan(arg1);
+    if (arg1 && mVesc->commands()->getCanSendId() < 0) {
+        ui->actionCanFwd->setChecked(false);
+        mVesc->emitMessageDialog("CAN Forward",
+                                 "No CAN device is selected. Go to the connection page and select one.",
+                                 false, false);
+    } else {
+        mVesc->commands()->setSendCan(arg1);
+    }
 }
 
 void MainWindow::on_actionSafetyInformation_triggered()
@@ -1226,4 +1346,79 @@ void MainWindow::on_posBox_valueChanged(double arg1)
 {
     (void)arg1;
 //    on_posButton_clicked();
+}
+
+void MainWindow::on_actionExportConfigurationParser_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the parser C source and header file"),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    Utility::createParamParserC(mVesc, path);
+}
+
+void MainWindow::on_actionBackupConfiguration_triggered()
+{
+    bool ok;
+    QString name = QInputDialog::getText(this, "Backup name (Optional)",
+                                         "Name (can be blank):", QLineEdit::Normal,
+                                         "", &ok);
+    if (ok) {
+        mVesc->confStoreBackup(false, name);
+    }
+}
+
+void MainWindow::on_actionRestoreConfiguration_triggered()
+{
+    mVesc->confRestoreBackup(false);
+}
+
+void MainWindow::on_actionClearConfigurationBackups_triggered()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this,
+                                 tr("Warning"),
+                                 tr("This is going to remove all configuration backups for "
+                                    "this instance of VESC Tool. Continue?"),
+                                 QMessageBox::Yes | QMessageBox::Cancel);
+
+    if (reply == QMessageBox::Yes) {
+        mVesc->confClearBackups();
+    }
+}
+
+void MainWindow::on_actionParameterEditorFW_triggered()
+{
+    ParameterEditor *p = new ParameterEditor(this);
+    p->setAttribute(Qt::WA_DeleteOnClose);
+    p->setParams(mVesc->fwConfig());
+    p->show();
+}
+
+void MainWindow::on_actionBackupConfigurationsCAN_triggered()
+{
+    bool ok;
+    QString name = QInputDialog::getText(this, "Backup name (Optional)",
+                                         "Name (can be blank):", QLineEdit::Normal,
+                                         "", &ok);
+    if (ok) {
+        QProgressDialog dialog("Backing up configurations...", QString(), 0, 0, this);
+        dialog.setWindowModality(Qt::WindowModal);
+        dialog.show();
+        mVesc->confStoreBackup(true, name);
+    }
+}
+
+void MainWindow::on_actionRestoreConfigurationsCAN_triggered()
+{
+    QProgressDialog dialog("Restoring configurations...", QString(), 0, 0, this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.show();
+    mVesc->confRestoreBackup(true);
 }

@@ -52,7 +52,7 @@ Item {
         anchors.fill: parent
         color: "#4cbfbfbf"
         radius: 10
-        border.color: "#4c000000"
+        border.color: "#cfcfcf"
         border.width: 3
 
         ColumnLayout {
@@ -62,6 +62,7 @@ Item {
 
             Text {
                 id: nameText
+                color: "white"
                 text: paramName
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -77,6 +78,7 @@ Item {
                 radius: 3
                 TextInput {
                     id: stringInput
+                    color: "white"
                     anchors.fill: parent
                     anchors.margins: 7
                     font.pointSize: 12

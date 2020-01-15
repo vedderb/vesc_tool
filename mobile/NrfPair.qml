@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2018 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -26,78 +26,67 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
 Item {
-    property int parentWidth: 10
-    property real pairCnt: 0.0
+    implicitHeight: column.implicitHeight
+    property bool hideAfterPair: false
 
+    function startPairing() {
+        mCommands.pairNrf(timeBox.realValue * 1000.0)
+    }
+
+    property real pairCnt: 0.0
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
 
-    function openDialog() {
-        dialog.open()
-    }
+    ColumnLayout {
+        id: column
+        anchors.fill: parent
+        spacing: 0
 
-    Dialog {
-        id: dialog
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-        width: parentWidth - 20
-        height: Math.min(implicitHeight, column.height - 40)
-        closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: 10
+        DoubleSpinBox {
+            id: timeBox
+            Layout.fillWidth: true
+            realFrom: 1.0
+            realTo: 30.0
+            realValue: 10.0
+            decimals: 1
+            prefix: "Time: "
+            suffix: " s"
+        }
 
-        ScrollView {
-            anchors.fill: parent
-            clip: true
-            contentWidth: parent.width
-            ColumnLayout {
-                anchors.fill: parent
-                spacing: 0
+        ProgressBar {
+            id: cntBar
+            Layout.fillWidth: true
+            Layout.bottomMargin: 5
+            from: 0.0
+            to: 1.0
+            value: 0.0
+        }
 
-                DoubleSpinBox {
-                    id: timeBox
-                    Layout.fillWidth: true
-                    realFrom: 1.0
-                    realTo: 30.0
-                    realValue: 10.0
-                    decimals: 1
-                    prefix: "Time: "
-                    suffix: " s"
+        RowLayout {
+            Layout.fillWidth: true
+            Button {
+                text: "Help"
+                Layout.preferredWidth: 50
+                Layout.fillWidth: true
+                flat: true
+
+                onClicked: {
+                    VescIf.emitMessageDialog(
+                                mInfoConf.getLongName("help_nrf_pair"),
+                                mInfoConf.getDescription("help_nrf_pair"),
+                                true, true)
                 }
+            }
 
-                ProgressBar {
-                    id: cntBar
-                    Layout.fillWidth: true
-                    Layout.bottomMargin: 5
-                    from: 0.0
-                    to: 1.0
-                    value: 0.0
-                }
+            Button {
+                id: startButton
+                text: "Start"
+                Layout.preferredWidth: 50
+                Layout.fillWidth: true
+                flat: true
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Button {
-                        text: "Help"
-                        Layout.preferredWidth: 50
-                        Layout.fillWidth: true
-                        onClicked: {
-                            VescIf.emitMessageDialog(
-                                        mInfoConf.getLongName("help_nrf_pair"),
-                                        mInfoConf.getDescription("help_nrf_pair"),
-                                        true, true)
-                        }
-                    }
-
-                    Button {
-                        id: startButton
-                        text: "Start"
-                        Layout.preferredWidth: 50
-                        Layout.fillWidth: true
-                        onClicked: {
-                            mCommands.pairNrf(timeBox.realValue * 1000.0)
-                        }
-                    }
+                onClicked: {
+                    startPairing()
                 }
             }
         }
@@ -127,7 +116,7 @@ Item {
         target: mCommands
 
         onNrfPairingRes: {
-            if (!dialog.visible) {
+            if (!visible) {
                 return
             }
 
@@ -163,10 +152,15 @@ Item {
                             "pairing mode, just switch it on using any of the buttons. Then it " +
                             "will enter pairing mode if it was switched off previously.",
                             false, false)
+//                VescIf.emitMessageDialog("Test", "test23", false, false)
                 break;
 
             default:
                 break;
+            }
+
+            if (hideAfterPair && res > 0) {
+                visible = false
             }
         }
     }

@@ -26,7 +26,7 @@ PageControllers::PageControllers(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageControllers::~PageControllers()
@@ -44,19 +44,14 @@ void PageControllers::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->paramTab->addRowSeparator(tr("Speed Controller"));
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "s_pid_kp");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "s_pid_ki");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "s_pid_kd");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "s_pid_kd_filter");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "s_pid_min_erpm");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "s_pid_allow_braking");
+        reloadParams();
+    }
+}
 
-        ui->paramTab->addRowSeparator(tr("Position Controller"));
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "p_pid_kp");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "p_pid_ki");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "p_pid_kd");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "p_pid_kd_filter");
-        ui->paramTab->addParamRow(mVesc->mcConfig(), "p_pid_ang_div");
+void PageControllers::reloadParams()
+{
+    if (mVesc) {
+        ui->paramTab->clearParams();
+        ui->paramTab->addParamSubgroup(mVesc->mcConfig(), "pid controllers", "general");
     }
 }

@@ -28,7 +28,7 @@ Item {
     id: editor
     property string paramName: ""
     property ConfigParams params: null
-    height: column.implicitHeight + 2 * column.anchors.margins
+    height: 140
     Layout.fillWidth: true
     property real maxVal: 1.0
 
@@ -50,18 +50,20 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: "#4cbfbfbf"
-        radius: 10
-        border.color: "#4c000000"
-        border.width: 3
+        color: "#4c5a5a5a"
+        radius: 5
+        border.color: "#919191"
+        border.width: 2
 
         ColumnLayout {
             id: column
             anchors.fill: parent
-            anchors.margins: 10
+            anchors.topMargin: 10
+            anchors.margins: 5
 
             Text {
                 id: nameText
+                color: "white"
                 text: paramName
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true

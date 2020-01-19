@@ -28,6 +28,7 @@
 #include <QTcpSocket>
 #include <QSettings>
 #include <QHash>
+#include <QFile>
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPort>

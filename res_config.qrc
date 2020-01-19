@@ -25,5 +25,20 @@
         <file>res/config/3.67/info.xml</file>
         <file>res/config/3.67/parameters_appconf.xml</file>
         <file>res/config/3.67/parameters_mcconf.xml</file>
+        <file>res/config/3.59/info.xml</file>
+        <file>res/config/3.59/parameters_appconf.xml</file>
+        <file>res/config/3.59/parameters_mcconf.xml</file>
+        <file>res/config/3.58/info.xml</file>
+        <file>res/config/3.58/parameters_appconf.xml</file>
+        <file>res/config/3.58/parameters_mcconf.xml</file>
+        <file>res/config/3.57/info.xml</file>
+        <file>res/config/3.57/parameters_appconf.xml</file>
+        <file>res/config/3.57/parameters_mcconf.xml</file>
+        <file>res/config/3.56/info.xml</file>
+        <file>res/config/3.56/parameters_appconf.xml</file>
+        <file>res/config/3.56/parameters_mcconf.xml</file>
+        <file>res/config/3.55/info.xml</file>
+        <file>res/config/3.55/parameters_appconf.xml</file>
+        <file>res/config/3.55/parameters_mcconf.xml</file>
     </qresource>
 </RCC>

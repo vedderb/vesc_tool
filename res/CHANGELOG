@@ -1,3 +1,10 @@
+== 2.01 ==
+* Upadted NRF52 firmware to support NRF remotes at the same time as VESC Tool is connected.
+* Fixed swdprog bootloader paths.
+* Added option to remove experiment plot line.
+* Disconnect port after firmware upload.
+* Support for FW 3.67, which has HFI support. This is a major new feature.
+
 == 2.00 ==
 * Focus for this release: increase backwards compatibility with old firmwares.
  - Include XML files for old firmwares. Currently 3.60 - 3.66, but more will be added.

@@ -1336,6 +1336,8 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
 
     if (!isBootloader) {
         mCommands->jumpToBootloader(fwdCan);
+        QThread::msleep(100);
+        disconnectPort();
     }
 
     return true;

@@ -59,12 +59,14 @@ void PageFoc::reloadParams()
         ui->sensorlessTab->clearParams();
         ui->hallTab->clearParams();
         ui->encoderTab->clearParams();
+        ui->hfiTab->clearParams();
         ui->advancedTab->clearParams();
 
         ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "foc", "general");
         ui->sensorlessTab->addParamSubgroup(mVesc->mcConfig(), "foc", "sensorless");
         ui->hallTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hall sensors");
         ui->encoderTab->addParamSubgroup(mVesc->mcConfig(), "foc", "encoder");
+        ui->hfiTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hfi");
         ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "foc", "advanced");
     }
 }

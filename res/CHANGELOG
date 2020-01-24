@@ -1,3 +1,6 @@
+== 2.01 ==
+* KTY83/122 motor temp sensor support.
+
 == 2.00 ==
 * Focus for this release: increase backwards compatibility with old firmwares.
  - Include XML files for old firmwares. Currently 3.60 - 3.66, but more will be added.

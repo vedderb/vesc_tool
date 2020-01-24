@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 2.00
+VT_VERSION = 2.01
 VT_INTRO_VERSION = 1
 
 VT_ANDROID_VERSION_ARMV7 = 62
@@ -149,37 +149,20 @@ build_mobile {
     DEFINES += USE_MOBILE
 }
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    packet.cpp \
-    vbytearray.cpp \
-    commands.cpp \
-    configparams.cpp \
-    configparam.cpp \
-    vescinterface.cpp \
+SOURCES += main.cpp \
+    mainwindow.cpp \
     parametereditor.cpp \
     digitalfiltering.cpp \
     setupwizardapp.cpp \
     setupwizardmotor.cpp \
-    startupwizard.cpp \
-    utility.cpp \
-    tcpserversimple.cpp
+    startupwizard.cpp
 
 HEADERS  += mainwindow.h \
-    packet.h \
-    vbytearray.h \
-    commands.h \
-    datatypes.h \
-    configparams.h \
-    configparam.h \
-    vescinterface.h \
     parametereditor.h \
     digitalfiltering.h \
     setupwizardapp.h \
     setupwizardmotor.h \
-    startupwizard.h \
-    utility.h \
-    tcpserversimple.h
+    startupwizard.h
 
 FORMS    += mainwindow.ui \
     parametereditor.ui
@@ -189,6 +172,7 @@ contains(DEFINES, HAS_BLUETOOTH) {
     HEADERS += bleuart.h
 }
 
+include(application.pri)
 include(pages/pages.pri)
 include(widgets/widgets.pri)
 include(mobile/mobile.pri)

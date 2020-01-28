@@ -282,6 +282,17 @@ bool Utility::waitSignal(QObject *sender, QString signal, int timeoutMs)
     return timeoutTimer.isActive();
 }
 
+void Utility::sleepWithEventLoop(int timeMs)
+{
+    QEventLoop loop;
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    timeoutTimer.start(timeMs);
+    auto conn1 = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    loop.exec();
+    QObject::disconnect(conn1);
+}
+
 QString Utility::detectAllFoc(VescInterface *vesc,
                               bool detect_can, double max_power_loss, double min_current_in,
                               double max_current_in, double openloop_rpm, double sl_erpm)

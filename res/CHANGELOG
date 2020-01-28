@@ -3,7 +3,11 @@
 * Fixed swdprog bootloader paths.
 * Added option to remove experiment plot line.
 * Disconnect port after firmware upload.
-* Support for FW 3.67, which has HFI support. This is a major new feature.
+* Support for FW 4.00, which has HFI support.
+* Try regular FW chunk write if LZO write fails.
+* Use 4 ms current controller time constant by default.
+* Added TCP server to desktop VESC Tool.
+* Added CAN analyzer page.
 
 == 2.00 ==
 * Focus for this release: increase backwards compatibility with old firmwares.

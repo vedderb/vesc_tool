@@ -1289,6 +1289,17 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             uploadSize += out_len + 2;
             res = writeChunk(uint32_t(addr), QByteArray((const char*)out, int(out_len)),
                              true, uint16_t(sz));
+
+            if (res != 1) {
+                res = writeChunk(uint32_t(addr), in, false, 0);
+
+                // This actually can happen for at least one block of data, which is strange. Probably some
+                // incompatibility between lzokay and minilzo. TODO: figure out what the problem is.
+                if (res == 1) {
+                    qWarning() << "Writing LZO failed, but regular write was OK.";
+                    qWarning() << out_len << sz;
+                }
+            }
         } else {
             nonCompChunks++;
             uploadSize += sz;
@@ -1336,7 +1347,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
 
     if (!isBootloader) {
         mCommands->jumpToBootloader(fwdCan);
-        QThread::msleep(100);
+        Utility::sleepWithEventLoop(500);
         disconnectPort();
     }
 
@@ -1794,6 +1805,7 @@ void VescInterface::disconnectPort()
 {
 #ifdef HAS_SERIALPORT
     if(mSerialPort->isOpen()) {
+        mSerialPort->flush();
         mSerialPort->close();
         updateFwRx(false);
     }
@@ -1808,6 +1820,7 @@ void VescInterface::disconnectPort()
 #endif
 
     if (mTcpConnected) {
+        mTcpSocket->flush();
         mTcpSocket->close();
         updateFwRx(false);
     }

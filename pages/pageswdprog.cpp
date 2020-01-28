@@ -265,7 +265,7 @@ void PageSwdProg::bmConnRes(int res)
                  0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
         addSwdFw("VESC SIX MK3", "://res/firmwares/60_MK3/VESC_default.bin",
                  0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
-        addSwdFw("VESC 100/250 R1", "://res/firmwares/100_250/VESC_default.bin",
+        addSwdFw("VESC 100/250", "://res/firmwares/100_250/VESC_default.bin",
                  0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
         break;
 

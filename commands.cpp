@@ -596,6 +596,12 @@ void Commands::processPacket(QByteArray data)
         emit bmReadMemRes(res, vb);
     } break;
 
+    case COMM_CAN_FWD_FRAME: {
+        quint32 id = vb.vbPopFrontUint32();
+        bool isExtended = vb.vbPopFrontInt8();
+        emit canFrameRx(vb, id, isExtended);
+    } break;
+
     default:
         break;
     }
@@ -1300,6 +1306,16 @@ void Commands::setCurrentRel(double current)
     VByteArray vb;
     vb.vbAppendInt8(COMM_SET_CURRENT_REL);
     vb.vbAppendDouble32(current, 1e5);
+    emitData(vb);
+}
+
+void Commands::forwardCanFrame(QByteArray data, quint32 id, bool isExtended)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_CAN_FWD_FRAME);
+    vb.vbAppendUint32(id);
+    vb.vbAppendInt8(isExtended);
+    vb.append(data);
     emitData(vb);
 }
 

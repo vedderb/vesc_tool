@@ -110,6 +110,13 @@ void Packet::sendPacket(const QByteArray &data)
     emit dataToSend(to_send);
 }
 
+void Packet::resetState()
+{
+    mRxReadPtr = 0;
+    mRxWritePtr = 0;
+    mBytesLeft = 0;
+}
+
 unsigned short Packet::crc16(const unsigned char *buf, unsigned int len)
 {
     unsigned short cksum = 0;

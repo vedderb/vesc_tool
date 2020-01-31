@@ -1,3 +1,7 @@
+== 2.02 ==
+* Better autoconnect.
+* Increased maximum file size for SWD prog.
+
 == 2.01 ==
 * Upadted NRF52 firmware to support NRF remotes at the same time as VESC Tool is connected.
 * Fixed swdprog bootloader paths.

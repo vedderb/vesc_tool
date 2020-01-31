@@ -149,7 +149,7 @@ void PageSwdProg::on_uploadButton_clicked()
                                       tr("Could not open file. Make sure that the path is valid."));
                 return;
             }
-            if (file.size() > 400000) {
+            if (file.size() > (1024 * 1024 * 5)) {
                 QMessageBox::critical(this,
                                       tr("Upload Error"),
                                       tr("The selected file is too large to be a firmware."));

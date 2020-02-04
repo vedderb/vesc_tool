@@ -241,6 +241,7 @@ Item {
 
             GroupBox {
                 id: canFwdBox
+                Layout.preferredHeight: isHorizontal ? toolsBox.height : -1
                 title: qsTr("CAN Forwarding")
                 Layout.fillWidth: true
 
@@ -252,6 +253,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
+                        Layout.bottomMargin: isHorizontal ? 5 : 0
 
                         ComboBox {
                             id: canIdBox
@@ -327,12 +329,17 @@ Item {
                             }
                         }
                     }
+
+                    Item {
+                        Layout.fillHeight: true
+                        visible: isHorizontal
+                    }
                 }
             }
 
             GroupBox {
+                id: toolsBox
                 title: qsTr("Tools")
-                Layout.preferredHeight: isHorizontal ? canFwdBox.height : -1
                 Layout.fillWidth: true
 
                 ColumnLayout {
@@ -367,6 +374,26 @@ Item {
                                 directionSetup.scanCan()
                                 enabled = true
                             }
+                        }
+                    }
+
+                    Button {
+                        text: "Backup Configuration(s)"
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 500
+
+                        onClicked: {
+                            backupConfigDialog.open()
+                        }
+                    }
+
+                    Button {
+                        text: "Restore Configuration(s)"
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 500
+
+                        onClicked: {
+                            restoreConfigDialog.open()
                         }
                     }
                 }
@@ -569,6 +596,86 @@ Item {
             nrfPair.visible = true
             nrfPairButton.visible = false
             nrfPair.startPairing()
+        }
+    }
+
+    Dialog {
+        id: backupConfigDialog
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        modal: true
+        focus: true
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        title: "Backup configuration(s)"
+
+        parent: ApplicationWindow.overlay
+        x: 10
+        y: topItem.y + topItem.height / 2 - height / 2
+
+        Text {
+            color: "white"
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text:
+                "This will backup the configuration of the connected VESC, as well as for the VESCs " +
+                "connected over CAN-bus. The configurations are stored by VESC UUID. If a backup for a " +
+                "VESC UUID already exists it will be overwritten. Continue?"
+        }
+
+        onAccepted: {
+            progDialog.open()
+            VescIf.confStoreBackup(true, "")
+            progDialog.close()
+        }
+    }
+
+    Dialog {
+        id: restoreConfigDialog
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        modal: true
+        focus: true
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        title: "Restore configuration backup(s)"
+
+        parent: ApplicationWindow.overlay
+        x: 10
+        y: topItem.y + topItem.height / 2 - height / 2
+
+        Text {
+            color: "white"
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text:
+                "This will restore the configuration of the connected VESC, as well as the VESCs connected over CAN bus " +
+                "if a backup exists for their UUID in this instance of VESC Tool. If no backup is found for the UUID of " +
+                "the VESCs nothing will be changed. Continue?"
+        }
+
+        onAccepted: {
+            progDialog.open()
+            VescIf.confRestoreBackup(true)
+            progDialog.close()
+        }
+    }
+
+    Dialog {
+        id: progDialog
+        title: "Processing..."
+        closePolicy: Popup.NoAutoClose
+        modal: true
+        focus: true
+
+        width: parent.width - 20
+        x: 10
+        y: parent.height / 2 - height / 2
+        parent: ApplicationWindow.overlay
+
+        ProgressBar {
+            anchors.fill: parent
+            indeterminate: visible
         }
     }
 }

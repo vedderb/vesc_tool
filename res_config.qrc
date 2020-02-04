@@ -1,0 +1,47 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/config/3.63/info.xml</file>
+        <file>res/config/3.63/parameters_appconf.xml</file>
+        <file>res/config/3.63/parameters_mcconf.xml</file>
+        <file>res/config/3.64/info.xml</file>
+        <file>res/config/3.64/parameters_appconf.xml</file>
+        <file>res/config/3.64/parameters_mcconf.xml</file>
+        <file>res/config/3.61/info.xml</file>
+        <file>res/config/3.61/parameters_appconf.xml</file>
+        <file>res/config/3.61/parameters_mcconf.xml</file>
+        <file>res/config/3.62/info.xml</file>
+        <file>res/config/3.62/parameters_appconf.xml</file>
+        <file>res/config/3.62/parameters_mcconf.xml</file>
+        <file>res/config/3.60/info.xml</file>
+        <file>res/config/3.60/parameters_appconf.xml</file>
+        <file>res/config/3.60/parameters_mcconf.xml</file>
+        <file>res/config/fw.xml</file>
+        <file>res/config/3.65/info.xml</file>
+        <file>res/config/3.65/parameters_appconf.xml</file>
+        <file>res/config/3.65/parameters_mcconf.xml</file>
+        <file>res/config/3.66/info.xml</file>
+        <file>res/config/3.66/parameters_appconf.xml</file>
+        <file>res/config/3.66/parameters_mcconf.xml</file>
+        <file>res/config/4.00/info.xml</file>
+        <file>res/config/4.00/parameters_appconf.xml</file>
+        <file>res/config/4.00/parameters_mcconf.xml</file>
+        <file>res/config/3.59/info.xml</file>
+        <file>res/config/3.59/parameters_appconf.xml</file>
+        <file>res/config/3.59/parameters_mcconf.xml</file>
+        <file>res/config/3.58/info.xml</file>
+        <file>res/config/3.58/parameters_appconf.xml</file>
+        <file>res/config/3.58/parameters_mcconf.xml</file>
+        <file>res/config/3.57/info.xml</file>
+        <file>res/config/3.57/parameters_appconf.xml</file>
+        <file>res/config/3.57/parameters_mcconf.xml</file>
+        <file>res/config/3.56/info.xml</file>
+        <file>res/config/3.56/parameters_appconf.xml</file>
+        <file>res/config/3.56/parameters_mcconf.xml</file>
+        <file>res/config/3.55/info.xml</file>
+        <file>res/config/3.55/parameters_appconf.xml</file>
+        <file>res/config/3.55/parameters_mcconf.xml</file>
+        <file>res/config/4.01/info.xml</file>
+        <file>res/config/4.01/parameters_appconf.xml</file>
+        <file>res/config/4.01/parameters_mcconf.xml</file>
+    </qresource>
+</RCC>

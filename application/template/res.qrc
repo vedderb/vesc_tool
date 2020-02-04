@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>res/info.xml</file>
-        <file>res/parameters_appconf.xml</file>
-        <file>res/parameters_mcconf.xml</file>
-    </qresource>
-</RCC>

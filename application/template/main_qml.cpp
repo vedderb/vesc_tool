@@ -26,10 +26,8 @@ QObject *vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scr
     (void)scriptEngine;
 
     VescInterface *vesc = new VescInterface();
-
-    vesc->mcConfig()->loadParamsXml("://res/parameters_mcconf.xml");
-    vesc->appConfig()->loadParamsXml("://res/parameters_appconf.xml");
-    vesc->infoConfig()->loadParamsXml("://res/info.xml");
+	vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    Utility::configLoadLatest(vesc);
 
     return vesc;
 }

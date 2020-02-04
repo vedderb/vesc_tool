@@ -30,7 +30,7 @@ PageRtData::PageRtData(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 
     mTimer = new QTimer(this);
     mTimer->start(20);
@@ -140,6 +140,7 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->rpmPlot->yAxis->setRange(0, 120);
     ui->focPlot->yAxis->setRange(0, 120);
     ui->focPlot->yAxis2->setRange(0, 120);
+    ui->focPlot->yAxis2->setVisible(true);
 
     ui->posPlot->addGraph();
     ui->posPlot->graph(0)->setPen(QPen(Qt::blue));
@@ -165,7 +166,11 @@ PageRtData::PageRtData(QWidget *parent) :
             [=]() {mExperimentReplot = true;});
     connect(ui->experimentGraph5Button, &QPushButton::toggled,
             [=]() {mExperimentReplot = true;});
+    connect(ui->experimentGraph6Button, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
     connect(ui->experimentScatterButton, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
+    connect(ui->experimentShowLineButton, &QPushButton::toggled,
             [=]() {mExperimentReplot = true;});
 
     connect(ui->experimentHZoomButton, &QPushButton::toggled,
@@ -251,10 +256,12 @@ void PageRtData::timerSlot()
         ui->tempPlot->clearGraphs();
 
         graphIndex = 0;
+
         ui->tempPlot->addGraph();
         ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
         ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET");
         ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMosVec);
+        ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMosfetBox->isChecked());
         graphIndex++;
 
         if (!mTempMos1Vec.isEmpty() && mTempMos1Vec.last() != 0.0) {
@@ -262,18 +269,21 @@ void PageRtData::timerSlot()
             ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::green));
             ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET 1");
             ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMos1Vec);
+            ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMosfetBox->isChecked());
             graphIndex++;
 
             ui->tempPlot->addGraph();
             ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::darkGreen));
             ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET 2");
             ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMos2Vec);
+            ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMosfetBox->isChecked());
             graphIndex++;
 
             ui->tempPlot->addGraph();
             ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::cyan));
             ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET 3");
             ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMos3Vec);
+            ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMosfetBox->isChecked());
             graphIndex++;
         }
 
@@ -281,6 +291,7 @@ void PageRtData::timerSlot()
         ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::magenta));
         ui->tempPlot->graph(graphIndex)->setName("Temperature Motor");
         ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMotorVec);
+        ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMotorBox->isChecked());
         graphIndex++;
 
         // RPM plot
@@ -337,6 +348,7 @@ void PageRtData::timerSlot()
             case 2: if (!ui->experimentGraph3Button->isChecked()) {continue;} break;
             case 3: if (!ui->experimentGraph4Button->isChecked()) {continue;} break;
             case 4: if (!ui->experimentGraph5Button->isChecked()) {continue;} break;
+            case 5: if (!ui->experimentGraph6Button->isChecked()) {continue;} break;
             default: break;
             }
 
@@ -346,6 +358,11 @@ void PageRtData::timerSlot()
             ui->experimentPlot->graph()->setPen(QPen(mExperimentPlots.at(i).color));
             if (ui->experimentScatterButton->isChecked()) {
                 ui->experimentPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
+            }
+            if (ui->experimentShowLineButton->isChecked()) {
+                ui->experimentPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsLine);
+            } else {
+                ui->experimentPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsNone);
             }
         }
 
@@ -449,7 +466,7 @@ void PageRtData::plotAddGraphReceived(QString name)
     } else if (mExperimentPlots.size() == 5) {
         mExperimentPlots.last().color = "cyan";
     } else {
-        mExperimentPlots.last().color = "blue";
+        mExperimentPlots.last().color = "orange";
     }
 
     mExperimentReplot = true;

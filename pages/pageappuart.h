@@ -32,11 +32,12 @@ class PageAppUart : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageAppUart(QWidget *parent = 0);
+    explicit PageAppUart(QWidget *parent = nullptr);
     ~PageAppUart();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private:
     Ui::PageAppUart *ui;

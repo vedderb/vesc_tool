@@ -36,5 +36,8 @@
         <file>res/firmwares/60_MK3/VESC_default_no_hw_limits.bin</file>
         <file>res/firmwares/60_MK3/VESC_servoout.bin</file>
         <file>res/firmwares/60_MK3/VESC_ws2811.bin</file>
+        <file>res/firmwares/100_250/VESC_default.bin</file>
+        <file>res/firmwares/100_250/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/100_250/VESC_servoout.bin</file>
     </qresource>
 </RCC>

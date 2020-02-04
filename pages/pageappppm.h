@@ -32,11 +32,12 @@ class PageAppPpm : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageAppPpm(QWidget *parent = 0);
+    explicit PageAppPpm(QWidget *parent = nullptr);
     ~PageAppPpm();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private slots:
     void paramChangedDouble(QObject *src, QString name, double newParam);

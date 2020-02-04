@@ -81,7 +81,10 @@ typedef enum {
     FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1,
     FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2,
     FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3,
-    FAULT_CODE_UNBALANCED_CURRENTS
+    FAULT_CODE_UNBALANCED_CURRENTS,
+    FAULT_CODE_RESOLVER_LOT,
+    FAULT_CODE_RESOLVER_DOS,
+    FAULT_CODE_RESOLVER_LOS
 } mc_fault_code;
 
 typedef enum {
@@ -413,6 +416,23 @@ public:
 
 Q_DECLARE_METATYPE(MCCONF_TEMP)
 
+struct CONFIG_BACKUP {
+    Q_GADGET
+
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString vesc_uuid MEMBER vesc_uuid)
+    Q_PROPERTY(QString mcconf_xml_compressed MEMBER mcconf_xml_compressed)
+    Q_PROPERTY(QString appconf_xml_compressed MEMBER appconf_xml_compressed)
+
+public:
+    QString name;
+    QString vesc_uuid;
+    QString mcconf_xml_compressed;
+    QString appconf_xml_compressed;
+};
+
+Q_DECLARE_METATYPE(CONFIG_BACKUP)
+
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,
     DEBUG_SAMPLING_NOW,
@@ -509,7 +529,8 @@ typedef enum {
     COMM_WRITE_NEW_APP_DATA_LZO,
     COMM_WRITE_NEW_APP_DATA_ALL_CAN_LZO,
     COMM_BM_WRITE_FLASH_LZO,
-    COMM_SET_CURRENT_REL
+    COMM_SET_CURRENT_REL,
+    COMM_CAN_FWD_FRAME
 } COMM_PACKET_ID;
 
 typedef enum {

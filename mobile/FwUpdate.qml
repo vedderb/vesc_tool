@@ -545,11 +545,21 @@ Item {
 
             if (hwItems.rowCount() === 1) {
                 uploadDialog.title = "Warning"
-                uploadDialogLabel.text =
-                        msg + "\n\n" +
-                        "Uploading new firmware will clear all settings on your VESC " +
-                        "and you have to do the configuration again. Do you want to " +
-                        "continue?"
+
+                if (VescIf.getFwSupportsConfiguration()) {
+                    msg += "\n\n" +
+                            "Uploading new firmware will clear all settings on your VESC. You can make " +
+                            "a backup of the settings from the connection page and restore them after the " +
+                            "update if you'd like (if you haven't done the backup already). " +
+                            "Do you want to continue with the update, or cancel and do the backup first?"
+                } else {
+                    msg += "\n\n" +
+                            "Uploading new firmware will clear all settings on your VESC " +
+                            "and you have to do the configuration again. Do you want to " +
+                            "continue?"
+                }
+
+                uploadDialogLabel.text = msg
                 uploadDialog.open()
             } else {
                 uploadDialog.title = "Warning"

@@ -27,7 +27,7 @@ PageMotorSettings::PageMotorSettings(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageMotorSettings::~PageMotorSettings()
@@ -45,8 +45,15 @@ void PageMotorSettings::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
+        reloadParams();
+    }
+}
+
+void PageMotorSettings::reloadParams()
+{
+    if (mVesc) {
         ConfigParam *p = mVesc->infoConfig()->getParam("motor_setting_description");
-        if (p != 0) {
+        if (p != nullptr) {
             ui->textEdit->setHtml(p->description);
         } else {
             ui->textEdit->setText("Motor Setting Description not found.");

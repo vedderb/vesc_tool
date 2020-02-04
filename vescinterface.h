@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -28,6 +28,7 @@
 #include <QTcpSocket>
 #include <QSettings>
 #include <QHash>
+#include <QFile>
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPort>
@@ -61,19 +62,23 @@ class VescInterface : public QObject
 {
     Q_OBJECT
 public:
-    explicit VescInterface(QObject *parent = 0);
+    explicit VescInterface(QObject *parent = nullptr);
     ~VescInterface();
     Q_INVOKABLE Commands *commands() const;
     Q_INVOKABLE ConfigParams *mcConfig();
     Q_INVOKABLE ConfigParams *appConfig();
     Q_INVOKABLE ConfigParams *infoConfig();
+    Q_INVOKABLE ConfigParams *fwConfig();
     Q_INVOKABLE QStringList getSupportedFirmwares();
     QList<QPair<int, int> > getSupportedFirmwarePairs();
     Q_INVOKABLE QString getFirmwareNow();
+    QPair<int, int> getFirmwareNowPair();
     Q_INVOKABLE void emitStatusMessage(const QString &msg, bool isGood);
     Q_INVOKABLE void emitMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText = false);
     Q_INVOKABLE bool fwRx();
     Q_INVOKABLE void storeSettings();
+
+    // Profiles
     Q_INVOKABLE QVariantList getProfiles();
     Q_INVOKABLE void addProfile(QVariant profile);
     Q_INVOKABLE void clearProfiles();
@@ -85,14 +90,18 @@ public:
     Q_INVOKABLE bool isProfileInUse(int index);
     Q_INVOKABLE MCCONF_TEMP createMcconfTemp();
     Q_INVOKABLE void updateMcconfFromProfile(MCCONF_TEMP profile);
+
+    // Pairing
     Q_INVOKABLE QStringList getPairedUuids();
     Q_INVOKABLE bool addPairedUuid(QString uuid);
     Q_INVOKABLE bool deletePairedUuid(QString uuid);
     Q_INVOKABLE void clearPairedUuids();
     Q_INVOKABLE bool hasPairedUuid(QString uuid);
     Q_INVOKABLE QString getConnectedUuid();
+
     Q_INVOKABLE bool isIntroDone();
     Q_INVOKABLE void setIntroDone(bool done);
+
     Q_INVOKABLE QString getLastTcpServer() const;
     Q_INVOKABLE int getLastTcpPort() const;
 #ifdef HAS_SERIALPORT
@@ -103,12 +112,15 @@ public:
     Q_INVOKABLE QString getLastCANbusInterface() const;
     Q_INVOKABLE int getLastCANbusBitrate() const;
 #endif
+
+    // SWD Programming
     bool swdEraseFlash();
     bool swdUploadFw(QByteArray newFirmware, uint32_t startAddr = 0,
                      bool verify = false, bool isLzo = true);
     void swdCancel();
     bool swdReboot();
 
+    // Firmware Updates
     bool fwEraseNewApp(bool fwdCan, quint32 fwSize);
     bool fwEraseBootloader(bool fwdCan);
     bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true);
@@ -117,6 +129,7 @@ public:
     Q_INVOKABLE QString getFwUploadStatus();
     Q_INVOKABLE bool isCurrentFwBootloader();
 
+    // Logging
     Q_INVOKABLE bool openRtLogFile(QString outDirectory);
     Q_INVOKABLE void closeRtLogFile();
     Q_INVOKABLE bool isRtLogOpen();
@@ -125,6 +138,7 @@ public:
     Q_INVOKABLE LOG_DATA getRtLogSample(double progress);
     Q_INVOKABLE LOG_DATA getRtLogSampleAtValTimeFromStart(int time);
 
+    // Persistent settings
     Q_INVOKABLE bool useImperialUnits();
     Q_INVOKABLE void setUseImperialUnits(bool useImperialUnits);
     Q_INVOKABLE bool keepScreenOn();
@@ -168,6 +182,20 @@ public:
     Q_INVOKABLE bool tcpServerIsClientConnected();
     Q_INVOKABLE QString tcpServerClientIp();
 
+    Q_INVOKABLE void emitConfigurationChanged();
+
+    Q_INVOKABLE bool getFwSupportsConfiguration() const;
+
+    // Configuration backups
+    Q_INVOKABLE bool confStoreBackup(bool can, QString name = "");
+    Q_INVOKABLE bool confRestoreBackup(bool can);
+    Q_INVOKABLE bool confLoadBackup(QString uuid);
+    Q_INVOKABLE QStringList confListBackups();
+    Q_INVOKABLE void confClearBackups();
+    Q_INVOKABLE QString confBackupName(QString uuid);
+
+    Q_INVOKABLE bool deserializeFailedSinceConnected();
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -182,6 +210,8 @@ signals:
     void CANbusNewNode(int node);
     void CANbusInterfaceListUpdated();
     void useImperialUnitsChanged(bool useImperialUnits);
+    void configurationChanged();
+    void configurationBackupsChanged();
 
 public slots:
 
@@ -225,6 +255,7 @@ private:
 
     QSettings mSettings;
     QHash<QString, QString> mBleNames;
+    QHash<QString, CONFIG_BACKUP> mConfigurationBackups;
     QVariantList mProfiles;
     QStringList mPairedUuids;
     TcpServerSimple *mTcpServer;
@@ -232,18 +263,22 @@ private:
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;
     ConfigParams *mInfoConfig;
+    ConfigParams *mFwConfig;
 
     QTimer *mTimer;
     Packet *mPacket;
     Commands *mCommands;
     bool mFwVersionReceived;
+    bool mDeserialFailedMessageShown;
     int mFwRetries;
     int mFwPollCnt;
     QString mFwTxt;
+    QPair<int, int> mFwPair;
     QString mHwTxt;
     QString mUuidStr;
     bool mIsUploadingFw;
     bool mIsLastFwBootloader;
+    bool mFwSupportsConfiguration;
 
     // FW Upload
     bool mCancelSwdUpload;

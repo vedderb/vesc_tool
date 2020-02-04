@@ -31,7 +31,7 @@ class PageDebugPrint : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageDebugPrint(QWidget *parent = 0);
+    explicit PageDebugPrint(QWidget *parent = nullptr);
     ~PageDebugPrint();
 
     static PageDebugPrint* currentMsgHandler;

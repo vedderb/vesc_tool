@@ -71,6 +71,18 @@ void PageFirmware::setVesc(VescInterface *vesc)
     if (mVesc) {
         ui->display->setText(mVesc->getFwUploadStatus());
 
+        reloadParams();
+
+        connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
+                this, SLOT(fwUploadStatus(QString,double,bool)));
+        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
+                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+    }
+}
+
+void PageFirmware::reloadParams()
+{
+    if (mVesc) {
         QStringList fws = mVesc->getSupportedFirmwares();
         QString str;
         for (int i = 0;i < fws.size();i++) {
@@ -80,11 +92,6 @@ void PageFirmware::setVesc(VescInterface *vesc)
             }
         }
         ui->supportedLabel->setText(str);
-
-        connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
-                this, SLOT(fwUploadStatus(QString,double,bool)));
-        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
-                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
     }
 }
 

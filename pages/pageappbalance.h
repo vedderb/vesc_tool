@@ -34,11 +34,12 @@ class PageAppBalance : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageAppBalance(QWidget *parent = 0);
+    explicit PageAppBalance(QWidget *parent = nullptr);
     ~PageAppBalance();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private slots:
     void timerSlot();

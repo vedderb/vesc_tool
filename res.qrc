@@ -64,8 +64,6 @@
         <file>res/icons/Down-96.png</file>
         <file>res/icons/Plus Math-96.png</file>
         <file>res/icons/Up-96.png</file>
-        <file>res/parameters_appconf.xml</file>
-        <file>res/parameters_mcconf.xml</file>
         <file>res/icons/Ok-96.png</file>
         <file>res/icons/Car Battery-96.png</file>
         <file>res/icons/lambda.png</file>
@@ -108,7 +106,6 @@
         <file>res/icons_textedit/Align Justify-96.png</file>
         <file>res/icons_textedit/Align Left-96.png</file>
         <file>res/icons_textedit/Align Right-96.png</file>
-        <file>res/info.xml</file>
         <file>res/logo_intro_wizard.png</file>
         <file>res/CHANGELOG</file>
         <file>res/icons/sampl_trigger_start.png</file>
@@ -161,6 +158,7 @@
         <file>res/images/slider1.png</file>
         <file>res/icons/icons8-target-96.png</file>
         <file>res/icons/icons8-fantasy-96.png</file>
-        <file>res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3.bin</file>
+        <file>res/icons/icons8-edit-96.png</file>
+        <file>res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin</file>
     </qresource>
 </RCC>

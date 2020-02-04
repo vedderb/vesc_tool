@@ -27,7 +27,7 @@ PageMotorInfo::PageMotorInfo(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageMotorInfo::~PageMotorInfo()
@@ -45,31 +45,28 @@ void PageMotorInfo::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_motor_poles");
-        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_gear_ratio");
-        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_wheel_diameter");
-        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_battery_type");
-        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_battery_cells");
-        ui->setupTab->addParamRow(mVesc->mcConfig(), "si_battery_ah");
-
-        ui->descriptionEdit->document()->setHtml(mVesc->mcConfig()->getParamQString("motor_description"));
-        ui->qualityEdit->document()->setHtml(mVesc->mcConfig()->getParamQString("motor_quality_description"));
-
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "motor_brand");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "motor_model");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "motor_weight");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "motor_poles");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "motor_sensor_type");
-        ui->generalTab->addParamRow(mVesc->mcConfig(), "motor_loss_torque");
-
-        ui->qualityTab->addParamRow(mVesc->mcConfig(), "motor_quality_bearings");
-        ui->qualityTab->addParamRow(mVesc->mcConfig(), "motor_quality_magnets");
-        ui->qualityTab->addParamRow(mVesc->mcConfig(), "motor_quality_construction");
+        reloadParams();
 
         connect(mVesc->mcConfig(), SIGNAL(paramChangedQString(QObject*,QString,QString)),
                 this, SLOT(paramChangedQString(QObject*,QString,QString)));
         connect(mVesc->mcConfig(), SIGNAL(savingXml()),
                 this, SLOT(savingXml()));
+    }
+}
+
+void PageMotorInfo::reloadParams()
+{
+    if (mVesc) {
+        ui->setupTab->clearParams();
+        ui->generalTab->clearParams();
+        ui->qualityTab->clearParams();
+
+        ui->setupTab->addParamSubgroup(mVesc->mcConfig(), "Additional Info", "setup");
+        ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "Additional Info", "general");
+        ui->qualityTab->addParamSubgroup(mVesc->mcConfig(), "Additional Info", "quality");
+
+        ui->descriptionEdit->document()->setHtml(mVesc->mcConfig()->getParamQString("motor_description"));
+        ui->qualityEdit->document()->setHtml(mVesc->mcConfig()->getParamQString("motor_quality_description"));
     }
 }
 

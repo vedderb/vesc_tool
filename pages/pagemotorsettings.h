@@ -32,11 +32,12 @@ class PageMotorSettings : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageMotorSettings(QWidget *parent = 0);
+    explicit PageMotorSettings(QWidget *parent = nullptr);
     ~PageMotorSettings();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private slots:
     void on_motorSetupWizardButton_clicked();

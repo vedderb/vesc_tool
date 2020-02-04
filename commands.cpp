@@ -256,12 +256,15 @@ void Commands::processPacket(QByteArray data)
     case COMM_GET_MCCONF_DEFAULT:
         mTimeoutMcconf = 0;
         if (mMcConfig) {
-            mMcConfig->deSerialize(vb);
-            mMcConfig->updateDone();
+            if (mMcConfig->deSerialize(vb)) {
+                mMcConfig->updateDone();
 
-            if (mCheckNextMcConfig) {
-                mCheckNextMcConfig = false;
-                emit mcConfigCheckResult(mMcConfig->checkDifference(&mMcConfigLast));
+                if (mCheckNextMcConfig) {
+                    mCheckNextMcConfig = false;
+                    emit mcConfigCheckResult(mMcConfig->checkDifference(&mMcConfigLast));
+                }
+            } else {
+                emit deserializeConfigFailed(true, false);
             }
         }
         break;
@@ -270,8 +273,11 @@ void Commands::processPacket(QByteArray data)
     case COMM_GET_APPCONF_DEFAULT:
         mTimeoutAppconf = 0;
         if (mAppConfig) {
-            mAppConfig->deSerialize(vb);
-            mAppConfig->updateDone();
+            if (mAppConfig->deSerialize(vb)) {
+                mAppConfig->updateDone();
+            } else {
+                emit deserializeConfigFailed(false, true);
+            }
         }
         break;
 
@@ -588,6 +594,12 @@ void Commands::processPacket(QByteArray data)
     case COMM_BM_MEM_READ: {
         int res = vb.vbPopFrontInt16();
         emit bmReadMemRes(res, vb);
+    } break;
+
+    case COMM_CAN_FWD_FRAME: {
+        quint32 id = vb.vbPopFrontUint32();
+        bool isExtended = vb.vbPopFrontInt8();
+        emit canFrameRx(vb, id, isExtended);
     } break;
 
     default:
@@ -1297,6 +1309,16 @@ void Commands::setCurrentRel(double current)
     emitData(vb);
 }
 
+void Commands::forwardCanFrame(QByteArray data, quint32 id, bool isExtended)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_CAN_FWD_FRAME);
+    vb.vbAppendUint32(id);
+    vb.vbAppendInt8(isExtended);
+    vb.append(data);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;
@@ -1403,6 +1425,9 @@ QString Commands::faultToStr(mc_fault_code fault)
     case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2";
     case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3";
     case FAULT_CODE_UNBALANCED_CURRENTS: return "FAULT_CODE_UNBALANCED_CURRENTS";
+    case FAULT_CODE_RESOLVER_LOT: return "FAULT_CODE_RESOLVER_LOT";
+    case FAULT_CODE_RESOLVER_DOS: return "FAULT_CODE_RESOLVER_DOS";
+    case FAULT_CODE_RESOLVER_LOS: return "FAULT_CODE_RESOLVER_LOS";
     default: return "Unknown fault";
     }
 }

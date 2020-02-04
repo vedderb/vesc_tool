@@ -775,6 +775,9 @@ ApplicationWindow {
             connectedText.text = VescIf.getConnectedPortName()
             if (VescIf.isPortConnected()) {
                 reconnectButton.enabled = true
+            } else {
+                confTimer.mcConfRx = false
+                confTimer.appConfRx = false
             }
 
             if (VescIf.useWakeLock()) {
@@ -797,7 +800,7 @@ ApplicationWindow {
 
         onFwRxChanged: {
             if (rx) {
-                if (limited) {
+                if (limited && !VescIf.getFwSupportsConfiguration()) {
                     confPageMotor.enabled = false
                     confPageApp.enabled = false
                     swipeView.setCurrentIndex(5)

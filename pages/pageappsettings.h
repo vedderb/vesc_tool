@@ -32,11 +32,12 @@ class PageAppSettings : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageAppSettings(QWidget *parent = 0);
+    explicit PageAppSettings(QWidget *parent = nullptr);
     ~PageAppSettings();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+    void reloadParams();
 
 private slots:
     void on_appWizardButton_clicked();

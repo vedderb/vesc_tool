@@ -57,6 +57,6 @@ include(widgets/widgets.pri)
 include(lzokay/lzokay.pri)
 
 RESOURCES += \
-    res.qrc \
-    qml.qrc
+    qml.qrc \
+    res_config.qrc
 

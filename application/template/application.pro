@@ -60,5 +60,5 @@ include(widgets/widgets.pri)
 include(lzokay/lzokay.pri)
 
 RESOURCES += \
-    res.qrc
+    res_config.qrc
 

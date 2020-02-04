@@ -34,7 +34,7 @@ class ParameterEditor : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit ParameterEditor(QWidget *parent = 0);
+    explicit ParameterEditor(QWidget *parent = nullptr);
     ~ParameterEditor();
     void setParams(const ConfigParams *params);
 
@@ -61,6 +61,21 @@ private slots:
     void on_actionDeleteAll_triggered();
     void on_doubleTxTypeBox_currentIndexChanged(int index);
     void on_actionCalculatePacketSize_triggered();
+    void on_groupRemoveButton_clicked();
+    void on_groupDownButton_clicked();
+    void on_groupUpButton_clicked();
+    void on_groupAddButton_clicked();
+    void on_groupEditButton_clicked();
+    void on_subgroupRemoveButton_clicked();
+    void on_subgroupDownButton_clicked();
+    void on_subgroupUpButton_clicked();
+    void on_subgroupAddButton_clicked();
+    void on_subgroupEditButton_clicked();
+    void on_groupParamRemoveButton_clicked();
+    void on_groupParamDownButton_clicked();
+    void on_groupParamUpButton_clicked();
+    void on_groupParamAddButton_clicked();
+    void on_groupParamEditButton_clicked();
 
 private:
     Ui::ParameterEditor *ui;
@@ -74,6 +89,9 @@ private:
     QString getEditorValues(ConfigParam *p);
     void addEnum(QString name);
     void showStatusInfo(QString info, bool isGood);
+    void updateGroupList();
+    void updateSubgroupList();
+    void updateGroupParamList();
 
 };
 

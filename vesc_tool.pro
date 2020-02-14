@@ -20,7 +20,7 @@ VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
 
-CONFIG += c++11
+CONFIG += c++11 resources_big
 
 # Build mobile GUI
 #CONFIG += build_mobile
@@ -43,7 +43,9 @@ DEFINES += HAS_BLUETOOTH
 #DEFINES += HAS_CANBUS
 
 # Positioning
-DEFINES += HAS_POS
+build_mobile {
+    DEFINES += HAS_POS
+}
 
 !android: {
     # Serial port available
@@ -62,8 +64,11 @@ QT       += core gui
 QT       += widgets
 QT       += printsupport
 QT       += network
-QT       += quick
-QT       += quickcontrols2
+
+build_mobile {
+    QT       += quick
+    QT       += quickcontrols2
+}
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
@@ -191,7 +196,9 @@ contains(DEFINES, HAS_BLUETOOTH) {
 
 include(pages/pages.pri)
 include(widgets/widgets.pri)
-include(mobile/mobile.pri)
+build_mobile {
+    include(mobile/mobile.pri)
+}
 include(map/map.pri)
 include(lzokay/lzokay.pri)
 

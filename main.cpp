@@ -18,7 +18,9 @@
     */
 
 #include "mainwindow.h"
+#ifdef USE_MOBILE
 #include "mobile/qmlui.h"
+#endif
 
 #include <QApplication>
 #include <QStyleFactory>

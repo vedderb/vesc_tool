@@ -17,6 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
+#define _USE_MATH_DEFINES
 #include "vescinterface.h"
 #include <QDebug>
 #include <QHostInfo>
@@ -970,11 +971,12 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
 
         QByteArray in = newFirmware.mid(0, sz);
         std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
-        unsigned char out[outMaxSize];
+        QVector<unsigned char> out;
+        out.resize(outMaxSize);
         std::size_t out_len = sz;
 
         if (supportsLzo && isLzo) {
-            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out, outMaxSize, out_len);
+            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out.data(), outMaxSize, out_len);
             if (error < lzokay::EResult::Success) {
                 qWarning() << "LZO Compress Error" << int(error);
                 isLzo = false;
@@ -985,7 +987,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
         if (supportsLzo && isLzo && (out_len + 2) < uint32_t(sz)) {
             compChunks++;
             uploadSize += out_len + 2;
-            res = writeChunk(uint32_t(addr), in, QByteArray((const char*)out, int(out_len)));
+            res = writeChunk(uint32_t(addr), in, QByteArray((const char*)out.data(), int(out_len)));
         } else {
             nonCompChunks++;
             uploadSize += sz;
@@ -1272,11 +1274,12 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
 
         QByteArray in = newFirmware.mid(0, sz);
         std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
-        unsigned char out[outMaxSize];
+        QVector<unsigned char> out;
+        out.resize(outMaxSize);
         std::size_t out_len = sz;
 
         if (isLzo && supportsLzo) {
-            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out,outMaxSize, out_len);
+            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out.data(),outMaxSize, out_len);
             if (error < lzokay::EResult::Success) {
                 qWarning() << "LZO Compress Error" << int(error);
                 isLzo = false;
@@ -1287,7 +1290,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         if (isLzo && supportsLzo && (out_len + 2) < uint32_t(sz)) {
             compChunks++;
             uploadSize += out_len + 2;
-            res = writeChunk(uint32_t(addr), QByteArray((const char*)out, int(out_len)),
+            res = writeChunk(uint32_t(addr), QByteArray((const char*)out.data(), int(out_len)),
                              true, uint16_t(sz));
 
             if (res != 1) {

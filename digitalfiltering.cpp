@@ -17,9 +17,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
+#define _USE_MATH_DEFINES
+
 #include "digitalfiltering.h"
 #include <cmath>
+#include <QVector>
 #include <QDebug>
+
 
 DigitalFiltering::DigitalFiltering()
 {
@@ -229,8 +233,10 @@ QVector<double> DigitalFiltering::filterSignal(const QVector<double> &signal, co
 QVector<double> DigitalFiltering::generateFirFilter(double f_break, int bits, bool useHamming)
 {
     int taps = 1 << bits;
-    double imag[taps];
-    double filter_vector[taps];
+    QVector<double> imag;
+    imag.resize(taps);
+    QVector<double> filter_vector;
+    filter_vector.resize(taps);
 
     for(int i = 0;i < taps;i++) {
         if (i < (int)((double)taps * f_break)) {
@@ -245,11 +251,11 @@ QVector<double> DigitalFiltering::generateFirFilter(double f_break, int bits, bo
         filter_vector[taps - i - 1] = filter_vector[i];
     }
 
-    fft(1, bits, filter_vector, imag);
-    fftshift(filter_vector, taps);
+    fft(1, bits, filter_vector.data(), imag.data());
+    fftshift(filter_vector.data(), taps);
 
     if (useHamming) {
-        hamming(filter_vector, taps);
+        hamming(filter_vector.data(), taps);
     }
 
     QVector<double> result;

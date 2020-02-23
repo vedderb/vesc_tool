@@ -608,6 +608,8 @@ struct BALANCE_VALUES {
     Q_PROPERTY(double motor_position MEMBER motor_position)
     Q_PROPERTY(uint16_t state MEMBER state)
     Q_PROPERTY(uint16_t switch_value MEMBER switch_value)
+    Q_PROPERTY(double adc1 MEMBER adc1)
+    Q_PROPERTY(double adc2 MEMBER adc2)
 
 public:
     BALANCE_VALUES() {
@@ -619,6 +621,8 @@ public:
         motor_position = 0;
         state = 0;
         switch_value = 0;
+        adc1 = 0;
+        adc2 = 0;
     }
 
     double pid_output;
@@ -629,6 +633,8 @@ public:
     double motor_position;
     uint16_t state;
     uint16_t switch_value;
+    double adc1;
+    double adc2;
 };
 
 Q_DECLARE_METATYPE(BALANCE_VALUES)

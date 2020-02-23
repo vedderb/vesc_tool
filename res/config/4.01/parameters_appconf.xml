@@ -3030,6 +3030,7 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.roll_fault</param>
                     <param>app_balance_conf.adc1</param>
                     <param>app_balance_conf.adc2</param>
+                    <param>app_balance_conf.fault_delay</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

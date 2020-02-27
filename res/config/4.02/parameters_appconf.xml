@@ -1796,7 +1796,7 @@ p, li { white-space: pre-wrap; }
             <stepDouble>1</stepDouble>
             <valDouble>20</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> degrees</suffix>
+            <suffix> °</suffix>
             <vTx>9</vTx>
         </app_balance_conf.pitch_fault>
         <app_balance_conf.roll_fault>
@@ -1818,23 +1818,55 @@ p, li { white-space: pre-wrap; }
             <stepDouble>1</stepDouble>
             <valDouble>45</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> degrees</suffix>
+            <suffix> °</suffix>
             <vTx>9</vTx>
         </app_balance_conf.roll_fault>
-        <app_balance_conf.use_switches>
-            <longName>Use Switches</longName>
-            <type>5</type>
+        <app_balance_conf.adc1>
+            <longName>ADC1 Switch Voltage</longName>
+            <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use daul switches for disabling drive. Switches are wired from 3.3v to SPI SCK and SPI MISO.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_USE_SWITCHES</cDefine>
-            <valInt>0</valInt>
-        </app_balance_conf.use_switches>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Voltage below this value will trigger a fault. To disable this switch set this value to 0.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_ADC1</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>3.3</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>1</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.adc1>
+        <app_balance_conf.adc2>
+            <longName>ADC2 Switch Voltage</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Voltage below this value will trigger a fault. To disable this switch set this value to 0.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_ADC2</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>3.3</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>1</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.adc2>
         <app_balance_conf.overspeed_duty>
-            <longName>Cutoff Duty Cycle </longName>
+            <longName>Cutoff Duty Cycle (Causes "Dead" State)</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -1856,7 +1888,7 @@ p, li { white-space: pre-wrap; }
             <vTx>9</vTx>
         </app_balance_conf.overspeed_duty>
         <app_balance_conf.tiltback_duty>
-            <longName>Tiltback Duty Cycle</longName>
+            <longName>Duty Cycle Tiltback</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -1896,7 +1928,7 @@ p, li { white-space: pre-wrap; }
             <stepDouble>0.1</stepDouble>
             <valDouble>15</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> degrees</suffix>
+            <suffix> °</suffix>
             <vTx>9</vTx>
         </app_balance_conf.tiltback_angle>
         <app_balance_conf.tiltback_speed>
@@ -1918,7 +1950,7 @@ p, li { white-space: pre-wrap; }
             <stepDouble>0.1</stepDouble>
             <valDouble>5</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> degrees/s</suffix>
+            <suffix> °/s</suffix>
             <vTx>9</vTx>
         </app_balance_conf.tiltback_speed>
         <app_balance_conf.tiltback_high_voltage>
@@ -1984,7 +2016,7 @@ p, li { white-space: pre-wrap; }
             <stepDouble>0.1</stepDouble>
             <valDouble>20</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> degrees</suffix>
+            <suffix> °</suffix>
             <vTx>9</vTx>
         </app_balance_conf.startup_pitch_tolerance>
         <app_balance_conf.startup_roll_tolerance>
@@ -2006,7 +2038,7 @@ p, li { white-space: pre-wrap; }
             <stepDouble>0.1</stepDouble>
             <valDouble>8</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> degrees</suffix>
+            <suffix> °</suffix>
             <vTx>9</vTx>
         </app_balance_conf.startup_roll_tolerance>
         <app_balance_conf.startup_speed>
@@ -2028,7 +2060,7 @@ p, li { white-space: pre-wrap; }
             <stepDouble>0.1</stepDouble>
             <valDouble>30</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> degrees/s</suffix>
+            <suffix> °/s</suffix>
             <vTx>9</vTx>
         </app_balance_conf.startup_speed>
         <app_balance_conf.deadzone>
@@ -2050,7 +2082,7 @@ p, li { white-space: pre-wrap; }
             <stepDouble>0.01</stepDouble>
             <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> degrees</suffix>
+            <suffix> °</suffix>
             <vTx>9</vTx>
         </app_balance_conf.deadzone>
         <app_balance_conf.current_boost>
@@ -2075,6 +2107,190 @@ p, li { white-space: pre-wrap; }
             <suffix> A</suffix>
             <vTx>9</vTx>
         </app_balance_conf.current_boost>
+        <app_balance_conf.multi_esc>
+            <longName>Multiple VESCs Over CAN</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Listen for other VESCs on the CAN-bus and send the same control commands to them. Notice that the application only has to be set up on the master VESC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_MULTI_ESC</cDefine>
+            <valInt>0</valInt>
+        </app_balance_conf.multi_esc>
+        <app_balance_conf.yaw_kp>
+            <longName>Yaw P</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;P value for yaw PID stabilization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_YAW_KP</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>10000</maxDouble>
+            <minDouble>-10000</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.yaw_kp>
+        <app_balance_conf.yaw_ki>
+            <longName>Yaw I</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;I value for yaw PID stabilization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_YAW_KI</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>10000</maxDouble>
+            <minDouble>-10000</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.yaw_ki>
+        <app_balance_conf.yaw_kd>
+            <longName>Yaw D</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;D value for yaw PID stabilization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_YAW_KD</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>10000</maxDouble>
+            <minDouble>-10000</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.yaw_kd>
+        <app_balance_conf.roll_steer_kp>
+            <longName>Roll Steer KP</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Roll angle to yaw setpoint adjustment proportion.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_ROLL_STEER_KP</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>10000</maxDouble>
+            <minDouble>-10000</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.roll_steer_kp>
+        <app_balance_conf.brake_current>
+            <longName>Brake Current</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Breaking current to be applied when balance app is not actively balancing.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_BRAKE_CURRENT</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>100</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.brake_current>
+        <app_balance_conf.overspeed_delay>
+            <longName>Overspeed Delay</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Overspeed cutoff time delay in ms.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_OVERSPEED_DELAY</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>10000</maxInt>
+            <minInt>0</minInt>
+            <showDisplay>0</showDisplay>
+            <stepInt>10</stepInt>
+            <valInt>0</valInt>
+            <suffix> ms</suffix>
+            <vTx>3</vTx>
+        </app_balance_conf.overspeed_delay>
+        <app_balance_conf.fault_delay>
+            <longName>Fault Delay</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Fault cutoff time delay in ms.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_FAULT_DELAY</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>10000</maxInt>
+            <minInt>0</minInt>
+            <showDisplay>0</showDisplay>
+            <stepInt>10</stepInt>
+            <valInt>0</valInt>
+            <suffix> ms</suffix>
+            <vTx>3</vTx>
+        </app_balance_conf.fault_delay>
+        <app_balance_conf.tiltback_constant>
+            <longName>Constant Tiltback</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Tiltback that will be applied above 3% duty cycle. AKA nose angle adjustment, can be downwards too.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_TILTBACK_CONSTANT</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>80</maxDouble>
+            <minDouble>-80</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix> °</suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.tiltback_constant>
         <imu_conf.type>
             <longName>IMU Type</longName>
             <type>4</type>
@@ -2586,7 +2802,8 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.hertz</ser>
         <ser>app_balance_conf.pitch_fault</ser>
         <ser>app_balance_conf.roll_fault</ser>
-        <ser>app_balance_conf.use_switches</ser>
+        <ser>app_balance_conf.adc1</ser>
+        <ser>app_balance_conf.adc2</ser>
         <ser>app_balance_conf.overspeed_duty</ser>
         <ser>app_balance_conf.tiltback_duty</ser>
         <ser>app_balance_conf.tiltback_angle</ser>
@@ -2598,6 +2815,15 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.startup_speed</ser>
         <ser>app_balance_conf.deadzone</ser>
         <ser>app_balance_conf.current_boost</ser>
+        <ser>app_balance_conf.multi_esc</ser>
+        <ser>app_balance_conf.yaw_kp</ser>
+        <ser>app_balance_conf.yaw_ki</ser>
+        <ser>app_balance_conf.yaw_kd</ser>
+        <ser>app_balance_conf.roll_steer_kp</ser>
+        <ser>app_balance_conf.brake_current</ser>
+        <ser>app_balance_conf.overspeed_delay</ser>
+        <ser>app_balance_conf.fault_delay</ser>
+        <ser>app_balance_conf.tiltback_constant</ser>
         <ser>imu_conf.type</ser>
         <ser>imu_conf.mode</ser>
         <ser>imu_conf.sample_rate_hz</ser>
@@ -2788,18 +3014,23 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.startup_pitch_tolerance</param>
                     <param>app_balance_conf.startup_roll_tolerance</param>
                     <param>app_balance_conf.startup_speed</param>
+                    <param>app_balance_conf.brake_current</param>
                     <param>::sep::Tiltback</param>
-                    <param>app_balance_conf.tiltback_duty</param>
                     <param>app_balance_conf.tiltback_angle</param>
                     <param>app_balance_conf.tiltback_speed</param>
+                    <param>app_balance_conf.tiltback_duty</param>
                     <param>app_balance_conf.tiltback_high_voltage</param>
                     <param>app_balance_conf.tiltback_low_voltage</param>
+                    <param>app_balance_conf.tiltback_constant</param>
                     <param>::sep::Overspeed</param>
                     <param>app_balance_conf.overspeed_duty</param>
+                    <param>app_balance_conf.overspeed_delay</param>
                     <param>::sep::Fault</param>
                     <param>app_balance_conf.pitch_fault</param>
                     <param>app_balance_conf.roll_fault</param>
-                    <param>app_balance_conf.use_switches</param>
+                    <param>app_balance_conf.adc1</param>
+                    <param>app_balance_conf.adc2</param>
+                    <param>app_balance_conf.fault_delay</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>
@@ -2811,6 +3042,12 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.kd</param>
                     <param>::sep::Main Loop</param>
                     <param>app_balance_conf.hertz</param>
+                    <param>::sep::Multi ESC</param>
+                    <param>app_balance_conf.multi_esc</param>
+                    <param>app_balance_conf.yaw_kp</param>
+                    <param>app_balance_conf.yaw_ki</param>
+                    <param>app_balance_conf.yaw_kd</param>
+                    <param>app_balance_conf.roll_steer_kp</param>
                     <param>::sep::Experimental</param>
                     <param>app_balance_conf.deadzone</param>
                     <param>app_balance_conf.current_boost</param>

@@ -352,6 +352,8 @@ void Commands::processPacket(QByteArray data)
         values.motor_position = vb.vbPopFrontDouble32(1e6);
         values.state = vb.vbPopFrontUint16();
         values.switch_value = vb.vbPopFrontUint16();
+        values.adc1 = vb.vbPopFrontDouble32(1e6);
+        values.adc2 = vb.vbPopFrontDouble32(1e6);
         emit decodedBalanceReceived(values);
     } break;
 

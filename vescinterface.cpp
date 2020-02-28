@@ -2945,8 +2945,7 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
             updateFwRx(true);
             if (!wasReceived) {
                 if (mFwSupportsConfiguration) {
-                    emit messageDialog(tr("Warning"), tr("The connected VESC has old, but mostly compatible firmware. It is recommended to "
-                                                         "update it for the latest features and best compatibility."), false, false);
+                    emit statusMessage(tr("The connected VESC has old, but mostly compatible firmware."), true);
                 } else {
                     emit messageDialog(tr("Warning"), tr("The connected VESC has too old firmware. Since the"
                                                          " connected VESC has firmware with bootloader support, it can be"

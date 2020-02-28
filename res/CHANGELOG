@@ -1,3 +1,7 @@
+== 2.03 ==
+* App balance updates. See https://github.com/vedderb/bldc/pull/138.
+* Changed back FOC time constant.
+
 == 2.02 ==
 * Better autoconnect.
 * Increased maximum file size for SWD prog.

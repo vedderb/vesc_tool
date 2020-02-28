@@ -61,6 +61,8 @@ private:
     QVector<double> mAppMotorPositionVec;
     uint16_t mAppState;
     uint16_t mAppSwitchValue;
+    double mAppADC1;
+    double mAppADC2;
 
     QVector<double> mSeconds;
 

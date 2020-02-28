@@ -170,7 +170,7 @@ Item {
                     id: tcBox
                     Layout.fillWidth: true
                     decimals: 1
-                    realValue: 4000.0
+                    realValue: 1000.0
                     realFrom: 0.0
                     realTo: 1000000.0
                     realStepSize: 100.0

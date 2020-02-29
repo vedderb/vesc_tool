@@ -33,7 +33,7 @@ class PageSwdProg : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageSwdProg(QWidget *parent = 0);
+    explicit PageSwdProg(QWidget *parent = nullptr);
     ~PageSwdProg();
 
     VescInterface *vesc() const;

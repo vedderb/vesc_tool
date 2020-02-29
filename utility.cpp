@@ -159,6 +159,9 @@ void Utility::checkVersion(VescInterface *vesc)
     } else {
         qWarning() << res;
     }
+
+    reply->abort();
+    reply->deleteLater();
 }
 
 QString Utility::fwChangeLog()

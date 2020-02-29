@@ -29,7 +29,7 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 
     mTimer = new QTimer(this);
     mTimer->start(500);

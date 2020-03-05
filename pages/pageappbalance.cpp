@@ -26,13 +26,15 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 
     mTimer = new QTimer(this);
     mTimer->start(20);
     mUpdatePlots = false;
     mSecondCounter = 0.0;
     mLastUpdateTime = 0;
+    mAppADC1 = 0.0;
+    mAppADC2 = 0.0;
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));

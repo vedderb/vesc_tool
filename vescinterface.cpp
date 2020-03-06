@@ -405,6 +405,16 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
                               false, false);
         }
     });
+
+#if VT_IS_TEST_VERSION
+    QTimer::singleShot(1000, [this]() {
+        emitMessageDialog("VESC Tool Test Version",
+                          "Warning: This is a test version of VESC Tool. The included firmwares are NOT compatible with "
+                          "released firmwares and should only be used with this test version. When using a release version "
+                          "of VESC Tool, the firmware must be upgraded even if the version number is the same.",
+                          false);
+    });
+#endif
 }
 
 VescInterface::~VescInterface()
@@ -2942,8 +2952,13 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
             updateFwRx(true);
             if (!wasReceived) {
                 if (mFwSupportsConfiguration) {
-                    emit messageDialog(tr("Warning"), tr("The connected VESC has old, but mostly compatible firmware. It is recommended to "
-                                                         "update it for the latest features and best compatibility."), false, false);
+                    emit messageDialog(tr("Warning"), tr("The connected VESC has old, but mostly compatible firmware. This is fine if "
+                                                         "your setup works properly.<br><br>"
+                                                         "Check out the firmware changelog (from the help menu) to decide if you want to "
+                                                         "use some of the new features that have been added after your firmware version. "
+                                                         "Keep in mind that you only should upgrade firmware if you have time to test "
+                                                         "it after the upgrade and carefully make sure that everything works as expected."),
+                                       false, false);
                 } else {
                     emit messageDialog(tr("Warning"), tr("The connected VESC has too old firmware. Since the"
                                                          " connected VESC has firmware with bootloader support, it can be"

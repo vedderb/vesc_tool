@@ -134,6 +134,28 @@ void PageConnection::timerSlot()
             }
         }
     }
+
+    QString ipTxt = "Server IPs\n";
+    QString clientTxt = "Connected Clients\n";
+    if (mVesc->tcpServerIsRunning()) {
+        for (auto adr: Utility::getNetworkAddresses()) {
+            ipTxt += adr.toString() + "\n";
+        }
+
+        if (mVesc->tcpServerIsClientConnected()) {
+            clientTxt += mVesc->tcpServerClientIp();
+        }
+    } else {
+        ui->tcpServerPortBox->setEnabled(true);
+    }
+
+    if (ui->tcpServerAddressesEdit->toPlainText() != ipTxt) {
+        ui->tcpServerAddressesEdit->setPlainText(ipTxt);
+    }
+
+    if (ui->tcpServerClientsEdit->toPlainText() != clientTxt) {
+        ui->tcpServerClientsEdit->setPlainText(clientTxt);
+    }
 }
 
 void PageConnection::bleScanDone(QVariantMap devs, bool done)
@@ -372,7 +394,7 @@ void PageConnection::on_canFwdBox_currentIndexChanged(const QString &arg1)
 {
     (void)arg1;
     if (mVesc && ui->canFwdBox->count() > 0) {
-        mVesc->commands()->setCanSendId(ui->canFwdBox->currentData().toInt());
+        mVesc->commands()->setCanSendId(quint32(ui->canFwdBox->currentData().toInt()));
     }
 }
 
@@ -531,6 +553,18 @@ void PageConnection::on_unpairButton_clicked()
             mVesc->emitMessageDialog("Unpair VESC",
                                      "You are not connected to the VESC. Connect in order to unpair it.",
                                      false, false);
+        }
+    }
+}
+
+void PageConnection::on_tcpServerEnableBox_toggled(bool arg1)
+{
+    if (mVesc) {
+        if (arg1) {
+            mVesc->tcpServerStart(ui->tcpServerPortBox->value());
+            ui->tcpServerPortBox->setEnabled(false);
+        } else {
+            mVesc->tcpServerStop();
         }
     }
 }

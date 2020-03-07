@@ -159,6 +159,9 @@ void Utility::checkVersion(VescInterface *vesc)
     } else {
         qWarning() << res;
     }
+
+    reply->abort();
+    reply->deleteLater();
 }
 
 QString Utility::fwChangeLog()
@@ -280,6 +283,17 @@ bool Utility::waitSignal(QObject *sender, QString signal, int timeoutMs)
     QObject::disconnect(conn2);
 
     return timeoutTimer.isActive();
+}
+
+void Utility::sleepWithEventLoop(int timeMs)
+{
+    QEventLoop loop;
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    timeoutTimer.start(timeMs);
+    auto conn1 = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    loop.exec();
+    QObject::disconnect(conn1);
 }
 
 QString Utility::detectAllFoc(VescInterface *vesc,

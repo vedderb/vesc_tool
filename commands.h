@@ -99,6 +99,7 @@ signals:
     void plotSetGraphReceived(int graph);
     void bmReadMemRes(int res, QByteArray data);
     void deserializeConfigFailed(bool isMc, bool isApp);
+    void canFrameRx(QByteArray data, quint32 id, bool isExtended);
 
 public slots:
     void processPacket(QByteArray data);
@@ -171,6 +172,7 @@ public slots:
     void bmMapPinsNrf5x();
     void bmReadMem(uint32_t addr, quint16 size);
     void setCurrentRel(double current);
+    void forwardCanFrame(QByteArray data, quint32 id, bool isExtended);
 
 private slots:
     void timerSlot();

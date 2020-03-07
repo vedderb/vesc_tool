@@ -137,7 +137,7 @@ MainWindow::MainWindow(QWidget *parent) :
     fwMenu->setIcon(QIcon("://res/icons/Electronics-96.png"));
     for (auto fw: Utility::configSupportedFws()) {
         QAction *action = new QAction(fwMenu);
-        action->setText(QString("%1.%2").arg(fw.first).arg(fw.second));
+        action->setText(QString("%1.%2").arg(fw.first).arg(fw.second, 2, 10, QChar('0')));
         connect(action, &QAction::triggered, [this,fw]() {
             Utility::configLoad(mVesc, fw.first, fw.second);
         });
@@ -207,6 +207,7 @@ MainWindow::MainWindow(QWidget *parent) :
         mPageAppBalance->reloadParams();
         mPageAppImu->reloadParams();
         mPageFirmware->reloadParams();
+        mPageCanAnalyzer->reloadParams();
     });
 
     qApp->installEventFilter(this);
@@ -1060,6 +1061,11 @@ void MainWindow::reloadPages()
     mPageSwdProg->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSwdProg);
     addPageItem(tr("SWD Prog"), "://res/icons/Electronics-96.png", "", true);
+
+    mPageCanAnalyzer = new PageCanAnalyzer(this);
+    mPageCanAnalyzer->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageCanAnalyzer);
+    addPageItem(tr("CAN Analyzer"), "://res/icons/can_off.png", "", true);
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);

@@ -26,13 +26,15 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 
     mTimer = new QTimer(this);
     mTimer->start(20);
     mUpdatePlots = false;
     mSecondCounter = 0.0;
     mLastUpdateTime = 0;
+    mAppADC1 = 0.0;
+    mAppADC2 = 0.0;
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
@@ -146,6 +148,8 @@ void PageAppBalance::appValuesReceived(BALANCE_VALUES values) {
     appendDoubleAndTrunc(&mAppMotorPositionVec, values.motor_position, maxS);
     mAppState = values.state;
     mAppSwitchValue = values.switch_value;
+    mAppADC1 = values.adc1;
+    mAppADC2 = values.adc2;
 
 
     qint64 tNow = QDateTime::currentMSecsSinceEpoch();
@@ -190,7 +194,20 @@ void PageAppBalance::updateTextOutput(){
         output = output + "Unknown";
     }
 
-    output = output + "\tSwitch Value: " + QString::number(mAppSwitchValue);
+    output = output + "\tADC1: ";
+    output = output + QString::number(mAppADC1, 'f', 2);
+    output = output + " ADC2: ";
+    output = output + QString::number(mAppADC2, 'f', 2);
+    output = output + " Switch Value: ";
+    if(mAppSwitchValue == 0){
+        output = output + "Off";
+    }else if(mAppSwitchValue == 1){
+        output = output + "Half";
+    }else if(mAppSwitchValue == 2){
+        output = output + "On";
+    }else{
+        output = output + "Unknown";
+    }
 
     output = output + "\tMotor Position: ";
     if(mAppMotorPositionVec.empty() == false){

@@ -1,3 +1,28 @@
+=== FW 4.02 ===
+* Position PID fix (most notable on multiturn encoders).
+* App balance updates. See https://github.com/vedderb/bldc/pull/138.
+* Changed FOC time constant back to 1000 us.
+* Do not count AS5047 all ones as fault.
+* Improved axis decoupling and integrator windup protection. Should prevent wobbles.
+
+=== FW 4.01 ===
+* Leave debug mode on NRF5x after disconnect to avoid excess power consumption before power cycle.
+* Added encoder_clear_errors and encoder_clear_multiturn terminal commands.
+* Initialize current offsets to 2048 to avoid a fault code to be logged at boot.
+* Added 10K, 20K, 50K and 75K CAN baud rates.
+* Added very basic TS5700N8501 multiturn mode.
+
+=== FW 4.00 ===
+* Added support for HFI to track motor position at 0 speed without sensors. This is the main new feature of FW 4.
+* Fixed CAN-bug in VESC Remote.
+* Reset current integrator when leaving duty cycle control mode. Fixes braking issue #125.
+* More accurate and faster inductance measurement.
+* Ability to measyre ld - lq. Useful for MTPA in future firmwares.
+* Reset shutdown when uploading FW data.
+* Added CAN-bride and COMM_CAN_FWD_FRAME.
+* Added CAN_PACKET_POLL_TS5700N8501_STATUS to poll most relevant data last received from the TS5700N8501 encoder.
+* Added TS57N8501 ABM, SF and ALMC to encoder terminal command.
+
 === FW 3.66 ===
 * Added support for HW 100/250.
 * Added uptime terminal command.

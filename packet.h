@@ -27,9 +27,10 @@ class Packet : public QObject
 {
     Q_OBJECT
 public:
-    explicit Packet(QObject *parent = 0);
+    explicit Packet(QObject *parent = nullptr);
     ~Packet();
     void sendPacket(const QByteArray &data);
+    void resetState();
     static unsigned short crc16(const unsigned char *buf, unsigned int len);
 
 signals:

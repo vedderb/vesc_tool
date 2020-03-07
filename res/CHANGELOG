@@ -1,6 +1,10 @@
 == 2.03 ==
 * App balance updates. See https://github.com/vedderb/bldc/pull/138.
 * Changed back FOC time constant.
+* Added test version warning.
+* Remind user to switch on the location service on android 10 if BLE scan fails.
+* Updated to Qt 5.12.7 for the android build.
+* Start linux version without openssl on version mismatch.
 
 == 2.02 ==
 * Better autoconnect.

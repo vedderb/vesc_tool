@@ -388,13 +388,13 @@ void MainWindow::timerSlot()
     }
 
     // Read configurations if they haven't been read since starting VESC Tool
+    static int conf_cnt = 0;
     if (mVesc->isPortConnected()) {
-        static int conf_cnt = 0;
         conf_cnt++;
-        if (conf_cnt >= 20) {
-            conf_cnt = 0;
-
+        if (conf_cnt == 1) {
             if (!mVesc->deserializeFailedSinceConnected()) {
+                // Next 2 commands produce about 1Kb of data
+                // and can not be executed over slow links frequently
                 if (!mMcConfRead) {
                     mVesc->commands()->getMcconf();
                 }
@@ -404,7 +404,11 @@ void MainWindow::timerSlot()
                 }
             }
         }
+        else if(conf_cnt > 3 * 50) // 3 secs timeout to request again
+            conf_cnt = 0;
     }
+    else
+        conf_cnt = 0; // Request configuration on next connection if failed before
 
     // Disable all data streaming when uploading firmware
     if (mVesc->getFwUploadProgress() > 0.1) {

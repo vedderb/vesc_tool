@@ -156,7 +156,8 @@ public slots:
                        bool forward_can, bool divide_by_controllers, bool ack);
     void getValuesSelective(unsigned int mask);
     void getValuesSetupSelective(unsigned int mask);
-    void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty, double resistance);
+    void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty,
+                                double resistance, double inductanec);
     void detectAllFoc(bool detect_can, double max_power_loss, double min_current_in,
                       double max_current_in, double openloop_rpm, double sl_erpm);
     void pingCan();

@@ -53,6 +53,7 @@ void PageAppNunchuk::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
+        ui->nrfPair->setVesc(mVesc);
         reloadParams();
 
         connect(mVesc->commands(), SIGNAL(decodedChukReceived(double)),

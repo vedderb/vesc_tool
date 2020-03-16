@@ -1159,7 +1159,8 @@ void Commands::getValuesSetupSelective(unsigned int mask)
     emitData(vb);
 }
 
-void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty, double resistance)
+void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty,
+                                      double resistance, double inductanec)
 {
     VByteArray vb;
     vb.vbAppendInt8(COMM_DETECT_MOTOR_FLUX_LINKAGE_OPENLOOP);
@@ -1167,6 +1168,7 @@ void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, doubl
     vb.vbAppendDouble32(erpm_per_sec, 1e3);
     vb.vbAppendDouble32(low_duty, 1e3);
     vb.vbAppendDouble32(resistance, 1e6);
+    vb.vbAppendDouble32(inductanec, 1e8);
     emitData(vb);
 }
 

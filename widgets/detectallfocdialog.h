@@ -83,6 +83,7 @@ private slots:
     void on_directDriveBox_toggled(bool checked);
     void on_motorList_currentRowChanged(int currentRow);
     void on_prevDirButton_clicked();
+    void on_runNoCanButton_clicked();
 
 private:
     Ui::DetectAllFocDialog *ui;
@@ -90,6 +91,8 @@ private:
     bool mRejectOk;
     int mPulleyMotorOld;
     int mPulleyWheelOld;
+
+    void runDetect(bool can);
 
 };
 

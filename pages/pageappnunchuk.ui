@@ -77,6 +77,9 @@
      </widget>
     </widget>
    </item>
+   <item>
+    <widget class="NrfPair" name="nrfPair" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -95,6 +98,12 @@
    <class>DisplayPercentage</class>
    <extends>QWidget</extends>
    <header>widgets/displaypercentage.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NrfPair</class>
+   <extends>QWidget</extends>
+   <header>widgets/nrfpair.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

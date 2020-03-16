@@ -91,7 +91,8 @@ void DetectFoc::on_lambdaButton_clicked()
             mVesc->commands()->measureLinkageOpenloop(ui->currentBox->value(),
                                                       ui->erpmBox->value(),
                                                       ui->dutyBox->value(),
-                                                      ui->resistanceBox->value() / 1e3);
+                                                      ui->resistanceBox->value() / 1e3,
+                                                      ui->inductanceBox->value() / 1e6);
 
             mRunning = true;
         }

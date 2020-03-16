@@ -341,7 +341,8 @@ Item {
         }
 
         onAccepted: {
-            mCommands.measureLinkageOpenloop(currentBox.realValue, erpmBox.realValue, dutyBox.realValue, res)
+            mCommands.measureLinkageOpenloop(currentBox.realValue, erpmBox.realValue,
+                                             dutyBox.realValue, res, ind)
         }
     }
 

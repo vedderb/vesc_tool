@@ -1,3 +1,9 @@
+== 2.04 ==
+* FW 5.0 support:
+ - Dual motor support, for e.g. unity.
+* Added NRF pair to VESC Remote page.
+* Added detect all without CAN button.
+
 == 2.03 ==
 * App balance updates. See https://github.com/vedderb/bldc/pull/138.
 * Changed back FOC time constant.

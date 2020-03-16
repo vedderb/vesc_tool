@@ -1189,6 +1189,8 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     mFwUploadProgress = 0.0;
     mCancelFwUpload = false;
 
+//    isLzo = false;
+
     if (isBootloader) {
         if (mCommands->getLimitedSupportsEraseBootloader()) {
             mFwUploadStatus = "Erasing bootloader";

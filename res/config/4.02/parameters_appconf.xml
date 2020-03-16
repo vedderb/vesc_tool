@@ -1829,7 +1829,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Voltage below this value will trigger a fault. To disable this switch set this value to 0. Hint: consider a pulldown resisitor!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Voltage below this value will trigger a fault. To disable this switch set this value to 0.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_BALANCE_ADC1</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -1851,7 +1851,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Voltage below this value will trigger a fault. To disable this switch set this value to 0. Hint: consider a pulldown resisitor!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Voltage below this value will trigger a fault. To disable this switch set this value to 0.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_BALANCE_ADC2</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -2193,7 +2193,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Roll angle to yaw setpoint adjustment proportion. This is a constant turning speed regardless of forward travel speed. It will turn tighter at low speeds&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Roll angle to yaw setpoint adjustment proportion.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_BALANCE_ROLL_STEER_KP</cDefine>
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -2226,7 +2226,7 @@ p, li { white-space: pre-wrap; }
             <stepDouble>0.01</stepDouble>
             <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> A</suffix>
+            <suffix></suffix>
             <vTx>9</vTx>
         </app_balance_conf.brake_current>
         <app_balance_conf.overspeed_delay>
@@ -2291,136 +2291,6 @@ p, li { white-space: pre-wrap; }
             <suffix> °</suffix>
             <vTx>9</vTx>
         </app_balance_conf.tiltback_constant>
-        <app_balance_conf.roll_steer_erpm_kp>
-            <longName>Roll Steer ERPM KP</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Roll angle multiplied by ERPM to yaw setpoint adjustment proportion. Scaling turn speed by erpm will give a constant turning radius at all speeds, like a normal vehicle.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_ROLL_STEER_ERPM_KP</cDefine>
-            <editorDecimalsDouble>5</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>10000</maxDouble>
-            <minDouble>-10000</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.0001</stepDouble>
-            <valDouble>0</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix></suffix>
-            <vTx>9</vTx>
-        </app_balance_conf.roll_steer_erpm_kp>
-        <app_balance_conf.yaw_current_clamp>
-            <longName>Yaw Current Clamp</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Maximum current to be applied to yaw motions. This lets you overpower the pid traction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_YAW_CURRENT_CLAMP</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>100</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>100</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> A</suffix>
-            <vTx>9</vTx>
-        </app_balance_conf.yaw_current_clamp>
-        <app_balance_conf.adc_half_fault_erpm>
-            <longName>ADC Half State Fault ERPM</longName>
-            <type>2</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;ERPM (absoulte value) below which a half state on the ADC switches will be considered a fault.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_ADC_HALF_FAULT_ERPM</cDefine>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxInt>100000</maxInt>
-            <minInt>0</minInt>
-            <showDisplay>0</showDisplay>
-            <stepInt>10</stepInt>
-            <valInt>1,000</valInt>
-            <suffix> ERPM</suffix>
-            <vTx>3</vTx>
-        </app_balance_conf.adc_half_fault_erpm>
-        <app_balance_conf.setpoint_pitch_filter>
-            <longName>Setpoint Pitch Low Pass Filter</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Low pass filter that combines the pitch angle with the desired balanceing angle. 0 = 100% setpoint, 1 = 100% current pitch angle.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_SETPOINT_PITCH_FILTER</cDefine>
-            <editorDecimalsDouble>5</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.0001</stepDouble>
-            <valDouble>0</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix></suffix>
-            <vTx>9</vTx>
-        </app_balance_conf.setpoint_pitch_filter>
-        <app_balance_conf.setpoint_target_filter>
-            <longName>Setpoint Target Low Pass Filter</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Low pass filter that combines the desired setpoint (0 or tiltback) with the current setpoint (modified by the setpoint pitch filter). 0 = 100% current setpoint angle, 1 = 100% desired setpoint. Non 1 values will effect your tiltback speed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_SETPOINT_TARGET_FILTER</cDefine>
-            <editorDecimalsDouble>5</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.0001</stepDouble>
-            <valDouble>1</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix></suffix>
-            <vTx>9</vTx>
-        </app_balance_conf.setpoint_target_filter>
-        <app_balance_conf.setpoint_clamp>
-            <longName>Setpoint Clamp</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Maximum angle (absolute value) the setpoint can travel to. There will be no filtering past this angle.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_SETPOINT_CLAMP</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>80</maxDouble>
-            <minDouble>-0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>1</stepDouble>
-            <valDouble>80</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
-            <suffix> °</suffix>
-            <vTx>9</vTx>
-        </app_balance_conf.setpoint_clamp>
         <imu_conf.type>
             <longName>IMU Type</longName>
             <type>4</type>
@@ -2954,12 +2824,6 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.overspeed_delay</ser>
         <ser>app_balance_conf.fault_delay</ser>
         <ser>app_balance_conf.tiltback_constant</ser>
-        <ser>app_balance_conf.roll_steer_erpm_kp</ser>
-        <ser>app_balance_conf.yaw_current_clamp</ser>
-        <ser>app_balance_conf.adc_half_fault_erpm</ser>
-        <ser>app_balance_conf.setpoint_pitch_filter</ser>
-        <ser>app_balance_conf.setpoint_target_filter</ser>
-        <ser>app_balance_conf.setpoint_clamp</ser>
         <ser>imu_conf.type</ser>
         <ser>imu_conf.mode</ser>
         <ser>imu_conf.sample_rate_hz</ser>
@@ -3166,7 +3030,6 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.roll_fault</param>
                     <param>app_balance_conf.adc1</param>
                     <param>app_balance_conf.adc2</param>
-                    <param>app_balance_conf.adc_half_fault_erpm</param>
                     <param>app_balance_conf.fault_delay</param>
                 </subgroupParams>
             </subgroup>
@@ -3179,18 +3042,12 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.kd</param>
                     <param>::sep::Main Loop</param>
                     <param>app_balance_conf.hertz</param>
-                    <param>::sep::Balance Filtering</param>
-                    <param>app_balance_conf.setpoint_pitch_filter</param>
-                    <param>app_balance_conf.setpoint_target_filter</param>
-                    <param>app_balance_conf.setpoint_clamp</param>
                     <param>::sep::Multi ESC</param>
                     <param>app_balance_conf.multi_esc</param>
                     <param>app_balance_conf.yaw_kp</param>
                     <param>app_balance_conf.yaw_ki</param>
                     <param>app_balance_conf.yaw_kd</param>
                     <param>app_balance_conf.roll_steer_kp</param>
-                    <param>app_balance_conf.roll_steer_erpm_kp</param>
-                    <param>app_balance_conf.yaw_current_clamp</param>
                     <param>::sep::Experimental</param>
                     <param>app_balance_conf.deadzone</param>
                     <param>app_balance_conf.current_boost</param>

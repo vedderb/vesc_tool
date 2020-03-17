@@ -239,8 +239,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             this, SLOT(packetReceived(QByteArray&)));
     connect(mCommands, SIGNAL(dataToSend(QByteArray&)),
             this, SLOT(cmdDataToSend(QByteArray&)));
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)),
+            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,bool)));
     connect(mCommands, SIGNAL(ackReceived(QString)), this, SLOT(ackReceived(QString)));
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
@@ -1898,8 +1898,8 @@ bool VescInterface::autoconnect()
     mAutoconnectProgress = 0.0;
 
     disconnectPort();
-    disconnect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
-               this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+    disconnect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)),
+               this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,bool)));
 
     for (int i = 0;i < ports.size();i++) {
         VSerialInfo_t serial = ports[i];
@@ -1916,7 +1916,7 @@ bool VescInterface::autoconnect()
         QTimer timeoutTimer;
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(500);
-        connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)), &loop, SLOT(quit()));
+        connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)), &loop, SLOT(quit()));
         connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
         loop.exec();
 
@@ -1931,8 +1931,8 @@ bool VescInterface::autoconnect()
         }
     }
 
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)),
+            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,bool)));
 #endif
 
     emit autoConnectProgressUpdated(1.0, true);
@@ -2763,7 +2763,8 @@ void VescInterface::cmdDataToSend(QByteArray &data)
     mPacket->sendPacket(data);
 }
 
-void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired)
+void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
+                                      bool isPaired, bool isTestFw)
 {
     QString uuidStr = Utility::uuid2Str(uuid, true);
     mUuidStr = uuidStr.toUpper();
@@ -2786,6 +2787,13 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
 #else
     (void)isPaired;
 #endif
+
+    if (isTestFw && !VT_IS_TEST_VERSION) {
+        emitMessageDialog("Test Firmware",
+                          "The connected VESC has test firmware, and this is not a test build of VESC Tool. You should "
+                          "update the firmware urgently, as this is not a safe situation.",
+                          false, false);
+    }
 
     auto fwPairs = getSupportedFirmwarePairs();
 

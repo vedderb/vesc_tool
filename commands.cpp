@@ -105,6 +105,7 @@ void Commands::processPacket(QByteArray data)
         QString hw;
         QByteArray uuid;
         bool isPaired = false;
+        bool isTestFw = false;
 
         if (vb.size() >= 2) {
             fw_major = vb.vbPopFrontInt8();
@@ -121,7 +122,11 @@ void Commands::processPacket(QByteArray data)
             isPaired = vb.vbPopFrontInt8();
         }
 
-        emit fwVersionReceived(fw_major, fw_minor, hw, uuid, isPaired);
+        if (vb.size() >= 1) {
+            isTestFw = vb.vbPopFrontInt8();
+        }
+
+        emit fwVersionReceived(fw_major, fw_minor, hw, uuid, isPaired, isTestFw);
     } break;
 
     case COMM_ERASE_NEW_APP:

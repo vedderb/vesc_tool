@@ -59,7 +59,8 @@ public:
 signals:
     void dataToSend(QByteArray &data);
 
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired);
+    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
+                           bool isPaired, bool isTestFw);
     void eraseNewAppResReceived(bool ok);
     void eraseBootloaderResReceived(bool ok);
     void writeNewAppDataResReceived(bool ok);

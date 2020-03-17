@@ -4,6 +4,8 @@
 * Added NRF pair to VESC Remote page.
 * Added detect all without CAN button.
 * Updated observer gain calculation.
+* Added support for FW test build flag.
+* Added unity firmwares.
 
 == 2.03 ==
 * App balance updates. See https://github.com/vedderb/bldc/pull/138.

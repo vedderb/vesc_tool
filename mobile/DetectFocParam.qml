@@ -90,7 +90,7 @@ Item {
             return;
         }
 
-        gain = (0.00001 / res) / (lambda * lambda)
+        gain = 1.0e-3 / (lambda * lambda)
 
         updateDisplay()
     }

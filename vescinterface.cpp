@@ -2918,6 +2918,11 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
 
     if (fw_connected >= qMakePair(3, 64)) {
         compCommands.append(int(COMM_SET_CURRENT_REL));
+        compCommands.append(int(COMM_SET_BATTERY_CUT));
+    }
+
+    if (fw_connected >= qMakePair(5, 00)) {
+        compCommands.append(int(COMM_SET_CURRENT_REL));
     }
 
     if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {

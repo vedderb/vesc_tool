@@ -175,6 +175,7 @@ public slots:
     void bmReadMem(uint32_t addr, quint16 size);
     void setCurrentRel(double current);
     void forwardCanFrame(QByteArray data, quint32 id, bool isExtended);
+    void setBatteryCut(double start, double end, bool store, bool fwdCan);
 
 private slots:
     void timerSlot();

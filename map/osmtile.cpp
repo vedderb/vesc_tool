@@ -20,6 +20,11 @@
 #include "osmtile.h"
 #include <cmath>
 
+#ifndef _M_PI
+#define M_PI 3.14159
+#endif
+
+
 OsmTile::OsmTile(QPixmap pxm, int zoom, int x, int y) : mPixmap(pxm), mZoom(zoom), mX(x), mY(y)
 {
 

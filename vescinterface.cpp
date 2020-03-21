@@ -2940,6 +2940,11 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         mFwSupportsConfiguration = true;
     }
 
+    if ((fw_connected >= qMakePair(3, 100) && fw_connected <= qMakePair(3, 103)) ||
+        (fw_connected >= qMakePair(23, 34) && fw_connected <= qMakePair(23, 46))) {
+        compCommands.clear();
+    }
+
     mCommands->setLimitedCompatibilityCommands(compCommands);
 
     bool wasReceived = mFwVersionReceived;

@@ -39,5 +39,7 @@
         <file>res/firmwares/100_250/VESC_default.bin</file>
         <file>res/firmwares/100_250/VESC_default_no_hw_limits.bin</file>
         <file>res/firmwares/100_250/VESC_servoout.bin</file>
+        <file>res/firmwares/UNITY/VESC_default.bin</file>
+        <file>res/firmwares/UNITY/VESC_default_no_hw_limits.bin</file>
     </qresource>
 </RCC>

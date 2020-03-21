@@ -260,15 +260,23 @@ void DetectAllFocDialog::runDetect(bool can)
     Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
     auto canDevs = mVesc->scanCan();
 
-    if (!Utility::setBatteryCutCan(mVesc, canDevs, 6.0, 6.0)) {
-        ui->tabWidget->setEnabled(true);
-        ui->runButton->setEnabled(true);
-        ui->runNoCanButton->setEnabled(true);
-        ui->closeButton->setEnabled(true);
-        mRejectOk = true;
-        ui->progressBar->setRange(0, 100);
-        ui->progressBar->setValue(0);
-        return;
+    if (mVesc->commands()->getLimitedCompatibilityCommands().contains(COMM_SET_BATTERY_CUT)) {
+        mVesc->commands()->setBatteryCut(
+                    mVesc->mcConfig()->getParamDouble("l_battery_cut_start"),
+                    mVesc->mcConfig()->getParamDouble("l_battery_cut_end"),
+                    true, true);
+        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    } else {
+        if (!Utility::setBatteryCutCan(mVesc, canDevs, 6.0, 6.0)) {
+            ui->tabWidget->setEnabled(true);
+            ui->runButton->setEnabled(true);
+            ui->runNoCanButton->setEnabled(true);
+            ui->closeButton->setEnabled(true);
+            mRejectOk = true;
+            ui->progressBar->setRange(0, 100);
+            ui->progressBar->setValue(0);
+            return;
+        }
     }
 
     QString res = Utility::detectAllFoc(mVesc, can,

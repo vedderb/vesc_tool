@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -e
+
+# Linux
+export PATH=/opt/Qt/5.12-static/bin:$PATH
+rm -rf build/lin/*
+
+qmake -config release "CONFIG += release_lin build_original vt_test_version"
+make clean
+make -j8
+rm -rf build/lin/obj
+mv build/lin/vesc_tool* build/test_all/vesc_tool_test_linux
+
+# Windows
+export PATH=/opt/mxe2/usr/bin/:$PATH
+rm -rf build/win/*
+
+/opt/mxe2/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG += release_win build_original vt_test_version"
+make clean
+make -j8
+rm -rf build/win/obj
+mv build/win/vesc_tool*.exe build/test_all/vesc_tool_test_windows.exe
+
+# Android
+export ANDROID_HOME=~/Android/Latest
+export ANDROID_NDK_HOST=linux-x86_64
+export ANDROID_NDK_PLATFORM=android-23
+export ANDROID_NDK_TOOLCHAIN_VERSION=4.9
+export ANDROID_API_VERSION=android-23
+export ANDROID_NDK_ROOT=$ANDROID_HOME/Ndk
+export ANDROID_SDK_ROOT=$ANDROID_HOME/Sdk
+
+export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+export PATH=$PATH:$ANDROID_HOME/Sdk/tools:/usr/bin:$JAVA_HOME/bin
+
+rm -rf build/android/*
+
+# armv7
+export PATH=/opt/Qt3/5.12.7/android_armv7/bin/:$PATH
+export ANDROID_NDK_TOOLCHAIN_PREFIX=arm-linux-androideabi
+export ANDROID_NDK_TOOLS_PREFIX=arm-linux-androideabi
+
+# Mobile
+qmake -config release "CONFIG += release_android build_mobile vt_test_version"
+make clean
+make -j8
+make install INSTALL_ROOT=build/android/build
+androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-libvesc_tool.so-deployment-settings.json --android-platform android-28
+mv build/android/build/build/outputs/apk/build-debug.apk build/test_all/vesc_tool_test_android.apk
+rm -rf build/android/build
+rm -rf build/android/obj
+rm -f build/android/libvesc_tool.so
+

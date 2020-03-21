@@ -105,6 +105,7 @@ void Commands::processPacket(QByteArray data)
         QString hw;
         QByteArray uuid;
         bool isPaired = false;
+        bool isTestFw = false;
 
         if (vb.size() >= 2) {
             fw_major = vb.vbPopFrontInt8();
@@ -121,7 +122,11 @@ void Commands::processPacket(QByteArray data)
             isPaired = vb.vbPopFrontInt8();
         }
 
-        emit fwVersionReceived(fw_major, fw_minor, hw, uuid, isPaired);
+        if (vb.size() >= 1) {
+            isTestFw = vb.vbPopFrontInt8();
+        }
+
+        emit fwVersionReceived(fw_major, fw_minor, hw, uuid, isPaired, isTestFw);
     } break;
 
     case COMM_ERASE_NEW_APP:
@@ -603,6 +608,10 @@ void Commands::processPacket(QByteArray data)
         bool isExtended = vb.vbPopFrontInt8();
         emit canFrameRx(vb, id, isExtended);
     } break;
+
+    case COMM_SET_BATTERY_CUT:
+        emit ackReceived("COMM_SET_BATTERY_CUT Write OK");
+        break;
 
     default:
         break;
@@ -1320,6 +1329,17 @@ void Commands::forwardCanFrame(QByteArray data, quint32 id, bool isExtended)
     vb.vbAppendUint32(id);
     vb.vbAppendInt8(isExtended);
     vb.append(data);
+    emitData(vb);
+}
+
+void Commands::setBatteryCut(double start, double end, bool store, bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_SET_BATTERY_CUT);
+    vb.vbAppendDouble32(start, 1e3);
+    vb.vbAppendDouble32(end, 1e3);
+    vb.vbAppendInt8(store);
+    vb.vbAppendInt8(fwdCan);
     emitData(vb);
 }
 

@@ -268,7 +268,13 @@ void PageSwdProg::bmConnRes(int res)
         addSwdFw("VESC 100/250", "://res/firmwares/100_250/VESC_default.bin",
                  0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
         addSwdFw("FOCBOX UNITY", "://res/firmwares/UNITY/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("STORMCORE 60D", ":/res/firmwares/STORMCORE_60D/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("STORMCORE 100D", ":/res/firmwares/STORMCORE_100D/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("STORMCORE 100S", ":/res/firmwares/STORMCORE_100S/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
         break;
 
     case 2:

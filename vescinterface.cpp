@@ -1222,8 +1222,10 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(3000);
         auto conn = connect(mCommands, &Commands::writeNewAppDataResReceived,
-                            [&res,&loop](bool wrRes) {
-            res = wrRes ? 1 : -1;
+                            [&res,&loop](bool ok, bool hasOffset, quint32 offset) {
+            (void)offset;
+            (void)hasOffset;
+            res = ok ? 1 : -1;
             loop.quit();
         });
 
@@ -1270,6 +1272,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         addr += sizeCrc.size();
     }
 
+    int lzoFailures = 0;
     while (newFirmware.size() > 0) {
         if (mCancelFwUpload) {
             emit fwUploadStatus("Upload cancelled", 0.0, false);
@@ -1310,7 +1313,15 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
                 if (res == 1) {
                     qWarning() << "Writing LZO failed, but regular write was OK.";
                     qWarning() << out_len << sz;
+                    lzoFailures++;
+
+                    if (lzoFailures > 3) {
+                        qWarning() << "Lzo does not seem to work with the current FW, disabling it for this upload.";
+                        supportsLzo = false;
+                    }
                 }
+            } else {
+                lzoFailures = 0;
             }
         } else {
             nonCompChunks++;

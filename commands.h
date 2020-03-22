@@ -63,7 +63,7 @@ signals:
                            bool isPaired, bool isTestFw);
     void eraseNewAppResReceived(bool ok);
     void eraseBootloaderResReceived(bool ok);
-    void writeNewAppDataResReceived(bool ok);
+    void writeNewAppDataResReceived(bool ok, bool hasOffset, quint32 offset);
     void ackReceived(QString ackType);
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void printReceived(QString str);

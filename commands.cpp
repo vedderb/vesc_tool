@@ -133,9 +133,16 @@ void Commands::processPacket(QByteArray data)
         emit eraseNewAppResReceived(vb.at(0));
         break;
 
-    case COMM_WRITE_NEW_APP_DATA:
-        emit writeNewAppDataResReceived(vb.at(0));
-        break;
+    case COMM_WRITE_NEW_APP_DATA: {
+        bool ok = vb.vbPopFrontInt8();
+        bool hasOffset = false;
+        quint32 offset = 0;
+        if (vb.size() >= 4) {
+            hasOffset = true;
+            offset = vb.vbPopFrontUint32();
+        }
+        emit writeNewAppDataResReceived(ok, hasOffset, offset);
+    } break;
 
     case COMM_ERASE_BOOTLOADER:
         emit eraseBootloaderResReceived(vb.at(0));

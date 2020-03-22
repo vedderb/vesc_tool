@@ -8,6 +8,7 @@
 * Added unity firmwares.
 * Added stormcore firmwares.
 * Removed some uncommon firmwares.
+* Disable LZO FW compression if 3 consecutive chunks fail.
 
 == 2.03 ==
 * App balance updates. See https://github.com/vedderb/bldc/pull/138.

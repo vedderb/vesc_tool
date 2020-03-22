@@ -6,6 +6,8 @@
 * Updated observer gain calculation.
 * Added support for FW test build flag.
 * Added unity firmwares.
+* Added stormcore firmwares.
+* Removed some uncommon firmwares.
 
 == 2.03 ==
 * App balance updates. See https://github.com/vedderb/bldc/pull/138.

@@ -101,7 +101,13 @@ int main(int argc, char *argv[])
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-BoldOblique.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Oblique.ttf");
 
-    qApp->setFont(QFont("DejaVu Sans", 11));
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Regular.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Medium.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bolf.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
+
+    qApp->setFont(QFont("Roboto",12));
 
     // Style
     a.setStyleSheet("");

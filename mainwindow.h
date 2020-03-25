@@ -81,6 +81,7 @@ private slots:
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void paramChangedDouble(QObject *src, QString name, double newParam);
     void mcConfigCheckResult(QStringList paramsNotSet);
+    void pingCanRx(QVector<int> devs, bool isTimeout);
 
     void on_actionReconnect_triggered();
     void on_actionDisconnect_triggered();
@@ -135,6 +136,9 @@ private slots:
     void on_actionParameterEditorFW_triggered();
     void on_actionBackupConfigurationsCAN_triggered();
     void on_actionRestoreConfigurationsCAN_triggered();
+    void on_scanButton_clicked();
+    void on_clearButton_clicked();
+    void on_canList_currentRowChanged(int currentRow);
 
 private:
     Ui::MainWindow *ui;

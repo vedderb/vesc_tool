@@ -9,6 +9,8 @@
 * Added stormcore firmwares.
 * Removed some uncommon firmwares.
 * Disable LZO FW compression if 3 consecutive chunks fail.
+* Added CAN-list with connected VESCs.
+* Filter pages based on selected motor and app.
 
 == 2.03 ==
 * App balance updates. See https://github.com/vedderb/bldc/pull/138.

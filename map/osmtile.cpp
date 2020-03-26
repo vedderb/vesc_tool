@@ -20,8 +20,8 @@
 #include "osmtile.h"
 #include <cmath>
 
-#ifndef _M_PI
-#define M_PI 3.14159
+#ifndef M_PI
+#define M_PI 3.14159265358979
 #endif
 
 

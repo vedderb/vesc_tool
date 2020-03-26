@@ -25,6 +25,7 @@
 #include <QTimer>
 #include <QProcess>
 #include <QSettings>
+#include <QMap>
 #include "vescinterface.h"
 #include "widgets/pagelistitem.h"
 
@@ -136,8 +137,7 @@ private slots:
     void on_actionParameterEditorFW_triggered();
     void on_actionBackupConfigurationsCAN_triggered();
     void on_actionRestoreConfigurationsCAN_triggered();
-    void on_scanButton_clicked();
-    void on_clearButton_clicked();
+    void on_scanCanButton_clicked();
     void on_canList_currentRowChanged(int currentRow);
 
 private:
@@ -153,6 +153,7 @@ private:
     bool mKeyRight;
     bool mMcConfRead;
     bool mAppConfRead;
+    QMap<QString, int> mPageNameIdList;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;

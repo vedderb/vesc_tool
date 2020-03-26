@@ -34,8 +34,8 @@
 #include <QDirIterator>
 
 
-#ifndef _M_PI
-#define M_PI 3.14159
+#ifndef M_PI
+#define M_PI 3.14159265358979
 #endif
 
 #ifdef Q_OS_ANDROID

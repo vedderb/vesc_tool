@@ -31,8 +31,8 @@
 #include <cmath>
 #include "lzokay/lzokay.hpp"
 
-#ifndef _M_PI
-#define M_PI 3.14159
+#ifndef M_PI
+#define M_PI 3.14159265358979
 #endif
 
 #ifdef HAS_SERIALPORT
@@ -2024,31 +2024,23 @@ bool VescInterface::connectSerial(QString port, int baudrate)
 #endif
 
         mSerialPort->setPortName(port);
-        QThread::msleep(1);
         mSerialPort->open(QIODevice::ReadWrite);
-        QThread::msleep(10);
 
         if(!mSerialPort->isOpen()) {
             return false;
         }
 
-        QThread::msleep(10);
         mSerialPort->setBaudRate(baudrate);
-
         mSerialPort->setDataBits(QSerialPort::Data8);
-
-       // mSerialPort->setParity(QSerialPort::NoParity);
-      //  mSerialPort->setStopBits(QSerialPort::OneStop);
-       // mSerialPort->setFlowControl(QSerialPort::NoFlowControl);
+        mSerialPort->setParity(QSerialPort::NoParity);
+        mSerialPort->setStopBits(QSerialPort::OneStop);
+        mSerialPort->setFlowControl(QSerialPort::NoFlowControl);
 
         // For nrf
-       // mSerialPort->setRequestToSend(true);
-      //  QThread::msleep(1);
-       // mSerialPort->setDataTerminalReady(true);
-       // QThread::msleep(5);
-      //  mSerialPort->setDataTerminalReady(false);
-
-        QThread::msleep(100);
+        mSerialPort->setRequestToSend(true);
+        mSerialPort->setDataTerminalReady(true);
+        QThread::msleep(5);
+        mSerialPort->setDataTerminalReady(false);
     }
 
     mLastSerialPort = port;

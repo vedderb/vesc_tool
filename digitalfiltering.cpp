@@ -22,8 +22,8 @@
 #include <QDebug>
 
 
-#ifndef _M_PI
-#define M_PI 3.14159
+#ifndef M_PI
+#define M_PI 3.14159265358979
 #endif
 
 DigitalFiltering::DigitalFiltering()
@@ -120,8 +120,8 @@ void DigitalFiltering::dft(int dir, int len, double *real, double *imag) {
     for (i=0;i < len;i++) {
         x2[i] = 0;
         y2[i] = 0;
-        arg = -(double)dir * 2.0 * M_PI * (double)i / (double)len;
-        for (k=0;k<len;k++) {
+        arg = -double(dir) * 2.0 * M_PI * double(i) / double(len);
+        for (k=0;k < len;k++) {
             cosarg = cos(k * arg);
             sinarg = sin(k * arg);
             x2[i] += (real[k] * cosarg - imag[k] * sinarg);
@@ -132,8 +132,8 @@ void DigitalFiltering::dft(int dir, int len, double *real, double *imag) {
     // Copy the data back
     if (dir == 1) {
         for (i=0;i<len;i++) {
-            real[i] = x2[i] / (double)len;
-            imag[i] = y2[i] / (double)len;
+            real[i] = x2[i] / double(len);
+            imag[i] = y2[i] / double(len);
         }
     } else {
         for (i=0;i<len;i++) {
@@ -161,13 +161,13 @@ void DigitalFiltering::hamming(double *data, int len)
 {
     if (len % 2 == 0) {
         for (int i = 0;i < (len / 2);i++) {
-            double val = 0.54 - 0.46 * cos((2.0 * M_PI * (double)i)/(double)(len - 1));
+            double val = 0.54 - 0.46 * cos((2.0 * M_PI * double(i)) / double(len - 1));
             data[i] *= val;
             data[len - i - 1] *= val;
         }
     } else {
         for (int i = 0;i < len;i++) {
-            data[i] *= 0.54 - 0.46 * cos((2.0 * M_PI * (double)i)/(double)(len - 1));
+            data[i] *= 0.54 - 0.46 * cos((2.0 * M_PI * double(i)) / double(len - 1));
         }
     }
 }
@@ -234,11 +234,11 @@ QVector<double> DigitalFiltering::filterSignal(const QVector<double> &signal, co
 QVector<double> DigitalFiltering::generateFirFilter(double f_break, int bits, bool useHamming)
 {
     int taps = 1 << bits;
-    double imag[4000];
-    double filter_vector[4000];
+    double *imag = new double[taps];
+    double *filter_vector = new double[taps];
 
     for(int i = 0;i < taps;i++) {
-        if (i < (int)((double)taps * f_break)) {
+        if (i < int(double(taps) * f_break)) {
             filter_vector[i] = 1.0;
         } else {
             filter_vector[i] = 0.0;
@@ -261,6 +261,9 @@ QVector<double> DigitalFiltering::generateFirFilter(double f_break, int bits, bo
     for(int i = 0;i < taps;i++) {
         result.append(filter_vector[i]);
     }
+
+    delete [] imag;
+    delete [] filter_vector;
 
     return result;
 }

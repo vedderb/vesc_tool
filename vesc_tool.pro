@@ -56,6 +56,9 @@ DEFINES += HAS_POS
     # Serial port available
     DEFINES += HAS_SERIALPORT
 }
+win32: {
+    DEFINES += _USE_MATH_DEFINES
+}
 
 # Options
 #CONFIG += build_original

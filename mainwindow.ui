@@ -19,7 +19,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_platinum.qrc">
+   <iconset resource="res_free.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -55,7 +55,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_platinum.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_free.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -545,7 +545,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -601,7 +601,7 @@
     <addaction name="actionTerminalPrintFaults"/>
     <addaction name="actionTerminalPrintThreads"/>
     <addaction name="separator"/>
-    <addaction name="actionTerminalDRV8301ResetLatchedFaults"/>
+    <addaction name="actionTerminalDRVResetLatchedFaults"/>
     <addaction name="separator"/>
     <addaction name="actionTerminalClear"/>
    </widget>
@@ -1122,13 +1122,13 @@ p, li { white-space: pre-wrap; }
     <string>VESC Tool Changelog</string>
    </property>
   </action>
-  <action name="actionTerminalDRV8301ResetLatchedFaults">
+  <action name="actionTerminalDRVResetLatchedFaults">
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/res/icons/Bug-96.png</normaloff>:/res/icons/Bug-96.png</iconset>
    </property>
    <property name="text">
-    <string>DRV8301 Reset Latched Faults</string>
+    <string>DRV Reset Latched Faults</string>
    </property>
   </action>
   <action name="actionVESCProjectForums">
@@ -1275,7 +1275,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_platinum.qrc"/>
+  <include location="res_free.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

@@ -120,6 +120,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(paramChangedDouble(QObject*,QString,double)));
     connect(ui->actionAboutQt, SIGNAL(triggered(bool)),
             qApp, SLOT(aboutQt()));
+    connect(mVesc->commands(), SIGNAL(pingCanRx(QVector<int>,bool)),
+            this, SLOT(pingCanRx(QVector<int>,bool)));
 
     ui->dispDuty->setName("Duty");
     ui->dispDuty->setRange(100.0);
@@ -1087,6 +1089,10 @@ void MainWindow::reloadPages()
 
     ui->pageList->setMinimumWidth(width);
     ui->pageList->setMaximumWidth(width);
+    ui->canList->setMinimumWidth(width);
+    ui->canList->setMaximumWidth(width);
+    ui->scanButton->setMaximumWidth(width/2-3);
+    ui->clearButton->setMaximumWidth(width/2-3);
     ui->pageLabel->setMaximumWidth(width);
     ui->pageLabel->setMaximumHeight((394 * width) / 1549);
 
@@ -1427,4 +1433,54 @@ void MainWindow::on_actionRestoreConfigurationsCAN_triggered()
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
     mVesc->confRestoreBackup(true);
+}
+
+void MainWindow::on_scanButton_clicked()
+{
+    if (mVesc) {
+        ui->scanButton->setEnabled(false);
+        mVesc->commands()->pingCan();
+    }
+}
+
+void MainWindow::on_clearButton_clicked()
+{
+ ui->canList->clear();
+ QListWidgetItem *item = new QListWidgetItem(QString("VESC LOCAL"));
+ ui->canList->addItem(item);
+}
+
+void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
+{
+    (void)isTimeout;
+    ui->scanButton->setEnabled(true);
+
+    ui->canList->clear();
+    QListWidgetItem *item = new QListWidgetItem(QString("VESC LOCAL"));
+    ui->canList->addItem(item);
+    for (int dev: devs) {
+        item = new QListWidgetItem(QString("VESC %1").arg(dev));
+        ui->canList->addItem(item);
+    }
+    ui->canList->setCurrentRow(0);
+}
+
+
+
+void MainWindow::on_canList_currentRowChanged(int currentRow)
+{
+    if (currentRow >= 0) {
+        if(currentRow == 0){
+            mVesc->commands()->setSendCan(false);
+            mVesc->commands()->getMcconf();
+        }else {
+            int id =  ui->canList->currentItem()->text().split(" ")[1].toInt(); //  toDouble();
+            if (id >= 0 && id<255) {
+                mVesc->commands()->setCanSendId(quint32(id));
+                mVesc->commands()->setSendCan(true);
+                mVesc->commands()->getMcconf();
+            }
+
+        }
+    }
 }

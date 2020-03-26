@@ -31,6 +31,10 @@
 #include <cmath>
 #include "lzokay/lzokay.hpp"
 
+#ifndef _M_PI
+#define M_PI 3.14159
+#endif
+
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
 #endif
@@ -980,7 +984,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
 
         QByteArray in = newFirmware.mid(0, sz);
         std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
-        unsigned char out[outMaxSize];
+        unsigned char out[1000];
         std::size_t out_len = sz;
 
         if (supportsLzo && isLzo) {
@@ -1287,7 +1291,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
 
         QByteArray in = newFirmware.mid(0, sz);
         std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
-        unsigned char out[outMaxSize];
+        unsigned char out[1000];
         std::size_t out_len = sz;
 
         if (isLzo && supportsLzo) {
@@ -2020,23 +2024,30 @@ bool VescInterface::connectSerial(QString port, int baudrate)
 #endif
 
         mSerialPort->setPortName(port);
+        QThread::msleep(1);
         mSerialPort->open(QIODevice::ReadWrite);
+        QThread::msleep(10);
 
         if(!mSerialPort->isOpen()) {
             return false;
         }
 
+        QThread::msleep(10);
         mSerialPort->setBaudRate(baudrate);
+
         mSerialPort->setDataBits(QSerialPort::Data8);
-        mSerialPort->setParity(QSerialPort::NoParity);
-        mSerialPort->setStopBits(QSerialPort::OneStop);
-        mSerialPort->setFlowControl(QSerialPort::NoFlowControl);
+
+       // mSerialPort->setParity(QSerialPort::NoParity);
+      //  mSerialPort->setStopBits(QSerialPort::OneStop);
+       // mSerialPort->setFlowControl(QSerialPort::NoFlowControl);
 
         // For nrf
-        mSerialPort->setRequestToSend(true);
-        mSerialPort->setDataTerminalReady(true);
-        QThread::msleep(5);
-        mSerialPort->setDataTerminalReady(false);
+       // mSerialPort->setRequestToSend(true);
+      //  QThread::msleep(1);
+       // mSerialPort->setDataTerminalReady(true);
+       // QThread::msleep(5);
+      //  mSerialPort->setDataTerminalReady(false);
+
         QThread::msleep(100);
     }
 

@@ -1532,12 +1532,14 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
         if (currentRow == 0) {
             mVesc->commands()->setSendCan(false);
             mVesc->commands()->getMcconf();
+            mVesc->commands()->getAppConf();
         } else {
             int id = ui->canList->currentItem()->text().split(" ")[2].toInt();
             if (id >= 0 && id < 255) {
                 mVesc->commands()->setCanSendId(quint32(id));
                 mVesc->commands()->setSendCan(true);
                 mVesc->commands()->getMcconf();
+                mVesc->commands()->getAppConf();
             }
         }
     }

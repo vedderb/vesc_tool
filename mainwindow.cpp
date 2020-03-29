@@ -410,6 +410,9 @@ void MainWindow::timerSlot()
     // RT data
     if (ui->actionRtData->isChecked()) {
         mVesc->commands()->getValues();
+        if (mVesc->isRtLogOpen()) {
+            mVesc->commands()->getValuesSetup();
+        }
     }
 
     // APP RT data

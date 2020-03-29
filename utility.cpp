@@ -33,11 +33,6 @@
 #include <QNetworkInterface>
 #include <QDirIterator>
 
-
-#ifndef M_PI
-#define M_PI 3.14159265358979
-#endif
-
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
 #include <QAndroidJniObject>

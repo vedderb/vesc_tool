@@ -402,6 +402,10 @@ void MainWindow::timerSlot()
         }
     }
 
+    if(mVesc->isPortConnected() && ui->canList->count()==0){
+        on_scanCanButton_clicked();
+    }
+
     // CAN fwd
     if (ui->actionCanFwd->isChecked() != mVesc->commands()->getSendCan()) {
         ui->actionCanFwd->setChecked(mVesc->commands()->getSendCan());
@@ -1360,9 +1364,12 @@ void MainWindow::on_actionTerminalPrintThreads_triggered()
     showPage("VESC Terminal");
 }
 
-void MainWindow::on_actionTerminalDRV8301ResetLatchedFaults_triggered()
+void MainWindow::on_actionTerminalDRVResetLatchedFaults_triggered()
 {
     mVesc->commands()->sendTerminalCmd("drv8301_reset_faults");
+    mVesc->commands()->sendTerminalCmd("drv8323s_reset_faults");
+    mVesc->commands()->sendTerminalCmd("drv8320_reset_faults");
+    mVesc->commands()->sendTerminalCmd("drv8305_reset_faults");
 }
 
 void MainWindow::on_actionCanFwd_toggled(bool arg1)
@@ -1495,9 +1502,12 @@ void MainWindow::on_actionRestoreConfigurationsCAN_triggered()
 
 void MainWindow::on_scanCanButton_clicked()
 {
-    if (mVesc) {
+    if (mVesc->isPortConnected()) {
         ui->scanCanButton->setEnabled(false);
         mVesc->commands()->pingCan();
+    }else{
+        ui->canList->clear();
+        showStatusInfo("Connect to VESC before scanning", false);
     }
 }
 
@@ -1507,10 +1517,10 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
     ui->scanCanButton->setEnabled(true);
 
     ui->canList->clear();
-    QListWidgetItem *item = new QListWidgetItem(QString("VESC LOCAL"));
+    QListWidgetItem *item = new QListWidgetItem(QString("MOTOR ID: LOCAL"));
     ui->canList->addItem(item);
     for (int dev: devs) {
-        item = new QListWidgetItem(QString("VESC %1").arg(dev));
+        item = new QListWidgetItem(QString("MOTOR ID: %1").arg(dev));
         ui->canList->addItem(item);
     }
     ui->canList->setCurrentRow(0);
@@ -1523,7 +1533,7 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
             mVesc->commands()->setSendCan(false);
             mVesc->commands()->getMcconf();
         } else {
-            int id = ui->canList->currentItem()->text().split(" ")[1].toInt();
+            int id = ui->canList->currentItem()->text().split(" ")[2].toInt();
             if (id >= 0 && id < 255) {
                 mVesc->commands()->setCanSendId(quint32(id));
                 mVesc->commands()->setSendCan(true);

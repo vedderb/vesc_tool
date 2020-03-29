@@ -402,7 +402,7 @@ void MainWindow::timerSlot()
         }
     }
 
-    if(mVesc->isPortConnected() && ui->canList->count()==0){
+    if (mVesc->isPortConnected() && ui->canList->count() == 0 && ui->scanCanButton->isEnabled()) {
         on_scanCanButton_clicked();
     }
 
@@ -1505,7 +1505,7 @@ void MainWindow::on_scanCanButton_clicked()
     if (mVesc->isPortConnected()) {
         ui->scanCanButton->setEnabled(false);
         mVesc->commands()->pingCan();
-    }else{
+    } else {
         ui->canList->clear();
         showStatusInfo("Connect to VESC before scanning", false);
     }

@@ -402,9 +402,20 @@ void MainWindow::timerSlot()
         }
     }
 
+    //Scan can bus on connect
     if (mVesc->isPortConnected() && ui->canList->count() == 0 && ui->scanCanButton->isEnabled()) {
         on_scanCanButton_clicked();
     }
+
+    //If disconnected for a short time clear the can list so it scans on reconnect.
+    //Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
+    static int disconected_cnt = 0;
+    disconected_cnt++;
+    if (disconected_cnt >= 20 && ui->canList->count()>0) {
+        ui->canList->clear();
+        mVesc->commands()->setSendCan(false);
+    }
+
 
     // CAN fwd
     if (ui->actionCanFwd->isChecked() != mVesc->commands()->getSendCan()) {
@@ -445,6 +456,7 @@ void MainWindow::timerSlot()
     // Read configurations if they haven't been read since starting VESC Tool
     if (mVesc->isPortConnected()) {
         static int conf_cnt = 0;
+        disconected_cnt = 0;
         conf_cnt++;
         if (conf_cnt >= 20) {
             conf_cnt = 0;
@@ -1381,6 +1393,20 @@ void MainWindow::on_actionCanFwd_toggled(bool arg1)
                                  false, false);
     } else {
         mVesc->commands()->setSendCan(arg1);
+    }
+
+    if (arg1){
+        int id_set = mVesc->commands()->getCanSendId();
+        for(int i = 1; i <  ui->canList->count(); i++){
+            int id_ui = ui->canList->item(i)->text().split(" ")[2].toInt();
+            if(id_ui == id_set){
+                ui->canList->setCurrentRow(i);
+                return;
+            }
+        }
+
+    }else{
+        ui->canList->setCurrentRow(0);
     }
 }
 

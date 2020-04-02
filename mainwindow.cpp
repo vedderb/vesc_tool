@@ -402,24 +402,38 @@ void MainWindow::timerSlot()
         }
     }
 
-    //Scan can bus on connect
+    // Scan can bus on connect
     if (mVesc->isPortConnected() && ui->canList->count() == 0 && ui->scanCanButton->isEnabled()) {
         on_scanCanButton_clicked();
     }
 
-    //If disconnected for a short time clear the can list so it scans on reconnect.
-    //Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
+    // If disconnected for a short time clear the can list so it scans on reconnect.
+    // Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
     static int disconected_cnt = 0;
     disconected_cnt++;
-    if (disconected_cnt >= 20 && ui->canList->count()>0) {
+    if (disconected_cnt >= 20 && ui->canList->count() > 0) {
         ui->canList->clear();
         mVesc->commands()->setSendCan(false);
     }
 
-
     // CAN fwd
     if (ui->actionCanFwd->isChecked() != mVesc->commands()->getSendCan()) {
         ui->actionCanFwd->setChecked(mVesc->commands()->getSendCan());
+    }
+
+    {
+        if (mVesc->commands()->getSendCan()) {
+            int id_set = mVesc->commands()->getCanSendId();
+            for (int i = 1; i <  ui->canList->count(); i++) {
+                int id_ui = ui->canList->item(i)->text().split(" ")[2].toInt();
+                if (id_ui == id_set) {
+                    ui->canList->setCurrentRow(i);
+                    break;
+                }
+            }
+        } else {
+            ui->canList->setCurrentRow(0);
+        }
     }
 
     // RT data
@@ -461,7 +475,7 @@ void MainWindow::timerSlot()
         if (conf_cnt >= 20) {
             conf_cnt = 0;
 
-            if (!mVesc->deserializeFailedSinceConnected()) {
+            if (!mVesc->deserializeFailedSinceConnected() && mVesc->fwRx()) {
                 if (!mMcConfRead) {
                     mVesc->commands()->getMcconf();
                 }
@@ -1394,20 +1408,6 @@ void MainWindow::on_actionCanFwd_toggled(bool arg1)
     } else {
         mVesc->commands()->setSendCan(arg1);
     }
-
-    if (arg1){
-        int id_set = mVesc->commands()->getCanSendId();
-        for(int i = 1; i <  ui->canList->count(); i++){
-            int id_ui = ui->canList->item(i)->text().split(" ")[2].toInt();
-            if(id_ui == id_set){
-                ui->canList->setCurrentRow(i);
-                return;
-            }
-        }
-
-    }else{
-        ui->canList->setCurrentRow(0);
-    }
 }
 
 void MainWindow::on_actionSafetyInformation_triggered()
@@ -1556,16 +1556,20 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
 {
     if (currentRow >= 0) {
         if (currentRow == 0) {
-            mVesc->commands()->setSendCan(false);
-            mVesc->commands()->getMcconf();
-            mVesc->commands()->getAppConf();
+            if (mVesc->commands()->getSendCan()) {
+                mVesc->commands()->setSendCan(false);
+                mVesc->commands()->getMcconf();
+                mVesc->commands()->getAppConf();
+            }
         } else {
             int id = ui->canList->currentItem()->text().split(" ")[2].toInt();
             if (id >= 0 && id < 255) {
-                mVesc->commands()->setCanSendId(quint32(id));
-                mVesc->commands()->setSendCan(true);
-                mVesc->commands()->getMcconf();
-                mVesc->commands()->getAppConf();
+                if (!mVesc->commands()->getSendCan() || mVesc->commands()->getCanSendId() != id) {
+                    mVesc->commands()->setCanSendId(quint32(id));
+                    mVesc->commands()->setSendCan(true);
+                    mVesc->commands()->getMcconf();
+                    mVesc->commands()->getAppConf();
+                }
             }
         }
     }

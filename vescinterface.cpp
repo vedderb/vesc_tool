@@ -138,8 +138,6 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     // TCP
     mTcpSocket = new QTcpSocket(this);
     mTcpConnected = false;
-    mLastTcpServer = QSettings().value("tcp_server", "").toString();
-    mLastTcpPort = QSettings().value("tcp_port", 65102).toInt();
 
     connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
     connect(mTcpSocket, SIGNAL(connected()), this, SLOT(tcpInputConnected()));

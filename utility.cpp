@@ -1277,23 +1277,23 @@ bool Utility::checkFwCompatibility(VescInterface *vesc)
 
     auto conn = connect(vesc->commands(), &Commands::fwVersionReceived,
             [&res, vesc](int major, int minor, QString hw, QByteArray uuid,
-                        bool isPaired, bool isTestFw) {
+                        bool isPaired, int isTestFw) {
         (void)hw;(void)uuid;(void)isPaired;(void)isTestFw;
         if (vesc->getSupportedFirmwarePairs().contains(qMakePair(major, minor))) {
             res = true;
         }
     });
 
-    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)),
-               vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,bool)));
+    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
+               vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)), 1500);
+    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)), 1500);
 
     disconnect(conn);
 
-    connect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)),
-            vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,bool)));
+    connect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
+            vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
 
     return res;
 }
@@ -1554,7 +1554,7 @@ bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
 
     auto conn = connect(vesc->commands(), &Commands::fwVersionReceived,
             [&res, &uuidRx, vesc](int major, int minor, QString hw, QByteArray uuid,
-                        bool isPaired, bool isTestFw) {
+                        bool isPaired, int isTestFw) {
         (void)hw;(void)uuid;(void)isPaired;(void)isTestFw;
 
         if (vesc->getSupportedFirmwarePairs().contains(qMakePair(major, minor))) {
@@ -1572,19 +1572,19 @@ bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
         }
     });
 
-    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)),
-               vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,bool)));
+    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
+               vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
 
     vesc->commands()->getFwVersion();
 
-    if (!waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)), 1500)) {
+    if (!waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)), 1500)) {
         vesc->emitMessageDialog("Load Config", "No response when reading firmware version.", false, false);
     }
 
     disconnect(conn);
 
-    connect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)),
-            vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,bool)));
+    connect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
+            vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
 
     return res;
 }

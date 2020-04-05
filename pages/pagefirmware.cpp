@@ -75,8 +75,8 @@ void PageFirmware::setVesc(VescInterface *vesc)
 
         connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
                 this, SLOT(fwUploadStatus(QString,double,bool)));
-        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,bool)),
-                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,bool)));
+        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
+                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
     }
 }
 
@@ -126,7 +126,7 @@ void PageFirmware::fwUploadStatus(const QString &status, double progress, bool i
 }
 
 void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
-                                     bool isPaired, bool isTestFw)
+                                     bool isPaired, int isTestFw)
 {
     QString fwStr;
     QString strUuid = Utility::uuid2Str(uuid, true);
@@ -146,8 +146,15 @@ void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArra
         }
     }
 
-    fwStr += "\n" + QString("Paired: %1, Test FW: %2").
-            arg(isPaired ? "true" : "false").arg(isTestFw ? "true" : "false");
+    fwStr += "\n" + QString("Paired: %1, Status: ").
+            arg(isPaired ? "true" : "false");
+    if(isTestFw>0){
+        fwStr += QString("BETA %1").
+                    arg(isTestFw);
+    }
+    else{
+        fwStr += "STABLE";
+    }
 
     ui->currentLabel->setText(fwStr);
     updateHwList(hw);

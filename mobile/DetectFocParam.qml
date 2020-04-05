@@ -90,7 +90,7 @@ Item {
             return;
         }
 
-        gain = (0.00001 / res) / (lambda * lambda)
+        gain = 1.0e-3 / (lambda * lambda)
 
         updateDisplay()
     }
@@ -341,7 +341,8 @@ Item {
         }
 
         onAccepted: {
-            mCommands.measureLinkageOpenloop(currentBox.realValue, erpmBox.realValue, dutyBox.realValue, res)
+            mCommands.measureLinkageOpenloop(currentBox.realValue, erpmBox.realValue,
+                                             dutyBox.realValue, res, ind)
         }
     }
 

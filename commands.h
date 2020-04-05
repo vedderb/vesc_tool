@@ -59,10 +59,11 @@ public:
 signals:
     void dataToSend(QByteArray &data);
 
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired);
+    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
+                           bool isPaired, bool isTestFw);
     void eraseNewAppResReceived(bool ok);
     void eraseBootloaderResReceived(bool ok);
-    void writeNewAppDataResReceived(bool ok);
+    void writeNewAppDataResReceived(bool ok, bool hasOffset, quint32 offset);
     void ackReceived(QString ackType);
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void printReceived(QString str);
@@ -99,6 +100,7 @@ signals:
     void plotSetGraphReceived(int graph);
     void bmReadMemRes(int res, QByteArray data);
     void deserializeConfigFailed(bool isMc, bool isApp);
+    void canFrameRx(QByteArray data, quint32 id, bool isExtended);
 
 public slots:
     void processPacket(QByteArray data);
@@ -155,7 +157,8 @@ public slots:
                        bool forward_can, bool divide_by_controllers, bool ack);
     void getValuesSelective(unsigned int mask);
     void getValuesSetupSelective(unsigned int mask);
-    void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty, double resistance);
+    void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty,
+                                double resistance, double inductanec);
     void detectAllFoc(bool detect_can, double max_power_loss, double min_current_in,
                       double max_current_in, double openloop_rpm, double sl_erpm);
     void pingCan();
@@ -171,6 +174,8 @@ public slots:
     void bmMapPinsNrf5x();
     void bmReadMem(uint32_t addr, quint16 size);
     void setCurrentRel(double current);
+    void forwardCanFrame(QByteArray data, quint32 id, bool isExtended);
+    void setBatteryCut(double start, double end, bool store, bool fwdCan);
 
 private slots:
     void timerSlot();

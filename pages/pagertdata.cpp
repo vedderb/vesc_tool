@@ -166,7 +166,11 @@ PageRtData::PageRtData(QWidget *parent) :
             [=]() {mExperimentReplot = true;});
     connect(ui->experimentGraph5Button, &QPushButton::toggled,
             [=]() {mExperimentReplot = true;});
+    connect(ui->experimentGraph6Button, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
     connect(ui->experimentScatterButton, &QPushButton::toggled,
+            [=]() {mExperimentReplot = true;});
+    connect(ui->experimentShowLineButton, &QPushButton::toggled,
             [=]() {mExperimentReplot = true;});
 
     connect(ui->experimentHZoomButton, &QPushButton::toggled,
@@ -344,6 +348,7 @@ void PageRtData::timerSlot()
             case 2: if (!ui->experimentGraph3Button->isChecked()) {continue;} break;
             case 3: if (!ui->experimentGraph4Button->isChecked()) {continue;} break;
             case 4: if (!ui->experimentGraph5Button->isChecked()) {continue;} break;
+            case 5: if (!ui->experimentGraph6Button->isChecked()) {continue;} break;
             default: break;
             }
 
@@ -353,6 +358,11 @@ void PageRtData::timerSlot()
             ui->experimentPlot->graph()->setPen(QPen(mExperimentPlots.at(i).color));
             if (ui->experimentScatterButton->isChecked()) {
                 ui->experimentPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
+            }
+            if (ui->experimentShowLineButton->isChecked()) {
+                ui->experimentPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsLine);
+            } else {
+                ui->experimentPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsNone);
             }
         }
 
@@ -456,7 +466,7 @@ void PageRtData::plotAddGraphReceived(QString name)
     } else if (mExperimentPlots.size() == 5) {
         mExperimentPlots.last().color = "cyan";
     } else {
-        mExperimentPlots.last().color = "blue";
+        mExperimentPlots.last().color = "orange";
     }
 
     mExperimentReplot = true;

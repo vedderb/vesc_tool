@@ -105,6 +105,7 @@ void Commands::processPacket(QByteArray data)
         QString hw;
         QByteArray uuid;
         bool isPaired = false;
+        bool isTestFw = false;
 
         if (vb.size() >= 2) {
             fw_major = vb.vbPopFrontInt8();
@@ -121,16 +122,27 @@ void Commands::processPacket(QByteArray data)
             isPaired = vb.vbPopFrontInt8();
         }
 
-        emit fwVersionReceived(fw_major, fw_minor, hw, uuid, isPaired);
+        if (vb.size() >= 1) {
+            isTestFw = vb.vbPopFrontInt8();
+        }
+
+        emit fwVersionReceived(fw_major, fw_minor, hw, uuid, isPaired, isTestFw);
     } break;
 
     case COMM_ERASE_NEW_APP:
         emit eraseNewAppResReceived(vb.at(0));
         break;
 
-    case COMM_WRITE_NEW_APP_DATA:
-        emit writeNewAppDataResReceived(vb.at(0));
-        break;
+    case COMM_WRITE_NEW_APP_DATA: {
+        bool ok = vb.vbPopFrontInt8();
+        bool hasOffset = false;
+        quint32 offset = 0;
+        if (vb.size() >= 4) {
+            hasOffset = true;
+            offset = vb.vbPopFrontUint32();
+        }
+        emit writeNewAppDataResReceived(ok, hasOffset, offset);
+    } break;
 
     case COMM_ERASE_BOOTLOADER:
         emit eraseBootloaderResReceived(vb.at(0));
@@ -352,6 +364,8 @@ void Commands::processPacket(QByteArray data)
         values.motor_position = vb.vbPopFrontDouble32(1e6);
         values.state = vb.vbPopFrontUint16();
         values.switch_value = vb.vbPopFrontUint16();
+        values.adc1 = vb.vbPopFrontDouble32(1e6);
+        values.adc2 = vb.vbPopFrontDouble32(1e6);
         emit decodedBalanceReceived(values);
     } break;
 
@@ -595,6 +609,16 @@ void Commands::processPacket(QByteArray data)
         int res = vb.vbPopFrontInt16();
         emit bmReadMemRes(res, vb);
     } break;
+
+    case COMM_CAN_FWD_FRAME: {
+        quint32 id = vb.vbPopFrontUint32();
+        bool isExtended = vb.vbPopFrontInt8();
+        emit canFrameRx(vb, id, isExtended);
+    } break;
+
+    case COMM_SET_BATTERY_CUT:
+        emit ackReceived("COMM_SET_BATTERY_CUT Write OK");
+        break;
 
     default:
         break;
@@ -1151,7 +1175,8 @@ void Commands::getValuesSetupSelective(unsigned int mask)
     emitData(vb);
 }
 
-void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty, double resistance)
+void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty,
+                                      double resistance, double inductanec)
 {
     VByteArray vb;
     vb.vbAppendInt8(COMM_DETECT_MOTOR_FLUX_LINKAGE_OPENLOOP);
@@ -1159,6 +1184,7 @@ void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, doubl
     vb.vbAppendDouble32(erpm_per_sec, 1e3);
     vb.vbAppendDouble32(low_duty, 1e3);
     vb.vbAppendDouble32(resistance, 1e6);
+    vb.vbAppendDouble32(inductanec, 1e8);
     emitData(vb);
 }
 
@@ -1303,6 +1329,27 @@ void Commands::setCurrentRel(double current)
     emitData(vb);
 }
 
+void Commands::forwardCanFrame(QByteArray data, quint32 id, bool isExtended)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_CAN_FWD_FRAME);
+    vb.vbAppendUint32(id);
+    vb.vbAppendInt8(isExtended);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::setBatteryCut(double start, double end, bool store, bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_SET_BATTERY_CUT);
+    vb.vbAppendDouble32(start, 1e3);
+    vb.vbAppendDouble32(end, 1e3);
+    vb.vbAppendInt8(store);
+    vb.vbAppendInt8(fwdCan);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;
@@ -1409,6 +1456,9 @@ QString Commands::faultToStr(mc_fault_code fault)
     case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2";
     case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3";
     case FAULT_CODE_UNBALANCED_CURRENTS: return "FAULT_CODE_UNBALANCED_CURRENTS";
+    case FAULT_CODE_RESOLVER_LOT: return "FAULT_CODE_RESOLVER_LOT";
+    case FAULT_CODE_RESOLVER_DOS: return "FAULT_CODE_RESOLVER_DOS";
+    case FAULT_CODE_RESOLVER_LOS: return "FAULT_CODE_RESOLVER_LOS";
     default: return "Unknown fault";
     }
 }

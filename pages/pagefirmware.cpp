@@ -331,7 +331,8 @@ void PageFirmware::uploadFw(bool allOverCan)
             file.setFileName(ui->fwEdit->text());
 
             QFileInfo fileInfo(file.fileName());
-            if (!(fileInfo.fileName().startsWith("BLDC_4") || fileInfo.fileName().startsWith("VESC"))
+            if (!(fileInfo.fileName().toLower().startsWith("bldc_4") ||
+                  fileInfo.fileName().toLower().startsWith("vesc"))
                     || !fileInfo.fileName().endsWith(".bin")) {
                 QMessageBox::critical(this,
                                       tr("Upload Error"),

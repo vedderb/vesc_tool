@@ -105,7 +105,7 @@ void Commands::processPacket(QByteArray data)
         QString hw;
         QByteArray uuid;
         bool isPaired = false;
-        bool isTestFw = false;
+        int isTestFw = false;
 
         if (vb.size() >= 2) {
             fw_major = vb.vbPopFrontInt8();

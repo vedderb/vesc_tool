@@ -240,7 +240,7 @@ private slots:
     void packetReceived(QByteArray &data);
     void cmdDataToSend(QByteArray &data);
     void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
-                           bool isPaired, bool isTestFw);
+                           bool isPaired, int isTestFw);
     void appconfUpdated();
     void mcconfUpdated();
     void ackReceived(QString ackType);

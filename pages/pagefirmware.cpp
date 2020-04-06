@@ -148,11 +148,9 @@ void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArra
 
     fwStr += "\n" + QString("Paired: %1, Status: ").
             arg(isPaired ? "true" : "false");
-    if(isTestFw>0){
-        fwStr += QString("BETA %1").
-                    arg(isTestFw);
-    }
-    else{
+    if (isTestFw > 0) {
+        fwStr += QString("BETA %1").arg(isTestFw);
+    } else {
         fwStr += "STABLE";
     }
 

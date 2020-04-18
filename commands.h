@@ -164,6 +164,7 @@ public slots:
     void pingCan();
     void disableAppOutput(int time_ms, bool fwdCan);
     void getImuData(unsigned int mask);
+    void getImuCalibration(double yaw);
     void bmConnect();
     void bmEraseFlashAll();
     void bmWriteFlash(uint32_t addr, QByteArray data);

@@ -1251,6 +1251,14 @@ void Commands::getImuData(unsigned int mask)
     emitData(vb);
 }
 
+void Commands::getImuCalibration(double yaw)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_IMU_CALIBRATION);
+    vb.vbAppendDouble32(yaw, 1e3);
+    emitData(vb);
+}
+
 void Commands::bmConnect()
 {
     VByteArray vb;

@@ -12,6 +12,7 @@
 * Added CAN-list with connected VESCs.
 * Filter pages based on selected motor and app.
 * Log setup values in desktop VESC Tool too.
+* Added IMU orientation calibration widget.
 
 == 2.03 ==
 * App balance updates. See https://github.com/vedderb/bldc/pull/138.

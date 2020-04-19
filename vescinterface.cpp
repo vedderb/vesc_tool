@@ -2496,6 +2496,8 @@ void VescInterface::CANbusError(QCanBusDevice::CanBusError error)
 
 void VescInterface::tcpInputConnected()
 {
+    mTcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+
     mSettings.setValue("tcp_server", mLastTcpServer);
     mSettings.setValue("tcp_port", mLastTcpPort);
     setLastConnectionType(CONN_TCP);

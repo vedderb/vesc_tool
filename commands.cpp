@@ -556,6 +556,14 @@ void Commands::processPacket(QByteArray data)
         emit valuesImuReceived(values, mask);
     } break;
 
+    case COMM_GET_IMU_CALIBRATION: {
+        QVector<double> cal;
+        for (int i = 0;i < 9;i++) {
+            cal.append(vb.vbPopFrontDouble32(1e6));
+        }
+        emit imuCalibrationReceived(cal);
+    } break;
+
     case COMM_BM_CONNECT:
         emit bmConnRes(vb.vbPopFrontInt16());
         break;

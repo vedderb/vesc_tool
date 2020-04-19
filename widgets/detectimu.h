@@ -38,7 +38,7 @@ public:
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
 private slots:
-    void imuCalibrationReceived(QVector<float> imu_calibration, int res);
+    void imuCalibrationReceived(QVector<double> imu_calibration);
 
     void on_helpButton_clicked();
     void on_startButton_clicked();

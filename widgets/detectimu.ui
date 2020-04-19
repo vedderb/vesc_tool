@@ -29,7 +29,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Detect IMU Calibration</string>
+      <string>IMU Calibration</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -57,7 +57,10 @@
         <item>
          <widget class="QDoubleSpinBox" name="yawBox">
           <property name="toolTip">
-           <string>Open loop current to turn the motor with</string>
+           <string>Yaw offset to be applied to calibration</string>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
           </property>
           <property name="prefix">
            <string>Yaw Offset: </string>
@@ -65,8 +68,11 @@
           <property name="suffix">
            <string>°</string>
           </property>
+          <property name="minimum">
+           <double>-180.000000000000000</double>
+          </property>
           <property name="maximum">
-           <double>360.000000000000000</double>
+           <double>180.000000000000000</double>
           </property>
           <property name="value">
            <double>0.000000000000000</double>
@@ -82,7 +88,7 @@
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Start detection</string>
+           <string>Start calibration</string>
           </property>
           <property name="text">
            <string/>
@@ -102,7 +108,7 @@
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Apply detection result</string>
+           <string>Apply calibration result</string>
           </property>
           <property name="text">
            <string/>
@@ -128,6 +134,9 @@
         </property>
         <item>
          <widget class="QDoubleSpinBox" name="calRBox">
+          <property name="toolTip">
+           <string>IMU Roll offset</string>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -140,6 +149,9 @@
           <property name="suffix">
            <string/>
           </property>
+          <property name="minimum">
+           <double>-360.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>360.000000000000000</double>
           </property>
@@ -148,7 +160,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="calPBox">
           <property name="toolTip">
-           <string>Hall table 0 position (0 - 200, 255 = not used)</string>
+           <string>IMU Pitch offset</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -162,6 +174,9 @@
           <property name="suffix">
            <string/>
           </property>
+          <property name="minimum">
+           <double>-360.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>360.000000000000000</double>
           </property>
@@ -170,7 +185,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="calYBox">
           <property name="toolTip">
-           <string>Hall table 1 position (0 - 200, 255 = not used)</string>
+           <string>IMU Yaw offset</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -184,6 +199,9 @@
           <property name="suffix">
            <string/>
           </property>
+          <property name="minimum">
+           <double>-360.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>360.000000000000000</double>
           </property>
@@ -192,7 +210,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="calAXBox">
           <property name="toolTip">
-           <string>Hall table 2 position (0 - 200, 255 = not used)</string>
+           <string>Accel X axis offset</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -206,6 +224,9 @@
           <property name="suffix">
            <string/>
           </property>
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>100.000000000000000</double>
           </property>
@@ -214,7 +235,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="calAYBox">
           <property name="toolTip">
-           <string>Hall table 3 position (0 - 200, 255 = not used)</string>
+           <string>Accel Y axis offset</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -228,6 +249,9 @@
           <property name="suffix">
            <string/>
           </property>
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>100.000000000000000</double>
           </property>
@@ -236,7 +260,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="calAZBox">
           <property name="toolTip">
-           <string>Hall table 4 position (0 - 200, 255 = not used)</string>
+           <string>Accel Z axis offset</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -250,6 +274,9 @@
           <property name="suffix">
            <string/>
           </property>
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>100.000000000000000</double>
           </property>
@@ -258,7 +285,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="calGXBox">
           <property name="toolTip">
-           <string>Hall table 5 position (0 - 200, 255 = not used)</string>
+           <string>Gyro X axis offset</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -272,6 +299,9 @@
           <property name="suffix">
            <string/>
           </property>
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>100.000000000000000</double>
           </property>
@@ -280,7 +310,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="calGYBox">
           <property name="toolTip">
-           <string>Hall table 6 position (0 - 200, 255 = not used)</string>
+           <string>Gyro Y axis offset</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -294,6 +324,9 @@
           <property name="suffix">
            <string/>
           </property>
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>100.000000000000000</double>
           </property>
@@ -302,7 +335,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="calGZBox">
           <property name="toolTip">
-           <string>Hall table 7 position (0 - 200, 255 = not used)</string>
+           <string>Gyro Z axis offset</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -315,6 +348,9 @@
           </property>
           <property name="suffix">
            <string/>
+          </property>
+          <property name="minimum">
+           <double>-100.000000000000000</double>
           </property>
           <property name="maximum">
            <double>100.000000000000000</double>

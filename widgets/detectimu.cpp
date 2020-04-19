@@ -39,7 +39,7 @@ DetectIMU::~DetectIMU()
 void DetectIMU::on_helpButton_clicked()
 {
     if (mVesc) {
-        HelpDialog::showHelp(this, mVesc->infoConfig(), "help_foc_hall_detect");
+        HelpDialog::showHelp(this, mVesc->infoConfig(), "help_imu_calibration");
     }
 }
 
@@ -84,24 +84,21 @@ void DetectIMU::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-//        connect(mVesc->commands(), SIGNAL(focHallTableReceived(QVector<int>,int)),
-//                this, SLOT(focHallTableReceived(QVector<int>,int)));
+        connect(mVesc->commands(), SIGNAL(imuCalibrationReceived(QVector<double>)),
+                this, SLOT(imuCalibrationReceived(QVector<double>)));
     }
 }
 
-void DetectIMU::imuCalibrationReceived(QVector<float> hall_table, int res)
+void DetectIMU::imuCalibrationReceived(QVector<double> cal)
 {
-    if (res != 0) {
-        mVesc->emitStatusMessage(tr("Bad FOC Hall Detection Result Received"), false);
-    } else {
-        mVesc->emitStatusMessage(tr("FOC Hall Result Received"), true);
-//        ui->hall0Box->setValue(hall_table.at(0));
-//        ui->hall1Box->setValue(hall_table.at(1));
-//        ui->hall2Box->setValue(hall_table.at(2));
-//        ui->hall3Box->setValue(hall_table.at(3));
-//        ui->hall4Box->setValue(hall_table.at(4));
-//        ui->hall5Box->setValue(hall_table.at(5));
-//        ui->hall6Box->setValue(hall_table.at(6));
-//        ui->hall7Box->setValue(hall_table.at(7));
-    }
+    mVesc->emitStatusMessage(tr("IMU Calibration Result Received"), true);
+    ui->calRBox->setValue(cal.at(0));
+    ui->calPBox->setValue(cal.at(1));
+    ui->calYBox->setValue(cal.at(2));
+    ui->calAXBox->setValue(cal.at(3));
+    ui->calAYBox->setValue(cal.at(4));
+    ui->calAZBox->setValue(cal.at(5));
+    ui->calGXBox->setValue(cal.at(6));
+    ui->calGYBox->setValue(cal.at(7));
+    ui->calGZBox->setValue(cal.at(8));
 }

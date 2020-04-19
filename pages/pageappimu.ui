@@ -63,6 +63,21 @@
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="tab_4">
+          <attribute name="title">
+           <string>Detect Calibration</string>
+          </attribute>
+          <widget class="DetectIMU" name="detectIMU" native="true">
+           <property name="geometry">
+            <rect>
+             <x>9</x>
+             <y>-1</y>
+             <width>581</width>
+             <height>111</height>
+            </rect>
+           </property>
+          </widget>
+         </widget>
         </widget>
        </item>
        <item>
@@ -86,6 +101,12 @@
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
    <header>widgets/qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DetectIMU</class>
+   <extends>QWidget</extends>
+   <header location="global">widgets/detectimu.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

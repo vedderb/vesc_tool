@@ -556,6 +556,14 @@ void Commands::processPacket(QByteArray data)
         emit valuesImuReceived(values, mask);
     } break;
 
+    case COMM_GET_IMU_CALIBRATION: {
+        QVector<double> cal;
+        for (int i = 0;i < 9;i++) {
+            cal.append(vb.vbPopFrontDouble32(1e6));
+        }
+        emit imuCalibrationReceived(cal);
+    } break;
+
     case COMM_BM_CONNECT:
         emit bmConnRes(vb.vbPopFrontInt16());
         break;
@@ -1248,6 +1256,14 @@ void Commands::getImuData(unsigned int mask)
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_IMU_DATA);
     vb.vbAppendUint16(mask);
+    emitData(vb);
+}
+
+void Commands::getImuCalibration(double yaw)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_IMU_CALIBRATION);
+    vb.vbAppendDouble32(yaw, 1e3);
     emitData(vb);
 }
 

@@ -396,11 +396,20 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             } else if (isApp) {
                 configName = "app";
             }
+
+#if VT_IS_TEST_VERSION
+            emitMessageDialog("Deserializing " + configName + " configuration failed",
+                              "Could not deserialize " + configName +
+                              " configuration. You probably need to update the VESC firmware, as "
+                              "a new iteration of the test version has been made.",
+                              false, false);
+#else
             emitMessageDialog("Deserializing " + configName + " configuration failed",
                               "Could not deserialize " + configName +
                               " configuration. This probably means "
                               "that something is wrong with your firmware, or this VESC Tool version.",
                               false, false);
+#endif
         }
     });
 

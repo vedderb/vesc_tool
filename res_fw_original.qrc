@@ -28,5 +28,9 @@
         <file>res/firmwares/STORMCORE_100D/VESC_default_no_hw_limits.bin</file>
         <file>res/firmwares/STORMCORE_100S/VESC_default.bin</file>
         <file>res/firmwares/STORMCORE_100S/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/60_MK4/VESC_default.bin</file>
+        <file>res/firmwares/60_MK4/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/75_300_R3/VESC_default.bin</file>
+        <file>res/firmwares/75_300_R3/VESC_default_no_hw_limits.bin</file>
     </qresource>
 </RCC>

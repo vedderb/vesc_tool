@@ -256,17 +256,29 @@ void PageSwdProg::bmConnRes(int res)
         addSwdFw("VESC 4.10 - 4.12", "://res/firmwares/410_o_411_o_412/VESC_default.bin",
                  0, "://res/bootloaders/40_o_47_o_48_o_410_o_411_o_412_o_DAS_RS.bin");
         addSwdFw("VESC SIX", "://res/firmwares/60/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
         addSwdFw("VESC 75/300 R1", "://res/firmwares/75_300/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
         addSwdFw("VESC 75/300 R2", "://res/firmwares/75_300_R2/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+        addSwdFw("VESC 75/300 R3", "://res/firmwares/75_300_R3/VESC_default.bin",
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
         addSwdFw("VESC HD", "://res/firmwares/HD/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
         addSwdFw("VESC SIX MK3", "://res/firmwares/60_MK3/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+        addSwdFw("VESC SIX MK4", "://res/firmwares/60_MK4/VESC_default.bin",
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
         addSwdFw("VESC 100/250", "://res/firmwares/100_250/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+        addSwdFw("FOCBOX UNITY", "://res/firmwares/UNITY/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("STORMCORE 60D", ":/res/firmwares/STORMCORE_60D/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("STORMCORE 100D", ":/res/firmwares/STORMCORE_100D/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("STORMCORE 100S", ":/res/firmwares/STORMCORE_100S/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
         break;
 
     case 2:

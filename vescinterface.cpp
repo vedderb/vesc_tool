@@ -17,7 +17,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#define _USE_MATH_DEFINES
 #include "vescinterface.h"
 #include <QDebug>
 #include <QHostInfo>
@@ -139,8 +138,6 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     // TCP
     mTcpSocket = new QTcpSocket(this);
     mTcpConnected = false;
-    mLastTcpServer = QSettings().value("tcp_server", "").toString();
-    mLastTcpPort = QSettings().value("tcp_port", 65102).toInt();
 
     connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
     connect(mTcpSocket, SIGNAL(connected()), this, SLOT(tcpInputConnected()));
@@ -240,8 +237,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             this, SLOT(packetReceived(QByteArray&)));
     connect(mCommands, SIGNAL(dataToSend(QByteArray&)),
             this, SLOT(cmdDataToSend(QByteArray&)));
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
+            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
     connect(mCommands, SIGNAL(ackReceived(QString)), this, SLOT(ackReceived(QString)));
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
@@ -399,11 +396,20 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             } else if (isApp) {
                 configName = "app";
             }
+
+#if VT_IS_TEST_VERSION
+            emitMessageDialog("Deserializing " + configName + " configuration failed",
+                              "Could not deserialize " + configName +
+                              " configuration. You probably need to update the VESC firmware, as "
+                              "a new iteration of the test version has been made.",
+                              false, false);
+#else
             emitMessageDialog("Deserializing " + configName + " configuration failed",
                               "Could not deserialize " + configName +
                               " configuration. This probably means "
                               "that something is wrong with your firmware, or this VESC Tool version.",
                               false, false);
+#endif
         }
     });
 
@@ -981,12 +987,11 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
 
         QByteArray in = newFirmware.mid(0, sz);
         std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
-        QVector<unsigned char> out;
-        out.resize(outMaxSize);
+        unsigned char out[1000];
         std::size_t out_len = sz;
 
         if (supportsLzo && isLzo) {
-            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out.data(), outMaxSize, out_len);
+            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out, outMaxSize, out_len);
             if (error < lzokay::EResult::Success) {
                 qWarning() << "LZO Compress Error" << int(error);
                 isLzo = false;
@@ -997,7 +1002,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
         if (supportsLzo && isLzo && (out_len + 2) < uint32_t(sz)) {
             compChunks++;
             uploadSize += out_len + 2;
-            res = writeChunk(uint32_t(addr), in, QByteArray((const char*)out.data(), int(out_len)));
+            res = writeChunk(uint32_t(addr), in, QByteArray((const char*)out, int(out_len)));
         } else {
             nonCompChunks++;
             uploadSize += sz;
@@ -1191,6 +1196,8 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     mFwUploadProgress = 0.0;
     mCancelFwUpload = false;
 
+//    isLzo = false;
+
     if (isBootloader) {
         if (mCommands->getLimitedSupportsEraseBootloader()) {
             mFwUploadStatus = "Erasing bootloader";
@@ -1222,8 +1229,10 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(3000);
         auto conn = connect(mCommands, &Commands::writeNewAppDataResReceived,
-                            [&res,&loop](bool wrRes) {
-            res = wrRes ? 1 : -1;
+                            [&res,&loop](bool ok, bool hasOffset, quint32 offset) {
+            (void)offset;
+            (void)hasOffset;
+            res = ok ? 1 : -1;
             loop.quit();
         });
 
@@ -1270,6 +1279,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         addr += sizeCrc.size();
     }
 
+    int lzoFailures = 0;
     while (newFirmware.size() > 0) {
         if (mCancelFwUpload) {
             emit fwUploadStatus("Upload cancelled", 0.0, false);
@@ -1284,12 +1294,11 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
 
         QByteArray in = newFirmware.mid(0, sz);
         std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
-        QVector<unsigned char> out;
-        out.resize(outMaxSize);
+        unsigned char out[1000];
         std::size_t out_len = sz;
 
         if (isLzo && supportsLzo) {
-            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out.data(),outMaxSize, out_len);
+            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out, outMaxSize, out_len);
             if (error < lzokay::EResult::Success) {
                 qWarning() << "LZO Compress Error" << int(error);
                 isLzo = false;
@@ -1300,7 +1309,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         if (isLzo && supportsLzo && (out_len + 2) < uint32_t(sz)) {
             compChunks++;
             uploadSize += out_len + 2;
-            res = writeChunk(uint32_t(addr), QByteArray((const char*)out.data(), int(out_len)),
+            res = writeChunk(uint32_t(addr), QByteArray((const char*)out, int(out_len)),
                              true, uint16_t(sz));
 
             if (res != 1) {
@@ -1311,7 +1320,15 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
                 if (res == 1) {
                     qWarning() << "Writing LZO failed, but regular write was OK.";
                     qWarning() << out_len << sz;
+                    lzoFailures++;
+
+                    if (lzoFailures > 3) {
+                        qWarning() << "Lzo does not seem to work with the current FW, disabling it for this upload.";
+                        supportsLzo = false;
+                    }
                 }
+            } else {
+                lzoFailures = 0;
             }
         } else {
             nonCompChunks++;
@@ -1899,8 +1916,8 @@ bool VescInterface::autoconnect()
     mAutoconnectProgress = 0.0;
 
     disconnectPort();
-    disconnect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
-               this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+    disconnect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
+               this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
 
     for (int i = 0;i < ports.size();i++) {
         VSerialInfo_t serial = ports[i];
@@ -1917,7 +1934,7 @@ bool VescInterface::autoconnect()
         QTimer timeoutTimer;
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(500);
-        connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)), &loop, SLOT(quit()));
+        connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)), &loop, SLOT(quit()));
         connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
         loop.exec();
 
@@ -1932,8 +1949,8 @@ bool VescInterface::autoconnect()
         }
     }
 
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
+    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
+            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
 #endif
 
     emit autoConnectProgressUpdated(1.0, true);
@@ -2027,7 +2044,6 @@ bool VescInterface::connectSerial(QString port, int baudrate)
         mSerialPort->setDataTerminalReady(true);
         QThread::msleep(5);
         mSerialPort->setDataTerminalReady(false);
-        QThread::msleep(100);
     }
 
     mLastSerialPort = port;
@@ -2489,6 +2505,8 @@ void VescInterface::CANbusError(QCanBusDevice::CanBusError error)
 
 void VescInterface::tcpInputConnected()
 {
+    mTcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+
     mSettings.setValue("tcp_server", mLastTcpServer);
     mSettings.setValue("tcp_port", mLastTcpPort);
     setLastConnectionType(CONN_TCP);
@@ -2764,7 +2782,8 @@ void VescInterface::cmdDataToSend(QByteArray &data)
     mPacket->sendPacket(data);
 }
 
-void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired)
+void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
+                                      bool isPaired, int isTestFw)
 {
     QString uuidStr = Utility::uuid2Str(uuid, true);
     mUuidStr = uuidStr.toUpper();
@@ -2787,6 +2806,13 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
 #else
     (void)isPaired;
 #endif
+
+    if (isTestFw > 0 && !VT_IS_TEST_VERSION) {
+        emitMessageDialog("Test Firmware",
+                          "The connected VESC has test firmware, and this is not a test build of VESC Tool. You should "
+                          "update the firmware urgently, as this is not a safe situation.",
+                          false, false);
+    }
 
     auto fwPairs = getSupportedFirmwarePairs();
 
@@ -2911,6 +2937,11 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
 
     if (fw_connected >= qMakePair(3, 64)) {
         compCommands.append(int(COMM_SET_CURRENT_REL));
+        compCommands.append(int(COMM_SET_BATTERY_CUT));
+    }
+
+    if (fw_connected >= qMakePair(5, 00)) {
+        compCommands.append(int(COMM_SET_CURRENT_REL));
     }
 
     if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {
@@ -2926,6 +2957,11 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         }
 
         mFwSupportsConfiguration = true;
+    }
+
+    if ((fw_connected >= qMakePair(3, 100) && fw_connected <= qMakePair(3, 103)) ||
+        (fw_connected >= qMakePair(23, 34) && fw_connected <= qMakePair(23, 46))) {
+        compCommands.clear();
     }
 
     mCommands->setLimitedCompatibilityCommands(compCommands);

@@ -1,3 +1,7 @@
+== 2.05 ==
+* FW 5.01 support:
+ - Fixed PPM bug in previous release.
+
 == 2.04 ==
 * FW 5.0 support:
  - Dual motor support, for e.g. unity.

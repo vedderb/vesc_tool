@@ -159,6 +159,18 @@
         <file>res/icons/icons8-target-96.png</file>
         <file>res/icons/icons8-fantasy-96.png</file>
         <file>res/icons/icons8-edit-96.png</file>
-        <file>res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin</file>
+        <file>res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin</file>
+        <file>res/fonts/Roboto/Roboto-Black.ttf</file>
+        <file>res/fonts/Roboto/Roboto-BlackItalic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Bold.ttf</file>
+        <file>res/fonts/Roboto/Roboto-BoldItalic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Italic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Light.ttf</file>
+        <file>res/fonts/Roboto/Roboto-LightItalic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Medium.ttf</file>
+        <file>res/fonts/Roboto/Roboto-MediumItalic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Regular.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Thin.ttf</file>
+        <file>res/fonts/Roboto/Roboto-ThinItalic.ttf</file>
     </qresource>
 </RCC>

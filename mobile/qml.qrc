@@ -42,5 +42,6 @@
         <file>Vesc3DView.qml</file>
         <file>DirectoryPicker.qml</file>
         <file>Settings.qml</file>
+        <file>DetectIMU.qml</file>
     </qresource>
 </RCC>

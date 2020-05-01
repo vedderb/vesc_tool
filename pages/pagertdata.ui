@@ -384,7 +384,7 @@
               <number>50</number>
              </property>
              <property name="value">
-              <number>500</number>
+              <number>2000</number>
              </property>
             </widget>
            </item>
@@ -399,6 +399,23 @@
              <property name="icon">
               <iconset resource="../res.qrc">
                <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="experimentShowLineButton">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/3ph_sine.png</normaloff>:/res/icons/3ph_sine.png</iconset>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -541,6 +558,25 @@
              </property>
              <property name="text">
               <string>5</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="experimentGraph6Button">
+             <property name="maximumSize">
+              <size>
+               <width>25</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>6</string>
              </property>
              <property name="checkable">
               <bool>true</bool>

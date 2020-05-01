@@ -16,7 +16,7 @@ export PATH=$PATH:$ANDROID_HOME/Sdk/tools:/usr/bin:$JAVA_HOME/bin
 rm -rf build/android/*
 
 # armv7
-export PATH=/opt/Qt3/5.12.3/android_armv7/bin/:$PATH
+export PATH=/opt/Qt3/5.12.7/android_armv7/bin/:$PATH
 export ANDROID_NDK_TOOLCHAIN_PREFIX=arm-linux-androideabi
 export ANDROID_NDK_TOOLS_PREFIX=arm-linux-androideabi
 

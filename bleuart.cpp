@@ -172,7 +172,14 @@ void BleUart::deviceScanError(QBluetoothDeviceDiscoveryAgent::Error e)
     qWarning() << "BLE Scan error: " << e;
     mDevs.clear();
     emit scanDone(mDevs, true);
-    emit bleError(tr("BLE Scan error: ") + Utility::QEnumToQString(e));
+    QString errorStr = tr("BLE Scan error: ") + Utility::QEnumToQString(e);
+
+#ifdef Q_OS_ANDROID
+    errorStr += ". If you are on Android 10, make sure that both bluetooth and the "
+                "location service are activated.";
+#endif
+
+    emit bleError(errorStr);
 }
 
 void BleUart::serviceDiscovered(const QBluetoothUuid &gatt)

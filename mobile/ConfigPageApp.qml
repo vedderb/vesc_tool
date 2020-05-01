@@ -87,6 +87,24 @@ Item {
         }
     }
 
+    Dialog {
+        id: detectImu
+        title: "IMU Calibration"
+        standardButtons: Dialog.Close
+        modal: true
+        focus: true
+
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        x: 10
+        y: (parent.height - height) / 2
+        parent: ApplicationWindow.overlay
+
+        DetectIMU {
+            anchors.fill: parent
+        }
+    }
+
     onIsHorizontalChanged: {
         updateEditors()
     }
@@ -228,6 +246,12 @@ Item {
                         text: "Pair NRF..."
                         onTriggered: {
                             nrfPair.open()
+                        }
+                    }
+                    MenuItem {
+                        text: "Calibrate IMU..."
+                        onTriggered: {
+                            detectImu.open()
                         }
                     }
                 }

@@ -81,7 +81,10 @@ typedef enum {
     FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1,
     FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2,
     FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3,
-    FAULT_CODE_UNBALANCED_CURRENTS
+    FAULT_CODE_UNBALANCED_CURRENTS,
+    FAULT_CODE_RESOLVER_LOT,
+    FAULT_CODE_RESOLVER_DOS,
+    FAULT_CODE_RESOLVER_LOS
 } mc_fault_code;
 
 typedef enum {
@@ -526,9 +529,16 @@ typedef enum {
     COMM_WRITE_NEW_APP_DATA_LZO,
     COMM_WRITE_NEW_APP_DATA_ALL_CAN_LZO,
     COMM_BM_WRITE_FLASH_LZO,
-    COMM_SET_CURRENT_REL
+    COMM_SET_CURRENT_REL,
+    COMM_CAN_FWD_FRAME,
+    COMM_SET_BATTERY_CUT,
+    COMM_SET_BLE_NAME,
+    COMM_SET_BLE_PIN,
+    COMM_SET_CAN_MODE,
+    COMM_GET_IMU_CALIBRATION
 } COMM_PACKET_ID;
 
+// CAN commands
 typedef enum {
     CAN_PACKET_SET_DUTY = 0,
     CAN_PACKET_SET_CURRENT,
@@ -557,7 +567,11 @@ typedef enum {
     CAN_PACKET_CONF_STORE_CURRENT_LIMITS_IN,
     CAN_PACKET_CONF_FOC_ERPMS,
     CAN_PACKET_CONF_STORE_FOC_ERPMS,
-    CAN_PACKET_STATUS_5
+    CAN_PACKET_STATUS_5,
+    CAN_PACKET_POLL_TS5700N8501_STATUS,
+    CAN_PACKET_CONF_BATTERY_CUT,
+    CAN_PACKET_CONF_STORE_BATTERY_CUT,
+    CAN_PACKET_SHUTDOWN
 } CAN_PACKET_ID;
 
 typedef struct {
@@ -604,6 +618,8 @@ struct BALANCE_VALUES {
     Q_PROPERTY(double motor_position MEMBER motor_position)
     Q_PROPERTY(uint16_t state MEMBER state)
     Q_PROPERTY(uint16_t switch_value MEMBER switch_value)
+    Q_PROPERTY(double adc1 MEMBER adc1)
+    Q_PROPERTY(double adc2 MEMBER adc2)
 
 public:
     BALANCE_VALUES() {
@@ -615,6 +631,8 @@ public:
         motor_position = 0;
         state = 0;
         switch_value = 0;
+        adc1 = 0;
+        adc2 = 0;
     }
 
     double pid_output;
@@ -625,6 +643,8 @@ public:
     double motor_position;
     uint16_t state;
     uint16_t switch_value;
+    double adc1;
+    double adc2;
 };
 
 Q_DECLARE_METATYPE(BALANCE_VALUES)

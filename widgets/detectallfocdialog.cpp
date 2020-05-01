@@ -153,76 +153,7 @@ void DetectAllFocDialog::updateGearRatio()
 
 void DetectAllFocDialog::on_runButton_clicked()
 {
-    if (!mVesc->isPortConnected()) {
-        mVesc->emitMessageDialog("Error",
-                                 "The VESC is not connected. Please connect and try again.",
-                                 false, false);
-        return;
-    }
-
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::warning(this,
-                                 tr("Warning"),
-                                 tr("<font color=\"red\">Warning: </font>"
-                                    "This is going to spin up all motors connected on "
-                                    "the CAN-bus. Make sure that nothing is in the way."),
-                                 QMessageBox::Ok | QMessageBox::Cancel);
-
-    if (reply != QMessageBox::Ok) {
-        return;
-    }
-
-    mRejectOk = false;
-    ui->tabWidget->setEnabled(false);
-    ui->runButton->setEnabled(false);
-    ui->closeButton->setEnabled(false);
-
-    ui->progressBar->setRange(0, 0);
-
-    mVesc->commands()->setMcconf(false);
-    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
-    auto canDevs = mVesc->scanCan();
-
-    if (!Utility::setBatteryCutCan(mVesc, canDevs, 6.0, 6.0)) {
-        ui->tabWidget->setEnabled(true);
-        ui->runButton->setEnabled(true);
-        ui->closeButton->setEnabled(true);
-        mRejectOk = true;
-        ui->progressBar->setRange(0, 100);
-        ui->progressBar->setValue(0);
-        return;
-    }
-
-    QString res = Utility::detectAllFoc(mVesc, true,
-                                        ui->maxPowerLossBox->value(),
-                                        ui->currentInMinBox->value(),
-                                        ui->currentInMaxBox->value(),
-                                        ui->openloopErpmBox->value(),
-                                        ui->sensorlessErpmBox->value());
-
-    if (res.startsWith("Success!")) {
-        Utility::setBatteryCutCanFromCurrentConfig(mVesc, canDevs);
-    }
-
-    ui->progressBar->setRange(0, 100);
-    ui->progressBar->setValue(100);
-
-    ui->tabWidget->setEnabled(true);
-    ui->runButton->setEnabled(true);
-    ui->closeButton->setEnabled(true);
-    mRejectOk = true;
-
-    QMessageBox *msg = new QMessageBox(QMessageBox::Information,
-                                       "FOC Detection Result", res,
-                                       QMessageBox::Ok, this);
-    QFont font = QFont("DejaVu Sans Mono");
-    msg->setFont(font);
-    msg->exec();
-
-    if (res.startsWith("Success!")) {
-        ui->simpleSetupBox->setCurrentIndex(3);
-        ui->dirSetup->scanVescs();
-    }
+    runDetect(true);
 }
 
 void DetectAllFocDialog::on_closeButton_clicked()
@@ -289,4 +220,94 @@ void DetectAllFocDialog::on_motorList_currentRowChanged(int currentRow)
 void DetectAllFocDialog::on_prevDirButton_clicked()
 {
     ui->simpleSetupBox->setCurrentIndex(2);
+}
+
+void DetectAllFocDialog::on_runNoCanButton_clicked()
+{
+    runDetect(false);
+}
+
+void DetectAllFocDialog::runDetect(bool can)
+{
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog("Error",
+                                 "The VESC is not connected. Please connect and try again.",
+                                 false, false);
+        return;
+    }
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this,
+                                 tr("Warning"),
+                                 tr("<font color=\"red\">Warning: </font>"
+                                    "This is going to spin up all motors connected on "
+                                    "the CAN-bus. Make sure that nothing is in the way."),
+                                 QMessageBox::Ok | QMessageBox::Cancel);
+
+    if (reply != QMessageBox::Ok) {
+        return;
+    }
+
+    mRejectOk = false;
+    ui->tabWidget->setEnabled(false);
+    ui->runButton->setEnabled(false);
+    ui->runNoCanButton->setEnabled(false);
+    ui->closeButton->setEnabled(false);
+
+    ui->progressBar->setRange(0, 0);
+
+    mVesc->commands()->setMcconf(false);
+    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    auto canDevs = mVesc->scanCan();
+
+    if (mVesc->commands()->getLimitedCompatibilityCommands().contains(COMM_SET_BATTERY_CUT)) {
+        mVesc->commands()->setBatteryCut(
+                    mVesc->mcConfig()->getParamDouble("l_battery_cut_start"),
+                    mVesc->mcConfig()->getParamDouble("l_battery_cut_end"),
+                    true, true);
+        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    } else {
+        if (!Utility::setBatteryCutCan(mVesc, canDevs, 6.0, 6.0)) {
+            ui->tabWidget->setEnabled(true);
+            ui->runButton->setEnabled(true);
+            ui->runNoCanButton->setEnabled(true);
+            ui->closeButton->setEnabled(true);
+            mRejectOk = true;
+            ui->progressBar->setRange(0, 100);
+            ui->progressBar->setValue(0);
+            return;
+        }
+    }
+
+    QString res = Utility::detectAllFoc(mVesc, can,
+                                        ui->maxPowerLossBox->value(),
+                                        ui->currentInMinBox->value(),
+                                        ui->currentInMaxBox->value(),
+                                        ui->openloopErpmBox->value(),
+                                        ui->sensorlessErpmBox->value());
+
+    if (res.startsWith("Success!")) {
+        Utility::setBatteryCutCanFromCurrentConfig(mVesc, canDevs);
+    }
+
+    ui->progressBar->setRange(0, 100);
+    ui->progressBar->setValue(100);
+
+    ui->tabWidget->setEnabled(true);
+    ui->runButton->setEnabled(true);
+    ui->runNoCanButton->setEnabled(true);
+    ui->closeButton->setEnabled(true);
+    mRejectOk = true;
+
+    QMessageBox *msg = new QMessageBox(QMessageBox::Information,
+                                       "FOC Detection Result", res,
+                                       QMessageBox::Ok, this);
+    QFont font = QFont("DejaVu Sans Mono");
+    msg->setFont(font);
+    msg->exec();
+
+    if (res.startsWith("Success!")) {
+        ui->simpleSetupBox->setCurrentIndex(3);
+        ui->dirSetup->scanVescs();
+    }
 }

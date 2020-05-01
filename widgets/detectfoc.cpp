@@ -91,7 +91,8 @@ void DetectFoc::on_lambdaButton_clicked()
             mVesc->commands()->measureLinkageOpenloop(ui->currentBox->value(),
                                                       ui->erpmBox->value(),
                                                       ui->dutyBox->value(),
-                                                      ui->resistanceBox->value() / 1e3);
+                                                      ui->resistanceBox->value() / 1e3,
+                                                      ui->inductanceBox->value() / 1e6);
 
             mRunning = true;
         }
@@ -323,7 +324,6 @@ void DetectFoc::on_calcKpKiButton_clicked()
 void DetectFoc::on_calcGainButton_clicked()
 {
     double lambda = ui->lambdaBox->value() / 1e3;
-    double res = ui->resistanceBox->value() / 1e3;
     mLastCalcOk = false;
 
     if (lambda < 1e-10) {
@@ -333,7 +333,7 @@ void DetectFoc::on_calcGainButton_clicked()
         return;
     }
 
-    ui->obsGainBox->setValue((0.00001 / res) / (lambda * lambda));
+    ui->obsGainBox->setValue(1.0e-3 / (lambda * lambda));
 
     mLastOkValuesApplied = false;
     mLastCalcOk = true;
@@ -361,7 +361,7 @@ void DetectFoc::on_calcApplyLocalButton_clicked()
         double bw = 1.0 / (tc * 1e-6);
         double kp = l * bw;
         double ki = r * bw;
-        double gain = (0.00001 / r) / (lambda * lambda);
+        double gain = 1.0e-3 / (lambda * lambda);
 
         mVesc->mcConfig()->updateParamDouble("foc_current_kp", kp);
         mVesc->mcConfig()->updateParamDouble("foc_current_ki", ki);

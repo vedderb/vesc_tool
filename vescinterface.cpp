@@ -2807,13 +2807,6 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
     (void)isPaired;
 #endif
 
-    if (isTestFw > 0 && !VT_IS_TEST_VERSION) {
-        emitMessageDialog("Test Firmware",
-                          "The connected VESC has test firmware, and this is not a test build of VESC Tool. You should "
-                          "update the firmware urgently, as this is not a safe situation.",
-                          false, false);
-    }
-
     auto fwPairs = getSupportedFirmwarePairs();
 
     // Make sure that we start from the latest firmware
@@ -3056,6 +3049,13 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         if (fwInfoCfg) {
             emitMessageDialog("Firmware Known Issues", fwInfoCfg->description, false, true);
         }
+    }
+
+    if (isTestFw > 0 && !VT_IS_TEST_VERSION) {
+        emitMessageDialog("Test Firmware",
+                          "The connected VESC has test firmware, and this is not a test build of VESC Tool. You should "
+                          "update the firmware urgently, as this is not a safe situation.",
+                          false, false);
     }
 }
 

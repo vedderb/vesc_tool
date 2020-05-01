@@ -2570,7 +2570,8 @@ void VescInterface::timerSlot()
     if (!mIgnoreCanChange) {
         if (isPortConnected()) {
             if (mSendCanBefore != mCommands->getSendCan() ||
-                    mCanIdBefore != mCommands->getCanSendId()) {
+                    (mCommands->getSendCan() &&
+                     mCanIdBefore != mCommands->getCanSendId())) {
                 updateFwRx(false);
                 mFwRetries = 0;
             }

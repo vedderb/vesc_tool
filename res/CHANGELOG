@@ -1,3 +1,7 @@
+== 2.06 ==
+* Prevent repeated test version notification dialogs.
+* Made IMU calibration more compact to decrease the minimum horizontal size.
+
 == 2.05 ==
 * FW 5.01 support:
  - Fixed PPM bug in previous release.

@@ -5,13 +5,13 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 2.06
+VT_VERSION = 2.07
 VT_INTRO_VERSION = 1
-VT_IS_TEST_VERSION = 0
+VT_IS_TEST_VERSION = 1
 
-VT_ANDROID_VERSION_ARMV7 = 86
-VT_ANDROID_VERSION_ARM64 = 87
-VT_ANDROID_VERSION_X86 = 88
+VT_ANDROID_VERSION_ARMV7 = 89
+VT_ANDROID_VERSION_ARM64 = 90
+VT_ANDROID_VERSION_X86 = 91
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -28,6 +28,7 @@ vt_test_version: {
 }
 
 CONFIG += c++11
+QMAKE_CXXFLAGS += -Wno-deprecated-copy
 
 # Build mobile GUI
 #CONFIG += build_mobile

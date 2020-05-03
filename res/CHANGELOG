@@ -1,6 +1,7 @@
 == 2.06 ==
 * Prevent repeated test version notification dialogs.
 * Made IMU calibration more compact to decrease the minimum horizontal size.
+* Only allow uploading firmware to all VESCs when they have the same hardware version.
 
 == 2.05 ==
 * FW 5.01 support:

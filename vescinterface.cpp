@@ -1196,7 +1196,57 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     mFwUploadProgress = 0.0;
     mCancelFwUpload = false;
 
-//    isLzo = false;
+    if (fwdCan) {
+        if (mCommands->getSendCan()) {
+            emitMessageDialog("Firmware Upload",
+                              "CAN forwarding must be disabled when uploading firmware to "
+                              "all VESCs at the same time.", false, false);
+            mFwUploadStatus = "CAN check failed";
+            mFwUploadProgress = -1.0;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+            return false;
+        }
+
+        QString hwLocal;
+        Utility::getFwVersionBlocking(this, nullptr, nullptr, &hwLocal, nullptr, nullptr, nullptr);
+        if (hwLocal.isEmpty()) {
+            emitMessageDialog("Firmware Upload", "Could not read hardware version", false, false);
+            mFwUploadStatus = "Read HW version failed";
+            mFwUploadProgress = -1.0;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+            return false;
+        }
+
+        mFwUploadStatus = "Scanning CAN bus...";
+        emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+        auto devs = scanCan();
+
+        bool ignoreBefore = mIgnoreCanChange;
+        mIgnoreCanChange = true;
+
+        for (auto d: devs) {
+            mCommands->setSendCan(true, d);
+            QString hwCan;
+            Utility::getFwVersionBlocking(this, nullptr, nullptr, &hwCan, nullptr, nullptr, nullptr);
+            if (hwLocal != hwCan) {
+                emitMessageDialog("Firmware Upload",
+                                  "All VESCs on the CAN-bus must have the same hardware version to upload "
+                                  "firmware to all of them at the same time. You must update them individually.",
+                                  false, false);
+                mCommands->setSendCan(false);
+                mIgnoreCanChange = ignoreBefore;
+
+                mFwUploadStatus = "CAN check failed";
+                mFwUploadProgress = -1.0;
+                emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+
+                return false;
+            }
+        }
+
+        mCommands->setSendCan(false);
+        mIgnoreCanChange = ignoreBefore;
+    }
 
     if (isBootloader) {
         if (mCommands->getLimitedSupportsEraseBootloader()) {
@@ -1205,6 +1255,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             if (!fwEraseBootloader(fwdCan)) {
                 mFwUploadStatus = "Erasing bootloader failed";
                 mFwUploadProgress = -1.0;
+                emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
                 return false;
             }
         }
@@ -1214,6 +1265,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         if (!fwEraseNewApp(fwdCan, quint32(newFirmware.size()))) {
             mFwUploadStatus = "Erasing buffer failed";
             mFwUploadProgress = -1.0;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
             return false;
         }
     }
@@ -1282,9 +1334,9 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     int lzoFailures = 0;
     while (newFirmware.size() > 0) {
         if (mCancelFwUpload) {
-            emit fwUploadStatus("Upload cancelled", 0.0, false);
             mFwUploadProgress = -1.0;
             mFwUploadStatus = "Upload cancelled";
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
             return false;
         }
 
@@ -1358,9 +1410,9 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             }
 
             emitMessageDialog("Firmware Upload", msg, false, false);
-            emit fwUploadStatus(msg, 0.0, false);
             mFwUploadProgress = -1.0;
             mFwUploadStatus = msg;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
             return false;
         }
     }

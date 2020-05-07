@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>528</height>
+    <width>750</width>
+    <height>527</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <enum>QTabWidget::Triangular</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -306,9 +306,9 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="clientBox">
          <property name="title">
-          <string>TCP Client</string>
+          <string>Client</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
@@ -316,6 +316,20 @@
             <property name="text">
              <string>Address</string>
             </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="clientProtocol">
+            <item>
+             <property name="text">
+              <string>TCP</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>UDP</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item>
@@ -382,9 +396,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="tcpServerBox">
+        <widget class="QGroupBox" name="serverBox">
          <property name="title">
-          <string>TCP Server</string>
+          <string>Server</string>
          </property>
          <property name="checkable">
           <bool>false</bool>
@@ -396,14 +410,28 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
-             <widget class="QCheckBox" name="tcpServerEnableBox">
+             <widget class="QCheckBox" name="serverEnableBox">
               <property name="text">
-               <string>Enable TCP Server</string>
+               <string>Run server</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="tcpServerPortBox">
+             <widget class="QComboBox" name="serverProtocol">
+              <item>
+               <property name="text">
+                <string>TCP</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>UDP</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="serverPortBox">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -411,7 +439,7 @@
                </sizepolicy>
               </property>
               <property name="prefix">
-               <string>TCP Port: </string>
+               <string>Port: </string>
               </property>
               <property name="maximum">
                <number>65535</number>

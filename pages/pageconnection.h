@@ -71,7 +71,7 @@ private slots:
     void on_clearPairedButton_clicked();
     void on_addUuidButton_clicked();
     void on_unpairButton_clicked();
-    void on_tcpServerEnableBox_toggled(bool arg1);
+    void on_serverEnableBox_toggled(bool isEnabled);
 
 private:
     Ui::PageConnection *ui;

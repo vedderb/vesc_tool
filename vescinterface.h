@@ -43,6 +43,7 @@
 #include "commands.h"
 #include "packet.h"
 #include "tcpserversimple.h"
+#include "udpserversimple.h"
 
 #ifdef HAS_BLUETOOTH
 #include "bleuart.h"
@@ -182,6 +183,10 @@ public:
     Q_INVOKABLE bool tcpServerIsClientConnected();
     Q_INVOKABLE QString tcpServerClientIp();
 
+    Q_INVOKABLE bool udpServerStart(int port);
+    Q_INVOKABLE bool udpServerIsRunning();
+    Q_INVOKABLE bool udpServerIsClientConnected();
+
     Q_INVOKABLE void emitConfigurationChanged();
 
     Q_INVOKABLE bool getFwSupportsConfiguration() const;
@@ -260,6 +265,7 @@ private:
     QVariantList mProfiles;
     QStringList mPairedUuids;
     TcpServerSimple *mTcpServer;
+    UdpServerSimple *mUdpServer;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;

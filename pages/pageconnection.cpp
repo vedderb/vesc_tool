@@ -145,8 +145,18 @@ void PageConnection::timerSlot()
         if (mVesc->tcpServerIsClientConnected()) {
             clientTxt += mVesc->tcpServerClientIp();
         }
-    } else {
-        ui->tcpServerPortBox->setEnabled(true);
+    }
+    else if(mVesc->udpServerIsRunning()) {
+        for (auto adr: Utility::getNetworkAddresses()) {
+            ipTxt += adr.toString() + "\n";
+        }
+
+        if (mVesc->udpServerIsClientConnected()) {
+            clientTxt += mVesc->tcpServerClientIp();
+        }
+    }
+    else {
+        ui->serverPortBox->setEnabled(true);
     }
 
     if (ui->tcpServerAddressesEdit->toPlainText() != ipTxt) {
@@ -557,12 +567,19 @@ void PageConnection::on_unpairButton_clicked()
     }
 }
 
-void PageConnection::on_tcpServerEnableBox_toggled(bool arg1)
+void PageConnection::on_serverEnableBox_toggled(bool isEnabled)
 {
     if (mVesc) {
-        if (arg1) {
-            mVesc->tcpServerStart(ui->tcpServerPortBox->value());
-            ui->tcpServerPortBox->setEnabled(false);
+        if (isEnabled)
+        {
+            if(ui->serverProtocol->currentText() == "TCP") {
+                mVesc->tcpServerStart(ui->serverPortBox->value());
+                ui->serverPortBox->setEnabled(false);
+            }
+            else if(ui->serverProtocol->currentText() == "UDP") {
+                mVesc->udpServerStart(ui->serverPortBox->value());
+                ui->serverPortBox->setEnabled(false);
+            }
         } else {
             mVesc->tcpServerStop();
         }

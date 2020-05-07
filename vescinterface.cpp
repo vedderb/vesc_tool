@@ -178,6 +178,15 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         mTcpServer->packet()->sendPacket(packet);
     });
 
+    mUdpServer = new UdpServerSimple(this);
+    mUdpServer->setUsePacket(true);
+    connect(mUdpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
+        mPacket->sendPacket(packet);
+    });
+    connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
+        mUdpServer->packet()->sendPacket(packet);
+    });
+
     {
         int size = mSettings.beginReadArray("profiles");
         for (int i = 0; i < size; ++i) {
@@ -2350,6 +2359,29 @@ bool VescInterface::tcpServerIsClientConnected()
 QString VescInterface::tcpServerClientIp()
 {
     return mTcpServer->getConnectedClientIp();
+}
+
+bool VescInterface::udpServerStart(int port)
+{
+    bool res = mUdpServer->startServer(port);
+
+    if (!res) {
+        emitMessageDialog("Start UDP Server",
+                          "Could not start UDP server: " + mUdpServer->errorString(),
+                          false, false);
+    }
+
+    return res;
+}
+
+bool VescInterface::udpServerIsRunning()
+{
+    return mUdpServer->isServerRunning();
+}
+
+bool VescInterface::udpServerIsClientConnected()
+{
+    return mUdpServer->isClientConnected();
 }
 
 void VescInterface::emitConfigurationChanged()

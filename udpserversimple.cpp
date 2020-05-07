@@ -46,6 +46,7 @@ void UdpServerSimple::stopServer()
 {
     emit connectionChanged(false, mUdpSocket->peerAddress().toString());
     mUdpSocket->close();
+    clientAddr.clear();
 }
 
 bool UdpServerSimple::sendData(const QByteArray &data)
@@ -70,6 +71,8 @@ void UdpServerSimple::udpInputDataAvailable()
 {
     while (mUdpSocket->hasPendingDatagrams()) {
         QNetworkDatagram datagram = mUdpSocket->receiveDatagram();
+        clientAddr = datagram.senderAddress();
+        clientPort = datagram.senderPort();
         emit dataRx(datagram.data());
         if (mUsePacket) {
             mPacket->processData(datagram.data());
@@ -102,7 +105,7 @@ QString UdpServerSimple::getConnectedClientIp()
 {
     QString res;
 
-    if (mUdpSocket->isOpen() && !clientAddr.isNull())
+    if (!clientAddr.isNull())
         res = clientAddr.toString() + ":" + QString::number(clientPort);
 
     return res;
@@ -110,5 +113,5 @@ QString UdpServerSimple::getConnectedClientIp()
 
 bool UdpServerSimple::isServerRunning()
 {
-    return mUdpSocket->isOpen();
+    return mUdpSocket->state() == QAbstractSocket::BoundState;
 }

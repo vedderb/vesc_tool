@@ -152,19 +152,19 @@ void PageConnection::timerSlot()
         }
 
         if (mVesc->udpServerIsClientConnected()) {
-            clientTxt += mVesc->tcpServerClientIp();
+            clientTxt += mVesc->udpServerClientIp();
         }
     }
     else {
         ui->serverPortBox->setEnabled(true);
     }
 
-    if (ui->tcpServerAddressesEdit->toPlainText() != ipTxt) {
-        ui->tcpServerAddressesEdit->setPlainText(ipTxt);
+    if (ui->serverAddressesEdit->toPlainText() != ipTxt) {
+        ui->serverAddressesEdit->setPlainText(ipTxt);
     }
 
-    if (ui->tcpServerClientsEdit->toPlainText() != clientTxt) {
-        ui->tcpServerClientsEdit->setPlainText(clientTxt);
+    if (ui->serverClientsEdit->toPlainText() != clientTxt) {
+        ui->serverClientsEdit->setPlainText(clientTxt);
     }
 }
 
@@ -581,7 +581,10 @@ void PageConnection::on_serverEnableBox_toggled(bool isEnabled)
                 ui->serverPortBox->setEnabled(false);
             }
         } else {
-            mVesc->tcpServerStop();
+            if(ui->serverProtocol->currentText() == "TCP")
+                mVesc->tcpServerStop();
+            if(ui->serverProtocol->currentText() == "UDP")
+               mVesc->udpServerStop();
         }
     }
 }

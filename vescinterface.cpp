@@ -2374,6 +2374,11 @@ bool VescInterface::udpServerStart(int port)
     return res;
 }
 
+void VescInterface::udpServerStop()
+{
+    mUdpServer->stopServer();
+}
+
 bool VescInterface::udpServerIsRunning()
 {
     return mUdpServer->isServerRunning();
@@ -2382,6 +2387,11 @@ bool VescInterface::udpServerIsRunning()
 bool VescInterface::udpServerIsClientConnected()
 {
     return mUdpServer->isClientConnected();
+}
+
+QString VescInterface::udpServerClientIp()
+{
+    return mUdpServer->getConnectedClientIp();
 }
 
 void VescInterface::emitConfigurationChanged()

@@ -454,14 +454,14 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
-             <widget class="QPlainTextEdit" name="tcpServerAddressesEdit">
+             <widget class="QPlainTextEdit" name="serverAddressesEdit">
               <property name="readOnly">
                <bool>true</bool>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPlainTextEdit" name="tcpServerClientsEdit">
+             <widget class="QPlainTextEdit" name="serverClientsEdit">
               <property name="readOnly">
                <bool>true</bool>
               </property>

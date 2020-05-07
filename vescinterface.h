@@ -26,6 +26,7 @@
 #include <QByteArray>
 #include <QList>
 #include <QTcpSocket>
+#include <QUdpSocket>
 #include <QSettings>
 #include <QHash>
 #include <QFile>
@@ -184,8 +185,10 @@ public:
     Q_INVOKABLE QString tcpServerClientIp();
 
     Q_INVOKABLE bool udpServerStart(int port);
+    Q_INVOKABLE void udpServerStop();
     Q_INVOKABLE bool udpServerIsRunning();
     Q_INVOKABLE bool udpServerIsClientConnected();
+    Q_INVOKABLE QString udpServerClientIp();
 
     Q_INVOKABLE void emitConfigurationChanged();
 
@@ -319,6 +322,8 @@ private:
     bool mTcpConnected;
     QString mLastTcpServer;
     int mLastTcpPort;
+
+    QUdpSocket *mUdpSocket;
 
 #ifdef HAS_BLUETOOTH
     BleUart *mBleUart;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
-    <height>527</height>
+    <width>801</width>
+    <height>528</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <enum>QTabWidget::Triangular</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -306,9 +306,9 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QGroupBox" name="clientBox">
+        <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>Client</string>
+          <string>TCP Client</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
@@ -319,28 +319,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="clientProtocol">
-            <item>
-             <property name="text">
-              <string>TCP</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>UDP</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="connectToIpEdit">
+           <widget class="QLineEdit" name="tcpServerEdit">
             <property name="text">
              <string>127.0.0.1</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="connectToPortBox">
+           <widget class="QSpinBox" name="tcpPortBox">
             <property name="prefix">
              <string>Port: </string>
             </property>
@@ -373,7 +359,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="ipConnectButton">
+           <widget class="QPushButton" name="tcpConnectButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -396,9 +382,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="serverBox">
+        <widget class="QGroupBox" name="tcpServerBox">
          <property name="title">
-          <string>Server</string>
+          <string>TCP Server</string>
          </property>
          <property name="checkable">
           <bool>false</bool>
@@ -410,28 +396,14 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
-             <widget class="QCheckBox" name="serverEnableBox">
+             <widget class="QCheckBox" name="tcpServerEnableBox">
               <property name="text">
-               <string>Run server</string>
+               <string>Enable TCP Server</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="serverProtocol">
-              <item>
-               <property name="text">
-                <string>TCP</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>UDP</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="serverPortBox">
+             <widget class="QSpinBox" name="tcpServerPortBox">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -439,7 +411,7 @@
                </sizepolicy>
               </property>
               <property name="prefix">
-               <string>Port: </string>
+               <string>TCP Port: </string>
               </property>
               <property name="maximum">
                <number>65535</number>
@@ -454,14 +426,160 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
-             <widget class="QPlainTextEdit" name="serverAddressesEdit">
+             <widget class="QPlainTextEdit" name="tcpServerAddressesEdit">
               <property name="readOnly">
                <bool>true</bool>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPlainTextEdit" name="serverClientsEdit">
+             <widget class="QPlainTextEdit" name="tcpServerClientsEdit">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>UDP</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_10">
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>UDP Client</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Address</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="udpServerEdit">
+            <property name="text">
+             <string>127.0.0.1</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="udpPortBox">
+            <property name="prefix">
+             <string>Port: </string>
+            </property>
+            <property name="maximum">
+             <number>65535</number>
+            </property>
+            <property name="value">
+             <number>65102</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="udpDisconnectButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Disconnect</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Disconnected-96.png</normaloff>:/res/icons/Disconnected-96.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="udpConnectButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Connect</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Connected-96.png</normaloff>:/res/icons/Connected-96.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="tcpServerBox_2">
+         <property name="title">
+          <string>UDP Server</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item>
+             <widget class="QCheckBox" name="udpServerEnableBox">
+              <property name="text">
+               <string>Enable UDP Server</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="udpServerPortBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="prefix">
+               <string>UDP Port: </string>
+              </property>
+              <property name="maximum">
+               <number>65535</number>
+              </property>
+              <property name="value">
+               <number>65102</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <item>
+             <widget class="QPlainTextEdit" name="udpServerAddressesEdit">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPlainTextEdit" name="udpServerClientsEdit">
               <property name="readOnly">
                <bool>true</bool>
               </property>

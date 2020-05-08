@@ -55,8 +55,11 @@ void PageConnection::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
 
-    ui->connectToIpEdit->setText(mVesc->getLastTcpServer());
-    ui->connectToPortBox->setValue(mVesc->getLastTcpPort());
+    ui->tcpServerEdit->setText(mVesc->getLastTcpServer());
+    ui->tcpPortBox->setValue(mVesc->getLastTcpPort());
+
+    ui->udpServerEdit->setText(mVesc->getLastUdpServer());
+    ui->udpPortBox->setValue(mVesc->getLastUdpPort());
 
 #ifdef HAS_BLUETOOTH
     connect(mVesc->bleDevice(), SIGNAL(scanDone(QVariantMap,bool)),
@@ -135,36 +138,50 @@ void PageConnection::timerSlot()
         }
     }
 
-    QString ipTxt = "Server IPs\n";
-    QString clientTxt = "Connected Clients\n";
+    QString tcpIpTxt = "Server IPs\n";
+    QString tcpClientTxt = "Connected Clients\n";
     if (mVesc->tcpServerIsRunning()) {
         for (auto adr: Utility::getNetworkAddresses()) {
-            ipTxt += adr.toString() + "\n";
+            tcpIpTxt += adr.toString() + "\n";
         }
 
         if (mVesc->tcpServerIsClientConnected()) {
-            clientTxt += mVesc->tcpServerClientIp();
-        }
-    }
-    else if(mVesc->udpServerIsRunning()) {
-        for (auto adr: Utility::getNetworkAddresses()) {
-            ipTxt += adr.toString() + "\n";
-        }
-
-        if (mVesc->udpServerIsClientConnected()) {
-            clientTxt += mVesc->udpServerClientIp();
+            tcpClientTxt += mVesc->tcpServerClientIp();
         }
     }
     else {
-        ui->serverPortBox->setEnabled(true);
+        ui->tcpServerPortBox->setEnabled(true);
     }
 
-    if (ui->serverAddressesEdit->toPlainText() != ipTxt) {
-        ui->serverAddressesEdit->setPlainText(ipTxt);
+    if (ui->tcpServerAddressesEdit->toPlainText() != tcpIpTxt) {
+        ui->tcpServerAddressesEdit->setPlainText(tcpIpTxt);
     }
 
-    if (ui->serverClientsEdit->toPlainText() != clientTxt) {
-        ui->serverClientsEdit->setPlainText(clientTxt);
+    if (ui->tcpServerClientsEdit->toPlainText() != tcpClientTxt) {
+        ui->tcpServerClientsEdit->setPlainText(tcpClientTxt);
+    }
+
+    QString udpIpTxt = "Server IPs\n";
+    QString udpClientTxt = "Connected Clients\n";
+    if(mVesc->udpServerIsRunning()) {
+        for (auto adr: Utility::getNetworkAddresses()) {
+            udpIpTxt += adr.toString() + "\n";
+        }
+
+        if (mVesc->udpServerIsClientConnected()) {
+            udpClientTxt += mVesc->udpServerClientIp();
+        }
+    }
+    else {
+        ui->udpServerPortBox->setEnabled(true);
+    }
+
+    if (ui->udpServerAddressesEdit->toPlainText() != udpIpTxt) {
+        ui->udpServerAddressesEdit->setPlainText(udpIpTxt);
+    }
+
+    if (ui->udpServerClientsEdit->toPlainText() != udpClientTxt) {
+        ui->udpServerClientsEdit->setPlainText(udpClientTxt);
     }
 }
 
@@ -319,19 +336,28 @@ void PageConnection::on_tcpDisconnectButton_clicked()
     }
 }
 
-void PageConnection::on_ipConnectButton_clicked()
+void PageConnection::on_udpDisconnectButton_clicked()
 {
     if (mVesc) {
-        if(ui->clientProtocol->currentText() == "TCP") {
-            QString tcpServer = ui->connectToIpEdit->text();
-            int port = ui->connectToPortBox->value();
-            mVesc->connectTcp(tcpServer, port);
-        }
-        else if(ui->clientProtocol->currentText() == "UDP") {
-            QString udpServer = ui->connectToIpEdit->text();
-            int port = ui->connectToPortBox->value();
-            mVesc->connectUdp(udpServer, port);
-        }
+        mVesc->disconnectPort();
+    }
+}
+
+void PageConnection::on_tcpConnectButton_clicked()
+{
+    if (mVesc) {
+        QString tcpServer = ui->tcpServerEdit->text();
+        int tcpPort = ui->tcpPortBox->value();
+        mVesc->connectTcp(tcpServer, tcpPort);
+    }
+}
+
+void PageConnection::on_udpConnectButton_clicked()
+{
+    if (mVesc) {
+        QString udpServer = ui->udpServerEdit->text();
+        int udpPort = ui->udpPortBox->value();
+        mVesc->connectUdp(udpServer, udpPort);
     }
 }
 
@@ -574,24 +600,28 @@ void PageConnection::on_unpairButton_clicked()
     }
 }
 
-void PageConnection::on_serverEnableBox_toggled(bool isEnabled)
+void PageConnection::on_tcpServerEnableBox_toggled(bool isEnabled)
 {
     if (mVesc) {
         if (isEnabled)
         {
-            if(ui->serverProtocol->currentText() == "TCP") {
-                mVesc->tcpServerStart(ui->serverPortBox->value());
-                ui->serverPortBox->setEnabled(false);
-            }
-            else if(ui->serverProtocol->currentText() == "UDP") {
-                mVesc->udpServerStart(ui->serverPortBox->value());
-                ui->serverPortBox->setEnabled(false);
-            }
+            mVesc->tcpServerStart(ui->tcpServerPortBox->value());
+            ui->tcpServerPortBox->setEnabled(false);
         } else {
-            if(ui->serverProtocol->currentText() == "TCP")
-                mVesc->tcpServerStop();
-            if(ui->serverProtocol->currentText() == "UDP")
-               mVesc->udpServerStop();
+            mVesc->tcpServerStop();
+        }
+    }
+}
+
+void PageConnection::on_udpServerEnableBox_toggled(bool isEnabled)
+{
+    if (mVesc) {
+        if (isEnabled)
+        {
+            mVesc->udpServerStart(ui->udpServerPortBox->value());
+            ui->udpServerPortBox->setEnabled(false);
+        } else {
+           mVesc->udpServerStop();
         }
     }
 }

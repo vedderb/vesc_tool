@@ -2025,6 +2025,11 @@ QString VescInterface::getConnectedPortName()
         connected = true;
     }
 
+    if (mUdpConnected) {
+        res = tr("Connected (UDP) to %1:%2").arg(mLastUdpServer.toString()).arg(mLastUdpPort);
+        connected = true;
+    }
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         res = tr("Connected (BLE) to %1").arg(mLastBleAddr);

@@ -55,8 +55,8 @@ void PageConnection::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
 
-    ui->tcpServerEdit->setText(mVesc->getLastTcpServer());
-    ui->tcpPortBox->setValue(mVesc->getLastTcpPort());
+    ui->connectToIpEdit->setText(mVesc->getLastTcpServer());
+    ui->connectToPortBox->setValue(mVesc->getLastTcpPort());
 
 #ifdef HAS_BLUETOOTH
     connect(mVesc->bleDevice(), SIGNAL(scanDone(QVariantMap,bool)),
@@ -319,12 +319,19 @@ void PageConnection::on_tcpDisconnectButton_clicked()
     }
 }
 
-void PageConnection::on_tcpConnectButton_clicked()
+void PageConnection::on_ipConnectButton_clicked()
 {
     if (mVesc) {
-        QString tcpServer = ui->tcpServerEdit->text();
-        int tcpPort = ui->tcpPortBox->value();
-        mVesc->connectTcp(tcpServer, tcpPort);
+        if(ui->clientProtocol->currentText() == "TCP") {
+            QString tcpServer = ui->connectToIpEdit->text();
+            int port = ui->connectToPortBox->value();
+            mVesc->connectTcp(tcpServer, port);
+        }
+        else if(ui->clientProtocol->currentText() == "UDP") {
+            QString udpServer = ui->connectToIpEdit->text();
+            int port = ui->connectToPortBox->value();
+            mVesc->connectUdp(udpServer, port);
+        }
     }
 }
 

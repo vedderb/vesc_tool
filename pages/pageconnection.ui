@@ -333,14 +333,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="tcpServerEdit">
+           <widget class="QLineEdit" name="connectToIpEdit">
             <property name="text">
              <string>127.0.0.1</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="tcpPortBox">
+           <widget class="QSpinBox" name="connectToPortBox">
             <property name="prefix">
              <string>Port: </string>
             </property>
@@ -373,7 +373,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="tcpConnectButton">
+           <widget class="QPushButton" name="ipConnectButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>

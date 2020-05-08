@@ -54,7 +54,7 @@ private slots:
     void on_CANbusDisconnectButton_clicked();
     void on_CANbusConnectButton_clicked();
     void on_tcpDisconnectButton_clicked();
-    void on_tcpConnectButton_clicked();
+    void on_ipConnectButton_clicked();
     void on_helpButton_clicked();
     void on_canFwdButton_toggled(bool checked);
     void on_autoConnectButton_clicked();

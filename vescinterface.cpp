@@ -20,6 +20,7 @@
 #include "vescinterface.h"
 #include <QDebug>
 #include <QHostInfo>
+#include <QNetworkDatagram>
 #include <QFileInfo>
 #include <QThread>
 #include <QEventLoop>
@@ -78,6 +79,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastConnType = static_cast<conn_t>(mSettings.value("connection_type", CONN_NONE).toInt());
     mLastTcpServer = mSettings.value("tcp_server", "127.0.0.1").toString();
     mLastTcpPort = mSettings.value("tcp_port", 65102).toInt();
+    mLastUdpServer = mSettings.value("udp_server", "127.0.0.1").toString();
+    mLastUdpPort = mSettings.value("udp_port", 65102).toInt();
 
     mSendCanBefore = false;
     mCanIdBefore = 0;
@@ -145,6 +148,13 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             this, SLOT(tcpInputDisconnected()));
     connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
+
+    // UDP
+    mUdpSocket = new QUdpSocket(this);
+    mUdpConnected = false;
+    connect(mUdpSocket, SIGNAL(readyRead()), this, SLOT(udpInputDataAvailable()));
+    connect(mUdpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(udpInputError(QAbstractSocket::SocketError)));
 
     // BLE
 #ifdef HAS_BLUETOOTH
@@ -851,6 +861,16 @@ QString VescInterface::getLastTcpServer() const
 int VescInterface::getLastTcpPort() const
 {
     return mLastTcpPort;
+}
+
+QString VescInterface::getLastUdpServer() const
+{
+    return mLastUdpServer.toString();
+}
+
+int VescInterface::getLastUdpPort() const
+{
+    return mLastUdpPort;
 }
 
 bool VescInterface::swdEraseFlash()
@@ -1831,6 +1851,10 @@ bool VescInterface::isPortConnected()
         res = true;
     }
 
+    if (mUdpConnected) {
+        res = true;
+    }
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         res = true;
@@ -1864,6 +1888,12 @@ void VescInterface::disconnectPort()
         updateFwRx(false);
     }
 
+    if (mUdpConnected) {
+        mUdpSocket->close();
+        mUdpConnected = false;
+        updateFwRx(false);
+    }
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         mBleUart->disconnectBle();
@@ -1884,6 +1914,9 @@ bool VescInterface::reconnectLastPort()
 #endif
     } else if (mLastConnType == CONN_TCP) {
         connectTcp(mLastTcpServer, mLastTcpPort);
+        return true;
+    } else if (mLastConnType == CONN_UDP) {
+        connectUdp(mLastUdpServer.toString(), mLastUdpPort);
         return true;
     } else if (mLastConnType == CONN_BLE) {
 #ifdef HAS_BLUETOOTH
@@ -2225,6 +2258,30 @@ void VescInterface::connectTcp(QString server, int port)
 
     mTcpSocket->abort();
     mTcpSocket->connectToHost(host, port);
+}
+
+void VescInterface::connectUdp(QString server, int port)
+{
+    QHostAddress host;
+    host.setAddress(server);
+
+    // Try DNS lookup
+    if (host.isNull()) {
+        QList<QHostAddress> addresses = QHostInfo::fromName(server).addresses();
+
+        if (!addresses.isEmpty()) {
+            host.setAddress(addresses.first().toString());
+        }
+    }
+
+    if(host.isNull()) // Can't lookup
+        return;
+
+    mUdpConnected = true;
+    mLastUdpServer = host;
+    mLastUdpPort = port;
+    setLastConnectionType(CONN_UDP);
+    updateFwRx(false);
 }
 
 void VescInterface::connectBle(QString address)
@@ -2570,6 +2627,14 @@ void VescInterface::tcpInputDataAvailable()
     }
 }
 
+void VescInterface::udpInputDataAvailable()
+{
+    while (mUdpSocket->hasPendingDatagrams()) {
+        QNetworkDatagram datagram = mUdpSocket->receiveDatagram();
+        mPacket->processData(datagram.data());
+    }
+}
+
 void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
 {
     (void)socketError;
@@ -2577,6 +2642,17 @@ void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
     QString errorStr = mTcpSocket->errorString();
     emit statusMessage(tr("TCP Error") + errorStr, false);
     mTcpSocket->close();
+    updateFwRx(false);
+}
+
+void VescInterface::udpInputError(QAbstractSocket::SocketError socketError)
+{
+    (void)socketError;
+
+    QString errorStr = mUdpSocket->errorString();
+    emit statusMessage(tr("UDP Error") + errorStr, false);
+    mUdpSocket->close();
+    mUdpConnected = false;
     updateFwRx(false);
 }
 
@@ -2806,6 +2882,10 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
     if (mTcpConnected && mTcpSocket->isOpen()) {
         mTcpSocket->write(data);
+    }
+
+    if (mUdpConnected) {
+        mUdpSocket->writeDatagram(data, mLastUdpServer, mLastUdpPort);
     }
 
 #ifdef HAS_BLUETOOTH

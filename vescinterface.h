@@ -106,6 +106,8 @@ public:
 
     Q_INVOKABLE QString getLastTcpServer() const;
     Q_INVOKABLE int getLastTcpPort() const;
+    Q_INVOKABLE QString getLastUdpServer() const;
+    Q_INVOKABLE int getLastUdpPort() const;
 #ifdef HAS_SERIALPORT
     Q_INVOKABLE QString getLastSerialPort() const;
     Q_INVOKABLE int getLastSerialBaud() const;
@@ -171,6 +173,7 @@ public:
     Q_INVOKABLE void scanCANbus();
 
     Q_INVOKABLE void connectTcp(QString server, int port);
+    Q_INVOKABLE void connectUdp(QString server, int port);
     Q_INVOKABLE void connectBle(QString address);
     Q_INVOKABLE bool isAutoconnectOngoing() const;
     Q_INVOKABLE double getAutoconnectProgress() const;
@@ -239,6 +242,9 @@ private slots:
     void tcpInputDataAvailable();
     void tcpInputError(QAbstractSocket::SocketError socketError);
 
+    void udpInputError(QAbstractSocket::SocketError socketError);
+    void udpInputDataAvailable();
+
 #ifdef HAS_BLUETOOTH
     void bleDataRx(QByteArray data);
 #endif
@@ -259,7 +265,8 @@ private:
         CONN_SERIAL,
         CONN_CANBUS,
         CONN_TCP,
-        CONN_BLE
+        CONN_BLE,
+        CONN_UDP,
     } conn_t;
 
     QSettings mSettings;
@@ -324,6 +331,9 @@ private:
     int mLastTcpPort;
 
     QUdpSocket *mUdpSocket;
+    bool mUdpConnected;
+    QHostAddress mLastUdpServer;
+    int mLastUdpPort;
 
 #ifdef HAS_BLUETOOTH
     BleUart *mBleUart;

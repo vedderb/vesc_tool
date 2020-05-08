@@ -78,7 +78,6 @@ void UdpServerSimple::udpInputDataAvailable()
             mPacket->processData(datagram.data());
         }
     }
-
 }
 
 void UdpServerSimple::dataToSend(QByteArray &data)

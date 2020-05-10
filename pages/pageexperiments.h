@@ -73,7 +73,8 @@ private:
         EXPERIMENT_OFF = 0,
         EXPERIMENT_DUTY,
         EXPERIMENT_CURRENT,
-        EXPERIMENT_RPM
+        EXPERIMENT_RPM,
+        EXPERIMENT_HOLD
     } experiment_state;
 
     Ui::PageExperiments *ui;

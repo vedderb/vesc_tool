@@ -23,6 +23,7 @@ DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
 DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
 
 CONFIG += c++11
+#QMAKE_CXXFLAGS += -Wno-deprecated-copy
 
 # Build mobile GUI
 #CONFIG += build_mobile

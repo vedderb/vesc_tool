@@ -651,8 +651,14 @@ Item {
             updateHw(hw)
             updateBl(hw)
 
+            var testFwStr = "";
+
+            if (isTestFw > 0) {
+                testFwStr = " BETA " +  isTestFw
+            }
+
             versionText.text =
-                    "FW   : " + major + "." + minor + "\n" +
+                    "FW   : " + major + "." + minor + testFwStr + "\n" +
                     "HW   : " + hw + "\n" +
                     "UUID : " + Utility.uuid2Str(uuid, false)
         }

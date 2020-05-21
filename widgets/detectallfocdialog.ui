@@ -253,6 +253,17 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="runNoCanButton">
+               <property name="text">
+                <string>Run Detection (no CAN)</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="runButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -274,6 +285,14 @@
           </layout>
          </widget>
          <widget class="QWidget" name="page_4">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>796</width>
+            <height>481</height>
+           </rect>
+          </property>
           <attribute name="label">
            <string>Directions</string>
           </attribute>

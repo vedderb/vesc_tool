@@ -2,42 +2,35 @@
     <qresource prefix="/">
         <file>res/firmwares/60/VESC_default.bin</file>
         <file>res/firmwares/60/VESC_default_no_hw_limits.bin</file>
-        <file>res/firmwares/60/VESC_servoout.bin</file>
-        <file>res/firmwares/60/VESC_ws2811.bin</file>
         <file>res/firmwares/75_300/VESC_default.bin</file>
         <file>res/firmwares/75_300/VESC_default_no_hw_limits.bin</file>
-        <file>res/firmwares/75_300/VESC_servoout.bin</file>
-        <file>res/firmwares/75_300/VESC_ws2811.bin</file>
-        <file>res/firmwares/410_o_411_o_412/VESC_ws2811.bin</file>
-        <file>res/firmwares/410_o_411_o_412/VESC_servoout.bin</file>
         <file>res/firmwares/410_o_411_o_412/VESC_default_no_hw_limits.bin</file>
         <file>res/firmwares/410_o_411_o_412/VESC_default.bin</file>
         <file>res/firmwares/410_o_411_o_412/VESC_0005ohm.bin</file>
-        <file>res/firmwares/48/VESC_ws2811.bin</file>
-        <file>res/firmwares/48/VESC_servoout.bin</file>
         <file>res/firmwares/48/VESC_default.bin</file>
-        <file>res/firmwares/48/VESC_0005ohm.bin</file>
-        <file>res/firmwares/46_o_47/VESC_ws2811_33k.bin</file>
-        <file>res/firmwares/46_o_47/VESC_ws2811.bin</file>
-        <file>res/firmwares/46_o_47/VESC_servoout.bin</file>
         <file>res/firmwares/46_o_47/VESC_default.bin</file>
         <file>res/firmwares/46_o_47/VESC_33k.bin</file>
         <file>res/firmwares/46_o_47/VESC_0005ohm.bin</file>
         <file>res/firmwares/75_300_R2/VESC_default.bin</file>
         <file>res/firmwares/75_300_R2/VESC_default_no_hw_limits.bin</file>
-        <file>res/firmwares/75_300_R2/VESC_servoout.bin</file>
-        <file>res/firmwares/75_300_R2/VESC_ws2811.bin</file>
         <file>res/firmwares/UAVC_OMEGA/VESC_default.bin</file>
         <file>res/firmwares/HD/VESC_default.bin</file>
         <file>res/firmwares/HD/VESC_default_no_hw_limits.bin</file>
-        <file>res/firmwares/HD/VESC_servoout.bin</file>
-        <file>res/firmwares/HD/VESC_ws2811.bin</file>
         <file>res/firmwares/60_MK3/VESC_default.bin</file>
         <file>res/firmwares/60_MK3/VESC_default_no_hw_limits.bin</file>
-        <file>res/firmwares/60_MK3/VESC_servoout.bin</file>
-        <file>res/firmwares/60_MK3/VESC_ws2811.bin</file>
         <file>res/firmwares/100_250/VESC_default.bin</file>
         <file>res/firmwares/100_250/VESC_default_no_hw_limits.bin</file>
-        <file>res/firmwares/100_250/VESC_servoout.bin</file>
+        <file>res/firmwares/UNITY/VESC_default.bin</file>
+        <file>res/firmwares/UNITY/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/STORMCORE_60D/VESC_default.bin</file>
+        <file>res/firmwares/STORMCORE_60D/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/STORMCORE_100D/VESC_default.bin</file>
+        <file>res/firmwares/STORMCORE_100D/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/STORMCORE_100S/VESC_default.bin</file>
+        <file>res/firmwares/STORMCORE_100S/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/60_MK4/VESC_default.bin</file>
+        <file>res/firmwares/60_MK4/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/75_300_R3/VESC_default.bin</file>
+        <file>res/firmwares/75_300_R3/VESC_default_no_hw_limits.bin</file>
     </qresource>
 </RCC>

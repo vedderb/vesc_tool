@@ -44,7 +44,8 @@ private slots:
     void timerSlot();
 
     void fwUploadStatus(const QString &status, double progress, bool isOngoing);
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired);
+    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
+                           bool isPaired, int isTestFw);
     void updateHwList(QString hw = "");
     void updateFwList();
     void updateBlList(QString hw = "");

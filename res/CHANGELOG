@@ -1,3 +1,27 @@
+== 2.06 ==
+* Prevent repeated test version notification dialogs.
+* Made IMU calibration more compact to decrease the minimum horizontal size.
+
+== 2.05 ==
+* FW 5.01 support:
+ - Fixed PPM bug in previous release.
+
+== 2.04 ==
+* FW 5.0 support:
+ - Dual motor support, for e.g. unity.
+* Added NRF pair to VESC Remote page.
+* Added detect all without CAN button.
+* Updated observer gain calculation.
+* Added support for FW test build flag.
+* Added unity firmwares.
+* Added stormcore firmwares.
+* Removed some uncommon firmwares.
+* Disable LZO FW compression if 3 consecutive chunks fail.
+* Added CAN-list with connected VESCs.
+* Filter pages based on selected motor and app.
+* Log setup values in desktop VESC Tool too.
+* Added IMU orientation calibration widget.
+
 == 2.03 ==
 * App balance updates. See https://github.com/vedderb/bldc/pull/138.
 * Changed back FOC time constant.

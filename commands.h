@@ -59,10 +59,11 @@ public:
 signals:
     void dataToSend(QByteArray &data);
 
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired);
+    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
+                           bool isPaired, int isTestFw);
     void eraseNewAppResReceived(bool ok);
     void eraseBootloaderResReceived(bool ok);
-    void writeNewAppDataResReceived(bool ok);
+    void writeNewAppDataResReceived(bool ok, bool hasOffset, quint32 offset);
     void ackReceived(QString ackType);
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void printReceived(QString str);
@@ -87,6 +88,7 @@ signals:
     void detectAllFocReceived(int result);
     void pingCanRx(QVector<int> devs, bool isTimeout);
     void valuesImuReceived(IMU_VALUES values, unsigned int mask);
+    void imuCalibrationReceived(QVector<double> cal);
     void bmConnRes(int res);
     void bmEraseFlashAllRes(int res);
     void bmWriteFlashRes(int res);
@@ -156,12 +158,14 @@ public slots:
                        bool forward_can, bool divide_by_controllers, bool ack);
     void getValuesSelective(unsigned int mask);
     void getValuesSetupSelective(unsigned int mask);
-    void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty, double resistance);
+    void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty,
+                                double resistance, double inductanec);
     void detectAllFoc(bool detect_can, double max_power_loss, double min_current_in,
                       double max_current_in, double openloop_rpm, double sl_erpm);
     void pingCan();
     void disableAppOutput(int time_ms, bool fwdCan);
     void getImuData(unsigned int mask);
+    void getImuCalibration(double yaw);
     void bmConnect();
     void bmEraseFlashAll();
     void bmWriteFlash(uint32_t addr, QByteArray data);
@@ -173,6 +177,7 @@ public slots:
     void bmReadMem(uint32_t addr, quint16 size);
     void setCurrentRel(double current);
     void forwardCanFrame(QByteArray data, quint32 id, bool isExtended);
+    void setBatteryCut(double start, double end, bool store, bool fwdCan);
 
 private slots:
     void timerSlot();

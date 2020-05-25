@@ -233,17 +233,12 @@ void PageExperiments::timerSlot()
             double valueNow = from + stepNow * step;
 
             if (progress >= 1.0) {
-                switch (mState) {
-                case EXPERIMENT_RPM:
-                    if(ui->keepRPMcheckBox->isChecked()){
-                        mVesc->commands()->setRpm( ui->rpmEndBox->value() );
-                        mState = EXPERIMENT_HOLD;
-                        break;
-                    }
-                default:
+                if (mState == EXPERIMENT_RPM && ui->keepRPMcheckBox->isChecked()) {
+                    mVesc->commands()->setRpm(ui->rpmEndBox->value());
+                    mState = EXPERIMENT_HOLD;
+                } else {
                     mVesc->commands()->setCurrent(0);
                     mState = EXPERIMENT_OFF;
-                    break;
                 }
             } else {
                 ui->progressBar->setValue(progress * 100);

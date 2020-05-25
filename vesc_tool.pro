@@ -163,6 +163,7 @@ build_mobile {
 SOURCES += main.cpp\
         mainwindow.cpp \
     packet.cpp \
+    udpserversimple.cpp \
     vbytearray.cpp \
     commands.cpp \
     configparams.cpp \
@@ -178,6 +179,7 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     packet.h \
+    udpserversimple.h \
     vbytearray.h \
     commands.h \
     datatypes.h \

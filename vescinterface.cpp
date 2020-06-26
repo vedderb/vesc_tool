@@ -20,6 +20,7 @@
 #include "vescinterface.h"
 #include <QDebug>
 #include <QHostInfo>
+#include <QNetworkDatagram>
 #include <QFileInfo>
 #include <QThread>
 #include <QEventLoop>
@@ -78,6 +79,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastConnType = static_cast<conn_t>(mSettings.value("connection_type", CONN_NONE).toInt());
     mLastTcpServer = mSettings.value("tcp_server", "127.0.0.1").toString();
     mLastTcpPort = mSettings.value("tcp_port", 65102).toInt();
+    mLastUdpServer = mSettings.value("udp_server", "127.0.0.1").toString();
+    mLastUdpPort = mSettings.value("udp_port", 65102).toInt();
 
     mSendCanBefore = false;
     mCanIdBefore = 0;
@@ -146,6 +149,13 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
 
+    // UDP
+    mUdpSocket = new QUdpSocket(this);
+    mUdpConnected = false;
+    connect(mUdpSocket, SIGNAL(readyRead()), this, SLOT(udpInputDataAvailable()));
+    connect(mUdpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(udpInputError(QAbstractSocket::SocketError)));
+
     // BLE
 #ifdef HAS_BLUETOOTH
     mBleUart = new BleUart(this);
@@ -176,6 +186,15 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     });
     connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
         mTcpServer->packet()->sendPacket(packet);
+    });
+
+    mUdpServer = new UdpServerSimple(this);
+    mUdpServer->setUsePacket(true);
+    connect(mUdpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
+        mPacket->sendPacket(packet);
+    });
+    connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
+        mUdpServer->packet()->sendPacket(packet);
     });
 
     {
@@ -844,6 +863,16 @@ int VescInterface::getLastTcpPort() const
     return mLastTcpPort;
 }
 
+QString VescInterface::getLastUdpServer() const
+{
+    return mLastUdpServer.toString();
+}
+
+int VescInterface::getLastUdpPort() const
+{
+    return mLastUdpPort;
+}
+
 bool VescInterface::swdEraseFlash()
 {
     auto waitBmEraseRes = [this]() {
@@ -1196,7 +1225,57 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     mFwUploadProgress = 0.0;
     mCancelFwUpload = false;
 
-//    isLzo = false;
+    if (fwdCan) {
+        if (mCommands->getSendCan()) {
+            emitMessageDialog("Firmware Upload",
+                              "CAN forwarding must be disabled when uploading firmware to "
+                              "all VESCs at the same time.", false, false);
+            mFwUploadStatus = "CAN check failed";
+            mFwUploadProgress = -1.0;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+            return false;
+        }
+
+        QString hwLocal;
+        Utility::getFwVersionBlocking(this, nullptr, nullptr, &hwLocal, nullptr, nullptr, nullptr);
+        if (hwLocal.isEmpty()) {
+            emitMessageDialog("Firmware Upload", "Could not read hardware version", false, false);
+            mFwUploadStatus = "Read HW version failed";
+            mFwUploadProgress = -1.0;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+            return false;
+        }
+
+        mFwUploadStatus = "Scanning CAN bus...";
+        emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+        auto devs = scanCan();
+
+        bool ignoreBefore = mIgnoreCanChange;
+        mIgnoreCanChange = true;
+
+        for (auto d: devs) {
+            mCommands->setSendCan(true, d);
+            QString hwCan;
+            Utility::getFwVersionBlocking(this, nullptr, nullptr, &hwCan, nullptr, nullptr, nullptr);
+            if (hwLocal != hwCan) {
+                emitMessageDialog("Firmware Upload",
+                                  "All VESCs on the CAN-bus must have the same hardware version to upload "
+                                  "firmware to all of them at the same time. You must update them individually.",
+                                  false, false);
+                mCommands->setSendCan(false);
+                mIgnoreCanChange = ignoreBefore;
+
+                mFwUploadStatus = "CAN check failed";
+                mFwUploadProgress = -1.0;
+                emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+
+                return false;
+            }
+        }
+
+        mCommands->setSendCan(false);
+        mIgnoreCanChange = ignoreBefore;
+    }
 
     if (isBootloader) {
         if (mCommands->getLimitedSupportsEraseBootloader()) {
@@ -1205,6 +1284,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             if (!fwEraseBootloader(fwdCan)) {
                 mFwUploadStatus = "Erasing bootloader failed";
                 mFwUploadProgress = -1.0;
+                emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
                 return false;
             }
         }
@@ -1214,6 +1294,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         if (!fwEraseNewApp(fwdCan, quint32(newFirmware.size()))) {
             mFwUploadStatus = "Erasing buffer failed";
             mFwUploadProgress = -1.0;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
             return false;
         }
     }
@@ -1282,9 +1363,9 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     int lzoFailures = 0;
     while (newFirmware.size() > 0) {
         if (mCancelFwUpload) {
-            emit fwUploadStatus("Upload cancelled", 0.0, false);
             mFwUploadProgress = -1.0;
             mFwUploadStatus = "Upload cancelled";
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
             return false;
         }
 
@@ -1358,9 +1439,9 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             }
 
             emitMessageDialog("Firmware Upload", msg, false, false);
-            emit fwUploadStatus(msg, 0.0, false);
             mFwUploadProgress = -1.0;
             mFwUploadStatus = msg;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
             return false;
         }
     }
@@ -1822,6 +1903,10 @@ bool VescInterface::isPortConnected()
         res = true;
     }
 
+    if (mUdpConnected) {
+        res = true;
+    }
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         res = true;
@@ -1855,6 +1940,12 @@ void VescInterface::disconnectPort()
         updateFwRx(false);
     }
 
+    if (mUdpConnected) {
+        mUdpSocket->close();
+        mUdpConnected = false;
+        updateFwRx(false);
+    }
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         mBleUart->disconnectBle();
@@ -1875,6 +1966,9 @@ bool VescInterface::reconnectLastPort()
 #endif
     } else if (mLastConnType == CONN_TCP) {
         connectTcp(mLastTcpServer, mLastTcpPort);
+        return true;
+    } else if (mLastConnType == CONN_UDP) {
+        connectUdp(mLastUdpServer.toString(), mLastUdpPort);
         return true;
     } else if (mLastConnType == CONN_BLE) {
 #ifdef HAS_BLUETOOTH
@@ -1980,6 +2074,11 @@ QString VescInterface::getConnectedPortName()
 
     if (mTcpConnected) {
         res = tr("Connected (TCP) to %1:%2").arg(mLastTcpServer).arg(mLastTcpPort);
+        connected = true;
+    }
+
+    if (mUdpConnected) {
+        res = tr("Connected (UDP) to %1:%2").arg(mLastUdpServer.toString()).arg(mLastUdpPort);
         connected = true;
     }
 
@@ -2218,6 +2317,30 @@ void VescInterface::connectTcp(QString server, int port)
     mTcpSocket->connectToHost(host, port);
 }
 
+void VescInterface::connectUdp(QString server, int port)
+{
+    QHostAddress host;
+    host.setAddress(server);
+
+    // Try DNS lookup
+    if (host.isNull()) {
+        QList<QHostAddress> addresses = QHostInfo::fromName(server).addresses();
+
+        if (!addresses.isEmpty()) {
+            host.setAddress(addresses.first().toString());
+        }
+    }
+
+    if(host.isNull()) // Can't lookup
+        return;
+
+    mUdpConnected = true;
+    mLastUdpServer = host;
+    mLastUdpPort = port;
+    setLastConnectionType(CONN_UDP);
+    updateFwRx(false);
+}
+
 void VescInterface::connectBle(QString address)
 {
 #ifdef HAS_BLUETOOTH
@@ -2350,6 +2473,39 @@ bool VescInterface::tcpServerIsClientConnected()
 QString VescInterface::tcpServerClientIp()
 {
     return mTcpServer->getConnectedClientIp();
+}
+
+bool VescInterface::udpServerStart(int port)
+{
+    bool res = mUdpServer->startServer(port);
+
+    if (!res) {
+        emitMessageDialog("Start UDP Server",
+                          "Could not start UDP server: " + mUdpServer->errorString(),
+                          false, false);
+    }
+
+    return res;
+}
+
+void VescInterface::udpServerStop()
+{
+    mUdpServer->stopServer();
+}
+
+bool VescInterface::udpServerIsRunning()
+{
+    return mUdpServer->isServerRunning();
+}
+
+bool VescInterface::udpServerIsClientConnected()
+{
+    return mUdpServer->isClientConnected();
+}
+
+QString VescInterface::udpServerClientIp()
+{
+    return mUdpServer->getConnectedClientIp();
 }
 
 void VescInterface::emitConfigurationChanged()
@@ -2528,6 +2684,14 @@ void VescInterface::tcpInputDataAvailable()
     }
 }
 
+void VescInterface::udpInputDataAvailable()
+{
+    while (mUdpSocket->hasPendingDatagrams()) {
+        QNetworkDatagram datagram = mUdpSocket->receiveDatagram();
+        mPacket->processData(datagram.data());
+    }
+}
+
 void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
 {
     (void)socketError;
@@ -2535,6 +2699,17 @@ void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
     QString errorStr = mTcpSocket->errorString();
     emit statusMessage(tr("TCP Error") + errorStr, false);
     mTcpSocket->close();
+    updateFwRx(false);
+}
+
+void VescInterface::udpInputError(QAbstractSocket::SocketError socketError)
+{
+    (void)socketError;
+
+    QString errorStr = mUdpSocket->errorString();
+    emit statusMessage(tr("UDP Error") + errorStr, false);
+    mUdpSocket->close();
+    mUdpConnected = false;
     updateFwRx(false);
 }
 
@@ -2764,6 +2939,10 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
     if (mTcpConnected && mTcpSocket->isOpen()) {
         mTcpSocket->write(data);
+    }
+
+    if (mUdpConnected) {
+        mUdpSocket->writeDatagram(data, mLastUdpServer, mLastUdpPort);
     }
 
 #ifdef HAS_BLUETOOTH

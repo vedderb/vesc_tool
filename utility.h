@@ -61,6 +61,9 @@ public:
     Q_INVOKABLE static bool almostEqual(double A, double B, double eps);
     static bool createParamParserC(VescInterface *vesc, QString filename);
     static uint32_t crc32c(uint8_t *data, uint32_t len);
+    static bool getFwVersionBlocking(VescInterface *vesc, int *majorPtr, int *minorPtr,
+                                     QString *hwPtr, QByteArray *uuidPtr,
+                                     bool *isPairedPtr, int *isTestFwPtr);
     static bool checkFwCompatibility(VescInterface *vesc);
     Q_INVOKABLE static QVariantList getNetworkAddresses();
     Q_INVOKABLE static void startGnssForegroundService();

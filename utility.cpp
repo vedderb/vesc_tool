@@ -1271,17 +1271,22 @@ uint32_t Utility::crc32c(uint8_t *data, uint32_t len)
     return ~crc;
 }
 
-bool Utility::checkFwCompatibility(VescInterface *vesc)
+bool Utility::getFwVersionBlocking(VescInterface *vesc, int *majorPtr, int *minorPtr,
+                                   QString *hwPtr, QByteArray *uuidPtr,
+                                   bool *isPairedPtr, int *isTestFwPtr)
 {
     bool res = false;
 
     auto conn = connect(vesc->commands(), &Commands::fwVersionReceived,
-            [&res, vesc](int major, int minor, QString hw, QByteArray uuid,
+            [&](int major, int minor, QString hw, QByteArray uuid,
                         bool isPaired, int isTestFw) {
-        (void)hw;(void)uuid;(void)isPaired;(void)isTestFw;
-        if (vesc->getSupportedFirmwarePairs().contains(qMakePair(major, minor))) {
-            res = true;
-        }
+        if (majorPtr) *majorPtr = major;
+        if (minorPtr) *minorPtr = minor;
+        if (hwPtr) *hwPtr = hw;
+        if (uuidPtr) *uuidPtr = uuid;
+        if (isPairedPtr) *isPairedPtr = isPaired;
+        if (isTestFwPtr) *isTestFwPtr = isTestFw;
+        res = true;
     });
 
     disconnect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
@@ -1294,6 +1299,19 @@ bool Utility::checkFwCompatibility(VescInterface *vesc)
 
     connect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
             vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+
+    return res;
+}
+
+bool Utility::checkFwCompatibility(VescInterface *vesc)
+{
+    bool res = false;
+
+    int major = 0;
+    int minor = 0;
+    if (getFwVersionBlocking(vesc, &major, &minor, nullptr, nullptr, nullptr, nullptr)) {
+        res = vesc->getSupportedFirmwarePairs().contains(qMakePair(major, minor));
+    }
 
     return res;
 }

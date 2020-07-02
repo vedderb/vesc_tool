@@ -64,6 +64,9 @@ private slots:
     void on_cancelButton_clicked();
     void on_eraseFlashButton_clicked();
     void on_connectNrf5xButton_clicked();
+    void on_uicrReadButton_clicked();
+    void on_uicrWriteButton_clicked();
+    void on_uicrEraseButton_clicked();
 
 private:
     Ui::PageSwdProg *ui;

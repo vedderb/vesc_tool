@@ -3,6 +3,7 @@
 * Made IMU calibration more compact to decrease the minimum horizontal size.
 * Only allow uploading firmware to all VESCs when they have the same hardware version.
 * Added UDP server and client.
+* Added NRF52 UICR read and write support to SWDPROG page.
 
 == 2.05 ==
 * FW 5.01 support:

@@ -3421,6 +3421,9 @@ bool VescInterface::confRestoreBackup(bool can)
         storeSettings();
         emit configurationBackupsChanged();
 
+        commands()->getMcconf(); //Refresh Motor conf.
+        commands()->getAppConf(); //Refresh App conf.
+
         if (!uuidsOk.isEmpty()) {
             QString uuidsStr;
             for (auto s: uuidsOk) {

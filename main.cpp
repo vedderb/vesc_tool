@@ -26,6 +26,25 @@
 #include <QDesktopWidget>
 #include <QFontDatabase>
 
+#ifdef Q_OS_LINUX
+#include <signal.h>
+#endif
+
+static void showHelp()
+{
+    qDebug() << "Arguments";
+    qDebug() << "-h, --help : Show help text";
+    qDebug() << "--tcpServer [port] : Autoconnect to VESC and start TCP server on [port]";
+}
+
+#ifdef Q_OS_LINUX
+static void m_cleanup(int sig)
+{
+    (void)sig;
+    qApp->quit();
+}
+#endif
+
 int main(int argc, char *argv[])
 {
     // Settings
@@ -44,6 +63,63 @@ int main(int argc, char *argv[])
 #endif
 #else
     QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
+
+#ifdef Q_OS_LINUX
+    signal(SIGINT, m_cleanup);
+    signal(SIGTERM, m_cleanup);
+#endif
+
+    // Parse command line arguments
+    QStringList args;
+    for (int i = 0;i < argc;i++) {
+        args.append(argv[i]);
+    }
+
+    bool useTcp = false;
+    int tcpPort = 65102;
+
+    for (int i = 0;i < args.size();i++) {
+        // Skip the program argument
+        if (i == 0) {
+            continue;
+        }
+
+        QString str = args.at(i);
+
+        // Skip path argument
+        if (i >= args.size() && args.size() >= 3) {
+            break;
+        }
+
+        bool dash = str.startsWith("-") && !str.startsWith("--");
+        bool found = false;
+
+        if ((dash && str.contains('h')) || str == "--help") {
+            showHelp();
+            found = true;
+            return 0;
+        }
+
+        if (str == "--tcpServer") {
+            if ((i + 1) < args.size()) {
+                i++;
+                tcpPort = args.at(i).toInt();
+                useTcp = true;
+                found = true;
+            }
+        }
+
+        if (!found) {
+            if (dash) {
+                qCritical() << "At least one of the flags is invalid:" << str;
+            } else {
+                qCritical() << "Invalid option:" << str;
+            }
+
+            showHelp();
+            return 1;
+        }
+    }
 
     QSettings set;
     bool scaleAuto = true;
@@ -89,37 +165,18 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    QApplication a(argc, argv);
-
-    // Fonts
-    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Bold.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-BoldOblique.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Oblique.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Bold.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-BoldOblique.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Oblique.ttf");
-
-    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Regular.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Medium.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bolf.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
-
-    qApp->setFont(QFont("Roboto",12));
-
-    // Style
-    a.setStyleSheet("");
-    a.setStyle(QStyleFactory::create("Fusion"));
+    QCoreApplication *app;
 
 #ifdef USE_MOBILE
+    QApplication *a = new QApplication(argc, argv);
+    app = a;
+
     QmlUi q;
     q.startQmlUi();
 
     // As background running is allowed, make sure to not update the GUI when
     // running in the background.
-    QObject::connect(&a, &QApplication::applicationStateChanged, [&q](Qt::ApplicationState state) {
+    QObject::connect(a, &QApplication::applicationStateChanged, [&q](Qt::ApplicationState state) {
         if(state == Qt::ApplicationHidden) {
             q.setVisible(false);
         } else {
@@ -127,9 +184,84 @@ int main(int argc, char *argv[])
         }
     });
 #else
-    MainWindow w;
-    w.show();
+    VescInterface *vesc = nullptr;
+    MainWindow *w = nullptr;
+
+    if (useTcp) {
+        app = new QCoreApplication(argc, argv);
+
+        vesc = new VescInterface;
+        vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+        Utility::configLoadLatest(vesc);
+
+        QTimer::singleShot(1000, [&vesc, &tcpPort]() {
+            bool ok = vesc->autoconnect();
+            if (ok) {
+                ok = vesc->tcpServerStart(tcpPort);
+
+                if (!ok) {
+                    qCritical() << "Could not start TCP server on port" << tcpPort;
+                    qApp->quit();
+                }
+            } else {
+                qCritical() << "Could not autoconnect to VESC";
+                qApp->quit();
+            }
+        });
+
+        QObject::connect(vesc, &VescInterface::statusMessage, [](QString msg, bool isGood) {
+            if (isGood) {
+                qDebug() << msg;
+            } else  {
+                qWarning() << msg;
+                qWarning() << "Closing...";
+                qApp->quit();
+            }
+        });
+    } else {
+        QApplication *a = new QApplication(argc, argv);
+        app = a;
+
+        // Fonts
+        QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Bold.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-BoldOblique.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Oblique.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Bold.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-BoldOblique.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Oblique.ttf");
+
+        QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Regular.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Medium.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bolf.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
+        QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
+
+        qApp->setFont(QFont("Roboto",12));
+
+        // Style
+        a->setStyleSheet("");
+        a->setStyle(QStyleFactory::create("Fusion"));
+
+        w = new MainWindow;
+        w->show();
+    }
 #endif
 
-    return a.exec();
+    int res = app->exec();
+
+#ifndef USE_MOBILE
+    if (vesc) {
+        delete vesc;
+    }
+
+    if (w) {
+        delete w;
+    }
+#endif
+
+    delete app;
+
+    return res;
 }

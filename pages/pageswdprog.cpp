@@ -19,6 +19,9 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTableWidgetItem>
+#include <QLineEdit>
+#include <QPushButton>
 #include "pageswdprog.h"
 #include "ui_pageswdprog.h"
 #include "utility.h"
@@ -41,6 +44,121 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
     }
 
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+
+    // UICR tab
+    ui->uicrTable->setColumnWidth(0, 200);
+    ui->uicrTable->setColumnWidth(2, 200);
+
+    auto addDataItem = [this](QString name, QString offset, QString defaultValue) {
+        ui->uicrTable->setRowCount(ui->uicrTable->rowCount() + 1);
+        ui->uicrTable->setItem(ui->uicrTable->rowCount() - 1, 0, new QTableWidgetItem(name));
+        ui->uicrTable->setItem(ui->uicrTable->rowCount() - 1, 1, new QTableWidgetItem(offset));
+
+        QLineEdit *le = new QLineEdit;
+        le->setText(defaultValue);
+        QFont font;
+        font.setFamily("DejaVu Sans Mono");
+        le->setFont(font);
+        ui->uicrTable->setCellWidget(ui->uicrTable->rowCount() - 1, 2, le);
+
+        QPushButton *readButton = new QPushButton;
+        readButton->setText("Read");
+        readButton->setIcon(QIcon("://res/icons/Upload-96.png"));
+        ui->uicrTable->setCellWidget(ui->uicrTable->rowCount() - 1, 3, readButton);
+
+        connect(readButton, &QAbstractButton::clicked, [this, offset, le]() {
+            if (mVesc) {
+                if (ui->targetLabel->text().isEmpty()) {
+                    QMessageBox::information(this,
+                                             tr("Read UICR"),
+                                             tr("SWD must be connected for this command to work."));
+                    return;
+                }
+
+                uint32_t ofs = offset.mid(2).toUInt(nullptr, 16);
+                auto data = mVesc->commands()->bmReadMemWait(0x10001000 + ofs, 4);
+
+                if (data.size() == 4) {
+                    VByteArray vb(data);
+                    le->setText("0x" + QString("%1").
+                                arg(vb.vbPopFrontUint32(), 8, 16, QLatin1Char('0')).toUpper());
+                } else {
+                    QMessageBox::information(this,
+                                             tr("Read UICR"),
+                                             tr("Could not read UICR."));
+                }
+            }
+        });
+
+        QPushButton *writeButton = new QPushButton;
+        writeButton->setText("Write");
+        writeButton->setIcon(QIcon("://res/icons/Download-96.png"));
+        ui->uicrTable->setCellWidget(ui->uicrTable->rowCount() - 1, 4, writeButton);
+
+        connect(writeButton, &QAbstractButton::clicked, [this, offset, le, name]() {
+            if (mVesc) {
+                if (ui->targetLabel->text().isEmpty()) {
+                    QMessageBox::information(this,
+                                             tr("Write UICR"),
+                                             tr("SWD must be connected for this command to work."));
+                    return;
+                }
+
+                QString txt = le->text();
+                int base = 10;
+
+                if (txt.toLower().startsWith("0x")) {
+                    txt.remove(0, 2);
+                    base = 16;
+                }
+
+                bool ok = false;
+                quint32 val = txt.toUInt(&ok, base);
+                if (ok) {
+                    VByteArray vb;
+                    vb.vbAppendUint32(val);
+                    uint32_t ofs = offset.mid(2).toUInt(nullptr, 16);
+                    int res = mVesc->commands()->bmWriteMemWait(0x10001000 + ofs, vb);
+
+                    if (res != 1) {
+                        QMessageBox::warning(this,
+                                             tr("Write UICR"),
+                                             QString("Unable to write UICR register. Res: %1").
+                                             arg(res));
+                    }
+                } else {
+                    QMessageBox::warning(this,
+                                         tr("Write UICR"),
+                                         QString("Unable to parse value for %1").
+                                         arg(name));
+                    return;
+                }
+            }
+        });
+    };
+
+    for (int i = 0;i < 15;i++) {
+        addDataItem(QString("NRFFW[%1]").arg(i),
+                    "0x0" + QString("%1").arg(i * 4 + 0x14, 0, 16).toUpper(),
+                    "0xFFFFFFFF");
+    }
+
+    for (int i = 0;i < 12;i++) {
+        addDataItem(QString("NRFHW[%1]").arg(i),
+                    "0x0" + QString("%1").arg(i * 4 + 0x50, 0, 16).toUpper(),
+                    "0xFFFFFFFF");
+    }
+
+    for (int i = 0;i < 32;i++) {
+        addDataItem(QString("CUSTOMER[%1]").arg(i),
+                    "0x0" + QString("%1").arg(i * 4 + 0x80, 0, 16).toUpper(),
+                    "0xFFFFFFFF");
+    }
+
+    addDataItem("PSELRESET[0]", "0x200", "0xFFFFFFFF");
+    addDataItem("PSELRESET[1]", "0x204", "0xFFFFFFFF");
+    addDataItem("APPROTECT", "0x208", "0xFFFFFFFF");
+    addDataItem("NRFPINS", "0x20C", "0xFFFFFFFF");
 }
 
 PageSwdProg::~PageSwdProg()
@@ -256,21 +374,21 @@ void PageSwdProg::bmConnRes(int res)
         addSwdFw("VESC 4.10 - 4.12", "://res/firmwares/410_o_411_o_412/VESC_default.bin",
                  0, "://res/bootloaders/40_o_47_o_48_o_410_o_411_o_412_o_DAS_RS.bin");
         addSwdFw("VESC SIX", "://res/firmwares/60/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC 75/300 R1", "://res/firmwares/75_300/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC 75/300 R2", "://res/firmwares/75_300_R2/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC 75/300 R3", "://res/firmwares/75_300_R3/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC HD", "://res/firmwares/HD/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC SIX MK3", "://res/firmwares/60_MK3/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC SIX MK4", "://res/firmwares/60_MK4/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC 100/250", "://res/firmwares/100_250/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD_R2.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("FOCBOX UNITY", "://res/firmwares/UNITY/VESC_default.bin",
                  0, ":/res/bootloaders/generic.bin");
         addSwdFw("STORMCORE 60D", ":/res/firmwares/STORMCORE_60D/VESC_default.bin",
@@ -378,5 +496,104 @@ void PageSwdProg::on_connectNrf5xButton_clicked()
         Utility::waitSignal(mVesc->commands(), SIGNAL(bmMapPinsNrf5xRes(bool)), 100);
         ui->connectNrf5xButton->setEnabled(true);
         mVesc->commands()->bmConnect();
+    }
+}
+
+void PageSwdProg::on_uicrReadButton_clicked()
+{
+    if (mVesc) {
+        if (ui->targetLabel->text().isEmpty()) {
+            QMessageBox::information(this,
+                                     tr("Read UICR"),
+                                     tr("SWD must be connected for this command to work."));
+            return;
+        }
+
+        ui->uicrReadButton->setEnabled(false);
+        auto data1 = mVesc->commands()->bmReadMemWait(0x10001000 + 0x14, 0xFC - 0x10);
+        auto data2 = mVesc->commands()->bmReadMemWait(0x10001000 + 0x200, 16);
+        ui->uicrReadButton->setEnabled(true);
+        if (data1.size() == (0xFC - 0x10) && data2.size() == 16) {
+            VByteArray vb1(data1);
+            vb1.append(data2);
+            int ind = 0;
+            while(!vb1.isEmpty()) {
+                auto reg = vb1.vbPopFrontUint32();
+                if (QLineEdit *le = qobject_cast<QLineEdit*>(ui->uicrTable->cellWidget(ind, 2))) {
+                    le->setText("0x" + QString("%1").arg(reg, 8, 16, QLatin1Char('0')).toUpper());
+                }
+                ind++;
+            }
+        } else {
+            QMessageBox::warning(this,
+                                 tr("Read UICR"),
+                                 tr("Could not read UICR registers."));
+        }
+    }
+}
+
+void PageSwdProg::on_uicrWriteButton_clicked()
+{
+    if (mVesc) {
+        if (ui->targetLabel->text().isEmpty()) {
+            QMessageBox::information(this,
+                                     tr("Write UICR"),
+                                     tr("SWD must be connected for this command to work."));
+            return;
+        }
+
+        VByteArray vb;
+        for (int i = 0;i < ui->uicrTable->rowCount();i++) {
+            if (QLineEdit *le = qobject_cast<QLineEdit*>(ui->uicrTable->cellWidget(i, 2))) {
+                QString txt = le->text();
+                int base = 10;
+
+                if (txt.toLower().startsWith("0x")) {
+                    txt.remove(0, 2);
+                    base = 16;
+                }
+
+                bool ok = false;
+                quint32 val = txt.toUInt(&ok, base);
+                if (ok) {
+                    vb.vbAppendUint32(val);
+                } else {
+                    QMessageBox::warning(this,
+                                         tr("Write UICR"),
+                                         QString("Unable to parse value for %1").
+                                         arg(ui->uicrTable->item(i, 0)->text()));
+                    return;
+                }
+            }
+        }
+
+        QByteArray data1 = vb.left(0xFC - 0x10);
+        QByteArray data2 = vb.right(16);
+
+        ui->uicrWriteButton->setEnabled(false);
+        int res1 = mVesc->commands()->bmWriteMemWait(0x10001000 + 0x14, data1);
+        int res2 = mVesc->commands()->bmWriteMemWait(0x10001000 + 0x200, data2);
+        ui->uicrWriteButton->setEnabled(true);
+
+        if (res1 != 1 || res2 != 1) {
+            QMessageBox::warning(this,
+                                 tr("Write UICR"),
+                                 QString("Unable to write UICR registers. Res1: %1, Res2: %2").
+                                 arg(res1).arg(res2));
+        }
+    }
+}
+
+void PageSwdProg::on_uicrEraseButton_clicked()
+{
+    if (mVesc) {
+        if (ui->targetLabel->text().isEmpty()) {
+            QMessageBox::information(this,
+                                     tr("Write UICR"),
+                                     tr("SWD must be connected for this command to work."));
+            return;
+        }
+
+        mVesc->commands()->sendTerminalCmd("bm_target_cmd erase_uicr");
     }
 }

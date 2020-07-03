@@ -56,6 +56,9 @@ public:
 
     Q_INVOKABLE static QString faultToStr(mc_fault_code fault);
 
+    Q_INVOKABLE QByteArray bmReadMemWait(uint32_t addr, quint16 size, int timeoutMs = 3000);
+    Q_INVOKABLE int bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs = 3000);
+
 signals:
     void dataToSend(QByteArray &data);
 

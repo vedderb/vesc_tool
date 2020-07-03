@@ -946,29 +946,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
         return res;
     };
 
-    auto waitBmReadRes = [this]() {
-        int res = -10;
-        QByteArray resData;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(3000);
-        auto conn = connect(mCommands, &Commands::bmReadMemRes, [&res,&resData,&loop]
-                            (int rdRes, QByteArray data) {
-            res = rdRes;
-            resData = data;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
-        return resData;
-    };
-
-    auto writeChunk = [this, &waitBmWriteRes, &waitBmReadRes, &verify]
+    auto writeChunk = [this, &waitBmWriteRes, &verify]
             (uint32_t addr, QByteArray chunk, QByteArray chunkLzo) {
         for (int i = 0;i < 3;i++) {
             if (chunkLzo.isEmpty()) {
@@ -982,8 +960,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
             if (verify && (!mCommands->isLimitedMode() ||
                            mCommands->getLimitedCompatibilityCommands().
                            contains(int(COMM_BM_MEM_READ)))) {
-                mCommands->bmReadMem(addr, chunk.size());
-                QByteArray rdData = waitBmReadRes();
+                QByteArray rdData = mCommands->bmReadMemWait(addr, quint16(chunk.size()));
 
                 if (rdData.size() != chunk.size()) {
                     return -11;
@@ -3443,6 +3420,9 @@ bool VescInterface::confRestoreBackup(bool can)
     if (res) {
         storeSettings();
         emit configurationBackupsChanged();
+
+        commands()->getMcconf(); //Refresh Motor conf.
+        commands()->getAppConf(); //Refresh App conf.
 
         if (!uuidsOk.isEmpty()) {
             QString uuidsStr;

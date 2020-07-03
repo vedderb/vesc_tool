@@ -19,6 +19,7 @@
 
 #include "commands.h"
 #include <QDebug>
+#include <QEventLoop>
 
 Commands::Commands(QObject *parent) : QObject(parent)
 {
@@ -1477,6 +1478,53 @@ QString Commands::faultToStr(mc_fault_code fault)
     case FAULT_CODE_RESOLVER_LOS: return "FAULT_CODE_RESOLVER_LOS";
     default: return "Unknown fault";
     }
+}
+
+QByteArray Commands::bmReadMemWait(uint32_t addr, quint16 size, int timeoutMs)
+{
+    bmReadMem(addr, size);
+
+    int res = -10;
+    QByteArray resData;
+
+    QEventLoop loop;
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    timeoutTimer.start(timeoutMs);
+    auto conn = connect(this, &Commands::bmReadMemRes, [&res,&resData,&loop]
+                        (int rdRes, QByteArray data) {
+        res = rdRes;
+        resData = data;
+        loop.quit();
+    });
+
+    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    loop.exec();
+
+    disconnect(conn);
+    return resData;
+}
+
+int Commands::bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs)
+{
+    bmWriteFlash(addr, data);
+
+    int res = -10;
+
+    QEventLoop loop;
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    timeoutTimer.start(timeoutMs);
+    auto conn = connect(this, &Commands::bmWriteFlashRes, [&res,&loop](int wrRes) {
+        res = wrRes;
+        loop.quit();
+    });
+
+    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    loop.exec();
+
+    disconnect(conn);
+    return res;
 }
 
 void Commands::setAppConfig(ConfigParams *appConfig)

@@ -193,9 +193,25 @@ void PageAppBalance::updateTextOutput(){
     }else if(mAppState == 1){
         output = output + "Running";
     }else if(mAppState == 2){
-        output = output + "Fault";
+        output = output + "Running (Tiltback Duty)";
     }else if(mAppState == 3){
-        output = output + "Dead";
+        output = output + "Running (Tiltback High Voltage)";
+    }else if(mAppState == 4){
+        output = output + "Running (Tiltback Low Voltage)";
+    }else if(mAppState == 5){
+        output = output + "Running (Tiltback Constant)";
+    }else if(mAppState == 6){
+        output = output + "Fault (Pitch Angle)";
+    }else if(mAppState == 7){
+        output = output + "Fault (Roll Angle)";
+    }else if(mAppState == 8){
+        output = output + "Fault (Switch Half)";
+    }else if(mAppState == 9){
+        output = output + "Fault (Switch FULL)";
+    }else if(mAppState == 10){
+        output = output + "Fault (Duty)";
+    }else if(mAppState == 11){
+        output = output + "Initial";
     }else{
         output = output + "Unknown";
     }

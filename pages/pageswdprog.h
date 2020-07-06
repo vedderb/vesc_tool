@@ -67,6 +67,7 @@ private slots:
     void on_uicrReadButton_clicked();
     void on_uicrWriteButton_clicked();
     void on_uicrEraseButton_clicked();
+    void on_resetButton_clicked();
 
 private:
     Ui::PageSwdProg *ui;

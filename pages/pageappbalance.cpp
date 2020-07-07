@@ -147,8 +147,8 @@ void PageAppBalance::appValuesReceived(BALANCE_VALUES values) {
     const int maxS = 250;
 
     appendDoubleAndTrunc(&mAppPidOutputVec, values.pid_output, maxS);
-    appendDoubleAndTrunc(&mAppMAngleVec, values.m_angle, maxS);
-    appendDoubleAndTrunc(&mAppCAngleVec, values.c_angle, maxS);
+    appendDoubleAndTrunc(&mAppMAngleVec, values.pitch_angle, maxS);
+    appendDoubleAndTrunc(&mAppCAngleVec, values.roll_angle, maxS);
     mAppDiffTime = values.diff_time;
     appendDoubleAndTrunc(&mAppMotorCurrentVec, values.motor_current, maxS);
     appendDoubleAndTrunc(&mAppMotorPositionVec, values.motor_position, maxS);

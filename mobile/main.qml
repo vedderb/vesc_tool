@@ -638,6 +638,14 @@ ApplicationWindow {
         }
     }
 
+    Page {
+        id: rtDataBalance
+        visible: false
+        RtDataBalance {
+            anchors.fill: parent
+        }
+    }
+
     footer: Rectangle {
         id: connectedRect
         color: "#4f4f4f"
@@ -707,6 +715,15 @@ ApplicationWindow {
         repeat: true
 
         onTriggered: {
+            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 3){
+                rtSwipeView.addItem(rtDataBalance)
+                rtDataBalance.visible = true
+            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 4){
+                rtSwipeView.removeItem(3)
+                rtDataBalance.visible = false
+            }
+
+
             if (VescIf.isPortConnected()) {
                 // Sample RT data when the corresponding page is selected, or when
                 // RT logging is active.
@@ -730,6 +747,12 @@ ApplicationWindow {
                     if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
                         interval = 20
                         mCommands.getImuData(0x7)
+                    }
+
+                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 3) {
+                        interval = 50
+                        mCommands.getValuesSetup()
+                        mCommands.getDecodedBalance()
                     }
                 }
             }

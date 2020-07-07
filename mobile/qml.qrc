@@ -43,5 +43,6 @@
         <file>DirectoryPicker.qml</file>
         <file>Settings.qml</file>
         <file>DetectIMU.qml</file>
+        <file>RtDataBalance.qml</file>
     </qresource>
 </RCC>

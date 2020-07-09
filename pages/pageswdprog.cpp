@@ -362,6 +362,12 @@ void PageSwdProg::bmConnRes(int res)
         ui->targetLabel->setText("NRF52832 512K/64K");
     } else if (res == 8) {
         ui->targetLabel->setText("NRF52840 1M/256K");
+    } else if (res == 9) {
+        ui->targetLabel->setText("STM32F30x");
+        mFlashOffset = 0x08000000;
+    } else if (res == 10) {
+        ui->targetLabel->setText("STM32L47x");
+        mFlashOffset = 0x08000000;
     }
 
     switch (res) {
@@ -595,5 +601,19 @@ void PageSwdProg::on_uicrEraseButton_clicked()
         }
 
         mVesc->commands()->sendTerminalCmd("bm_target_cmd erase_uicr");
+    }
+}
+
+void PageSwdProg::on_resetButton_clicked()
+{
+    if (mVesc) {
+        if (ui->targetLabel->text().isEmpty()) {
+            QMessageBox::information(this,
+                                     tr("Reset Target"),
+                                     tr("SWD must be connected for this command to work."));
+            return;
+        }
+
+        mVesc->commands()->sendTerminalCmd("bm_reset");
     }
 }

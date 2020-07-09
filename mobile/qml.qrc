@@ -44,5 +44,6 @@
         <file>Settings.qml</file>
         <file>DetectIMU.qml</file>
         <file>RtDataBalance.qml</file>
+        <file>RtDataIMU.qml</file>
     </qresource>
 </RCC>

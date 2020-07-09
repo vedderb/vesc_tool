@@ -242,6 +242,8 @@ ApplicationWindow {
                         ColumnLayout {
                             anchors.fill: parent
 
+                            RtDataIMU {}
+
                             CheckBox {
                                 Layout.fillWidth: true
                                 id: useYawBox
@@ -746,7 +748,7 @@ ApplicationWindow {
 
                     if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
                         interval = 20
-                        mCommands.getImuData(0x7)
+                        mCommands.getImuData(0x1FF)
                     }
 
                     if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 3) {

@@ -358,8 +358,8 @@ void Commands::processPacket(QByteArray data)
         BALANCE_VALUES values;
 
         values.pid_output = vb.vbPopFrontDouble32(1e6);
-        values.m_angle = vb.vbPopFrontDouble32(1e6);
-        values.c_angle = vb.vbPopFrontDouble32(1e6);
+        values.pitch_angle = vb.vbPopFrontDouble32(1e6);
+        values.roll_angle = vb.vbPopFrontDouble32(1e6);
         values.diff_time = vb.vbPopFrontUint32();
         values.motor_current = vb.vbPopFrontDouble32(1e6);
         values.motor_position = vb.vbPopFrontDouble32(1e6);

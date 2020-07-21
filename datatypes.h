@@ -612,21 +612,21 @@ struct BALANCE_VALUES {
     Q_GADGET
 
     Q_PROPERTY(double pid_output MEMBER pid_output)
-    Q_PROPERTY(double m_angle MEMBER m_angle)
-    Q_PROPERTY(double c_angle MEMBER c_angle)
-    Q_PROPERTY(uint32_t diff_time MEMBER diff_time)
+    Q_PROPERTY(double pitch_angle MEMBER pitch_angle)
+    Q_PROPERTY(double roll_angle MEMBER roll_angle)
+    Q_PROPERTY(int diff_time MEMBER diff_time)
     Q_PROPERTY(double motor_current MEMBER motor_current)
     Q_PROPERTY(double motor_position MEMBER motor_position)
-    Q_PROPERTY(uint16_t state MEMBER state)
-    Q_PROPERTY(uint16_t switch_value MEMBER switch_value)
+    Q_PROPERTY(int state MEMBER state)
+    Q_PROPERTY(int switch_value MEMBER switch_value)
     Q_PROPERTY(double adc1 MEMBER adc1)
     Q_PROPERTY(double adc2 MEMBER adc2)
 
 public:
     BALANCE_VALUES() {
         pid_output = 0;
-        m_angle = 0;
-        c_angle = 0;
+        pitch_angle = 0;
+        roll_angle = 0;
         diff_time = 0;
         motor_current = 0;
         motor_position = 0;
@@ -637,13 +637,13 @@ public:
     }
 
     double pid_output;
-    double m_angle;
-    double c_angle;
-    uint32_t diff_time;
+    double pitch_angle;
+    double roll_angle;
+    int diff_time;
     double motor_current;
     double motor_position;
-    uint16_t state;
-    uint16_t switch_value;
+    int state;
+    int switch_value;
     double adc1;
     double adc2;
 };

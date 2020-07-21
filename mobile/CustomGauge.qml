@@ -37,6 +37,7 @@ Item {
     property color traceColor: "#606060"
     property double maxAngle: 144
     property double minAngle: -144
+    property double precision: 0
 
     CircularGauge {
         id: gauge
@@ -142,7 +143,7 @@ Item {
                 Text {
                     id: speedLabel
                     anchors.centerIn: parent
-                    text: gauge.value.toFixed(0)
+                    text: gauge.value.toFixed(precision)
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.3
                     color: "white"

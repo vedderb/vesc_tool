@@ -279,6 +279,8 @@ MainWindow::MainWindow(QWidget *parent) :
     updateMotortype();
     updateAppToUse();
 
+    ui->leftSplitter->setSizes(QList<int>({1000, 80}));
+
     mPageDebugPrint->printConsole("VESC® Tool " + mVersion + " started<br>");
 }
 

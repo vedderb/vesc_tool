@@ -19,26 +19,32 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_free.qrc">
+   <iconset resource="res_original.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <property name="leftMargin">
      <number>6</number>
     </property>
+    <property name="topMargin">
+     <number>6</number>
+    </property>
+    <property name="rightMargin">
+     <number>6</number>
+    </property>
     <property name="bottomMargin">
-     <number>2</number>
+     <number>6</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>2</number>
+      </property>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <property name="spacing">
          <number>2</number>
-        </property>
-        <property name="sizeConstraint">
-         <enum>QLayout::SetDefaultConstraint</enum>
         </property>
         <item>
          <widget class="QLabel" name="pageLabel">
@@ -55,7 +61,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_free.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_original.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -63,63 +69,63 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="pageList">
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>0</height>
-           </size>
+         <widget class="QSplitter" name="leftSplitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-          <property name="maximumSize">
-           <size>
-            <width>220</width>
-            <height>16777215</height>
-           </size>
+          <property name="childrenCollapsible">
+           <bool>false</bool>
           </property>
-          <property name="font">
-           <font>
-            <family>Roboto</family>
-           </font>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QListWidget" name="canList">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>220</width>
-            <height>80</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <family>Roboto</family>
-           </font>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
+          <widget class="QListWidget" name="pageList">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>220</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>220</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Roboto</family>
+            </font>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+          </widget>
+          <widget class="QListWidget" name="canList">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>80</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Roboto</family>
+            </font>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+          </widget>
          </widget>
         </item>
         <item>
@@ -545,7 +551,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1275,7 +1281,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_free.qrc"/>
+  <include location="res_original.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

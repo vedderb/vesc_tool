@@ -4,6 +4,7 @@
 * Only allow uploading firmware to all VESCs when they have the same hardware version.
 * Added UDP server and client.
 * Added NRF52 UICR read and write support to SWDPROG page.
+* Realtime IMU and balance data. See: https://github.com/vedderb/vesc_tool/pull/91
 
 == 2.05 ==
 * FW 5.01 support:

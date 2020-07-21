@@ -30,6 +30,7 @@
 #include <signal.h>
 #endif
 
+#ifndef USE_MOBILE
 static void showHelp()
 {
     qDebug() << "Arguments";
@@ -43,6 +44,7 @@ static void m_cleanup(int sig)
     (void)sig;
     qApp->quit();
 }
+#endif
 #endif
 
 int main(int argc, char *argv[])
@@ -171,16 +173,16 @@ int main(int argc, char *argv[])
     QApplication *a = new QApplication(argc, argv);
     app = a;
 
-    QmlUi q;
-    q.startQmlUi();
+    QmlUi *qml = new QmlUi;
+    qml->startQmlUi();
 
     // As background running is allowed, make sure to not update the GUI when
     // running in the background.
-    QObject::connect(a, &QApplication::applicationStateChanged, [&q](Qt::ApplicationState state) {
+    QObject::connect(a, &QApplication::applicationStateChanged, [&qml](Qt::ApplicationState state) {
         if(state == Qt::ApplicationHidden) {
-            q.setVisible(false);
+            qml->setVisible(false);
         } else {
-            q.setVisible(true);
+            qml->setVisible(true);
         }
     });
 #else
@@ -251,7 +253,9 @@ int main(int argc, char *argv[])
 
     int res = app->exec();
 
-#ifndef USE_MOBILE
+#ifdef USE_MOBILE
+    delete qml;
+#else
     if (vesc) {
         delete vesc;
     }

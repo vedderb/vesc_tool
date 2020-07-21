@@ -242,7 +242,9 @@ ApplicationWindow {
                         ColumnLayout {
                             anchors.fill: parent
 
-                            RtDataIMU {}
+                            RtDataIMU {
+                                Layout.fillWidth: true
+                            }
 
                             CheckBox {
                                 Layout.fillWidth: true

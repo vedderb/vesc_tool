@@ -8,10 +8,7 @@ import Vedder.vesc.configparams 1.0
 
 Item {
     id: root
-    anchors.left: parent.left
-    anchors.right: parent.right
-    height: 50
-    width: 100
+    height: rect.height
 
     Rectangle {
         id: rect
@@ -24,14 +21,13 @@ Item {
             anchors.fill: parent
             Layout.alignment: Qt.AlignHCenter
             columns: 3
-            anchors.leftMargin: 5
 
             Text {
                 id: valText1
                 color: "white"
                 font.family: "DejaVu Sans Mono"
                 Layout.margins: 0
-                anchors.margins: 0
+                Layout.leftMargin: 5
                 Layout.preferredWidth: parent.width/3
                 text: "Roll   : 0.00\n" +
                       "Acc X  : 0.00\n" +
@@ -43,7 +39,6 @@ Item {
                 color: "white"
                 font.family: "DejaVu Sans Mono"
                 Layout.margins: 0
-                anchors.margins: 0
                 Layout.preferredWidth: parent.width/3
                 text: "Pitch  : 0.00\n" +
                       "Acc Y  : 0.00\n" +
@@ -55,7 +50,6 @@ Item {
                 color: "white"
                 font.family: "DejaVu Sans Mono"
                 Layout.margins: 0
-                anchors.margins: 0
                 Layout.preferredWidth: parent.width/3
                 text: "Yaw    : 0.00\n" +
                       "Acc Z  : 0.00\n" +

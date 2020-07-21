@@ -20,6 +20,7 @@
 #include "detectallfocdialog.h"
 #include "ui_detectallfocdialog.h"
 #include "utility.h"
+#include "helpdialog.h"
 
 #include <QMessageBox>
 
@@ -299,12 +300,7 @@ void DetectAllFocDialog::runDetect(bool can)
     ui->closeButton->setEnabled(true);
     mRejectOk = true;
 
-    QMessageBox *msg = new QMessageBox(QMessageBox::Information,
-                                       "FOC Detection Result", res,
-                                       QMessageBox::Ok, this);
-    QFont font = QFont("DejaVu Sans Mono");
-    msg->setFont(font);
-    msg->exec();
+    HelpDialog::showHelpMonospace(this, "FOC Detection Result", res);
 
     if (res.startsWith("Success!")) {
         ui->simpleSetupBox->setCurrentIndex(3);

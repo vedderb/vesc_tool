@@ -60,6 +60,8 @@ public:
     Q_INVOKABLE static bool restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app);
     Q_INVOKABLE static bool almostEqual(double A, double B, double eps);
     static bool createParamParserC(VescInterface *vesc, QString filename);
+    static bool createParamParserC(ConfigParams *params, QString configName, QString filename);
+    static bool createCompressedConfigC(ConfigParams *params, QString configName, QString filename);
     static uint32_t crc32c(uint8_t *data, uint32_t len);
     static bool getFwVersionBlocking(VescInterface *vesc, int *majorPtr, int *minorPtr,
                                      QString *hwPtr, QByteArray *uuidPtr,
@@ -90,6 +92,12 @@ public:
 signals:
 
 public slots:
+
+private:
+    static void serialFunc(ConfigParams *params, QTextStream &s);
+    static void deserialFunc(ConfigParams *params, QTextStream &s);
+    static void defaultFunc(ConfigParams *params, QTextStream &s);
+
 };
 
 #endif // UTILITY_H

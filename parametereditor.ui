@@ -1503,7 +1503,7 @@
      <x>0</x>
      <y>0</y>
      <width>1267</width>
-     <height>24</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1512,6 +1512,8 @@
     </property>
     <addaction name="actionLoad_XML"/>
     <addaction name="actionSave_XML_as"/>
+    <addaction name="actionSave_Configuration_C_Header_as"/>
+    <addaction name="actionSave_Configuration_C_Header_ifdef_wrapped_as"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -1524,6 +1526,9 @@
      <string>Tools</string>
     </property>
     <addaction name="actionCalculatePacketSize"/>
+    <addaction name="actionCalculateCompressedCArraySize"/>
+    <addaction name="actionExportConfigurationParser"/>
+    <addaction name="actionExportCompressedCArray"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1564,6 +1569,54 @@
    </property>
    <property name="text">
     <string>Calculate Packet Size</string>
+   </property>
+  </action>
+  <action name="actionExportConfigurationParser">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Configuration Parser</string>
+   </property>
+  </action>
+  <action name="actionSave_Configuration_C_Header_as">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Configuration C Header as...</string>
+   </property>
+  </action>
+  <action name="actionSave_Configuration_C_Header_ifdef_wrapped_as">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Configuration C Header (ifdef wrapped) as...</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Configuration C Header (ifdef wrapped) as</string>
+   </property>
+  </action>
+  <action name="actionExportCompressedCArray">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Compressed C Array</string>
+   </property>
+  </action>
+  <action name="actionCalculateCompressedCArraySize">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Calculator-96.png</normaloff>:/res/icons/Calculator-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Calculate Compressed C Array Size</string>
    </property>
   </action>
  </widget>

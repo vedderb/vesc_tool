@@ -100,6 +100,8 @@ public:
     bool setParamsXML(QXmlStreamReader &stream);
     bool saveParamsXml(QString fileName);
     bool loadParamsXml(QString fileName);
+    QByteArray getCompressedParamsXml();
+    bool loadCompressedParamsXml(QByteArray data);
 
     bool saveCDefines(const QString &fileName, bool wrapIfdef = false);
 

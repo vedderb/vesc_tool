@@ -577,12 +577,16 @@ void PageRtData::on_posStopButton_clicked()
 
 void PageRtData::on_tempShowMosfetBox_toggled(bool checked)
 {
-    ui->tempPlot->graph(0)->setVisible(checked);
+    if (ui->tempPlot->graphCount() > 0) {
+        ui->tempPlot->graph(0)->setVisible(checked);
+    }
 }
 
 void PageRtData::on_tempShowMotorBox_toggled(bool checked)
 {
-    ui->tempPlot->graph(1)->setVisible(checked);
+    if (ui->tempPlot->graphCount() > 1) {
+        ui->tempPlot->graph(1)->setVisible(checked);
+    }
 }
 
 void PageRtData::on_csvChooseDirButton_clicked()

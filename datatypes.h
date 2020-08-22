@@ -63,6 +63,12 @@ typedef enum {
 } gpd_output_mode;
 
 typedef enum {
+    HW_TYPE_VESC = 0,
+    HW_TYPE_VESC_BMS,
+    HW_TYPE_CUSTOM_MODULE
+} HW_TYPE;
+
+typedef enum {
     FAULT_CODE_NONE = 0,
     FAULT_CODE_OVER_VOLTAGE,
     FAULT_CODE_UNDER_VOLTAGE,
@@ -433,6 +439,40 @@ public:
 
 Q_DECLARE_METATYPE(CONFIG_BACKUP)
 
+struct FW_RX_PARAMS {
+    Q_GADGET
+
+    Q_PROPERTY(int major MEMBER major)
+    Q_PROPERTY(int minor MEMBER minor)
+    Q_PROPERTY(QString hw MEMBER hw)
+    Q_PROPERTY(QByteArray uuid MEMBER uuid)
+    Q_PROPERTY(bool isPaired MEMBER isPaired)
+    Q_PROPERTY(int isTestFw MEMBER isTestFw)
+    Q_PROPERTY(HW_TYPE hwType MEMBER hwType)
+    Q_PROPERTY(int customConfigNum MEMBER customConfigNum)
+
+public:
+    FW_RX_PARAMS() {
+        major = -1;
+        minor = -1;
+        isPaired = false;
+        isTestFw = false;
+        hwType = HW_TYPE_VESC;
+        customConfigNum = 0;
+    }
+
+    int major;
+    int minor;
+    QString hw;
+    QByteArray uuid;
+    bool isPaired;
+    int isTestFw;
+    HW_TYPE hwType;
+    int customConfigNum;
+};
+
+Q_DECLARE_METATYPE(FW_RX_PARAMS)
+
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,
     DEBUG_SAMPLING_NOW,
@@ -541,6 +581,7 @@ typedef enum {
     // Custom configuration for hardware
     COMM_GET_CUSTOM_CONFIG_XML,
     COMM_GET_CUSTOM_CONFIG,
+    COMM_GET_CUSTOM_CONFIG_DEFAULT,
     COMM_SET_CUSTOM_CONFIG,
 
     // BMS commands

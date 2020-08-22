@@ -253,8 +253,7 @@ private slots:
     void packetDataToSend(QByteArray &data);
     void packetReceived(QByteArray &data);
     void cmdDataToSend(QByteArray &data);
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
-                           bool isPaired, int isTestFw);
+    void fwVersionReceived(FW_RX_PARAMS params);
     void appconfUpdated();
     void mcconfUpdated();
     void ackReceived(QString ackType);

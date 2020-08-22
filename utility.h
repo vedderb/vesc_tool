@@ -63,9 +63,7 @@ public:
     static bool createParamParserC(ConfigParams *params, QString configName, QString filename);
     static bool createCompressedConfigC(ConfigParams *params, QString configName, QString filename);
     static uint32_t crc32c(uint8_t *data, uint32_t len);
-    static bool getFwVersionBlocking(VescInterface *vesc, int *majorPtr, int *minorPtr,
-                                     QString *hwPtr, QByteArray *uuidPtr,
-                                     bool *isPairedPtr, int *isTestFwPtr);
+    static bool getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params);
     static bool checkFwCompatibility(VescInterface *vesc);
     Q_INVOKABLE static QVariantList getNetworkAddresses();
     Q_INVOKABLE static void startGnssForegroundService();

@@ -75,8 +75,8 @@ void PageFirmware::setVesc(VescInterface *vesc)
 
         connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
                 this, SLOT(fwUploadStatus(QString,double,bool)));
-        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+        connect(mVesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+                this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
     }
 }
 
@@ -125,20 +125,19 @@ void PageFirmware::fwUploadStatus(const QString &status, double progress, bool i
     ui->cancelButton->setEnabled(isOngoing);
 }
 
-void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
-                                     bool isPaired, int isTestFw)
+void PageFirmware::fwVersionReceived(FW_RX_PARAMS params)
 {
     QString fwStr;
-    QString strUuid = Utility::uuid2Str(uuid, true);
+    QString strUuid = Utility::uuid2Str(params.uuid, true);
 
     if (!strUuid.isEmpty()) {
         fwStr += ", UUID: " + strUuid;
     }
 
-    if (major >= 0) {
-        fwStr.sprintf("Fw: %d.%d", major, minor);
-        if (!hw.isEmpty()) {
-            fwStr += ", Hw: " + hw;
+    if (params.major >= 0) {
+        fwStr.sprintf("Fw: %d.%d", params.major, params.minor);
+        if (!params.hw.isEmpty()) {
+            fwStr += ", Hw: " + params.hw;
         }
 
         if (!strUuid.isEmpty()) {
@@ -147,16 +146,16 @@ void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArra
     }
 
     fwStr += "\n" + QString("Paired: %1, Status: ").
-            arg(isPaired ? "true" : "false");
-    if (isTestFw > 0) {
-        fwStr += QString("BETA %1").arg(isTestFw);
+            arg(params.isPaired ? "true" : "false");
+    if (params.isTestFw > 0) {
+        fwStr += QString("BETA %1").arg(params.isTestFw);
     } else {
         fwStr += "STABLE";
     }
 
     ui->currentLabel->setText(fwStr);
-    updateHwList(hw);
-    updateBlList(hw);
+    updateHwList(params.hw);
+    updateBlList(params.hw);
     update();
 }
 

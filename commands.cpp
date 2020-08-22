@@ -101,33 +101,36 @@ void Commands::processPacket(QByteArray data)
     switch (id) {
     case COMM_FW_VERSION: {
         mTimeoutFwVer = 0;
-        int fw_major = -1;
-        int fw_minor = -1;
-        QString hw;
-        QByteArray uuid;
-        bool isPaired = false;
-        int isTestFw = false;
+        FW_RX_PARAMS params;
 
         if (vb.size() >= 2) {
-            fw_major = vb.vbPopFrontInt8();
-            fw_minor = vb.vbPopFrontInt8();
-            hw = vb.vbPopFrontString();
+            params.major = vb.vbPopFrontInt8();
+            params.minor = vb.vbPopFrontInt8();
+            params.hw = vb.vbPopFrontString();
         }
 
         if (vb.size() >= 12) {
-            uuid.append(vb.left(12));
+            params.uuid.append(vb.left(12));
             vb.remove(0, 12);
         }
 
         if (vb.size() >= 1) {
-            isPaired = vb.vbPopFrontInt8();
+            params.isPaired = vb.vbPopFrontInt8();
         }
 
         if (vb.size() >= 1) {
-            isTestFw = vb.vbPopFrontInt8();
+            params.isTestFw = vb.vbPopFrontInt8();
         }
 
-        emit fwVersionReceived(fw_major, fw_minor, hw, uuid, isPaired, isTestFw);
+        if (vb.size() >= 1) {
+            params.hwType = HW_TYPE(vb.vbPopFrontInt8());
+        }
+
+        if (vb.size() >= 1) {
+            params.customConfigNum = vb.vbPopFrontInt8();
+        }
+
+        emit fwVersionReceived(params);
     } break;
 
     case COMM_ERASE_NEW_APP:

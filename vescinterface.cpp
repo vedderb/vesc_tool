@@ -256,8 +256,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             this, SLOT(packetReceived(QByteArray&)));
     connect(mCommands, SIGNAL(dataToSend(QByteArray&)),
             this, SLOT(cmdDataToSend(QByteArray&)));
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    connect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+            this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
     connect(mCommands, SIGNAL(ackReceived(QString)), this, SLOT(ackReceived(QString)));
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
@@ -1213,9 +1213,9 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             return false;
         }
 
-        QString hwLocal;
-        Utility::getFwVersionBlocking(this, nullptr, nullptr, &hwLocal, nullptr, nullptr, nullptr);
-        if (hwLocal.isEmpty()) {
+        FW_RX_PARAMS fwParamsLocal;
+        Utility::getFwVersionBlocking(this, &fwParamsLocal);
+        if (fwParamsLocal.hw.isEmpty()) {
             emitMessageDialog("Firmware Upload", "Could not read hardware version", false, false);
             mFwUploadStatus = "Read HW version failed";
             mFwUploadProgress = -1.0;
@@ -1232,9 +1232,9 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
 
         for (auto d: devs) {
             mCommands->setSendCan(true, d);
-            QString hwCan;
-            Utility::getFwVersionBlocking(this, nullptr, nullptr, &hwCan, nullptr, nullptr, nullptr);
-            if (hwLocal != hwCan) {
+            FW_RX_PARAMS fwParamsCan;
+            Utility::getFwVersionBlocking(this, &fwParamsCan);
+            if (fwParamsLocal.hw != fwParamsCan.hw) {
                 emitMessageDialog("Firmware Upload",
                                   "All VESCs on the CAN-bus must have the same hardware version to upload "
                                   "firmware to all of them at the same time. You must update them individually.",
@@ -1987,8 +1987,8 @@ bool VescInterface::autoconnect()
     mAutoconnectProgress = 0.0;
 
     disconnectPort();
-    disconnect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-               this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    disconnect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+               this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     for (int i = 0;i < ports.size();i++) {
         VSerialInfo_t serial = ports[i];
@@ -2005,7 +2005,7 @@ bool VescInterface::autoconnect()
         QTimer timeoutTimer;
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(500);
-        connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)), &loop, SLOT(quit()));
+        connect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)), &loop, SLOT(quit()));
         connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
         loop.exec();
 
@@ -2020,8 +2020,8 @@ bool VescInterface::autoconnect()
         }
     }
 
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    connect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+            this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 #endif
 
     emit autoConnectProgressUpdated(1.0, true);
@@ -2939,17 +2939,16 @@ void VescInterface::cmdDataToSend(QByteArray &data)
     mPacket->sendPacket(data);
 }
 
-void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
-                                      bool isPaired, int isTestFw)
+void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 {
-    QString uuidStr = Utility::uuid2Str(uuid, true);
+    QString uuidStr = Utility::uuid2Str(params.uuid, true);
     mUuidStr = uuidStr.toUpper();
     mUuidStr.replace(" ", "");
     mFwSupportsConfiguration = false;
 
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
-        if (isPaired && !hasPairedUuid(mUuidStr)) {
+        if (params.isPaired && !hasPairedUuid(mUuidStr)) {
             disconnectPort();
             emitMessageDialog("Pairing",
                               "This VESC is not paired to your local version of VESC Tool. You can either "
@@ -2960,8 +2959,6 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
             return;
         }
     }
-#else
-    (void)isPaired;
 #endif
 
     auto fwPairs = getSupportedFirmwarePairs();
@@ -2985,7 +2982,7 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
     }
 
     QPair<int, int> highest_supported = *std::max_element(fwPairs.begin(), fwPairs.end());
-    QPair<int, int> fw_connected = qMakePair(major, minor);
+    QPair<int, int> fw_connected = qMakePair(params.major, params.minor);
 
     mCommands->setLimitedSupportsFwdAllCan(fw_connected >= qMakePair(3, 45));
     mCommands->setLimitedSupportsEraseBootloader(fw_connected >= qMakePair(3, 59));
@@ -3119,7 +3116,7 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
     bool wasReceived = mFwVersionReceived;
     mCommands->setLimitedMode(false);
 
-    if (major < 0) {
+    if (params.major < 0) {
         updateFwRx(false);
         mFwRetries = 0;
         disconnectPort();
@@ -3174,9 +3171,9 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         }
 
         QString fwStr;
-        fwStr.sprintf("VESC Firmware Version %d.%d", major, minor);
-        if (!hw.isEmpty()) {
-            fwStr += ", Hardware: " + hw;
+        fwStr.sprintf("VESC Firmware Version %d.%d", params.major, params.minor);
+        if (!params.hw.isEmpty()) {
+            fwStr += ", Hardware: " + params.hw;
         }
 
         if (!uuidStr.isEmpty()) {
@@ -3186,12 +3183,12 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         emit statusMessage(fwStr, true);
     }
 
-    if (major >= 0) {
-        mFwTxt.sprintf("Fw: %d.%d", major, minor);
-        mFwPair = qMakePair(major, minor);
-        mHwTxt = hw;
-        if (!hw.isEmpty()) {
-            mFwTxt += ", Hw: " + hw;
+    if (params.major >= 0) {
+        mFwTxt.sprintf("Fw: %d.%d", params.major, params.minor);
+        mFwPair = qMakePair(params.major, params.minor);
+        mHwTxt = params.hw;
+        if (!params.hw.isEmpty()) {
+            mFwTxt += ", Hw: " + params.hw;
         }
 
         if (!uuidStr.isEmpty()) {
@@ -3200,7 +3197,7 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
     }
 
     // Check for known issues in firmware
-    QString fwParam = QString("fw_%1.%2").arg(major).arg(minor);
+    QString fwParam = QString("fw_%1.%2").arg(params.major).arg(params.minor);
     if (mFwConfig->hasParam(fwParam)) {
         auto fwInfoCfg = mFwConfig->getParam(fwParam);
         if (fwInfoCfg) {
@@ -3208,7 +3205,7 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         }
     }
 
-    if (isTestFw > 0 && !VT_IS_TEST_VERSION) {
+    if (params.isTestFw > 0 && !VT_IS_TEST_VERSION) {
         emitMessageDialog("Test Firmware",
                           "The connected VESC has test firmware, and this is not a test build of VESC Tool. You should "
                           "update the firmware urgently, as this is not a safe situation.",

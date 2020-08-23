@@ -461,6 +461,25 @@ public:
         customConfigNum = 0;
     }
 
+    QString hwTypeStr() {
+        QString res = "Unknown Hardware";
+        switch (hwType) {
+        case HW_TYPE_VESC:
+            res = "VESC";
+            break;
+
+        case HW_TYPE_VESC_BMS:
+            res = "VESC BMS";
+            break;
+
+        case HW_TYPE_CUSTOM_MODULE:
+            res = "Custom Module";
+            break;
+        }
+
+        return res;
+    }
+
     int major;
     int minor;
     QString hw;
@@ -472,6 +491,54 @@ public:
 };
 
 Q_DECLARE_METATYPE(FW_RX_PARAMS)
+
+struct BMS_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(double v_tot MEMBER v_tot)
+    Q_PROPERTY(double v_charge MEMBER v_charge)
+    Q_PROPERTY(double i_in MEMBER i_in)
+    Q_PROPERTY(double i_in_ic MEMBER i_in_ic)
+    Q_PROPERTY(double ah_cnt MEMBER ah_cnt)
+    Q_PROPERTY(double wh_cnt MEMBER wh_cnt)
+    Q_PROPERTY(QVector<qreal> v_cells MEMBER v_cells)
+    Q_PROPERTY(QVector<qreal> temps MEMBER temps)
+    Q_PROPERTY(QVector<bool> is_balancing MEMBER is_balancing)
+    Q_PROPERTY(double temp_ic MEMBER temp_ic)
+    Q_PROPERTY(double humidity MEMBER humidity)
+    Q_PROPERTY(double temp_hum_sensor MEMBER temp_hum_sensor)
+    Q_PROPERTY(double temp_cells_highest MEMBER temp_cells_highest)
+
+public:
+    BMS_VALUES() {
+        v_tot = 0.0;
+        v_charge = 0.0;
+        i_in = 0.0;
+        i_in_ic = 0.0;
+        ah_cnt = 0.0;
+        wh_cnt = 0.0;
+        humidity = 0.0;
+        temp_hum_sensor = 0.0;
+        temp_cells_highest = 0.0;
+    }
+
+    double v_tot;
+    double v_charge;
+    double i_in;
+    double i_in_ic;
+    double ah_cnt;
+    double wh_cnt;
+    QVector<qreal> v_cells;
+    QVector<qreal> temps;
+    QVector<bool> is_balancing;
+    double temp_ic;
+    double humidity;
+    double temp_hum_sensor;
+    double temp_cells_highest;
+
+};
+
+Q_DECLARE_METATYPE(BMS_VALUES)
 
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,

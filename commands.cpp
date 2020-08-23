@@ -632,6 +632,39 @@ void Commands::processPacket(QByteArray data)
         emit ackReceived("COMM_SET_BATTERY_CUT Write OK");
         break;
 
+    case COMM_BMS_GET_VALUES: {
+        BMS_VALUES val;
+        val.v_tot = vb.vbPopFrontDouble32(1e6);
+        val.v_charge = vb.vbPopFrontDouble32(1e6);
+        val.i_in = vb.vbPopFrontDouble32(1e6);
+        val.i_in_ic = vb.vbPopFrontDouble32(1e6);
+        val.ah_cnt = vb.vbPopFrontDouble32(1e3);
+        val.wh_cnt = vb.vbPopFrontDouble32(1e3);
+
+        int cells = vb.vbPopFrontUint8();
+
+        for (int i = 0;i < cells;i++) {
+            val.v_cells.append(vb.vbPopFrontDouble16(1e3));
+        }
+
+        for (int i = 0;i < cells;i++) {
+            val.is_balancing.append(vb.vbPopFrontUint8());
+        }
+
+        int sensors = vb.vbPopFrontUint8();
+        for (int i = 0;i < sensors;i++) {
+            val.temps.append(vb.vbPopFrontDouble16(1e2));
+        }
+
+        val.temp_ic = vb.vbPopFrontDouble16(1e2);
+        val.temp_hum_sensor = vb.vbPopFrontDouble16(1e2);
+        val.humidity = vb.vbPopFrontDouble16(1e2);
+
+        val.temp_cells_highest = vb.vbPopFrontDouble16(1e2);
+
+        emit bmsValuesRx(val);
+    } break;
+
     default:
         break;
     }
@@ -1368,6 +1401,54 @@ void Commands::setBatteryCut(double start, double end, bool store, bool fwdCan)
     vb.vbAppendInt8(store);
     vb.vbAppendInt8(fwdCan);
     emitData(vb);
+}
+
+void Commands::bmsGetValues()
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_GET_VALUES);
+    emit dataToSend(vb);
+}
+
+void Commands::bmsSetChargeAllowed(bool allowed)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_SET_CHARGE_ALLOWED);
+    vb.vbAppendUint8(allowed);
+    emit dataToSend(vb);
+}
+
+void Commands::bmsSetBalanceOverride(uint8_t cell, uint8_t override)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_SET_BALANCE_OVERRIDE);
+    vb.vbAppendUint8(cell);
+    vb.vbAppendUint8(override);
+    emit dataToSend(vb);
+}
+
+void Commands::bmsResetCounters(bool ah, bool wh)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_RESET_COUNTERS);
+    vb.vbAppendUint8(ah);
+    vb.vbAppendUint8(wh);
+    emit dataToSend(vb);
+}
+
+void Commands::bmsForceBalance(bool bal_en)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_FORCE_BALANCE);
+    vb.vbAppendUint8(bal_en);
+    emit dataToSend(vb);
+}
+
+void Commands::bmsZeroCurrentOffset()
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_ZERO_CURRENT_OFFSET);
+    emit dataToSend(vb);
 }
 
 void Commands::timerSlot()

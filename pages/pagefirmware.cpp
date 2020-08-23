@@ -153,6 +153,8 @@ void PageFirmware::fwVersionReceived(FW_RX_PARAMS params)
         fwStr += "STABLE";
     }
 
+    fwStr += "\nHW Type: " + params.hwTypeStr();
+
     ui->currentLabel->setText(fwStr);
     updateHwList(params.hw);
     updateBlList(params.hw);

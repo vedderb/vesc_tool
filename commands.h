@@ -104,6 +104,7 @@ signals:
     void bmReadMemRes(int res, QByteArray data);
     void deserializeConfigFailed(bool isMc, bool isApp);
     void canFrameRx(QByteArray data, quint32 id, bool isExtended);
+    void bmsValuesRx(BMS_VALUES val);
 
 public slots:
     void processPacket(QByteArray data);
@@ -180,6 +181,13 @@ public slots:
     void setCurrentRel(double current);
     void forwardCanFrame(QByteArray data, quint32 id, bool isExtended);
     void setBatteryCut(double start, double end, bool store, bool fwdCan);
+
+    void bmsGetValues();
+    void bmsSetChargeAllowed(bool allowed);
+    void bmsSetBalanceOverride(uint8_t cell, uint8_t override);
+    void bmsResetCounters(bool ah, bool wh);
+    void bmsForceBalance(bool bal_en);
+    void bmsZeroCurrentOffset();
 
 private slots:
     void timerSlot();

@@ -2941,6 +2941,10 @@ void VescInterface::cmdDataToSend(QByteArray &data)
 
 void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 {
+    mLastFwParams = params;
+
+    qDebug() << params.major << params.minor;
+
     QString uuidStr = Utility::uuid2Str(params.uuid, true);
     mUuidStr = uuidStr.toUpper();
     mUuidStr.replace(" ", "");
@@ -3489,6 +3493,11 @@ QString VescInterface::confBackupName(QString uuid)
 bool VescInterface::deserializeFailedSinceConnected()
 {
     return mDeserialFailedMessageShown;
+}
+
+FW_RX_PARAMS VescInterface::getLastFwRxParams()
+{
+    return mLastFwParams;
 }
 
 void VescInterface::updateFwRx(bool fwRx)

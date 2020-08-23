@@ -207,6 +207,8 @@ public:
 
     Q_INVOKABLE bool deserializeFailedSinceConnected();
 
+    Q_INVOKABLE FW_RX_PARAMS getLastFwRxParams();
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -365,6 +367,8 @@ private:
     bool mIgnoreCanChange;
 
     QVector<int> mCanDevsLast;
+
+    FW_RX_PARAMS mLastFwParams;
 
     // Other settings
     bool mUseImperialUnits;

@@ -186,26 +186,76 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     auto updateMotortype = [this]() {
-        int type = mVesc->mcConfig()->getParamEnum("motor_type");
-        ui->pageList->item(mPageNameIdList.value("motor_bldc"))->setHidden(type != 0);
-        ui->pageList->item(mPageNameIdList.value("motor_dc"))->setHidden(type != 1);
-        ui->pageList->item(mPageNameIdList.value("motor_foc"))->setHidden(type != 2);
-        ui->pageList->item(mPageNameIdList.value("motor_gpdrive"))->setHidden(type != 3);
+        if (mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
+            int type = mVesc->mcConfig()->getParamEnum("motor_type");
+            ui->pageList->item(mPageNameIdList.value("motor_bldc"))->setHidden(type != 0);
+            ui->pageList->item(mPageNameIdList.value("motor_dc"))->setHidden(type != 1);
+            ui->pageList->item(mPageNameIdList.value("motor_foc"))->setHidden(type != 2);
+            ui->pageList->item(mPageNameIdList.value("motor_gpdrive"))->setHidden(type != 3);
+        }
     };
 
     auto updateAppToUse = [this]() {
-        int type = mVesc->appConfig()->getParamEnum("app_to_use");
-        ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden
-                (!(type == 1 || type == 4 || type == 8));
-        ui->pageList->item(mPageNameIdList.value("app_adc"))->setHidden
-                (!(type == 2 || type == 5 || type == 8));
-        ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden
-                (!(type == 3 || type == 4 || type == 5 || type == 8 || type == 8));
-        ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden
-                (!(type == 0 || type == 3 || type == 6 || type == 7 || type == 8));
-        ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden
-                (!(type == 8 || type == 9));
+        if (mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
+            int type = mVesc->appConfig()->getParamEnum("app_to_use");
+            ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden
+                    (!(type == 1 || type == 4 || type == 8));
+            ui->pageList->item(mPageNameIdList.value("app_adc"))->setHidden
+                    (!(type == 2 || type == 5 || type == 8));
+            ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden
+                    (!(type == 3 || type == 4 || type == 5 || type == 8 || type == 8));
+            ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden
+                    (!(type == 0 || type == 3 || type == 6 || type == 7 || type == 8));
+            ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden
+                    (!(type == 8 || type == 9));
+        }
     };
+
+    connect(mVesc->commands(), &Commands::fwVersionReceived,
+            [this, updateMotortype, updateAppToUse](FW_RX_PARAMS params) {
+        if (params.hwType == HW_TYPE_VESC) {
+            ui->pageList->item(mPageNameIdList.value("motor"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_general"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_bldc"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_dc"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_foc"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_gpdrive"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_pid"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_additional_info"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_experiments"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app_general"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app_adc"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(false);
+
+            updateMotortype();
+            updateAppToUse();
+        } else {
+            ui->pageList->item(mPageNameIdList.value("motor"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_general"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_bldc"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_dc"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_foc"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_gpdrive"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_pid"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_additional_info"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_experiments"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app_general"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app_adc"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(true);
+        }
+    });
 
     connect(mVesc, &VescInterface::configurationChanged, [updateMotortype, updateAppToUse, this]() {
         qDebug() << "Reloading user interface due to configuration change.";
@@ -477,7 +527,8 @@ void MainWindow::timerSlot()
         if (conf_cnt >= 20) {
             conf_cnt = 0;
 
-            if (!mVesc->deserializeFailedSinceConnected() && mVesc->fwRx()) {
+            if (!mVesc->deserializeFailedSinceConnected() && mVesc->fwRx() &&
+                    mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
                 if (!mMcConfRead) {
                     mVesc->commands()->getMcconf();
                 }
@@ -1008,12 +1059,14 @@ void MainWindow::reloadPages()
     mPageMotorSettings->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotorSettings);
     addPageItem(tr("Motor Settings"), "://res/icons/motor.png", "", true);
+    mPageNameIdList.insert("motor", ui->pageList->count() - 1);
 
     mPageMotor = new PageMotor(this);
     mPageMotor->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotor);
     addPageItem(tr("General"), "://res/icons/Horizontal Settings Mixer-96.png",
                 "://res/icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_general", ui->pageList->count() - 1);
 
     mPageBldc = new PageBldc(this);
     mPageBldc->setVesc(mVesc);
@@ -1048,29 +1101,34 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageControllers);
     addPageItem(tr("PID Controllers"), "://res/icons/Speed-96.png",
                 "://res/icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_pid", ui->pageList->count() - 1);
 
     mPageMotorInfo = new PageMotorInfo(this);
     mPageMotorInfo->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotorInfo);
     addPageItem(tr("Additional Info"), "://res/icons/About-96.png",
                 "://res/icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_additional_info", ui->pageList->count() - 1);
 
     mPageExperiments = new PageExperiments(this);
     mPageExperiments->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageExperiments);
     addPageItem(tr("Experiments"), "://res/icons/Calculator-96.png",
                 "://res/icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_experiments", ui->pageList->count() - 1);
 
     mPageAppSettings = new PageAppSettings(this);
     mPageAppSettings->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppSettings);
     addPageItem(tr("App Settings"), "://res/icons/Outgoing Data-96.png", "", true);
+    mPageNameIdList.insert("app", ui->pageList->count() - 1);
 
     mPageAppGeneral = new PageAppGeneral(this);
     mPageAppGeneral->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppGeneral);
     addPageItem(tr("General"), "://res/icons/Horizontal Settings Mixer-96.png",
                 "://res/icons/appconf.png", false, true);
+    mPageNameIdList.insert("app_general", ui->pageList->count() - 1);
 
     mPageAppPpm = new PageAppPpm(this);
     mPageAppPpm->setVesc(mVesc);
@@ -1119,6 +1177,7 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageAppImu);
     addPageItem(tr("IMU"), "://res/icons/Gyroscope-96.png",
                 "://res/icons/appconf.png", false, true);
+    mPageNameIdList.insert("app_imu", ui->pageList->count() - 1);
 
     mPageDataAnalysis = new PageDataAnalysis(this);
     mPageDataAnalysis->setVesc(mVesc);
@@ -1167,6 +1226,29 @@ void MainWindow::reloadPages()
     mPageSettings = new PageSettings(this);
     ui->pageWidget->addWidget(mPageSettings);
     addPageItem(tr("VESC Tool Settings"), "://res/icons/Settings-96.png", "", true);
+
+    /*
+     * Page IDs
+     *
+     * motor
+     * motor_general
+     * motor_bldc
+     * motor_dc
+     * motor_foc
+     * motor_gpdrive
+     * motor_pid
+     * motor_additional_info
+     * motor_experiments
+     * app
+     * app_general
+     * app_ppm
+     * app_adc
+     * app_uart
+     * app_vescremote
+     * app_nrf
+     * app_balance
+     * app_imu
+     */
 
     // Adjust sizes
     QFontMetrics fm(this->font());

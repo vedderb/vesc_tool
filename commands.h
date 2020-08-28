@@ -56,6 +56,8 @@ public:
 
     Q_INVOKABLE static QString faultToStr(mc_fault_code fault);
 
+    Q_INVOKABLE void setOdometer(unsigned odometer_meters);
+
 signals:
     void dataToSend(QByteArray &data);
 

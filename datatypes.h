@@ -214,6 +214,7 @@ struct SETUP_VALUES {
     Q_PROPERTY(int num_vescs MEMBER num_vescs)
     Q_PROPERTY(double battery_wh MEMBER battery_wh)
     Q_PROPERTY(QString fault_str MEMBER fault_str)
+    Q_PROPERTY(unsigned odometer MEMBER odometer)
 
 public:
     SETUP_VALUES() {
@@ -237,6 +238,7 @@ public:
         vesc_id = 0;
         num_vescs = 0;
         battery_wh = 0.0;
+        odometer = 0;
     }
 
     bool operator==(const SETUP_VALUES &other) const {
@@ -270,6 +272,7 @@ public:
     int num_vescs;
     double battery_wh;
     QString fault_str;
+    unsigned odometer;
 };
 
 Q_DECLARE_METATYPE(SETUP_VALUES)
@@ -535,7 +538,8 @@ typedef enum {
     COMM_SET_BLE_NAME,
     COMM_SET_BLE_PIN,
     COMM_SET_CAN_MODE,
-    COMM_GET_IMU_CALIBRATION
+    COMM_GET_IMU_CALIBRATION,
+    COMM_SET_ODOMETER
 } COMM_PACKET_ID;
 
 // CAN commands

@@ -59,6 +59,8 @@ public:
     Q_INVOKABLE QByteArray bmReadMemWait(uint32_t addr, quint16 size, int timeoutMs = 3000);
     Q_INVOKABLE int bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs = 3000);
 
+    Q_INVOKABLE void setOdometer(unsigned odometer_meters);
+
 signals:
     void dataToSend(QByteArray &data);
 

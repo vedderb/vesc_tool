@@ -84,7 +84,9 @@ typedef enum {
     FAULT_CODE_UNBALANCED_CURRENTS,
     FAULT_CODE_RESOLVER_LOT,
     FAULT_CODE_RESOLVER_DOS,
-    FAULT_CODE_RESOLVER_LOS
+    FAULT_CODE_RESOLVER_LOS,
+    FAULT_CODE_FLASH_CORRUPTION_APP_CFG,
+    FAULT_CODE_FLASH_CORRUPTION_MC_CFG
 } mc_fault_code;
 
 typedef enum {
@@ -121,7 +123,7 @@ struct MC_VALUES {
     Q_PROPERTY(double position MEMBER position)
     Q_PROPERTY(mc_fault_code fault_code MEMBER fault_code)
     Q_PROPERTY(int vesc_id MEMBER vesc_id)
-    Q_PROPERTY(QString fault_str MEMBER fault_str)
+    Q_PROPERTY(QString FAULT_str MEMBER fault_str)
     Q_PROPERTY(double vd MEMBER vd)
     Q_PROPERTY(double vq MEMBER vq)
 
@@ -539,6 +541,7 @@ typedef enum {
     COMM_SET_BLE_PIN,
     COMM_SET_CAN_MODE,
     COMM_GET_IMU_CALIBRATION,
+    COMM_GET_MCCONF_TEMP,
     COMM_SET_ODOMETER
 } COMM_PACKET_ID;
 

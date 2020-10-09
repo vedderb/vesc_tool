@@ -199,7 +199,7 @@ Item {
                     height: Math.min(implicitHeight, parent.height - 60)
                     closePolicy: Popup.CloseOnEscape
                     x: 10
-                    y: 50
+                    y: Math.max((parent.height - height) / 2, 10)
                     parent: ApplicationWindow.overlay
                     standardButtons: Dialog.Ok | Dialog.Cancel
                     onAccepted: { 
@@ -231,9 +231,9 @@ Item {
 
                                 DoubleSpinBox {
                                     id: odometerBox
-                                    decimals: 3
+                                    decimals: 2
                                     realFrom: 0.0
-                                    realTo: 999999999.0
+                                    realTo: 20000000
                                     Layout.fillWidth: true
                                 }
                             }

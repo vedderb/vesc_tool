@@ -465,6 +465,9 @@ void Commands::processPacket(QByteArray data)
         if (mask & (uint32_t(1) << 19)) {
             values.battery_wh = vb.vbPopFrontDouble32(1e3);
         }
+        if (mask & (uint32_t(1) << 20)) {
+            values.odometer = vb.vbPopFrontUint32();
+        }
 
         emit valuesSetupReceived(values, mask);
     } break;
@@ -704,6 +707,16 @@ void Commands::getValues()
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_VALUES);
     emitData(vb);
+}
+
+void Commands::setOdometer(unsigned odometer_meters)
+{
+    qDebug() << "Set odometer: " << odometer_meters;
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_SET_ODOMETER);
+    vb.vbAppendUint32(odometer_meters);
+    emitData(vb);
+	
 }
 
 void Commands::sendTerminalCmd(QString cmd)

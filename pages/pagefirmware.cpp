@@ -34,8 +34,8 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->cancelButton->setEnabled(false);
     mVesc = nullptr;
 
-    updateHwList();
-    updateBlList();
+    updateHwList(FW_RX_PARAMS());
+    updateBlList(FW_RX_PARAMS());
 
     mTimer = new QTimer(this);
     mTimer->start(500);
@@ -75,8 +75,8 @@ void PageFirmware::setVesc(VescInterface *vesc)
 
         connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
                 this, SLOT(fwUploadStatus(QString,double,bool)));
-        connect(mVesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-                this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+        connect(mVesc, SIGNAL(fwRxChanged(bool,bool)),
+                this, SLOT(fwRxChanged(bool,bool)));
     }
 }
 
@@ -125,8 +125,16 @@ void PageFirmware::fwUploadStatus(const QString &status, double progress, bool i
     ui->cancelButton->setEnabled(isOngoing);
 }
 
-void PageFirmware::fwVersionReceived(FW_RX_PARAMS params)
+void PageFirmware::fwRxChanged(bool rx, bool limited)
 {
+    (void)limited;
+
+    if (!rx) {
+        return;
+    }
+
+    FW_RX_PARAMS params = mVesc->getLastFwRxParams();
+
     QString fwStr;
     QString strUuid = Utility::uuid2Str(params.uuid, true);
 
@@ -156,21 +164,27 @@ void PageFirmware::fwVersionReceived(FW_RX_PARAMS params)
     fwStr += "\nHW Type: " + params.hwTypeStr();
 
     ui->currentLabel->setText(fwStr);
-    updateHwList(params.hw);
-    updateBlList(params.hw);
+    updateHwList(params);
+    updateBlList(params);
     update();
 }
 
-void PageFirmware::updateHwList(QString hw)
+void PageFirmware::updateHwList(FW_RX_PARAMS params)
 {
     ui->hwList->clear();
 
-    QDirIterator it("://res/firmwares");
+    QString fwDir = "://res/firmwares";
+
+    if (params.hwType == HW_TYPE_VESC_BMS) {
+        fwDir = "://res/firmwares_bms";
+    }
+
+    QDirIterator it(fwDir);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         QStringList names = fi.fileName().split("_o_");
 
-        if (fi.isDir() && (hw.isEmpty() || names.contains(hw, Qt::CaseInsensitive))) {
+        if (fi.isDir() && (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
             QListWidgetItem *item = new QListWidgetItem;
 
             QString name = names.at(0);
@@ -216,16 +230,22 @@ void PageFirmware::updateFwList()
     }
 }
 
-void PageFirmware::updateBlList(QString hw)
+void PageFirmware::updateBlList(FW_RX_PARAMS params)
 {
     ui->blList->clear();
 
-    QDirIterator it("://res/bootloaders");
+    QString blDir = "://res/bootloaders";
+
+    if (params.hwType == HW_TYPE_VESC_BMS) {
+        blDir = "://res/bootloaders_bms";
+    }
+
+    QDirIterator it(blDir);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         QStringList names = fi.fileName().replace(".bin", "").split("_o_");
 
-        if (!fi.isDir() && (hw.isEmpty() || names.contains(hw, Qt::CaseInsensitive))) {
+        if (!fi.isDir() && (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
             QListWidgetItem *item = new QListWidgetItem;
 
             QString name = names.at(0);
@@ -240,7 +260,7 @@ void PageFirmware::updateBlList(QString hw)
     }
 
     if (ui->blList->count() == 0) {
-        QFileInfo generic("://res/bootloaders/generic.bin");
+        QFileInfo generic(blDir + "/generic.bin");
         if (generic.exists()) {
             QListWidgetItem *item = new QListWidgetItem;
             item->setText("generic");

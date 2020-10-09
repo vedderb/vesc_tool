@@ -49,6 +49,8 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mTimeoutDecChuk = 0;
     mTimeoutDecBalance = 0;
     mTimeoutPingCan = 0;
+    mTimeoutCustomConf = 0;
+    mTimeoutBmsVal = 0;
 
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
 }
@@ -633,6 +635,7 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_BMS_GET_VALUES: {
+        mTimeoutBmsVal = 0;
         BMS_VALUES val;
         val.v_tot = vb.vbPopFrontDouble32(1e6);
         val.v_charge = vb.vbPopFrontDouble32(1e6);
@@ -642,11 +645,9 @@ void Commands::processPacket(QByteArray data)
         val.wh_cnt = vb.vbPopFrontDouble32(1e3);
 
         int cells = vb.vbPopFrontUint8();
-
         for (int i = 0;i < cells;i++) {
             val.v_cells.append(vb.vbPopFrontDouble16(1e3));
         }
-
         for (int i = 0;i < cells;i++) {
             val.is_balancing.append(vb.vbPopFrontUint8());
         }
@@ -663,6 +664,24 @@ void Commands::processPacket(QByteArray data)
         val.temp_cells_highest = vb.vbPopFrontDouble16(1e2);
 
         emit bmsValuesRx(val);
+    } break;
+
+    case COMM_SET_CUSTOM_CONFIG:
+        emit ackReceived("COMM_SET_CUSTOM_CONFIG Write OK");
+        break;
+
+    case COMM_GET_CUSTOM_CONFIG:
+    case COMM_GET_CUSTOM_CONFIG_DEFAULT: {
+        mTimeoutCustomConf = 0;
+        int confInd = vb.vbPopFrontInt8();
+        emit customConfigRx(confInd, vb);
+    } break;
+
+    case COMM_GET_CUSTOM_CONFIG_XML: {
+        int confInd = vb.vbPopFrontInt8();
+        int confSize = vb.vbPopFrontInt32();
+        int offset = vb.vbPopFrontInt32();
+        emit customConfigChunkRx(confInd, confSize, offset, vb);
     } break;
 
     default:
@@ -683,28 +702,49 @@ void Commands::getFwVersion()
     emitData(vb);
 }
 
-void Commands::eraseNewApp(bool fwdCan, quint32 fwSize)
+void Commands::eraseNewApp(bool fwdCan, quint32 fwSize, HW_TYPE hwType, QString hwName)
 {
     VByteArray vb;
-    vb.vbAppendInt8(fwdCan ? COMM_ERASE_NEW_APP_ALL_CAN :
-                             COMM_ERASE_NEW_APP);
+    if (!hwName.isEmpty() && hwType != HW_TYPE_VESC && fwdCan) {
+        vb.vbAppendInt8(COMM_ERASE_NEW_APP_ALL_CAN_HW);
+        vb.vbAppendUint8(hwType);
+        vb.vbAppendString(hwName);
+    } else {
+        vb.vbAppendInt8(fwdCan ? COMM_ERASE_NEW_APP_ALL_CAN :
+                                 COMM_ERASE_NEW_APP);
+    }
+
     vb.vbAppendUint32(fwSize);
     emitData(vb);
 }
 
-void Commands::eraseBootloader(bool fwdCan)
+void Commands::eraseBootloader(bool fwdCan, HW_TYPE hwType, QString hwName)
 {
     VByteArray vb;
-    vb.vbAppendInt8(fwdCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
-                             COMM_ERASE_BOOTLOADER);
+    if (!hwName.isEmpty() && hwType != HW_TYPE_VESC && fwdCan) {
+        vb.vbAppendInt8(COMM_ERASE_BOOTLOADER_ALL_CAN_HW);
+        vb.vbAppendUint8(hwType);
+        vb.vbAppendString(hwName);
+    } else {
+        vb.vbAppendInt8(fwdCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
+                                 COMM_ERASE_BOOTLOADER);
+    }
+
     emitData(vb);
 }
 
-void Commands::writeNewAppData(QByteArray data, quint32 offset, bool fwdCan)
+void Commands::writeNewAppData(QByteArray data, quint32 offset, bool fwdCan, HW_TYPE hwType, QString hwName)
 {
     VByteArray vb;
-    vb.vbAppendInt8(fwdCan ? COMM_WRITE_NEW_APP_DATA_ALL_CAN :
-                             COMM_WRITE_NEW_APP_DATA);
+    if (!hwName.isEmpty() && hwType != HW_TYPE_VESC && fwdCan) {
+        vb.vbAppendInt8(COMM_WRITE_NEW_APP_DATA_ALL_CAN_HW);
+        vb.vbAppendUint8(hwType);
+        vb.vbAppendString(hwName);
+    } else {
+        vb.vbAppendInt8(fwdCan ? COMM_WRITE_NEW_APP_DATA_ALL_CAN :
+                                 COMM_WRITE_NEW_APP_DATA);
+    }
+
     vb.vbAppendUint32(offset);
     vb.append(data);
     emitData(vb);
@@ -721,11 +761,17 @@ void Commands::writeNewAppDataLzo(QByteArray data, quint32 offset, quint16 decom
     emitData(vb);
 }
 
-void Commands::jumpToBootloader(bool fwdCan)
+void Commands::jumpToBootloader(bool fwdCan, HW_TYPE hwType, QString hwName)
 {
     VByteArray vb;
-    vb.vbAppendInt8(fwdCan ? COMM_JUMP_TO_BOOTLOADER_ALL_CAN :
-                             COMM_JUMP_TO_BOOTLOADER);
+    if (!hwName.isEmpty() && hwType != HW_TYPE_VESC && fwdCan) {
+        vb.vbAppendInt8(COMM_JUMP_TO_BOOTLOADER_ALL_CAN_HW);
+        vb.vbAppendUint8(hwType);
+        vb.vbAppendString(hwName);
+    } else {
+        vb.vbAppendInt8(fwdCan ? COMM_JUMP_TO_BOOTLOADER_ALL_CAN :
+                                 COMM_JUMP_TO_BOOTLOADER);
+    }
     emitData(vb);
 }
 
@@ -1405,9 +1451,15 @@ void Commands::setBatteryCut(double start, double end, bool store, bool fwdCan)
 
 void Commands::bmsGetValues()
 {
+    if (mTimeoutBmsVal > 0) {
+        return;
+    }
+
+    mTimeoutBmsVal = mTimeoutCount;
+
     VByteArray vb;
     vb.vbAppendUint8(COMM_BMS_GET_VALUES);
-    emit dataToSend(vb);
+    emitData(vb);
 }
 
 void Commands::bmsSetChargeAllowed(bool allowed)
@@ -1415,7 +1467,7 @@ void Commands::bmsSetChargeAllowed(bool allowed)
     VByteArray vb;
     vb.vbAppendUint8(COMM_BMS_SET_CHARGE_ALLOWED);
     vb.vbAppendUint8(allowed);
-    emit dataToSend(vb);
+    emitData(vb);
 }
 
 void Commands::bmsSetBalanceOverride(uint8_t cell, uint8_t override)
@@ -1424,7 +1476,7 @@ void Commands::bmsSetBalanceOverride(uint8_t cell, uint8_t override)
     vb.vbAppendUint8(COMM_BMS_SET_BALANCE_OVERRIDE);
     vb.vbAppendUint8(cell);
     vb.vbAppendUint8(override);
-    emit dataToSend(vb);
+    emitData(vb);
 }
 
 void Commands::bmsResetCounters(bool ah, bool wh)
@@ -1433,7 +1485,7 @@ void Commands::bmsResetCounters(bool ah, bool wh)
     vb.vbAppendUint8(COMM_BMS_RESET_COUNTERS);
     vb.vbAppendUint8(ah);
     vb.vbAppendUint8(wh);
-    emit dataToSend(vb);
+    emitData(vb);
 }
 
 void Commands::bmsForceBalance(bool bal_en)
@@ -1441,14 +1493,47 @@ void Commands::bmsForceBalance(bool bal_en)
     VByteArray vb;
     vb.vbAppendUint8(COMM_BMS_FORCE_BALANCE);
     vb.vbAppendUint8(bal_en);
-    emit dataToSend(vb);
+    emitData(vb);
 }
 
 void Commands::bmsZeroCurrentOffset()
 {
     VByteArray vb;
     vb.vbAppendUint8(COMM_BMS_ZERO_CURRENT_OFFSET);
-    emit dataToSend(vb);
+    emitData(vb);
+}
+
+void Commands::customConfigGetChunk(int confInd, int len, int offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_GET_CUSTOM_CONFIG_XML);
+    vb.vbAppendInt8(int8_t(confInd));
+    vb.vbAppendInt32(len);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::customConfigGet(int confInd, bool isDefault)
+{
+    if (mTimeoutCustomConf > 0) {
+        return;
+    }
+
+    mTimeoutCustomConf = mTimeoutCount;
+
+    VByteArray vb;
+    vb.vbAppendUint8(isDefault ? COMM_GET_CUSTOM_CONFIG_DEFAULT : COMM_GET_CUSTOM_CONFIG);
+    vb.vbAppendInt8(int8_t(confInd));
+    emitData(vb);
+}
+
+void Commands::customConfigSet(int confInd, QByteArray confData)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_SET_CUSTOM_CONFIG);
+    vb.vbAppendInt8(int8_t(confInd));
+    vb.append(confData);
+    emitData(vb);
 }
 
 void Commands::timerSlot()
@@ -1468,14 +1553,14 @@ void Commands::timerSlot()
     if (mTimeoutDecAdc > 0) mTimeoutDecAdc--;
     if (mTimeoutDecChuk > 0) mTimeoutDecChuk--;
     if (mTimeoutDecBalance > 0) mTimeoutDecBalance--;
-
     if (mTimeoutPingCan > 0) {
         mTimeoutPingCan--;
-
         if (mTimeoutPingCan == 0) {
             emit pingCanRx(QVector<int>(), true);
         }
     }
+    if (mTimeoutCustomConf > 0) mTimeoutCustomConf--;
+    if (mTimeoutBmsVal > 0) mTimeoutBmsVal--;
 }
 
 void Commands::emitData(QByteArray data)

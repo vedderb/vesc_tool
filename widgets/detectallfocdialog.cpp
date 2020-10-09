@@ -259,7 +259,7 @@ void DetectAllFocDialog::runDetect(bool can)
 
     mVesc->commands()->setMcconf(false);
     Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
-    auto canDevs = mVesc->scanCan();
+    auto canDevs = Utility::scanCanVescOnly(mVesc);
 
     if (mVesc->commands()->getLimitedCompatibilityCommands().contains(COMM_SET_BATTERY_CUT)) {
         mVesc->commands()->setBatteryCut(

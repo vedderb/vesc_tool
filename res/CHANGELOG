@@ -10,6 +10,7 @@
  - Realtime IMU and balance data. See: https://github.com/vedderb/vesc_tool/pull/91
  - Made CAN list resizeable.
  - Made FOC detection result dialog scrollable.
+ - Added gamepad control support.
 
 == 2.06 ==
 * Prevent repeated test version notification dialogs.

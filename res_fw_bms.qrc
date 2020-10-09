@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/firmwares_bms/12s7p/vesc_default.bin</file>
+        <file>res/bootloaders_bms/generic.bin</file>
+    </qresource>
+</RCC>

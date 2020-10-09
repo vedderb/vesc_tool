@@ -105,16 +105,18 @@ signals:
     void deserializeConfigFailed(bool isMc, bool isApp);
     void canFrameRx(QByteArray data, quint32 id, bool isExtended);
     void bmsValuesRx(BMS_VALUES val);
+    void customConfigChunkRx(int confInd, int lenConf, int ofsConf, QByteArray data);
+    void customConfigRx(int confInd, QByteArray data);
 
 public slots:
     void processPacket(QByteArray data);
 
     void getFwVersion();
-    void eraseNewApp(bool fwdCan, quint32 fwSize);
-    void eraseBootloader(bool fwdCan);
-    void writeNewAppData(QByteArray data, quint32 offset, bool fwdCan);
+    void eraseNewApp(bool fwdCan, quint32 fwSize, HW_TYPE hwType, QString hwName);
+    void eraseBootloader(bool fwdCan, HW_TYPE hwType, QString hwName);
+    void writeNewAppData(QByteArray data, quint32 offset, bool fwdCan, HW_TYPE hwType, QString hwName);
     void writeNewAppDataLzo(QByteArray data, quint32 offset, quint16 decompressedLen, bool fwdCan);
-    void jumpToBootloader(bool fwdCan);
+    void jumpToBootloader(bool fwdCan, HW_TYPE hwType, QString hwName);
     void getValues();
     void sendTerminalCmd(QString cmd);
     void sendTerminalCmdSync(QString cmd);
@@ -189,6 +191,10 @@ public slots:
     void bmsForceBalance(bool bal_en);
     void bmsZeroCurrentOffset();
 
+    void customConfigGetChunk(int confInd, int len, int offset);
+    void customConfigGet(int confInd, bool isDefault);
+    void customConfigSet(int confInd, QByteArray confData);
+
 private slots:
     void timerSlot();
 
@@ -220,6 +226,8 @@ private:
     int mTimeoutDecChuk;
     int mTimeoutDecBalance;
     int mTimeoutPingCan;
+    int mTimeoutCustomConf;
+    int mTimeoutBmsVal;
 
 };
 

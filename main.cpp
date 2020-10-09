@@ -173,6 +173,24 @@ int main(int argc, char *argv[])
     QApplication *a = new QApplication(argc, argv);
     app = a;
 
+    // Fonts
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Bold.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-BoldOblique.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Oblique.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Bold.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-BoldOblique.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Oblique.ttf");
+
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Regular.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Medium.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bolf.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
+
+    qApp->setFont(QFont("Roboto", 12));
+
     QmlUi *qml = new QmlUi;
     qml->startQmlUi();
 
@@ -196,8 +214,9 @@ int main(int argc, char *argv[])
         vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
         Utility::configLoadLatest(vesc);
 
-        QTimer::singleShot(1000, [&vesc, &tcpPort]() {
+        QTimer::singleShot(1000, [&]() {
             bool ok = vesc->autoconnect();
+
             if (ok) {
                 ok = vesc->tcpServerStart(tcpPort);
 
@@ -240,7 +259,7 @@ int main(int argc, char *argv[])
         QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
         QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
 
-        qApp->setFont(QFont("Roboto",12));
+        qApp->setFont(QFont("Roboto", 12));
 
         // Style
         a->setStyleSheet("");

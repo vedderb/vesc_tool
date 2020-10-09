@@ -40,9 +40,9 @@ ApplicationWindow {
     title: qsTr("VESC Tool")
 
     Component.onCompleted: {
-        //        Utility.checkVersion(VescIf)
-        //        swipeView.setCurrentIndex(1)
-        //        rtSwipeView.setCurrentIndex(1)
+//        Utility.checkVersion(VescIf)
+//        swipeView.setCurrentIndex(7)
+//        rtSwipeView.setCurrentIndex(1)
 
         if (!VescIf.isIntroDone()) {
             introWizard.openDialog()
@@ -316,6 +316,12 @@ ApplicationWindow {
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
                 anchors.topMargin: 10
+            }
+        }
+
+        Page {
+            BMS {
+                anchors.fill: parent
             }
         }
 
@@ -635,6 +641,10 @@ ApplicationWindow {
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {
+                    text: qsTr("BMS")
+                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                }
+                TabButton {
                     text: qsTr("Developer")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
@@ -700,7 +710,7 @@ ApplicationWindow {
         property bool appConfRx: false
 
         onTriggered: {
-            if (VescIf.isPortConnected()) {
+            if (VescIf.isPortConnected() && VescIf.getLastFwRxParams().hwTypeStr() === "VESC") {
                 if (!mcConfRx) {
                     mCommands.getMcconf()
                 }
@@ -757,6 +767,11 @@ ApplicationWindow {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getDecodedBalance()
+                    }
+
+                    if (tabBar.currentIndex == 7) {
+                        interval = 100
+                        mCommands.bmsGetValues()
                     }
                 }
             }

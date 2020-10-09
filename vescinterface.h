@@ -180,6 +180,7 @@ public:
     Q_INVOKABLE QVector<int> scanCan();
     Q_INVOKABLE QVector<int> getCanDevsLast() const;
     Q_INVOKABLE void ignoreCanChange(bool ignore);
+    Q_INVOKABLE bool isIgnoringCanChanges();
 
     Q_INVOKABLE bool tcpServerStart(int port);
     Q_INVOKABLE void tcpServerStop();
@@ -209,6 +210,10 @@ public:
 
     Q_INVOKABLE FW_RX_PARAMS getLastFwRxParams();
 
+    Q_INVOKABLE int customConfigNum();
+    Q_INVOKABLE bool customConfigsLoaded();
+    ConfigParams *customConfig(int configNum);
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -225,6 +230,7 @@ signals:
     void useImperialUnitsChanged(bool useImperialUnits);
     void configurationChanged();
     void configurationBackupsChanged();
+    void customConfigLoadDone();
 
 public slots:
 
@@ -282,6 +288,8 @@ private:
     ConfigParams *mAppConfig;
     ConfigParams *mInfoConfig;
     ConfigParams *mFwConfig;
+    QVector<ConfigParams*> mCustomConfigs;
+    bool mCustomConfigsLoaded;
 
     QTimer *mTimer;
     Packet *mPacket;

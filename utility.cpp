@@ -369,7 +369,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                         arg(sensors);
             };
 
-            QVector<int> canDevs = vesc->scanCan();
+            QVector<int> canDevs = Utility::scanCanVescOnly(vesc);
             res = genRes();
 
             int canLastFwd = vesc->commands()->getSendCan();
@@ -860,7 +860,7 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
     }
 
     if (res && can) {
-        QVector<int> canDevs = vesc->scanCan();
+        QVector<int> canDevs = Utility::scanCanVescOnly(vesc);
 
         for (int d: canDevs) {
             vesc->commands()->setSendCan(true, d);
@@ -1242,7 +1242,7 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
                vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 1500);
+    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 2000);
 
     disconnect(conn);
 
@@ -1250,6 +1250,25 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
             vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     return res;
+}
+
+bool Utility::getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId)
+{
+    vesc->ignoreCanChange(true);
+    bool canLastFwd = vesc->commands()->getSendCan();
+    int canLastId = vesc->commands()->getCanSendId();
+    vesc->commands()->setSendCan(true, canId);
+    bool res = getFwVersionBlocking(vesc, params);
+    vesc->commands()->setSendCan(canLastFwd, canLastId);
+    vesc->ignoreCanChange(false);
+    return res;
+}
+
+FW_RX_PARAMS Utility::getFwVersionBlockingCan(VescInterface *vesc, int canId)
+{
+    FW_RX_PARAMS params;
+    getFwVersionBlockingCan(vesc, &params, canId);
+    return params;
 }
 
 bool Utility::checkFwCompatibility(VescInterface *vesc)
@@ -1548,6 +1567,22 @@ bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
 
     connect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
             vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+
+    return res;
+}
+
+QVector<int> Utility::scanCanVescOnly(VescInterface *vesc)
+{
+    auto canDevs = vesc->scanCan();
+    QVector<int> res;
+
+    for (auto d: canDevs) {
+        FW_RX_PARAMS params;
+        getFwVersionBlockingCan(vesc, &params, d);
+        if (params.hwType == HW_TYPE_VESC) {
+            res.append(d);
+        }
+    }
 
     return res;
 }

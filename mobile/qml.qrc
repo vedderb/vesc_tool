@@ -45,5 +45,7 @@
         <file>DetectIMU.qml</file>
         <file>RtDataBalance.qml</file>
         <file>RtDataIMU.qml</file>
+        <file>BMS.qml</file>
+        <file>CustomGaugeV2.qml</file>
     </qresource>
 </RCC>

@@ -56,6 +56,7 @@ DEFINES += HAS_POS
 !android: {
     # Serial port available
     DEFINES += HAS_SERIALPORT
+    DEFINES += HAS_GAMEPAD
 }
 win32: {
     DEFINES += _USE_MATH_DEFINES
@@ -92,11 +93,14 @@ contains(DEFINES, HAS_POS) {
     QT       += positioning
 }
 
+contains(DEFINES, HAS_GAMEPAD) {
+    QT       += gamepad
+}
+
 android: QT += androidextras
 
 android: TARGET = vesc_tool
 !android: TARGET = vesc_tool_$$VT_VERSION
-
 
 ANDROID_VERSION = 1
 
@@ -208,7 +212,9 @@ include(mobile/mobile.pri)
 include(map/map.pri)
 include(lzokay/lzokay.pri)
 
-RESOURCES += res.qrc
+RESOURCES += res.qrc \
+    res_fw_bms.qrc \
+    res_qml.qrc
 RESOURCES += res_config.qrc
 
 build_original {

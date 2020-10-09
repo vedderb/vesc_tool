@@ -461,7 +461,7 @@ public:
         customConfigNum = 0;
     }
 
-    QString hwTypeStr() {
+    Q_INVOKABLE QString hwTypeStr() {
         QString res = "Unknown Hardware";
         switch (hwType) {
         case HW_TYPE_VESC:
@@ -658,6 +658,16 @@ typedef enum {
     COMM_BMS_RESET_COUNTERS,
     COMM_BMS_FORCE_BALANCE,
     COMM_BMS_ZERO_CURRENT_OFFSET,
+
+    // FW updates commands for different HW types
+    COMM_JUMP_TO_BOOTLOADER_HW,
+    COMM_ERASE_NEW_APP_HW,
+    COMM_WRITE_NEW_APP_DATA_HW,
+    COMM_ERASE_BOOTLOADER_HW,
+    COMM_JUMP_TO_BOOTLOADER_ALL_CAN_HW,
+    COMM_ERASE_NEW_APP_ALL_CAN_HW,
+    COMM_WRITE_NEW_APP_DATA_ALL_CAN_HW,
+    COMM_ERASE_BOOTLOADER_ALL_CAN_HW
 } COMM_PACKET_ID;
 
 // CAN commands

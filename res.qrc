@@ -172,5 +172,10 @@
         <file>res/fonts/Roboto/Roboto-Regular.ttf</file>
         <file>res/fonts/Roboto/Roboto-Thin.ttf</file>
         <file>res/fonts/Roboto/Roboto-ThinItalic.ttf</file>
+        <file>res/icons/icons8-battery-100.png</file>
+        <file>res/icons/bms_off.png</file>
+        <file>res/icons/bms_on.png</file>
+        <file>res/images/12s7p_pcb.png</file>
+        <file>res/icons/Controller-96_on.png</file>
     </qresource>
 </RCC>

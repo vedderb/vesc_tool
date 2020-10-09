@@ -106,11 +106,13 @@ void TcpServerSimple::tcpInputDisconnected()
 
 void TcpServerSimple::tcpInputDataAvailable()
 {
-    QByteArray data = mTcpSocket->readAll();
-    emit dataRx(data);
+    while (mTcpSocket->bytesAvailable() > 0) {
+        QByteArray data = mTcpSocket->readAll();
+        emit dataRx(data);
 
-    if (mUsePacket) {
-        mPacket->processData(data);
+        if (mUsePacket) {
+            mPacket->processData(data);
+        }
     }
 }
 

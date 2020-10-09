@@ -53,6 +53,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mAppConfig = new ConfigParams(this);
     mInfoConfig = new ConfigParams(this);
     mFwConfig = new ConfigParams(this);
+    mCustomConfigsLoaded = false;
     mPacket = new Packet(this);
     mCommands = new Commands(this);
 
@@ -1128,11 +1129,11 @@ bool VescInterface::fwEraseNewApp(bool fwdCan, quint32 fwSize)
         return res;
     };
 
-    mCommands->eraseNewApp(fwdCan, fwSize);
+    mCommands->eraseNewApp(fwdCan, fwSize, mLastFwParams.hwType, mLastFwParams.hw);
     emit fwUploadStatus("Erasing buffer...", 0.0, true);
     int erRes = waitEraseRes();
     if (erRes != 1) {
-        QString msg = "Unknown failure";
+        QString msg = QString("Unknown failure: %1").arg(erRes);
 
         if (erRes == -10) {
             msg = "Erase timed out";
@@ -1173,7 +1174,7 @@ bool VescInterface::fwEraseBootloader(bool fwdCan)
         return res;
     };
 
-    mCommands->eraseBootloader(fwdCan);
+    mCommands->eraseBootloader(fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
     emit fwUploadStatus("Erasing bootloader...", 0.0, true);
     int erRes = waitEraseRes();
     if (erRes != 1) {
@@ -1223,35 +1224,37 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             return false;
         }
 
-        mFwUploadStatus = "Scanning CAN bus...";
-        emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
-        auto devs = scanCan();
+        if (fwParamsLocal.hw == HW_TYPE_VESC) {
+            mFwUploadStatus = "Scanning CAN bus...";
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+            auto devs = scanCan();
 
-        bool ignoreBefore = mIgnoreCanChange;
-        mIgnoreCanChange = true;
+            bool ignoreBefore = mIgnoreCanChange;
+            mIgnoreCanChange = true;
 
-        for (auto d: devs) {
-            mCommands->setSendCan(true, d);
-            FW_RX_PARAMS fwParamsCan;
-            Utility::getFwVersionBlocking(this, &fwParamsCan);
-            if (fwParamsLocal.hw != fwParamsCan.hw) {
-                emitMessageDialog("Firmware Upload",
-                                  "All VESCs on the CAN-bus must have the same hardware version to upload "
-                                  "firmware to all of them at the same time. You must update them individually.",
-                                  false, false);
-                mCommands->setSendCan(false);
-                mIgnoreCanChange = ignoreBefore;
+            for (auto d: devs) {
+                mCommands->setSendCan(true, d);
+                FW_RX_PARAMS fwParamsCan;
+                Utility::getFwVersionBlocking(this, &fwParamsCan);
+                if (fwParamsLocal.hw != fwParamsCan.hw) {
+                    emitMessageDialog("Firmware Upload",
+                                      "All VESCs on the CAN-bus must have the same hardware version to upload "
+                                      "firmware to all of them at the same time. You must update them individually.",
+                                      false, false);
+                    mCommands->setSendCan(false);
+                    mIgnoreCanChange = ignoreBefore;
 
-                mFwUploadStatus = "CAN check failed";
-                mFwUploadProgress = -1.0;
-                emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+                    mFwUploadStatus = "CAN check failed";
+                    mFwUploadProgress = -1.0;
+                    emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
 
-                return false;
+                    return false;
+                }
             }
-        }
 
-        mCommands->setSendCan(false);
-        mIgnoreCanChange = ignoreBefore;
+            mCommands->setSendCan(false);
+            mIgnoreCanChange = ignoreBefore;
+        }
     }
 
     if (isBootloader) {
@@ -1278,6 +1281,10 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
 
     bool supportsLzo = mCommands->getLimitedCompatibilityCommands().
             contains(int(COMM_WRITE_NEW_APP_DATA_LZO));
+
+    if (mLastFwParams.hwType != HW_TYPE_VESC) {
+        supportsLzo = false;
+    }
 
     auto waitWriteRes = [this]() {
         int res = -10;
@@ -1307,7 +1314,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             if (fwIsLzo) {
                 mCommands->writeNewAppDataLzo(chunk, addr, decompressedLen, fwdCan);
             } else {
-                mCommands->writeNewAppData(chunk, addr, fwdCan);
+                mCommands->writeNewAppData(chunk, addr, fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
             }
 
             int res = waitWriteRes();
@@ -1320,7 +1327,16 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         return -20;
     };
 
-    int addr = isBootloader ? (1024 * 128 * 3) : 0;
+    int addr = 0;
+
+    if (isBootloader) {
+        if (mLastFwParams.hwType == HW_TYPE_VESC_BMS) {
+            addr += 0x0803E000 - 0x08020000;
+        } else {
+            addr += (1024 * 128 * 3);
+        }
+    }
+
     int startAddr = addr;
     int szTot = newFirmware.size();
     int uploadSize = 2;
@@ -1333,8 +1349,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         VByteArray sizeCrc;
         sizeCrc.vbAppendInt32(szTot);
         sizeCrc.vbAppendUint16(crc);
-        writeChunk(uint32_t(addr), sizeCrc, false, 0);
-        addr += sizeCrc.size();
+        newFirmware.prepend(sizeCrc);
     }
 
     int lzoFailures = 0;
@@ -1346,7 +1361,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             return false;
         }
 
-        const int chunkSize = 400;
+        const int chunkSize = 384;
 
         int sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
 
@@ -1407,7 +1422,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             }
             emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
         } else {
-            QString msg = "Unknown failure";
+            QString msg = QString("Unknown failure: %1").arg(res);
 
             if (res == -20) {
                 msg = "Firmware upload timed out";
@@ -1434,7 +1449,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     }
 
     if (!isBootloader) {
-        mCommands->jumpToBootloader(fwdCan);
+        mCommands->jumpToBootloader(fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
         Utility::sleepWithEventLoop(500);
         disconnectPort();
     }
@@ -2419,6 +2434,11 @@ void VescInterface::ignoreCanChange(bool ignore)
     mIgnoreCanChange = ignore;
 }
 
+bool VescInterface::isIgnoringCanChanges()
+{
+    return mIgnoreCanChange;
+}
+
 bool VescInterface::tcpServerStart(int port)
 {
     bool res = mTcpServer->startServer(port);
@@ -2638,7 +2658,7 @@ void VescInterface::CANbusError(QCanBusDevice::CanBusError error)
 
 void VescInterface::tcpInputConnected()
 {
-    mTcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+    mTcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, true);
 
     mSettings.setValue("tcp_server", mLastTcpServer);
     mSettings.setValue("tcp_port", mLastTcpPort);
@@ -2710,7 +2730,7 @@ void VescInterface::timerSlot()
         CANbusDataAvailable();
     }
 #endif
-
+    tcpInputDataAvailable();
 
 #ifdef HAS_CANBUS
     if (mCanDeviceInterfaces != listCANbusInterfaces()) {
@@ -2916,6 +2936,7 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
     if (mTcpConnected && mTcpSocket->isOpen()) {
         mTcpSocket->write(data);
+        mTcpSocket->flush();
     }
 
     if (mUdpConnected) {
@@ -2941,9 +2962,12 @@ void VescInterface::cmdDataToSend(QByteArray &data)
 
 void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 {
-    mLastFwParams = params;
+    // Do not reload configs when the firmware version is read from somewhere else.
+    if (mFwVersionReceived) {
+        return;
+    }
 
-    qDebug() << params.major << params.minor;
+    mLastFwParams = params;
 
     QString uuidStr = Utility::uuid2Str(params.uuid, true);
     mUuidStr = uuidStr.toUpper();
@@ -3095,6 +3119,26 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_SET_CURRENT_REL));
     }
 
+    if (fw_connected >= qMakePair(5, 02)) {
+        compCommands.append(int(COMM_CAN_FWD_FRAME));
+        compCommands.append(int(COMM_SET_BATTERY_CUT));
+        compCommands.append(int(COMM_SET_BLE_NAME));
+        compCommands.append(int(COMM_SET_BLE_PIN));
+        compCommands.append(int(COMM_SET_CAN_MODE));
+        compCommands.append(int(COMM_GET_IMU_CALIBRATION));
+        compCommands.append(int(COMM_GET_MCCONF_TEMP));
+        compCommands.append(int(COMM_GET_CUSTOM_CONFIG_XML));
+        compCommands.append(int(COMM_GET_CUSTOM_CONFIG));
+        compCommands.append(int(COMM_GET_CUSTOM_CONFIG_DEFAULT));
+        compCommands.append(int(COMM_SET_CUSTOM_CONFIG));
+        compCommands.append(int(COMM_BMS_GET_VALUES));
+        compCommands.append(int(COMM_BMS_SET_CHARGE_ALLOWED));
+        compCommands.append(int(COMM_BMS_SET_BALANCE_OVERRIDE));
+        compCommands.append(int(COMM_BMS_RESET_COUNTERS));
+        compCommands.append(int(COMM_BMS_FORCE_BALANCE));
+        compCommands.append(int(COMM_BMS_ZERO_CURRENT_OFFSET));
+    }
+
     if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {
         compCommands.append(int(COMM_SET_MCCONF));
         compCommands.append(int(COMM_GET_MCCONF));
@@ -3215,6 +3259,78 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                           "update the firmware urgently, as this is not a safe situation.",
                           false, false);
     }
+
+    // Read custom configs
+    if (params.customConfigNum > 0) {
+        bool readConfigsOk = true;
+        for (int i = 0;i < params.customConfigNum;i++) {
+            QByteArray configData;
+            int confIndLast = 0;
+            int lenConfLast = 0;
+            auto conn = connect(mCommands, &Commands::customConfigChunkRx,
+                    [&](int confInd, int lenConf, int ofsConf, QByteArray data) {
+                if (configData.size() <= ofsConf) {
+                    configData.append(data);
+                }
+                confIndLast = confInd;
+                lenConfLast = lenConf;
+            });
+
+            auto getChunk = [&](int size, int offset, int tries, int timeout) {
+                bool res = false;
+
+                for (int j = 0;j < tries;j++) {
+                    mCommands->customConfigGetChunk(i, size, offset);
+                    res = Utility::waitSignal(mCommands, SIGNAL(customConfigChunkRx(int,int,int,QByteArray)), timeout);
+                    if (res) {
+                        break;
+                    }
+                }
+                return res;
+            };
+
+            if (getChunk(10, 0, 5, 1500)) {
+                while (configData.size() < lenConfLast) {
+                    int dataLeft = lenConfLast - configData.size();
+                    if (!getChunk(dataLeft > 400 ? 400 : dataLeft, configData.size(), 5, 1500)) {
+                        break;
+                    }
+                }
+
+                if (configData.size() == lenConfLast) {
+                    if (mCustomConfigs.size() <= i) {
+                        mCustomConfigs.append(new ConfigParams(this));
+                        connect(mCustomConfigs.last(), &ConfigParams::updateRequested, [this]() {
+                            mCommands->customConfigGet(mCustomConfigs.size() - 1, false);
+                        });
+                        connect(mCustomConfigs.last(), &ConfigParams::updateRequestDefault, [this]() {
+                            mCommands->customConfigGet(mCustomConfigs.size() - 1, true);
+                        });
+                    }
+                    if (!mCustomConfigs.last()->loadCompressedParamsXml(configData)) {
+                        readConfigsOk = false;
+                        disconnect(conn);
+                        break;
+                    }
+
+                    emitStatusMessage(QString("Got custom config %1").arg(i), true);
+                } else {
+                    emitMessageDialog("Get Custom Config",
+                                      "Could not read custom config form hardware",
+                                      false, false);
+                    readConfigsOk = false;
+                    disconnect(conn);
+                    break;
+                }
+            }
+
+            disconnect(conn);
+        }
+
+        mCustomConfigsLoaded = readConfigsOk;
+    }
+
+    emit customConfigLoadDone();
 }
 
 void VescInterface::appconfUpdated()
@@ -3500,12 +3616,39 @@ FW_RX_PARAMS VescInterface::getLastFwRxParams()
     return mLastFwParams;
 }
 
+int VescInterface::customConfigNum()
+{
+    if (mCustomConfigsLoaded) {
+        return mCustomConfigs.size();
+    } else {
+        return 0;
+    }
+}
+
+bool VescInterface::customConfigsLoaded()
+{
+    return mCustomConfigsLoaded;
+}
+
+ConfigParams *VescInterface::customConfig(int configNum)
+{
+    if (customConfigsLoaded() && configNum < mCustomConfigs.size()) {
+        return mCustomConfigs[configNum];
+    } else {
+        return nullptr;
+    }
+}
+
 void VescInterface::updateFwRx(bool fwRx)
 {
     bool change = mFwVersionReceived != fwRx;
     mFwVersionReceived = fwRx;
     if (change) {
         emit fwRxChanged(mFwVersionReceived, mCommands->isLimitedMode());
+    }
+
+    if (!mFwVersionReceived) {
+        mCustomConfigsLoaded = false;
     }
 }
 

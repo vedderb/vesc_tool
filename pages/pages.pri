@@ -1,7 +1,9 @@
 FORMS += \
     $$PWD/pageappbalance.ui \
+    $$PWD/pagebms.ui \
     $$PWD/pagecananalyzer.ui \
     $$PWD/pageconnection.ui \
+    $$PWD/pagecustomconfig.ui \
     $$PWD/pagemotor.ui \
     $$PWD/pagedebugprint.ui \
     $$PWD/pagebldc.ui \
@@ -34,8 +36,10 @@ FORMS += \
 
 HEADERS += \
     $$PWD/pageappbalance.h \
+    $$PWD/pagebms.h \
     $$PWD/pagecananalyzer.h \
     $$PWD/pageconnection.h \
+    $$PWD/pagecustomconfig.h \
     $$PWD/pagemotor.h \
     $$PWD/pagedebugprint.h \
     $$PWD/pagebldc.h \
@@ -68,8 +72,10 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/pageappbalance.cpp \
+    $$PWD/pagebms.cpp \
     $$PWD/pagecananalyzer.cpp \
     $$PWD/pageconnection.cpp \
+    $$PWD/pagecustomconfig.cpp \
     $$PWD/pagemotor.cpp \
     $$PWD/pagedebugprint.cpp \
     $$PWD/pagebldc.cpp \

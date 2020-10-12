@@ -435,6 +435,21 @@ void PageFirmware::uploadFw(bool allOverCan)
 
         if (reply == QMessageBox::Yes) {
             QByteArray data = file.readAll();
+            if (!isBootloader && !mVesc->fwCheckHwCompatibility(data) ) {
+                QMessageBox msg(this);
+                msg.setText(tr("HW incompatibility detected"));
+                msg.setIcon(QMessageBox::Warning);
+                msg.setInformativeText(tr("This firmware file does not seem compatible with: ") +
+                                       mVesc->getHardwareNow() +
+                                       tr("\nContinuing now is probably a BIG, FOOLISH, and COSTLY mistake.\n") +
+                                       tr("Do you want to upload?"));
+                msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+                msg.setDefaultButton(QMessageBox::No);
+                if(msg.exec() == QMessageBox::No) {
+                    return;
+                }
+            }
+
             bool fwRes = mVesc->fwUpload(data, isBootloader, allOverCan);
 
             if (!isBootloader && fwRes) {

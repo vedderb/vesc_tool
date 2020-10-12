@@ -29,6 +29,7 @@
 #include <QRegularExpression>
 #include <QDateTime>
 #include <QDir>
+#include <QByteArrayMatcher>
 #include <cmath>
 #include "lzokay/lzokay.hpp"
 
@@ -516,6 +517,11 @@ QList<QPair<int, int> > VescInterface::getSupportedFirmwarePairs()
 QString VescInterface::getFirmwareNow()
 {
     return mFwTxt;
+}
+
+QString VescInterface::getHardwareNow()
+{
+    return mHwTxt;
 }
 
 QPair<int, int> VescInterface::getFirmwareNowPair()
@@ -1455,6 +1461,13 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     }
 
     return true;
+}
+
+//check HW compatibility by searching for current HW name in new FW
+bool VescInterface::fwCheckHwCompatibility(QByteArray newFirmware)
+{
+    QByteArrayMatcher pattern(mHwTxt.toUtf8());
+    return pattern.indexIn(newFirmware) >= 0;
 }
 
 void VescInterface::fwUploadCancel()

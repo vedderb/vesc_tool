@@ -74,6 +74,7 @@ public:
     Q_INVOKABLE QStringList getSupportedFirmwares();
     QList<QPair<int, int> > getSupportedFirmwarePairs();
     Q_INVOKABLE QString getFirmwareNow();
+    Q_INVOKABLE QString getHardwareNow();
     QPair<int, int> getFirmwareNowPair();
     Q_INVOKABLE void emitStatusMessage(const QString &msg, bool isGood);
     Q_INVOKABLE void emitMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText = false);
@@ -128,6 +129,7 @@ public:
     bool fwEraseNewApp(bool fwdCan, quint32 fwSize);
     bool fwEraseBootloader(bool fwdCan);
     bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true);
+    bool fwCheckHwCompatibility(QByteArray newFirmware);
     Q_INVOKABLE void fwUploadCancel();
     Q_INVOKABLE double getFwUploadProgress();
     Q_INVOKABLE QString getFwUploadStatus();

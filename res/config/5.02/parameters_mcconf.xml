@@ -1799,6 +1799,46 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </foc_sl_erpm>
+        <foc_hall_samples>
+            <longName>Hall Sample Count</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Number of samples to take for each hall read. Reads are averaged, so odd numbers will perform better.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_HALL_SAMPLES</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>15</maxInt>
+            <minInt>1</minInt>
+            <showDisplay>0</showDisplay>
+            <stepInt>2</stepInt>
+            <valInt>3</valInt>
+            <suffix></suffix>
+            <vTx>1</vTx>
+        </foc_hall_samples>
+        <foc_hall_interp_erpm>
+            <longName>Hall Interpolation ERPM</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;ERPM above which interpolation is used for hall sensors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_HALL_INTERP_ERPM</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>100000</maxInt>
+            <minInt>0</minInt>
+            <showDisplay>0</showDisplay>
+            <stepInt>50</stepInt>
+            <valInt>100</valInt>
+            <suffix></suffix>
+            <vTx>3</vTx>
+        </foc_hall_interp_erpm>
         <foc_sample_v0_v7>
             <longName>Sample in V0 and V7</longName>
             <type>5</type>
@@ -3295,6 +3335,8 @@ p, li { white-space: pre-wrap; }
         <ser>foc_hall_table__6</ser>
         <ser>foc_hall_table__7</ser>
         <ser>foc_sl_erpm</ser>
+        <ser>foc_hall_samples</ser>
+        <ser>foc_hall_interp_erpm</ser>
         <ser>foc_sample_v0_v7</ser>
         <ser>foc_sample_high_current</ser>
         <ser>foc_sat_comp</ser>
@@ -3534,6 +3576,8 @@ p, li { white-space: pre-wrap; }
                     <param>foc_hall_table__5</param>
                     <param>foc_hall_table__6</param>
                     <param>foc_hall_table__7</param>
+                    <param>foc_hall_samples</param>
+                    <param>foc_hall_interp_erpm</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

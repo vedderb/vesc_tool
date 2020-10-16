@@ -20,6 +20,7 @@ VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
 DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
+DEFINES += USE_SETUP_TOOL
 !vt_test_version: {
     DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
 }
@@ -160,6 +161,7 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
+    boardsetupwindow.cpp \
         mainwindow.cpp \
     packet.cpp \
     vbytearray.cpp \
@@ -176,6 +178,7 @@ SOURCES += main.cpp\
     tcpserversimple.cpp
 
 HEADERS  += mainwindow.h \
+    boardsetupwindow.h \
     packet.h \
     vbytearray.h \
     commands.h \
@@ -192,6 +195,7 @@ HEADERS  += mainwindow.h \
     tcpserversimple.h
 
 FORMS    += mainwindow.ui \
+    boardsetupwindow.ui \
     parametereditor.ui
 
 contains(DEFINES, HAS_BLUETOOTH) {

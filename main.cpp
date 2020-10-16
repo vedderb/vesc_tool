@@ -18,6 +18,7 @@
     */
 
 #include "mainwindow.h"
+#include "boardsetupwindow.h"
 #include "mobile/qmlui.h"
 
 #include <QApplication>
@@ -126,9 +127,12 @@ int main(int argc, char *argv[])
             q.setVisible(true);
         }
     });
-#else
-    MainWindow w;
+#else //if defined USE_SETUP_TOOL
+    BoardSetupWindow w;
     w.show();
+/*#else
+    MainWindow w;
+    w.show();*/
 #endif
 
     return a.exec();

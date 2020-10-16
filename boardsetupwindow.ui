@@ -274,6 +274,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="startButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="text">
          <string>Start Setup</string>
         </property>
@@ -318,80 +321,139 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="bootloaderLabel">
-        <property name="autoFillBackground">
-         <bool>false</bool>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetNoConstraint</enum>
         </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="text">
-         <string>Bootloader Upload</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
+        <item>
+         <widget class="QLabel" name="bootloaderLabel">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::WinPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text">
+           <string>Bootloader Upload</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="bootloaderCheckBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QLabel" name="firmwareLabel">
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="text">
-         <string>Firmware Upload</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QLabel" name="firmwareLabel">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::WinPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text">
+           <string>Firmware Upload</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="firmwareCheckBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QLabel" name="bleFirmwareLabel">
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="text">
-         <string>BLE Firmware Upload</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="motorConfigWrite">
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="text">
-         <string>Default Motor Config Write</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QLabel" name="bleFirmwareLabel">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::WinPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text">
+           <string>BLE Firmware Upload</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="bleCheckBox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QLabel" name="motorDetectionLabel">
@@ -413,7 +475,91 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="hallDetectionLabel">
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QLabel" name="motorDirectionLabel">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::WinPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text">
+           <string>Motor Direction</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="directionCheckBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <item>
+         <widget class="QLabel" name="motorTestLabel">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::WinPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text">
+           <string>Motor Test</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="motorTestCheckBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="remoteTestLabel_3">
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
@@ -424,7 +570,7 @@
          <enum>QFrame::Plain</enum>
         </property>
         <property name="text">
-         <string>Hall Detection</string>
+         <string>App Setup</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -432,61 +578,46 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="motorDirectionLabel">
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="text">
-         <string>Motor Direction</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="motorTestLabel">
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="text">
-         <string>Motor Test</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="remoteTestLabel">
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="text">
-         <string>Remote Test</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_14">
+        <item>
+         <widget class="QLabel" name="remoteTestLabel">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::WinPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text">
+           <string>Remote Test</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="remoteTestCheckBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>

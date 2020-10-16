@@ -37,12 +37,15 @@ private slots:
      void on_bleFirmwareButton_clicked();
      void on_serialRefreshButton_clicked();
      void on_startButton_clicked();
+     void on_firmwareCheckBox_stateChanged();
 
 private:
     Ui::BoardSetupWindow *ui;
 
     QSettings mSettings;
     QString mVersion;
+    QString testResultMsg;
+    bool testResult;
     VescInterface *mVesc;
     QTimer *mTimer;
     QLabel *mStatusLabel;

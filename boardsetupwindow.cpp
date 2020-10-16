@@ -209,31 +209,27 @@ void BoardSetupWindow::on_startButton_clicked()
     ui->startButton->setEnabled(false);
     bool res;
     res = trySerialConnect();
-    if(!res){ showMessageDialog(tr("Connect to USB"),
-                                tr("Could not connect USB. Make sure the unit is powered on, connected to the computer, and the correct Serial port is selected."),
-                                false, false);
+    if(!res){
         resetRoutine();
         return;
     }
     res = tryCANScan();
-    if(!res){ showMessageDialog(tr("CAN Bus Scan"),
-                                tr("CAN Bus Scan timed out. There may be a problem with the firmware on your units. Ty updating it with the standard vesc tool."),
-                                false, false);
+    if(!res){
         return;
     }
-    res = tryBootloaderUpload();
-    if(!res){ showMessageDialog(tr("Bootloader Upload"),
-                                tr("Bootloader upload Failed. There may be a problem with the firmware on your unit. Try updating it with the standard vesc tool."),
-                                false, false);
-        resetRoutine();
-        return;
+    if(ui->bootloaderCheckBox->isChecked()){
+        res = tryBootloaderUpload();
+        if(!res){
+            resetRoutine();
+            return;
+        }
     }
-    res = tryFirmwareUpload();
-    if(!res){ showMessageDialog(tr("Firmware Upload"),
-                                tr("Firmware upload Failed. There may be a problem with the firmware on your unit, or an unreliable connection. Ty updating it with the standard vesc tool."),
-                                false, false);
-        resetRoutine();
-        return;
+    if(ui->firmwareCheckBox->isChecked()){
+        res = tryFirmwareUpload();
+        if(!res){
+            resetRoutine();
+            return;
+        }
     }
     res = tryFOCCalibration();
     if(!res){ showMessageDialog(tr("FOC Calibration"),
@@ -264,9 +260,7 @@ void BoardSetupWindow::on_startButton_clicked()
         return;
     }
     res = tryApplyMasterAppSettings();
-    if(!res){ showMessageDialog(tr("Master App Settings"),
-                                tr("The Master App settings were unable to be applied. There may be a problem with the firmware or connections."),
-                                false, false);
+    if(!res){
         resetRoutine();
         return;
     }
@@ -284,13 +278,15 @@ void BoardSetupWindow::on_startButton_clicked()
         resetRoutine();
         return;
     }
-    showMessageDialog(tr("Setup Completed Succesfully"),
-                      tr("Your board should now be ready to ride."),
-                      false, false);
-
+    testResultMsg = "Setup completed succesfully. Your board should now be ready to ride.";
+    testResult = true;
+    resetRoutine();
 }
 
 void BoardSetupWindow::resetRoutine(){
+    showMessageDialog(tr("Test Results"),
+                      tr(testResultMsg.toUtf8()),
+                      testResult, false);
     ui->startButton->setEnabled(true);
 
 }
@@ -305,6 +301,8 @@ bool BoardSetupWindow::trySerialConnect(){
         ui->usbConnectLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
     }else{
         ui->usbConnectLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "Could not connect USB. Make sure the unit is powered on, connected to the computer, and the correct Serial port is selected.";
+        testResult = false;
     }
     return mVesc->isPortConnected();
 }
@@ -318,6 +316,8 @@ bool BoardSetupWindow::tryCANScan(){
     if(CAN_Timeout){
         res = false;
         ui->CANScanLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
+        testResultMsg = "Could not connect USB. Make sure the unit is powered on, connected to the computer, and the correct Serial port is selected.";
+        testResult = false;
     }else{
         res = true;
         int this_ID = mVesc->appConfig()->getParamInt("controller_id");
@@ -341,12 +341,16 @@ bool BoardSetupWindow::tryBootloaderUpload(){
         QMessageBox::critical(this,
                               tr("Upload Error"),
                               tr("Could not open file. Make sure that the path is valid."));
+        testResultMsg = "Something is wrong with the included bootloader file in this software.";
+        testResult = false;
         return false;
     }
     if (file.size() > 400000) {
         QMessageBox::critical(this,
                               tr("Upload Error"),
                               tr("The selected file is too large to be a firmware."));
+        testResultMsg = "The included bootloader file is too large.";
+        testResult = false;
         return false;
     }
     QByteArray data = file.readAll();
@@ -356,6 +360,8 @@ bool BoardSetupWindow::tryBootloaderUpload(){
         ui->bootloaderLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
     }else{
         ui->bootloaderLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "The bootloader upload timed out. Please try the routine again, you may need to update the firmware first seperatley from the VESC tool.";
+        testResult = false;
     }
     return fwRes;
 }
@@ -380,7 +386,7 @@ bool BoardSetupWindow::tryFirmwareUpload(){
             FW_Path = fi.absoluteFilePath() +  "/VESC_default.bin";
         }
     }
-    qDebug() <<FW_Path;
+    bool fwRes = false;
     is_Bootloader = false;
     QFile file;
     if(!FW_Path.isEmpty()){
@@ -389,30 +395,59 @@ bool BoardSetupWindow::tryFirmwareUpload(){
             QMessageBox::critical(this,
                                   tr("Upload Error"),
                                   tr("Could not open file. Make sure that the path is valid."));
+            testResultMsg = "Something is wrong with the included firmware file for your hardware in this software.";
+            testResult = false;
             return false;
         }
         if (file.size() > 400000) {
             QMessageBox::critical(this,
                                   tr("Upload Error"),
                                   tr("The selected file is too large to be a firmware."));
+            testResultMsg = "The included firmware file is too large.";
+            testResult = false;
             return false;
         }
         QByteArray data = file.readAll();
 
-        bool fwRes = mVesc->fwUpload(data, is_Bootloader, num_VESCs > 1);
-        if(fwRes){
-            ui->firmwareLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
-        }else{
+        fwRes = mVesc->fwUpload(data, is_Bootloader, num_VESCs > 1);
+        if(!fwRes){
             ui->firmwareLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            ui->bootloaderLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "The firmware upload timed out. Please try the routine again, you may need to update the firmware first seperatley from the VESC tool.";
+            return false;
         }
-        return fwRes;
     }else{
         // Didn't find any supported default firmwares
+        ui->bootloaderLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "The firmware file path is non-existent.";
         return false;
     }
+    for(int j = 12; j>-1; j--){
+        ui->firmwareLabel->setText("Waiting for Reboot: " + QString::number(j)  + " s");
+        Utility::sleepWithEventLoop(1000);
+    }
+    bool reconnected = trySerialConnect();
+    if(reconnected){
+        ui->firmwareLabel->setText("Firmware Uploaded Succesfully and Reconnected");
+        ui->firmwareLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
+    }else{
+        ui->firmwareLabel->setText("Unit did not reconnect after firmware upload.");
+        ui->firmwareLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResult = false;
+    }
+    return reconnected;
 }
 
+
 bool BoardSetupWindow::tryFOCCalibration(){
+    double max_loss = pow(mMcConfig_Target->getParamDouble("l_current_max"),2.0) * mMcConfig_Target->getParamDouble("foc_motor_r");
+    mVesc->mcConfig();
+    QString res = Utility::detectAllFoc(mVesc, true,
+                                        max_loss,
+                                        mMcConfig_Target->getParamDouble("l_in_current_min"),
+                                        mMcConfig_Target->getParamDouble("l_in_current_max"),
+                                        mMcConfig_Target->getParamDouble("foc_openloop_rpm"),
+                                        mMcConfig_Target->getParamDouble("foc_sl_erpm"));
     return true;
 }
 
@@ -429,6 +464,8 @@ bool BoardSetupWindow::tryApplySlaveAppSettings(){
 }
 
 bool BoardSetupWindow::tryApplyMasterAppSettings(){
+
+    //"The Master App settings were unable to be applied. There may be a problem with the firmware or connections."
     return true;
 }
 
@@ -507,6 +544,9 @@ void BoardSetupWindow::on_serialRefreshButton_clicked()
         ui->serialPortBox->setCurrentIndex(0);
     }
 
+}
+void BoardSetupWindow::on_firmwareCheckBox_stateChanged(){
+    ui->firmwareLabel->setEnabled(ui->firmwareCheckBox->isChecked());
 }
 
 
@@ -666,16 +706,16 @@ void BoardSetupWindow::fwUploadStatus(const QString &status, double progress, bo
     if(is_Bootloader){
         if (isOngoing) {
             ui->bootloaderLabel->setText(tr("%1 (%2 %)").
-                                 arg(status).
-                                 arg(progress * 100, 0, 'f', 1));
+                                         arg(status).
+                                         arg(progress * 100, 0, 'f', 1));
         } else {
             ui->bootloaderLabel->setText("Bootloader " + status);
         }
     }else{
         if (isOngoing) {
             ui->firmwareLabel->setText(tr("%1 (%2 %)").
-                                 arg(status).
-                                 arg(progress * 100, 0, 'f', 1));
+                                       arg(status).
+                                       arg(progress * 100, 0, 'f', 1));
         } else {
             ui->firmwareLabel->setText("Firmware " + status);
         }

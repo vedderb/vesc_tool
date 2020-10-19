@@ -24,11 +24,8 @@ BoardSetupWindow::BoardSetupWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-
     mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
-
-
 
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
@@ -52,6 +49,8 @@ BoardSetupWindow::BoardSetupWindow(QWidget *parent) :
             this, SLOT(pingCanRx(QVector<int>,bool)));
     connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
             this, SLOT(fwUploadStatus(QString,double,bool)));
+    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,unsigned int)),
+            this, SLOT(valuesReceived(MC_VALUES,unsigned int)));
 
     mTimer->start(20);
 
@@ -223,58 +222,60 @@ void BoardSetupWindow::on_startButton_clicked()
             resetRoutine();
             return;
         }
-    }
-    if(ui->firmwareCheckBox->isChecked()){
         res = tryFirmwareUpload();
         if(!res){
             resetRoutine();
             return;
         }
     }
-    res = tryFOCCalibration();
-    if(!res){ showMessageDialog(tr("FOC Calibration"),
-                                tr("FOC Routine failed. Check Motor Connections."),
-                                false, false);
-        resetRoutine();
-        return;
+
+    if(ui->bleCheckBox->isChecked()){
+        res = tryBleFirmwareUpload();
+        if(!res){
+            resetRoutine();
+            return;
+        }
+
     }
-    res = tryTestMotorParameters();
-    if(!res){ showMessageDialog(tr("Motor Parameters"),
-                                tr("Your motor parameters are outside of expected bounds. Ensure you have selected the correct configuration file for your board."),
-                                false, false);
-        resetRoutine();
-        return;
+
+    if(ui->motorDetectionCheckBox->isChecked()){
+        res = tryFOCCalibration();
+        if(!res){
+            resetRoutine();
+            return;
+        }
+        res = tryMotorDirection();
+        if(!res){
+            resetRoutine();
+            return;
+        }
+
+        res = tryTestMotorParameters();
+        if(!res){
+            resetRoutine();
+            return;
+        }
     }
-    res = tryMotorDirection();
-    if(!res){ showMessageDialog(tr("Motor Direction"),
-                                tr("Please select the motor directions within the time window"),
-                                false, false);
-        resetRoutine();
-        return;
-    }
-    res = tryApplySlaveAppSettings();
-    if(!res){ showMessageDialog(tr("Slave App Settings"),
-                                tr("Please ensure that all CAN Bus connections are solid. The app settings write to slave failed."),
-                                false, false);
-        resetRoutine();
-        return;
-    }
-    res = tryApplyMasterAppSettings();
-    if(!res){
-        resetRoutine();
-        return;
-    }
-    res = tryRemoteTest();
-    if(!res){ showMessageDialog(tr("Master App Settings"),
-                                tr("The Master App settings were unable to be applied. There may be a problem with the firmware or connections."),
-                                false, false);
-        resetRoutine();
-        return;
+
+    if(ui->appCheckBox->isChecked()){
+        res = tryApplySlaveAppSettings();
+        if(!res){
+            resetRoutine();
+            return;
+        }
+        res = tryApplyMasterAppSettings();
+        if(!res){
+            resetRoutine();
+            return;
+        }
+        res = tryRemoteTest();
+        if(!res){
+            resetRoutine();
+            return;
+        }
     }
     res = tryFinalDiagnostics();
-    if(!res){ showMessageDialog(tr("Failed Final Diagnostics"),
-                                tr("Applied load caused issues with your setup, further investigation needed."),
-                                false, false);
+    if(!res){
         resetRoutine();
         return;
     }
@@ -284,15 +285,33 @@ void BoardSetupWindow::on_startButton_clicked()
 }
 
 void BoardSetupWindow::resetRoutine(){
-    showMessageDialog(tr("Test Results"),
-                      tr(testResultMsg.toUtf8()),
-                      testResult, false);
+    //showMessageDialog(tr("Test Results"),
+    //                  tr(testResultMsg.toUtf8()),
+    //                 testResult, false);
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::information(this,
+                                     tr("Test Results:"),
+                                     tr(testResultMsg.toUtf8()),
+                                     QMessageBox::Ok);
+    mVesc->disconnectPort();
     ui->startButton->setEnabled(true);
+    ui->usbConnectLabel->setStyleSheet("");
+    ui->usbConnectLabel->setText("");
+    ui->CANScanLabel->setStyleSheet("");
+    ui->bootloaderLabel->setStyleSheet("");
+    ui->firmwareLabel->setStyleSheet("");
+    ui->bleFirmwareLabel->setStyleSheet("");
+    ui->motorDetectionLabel->setStyleSheet("");
+    ui->motorDirectionLabel->setStyleSheet("");
+    ui->motorTestLabel->setStyleSheet("");
+    ui->appSetupLabel->setStyleSheet("");
+    ui->remoteTestLabel->setStyleSheet("");
 
 }
 
 bool BoardSetupWindow::trySerialConnect(){
     bool res;
+    mVesc->commands()->setSendCan(false);
     res = mVesc->connectSerial(ui->serialPortBox->currentData().toString(), 115200);
     if(res){
         Utility::waitSignal(mVesc, SIGNAL(fwRxChanged(bool, bool)), 5000);
@@ -334,6 +353,15 @@ bool BoardSetupWindow::tryCANScan(){
 }
 
 bool BoardSetupWindow::tryBootloaderUpload(){
+    QString HW_Name = mVesc->getFirmwareNow().split("Hw: ").last();
+    QString FW_Path;
+    HW_Name = HW_Name.split("\n").first();
+    int num_VESCs;
+    if(HW_Name.contains("STORMCORE")|| HW_Name.contains("UNITY")){
+        num_VESCs = (CAN_IDs.size() + 1)/2;
+    }else{
+        num_VESCs = CAN_IDs.size() + 1;
+    }
     QFile file;
     file.setFileName("://res/bootloaders/generic.bin");
     is_Bootloader = true;
@@ -355,7 +383,7 @@ bool BoardSetupWindow::tryBootloaderUpload(){
     }
     QByteArray data = file.readAll();
 
-    bool fwRes = mVesc->fwUpload(data, is_Bootloader, true);
+    bool fwRes = mVesc->fwUpload(data, is_Bootloader, num_VESCs > 1);
     if(fwRes){
         ui->bootloaderLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
     }else{
@@ -412,7 +440,6 @@ bool BoardSetupWindow::tryFirmwareUpload(){
         fwRes = mVesc->fwUpload(data, is_Bootloader, num_VESCs > 1);
         if(!fwRes){
             ui->firmwareLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-            ui->bootloaderLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
             testResultMsg = "The firmware upload timed out. Please try the routine again, you may need to update the firmware first seperatley from the VESC tool.";
             return false;
         }
@@ -438,8 +465,29 @@ bool BoardSetupWindow::tryFirmwareUpload(){
     return reconnected;
 }
 
+bool BoardSetupWindow::tryBleFirmwareUpload(){
+    return true;
+}
+
 
 bool BoardSetupWindow::tryFOCCalibration(){
+    bool xml_res = mVesc->mcConfig()->loadXml(mcXmlPath, "MCConfiguration");
+    if(!xml_res){
+        ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        return false;
+    }
+    ui->motorDetectionLabel->setText("Writing Default Configs");
+    mVesc->commands()->setSendCan(false);
+    mVesc->commands()->setMcconf(false);
+    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+
+    for(int i = 0; i < CAN_IDs.size(); i++){
+        mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+        mVesc->commands()->setMcconf();
+        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    }
+
+    ui->motorDetectionLabel->setText("Running FOC Detection");
     double max_loss = pow(mMcConfig_Target->getParamDouble("l_current_max"),2.0) * mMcConfig_Target->getParamDouble("foc_motor_r");
     mVesc->mcConfig();
     QString res = Utility::detectAllFoc(mVesc, true,
@@ -448,14 +496,160 @@ bool BoardSetupWindow::tryFOCCalibration(){
                                         mMcConfig_Target->getParamDouble("l_in_current_max"),
                                         mMcConfig_Target->getParamDouble("foc_openloop_rpm"),
                                         mMcConfig_Target->getParamDouble("foc_sl_erpm"));
-    return true;
-}
+    if(!res.startsWith("Success!")){
+        ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        return false;
+    }
+    ui->motorDetectionLabel->setText("Checking Detected Values for Accuracy");
+    mVesc->commands()->getMcconf();
+    Utility::waitSignal(mVesc->mcConfig(), SIGNAL(updated()), 5000);
+    for(int i = -1; i < CAN_IDs.size(); i++){
+        QString canid;
+        if(i == -1){
+            canid = "Master";
+            mVesc->commands()->setSendCan(false);
+        }  else{
+            canid = QString::number(CAN_IDs.at(i));
+            mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+        }
+        mVesc->commands()->getMcconf();
+        Utility::waitSignal(mVesc->mcConfig(), SIGNAL(updated()), 5000);
+        if(mcConfigOutsideParamBounds("foc_motor_r",0.1)){
+            ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Motor Resistance of CAN ID " + canid + " is outside the tolerance for the target value." +
+                    " Check your motors and winding connections. The measured resistance was " +
+                    QString::number(mVesc->mcConfig()->getParamDouble("foc_motor_r")*1.0e3)+" mOhm";
+            return false;
+        }
 
-bool BoardSetupWindow::tryTestMotorParameters(){
+        if(mcConfigOutsideParamBounds("foc_motor_l",0.1)){
+            ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Motor Inductance of CAN ID " + canid + " is outside the tolerance for the target value." +
+                    " Check your motors and winding connections. The measured inductance was " +
+                    QString::number(mVesc->mcConfig()->getParamDouble("foc_motor_l")*1.0e6)+" uH";
+            return false;
+        }
+
+        if(mcConfigOutsideParamBounds("foc_motor_flux_linkage",0.1)){
+            ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Motor Flux Linkage of CAN ID " + canid + " is outside the tolerance for the target value." +
+                    " Check your motors and winding connections and ensure the motors are able to spin freely. The measured flux linkage was " +
+                    QString::number(mVesc->mcConfig()->getParamDouble("foc_motor_flux_linkage")*1.0e3)+" mWb";
+            return false;
+        }
+        if(mVesc->mcConfig()->getParamEnum("foc_sensor_mode") != mMcConfig_Target->getParamEnum("foc_sensor_mode")){
+            ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Motor Sensors of CAN ID " + canid + " does not match the target setting." +
+                    " Ensure that the sensors are plugged in and wired correctly.";
+            return false;
+        }
+    }
+    mVesc->commands()->setSendCan(false);
+    ui->motorDetectionLabel->setText("Detection Completed Succesfully");
+    ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
     return true;
 }
 
 bool BoardSetupWindow::tryMotorDirection(){
+    int tach_start[16];
+    int tach_end[16];
+    QString directionStatus;
+    directionStatus = tr("Spin each motor in the forward direction to continue.\n");
+    for(int i = -1; i < CAN_IDs.size(); i++){
+        if(i<0){
+            mVesc->commands()->setSendCan(false);
+        }else{
+            mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+        }
+        mVesc->commands()->getValues();
+        if(!Utility::waitSignal(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 2000)){
+            ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Failed to read tachometer value during motor direction routine.";
+            return false;
+        }
+        tach_start[i+1] = values_now.tachometer;
+        directionStatus += "  0% ";
+    }
+    bool allHaveTurned = false;
+
+    QMessageBox* msgBox = new QMessageBox( this );
+    msgBox->setWindowTitle( tr("Spin Motors") );
+    msgBox->setText(directionStatus);
+    msgBox->addButton(QMessageBox::Cancel);
+    msgBox->setModal( true );
+    msgBox->open(this, SLOT(msgBoxClosed(QAbstractButton*)));
+    while(!allHaveTurned){
+        directionStatus = tr("Spin each motor in the forward direction to continue.\n");
+        bool turned = true;
+        for(int i = -1; i < CAN_IDs.size(); i++){
+
+            if(i<0){
+                mVesc->commands()->setSendCan(false);
+            }else{
+                mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+            }
+            mVesc->commands()->getValues();
+            if(!Utility::waitSignal(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 2000)){
+                ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+                testResultMsg = "Failed to read tachometer value during motor direction routine.";
+                return false;
+            }
+            tach_end[i+1] = values_now.tachometer;
+            int tachDiff = tach_start[i+1] - tach_end[i+1];
+            turned &= (abs(tachDiff) >= 50);
+            int percent = abs(2*tachDiff);
+            percent = percent>100?100:percent;
+            QString number = "motor " + QString::number(i+2) + ": " +
+                    QStringLiteral("%1").arg(percent, 3, 10, QLatin1Char(' '))+ "% ";
+            // number = QString::number(tach_end[i+1]) +" " + QString::number(tach_start[i+1]) + " ";
+            directionStatus += number;
+        }
+        msgBox->setText(directionStatus);
+        if(!msgBox->isVisible()){
+            ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Direction routine canceled by the user.";
+            return false;
+        }
+        if(!mVesc->isPortConnected()){
+            ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Disconnected during direction calibration.";
+            msgBox->close();
+            msgBox->deleteLater();
+            return false;
+        }
+        allHaveTurned = turned;
+    }
+    msgBox->close();
+    msgBox->deleteLater();
+    for(int i = -1; i < CAN_IDs.size(); i++){
+        if(i<0){
+            mVesc->commands()->setSendCan(false);
+        }else{
+            mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+        }
+        mVesc->commands()->getMcconf();
+        if(!Utility::waitSignal(mVesc->mcConfig(), SIGNAL(updated()), 5000)){
+            ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Failed to read config during motor direction routine.";
+            return false;
+        }
+
+        bool invert_motor = ((tach_start[i+1] - tach_end[i+1]) < 0);
+        mVesc->mcConfig()->updateParamBool("m_invert_direction", invert_motor);
+        mVesc->commands()->setMcconf(false);
+        if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000)){
+            ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Failed to write config during during motor direction routine.";
+            return false;
+        }
+    }
+
+    ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
+    ui->motorDirectionLabel->setText("Motor Directions Set");
+    return true;
+}
+
+bool BoardSetupWindow::tryTestMotorParameters(){
     return true;
 }
 
@@ -477,10 +671,11 @@ bool BoardSetupWindow::tryFinalDiagnostics(){
     return true;
 }
 
-
-
-
-
+bool BoardSetupWindow::mcConfigOutsideParamBounds(QString paramName, double tolerance) {
+    double detectedParam = mVesc->mcConfig()->getParamDouble(paramName);
+    double targetParam = mMcConfig_Target->getParamDouble(paramName);
+    return abs(detectedParam - targetParam) > tolerance*targetParam;
+}
 
 void BoardSetupWindow::mcConfigCheckResult(QStringList paramsNotSet)
 {
@@ -545,9 +740,27 @@ void BoardSetupWindow::on_serialRefreshButton_clicked()
     }
 
 }
-void BoardSetupWindow::on_firmwareCheckBox_stateChanged(){
-    ui->firmwareLabel->setEnabled(ui->firmwareCheckBox->isChecked());
+
+void BoardSetupWindow::on_bootloaderCheckBox_stateChanged(){
+    ui->bootloaderLabel->setEnabled(ui->bootloaderCheckBox->isChecked());
+    ui->firmwareLabel->setEnabled(ui->bootloaderCheckBox->isChecked());
 }
+
+void BoardSetupWindow::on_bleCheckBox_stateChanged(){
+    ui->bleFirmwareLabel->setEnabled(ui->bleCheckBox->isChecked());
+}
+
+void BoardSetupWindow::on_motorDetectionCheckBox_stateChanged(){
+    ui->motorDetectionLabel->setEnabled(ui->motorDetectionCheckBox->isChecked());
+    ui->motorDirectionLabel->setEnabled(ui->motorDetectionCheckBox->isChecked());
+    ui->motorTestLabel->setEnabled(ui->motorDetectionCheckBox->isChecked());
+}
+
+void BoardSetupWindow::on_appCheckBox_stateChanged(){
+    ui->appSetupLabel->setEnabled(ui->appCheckBox->isChecked());
+    ui->remoteTestLabel->setEnabled(ui->appCheckBox->isChecked());
+}
+
 
 
 void BoardSetupWindow::showStatusInfo(QString info, bool isGood)
@@ -584,6 +797,7 @@ void BoardSetupWindow::loadAppConfXML(QString path){
     bool res = mAppConfig_Target->loadXml(path, "APPConfiguration");
 
     if (res) {
+        appXmlPath = path;
         ui->appConfigEdit->setText(path);
         showStatusInfo("Loaded app configuration", true);
         QString str;
@@ -638,12 +852,8 @@ void BoardSetupWindow::loadAppConfXML(QString path){
         foreach(QObject *p, ui->appTab->children().at(0)->children()){
             p->setProperty("enabled",false);
         }
-        //ui->appTab->children().at(0)->children();
-        //  setEnabled(true);
-        //ui->appTab->verticalScrollBar()->setEnabled(true);
-
-
-
+        ui->appCheckBox->setCheckable(true);
+        ui->appCheckBox->setCheckState(Qt::Checked);
 
     } else {
         showMessageDialog(tr("Load app configuration"),
@@ -654,6 +864,7 @@ void BoardSetupWindow::loadAppConfXML(QString path){
 }
 void BoardSetupWindow::loadMotorConfXML(QString path){
 
+
     if (path.isNull()) {
         return;
     }
@@ -663,8 +874,7 @@ void BoardSetupWindow::loadMotorConfXML(QString path){
     bool res = mMcConfig_Target->loadXml(path, "MCConfiguration");
 
     if (res) {
-
-
+        mcXmlPath = path;
         showStatusInfo("Loaded motor configuration", true);
         QString str;
         ui->motorTab->clearParams();
@@ -683,7 +893,8 @@ void BoardSetupWindow::loadMotorConfXML(QString path){
         foreach(QObject *p, ui->motorTab->children().at(0)->children()){
             p->setProperty("enabled",false);
         }
-
+        ui->motorDetectionCheckBox->setCheckable(true);
+        ui->motorDetectionCheckBox->setCheckState(Qt::Checked);
     } else {
         showMessageDialog(tr("Load motor configuration"),
                           tr("Could not load motor configuration:<BR>"
@@ -720,5 +931,11 @@ void BoardSetupWindow::fwUploadStatus(const QString &status, double progress, bo
             ui->firmwareLabel->setText("Firmware " + status);
         }
     }
+}
+
+void BoardSetupWindow::valuesReceived(MC_VALUES values, unsigned int mask)
+{
+    (void)mask;
+    values_now = values;
 }
 

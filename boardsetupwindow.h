@@ -37,13 +37,19 @@ private slots:
      void on_bleFirmwareButton_clicked();
      void on_serialRefreshButton_clicked();
      void on_startButton_clicked();
-     void on_firmwareCheckBox_stateChanged();
+     void on_bootloaderCheckBox_stateChanged();
+     void on_motorDetectionCheckBox_stateChanged();
+     void on_appCheckBox_stateChanged();
+     void on_bleCheckBox_stateChanged();
+     void valuesReceived(MC_VALUES values, unsigned int mask);
 
 private:
     Ui::BoardSetupWindow *ui;
 
     QSettings mSettings;
     QString mVersion;
+    QString mcXmlPath;
+    QString appXmlPath;
     QString testResultMsg;
     bool testResult;
     VescInterface *mVesc;
@@ -52,6 +58,7 @@ private:
     QVector<int> CAN_IDs;
     bool CAN_Timeout;
     bool is_Bootloader;
+    MC_VALUES values_now;
 
     ConfigParams *mMcConfig_Target;
     ConfigParams *mAppConfig_Target;
@@ -72,6 +79,7 @@ private:
     bool trySerialConnect();
     bool tryBootloaderUpload();
     bool tryFirmwareUpload();
+    bool tryBleFirmwareUpload();
     bool tryCANScan();
     bool tryFOCCalibration();
     bool tryTestMotorParameters();
@@ -80,8 +88,8 @@ private:
     bool tryApplyMasterAppSettings();
     bool tryRemoteTest();
     bool tryFinalDiagnostics();
+    bool mcConfigOutsideParamBounds(QString paramName, double tolerance);
 
 
 };
-
 #endif // BOARDSETUPWINDOW_H

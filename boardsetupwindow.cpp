@@ -205,6 +205,18 @@ void BoardSetupWindow::timerSlot()
 
 void BoardSetupWindow::on_startButton_clicked()
 {
+    if(ui->motorDetectionCheckBox->isChecked()){
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::information(this,
+                                         tr("Board Setup Started"),
+                                         tr("You have begun the board setup process with motor calibration enabled.") +
+                                         tr(" Please ensure the motors and wheels are able to free-spin without") +
+                                         tr(" interference before pressing OK."),
+                                         QMessageBox::Ok|QMessageBox::Cancel);
+        if(reply!=QMessageBox::Ok){
+            return;
+        }
+    }
     ui->startButton->setEnabled(false);
     bool res;
     res = trySerialConnect();
@@ -296,7 +308,7 @@ void BoardSetupWindow::resetRoutine(){
     mVesc->disconnectPort();
     ui->startButton->setEnabled(true);
     ui->usbConnectLabel->setStyleSheet("");
-    ui->usbConnectLabel->setText("");
+
     ui->CANScanLabel->setStyleSheet("");
     ui->bootloaderLabel->setStyleSheet("");
     ui->firmwareLabel->setStyleSheet("");
@@ -306,6 +318,17 @@ void BoardSetupWindow::resetRoutine(){
     ui->motorTestLabel->setStyleSheet("");
     ui->appSetupLabel->setStyleSheet("");
     ui->remoteTestLabel->setStyleSheet("");
+
+    ui->usbConnectLabel->setText("Connect USB Port");
+    ui->CANScanLabel->setText("CAN Bus Scan");
+    ui->bootloaderLabel->setText("Bootloader Upload");
+    ui->firmwareLabel->setText("Firmware Upload");
+    ui->bleFirmwareLabel->setText("BLE Firmware Upload");
+    ui->motorDetectionLabel->setText("Motor FOC Detection");
+    ui->motorDirectionLabel->setText("Motor Direction Calibration");
+    ui->motorTestLabel->setText("Motor Test");
+    ui->appSetupLabel->setText("App Setup");
+    ui->remoteTestLabel->setText("App Test");
 
 }
 
@@ -561,6 +584,7 @@ bool BoardSetupWindow::tryMotorDirection(){
         }else{
             mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
         }
+        Utility::sleepWithEventLoop(100);
         mVesc->commands()->getValues();
         if(!Utility::waitSignal(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 2000)){
             ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
@@ -588,6 +612,7 @@ bool BoardSetupWindow::tryMotorDirection(){
             }else{
                 mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
             }
+            Utility::sleepWithEventLoop(10);
             mVesc->commands()->getValues();
             if(!Utility::waitSignal(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 2000)){
                 ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
@@ -621,12 +646,17 @@ bool BoardSetupWindow::tryMotorDirection(){
     }
     msgBox->close();
     msgBox->deleteLater();
+    double motor_current_min = mMcConfig_Target->getParamDouble("l_current_min");
+    double motor_current_max = mMcConfig_Target->getParamDouble("l_current_max");
+    double motor_current_in_min = mMcConfig_Target->getParamDouble("l_in_current_min");
+    double motor_current_in_max = mMcConfig_Target->getParamDouble("l_in_current_max");
     for(int i = -1; i < CAN_IDs.size(); i++){
         if(i<0){
             mVesc->commands()->setSendCan(false);
         }else{
             mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
         }
+        Utility::sleepWithEventLoop(100);
         mVesc->commands()->getMcconf();
         if(!Utility::waitSignal(mVesc->mcConfig(), SIGNAL(updated()), 5000)){
             ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
@@ -634,9 +664,14 @@ bool BoardSetupWindow::tryMotorDirection(){
             return false;
         }
 
-        bool invert_motor = ((tach_start[i+1] - tach_end[i+1]) < 0);
+        bool invert_motor = ((tach_start[i+1] - tach_end[i+1]) > 0);
         mVesc->mcConfig()->updateParamBool("m_invert_direction", invert_motor);
+        mVesc->mcConfig()->updateParamDouble("l_current_min", motor_current_min);
+        mVesc->mcConfig()->updateParamDouble("l_current_max", motor_current_max);
+        mVesc->mcConfig()->updateParamDouble("l_in_current_min", motor_current_in_min);
+        mVesc->mcConfig()->updateParamDouble("l_in_current_max", motor_current_in_max);
         mVesc->commands()->setMcconf(false);
+
         if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000)){
             ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
             testResultMsg = "Failed to write config during during motor direction routine.";
@@ -650,6 +685,7 @@ bool BoardSetupWindow::tryMotorDirection(){
 }
 
 bool BoardSetupWindow::tryTestMotorParameters(){
+
     return true;
 }
 
@@ -797,15 +833,7 @@ void BoardSetupWindow::loadAppConfXML(QString path){
     bool res = mAppConfig_Target->loadXml(path, "APPConfiguration");
 
     if (res) {
-        appXmlPath = path;
-        ui->appConfigEdit->setText(path);
-        showStatusInfo("Loaded app configuration", true);
-        QString str;
         ui->appTab->clearParams();
-        ui->appTab->addParamRow(mAppConfig_Target, "app_to_use");
-        //ui->appTab->setEnabled(false);
-
-
 
         switch(mAppConfig_Target->getParamEnum("app_to_use")){
         case 4: //ppm and uart
@@ -845,10 +873,23 @@ void BoardSetupWindow::loadAppConfXML(QString path){
             }
             break;
         default:
-            str.sprintf("App Config Values:\n"
-                        "Unsupported app selected");
-            break;
+                QMessageBox::StandardButton reply;
+                reply = QMessageBox::warning(this,
+                                                 tr("App Type Not Supported"),
+                                                 tr("This tool currently only supports a subset of app types.") +
+                                                 tr(" The app config loaded is of a different type and is not compatible."),
+                                                 QMessageBox::Ok);
+                ui->appCheckBox->setCheckable(false);
+                ui->appCheckBox->setCheckState(Qt::Unchecked);
+                return;
         }
+
+        appXmlPath = path;
+        ui->appConfigEdit->setText(path);
+        showStatusInfo("Loaded app configuration", true);
+        QString str;
+
+        ui->appTab->addParamRow(mAppConfig_Target, "app_to_use");
         foreach(QObject *p, ui->appTab->children().at(0)->children()){
             p->setProperty("enabled",false);
         }
@@ -874,10 +915,21 @@ void BoardSetupWindow::loadMotorConfXML(QString path){
     bool res = mMcConfig_Target->loadXml(path, "MCConfiguration");
 
     if (res) {
+        ui->motorTab->clearParams();
+        if(mMcConfig_Target->getParamEnum("motor_type") != 2){
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::warning(this,
+                                             tr("Motor Type Not Supported"),
+                                             tr("This tool currently only supports FOC motor calibration.") +
+                                             tr(" The config loaded is of a different motor type and is not compatible."),
+                                             QMessageBox::Ok);
+            ui->motorDetectionCheckBox->setCheckable(false);
+            ui->motorDetectionCheckBox->setCheckState(Qt::Unchecked);
+            return;
+        }
         mcXmlPath = path;
         showStatusInfo("Loaded motor configuration", true);
         QString str;
-        ui->motorTab->clearParams();
         ui->motorTab->addParamRow(mMcConfig_Target, "foc_motor_r");
         ui->motorTab->addParamRow(mMcConfig_Target, "foc_motor_l");
         ui->motorTab->addParamRow(mMcConfig_Target, "foc_motor_flux_linkage");

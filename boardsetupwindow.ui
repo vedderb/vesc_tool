@@ -294,7 +294,7 @@
          <enum>QFrame::Plain</enum>
         </property>
         <property name="text">
-         <string>Connect Serial Port</string>
+         <string>Connect USB Port</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

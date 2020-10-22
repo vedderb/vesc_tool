@@ -222,7 +222,7 @@ Item {
             }
 
             Layout.fillWidth: true
-            Layout.preferredHeight: valMetrics.height * 7 + 20
+            Layout.preferredHeight: valMetrics.height * 10 + 20
             Layout.alignment: Qt.AlignBottom
 
             Text {
@@ -324,7 +324,10 @@ Item {
                     "Ah Cnt     : " + parseFloat(val.ah_cnt).toFixed(3) + " Ah\n" +
                     "Wh Cnt     : " + parseFloat(val.wh_cnt).toFixed(2) + " Wh\n" +
                     "Power      : " + parseFloat(val.v_tot * val.i_in_ic).toFixed(2) + " W\n" +
-                    "Humidity   : " + parseFloat(val.humidity).toFixed(1) + " %"
+                    "Humidity   : " + parseFloat(val.humidity).toFixed(1) + " %\n" +
+                    "Temp Max   : " + parseFloat(val.temp_cells_highest).toFixed(1) + " %\n" +
+                    "SoC        : " + parseFloat(val.soc).toFixed(1) + " %\n" +
+                    "SoH        : " + parseFloat(val.soh).toFixed(1) + " %"
 
             cellCanvas.requestPaint()
             tempCanvas.requestPaint()

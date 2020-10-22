@@ -17,6 +17,7 @@
 # make qtserialbus
 # make qtlocation
 # make qtgamepad
+# make qtgraphicaleffects
 
 set -e
 

@@ -1,3 +1,26 @@
+=== FW 5.02 <dev> ===
+* IMU calibration improvement.
+* Added COMM_GET_MCCONF_TEMP command.
+* Added bidirectional current command to VESC remote.
+* Fixed motor temperature reading on hw with ADC mux.
+* Added speed PID input ramping option.
+* Added LSM6DS3 IMU support.
+* Added MTPA support. See See: https://github.com/vedderb/bldc/pull/179
+* Added HW_HD75 support.
+* NRF52 UICR write fix.
+* App PPM rework. See https://github.com/vedderb/bldc/pull/192
+* Added bm_reset terminal command.
+* Added bm support for STM32F30x and STM32L47x.
+* App Balance updates. See https://github.com/vedderb/bldc/pull/193
+* Motor current now based on magnitude of both axes.
+* Initial VESC BMS support.
+* Hall sensor interpolation improvement.
+* Made hall sensor filter configurable.
+* Added locking time and ramp up time parameters to sensorless startup.
+* Removed D axis current injection.
+* Initial VESC IO-board support
+* Added hall sensor interpolation ERPM config option.
+
 === FW 5.01 ===
 * Fixed PPM bug in previous release.
 
@@ -477,4 +500,3 @@
 * Hardware specific default configuration support.
 * Stop functionality for apps so that reboots are not required anymore when changing app.
 * EEPROM emulation bug fix: https://github.com/vedderb/bldc/issues/27
-

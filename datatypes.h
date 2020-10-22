@@ -513,6 +513,8 @@ struct BMS_VALUES {
     Q_PROPERTY(double humidity MEMBER humidity)
     Q_PROPERTY(double temp_hum_sensor MEMBER temp_hum_sensor)
     Q_PROPERTY(double temp_cells_highest MEMBER temp_cells_highest)
+    Q_PROPERTY(double soc MEMBER soc)
+    Q_PROPERTY(double soh MEMBER soh)
 
 public:
     BMS_VALUES() {
@@ -525,6 +527,8 @@ public:
         humidity = 0.0;
         temp_hum_sensor = 0.0;
         temp_cells_highest = 0.0;
+        soc = 0.0;
+        soh = 0.0;
     }
 
     double v_tot;
@@ -540,6 +544,8 @@ public:
     double humidity;
     double temp_hum_sensor;
     double temp_cells_highest;
+    double soc;
+    double soh;
 
 };
 
@@ -649,7 +655,6 @@ typedef enum {
     COMM_SET_CAN_MODE,
     COMM_GET_IMU_CALIBRATION,
     COMM_GET_MCCONF_TEMP,
-    COMM_SET_ODOMETER,
 
     // Custom configuration for hardware
     COMM_GET_CUSTOM_CONFIG_XML,
@@ -673,7 +678,9 @@ typedef enum {
     COMM_JUMP_TO_BOOTLOADER_ALL_CAN_HW,
     COMM_ERASE_NEW_APP_ALL_CAN_HW,
     COMM_WRITE_NEW_APP_DATA_ALL_CAN_HW,
-    COMM_ERASE_BOOTLOADER_ALL_CAN_HW
+    COMM_ERASE_BOOTLOADER_ALL_CAN_HW,
+
+    COMM_SET_ODOMETER,
 } COMM_PACKET_ID;
 
 // CAN commands

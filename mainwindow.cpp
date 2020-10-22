@@ -504,6 +504,7 @@ void MainWindow::timerSlot()
     if (disconected_cnt >= 20 && ui->canList->count() > 0) {
         ui->canList->clear();
         mVesc->commands()->setSendCan(false);
+        ui->scanCanButton->setEnabled(true);
         ui->pageList->item(mPageNameIdList.value("app_custom_config_0"))->setHidden(true);
         ui->pageList->item(mPageNameIdList.value("app_custom_config_1"))->setHidden(true);
         ui->pageList->item(mPageNameIdList.value("app_custom_config_2"))->setHidden(true);

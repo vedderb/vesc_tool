@@ -15,6 +15,7 @@
 # make qtquickcontrols2
 # make qtserialbus
 # make qtlocation
+# make qtgamepad
 
 set -e
 

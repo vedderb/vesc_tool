@@ -37,6 +37,8 @@ void BattTempPlot::setValues(BMS_VALUES &val)
 void BattTempPlot::unload()
 {
     mBattImg = QPixmap();
+    mBatt = BATT_NULL;
+    update();
 }
 
 void BattTempPlot::load12s7p()

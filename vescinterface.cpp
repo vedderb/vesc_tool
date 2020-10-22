@@ -3262,6 +3262,11 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
     // Read custom configs
     if (params.customConfigNum > 0) {
+        while (!mCustomConfigs.isEmpty()) {
+            mCustomConfigs.last()->deleteLater();
+            mCustomConfigs.removeLast();
+        }
+
         bool readConfigsOk = true;
         for (int i = 0;i < params.customConfigNum;i++) {
             QByteArray configData;
@@ -3298,15 +3303,14 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                 }
 
                 if (configData.size() == lenConfLast) {
-                    if (mCustomConfigs.size() <= i) {
-                        mCustomConfigs.append(new ConfigParams(this));
-                        connect(mCustomConfigs.last(), &ConfigParams::updateRequested, [this]() {
-                            mCommands->customConfigGet(mCustomConfigs.size() - 1, false);
-                        });
-                        connect(mCustomConfigs.last(), &ConfigParams::updateRequestDefault, [this]() {
-                            mCommands->customConfigGet(mCustomConfigs.size() - 1, true);
-                        });
-                    }
+                    mCustomConfigs.append(new ConfigParams(this));
+                    connect(mCustomConfigs.last(), &ConfigParams::updateRequested, [this]() {
+                        mCommands->customConfigGet(mCustomConfigs.size() - 1, false);
+                    });
+                    connect(mCustomConfigs.last(), &ConfigParams::updateRequestDefault, [this]() {
+                        mCommands->customConfigGet(mCustomConfigs.size() - 1, true);
+                    });
+
                     if (!mCustomConfigs.last()->loadCompressedParamsXml(configData)) {
                         readConfigsOk = false;
                         disconnect(conn);
@@ -3316,7 +3320,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                     emitStatusMessage(QString("Got custom config %1").arg(i), true);
                 } else {
                     emitMessageDialog("Get Custom Config",
-                                      "Could not read custom config form hardware",
+                                      "Could not read custom config from hardware",
                                       false, false);
                     readConfigsOk = false;
                     disconnect(conn);

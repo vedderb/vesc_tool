@@ -109,6 +109,9 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
     ui->valTable->item(4, 0)->setText(QString("%1 Ah").arg(val.ah_cnt, 0, 'f', 3));
     ui->valTable->item(5, 0)->setText(QString("%1 Wh").arg(val.wh_cnt, 0, 'f', 3));
     ui->valTable->item(6, 0)->setText(QString("%1 W").arg(val.i_in_ic * val.v_tot, 0, 'f', 3));
+    ui->valTable->item(7, 0)->setText(QString("%1 %").arg(val.soc * 100.0, 0, 'f', 0));
+    ui->valTable->item(8, 0)->setText(QString("%1 %").arg(val.soh * 100.0, 0, 'f', 0));
+    ui->valTable->item(9, 0)->setText(QString("%1 °C").arg(val.temp_cells_highest, 0, 'f', 2));
 }
 
 void PageBms::reloadCellBars(int cells)

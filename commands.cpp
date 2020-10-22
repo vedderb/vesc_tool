@@ -666,6 +666,14 @@ void Commands::processPacket(QByteArray data)
 
         val.temp_cells_highest = vb.vbPopFrontDouble16(1e2);
 
+        if (vb.size() >= 2) {
+            val.soc = vb.vbPopFrontDouble16(1e3);
+        }
+
+        if (vb.size() >= 2) {
+            val.soh = vb.vbPopFrontDouble16(1e3);
+        }
+
         emit bmsValuesRx(val);
     } break;
 

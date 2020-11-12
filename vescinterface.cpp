@@ -1224,7 +1224,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             return false;
         }
 
-        if (fwParamsLocal.hw == HW_TYPE_VESC) {
+        if (fwParamsLocal.hwType == HW_TYPE_VESC) {
             mFwUploadStatus = "Scanning CAN bus...";
             emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
             auto devs = scanCan();

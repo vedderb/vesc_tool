@@ -115,6 +115,8 @@ private slots:
     void on_actionParameterEditorMcconf_triggered();
     void on_actionParameterEditorAppconf_triggered();
     void on_actionParameterEditorInfo_triggered();
+    void on_actionParameterEditorFW_triggered();
+    void on_actionParameterEditorCustomConf0_triggered();
     void on_actionSaveMotorConfigurationHeader_triggered();
     void on_actionSaveAppConfigurationHeader_triggered();
     void on_actionSaveMotorConfigurationHeaderWrap_triggered();
@@ -137,7 +139,6 @@ private slots:
     void on_actionBackupConfiguration_triggered();
     void on_actionRestoreConfiguration_triggered();
     void on_actionClearConfigurationBackups_triggered();
-    void on_actionParameterEditorFW_triggered();
     void on_actionBackupConfigurationsCAN_triggered();
     void on_actionRestoreConfigurationsCAN_triggered();
     void on_scanCanButton_clicked();

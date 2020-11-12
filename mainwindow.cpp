@@ -510,6 +510,10 @@ void MainWindow::timerSlot()
         ui->pageList->item(mPageNameIdList.value("app_custom_config_2"))->setHidden(true);
     }
 
+    if (disconected_cnt >= 20 && !mVesc->isPortConnected()) {
+        ui->scanCanButton->setEnabled(true);
+    }
+
     if (!mVesc->isIgnoringCanChanges()) {
         // CAN fwd
         if (ui->actionCanFwd->isChecked() != mVesc->commands()->getSendCan()) {
@@ -1519,6 +1523,30 @@ void MainWindow::on_actionParameterEditorInfo_triggered()
     p->show();
 }
 
+void MainWindow::on_actionParameterEditorFW_triggered()
+{
+    ParameterEditor *p = new ParameterEditor(this);
+    p->setAttribute(Qt::WA_DeleteOnClose);
+    p->setParams(mVesc->fwConfig());
+    p->show();
+}
+
+void MainWindow::on_actionParameterEditorCustomConf0_triggered()
+{
+    auto conf = mVesc->customConfig(0);
+
+    if (conf) {
+        ParameterEditor *p = new ParameterEditor(this);
+        p->setAttribute(Qt::WA_DeleteOnClose);
+        p->setParams(conf);
+        p->show();
+    } else {
+        mVesc->emitMessageDialog("Edit Custom Config 0",
+                                 "The connected hardware does not have a custom configuration.",
+                                 false);
+    }
+}
+
 void MainWindow::on_actionSaveMotorConfigurationHeader_triggered()
 {
     saveParamFileDialog("mcconf", false);
@@ -1667,14 +1695,6 @@ void MainWindow::on_actionClearConfigurationBackups_triggered()
     if (reply == QMessageBox::Yes) {
         mVesc->confClearBackups();
     }
-}
-
-void MainWindow::on_actionParameterEditorFW_triggered()
-{
-    ParameterEditor *p = new ParameterEditor(this);
-    p->setAttribute(Qt::WA_DeleteOnClose);
-    p->setParams(mVesc->fwConfig());
-    p->show();
 }
 
 void MainWindow::on_actionBackupConfigurationsCAN_triggered()

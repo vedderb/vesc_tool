@@ -985,3 +985,48 @@ void ParameterEditor::on_actionCalculateCompressedCArraySize_triggered()
                              tr("Compressed XML Size"),
                              tr("%1 Bytes").arg(compressed.size()));
 }
+
+void ParameterEditor::on_actionSave_XML_and_export_config_parser_and_compressed_C_array_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose the XML file or one of the C files. All files will be created with default "
+                                           "names and/or overwritten if they already exist in the directory."),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    QString nameConfig = "device_config";
+    if (mParams.hasParam("config_name") && mParams.getParam("config_name")->type == CFG_T_QSTRING) {
+        nameConfig = mParams.getParamQString("config_name");
+    } else {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Config Name",
+                                             "Name:", QLineEdit::Normal,
+                                             nameConfig, &ok);
+
+        if (ok && text.size() > 0) {
+            nameConfig = text;
+        }
+    }
+
+    QFileInfo fi(path);
+    path.chop(fi.fileName().length());
+    QString pathXml = path + "settings.xml";
+    QString pathDefines = path + "conf_default.h";
+    QString pathParser = path + "confparser.c";
+    QString pathCompressed = path + "confxml.c";
+
+    qDebug() << pathXml;
+    qDebug() << pathDefines;
+    qDebug() << pathParser;
+    qDebug() << pathCompressed;
+
+    Utility::createCompressedConfigC(&mParams, nameConfig, pathCompressed);
+    Utility::createParamParserC(&mParams, nameConfig, pathParser);
+    mParams.saveCDefines(pathDefines, true);
+    mParams.saveParamsXml(pathXml);
+}

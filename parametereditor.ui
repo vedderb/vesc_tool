@@ -1529,6 +1529,7 @@
     <addaction name="actionCalculateCompressedCArraySize"/>
     <addaction name="actionExportConfigurationParser"/>
     <addaction name="actionExportCompressedCArray"/>
+    <addaction name="actionSave_XML_and_export_config_parser_and_compressed_C_array"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1619,18 +1620,27 @@
     <string>Calculate Compressed C Array Size</string>
    </property>
   </action>
+  <action name="actionSave_XML_and_export_config_parser_and_compressed_C_array">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save XML and export config, parser and compressed C array</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ParamTable</class>
+   <extends>QTableWidget</extends>
+   <header>widgets/paramtable.h</header>
+  </customwidget>
   <customwidget>
    <class>MRichTextEdit</class>
    <extends>QWidget</extends>
    <header>widgets/mrichtextedit.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ParamTable</class>
-   <extends>QTableWidget</extends>
-   <header>widgets/paramtable.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -81,6 +81,7 @@ private slots:
     void on_actionSave_Configuration_C_Header_ifdef_wrapped_as_triggered();
     void on_actionExportCompressedCArray_triggered();
     void on_actionCalculateCompressedCArraySize_triggered();
+    void on_actionSave_XML_and_export_config_parser_and_compressed_C_array_triggered();
 
 private:
     Ui::ParameterEditor *ui;

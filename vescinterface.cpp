@@ -1305,6 +1305,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         loop.exec();
 
         disconnect(conn);
+
         return res;
     };
 

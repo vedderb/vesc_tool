@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>769</width>
-    <height>514</height>
+    <width>920</width>
+    <height>657</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -90,15 +90,35 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="clearRxButton">
-     <property name="text">
-      <string>Clear</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../res.qrc">
-       <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="clearRxButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Clear</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../res.qrc">
+         <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="autoScrollBox">
+       <property name="text">
+        <string>Autoscroll</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox">

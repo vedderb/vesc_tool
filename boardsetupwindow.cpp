@@ -309,6 +309,10 @@ void BoardSetupWindow::resetRoutine(){
     ui->startButton->setEnabled(true);
     ui->usbConnectLabel->setStyleSheet("");
 
+    is_Dual = false;
+    num_VESCs = 0;
+    HW_Name = "";
+
     ui->CANScanLabel->setStyleSheet("");
     ui->bootloaderLabel->setStyleSheet("");
     ui->firmwareLabel->setStyleSheet("");
@@ -370,21 +374,21 @@ bool BoardSetupWindow::tryCANScan(){
         canTxt = canTxt + " (" + QString::number(CAN_IDs.size() + 1) + " motors total)";
         ui->CANScanLabel->setText(canTxt);
         ui->CANScanLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
+    }    
+    HW_Name = mVesc->getFirmwareNow().split("Hw: ").last();
+    HW_Name = HW_Name.split("\n").first();
+    if(HW_Name.contains("STORMCORE")|| HW_Name.contains("UNITY")){
+        is_Dual = true;
+        num_VESCs = (CAN_IDs.size() + 1)/2;
+    }else{
+        is_Dual = false;
+        num_VESCs = CAN_IDs.size() + 1;
     }
-
     return res;
 }
 
-bool BoardSetupWindow::tryBootloaderUpload(){
-    QString HW_Name = mVesc->getFirmwareNow().split("Hw: ").last();
+bool BoardSetupWindow::tryBootloaderUpload(){   
     QString FW_Path;
-    HW_Name = HW_Name.split("\n").first();
-    int num_VESCs;
-    if(HW_Name.contains("STORMCORE")|| HW_Name.contains("UNITY")){
-        num_VESCs = (CAN_IDs.size() + 1)/2;
-    }else{
-        num_VESCs = CAN_IDs.size() + 1;
-    }
     QFile file;
     file.setFileName("://res/bootloaders/generic.bin");
     is_Bootloader = true;
@@ -418,18 +422,8 @@ bool BoardSetupWindow::tryBootloaderUpload(){
 }
 
 bool BoardSetupWindow::tryFirmwareUpload(){
-    QString HW_Name = mVesc->getFirmwareNow().split("Hw: ").last();
     QString FW_Path;
-    HW_Name = HW_Name.split("\n").first();
-    int num_VESCs;
-    if(HW_Name.contains("STORMCORE")|| HW_Name.contains("UNITY")){
-        num_VESCs = (CAN_IDs.size() + 1)/2;
-    }else{
-        num_VESCs = CAN_IDs.size() + 1;
-    }
-
     QDirIterator it("://res/firmwares");
-
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         QStringList names = fi.fileName().split("_o_");

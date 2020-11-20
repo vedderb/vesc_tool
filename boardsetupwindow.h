@@ -58,6 +58,9 @@ private:
     QVector<int> CAN_IDs;
     bool CAN_Timeout;
     bool is_Bootloader;
+    bool is_Dual;
+    int num_VESCs;
+    QString HW_Name;
     MC_VALUES values_now;
 
     ConfigParams *mMcConfig_Target;

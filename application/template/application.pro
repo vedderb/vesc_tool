@@ -1,4 +1,5 @@
-VT_VERSION = 0.95
+VT_VERSION = 2.07
+VT_IS_TEST_VERSION = 1
 DEFINES += VT_VERSION=$$VT_VERSION
 
 CONFIG += c++11
@@ -19,6 +20,13 @@ DEFINES += HAS_SERIALPORT
 # Bluetooth available
 #DEFINES += HAS_BLUETOOTH
 
+!vt_test_version: {
+    DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
+}
+vt_test_version: {
+    DEFINES += VT_IS_TEST_VERSION=1
+}
+
 contains(DEFINES, HAS_SERIALPORT) {
     QT += serialport
 }
@@ -36,7 +44,8 @@ SOURCES += main.cpp\
     vescinterface.cpp \
     vbytearray.cpp \
     utility.cpp \
-    tcpserversimple.cpp
+    tcpserversimple.cpp \
+    udpserversimple.cpp
 
 HEADERS  += mainwindow.h \
     commands.h \
@@ -47,7 +56,8 @@ HEADERS  += mainwindow.h \
     vescinterface.h \
     vbytearray.h \
     utility.h \
-    tcpserversimple.h
+    tcpserversimple.h \
+    udpserversimple.h
 
 FORMS += mainwindow.ui
     

@@ -270,10 +270,12 @@ void BoardSetupWindow::on_startButton_clicked()
     }
 
     if(ui->appCheckBox->isChecked()){
-        res = tryApplySlaveAppSettings();
-        if(!res){
-            resetRoutine();
-            return;
+        if(num_VESCs>1){
+            res = tryApplySlaveAppSettings();
+            if(!res){
+                resetRoutine();
+                return;
+            }
         }
         res = tryApplyMasterAppSettings();
         if(!res){
@@ -374,7 +376,7 @@ bool BoardSetupWindow::tryCANScan(){
         canTxt = canTxt + " (" + QString::number(CAN_IDs.size() + 1) + " motors total)";
         ui->CANScanLabel->setText(canTxt);
         ui->CANScanLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
-    }    
+    }
     HW_Name = mVesc->getFirmwareNow().split("Hw: ").last();
     HW_Name = HW_Name.split("\n").first();
     if(HW_Name.contains("STORMCORE")|| HW_Name.contains("UNITY")){
@@ -684,10 +686,76 @@ bool BoardSetupWindow::tryTestMotorParameters(){
 }
 
 bool BoardSetupWindow::tryApplySlaveAppSettings(){
+    mVesc->appConfig()->updateParamEnum("app_to_use",3); // set to use uart
+    mVesc->appConfig()->updateParamEnum("app_to_use",3);
+
+
+    for(int i = 0; i < CAN_IDs.size(); i = i + 1){
+        mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+        Utility::sleepWithEventLoop(100);
+        mVesc->commands()->setAppConf();
+        if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000)){
+            ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Failed to write config during slave app routine.";
+            return false;
+        }
+    }
     return true;
 }
 
 bool BoardSetupWindow::tryApplyMasterAppSettings(){
+
+
+    switch(mAppConfig_Target->getParamEnum("app_to_use")){
+    case 4: //ppm and uart
+        ui->appTab->addParamRow(mAppConfig_Target, "app_uart_baudrate");
+        [[clang::fallthrough]];
+    case 1: //ppm
+        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ctrl_type");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.pulse_start");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.pulse_center");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.hyst");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ramp_time_pos");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ramp_time_neg");
+        if(mAppConfig_Target->getParamBool("app_ppm_conf.tc")){
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.tc");
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.tc_max_diff");
+        }
+        if(mAppConfig_Target->getParamEnum("app_ppm_conf.ctrl_type") == 9){
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.smart_rev_max_duty");
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.smart_rev_ramp_time");
+        }
+        break;
+    case 2: //adc
+        break;
+    case 3: //uart
+        ui->appTab->addParamRow(mAppConfig_Target, "app_uart_baudrate");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ctrl_type");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.hyst");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ramp_time_pos");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ramp_time_neg");
+        if(mAppConfig_Target->getParamBool("app_chuk_conf.tc")){
+            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.tc");
+            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.tc_max_diff");
+        }
+        if(mAppConfig_Target->getParamBool("app_chuk_conf.use_smart_rev")){
+            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.smart_rev_max_duty");
+            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.smart_rev_ramp_time");
+        }
+        break;
+    default:
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::warning(this,
+                                     tr("App Type Not Supported"),
+                                     tr("This tool currently only supports a subset of app types.") +
+                                     tr(" The app config loaded is of a different type and is not compatible."),
+                                     QMessageBox::Ok);
+        ui->appCheckBox->setCheckable(false);
+        ui->appCheckBox->setCheckState(Qt::Unchecked);
+        return;
+    }
+
+
 
     //"The Master App settings were unable to be applied. There may be a problem with the firmware or connections."
     return true;
@@ -867,15 +935,15 @@ void BoardSetupWindow::loadAppConfXML(QString path){
             }
             break;
         default:
-                QMessageBox::StandardButton reply;
-                reply = QMessageBox::warning(this,
-                                                 tr("App Type Not Supported"),
-                                                 tr("This tool currently only supports a subset of app types.") +
-                                                 tr(" The app config loaded is of a different type and is not compatible."),
-                                                 QMessageBox::Ok);
-                ui->appCheckBox->setCheckable(false);
-                ui->appCheckBox->setCheckState(Qt::Unchecked);
-                return;
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::warning(this,
+                                         tr("App Type Not Supported"),
+                                         tr("This tool currently only supports a subset of app types.") +
+                                         tr(" The app config loaded is of a different type and is not compatible."),
+                                         QMessageBox::Ok);
+            ui->appCheckBox->setCheckable(false);
+            ui->appCheckBox->setCheckState(Qt::Unchecked);
+            return;
         }
 
         appXmlPath = path;
@@ -913,10 +981,10 @@ void BoardSetupWindow::loadMotorConfXML(QString path){
         if(mMcConfig_Target->getParamEnum("motor_type") != 2){
             QMessageBox::StandardButton reply;
             reply = QMessageBox::warning(this,
-                                             tr("Motor Type Not Supported"),
-                                             tr("This tool currently only supports FOC motor calibration.") +
-                                             tr(" The config loaded is of a different motor type and is not compatible."),
-                                             QMessageBox::Ok);
+                                         tr("Motor Type Not Supported"),
+                                         tr("This tool currently only supports FOC motor calibration.") +
+                                         tr(" The config loaded is of a different motor type and is not compatible."),
+                                         QMessageBox::Ok);
             ui->motorDetectionCheckBox->setCheckable(false);
             ui->motorDetectionCheckBox->setCheckState(Qt::Unchecked);
             return;

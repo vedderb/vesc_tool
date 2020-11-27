@@ -163,24 +163,8 @@ void BoardSetupWindow::timerSlot()
     }
 
     // Read configurations if they haven't been read since starting VESC Tool
-    if (mVesc->isPortConnected()) {
-        static int conf_cnt = 0;
-        // disconected_cnt = 0;
-        conf_cnt++;
-        if (conf_cnt >= 20) {
-            conf_cnt = 0;
 
-            if (!mVesc->deserializeFailedSinceConnected() && mVesc->fwRx()) {
-                if (!mMcConfRead) {
-                    mVesc->commands()->getMcconf();
-                }
 
-                if (!mAppConfRead) {
-                    mVesc->commands()->getAppConf();
-                }
-            }
-        }
-    }
 
     // Disable all data streaming when uploading firmware
     if (mVesc->getFwUploadProgress() > 0.1) {
@@ -205,6 +189,23 @@ void BoardSetupWindow::timerSlot()
 
 void BoardSetupWindow::on_startButton_clicked()
 {
+    ui->appConfigButton->setEnabled(false);
+    ui->motorConfigButton->setEnabled(false);
+    ui->appConfigEdit->setEnabled(false);
+    ui->motorConfigEdit->setEnabled(false);
+    ui->motorTolSlider->setEnabled(false);
+    ui->guideButton->setEnabled(false);
+    ui->startButton->setEnabled(false);
+    ui->serialRefreshButton->setEnabled(false);
+    ui->serialPortBox->setEnabled(false);
+    ui->bleFirmwareButton->setEnabled(false);
+    ui->bleFirmwareEdit->setEnabled(false);
+    ui->bootloaderCheckBox->setEnabled(false);
+    ui->bleCheckBox->setEnabled(false);
+    ui->appCheckBox->setEnabled(false);
+    ui->motorDetectionCheckBox->setEnabled(false);
+
+
     if(ui->motorDetectionCheckBox->isChecked()){
         QMessageBox::StandardButton reply;
         reply = QMessageBox::information(this,
@@ -237,6 +238,10 @@ void BoardSetupWindow::on_startButton_clicked()
         res = tryFirmwareUpload();
         if(!res){
             resetRoutine();
+            return;
+        }
+        res = tryCANScan();
+        if(!res){
             return;
         }
     }
@@ -315,6 +320,22 @@ void BoardSetupWindow::resetRoutine(){
     num_VESCs = 0;
     HW_Name = "";
 
+    ui->appConfigButton->setEnabled(true);
+    ui->motorConfigButton->setEnabled(true);
+    ui->motorTolSlider->setEnabled(true);
+    ui->appConfigEdit->setEnabled(true);
+    ui->motorConfigEdit->setEnabled(true);
+    ui->guideButton->setEnabled(true);
+    ui->startButton->setEnabled(true);
+    ui->serialRefreshButton->setEnabled(true);
+    ui->serialPortBox->setEnabled(true);
+    ui->bleFirmwareButton->setEnabled(true);
+    ui->bleFirmwareEdit->setEnabled(true);
+    ui->bootloaderCheckBox->setEnabled(true);
+    ui->bleCheckBox->setEnabled(true);
+    ui->appCheckBox->setEnabled(true);
+    ui->motorDetectionCheckBox->setEnabled(true);
+
     ui->CANScanLabel->setStyleSheet("");
     ui->bootloaderLabel->setStyleSheet("");
     ui->firmwareLabel->setStyleSheet("");
@@ -368,6 +389,13 @@ bool BoardSetupWindow::tryCANScan(){
         testResult = false;
     }else{
         res = true;
+        mVesc->commands()->setSendCan(false);
+        mVesc->commands()->getAppConf();
+        if(!Utility::waitSignal(mVesc->appConfig(), SIGNAL(updated()), 5000)){
+            ui->CANScanLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Failed to read app config during CAN Scan.";
+            return false;
+        }
         int this_ID = mVesc->appConfig()->getParamInt("controller_id");
         QString canTxt("CAN IDs: " + QString::number(this_ID));
         for(int i = 0; i < CAN_IDs.size(); i++){
@@ -382,6 +410,7 @@ bool BoardSetupWindow::tryCANScan(){
     if(HW_Name.contains("STORMCORE")|| HW_Name.contains("UNITY")){
         is_Dual = true;
         num_VESCs = (CAN_IDs.size() + 1)/2;
+        qDebug() << "num vescs" << num_VESCs;
     }else{
         is_Dual = false;
         num_VESCs = CAN_IDs.size() + 1;
@@ -468,7 +497,7 @@ bool BoardSetupWindow::tryFirmwareUpload(){
         testResultMsg = "The firmware file path is non-existent.";
         return false;
     }
-    for(int j = 12; j>-1; j--){
+    for(int j = 15; j>-1; j--){
         ui->firmwareLabel->setText("Waiting for Reboot: " + QString::number(j)  + " s");
         Utility::sleepWithEventLoop(1000);
     }
@@ -493,8 +522,10 @@ bool BoardSetupWindow::tryFOCCalibration(){
     bool xml_res = mVesc->mcConfig()->loadXml(mcXmlPath, "MCConfiguration");
     if(!xml_res){
         ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "motor XML read failed during FOC calibration";
         return false;
     }
+    mVesc->ignoreCanChange(true);
     ui->motorDetectionLabel->setText("Writing Default Configs");
     mVesc->commands()->setSendCan(false);
     mVesc->commands()->setMcconf(false);
@@ -505,9 +536,13 @@ bool BoardSetupWindow::tryFOCCalibration(){
         mVesc->commands()->setMcconf();
         Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
     }
+    mVesc->ignoreCanChange(false);
+    mVesc->commands()->setSendCan(false);
 
+    Utility::sleepWithEventLoop(1000);
     ui->motorDetectionLabel->setText("Running FOC Detection");
     double max_loss = pow(mMcConfig_Target->getParamDouble("l_current_max"),2.0) * mMcConfig_Target->getParamDouble("foc_motor_r");
+    qDebug() << "max loss" << max_loss;
     mVesc->mcConfig();
     QString res = Utility::detectAllFoc(mVesc, true,
                                         max_loss,
@@ -520,8 +555,14 @@ bool BoardSetupWindow::tryFOCCalibration(){
         return false;
     }
     ui->motorDetectionLabel->setText("Checking Detected Values for Accuracy");
-    mVesc->commands()->getMcconf();
-    Utility::waitSignal(mVesc->mcConfig(), SIGNAL(updated()), 5000);
+    mVesc->ignoreCanChange(true);
+    float tolerance = ui->motorTolSlider->value();
+    if(ui->motorTolSlider->value() < 100.0){
+        tolerance /= 100.0;
+    }else{
+        tolerance *= 100.0;
+    }
+
     for(int i = -1; i < CAN_IDs.size(); i++){
         QString canid;
         if(i == -1){
@@ -533,7 +574,8 @@ bool BoardSetupWindow::tryFOCCalibration(){
         }
         mVesc->commands()->getMcconf();
         Utility::waitSignal(mVesc->mcConfig(), SIGNAL(updated()), 5000);
-        if(mcConfigOutsideParamBounds("foc_motor_r",0.1)){
+
+        if(mcConfigOutsideParamBounds("foc_motor_r",tolerance )){
             ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
             testResultMsg = "Motor Resistance of CAN ID " + canid + " is outside the tolerance for the target value." +
                     " Check your motors and winding connections. The measured resistance was " +
@@ -541,7 +583,7 @@ bool BoardSetupWindow::tryFOCCalibration(){
             return false;
         }
 
-        if(mcConfigOutsideParamBounds("foc_motor_l",0.1)){
+        if(mcConfigOutsideParamBounds("foc_motor_l",tolerance )){
             ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
             testResultMsg = "Motor Inductance of CAN ID " + canid + " is outside the tolerance for the target value." +
                     " Check your motors and winding connections. The measured inductance was " +
@@ -549,7 +591,7 @@ bool BoardSetupWindow::tryFOCCalibration(){
             return false;
         }
 
-        if(mcConfigOutsideParamBounds("foc_motor_flux_linkage",0.1)){
+        if(mcConfigOutsideParamBounds("foc_motor_flux_linkage",tolerance)){
             ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
             testResultMsg = "Motor Flux Linkage of CAN ID " + canid + " is outside the tolerance for the target value." +
                     " Check your motors and winding connections and ensure the motors are able to spin freely. The measured flux linkage was " +
@@ -563,6 +605,7 @@ bool BoardSetupWindow::tryFOCCalibration(){
             return false;
         }
     }
+    mVesc->ignoreCanChange(false);
     mVesc->commands()->setSendCan(false);
     ui->motorDetectionLabel->setText("Detection Completed Succesfully");
     ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
@@ -574,13 +617,13 @@ bool BoardSetupWindow::tryMotorDirection(){
     int tach_end[16];
     QString directionStatus;
     directionStatus = tr("Spin each motor in the forward direction to continue.\n");
+    mVesc->ignoreCanChange(true);
     for(int i = -1; i < CAN_IDs.size(); i++){
         if(i<0){
             mVesc->commands()->setSendCan(false);
         }else{
             mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
         }
-        Utility::sleepWithEventLoop(100);
         mVesc->commands()->getValues();
         if(!Utility::waitSignal(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 2000)){
             ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
@@ -598,6 +641,7 @@ bool BoardSetupWindow::tryMotorDirection(){
     msgBox->addButton(QMessageBox::Cancel);
     msgBox->setModal( true );
     msgBox->open(this, SLOT(msgBoxClosed(QAbstractButton*)));
+    mVesc->ignoreCanChange(true);
     while(!allHaveTurned){
         directionStatus = tr("Spin each motor in the forward direction to continue.\n");
         bool turned = true;
@@ -610,21 +654,22 @@ bool BoardSetupWindow::tryMotorDirection(){
             }
             Utility::sleepWithEventLoop(10);
             mVesc->commands()->getValues();
-            if(!Utility::waitSignal(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 2000)){
+            if(Utility::waitSignal(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 100)){
                 ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-                testResultMsg = "Failed to read tachometer value during motor direction routine.";
-                return false;
+                // testResultMsg = "Failed to read tachometer value during motor direction routine.";
+                // return false;
+                tach_end[i+1] = values_now.tachometer;
             }
-            tach_end[i+1] = values_now.tachometer;
             int tachDiff = tach_start[i+1] - tach_end[i+1];
             turned &= (abs(tachDiff) >= 50);
             int percent = abs(2*tachDiff);
             percent = percent>100?100:percent;
             QString number = "motor " + QString::number(i+2) + ": " +
-                    QStringLiteral("%1").arg(percent, 3, 10, QLatin1Char(' '))+ "% ";
+            QStringLiteral("%1").arg(percent, 3, 10, QLatin1Char(' '))+ "% ";
             // number = QString::number(tach_end[i+1]) +" " + QString::number(tach_start[i+1]) + " ";
             directionStatus += number;
         }
+
         msgBox->setText(directionStatus);
         if(!msgBox->isVisible()){
             ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
@@ -640,6 +685,7 @@ bool BoardSetupWindow::tryMotorDirection(){
         }
         allHaveTurned = turned;
     }
+    mVesc->ignoreCanChange(true);
     msgBox->close();
     msgBox->deleteLater();
     double motor_current_min = mMcConfig_Target->getParamDouble("l_current_min");
@@ -686,12 +732,48 @@ bool BoardSetupWindow::tryTestMotorParameters(){
 }
 
 bool BoardSetupWindow::tryApplySlaveAppSettings(){
+
+    bool xml_res = mVesc->appConfig()->loadXml(appXmlPath, "APPConfiguration");
+    if(!xml_res){
+        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "app XML read failed during App Setup";
+        return false;
+    }
+
     mVesc->appConfig()->updateParamEnum("app_to_use",3); // set to use uart
-    mVesc->appConfig()->updateParamEnum("app_to_use",3);
+    mVesc->appConfig()->updateParamEnum("can_mode",0); // set to use vesc CAN
+    mVesc->appConfig()->updateParamEnum("can_baud_rate",2); // 500K baud
+    mVesc->appConfig()->updateParamEnum("send_can_status",5); // send all CAN status'
+    mVesc->appConfig()->updateParamInt("send_can_status_rate_hz",50); // 50 Hz
+    mVesc->appConfig()->updateParamEnum("shutdown_mode",1); // set slaves to always on so they don't time out seperatley and master controls shutdown
 
-
+    mVesc->commands()->setSendCan(false);
+    mVesc->ignoreCanChange(true);
+    // I wrote this little bit to determine if it was the second or motor or not for dual drivers and then
+    // realized it didn't really matter since it's ok to double write app config.
+    //
+    //    int master_ID = 0;
+    //    mVesc->commands()->setSendCan(false);
+    //    mVesc->commands()->getAppConf();
+    //    if(!Utility::waitSignal(mVesc->appConfig(), SIGNAL(updated()), 5000)){
+    //        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+    //        testResultMsg = "Failed to read app config during slave setup routine.";
+    //        return false;
+    //    }
+    //    master_ID = mVesc->appConfig()->getParamInt("controller_id");
+    //    for(int i = 0; i < CAN_IDs.size(); i = i + 1){
+    //        bool is_second_motor_id = false;
+    //        is_second_motor_id |= ((master_ID + 1) == CAN_IDs.at(i));
+    //        if(i>0){
+    //            is_second_motor_id |= ((CAN_IDs.at(i) - CAN_IDs.at(i - 1) + 256) % 256 == 1);
+    //        }
+    //        is_second_motor_id &= is_Dual;
+    //        is_second_motor_id = false;
+    //        if(!is_second_motor_id){
+    //        }
     for(int i = 0; i < CAN_IDs.size(); i = i + 1){
         mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+        mVesc->appConfig()->updateParamInt("controller_id", CAN_IDs.at(i));
         Utility::sleepWithEventLoop(100);
         mVesc->commands()->setAppConf();
         if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000)){
@@ -699,69 +781,72 @@ bool BoardSetupWindow::tryApplySlaveAppSettings(){
             testResultMsg = "Failed to write config during slave app routine.";
             return false;
         }
+
     }
+    mVesc->commands()->setSendCan(false);
+    mVesc->ignoreCanChange(false);
     return true;
 }
 
 bool BoardSetupWindow::tryApplyMasterAppSettings(){
+    int master_ID = 0;
+    mVesc->commands()->setSendCan(false);
+    mVesc->commands()->getAppConf();
+    if(!Utility::waitSignal(mVesc->appConfig(), SIGNAL(updated()), 5000)){
+        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "Failed to read app config during slave setup routine.";
+        return false;
+    }
+    master_ID = mVesc->appConfig()->getParamInt("controller_id");
 
+    bool xml_res = mVesc->appConfig()->loadXml(appXmlPath, "APPConfiguration");
+    if(!xml_res){
+        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "app XML read failed during App Setup";
+        return false;
+    }
+    mVesc->appConfig()->updateParamEnum("send_can_status",0); // don't send CAN status on master
+    mVesc->appConfig()->updateParamInt("controller_id",master_ID); // don't send CAN status on master
+
+    QString success_msg = "";
 
     switch(mAppConfig_Target->getParamEnum("app_to_use")){
     case 4: //ppm and uart
-        ui->appTab->addParamRow(mAppConfig_Target, "app_uart_baudrate");
-        [[clang::fallthrough]];
+
     case 1: //ppm
-        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ctrl_type");
-        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.pulse_start");
-        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.pulse_center");
-        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.hyst");
-        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ramp_time_pos");
-        ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ramp_time_neg");
-        if(mAppConfig_Target->getParamBool("app_ppm_conf.tc")){
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.tc");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.tc_max_diff");
-        }
-        if(mAppConfig_Target->getParamEnum("app_ppm_conf.ctrl_type") == 9){
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.smart_rev_max_duty");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.smart_rev_ramp_time");
-        }
-        break;
-    case 2: //adc
+        mVesc->appConfig()->updateParamBool("app_ppm_conf.multi_esc",true);
+        success_msg = "PPM Remote Config Applied";
         break;
     case 3: //uart
-        ui->appTab->addParamRow(mAppConfig_Target, "app_uart_baudrate");
-        ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ctrl_type");
-        ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.hyst");
-        ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ramp_time_pos");
-        ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ramp_time_neg");
-        if(mAppConfig_Target->getParamBool("app_chuk_conf.tc")){
-            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.tc");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.tc_max_diff");
-        }
-        if(mAppConfig_Target->getParamBool("app_chuk_conf.use_smart_rev")){
-            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.smart_rev_max_duty");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.smart_rev_ramp_time");
-        }
+        // if uart only on master assume a uart based chuk remote
+        mVesc->appConfig()->updateParamBool("app_chuk_conf.multi_esc",true);
+        success_msg = "UART Remote Config Applied";
+        break;
+    case 2: //adc
+        mVesc->appConfig()->updateParamBool("app_adc_conf.multi_esc",true);
+        success_msg = "ADC Config Applied";
         break;
     default:
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::warning(this,
-                                     tr("App Type Not Supported"),
-                                     tr("This tool currently only supports a subset of app types.") +
-                                     tr(" The app config loaded is of a different type and is not compatible."),
-                                     QMessageBox::Ok);
-        ui->appCheckBox->setCheckable(false);
-        ui->appCheckBox->setCheckState(Qt::Unchecked);
-        return;
+        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "Your app type is not compatible with this setup tool currently.";
+        return false;
     }
 
+    mVesc->commands()->setSendCan(false);
+    mVesc->commands()->setAppConf();
+    if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000)){
+        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "Failed to write config during master app routine.";
+        return false;
+    }
 
-
-    //"The Master App settings were unable to be applied. There may be a problem with the firmware or connections."
+    ui->appSetupLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
+    ui->appSetupLabel->setText(success_msg);
     return true;
 }
 
 bool BoardSetupWindow::tryRemoteTest(){
+
     return true;
 }
 
@@ -770,6 +855,7 @@ bool BoardSetupWindow::tryFinalDiagnostics(){
 }
 
 bool BoardSetupWindow::mcConfigOutsideParamBounds(QString paramName, double tolerance) {
+    qDebug() << "tolerance" << tolerance;
     double detectedParam = mVesc->mcConfig()->getParamDouble(paramName);
     double targetParam = mMcConfig_Target->getParamDouble(paramName);
     return abs(detectedParam - targetParam) > tolerance*targetParam;
@@ -849,6 +935,9 @@ void BoardSetupWindow::on_bleCheckBox_stateChanged(){
 }
 
 void BoardSetupWindow::on_motorDetectionCheckBox_stateChanged(){
+    ui->motorTolLabel->setEnabled(ui->motorDetectionCheckBox->isChecked());
+    ui->motorTolLabel_2->setEnabled(ui->motorDetectionCheckBox->isChecked());
+    ui->motorTolSlider->setEnabled(ui->motorDetectionCheckBox->isChecked());
     ui->motorDetectionLabel->setEnabled(ui->motorDetectionCheckBox->isChecked());
     ui->motorDirectionLabel->setEnabled(ui->motorDetectionCheckBox->isChecked());
     ui->motorTestLabel->setEnabled(ui->motorDetectionCheckBox->isChecked());
@@ -857,6 +946,14 @@ void BoardSetupWindow::on_motorDetectionCheckBox_stateChanged(){
 void BoardSetupWindow::on_appCheckBox_stateChanged(){
     ui->appSetupLabel->setEnabled(ui->appCheckBox->isChecked());
     ui->remoteTestLabel->setEnabled(ui->appCheckBox->isChecked());
+}
+
+void BoardSetupWindow::on_motorTolSlider_valueChanged(int value){
+    if(value < 100){
+        ui->motorTolLabel_2->setText(QString::number(value).rightJustified(3, ' ') + "%");
+    }else{
+        ui->motorTolLabel_2->setText(" INF ");
+    }
 }
 
 

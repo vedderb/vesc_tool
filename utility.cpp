@@ -382,6 +382,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
 
             for (int id: canDevs) {
                 vesc->commands()->setSendCan(true, id);
+                Utility::sleepWithEventLoop(2000);
 
                 if (!checkFwCompatibility(vesc)) {
                     vesc->emitMessageDialog("FW Versions",

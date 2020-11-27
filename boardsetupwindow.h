@@ -39,6 +39,7 @@ private slots:
      void on_startButton_clicked();
      void on_bootloaderCheckBox_stateChanged();
      void on_motorDetectionCheckBox_stateChanged();
+     void on_motorTolSlider_valueChanged(int value);
      void on_appCheckBox_stateChanged();
      void on_bleCheckBox_stateChanged();
      void valuesReceived(MC_VALUES values, unsigned int mask);

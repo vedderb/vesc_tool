@@ -577,7 +577,7 @@ bool BoardSetupWindow::tryFOCCalibration(){
     ui->motorDetectionLabel->setText("Checking Detected Values for Accuracy");
     mVesc->ignoreCanChange(true);
     float tolerance = (float) ui->motorTolSlider->value();
-    if(ui->motorTolSlider->value() < 99.5){
+    if(ui->motorTolSlider->value() < 100){
         tolerance /= 100.0;
     }else{
         tolerance *= 100.0;
@@ -770,15 +770,6 @@ bool BoardSetupWindow::tryTestMotorParameters(){
 
 bool BoardSetupWindow::tryApplySlaveAppSettings(){
 
-
-    mVesc->appConfig()->updateParamEnum("app_to_use",3); // set to use uart
-    mVesc->appConfig()->updateParamEnum("can_mode",0); // set to use vesc CAN
-    mVesc->appConfig()->updateParamEnum("can_baud_rate",2); // 500K baud
-    mVesc->appConfig()->updateParamEnum("send_can_status",5); // send all CAN status'
-    mVesc->appConfig()->updateParamInt("send_can_status_rate_hz",50); // 50 Hz
-    mVesc->appConfig()->updateParamEnum("shutdown_mode",1); // set slaves to always on so they don't time out seperatley and master controls shutdown
-
-
     // I wrote this little bit to determine if it was the second or motor or not for dual drivers and then
     // realized it didn't really matter since it's ok to double write app config.
     //
@@ -791,12 +782,29 @@ bool BoardSetupWindow::tryApplySlaveAppSettings(){
         return false;
     }
     master_ID = mVesc->appConfig()->getParamInt("controller_id");   
+    mVesc->appConfig()->updateParamEnum("app_to_use",0); // set to use uart
+    mVesc->commands()->setAppConf();
+    if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 5000)){
+        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "Failed to write master config during slave app routine.";
+        return false;
+    }
+
     bool xml_res = mVesc->appConfig()->loadXml(appXmlPath, "APPConfiguration");
     if(!xml_res){
         ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
         testResultMsg = "app XML read failed during App Setup";
         return false;
     }
+
+
+    mVesc->appConfig()->updateParamEnum("app_to_use",3); // set to use uart
+    mVesc->appConfig()->updateParamEnum("can_mode",0); // set to use vesc CAN
+    mVesc->appConfig()->updateParamEnum("can_baud_rate",2); // 500K baud
+    mVesc->appConfig()->updateParamEnum("send_can_status",5); // send all CAN status'
+    mVesc->appConfig()->updateParamInt("send_can_status_rate_hz",50); // 50 Hz
+    mVesc->appConfig()->updateParamEnum("shutdown_mode",1); // set slaves to always on so they don't time out seperatley and master controls shutdown
+
 
     //    for(int i = 0; i < CAN_IDs.size(); i = i + 1){
     //

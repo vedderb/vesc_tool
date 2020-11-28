@@ -63,6 +63,7 @@ private:
     int num_VESCs;
     QString HW_Name;
     MC_VALUES values_now;
+    int app_enum_old = 0;
 
     ConfigParams *mMcConfig_Target;
     ConfigParams *mAppConfig_Target;

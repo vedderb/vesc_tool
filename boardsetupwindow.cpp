@@ -194,7 +194,6 @@ void BoardSetupWindow::on_startButton_clicked()
     ui->appConfigEdit->setEnabled(false);
     ui->motorConfigEdit->setEnabled(false);
     ui->motorTolSlider->setEnabled(false);
-    ui->guideButton->setEnabled(false);
     ui->startButton->setEnabled(false);
     ui->serialRefreshButton->setEnabled(false);
     ui->serialPortBox->setEnabled(false);
@@ -325,7 +324,6 @@ void BoardSetupWindow::resetRoutine(){
     ui->motorTolSlider->setEnabled(true);
     ui->appConfigEdit->setEnabled(true);
     ui->motorConfigEdit->setEnabled(true);
-    ui->guideButton->setEnabled(true);
     ui->startButton->setEnabled(true);
     ui->serialRefreshButton->setEnabled(true);
     ui->serialPortBox->setEnabled(true);
@@ -518,7 +516,29 @@ bool BoardSetupWindow::tryBleFirmwareUpload(){
 }
 
 
-bool BoardSetupWindow::tryFOCCalibration(){
+bool BoardSetupWindow::tryFOCCalibration(){    
+    mVesc->commands()->setSendCan(false);
+    mVesc->ignoreCanChange(true);
+    mVesc->commands()->getAppConf();
+    if(!Utility::waitSignal(mVesc->appConfig(), SIGNAL(updated()), 5000)){
+        ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "Failed to read app config during motor setup routine.";
+        return false;
+    }
+    app_enum_old = mVesc->appConfig()->getParamEnum("app_to_use");
+    mVesc->appConfig()->updateParamEnum("app_to_use",0); // set to use no app
+    Utility::sleepWithEventLoop(100);
+    mVesc->commands()->setAppConf();
+    if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000)){
+        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "Failed to write app config during motor routine.";
+        return false;
+    }
+
+
+
+
+
     bool xml_res = mVesc->mcConfig()->loadXml(mcXmlPath, "MCConfiguration");
     if(!xml_res){
         ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
@@ -655,9 +675,6 @@ bool BoardSetupWindow::tryMotorDirection(){
             Utility::sleepWithEventLoop(10);
             mVesc->commands()->getValues();
             if(Utility::waitSignal(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 100)){
-                ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-                // testResultMsg = "Failed to read tachometer value during motor direction routine.";
-                // return false;
                 tach_end[i+1] = values_now.tachometer;
             }
             int tachDiff = tach_start[i+1] - tach_end[i+1];
@@ -665,7 +682,7 @@ bool BoardSetupWindow::tryMotorDirection(){
             int percent = abs(2*tachDiff);
             percent = percent>100?100:percent;
             QString number = "motor " + QString::number(i+2) + ": " +
-            QStringLiteral("%1").arg(percent, 3, 10, QLatin1Char(' '))+ "% ";
+                    QStringLiteral("%1").arg(percent, 3, 10, QLatin1Char(' '))+ "% ";
             // number = QString::number(tach_end[i+1]) +" " + QString::number(tach_start[i+1]) + " ";
             directionStatus += number;
         }
@@ -723,11 +740,31 @@ bool BoardSetupWindow::tryMotorDirection(){
 
     ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
     ui->motorDirectionLabel->setText("Motor Directions Set");
+
+
     return true;
 }
 
-bool BoardSetupWindow::tryTestMotorParameters(){
+bool BoardSetupWindow::tryTestMotorParameters(){   
 
+
+
+    if(!ui->appCheckBox->isChecked()){
+        mVesc->commands()->setSendCan(false);
+        mVesc->commands()->getAppConf();
+        if(!Utility::waitSignal(mVesc->appConfig(), SIGNAL(updated()), 5000)){
+            ui->motorDetectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Failed to read app config after motor setup routine.";
+            return false;
+        }
+        mVesc->appConfig()->updateParamEnum("app_to_use",app_enum_old); // set to use no app
+        mVesc->commands()->setAppConf();
+        if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000)){
+            ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+            testResultMsg = "Failed to write app config after motor routine.";
+            return false;
+        }
+    }
     return true;
 }
 
@@ -747,22 +784,21 @@ bool BoardSetupWindow::tryApplySlaveAppSettings(){
     mVesc->appConfig()->updateParamInt("send_can_status_rate_hz",50); // 50 Hz
     mVesc->appConfig()->updateParamEnum("shutdown_mode",1); // set slaves to always on so they don't time out seperatley and master controls shutdown
 
-    mVesc->commands()->setSendCan(false);
-    mVesc->ignoreCanChange(true);
+
     // I wrote this little bit to determine if it was the second or motor or not for dual drivers and then
     // realized it didn't really matter since it's ok to double write app config.
     //
-    //    int master_ID = 0;
-    //    mVesc->commands()->setSendCan(false);
-    //    mVesc->commands()->getAppConf();
-    //    if(!Utility::waitSignal(mVesc->appConfig(), SIGNAL(updated()), 5000)){
-    //        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-    //        testResultMsg = "Failed to read app config during slave setup routine.";
-    //        return false;
-    //    }
-    //    master_ID = mVesc->appConfig()->getParamInt("controller_id");
+    int master_ID = 0;
+    mVesc->commands()->setSendCan(false);
+    mVesc->commands()->getAppConf();
+    if(!Utility::waitSignal(mVesc->appConfig(), SIGNAL(updated()), 5000)){
+        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "Failed to read app config during slave setup routine.";
+        return false;
+    }
+    master_ID = mVesc->appConfig()->getParamInt("controller_id");
     //    for(int i = 0; i < CAN_IDs.size(); i = i + 1){
-    //        bool is_second_motor_id = false;
+    //
     //        is_second_motor_id |= ((master_ID + 1) == CAN_IDs.at(i));
     //        if(i>0){
     //            is_second_motor_id |= ((CAN_IDs.at(i) - CAN_IDs.at(i - 1) + 256) % 256 == 1);
@@ -771,17 +807,22 @@ bool BoardSetupWindow::tryApplySlaveAppSettings(){
     //        is_second_motor_id = false;
     //        if(!is_second_motor_id){
     //        }
-    for(int i = 0; i < CAN_IDs.size(); i = i + 1){
-        mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
-        mVesc->appConfig()->updateParamInt("controller_id", CAN_IDs.at(i));
-        Utility::sleepWithEventLoop(100);
-        mVesc->commands()->setAppConf();
-        if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000)){
-            ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-            testResultMsg = "Failed to write config during slave app routine.";
-            return false;
-        }
 
+    mVesc->ignoreCanChange(true);
+    for(int i = 0; i < CAN_IDs.size(); i = i + 1){
+        bool is_second_master_id = is_Dual && ((master_ID + 1) == CAN_IDs.at(i));
+        if(!is_second_master_id)
+        {
+            mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+            mVesc->appConfig()->updateParamInt("controller_id", CAN_IDs.at(i));
+            Utility::sleepWithEventLoop(100);
+            mVesc->commands()->setAppConf();
+            if(!Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000)){
+                ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+                testResultMsg = "Failed to write config during slave app routine.";
+                return false;
+            }
+        }
     }
     mVesc->commands()->setSendCan(false);
     mVesc->ignoreCanChange(false);

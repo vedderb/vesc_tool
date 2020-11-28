@@ -576,8 +576,8 @@ bool BoardSetupWindow::tryFOCCalibration(){
     }
     ui->motorDetectionLabel->setText("Checking Detected Values for Accuracy");
     mVesc->ignoreCanChange(true);
-    float tolerance = ui->motorTolSlider->value();
-    if(ui->motorTolSlider->value() < 100.0){
+    float tolerance = (float) ui->motorTolSlider->value();
+    if(ui->motorTolSlider->value() < 99.5){
         tolerance /= 100.0;
     }else{
         tolerance *= 100.0;
@@ -770,12 +770,6 @@ bool BoardSetupWindow::tryTestMotorParameters(){
 
 bool BoardSetupWindow::tryApplySlaveAppSettings(){
 
-    bool xml_res = mVesc->appConfig()->loadXml(appXmlPath, "APPConfiguration");
-    if(!xml_res){
-        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-        testResultMsg = "app XML read failed during App Setup";
-        return false;
-    }
 
     mVesc->appConfig()->updateParamEnum("app_to_use",3); // set to use uart
     mVesc->appConfig()->updateParamEnum("can_mode",0); // set to use vesc CAN
@@ -796,7 +790,14 @@ bool BoardSetupWindow::tryApplySlaveAppSettings(){
         testResultMsg = "Failed to read app config during slave setup routine.";
         return false;
     }
-    master_ID = mVesc->appConfig()->getParamInt("controller_id");
+    master_ID = mVesc->appConfig()->getParamInt("controller_id");   
+    bool xml_res = mVesc->appConfig()->loadXml(appXmlPath, "APPConfiguration");
+    if(!xml_res){
+        ui->appSetupLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
+        testResultMsg = "app XML read failed during App Setup";
+        return false;
+    }
+
     //    for(int i = 0; i < CAN_IDs.size(); i = i + 1){
     //
     //        is_second_motor_id |= ((master_ID + 1) == CAN_IDs.at(i));

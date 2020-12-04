@@ -227,6 +227,21 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>1</vTx>
         </uavcan_esc_index>
+        <uavcan_raw_mode>
+            <longName>UAVCAN Raw Throttle Mode</longName>
+            <type>4</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Drive mode for the raw throttle command in UAVCAN.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_UAVCAN_RAW_MODE</cDefine>
+            <valInt>0</valInt>
+            <enumNames>Current Control</enumNames>
+            <enumNames>Current No Reverse Brake</enumNames>
+            <enumNames>Duty Cycle Control</enumNames>
+        </uavcan_raw_mode>
         <app_to_use>
             <longName>APP to Use</longName>
             <type>4</type>
@@ -1863,7 +1878,7 @@ p, li { white-space: pre-wrap; }
             <maxDouble>3.3</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
-            <stepDouble>0.10</stepDouble>
+            <stepDouble>0.1</stepDouble>
             <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> V</suffix>
@@ -1885,7 +1900,7 @@ p, li { white-space: pre-wrap; }
             <maxDouble>3.3</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
-            <stepDouble>0.10</stepDouble>
+            <stepDouble>0.1</stepDouble>
             <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> V</suffix>
@@ -2964,6 +2979,7 @@ p, li { white-space: pre-wrap; }
         <ser>shutdown_mode</ser>
         <ser>can_mode</ser>
         <ser>uavcan_esc_index</ser>
+        <ser>uavcan_raw_mode</ser>
         <ser>app_to_use</ser>
         <ser>app_ppm_conf.ctrl_type</ser>
         <ser>app_ppm_conf.pid_max_erpm</ser>
@@ -3109,6 +3125,7 @@ p, li { white-space: pre-wrap; }
                     <param>shutdown_mode</param>
                     <param>can_mode</param>
                     <param>uavcan_esc_index</param>
+                    <param>uavcan_raw_mode</param>
                 </subgroupParams>
             </subgroup>
         </group>

@@ -1551,6 +1551,50 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>7</vTx>
         </foc_openloop_rpm_low>
+        <foc_d_gain_scale_start>
+            <longName>D Axis Gain Scaling Start</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Start decreasing the D axis current controller gain at this modulation.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_D_GAIN_SCALE_START</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>1</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>1</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.9</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </foc_d_gain_scale_start>
+        <foc_d_gain_scale_max_mod>
+            <longName>D Axis Gain Scaling at Max Mod</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;D axis current controller gain at maximum modulation.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_D_GAIN_SCALE_MAX_MOD</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>1</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>1</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.2</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </foc_d_gain_scale_max_mod>
         <foc_sl_openloop_hyst>
             <longName>Openloop Hysteresis</longName>
             <type>1</type>
@@ -3466,6 +3510,8 @@ p, li { white-space: pre-wrap; }
         <ser>foc_duty_dowmramp_ki</ser>
         <ser>foc_openloop_rpm</ser>
         <ser>foc_openloop_rpm_low</ser>
+        <ser>foc_d_gain_scale_start</ser>
+        <ser>foc_d_gain_scale_max_mod</ser>
         <ser>foc_sl_openloop_hyst</ser>
         <ser>foc_sl_openloop_time_lock</ser>
         <ser>foc_sl_openloop_time_ramp</ser>
@@ -3785,6 +3831,8 @@ p, li { white-space: pre-wrap; }
                     <param>foc_cc_decoupling</param>
                     <param>foc_observer_type</param>
                     <param>foc_motor_ld_lq_diff</param>
+                    <param>foc_d_gain_scale_start</param>
+                    <param>foc_d_gain_scale_max_mod</param>
                 </subgroupParams>
             </subgroup>
         </group>

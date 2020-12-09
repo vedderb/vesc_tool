@@ -446,6 +446,9 @@ void PageSwdProg::bmConnRes(int res)
         addSwdFw("Trampa 12s7p BMS",
                  "://res/firmwares_bms/12s7p/vesc_default.bin", 0,
                  "://res/bootloaders_bms/generic.bin", 0x3E000);
+        addSwdFw("Trampa 18s Light BMS",
+                 "://res/firmwares_bms/18s_light/vesc_default.bin", 0,
+                 "://res/bootloaders_bms/generic.bin", 0x3E000);
         break;
 
     default:

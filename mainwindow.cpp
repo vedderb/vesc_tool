@@ -201,13 +201,15 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden
                     (!(type == 1 || type == 4 || type == 8));
             ui->pageList->item(mPageNameIdList.value("app_adc"))->setHidden
-                    (!(type == 2 || type == 5 || type == 8));
+                    (!(type == 2 || type == 5 || type == 8 || type == 11));
             ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden
                     (!(type == 3 || type == 4 || type == 5 || type == 8));
             ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden
                     (!(type == 0 || type == 3 || type == 6 || type == 7 || type == 8));
             ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden
                     (!(type == 8 || type == 9));
+            ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden
+                    (!(type == 10 || type == 11));
         }
     };
 
@@ -239,6 +241,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("data_sampled"))->setHidden(false);
@@ -265,6 +268,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(true);
 //            ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("data_sampled"))->setHidden(true);
@@ -293,6 +297,7 @@ MainWindow::MainWindow(QWidget *parent) :
         mPageAppNunchuk->reloadParams();
         mPageAppNrf->reloadParams();
         mPageAppBalance->reloadParams();
+        mPageAppPas->reloadParams();
         mPageAppImu->reloadParams();
         mPageFirmware->reloadParams();
         mPageCanAnalyzer->reloadParams();
@@ -1223,6 +1228,13 @@ void MainWindow::reloadPages()
     addPageItem(tr("Balance"), "://res/icons/EUC-96.png",
                 "://res/icons/appconf.png", false, true);
     mPageNameIdList.insert("app_balance", ui->pageList->count() - 1);
+
+    mPageAppPas = new PageAppPas(this);
+    mPageAppPas->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppPas);
+    addPageItem(tr("PAS"), "://res/icons/icons8-fantasy-96.png",
+                "://res/icons/appconf.png", false, true);
+    mPageNameIdList.insert("app_pas", ui->pageList->count() - 1);
 
     mPageAppImu = new PageAppImu(this);
     mPageAppImu->setVesc(mVesc);

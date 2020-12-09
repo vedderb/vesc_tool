@@ -2592,9 +2592,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>10</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_pas_conf.pedal_rpm_start>
         <app_pas_conf.pedal_rpm_end>
             <longName>Pedal RPM End</longName>
@@ -2614,9 +2614,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>120</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_pas_conf.pedal_rpm_end>
         <app_pas_conf.invert_pedal_direction>
             <longName>Invert Pedal Direction</longName>
@@ -2681,9 +2681,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.05</stepDouble>
             <valDouble>0.08</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
+            <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_pas_conf.current_scaling>
         <app_pas_conf.ramp_time_pos>
             <longName>Positive Ramping Time</longName>
@@ -2703,9 +2703,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.05</stepDouble>
             <valDouble>0.3</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> s</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_pas_conf.ramp_time_pos>
         <app_pas_conf.ramp_time_neg>
             <longName>Negative Ramping Time</longName>
@@ -2725,9 +2725,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.05</stepDouble>
             <valDouble>0.2</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> s</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_pas_conf.ramp_time_neg>
         <app_pas_conf.update_rate_hz>
             <longName>Update Rate</longName>

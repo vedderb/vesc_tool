@@ -120,6 +120,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>CAN_BAUD_20K</enumNames>
             <enumNames>CAN_BAUD_50K</enumNames>
             <enumNames>CAN_BAUD_75K</enumNames>
+            <enumNames>CAN_BAUD_100K</enumNames>
         </can_baud_rate>
         <pairing_done>
             <longName>Pairing Done</longName>

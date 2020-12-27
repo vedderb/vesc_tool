@@ -11,6 +11,7 @@
  - Made CAN list resizeable.
  - Made FOC detection result dialog scrollable.
  - Added gamepad control support.
+ - Use QStandardPaths::AppDataLocation for OSM tile cache.
 
 == 2.06 ==
 * Prevent repeated test version notification dialogs.

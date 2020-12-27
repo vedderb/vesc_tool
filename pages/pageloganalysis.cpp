@@ -22,6 +22,7 @@
 #include "ui_pageloganalysis.h"
 #include "utility.h"
 #include <cmath>
+#include <QStandardPaths>
 
 PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     QWidget(parent),
@@ -1087,13 +1088,15 @@ double PageLogAnalysis::getDistGnssSample(int timeMs)
 
 void PageLogAnalysis::updateTileServers()
 {
+    QString base = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
     if (ui->tilesOsmButton->isChecked()) {
         ui->map->osmClient()->setTileServerUrl("http://tile.openstreetmap.org");
-        ui->map->osmClient()->setCacheDir("osm_tiles/osm");
+        ui->map->osmClient()->setCacheDir(base + "/osm_tiles/osm");
         ui->map->osmClient()->clearCacheMemory();
     } else if (ui->tilesHiResButton->isChecked()) {
         ui->map->osmClient()->setTileServerUrl("http://c.osm.rrze.fau.de/osmhd");
-        ui->map->osmClient()->setCacheDir("osm_tiles/hd");
+        ui->map->osmClient()->setCacheDir(base + "/osm_tiles/hd");
         ui->map->osmClient()->clearCacheMemory();
     }
 }

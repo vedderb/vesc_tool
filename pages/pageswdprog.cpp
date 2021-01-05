@@ -1,5 +1,5 @@
 /*
-    Copyright 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2019 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -41,6 +41,15 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
     QSettings set;
     if (set.contains("pageswdprog/lastcustomfile")) {
         ui->fwEdit->setText(set.value("pageswdprog/lastcustomfile").toString());
+    }
+    if (set.contains("pageswdprog/lastcustomfile2")) {
+        ui->fw2Edit->setText(set.value("pageswdprog/lastcustomfile2").toString());
+    }
+    if (set.contains("pageswdprog/lastcustomfile3")) {
+        ui->fw3Edit->setText(set.value("pageswdprog/lastcustomfile3").toString());
+    }
+    if (set.contains("pageswdprog/lastcustomfil4e")) {
+        ui->fw4Edit->setText(set.value("pageswdprog/lastcustomfile4").toString());
     }
 
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
@@ -165,6 +174,9 @@ PageSwdProg::~PageSwdProg()
 {
     QSettings set;
     set.setValue("pageswdprog/lastcustomfile", ui->fwEdit->text());
+    set.setValue("pageswdprog/lastcustomfile2", ui->fw2Edit->text());
+    set.setValue("pageswdprog/lastcustomfile3", ui->fw3Edit->text());
+    set.setValue("pageswdprog/lastcustomfile4", ui->fw4Edit->text());
     delete ui;
 }
 
@@ -179,6 +191,45 @@ void PageSwdProg::on_chooseButton_clicked()
     }
 
     ui->fwEdit->setText(filename);
+}
+
+void PageSwdProg::on_choose2Button_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("Choose Firmware File 2"), ".",
+                                                    tr("Binary files (*.bin)"));
+
+    if (filename.isNull()) {
+        return;
+    }
+
+    ui->fw2Edit->setText(filename);
+}
+
+void PageSwdProg::on_choose3Button_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("Choose Firmware File 3"), ".",
+                                                    tr("Binary files (*.bin)"));
+
+    if (filename.isNull()) {
+        return;
+    }
+
+    ui->fw3Edit->setText(filename);
+}
+
+void PageSwdProg::on_choose4Button_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("Choose Firmware File 4"), ".",
+                                                    tr("Binary files (*.bin)"));
+
+    if (filename.isNull()) {
+        return;
+    }
+
+    ui->fw4Edit->setText(filename);
 }
 
 void PageSwdProg::on_connectButton_clicked()
@@ -255,6 +306,19 @@ void PageSwdProg::on_uploadButton_clicked()
             }
         } else if (ui->tabWidget->currentIndex() == 1) {
             QFile file(ui->fwEdit->text());
+
+            if (ui->useFw2Button->isChecked()) {
+                file.setFileName(ui->fw2Edit->text());
+            }
+
+            if (ui->useFw3Button->isChecked()) {
+                file.setFileName(ui->fw3Edit->text());
+            }
+
+            if (ui->useFw4Button->isChecked()) {
+                file.setFileName(ui->fw4Edit->text());
+            }
+
             if (!file.exists()) {
                 QMessageBox::critical(this,
                                       tr("File Error"),
@@ -380,21 +444,23 @@ void PageSwdProg::bmConnRes(int res)
         addSwdFw("VESC 4.10 - 4.12", "://res/firmwares/410_o_411_o_412/VESC_default.bin",
                  0, "://res/bootloaders/40_o_47_o_48_o_410_o_411_o_412_o_DAS_RS.bin");
         addSwdFw("VESC SIX", "://res/firmwares/60/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC 75/300 R1", "://res/firmwares/75_300/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC 75/300 R2", "://res/firmwares/75_300_R2/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC 75/300 R3", "://res/firmwares/75_300_R3/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
-        addSwdFw("VESC HD", "://res/firmwares/HD/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+        addSwdFw("VESC HD60", "://res/firmwares/HD60/VESC_default.bin",
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+        addSwdFw("VESC HD75", "://res/firmwares/HD75/VESC_default.bin",
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC SIX MK3", "://res/firmwares/60_MK3/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC SIX MK4", "://res/firmwares/60_MK4/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("VESC 100/250", "://res/firmwares/100_250/VESC_default.bin",
-                 0, "://res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
         addSwdFw("FOCBOX UNITY", "://res/firmwares/UNITY/VESC_default.bin",
                  0, ":/res/bootloaders/generic.bin");
         addSwdFw("STORMCORE 60D", ":/res/firmwares/STORMCORE_60D/VESC_default.bin",

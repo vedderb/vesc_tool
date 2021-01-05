@@ -12,6 +12,7 @@
  - Made FOC detection result dialog scrollable.
  - Added gamepad control support.
  - Use QStandardPaths::AppDataLocation for OSM tile cache.
+ - Added more custom firmare paths to SWDPROG to easily switch between firmware files.
 
 == 2.06 ==
 * Prevent repeated test version notification dialogs.

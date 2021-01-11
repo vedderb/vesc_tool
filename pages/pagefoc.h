@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -38,6 +38,13 @@ public:
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
     void reloadParams();
+
+private slots:
+    void on_openloopOldButton_clicked();
+    void on_openloopGenericButton_clicked();
+    void on_openloopFastStartButton_clicked();
+    void on_openloopPropellerButton_clicked();
+    void on_openloopHeavyInertialButton_clicked();
 
 private:
     Ui::PageFoc *ui;

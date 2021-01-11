@@ -31,6 +31,7 @@ Item {
     id: rtData
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
+    property int odometerValue: 0
     property bool isHorizontal: rtData.width > rtData.height
 
     property int gaugeSize: isHorizontal ? Math.min((height - valMetrics.height * 4) - 30, width / 3.5 - 10) :
@@ -87,7 +88,7 @@ Item {
                 typeText: "Current"
             }
         }
-
+        
         CustomGauge {
             id: speedGauge
             Layout.alignment: Qt.AlignHCenter
@@ -181,6 +182,65 @@ Item {
                 font: valText.font
                 text: valText.text
             }
+                        
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {  
+                   var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
+                   odometerBox.realValue = odometerValue*impFact/1000.0
+                   tripDialog.open() 
+                }
+              
+                Dialog {
+                    id: tripDialog
+                    modal: true
+                    focus: true
+                    width: parent.width - 20
+                    height: Math.min(implicitHeight, parent.height - 60)
+                    closePolicy: Popup.CloseOnEscape
+                    x: 10
+                    y: Math.max((parent.height - height) / 2, 10)
+                    parent: ApplicationWindow.overlay
+                    standardButtons: Dialog.Ok | Dialog.Cancel
+                    onAccepted: { 
+                        var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
+                        mCommands.setOdometer(Math.round(odometerBox.realValue*1000/impFact)) 
+                    }
+
+                    ColumnLayout {
+                        id: scrollColumn
+                        anchors.fill: parent
+
+                        ScrollView {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            clip: true
+                            contentWidth: parent.width
+                            ColumnLayout {
+                                anchors.fill: parent
+                                spacing: 0
+
+                                Text {
+                                    color: "white"
+                                    text: "Odometer"
+                                    font.bold: true
+                                    horizontalAlignment: Text.AlignHCenter
+                                    Layout.fillWidth: true
+                                    font.pointSize: 12
+                                }
+
+                                DoubleSpinBox {
+                                    id: odometerBox
+                                    decimals: 2
+                                    realFrom: 0.0
+                                    realTo: 20000000
+                                    Layout.fillWidth: true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -226,22 +286,24 @@ Item {
             powerGauge.value = (values.current_in * values.v_in)
 
             valText.text =
+                    "VESCs  : " + values.num_vescs + "\n" +
                     "mAh Out: " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + "\n" +
-                    "mAh In : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1) + "\n" +
-                    "Wh Out : " + parseFloat(values.watt_hours).toFixed(2) + "\n" +
-                    "Wh In  : " + parseFloat(values.watt_hours_charged).toFixed(2)
+                    "mAh In : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1)
 
+            odometerValue = values.odometer;
+            
             var wh_km = (values.watt_hours - values.watt_hours_charged) / (values.tachometer_abs / 1000.0)
 
-            var l1Txt = useImperial ? "Mi Trip : " : "Km Trip : "
-            var l2Txt = useImperial ? "Wh/Mi   : " : "Wh/Km   : "
-            var l3Txt = useImperial ? "Mi Range: " : "Km Range: "
+            var l1Txt = useImperial ? "mi Trip : " : "km Trip : "
+            var l2Txt = useImperial ? "mi ODO  : " : "km ODO  : "
+            var l3Txt = useImperial ? "Wh/mi   : " : "Wh/km   : "
+            var l4Txt = useImperial ? "mi Range: " : "km Range: "
 
             valText2.text =
                     l1Txt + parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(3) + "\n" +
-                    l2Txt + parseFloat(wh_km / impFact).toFixed(1) + "\n" +
-                    l3Txt + parseFloat(values.battery_wh / (wh_km / impFact)).toFixed(2) + "\n" +
-                    "VESCs   : " + values.num_vescs
+                    l2Txt + parseFloat((values.odometer * impFact) / 1000.0).toFixed(odometerBox.decimals) + "\n" +
+                    l3Txt + parseFloat(wh_km / impFact).toFixed(1) + "\n" +
+                    l4Txt + parseFloat(values.battery_wh / (wh_km / impFact)).toFixed(2)
         }
     }
 }

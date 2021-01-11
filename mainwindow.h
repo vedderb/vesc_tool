@@ -28,6 +28,7 @@
 #include <QMap>
 #include "vescinterface.h"
 #include "widgets/pagelistitem.h"
+#include "mobile/qmlui.h"
 
 #include "pages/pagewelcome.h"
 #include "pages/pageconnection.h"
@@ -52,6 +53,7 @@
 #include "pages/pageappnunchuk.h"
 #include "pages/pageappnrf.h"
 #include "pages/pageappbalance.h"
+#include "pages/pageapppas.h"
 #include "pages/pagesettings.h"
 #include "pages/pagegpd.h"
 #include "pages/pageexperiments.h"
@@ -60,6 +62,8 @@
 #include "pages/pageappimu.h"
 #include "pages/pageloganalysis.h"
 #include "pages/pagecananalyzer.h"
+#include "pages/pagebms.h"
+#include "pages/pagecustomconfig.h"
 
 namespace Ui {
 class MainWindow;
@@ -112,6 +116,8 @@ private slots:
     void on_actionParameterEditorMcconf_triggered();
     void on_actionParameterEditorAppconf_triggered();
     void on_actionParameterEditorInfo_triggered();
+    void on_actionParameterEditorFW_triggered();
+    void on_actionParameterEditorCustomConf0_triggered();
     void on_actionSaveMotorConfigurationHeader_triggered();
     void on_actionSaveAppConfigurationHeader_triggered();
     void on_actionSaveMotorConfigurationHeaderWrap_triggered();
@@ -134,11 +140,13 @@ private slots:
     void on_actionBackupConfiguration_triggered();
     void on_actionRestoreConfiguration_triggered();
     void on_actionClearConfigurationBackups_triggered();
-    void on_actionParameterEditorFW_triggered();
     void on_actionBackupConfigurationsCAN_triggered();
     void on_actionRestoreConfigurationsCAN_triggered();
     void on_scanCanButton_clicked();
     void on_canList_currentRowChanged(int currentRow);
+    void on_actionGamepadControl_triggered(bool checked);
+    void on_actionLoadMeters_triggered();
+    void on_actionCloseCustomGUI_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -154,6 +162,7 @@ private:
     bool mMcConfRead;
     bool mAppConfRead;
     QMap<QString, int> mPageNameIdList;
+    QmlUi mQmlUi;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;
@@ -181,11 +190,16 @@ private:
     PageAppNunchuk *mPageAppNunchuk;
     PageAppNrf *mPageAppNrf;
     PageAppBalance *mPageAppBalance;
+    PageAppPas *mPageAppPas;
     PageSettings *mPageSettings;
     PageSwdProg *mPageSwdProg;
     PageAppImu *mPageAppImu;
     PageLogAnalysis *mPageLogAnalysis;
     PageCanAnalyzer *mPageCanAnalyzer;
+    PageBms *mPageBms;
+    PageCustomConfig *mPageCustomConfig0;
+    PageCustomConfig *mPageCustomConfig1;
+    PageCustomConfig *mPageCustomConfig2;
 
     void addPageItem(QString name,
                      QString icon = "",

@@ -63,6 +63,12 @@ typedef enum {
 } gpd_output_mode;
 
 typedef enum {
+    HW_TYPE_VESC = 0,
+    HW_TYPE_VESC_BMS,
+    HW_TYPE_CUSTOM_MODULE
+} HW_TYPE;
+
+typedef enum {
     FAULT_CODE_NONE = 0,
     FAULT_CODE_OVER_VOLTAGE,
     FAULT_CODE_UNDER_VOLTAGE,
@@ -84,7 +90,10 @@ typedef enum {
     FAULT_CODE_UNBALANCED_CURRENTS,
     FAULT_CODE_RESOLVER_LOT,
     FAULT_CODE_RESOLVER_DOS,
-    FAULT_CODE_RESOLVER_LOS
+    FAULT_CODE_RESOLVER_LOS,
+    FAULT_CODE_FLASH_CORRUPTION_APP_CFG,
+    FAULT_CODE_FLASH_CORRUPTION_MC_CFG,
+    FAULT_CODE_ENCODER_NO_MAGNET
 } mc_fault_code;
 
 typedef enum {
@@ -96,6 +105,25 @@ typedef enum {
     DISP_POS_MODE_PID_POS_ERROR,
     DISP_POS_MODE_ENCODER_OBSERVER_ERROR
 } disp_pos_mode;
+
+// ADC control types. Remember to add new types here when adding them to the firmware.
+typedef enum {
+    ADC_CTRL_TYPE_NONE = 0,
+    ADC_CTRL_TYPE_CURRENT,
+    ADC_CTRL_TYPE_CURRENT_REV_CENTER,
+    ADC_CTRL_TYPE_CURRENT_REV_BUTTON,
+    ADC_CTRL_TYPE_CURRENT_REV_BUTTON_BRAKE_ADC,
+    ADC_CTRL_TYPE_CURRENT_REV_BUTTON_BRAKE_CENTER,
+    ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_CENTER,
+    ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_BUTTON,
+    ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_ADC,
+    ADC_CTRL_TYPE_DUTY,
+    ADC_CTRL_TYPE_DUTY_REV_CENTER,
+    ADC_CTRL_TYPE_DUTY_REV_BUTTON,
+    ADC_CTRL_TYPE_PID,
+    ADC_CTRL_TYPE_PID_REV_CENTER,
+    ADC_CTRL_TYPE_PID_REV_BUTTON
+} adc_control_type;
 
 struct MC_VALUES {
     Q_GADGET
@@ -214,6 +242,7 @@ struct SETUP_VALUES {
     Q_PROPERTY(int num_vescs MEMBER num_vescs)
     Q_PROPERTY(double battery_wh MEMBER battery_wh)
     Q_PROPERTY(QString fault_str MEMBER fault_str)
+    Q_PROPERTY(unsigned odometer MEMBER odometer)
 
 public:
     SETUP_VALUES() {
@@ -237,6 +266,7 @@ public:
         vesc_id = 0;
         num_vescs = 0;
         battery_wh = 0.0;
+        odometer = 0;
     }
 
     bool operator==(const SETUP_VALUES &other) const {
@@ -270,6 +300,7 @@ public:
     int num_vescs;
     double battery_wh;
     QString fault_str;
+    unsigned odometer;
 };
 
 Q_DECLARE_METATYPE(SETUP_VALUES)
@@ -433,6 +464,113 @@ public:
 
 Q_DECLARE_METATYPE(CONFIG_BACKUP)
 
+struct FW_RX_PARAMS {
+    Q_GADGET
+
+    Q_PROPERTY(int major MEMBER major)
+    Q_PROPERTY(int minor MEMBER minor)
+    Q_PROPERTY(QString hw MEMBER hw)
+    Q_PROPERTY(QByteArray uuid MEMBER uuid)
+    Q_PROPERTY(bool isPaired MEMBER isPaired)
+    Q_PROPERTY(int isTestFw MEMBER isTestFw)
+    Q_PROPERTY(HW_TYPE hwType MEMBER hwType)
+    Q_PROPERTY(int customConfigNum MEMBER customConfigNum)
+
+public:
+    FW_RX_PARAMS() {
+        major = -1;
+        minor = -1;
+        isPaired = false;
+        isTestFw = false;
+        hwType = HW_TYPE_VESC;
+        customConfigNum = 0;
+    }
+
+    Q_INVOKABLE QString hwTypeStr() {
+        QString res = "Unknown Hardware";
+        switch (hwType) {
+        case HW_TYPE_VESC:
+            res = "VESC";
+            break;
+
+        case HW_TYPE_VESC_BMS:
+            res = "VESC BMS";
+            break;
+
+        case HW_TYPE_CUSTOM_MODULE:
+            res = "Custom Module";
+            break;
+        }
+
+        return res;
+    }
+
+    int major;
+    int minor;
+    QString hw;
+    QByteArray uuid;
+    bool isPaired;
+    int isTestFw;
+    HW_TYPE hwType;
+    int customConfigNum;
+};
+
+Q_DECLARE_METATYPE(FW_RX_PARAMS)
+
+struct BMS_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(double v_tot MEMBER v_tot)
+    Q_PROPERTY(double v_charge MEMBER v_charge)
+    Q_PROPERTY(double i_in MEMBER i_in)
+    Q_PROPERTY(double i_in_ic MEMBER i_in_ic)
+    Q_PROPERTY(double ah_cnt MEMBER ah_cnt)
+    Q_PROPERTY(double wh_cnt MEMBER wh_cnt)
+    Q_PROPERTY(QVector<qreal> v_cells MEMBER v_cells)
+    Q_PROPERTY(QVector<qreal> temps MEMBER temps)
+    Q_PROPERTY(QVector<bool> is_balancing MEMBER is_balancing)
+    Q_PROPERTY(double temp_ic MEMBER temp_ic)
+    Q_PROPERTY(double humidity MEMBER humidity)
+    Q_PROPERTY(double temp_hum_sensor MEMBER temp_hum_sensor)
+    Q_PROPERTY(double temp_cells_highest MEMBER temp_cells_highest)
+    Q_PROPERTY(double soc MEMBER soc)
+    Q_PROPERTY(double soh MEMBER soh)
+
+public:
+    BMS_VALUES() {
+        v_tot = 0.0;
+        v_charge = 0.0;
+        i_in = 0.0;
+        i_in_ic = 0.0;
+        ah_cnt = 0.0;
+        wh_cnt = 0.0;
+        humidity = 0.0;
+        temp_hum_sensor = 0.0;
+        temp_cells_highest = 0.0;
+        soc = 0.0;
+        soh = 0.0;
+    }
+
+    double v_tot;
+    double v_charge;
+    double i_in;
+    double i_in_ic;
+    double ah_cnt;
+    double wh_cnt;
+    QVector<qreal> v_cells;
+    QVector<qreal> temps;
+    QVector<bool> is_balancing;
+    double temp_ic;
+    double humidity;
+    double temp_hum_sensor;
+    double temp_cells_highest;
+    double soc;
+    double soh;
+
+};
+
+Q_DECLARE_METATYPE(BMS_VALUES)
+
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,
     DEBUG_SAMPLING_NOW,
@@ -535,7 +673,34 @@ typedef enum {
     COMM_SET_BLE_NAME,
     COMM_SET_BLE_PIN,
     COMM_SET_CAN_MODE,
-    COMM_GET_IMU_CALIBRATION
+    COMM_GET_IMU_CALIBRATION,
+    COMM_GET_MCCONF_TEMP,
+
+    // Custom configuration for hardware
+    COMM_GET_CUSTOM_CONFIG_XML,
+    COMM_GET_CUSTOM_CONFIG,
+    COMM_GET_CUSTOM_CONFIG_DEFAULT,
+    COMM_SET_CUSTOM_CONFIG,
+
+    // BMS commands
+    COMM_BMS_GET_VALUES,
+    COMM_BMS_SET_CHARGE_ALLOWED,
+    COMM_BMS_SET_BALANCE_OVERRIDE,
+    COMM_BMS_RESET_COUNTERS,
+    COMM_BMS_FORCE_BALANCE,
+    COMM_BMS_ZERO_CURRENT_OFFSET,
+
+    // FW updates commands for different HW types
+    COMM_JUMP_TO_BOOTLOADER_HW,
+    COMM_ERASE_NEW_APP_HW,
+    COMM_WRITE_NEW_APP_DATA_HW,
+    COMM_ERASE_BOOTLOADER_HW,
+    COMM_JUMP_TO_BOOTLOADER_ALL_CAN_HW,
+    COMM_ERASE_NEW_APP_ALL_CAN_HW,
+    COMM_WRITE_NEW_APP_DATA_ALL_CAN_HW,
+    COMM_ERASE_BOOTLOADER_ALL_CAN_HW,
+
+    COMM_SET_ODOMETER,
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -611,21 +776,21 @@ struct BALANCE_VALUES {
     Q_GADGET
 
     Q_PROPERTY(double pid_output MEMBER pid_output)
-    Q_PROPERTY(double m_angle MEMBER m_angle)
-    Q_PROPERTY(double c_angle MEMBER c_angle)
-    Q_PROPERTY(uint32_t diff_time MEMBER diff_time)
+    Q_PROPERTY(double pitch_angle MEMBER pitch_angle)
+    Q_PROPERTY(double roll_angle MEMBER roll_angle)
+    Q_PROPERTY(int diff_time MEMBER diff_time)
     Q_PROPERTY(double motor_current MEMBER motor_current)
     Q_PROPERTY(double motor_position MEMBER motor_position)
-    Q_PROPERTY(uint16_t state MEMBER state)
-    Q_PROPERTY(uint16_t switch_value MEMBER switch_value)
+    Q_PROPERTY(int state MEMBER state)
+    Q_PROPERTY(int switch_value MEMBER switch_value)
     Q_PROPERTY(double adc1 MEMBER adc1)
     Q_PROPERTY(double adc2 MEMBER adc2)
 
 public:
     BALANCE_VALUES() {
         pid_output = 0;
-        m_angle = 0;
-        c_angle = 0;
+        pitch_angle = 0;
+        roll_angle = 0;
         diff_time = 0;
         motor_current = 0;
         motor_position = 0;
@@ -636,13 +801,13 @@ public:
     }
 
     double pid_output;
-    double m_angle;
-    double c_angle;
-    uint32_t diff_time;
+    double pitch_angle;
+    double roll_angle;
+    int diff_time;
     double motor_current;
     double motor_position;
-    uint16_t state;
-    uint16_t switch_value;
+    int state;
+    int switch_value;
     double adc1;
     double adc2;
 };

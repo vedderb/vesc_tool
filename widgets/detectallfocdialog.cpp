@@ -20,6 +20,7 @@
 #include "detectallfocdialog.h"
 #include "ui_detectallfocdialog.h"
 #include "utility.h"
+#include "helpdialog.h"
 
 #include <QMessageBox>
 
@@ -258,7 +259,7 @@ void DetectAllFocDialog::runDetect(bool can)
 
     mVesc->commands()->setMcconf(false);
     Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
-    auto canDevs = mVesc->scanCan();
+    auto canDevs = Utility::scanCanVescOnly(mVesc);
 
     if (mVesc->commands()->getLimitedCompatibilityCommands().contains(COMM_SET_BATTERY_CUT)) {
         mVesc->commands()->setBatteryCut(
@@ -299,12 +300,7 @@ void DetectAllFocDialog::runDetect(bool can)
     ui->closeButton->setEnabled(true);
     mRejectOk = true;
 
-    QMessageBox *msg = new QMessageBox(QMessageBox::Information,
-                                       "FOC Detection Result", res,
-                                       QMessageBox::Ok, this);
-    QFont font = QFont("DejaVu Sans Mono");
-    msg->setFont(font);
-    msg->exec();
+    HelpDialog::showHelpMonospace(this, "FOC Detection Result", res);
 
     if (res.startsWith("Success!")) {
         ui->simpleSetupBox->setCurrentIndex(3);

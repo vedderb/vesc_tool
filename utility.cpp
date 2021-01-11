@@ -369,7 +369,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                         arg(sensors);
             };
 
-            QVector<int> canDevs = vesc->scanCan();
+            QVector<int> canDevs = Utility::scanCanVescOnly(vesc);
             res = genRes();
 
             int canLastFwd = vesc->commands()->getSendCan();
@@ -860,7 +860,7 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
     }
 
     if (res && can) {
-        QVector<int> canDevs = vesc->scanCan();
+        QVector<int> canDevs = Utility::scanCanVescOnly(vesc);
 
         for (int d: canDevs) {
             vesc->commands()->setSendCan(true, d);
@@ -996,209 +996,6 @@ bool Utility::createParamParserC(VescInterface *vesc, QString filename)
     outHeader << "// " + headerNameStr + "\n";
     outHeader << "#endif\n";
 
-    auto serialFunc = [](ConfigParams *params, QTextStream &s) {
-        QStringList serialOrder = params->getSerializeOrder();
-
-        for (int i = 0;i < serialOrder.size();i++) {
-            QString name = serialOrder.at(i);
-
-            ConfigParam *p = params->getParam(name);
-
-            int last__ = name.lastIndexOf("__");
-            if (last__ > 0) {
-                QString end = name.mid(last__ + 2);
-                bool ok;
-                int endNum = end.toInt(&ok);
-                if (ok) {
-                    name = name.left(last__) + QString("[%1]").arg(endNum);
-                }
-            }
-
-            if (p) {
-                switch (p->type) {
-                case CFG_T_BOOL:
-                case CFG_T_ENUM:
-                    s << "\t" << "buffer[ind++] = conf->" << name << ";\n";
-                    break;
-
-                case CFG_T_INT:
-                    switch (p->vTx) {
-                    case VESC_TX_UINT8:
-                    case VESC_TX_INT8:
-                        s << "\t" << "buffer[ind++] = (uint8_t)conf->" << name << ";\n";
-                        break;
-
-                    case VESC_TX_UINT16:
-                        s << "\t" << "buffer_append_uint16(buffer, conf->" << name << ", &ind);\n";
-                        break;
-
-                    case VESC_TX_INT16:
-                        s << "\t" << "buffer_append_int16(buffer, conf->" << name << ", &ind);\n";
-                        break;
-
-                    case VESC_TX_UINT32:
-                        s << "\t" << "buffer_append_uint32(buffer, conf->" << name << ", &ind);\n";
-                        break;
-
-                    case VESC_TX_INT32:
-                        s << "\t" << "buffer_append_int32(buffer, conf->" << name << ", &ind);\n";
-                        break;
-
-                    default:
-                        qWarning() << "Serialization type not supporter";
-                        break;
-                    }
-                    break;
-
-                case CFG_T_DOUBLE:
-                    switch (p->vTx) {
-                    case VESC_TX_DOUBLE16:
-                        s << "\t" << "buffer_append_float16(buffer, conf->" << name << ", " << p->vTxDoubleScale << ", &ind);\n";
-                        break;
-
-                    case VESC_TX_DOUBLE32:
-                        s << "\t" << "buffer_append_float32(buffer, conf->" << name << ", " << p->vTxDoubleScale << ", &ind);\n";
-                        break;
-
-                    case VESC_TX_DOUBLE32_AUTO:
-                        s << "\t" << "buffer_append_float32_auto(buffer, conf->" << name << ", &ind);\n";
-                        break;
-
-                    default:
-                        qWarning() << "Serialization type not supporter";
-                        break;
-                    }
-                    break;
-
-                default:
-                    qWarning() << name << ": type not supported.";
-                    break;
-                }
-            } else {
-                qWarning() << name << "not found.";
-            }
-        }
-    };
-
-    auto deserialFunc = [](ConfigParams *params, QTextStream &s) {
-        QStringList serialOrder = params->getSerializeOrder();
-
-        for (int i = 0;i < serialOrder.size();i++) {
-            QString name = serialOrder.at(i);
-
-            ConfigParam *p = params->getParam(name);
-
-            int last__ = name.lastIndexOf("__");
-            if (last__ > 0) {
-                QString end = name.mid(last__ + 2);
-                bool ok;
-                int endNum = end.toInt(&ok);
-                if (ok) {
-                    name = name.left(last__) + QString("[%1]").arg(endNum);
-                }
-            }
-
-            if (p) {
-                switch (p->type) {
-                case CFG_T_BOOL:
-                case CFG_T_ENUM:
-                    s << "\tconf->" << name << " = buffer[ind++];\n";
-                    break;
-
-                case CFG_T_INT:
-                    switch (p->vTx) {
-                    case VESC_TX_UINT8:
-                        s << "\tconf->" << name << " = buffer[ind++];\n";
-                        break;
-
-                    case VESC_TX_INT8:
-                        s << "\tconf->" << name << " = (int8_t)buffer[ind++];\n";
-                        break;
-
-                    case VESC_TX_UINT16:
-                        s << "\tconf->" << name << " = buffer_get_uint16(buffer, &ind);\n";
-                        break;
-
-                    case VESC_TX_INT16:
-                        s << "\tconf->" << name << " = buffer_get_int16(buffer, &ind);\n";
-                        break;
-
-                    case VESC_TX_UINT32:
-                        s << "\tconf->" << name << " = buffer_get_uint32(buffer, &ind);\n";
-                        break;
-
-                    case VESC_TX_INT32:
-                        s << "\tconf->" << name << " = buffer_get_int32(buffer, &ind);\n";
-                        break;
-
-                    default:
-                        qWarning() << "Serialization type not supporter";
-                        break;
-                    }
-                    break;
-                    break;
-
-                case CFG_T_DOUBLE:
-                    switch (p->vTx) {
-                    case VESC_TX_DOUBLE16:
-                        s << "\tconf->" << name << " = buffer_get_float16(buffer, " << p->vTxDoubleScale << ", &ind);\n";
-                        break;
-
-                    case VESC_TX_DOUBLE32:
-                        s << "\tconf->" << name << " = buffer_get_float32(buffer, " << p->vTxDoubleScale << ", &ind);\n";
-                        break;
-
-                    case VESC_TX_DOUBLE32_AUTO:
-                        s << "\tconf->" << name << " = buffer_get_float32_auto(buffer, &ind);\n";
-                        break;
-
-                    default:
-                        qWarning() << "Serialization type not supporter";
-                        break;
-                    }
-                    break;
-
-                default:
-                    qWarning() << name << ": type not supported.";
-                    break;
-                }
-            } else {
-                qWarning() << name << "not found.";
-            }
-        }
-    };
-
-    auto defaultFunc = [](ConfigParams *params, QTextStream &s) {
-        QStringList serialOrder = params->getSerializeOrder();
-
-        for (int i = 0;i < serialOrder.size();i++) {
-            QString name = serialOrder.at(i);
-
-            ConfigParam *p = params->getParam(name);
-
-            int last__ = name.lastIndexOf("__");
-            if (last__ > 0) {
-                QString end = name.mid(last__ + 2);
-                bool ok;
-                int endNum = end.toInt(&ok);
-                if (ok) {
-                    name = name.left(last__) + QString("[%1]").arg(endNum);
-                }
-            }
-
-            if (p) {
-                QString def = p->cDefine;
-                // Kind of a hack...
-                if (name == "controller_id") {
-                    def = "HW_DEFAULT_ID";
-                }
-                s << "\tconf->" << name << " = " << def << ";\n";
-            } else {
-                qWarning() << name << "not found.";
-            }
-        }
-    };
-
     outSource << "// This file is autogenerated by VESC Tool\n\n";
     outSource << "#include \"buffer.h\"\n";
     outSource << "#include \"conf_general.h\"\n";
@@ -1254,6 +1051,164 @@ bool Utility::createParamParserC(VescInterface *vesc, QString filename)
     return true;
 }
 
+bool Utility::createParamParserC(ConfigParams *params, QString configName, QString filename)
+{
+    if (filename.toLower().endsWith(".c") || filename.toLower().endsWith(".h")) {
+        filename.chop(2);
+    }
+
+    QString sourceFileName = filename + ".c";
+    QString headerFileName = filename + ".h";
+
+    QFile sourceFile(sourceFileName);
+    if (!sourceFile.open(QIODevice::WriteOnly)) {
+        qWarning() << tr("Could not open %1 for writing").arg(sourceFileName);
+        return false;
+    }
+
+    QFile headerFile(headerFileName);
+    if (!headerFile.open(QIODevice::WriteOnly)) {
+        qWarning() << tr("Could not open %1 for writing").arg(headerFileName);
+        return false;
+    }
+
+    QTextStream outSource(&sourceFile);
+    QTextStream outHeader(&headerFile);
+    QFileInfo headerInfo(headerFile);
+    QString headerNameStr = headerInfo.fileName().toUpper().replace(".", "_") + "_";
+    QString prefix = headerInfo.fileName();
+    prefix.chop(2);
+
+    QString signatureString = QString("%1_SIGNATURE").arg(configName.toUpper());
+
+    outHeader << "// This file is autogenerated by VESC Tool\n\n";
+
+    outHeader << "#ifndef " + headerNameStr + "\n";
+    outHeader << "#define " + headerNameStr + "\n\n";
+
+    outHeader << "#include \"datatypes.h\"\n";
+    outHeader << "#include <stdint.h>\n";
+    outHeader << "#include <stdbool.h>\n\n";
+
+    outHeader << "// Constants\n";
+    outHeader << "#define " << signatureString << "\t\t" << params->getSignature() << "\n\n";
+
+    outHeader << "// Functions\n";
+    outHeader << "int32_t " << prefix << "_serialize_" << configName.toLower() << "(uint8_t *buffer, const " << configName << " *conf);\n";
+    outHeader << "bool " << prefix << "_deserialize_" << configName.toLower() << "(const uint8_t *buffer, " << configName << " *conf);\n";
+    outHeader << "void " << prefix << "_set_defaults_" << configName.toLower() << "(" << configName << " *conf);\n\n";
+
+    outHeader << "// " + headerNameStr + "\n";
+    outHeader << "#endif\n";
+
+    outSource << "// This file is autogenerated by VESC Tool\n\n";
+    outSource << "#include \"buffer.h\"\n";
+    outSource << "#include \"conf_general.h\"\n";
+    outSource << "#include \"" << headerInfo.fileName() << "\"\n\n";
+
+    outSource << "int32_t " << prefix << "_serialize_" << configName.toLower() << "(uint8_t *buffer, const " << configName << " *conf) {\n";
+    outSource << "\t" << "int32_t ind = 0;\n\n";
+    outSource << "\t" << "buffer_append_uint32(buffer, " << signatureString << ", &ind);\n\n";
+    serialFunc(params, outSource);
+    outSource << "\n\t" << "return ind;\n";
+    outSource << "}\n\n";
+
+    outSource << "bool " << prefix << "_deserialize_" << configName.toLower() << "(const uint8_t *buffer, " << configName << " *conf) {\n";
+    outSource << "\t" << "int32_t ind = 0;\n\n";
+    outSource << "\t" << "uint32_t signature = buffer_get_uint32(buffer, &ind);\n";
+    outSource << "\t" << "if (signature != " << signatureString << ") {\n";
+    outSource << "\t\t" << "return false;\n";
+    outSource << "\t" << "}\n\n";
+    deserialFunc(params, outSource);
+    outSource << "\n\t" << "return true;\n";
+    outSource << "}\n\n";
+
+    outSource << "void " << prefix << "_set_defaults_" << configName.toLower() << "(" << configName << " *conf) {\n";
+    defaultFunc(params, outSource);
+    outSource << "}\n\n";
+
+    outHeader.flush();
+    outSource.flush();
+    headerFile.close();
+    sourceFile.close();
+
+    return true;
+}
+
+bool Utility::createCompressedConfigC(ConfigParams *params, QString configName, QString filename)
+{
+    if (filename.toLower().endsWith(".c") || filename.toLower().endsWith(".h")) {
+        filename.chop(2);
+    }
+
+    QString sourceFileName = filename + ".c";
+    QString headerFileName = filename + ".h";
+
+    QFile sourceFile(sourceFileName);
+    if (!sourceFile.open(QIODevice::WriteOnly)) {
+        qWarning() << tr("Could not open %1 for writing").arg(sourceFileName);
+        return false;
+    }
+
+    QFile headerFile(headerFileName);
+    if (!headerFile.open(QIODevice::WriteOnly)) {
+        qWarning() << tr("Could not open %1 for writing").arg(headerFileName);
+        return false;
+    }
+
+    QTextStream outSource(&sourceFile);
+    QTextStream outHeader(&headerFile);
+    QFileInfo headerInfo(headerFile);
+    QString headerNameStr = headerInfo.fileName().toUpper().replace(".", "_") + "_";
+    QString configNameStr = configName.toLower().replace(".", "_") + "_";
+    QString prefix = headerInfo.fileName();
+    prefix.chop(2);
+
+    QByteArray compressed = params->getCompressedParamsXml();
+
+    outHeader << "// This file is autogenerated by VESC Tool\n\n";
+
+    outHeader << "#ifndef " + headerNameStr + "\n";
+    outHeader << "#define " + headerNameStr + "\n\n";
+
+    outHeader << "#include \"datatypes.h\"\n";
+    outHeader << "#include <stdint.h>\n";
+    outHeader << "#include <stdbool.h>\n\n";
+
+    outHeader << "// Constants\n";
+    outHeader << "#define DATA_" << configNameStr.toUpper() << "_SIZE\t\t" << compressed.size() << "\n\n";
+
+    outHeader << "// Variables\n";
+    outHeader << "extern uint8_t data_" << configNameStr << "[];\n\n";
+
+    outHeader << "// " + headerNameStr + "\n";
+    outHeader << "#endif\n";
+
+    outSource << "// This file is autogenerated by VESC Tool\n\n";
+    outSource << "#include \"" << headerInfo.fileName() << "\"\n\n";
+    outSource << "uint8_t data_" << configNameStr << "[" << compressed.size() << "] = {\n\t";
+
+    int posCnt = 0;
+    for (auto b: compressed) {
+        if (posCnt >= 16) {
+            posCnt = 0;
+            outSource << "\n\t";
+        }
+
+        outSource << QString("0x%1, ").arg(quint8(b), 2, 16, QLatin1Char('0'));
+        posCnt++;
+    }
+
+    outSource << "\n};\n";
+
+    outHeader.flush();
+    outSource.flush();
+    headerFile.close();
+    sourceFile.close();
+
+    return true;
+}
+
 uint32_t Utility::crc32c(uint8_t *data, uint32_t len)
 {
     uint32_t crc = 0xFFFFFFFF;
@@ -1271,29 +1226,59 @@ uint32_t Utility::crc32c(uint8_t *data, uint32_t len)
     return ~crc;
 }
 
-bool Utility::checkFwCompatibility(VescInterface *vesc)
+bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
 {
     bool res = false;
 
     auto conn = connect(vesc->commands(), &Commands::fwVersionReceived,
-            [&res, vesc](int major, int minor, QString hw, QByteArray uuid,
-                        bool isPaired, int isTestFw) {
-        (void)hw;(void)uuid;(void)isPaired;(void)isTestFw;
-        if (vesc->getSupportedFirmwarePairs().contains(qMakePair(major, minor))) {
-            res = true;
+            [&](FW_RX_PARAMS paramsRx) {
+        if (params) {
+            *params = paramsRx;
         }
+        res = true;
     });
 
-    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-               vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+               vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)), 1500);
+    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 2000);
 
     disconnect(conn);
 
-    connect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-            vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    connect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+            vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+
+    return res;
+}
+
+bool Utility::getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId)
+{
+    vesc->ignoreCanChange(true);
+    bool canLastFwd = vesc->commands()->getSendCan();
+    int canLastId = vesc->commands()->getCanSendId();
+    vesc->commands()->setSendCan(true, canId);
+    bool res = getFwVersionBlocking(vesc, params);
+    vesc->commands()->setSendCan(canLastFwd, canLastId);
+    vesc->ignoreCanChange(false);
+    return res;
+}
+
+FW_RX_PARAMS Utility::getFwVersionBlockingCan(VescInterface *vesc, int canId)
+{
+    FW_RX_PARAMS params;
+    getFwVersionBlockingCan(vesc, &params, canId);
+    return params;
+}
+
+bool Utility::checkFwCompatibility(VescInterface *vesc)
+{
+    bool res = false;
+
+    FW_RX_PARAMS params;
+    if (getFwVersionBlocking(vesc, &params)) {
+        res = vesc->getSupportedFirmwarePairs().contains(qMakePair(params.major, params.minor));
+    }
 
     return res;
 }
@@ -1553,17 +1538,14 @@ bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
     bool res = false;
 
     auto conn = connect(vesc->commands(), &Commands::fwVersionReceived,
-            [&res, &uuidRx, vesc](int major, int minor, QString hw, QByteArray uuid,
-                        bool isPaired, int isTestFw) {
-        (void)hw;(void)uuid;(void)isPaired;(void)isTestFw;
-
-        if (vesc->getSupportedFirmwarePairs().contains(qMakePair(major, minor))) {
+            [&res, &uuidRx, vesc](FW_RX_PARAMS params) {
+        if (vesc->getSupportedFirmwarePairs().contains(qMakePair(params.major, params.minor))) {
             res = true;
         } else {
-            res = configLoad(vesc, major, minor);
+            res = configLoad(vesc, params.major, params.minor);
         }
 
-        QString uuidStr = uuid2Str(uuid, true);
+        QString uuidStr = uuid2Str(params.uuid, true);
         uuidRx = uuidStr.toUpper();
         uuidRx.replace(" ", "");
 
@@ -1572,19 +1554,238 @@ bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
         }
     });
 
-    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-               vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+               vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     vesc->commands()->getFwVersion();
 
-    if (!waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)), 1500)) {
+    if (!waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 1500)) {
         vesc->emitMessageDialog("Load Config", "No response when reading firmware version.", false, false);
     }
 
     disconnect(conn);
 
-    connect(vesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-            vesc, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    connect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+            vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     return res;
+}
+
+QVector<int> Utility::scanCanVescOnly(VescInterface *vesc)
+{
+    auto canDevs = vesc->scanCan();
+    QVector<int> res;
+
+    for (auto d: canDevs) {
+        FW_RX_PARAMS params;
+        getFwVersionBlockingCan(vesc, &params, d);
+        if (params.hwType == HW_TYPE_VESC) {
+            res.append(d);
+        }
+    }
+
+    return res;
+}
+
+void Utility::serialFunc(ConfigParams *params, QTextStream &s) {
+    QStringList serialOrder = params->getSerializeOrder();
+
+    for (int i = 0;i < serialOrder.size();i++) {
+        QString name = serialOrder.at(i);
+
+        ConfigParam *p = params->getParam(name);
+
+        int last__ = name.lastIndexOf("__");
+        if (last__ > 0) {
+            QString end = name.mid(last__ + 2);
+            bool ok;
+            int endNum = end.toInt(&ok);
+            if (ok) {
+                name = name.left(last__) + QString("[%1]").arg(endNum);
+            }
+        }
+
+        if (p) {
+            switch (p->type) {
+            case CFG_T_BOOL:
+            case CFG_T_ENUM:
+                s << "\t" << "buffer[ind++] = conf->" << name << ";\n";
+                break;
+
+            case CFG_T_INT:
+                switch (p->vTx) {
+                case VESC_TX_UINT8:
+                case VESC_TX_INT8:
+                    s << "\t" << "buffer[ind++] = (uint8_t)conf->" << name << ";\n";
+                    break;
+
+                case VESC_TX_UINT16:
+                    s << "\t" << "buffer_append_uint16(buffer, conf->" << name << ", &ind);\n";
+                    break;
+
+                case VESC_TX_INT16:
+                    s << "\t" << "buffer_append_int16(buffer, conf->" << name << ", &ind);\n";
+                    break;
+
+                case VESC_TX_UINT32:
+                    s << "\t" << "buffer_append_uint32(buffer, conf->" << name << ", &ind);\n";
+                    break;
+
+                case VESC_TX_INT32:
+                    s << "\t" << "buffer_append_int32(buffer, conf->" << name << ", &ind);\n";
+                    break;
+
+                default:
+                    qWarning() << "Serialization type not supporter";
+                    break;
+                }
+                break;
+
+            case CFG_T_DOUBLE:
+                switch (p->vTx) {
+                case VESC_TX_DOUBLE16:
+                    s << "\t" << "buffer_append_float16(buffer, conf->" << name << ", " << p->vTxDoubleScale << ", &ind);\n";
+                    break;
+
+                case VESC_TX_DOUBLE32:
+                    s << "\t" << "buffer_append_float32(buffer, conf->" << name << ", " << p->vTxDoubleScale << ", &ind);\n";
+                    break;
+
+                case VESC_TX_DOUBLE32_AUTO:
+                    s << "\t" << "buffer_append_float32_auto(buffer, conf->" << name << ", &ind);\n";
+                    break;
+
+                default:
+                    qWarning() << "Serialization type not supporter";
+                    break;
+                }
+                break;
+
+            default:
+                qWarning() << name << ": type not supported.";
+                break;
+            }
+        } else {
+            qWarning() << name << "not found.";
+        }
+    }
+}
+
+void Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
+    QStringList serialOrder = params->getSerializeOrder();
+
+    for (int i = 0;i < serialOrder.size();i++) {
+        QString name = serialOrder.at(i);
+
+        ConfigParam *p = params->getParam(name);
+
+        int last__ = name.lastIndexOf("__");
+        if (last__ > 0) {
+            QString end = name.mid(last__ + 2);
+            bool ok;
+            int endNum = end.toInt(&ok);
+            if (ok) {
+                name = name.left(last__) + QString("[%1]").arg(endNum);
+            }
+        }
+
+        if (p) {
+            switch (p->type) {
+            case CFG_T_BOOL:
+            case CFG_T_ENUM:
+                s << "\tconf->" << name << " = buffer[ind++];\n";
+                break;
+
+            case CFG_T_INT:
+                switch (p->vTx) {
+                case VESC_TX_UINT8:
+                    s << "\tconf->" << name << " = buffer[ind++];\n";
+                    break;
+
+                case VESC_TX_INT8:
+                    s << "\tconf->" << name << " = (int8_t)buffer[ind++];\n";
+                    break;
+
+                case VESC_TX_UINT16:
+                    s << "\tconf->" << name << " = buffer_get_uint16(buffer, &ind);\n";
+                    break;
+
+                case VESC_TX_INT16:
+                    s << "\tconf->" << name << " = buffer_get_int16(buffer, &ind);\n";
+                    break;
+
+                case VESC_TX_UINT32:
+                    s << "\tconf->" << name << " = buffer_get_uint32(buffer, &ind);\n";
+                    break;
+
+                case VESC_TX_INT32:
+                    s << "\tconf->" << name << " = buffer_get_int32(buffer, &ind);\n";
+                    break;
+
+                default:
+                    qWarning() << "Serialization type not supporter";
+                    break;
+                }
+                break;
+                break;
+
+            case CFG_T_DOUBLE:
+                switch (p->vTx) {
+                case VESC_TX_DOUBLE16:
+                    s << "\tconf->" << name << " = buffer_get_float16(buffer, " << p->vTxDoubleScale << ", &ind);\n";
+                    break;
+
+                case VESC_TX_DOUBLE32:
+                    s << "\tconf->" << name << " = buffer_get_float32(buffer, " << p->vTxDoubleScale << ", &ind);\n";
+                    break;
+
+                case VESC_TX_DOUBLE32_AUTO:
+                    s << "\tconf->" << name << " = buffer_get_float32_auto(buffer, &ind);\n";
+                    break;
+
+                default:
+                    qWarning() << "Serialization type not supporter";
+                    break;
+                }
+                break;
+
+            default:
+                qWarning() << name << ": type not supported.";
+                break;
+            }
+        } else {
+            qWarning() << name << "not found.";
+        }
+    }
+}
+
+void Utility::defaultFunc(ConfigParams *params, QTextStream &s) {
+    QStringList serialOrder = params->getSerializeOrder();
+
+    for (int i = 0;i < serialOrder.size();i++) {
+        QString name = serialOrder.at(i);
+
+        ConfigParam *p = params->getParam(name);
+
+        int last__ = name.lastIndexOf("__");
+        if (last__ > 0) {
+            QString end = name.mid(last__ + 2);
+            bool ok;
+            int endNum = end.toInt(&ok);
+            if (ok) {
+                name = name.left(last__) + QString("[%1]").arg(endNum);
+            }
+        }
+
+        if (p) {
+            QString def = p->cDefine;
+            // Kind of a hack...
+            if (name == "controller_id") {
+                def = "HW_DEFAULT_ID";
+            }
+            s << "\tconf->" << name << " = " << def << ";\n";
+        } else {
+            qWarning() << name << "not found.";
+        }
+    }
 }

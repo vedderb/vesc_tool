@@ -53,7 +53,7 @@ Item {
                                   "isCan": false})
             dialog.open()
             disableDialog()
-            var canDevs = VescIf.scanCan()
+            var canDevs = Utility.scanCanVescOnly(VescIf)
 
             for (var i = 0;i < canDevs.length;i++) {
                 canIdModel.append({"name": "VESC on CAN-bus",

@@ -60,7 +60,12 @@ public:
     Q_INVOKABLE static bool restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app);
     Q_INVOKABLE static bool almostEqual(double A, double B, double eps);
     static bool createParamParserC(VescInterface *vesc, QString filename);
+    static bool createParamParserC(ConfigParams *params, QString configName, QString filename);
+    static bool createCompressedConfigC(ConfigParams *params, QString configName, QString filename);
     static uint32_t crc32c(uint8_t *data, uint32_t len);
+    static bool getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params);
+    static bool getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId);
+    Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlockingCan(VescInterface *vesc, int canId);
     static bool checkFwCompatibility(VescInterface *vesc);
     Q_INVOKABLE static QVariantList getNetworkAddresses();
     Q_INVOKABLE static void startGnssForegroundService();
@@ -78,6 +83,7 @@ public:
     static bool configLoadLatest(VescInterface *vesc);
     static QVector<QPair<int, int>> configSupportedFws();
     static bool configLoadCompatible(VescInterface *vesc, QString &uuidRx);
+    Q_INVOKABLE static QVector<int> scanCanVescOnly(VescInterface *vesc);
 
     template<typename QEnum>
     static QString QEnumToQString (const QEnum value) {
@@ -87,6 +93,12 @@ public:
 signals:
 
 public slots:
+
+private:
+    static void serialFunc(ConfigParams *params, QTextStream &s);
+    static void deserialFunc(ConfigParams *params, QTextStream &s);
+    static void defaultFunc(ConfigParams *params, QTextStream &s);
+
 };
 
 #endif // UTILITY_H

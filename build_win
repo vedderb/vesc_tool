@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# http://stackoverflow.com/questions/14170590/building-qt-5-on-linux-for-windows
+# https://stackoverflow.com/questions/14170590/building-qt-5-on-linux-for-windows
+# https://github.com/mxe/mxe/issues/2561
 
 # cd /opt
 # sudo mkdir mxe2
 # sudo chown $USER mxe2
 # git clone https://github.com/mxe/mxe.git mxe2
-# sudo apt-get install autoconf automake autopoint bash bison bzip2 flex gettext git g++ gperf intltool libffi-dev libgdk-pixbuf2.0-dev libtool libltdl-dev libssl-dev libxml-parser-perl make openssl p7zip-full patch perl pkg-config python ruby scons sed unzip wget xz-utils g++-multilib libc6-dev-i386 libtool-bin lzip
+# sudo apt-get install autoconf automake autopoint bash bison bzip2 flex gettext git g++ gperf intltool libffi-dev libgdk-pixbuf2.0-dev libtool libltdl-dev libssl-dev libxml-parser-perl make openssl p7zip-full patch perl pkg-config python ruby scons sed unzip wget xz-utils g++-multilib libc6-dev-i386 libtool-bin lzip python-mako
 # cd mxe2
 # make qtbase
 # make qtserialport
@@ -15,6 +16,8 @@
 # make qtquickcontrols2
 # make qtserialbus
 # make qtlocation
+# make qtgamepad
+# make qtgraphicaleffects
 
 set -e
 

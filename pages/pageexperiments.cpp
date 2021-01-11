@@ -183,72 +183,82 @@ void PageExperiments::timerSlot()
     }
 #endif
 
-    if (mState != EXPERIMENT_OFF) {
-        mVesc->commands()->getValues();
+    if(mState == EXPERIMENT_HOLD){
+        mVesc->commands()->setRpm( ui->rpmEndBox->value() );
+    }else{
+        if (mState != EXPERIMENT_OFF) {
 
-        double from = 0.0;
-        double to = 0.0;
-        double step = 0.0;
-        double stepTime = 0.0;
+            mVesc->commands()->getValues();
 
-        switch (mState) {
-        case EXPERIMENT_DUTY:
-            from = ui->dutyFromBox->value();
-            to = ui->dutyToBox->value();
-            step = ui->dutyStepBox->value();
-            stepTime = ui->dutyStepTimeBox->value();
-            break;
-
-        case EXPERIMENT_CURRENT:
-            from = ui->currentFromBox->value();
-            to = ui->currentToBox->value();
-            step = ui->currentStepBox->value();
-            stepTime = ui->currentStepTimeBox->value();
-            break;
-
-        case EXPERIMENT_RPM:
-            from = ui->rpmFromBox->value();
-            to = ui->rpmToBox->value();
-            step = ui->rpmStepBox->value();
-            stepTime = ui->rpmStepTimeBox->value();
-            break;
-
-        default:
-            break;
-        }
-
-        if (from > to) {
-            step = -step;
-        }
-
-        double elapsedSecs = (double)mExperimentTimer.elapsed() / 1000.0;
-        double totalSteps = (to - from) / step;
-        double totalTime = totalSteps * stepTime;
-        double progress = elapsedSecs / totalTime;
-        double stepNow = floor(progress * totalSteps);
-        double valueNow = from + stepNow * step;
-
-        if (progress >= 1.0) {
-            mState = EXPERIMENT_OFF;
-            mVesc->commands()->setCurrent(0);
-        } else {
-            ui->progressBar->setValue(progress * 100);
+            double from = 0.0;
+            double to = 0.0;
+            double step = 0.0;
+            double stepTime = 0.0;
 
             switch (mState) {
             case EXPERIMENT_DUTY:
-                mVesc->commands()->setDutyCycle(valueNow);
+                from = ui->dutyFromBox->value();
+                to = ui->dutyToBox->value();
+                step = ui->dutyStepBox->value();
+                stepTime = ui->dutyStepTimeBox->value();
                 break;
 
             case EXPERIMENT_CURRENT:
-                mVesc->commands()->setCurrent(valueNow);
+                from = ui->currentFromBox->value();
+                to = ui->currentToBox->value();
+                step = ui->currentStepBox->value();
+                stepTime = ui->currentStepTimeBox->value();
                 break;
 
             case EXPERIMENT_RPM:
-                mVesc->commands()->setRpm(valueNow);
+                from = ui->rpmFromBox->value();
+                to = ui->rpmToBox->value();
+                step = ui->rpmStepBox->value();
+                stepTime = ui->rpmStepTimeBox->value();
                 break;
 
             default:
                 break;
+            }
+
+            if (from > to) {
+                step = -step;
+            }
+
+            double elapsedSecs = (double)mExperimentTimer.elapsed() / 1000.0;
+            double totalSteps = (to - from) / step;
+            double totalTime = totalSteps * stepTime;
+            double progress = elapsedSecs / totalTime;
+            double stepNow = floor(progress * totalSteps);
+            double valueNow = from + stepNow * step;
+
+            if (progress >= 1.0) {
+                if (mState == EXPERIMENT_RPM && ui->keepRPMcheckBox->isChecked()) {
+                    mVesc->commands()->setRpm(ui->rpmEndBox->value());
+                    mState = EXPERIMENT_HOLD;
+                } else {
+                    mVesc->commands()->setCurrent(0);
+                    mState = EXPERIMENT_OFF;
+                }
+            } else {
+                ui->progressBar->setValue(progress * 100);
+
+                switch (mState) {
+                case EXPERIMENT_DUTY:
+                    mVesc->commands()->setDutyCycle(valueNow);
+                    break;
+
+                case EXPERIMENT_CURRENT:
+                    mVesc->commands()->setCurrent(valueNow);
+                    break;
+
+                case EXPERIMENT_RPM:
+                    mVesc->commands()->setRpm(valueNow);
+                    break;
+
+                default:
+                    break;
+                }
             }
         }
     }

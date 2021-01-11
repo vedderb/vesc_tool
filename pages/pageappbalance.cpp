@@ -102,10 +102,16 @@ void PageAppBalance::reloadParams()
 {
     if (mVesc) {
         ui->tunePane->clearParams();
-        ui->configPane->clearParams();
+        ui->startupPane->clearParams();
+        ui->tiltbackPane->clearParams();
+        ui->faultPane->clearParams();
+        ui->multiescPane->clearParams();
 
         ui->tunePane->addParamSubgroup(mVesc->appConfig(), "balance", "tune");
-        ui->configPane->addParamSubgroup(mVesc->appConfig(), "balance", "config");
+        ui->startupPane->addParamSubgroup(mVesc->appConfig(), "balance", "startup");
+        ui->tiltbackPane->addParamSubgroup(mVesc->appConfig(), "balance", "tiltback");
+        ui->faultPane->addParamSubgroup(mVesc->appConfig(), "balance", "fault");
+        ui->multiescPane->addParamSubgroup(mVesc->appConfig(), "balance", "multi esc");
     }
 }
 
@@ -141,8 +147,8 @@ void PageAppBalance::appValuesReceived(BALANCE_VALUES values) {
     const int maxS = 250;
 
     appendDoubleAndTrunc(&mAppPidOutputVec, values.pid_output, maxS);
-    appendDoubleAndTrunc(&mAppMAngleVec, values.m_angle, maxS);
-    appendDoubleAndTrunc(&mAppCAngleVec, values.c_angle, maxS);
+    appendDoubleAndTrunc(&mAppMAngleVec, values.pitch_angle, maxS);
+    appendDoubleAndTrunc(&mAppCAngleVec, values.roll_angle, maxS);
     mAppDiffTime = values.diff_time;
     appendDoubleAndTrunc(&mAppMotorCurrentVec, values.motor_current, maxS);
     appendDoubleAndTrunc(&mAppMotorPositionVec, values.motor_position, maxS);
@@ -187,9 +193,25 @@ void PageAppBalance::updateTextOutput(){
     }else if(mAppState == 1){
         output = output + "Running";
     }else if(mAppState == 2){
-        output = output + "Fault";
+        output = output + "Running (Tiltback Duty)";
     }else if(mAppState == 3){
-        output = output + "Dead";
+        output = output + "Running (Tiltback High Voltage)";
+    }else if(mAppState == 4){
+        output = output + "Running (Tiltback Low Voltage)";
+    }else if(mAppState == 5){
+        output = output + "Running (Tiltback Constant)";
+    }else if(mAppState == 6){
+        output = output + "Fault (Pitch Angle)";
+    }else if(mAppState == 7){
+        output = output + "Fault (Roll Angle)";
+    }else if(mAppState == 8){
+        output = output + "Fault (Switch Half)";
+    }else if(mAppState == 9){
+        output = output + "Fault (Switch FULL)";
+    }else if(mAppState == 10){
+        output = output + "Fault (Duty)";
+    }else if(mAppState == 11){
+        output = output + "Initial";
     }else{
         output = output + "Unknown";
     }

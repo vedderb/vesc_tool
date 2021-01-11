@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1054</width>
-    <height>642</height>
+    <height>652</height>
    </rect>
   </property>
   <property name="font">
@@ -19,26 +19,35 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_free.qrc">
+   <iconset resource="res_platinum.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="spacing">
+     <number>4</number>
+    </property>
     <property name="leftMargin">
      <number>6</number>
     </property>
+    <property name="topMargin">
+     <number>6</number>
+    </property>
+    <property name="rightMargin">
+     <number>6</number>
+    </property>
     <property name="bottomMargin">
-     <number>2</number>
+     <number>6</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>4</number>
+      </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="sizeConstraint">
-         <enum>QLayout::SetDefaultConstraint</enum>
+         <number>4</number>
         </property>
         <item>
          <widget class="QLabel" name="pageLabel">
@@ -55,7 +64,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_free.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_platinum.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -63,63 +72,92 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="pageList">
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>0</height>
-           </size>
+         <widget class="QSplitter" name="leftSplitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-          <property name="maximumSize">
-           <size>
-            <width>220</width>
-            <height>16777215</height>
-           </size>
+          <property name="handleWidth">
+           <number>6</number>
           </property>
-          <property name="font">
-           <font>
-            <family>Roboto</family>
-           </font>
+          <property name="childrenCollapsible">
+           <bool>true</bool>
           </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QListWidget" name="canList">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>220</width>
-            <height>80</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <family>Roboto</family>
-           </font>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
+          <widget class="QListWidget" name="pageList">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>220</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>220</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Roboto</family>
+            </font>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+          </widget>
+          <widget class="QWidget" name="layoutWidget">
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="font">
+               <font>
+                <family>Roboto</family>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>CAN-Devices</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="canList">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>80</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>Roboto</family>
+               </font>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
         <item>
@@ -545,7 +583,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -591,6 +629,7 @@
     <addaction name="actionParameterEditorAppconf"/>
     <addaction name="actionParameterEditorInfo"/>
     <addaction name="actionParameterEditorFW"/>
+    <addaction name="actionParameterEditorCustomConf0"/>
     <addaction name="actionExportConfigurationParser"/>
    </widget>
    <widget class="QMenu" name="menuTerminal">
@@ -634,8 +673,22 @@
     <addaction name="actionRestoreConfigurationsCAN"/>
     <addaction name="actionClearConfigurationBackups"/>
    </widget>
+   <widget class="QMenu" name="menuTools_3">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <widget class="QMenu" name="menuCustom_GUI">
+     <property name="title">
+      <string>Custom GUI</string>
+     </property>
+     <addaction name="actionLoadMeters"/>
+     <addaction name="actionCloseCustomGUI"/>
+    </widget>
+    <addaction name="menuCustom_GUI"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools_2"/>
+   <addaction name="menuTools_3"/>
    <addaction name="menuWizards"/>
    <addaction name="menuCommands"/>
    <addaction name="menuTerminal"/>
@@ -676,9 +729,11 @@
    <addaction name="actionWriteAppconf"/>
    <addaction name="separator"/>
    <addaction name="actionKeyboardControl"/>
+   <addaction name="actionGamepadControl"/>
    <addaction name="actionRtData"/>
    <addaction name="actionRtDataApp"/>
    <addaction name="actionIMU"/>
+   <addaction name="actionrtDataBms"/>
    <addaction name="actionSendAlive"/>
    <addaction name="actionCanFwd"/>
   </widget>
@@ -1264,6 +1319,65 @@ p, li { white-space: pre-wrap; }
     <string>Restore Configurations (Including CAN)</string>
    </property>
   </action>
+  <action name="actionrtDataBms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/bms_off.png</normaloff>
+     <normalon>:/res/icons/bms_on.png</normalon>:/res/icons/bms_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>rtDataBms</string>
+   </property>
+   <property name="toolTip">
+    <string>Stream BMS realtime data</string>
+   </property>
+  </action>
+  <action name="actionGamepadControl">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Controller-96.png</normaloff>
+     <normalon>:/res/icons/Controller-96_on.png</normalon>:/res/icons/Controller-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Gamepad Control</string>
+   </property>
+   <property name="toolTip">
+    <string>Use Gamepad Control</string>
+   </property>
+  </action>
+  <action name="actionLoadMeters">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Speed-96.png</normaloff>:/res/icons/Speed-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Meters</string>
+   </property>
+  </action>
+  <action name="actionCloseCustomGUI">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Close Custom GUI</string>
+   </property>
+  </action>
+  <action name="actionParameterEditorCustomConf0">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Parameter Editor Custom Conf 0</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1275,7 +1389,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_free.qrc"/>
+  <include location="res_platinum.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

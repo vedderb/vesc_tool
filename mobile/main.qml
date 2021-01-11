@@ -737,7 +737,6 @@ ApplicationWindow {
                 rtDataBalance.visible = false
             }
 
-
             if (VescIf.isPortConnected()) {
                 // Sample RT data when the corresponding page is selected, or when
                 // RT logging is active.
@@ -747,6 +746,10 @@ ApplicationWindow {
                     mCommands.getValues()
                     mCommands.getValuesSetup()
                     mCommands.getImuData(0xFFFF)
+
+                    if (tabBar.currentIndex == 7) {
+                        mCommands.bmsGetValues()
+                    }
                 } else {
                     if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0)) {
                         interval = 50

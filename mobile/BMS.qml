@@ -326,8 +326,8 @@ Item {
                     "Power      : " + parseFloat(val.v_tot * val.i_in_ic).toFixed(2) + " W\n" +
                     "Humidity   : " + parseFloat(val.humidity).toFixed(1) + " %\n" +
                     "Temp Max   : " + parseFloat(val.temp_cells_highest).toFixed(1) + " %\n" +
-                    "SoC        : " + parseFloat(val.soc).toFixed(1) + " %\n" +
-                    "SoH        : " + parseFloat(val.soh).toFixed(1) + " %"
+                    "SoC        : " + parseFloat(val.soc * 100).toFixed(1) + " %\n" +
+                    "SoH        : " + parseFloat(val.soh * 100).toFixed(1) + " %"
 
             cellCanvas.requestPaint()
             tempCanvas.requestPaint()

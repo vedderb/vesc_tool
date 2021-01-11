@@ -165,6 +165,7 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
+    customguitool.cpp \
         mainwindow.cpp \
     packet.cpp \
     udpserversimple.cpp \
@@ -182,6 +183,7 @@ SOURCES += main.cpp\
     tcpserversimple.cpp
 
 HEADERS  += mainwindow.h \
+    customguitool.h \
     packet.h \
     udpserversimple.h \
     vbytearray.h \
@@ -199,6 +201,7 @@ HEADERS  += mainwindow.h \
     tcpserversimple.h
 
 FORMS    += mainwindow.ui \
+    customguitool.ui \
     parametereditor.ui
 
 contains(DEFINES, HAS_BLUETOOTH) {

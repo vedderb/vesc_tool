@@ -19,7 +19,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_platinum.qrc">
+   <iconset resource="res_neutral.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -64,7 +64,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_platinum.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_neutral.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -683,8 +683,15 @@
      </property>
      <addaction name="actionLoadMeters"/>
      <addaction name="actionCloseCustomGUI"/>
+     <addaction name="actionCustomGUITool"/>
+    </widget>
+    <widget class="QMenu" name="menuType_Here">
+     <property name="title">
+      <string>Type Here</string>
+     </property>
     </widget>
     <addaction name="menuCustom_GUI"/>
+    <addaction name="menuType_Here"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools_2"/>
@@ -1324,7 +1331,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/bms_off.png</normaloff>
      <normalon>:/res/icons/bms_on.png</normalon>:/res/icons/bms_off.png</iconset>
    </property>
@@ -1378,6 +1385,15 @@ p, li { white-space: pre-wrap; }
     <string>Parameter Editor Custom Conf 0</string>
    </property>
   </action>
+  <action name="actionCustomGUITool">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Custom GUI Tool</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1389,8 +1405,8 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_platinum.qrc"/>
   <include location="res.qrc"/>
+  <include location="res_neutral.qrc"/>
  </resources>
  <connections/>
 </ui>

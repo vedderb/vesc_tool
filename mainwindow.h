@@ -147,6 +147,7 @@ private slots:
     void on_actionGamepadControl_triggered(bool checked);
     void on_actionLoadMeters_triggered();
     void on_actionCloseCustomGUI_triggered();
+    void on_actionCustomGUITool_triggered();
 
 private:
     Ui::MainWindow *ui;

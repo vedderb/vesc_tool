@@ -33,6 +33,7 @@
 #include "utility.h"
 #include "widgets/paramdialog.h"
 #include "widgets/detectallfocdialog.h"
+#include "customguitool.h"
 
 namespace {
 void stepTowards(double &value, double goal, double step) {
@@ -1839,4 +1840,12 @@ void MainWindow::on_actionLoadMeters_triggered()
 void MainWindow::on_actionCloseCustomGUI_triggered()
 {
     mQmlUi.stopCustomGui();
+}
+
+void MainWindow::on_actionCustomGUITool_triggered()
+{
+    CustomGuiTool *t = new CustomGuiTool(this);
+    t->setAttribute(Qt::WA_DeleteOnClose);
+    t->setVesc(mVesc);
+    t->show();
 }

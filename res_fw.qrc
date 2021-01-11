@@ -36,5 +36,7 @@
         <file>res/firmwares/HD75/VESC_default_no_hw_limits.bin</file>
         <file>res/firmwares/60_MK5/VESC_default.bin</file>
         <file>res/firmwares/60_MK5/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/STORMCORE_60D+/VESC_default.bin</file>
+        <file>res/firmwares/STORMCORE_60D+/VESC_default_no_hw_limits.bin</file>
     </qresource>
 </RCC>

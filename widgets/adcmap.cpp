@@ -128,20 +128,28 @@ void AdcMap::decodedAdcReceived(double value, double voltage, double value2, dou
 
 void AdcMap::on_controlTypeBox_currentIndexChanged(int index)
 {
+    const int CTRL_TYPE_OFF = 0;
+    const int CTRL_TYPE_CURRENT_NO_REVERSE_BRAKE_ADC2 = 8;
+
     switch (index) {
     case 2: // Current Reverse Center
-    case 4: // Current No Reverse Brake Center
-    case 8: // Duty Cycle Reverse Center
+    case 4: // Current Reverse ADC2 Brake Button
+    case 5: // Current Reverse Button Brake Center
+    case 6: // Current No Reverse Brake Center
+    case 10: // Duty Cycle Reverse Center
+    case 13: // PID Speed Reverse Center
         ui->displayCh1->setDual(true);
         break;
 
-    case 0: // Off
+    case CTRL_TYPE_OFF: // Off
     case 1: // Current
     case 3: // Current Reverse Button
-    case 5: // Current No Reverse Brake Button
-    case 6: // Current No Reverse Brake ADC2
-    case 7: // Duty Cycle
-    case 9: // Duty Cycle Reverse Button
+    case 7: // Current No Reverse Brake Button
+    case CTRL_TYPE_CURRENT_NO_REVERSE_BRAKE_ADC2: // Current No Reverse Brake ADC2
+    case 9: // Duty Cycle
+    case 11: // Duty Cycle Reverse Button
+    case 12: // PID Speed
+    case 14: // PID Speed Reverse Button
         ui->displayCh1->setDual(false);
         break;
 
@@ -149,9 +157,9 @@ void AdcMap::on_controlTypeBox_currentIndexChanged(int index)
         break;
     }
 
-    ui->displayCh1->setEnabled(index != 0);
-    ui->displayCh2->setEnabled(index != 0);
-    ui->displayCh2->setEnabled(index == 6);
+    ui->displayCh1->setEnabled(index != CTRL_TYPE_OFF);
+    ui->displayCh2->setEnabled(index != CTRL_TYPE_OFF);
+    ui->displayCh2->setEnabled(index == CTRL_TYPE_CURRENT_NO_REVERSE_BRAKE_ADC2);
 }
 
 void AdcMap::on_helpButton_clicked()

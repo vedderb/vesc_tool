@@ -25,6 +25,7 @@
 #include <QInputDialog>
 #include <QDebug>
 #include <cmath>
+#include "utility.h"
 
 ParameterEditor::ParameterEditor(QWidget *parent) :
     QMainWindow(parent),
@@ -625,6 +626,38 @@ void ParameterEditor::updateGroupParamList()
     }
 }
 
+void ParameterEditor::saveParamFileDialog(bool wrapIfdef)
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the configuration header file"),
+                                        ".",
+                                        tr("h files (*.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    if (path.contains(" ")) {
+        QMessageBox::warning(this, tr("Save header"),
+                          tr("Spaces are not allowed in the filename."));
+        return;
+    }
+
+    if (!path.toLower().endsWith(".h")) {
+        path += ".h";
+    }
+
+    bool res = mParams.saveCDefines(path, wrapIfdef);
+
+    if (res) {
+        showStatusInfo("Saved C header", true);
+    } else {
+        QMessageBox::warning(this, tr("Save header"),
+                          tr("Could not save header"));
+    }
+}
+
 void ParameterEditor::on_doubleTxTypeBox_currentIndexChanged(int index)
 {
     if (index == 2) {
@@ -873,4 +906,127 @@ void ParameterEditor::on_groupParamEditButton_clicked()
             updateGroupParamList();
         }
     }
+}
+
+void ParameterEditor::on_actionExportConfigurationParser_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the parser C source and header file"),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    QString name = "device_config";
+
+    if (mParams.hasParam("config_name") && mParams.getParam("config_name")->type == CFG_T_QSTRING) {
+        name = mParams.getParamQString("config_name");
+    } else {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Config Name",
+                                             "Name:", QLineEdit::Normal,
+                                             name, &ok);
+
+        if (ok && text.size() > 0) {
+            name = text;
+        }
+    }
+
+    Utility::createParamParserC(&mParams, name, path);
+}
+
+void ParameterEditor::on_actionSave_Configuration_C_Header_as_triggered()
+{
+    saveParamFileDialog(false);
+}
+
+void ParameterEditor::on_actionSave_Configuration_C_Header_ifdef_wrapped_as_triggered()
+{
+    saveParamFileDialog(true);
+}
+
+void ParameterEditor::on_actionExportCompressedCArray_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the config C source and header file"),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    QString name = "device_config";
+
+    if (mParams.hasParam("config_name") && mParams.getParam("config_name")->type == CFG_T_QSTRING) {
+        name = mParams.getParamQString("config_name");
+    } else {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Config Name",
+                                             "Name:", QLineEdit::Normal,
+                                             name, &ok);
+
+        if (ok && text.size() > 0) {
+            name = text;
+        }
+    }
+
+    Utility::createCompressedConfigC(&mParams, name, path);
+}
+
+void ParameterEditor::on_actionCalculateCompressedCArraySize_triggered()
+{
+    QByteArray compressed = mParams.getCompressedParamsXml();
+    QMessageBox::information(this,
+                             tr("Compressed XML Size"),
+                             tr("%1 Bytes").arg(compressed.size()));
+}
+
+void ParameterEditor::on_actionSave_XML_and_export_config_parser_and_compressed_C_array_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose the XML file or one of the C files. All files will be created with default "
+                                           "names and/or overwritten if they already exist in the directory."),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    QString nameConfig = "device_config";
+    if (mParams.hasParam("config_name") && mParams.getParam("config_name")->type == CFG_T_QSTRING) {
+        nameConfig = mParams.getParamQString("config_name");
+    } else {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Config Name",
+                                             "Name:", QLineEdit::Normal,
+                                             nameConfig, &ok);
+
+        if (ok && text.size() > 0) {
+            nameConfig = text;
+        }
+    }
+
+    QFileInfo fi(path);
+    path.chop(fi.fileName().length());
+    QString pathXml = path + "settings.xml";
+    QString pathDefines = path + "conf_default.h";
+    QString pathParser = path + "confparser.c";
+    QString pathCompressed = path + "confxml.c";
+
+    qDebug() << pathXml;
+    qDebug() << pathDefines;
+    qDebug() << pathParser;
+    qDebug() << pathCompressed;
+
+    Utility::createCompressedConfigC(&mParams, nameConfig, pathCompressed);
+    Utility::createParamParserC(&mParams, nameConfig, pathParser);
+    mParams.saveCDefines(pathDefines, true);
+    mParams.saveParamsXml(pathXml);
 }

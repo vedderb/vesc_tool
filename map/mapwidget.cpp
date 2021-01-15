@@ -201,7 +201,7 @@ MapWidget::MapWidget(QWidget *parent) : QWidget(parent)
     //    mRefHeight = 204.626;
 
     // Hardcoded for now
-    mOsm->setCacheDir("osm_tiles");
+    //mOsm->setCacheDir("osm_tiles");
     //    mOsm->setTileServerUrl("http://tile.openstreetmap.org");
     mOsm->setTileServerUrl("http://c.osm.rrze.fau.de/osmhd"); // Also https
     //    mOsm->setTileServerUrl("http://tiles.vedder.se/osm_tiles");

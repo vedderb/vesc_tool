@@ -474,8 +474,8 @@ Item {
         }
     }
 
-    function updateHw(hw) {
-        var hws = fwHelper.getHardwares(hw)
+    function updateHw(params) {
+        var hws = fwHelper.getHardwares(params, params.hw)
 
         hwItems.clear()
 
@@ -490,8 +490,8 @@ Item {
         hwBox.currentIndex = 0
     }
 
-    function updateBl(hw) {
-        var bls = fwHelper.getBootloaders(hw)
+    function updateBl(params) {
+        var bls = fwHelper.getBootloaders(params, params.hw)
 
         blItems.clear()
 
@@ -648,19 +648,19 @@ Item {
         target: mCommands
 
         onFwVersionReceived: {
-            updateHw(hw)
-            updateBl(hw)
+            updateHw(params)
+            updateBl(params)
 
             var testFwStr = "";
 
-            if (isTestFw > 0) {
-                testFwStr = " BETA " +  isTestFw
+            if (params.isTestFw > 0) {
+                testFwStr = " BETA " +  params.isTestFw
             }
 
             versionText.text =
-                    "FW   : " + major + "." + minor + testFwStr + "\n" +
-                    "HW   : " + hw + "\n" +
-                    "UUID : " + Utility.uuid2Str(uuid, false)
+                    "FW   : " + params.major + "." + params.minor + testFwStr + "\n" +
+                    "HW   : " + params.hw + "\n" +
+                    "UUID : " + Utility.uuid2Str(params.uuid, false)
         }
     }
 }

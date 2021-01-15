@@ -20,6 +20,7 @@
 #include "vescinterface.h"
 #include <QDebug>
 #include <QHostInfo>
+#include <QNetworkDatagram>
 #include <QFileInfo>
 #include <QThread>
 #include <QEventLoop>
@@ -52,6 +53,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mAppConfig = new ConfigParams(this);
     mInfoConfig = new ConfigParams(this);
     mFwConfig = new ConfigParams(this);
+    mCustomConfigsLoaded = false;
     mPacket = new Packet(this);
     mCommands = new Commands(this);
 
@@ -78,6 +80,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastConnType = static_cast<conn_t>(mSettings.value("connection_type", CONN_NONE).toInt());
     mLastTcpServer = mSettings.value("tcp_server", "127.0.0.1").toString();
     mLastTcpPort = mSettings.value("tcp_port", 65102).toInt();
+    mLastUdpServer = mSettings.value("udp_server", "127.0.0.1").toString();
+    mLastUdpPort = mSettings.value("udp_port", 65102).toInt();
 
     mSendCanBefore = false;
     mCanIdBefore = 0;
@@ -146,6 +150,13 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
 
+    // UDP
+    mUdpSocket = new QUdpSocket(this);
+    mUdpConnected = false;
+    connect(mUdpSocket, SIGNAL(readyRead()), this, SLOT(udpInputDataAvailable()));
+    connect(mUdpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(udpInputError(QAbstractSocket::SocketError)));
+
     // BLE
 #ifdef HAS_BLUETOOTH
     mBleUart = new BleUart(this);
@@ -176,6 +187,15 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     });
     connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
         mTcpServer->packet()->sendPacket(packet);
+    });
+
+    mUdpServer = new UdpServerSimple(this);
+    mUdpServer->setUsePacket(true);
+    connect(mUdpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
+        mPacket->sendPacket(packet);
+    });
+    connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
+        mUdpServer->packet()->sendPacket(packet);
     });
 
     {
@@ -237,8 +257,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             this, SLOT(packetReceived(QByteArray&)));
     connect(mCommands, SIGNAL(dataToSend(QByteArray&)),
             this, SLOT(cmdDataToSend(QByteArray&)));
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    connect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+            this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
     connect(mCommands, SIGNAL(ackReceived(QString)), this, SLOT(ackReceived(QString)));
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
@@ -844,6 +864,16 @@ int VescInterface::getLastTcpPort() const
     return mLastTcpPort;
 }
 
+QString VescInterface::getLastUdpServer() const
+{
+    return mLastUdpServer.toString();
+}
+
+int VescInterface::getLastUdpPort() const
+{
+    return mLastUdpPort;
+}
+
 bool VescInterface::swdEraseFlash()
 {
     auto waitBmEraseRes = [this]() {
@@ -917,29 +947,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
         return res;
     };
 
-    auto waitBmReadRes = [this]() {
-        int res = -10;
-        QByteArray resData;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(3000);
-        auto conn = connect(mCommands, &Commands::bmReadMemRes, [&res,&resData,&loop]
-                            (int rdRes, QByteArray data) {
-            res = rdRes;
-            resData = data;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
-        return resData;
-    };
-
-    auto writeChunk = [this, &waitBmWriteRes, &waitBmReadRes, &verify]
+    auto writeChunk = [this, &waitBmWriteRes, &verify]
             (uint32_t addr, QByteArray chunk, QByteArray chunkLzo) {
         for (int i = 0;i < 3;i++) {
             if (chunkLzo.isEmpty()) {
@@ -953,8 +961,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
             if (verify && (!mCommands->isLimitedMode() ||
                            mCommands->getLimitedCompatibilityCommands().
                            contains(int(COMM_BM_MEM_READ)))) {
-                mCommands->bmReadMem(addr, chunk.size());
-                QByteArray rdData = waitBmReadRes();
+                QByteArray rdData = mCommands->bmReadMemWait(addr, quint16(chunk.size()));
 
                 if (rdData.size() != chunk.size()) {
                     return -11;
@@ -1122,11 +1129,11 @@ bool VescInterface::fwEraseNewApp(bool fwdCan, quint32 fwSize)
         return res;
     };
 
-    mCommands->eraseNewApp(fwdCan, fwSize);
+    mCommands->eraseNewApp(fwdCan, fwSize, mLastFwParams.hwType, mLastFwParams.hw);
     emit fwUploadStatus("Erasing buffer...", 0.0, true);
     int erRes = waitEraseRes();
     if (erRes != 1) {
-        QString msg = "Unknown failure";
+        QString msg = QString("Unknown failure: %1").arg(erRes);
 
         if (erRes == -10) {
             msg = "Erase timed out";
@@ -1167,7 +1174,7 @@ bool VescInterface::fwEraseBootloader(bool fwdCan)
         return res;
     };
 
-    mCommands->eraseBootloader(fwdCan);
+    mCommands->eraseBootloader(fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
     emit fwUploadStatus("Erasing bootloader...", 0.0, true);
     int erRes = waitEraseRes();
     if (erRes != 1) {
@@ -1196,7 +1203,59 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     mFwUploadProgress = 0.0;
     mCancelFwUpload = false;
 
-//    isLzo = false;
+    if (fwdCan) {
+        if (mCommands->getSendCan()) {
+            emitMessageDialog("Firmware Upload",
+                              "CAN forwarding must be disabled when uploading firmware to "
+                              "all VESCs at the same time.", false, false);
+            mFwUploadStatus = "CAN check failed";
+            mFwUploadProgress = -1.0;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+            return false;
+        }
+
+        FW_RX_PARAMS fwParamsLocal;
+        Utility::getFwVersionBlocking(this, &fwParamsLocal);
+        if (fwParamsLocal.hw.isEmpty()) {
+            emitMessageDialog("Firmware Upload", "Could not read hardware version", false, false);
+            mFwUploadStatus = "Read HW version failed";
+            mFwUploadProgress = -1.0;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+            return false;
+        }
+
+        if (fwParamsLocal.hwType == HW_TYPE_VESC) {
+            mFwUploadStatus = "Scanning CAN bus...";
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
+            auto devs = scanCan();
+
+            bool ignoreBefore = mIgnoreCanChange;
+            mIgnoreCanChange = true;
+
+            for (auto d: devs) {
+                mCommands->setSendCan(true, d);
+                FW_RX_PARAMS fwParamsCan;
+                Utility::getFwVersionBlocking(this, &fwParamsCan);
+                if (fwParamsLocal.hw != fwParamsCan.hw) {
+                    emitMessageDialog("Firmware Upload",
+                                      "All VESCs on the CAN-bus must have the same hardware version to upload "
+                                      "firmware to all of them at the same time. You must update them individually.",
+                                      false, false);
+                    mCommands->setSendCan(false);
+                    mIgnoreCanChange = ignoreBefore;
+
+                    mFwUploadStatus = "CAN check failed";
+                    mFwUploadProgress = -1.0;
+                    emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+
+                    return false;
+                }
+            }
+
+            mCommands->setSendCan(false);
+            mIgnoreCanChange = ignoreBefore;
+        }
+    }
 
     if (isBootloader) {
         if (mCommands->getLimitedSupportsEraseBootloader()) {
@@ -1205,6 +1264,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             if (!fwEraseBootloader(fwdCan)) {
                 mFwUploadStatus = "Erasing bootloader failed";
                 mFwUploadProgress = -1.0;
+                emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
                 return false;
             }
         }
@@ -1214,12 +1274,17 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         if (!fwEraseNewApp(fwdCan, quint32(newFirmware.size()))) {
             mFwUploadStatus = "Erasing buffer failed";
             mFwUploadProgress = -1.0;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
             return false;
         }
     }
 
     bool supportsLzo = mCommands->getLimitedCompatibilityCommands().
             contains(int(COMM_WRITE_NEW_APP_DATA_LZO));
+
+    if (mLastFwParams.hwType != HW_TYPE_VESC) {
+        supportsLzo = false;
+    }
 
     auto waitWriteRes = [this]() {
         int res = -10;
@@ -1240,6 +1305,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         loop.exec();
 
         disconnect(conn);
+
         return res;
     };
 
@@ -1249,7 +1315,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             if (fwIsLzo) {
                 mCommands->writeNewAppDataLzo(chunk, addr, decompressedLen, fwdCan);
             } else {
-                mCommands->writeNewAppData(chunk, addr, fwdCan);
+                mCommands->writeNewAppData(chunk, addr, fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
             }
 
             int res = waitWriteRes();
@@ -1262,7 +1328,16 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         return -20;
     };
 
-    int addr = isBootloader ? (1024 * 128 * 3) : 0;
+    int addr = 0;
+
+    if (isBootloader) {
+        if (mLastFwParams.hwType == HW_TYPE_VESC_BMS) {
+            addr += 0x0803E000 - 0x08020000;
+        } else {
+            addr += (1024 * 128 * 3);
+        }
+    }
+
     int startAddr = addr;
     int szTot = newFirmware.size();
     int uploadSize = 2;
@@ -1275,20 +1350,19 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         VByteArray sizeCrc;
         sizeCrc.vbAppendInt32(szTot);
         sizeCrc.vbAppendUint16(crc);
-        writeChunk(uint32_t(addr), sizeCrc, false, 0);
-        addr += sizeCrc.size();
+        newFirmware.prepend(sizeCrc);
     }
 
     int lzoFailures = 0;
     while (newFirmware.size() > 0) {
         if (mCancelFwUpload) {
-            emit fwUploadStatus("Upload cancelled", 0.0, false);
             mFwUploadProgress = -1.0;
             mFwUploadStatus = "Upload cancelled";
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
             return false;
         }
 
-        const int chunkSize = 400;
+        const int chunkSize = 384;
 
         int sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
 
@@ -1349,7 +1423,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             }
             emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
         } else {
-            QString msg = "Unknown failure";
+            QString msg = QString("Unknown failure: %1").arg(res);
 
             if (res == -20) {
                 msg = "Firmware upload timed out";
@@ -1358,9 +1432,9 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             }
 
             emitMessageDialog("Firmware Upload", msg, false, false);
-            emit fwUploadStatus(msg, 0.0, false);
             mFwUploadProgress = -1.0;
             mFwUploadStatus = msg;
+            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
             return false;
         }
     }
@@ -1376,7 +1450,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     }
 
     if (!isBootloader) {
-        mCommands->jumpToBootloader(fwdCan);
+        mCommands->jumpToBootloader(fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
         Utility::sleepWithEventLoop(500);
         disconnectPort();
     }
@@ -1822,6 +1896,10 @@ bool VescInterface::isPortConnected()
         res = true;
     }
 
+    if (mUdpConnected) {
+        res = true;
+    }
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         res = true;
@@ -1855,6 +1933,12 @@ void VescInterface::disconnectPort()
         updateFwRx(false);
     }
 
+    if (mUdpConnected) {
+        mUdpSocket->close();
+        mUdpConnected = false;
+        updateFwRx(false);
+    }
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         mBleUart->disconnectBle();
@@ -1875,6 +1959,9 @@ bool VescInterface::reconnectLastPort()
 #endif
     } else if (mLastConnType == CONN_TCP) {
         connectTcp(mLastTcpServer, mLastTcpPort);
+        return true;
+    } else if (mLastConnType == CONN_UDP) {
+        connectUdp(mLastUdpServer.toString(), mLastUdpPort);
         return true;
     } else if (mLastConnType == CONN_BLE) {
 #ifdef HAS_BLUETOOTH
@@ -1916,8 +2003,8 @@ bool VescInterface::autoconnect()
     mAutoconnectProgress = 0.0;
 
     disconnectPort();
-    disconnect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-               this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    disconnect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+               this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     for (int i = 0;i < ports.size();i++) {
         VSerialInfo_t serial = ports[i];
@@ -1934,7 +2021,7 @@ bool VescInterface::autoconnect()
         QTimer timeoutTimer;
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(500);
-        connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)), &loop, SLOT(quit()));
+        connect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)), &loop, SLOT(quit()));
         connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
         loop.exec();
 
@@ -1949,8 +2036,8 @@ bool VescInterface::autoconnect()
         }
     }
 
-    connect(mCommands, SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-            this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    connect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
+            this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 #endif
 
     emit autoConnectProgressUpdated(1.0, true);
@@ -1980,6 +2067,11 @@ QString VescInterface::getConnectedPortName()
 
     if (mTcpConnected) {
         res = tr("Connected (TCP) to %1:%2").arg(mLastTcpServer).arg(mLastTcpPort);
+        connected = true;
+    }
+
+    if (mUdpConnected) {
+        res = tr("Connected (UDP) to %1:%2").arg(mLastUdpServer.toString()).arg(mLastUdpPort);
         connected = true;
     }
 
@@ -2218,6 +2310,30 @@ void VescInterface::connectTcp(QString server, int port)
     mTcpSocket->connectToHost(host, port);
 }
 
+void VescInterface::connectUdp(QString server, int port)
+{
+    QHostAddress host;
+    host.setAddress(server);
+
+    // Try DNS lookup
+    if (host.isNull()) {
+        QList<QHostAddress> addresses = QHostInfo::fromName(server).addresses();
+
+        if (!addresses.isEmpty()) {
+            host.setAddress(addresses.first().toString());
+        }
+    }
+
+    if(host.isNull()) // Can't lookup
+        return;
+
+    mUdpConnected = true;
+    mLastUdpServer = host;
+    mLastUdpPort = port;
+    setLastConnectionType(CONN_UDP);
+    updateFwRx(false);
+}
+
 void VescInterface::connectBle(QString address)
 {
 #ifdef HAS_BLUETOOTH
@@ -2319,6 +2435,11 @@ void VescInterface::ignoreCanChange(bool ignore)
     mIgnoreCanChange = ignore;
 }
 
+bool VescInterface::isIgnoringCanChanges()
+{
+    return mIgnoreCanChange;
+}
+
 bool VescInterface::tcpServerStart(int port)
 {
     bool res = mTcpServer->startServer(port);
@@ -2350,6 +2471,39 @@ bool VescInterface::tcpServerIsClientConnected()
 QString VescInterface::tcpServerClientIp()
 {
     return mTcpServer->getConnectedClientIp();
+}
+
+bool VescInterface::udpServerStart(int port)
+{
+    bool res = mUdpServer->startServer(port);
+
+    if (!res) {
+        emitMessageDialog("Start UDP Server",
+                          "Could not start UDP server: " + mUdpServer->errorString(),
+                          false, false);
+    }
+
+    return res;
+}
+
+void VescInterface::udpServerStop()
+{
+    mUdpServer->stopServer();
+}
+
+bool VescInterface::udpServerIsRunning()
+{
+    return mUdpServer->isServerRunning();
+}
+
+bool VescInterface::udpServerIsClientConnected()
+{
+    return mUdpServer->isClientConnected();
+}
+
+QString VescInterface::udpServerClientIp()
+{
+    return mUdpServer->getConnectedClientIp();
 }
 
 void VescInterface::emitConfigurationChanged()
@@ -2505,7 +2659,7 @@ void VescInterface::CANbusError(QCanBusDevice::CanBusError error)
 
 void VescInterface::tcpInputConnected()
 {
-    mTcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+    mTcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, true);
 
     mSettings.setValue("tcp_server", mLastTcpServer);
     mSettings.setValue("tcp_port", mLastTcpPort);
@@ -2528,6 +2682,14 @@ void VescInterface::tcpInputDataAvailable()
     }
 }
 
+void VescInterface::udpInputDataAvailable()
+{
+    while (mUdpSocket->hasPendingDatagrams()) {
+        QNetworkDatagram datagram = mUdpSocket->receiveDatagram();
+        mPacket->processData(datagram.data());
+    }
+}
+
 void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
 {
     (void)socketError;
@@ -2535,6 +2697,17 @@ void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
     QString errorStr = mTcpSocket->errorString();
     emit statusMessage(tr("TCP Error") + errorStr, false);
     mTcpSocket->close();
+    updateFwRx(false);
+}
+
+void VescInterface::udpInputError(QAbstractSocket::SocketError socketError)
+{
+    (void)socketError;
+
+    QString errorStr = mUdpSocket->errorString();
+    emit statusMessage(tr("UDP Error") + errorStr, false);
+    mUdpSocket->close();
+    mUdpConnected = false;
     updateFwRx(false);
 }
 
@@ -2558,7 +2731,7 @@ void VescInterface::timerSlot()
         CANbusDataAvailable();
     }
 #endif
-
+    tcpInputDataAvailable();
 
 #ifdef HAS_CANBUS
     if (mCanDeviceInterfaces != listCANbusInterfaces()) {
@@ -2570,7 +2743,8 @@ void VescInterface::timerSlot()
     if (!mIgnoreCanChange) {
         if (isPortConnected()) {
             if (mSendCanBefore != mCommands->getSendCan() ||
-                    mCanIdBefore != mCommands->getCanSendId()) {
+                    (mCommands->getSendCan() &&
+                     mCanIdBefore != mCommands->getCanSendId())) {
                 updateFwRx(false);
                 mFwRetries = 0;
             }
@@ -2763,6 +2937,11 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
     if (mTcpConnected && mTcpSocket->isOpen()) {
         mTcpSocket->write(data);
+        mTcpSocket->flush();
+    }
+
+    if (mUdpConnected) {
+        mUdpSocket->writeDatagram(data, mLastUdpServer, mLastUdpPort);
     }
 
 #ifdef HAS_BLUETOOTH
@@ -2782,17 +2961,23 @@ void VescInterface::cmdDataToSend(QByteArray &data)
     mPacket->sendPacket(data);
 }
 
-void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
-                                      bool isPaired, int isTestFw)
+void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 {
-    QString uuidStr = Utility::uuid2Str(uuid, true);
+    // Do not reload configs when the firmware version is read from somewhere else.
+    if (mFwVersionReceived) {
+        return;
+    }
+
+    mLastFwParams = params;
+
+    QString uuidStr = Utility::uuid2Str(params.uuid, true);
     mUuidStr = uuidStr.toUpper();
     mUuidStr.replace(" ", "");
     mFwSupportsConfiguration = false;
 
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
-        if (isPaired && !hasPairedUuid(mUuidStr)) {
+        if (params.isPaired && !hasPairedUuid(mUuidStr)) {
             disconnectPort();
             emitMessageDialog("Pairing",
                               "This VESC is not paired to your local version of VESC Tool. You can either "
@@ -2803,16 +2988,7 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
             return;
         }
     }
-#else
-    (void)isPaired;
 #endif
-
-    if (isTestFw > 0 && !VT_IS_TEST_VERSION) {
-        emitMessageDialog("Test Firmware",
-                          "The connected VESC has test firmware, and this is not a test build of VESC Tool. You should "
-                          "update the firmware urgently, as this is not a safe situation.",
-                          false, false);
-    }
 
     auto fwPairs = getSupportedFirmwarePairs();
 
@@ -2835,7 +3011,7 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
     }
 
     QPair<int, int> highest_supported = *std::max_element(fwPairs.begin(), fwPairs.end());
-    QPair<int, int> fw_connected = qMakePair(major, minor);
+    QPair<int, int> fw_connected = qMakePair(params.major, params.minor);
 
     mCommands->setLimitedSupportsFwdAllCan(fw_connected >= qMakePair(3, 45));
     mCommands->setLimitedSupportsEraseBootloader(fw_connected >= qMakePair(3, 59));
@@ -2944,6 +3120,26 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         compCommands.append(int(COMM_SET_CURRENT_REL));
     }
 
+    if (fw_connected >= qMakePair(5, 02)) {
+        compCommands.append(int(COMM_CAN_FWD_FRAME));
+        compCommands.append(int(COMM_SET_BATTERY_CUT));
+        compCommands.append(int(COMM_SET_BLE_NAME));
+        compCommands.append(int(COMM_SET_BLE_PIN));
+        compCommands.append(int(COMM_SET_CAN_MODE));
+        compCommands.append(int(COMM_GET_IMU_CALIBRATION));
+        compCommands.append(int(COMM_GET_MCCONF_TEMP));
+        compCommands.append(int(COMM_GET_CUSTOM_CONFIG_XML));
+        compCommands.append(int(COMM_GET_CUSTOM_CONFIG));
+        compCommands.append(int(COMM_GET_CUSTOM_CONFIG_DEFAULT));
+        compCommands.append(int(COMM_SET_CUSTOM_CONFIG));
+        compCommands.append(int(COMM_BMS_GET_VALUES));
+        compCommands.append(int(COMM_BMS_SET_CHARGE_ALLOWED));
+        compCommands.append(int(COMM_BMS_SET_BALANCE_OVERRIDE));
+        compCommands.append(int(COMM_BMS_RESET_COUNTERS));
+        compCommands.append(int(COMM_BMS_FORCE_BALANCE));
+        compCommands.append(int(COMM_BMS_ZERO_CURRENT_OFFSET));
+    }
+
     if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {
         compCommands.append(int(COMM_SET_MCCONF));
         compCommands.append(int(COMM_GET_MCCONF));
@@ -2969,7 +3165,7 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
     bool wasReceived = mFwVersionReceived;
     mCommands->setLimitedMode(false);
 
-    if (major < 0) {
+    if (params.major < 0) {
         updateFwRx(false);
         mFwRetries = 0;
         disconnectPort();
@@ -3018,9 +3214,9 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         }
 
         QString fwStr;
-        fwStr.sprintf("VESC Firmware Version %d.%d", major, minor);
-        if (!hw.isEmpty()) {
-            fwStr += ", Hardware: " + hw;
+        fwStr.sprintf("VESC Firmware Version %d.%d", params.major, params.minor);
+        if (!params.hw.isEmpty()) {
+            fwStr += ", Hardware: " + params.hw;
         }
 
         if (!uuidStr.isEmpty()) {
@@ -3030,12 +3226,12 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
         emit statusMessage(fwStr, true);
     }
 
-    if (major >= 0) {
-        mFwTxt.sprintf("Fw: %d.%d", major, minor);
-        mFwPair = qMakePair(major, minor);
-        mHwTxt = hw;
-        if (!hw.isEmpty()) {
-            mFwTxt += ", Hw: " + hw;
+    if (params.major >= 0) {
+        mFwTxt.sprintf("Fw: %d.%d", params.major, params.minor);
+        mFwPair = qMakePair(params.major, params.minor);
+        mHwTxt = params.hw;
+        if (!params.hw.isEmpty()) {
+            mFwTxt += ", Hw: " + params.hw;
         }
 
         if (!uuidStr.isEmpty()) {
@@ -3044,13 +3240,96 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
     }
 
     // Check for known issues in firmware
-    QString fwParam = QString("fw_%1.%2").arg(major).arg(minor);
+    QString fwParam = QString("fw_%1.%2").arg(params.major).arg(params.minor);
     if (mFwConfig->hasParam(fwParam)) {
         auto fwInfoCfg = mFwConfig->getParam(fwParam);
         if (fwInfoCfg) {
             emitMessageDialog("Firmware Known Issues", fwInfoCfg->description, false, true);
         }
     }
+
+    if (params.isTestFw > 0 && !VT_IS_TEST_VERSION) {
+        emitMessageDialog("Test Firmware",
+                          "The connected VESC has test firmware, and this is not a test build of VESC Tool. You should "
+                          "update the firmware urgently, as this is not a safe situation.",
+                          false, false);
+    }
+
+    // Read custom configs
+    if (params.customConfigNum > 0) {
+        while (!mCustomConfigs.isEmpty()) {
+            mCustomConfigs.last()->deleteLater();
+            mCustomConfigs.removeLast();
+        }
+
+        bool readConfigsOk = true;
+        for (int i = 0;i < params.customConfigNum;i++) {
+            QByteArray configData;
+            int confIndLast = 0;
+            int lenConfLast = 0;
+            auto conn = connect(mCommands, &Commands::customConfigChunkRx,
+                    [&](int confInd, int lenConf, int ofsConf, QByteArray data) {
+                if (configData.size() <= ofsConf) {
+                    configData.append(data);
+                }
+                confIndLast = confInd;
+                lenConfLast = lenConf;
+            });
+
+            auto getChunk = [&](int size, int offset, int tries, int timeout) {
+                bool res = false;
+
+                for (int j = 0;j < tries;j++) {
+                    mCommands->customConfigGetChunk(i, size, offset);
+                    res = Utility::waitSignal(mCommands, SIGNAL(customConfigChunkRx(int,int,int,QByteArray)), timeout);
+                    if (res) {
+                        break;
+                    }
+                }
+                return res;
+            };
+
+            if (getChunk(10, 0, 5, 1500)) {
+                while (configData.size() < lenConfLast) {
+                    int dataLeft = lenConfLast - configData.size();
+                    if (!getChunk(dataLeft > 400 ? 400 : dataLeft, configData.size(), 5, 1500)) {
+                        break;
+                    }
+                }
+
+                if (configData.size() == lenConfLast) {
+                    mCustomConfigs.append(new ConfigParams(this));
+                    connect(mCustomConfigs.last(), &ConfigParams::updateRequested, [this]() {
+                        mCommands->customConfigGet(mCustomConfigs.size() - 1, false);
+                    });
+                    connect(mCustomConfigs.last(), &ConfigParams::updateRequestDefault, [this]() {
+                        mCommands->customConfigGet(mCustomConfigs.size() - 1, true);
+                    });
+
+                    if (!mCustomConfigs.last()->loadCompressedParamsXml(configData)) {
+                        readConfigsOk = false;
+                        disconnect(conn);
+                        break;
+                    }
+
+                    emitStatusMessage(QString("Got custom config %1").arg(i), true);
+                } else {
+                    emitMessageDialog("Get Custom Config",
+                                      "Could not read custom config from hardware",
+                                      false, false);
+                    readConfigsOk = false;
+                    disconnect(conn);
+                    break;
+                }
+            }
+
+            disconnect(conn);
+        }
+
+        mCustomConfigsLoaded = readConfigsOk;
+    }
+
+    emit customConfigLoadDone();
 }
 
 void VescInterface::appconfUpdated()
@@ -3258,6 +3537,9 @@ bool VescInterface::confRestoreBackup(bool can)
         storeSettings();
         emit configurationBackupsChanged();
 
+        commands()->getMcconf(); //Refresh Motor conf.
+        commands()->getAppConf(); //Refresh App conf.
+
         if (!uuidsOk.isEmpty()) {
             QString uuidsStr;
             for (auto s: uuidsOk) {
@@ -3328,12 +3610,44 @@ bool VescInterface::deserializeFailedSinceConnected()
     return mDeserialFailedMessageShown;
 }
 
+FW_RX_PARAMS VescInterface::getLastFwRxParams()
+{
+    return mLastFwParams;
+}
+
+int VescInterface::customConfigNum()
+{
+    if (mCustomConfigsLoaded) {
+        return mCustomConfigs.size();
+    } else {
+        return 0;
+    }
+}
+
+bool VescInterface::customConfigsLoaded()
+{
+    return mCustomConfigsLoaded;
+}
+
+ConfigParams *VescInterface::customConfig(int configNum)
+{
+    if (customConfigsLoaded() && configNum < mCustomConfigs.size()) {
+        return mCustomConfigs[configNum];
+    } else {
+        return nullptr;
+    }
+}
+
 void VescInterface::updateFwRx(bool fwRx)
 {
     bool change = mFwVersionReceived != fwRx;
     mFwVersionReceived = fwRx;
     if (change) {
         emit fwRxChanged(mFwVersionReceived, mCommands->isLimitedMode());
+    }
+
+    if (!mFwVersionReceived) {
+        mCustomConfigsLoaded = false;
     }
 }
 

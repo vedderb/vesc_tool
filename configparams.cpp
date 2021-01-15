@@ -1382,6 +1382,24 @@ bool ConfigParams::loadParamsXml(QString fileName)
     return res;
 }
 
+QByteArray ConfigParams::getCompressedParamsXml()
+{
+    QByteArray res;
+    QXmlStreamWriter stream(&res);
+    stream.setCodec("UTF-8");
+    stream.setAutoFormatting(true);
+    getParamsXML(stream);
+    return qCompress(res, 9);
+}
+
+bool ConfigParams::loadCompressedParamsXml(QByteArray data)
+{
+    QByteArray uncompressed = qUncompress(data);
+    QXmlStreamReader stream(uncompressed);
+    bool res = setParamsXML(stream);
+    return res;
+}
+
 bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
 {
     QFile file(fileName);

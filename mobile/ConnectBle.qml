@@ -24,6 +24,7 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.bleuart 1.0
 import Vedder.vesc.commands 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: topItem
@@ -479,21 +480,39 @@ Item {
         }
     }
 
+    Timer {
+        repeat: true
+        interval: 1000
+        running: true
+
+        onTriggered: {
+            if (!VescIf.isPortConnected()) {
+                canItems.clear()
+                mCommands.setSendCan(false, -1)
+                fwdCanBox.checked = false
+                canScanButton.enabled = true
+                canAllButton.enabled = true
+            }
+        }
+    }
+
     Connections {
         target: mCommands
 
         onPingCanRx: {
-            canItems.clear()
-            for (var i = 0;i < devs.length;i++) {
-                var name = "VESC " + devs[i]
-                canItems.append({ key: name, value: devs[i] })
+            if (canItems.count == 0) {
+                for (var i = 0;i < devs.length;i++) {
+                    var params = Utility.getFwVersionBlockingCan(VescIf, devs[i])
+                    var name = params.hwTypeStr() + " " + devs[i]
+                    canItems.append({ key: name, value: devs[i] })
+                }
+                canScanButton.enabled = true
+                canAllButton.enabled = true
+                canIdBox.currentIndex = 0
+                canButtonLayout.visible = true
+                canScanBar.visible = false
+                canScanBar.indeterminate = false
             }
-            canScanButton.enabled = true
-            canAllButton.enabled = true
-            canIdBox.currentIndex = 0
-            canButtonLayout.visible = true
-            canScanBar.visible = false
-            canScanBar.indeterminate = false
         }
 
         onNrfPairingRes: {

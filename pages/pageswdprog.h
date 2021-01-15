@@ -1,5 +1,5 @@
 /*
-    Copyright 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2019 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -58,12 +58,19 @@ private slots:
     void bmConnRes(int res);
 
     void on_chooseButton_clicked();
+    void on_choose2Button_clicked();
+    void on_choose3Button_clicked();
+    void on_choose4Button_clicked();
     void on_connectButton_clicked();
     void on_uploadButton_clicked();
     void on_disconnectButton_clicked();
     void on_cancelButton_clicked();
     void on_eraseFlashButton_clicked();
     void on_connectNrf5xButton_clicked();
+    void on_uicrReadButton_clicked();
+    void on_uicrWriteButton_clicked();
+    void on_uicrEraseButton_clicked();
+    void on_resetButton_clicked();
 
 private:
     Ui::PageSwdProg *ui;

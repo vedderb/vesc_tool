@@ -23,6 +23,7 @@
 #include <QQuickStyle>
 #include <QApplication>
 #include <QQuickWindow>
+#include <QQmlContext>
 
 VescInterface *QmlUi::mVesc = nullptr;
 
@@ -32,18 +33,19 @@ QmlUi::QmlUi(QObject *parent) : QObject(parent)
 #ifdef DEBUG_BUILD
     qApp->installEventFilter(this);
 #endif
-}
 
-bool QmlUi::startQmlUi()
-{
-    qmlRegisterSingletonType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf", vescinterface_singletontype_provider);
-    qmlRegisterSingletonType<Utility>("Vedder.vesc.utility", 1, 0, "Utility", utility_singletontype_provider);
 #ifdef HAS_BLUETOOTH
     qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
 #endif
     qmlRegisterType<Commands>("Vedder.vesc.commands", 1, 0, "Commands");
     qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");
     qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
+}
+
+bool QmlUi::startQmlUi()
+{
+    qmlRegisterSingletonType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf", vescinterface_singletontype_provider);
+    qmlRegisterSingletonType<Utility>("Vedder.vesc.utility", 1, 0, "Utility", utility_singletontype_provider);
 
     mEngine->load(QUrl(QLatin1String("qrc:/mobile/main.qml")));
     return !mEngine->rootObjects().isEmpty();
@@ -80,6 +82,39 @@ void QmlUi::setVisible(bool visible)
     QQuickWindow *window = qobject_cast<QQuickWindow *>(rootObject);
     if (window) {
         window->setVisible(visible);
+    }
+}
+
+void QmlUi::startCustomGui(VescInterface *vesc)
+{
+    if (mEngine) {
+        mEngine->deleteLater();
+        mEngine = nullptr;
+    }
+
+    mEngine = new QQmlApplicationEngine(this);
+    mEngine->rootContext()->setContextProperty("QmlUi", this);
+    mEngine->rootContext()->setContextProperty("VescIf", vesc);
+    mEngine->load(QUrl(QLatin1String("qrc:/res/qml/MainLoader.qml")));
+}
+
+void QmlUi::stopCustomGui()
+{
+    if (mEngine) {
+        mEngine->deleteLater();
+        mEngine = nullptr;
+    }
+}
+
+void QmlUi::reloadCustomGui(QString fileName)
+{
+    emit reloadFile(fileName);
+}
+
+void QmlUi::clearQmlCache()
+{
+    if (mEngine) {
+        mEngine->clearComponentCache();
     }
 }
 

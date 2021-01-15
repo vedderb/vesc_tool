@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -22,6 +22,13 @@
 
 #include <QWidget>
 #include <QSettings>
+#include <QTimer>
+
+#ifdef HAS_GAMEPAD
+#include <QtGamepad/QGamepad>
+#endif
+
+#include "vescinterface.h"
 
 namespace Ui {
 class PageSettings;
@@ -35,13 +42,30 @@ public:
     explicit PageSettings(QWidget *parent = nullptr);
     ~PageSettings();
 
+    VescInterface *vesc() const;
+    void setVesc(VescInterface *vesc);
+    void setUseGamepadControl(bool useControl);
+    bool isUsingGamepadControl();
+
 private slots:
+    void timerSlot();
+
     void on_uiScaleBox_valueChanged(double arg1);
     void on_uiAutoScaleBox_toggled(bool checked);
+    void on_jsScanButton_clicked();
+    void on_jsConnectButton_clicked();
+    void on_jsResetConfigButton_clicked();
 
 private:
     Ui::PageSettings *ui;
+    VescInterface *mVesc;
     QSettings mSettings;
+    QTimer *mTimer;
+
+#ifdef HAS_GAMEPAD
+    QGamepad *mGamepad;
+    bool mUseGamepadControl;
+#endif
 
 };
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>819</width>
-    <height>112</height>
+    <width>314</width>
+    <height>180</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,8 +32,14 @@
       <string>IMU Calibration</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="spacing">
+       <number>2</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QPushButton" name="helpButton">
           <property name="sizePolicy">
@@ -128,9 +134,9 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
         <property name="spacing">
-         <number>0</number>
+         <number>2</number>
         </property>
         <item>
          <widget class="QDoubleSpinBox" name="calRBox">
@@ -207,6 +213,13 @@
           </property>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QDoubleSpinBox" name="calAXBox">
           <property name="toolTip">
@@ -282,6 +295,13 @@
           </property>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QDoubleSpinBox" name="calGXBox">
           <property name="toolTip">

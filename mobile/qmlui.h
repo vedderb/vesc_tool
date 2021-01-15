@@ -35,9 +35,15 @@ public:
     bool eventFilter(QObject *object, QEvent *e);
     void setVisible(bool visible);
 
+    void startCustomGui(VescInterface *vesc);
+    void stopCustomGui();
+    void reloadCustomGui(QString fileName);
+    Q_INVOKABLE void clearQmlCache();
+
     static VescInterface *vesc();
 
 signals:
+    void reloadFile(QString fileName);
 
 public slots:
 

@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -26,7 +26,7 @@ PageFoc::PageFoc(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 PageFoc::~PageFoc()
@@ -69,4 +69,56 @@ void PageFoc::reloadParams()
         ui->hfiTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hfi");
         ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "foc", "advanced");
     }
+}
+
+void PageFoc::on_openloopOldButton_clicked()
+{
+    if (mVesc) {
+        mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm", 700.0);
+        mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm_low", 0.0);
+        mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_hyst", 0.1);
+        mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time", 0.1);
+        mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_lock", 0.0);
+        mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_ramp", 0.0);
+    }
+}
+
+void PageFoc::on_openloopGenericButton_clicked()
+{
+    mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm", 1200.0);
+    mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm_low", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_hyst", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time", 0.05);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_lock", 0.0);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_ramp", 0.1);
+}
+
+void PageFoc::on_openloopFastStartButton_clicked()
+{
+    mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm", 1500.0);
+    mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm_low", 0.0);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_hyst", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_lock", 0.0);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_ramp", 0.0);
+}
+
+void PageFoc::on_openloopPropellerButton_clicked()
+{
+    mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm", 1500.0);
+    mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm_low", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_hyst", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_lock", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_ramp", 0.1);
+}
+
+void PageFoc::on_openloopHeavyInertialButton_clicked()
+{
+    mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm", 1500.0);
+    mVesc->mcConfig()->updateParamDouble("foc_openloop_rpm_low", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_hyst", 0.1);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time", 0.2);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_lock", 0.5);
+    mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_ramp", 0.5);
 }

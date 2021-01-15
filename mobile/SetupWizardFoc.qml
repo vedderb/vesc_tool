@@ -687,7 +687,7 @@ Item {
 
             mCommands.setMcconf(false)
             Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)
-            var canDevs = VescIf.scanCan();
+            var canDevs = Utility.scanCanVescOnly(VescIf)
             if (!Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0)) {
                 enableDialog()
                 return

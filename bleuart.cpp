@@ -58,7 +58,7 @@ BleUart::~BleUart() {
 void BleUart::startScan()
 {
     mDevs.clear();
-    mDeviceDiscoveryAgent->start();
+    mDeviceDiscoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
 
 void BleUart::startConnect(QString addr)

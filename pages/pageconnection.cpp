@@ -205,7 +205,7 @@ void PageConnection::bleScanDone(QVariantMap devs, bool done)
             name += addr;
             name += "]";
             ui->bleDevBox->insertItem(0, name, addr);
-        } else if (devName.contains("VESC")) {
+        } else if (devName.contains("VESC") || devName.contains("Metr Pro")) {
             QString name;
             name += devName;
             name += " [";

@@ -678,7 +678,6 @@ void MainWindow::timerSlot()
 
         has_run_start_checks = true;
         checkUdev();
-        Utility::checkVersion(mVesc);
     }
 }
 
@@ -1832,11 +1831,15 @@ void MainWindow::on_actionGamepadControl_triggered(bool checked)
 
 void MainWindow::on_actionLoadMeters_triggered()
 {
+#ifdef USE_MOBILE
     mQmlUi.startCustomGui(mVesc);
     mQmlUi.reloadCustomGui("qrc:/res/qml/Meters.qml");
+#endif
 }
 
 void MainWindow::on_actionCloseCustomGUI_triggered()
 {
+#ifdef USE_MOBILE
     mQmlUi.stopCustomGui();
+#endif
 }

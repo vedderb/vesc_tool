@@ -1,3 +1,8 @@
+== 3.01 ==
+* Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.
+* Fixed configuration backup and restore over CAN-bus.
+* Added test version information to about dialog.
+
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.
  - Added hw type setting.

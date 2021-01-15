@@ -187,6 +187,9 @@ QString Utility::vescToolChangeLog()
 QString Utility::aboutText()
 {
     return tr("<b>VESC® Tool %1</b><br>"
+          #if VT_IS_TEST_VERSION
+              "Test Version %2<br>"
+          #endif
           #if defined(VER_ORIGINAL)
               "Original Version<br>"
           #elif defined(VER_PLATINUM)
@@ -200,10 +203,14 @@ QString Utility::aboutText()
           #elif defined(VER_FREE)
               "Free of Charge Version<br>"
           #endif
-              "&copy; Benjamin Vedder 2016 - 2020<br>"
+              "&copy; Benjamin Vedder 2016 - 2021<br>"
               "<a href=\"mailto:benjamin@vedder.se\">benjamin@vedder.se</a><br>"
               "<a href=\"https://vesc-project.com/\">https://vesc-project.com/</a>").
-            arg(QString::number(VT_VERSION, 'f', 2));
+            arg(QString::number(VT_VERSION, 'f', 2))
+        #if VT_IS_TEST_VERSION
+            .arg(QString::number(VT_IS_TEST_VERSION))
+        #endif
+            ;
 }
 
 QString Utility::uuid2Str(QByteArray uuid, bool space)

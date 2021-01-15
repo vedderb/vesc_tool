@@ -28,7 +28,9 @@
 #include <QMap>
 #include "vescinterface.h"
 #include "widgets/pagelistitem.h"
+#ifdef USE_MOBILE
 #include "mobile/qmlui.h"
+#endif
 
 #include "pages/pagewelcome.h"
 #include "pages/pageconnection.h"
@@ -162,8 +164,9 @@ private:
     bool mMcConfRead;
     bool mAppConfRead;
     QMap<QString, int> mPageNameIdList;
+ #ifdef USE_MOBILE
     QmlUi mQmlUi;
-
+#endif
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;
     PageDataAnalysis *mPageDataAnalysis;

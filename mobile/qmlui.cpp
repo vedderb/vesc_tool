@@ -106,9 +106,19 @@ void QmlUi::stopCustomGui()
     }
 }
 
-void QmlUi::reloadCustomGui(QString fileName)
+void QmlUi::emitReloadCustomGui(QString fileName)
 {
     emit reloadFile(fileName);
+}
+
+void QmlUi::emitReloadQml(QString str)
+{
+    emit reloadQml(str);
+}
+
+void QmlUi::emitToggleFullscreen()
+{
+    emit toggleFullscreen();
 }
 
 void QmlUi::clearQmlCache()

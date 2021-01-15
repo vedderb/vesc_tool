@@ -21,6 +21,7 @@
 #define PAGEDEBUGPRINT_H
 
 #include <QWidget>
+#include <QDebug>
 
 namespace Ui {
 class PageDebugPrint;
@@ -36,8 +37,12 @@ public:
 
     static PageDebugPrint* currentMsgHandler;
 
+signals:
+    void debugMsgRx(QtMsgType type, const QString msg);
+
 public slots:
     void printConsole(QString str);
+    void emitDebugMsg(QtMsgType type, const QString msg);
 
 private:
     Ui::PageDebugPrint *ui;

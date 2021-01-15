@@ -26,11 +26,17 @@ import QtQuick.Window 2.2
 ApplicationWindow {
     id: mainWindow
     visible: true
-    visibility: Window.Windowed//myObject.visIsFullscreen() ? Window.FullScreen : Window.Windowed
+    visibility: Window.Windowed
     width: 1920
     height: 1080
     title: qsTr("VESC Custom GUI")
+
     property string lastFile: ""
+    property bool wasFullscreen: false
+
+    onClosing: {
+        loader.source = ""
+    }
 
     Loader {
         id: loader
@@ -45,6 +51,15 @@ ApplicationWindow {
             QmlUi.clearQmlCache()
             loadTimer.start()
             lastFile = fileName
+        }
+
+        onToggleFullscreen: {
+            wasFullscreen = !wasFullscreen
+            if (wasFullscreen) {
+                mainWindow.visibility = Window.FullScreen
+            } else {
+                mainWindow.visibility = Window.Windowed
+            }
         }
     }
 

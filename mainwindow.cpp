@@ -33,7 +33,6 @@
 #include "utility.h"
 #include "widgets/paramdialog.h"
 #include "widgets/detectallfocdialog.h"
-#include "customguitool.h"
 
 namespace {
 void stepTowards(double &value, double goal, double step) {
@@ -74,6 +73,10 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
                 context.file, context.line, context.function, localMsg.constData());
 
     if (PageDebugPrint::currentMsgHandler) {
+        QMetaObject::invokeMethod(PageDebugPrint::currentMsgHandler, "emitDebugMsg",
+                                  Qt::QueuedConnection, Q_ARG(QtMsgType, type),
+                                  Q_ARG(QString, msg));
+
         QString strTmp;
         if (isBad) {
             strTmp = "<font color=\"red\">" + str + "</font><br>";
@@ -95,6 +98,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    qRegisterMetaType<QtMsgType>("QtMsgType");
 
     mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
@@ -302,6 +307,7 @@ MainWindow::MainWindow(QWidget *parent) :
         mPageAppImu->reloadParams();
         mPageFirmware->reloadParams();
         mPageCanAnalyzer->reloadParams();
+        mPageScripting->reloadParams();
 
         updateMotortype();
         updateAppToUse();
@@ -1326,6 +1332,13 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageSettings);
     addPageItem(tr("Settings"), "://res/icons/Settings-96.png", "", true);
 
+    mPageScripting = new PageScripting(this);
+    mPageScripting->setVesc(mVesc);
+    connect(mPageDebugPrint, SIGNAL(debugMsgRx(QtMsgType, const QString)),
+            mPageScripting, SLOT(debugMsgRx(QtMsgType, const QString)));
+    ui->pageWidget->addWidget(mPageScripting);
+    addPageItem(tr("Scripting"), "://res/icons_textedit/Outdent-96.png", "", true);
+
     /*
      * Page IDs
      *
@@ -1829,23 +1842,4 @@ void MainWindow::on_actionGamepadControl_triggered(bool checked)
     if (!mPageSettings->isUsingGamepadControl()) {
         ui->actionGamepadControl->setChecked(false);
     }
-}
-
-void MainWindow::on_actionLoadMeters_triggered()
-{
-    mQmlUi.startCustomGui(mVesc);
-    mQmlUi.reloadCustomGui("qrc:/res/qml/Meters.qml");
-}
-
-void MainWindow::on_actionCloseCustomGUI_triggered()
-{
-    mQmlUi.stopCustomGui();
-}
-
-void MainWindow::on_actionCustomGUITool_triggered()
-{
-    CustomGuiTool *t = new CustomGuiTool(this);
-    t->setAttribute(Qt::WA_DeleteOnClose);
-    t->setVesc(mVesc);
-    t->show();
 }

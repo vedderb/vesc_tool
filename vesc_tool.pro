@@ -78,6 +78,7 @@ QT       += printsupport
 QT       += network
 QT       += quick
 QT       += quickcontrols2
+QT       += quickwidgets
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
@@ -167,7 +168,6 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
-    customguitool.cpp \
         mainwindow.cpp \
     packet.cpp \
     udpserversimple.cpp \
@@ -185,7 +185,6 @@ SOURCES += main.cpp\
     tcpserversimple.cpp
 
 HEADERS  += mainwindow.h \
-    customguitool.h \
     packet.h \
     udpserversimple.h \
     vbytearray.h \
@@ -203,7 +202,6 @@ HEADERS  += mainwindow.h \
     tcpserversimple.h
 
 FORMS    += mainwindow.ui \
-    customguitool.ui \
     parametereditor.ui
 
 contains(DEFINES, HAS_BLUETOOTH) {
@@ -216,6 +214,7 @@ include(widgets/widgets.pri)
 include(mobile/mobile.pri)
 include(map/map.pri)
 include(lzokay/lzokay.pri)
+include(QCodeEditor/qcodeeditor.pri)
 
 RESOURCES += res.qrc \
     res_fw_bms.qrc \

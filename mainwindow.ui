@@ -19,7 +19,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_neutral.qrc">
+   <iconset resource="res_silver.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -64,7 +64,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_neutral.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_silver.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -577,6 +577,49 @@
     </item>
    </layout>
   </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionReconnect"/>
+   <addaction name="actionDisconnect"/>
+   <addaction name="separator"/>
+   <addaction name="actionReadMcconf"/>
+   <addaction name="actionReadMcconfDefault"/>
+   <addaction name="actionWriteMcconf"/>
+   <addaction name="separator"/>
+   <addaction name="actionReadAppconf"/>
+   <addaction name="actionReadAppconfDefault"/>
+   <addaction name="actionWriteAppconf"/>
+   <addaction name="separator"/>
+   <addaction name="actionKeyboardControl"/>
+   <addaction name="actionGamepadControl"/>
+   <addaction name="actionRtData"/>
+   <addaction name="actionRtDataApp"/>
+   <addaction name="actionIMU"/>
+   <addaction name="actionrtDataBms"/>
+   <addaction name="actionSendAlive"/>
+   <addaction name="actionCanFwd"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
@@ -673,78 +716,14 @@
     <addaction name="actionRestoreConfigurationsCAN"/>
     <addaction name="actionClearConfigurationBackups"/>
    </widget>
-   <widget class="QMenu" name="menuTools_3">
-    <property name="title">
-     <string>Tools</string>
-    </property>
-    <widget class="QMenu" name="menuCustom_GUI">
-     <property name="title">
-      <string>Custom GUI</string>
-     </property>
-     <addaction name="actionLoadMeters"/>
-     <addaction name="actionCloseCustomGUI"/>
-     <addaction name="actionCustomGUITool"/>
-    </widget>
-    <widget class="QMenu" name="menuType_Here">
-     <property name="title">
-      <string>Type Here</string>
-     </property>
-    </widget>
-    <addaction name="menuCustom_GUI"/>
-    <addaction name="menuType_Here"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools_2"/>
-   <addaction name="menuTools_3"/>
    <addaction name="menuWizards"/>
    <addaction name="menuCommands"/>
    <addaction name="menuTerminal"/>
    <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <property name="movable">
-    <bool>false</bool>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonIconOnly</enum>
-   </property>
-   <property name="floatable">
-    <bool>false</bool>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>RightToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionReconnect"/>
-   <addaction name="actionDisconnect"/>
-   <addaction name="separator"/>
-   <addaction name="actionReadMcconf"/>
-   <addaction name="actionReadMcconfDefault"/>
-   <addaction name="actionWriteMcconf"/>
-   <addaction name="separator"/>
-   <addaction name="actionReadAppconf"/>
-   <addaction name="actionReadAppconfDefault"/>
-   <addaction name="actionWriteAppconf"/>
-   <addaction name="separator"/>
-   <addaction name="actionKeyboardControl"/>
-   <addaction name="actionGamepadControl"/>
-   <addaction name="actionRtData"/>
-   <addaction name="actionRtDataApp"/>
-   <addaction name="actionIMU"/>
-   <addaction name="actionrtDataBms"/>
-   <addaction name="actionSendAlive"/>
-   <addaction name="actionCanFwd"/>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionReadMcconf">
    <property name="icon">
     <iconset resource="res.qrc">
@@ -1331,7 +1310,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="res.qrc">
      <normaloff>:/res/icons/bms_off.png</normaloff>
      <normalon>:/res/icons/bms_on.png</normalon>:/res/icons/bms_off.png</iconset>
    </property>
@@ -1358,24 +1337,6 @@ p, li { white-space: pre-wrap; }
     <string>Use Gamepad Control</string>
    </property>
   </action>
-  <action name="actionLoadMeters">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Speed-96.png</normaloff>:/res/icons/Speed-96.png</iconset>
-   </property>
-   <property name="text">
-    <string>Load Meters</string>
-   </property>
-  </action>
-  <action name="actionCloseCustomGUI">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
-   </property>
-   <property name="text">
-    <string>Close Custom GUI</string>
-   </property>
-  </action>
   <action name="actionParameterEditorCustomConf0">
    <property name="icon">
     <iconset resource="res.qrc">
@@ -1383,15 +1344,6 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Parameter Editor Custom Conf 0</string>
-   </property>
-  </action>
-  <action name="actionCustomGUITool">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
-   </property>
-   <property name="text">
-    <string>Custom GUI Tool</string>
    </property>
   </action>
  </widget>
@@ -1406,7 +1358,7 @@ p, li { white-space: pre-wrap; }
  </customwidgets>
  <resources>
   <include location="res.qrc"/>
-  <include location="res_neutral.qrc"/>
+  <include location="res_silver.qrc"/>
  </resources>
  <connections/>
 </ui>

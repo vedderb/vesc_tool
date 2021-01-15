@@ -64,6 +64,7 @@
 #include "pages/pagecananalyzer.h"
 #include "pages/pagebms.h"
 #include "pages/pagecustomconfig.h"
+#include "pages/pagescripting.h"
 
 namespace Ui {
 class MainWindow;
@@ -145,9 +146,6 @@ private slots:
     void on_scanCanButton_clicked();
     void on_canList_currentRowChanged(int currentRow);
     void on_actionGamepadControl_triggered(bool checked);
-    void on_actionLoadMeters_triggered();
-    void on_actionCloseCustomGUI_triggered();
-    void on_actionCustomGUITool_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -163,7 +161,6 @@ private:
     bool mMcConfRead;
     bool mAppConfRead;
     QMap<QString, int> mPageNameIdList;
-    QmlUi mQmlUi;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;
@@ -201,6 +198,7 @@ private:
     PageCustomConfig *mPageCustomConfig0;
     PageCustomConfig *mPageCustomConfig1;
     PageCustomConfig *mPageCustomConfig2;
+    PageScripting *mPageScripting;
 
     void addPageItem(QString name,
                      QString icon = "",

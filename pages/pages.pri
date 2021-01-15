@@ -17,6 +17,7 @@ FORMS += \
     $$PWD/pageappuart.ui \
     $$PWD/pageappnunchuk.ui \
     $$PWD/pageappnrf.ui \
+    $$PWD/pagescripting.ui \
     $$PWD/pageterminal.ui \
     $$PWD/pagefirmware.ui \
     $$PWD/pagertdata.ui \
@@ -54,6 +55,7 @@ HEADERS += \
     $$PWD/pageappuart.h \
     $$PWD/pageappnunchuk.h \
     $$PWD/pageappnrf.h \
+    $$PWD/pagescripting.h \
     $$PWD/pageterminal.h \
     $$PWD/pagefirmware.h \
     $$PWD/pagertdata.h \
@@ -91,6 +93,7 @@ SOURCES += \
     $$PWD/pageappuart.cpp \
     $$PWD/pageappnunchuk.cpp \
     $$PWD/pageappnrf.cpp \
+    $$PWD/pagescripting.cpp \
     $$PWD/pageterminal.cpp \
     $$PWD/pagefirmware.cpp \
     $$PWD/pagertdata.cpp \

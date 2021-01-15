@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>res/qml/MainLoader.qml</file>
-        <file>res/qml/Meters.qml</file>
+        <file>res/qml/DynamicLoader.qml</file>
+        <file>res/qml/Examples/Meters.qml</file>
+        <file>res/qml/Examples/RtData.qml</file>
+        <file>res/qml/Examples/RtDataSetup.qml</file>
     </qresource>
 </RCC>

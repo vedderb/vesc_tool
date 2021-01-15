@@ -37,13 +37,17 @@ public:
 
     void startCustomGui(VescInterface *vesc);
     void stopCustomGui();
-    void reloadCustomGui(QString fileName);
+    void emitReloadCustomGui(QString fileName);
+    void emitReloadQml(QString str);
+    void emitToggleFullscreen();
     Q_INVOKABLE void clearQmlCache();
 
     static VescInterface *vesc();
 
 signals:
     void reloadFile(QString fileName);
+    void reloadQml(QString str);
+    void toggleFullscreen();
 
 public slots:
 

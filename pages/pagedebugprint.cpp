@@ -46,3 +46,8 @@ void PageDebugPrint::printConsole(QString str)
                                    + str);
     ui->consoleBrowser->moveCursor(QTextCursor::End);
 }
+
+void PageDebugPrint::emitDebugMsg(QtMsgType type, const QString msg)
+{
+    emit debugMsgRx(type, msg);
+}

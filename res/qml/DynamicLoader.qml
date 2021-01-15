@@ -17,38 +17,24 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#ifndef CUSTOMGUITOOL_H
-#define CUSTOMGUITOOL_H
+import QtQuick 2.7
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.3
+import QtQuick.Controls.Material 2.12
 
-#include <QMainWindow>
-#include "mobile/qmlui.h"
-#include "vescinterface.h"
+Item {
+    id: container
 
-namespace Ui {
-class CustomGuiTool;
+    Rectangle {
+        anchors.fill: parent
+        color: Material.background
+    }
+
+    Connections {
+        target: QmlUi
+
+        onReloadQml: {
+            Qt.createQmlObject(str, container, "myCode");
+        }
+    }
 }
-
-class CustomGuiTool : public QMainWindow
-{
-    Q_OBJECT
-
-public:
-    explicit CustomGuiTool(QWidget *parent = nullptr);
-    ~CustomGuiTool();
-
-    void setVesc(VescInterface *vesc);
-
-private slots:
-    void on_chooseButton_clicked();
-    void on_reloadButton_clicked();
-    void on_closeButton_clicked();
-    void on_loadButton_clicked();
-
-private:
-    Ui::CustomGuiTool *ui;
-    QmlUi mQmlUi;
-    VescInterface *mVesc;
-
-};
-
-#endif // CUSTOMGUITOOL_H

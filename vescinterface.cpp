@@ -1236,7 +1236,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
                 mCommands->setSendCan(true, d);
                 FW_RX_PARAMS fwParamsCan;
                 Utility::getFwVersionBlocking(this, &fwParamsCan);
-                if (fwParamsLocal.hw != fwParamsCan.hw) {
+                if (fwParamsCan.hwType == HW_TYPE_VESC && fwParamsLocal.hw != fwParamsCan.hw) {
                     emitMessageDialog("Firmware Upload",
                                       "All VESCs on the CAN-bus must have the same hardware version to upload "
                                       "firmware to all of them at the same time. You must update them individually.",
@@ -3365,6 +3365,11 @@ bool VescInterface::confStoreBackup(bool can, QString name)
         return false;
     }
 
+    if (mLastFwParams.hwType != HW_TYPE_VESC) {
+        emitMessageDialog("Backup Configuration", "This only works for motor controllers.", false, false);
+        return false;
+    }
+
     QStringList uuidsOk;
 
     auto storeConf = [this, &uuidsOk, &name]() {
@@ -3413,7 +3418,13 @@ bool VescInterface::confStoreBackup(bool can, QString name)
     if (res && can) {
         for (int d: scanCan()) {
             commands()->setSendCan(true, d);
-            res = storeConf();
+
+            FW_RX_PARAMS fwp;
+            Utility::getFwVersionBlocking(this, &fwp);
+
+            if (fwp.hwType == HW_TYPE_VESC) {
+                res = storeConf();
+            }
 
             if (!res) {
                 break;
@@ -3448,6 +3459,11 @@ bool VescInterface::confRestoreBackup(bool can)
 {
     if (!isPortConnected()) {
         emitMessageDialog("Restore Configuration", "The VESC must be connected to perform this operation.", false, false);
+        return false;
+    }
+
+    if (mLastFwParams.hwType != HW_TYPE_VESC) {
+        emitMessageDialog("Restore Configuration", "This only works for motor controllers.", false, false);
         return false;
     }
 
@@ -3525,7 +3541,13 @@ bool VescInterface::confRestoreBackup(bool can)
     if (res && can) {
         for (int d: scanCan()) {
             commands()->setSendCan(true, d);
-            res = restoreConf();
+
+            FW_RX_PARAMS fwp;
+            Utility::getFwVersionBlocking(this, &fwp);
+
+            if (fwp.hwType == HW_TYPE_VESC) {
+                res = restoreConf();
+            }
 
             if (!res) {
                 break;

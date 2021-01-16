@@ -219,6 +219,8 @@ void PageScripting::on_saveButton_clicked()
 
     file.write(ui->qmlEdit->toPlainText().toUtf8());
     file.close();
+
+    mVesc->emitStatusMessage("Saved " + fileName, true);
 }
 
 void PageScripting::on_saveAsButton_clicked()
@@ -247,6 +249,8 @@ void PageScripting::on_saveAsButton_clicked()
             mRecentFiles.append(fileName);
             updateRecentList();
         }
+
+        mVesc->emitStatusMessage("Saved " + fileName, true);
     }
 }
 

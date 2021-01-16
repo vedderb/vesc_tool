@@ -106,6 +106,11 @@ void QmlUi::stopCustomGui()
     }
 }
 
+bool QmlUi::isCustomGuiRunning()
+{
+    return mEngine != nullptr;
+}
+
 void QmlUi::emitReloadCustomGui(QString fileName)
 {
     emit reloadFile(fileName);

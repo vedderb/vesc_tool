@@ -37,6 +37,7 @@ public:
 
     void startCustomGui(VescInterface *vesc);
     void stopCustomGui();
+    bool isCustomGuiRunning();
     void emitReloadCustomGui(QString fileName);
     void emitReloadQml(QString str);
     void emitToggleFullscreen();

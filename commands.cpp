@@ -801,12 +801,10 @@ void Commands::getValues()
 
 void Commands::setOdometer(unsigned odometer_meters)
 {
-    qDebug() << "Set odometer: " << odometer_meters;
     VByteArray vb;
     vb.vbAppendInt8(COMM_SET_ODOMETER);
     vb.vbAppendUint32(odometer_meters);
     emitData(vb);
-	
 }
 
 void Commands::sendTerminalCmd(QString cmd)

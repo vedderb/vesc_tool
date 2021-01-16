@@ -105,6 +105,10 @@ void PageScripting::reloadParams()
 
 void PageScripting::debugMsgRx(QtMsgType type, const QString msg)
 {
+    if (!ui->debugEdit->isVisible()) {
+        return;
+    }
+
     QString str;
 
     if (type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg) {
@@ -154,7 +158,11 @@ void PageScripting::on_runWindowButton_clicked()
 {
     ui->runWindowButton->setEnabled(false);
     mQmlUi.startCustomGui(mVesc);
-    mQmlUi.emitReloadCustomGui("qrc:/res/qml/DynamicLoader.qml");
+
+    QTimer::singleShot(10, [this]() {
+        mQmlUi.emitReloadCustomGui("qrc:/res/qml/DynamicLoader.qml");
+    });
+
     QTimer::singleShot(1000, [this]() {
         mQmlUi.emitReloadQml(ui->qmlEdit->toPlainText());
         ui->runWindowButton->setEnabled(true);

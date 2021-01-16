@@ -28,6 +28,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDirIterator>
+#include <QVescCompleter>
 
 PageScripting::PageScripting(QWidget *parent) :
     QWidget(parent),
@@ -39,6 +40,12 @@ PageScripting::PageScripting(QWidget *parent) :
     mIsQmlWidgetRuning = false;
 
     ui->qmlEdit->setHighlighter(new QmlHighlighter);
+    ui->qmlEdit->setCompleter(new QVescCompleter);
+    ui->qmlEdit->setTabReplaceSize(4);
+
+    connect(ui->qmlEdit, &QCodeEditor::saveTriggered, [this]() {
+        on_saveButton_clicked();
+    });
 
     QSettings set;
     ui->qmlEdit->setPlainText(set.value("pagescripting/lastqml", "").toString());

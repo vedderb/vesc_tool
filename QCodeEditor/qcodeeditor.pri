@@ -16,7 +16,8 @@ HEADERS += \
     $$PWD/include/internal/QStyleSyntaxHighlighter.hpp \
     $$PWD/include/internal/QSyntaxStyle.hpp \
     $$PWD/include/internal/QXMLHighlighter.hpp \
-    $$PWD/include/internal/QmlHighlighter.hpp
+    $$PWD/include/internal/QmlHighlighter.hpp \
+    $$PWD/include/internal/QVescCompleter.hpp
 
 SOURCES += \
     $$PWD/src/internal/QCodeEditor.cpp \
@@ -34,7 +35,8 @@ SOURCES += \
     $$PWD/src/internal/QStyleSyntaxHighlighter.cpp \
     $$PWD/src/internal/QSyntaxStyle.cpp \
     $$PWD/src/internal/QXMLHighlighter.cpp \
-    $$PWD/src/internal/QmlHighlighter.cpp
+    $$PWD/src/internal/QmlHighlighter.cpp \
+    $$PWD/src/internal/QVescCompleter.cpp
 
 RESOURCES += \
     $$PWD/resources/qcodeeditor_resources.qrc

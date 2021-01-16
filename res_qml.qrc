@@ -5,5 +5,6 @@
         <file>res/qml/Examples/Meters.qml</file>
         <file>res/qml/Examples/RtData.qml</file>
         <file>res/qml/Examples/RtDataSetup.qml</file>
+        <file>res/qml/Examples/CanDebugger.qml</file>
     </qresource>
 </RCC>

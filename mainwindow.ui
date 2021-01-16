@@ -330,9 +330,6 @@
           <height>40</height>
          </size>
         </property>
-        <property name="shortcut">
-         <string>Esc</string>
-        </property>
        </widget>
       </item>
       <item row="0" column="6" rowspan="2">

@@ -2,7 +2,16 @@
 * Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.
 * Fixed configuration backup and restore over CAN-bus.
 * Added test version information to about dialog.
-* Added scripting page.
+* Added scripting page
+ - Syntax highlighting (needs some work).
+ - Recent files.
+ - Example files.
+ - Auto-completion tree (needs some work).
+ - Run in widget, window or full screen.
+ - Debug print output.
+ - Toggle line comment.
+ - Auto-indentation of line or block.
+* Only capture esc key for stopping the motor when connected.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

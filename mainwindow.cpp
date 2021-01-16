@@ -403,12 +403,24 @@ bool MainWindow::eventFilter(QObject *object, QEvent *e)
 {
     (void)object;
 
-    if (!mVesc->isPortConnected() || !ui->actionKeyboardControl->isChecked()) {
+    if (!mVesc->isPortConnected()) {
+        return false;
+    }
+
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
+
+    if (e->type() == QEvent::KeyPress) {
+        if (keyEvent->key() == Qt::Key_Escape) {
+            ui->stopButton->animateClick();
+            return true;
+        }
+    }
+
+    if (!ui->actionKeyboardControl->isChecked()) {
         return false;
     }
 
     if (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
         bool isPress = e->type() == QEvent::KeyPress;
 
         switch(keyEvent->key()) {

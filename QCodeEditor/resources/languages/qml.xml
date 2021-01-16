@@ -67,21 +67,29 @@
     </section>
     <section name="PrimitiveType">
         <name>property</name>
+        <name>bool</name>
     </section>
     <section name="Type">
         <name>VescIf</name>
         <name>RowLayout</name>
-        <name>￼Item</name>
+        <name>Item</name>
         <name>Commands</name>
         <name>ConfigParams</name>
         <name>ColumnLayout</name>
+        <name>GridLayout</name>
+        <name>Rectangle</name>
         <name>RowLayout</name>
         <name>CustomGauge</name>
         <name>CustomGaugeV2</name>
         <name>Layout</name>
         <name>Text</name>
+        <name>TextMetrics</name>
         <name>Button</name>
         <name>Timer</name>
         <name>Connections</name>
+        <name>Component</name>
+        <name>Math</name>
+        <name>console</name>
+        <name>anchors</name>
     </section>
 </root>

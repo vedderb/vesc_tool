@@ -106,6 +106,9 @@ public:
      */
     QCompleter* completer() const;
 
+signals:
+    void saveTriggered();
+
 public Q_SLOTS:
 
     /**

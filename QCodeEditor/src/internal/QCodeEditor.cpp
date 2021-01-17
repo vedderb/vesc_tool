@@ -59,12 +59,12 @@ void QCodeEditor::initDocumentLayoutHandlers()
 }
 
 void QCodeEditor::initFont()
-{
-    auto fnt = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    fnt.setFixedPitch(true);
-    fnt.setPointSize(10);
+{    
+    QFont font;
+    font.setFamily("DejaVu Sans Mono");
+    font.setPointSize(11);
 
-    setFont(fnt);
+    setFont(font);
 }
 
 void QCodeEditor::performConnections()
@@ -556,6 +556,24 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
 
         if (e->key() == Qt::Key_S && e->modifiers() == Qt::ControlModifier) {
             emit saveTriggered();
+            return;
+        }
+
+        if (e->key() == Qt::Key_Plus && e->modifiers() == Qt::ControlModifier) {
+            auto f = font();
+            if (f.pointSize() < 50) {
+                f.setPointSize(f.pointSize() + 1);
+                setFont(f);
+            }
+            return;
+        }
+
+        if (e->key() == Qt::Key_Minus && e->modifiers() == Qt::ControlModifier) {
+            auto f = font();
+            if (f.pointSize() > 4) {
+                f.setPointSize(f.pointSize() - 1);
+                setFont(f);
+            }
             return;
         }
 

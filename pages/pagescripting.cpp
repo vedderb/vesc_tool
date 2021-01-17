@@ -19,6 +19,7 @@
 
 #include "pagescripting.h"
 #include "ui_pagescripting.h"
+#include "widgets/helpdialog.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -331,4 +332,16 @@ void PageScripting::updateRecentList()
     for (auto f: mRecentFiles) {
         ui->recentList->addItem(f);
     }
+}
+
+void PageScripting::on_helpButton_clicked()
+{
+    QString html = "<b>Keyboard Commands</b><br>"
+                   "Ctrl + '+'   : Increase font size<br>"
+                   "Ctrl + '-'   : Decrease font size<br>"
+                   "Ctrl + space : Show auto-complete suggestions<br>"
+                   "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
+                   "Ctrl + 'i'   : Auto-indent selected line or block<br>";
+
+    HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html.replace(" ","&nbsp;"));
 }

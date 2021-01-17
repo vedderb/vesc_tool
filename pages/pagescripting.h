@@ -61,6 +61,7 @@ private slots:
     void on_removeSelectedButton_clicked();
     void on_clearRecentButton_clicked();
     void on_openExampleButton_clicked();
+    void on_helpButton_clicked();
 
 private:
     Ui::PageScripting *ui;

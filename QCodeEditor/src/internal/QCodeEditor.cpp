@@ -464,8 +464,9 @@ void QCodeEditor::proceedCompleterEnd(QKeyEvent *e)
 
     auto isShortcut = ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Space);
     auto isDot = charUnderCursor(-1) == ".";
+    auto isSpace = charUnderCursor(-1) == " " || charUnderCursor(-1) == "\t";
 
-    if ((word.isEmpty() && !isDot)) {
+    if (isSpace || (word.isEmpty() && !isDot)) {
         m_completer->popup()->hide();
         return;
     }

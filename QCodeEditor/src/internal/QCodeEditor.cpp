@@ -624,10 +624,11 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                     while (!tc.atEnd()) {
                         if (tc.blockNumber() == lineNum) {
                             tc.select(QTextCursor::LineUnderCursor);
-                            tc.insertText(line);
+                            if (tc.selectedText() != line) {
+                                tc.insertText(line);
+                            }
                             break;
                         }
-
                         tc.setPosition(posStart++);
                     }
                 }

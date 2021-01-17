@@ -50,7 +50,6 @@ public slots:
 
 private slots:
     void on_runButton_clicked();
-    void on_reloadButton_clicked();
     void on_stopButton_clicked();
     void on_runWindowButton_clicked();
     void on_fullscreenButton_clicked();
@@ -67,7 +66,6 @@ private:
     Ui::PageScripting *ui;
     VescInterface *mVesc;
     QmlUi mQmlUi;
-    bool mIsQmlWidgetRuning;
     QStringList mRecentFiles;
 
     void updateRecentList();

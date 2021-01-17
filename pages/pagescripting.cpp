@@ -38,7 +38,6 @@ PageScripting::PageScripting(QWidget *parent) :
     ui->setupUi(this);
     mVesc = nullptr;
     ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mIsQmlWidgetRuning = false;
 
     ui->qmlEdit->setHighlighter(new QmlHighlighter);
     ui->qmlEdit->setCompleter(new QVescCompleter);
@@ -46,6 +45,18 @@ PageScripting::PageScripting(QWidget *parent) :
 
     connect(ui->qmlEdit, &QCodeEditor::saveTriggered, [this]() {
         on_saveButton_clicked();
+    });
+    connect(ui->qmlEdit, &QCodeEditor::runEmbeddedTriggered, [this]() {
+        on_runButton_clicked();
+    });
+    connect(ui->qmlEdit, &QCodeEditor::runWindowTriggered, [this]() {
+        on_runWindowButton_clicked();
+    });
+    connect(ui->qmlEdit, &QCodeEditor::stopTriggered, [this]() {
+        on_stopButton_clicked();
+    });
+    connect(ui->qmlEdit, &QCodeEditor::clearConsoleTriggered, [this]() {
+        ui->debugEdit->clear();
     });
 
     QSettings set;
@@ -136,36 +147,21 @@ void PageScripting::on_runButton_clicked()
 {
     ui->qmlWidget->setSource(QUrl(QLatin1String("qrc:/res/qml/DynamicLoader.qml")));
     emit reloadQml(ui->qmlEdit->toPlainText());
-    mIsQmlWidgetRuning = true;
-}
-
-void PageScripting::on_reloadButton_clicked()
-{
-    ui->reloadButton->setEnabled(false);
-
-    if (mIsQmlWidgetRuning) {
-        on_runButton_clicked();
-    }
-
-    mQmlUi.emitReloadCustomGui("qrc:/res/qml/DynamicLoader.qml");
-
-    QTimer::singleShot(1000, [this]() {
-        mQmlUi.emitReloadQml(ui->qmlEdit->toPlainText());
-        ui->reloadButton->setEnabled(true);
-    });
 }
 
 void PageScripting::on_stopButton_clicked()
 {
     ui->qmlWidget->setSource(QUrl(QLatin1String("")));
     mQmlUi.stopCustomGui();
-    mIsQmlWidgetRuning = false;
 }
 
 void PageScripting::on_runWindowButton_clicked()
 {
     ui->runWindowButton->setEnabled(false);
-    mQmlUi.startCustomGui(mVesc);
+
+    if (!mQmlUi.isCustomGuiRunning()) {
+        mQmlUi.startCustomGui(mVesc);
+    }
 
     QTimer::singleShot(10, [this]() {
         mQmlUi.emitReloadCustomGui("qrc:/res/qml/DynamicLoader.qml");
@@ -341,7 +337,12 @@ void PageScripting::on_helpButton_clicked()
                    "Ctrl + '-'   : Decrease font size<br>"
                    "Ctrl + space : Show auto-complete suggestions<br>"
                    "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
-                   "Ctrl + 'i'   : Auto-indent selected line or block<br>";
+                   "Ctrl + 'i'   : Auto-indent selected line or block<br>"
+                   "Ctrl + 'r'   : Run or restart embedded<br>"
+                   "Ctrl + 'w'   : Run or restart window<br>"
+                   "Ctrl + 'q'   : Stop code<br>"
+                   "Ctrl + 'd'   : Clear console<br>"
+                   "Ctrl + 's'   : Save file<br>";
 
     HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html.replace(" ","&nbsp;"));
 }

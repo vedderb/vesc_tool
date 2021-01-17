@@ -29,7 +29,7 @@ VescInterface *QmlUi::mVesc = nullptr;
 
 QmlUi::QmlUi(QObject *parent) : QObject(parent)
 {
-    mEngine = new QQmlApplicationEngine(this);
+    mEngine = nullptr;
 #ifdef DEBUG_BUILD
     qApp->installEventFilter(this);
 #endif
@@ -44,6 +44,10 @@ QmlUi::QmlUi(QObject *parent) : QObject(parent)
 
 bool QmlUi::startQmlUi()
 {
+    if (!mEngine) {
+        mEngine = new QQmlApplicationEngine(this);
+    }
+
     qmlRegisterSingletonType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf", vescinterface_singletontype_provider);
     qmlRegisterSingletonType<Utility>("Vedder.vesc.utility", 1, 0, "Utility", utility_singletontype_provider);
 
@@ -78,10 +82,12 @@ bool QmlUi::eventFilter(QObject *object, QEvent *e)
 
 void QmlUi::setVisible(bool visible)
 {
-    QObject *rootObject = mEngine->rootObjects().first();
-    QQuickWindow *window = qobject_cast<QQuickWindow *>(rootObject);
-    if (window) {
-        window->setVisible(visible);
+    if (mEngine) {
+        QObject *rootObject = mEngine->rootObjects().first();
+        QQuickWindow *window = qobject_cast<QQuickWindow *>(rootObject);
+        if (window) {
+            window->setVisible(visible);
+        }
     }
 }
 

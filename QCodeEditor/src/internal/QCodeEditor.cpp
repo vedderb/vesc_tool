@@ -554,9 +554,23 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
             return;
         }
 
-        if (e->key() == Qt::Key_S && e->modifiers() == Qt::ControlModifier) {
-            emit saveTriggered();
-            return;
+        if (e->modifiers() == Qt::ControlModifier) {
+            if (e->key() == Qt::Key_S) {
+                emit saveTriggered();
+                return;
+            } else if (e->key() == Qt::Key_R) {
+                emit runEmbeddedTriggered();
+                return;
+            } else if (e->key() == Qt::Key_W) {
+                emit runWindowTriggered();
+                return;
+            } else if (e->key() == Qt::Key_Q) {
+                emit stopTriggered();
+                return;
+            } else if (e->key() == Qt::Key_D) {
+                emit clearConsoleTriggered();
+                return;
+            }
         }
 
         if (e->key() == Qt::Key_Plus && e->modifiers() == Qt::ControlModifier) {

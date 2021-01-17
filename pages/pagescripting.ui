@@ -128,17 +128,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="reloadButton">
-            <property name="text">
-             <string>Reload Window</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="fullscreenButton">
             <property name="text">
              <string>Toggle Fullscreen</string>

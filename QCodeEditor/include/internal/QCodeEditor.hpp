@@ -108,6 +108,10 @@ public:
 
 signals:
     void saveTriggered();
+    void runEmbeddedTriggered();
+    void runWindowTriggered();
+    void stopTriggered();
+    void clearConsoleTriggered();
 
 public Q_SLOTS:
 

@@ -515,21 +515,42 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
     auto completerSkip = proceedCompleterBegin(e);
 
     if (!completerSkip) {
-        // Toggle line comment
+        auto tcStart = textCursor();
+        auto tcEnd = textCursor();
+        tcStart.setPosition(textCursor().selectionStart());
+        tcEnd.setPosition(textCursor().selectionEnd());
+
+        int lineStart = tcStart.blockNumber();
+        int lineEnd = tcEnd.blockNumber();
+
+        // Toggle block comment
         if (e->text() == "\u001F") {
-            auto tc = textCursor();
-            tc.select(QTextCursor::LineUnderCursor);
-            auto line = tc.selectedText();
-            auto line2 = line;
-            line2.replace(" ", "");
-            line2.replace("\t", "");
-            if (line2.startsWith("//")) {
-                line.replace(line.indexOf("/"), 2, "");
-            } else {
-                line.prepend("//");
+            for (int i = lineStart;i <= lineEnd;i++) {
+                auto tc = textCursor();
+
+                int posStart = 0;
+                tc.setPosition(posStart++);
+                while (!tc.atEnd()) {
+                    tc.setPosition(posStart++);
+
+                    if (tc.blockNumber() == i) {
+                        tc.select(QTextCursor::LineUnderCursor);
+                        auto line = tc.selectedText();
+                        auto line2 = line;
+                        line2.replace(" ", "");
+                        line2.replace("\t", "");
+                        if (line2.startsWith("//")) {
+                            line.replace(line.indexOf("/"), 2, "");
+                        } else {
+                            line.prepend("//");
+                        }
+
+                        tc.insertText(line);
+                        break;
+                    }
+                }
             }
 
-            tc.insertText(line);
             return;
         }
 
@@ -545,13 +566,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
             int indentNow = 0;
             bool isComment = false;
 
-            auto tcStart = textCursor();
-            auto tcEnd = textCursor();
-            tcStart.setPosition(textCursor().selectionStart());
-            tcEnd.setPosition(textCursor().selectionEnd());
-
-            int lineStart = tcStart.blockNumber();
-            int lineEnd = tcEnd.blockNumber();
             int posFinal = tcStart.position();
 
             int lineNum = -1;

@@ -531,8 +531,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                 int posStart = 0;
                 tc.setPosition(posStart++);
                 while (!tc.atEnd()) {
-                    tc.setPosition(posStart++);
-
                     if (tc.blockNumber() == i) {
                         tc.select(QTextCursor::LineUnderCursor);
                         auto line = tc.selectedText();
@@ -548,6 +546,8 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                         tc.insertText(line);
                         break;
                     }
+
+                    tc.setPosition(posStart++);
                 }
             }
 
@@ -561,15 +561,12 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
 
         // Auto-indent selected line or block
         if (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier) {
-            auto txt = toPlainText();
-            QString txtNew = "";
+            auto txtOld = toPlainText();
             int indentNow = 0;
             bool isComment = false;
 
-            int posFinal = tcStart.position();
-
             int lineNum = -1;
-            for (auto line: txt.split("\n")) {
+            for (auto line: txtOld.split("\n")) {
                 lineNum++;
 
                 bool indent = true;
@@ -620,23 +617,28 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                     }
                 }
 
+                if (indent || removeTrailing) {
+                    auto tc = textCursor();
+                    int posStart = 0;
+                    tc.setPosition(posStart++);
+                    while (!tc.atEnd()) {
+                        if (tc.blockNumber() == lineNum) {
+                            tc.select(QTextCursor::LineUnderCursor);
+                            tc.insertText(line);
+                            break;
+                        }
+
+                        tc.setPosition(posStart++);
+                    }
+                }
+
                 for (auto c: line) {
                     if (c == '{') {
                         indentNow++;
                     }
                 }
-
-                txtNew.append(line + "\n");
             }
 
-            txtNew.remove(txtNew.length() - 1, 1);
-
-            auto tc = textCursor();
-            tc.select(QTextCursor::Document);
-            tc.insertText(txtNew);
-
-            tc.setPosition(posFinal);
-            setTextCursor(tc);
             return;
         }
 

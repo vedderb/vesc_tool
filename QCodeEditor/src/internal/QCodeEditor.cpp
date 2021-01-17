@@ -558,7 +558,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
             if (e->key() == Qt::Key_S) {
                 emit saveTriggered();
                 return;
-            } else if (e->key() == Qt::Key_R) {
+            } else if (e->key() == Qt::Key_E) {
                 emit runEmbeddedTriggered();
                 return;
             } else if (e->key() == Qt::Key_W) {

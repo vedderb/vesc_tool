@@ -338,7 +338,7 @@ void PageScripting::on_helpButton_clicked()
                    "Ctrl + space : Show auto-complete suggestions<br>"
                    "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
                    "Ctrl + 'i'   : Auto-indent selected line or block<br>"
-                   "Ctrl + 'r'   : Run or restart embedded<br>"
+                   "Ctrl + 'e'   : Run or restart embedded<br>"
                    "Ctrl + 'w'   : Run or restart window<br>"
                    "Ctrl + 'q'   : Stop code<br>"
                    "Ctrl + 'd'   : Clear console<br>"

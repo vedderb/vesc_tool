@@ -451,14 +451,26 @@ void QCodeEditor::proceedCompleterEnd(QKeyEvent *e)
         return;
     }
 
-    if ((word.isEmpty() && charUnderCursor(-1) != ".")) {
+    bool isComment = false;
+    for (auto f: textCursor().block().layout()->formats()) {
+        int pos = textCursor().positionInBlock();
+        if (pos >= f.start && pos <= (f.start + f.length)) {
+            if (f.format == m_syntaxStyle->getFormat("Comment") ||
+                    f.format == m_syntaxStyle->getFormat("String")) {
+                isComment = true;
+            }
+        }
+    }
+
+    auto isShortcut = ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Space);
+    auto isDot = charUnderCursor(-1) == ".";
+
+    if ((word.isEmpty() && !isDot)) {
         m_completer->popup()->hide();
         return;
     }
 
     static QString eow(R"(~!@#$%^&*()_+{}|:"<>?,/;'[]\-=)");
-
-    auto isShortcut = ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Space);
 
     tc.select(QTextCursor::LineUnderCursor);
     QString completionPrefix = "";
@@ -472,7 +484,8 @@ void QCodeEditor::proceedCompleterEnd(QKeyEvent *e)
     }
 
     if (!isShortcut &&
-            (e->text().isEmpty() ||
+            (isComment ||
+             e->text().isEmpty() ||
              completionPrefix.length() < 2 ||
              eow.contains(e->text().right(1))))
     {

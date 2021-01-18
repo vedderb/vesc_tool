@@ -124,10 +124,6 @@ void PageScripting::reloadParams()
 
 void PageScripting::debugMsgRx(QtMsgType type, const QString msg)
 {
-    if (!ui->debugEdit->isVisible()) {
-        return;
-    }
-
     QString str;
 
     if (type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg) {

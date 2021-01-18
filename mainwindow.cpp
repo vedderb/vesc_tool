@@ -526,16 +526,19 @@ void MainWindow::timerSlotDebugMsg()
         auto msg = myDebugMsgs.first();
         myDebugMsgs.removeFirst();
 
-        mPageScripting->debugMsgRx(msg.type, msg.msg);
-
-        QString strTmp;
-        if (msg.isBad) {
-            strTmp = "<font color=\"red\">" + msg.msgLong + "</font><br>";
+        if (msg.file.contains("qrc:/res/qml/myCode") ||
+                msg.file.contains("qrc:/res/qml/DynamicLoader") ||
+                msg.file.contains("qrc:/res/qml/MainLoader")) {
+            mPageScripting->debugMsgRx(msg.type, msg.msg);
         } else {
-            strTmp = msg.msgLong + "<br>";
+            QString strTmp;
+            if (msg.isBad) {
+                strTmp = "<font color=\"red\">" + msg.msgLong + "</font><br>";
+            } else {
+                strTmp = msg.msgLong + "<br>";
+            }
+            mPageDebugPrint->printConsole(strTmp);
         }
-
-        mPageDebugPrint->printConsole(strTmp);
     }
 }
 

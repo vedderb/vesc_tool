@@ -147,12 +147,6 @@ public Q_SLOTS:
      */
     void updateStyle();
 
-    /**
-     * @brief Slot, that will be called on selection
-     * change.
-     */
-    void onSelectionChanged();
-
 protected:
     /**
      * @brief Method, that's called on any text insertion of
@@ -195,12 +189,6 @@ protected:
 private:
 
     /**
-     * @brief Method for initializing document
-     * layout handlers.
-     */
-    void initDocumentLayoutHandlers();
-
-    /**
      * @brief Method for initializing default
      * monospace font.
      */
@@ -211,12 +199,6 @@ private:
      * of objects.
      */
     void performConnections();
-
-    /**
-     * @brief Method, that performs selection
-     * frame selection.
-     */
-    void handleSelectionQuery(QTextCursor cursor);
 
     /**
      * @brief Method for updating geometry of line number area.
@@ -269,8 +251,6 @@ private:
     QSyntaxStyle* m_syntaxStyle;
     QLineNumberArea* m_lineNumberArea;
     QCompleter* m_completer;
-
-    QFramedTextAttribute* m_framedAttribute;
 
     bool m_autoIndentation;
     bool m_autoParentheses;

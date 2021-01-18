@@ -3,7 +3,6 @@
 #include <QSyntaxStyle>
 #include <QCodeEditor>
 #include <QStyleSyntaxHighlighter>
-#include <QFramedTextAttribute>
 #include <QCXXHighlighter>
 
 
@@ -35,27 +34,15 @@ QCodeEditor::QCodeEditor(QWidget* widget) :
     m_syntaxStyle(nullptr),
     m_lineNumberArea(new QLineNumberArea(this)),
     m_completer(nullptr),
-    m_framedAttribute(new QFramedTextAttribute(this)),
     m_autoIndentation(true),
     m_autoParentheses(true),
     m_replaceTab(true),
     m_tabReplace(QString(4, ' '))
 {
-    initDocumentLayoutHandlers();
     initFont();
     performConnections();
 
     setSyntaxStyle(QSyntaxStyle::defaultStyle());
-}
-
-void QCodeEditor::initDocumentLayoutHandlers()
-{
-    document()
-        ->documentLayout()
-        ->registerHandler(
-            QFramedTextAttribute::type(),
-            m_framedAttribute
-        );
 }
 
 void QCodeEditor::initFont()
@@ -88,13 +75,6 @@ void QCodeEditor::performConnections()
         this,
         &QCodeEditor::updateExtraSelection
     );
-
-    connect(
-        this,
-        &QTextEdit::selectionChanged,
-        this,
-        &QCodeEditor::onSelectionChanged
-    );
 }
 
 void QCodeEditor::setHighlighter(QStyleSyntaxHighlighter* highlighter)
@@ -117,7 +97,6 @@ void QCodeEditor::setSyntaxStyle(QSyntaxStyle* style)
 {
     m_syntaxStyle = style;
 
-    m_framedAttribute->setSyntaxStyle(m_syntaxStyle);
     m_lineNumberArea->setSyntaxStyle(m_syntaxStyle);
 
     if (m_highlighter)
@@ -163,36 +142,6 @@ void QCodeEditor::updateStyle()
     updateExtraSelection();
 }
 
-void QCodeEditor::onSelectionChanged()
-{
-    auto selected = textCursor().selectedText();
-
-    auto cursor = textCursor();
-
-    // Cursor is null if setPlainText was called.
-    if (cursor.isNull())
-    {
-        return;
-    }
-
-    cursor.movePosition(QTextCursor::MoveOperation::Left);
-    cursor.select(QTextCursor::SelectionType::WordUnderCursor);
-
-    QSignalBlocker blocker(this);
-    m_framedAttribute->clear(cursor);
-
-    if (selected.size() > 1 &&
-        cursor.selectedText() == selected)
-    {
-        auto backup = textCursor();
-
-        // Perform search selecting
-        handleSelectionQuery(cursor);
-
-        setTextCursor(backup);
-    }
-}
-
 void QCodeEditor::resizeEvent(QResizeEvent* e)
 {
     QTextEdit::resizeEvent(e);
@@ -230,20 +179,6 @@ void QCodeEditor::updateLineNumberArea(const QRect& rect)
     if (rect.contains(viewport()->rect()))
     {
         updateLineNumberAreaWidth(0);
-    }
-}
-
-void QCodeEditor::handleSelectionQuery(QTextCursor cursor)
-{
-
-    auto searchIterator = cursor;
-    searchIterator.movePosition(QTextCursor::Start);
-    searchIterator = document()->find(cursor.selectedText(), searchIterator);
-    while (searchIterator.hasSelection())
-    {
-        m_framedAttribute->frame(searchIterator);
-
-        searchIterator = document()->find(cursor.selectedText(), searchIterator);
     }
 }
 

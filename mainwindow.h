@@ -80,6 +80,7 @@ public:
     bool eventFilter(QObject *object, QEvent *e);
 
 private slots:
+    void timerSlotDebugMsg();
     void timerSlot();
     void showStatusInfo(QString info, bool isGood);
     void showMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -153,6 +154,7 @@ private:
     QSettings mSettings;
     QString mVersion;
     VescInterface *mVesc;
+    QTimer *mDebugTimer;
     QTimer *mTimer;
     QLabel *mStatusLabel;
     int mStatusInfoTime;

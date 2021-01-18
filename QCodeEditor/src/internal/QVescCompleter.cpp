@@ -124,11 +124,27 @@ QVescCompleter::QVescCompleter(QObject *parent) :
     {
         level++;
         addItem("fill: ");
+        addItem("top: ");
+        addItem("bottom: ");
+        addItem("left: ");
+        addItem("right: ");
         addItem("margins: ");
         addItem("leftMargin: ");
         addItem("rightMargin: ");
         addItem("topMargin: ");
         addItem("bottomMargin: ");
+        level--;
+    }
+
+    addItem("parent");
+    {
+        level++;
+        addItem("top");
+        addItem("bottom");
+        addItem("left");
+        addItem("right");
+        addItem("width");
+        addItem("height");
         level--;
     }
 
@@ -142,6 +158,8 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("rightMargin: ");
         addItem("topMargin: ");
         addItem("bottomMargin: ");
+        addItem("preferredWidth: ");
+        addItem("preferredHeight: ");
         level--;
     }
 

@@ -51,6 +51,26 @@ void stepTowards(double &value, double goal, double step) {
     }
 }
 
+struct DebugMsg {
+public:
+    DebugMsg() {
+        type = QtDebugMsg;
+        line = -1;
+        isBad = false;
+    }
+
+    QtMsgType type;
+    QString msg;
+    QString msgLong;
+    bool isBad;
+    QString file;
+    int line;
+    QString function;
+};
+
+QMutex myDebugMsgMutex;
+QVector<DebugMsg> myDebugMsgs;
+
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     QByteArray localMsg = msg.toLocal8Bit();
@@ -72,20 +92,18 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     str.sprintf("%s (%s:%u %s): %s", typeStr.toLocal8Bit().data(),
                 context.file, context.line, context.function, localMsg.constData());
 
-    if (PageDebugPrint::currentMsgHandler) {
-        QMetaObject::invokeMethod(PageDebugPrint::currentMsgHandler, "emitDebugMsg",
-                                  Qt::QueuedConnection, Q_ARG(QtMsgType, type),
-                                  Q_ARG(QString, msg));
+    DebugMsg dmsg;
+    dmsg.msg = msg;
+    dmsg.msgLong = str;
+    dmsg.isBad = isBad;
+    dmsg.type = type;
+    dmsg.file = context.file;
+    dmsg.line = context.line;
+    dmsg.function = context.function;
 
-        QString strTmp;
-        if (isBad) {
-            strTmp = "<font color=\"red\">" + str + "</font><br>";
-        } else {
-            strTmp = str + "<br>";
-        }
-
-        QMetaObject::invokeMethod(PageDebugPrint::currentMsgHandler, "printConsole",
-                                  Qt::QueuedConnection, Q_ARG(QString, strTmp));
+    {
+        QMutexLocker locker(&myDebugMsgMutex);
+        myDebugMsgs.append(dmsg);
     }
 
     printf("%s\n", str.toLocal8Bit().data());
@@ -106,10 +124,13 @@ MainWindow::MainWindow(QWidget *parent) :
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(mStatusLabel);
+    mDebugTimer = new QTimer(this);
     mTimer = new QTimer(this);
     mKeyLeft = false;
     mKeyRight = false;
 
+    connect(mDebugTimer, SIGNAL(timeout()),
+            this, SLOT(timerSlotDebugMsg()));
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
     connect(mVesc, SIGNAL(statusMessage(QString,bool)),
@@ -358,6 +379,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qApp->installEventFilter(this);
     qInstallMessageHandler(myMessageOutput);
 
+    mDebugTimer->start(10);
     mTimer->start(20);
 
     // Restore size and position
@@ -494,6 +516,27 @@ bool MainWindow::eventFilter(QObject *object, QEvent *e)
     }
 
     return false;
+}
+
+void MainWindow::timerSlotDebugMsg()
+{
+    QMutexLocker locker(&myDebugMsgMutex);
+
+    while (!myDebugMsgs.isEmpty()) {
+        auto msg = myDebugMsgs.first();
+        myDebugMsgs.removeFirst();
+
+        mPageScripting->debugMsgRx(msg.type, msg.msg);
+
+        QString strTmp;
+        if (msg.isBad) {
+            strTmp = "<font color=\"red\">" + msg.msgLong + "</font><br>";
+        } else {
+            strTmp = msg.msgLong + "<br>";
+        }
+
+        mPageDebugPrint->printConsole(strTmp);
+    }
 }
 
 void MainWindow::timerSlot()
@@ -1346,8 +1389,6 @@ void MainWindow::reloadPages()
 
     mPageScripting = new PageScripting(this);
     mPageScripting->setVesc(mVesc);
-    connect(mPageDebugPrint, SIGNAL(debugMsgRx(QtMsgType, const QString)),
-            mPageScripting, SLOT(debugMsgRx(QtMsgType, const QString)));
     ui->pageWidget->addWidget(mPageScripting);
     addPageItem(tr("Scripting"), "://res/icons_textedit/Outdent-96.png", "", true);
 

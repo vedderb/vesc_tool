@@ -35,14 +35,11 @@ public:
     explicit PageDebugPrint(QWidget *parent = nullptr);
     ~PageDebugPrint();
 
-    static PageDebugPrint* currentMsgHandler;
-
 signals:
     void debugMsgRx(QtMsgType type, const QString msg);
 
 public slots:
     void printConsole(QString str);
-    void emitDebugMsg(QtMsgType type, const QString msg);
 
 private:
     Ui::PageDebugPrint *ui;

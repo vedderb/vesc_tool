@@ -21,16 +21,12 @@
 #include "ui_pagedebugprint.h"
 #include <QDateTime>
 
-// Static member initialization
-PageDebugPrint *PageDebugPrint::currentMsgHandler = nullptr;
-
 PageDebugPrint::PageDebugPrint(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageDebugPrint)
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    currentMsgHandler = this;
 }
 
 PageDebugPrint::~PageDebugPrint()
@@ -45,9 +41,4 @@ void PageDebugPrint::printConsole(QString str)
                                    toString("yyyy-MM-dd hh:mm:ss: ")
                                    + str);
     ui->consoleBrowser->moveCursor(QTextCursor::End);
-}
-
-void PageDebugPrint::emitDebugMsg(QtMsgType type, const QString msg)
-{
-    emit debugMsgRx(type, msg);
 }

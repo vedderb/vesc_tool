@@ -87,9 +87,12 @@
         <name>Button</name>
         <name>Timer</name>
         <name>Connections</name>
+        <name>ScrollView</name>
         <name>Component</name>
         <name>Math</name>
         <name>console</name>
         <name>anchors</name>
+        <name>Camera</name>
+        <name>VideoOutput</name>
     </section>
 </root>

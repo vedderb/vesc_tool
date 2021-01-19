@@ -434,7 +434,7 @@ bool MainWindow::eventFilter(QObject *object, QEvent *e)
     if (e->type() == QEvent::KeyPress) {
         if (keyEvent->key() == Qt::Key_Escape) {
             ui->stopButton->animateClick();
-            return true;
+            return false; // Return false to pass the escape-event on
         }
     }
 

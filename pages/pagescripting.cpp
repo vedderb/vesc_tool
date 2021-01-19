@@ -150,6 +150,15 @@ void PageScripting::debugMsgRx(QtMsgType type, const QString msg)
     ui->debugEdit->moveCursor(QTextCursor::End);
 }
 
+void PageScripting::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape) {
+        if (ui->searchEdit->hasFocus() || ui->replaceEdit->hasFocus()) {
+            on_searchHideButton_clicked();
+        }
+    }
+}
+
 void PageScripting::on_runButton_clicked()
 {
     ui->qmlWidget->setSource(QUrl(QLatin1String("qrc:/res/qml/DynamicLoader.qml")));
@@ -364,6 +373,7 @@ void PageScripting::on_searchHideButton_clicked()
 {
     ui->searchWidget->setVisible(false);
     ui->qmlEdit->searchForString("");
+    ui->qmlEdit->setFocus();
 }
 
 void PageScripting::on_searchNextButton_clicked()
@@ -387,4 +397,10 @@ void PageScripting::on_replaceAllButton_clicked()
         ui->qmlEdit->textCursor().insertText(ui->replaceEdit->text());
         ui->qmlEdit->searchNextResult();
     }
+}
+
+void PageScripting::on_searchPrevButton_clicked()
+{
+    ui->qmlEdit->searchPreviousResult();
+    ui->qmlEdit->setFocus();
 }

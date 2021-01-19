@@ -48,6 +48,7 @@ public:
 
     void searchForString(QString str);
     void searchNextResult();
+    void searchPreviousResult();
 
 signals:
     void saveTriggered();
@@ -199,6 +200,7 @@ private:
     QCompleter* m_completer;
     QString m_search_str_now;
     bool m_search_select_next;
+    bool m_search_select_prev;
 
     bool m_autoIndentation;
     bool m_autoParentheses;

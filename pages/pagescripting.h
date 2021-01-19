@@ -48,6 +48,9 @@ signals:
 public slots:
     void debugMsgRx(QtMsgType type, const QString msg);
 
+protected:
+    void keyPressEvent(QKeyEvent *event);
+
 private slots:
     void on_runButton_clicked();
     void on_stopButton_clicked();
@@ -66,6 +69,7 @@ private slots:
     void on_searchNextButton_clicked();
     void on_replaceThisButton_clicked();
     void on_replaceAllButton_clicked();
+    void on_searchPrevButton_clicked();
 
 private:
     Ui::PageScripting *ui;

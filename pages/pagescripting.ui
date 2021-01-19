@@ -125,6 +125,13 @@
             <widget class="QLineEdit" name="searchEdit"/>
            </item>
            <item>
+            <widget class="QPushButton" name="searchPrevButton">
+             <property name="text">
+              <string>Previous</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="searchNextButton">
              <property name="text">
               <string>Next</string>
@@ -448,12 +455,12 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1269</x>
-     <y>284</y>
+     <x>1415</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1090</x>
-     <y>334</y>
+     <x>1128</x>
+     <y>744</y>
     </hint>
    </hints>
   </connection>

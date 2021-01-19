@@ -302,6 +302,8 @@ void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelecti
 
     int matchInd = 0;
     auto tc2 = document()->find(m_search_str_now, tc);
+    auto tcLast = tc2;
+
     while (!tc2.isNull()) {
         ExtraSelection sel;
         sel.cursor = tc2;
@@ -313,7 +315,15 @@ void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelecti
             setTextCursor(tc2);
         }
 
+        if (m_search_select_prev && tc2.position() == textCursor().position()) {
+            m_search_select_prev = false;
+            if (!tcLast.isNull()) {
+                setTextCursor(tcLast);
+            }
+        }
+
         matchInd++;
+        tcLast = tc2;
         tc2 = document()->find(m_search_str_now, tc2);
     }
 
@@ -899,12 +909,19 @@ void QCodeEditor::searchForString(QString str)
 {
     m_search_str_now = str;
     m_search_select_next = false;
+    m_search_select_prev = false;
     updateExtraSelection();
 }
 
 void QCodeEditor::searchNextResult()
 {
     m_search_select_next = true;
+    updateExtraSelection();
+}
+
+void QCodeEditor::searchPreviousResult()
+{
+    m_search_select_prev = true;
     updateExtraSelection();
 }
 

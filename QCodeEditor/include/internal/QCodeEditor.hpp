@@ -49,6 +49,7 @@ public:
     void searchForString(QString str);
     void searchNextResult();
     void searchPreviousResult();
+    void searchSetCaseSensitive(bool isCaseSensitive);
 
 signals:
     void saveTriggered();
@@ -198,9 +199,10 @@ private:
     QSyntaxStyle* m_syntaxStyle;
     QLineNumberArea* m_lineNumberArea;
     QCompleter* m_completer;
-    QString m_search_str_now;
-    bool m_search_select_next;
-    bool m_search_select_prev;
+    QString m_searchStrNow;
+    bool m_searchSelectNext;
+    bool m_searchSelectPrev;
+    bool m_searchIsCaseSensitive;
 
     bool m_autoIndentation;
     bool m_autoParentheses;

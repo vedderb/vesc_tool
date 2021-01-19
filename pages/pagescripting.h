@@ -71,6 +71,8 @@ private slots:
     void on_replaceAllButton_clicked();
     void on_searchPrevButton_clicked();
 
+    void on_searchCaseSensitiveBox_toggled(bool checked);
+
 private:
     Ui::PageScripting *ui;
     VescInterface *mVesc;

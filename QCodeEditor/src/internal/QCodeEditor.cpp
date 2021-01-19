@@ -34,6 +34,7 @@ QCodeEditor::QCodeEditor(QWidget* widget) :
     m_syntaxStyle(nullptr),
     m_lineNumberArea(new QLineNumberArea(this)),
     m_completer(nullptr),
+    m_searchIsCaseSensitive(false),
     m_autoIndentation(true),
     m_autoParentheses(true),
     m_replaceTab(true),
@@ -41,7 +42,6 @@ QCodeEditor::QCodeEditor(QWidget* widget) :
 {
     initFont();
     performConnections();
-
     setSyntaxStyle(QSyntaxStyle::defaultStyle());
 }
 
@@ -292,16 +292,17 @@ void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSe
 
 void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelection)
 {
-    if (m_search_str_now.isEmpty()) {
+    if (m_searchStrNow.isEmpty()) {
         return;
     }
 
     auto tc = textCursor();
     tc.setPosition(0);
     auto format = m_syntaxStyle->getFormat("SearchResult");
+    auto flags = m_searchIsCaseSensitive ? QTextDocument::FindCaseSensitively : QTextDocument::FindFlags();
 
     int matchInd = 0;
-    auto tc2 = document()->find(m_search_str_now, tc);
+    auto tc2 = document()->find(m_searchStrNow, tc, flags);
     auto tcLast = tc2;
 
     while (!tc2.isNull()) {
@@ -310,13 +311,13 @@ void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelecti
         sel.format = format;
         extraSelection.append(sel);
 
-        if (m_search_select_next && tc2.position() > textCursor().position()) {
-            m_search_select_next = false;
+        if (m_searchSelectNext && tc2.position() > textCursor().position()) {
+            m_searchSelectNext = false;
             setTextCursor(tc2);
         }
 
-        if (m_search_select_prev && tc2.position() == textCursor().position()) {
-            m_search_select_prev = false;
+        if (m_searchSelectPrev && tc2.position() == textCursor().position()) {
+            m_searchSelectPrev = false;
             if (!tcLast.isNull()) {
                 setTextCursor(tcLast);
             }
@@ -324,10 +325,10 @@ void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelecti
 
         matchInd++;
         tcLast = tc2;
-        tc2 = document()->find(m_search_str_now, tc2);
+        tc2 = document()->find(m_searchStrNow, tc2, flags);
     }
 
-    m_search_select_next = false;
+    m_searchSelectNext = false;
 }
 
 void QCodeEditor::highlightCurrentLine(QList<QTextEdit::ExtraSelection>& extraSelection)
@@ -907,21 +908,27 @@ QCompleter *QCodeEditor::completer() const
 
 void QCodeEditor::searchForString(QString str)
 {
-    m_search_str_now = str;
-    m_search_select_next = false;
-    m_search_select_prev = false;
+    m_searchStrNow = str;
+    m_searchSelectNext = false;
+    m_searchSelectPrev = false;
     updateExtraSelection();
 }
 
 void QCodeEditor::searchNextResult()
 {
-    m_search_select_next = true;
+    m_searchSelectNext = true;
     updateExtraSelection();
 }
 
 void QCodeEditor::searchPreviousResult()
 {
-    m_search_select_prev = true;
+    m_searchSelectPrev = true;
+    updateExtraSelection();
+}
+
+void QCodeEditor::searchSetCaseSensitive(bool isCaseSensitive)
+{
+    m_searchIsCaseSensitive = isCaseSensitive;
     updateExtraSelection();
 }
 

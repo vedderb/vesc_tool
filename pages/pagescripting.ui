@@ -35,31 +35,18 @@
          <number>2</number>
         </property>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>12</number>
+          </property>
           <item>
-           <widget class="QLabel" name="fileNowLabel">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+           <widget class="QPushButton" name="runButton">
             <property name="text">
-             <string/>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="openFileButton">
-            <property name="text">
-             <string>Open</string>
+             <string>Run</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -67,13 +54,13 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="saveButton">
+           <widget class="QPushButton" name="runWindowButton">
             <property name="text">
-             <string>Save</string>
+             <string>Run in Window</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
+              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -81,13 +68,57 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="saveAsButton">
+           <widget class="QPushButton" name="fullscreenButton">
             <property name="text">
-             <string>Save As.</string>
+             <string>Toggle Fullscreen</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+              <normaloff>:/res/icons/size_off.png</normaloff>:/res/icons/size_off.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stopButton">
+            <property name="text">
+             <string>Stop</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="helpButton">
+            <property name="toolTip">
+             <string>Show help</string>
+            </property>
+            <property name="text">
+             <string>Help</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -139,12 +170,19 @@
             </widget>
            </item>
            <item>
+            <widget class="QCheckBox" name="searchCaseSensitiveBox">
+             <property name="text">
+              <string>Case Sensitive</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QLineEdit" name="replaceEdit"/>
            </item>
            <item>
             <widget class="QPushButton" name="replaceThisButton">
              <property name="text">
-              <string>Replace &amp;&amp; Next</string>
+              <string>Replace</string>
              </property>
             </widget>
            </item>
@@ -176,75 +214,62 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QPushButton" name="runButton">
-            <property name="text">
-             <string>Run</string>
+           <widget class="QLabel" name="fileNowLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="runWindowButton">
+           <widget class="QPushButton" name="openFileButton">
             <property name="text">
-             <string>Run in Window</string>
+             <string>Open</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+              <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="fullscreenButton">
+           <widget class="QPushButton" name="saveButton">
             <property name="text">
-             <string>Toggle Fullscreen</string>
+             <string>Save</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/size_off.png</normaloff>:/res/icons/size_off.png</iconset>
+              <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="stopButton">
+           <widget class="QPushButton" name="saveAsButton">
             <property name="text">
-             <string>Stop</string>
+             <string>Save As</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
+              <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
             </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="helpButton">
-            <property name="toolTip">
-             <string>Show help</string>
-            </property>
-            <property name="text">
-             <string>Help</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
+            <property name="flat">
+             <bool>false</bool>
             </property>
            </widget>
           </item>

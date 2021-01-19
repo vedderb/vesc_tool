@@ -64,9 +64,8 @@ PageScripting::PageScripting(QWidget *parent) :
         auto selected = ui->qmlEdit->textCursor().selectedText();
         if (!selected.isEmpty()) {
             ui->searchEdit->setText(selected);
-        } else {
-            ui->qmlEdit->searchForString(ui->searchEdit->text());
         }
+        ui->qmlEdit->searchForString(ui->searchEdit->text());
         ui->searchEdit->setFocus();
     });
 
@@ -384,7 +383,7 @@ void PageScripting::on_searchNextButton_clicked()
 
 void PageScripting::on_replaceThisButton_clicked()
 {
-    if (!ui->qmlEdit->textCursor().selectedText().isEmpty()) {
+    if (ui->qmlEdit->textCursor().selectedText() == ui->searchEdit->text()) {
         ui->qmlEdit->textCursor().insertText(ui->replaceEdit->text());
         ui->qmlEdit->searchNextResult();
     }
@@ -403,4 +402,9 @@ void PageScripting::on_searchPrevButton_clicked()
 {
     ui->qmlEdit->searchPreviousResult();
     ui->qmlEdit->setFocus();
+}
+
+void PageScripting::on_searchCaseSensitiveBox_toggled(bool checked)
+{
+    ui->qmlEdit->searchSetCaseSensitive(checked);
 }

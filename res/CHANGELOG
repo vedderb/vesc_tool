@@ -11,6 +11,7 @@
  - Debug print output.
  - Toggle line comment.
  - Auto-indentation of line or block.
+ - Search, highlight and replace text.
 * Only capture esc key for stopping the motor when connected.
 
 == 3.00 ==

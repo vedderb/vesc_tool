@@ -186,6 +186,7 @@ void QCodeEditor::updateExtraSelection()
 {
     QList<QTextEdit::ExtraSelection> extra;
 
+    highlightSearch(extra);
     highlightCurrentLine(extra);
     highlightParenthesis(extra);
 
@@ -287,6 +288,36 @@ void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSe
 
         break;
     }
+}
+
+void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelection)
+{
+    if (m_search_str_now.isEmpty()) {
+        return;
+    }
+
+    auto tc = textCursor();
+    tc.setPosition(0);
+    auto format = m_syntaxStyle->getFormat("SearchResult");
+
+    int matchInd = 0;
+    auto tc2 = document()->find(m_search_str_now, tc);
+    while (!tc2.isNull()) {
+        ExtraSelection sel;
+        sel.cursor = tc2;
+        sel.format = format;
+        extraSelection.append(sel);
+
+        if (m_search_select_next && tc2.position() > textCursor().position()) {
+            m_search_select_next = false;
+            setTextCursor(tc2);
+        }
+
+        matchInd++;
+        tc2 = document()->find(m_search_str_now, tc2);
+    }
+
+    m_search_select_next = false;
 }
 
 void QCodeEditor::highlightCurrentLine(QList<QTextEdit::ExtraSelection>& extraSelection)
@@ -504,6 +535,9 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                 return;
             } else if (e->key() == Qt::Key_D) {
                 emit clearConsoleTriggered();
+                return;
+            } else if (e->key() == Qt::Key_F) {
+                emit searchTriggered();
                 return;
             }
         }
@@ -859,6 +893,19 @@ void QCodeEditor::insertCompletion(QString s)
 QCompleter *QCodeEditor::completer() const
 {
     return m_completer;
+}
+
+void QCodeEditor::searchForString(QString str)
+{
+    m_search_str_now = str;
+    m_search_select_next = false;
+    updateExtraSelection();
+}
+
+void QCodeEditor::searchNextResult()
+{
+    m_search_select_next = true;
+    updateExtraSelection();
 }
 
 QChar QCodeEditor::charUnderCursor(int offset) const

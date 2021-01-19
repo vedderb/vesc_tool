@@ -38,6 +38,7 @@ PageScripting::PageScripting(QWidget *parent) :
     ui->setupUi(this);
     mVesc = nullptr;
     ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    ui->searchWidget->setVisible(false);
 
     ui->qmlEdit->setHighlighter(new QmlHighlighter);
     ui->qmlEdit->setCompleter(new QVescCompleter);
@@ -57,6 +58,16 @@ PageScripting::PageScripting(QWidget *parent) :
     });
     connect(ui->qmlEdit, &QCodeEditor::clearConsoleTriggered, [this]() {
         ui->debugEdit->clear();
+    });
+    connect(ui->qmlEdit, &QCodeEditor::searchTriggered, [this]() {
+        ui->searchWidget->setVisible(true);
+        auto selected = ui->qmlEdit->textCursor().selectedText();
+        if (!selected.isEmpty()) {
+            ui->searchEdit->setText(selected);
+        } else {
+            ui->qmlEdit->searchForString(ui->searchEdit->text());
+        }
+        ui->searchEdit->setFocus();
     });
 
     QSettings set;
@@ -334,6 +345,7 @@ void PageScripting::on_helpButton_clicked()
                    "Ctrl + space : Show auto-complete suggestions<br>"
                    "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
                    "Ctrl + 'i'   : Auto-indent selected line or block<br>"
+                   "Ctrl + 'f'   : Open search (and replace) bar<br>"
                    "Ctrl + 'e'   : Run or restart embedded<br>"
                    "Ctrl + 'w'   : Run or restart window<br>"
                    "Ctrl + 'q'   : Stop code<br>"
@@ -341,4 +353,38 @@ void PageScripting::on_helpButton_clicked()
                    "Ctrl + 's'   : Save file<br>";
 
     HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html.replace(" ","&nbsp;"));
+}
+
+void PageScripting::on_searchEdit_textChanged(const QString &arg1)
+{
+    ui->qmlEdit->searchForString(arg1);
+}
+
+void PageScripting::on_searchHideButton_clicked()
+{
+    ui->searchWidget->setVisible(false);
+    ui->qmlEdit->searchForString("");
+}
+
+void PageScripting::on_searchNextButton_clicked()
+{
+    ui->qmlEdit->searchNextResult();
+    ui->qmlEdit->setFocus();
+}
+
+void PageScripting::on_replaceThisButton_clicked()
+{
+    if (!ui->qmlEdit->textCursor().selectedText().isEmpty()) {
+        ui->qmlEdit->textCursor().insertText(ui->replaceEdit->text());
+        ui->qmlEdit->searchNextResult();
+    }
+}
+
+void PageScripting::on_replaceAllButton_clicked()
+{
+    ui->qmlEdit->searchNextResult();
+    while (!ui->qmlEdit->textCursor().selectedText().isEmpty()) {
+        ui->qmlEdit->textCursor().insertText(ui->replaceEdit->text());
+        ui->qmlEdit->searchNextResult();
+    }
 }

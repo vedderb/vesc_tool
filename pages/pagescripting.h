@@ -61,6 +61,11 @@ private slots:
     void on_clearRecentButton_clicked();
     void on_openExampleButton_clicked();
     void on_helpButton_clicked();
+    void on_searchEdit_textChanged(const QString &arg1);
+    void on_searchHideButton_clicked();
+    void on_searchNextButton_clicked();
+    void on_replaceThisButton_clicked();
+    void on_replaceAllButton_clicked();
 
 private:
     Ui::PageScripting *ui;

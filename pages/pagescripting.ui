@@ -29,7 +29,7 @@
       <property name="handleWidth">
        <number>8</number>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout">
         <property name="spacing">
          <number>2</number>
@@ -101,6 +101,71 @@
           <property name="lineWrapMode">
            <enum>QTextEdit::NoWrap</enum>
           </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="searchWidget" native="true">
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <property name="spacing">
+            <number>2</number>
+           </property>
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>2</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>2</number>
+           </property>
+           <item>
+            <widget class="QLineEdit" name="searchEdit"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="searchNextButton">
+             <property name="text">
+              <string>Next</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="replaceEdit"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="replaceThisButton">
+             <property name="text">
+              <string>Replace &amp;&amp; Next</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="replaceAllButton">
+             <property name="text">
+              <string>Replace All</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="searchHideButton">
+             <property name="toolTip">
+              <string>Cancel Search</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/Cancel-96.png</normaloff>:/res/icons/Cancel-96.png</iconset>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>

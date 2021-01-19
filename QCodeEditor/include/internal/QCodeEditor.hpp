@@ -27,84 +27,27 @@ public:
     QCodeEditor(const QCodeEditor&) = delete;
     QCodeEditor& operator=(const QCodeEditor&) = delete;
 
-    /**
-     * @brief Method for getting first visible block
-     * index.
-     * @return Index.
-     */
     int getFirstVisibleBlock();
 
-    /**
-     * @brief Method for setting highlighter.
-     * @param highlighter Pointer to syntax highlighter.
-     */
     void setHighlighter(QStyleSyntaxHighlighter* highlighter);
-
-    /**
-     * @brief Method for setting syntax sty.e.
-     * @param style Pointer to syntax style.
-     */
     void setSyntaxStyle(QSyntaxStyle* style);
 
-    /**
-     * @brief Method setting auto parentheses enabled.
-     */
     void setAutoParentheses(bool enabled);
-
-    /**
-     * @brief Method for getting is auto parentheses enabled.
-     * Default value: true
-     */
     bool autoParentheses() const;
 
-    /**
-     * @brief Method for setting tab replacing
-     * enabled.
-     */
     void setTabReplace(bool enabled);
-
-    /**
-     * @brief Method for getting is tab replacing enabled.
-     * Default value: true
-     */
     bool tabReplace() const;
-
-    /**
-     * @brief Method for setting amount of spaces, that will
-     * replace tab.
-     * @param val Number of spaces.
-     */
     void setTabReplaceSize(int val);
-
-    /**
-     * @brief Method for getting number of spaces, that will
-     * replace tab if `tabReplace` is true.
-     * Default: 4
-     */
     int tabReplaceSize() const;
 
-    /**
-     * @brief Method for setting auto indentation enabled.
-     */
     void setAutoIndentation(bool enabled);
-
-    /**
-     * @brief Method for getting is auto indentation enabled.
-     * Default: true
-     */
     bool autoIndentation() const;
 
-    /**
-     * @brief Method for setting completer.
-     * @param completer Pointer to completer object.
-     */
     void setCompleter(QCompleter* completer);
-
-    /**
-     * @brief Method for getting completer.
-     * @return Pointer to completer.
-     */
     QCompleter* completer() const;
+
+    void searchForString(QString str);
+    void searchNextResult();
 
 signals:
     void saveTriggered();
@@ -112,6 +55,7 @@ signals:
     void runWindowTriggered();
     void stopTriggered();
     void clearConsoleTriggered();
+    void searchTriggered();
 
 public Q_SLOTS:
 
@@ -240,6 +184,8 @@ private:
      */
     void highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSelection);
 
+    void highlightSearch(QList<QTextEdit::ExtraSelection>& extraSelection);
+
     /**
      * @brief Method for getting number of indentation
      * spaces in current line. Tabs will be treated
@@ -251,6 +197,8 @@ private:
     QSyntaxStyle* m_syntaxStyle;
     QLineNumberArea* m_lineNumberArea;
     QCompleter* m_completer;
+    QString m_search_str_now;
+    bool m_search_select_next;
 
     bool m_autoIndentation;
     bool m_autoParentheses;

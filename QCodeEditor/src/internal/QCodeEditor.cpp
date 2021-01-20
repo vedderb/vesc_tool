@@ -301,7 +301,6 @@ void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelecti
     auto format = m_syntaxStyle->getFormat("SearchResult");
     auto flags = m_searchIsCaseSensitive ? QTextDocument::FindCaseSensitively : QTextDocument::FindFlags();
 
-    int matchInd = 0;
     auto tc2 = document()->find(m_searchStrNow, tc, flags);
     auto tcLast = tc2;
 
@@ -316,19 +315,25 @@ void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelecti
             setTextCursor(tc2);
         }
 
-        if (m_searchSelectPrev && tc2.position() == textCursor().position()) {
+        if (m_searchSelectPrev && tc2.position() >= textCursor().position()) {
             m_searchSelectPrev = false;
             if (!tcLast.isNull()) {
                 setTextCursor(tcLast);
             }
         }
 
-        matchInd++;
         tcLast = tc2;
         tc2 = document()->find(m_searchStrNow, tc2, flags);
     }
 
     m_searchSelectNext = false;
+
+    if (m_searchSelectPrev && !tcLast.isNull()) {
+        m_searchSelectPrev = false;
+        setTextCursor(tcLast);
+    }
+
+    m_searchSelectPrev = false;
 }
 
 void QCodeEditor::highlightCurrentLine(QList<QTextEdit::ExtraSelection>& extraSelection)

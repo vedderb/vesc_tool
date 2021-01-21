@@ -71,7 +71,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("setAppConf()");
         addItem("getMcconf()");
         addItem("getMcconfDefault()");
-        addItem("setMcconf(true)");
+        addItem("setMcconf(check)");
         addItem("forwardCanFrame(data, id, isExt)");
         level--;
     };
@@ -95,6 +95,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("commands()");
         addCommandCmds();
         addItem("autoconnect()");
+        addItem("reconnectLastPort()");
         addItem("disconnectPort()");
         addItem("isPortConnected()");
         addItem("getConnectedPortName()");

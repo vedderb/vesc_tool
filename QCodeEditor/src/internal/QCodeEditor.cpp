@@ -453,19 +453,24 @@ void QCodeEditor::proceedCompleterEnd(QKeyEvent *e)
         return;
     }
 
-    static QString eow(R"(~!@#$%^&*()_+{}|:"<>?,/;'[]\-=)");
+    QString lineStartChars = " \t([{\"";
+    QString lineEndChars = " \t)]}\"";
+    auto posStart = textCursor().positionInBlock() - 1;
+    auto posEnd = posStart;
+    auto line = textCursor().block().text();
+    while (posStart >= 0 && !lineStartChars.contains(line.at(posStart))) {
+        posStart--;
+    }
+    while ((posEnd + 1) < line.size() && !lineEndChars.contains(line.at(posEnd + 1))) {
+        posEnd++;
+    }
 
-    tc.select(QTextCursor::LineUnderCursor);
     QString completionPrefix = "";
-    auto splitted = tc.selectedText().split(" ");
-    if (!splitted.isEmpty()) {
-        completionPrefix = splitted.last();
+    if (posStart >= -1 && posEnd < line.size()) {
+        completionPrefix = line.mid(posStart + 1, posEnd - posStart);
     }
 
-    if (!completionPrefix.endsWith(word)) {
-        completionPrefix = word;
-    }
-
+    static QString eow(R"(~!@#$%^&*()_+{}|:"<>?,/;'[]\-=)");
     if (!isShortcut &&
             (isComment ||
              e->text().isEmpty() ||
@@ -875,34 +880,28 @@ void QCodeEditor::focusInEvent(QFocusEvent *e)
 
 void QCodeEditor::insertCompletion(QString s)
 {
-    if (m_completer->widget() != this)
-    {
+    if (m_completer->widget() != this) {
         return;
     }
 
+    QString lineStartChars = " \t([{\"";
+    QString lineEndChars = " \t)]}\"";
+    auto posStart = textCursor().positionInBlock() - 1;
+    auto posEnd = posStart;
+    auto line = textCursor().block().text();
+    while (posStart >= 0 && !lineStartChars.contains(line.at(posStart))) {
+        posStart--;
+    }
+    while ((posEnd + 1) < line.size() && !lineEndChars.contains(line.at(posEnd + 1))) {
+        posEnd++;
+    }
+
+    QString lineNew = line.mid(0, posStart + 1) + s + line.mid(posEnd + 1);
     auto tc = textCursor();
-    tc.select(QTextCursor::WordUnderCursor);
-    auto word = tc.selectedText();
-
     tc.select(QTextCursor::LineUnderCursor);
-    auto line = tc.selectedText();
-
-    QString completionPrefix = "";
-    auto splitted = line.split(" ");
-    if (!splitted.isEmpty()) {
-        completionPrefix = splitted.last();
-    }
-
-    if (completionPrefix.endsWith(word) && completionPrefix != word) {
-        line.replace(line.lastIndexOf(completionPrefix), completionPrefix.size(), s);
-        tc.select(QTextCursor::LineUnderCursor);
-        tc.insertText(line);
-    } else {
-        tc = textCursor();
-        tc.select(QTextCursor::WordUnderCursor);
-        tc.insertText(s);
-    }
-
+    tc.insertText(lineNew);
+    tc.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+    tc.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, posStart + s.size() + 1);
     setTextCursor(tc);
 }
 

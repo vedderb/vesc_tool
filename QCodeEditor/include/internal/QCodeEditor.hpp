@@ -195,6 +195,8 @@ private:
      */
     int getIndentationSpaces();
 
+    QString getCompletionWordNow(int *linePosStart, int *linePosEnd);
+
     QStyleSyntaxHighlighter* m_highlighter;
     QSyntaxStyle* m_syntaxStyle;
     QLineNumberArea* m_lineNumberArea;

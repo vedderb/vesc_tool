@@ -453,33 +453,7 @@ void QCodeEditor::proceedCompleterEnd(QKeyEvent *e)
         return;
     }
 
-    QString lineStartChars = " \t[{\"";
-    QString lineEndChars = " \t)]}\"";
-    auto posStart = textCursor().positionInBlock() - 1;
-    auto posEnd = posStart;
-    auto line = textCursor().block().text();
-    int rightPCnt = 0;
-    while (posStart >= 0 && !lineStartChars.contains(line.at(posStart))) {
-        if (line.at(posStart) == '(') {
-            if (rightPCnt == 0) {
-                break;
-            } else {
-                rightPCnt--;
-            }
-        }
-        if (line.at(posStart) == ')') {
-            rightPCnt++;
-        }
-        posStart--;
-    }
-    while ((posEnd + 1) < line.size() && !lineEndChars.contains(line.at(posEnd + 1))) {
-        posEnd++;
-    }
-
-    QString completionPrefix = "";
-    if (posStart >= -1 && posEnd < line.size()) {
-        completionPrefix = line.mid(posStart + 1, posEnd - posStart);
-    }
+    QString completionPrefix = getCompletionWordNow(0, 0);
 
     static QString eow(R"(~!@#$%^&*()_+{}|:"<>?,/;'[]\-=)");
     if (!isShortcut &&
@@ -895,33 +869,14 @@ void QCodeEditor::insertCompletion(QString s)
         return;
     }
 
-    QString lineStartChars = " \t[{\"";
-    QString lineEndChars = " \t)]}\"";
-    auto posStart = textCursor().positionInBlock() - 1;
-    auto posEnd = posStart;
-    auto line = textCursor().block().text();
-    int rightPCnt = 0;
-    while (posStart >= 0 && !lineStartChars.contains(line.at(posStart))) {
-        if (line.at(posStart) == '(') {
-            if (rightPCnt == 0) {
-                break;
-            } else {
-                rightPCnt--;
-            }
-        }
-        if (line.at(posStart) == ')') {
-            rightPCnt++;
-        }
-
-        posStart--;
-    }
-    while ((posEnd + 1) < line.size() && !lineEndChars.contains(line.at(posEnd + 1))) {
-        posEnd++;
-    }
-
-    QString lineNew = line.mid(0, posStart + 1) + s + line.mid(posEnd + 1);
+    int posStart = 0;
+    int posEnd = 0;
+    getCompletionWordNow(&posStart, &posEnd);
     auto tc = textCursor();
     tc.select(QTextCursor::LineUnderCursor);
+    auto line = tc.selectedText();
+
+    QString lineNew = line.mid(0, posStart + 1) + s + line.mid(posEnd + 1);
     tc.insertText(lineNew);
     tc.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
     tc.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, posStart + s.size() + 1);
@@ -1012,4 +967,45 @@ int QCodeEditor::getIndentationSpaces()
     }
 
     return indentationLevel;
+}
+
+QString QCodeEditor::getCompletionWordNow(int *linePosStart, int *linePosEnd)
+{
+    QString lineStartChars = " \t[{\"!";
+    QString lineEndChars = " \t)]}\"!";
+    auto posStart = textCursor().positionInBlock() - 1;
+    auto posEnd = posStart;
+    auto line = textCursor().block().text();
+    int rightPCnt = 0;
+    while (posStart >= 0 && !lineStartChars.contains(line.at(posStart))) {
+        if (line.at(posStart) == '(') {
+            if (rightPCnt == 0) {
+                break;
+            } else {
+                rightPCnt--;
+            }
+        }
+        if (line.at(posStart) == ')') {
+            rightPCnt++;
+        }
+        posStart--;
+    }
+    while ((posEnd + 1) < line.size() && !lineEndChars.contains(line.at(posEnd + 1))) {
+        posEnd++;
+    }
+
+    QString res = "";
+    if (posStart >= -1 && posEnd < line.size()) {
+        res = line.mid(posStart + 1, posEnd - posStart);
+    }
+
+    if (linePosStart) {
+        *linePosStart = posStart;
+    }
+
+    if (linePosEnd) {
+        *linePosEnd = posEnd;
+    }
+
+    return res;
 }

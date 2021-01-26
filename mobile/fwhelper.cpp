@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -25,11 +25,17 @@ FwHelper::FwHelper(QObject *parent) : QObject(parent)
 
 }
 
-QVariantMap FwHelper::getHardwares(QString hw)
+QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
 {
     QVariantMap hws;
 
-    QDirIterator it("://res/firmwares");
+    QString fwDir = "://res/firmwares";
+
+    if (params.hwType == HW_TYPE_VESC_BMS) {
+        fwDir = "://res/firmwares_bms";
+    }
+
+    QDirIterator it(fwDir);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         QStringList names = fi.fileName().split("_o_");
@@ -60,11 +66,17 @@ QVariantMap FwHelper::getFirmwares(QString hw)
     return fws;
 }
 
-QVariantMap FwHelper::getBootloaders(QString hw)
+QVariantMap FwHelper::getBootloaders(FW_RX_PARAMS params, QString hw)
 {
     QVariantMap bls;
 
-    QDirIterator it("://res/bootloaders");
+    QString blDir = "://res/bootloaders";
+
+    if (params.hwType == HW_TYPE_VESC_BMS) {
+        blDir = "://res/bootloaders_bms";
+    }
+
+    QDirIterator it(blDir);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         QStringList names = fi.fileName().replace(".bin", "").split("_o_");
@@ -80,7 +92,7 @@ QVariantMap FwHelper::getBootloaders(QString hw)
     }
 
     if (bls.isEmpty()) {
-        QFileInfo generic("://res/bootloaders/generic.bin");
+        QFileInfo generic(blDir + "/generic.bin");
         if (generic.exists()) {
             bls.insert("generic", generic.absoluteFilePath());
         }

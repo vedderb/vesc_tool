@@ -64,6 +64,14 @@ void HelpDialog::showHelp(QWidget *parent, QString title, QString text)
     h->exec();
 }
 
+void HelpDialog::showHelpMonospace(QWidget *parent, QString title, QString text)
+{
+    HelpDialog *h = new HelpDialog(title, text, parent);
+    QFont font = QFont("DejaVu Sans Mono");
+    h->setFont(font);
+    h->exec();
+}
+
 void HelpDialog::showEvent(QShowEvent *event)
 {
     QSize s = ui->textEdit->document()->size().toSize();

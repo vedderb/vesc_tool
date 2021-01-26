@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -33,7 +33,7 @@ class PageFirmware : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageFirmware(QWidget *parent = 0);
+    explicit PageFirmware(QWidget *parent = nullptr);
     ~PageFirmware();
 
     VescInterface *vesc() const;
@@ -44,11 +44,10 @@ private slots:
     void timerSlot();
 
     void fwUploadStatus(const QString &status, double progress, bool isOngoing);
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
-                           bool isPaired, int isTestFw);
-    void updateHwList(QString hw = "");
+    void fwRxChanged(bool rx, bool limited);
+    void updateHwList(FW_RX_PARAMS params);
     void updateFwList();
-    void updateBlList(QString hw = "");
+    void updateBlList(FW_RX_PARAMS params);
 
     void on_chooseButton_clicked();
     void on_uploadButton_clicked();

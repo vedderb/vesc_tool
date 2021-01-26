@@ -34,8 +34,8 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->cancelButton->setEnabled(false);
     mVesc = nullptr;
 
-    updateHwList();
-    updateBlList();
+    updateHwList(FW_RX_PARAMS());
+    updateBlList(FW_RX_PARAMS());
 
     mTimer = new QTimer(this);
     mTimer->start(500);
@@ -75,8 +75,8 @@ void PageFirmware::setVesc(VescInterface *vesc)
 
         connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
                 this, SLOT(fwUploadStatus(QString,double,bool)));
-        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
-                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+        connect(mVesc, SIGNAL(fwRxChanged(bool,bool)),
+                this, SLOT(fwRxChanged(bool,bool)));
     }
 }
 
@@ -125,20 +125,27 @@ void PageFirmware::fwUploadStatus(const QString &status, double progress, bool i
     ui->cancelButton->setEnabled(isOngoing);
 }
 
-void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
-                                     bool isPaired, int isTestFw)
+void PageFirmware::fwRxChanged(bool rx, bool limited)
 {
+    (void)limited;
+
+    if (!rx) {
+        return;
+    }
+
+    FW_RX_PARAMS params = mVesc->getLastFwRxParams();
+
     QString fwStr;
-    QString strUuid = Utility::uuid2Str(uuid, true);
+    QString strUuid = Utility::uuid2Str(params.uuid, true);
 
     if (!strUuid.isEmpty()) {
         fwStr += ", UUID: " + strUuid;
     }
 
-    if (major >= 0) {
-        fwStr.sprintf("Fw: %d.%d", major, minor);
-        if (!hw.isEmpty()) {
-            fwStr += ", Hw: " + hw;
+    if (params.major >= 0) {
+        fwStr.sprintf("Fw: %d.%d", params.major, params.minor);
+        if (!params.hw.isEmpty()) {
+            fwStr += ", Hw: " + params.hw;
         }
 
         if (!strUuid.isEmpty()) {
@@ -147,29 +154,37 @@ void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArra
     }
 
     fwStr += "\n" + QString("Paired: %1, Status: ").
-            arg(isPaired ? "true" : "false");
-    if (isTestFw > 0) {
-        fwStr += QString("BETA %1").arg(isTestFw);
+            arg(params.isPaired ? "true" : "false");
+    if (params.isTestFw > 0) {
+        fwStr += QString("BETA %1").arg(params.isTestFw);
     } else {
         fwStr += "STABLE";
     }
 
+    fwStr += "\nHW Type: " + params.hwTypeStr();
+
     ui->currentLabel->setText(fwStr);
-    updateHwList(hw);
-    updateBlList(hw);
+    updateHwList(params);
+    updateBlList(params);
     update();
 }
 
-void PageFirmware::updateHwList(QString hw)
+void PageFirmware::updateHwList(FW_RX_PARAMS params)
 {
     ui->hwList->clear();
 
-    QDirIterator it("://res/firmwares");
+    QString fwDir = "://res/firmwares";
+
+    if (params.hwType == HW_TYPE_VESC_BMS) {
+        fwDir = "://res/firmwares_bms";
+    }
+
+    QDirIterator it(fwDir);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         QStringList names = fi.fileName().split("_o_");
 
-        if (fi.isDir() && (hw.isEmpty() || names.contains(hw, Qt::CaseInsensitive))) {
+        if (fi.isDir() && (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
             QListWidgetItem *item = new QListWidgetItem;
 
             QString name = names.at(0);
@@ -215,16 +230,22 @@ void PageFirmware::updateFwList()
     }
 }
 
-void PageFirmware::updateBlList(QString hw)
+void PageFirmware::updateBlList(FW_RX_PARAMS params)
 {
     ui->blList->clear();
 
-    QDirIterator it("://res/bootloaders");
+    QString blDir = "://res/bootloaders";
+
+    if (params.hwType == HW_TYPE_VESC_BMS) {
+        blDir = "://res/bootloaders_bms";
+    }
+
+    QDirIterator it(blDir);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         QStringList names = fi.fileName().replace(".bin", "").split("_o_");
 
-        if (!fi.isDir() && (hw.isEmpty() || names.contains(hw, Qt::CaseInsensitive))) {
+        if (!fi.isDir() && (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
             QListWidgetItem *item = new QListWidgetItem;
 
             QString name = names.at(0);
@@ -239,7 +260,7 @@ void PageFirmware::updateBlList(QString hw)
     }
 
     if (ui->blList->count() == 0) {
-        QFileInfo generic("://res/bootloaders/generic.bin");
+        QFileInfo generic(blDir + "/generic.bin");
         if (generic.exists()) {
             QListWidgetItem *item = new QListWidgetItem;
             item->setText("generic");

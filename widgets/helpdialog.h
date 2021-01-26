@@ -39,6 +39,7 @@ public:
 
     static void showHelp(QWidget *parent, ConfigParams *params, QString name, bool modal = true);
     static void showHelp(QWidget *parent, QString title, QString text);
+    static void showHelpMonospace(QWidget *parent, QString title, QString text);
 
 private slots:
     void on_okButton_clicked();

@@ -57,6 +57,8 @@ cp ../utility.cpp $APP_NAME
 cp ../utility.h $APP_NAME
 cp ../tcpserversimple.cpp $APP_NAME
 cp ../tcpserversimple.h $APP_NAME
+cp ../udpserversimple.cpp $APP_NAME
+cp ../udpserversimple.h $APP_NAME
 
 cp -r ../res/config/* $APP_NAME/res/config
 

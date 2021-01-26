@@ -43,7 +43,7 @@ Item {
                               "isCan": false,
                               "isInv": Utility.getInvertDirection(VescIf, -1)})
 
-        var canDevs = VescIf.scanCan()
+        var canDevs = Utility.scanCanVescOnly(VescIf)
 
         for (var i = 0;i < canDevs.length;i++) {
             canIdModel.append({"name": "VESC on CAN-bus",

@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/qml/MainLoader.qml</file>
+        <file>res/qml/Meters.qml</file>
+    </qresource>
+</RCC>

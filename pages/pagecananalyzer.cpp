@@ -78,6 +78,10 @@ void PageCanAnalyzer::canFrameRx(QByteArray data, quint32 id, bool isExtended)
                                                    arg(quint8(data.at(i)),
                                                        2, 16, QLatin1Char('0'))));
     }
+
+    if (ui->autoScrollBox->isChecked()) {
+        ui->msgTable->scrollToBottom();
+    }
 }
 
 void PageCanAnalyzer::on_sendButton_clicked()

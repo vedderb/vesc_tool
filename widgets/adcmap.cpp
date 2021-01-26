@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -128,30 +128,34 @@ void AdcMap::decodedAdcReceived(double value, double voltage, double value2, dou
 
 void AdcMap::on_controlTypeBox_currentIndexChanged(int index)
 {
-    switch (index) {
-    case 2: // Current Reverse Center
-    case 4: // Current No Reverse Brake Center
-    case 8: // Duty Cycle Reverse Center
+    // Cast to the enum to get a warning when unhandled cases
+    // are added in datatypes.h.
+    switch (adc_control_type(index)) {
+    case ADC_CTRL_TYPE_CURRENT_REV_CENTER:
+    case ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_CENTER:
+    case ADC_CTRL_TYPE_DUTY_REV_CENTER:
+    case ADC_CTRL_TYPE_PID_REV_CENTER:
+    case ADC_CTRL_TYPE_CURRENT_REV_BUTTON_BRAKE_CENTER:
         ui->displayCh1->setDual(true);
         break;
 
-    case 0: // Off
-    case 1: // Current
-    case 3: // Current Reverse Button
-    case 5: // Current No Reverse Brake Button
-    case 6: // Current No Reverse Brake ADC2
-    case 7: // Duty Cycle
-    case 9: // Duty Cycle Reverse Button
+    case ADC_CTRL_TYPE_NONE:
+    case ADC_CTRL_TYPE_CURRENT:
+    case ADC_CTRL_TYPE_CURRENT_REV_BUTTON:
+    case ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_BUTTON:
+    case ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_ADC:
+    case ADC_CTRL_TYPE_DUTY:
+    case ADC_CTRL_TYPE_DUTY_REV_BUTTON:
+    case ADC_CTRL_TYPE_PID_REV_BUTTON:
+    case ADC_CTRL_TYPE_CURRENT_REV_BUTTON_BRAKE_ADC:
+    case ADC_CTRL_TYPE_PID:
         ui->displayCh1->setDual(false);
-        break;
-
-    default:
         break;
     }
 
-    ui->displayCh1->setEnabled(index != 0);
-    ui->displayCh2->setEnabled(index != 0);
-    ui->displayCh2->setEnabled(index == 6);
+    ui->displayCh1->setEnabled(index != ADC_CTRL_TYPE_NONE);
+    ui->displayCh2->setEnabled(index == ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_ADC ||
+                               index == ADC_CTRL_TYPE_CURRENT_REV_BUTTON_BRAKE_ADC);
 }
 
 void AdcMap::on_helpButton_clicked()

@@ -1,3 +1,19 @@
+== 3.00 ==
+* Focus for this release: External hardware and BMS support.
+ - Added hw type setting.
+ - Hide VESC settings when connected to other hardware.
+ - Added BMS commands
+* Other updates
+ - Only allow uploading firmware to all VESCs when they have the same hardware version.
+ - Added UDP server and client.
+ - Added NRF52 UICR read and write support to SWDPROG page.
+ - Realtime IMU and balance data. See: https://github.com/vedderb/vesc_tool/pull/91
+ - Made CAN list resizeable.
+ - Made FOC detection result dialog scrollable.
+ - Added gamepad control support.
+ - Use QStandardPaths::AppDataLocation for OSM tile cache.
+ - Added more custom firmare paths to SWDPROG to easily switch between firmware files.
+
 == 2.06 ==
 * Prevent repeated test version notification dialogs.
 * Made IMU calibration more compact to decrease the minimum horizontal size.

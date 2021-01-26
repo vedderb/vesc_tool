@@ -59,6 +59,7 @@ void PageMotor::reloadParams()
     ui->rpmTab->clearParams();
     ui->wattageTab->clearParams();
     ui->tempTab->clearParams();
+    ui->bmsTab->clearParams();
     ui->advancedTab->clearParams();
 
     ui->motorTab->addParamSubgroup(mVesc->mcConfig(), "general", "general");
@@ -67,5 +68,6 @@ void PageMotor::reloadParams()
     ui->rpmTab->addParamSubgroup(mVesc->mcConfig(), "general", "rpm");
     ui->wattageTab->addParamSubgroup(mVesc->mcConfig(), "general", "wattage");
     ui->tempTab->addParamSubgroup(mVesc->mcConfig(), "general", "temperature");
+    ui->bmsTab->addParamSubgroup(mVesc->mcConfig(), "general", "bms");
     ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "general", "advanced");
 }

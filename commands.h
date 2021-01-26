@@ -56,11 +56,15 @@ public:
 
     Q_INVOKABLE static QString faultToStr(mc_fault_code fault);
 
+    Q_INVOKABLE QByteArray bmReadMemWait(uint32_t addr, quint16 size, int timeoutMs = 3000);
+    Q_INVOKABLE int bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs = 3000);
+
+    Q_INVOKABLE void setOdometer(unsigned odometer_meters);
+
 signals:
     void dataToSend(QByteArray &data);
 
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
-                           bool isPaired, int isTestFw);
+    void fwVersionReceived(FW_RX_PARAMS params);
     void eraseNewAppResReceived(bool ok);
     void eraseBootloaderResReceived(bool ok);
     void writeNewAppDataResReceived(bool ok, bool hasOffset, quint32 offset);
@@ -102,16 +106,19 @@ signals:
     void bmReadMemRes(int res, QByteArray data);
     void deserializeConfigFailed(bool isMc, bool isApp);
     void canFrameRx(QByteArray data, quint32 id, bool isExtended);
+    void bmsValuesRx(BMS_VALUES val);
+    void customConfigChunkRx(int confInd, int lenConf, int ofsConf, QByteArray data);
+    void customConfigRx(int confInd, QByteArray data);
 
 public slots:
     void processPacket(QByteArray data);
 
     void getFwVersion();
-    void eraseNewApp(bool fwdCan, quint32 fwSize);
-    void eraseBootloader(bool fwdCan);
-    void writeNewAppData(QByteArray data, quint32 offset, bool fwdCan);
+    void eraseNewApp(bool fwdCan, quint32 fwSize, HW_TYPE hwType, QString hwName);
+    void eraseBootloader(bool fwdCan, HW_TYPE hwType, QString hwName);
+    void writeNewAppData(QByteArray data, quint32 offset, bool fwdCan, HW_TYPE hwType, QString hwName);
     void writeNewAppDataLzo(QByteArray data, quint32 offset, quint16 decompressedLen, bool fwdCan);
-    void jumpToBootloader(bool fwdCan);
+    void jumpToBootloader(bool fwdCan, HW_TYPE hwType, QString hwName);
     void getValues();
     void sendTerminalCmd(QString cmd);
     void sendTerminalCmdSync(QString cmd);
@@ -179,6 +186,17 @@ public slots:
     void forwardCanFrame(QByteArray data, quint32 id, bool isExtended);
     void setBatteryCut(double start, double end, bool store, bool fwdCan);
 
+    void bmsGetValues();
+    void bmsSetChargeAllowed(bool allowed);
+    void bmsSetBalanceOverride(uint8_t cell, uint8_t override);
+    void bmsResetCounters(bool ah, bool wh);
+    void bmsForceBalance(bool bal_en);
+    void bmsZeroCurrentOffset();
+
+    void customConfigGetChunk(int confInd, int len, int offset);
+    void customConfigGet(int confInd, bool isDefault);
+    void customConfigSet(int confInd, QByteArray confData);
+
 private slots:
     void timerSlot();
 
@@ -210,6 +228,8 @@ private:
     int mTimeoutDecChuk;
     int mTimeoutDecBalance;
     int mTimeoutPingCan;
+    int mTimeoutCustomConf;
+    int mTimeoutBmsVal;
 
 };
 

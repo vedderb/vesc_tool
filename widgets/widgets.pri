@@ -20,6 +20,7 @@ FORMS += \
     $$PWD/dirsetup.ui
 
 HEADERS += \
+    $$PWD/batttempplot.h \
     $$PWD/parameditbool.h \
     $$PWD/parameditdouble.h \
     $$PWD/parameditenum.h \
@@ -54,6 +55,7 @@ HEADERS += \
     $$PWD/superslider.h
 
 SOURCES += \
+    $$PWD/batttempplot.cpp \
     $$PWD/parameditbool.cpp \
     $$PWD/parameditdouble.cpp \
     $$PWD/parameditenum.cpp \

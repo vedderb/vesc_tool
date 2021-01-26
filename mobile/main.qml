@@ -40,9 +40,9 @@ ApplicationWindow {
     title: qsTr("VESC Tool")
 
     Component.onCompleted: {
-        //        Utility.checkVersion(VescIf)
-        //        swipeView.setCurrentIndex(1)
-        //        rtSwipeView.setCurrentIndex(1)
+//        Utility.checkVersion(VescIf)
+//        swipeView.setCurrentIndex(7)
+//        rtSwipeView.setCurrentIndex(1)
 
         if (!VescIf.isIntroDone()) {
             introWizard.openDialog()
@@ -242,6 +242,10 @@ ApplicationWindow {
                         ColumnLayout {
                             anchors.fill: parent
 
+                            RtDataIMU {
+                                Layout.fillWidth: true
+                            }
+
                             CheckBox {
                                 Layout.fillWidth: true
                                 id: useYawBox
@@ -312,6 +316,12 @@ ApplicationWindow {
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
                 anchors.topMargin: 10
+            }
+        }
+
+        Page {
+            BMS {
+                anchors.fill: parent
             }
         }
 
@@ -631,10 +641,22 @@ ApplicationWindow {
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {
+                    text: qsTr("BMS")
+                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                }
+                TabButton {
                     text: qsTr("Developer")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
             }
+        }
+    }
+
+    Page {
+        id: rtDataBalance
+        visible: false
+        RtDataBalance {
+            anchors.fill: parent
         }
     }
 
@@ -688,7 +710,7 @@ ApplicationWindow {
         property bool appConfRx: false
 
         onTriggered: {
-            if (VescIf.isPortConnected()) {
+            if (VescIf.isPortConnected() && VescIf.getLastFwRxParams().hwTypeStr() === "VESC") {
                 if (!mcConfRx) {
                     mCommands.getMcconf()
                 }
@@ -707,6 +729,14 @@ ApplicationWindow {
         repeat: true
 
         onTriggered: {
+            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 3){
+                rtSwipeView.addItem(rtDataBalance)
+                rtDataBalance.visible = true
+            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 4){
+                rtSwipeView.removeItem(3)
+                rtDataBalance.visible = false
+            }
+
             if (VescIf.isPortConnected()) {
                 // Sample RT data when the corresponding page is selected, or when
                 // RT logging is active.
@@ -716,6 +746,10 @@ ApplicationWindow {
                     mCommands.getValues()
                     mCommands.getValuesSetup()
                     mCommands.getImuData(0xFFFF)
+
+                    if (tabBar.currentIndex == 7) {
+                        mCommands.bmsGetValues()
+                    }
                 } else {
                     if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0)) {
                         interval = 50
@@ -729,7 +763,18 @@ ApplicationWindow {
 
                     if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
                         interval = 20
-                        mCommands.getImuData(0x7)
+                        mCommands.getImuData(0x1FF)
+                    }
+
+                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 3) {
+                        interval = 50
+                        mCommands.getValuesSetup()
+                        mCommands.getDecodedBalance()
+                    }
+
+                    if (tabBar.currentIndex == 7) {
+                        interval = 100
+                        mCommands.bmsGetValues()
                     }
                 }
             }

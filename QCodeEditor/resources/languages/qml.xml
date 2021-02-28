@@ -94,5 +94,9 @@
         <name>anchors</name>
         <name>Camera</name>
         <name>VideoOutput</name>
+        <name>TabBar</name>
+        <name>TabButton</name>
+        <name>SwipeView</name>
+        <name>Page</name>
     </section>
 </root>

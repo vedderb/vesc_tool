@@ -25,6 +25,7 @@
 
 #include "vescinterface.h"
 #include "mobile/qmlui.h"
+#include "widgets/qmleditor.h"
 
 namespace Ui {
 class PageScripting;
@@ -48,38 +49,28 @@ signals:
 public slots:
     void debugMsgRx(QtMsgType type, const QString msg);
 
-protected:
-    void keyPressEvent(QKeyEvent *event);
-
 private slots:
     void on_runButton_clicked();
     void on_stopButton_clicked();
     void on_runWindowButton_clicked();
     void on_fullscreenButton_clicked();
-    void on_openFileButton_clicked();
-    void on_saveButton_clicked();
-    void on_saveAsButton_clicked();
     void on_openRecentButton_clicked();
     void on_removeSelectedButton_clicked();
     void on_clearRecentButton_clicked();
     void on_openExampleButton_clicked();
     void on_helpButton_clicked();
-    void on_searchEdit_textChanged(const QString &arg1);
-    void on_searchHideButton_clicked();
-    void on_searchNextButton_clicked();
-    void on_replaceThisButton_clicked();
-    void on_replaceAllButton_clicked();
-    void on_searchPrevButton_clicked();
-
-    void on_searchCaseSensitiveBox_toggled(bool checked);
 
 private:
     Ui::PageScripting *ui;
     VescInterface *mVesc;
     QmlUi mQmlUi;
     QStringList mRecentFiles;
+    QString mDirNow;
 
     void updateRecentList();
+    void makeEditorConnections(QmlEditor *editor);
+    void createEditorTab(QString fileName, QString content);
+    QString qmlToRun();
 
 };
 

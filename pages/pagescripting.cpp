@@ -38,47 +38,65 @@ PageScripting::PageScripting(QWidget *parent) :
     ui->setupUi(this);
     mVesc = nullptr;
     ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    ui->searchWidget->setVisible(false);
 
-    ui->qmlEdit->setHighlighter(new QmlHighlighter);
-    ui->qmlEdit->setCompleter(new QVescCompleter);
-    ui->qmlEdit->setTabReplaceSize(4);
+    makeEditorConnections(ui->mainEdit);
 
-    connect(ui->qmlEdit, &QCodeEditor::saveTriggered, [this]() {
-        on_saveButton_clicked();
+    QPushButton *plusButton = new QPushButton();
+    plusButton->setIcon(QIcon("://res/icons/Plus Math-96.png"));
+    plusButton->setFlat(true);
+    plusButton->setText("New Tab");
+    ui->fileTabs->setCornerWidget(plusButton);
+    connect(plusButton, &QPushButton::clicked, [this]() {
+        createEditorTab("", "");
     });
-    connect(ui->qmlEdit, &QCodeEditor::runEmbeddedTriggered, [this]() {
-        on_runButton_clicked();
-    });
-    connect(ui->qmlEdit, &QCodeEditor::runWindowTriggered, [this]() {
-        on_runWindowButton_clicked();
-    });
-    connect(ui->qmlEdit, &QCodeEditor::stopTriggered, [this]() {
-        on_stopButton_clicked();
-    });
-    connect(ui->qmlEdit, &QCodeEditor::clearConsoleTriggered, [this]() {
-        ui->debugEdit->clear();
-    });
-    connect(ui->qmlEdit, &QCodeEditor::searchTriggered, [this]() {
-        ui->searchWidget->setVisible(true);
-        auto selected = ui->qmlEdit->textCursor().selectedText();
-        if (!selected.isEmpty()) {
-            ui->searchEdit->setText(selected);
+
+    connect(ui->mainEdit, &QmlEditor::fileNameChanged, [this](QString fileName) {
+        QFileInfo f(fileName);
+        QString txt = "main";
+
+        if (f.exists()) {
+            txt = f.fileName() + " (main)";
+            mDirNow = f.path();
+        } else {
+            mDirNow = "";
         }
-        ui->qmlEdit->searchForString(ui->searchEdit->text());
-        ui->searchEdit->setFocus();
+
+        ui->fileTabs->setTabText(0, txt);
     });
 
     QSettings set;
-    ui->qmlEdit->setPlainText(set.value("pagescripting/lastqml", "").toString());
-    ui->fileNowLabel->setText(set.value("pagescripting/lastfilepath", "").toString());
     {
         int size = set.beginReadArray("pagescripting/recentfiles");
         for (int i = 0; i < size; ++i) {
             set.setArrayIndex(i);
-            mRecentFiles.append(set.value("path").toString());
+            QString path = set.value("path").toString();
+            QFileInfo f(path);
+            if (f.exists()) {
+                mRecentFiles.append(path);
+            }
         }
         set.endArray();
+    }
+    {
+        int size = set.beginReadArray("pagescripting/recentopenfiles");
+        for (int i = 0; i < size; ++i) {
+            set.setArrayIndex(i);
+            QString path = set.value("path").toString();
+            QFileInfo f(path);
+            if (f.exists()) {
+                QFile file(path);
+                if (file.open(QIODevice::ReadOnly)) {
+                    if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
+                        ui->mainEdit->editor()->setPlainText(file.readAll());
+                        ui->mainEdit->setFileNow(path);
+                    } else {
+                        createEditorTab(path, file.readAll());
+                    }
+                }
+            }
+        }
+        set.endArray();
+        ui->fileTabs->setCurrentIndex(0);
     }
 
     updateRecentList();
@@ -97,8 +115,6 @@ PageScripting::PageScripting(QWidget *parent) :
 PageScripting::~PageScripting()
 {
     QSettings set;
-    set.setValue("pagescripting/lastqml", ui->qmlEdit->toPlainText());
-    set.setValue("pagescripting/lastfilepath", ui->fileNowLabel->text());
     {
         set.remove("pagescripting/recentfiles");
         set.beginWriteArray("pagescripting/recentfiles");
@@ -107,6 +123,16 @@ PageScripting::~PageScripting()
             set.setArrayIndex(ind);
             set.setValue("path", f);
             ind++;
+        }
+        set.endArray();
+    }
+    {
+        set.remove("pagescripting/recentopenfiles");
+        set.beginWriteArray("pagescripting/recentopenfiles");
+        for (int i = 0;i < ui->fileTabs->count();i++) {
+            auto e = qobject_cast<QmlEditor*>(ui->fileTabs->widget(i));
+            set.setArrayIndex(i);
+            set.setValue("path", e->fileNow());
         }
         set.endArray();
     }
@@ -149,19 +175,11 @@ void PageScripting::debugMsgRx(QtMsgType type, const QString msg)
     ui->debugEdit->moveCursor(QTextCursor::End);
 }
 
-void PageScripting::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Escape) {
-        if (ui->searchEdit->hasFocus() || ui->replaceEdit->hasFocus()) {
-            on_searchHideButton_clicked();
-        }
-    }
-}
-
 void PageScripting::on_runButton_clicked()
 {
     ui->qmlWidget->setSource(QUrl(QLatin1String("qrc:/res/qml/DynamicLoader.qml")));
-    emit reloadQml(ui->qmlEdit->toPlainText());
+    ui->qmlWidget->engine()->clearComponentCache();
+    emit reloadQml(qmlToRun());
 }
 
 void PageScripting::on_stopButton_clicked()
@@ -176,6 +194,8 @@ void PageScripting::on_runWindowButton_clicked()
 
     if (!mQmlUi.isCustomGuiRunning()) {
         mQmlUi.startCustomGui(mVesc);
+    } else {
+        mQmlUi.clearQmlCache();
     }
 
     QTimer::singleShot(10, [this]() {
@@ -183,7 +203,7 @@ void PageScripting::on_runWindowButton_clicked()
     });
 
     QTimer::singleShot(1000, [this]() {
-        mQmlUi.emitReloadQml(ui->qmlEdit->toPlainText());
+        mQmlUi.emitReloadQml(qmlToRun());
         ui->runWindowButton->setEnabled(true);
     });
 }
@@ -191,86 +211,6 @@ void PageScripting::on_runWindowButton_clicked()
 void PageScripting::on_fullscreenButton_clicked()
 {
     mQmlUi.emitToggleFullscreen();
-}
-
-void PageScripting::on_openFileButton_clicked()
-{
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open QML File"), "",
-                                                    tr("QML files (*.qml)"));
-
-    if (!fileName.isEmpty()) {
-        QFile file(fileName);
-        if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Open QML File",
-                                  "Could not open\n" + fileName + "\nfor reading");
-            return;
-        }
-
-        ui->qmlEdit->setPlainText(file.readAll());
-        ui->fileNowLabel->setText(fileName);
-        if (!mRecentFiles.contains(fileName)) {
-            mRecentFiles.append(fileName);
-            updateRecentList();
-        }
-
-        file.close();
-    }
-}
-
-void PageScripting::on_saveButton_clicked()
-{
-    QString fileName = ui->fileNowLabel->text();
-
-    QFileInfo fi(fileName);
-    if (!fi.exists()) {
-        QMessageBox::critical(this, "Save File",
-                              "Current file not valid. Use save as instead.");
-        return;
-    }
-
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this, "Save QML File",
-                              "Could not open\n" + fileName + "\nfor writing");
-        return;
-    }
-
-    file.write(ui->qmlEdit->toPlainText().toUtf8());
-    file.close();
-
-    mVesc->emitStatusMessage("Saved " + fileName, true);
-}
-
-void PageScripting::on_saveAsButton_clicked()
-{
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save QML"), "",
-                                                    tr("QML Files (*.qml)"));
-
-    if (!fileName.isEmpty()) {
-        if (!fileName.toLower().endsWith(".qml")) {
-            fileName.append(".qml");
-        }
-
-        QFile file(fileName);
-        if (!file.open(QIODevice::WriteOnly)) {
-            QMessageBox::critical(this, "Save QML File",
-                                  "Could not open\n" + fileName + "\nfor writing");
-            return;
-        }
-
-        file.write(ui->qmlEdit->toPlainText().toUtf8());
-        file.close();
-
-        ui->fileNowLabel->setText(fileName);
-        if (!mRecentFiles.contains(fileName)) {
-            mRecentFiles.append(fileName);
-            updateRecentList();
-        }
-
-        mVesc->emitStatusMessage("Saved " + fileName, true);
-    }
 }
 
 void PageScripting::on_openRecentButton_clicked()
@@ -287,8 +227,12 @@ void PageScripting::on_openRecentButton_clicked()
             return;
         }
 
-        ui->qmlEdit->setPlainText(file.readAll());
-        ui->fileNowLabel->setText(fileName);
+        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
+            ui->mainEdit->editor()->setPlainText(file.readAll());
+            ui->mainEdit->setFileNow(fileName);
+        } else {
+            createEditorTab(fileName, file.readAll());
+        }
 
         file.close();
     } else {
@@ -327,8 +271,12 @@ void PageScripting::on_openExampleButton_clicked()
             return;
         }
 
-        ui->qmlEdit->setPlainText(file.readAll());
-        ui->fileNowLabel->setText("");
+        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
+            ui->mainEdit->editor()->setPlainText(file.readAll());
+            ui->mainEdit->setFileNow("");
+        } else {
+            createEditorTab("", file.readAll());
+        }
 
         file.close();
     } else {
@@ -343,6 +291,82 @@ void PageScripting::updateRecentList()
     for (auto f: mRecentFiles) {
         ui->recentList->addItem(f);
     }
+}
+
+void PageScripting::makeEditorConnections(QmlEditor *editor)
+{
+    connect(editor->editor(), &QCodeEditor::runEmbeddedTriggered, [this]() {
+        on_runButton_clicked();
+    });
+    connect(editor->editor(), &QCodeEditor::runWindowTriggered, [this]() {
+        on_runWindowButton_clicked();
+    });
+    connect(editor->editor(), &QCodeEditor::stopTriggered, [this]() {
+        on_stopButton_clicked();
+    });
+    connect(editor->editor(), &QCodeEditor::clearConsoleTriggered, [this]() {
+        ui->debugEdit->clear();
+    });
+    connect(editor, &QmlEditor::fileOpened, [this](QString fileName) {
+        if (!mRecentFiles.contains(fileName)) {
+            mRecentFiles.append(fileName);
+            updateRecentList();
+        }
+    });
+    connect(editor, &QmlEditor::fileSaved, [this](QString fileName) {
+        if (mVesc) {
+            mVesc->emitStatusMessage("Saved " + fileName, true);
+        }
+
+        if (!mRecentFiles.contains(fileName)) {
+            mRecentFiles.append(fileName);
+            updateRecentList();
+        }
+    });
+}
+
+void PageScripting::createEditorTab(QString fileName, QString content)
+{
+    QmlEditor *editor = new QmlEditor();
+    int tabIndex = ui->fileTabs->addTab(editor, "");
+    ui->fileTabs->setCurrentIndex(tabIndex);
+
+    makeEditorConnections(editor);
+
+    connect(editor, &QmlEditor::fileNameChanged, [this, editor](QString fileName) {
+        QFileInfo f(fileName);
+        QString txt = "Unnamed";
+
+        if (f.exists()) {
+            txt = f.fileName();
+        }
+
+        ui->fileTabs->setTabText(ui->fileTabs->indexOf(editor), txt);
+    });
+
+    editor->setFileNow(fileName);
+    editor->editor()->setPlainText(content);
+
+    QPushButton *closeButton = new QPushButton();
+    closeButton->setIcon(QIcon("://res/icons/Cancel-96.png"));
+    closeButton->setFlat(true);
+    ui->fileTabs->tabBar()->setTabButton(tabIndex, QTabBar::RightSide, closeButton);
+
+    connect(closeButton, &QPushButton::clicked, [this, editor]() {
+        ui->fileTabs->removeTab(ui->fileTabs->indexOf(editor));
+    });
+}
+
+QString PageScripting::qmlToRun()
+{
+    QString res = ui->mainEdit->editor()->toPlainText();
+    res.prepend("import \"qrc:/mobile\";");
+
+    QFileInfo f(mDirNow);
+    if (f.exists() && f.isDir()) {
+        res.prepend("import \"file:/" + mDirNow + "\";");
+    }
+    return res;
 }
 
 void PageScripting::on_helpButton_clicked()
@@ -361,50 +385,4 @@ void PageScripting::on_helpButton_clicked()
                    "Ctrl + 's'   : Save file<br>";
 
     HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html.replace(" ","&nbsp;"));
-}
-
-void PageScripting::on_searchEdit_textChanged(const QString &arg1)
-{
-    ui->qmlEdit->searchForString(arg1);
-}
-
-void PageScripting::on_searchHideButton_clicked()
-{
-    ui->searchWidget->setVisible(false);
-    ui->qmlEdit->searchForString("");
-    ui->qmlEdit->setFocus();
-}
-
-void PageScripting::on_searchNextButton_clicked()
-{
-    ui->qmlEdit->searchNextResult();
-    ui->qmlEdit->setFocus();
-}
-
-void PageScripting::on_replaceThisButton_clicked()
-{
-    if (ui->qmlEdit->textCursor().selectedText() == ui->searchEdit->text()) {
-        ui->qmlEdit->textCursor().insertText(ui->replaceEdit->text());
-        ui->qmlEdit->searchNextResult();
-    }
-}
-
-void PageScripting::on_replaceAllButton_clicked()
-{
-    ui->qmlEdit->searchNextResult();
-    while (!ui->qmlEdit->textCursor().selectedText().isEmpty()) {
-        ui->qmlEdit->textCursor().insertText(ui->replaceEdit->text());
-        ui->qmlEdit->searchNextResult();
-    }
-}
-
-void PageScripting::on_searchPrevButton_clicked()
-{
-    ui->qmlEdit->searchPreviousResult();
-    ui->qmlEdit->setFocus();
-}
-
-void PageScripting::on_searchCaseSensitiveBox_toggled(bool checked)
-{
-    ui->qmlEdit->searchSetCaseSensitive(checked);
 }

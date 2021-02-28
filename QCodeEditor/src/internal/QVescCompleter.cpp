@@ -73,6 +73,8 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("getMcconfDefault()");
         addItem("setMcconf(check)");
         addItem("forwardCanFrame(data, id, isExt)");
+        addItem("pswGetStatus(by_id, id_ind)");
+        addItem("pswSwitch(id, is_on, plot)");
         level--;
     };
 
@@ -111,6 +113,56 @@ QVescCompleter::QVescCompleter(QObject *parent) :
     {
         level++;
         addItem("onCompleted:");
+        level--;
+    }
+
+    addItem("Math");
+    {
+        level++;
+        addItem("E");
+        addItem("LN2");
+        addItem("LN10");
+        addItem("LOG2E");
+        addItem("LOG10E");
+        addItem("PI");
+        addItem("SQRT1_2");
+        addItem("SQRT2");
+
+        addItem("abs(x)");
+        addItem("acos(x)");
+        addItem("acosh(x)");
+        addItem("asin(x)");
+        addItem("asinh(x)");
+        addItem("atan(x)");
+        addItem("atanh(x)");
+        addItem("atan2(y, x)");
+        addItem("cbrt(x)");
+        addItem("ceil(x)");
+        addItem("clz32(x)");
+        addItem("cos(x)");
+        addItem("cosh(x)");
+        addItem("exp(x)");
+        addItem("expm1(x)");
+        addItem("floor(x)");
+        addItem("fround(x)");
+        addItem("hypot(...");
+        addItem("imul(x, y)");
+        addItem("log(x)");
+        addItem("log1p(x)");
+        addItem("log10(x)");
+        addItem("log2(x)");
+        addItem("max(...");
+        addItem("min(...)");
+        addItem("pow(x, y)");
+        addItem("random()");
+        addItem("round(x)");
+        addItem("sign(x)");
+        addItem("sin(x)");
+        addItem("sinh(x)");
+        addItem("sqrt(x)");
+        addItem("tan(x)");
+        addItem("tanh(x)");
+        addItem("trunc(x)");
         level--;
     }
 

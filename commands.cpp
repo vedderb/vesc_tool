@@ -132,6 +132,10 @@ void Commands::processPacket(QByteArray data)
             params.customConfigNum = vb.vbPopFrontInt8();
         }
 
+        if (vb.size() >= 1) {
+            params.hasPhaseFilters = vb.vbPopFrontInt8();
+        }
+
         emit fwVersionReceived(params);
     } break;
 
@@ -693,6 +697,20 @@ void Commands::processPacket(QByteArray data)
         int confSize = vb.vbPopFrontInt32();
         int offset = vb.vbPopFrontInt32();
         emit customConfigChunkRx(confInd, confSize, offset, vb);
+    } break;
+
+    case COMM_PSW_GET_STATUS: {
+        PSW_STATUS stat;
+        stat.id = vb.vbPopFrontInt16();
+        stat.psws_num = vb.vbPopFrontInt16();
+        stat.age_seconds = vb.vbPopFrontDouble32Auto();
+        stat.v_in = vb.vbPopFrontDouble32Auto();
+        stat.v_out = vb.vbPopFrontDouble32Auto();
+        stat.temp = vb.vbPopFrontDouble32Auto();
+        stat.is_out_on = vb.vbPopFrontInt8();
+        stat.is_pch_on = vb.vbPopFrontInt8();
+        stat.is_dsc_on = vb.vbPopFrontInt8();
+        emit pswStatusRx(stat);
     } break;
 
     default:
@@ -1552,6 +1570,25 @@ void Commands::customConfigSet(int confInd, QByteArray confData)
     vb.vbAppendUint8(COMM_SET_CUSTOM_CONFIG);
     vb.vbAppendInt8(int8_t(confInd));
     vb.append(confData);
+    emitData(vb);
+}
+
+void Commands::pswGetStatus(bool by_id, int id_ind)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_PSW_GET_STATUS);
+    vb.vbAppendInt8(by_id);
+    vb.vbAppendInt16(id_ind);
+    emitData(vb);
+}
+
+void Commands::pswSwitch(int id, bool is_on, bool plot)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_PSW_SWITCH);
+    vb.vbAppendInt16(id);
+    vb.vbAppendInt8(is_on);
+    vb.vbAppendInt8(plot);
     emitData(vb);
 }
 

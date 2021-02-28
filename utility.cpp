@@ -376,7 +376,11 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                         arg(sensors);
             };
 
-            QVector<int> canDevs = Utility::scanCanVescOnly(vesc);
+            QVector<int> canDevs;
+            if (detect_can) {
+                canDevs = Utility::scanCanVescOnly(vesc);
+            }
+
             res = genRes();
 
             int canLastFwd = vesc->commands()->getSendCan();
@@ -497,6 +501,12 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
     if (res) {
         for (int id: canIds) {
             vesc->commands()->setSendCan(true, id);
+
+            FW_RX_PARAMS params;
+            getFwVersionBlocking(vesc, &params);
+            if (params.hwType != HW_TYPE_VESC) {
+                continue;
+            }
 
             if (!checkFwCompatibility(vesc)) {
                 vesc->emitMessageDialog("FW Versions",
@@ -758,8 +768,10 @@ QString Utility::testDirection(VescInterface *vesc, int canId, double duty, int 
 
     vesc->commands()->disableAppOutput(ms, true);
 
-    vesc->ignoreCanChange(true);
-    vesc->commands()->setSendCan(canId >= 0, canId);
+    if (canId >= 0) {
+        vesc->ignoreCanChange(true);
+        vesc->commands()->setSendCan(canId >= 0, canId);
+    }
 
     if (!checkFwCompatibility(vesc)) {
         vesc->emitMessageDialog("FW Versions",

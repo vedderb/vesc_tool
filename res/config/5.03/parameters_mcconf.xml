@@ -8,8 +8,8 @@
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The PWM mode to use for BLDC motors. Synchronous is the most tested and recommended mode. The others are likely to cause problems.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The PWM mode to use for BLDC motors. Synchronous is the most tested and recommended mode. The others are likely to cause problems.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_PWM_MODE</cDefine>
             <valInt>1</valInt>
             <enumNames>Nonsynchronous HISW</enumNames>
@@ -236,7 +236,7 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Start to reduce the current at this fraction of the ERPM limit. Lowering this number will make the ERPM limit softer.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_RPM_START</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
@@ -247,9 +247,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>0.8</valDouble>
-            <vTxDoubleScale>1e+06</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_erpm_start>
         <l_max_erpm_fbrake>
             <longName>Max ERPM Full Brake</longName>
@@ -402,8 +402,8 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The MOSFET temperature at which motor current starts to get reduced.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The MOSFET temperature at which motor current starts to get reduced.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_LIM_TEMP_FET_START</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -413,9 +413,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>85</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> °C</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_temp_fet_start>
         <l_temp_fet_end>
             <longName>MOSFET Temp Cutoff End</longName>
@@ -424,8 +424,8 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The MOSFET temperature above which motor current is not allowed and a fault is thrown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The MOSFET temperature above which motor current is not allowed and a fault is thrown.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_LIM_TEMP_FET_END</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -435,9 +435,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>100</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> °C</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_temp_fet_end>
         <l_temp_motor_start>
             <longName>Motor Temp Cutoff Start</longName>
@@ -446,8 +446,8 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The motor temperature at which motor current starts to get reduced.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The motor temperature at which motor current starts to get reduced.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_LIM_TEMP_MOTOR_START</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -457,9 +457,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>85</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> °C</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_temp_motor_start>
         <l_temp_motor_end>
             <longName>Motor Temp Cutoff End</longName>
@@ -468,8 +468,8 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The motor temperature above which motor current is not allowed and a fault is thrown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The motor temperature above which motor current is not allowed and a fault is thrown.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_LIM_TEMP_MOTOR_END</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -479,9 +479,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>100</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> °C</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_temp_motor_end>
         <l_temp_accel_dec>
             <longName>Acceleration Temperature Decrease</longName>
@@ -501,9 +501,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>0.15</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> %</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_temp_accel_dec>
         <l_min_duty>
             <longName>Minimum Duty Cycle</longName>
@@ -512,7 +512,7 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Minimum allowed duty cycle.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_MIN_DUTY</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
@@ -523,9 +523,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.5</stepDouble>
             <valDouble>0.005</valDouble>
-            <vTxDoubleScale>1e+06</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> %</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_min_duty>
         <l_max_duty>
             <longName>Maximum Duty Cycle</longName>
@@ -534,7 +534,7 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Maximum allowed duty cycle.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_MAX_DUTY</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
@@ -545,9 +545,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.5</stepDouble>
             <valDouble>0.95</valDouble>
-            <vTxDoubleScale>1e+06</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> %</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_max_duty>
         <l_watt_max>
             <longName>Maximum Wattage</longName>
@@ -615,9 +615,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.05</stepDouble>
             <valDouble>1</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_current_max_scale>
         <l_current_min_scale>
             <longName>Min Current Scale</longName>
@@ -637,9 +637,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.05</stepDouble>
             <valDouble>1</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_current_min_scale>
         <l_duty_start>
             <longName>Duty Cycle Current Limit Start</longName>
@@ -659,9 +659,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>1</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>1</valDouble>
-            <vTxDoubleScale>1e+06</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_duty_start>
         <sl_min_erpm>
             <longName>Minimum ERPM</longName>
@@ -736,20 +736,20 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Cycle ingegrator limit. This is how much area will be integrated under the back EMF after a zero crossing before doing a commutation. A too low value will cause a too early commutation, and a too high value will cause a too late commutation. A too late commutation will cause more problems than too early commutations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Cycle ingegrator limit. This is how much area will be integrated under the back EMF after a zero crossing before doing a commutation. A too low value will cause a too early commutation, and a too high value will cause a too late commutation. A too late commutation will cause more problems than too early commutations.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_SL_CYCLE_INT_LIMIT</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>5000</maxDouble>
+            <maxDouble>3000</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>62</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </sl_cycle_int_limit>
         <sl_phase_advance_at_br>
             <longName>Phase Advance at BR ERPM</longName>
@@ -758,8 +758,8 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Phase (timing) advance at the BR ERPM value. Below that value the advance will be less proportional to the current ERPM.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Phase (timing) advance at the BR ERPM value. Below that value the advance will be less proportional to the current ERPM.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_SL_PHASE_ADVANCE_AT_BR</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -769,9 +769,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.05</stepDouble>
             <valDouble>0.8</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </sl_phase_advance_at_br>
         <sl_cycle_int_rpm_br>
             <longName>BR ERPM</longName>
@@ -2001,9 +2001,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>0.1</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </foc_current_filter_const>
         <foc_cc_decoupling>
             <longName>Current Controller Decoupling</longName>
@@ -2203,6 +2203,250 @@ p, li { white-space: pre-wrap; }
             <enumNames>16</enumNames>
             <enumNames>32</enumNames>
         </foc_hfi_samples>
+        <foc_offsets_measured>
+            <longName>Offsets Measured</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Flag that tells if voltage and current offsets have been measured. If it is set to false the offsets will be measured at the next boot, and then this flag is set to true again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_MEASURED</cDefine>
+            <valInt>0</valInt>
+        </foc_offsets_measured>
+        <foc_offsets_current__0>
+            <longName>Current Offset 0</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Current channel 0 offset in ADC counts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_CURRENT_0</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>8192</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>2048</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </foc_offsets_current__0>
+        <foc_offsets_current__1>
+            <longName>Current Offset 1</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Current channel 1 offset in ADC counts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_CURRENT_1</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>8192</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>2048</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </foc_offsets_current__1>
+        <foc_offsets_current__2>
+            <longName>Current Offset 2</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Current channel 2 offset in ADC counts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_CURRENT_2</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>8192</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>2048</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </foc_offsets_current__2>
+        <foc_offsets_voltage__0>
+            <longName>Voltage Offset 0</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Voltage channel 0 offset. This is at the ADC input, so it is not scaled with the voltage dividers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_VOLTAGE_0</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>2</maxDouble>
+            <minDouble>-2</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.0005</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </foc_offsets_voltage__0>
+        <foc_offsets_voltage__1>
+            <longName>Voltage Offset 1</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Voltage channel 1 offset. This is at the ADC input, so it is not scaled with the voltage dividers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_VOLTAGE_1</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>2</maxDouble>
+            <minDouble>-2</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.0005</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </foc_offsets_voltage__1>
+        <foc_offsets_voltage__2>
+            <longName>Voltage Offset 2</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Voltage channel 2 offset. This is at the ADC input, so it is not scaled with the voltage dividers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_VOLTAGE_2</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>2</maxDouble>
+            <minDouble>-2</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.0005</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </foc_offsets_voltage__2>
+        <foc_offsets_voltage_undriven__0>
+            <longName>Voltage Offset Undriven 0</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Voltage channel 0 offset when the motor is undriven. This is at the ADC input, so it is not scaled with the voltage dividers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_VOLTAGE_UNDRIVEN_0</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>2</maxDouble>
+            <minDouble>-2</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.0005</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </foc_offsets_voltage_undriven__0>
+        <foc_offsets_voltage_undriven__1>
+            <longName>Voltage Offset Undriven 1</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Voltage channel 1 offset when the motor is undriven. This is at the ADC input, so it is not scaled with the voltage dividers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_VOLTAGE_UNDRIVEN_1</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>2</maxDouble>
+            <minDouble>-2</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.0005</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </foc_offsets_voltage_undriven__1>
+        <foc_offsets_voltage_undriven__2>
+            <longName>Voltage Offset Undriven 2</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Voltage channel 2 offset when the motor is undriven. This is at the ADC input, so it is not scaled with the voltage dividers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_VOLTAGE_UNDRIVEN_2</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>2</maxDouble>
+            <minDouble>-2</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.0005</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </foc_offsets_voltage_undriven__2>
+        <foc_phase_filter_enable>
+            <longName>Enable Phase Filters</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This enables the use of phase voltage filters on hardware that supports it. Instead of calculating the phase voltage from the input voltage and modulation, it is measured directly by low-pass filtering the power stage output. The advantage of doing so is that it eliminates dead-time distortion, which helps track the motor at very low speeds. It should also be very useful on hardware with an IGBT output stage, as it compensated for the effect of IGBT voltage drop too.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_PHASE_FILTER_ENABLE</cDefine>
+            <valInt>1</valInt>
+        </foc_phase_filter_enable>
+        <foc_phase_filter_max_erpm>
+            <longName>Maximum ERPM for phase filters</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use the filtered phase voltage up until this ERPM, then use the value derived from the input voltage and the modilation. The delay and attenuation from the phase filters increases with the motor speed, while the dead-time distortion becomes less significant. The delay and attenuation is partly compensated for, but at some point it is still better to derive the phase voltages from the input voltage and modulation. This parameter sets that point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_PHASE_FILTER_MAX_ERPM</cDefine>
+            <editorDecimalsDouble>0</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>100000</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>10</stepDouble>
+            <valDouble>10000</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix> ERPM</suffix>
+            <vTx>9</vTx>
+        </foc_phase_filter_max_erpm>
         <gpd_buffer_notify_left>
             <longName>Buffer Notification Length</longName>
             <type>2</type>
@@ -2261,9 +2505,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>0.1</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </gpd_current_filter_const>
         <gpd_current_kp>
             <longName>Current KP</longName>
@@ -2383,7 +2627,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Filter on derivative term for speed controller. &lt;/span&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The range is 0 to 1, where 0 is the maximum amount of filtering (infinite) and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Filter on derivative term for speed controller. The range is 0 to 1, where 0 is the maximum amount of filtering (infinite) and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_S_PID_KD_FILTER</cDefine>
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -2393,9 +2637,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
             <valDouble>0.2</valDouble>
-            <vTxDoubleScale>1e+06</vTxDoubleScale>
+            <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </s_pid_kd_filter>
         <s_pid_min_erpm>
             <longName>Minimum ERPM</longName>
@@ -2448,7 +2692,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-1</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>-1</valDouble>
+            <valDouble>25000</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -3543,6 +3787,18 @@ p, li { white-space: pre-wrap; }
         <ser>foc_hfi_start_samples</ser>
         <ser>foc_hfi_obs_ovr_sec</ser>
         <ser>foc_hfi_samples</ser>
+        <ser>foc_offsets_measured</ser>
+        <ser>foc_offsets_current__0</ser>
+        <ser>foc_offsets_current__1</ser>
+        <ser>foc_offsets_current__2</ser>
+        <ser>foc_offsets_voltage__0</ser>
+        <ser>foc_offsets_voltage__1</ser>
+        <ser>foc_offsets_voltage__2</ser>
+        <ser>foc_offsets_voltage_undriven__0</ser>
+        <ser>foc_offsets_voltage_undriven__1</ser>
+        <ser>foc_offsets_voltage_undriven__2</ser>
+        <ser>foc_phase_filter_enable</ser>
+        <ser>foc_phase_filter_max_erpm</ser>
         <ser>gpd_buffer_notify_left</ser>
         <ser>gpd_buffer_interpol</ser>
         <ser>gpd_current_filter_const</ser>
@@ -3815,6 +4071,31 @@ p, li { white-space: pre-wrap; }
                     <param>foc_sl_erpm_hfi</param>
                     <param>foc_hfi_start_samples</param>
                     <param>foc_hfi_obs_ovr_sec</param>
+                </subgroupParams>
+            </subgroup>
+            <subgroup>
+                <subgroupName>Filters</subgroupName>
+                <subgroupParams>
+                    <param>foc_phase_filter_enable</param>
+                    <param>foc_phase_filter_max_erpm</param>
+                </subgroupParams>
+            </subgroup>
+            <subgroup>
+                <subgroupName>Offsets</subgroupName>
+                <subgroupParams>
+                    <param>foc_offsets_measured</param>
+                    <param>::sep::Current</param>
+                    <param>foc_offsets_current__0</param>
+                    <param>foc_offsets_current__1</param>
+                    <param>foc_offsets_current__2</param>
+                    <param>::sep::Voltage</param>
+                    <param>foc_offsets_voltage__0</param>
+                    <param>foc_offsets_voltage__1</param>
+                    <param>foc_offsets_voltage__2</param>
+                    <param>::sep::Voltage Undriven</param>
+                    <param>foc_offsets_voltage_undriven__0</param>
+                    <param>foc_offsets_voltage_undriven__1</param>
+                    <param>foc_offsets_voltage_undriven__2</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

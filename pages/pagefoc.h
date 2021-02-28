@@ -45,6 +45,7 @@ private slots:
     void on_openloopFastStartButton_clicked();
     void on_openloopPropellerButton_clicked();
     void on_openloopHeavyInertialButton_clicked();
+    void on_offsetMeasureButton_clicked();
 
 private:
     Ui::PageFoc *ui;

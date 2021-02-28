@@ -484,6 +484,7 @@ public:
         isTestFw = false;
         hwType = HW_TYPE_VESC;
         customConfigNum = 0;
+        hasPhaseFilters = false;
     }
 
     Q_INVOKABLE QString hwTypeStr() {
@@ -513,6 +514,7 @@ public:
     int isTestFw;
     HW_TYPE hwType;
     int customConfigNum;
+    bool hasPhaseFilters;
 };
 
 Q_DECLARE_METATYPE(FW_RX_PARAMS)
@@ -570,6 +572,46 @@ public:
 };
 
 Q_DECLARE_METATYPE(BMS_VALUES)
+
+struct PSW_STATUS {
+    Q_GADGET
+
+    Q_PROPERTY(int id MEMBER id)
+    Q_PROPERTY(int psws_num MEMBER psws_num)
+    Q_PROPERTY(double age_seconds MEMBER age_seconds)
+    Q_PROPERTY(double v_in MEMBER v_in)
+    Q_PROPERTY(double v_out MEMBER v_out)
+    Q_PROPERTY(double temp MEMBER temp)
+    Q_PROPERTY(bool is_out_on MEMBER is_out_on)
+    Q_PROPERTY(bool is_pch_on MEMBER is_pch_on)
+    Q_PROPERTY(bool is_dsc_on MEMBER is_dsc_on)
+
+public:
+    PSW_STATUS() {
+        id = -1;
+        psws_num = 0;
+        age_seconds = -1.0;
+        v_in = 0.0;
+        v_out = 0.0;
+        temp = 0.0;
+        is_out_on = false;
+        is_pch_on = false;
+        is_dsc_on = false;
+    }
+
+    int id;
+    int psws_num;
+    double age_seconds;
+    double v_in;
+    double v_out;
+    double temp;
+    bool is_out_on;
+    bool is_pch_on;
+    bool is_dsc_on;
+
+};
+
+Q_DECLARE_METATYPE(PSW_STATUS)
 
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,
@@ -701,6 +743,10 @@ typedef enum {
     COMM_ERASE_BOOTLOADER_ALL_CAN_HW,
 
     COMM_SET_ODOMETER,
+
+    // Power switch commands
+    COMM_PSW_GET_STATUS,
+    COMM_PSW_SWITCH,
 } COMM_PACKET_ID;
 
 // CAN commands

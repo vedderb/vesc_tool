@@ -102,6 +102,10 @@ void QmlUi::startCustomGui(VescInterface *vesc)
     mEngine->rootContext()->setContextProperty("QmlUi", this);
     mEngine->rootContext()->setContextProperty("VescIf", vesc);
     mEngine->load(QUrl(QLatin1String("qrc:/res/qml/MainLoader.qml")));
+
+    if (!mImportPathList.isEmpty()) {
+        mEngine->setImportPathList(mImportPathList);
+    }
 }
 
 void QmlUi::stopCustomGui()
@@ -136,6 +140,15 @@ void QmlUi::clearQmlCache()
 {
     if (mEngine) {
         mEngine->clearComponentCache();
+    }
+}
+
+void QmlUi::setImportPathList(QStringList paths)
+{
+    mImportPathList = paths;
+
+    if (mEngine) {
+        mEngine->setImportPathList(paths);
     }
 }
 

@@ -109,6 +109,7 @@ signals:
     void bmsValuesRx(BMS_VALUES val);
     void customConfigChunkRx(int confInd, int lenConf, int ofsConf, QByteArray data);
     void customConfigRx(int confInd, QByteArray data);
+    void pswStatusRx(PSW_STATUS stat);
 
 public slots:
     void processPacket(QByteArray data);
@@ -196,6 +197,9 @@ public slots:
     void customConfigGetChunk(int confInd, int len, int offset);
     void customConfigGet(int confInd, bool isDefault);
     void customConfigSet(int confInd, QByteArray confData);
+
+    void pswGetStatus(bool by_id, int id_ind);
+    void pswSwitch(int id, bool is_on, bool plot);
 
 private slots:
     void timerSlot();

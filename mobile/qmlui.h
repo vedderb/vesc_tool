@@ -42,6 +42,7 @@ public:
     void emitReloadQml(QString str);
     void emitToggleFullscreen();
     Q_INVOKABLE void clearQmlCache();
+    void setImportPathList(QStringList paths);
 
     static VescInterface *vesc();
 
@@ -54,6 +55,7 @@ public slots:
 
 private:
     QQmlApplicationEngine *mEngine;
+    QStringList mImportPathList;
 
     static VescInterface *mVesc;
     static QObject *vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);

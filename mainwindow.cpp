@@ -528,7 +528,8 @@ void MainWindow::timerSlotDebugMsg()
 
         if (msg.file.contains("qrc:/res/qml/myCode") ||
                 msg.file.contains("qrc:/res/qml/DynamicLoader") ||
-                msg.file.contains("qrc:/res/qml/MainLoader")) {
+                msg.file.contains("qrc:/res/qml/MainLoader") ||
+                msg.file.toLower().endsWith(".qml")) {
             mPageScripting->debugMsgRx(msg.type, msg.msg);
         } else {
             QString strTmp;

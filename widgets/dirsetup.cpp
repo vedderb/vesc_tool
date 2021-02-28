@@ -51,7 +51,7 @@ void DirSetup::setVesc(VescInterface *vesc)
     mVesc = vesc;
 }
 
-void DirSetup::scanVescs()
+void DirSetup::scanVescs(bool scanCan)
 {
     if (mVesc) {
         auto *wOld = ui->vescArea->widget();
@@ -135,9 +135,11 @@ void DirSetup::scanVescs()
         l->setSpacing(4);
         l->addWidget(addViewer(QString("Local VESC"), -1));
 
-        auto canDevs = Utility::scanCanVescOnly(mVesc);
-        for (auto d: canDevs) {
-            l->addWidget(addViewer(QString("CAN VESC\nID: %1").arg(d), d));
+        if (scanCan) {
+            auto canDevs = Utility::scanCanVescOnly(mVesc);
+            for (auto d: canDevs) {
+                l->addWidget(addViewer(QString("CAN VESC\nID: %1").arg(d), d));
+            }
         }
 
         l->addStretch();

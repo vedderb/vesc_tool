@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -162,6 +162,11 @@ void PageFirmware::fwRxChanged(bool rx, bool limited)
     }
 
     fwStr += "\nHW Type: " + params.hwTypeStr();
+
+    if (params.hwType == HW_TYPE_VESC) {
+        fwStr += ", Phase Filters: ";
+        fwStr += params.hasPhaseFilters ? "Yes" : "No";
+    }
 
     ui->currentLabel->setText(fwStr);
     updateHwList(params);

@@ -259,7 +259,10 @@ void DetectAllFocDialog::runDetect(bool can)
 
     mVesc->commands()->setMcconf(false);
     Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
-    auto canDevs = Utility::scanCanVescOnly(mVesc);
+    QVector<int> canDevs;
+    if (can) {
+        canDevs = Utility::scanCanVescOnly(mVesc);
+    }
 
     if (mVesc->commands()->getLimitedCompatibilityCommands().contains(COMM_SET_BATTERY_CUT)) {
         mVesc->commands()->setBatteryCut(
@@ -304,6 +307,6 @@ void DetectAllFocDialog::runDetect(bool can)
 
     if (res.startsWith("Success!")) {
         ui->simpleSetupBox->setCurrentIndex(3);
-        ui->dirSetup->scanVescs();
+        ui->dirSetup->scanVescs(can);
     }
 }

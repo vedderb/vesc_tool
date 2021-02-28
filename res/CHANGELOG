@@ -13,6 +13,7 @@
  - Auto-indentation of line or block.
  - Search, highlight and replace text.
 * Only capture esc key for stopping the motor when connected.
+* Fixed FOC detect all no can when connected over CAN.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

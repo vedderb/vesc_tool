@@ -110,6 +110,17 @@ PageScripting::PageScripting(QWidget *parent) :
         item->setData(Qt::UserRole, it.filePath());
         ui->exampleList->addItem(item);
     }
+
+    // Add close button that clears the main editor
+    QPushButton *closeButton = new QPushButton();
+    closeButton->setIcon(QIcon("://res/icons/Delete-96.png"));
+    closeButton->setFlat(true);
+    ui->fileTabs->tabBar()->setTabButton(0, QTabBar::RightSide, closeButton);
+
+    auto editor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
+    connect(closeButton, &QPushButton::clicked, [editor]() {
+        editor->editor()->clear();
+    });
 }
 
 PageScripting::~PageScripting()

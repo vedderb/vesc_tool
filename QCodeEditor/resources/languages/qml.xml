@@ -98,5 +98,8 @@
         <name>TabButton</name>
         <name>SwipeView</name>
         <name>Page</name>
+        <name>CheckBox</name>
+        <name>DoubleSpinBox</name>
+        <name>Slider</name>
     </section>
 </root>

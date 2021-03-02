@@ -7,5 +7,6 @@
         <file>res/qml/Examples/RtDataSetup.qml</file>
         <file>res/qml/Examples/CanDebugger.qml</file>
         <file>res/qml/Examples/PollValues.qml</file>
+        <file>res/qml/Examples/Controls.qml</file>
     </qresource>
 </RCC>

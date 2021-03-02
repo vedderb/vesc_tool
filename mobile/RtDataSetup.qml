@@ -96,7 +96,7 @@ Item {
             Layout.preferredHeight: gaugeSize
             minimumValue: 0
             maximumValue: 60
-            minAngle: -250
+            minAngle: -180
             maxAngle: 70
             labelStep: maximumValue > 60 ? 20 : 10
             value: 20
@@ -249,7 +249,7 @@ Item {
 
         onValuesSetupReceived: {
             currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
-            currentGauge.minimumValue = -currentGauge.maximumValue
+            currentGauge.minimumValue = -Math.ceil(-mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
 
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
@@ -267,7 +267,7 @@ Item {
 
             if (Math.abs(speedGauge.maximumValue - speedMaxRound) > 6.0) {
                 speedGauge.maximumValue = speedMaxRound
-                speedGauge.minimumValue = -speedMaxRound
+                speedGauge.minimumValue = 0.0
             }
 
             speedGauge.value = values.speed * 3.6 * impFact
@@ -278,9 +278,14 @@ Item {
                                     mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
+            var powerMin = Math.min(values.v_in * Math.min(-mMcConf.getParamDouble("l_in_current_min"),
+                                                           -mMcConf.getParamDouble("l_current_min")),
+                                    -mMcConf.getParamDouble("l_watt_min")) * values.num_vescs
+            var powerMinRound = -(Math.ceil(powerMin / 1000.0) * 1000.0)
+            
             if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
                 powerGauge.maximumValue = powerMaxRound
-                powerGauge.minimumValue = -powerMaxRound
+                powerGauge.minimumValue = powerMinRound
             }
 
             powerGauge.value = (values.current_in * values.v_in)

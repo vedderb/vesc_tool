@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2018 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -23,7 +23,6 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 
-import "qrc:/mobile"
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
@@ -244,6 +243,16 @@ Item {
                     }
                 }
             }
+        }
+    }
+    
+    Timer {
+        running: true
+        repeat: true
+        interval: 50
+                
+        onTriggered: {
+            mCommands.getValuesSetup()
         }
     }
 

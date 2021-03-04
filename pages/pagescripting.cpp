@@ -35,6 +35,10 @@ PageScripting::PageScripting(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageScripting)
 {
+    // Register this to not stop on the import statement when reusing components
+    // from the mobile UI.
+    qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescInterface");
+
     ui->setupUi(this);
     mVesc = nullptr;
     ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);

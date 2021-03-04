@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2018 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -21,17 +21,18 @@ import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
-import Vedder.vesc.vescinterface 1.0
-
 Item {
+    anchors.fill: parent
+    anchors.margins: 5
+    
     function updateVisibleProfiles() {
         for(var i = scrollCol.children.length;i > 0;i--) {
-            scrollCol.children[i - 1].destroy(1) // Only works with delay on android, seems to be a bug
+            scrollCol.children[i - 1].destroy(1)
         }
 
         var prof = VescIf.getProfiles()
         for (i = 0;i < prof.length;i++) {
-            var component = Qt.createComponent("ProfileDisplay.qml");
+            var component = Qt.createComponent("qrc:/mobile/ProfileDisplay.qml");
             var disp = component.createObject(scrollCol, {"index": i})
             disp.setFromMcConfTemp(prof[i])
             disp.editRequested.connect(handleProfileEdit)
@@ -94,6 +95,7 @@ Item {
         x: 10
         y: 10 + parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
+        implicitHeight: 0
 
         Text {
             color: "#ffffff"
@@ -171,6 +173,7 @@ Item {
         width: column.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "Remove all profiles"
+        implicitHeight: 0
 
         x: 10
         y: column.y + column.height / 2 - height / 2

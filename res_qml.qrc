@@ -10,5 +10,6 @@
         <file>res/qml/Examples/Controls.qml</file>
         <file>res/qml/Examples/BMS.qml</file>
         <file>res/qml/Examples/Reconnect.qml</file>
+        <file>res/qml/Examples/Profiles.qml</file>
     </qresource>
 </RCC>

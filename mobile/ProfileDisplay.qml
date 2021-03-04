@@ -179,6 +179,7 @@ Item {
                         x: 10
                         y: 10 + parent.height / 2 - height / 2
                         parent: ApplicationWindow.overlay
+                        implicitHeight: 0
 
                         Text {
                             color: "#ffffff"

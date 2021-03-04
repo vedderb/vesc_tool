@@ -15,6 +15,7 @@
 * Only capture esc key for stopping the motor when connected.
 * Fixed FOC detect all no can when connected over CAN.
 * Increased motor and mosfet temperature limit editor range.
+* Mobile RT display update. See: https://github.com/vedderb/vesc_tool/pull/115
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

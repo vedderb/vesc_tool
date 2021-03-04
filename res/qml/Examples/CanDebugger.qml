@@ -1,3 +1,9 @@
+// This is an example of using the VESC as a CAN-debugger. It demonstrates:
+// * Changing the app configuration to forward CAN-frames
+// * Receiving and decoding CAN-frames
+// * Encoding and transmitting CAN-frames
+// * Presenting the data in Text-elements
+
 import QtQuick 2.5
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3

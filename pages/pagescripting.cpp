@@ -120,6 +120,7 @@ PageScripting::PageScripting(QWidget *parent) :
     auto editor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
     connect(closeButton, &QPushButton::clicked, [editor]() {
         editor->editor()->clear();
+        editor->setFileNow("");
     });
 }
 

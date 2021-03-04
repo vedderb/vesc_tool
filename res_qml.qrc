@@ -8,5 +8,7 @@
         <file>res/qml/Examples/CanDebugger.qml</file>
         <file>res/qml/Examples/PollValues.qml</file>
         <file>res/qml/Examples/Controls.qml</file>
+        <file>res/qml/Examples/BMS.qml</file>
+        <file>res/qml/Examples/Reconnect.qml</file>
     </qresource>
 </RCC>

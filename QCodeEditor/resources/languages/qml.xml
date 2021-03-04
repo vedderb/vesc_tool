@@ -101,5 +101,9 @@
         <name>CheckBox</name>
         <name>DoubleSpinBox</name>
         <name>Slider</name>
+        <name>PageIndicator</name>
+        <name>Canvas</name>
+        <name>Menu</name>
+        <name>MenuItem</name>
     </section>
 </root>

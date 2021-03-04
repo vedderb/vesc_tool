@@ -24,6 +24,7 @@ Item {
             // corresponding connection below.
 //            mCommands.getValues()
 //            mCommands.getValuesSetup()
+//            mCommands.bmsGetValues()
         }
     }
     
@@ -82,6 +83,26 @@ Item {
 //            values.battery_wh
 //            values.fault_str
 //            values.odometer
+        }
+        
+        onBmsValuesRx: { // val
+            // Members of values
+//            val.v_tot
+//            val.v_charge
+//            val.i_in
+//            val.i_in_ic
+//            val.ah_cnt
+//            val.wh_cnt
+//            val.v_cells[cell]
+//            val.temps[sensor]
+//            val.is_balancing[cell]
+//            val.temp_ic
+//            val.humidity
+//            val.temp_hum_sensor
+//            val.temp_cells_highest
+//            val.soc
+//            val.soh
+//            val.can_id
         }
     }
 }

@@ -537,6 +537,7 @@ struct BMS_VALUES {
     Q_PROPERTY(double temp_cells_highest MEMBER temp_cells_highest)
     Q_PROPERTY(double soc MEMBER soc)
     Q_PROPERTY(double soh MEMBER soh)
+    Q_PROPERTY(int can_id MEMBER can_id)
 
 public:
     BMS_VALUES() {
@@ -551,6 +552,7 @@ public:
         temp_cells_highest = 0.0;
         soc = 0.0;
         soh = 0.0;
+        can_id = -1;
     }
 
     double v_tot;
@@ -568,6 +570,7 @@ public:
     double temp_cells_highest;
     double soc;
     double soh;
+    int can_id;
 
 };
 

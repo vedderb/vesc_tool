@@ -678,6 +678,10 @@ void Commands::processPacket(QByteArray data)
             val.soh = vb.vbPopFrontDouble16(1e3);
         }
 
+        if (vb.size() >= 1) {
+            val.can_id = vb.vbPopFrontUint8();
+        }
+
         emit bmsValuesRx(val);
     } break;
 

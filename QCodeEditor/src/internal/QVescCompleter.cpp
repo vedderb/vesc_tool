@@ -75,6 +75,8 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("forwardCanFrame(data, id, isExt)");
         addItem("pswGetStatus(by_id, id_ind)");
         addItem("pswSwitch(id, is_on, plot)");
+        addItem("getSendCan()");
+        addItem("getCanSendId()");
         level--;
     };
 
@@ -102,6 +104,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("isPortConnected()");
         addItem("getConnectedPortName()");
         addItem("scanCANbus()");
+        addItem("ignoreCanChange(ignore)");
         addItem("mcConfig()");
         addConfigCmds();
         addItem("appConfig()");

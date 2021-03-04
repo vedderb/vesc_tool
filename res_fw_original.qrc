@@ -41,5 +41,6 @@
         <file>res/firmwares/Cheap_FOCer_2/VESC_default.bin</file>
         <file>res/firmwares/Little_FOCer/VESC_default.bin</file>
         <file>res/firmwares/Little_FOCer/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/UXV_SR/VESC_default.bin</file>
     </qresource>
 </RCC>

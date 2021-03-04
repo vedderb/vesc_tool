@@ -469,6 +469,8 @@ void PageSwdProg::bmConnRes(int res)
                  0, ":/res/bootloaders/generic.bin");
         addSwdFw("STORMCORE 100S", ":/res/firmwares/STORMCORE_100S/VESC_default.bin",
                  0, ":/res/bootloaders/generic.bin");
+        addSwdFw("UXV SR", ":/res/firmwares/UXV_SR/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
         break;
 
     case 2:

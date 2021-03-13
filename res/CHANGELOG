@@ -3,10 +3,10 @@
 * Fixed configuration backup and restore over CAN-bus.
 * Added test version information to about dialog.
 * Added scripting page
- - Syntax highlighting (needs some work).
+ - Syntax highlighting.
  - Recent files.
  - Example files.
- - Auto-completion tree (needs some work).
+ - Auto-completion tree.
  - Run in widget, window or full screen.
  - Debug print output.
  - Toggle line comment.
@@ -16,6 +16,8 @@
 * Fixed FOC detect all no can when connected over CAN.
 * Increased motor and mosfet temperature limit editor range.
 * Mobile RT display update. See: https://github.com/vedderb/vesc_tool/pull/115
+* Added FOC wizard, setup data and profiles from mobile UI to desktop UI.
+* Added usage page to FOC wizard.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

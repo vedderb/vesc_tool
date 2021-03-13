@@ -601,7 +601,6 @@ Item {
         y: topItem.y + topItem.height / 2 - height / 2
 
         Text {
-            id: detectLambdaLabel
             color: "white"
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent

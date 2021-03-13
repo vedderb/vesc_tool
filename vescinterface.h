@@ -181,6 +181,8 @@ public:
     Q_INVOKABLE QVector<int> getCanDevsLast() const;
     Q_INVOKABLE void ignoreCanChange(bool ignore);
     Q_INVOKABLE bool isIgnoringCanChanges();
+    Q_INVOKABLE void canTmpOverride(bool fwdCan, int canId);
+    Q_INVOKABLE void canTmpOverrideEnd();
 
     Q_INVOKABLE bool tcpServerStart(int port);
     Q_INVOKABLE void tcpServerStop();
@@ -373,6 +375,10 @@ private:
     bool mAutoconnectOngoing;
     double mAutoconnectProgress;
     bool mIgnoreCanChange;
+
+    bool mCanTmpFwdActive;
+    bool mCanTmpFwdSendCanLast;
+    int mCanTmpFwdIdLast;
 
     QVector<int> mCanDevsLast;
 

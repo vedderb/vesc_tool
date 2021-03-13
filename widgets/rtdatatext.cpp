@@ -103,7 +103,7 @@ void RtDataText::paintEvent(QPaintEvent *event)
     const double vidw = event->rect().width();
 
     // Left info box
-    str.sprintf("Power   : %.1f W\n"
+    str = QString::asprintf("Power   : %.1f W\n"
                 "Duty    : %.2f %%\n"
                 "ERPM    : %.1f\n"
                 "I Batt  : %.2f A\n"
@@ -123,7 +123,7 @@ void RtDataText::paintEvent(QPaintEvent *event)
                      Qt::AlignLeft, str);
 
     // Middle info box
-    str.sprintf("T FET   : %.2f \u00B0C\n"
+    str = QString::asprintf("T FET   : %.2f \u00B0C\n"
                 "T Motor : %.2f \u00B0C\n"
                 "Fault   : %s\n"
                 "Tac     : %i\n"
@@ -143,7 +143,7 @@ void RtDataText::paintEvent(QPaintEvent *event)
                      Qt::AlignLeft, str);
 
     // Right info box
-    str.sprintf("Ah Draw   : %.1f mAh\n"
+    str = QString::asprintf("Ah Draw   : %.1f mAh\n"
                 "Ah Charge : %.1f mAh\n"
                 "Wh Draw   : %.2f Wh\n"
                 "Wh Charge : %.2f Wh\n"

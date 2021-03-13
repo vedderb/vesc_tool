@@ -386,7 +386,7 @@ Item {
         repeat: true
         
         onTriggered: {
-            if (VescIf.isPortConnected() && dialog.visible) {
+            if (VescIf.isPortConnected()) {
                 // Send alive every 200 ms to keep the motor running
                 mCommands.sendAlive()
             }

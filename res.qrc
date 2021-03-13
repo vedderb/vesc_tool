@@ -177,5 +177,7 @@
         <file>res/icons/bms_on.png</file>
         <file>res/images/12s7p_pcb.png</file>
         <file>res/icons/Controller-96_on.png</file>
+        <file>res/images/esk8.jpg</file>
+        <file>res/images/propeller.jpg</file>
     </qresource>
 </RCC>

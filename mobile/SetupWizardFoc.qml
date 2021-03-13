@@ -28,18 +28,22 @@ import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    id: topItem
+
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
+    property var dialogParent: ApplicationWindow.overlay
+
+    signal dialogClosed()
 
     function openDialog() {
-        // Set few battery cells by default to avoid confusion
-        // if the motor does not spin due to battery cut.
-        mMcConf.updateParamInt("si_battery_cells", 3)
         dialog.open()
         loadDefaultDialog.open()
     }
 
     Component.onCompleted: {
+        paramListUsage.addEditorMc("l_duty_start")
+
         paramListBatt.addEditorMc("si_battery_type")
         paramListBatt.addEditorMc("si_battery_cells")
         paramListBatt.addEditorMc("si_battery_ah")
@@ -58,7 +62,7 @@ Item {
         closePolicy: Popup.NoAutoClose
         x: 5
         y: 5
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
         bottomMargin: 0
         rightMargin: 0
         padding: 10
@@ -66,6 +70,154 @@ Item {
         StackLayout {
             id: stackLayout
             anchors.fill: parent
+
+            Item {
+                ColumnLayout {
+                    id: usageColumn
+                    anchors.fill: parent
+
+                    ListModel {
+                        id: usageModel
+
+                        ListElement {
+                            name: "Generic"
+                            usageImg: "qrc:/res/icons/motor.png"
+                            duty_start: 1.0
+                            hfi_start: false
+                        }
+                        ListElement {
+                            name: "E-Skate"
+                            usageImg: "qrc:/res/images/esk8.jpg"
+                            duty_start: 0.85
+                            hfi_start: true
+                        }
+                        ListElement {
+                            name: "EUC"
+                            usageImg: "qrc:/res/icons/EUC-96"
+                            duty_start: 1.0
+                            hfi_start: false
+                        }
+                        ListElement {
+                            name: "Propeller"
+                            usageImg: "qrc:/res/images/propeller.jpg"
+                            duty_start: 1.0
+                            hfi_start: false
+                        }
+                    }
+
+                    ListView {
+                        id: usageList
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredHeight: 500
+                        focus: true
+                        clip: true
+                        spacing: 5
+
+                        Component {
+                            id: usageDelegate
+
+                            Rectangle {
+                                id: imgRect2
+                                property variant modelData: model
+
+                                width: usageList.width
+                                height: 90
+                                color: ListView.isCurrentItem ? "#41418f" : "#30000000"
+                                radius: 5
+                                RowLayout {
+                                    anchors.fill: parent
+                                    spacing: 10
+
+                                    Item {
+                                        Layout.preferredWidth: 80
+                                        Layout.preferredHeight: 80
+                                        Layout.leftMargin: 5
+                                        opacity: imgRect2.ListView.isCurrentItem ? 1.0 : 0.5
+
+                                        Image {
+                                            id: image2
+                                            fillMode: Image.PreserveAspectFit
+                                            source: usageImg
+                                            width: 80
+                                            height: 80
+                                            smooth: true
+                                            mipmap: false
+                                            visible: false
+                                        }
+
+                                        Rectangle {
+                                            id: mask2
+                                            width: 80
+                                            height: 80
+                                            radius: 40
+                                            visible: false
+                                        }
+
+                                        OpacityMask {
+                                            anchors.fill: image2
+                                            source: image2
+                                            maskSource: mask2
+                                        }
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: name
+                                        color: "white"
+                                        wrapMode: Text.WordWrap
+                                    }
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onPressed: {
+                                        usageList.currentIndex = index
+                                        usageList.focus = true
+                                    }
+                                }
+                            }
+                        }
+
+                        model: usageModel
+                        delegate: usageDelegate
+
+                        onCurrentIndexChanged: {
+                            mMcConf.updateParamDouble("l_duty_start", usageList.currentItem.modelData.duty_start, null)
+                        }
+                    }
+
+                    GroupBox {
+                        Layout.fillWidth: true
+//                        Layout.fillHeight: true
+                        contentWidth: parent.width
+
+                        label: CheckBox {
+                            id: overrideUsageBox
+                            checked: false
+                            text: qsTr("Override (Advanced)")
+
+                            onToggled: {
+                                if (!checked) {
+                                    currentInMinBox.realValue = 0
+                                    currentInMaxBox.realValue = 0
+                                }
+                            }
+                        }
+
+                        ScrollView {
+                            anchors.fill: parent
+                            clip: true
+
+                            ParamList {
+                                id: paramListUsage
+                                enabled: overrideUsageBox.checked
+                                anchors.fill: parent
+                            }
+                        }
+                    }
+                }
+            }
 
             Item {
                 ColumnLayout {
@@ -81,6 +233,7 @@ Item {
                             maxLosses: 10
                             openloopErpm: 1400
                             sensorlessErpm: 4000
+                            hfi_start: false
                             poles: 14
                         }
                         ListElement {
@@ -89,6 +242,7 @@ Item {
                             maxLosses: 25
                             openloopErpm: 1400
                             sensorlessErpm: 4000
+                            hfi_start: false
                             poles: 14
                         }
                         ListElement {
@@ -97,6 +251,7 @@ Item {
                             maxLosses: 60
                             openloopErpm: 700
                             sensorlessErpm: 4000
+                            hfi_start: true
                             poles: 14
                         }
                         ListElement {
@@ -105,6 +260,7 @@ Item {
                             maxLosses: 200
                             openloopErpm: 700
                             sensorlessErpm: 4000
+                            hfi_start: false
                             poles: 14
                         }
                         ListElement {
@@ -113,6 +269,7 @@ Item {
                             maxLosses: 25
                             openloopErpm: 1400
                             sensorlessErpm: 4000
+                            hfi_start: false
                             poles: 2
                         }
                         ListElement {
@@ -121,6 +278,7 @@ Item {
                             maxLosses: 70
                             openloopErpm: 1400
                             sensorlessErpm: 4000
+                            hfi_start: false
                             poles: 4
                         }
                         ListElement {
@@ -129,6 +287,7 @@ Item {
                             maxLosses: 200
                             openloopErpm: 1000
                             sensorlessErpm: 4000
+                            hfi_start: false
                             poles: 4
                         }
                         ListElement {
@@ -137,6 +296,7 @@ Item {
                             maxLosses: 75
                             openloopErpm: 300
                             sensorlessErpm: 2000
+                            hfi_start: false
                             poles: 46
                         }
                         ListElement {
@@ -145,6 +305,7 @@ Item {
                             maxLosses: 55
                             openloopErpm: 1400
                             sensorlessErpm: 4000
+                            hfi_start: false
                             poles: 6
                         }
                     }
@@ -185,6 +346,7 @@ Item {
                                             width: 80
                                             height: 80
                                             smooth: true
+                                            mipmap: false
                                             visible: false
                                         }
 
@@ -469,6 +631,7 @@ Item {
                 DirectionSetup {
                     id: dirSetup
                     anchors.fill: parent
+                    dialogParent: topItem.dialogParent
                 }
             }
         }
@@ -490,24 +653,16 @@ Item {
                     color: "#4f4f4f"
                 }
 
-                property int buttons: 4
+                property int buttons: 5
                 property int buttonWidth: 120
 
-                TabButton {
-                    text: qsTr("Motor")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Battery")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Setup")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Direction")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                Repeater {
+                    model: ["Usage", "Motor", "Battery", "Setup", "Direction"]
+
+                    TabButton {
+                        text: modelData
+                        width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                    }
                 }
             }
         }
@@ -524,6 +679,7 @@ Item {
                 onClicked: {
                     if (stackLayout.currentIndex == 0) {
                         dialog.close()
+                        dialogClosed()
                     } else {
                         stackLayout.currentIndex--
                     }
@@ -541,14 +697,16 @@ Item {
 
                 onClicked: {
                     if (stackLayout.currentIndex == 0) {
-                        startWarningDialog.open()
+                        stackLayout.currentIndex++
                     } else if (stackLayout.currentIndex == 1) {
+                        startWarningDialog.open()
+                    } else if (stackLayout.currentIndex == 2) {
                         if (overrideBattBox.checked) {
                             stackLayout.currentIndex++
                         } else {
                             batteryWarningDialog.open()
                         }
-                    } else if (stackLayout.currentIndex == 2) {
+                    } else if (stackLayout.currentIndex == 3) {
                         if (stackLayout.currentIndex == (stackLayout.count - 2)) {
                             if (VescIf.isPortConnected()) {
                                 detectDialog.open()
@@ -558,9 +716,10 @@ Item {
                                                          false, false)
                             }
                         }
-                    } else if (stackLayout.currentIndex == 3) {
+                    } else if (stackLayout.currentIndex == 4) {
                         stackLayout.currentIndex = 0
                         dialog.close()
+                        dialogClosed()
                     }
 
                     updateButtonText()
@@ -574,12 +733,12 @@ Item {
         standardButtons: Dialog.Yes | Dialog.No
         modal: true
         focus: true
-        width: parent.width - 20
+        rightMargin: 10
+        leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Load Default Parameters"
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
-        x: 10
         y: dialog.y + dialog.height / 2 - height / 2
 
         Text {
@@ -604,12 +763,12 @@ Item {
         standardButtons: Dialog.Yes | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        rightMargin: 10
+        leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Motor Selection"
-        x: 10
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Text {
             color: "#ffffff"
@@ -624,6 +783,20 @@ Item {
         onAccepted: {
             stackLayout.currentIndex++
             updateButtonText()
+
+            // Check if a 12s battery seems to be used and set the default number of cells accordingly.
+            // The reason is that this is one of the most common configurations and several people
+            // have damaged their battery by forgetting to set this number properly and overdischarge
+            // their battery.
+            disableDialog()
+            var val = Utility.getMcValuesBlocking(VescIf)
+            enableDialog()
+
+            if (val.v_in > 39.0 && val.v_in < 51.0) {
+                mMcConf.updateParamInt("si_battery_cells", 12)
+            } else {
+                mMcConf.updateParamInt("si_battery_cells", 3)
+            }
         }
     }
 
@@ -633,12 +806,12 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        rightMargin: 10
+        leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Battery Settings"
-        x: 10
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Text {
             color: "#ffffff"
@@ -662,38 +835,55 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        rightMargin: 10
+        leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Detect FOC Parameters"
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
+        property var canDevs: []
 
-        x: 10
         y: dialog.y + dialog.height / 2 - height / 2
 
-        Text {
-            color: "#ffffff"
-            verticalAlignment: Text.AlignVCenter
+        ColumnLayout {
             anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text: "This is going to spin up all motors. Make " +
-                  "sure that nothing is in the way."
+
+            Text {
+                Layout.fillWidth: true
+                color: "#ffffff"
+                verticalAlignment: Text.AlignVCenter
+                wrapMode: Text.WordWrap
+                text: "This is going to spin up all motors. Make " +
+                      "sure that nothing is in the way."
+            }
+
+            CheckBox {
+                id: detectCanBox
+                checked: true
+                text: "Detect CAN"
+            }
         }
 
         onAccepted: {
             disableDialog()
 
             mMcConf.updateParamDouble("si_gear_ratio", directDriveBox.checked ?
-                                          1 : (wheelPulleyBox.value / motorPulleyBox.value), 0)
+                                          1 : (wheelPulleyBox.value / motorPulleyBox.value), null)
 
             mCommands.setMcconf(false)
             Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)
-            var canDevs = Utility.scanCanVescOnly(VescIf)
+
+            if (detectCanBox.checked) {
+                canDevs = Utility.scanCanVescOnly(VescIf)
+            } else {
+                canDevs: []
+            }
+
             if (!Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0)) {
                 enableDialog()
                 return
             }
 
-            var res  = Utility.detectAllFoc(VescIf, true,
+            var res  = Utility.detectAllFoc(VescIf, detectCanBox.checked,
                                             maxPowerLossBox.realValue,
                                             currentInMinBox.realValue,
                                             currentInMaxBox.realValue,
@@ -703,7 +893,29 @@ Item {
             var resDetect = false
             if (res.startsWith("Success!")) {
                 resDetect = true
-                Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs);
+
+                var updateAllParams = ["l_duty_start", "si_battery_type", "si_battery_cells"]
+
+                // Temperature compensation means that the motor can be tracked at lower
+                // speed across a broader temperature range. Therefore openloop_erpm
+                // can be decreased.
+                if (mMcConf.getParamBool("foc_temp_comp")) {
+                    var openloopErpm = mMcConf.getParamDouble("foc_openloop_rpm")
+                    mMcConf.updateParamDouble("foc_openloop_rpm", openloopErpm / 2.0, null)
+                    updateAllParams.push("foc_openloop_rpm")
+                }
+
+                // Set sensor mode to HFI start if the motor is sensorless, the firmware supports it
+                // and the motor and application suggest it.
+                if (mMcConf.getParamEnumNames("foc_sensor_mode").length >= 5 &&
+                        mMcConf.getParamEnum("foc_sensor_mode") === 0 &&
+                        usageList.currentItem.modelData.hfi_start &&
+                        motorList.currentItem.modelData.hfi_start) {
+                    mMcConf.updateParamEnum("foc_sensor_mode", 4, null)
+                    updateAllParams.push("foc_sensor_mode")
+                }
+
+                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, updateAllParams)
             }
 
             enableDialog()
@@ -727,7 +939,7 @@ Item {
         width: parent.width - 20
         height: parent.height - 40
         closePolicy: Popup.CloseOnEscape
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
@@ -761,7 +973,7 @@ Item {
         running: false
 
         onTriggered: {
-            dirSetup.scanCan()
+            dirSetup.setCanDevs(detectDialog.canDevs)
         }
     }
 
@@ -805,7 +1017,7 @@ Item {
         width: parent.width - 20
         x: 10
         y: parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         ProgressBar {
             anchors.fill: parent

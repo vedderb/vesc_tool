@@ -11,5 +11,7 @@
         <file>res/qml/Examples/BMS.qml</file>
         <file>res/qml/Examples/Reconnect.qml</file>
         <file>res/qml/Examples/Profiles.qml</file>
+        <file>res/qml/SetupMotorWindow.qml</file>
+        <file>res/qml/WelcomeQmlPanel.qml</file>
     </qresource>
 </RCC>

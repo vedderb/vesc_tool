@@ -27,6 +27,7 @@ import Vedder.vesc.configparams 1.0
 Item {
     id: editor
 
+    property var dialogParent: ApplicationWindow.overlay
     property alias profileName: nameInput.text
     property double current: currentBox.realValue / 100
     property double currentBrake: currentBrakeBox.realValue / 100
@@ -142,7 +143,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: 10
         y: 50
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         ColumnLayout {
             id: scrollColumn

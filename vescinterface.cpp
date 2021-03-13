@@ -80,7 +80,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastConnType = static_cast<conn_t>(mSettings.value("connection_type", CONN_NONE).toInt());
     mLastTcpServer = mSettings.value("tcp_server", "127.0.0.1").toString();
     mLastTcpPort = mSettings.value("tcp_port", 65102).toInt();
-    mLastUdpServer = mSettings.value("udp_server", "127.0.0.1").toString();
+    mLastUdpServer = QHostAddress(mSettings.value("udp_server", "127.0.0.1").toString());
     mLastUdpPort = mSettings.value("udp_port", 65102).toInt();
 
     mSendCanBefore = false;
@@ -89,6 +89,10 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mAutoconnectOngoing = false;
     mAutoconnectProgress = 0.0;
     mIgnoreCanChange = false;
+
+    mCanTmpFwdActive = false;
+    mCanTmpFwdSendCanLast = false;
+    mCanTmpFwdIdLast = -1;
 
 #ifdef Q_OS_ANDROID
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
@@ -487,9 +491,7 @@ QStringList VescInterface::getSupportedFirmwares()
     QStringList fws;
 
     for (int i = 0;i < fwPairs.size();i++) {
-        QString tmp;
-        tmp.sprintf("%d.%d", fwPairs.at(i).first, fwPairs.at(i).second);
-        fws.append(tmp);
+        fws.append(QString("%1.%2").arg(fwPairs.at(i).first).arg(fwPairs.at(i).second));
     }
     return fws;
 }
@@ -2440,6 +2442,51 @@ bool VescInterface::isIgnoringCanChanges()
     return mIgnoreCanChange;
 }
 
+
+/**
+ * @brief VescInterface::canTmpOverride
+ * Temporarily override CAN-forwading and ignore CAN-changes while doing so. Useful
+ * to temporarily send one or more CAN-packets from commands to devices on the CAN-bus.
+ *
+ * This command should only be used briefly, after which canTmpOverrideEnd() should
+ * be used to restore the old CAN-forwarding state.
+ *
+ * This command can be used multiple times without running canTmpOverrideEnd()
+ * in-between, as the old CAN-state is only saved if overriding was not currently
+ * active.
+ *
+ * @param fwdCan
+ * Enable CAN-forwarding. Can also be set to false to send to the local divice
+ * if CAN-forwarding is already active.
+ *
+ * @param canId
+ * CAN-id to forward to
+ */
+void VescInterface::canTmpOverride(bool fwdCan, int canId)
+{
+    if (!mCanTmpFwdActive) {
+        mCanTmpFwdActive = true;
+        mCanTmpFwdSendCanLast = mCommands->getSendCan();
+        mCanTmpFwdIdLast = mCommands->getCanSendId();
+    }
+
+    ignoreCanChange(true);
+    mCommands->setSendCan(fwdCan, canId);
+}
+
+/**
+ * @brief VescInterface::canTmpOverrideEnd
+ * Restore the CAN-forwarding state after using canTmpOverride.
+ */
+void VescInterface::canTmpOverrideEnd()
+{
+    if (mCanTmpFwdActive) {
+        mCanTmpFwdActive = false;
+        mCommands->setSendCan(mCanTmpFwdSendCanLast, mCanTmpFwdIdLast);
+        ignoreCanChange(false);
+    }
+}
+
 bool VescInterface::tcpServerStart(int port)
 {
     bool res = mTcpServer->startServer(port);
@@ -3138,6 +3185,21 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_BMS_RESET_COUNTERS));
         compCommands.append(int(COMM_BMS_FORCE_BALANCE));
         compCommands.append(int(COMM_BMS_ZERO_CURRENT_OFFSET));
+        compCommands.append(int(COMM_JUMP_TO_BOOTLOADER_HW));
+        compCommands.append(int(COMM_ERASE_NEW_APP_HW));
+        compCommands.append(int(COMM_WRITE_NEW_APP_DATA_HW));
+        compCommands.append(int(COMM_ERASE_BOOTLOADER_HW));
+        compCommands.append(int(COMM_JUMP_TO_BOOTLOADER_ALL_CAN_HW));
+        compCommands.append(int(COMM_ERASE_NEW_APP_ALL_CAN_HW));
+        compCommands.append(int(COMM_WRITE_NEW_APP_DATA_ALL_CAN_HW));
+        compCommands.append(int(COMM_ERASE_BOOTLOADER_ALL_CAN_HW));
+        compCommands.append(int(COMM_SET_ODOMETER));
+    }
+
+    if (fw_connected >= qMakePair(5, 03)) {
+        compCommands.append(int(COMM_PSW_GET_STATUS));
+        compCommands.append(int(COMM_PSW_SWITCH));
+        compCommands.append(int(COMM_BMS_FWD_CAN_RX));
     }
 
     if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {
@@ -3155,6 +3217,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         mFwSupportsConfiguration = true;
     }
 
+    // Hack for old unity devices with a firmware fork
     if ((fw_connected >= qMakePair(3, 100) && fw_connected <= qMakePair(3, 103)) ||
         (fw_connected >= qMakePair(23, 34) && fw_connected <= qMakePair(23, 46))) {
         compCommands.clear();
@@ -3187,13 +3250,15 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
             updateFwRx(true);
             if (!wasReceived) {
                 if (mFwSupportsConfiguration) {
-                    emit messageDialog(tr("Warning"), tr("The connected VESC has old, but mostly compatible firmware. This is fine if "
-                                                         "your setup works properly.<br><br>"
-                                                         "Check out the firmware changelog (from the help menu) to decide if you want to "
-                                                         "use some of the new features that have been added after your firmware version. "
-                                                         "Keep in mind that you only should upgrade firmware if you have time to test "
-                                                         "it after the upgrade and carefully make sure that everything works as expected."),
-                                       false, false);
+                    if (params.hwType == HW_TYPE_VESC) {
+                        emit messageDialog(tr("Warning"), tr("The connected VESC has old, but mostly compatible firmware. This is fine if "
+                                                             "your setup works properly.<br><br>"
+                                                             "Check out the firmware changelog (from the help menu) to decide if you want to "
+                                                             "use some of the new features that have been added after your firmware version. "
+                                                             "Keep in mind that you only should upgrade firmware if you have time to test "
+                                                             "it after the upgrade and carefully make sure that everything works as expected."),
+                                           false, false);
+                    }
                 } else {
                     emit messageDialog(tr("Warning"), tr("The connected VESC has too old firmware. Since the"
                                                          " connected VESC has firmware with bootloader support, it can be"
@@ -3219,8 +3284,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
             }
         }
 
-        QString fwStr;
-        fwStr.sprintf("VESC Firmware Version %d.%d", params.major, params.minor);
+        QString fwStr = QString("VESC Firmware Version %1.%2").arg(params.major).arg(params.minor);
         if (!params.hw.isEmpty()) {
             fwStr += ", Hardware: " + params.hw;
         }
@@ -3233,7 +3297,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     }
 
     if (params.major >= 0) {
-        mFwTxt.sprintf("Fw: %d.%d", params.major, params.minor);
+        mFwTxt = QString("Fw: %1.%2").arg(params.major).arg(params.minor);
         mFwPair = qMakePair(params.major, params.minor);
         mHwTxt = params.hw;
         if (!params.hw.isEmpty()) {

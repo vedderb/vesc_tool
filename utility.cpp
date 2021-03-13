@@ -562,129 +562,121 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
     return res;
 }
 
-bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
-                               double cutStart, double cutEnd)
+bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds, double cutStart, double cutEnd)
 {
-    bool res = true;
-
-    bool canLastFwd = vesc->commands()->getSendCan();
-    int canLastId = vesc->commands()->getCanSendId();
-
-    vesc->ignoreCanChange(true);
-
-    // Local VESC first
-    ConfigParams *p = vesc->mcConfig();
-    vesc->commands()->setSendCan(false);
-
-    if (!checkFwCompatibility(vesc)) {
-        vesc->emitMessageDialog("FW Versions",
-                                "All VESCs must have the latest firmware to perform this operation.",
-                                false, false);
-        res = false;
-    }
-
-    if (res) {
-        vesc->commands()->getMcconf();
-        res = waitSignal(p, SIGNAL(updated()), 1500);
-        if (!res) {
-            vesc->emitMessageDialog("Read Motor Configuration",
-                                    "Could not read motor configuration.",
-                                    false, false);
-        }
-    }
-
-    if (res) {
-        p->updateParamDouble("l_battery_cut_start", cutStart);
-        p->updateParamDouble("l_battery_cut_end", cutEnd);
-        vesc->commands()->setMcconf(false);
-        res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
-
-        if (!res) {
-            vesc->emitMessageDialog("Write Motor Configuration",
-                                    "Could not write motor configuration.",
-                                    false, false);
-        }
-    }
-
-    // All VESCs on CAN-bus
-    if (res) {
-        for (int id: canIds) {
-            vesc->commands()->setSendCan(true, id);
-
-            if (!checkFwCompatibility(vesc)) {
-                vesc->emitMessageDialog("FW Versions",
-                                        "All VESCs must have the latest firmware to perform this operation.",
-                                        false, false);
-                res = false;
-                break;
-            }
-
-            vesc->commands()->getMcconf();
-            res = waitSignal(p, SIGNAL(updated()), 1500);
-
-            if (!res) {
-                vesc->emitMessageDialog("Read Motor Configuration",
-                                        "Could not read motor configuration.",
-                                        false, false);
-
-                break;
-            }
-
-            p->updateParamDouble("l_battery_cut_start", cutStart);
-            p->updateParamDouble("l_battery_cut_end", cutEnd);
-            vesc->commands()->setMcconf(false);
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
-
-            if (!res) {
-                vesc->emitMessageDialog("Write Motor Configuration",
-                                        "Could not write motor configuration.",
-                                        false, false);
-
-                break;
-            }
-        }
-    }
-
-    vesc->commands()->setSendCan(canLastFwd, canLastId);
-    vesc->commands()->getMcconf();
-    if (!waitSignal(p, SIGNAL(updated()), 1500)) {
-        res = false;
-
-        if (!res) {
-            vesc->emitMessageDialog("Read Motor Configuration",
-                                    "Could not read motor configuration.",
-                                    false, false);
-        }
-    }
-
-    vesc->ignoreCanChange(false);
-
-    return res;
+    vesc->mcConfig()->updateParamDouble("l_battery_cut_start", cutStart);
+    vesc->mcConfig()->updateParamDouble("l_battery_cut_end", cutEnd);
+    return setMcParamsFromCurrentConfigAllCan(vesc, canIds, {"l_battery_cut_start", "l_battery_cut_end"});
 }
 
 bool Utility::setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds)
 {
-    ConfigParams *p = vesc->mcConfig();
+    return setMcParamsFromCurrentConfigAllCan(vesc, canIds, {"si_battery_type", "si_battery_cells"});
+}
 
-    int battType = p->getParamEnum("si_battery_type");
-    int cells = p->getParamInt("si_battery_cells");
-    double start = -1.0;
-    double end = -1.0;
+/**
+ * @brief Utility::setMcParamsFromCurrentConfigAllCan
+ * Take the list of parameters from the current config and apply them on all VESCs on the CAN-bus (including the local one)
+ *
+ * @param vesc
+ * VescInterface pointer
+ *
+ * @param canIds
+ * A list with CAN-IDs to send the parameters to
+ *
+ * @param params
+ * The motor configuration parameters to set
+ *
+ * @return
+ * True for success, false otherwise.
+ */
+bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<int> canIds, QStringList params)
+{
+    bool res = true;
 
-    if (battType == 0) {
-        start = 3.4;
-        end = 3.0;
-    } else if (battType == 1) {
-        start = 2.9;
-        end = 2.6;
-    } else {
-        return false;
+    ConfigParams *config = vesc->mcConfig();
+    QVector<QPair<QString, ConfigParam>> paramVec;
+
+    for (auto s: params) {
+        paramVec.append(qMakePair(s, config->getParamCopy(s)));
     }
 
-    start *= (double)cells;
-    end *= (double)cells;
+    auto updateConf = [&vesc, &config, &paramVec]() {
+        if (!checkFwCompatibility(vesc)) {
+            vesc->emitMessageDialog("FW Versions",
+                                    "All VESCs must have the latest firmware to perform this operation.",
+                                    false, false);
+            return false;
+        }
 
-    return setBatteryCutCan(vesc, canIds, start, end);
+        vesc->commands()->getMcconf();
+
+        if (!waitSignal(config, SIGNAL(updated()), 1500)) {
+            vesc->emitMessageDialog("Read Motor Configuration",
+                                    "Could not read motor configuration.",
+                                    false, false);
+
+            return false;
+        }
+
+        for (auto p: paramVec) {
+            config->updateParamFromOther(p.first, p.second, nullptr);
+        }
+
+        vesc->commands()->setMcconf(false);
+
+        if (!waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000)) {
+            vesc->emitMessageDialog("Write Motor Configuration",
+                                    "Could not write motor configuration.",
+                                    false, false);
+
+            return false;
+        }
+
+        return true;
+    };
+
+    // Start with local VESC
+    vesc->canTmpOverride(false, 0);
+
+    FW_RX_PARAMS fwParams;
+    getFwVersionBlocking(vesc, &fwParams);
+    if (fwParams.hwType == HW_TYPE_VESC) {
+        res = updateConf();
+    }
+
+    res = updateConf();
+
+    // Now every VESC on the CAN-bus
+    if (res) {
+        for (int id: canIds) {
+            vesc->canTmpOverride(true, id);
+
+            getFwVersionBlocking(vesc, &fwParams);
+            if (fwParams.hwType == HW_TYPE_VESC) {
+                res = updateConf();
+                if (!res) {
+                    break;
+                }
+            }
+        }
+    }
+
+    vesc->canTmpOverrideEnd();
+
+    vesc->commands()->getMcconf();
+    if (!waitSignal(config, SIGNAL(updated()), 1500)) {
+        res = false;
+
+        if (!res) {
+            vesc->emitMessageDialog("Read Motor Configuration",
+                                    "Could not read motor configuration.",
+                                    false, false);
+        }
+    }
+
+
+    return res;
 }
 
 bool Utility::setInvertDirection(VescInterface *vesc, int canId, bool inverted)
@@ -763,22 +755,15 @@ bool Utility::getInvertDirection(VescInterface *vesc, int canId)
 
 QString Utility::testDirection(VescInterface *vesc, int canId, double duty, int ms)
 {
-    bool canLastFwd = vesc->commands()->getSendCan();
-    int canLastId = vesc->commands()->getCanSendId();
-
     vesc->commands()->disableAppOutput(ms, true);
 
-    if (canId >= 0) {
-        vesc->ignoreCanChange(true);
-        vesc->commands()->setSendCan(canId >= 0, canId);
-    }
+    vesc->canTmpOverride(canId >= 0, canId);
 
     if (!checkFwCompatibility(vesc)) {
         vesc->emitMessageDialog("FW Versions",
                                 "All VESCs must have the latest firmware to perform this operation.",
                                 false, false);
-        vesc->commands()->setSendCan(canLastFwd, canLastId);
-        vesc->ignoreCanChange(false);
+        vesc->canTmpOverrideEnd();
         return "FW not up to date";
     }
 
@@ -787,7 +772,7 @@ QString Utility::testDirection(VescInterface *vesc, int canId, double duty, int 
     QTimer pollTimer;
     timeoutTimer.setSingleShot(true);
     timeoutTimer.start(ms);
-    pollTimer.start(20);
+    pollTimer.start(40);
 
     QString pollRes = "Ok";
     auto conn = connect(&pollTimer, &QTimer::timeout,
@@ -808,11 +793,8 @@ QString Utility::testDirection(VescInterface *vesc, int canId, double duty, int 
     loop.exec();
 
     disconnect(conn);
-
     vesc->commands()->setCurrent(0.0);
-
-    vesc->commands()->setSendCan(canLastFwd, canLastId);
-    vesc->ignoreCanChange(false);
+    vesc->canTmpOverrideEnd();
 
     return pollRes;
 }
@@ -1273,13 +1255,9 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
 
 bool Utility::getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId)
 {
-    vesc->ignoreCanChange(true);
-    bool canLastFwd = vesc->commands()->getSendCan();
-    int canLastId = vesc->commands()->getCanSendId();
-    vesc->commands()->setSendCan(true, canId);
+    vesc->canTmpOverride(true, canId);
     bool res = getFwVersionBlocking(vesc, params);
-    vesc->commands()->setSendCan(canLastFwd, canLastId);
-    vesc->ignoreCanChange(false);
+    vesc->canTmpOverrideEnd();
     return res;
 }
 
@@ -1288,6 +1266,24 @@ FW_RX_PARAMS Utility::getFwVersionBlockingCan(VescInterface *vesc, int canId)
     FW_RX_PARAMS params;
     getFwVersionBlockingCan(vesc, &params, canId);
     return params;
+}
+
+MC_VALUES Utility::getMcValuesBlocking(VescInterface *vesc)
+{
+    MC_VALUES res;
+
+    auto conn = connect(vesc->commands(), &Commands::valuesReceived,
+                        [&](MC_VALUES val, unsigned int mask) {
+            (void)mask;
+            res = val;
+    });
+
+    vesc->commands()->getValues();
+    waitSignal(vesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 2000);
+
+    disconnect(conn);
+
+    return res;
 }
 
 bool Utility::checkFwCompatibility(VescInterface *vesc)

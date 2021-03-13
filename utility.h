@@ -51,9 +51,9 @@ public:
                                             bool detect_can, double max_power_loss, double min_current_in,
                                             double max_current_in, double openloop_rpm, double sl_erpm);
     Q_INVOKABLE static bool resetInputCan(VescInterface *vesc, QVector<int> canIds);
-    Q_INVOKABLE static bool setBatteryCutCan(VescInterface *vesc, QVector<int> canIds,
-                                             double cutStart, double cutEnd);
+    Q_INVOKABLE static bool setBatteryCutCan(VescInterface *vesc, QVector<int> canIds, double cutStart, double cutEnd);
     Q_INVOKABLE static bool setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds);
+    Q_INVOKABLE static bool setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<int> canIds, QStringList params);
     Q_INVOKABLE static bool setInvertDirection(VescInterface *vesc, int canId, bool inverted);
     Q_INVOKABLE static bool getInvertDirection(VescInterface *vesc, int canId);
     Q_INVOKABLE static QString testDirection(VescInterface *vesc, int canId, double duty, int ms);
@@ -66,6 +66,7 @@ public:
     static bool getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params);
     static bool getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId);
     Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlockingCan(VescInterface *vesc, int canId);
+    Q_INVOKABLE static MC_VALUES getMcValuesBlocking(VescInterface *vesc);
     static bool checkFwCompatibility(VescInterface *vesc);
     Q_INVOKABLE static QVariantList getNetworkAddresses();
     Q_INVOKABLE static void startGnssForegroundService();

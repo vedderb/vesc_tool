@@ -44,8 +44,8 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->statSplitter->setStretchFactor(1, 1);
 
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    ui->plot->axisRect()->setRangeZoom(nullptr);
-    ui->plot->axisRect()->setRangeDrag(nullptr);
+    ui->plot->axisRect()->setRangeZoom(Qt::Orientations());
+    ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
 
     ui->dataTable->setColumnWidth(0, 140);
     ui->dataTable->setColumnWidth(1, 120);
@@ -177,8 +177,8 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
             ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
             ui->plot->axisRect()->setRangeDrag(Qt::Vertical);
         } else {
-            ui->plot->axisRect()->setRangeZoom(nullptr);
-            ui->plot->axisRect()->setRangeDrag(nullptr);
+            ui->plot->axisRect()->setRangeZoom(Qt::Orientations());
+            ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
         }
 
         if (event->buttons() & Qt::LeftButton) {
@@ -204,12 +204,12 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
             ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
             ui->plot->axisRect()->setRangeDrag(Qt::Vertical);
         } else {
-            ui->plot->axisRect()->setRangeZoom(nullptr);
-            ui->plot->axisRect()->setRangeDrag(nullptr);
+            ui->plot->axisRect()->setRangeZoom(Qt::Orientations());
+            ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
 
             double upper = ui->plot->xAxis->range().upper;
             double progress = ui->plot->xAxis->pixelToCoord(event->x()) / upper;
-            double diff = event->delta();
+            double diff = event->angleDelta().y();
             double d1 = diff * progress;
             double d2 = diff * (1.0 - progress);
 
@@ -371,9 +371,7 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
             LocPoint p;
             p.setXY(xyz[0], xyz[1]);
             p.setRadius(5);
-            QString info;
-            info.sprintf("%d", d.valTime);
-            p.setInfo(info);
+            p.setInfo(QString("%1").arg(d.valTime));
 
             ui->map->addInfoPoint(p, false);
             posTimeLast = d.posTime;

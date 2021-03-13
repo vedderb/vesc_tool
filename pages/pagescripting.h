@@ -26,6 +26,7 @@
 #include "vescinterface.h"
 #include "mobile/qmlui.h"
 #include "widgets/qmleditor.h"
+#include "utility.h"
 
 namespace Ui {
 class PageScripting;
@@ -66,6 +67,7 @@ private:
     QmlUi mQmlUi;
     QStringList mRecentFiles;
     QString mDirNow;
+    Utility mUtil;
 
     void updateRecentList();
     void makeEditorConnections(QmlEditor *editor);

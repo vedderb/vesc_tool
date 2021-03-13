@@ -95,7 +95,6 @@ Item {
         x: 10
         y: 10 + parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
-        implicitHeight: 0
 
         Text {
             color: "#ffffff"
@@ -173,7 +172,6 @@ Item {
         width: column.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "Remove all profiles"
-        implicitHeight: 0
 
         x: 10
         y: column.y + column.height / 2 - height / 2

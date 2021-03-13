@@ -89,8 +89,8 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         break;
     }
 
-    str.sprintf("%s (%s:%u %s): %s", typeStr.toLocal8Bit().data(),
-                context.file, context.line, context.function, localMsg.constData());
+    str = QString("%1 (%2:%3 %4): %5").arg(typeStr).arg(QString::fromLocal8Bit(context.file)).
+            arg(context.line).arg(QString::fromLocal8Bit(context.function)).arg(QString::fromLocal8Bit(localMsg));
 
     DebugMsg dmsg;
     dmsg.msg = msg;
@@ -608,9 +608,7 @@ void MainWindow::timerSlot()
     // RT data
     if (ui->actionRtData->isChecked()) {
         mVesc->commands()->getValues();
-        if (mVesc->isRtLogOpen()) {
-            mVesc->commands()->getValuesSetup();
-        }
+        mVesc->commands()->getValuesSetup();
     }
 
     // APP RT data
@@ -1162,11 +1160,14 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageWelcome);
     addPageItem(tr("Welcome & Wizards"), "://res/icons/Home-96.png", "", true);
     connect(ui->actionAutoSetupFOC, SIGNAL(triggered(bool)),
-            mPageWelcome, SLOT(startSetupWizardFocSimple()));
+            mPageWelcome, SLOT(startSetupWizardFocQml()));
     connect(ui->actionMotorSetupWizard, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardMotor()));
     connect(ui->actionAppSetupWizard, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardApp()));
+    connect(ui->actionSetupMotorsFOCQuick, SIGNAL(triggered(bool)),
+            mPageWelcome, SLOT(startSetupWizardFocSimple()));
+
 
     mPageConnection = new PageConnection(this);
     mPageConnection->setVesc(mVesc);
@@ -1428,7 +1429,7 @@ void MainWindow::reloadPages()
 
     // Adjust sizes
     QFontMetrics fm(this->font());
-    int width = fm.width("Welcome & Wizards++++++++++");
+    int width = fm.horizontalAdvance("Welcome & Wizards++++++++++");
     int height = fm.height();
 
     for(int i = 0; i < ui->pageList->count(); i++) {

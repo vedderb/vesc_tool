@@ -77,6 +77,14 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("pswSwitch(id, is_on, plot)");
         addItem("getSendCan()");
         addItem("getCanSendId()");
+        addItem("bmsGetCanDevNum()");
+        addItem("bmsGetCanValues(can_id)");
+        addItem("bmsHasCanValues(can_id)");
+        addItem("bmsSetChargeAllowed(allowed)");
+        addItem("bmsSetBalanceOverride(cell, override)");
+        addItem("bmsResetCounters(ah, wh)");
+        addItem("bmsForceBalance(bal_en)");
+        addItem("bmsZeroCurrentOffset()");
         level--;
     };
 
@@ -109,6 +117,8 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addConfigCmds();
         addItem("appConfig()");
         addConfigCmds();
+        addItem("canTmpOverride(fwdCan, canId)");
+        addItem("canTmpOverrideEnd()");
         level--;
     }
 

@@ -26,6 +26,7 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
 Item {
+    property var dialogParent: ApplicationWindow.overlay
     property alias name: nameText.text
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
@@ -174,11 +175,12 @@ Item {
                         modal: true
                         focus: true
                         width: parent.width - 20
+                        height: 200
                         closePolicy: Popup.CloseOnEscape
                         title: "Use Profile Permanently"
                         x: 10
                         y: 10 + parent.height / 2 - height / 2
-                        parent: ApplicationWindow.overlay
+                        parent: dialogParent
                         implicitHeight: 0
 
                         Text {

@@ -42,7 +42,7 @@
 MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     setupUi(this);
     m_lastBlockList = 0;
-    f_textedit->setTabStopWidth(40);
+    f_textedit->setTabStopDistance(40);
 
     connect(f_textedit, SIGNAL(currentCharFormatChanged(QTextCharFormat)),
             this, SLOT(slotCurrentCharFormatChanged(QTextCharFormat)));
@@ -182,12 +182,12 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     // text color
 
     QPixmap pix(16, 16);
-    pix.fill(QApplication::palette().background().color());
+    pix.fill(QApplication::palette().window().color());
     f_bgcolor->setIcon(pix);
     connect(f_bgcolor, SIGNAL(clicked()), this, SLOT(textBgColor()));
 
     QPixmap pix2(16, 16);
-    pix2.fill(QApplication::palette().foreground().color());
+    pix2.fill(QApplication::palette().windowText().color());
     f_fgcolor->setIcon(pix2);
     connect(f_fgcolor, SIGNAL(clicked()), this, SLOT(textFgColor()));
 
@@ -615,7 +615,7 @@ void MRichTextEdit::bgColorChanged(const QColor &c) {
     if (c.isValid()) {
         pix.fill(c);
     } else {
-        pix.fill(QApplication::palette().background().color());
+        pix.fill(QApplication::palette().window().color());
     }
     f_bgcolor->setIcon(pix);
 }
@@ -626,7 +626,7 @@ void MRichTextEdit::fgColorChanged(const QColor &c)
     if (c.isValid()) {
         pix.fill(c);
     } else {
-        pix.fill(QApplication::palette().foreground().color());
+        pix.fill(QApplication::palette().windowText().color());
     }
     f_fgcolor->setIcon(pix);
 }

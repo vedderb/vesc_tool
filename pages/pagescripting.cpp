@@ -35,10 +35,6 @@ PageScripting::PageScripting(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageScripting)
 {
-    // Register this to not stop on the import statement when reusing components
-    // from the mobile UI.
-    qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescInterface");
-
     ui->setupUi(this);
     mVesc = nullptr;
     ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
@@ -167,6 +163,7 @@ void PageScripting::setVesc(VescInterface *vesc)
 
     ui->qmlWidget->engine()->rootContext()->setContextProperty("VescIf", mVesc);
     ui->qmlWidget->engine()->rootContext()->setContextProperty("QmlUi", this);
+    ui->qmlWidget->engine()->rootContext()->setContextProperty("Utility", &mUtil);
 }
 
 void PageScripting::reloadParams()

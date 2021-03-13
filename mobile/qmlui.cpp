@@ -91,7 +91,7 @@ void QmlUi::setVisible(bool visible)
     }
 }
 
-void QmlUi::startCustomGui(VescInterface *vesc)
+void QmlUi::startCustomGui(VescInterface *vesc, QString qmlFile)
 {
     if (mEngine) {
         mEngine->deleteLater();
@@ -101,7 +101,8 @@ void QmlUi::startCustomGui(VescInterface *vesc)
     mEngine = new QQmlApplicationEngine(this);
     mEngine->rootContext()->setContextProperty("QmlUi", this);
     mEngine->rootContext()->setContextProperty("VescIf", vesc);
-    mEngine->load(QUrl(QLatin1String("qrc:/res/qml/MainLoader.qml")));
+    mEngine->rootContext()->setContextProperty("Utility", &mUtil);
+    mEngine->load(QUrl(qmlFile));
 
     if (!mImportPathList.isEmpty()) {
         mEngine->setImportPathList(mImportPathList);

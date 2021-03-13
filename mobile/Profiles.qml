@@ -24,6 +24,10 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 
 Item {
+    id: topItem
+
+    property var dialogParent: ApplicationWindow.overlay
+
     function updateVisibleProfiles() {
         for(var i = scrollCol.children.length;i > 0;i--) {
             scrollCol.children[i - 1].destroy(1) // Only works with delay on android, seems to be a bug
@@ -32,7 +36,7 @@ Item {
         var prof = VescIf.getProfiles()
         for (i = 0;i < prof.length;i++) {
             var component = Qt.createComponent("ProfileDisplay.qml");
-            var disp = component.createObject(scrollCol, {"index": i})
+            var disp = component.createObject(scrollCol, {"index": i, "dialogParent": dialogParent})
             disp.setFromMcConfTemp(prof[i])
             disp.editRequested.connect(handleProfileEdit)
             disp.deleteRequested.connect(handleProfileDelete)
@@ -61,6 +65,7 @@ Item {
 
     ProfileEditor {
         id: editor
+        dialogParent: topItem.dialogParent
 
         onClosed: {
             if (ok) {
@@ -72,6 +77,7 @@ Item {
 
     ProfileEditor {
         id: editButtonEditor
+        dialogParent: topItem.dialogParent
         property int indexNow: 0
 
         onClosed: {
@@ -88,12 +94,12 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        rightMargin: 10
+        leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Remove profile"
-        x: 10
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Text {
             color: "#ffffff"
@@ -168,11 +174,11 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: column.width - 20
+        rightMargin: 10
+        leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Remove all profiles"
 
-        x: 10
         y: column.y + column.height / 2 - height / 2
 
         Text {

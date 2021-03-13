@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
     if (scaleAuto) {
         QApplication tmp(argc, argv);
-        QRect rec = tmp.desktop()->screenGeometry();
+        QRect rec = tmp.screens().first()->geometry();
         int height = rec.height();
         int width = rec.width();
         double ptFont = tmp.font().pointSizeF();
@@ -264,6 +264,12 @@ int main(int argc, char *argv[])
         // Style
         a->setStyleSheet("");
         a->setStyle(QStyleFactory::create("Fusion"));
+
+        // Register this to not stop on the import statement when reusing components
+        // from the mobile UI. In the mobile UI these are provided as singletins, whereas
+        // in the desktop GUI they are provided as context properties.
+        qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
+        qmlRegisterType<VescInterface>("Vedder.vesc.utility", 1, 0, "Utility2");
 
         w = new MainWindow;
         w->show();

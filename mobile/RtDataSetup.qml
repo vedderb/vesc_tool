@@ -29,6 +29,7 @@ import Vedder.vesc.configparams 1.0
 
 Item {
     id: rtData
+    property var dialogParent: ApplicationWindow.overlay
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property int odometerValue: 0
@@ -200,7 +201,7 @@ Item {
                     closePolicy: Popup.CloseOnEscape
                     x: 10
                     y: Math.max((parent.height - height) / 2, 10)
-                    parent: ApplicationWindow.overlay
+                    parent: dialogParent
                     standardButtons: Dialog.Ok | Dialog.Cancel
                     onAccepted: { 
                         var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
@@ -270,7 +271,7 @@ Item {
                 speedGauge.minimumValue = 0.0
             }
 
-            speedGauge.value = values.speed * 3.6 * impFact
+            speedGauge.value = Math.abs(values.speed * 3.6 * impFact)
             speedGauge.unitText = useImperial ? "mph" : "km/h"
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),

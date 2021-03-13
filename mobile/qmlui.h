@@ -35,7 +35,7 @@ public:
     bool eventFilter(QObject *object, QEvent *e);
     void setVisible(bool visible);
 
-    void startCustomGui(VescInterface *vesc);
+    void startCustomGui(VescInterface *vesc, QString qmlFile = "qrc:/res/qml/MainLoader.qml");
     void stopCustomGui();
     bool isCustomGuiRunning();
     void emitReloadCustomGui(QString fileName);
@@ -56,6 +56,7 @@ public slots:
 private:
     QQmlApplicationEngine *mEngine;
     QStringList mImportPathList;
+    Utility mUtil;
 
     static VescInterface *mVesc;
     static QObject *vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);

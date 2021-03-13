@@ -143,7 +143,7 @@ void PageFirmware::fwRxChanged(bool rx, bool limited)
     }
 
     if (params.major >= 0) {
-        fwStr.sprintf("Fw: %d.%d", params.major, params.minor);
+        fwStr = QString("Fw: %1.%2").arg(params.major).arg(params.minor);
         if (!params.hw.isEmpty()) {
             fwStr += ", Hw: " + params.hw;
         }

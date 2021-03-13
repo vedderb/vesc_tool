@@ -24,6 +24,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+#include <QDateTime>
 #include <stdint.h>
 
 typedef struct {
@@ -553,6 +554,22 @@ public:
         soc = 0.0;
         soh = 0.0;
         can_id = -1;
+        updateTime = -1;
+    }
+
+    Q_INVOKABLE double age() {
+        double res = -1.0;
+
+        if (updateTime > 0) {
+            auto ms = QDateTime::currentDateTime().toMSecsSinceEpoch() - updateTime;
+            res = double(ms) / 1000.0;
+        }
+
+        return res;
+    }
+
+    Q_INVOKABLE void updateTimeStamp() {
+        updateTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
     }
 
     double v_tot;
@@ -571,6 +588,7 @@ public:
     double soc;
     double soh;
     int can_id;
+    qint64 updateTime;
 
 };
 
@@ -750,6 +768,8 @@ typedef enum {
     // Power switch commands
     COMM_PSW_GET_STATUS,
     COMM_PSW_SWITCH,
+
+    COMM_BMS_FWD_CAN_RX,
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -785,7 +805,23 @@ typedef enum {
     CAN_PACKET_POLL_TS5700N8501_STATUS,
     CAN_PACKET_CONF_BATTERY_CUT,
     CAN_PACKET_CONF_STORE_BATTERY_CUT,
-    CAN_PACKET_SHUTDOWN
+    CAN_PACKET_SHUTDOWN,
+    CAN_PACKET_IO_BOARD_ADC_1_TO_4,
+    CAN_PACKET_IO_BOARD_ADC_5_TO_8,
+    CAN_PACKET_IO_BOARD_ADC_9_TO_12,
+    CAN_PACKET_IO_BOARD_DIGITAL_IN,
+    CAN_PACKET_IO_BOARD_SET_OUTPUT_DIGITAL,
+    CAN_PACKET_IO_BOARD_SET_OUTPUT_PWM,
+    CAN_PACKET_BMS_V_TOT,
+    CAN_PACKET_BMS_I,
+    CAN_PACKET_BMS_AH_WH,
+    CAN_PACKET_BMS_V_CELL,
+    CAN_PACKET_BMS_BAL,
+    CAN_PACKET_BMS_TEMPS,
+    CAN_PACKET_BMS_HUM,
+    CAN_PACKET_BMS_SOC_SOH_TEMP_STAT,
+    CAN_PACKET_PSW_STAT,
+    CAN_PACKET_PSW_SWITCH
 } CAN_PACKET_ID;
 
 typedef struct {

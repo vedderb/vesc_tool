@@ -682,6 +682,8 @@ void Commands::processPacket(QByteArray data)
             val.can_id = vb.vbPopFrontUint8();
         }
 
+        val.updateTimeStamp();
+
         emit bmsValuesRx(val);
     } break;
 
@@ -715,6 +717,101 @@ void Commands::processPacket(QByteArray data)
         stat.is_pch_on = vb.vbPopFrontInt8();
         stat.is_dsc_on = vb.vbPopFrontInt8();
         emit pswStatusRx(stat);
+    } break;
+
+    case COMM_BMS_FWD_CAN_RX: {
+        int id = vb.vbPopFrontUint8();
+        CAN_PACKET_ID cmd = CAN_PACKET_ID(vb.vbPopFrontUint8());
+        BMS_VALUES &val = mBmsValues[id];
+
+        switch (cmd) {
+        case CAN_PACKET_BMS_SOC_SOH_TEMP_STAT: {
+            vb.vbPopFrontDouble16(1e3); // V_CELL_MIN
+            vb.vbPopFrontDouble16(1e3); // V_CELL_MAX
+            val.can_id = id;
+            val.soc = double(vb.vbPopFrontUint8()) / 255.0;
+            val.soh = double(vb.vbPopFrontUint8()) / 255.0;
+            val.temp_cells_highest = double(vb.vbPopFrontUint8());
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_V_TOT: {
+            val.can_id = id;
+            val.v_tot = vb.vbPopFrontDouble32Auto();
+            val.v_charge = vb.vbPopFrontDouble32Auto();
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_I: {
+            val.can_id = id;
+            val.i_in = vb.vbPopFrontDouble32Auto();
+            val.i_in_ic = vb.vbPopFrontDouble32Auto();
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_AH_WH: {
+            val.can_id = id;
+            val.ah_cnt = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt = vb.vbPopFrontDouble32Auto();
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_V_CELL: {
+            val.can_id = id;
+
+            int ofs = vb.vbPopFrontUint8();
+            val.v_cells.resize(vb.vbPopFrontUint8());
+
+            while (vb.size() > 1) {
+                val.v_cells[ofs++] = vb.vbPopFrontDouble16(1e3);
+            }
+
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_BAL: {
+            val.can_id = id;
+
+            uint64_t bal_state_0 = vb.vbPopFrontUint32();
+            int cell_num = (bal_state_0 >> 24) & 0xFF;
+            bal_state_0 &= 0x00FFFFFF;
+            uint64_t bal_state_1 = vb.vbPopFrontUint32();
+            uint64_t bal_state = bal_state_0 << 32 | bal_state_1;
+            int32_t ind = 0;
+
+            val.is_balancing.resize(cell_num);
+            while (ind < cell_num) {
+                val.is_balancing[ind] = (bal_state >> ind) & 1;
+                ind++;
+            }
+
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_TEMPS: {
+            val.can_id = id;
+
+            unsigned int ofs = vb.vbPopFrontUint8();
+            val.temps.resize(vb.vbPopFrontUint8());
+
+            while (vb.size() > 1) {
+                val.temps[ofs++] = vb.vbPopFrontDouble16(1e2);
+            }
+
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_HUM: {
+            val.can_id = id;
+            val.temp_hum_sensor = vb.vbPopFrontDouble16(1e2);
+            val.humidity = vb.vbPopFrontDouble16(1e2);
+            val.temp_ic = vb.vbPopFrontDouble16(1e2);
+            val.updateTimeStamp();
+        } break;
+
+        default:
+            break;
+        }
     } break;
 
     default:
@@ -827,6 +924,21 @@ void Commands::setOdometer(unsigned odometer_meters)
     vb.vbAppendInt8(COMM_SET_ODOMETER);
     vb.vbAppendUint32(odometer_meters);
     emitData(vb);
+}
+
+int Commands::bmsGetCanDevNum()
+{
+    return mBmsValues.size();
+}
+
+BMS_VALUES Commands::bmsGetCanValues(int can_id)
+{
+    return mBmsValues.value(can_id);
+}
+
+bool Commands::bmsHasCanValues(int can_id)
+{
+    return mBmsValues.contains(can_id);
 }
 
 void Commands::sendTerminalCmd(QString cmd)

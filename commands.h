@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QMap>
 #include "vbytearray.h"
 #include "datatypes.h"
 #include "packet.h"
@@ -60,6 +61,10 @@ public:
     Q_INVOKABLE int bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs = 3000);
 
     Q_INVOKABLE void setOdometer(unsigned odometer_meters);
+
+    Q_INVOKABLE int bmsGetCanDevNum();
+    Q_INVOKABLE BMS_VALUES bmsGetCanValues(int can_id);
+    Q_INVOKABLE bool bmsHasCanValues(int can_id);
 
 signals:
     void dataToSend(QByteArray &data);
@@ -214,6 +219,7 @@ private:
     bool mLimitedSupportsFwdAllCan;
     bool mLimitedSupportsEraseBootloader;
     QVector<int> mCompatibilityCommands; // int to be QML-compatible
+    QMap<int, BMS_VALUES> mBmsValues;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;

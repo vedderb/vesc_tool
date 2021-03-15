@@ -47,15 +47,19 @@ PageFirmware::PageFirmware(QWidget *parent) :
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
 
     QSettings set;
-    if (set.contains("pagefirmware/lastcustomfile")) {
-        ui->fwEdit->setText(set.value("pagefirmware/lastcustomfile").toString());
-    }
+    ui->fwEdit->setText(set.value("pagefirmware/lastcustomfile", "").toString());
+    ui->fw2Edit->setText(set.value("pagefirmware/lastcustomfile2", "").toString());
+    ui->fw3Edit->setText(set.value("pagefirmware/lastcustomfile3", "").toString());
+    ui->fw4Edit->setText(set.value("pagefirmware/lastcustomfile4", "").toString());
 }
 
 PageFirmware::~PageFirmware()
 {
     QSettings set;
     set.setValue("pagefirmware/lastcustomfile", ui->fwEdit->text());
+    set.setValue("pagefirmware/lastcustomfile2", ui->fw2Edit->text());
+    set.setValue("pagefirmware/lastcustomfile3", ui->fw3Edit->text());
+    set.setValue("pagefirmware/lastcustomfile4", ui->fw4Edit->text());
     delete ui;
 }
 
@@ -284,12 +288,39 @@ void PageFirmware::on_chooseButton_clicked()
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File"), ".",
                                                     tr("Binary files (*.bin)"));
-
-    if (filename.isNull()) {
-        return;
+    if (!filename.isNull()) {
+        ui->fwEdit->setText(filename);
     }
+}
 
-    ui->fwEdit->setText(filename);
+void PageFirmware::on_choose2Button_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("Choose Firmware File"), ".",
+                                                    tr("Binary files (*.bin)"));
+    if (!filename.isNull()) {
+        ui->fw2Edit->setText(filename);
+    }
+}
+
+void PageFirmware::on_choose3Button_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("Choose Firmware File"), ".",
+                                                    tr("Binary files (*.bin)"));
+    if (!filename.isNull()) {
+        ui->fw3Edit->setText(filename);
+    }
+}
+
+void PageFirmware::on_choose4Button_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("Choose Firmware File"), ".",
+                                                    tr("Binary files (*.bin)"));
+    if (!filename.isNull()) {
+        ui->fw4Edit->setText(filename);
+    }
 }
 
 void PageFirmware::on_uploadButton_clicked()
@@ -354,7 +385,15 @@ void PageFirmware::uploadFw(bool allOverCan)
                 return;
             }
         } else if (ui->fwTabWidget->currentIndex() == 1) {
-            file.setFileName(ui->fwEdit->text());
+            if (ui->useFw1Button->isChecked()) {
+                file.setFileName(ui->fwEdit->text());
+            } else if (ui->useFw2Button->isChecked()) {
+                file.setFileName(ui->fw2Edit->text());
+            } else if (ui->useFw3Button->isChecked()) {
+                file.setFileName(ui->fw3Edit->text());
+            } else if (ui->useFw4Button->isChecked()) {
+                file.setFileName(ui->fw4Edit->text());
+            }
 
             QFileInfo fileInfo(file.fileName());
             if (!(fileInfo.fileName().toLower().startsWith("bldc_4") ||

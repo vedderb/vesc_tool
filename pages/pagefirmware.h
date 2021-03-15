@@ -50,6 +50,9 @@ private slots:
     void updateBlList(FW_RX_PARAMS params);
 
     void on_chooseButton_clicked();
+    void on_choose2Button_clicked();
+    void on_choose3Button_clicked();
+    void on_choose4Button_clicked();
     void on_uploadButton_clicked();
     void on_readVersionButton_clicked();
     void on_cancelButton_clicked();

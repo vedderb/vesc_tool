@@ -930,6 +930,10 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
     bool supportsLzo = mCommands->getLimitedCompatibilityCommands().
             contains(int(COMM_BM_WRITE_FLASH_LZO));
 
+    if (mLastFwParams.hwType != HW_TYPE_VESC) {
+        supportsLzo = false;
+    }
+
     auto waitBmWriteRes = [this]() {
         int res = -10;
 

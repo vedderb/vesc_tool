@@ -146,7 +146,6 @@ Item {
 
         onAccepted: {
             nrfPair.visible = true
-//            nrfPairButton.visible = false
             nrfPair.startPairing()
         }
     }

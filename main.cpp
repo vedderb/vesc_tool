@@ -81,6 +81,10 @@ int main(int argc, char *argv[])
     qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
     qmlRegisterType<TcpServerSimple>("Vedder.vesc.tcpserversimple", 1, 0, "TcpServerSimple");
 
+    qRegisterMetaType<MCCONF_TEMP>();
+    qRegisterMetaType<MC_VALUES>();
+    qRegisterMetaType<BMS_VALUES>();
+
     // Parse command line arguments
     QStringList args;
     for (int i = 0;i < argc;i++) {

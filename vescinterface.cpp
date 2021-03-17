@@ -46,9 +46,6 @@
 
 VescInterface::VescInterface(QObject *parent) : QObject(parent)
 {
-    qRegisterMetaType<MCCONF_TEMP>();
-    qRegisterMetaType<MC_VALUES>();
-
     mMcConfig = new ConfigParams(this);
     mAppConfig = new ConfigParams(this);
     mInfoConfig = new ConfigParams(this);

@@ -33,13 +33,6 @@ QmlUi::QmlUi(QObject *parent) : QObject(parent)
 #ifdef DEBUG_BUILD
     qApp->installEventFilter(this);
 #endif
-
-#ifdef HAS_BLUETOOTH
-    qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
-#endif
-    qmlRegisterType<Commands>("Vedder.vesc.commands", 1, 0, "Commands");
-    qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");
-    qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
 }
 
 bool QmlUi::startQmlUi()

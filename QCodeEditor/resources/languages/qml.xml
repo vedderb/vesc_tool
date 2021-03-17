@@ -106,5 +106,6 @@
         <name>Menu</name>
         <name>MenuItem</name>
         <name>Repeater</name>
+        <name>TcpServerSimple</name>
     </section>
 </root>

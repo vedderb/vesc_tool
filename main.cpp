@@ -19,6 +19,8 @@
 
 #include "mainwindow.h"
 #include "mobile/qmlui.h"
+#include "mobile/fwhelper.h"
+#include "tcpserversimple.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -70,6 +72,14 @@ int main(int argc, char *argv[])
     signal(SIGINT, m_cleanup);
     signal(SIGTERM, m_cleanup);
 #endif
+
+#ifdef HAS_BLUETOOTH
+    qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
+#endif
+    qmlRegisterType<Commands>("Vedder.vesc.commands", 1, 0, "Commands");
+    qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");
+    qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
+    qmlRegisterType<TcpServerSimple>("Vedder.vesc.tcpserversimple", 1, 0, "TcpServerSimple");
 
     // Parse command line arguments
     QStringList args;

@@ -1387,7 +1387,7 @@ void MainWindow::checkUdev()
         if (!fi_vesc.exists()) {
             QMessageBox::StandardButton reply;
             reply = QMessageBox::information(this,
-                                             tr("Modemmenager"),
+                                             tr("Modemmanager"),
                                              tr("It looks like modemmanager is installed on your system, and that "
                                                 "there are no VESC udev rules installed. This will cause a delay "
                                                 "from when you plug in the VESC until you can use it. Would you like "
@@ -1419,7 +1419,7 @@ void MainWindow::checkUdev()
                 if (process.exitCode() == 0) {
                     QMessageBox::StandardButton reply;
                     reply = QMessageBox::information(this,
-                                                     tr("Modemmenager"),
+                                                     tr("Modemmanager"),
                                                      tr("The udev rule was created successfully. Would you like "
                                                         "to reload udev to apply the new rule?"),
                                                      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);

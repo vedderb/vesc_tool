@@ -61,18 +61,6 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
-#ifdef USE_MOBILE
-#ifndef DEBUG_BUILD
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
-#else
-    QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
-
-#ifdef Q_OS_LINUX
-    signal(SIGINT, m_cleanup);
-    signal(SIGTERM, m_cleanup);
-#endif
-
 #ifdef HAS_BLUETOOTH
     qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
 #endif
@@ -84,6 +72,18 @@ int main(int argc, char *argv[])
     qRegisterMetaType<MCCONF_TEMP>();
     qRegisterMetaType<MC_VALUES>();
     qRegisterMetaType<BMS_VALUES>();
+
+#ifdef USE_MOBILE
+#ifndef DEBUG_BUILD
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+#else
+    QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
+
+#ifdef Q_OS_LINUX
+    signal(SIGINT, m_cleanup);
+    signal(SIGTERM, m_cleanup);
+#endif
 
     // Parse command line arguments
     QStringList args;

@@ -915,6 +915,7 @@ Item {
                     updateAllParams.push("foc_sensor_mode")
                 }
 
+                Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs)
                 Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, updateAllParams)
             }
 

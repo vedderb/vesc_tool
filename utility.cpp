@@ -571,7 +571,27 @@ bool Utility::setBatteryCutCan(VescInterface *vesc, QVector<int> canIds, double 
 
 bool Utility::setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds)
 {
-    return setMcParamsFromCurrentConfigAllCan(vesc, canIds, {"si_battery_type", "si_battery_cells"});
+    ConfigParams *p = vesc->mcConfig();
+
+    int battType = p->getParamEnum("si_battery_type");
+    int cells = p->getParamInt("si_battery_cells");
+    double start = -1.0;
+    double end = -1.0;
+
+    if (battType == 0) {
+        start = 3.4;
+        end = 3.0;
+    } else if (battType == 1) {
+        start = 2.9;
+        end = 2.6;
+    } else {
+        return false;
+    }
+
+    start *= (double)cells;
+    end *= (double)cells;
+
+    return setBatteryCutCan(vesc, canIds, start, end);
 }
 
 /**

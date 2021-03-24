@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<MCCONF_TEMP>();
     qRegisterMetaType<MC_VALUES>();
     qRegisterMetaType<BMS_VALUES>();
+    qRegisterMetaType<FW_RX_PARAMS>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD

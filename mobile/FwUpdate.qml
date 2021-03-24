@@ -134,7 +134,7 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                updateHw("")
+                                updateHw(VescIf.getLastFwRxParams())
                             }
 
                             onCurrentIndexChanged: {
@@ -356,7 +356,7 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                updateBl("")
+                                updateBl(VescIf.getLastFwRxParams())
                             }
                         }
 

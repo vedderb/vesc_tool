@@ -29,6 +29,7 @@ import QtQuick.Controls 2.1
 import Qt.labs.folderlistmodel 2.1
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.0
+import Qt.labs.platform 1.1
 
 Item {
     id:picker
@@ -43,7 +44,7 @@ Item {
     property bool showDotAndDotDot: false
     property bool showHidden: true
     property bool showDirsFirst: true
-    property string folder: "file:///sdcard"
+    property string folder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
     property string nameFilters: ""
 
     function currentFolder() {

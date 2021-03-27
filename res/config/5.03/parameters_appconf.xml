@@ -2455,6 +2455,72 @@ p, li { white-space: pre-wrap; }
             <suffix> Hz</suffix>
             <vTx>3</vTx>
         </app_balance_conf.kd_pt1_frequency>
+        <app_balance_conf.booster_angle>
+            <longName>Start Angle</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Angle at which booster is applied (actually measued as absolute deviation from setpoint).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_BOOSTER_ANGLE</cDefine>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>80</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>8</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix> °</suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.booster_angle>
+        <app_balance_conf.booster_ramp>
+            <longName>Ramp</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Degrees over which booster will ramp from 0A to the Configured Current, starting at start Angle.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_BOOSTER_RAMP</cDefine>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>80</maxDouble>
+            <minDouble>1</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>1</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix> °</suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.booster_ramp>
+        <app_balance_conf.booster_current>
+        <longName>Current</longName>
+        <type>1</type>
+        <transmittable>1</transmittable>
+        <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Extra current to be applied when booster angle is reached.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+        <cDefine>APPCONF_BALANCE_BOOSTER_CURRENT</cDefine>
+        <editorDecimalsDouble>1</editorDecimalsDouble>
+        <editorScale>1</editorScale>
+        <editAsPercentage>0</editAsPercentage>
+        <maxDouble>100</maxDouble>
+        <minDouble>0</minDouble>
+        <showDisplay>0</showDisplay>
+        <stepDouble>1.0</stepDouble>
+        <valDouble>0</valDouble>
+        <vTxDoubleScale>1000</vTxDoubleScale>
+        <suffix> A</suffix>
+        <vTx>9</vTx>
+    </app_balance_conf.booster_current>
         <app_pas_conf.ctrl_type>
             <longName>Control Type</longName>
             <type>4</type>
@@ -3204,6 +3270,9 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.brake_current</ser>
         <ser>app_balance_conf.yaw_current_clamp</ser>
         <ser>app_balance_conf.kd_pt1_frequency</ser>
+        <ser>app_balance_conf.booster_angle</ser>
+        <ser>app_balance_conf.booster_ramp</ser>
+        <ser>app_balance_conf.booster_current</ser>
         <ser>app_pas_conf.ctrl_type</ser>
         <ser>app_pas_conf.sensor_type</ser>
         <ser>app_pas_conf.current_scaling</ser>
@@ -3410,6 +3479,10 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.hertz</param>
                     <param>::sep::Filters</param>
                     <param>app_balance_conf.kd_pt1_frequency</param>
+                    <param>::sep::Booster</param>
+                    <param>app_balance_conf.booster_angle</param>
+                    <param>app_balance_conf.booster_ramp</param>
+                    <param>app_balance_conf.booster_current</param>
                     <param>::sep::Experimental</param>
                     <param>app_balance_conf.deadzone</param>
                 </subgroupParams>

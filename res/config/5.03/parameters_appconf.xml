@@ -3283,7 +3283,6 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.startup_roll_tolerance</ser>
         <ser>app_balance_conf.startup_speed</ser>
         <ser>app_balance_conf.deadzone</ser>
-        <ser>app_balance_conf.current_boost</ser>
         <ser>app_balance_conf.multi_esc</ser>
         <ser>app_balance_conf.yaw_kp</ser>
         <ser>app_balance_conf.yaw_ki</ser>
@@ -3292,9 +3291,6 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.roll_steer_erpm_kp</ser>
         <ser>app_balance_conf.brake_current</ser>
         <ser>app_balance_conf.yaw_current_clamp</ser>
-        <ser>app_balance_conf.setpoint_pitch_filter</ser>
-        <ser>app_balance_conf.setpoint_target_filter</ser>
-        <ser>app_balance_conf.setpoint_filter_clamp</ser>
         <ser>app_balance_conf.kd_pt1_frequency</ser>
         <ser>app_pas_conf.ctrl_type</ser>
         <ser>app_pas_conf.sensor_type</ser>
@@ -3500,14 +3496,10 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.kd</param>
                     <param>::sep::Main Loop</param>
                     <param>app_balance_conf.hertz</param>
-                    <param>::sep::Balance Filtering</param>
-                    <param>app_balance_conf.setpoint_pitch_filter</param>
-                    <param>app_balance_conf.setpoint_target_filter</param>
-                    <param>app_balance_conf.setpoint_filter_clamp</param>
+                    <param>::sep::Filters</param>
                     <param>app_balance_conf.kd_pt1_frequency</param>
                     <param>::sep::Experimental</param>
                     <param>app_balance_conf.deadzone</param>
-                    <param>app_balance_conf.current_boost</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

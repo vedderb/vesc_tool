@@ -489,12 +489,12 @@ Item {
                             nrfPairBox.visible = false
                             paramsMap.clear()
 
-                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 0, 0)
-                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 0, 0)
-                            mAppConf.updateParamEnum("app_to_use", apptype, 0)
-                            mAppConf.updateParamBool("app_ppm_conf.multi_esc", true, 0)
-                            mAppConf.updateParamBool("app_adc_conf.multi_esc", true, 0)
-                            mAppConf.updateParamBool("app_chuk_conf.multi_esc", true, 0)
+                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 0, null)
+                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 0, null)
+                            mAppConf.updateParamEnum("app_to_use", apptype, null)
+                            mAppConf.updateParamBool("app_ppm_conf.multi_esc", true, null)
+                            mAppConf.updateParamBool("app_adc_conf.multi_esc", true, null)
+                            mAppConf.updateParamBool("app_chuk_conf.multi_esc", true, null)
                             mCommands.setAppConf()
 
                             if (apptype === 4) {
@@ -532,8 +532,8 @@ Item {
 
                             // Setup page
                             paramsConf.clear()
-                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 3, 0)
-                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 1, 0)
+                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 3, null)
+                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 1, null)
                             mCommands.setAppConf()
                             Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)
 

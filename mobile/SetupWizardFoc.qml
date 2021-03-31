@@ -38,7 +38,12 @@ Item {
 
     function openDialog() {
         dialog.open()
+        updateUsageListParams()
         loadDefaultDialog.open()
+    }
+
+    function updateUsageListParams() {
+        mMcConf.updateParamDouble("l_duty_start", usageList.currentItem.modelData.duty_start, null)
     }
 
     Component.onCompleted: {
@@ -183,7 +188,7 @@ Item {
                         delegate: usageDelegate
 
                         onCurrentIndexChanged: {
-                            mMcConf.updateParamDouble("l_duty_start", usageList.currentItem.modelData.duty_start, null)
+                            updateUsageListParams()
                         }
                     }
 

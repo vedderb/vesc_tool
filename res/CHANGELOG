@@ -18,6 +18,7 @@
 * Mobile RT display update. See: https://github.com/vedderb/vesc_tool/pull/115
 * Added FOC wizard, setup data and profiles from mobile UI to desktop UI.
 * Added usage page to FOC wizard.
+* Added servo output control slider.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

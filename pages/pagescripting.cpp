@@ -267,8 +267,13 @@ void PageScripting::on_removeSelectedButton_clicked()
 
 void PageScripting::on_clearRecentButton_clicked()
 {
-    mRecentFiles.clear();
-    updateRecentList();
+    auto res = QMessageBox::question(this, "Clear Recent Files",
+                                     "This will clear the list with recent files. Are you sure?");
+
+    if (res == QMessageBox::Yes) {
+        mRecentFiles.clear();
+        updateRecentList();
+    }
 }
 
 void PageScripting::on_openExampleButton_clicked()

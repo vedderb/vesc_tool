@@ -682,6 +682,13 @@ void Commands::processPacket(QByteArray data)
             val.can_id = vb.vbPopFrontUint8();
         }
 
+        if (vb.size() >= 16) {
+            val.ah_cnt_chg_total = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt_chg_total = vb.vbPopFrontDouble32Auto();
+            val.ah_cnt_dis_total = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt_dis_total = vb.vbPopFrontDouble32Auto();
+        }
+
         val.updateTimeStamp();
 
         emit bmsValuesRx(val);
@@ -806,6 +813,20 @@ void Commands::processPacket(QByteArray data)
             val.temp_hum_sensor = vb.vbPopFrontDouble16(1e2);
             val.humidity = vb.vbPopFrontDouble16(1e2);
             val.temp_ic = vb.vbPopFrontDouble16(1e2);
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_AH_WH_CHG_TOTAL: {
+            val.can_id = id;
+            val.ah_cnt_chg_total = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt_chg_total = vb.vbPopFrontDouble32Auto();
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_AH_WH_DIS_TOTAL: {
+            val.can_id = id;
+            val.ah_cnt_dis_total = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt_dis_total = vb.vbPopFrontDouble32Auto();
             val.updateTimeStamp();
         } break;
 

@@ -63,7 +63,7 @@
        </layout>
       </widget>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
         <widget class="QTableWidget" name="valTable">
@@ -142,6 +142,26 @@
            <string>Temp Hum Sensor</string>
           </property>
          </row>
+         <row>
+          <property name="text">
+           <string>Ah Charge Total</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>Wh Charge Total</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>Ah Discharge Total</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>Wh Discharge Total</string>
+          </property>
+         </row>
          <column>
           <property name="text">
            <string>Value</string>
@@ -199,10 +219,30 @@
          </item>
          <item row="10" column="0">
           <property name="text">
-           <string> </string>
+           <string/>
           </property>
          </item>
          <item row="11" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="12" column="0">
+          <property name="text">
+           <string> </string>
+          </property>
+         </item>
+         <item row="13" column="0">
+          <property name="text">
+           <string> </string>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string> </string>
+          </property>
+         </item>
+         <item row="15" column="0">
           <property name="text">
            <string> </string>
           </property>

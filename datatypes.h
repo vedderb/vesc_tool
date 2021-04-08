@@ -539,6 +539,10 @@ struct BMS_VALUES {
     Q_PROPERTY(double soc MEMBER soc)
     Q_PROPERTY(double soh MEMBER soh)
     Q_PROPERTY(int can_id MEMBER can_id)
+    Q_PROPERTY(double ah_cnt_chg_total MEMBER ah_cnt_chg_total)
+    Q_PROPERTY(double wh_cnt_chg_total MEMBER wh_cnt_chg_total)
+    Q_PROPERTY(double ah_cnt_dis_total MEMBER ah_cnt_dis_total)
+    Q_PROPERTY(double wh_cnt_dis_total MEMBER wh_cnt_dis_total)
 
 public:
     BMS_VALUES() {
@@ -554,6 +558,10 @@ public:
         soc = 0.0;
         soh = 0.0;
         can_id = -1;
+        ah_cnt_chg_total = 0.0;
+        wh_cnt_chg_total = 0.0;
+        ah_cnt_dis_total = 0.0;
+        wh_cnt_dis_total = 0.0;
         updateTime = -1;
     }
 
@@ -588,6 +596,10 @@ public:
     double soc;
     double soh;
     int can_id;
+    double ah_cnt_chg_total;
+    double wh_cnt_chg_total;
+    double ah_cnt_dis_total;
+    double wh_cnt_dis_total;
     qint64 updateTime;
 
 };
@@ -770,6 +782,7 @@ typedef enum {
     COMM_PSW_SWITCH,
 
     COMM_BMS_FWD_CAN_RX,
+    COMM_BMS_HW_DATA,
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -821,7 +834,14 @@ typedef enum {
     CAN_PACKET_BMS_HUM,
     CAN_PACKET_BMS_SOC_SOH_TEMP_STAT,
     CAN_PACKET_PSW_STAT,
-    CAN_PACKET_PSW_SWITCH
+    CAN_PACKET_PSW_SWITCH,
+    CAN_PACKET_BMS_HW_DATA_1,
+    CAN_PACKET_BMS_HW_DATA_2,
+    CAN_PACKET_BMS_HW_DATA_3,
+    CAN_PACKET_BMS_HW_DATA_4,
+    CAN_PACKET_BMS_HW_DATA_5,
+    CAN_PACKET_BMS_AH_WH_CHG_TOTAL,
+    CAN_PACKET_BMS_AH_WH_DIS_TOTAL,
 } CAN_PACKET_ID;
 
 typedef struct {

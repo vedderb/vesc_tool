@@ -72,6 +72,7 @@ void PageFoc::reloadParams()
         ui->hfiTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hfi");
         ui->filterTab->addParamSubgroup(mVesc->mcConfig(), "foc", "filters");
         ui->offsetTab->addParamSubgroup(mVesc->mcConfig(), "foc", "offsets");
+        ui->fwTab->addParamSubgroup(mVesc->mcConfig(), "foc", "field weakening");
         ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "foc", "advanced");
     }
 }

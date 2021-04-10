@@ -899,6 +899,8 @@ Item {
             if (res.startsWith("Success!")) {
                 resDetect = true
 
+                Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs)
+
                 var updateAllParams = ["l_duty_start", "si_battery_type", "si_battery_cells"]
 
                 // Temperature compensation means that the motor can be tracked at lower
@@ -920,7 +922,6 @@ Item {
                     updateAllParams.push("foc_sensor_mode")
                 }
 
-                Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs)
                 Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, updateAllParams)
             }
 

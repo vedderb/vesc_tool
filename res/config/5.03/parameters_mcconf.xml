@@ -339,6 +339,36 @@ p, li { white-space: pre-wrap; }
             <suffix> V</suffix>
             <vTx>9</vTx>
         </l_max_vin>
+        <l_vin_correction>
+            <longName>Input Voltage Correction Factor</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;
+&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Correction factor for the reported input voltage vs actual input voltage (-10%..10%).&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The resistors used to measure Vin may have large tolerances and can cause significant errors in the measurement.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;How to determine the correction factor:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Measure the actual input voltage (Vm) and compare to the VESC-reported voltage (Vr). Then divide the difference by the VESC-reported input voltage, so: Correction-Factor = (Va-Vr)/Vr.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;For example, if the battery voltage measured with a multimeter is 50.2V while the VESC reports 49.1V then the correction factor should be (50.2-49.1)/49.1 = 2.24%.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_L_VIN_CORRECTION</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>100</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>0.1</maxDouble>
+            <minDouble>-0.1</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.0</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix> %</suffix>
+            <vTx>7</vTx>
+        </l_vin_correction>
         <l_battery_cut_start>
             <longName>Battery Voltage Cutoff Start</longName>
             <type>1</type>
@@ -3800,6 +3830,7 @@ p, li { white-space: pre-wrap; }
         <ser>l_max_erpm_fbrake_cc</ser>
         <ser>l_min_vin</ser>
         <ser>l_max_vin</ser>
+        <ser>l_vin_correction</ser>
         <ser>l_battery_cut_start</ser>
         <ser>l_battery_cut_end</ser>
         <ser>l_slow_abs_current</ser>
@@ -4033,6 +4064,7 @@ p, li { white-space: pre-wrap; }
                 <subgroupParams>
                     <param>l_min_vin</param>
                     <param>l_max_vin</param>
+                    <param>l_vin_correction</param>
                     <param>l_min_duty</param>
                     <param>l_max_duty</param>
                     <param>cc_min_current</param>

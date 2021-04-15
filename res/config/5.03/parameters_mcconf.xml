@@ -2496,6 +2496,28 @@ p, li { white-space: pre-wrap; }
             <suffix> %</suffix>
             <vTx>7</vTx>
         </foc_fw_duty_start>
+        <foc_fw_q_current_factor>
+            <longName>Q Axis Current Factor</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Give the q axis current this much of the field weakening current as braking current (opposite to the current direction). This helps slow the motor down when commanding 0 current in case the position has an offset and the field weakening current contributes with torque.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_FW_Q_CURRENT_FACTOR</cDefine>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
+            <editorScale>100</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>1</showDisplay>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>0.02</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix> %</suffix>
+            <vTx>7</vTx>
+        </foc_fw_q_current_factor>
         <foc_fw_ramp_time>
             <longName>Field Weakening Ramp Time</longName>
             <type>1</type>
@@ -3902,6 +3924,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_fw_current_max</ser>
         <ser>foc_fw_duty_start</ser>
         <ser>foc_fw_ramp_time</ser>
+        <ser>foc_fw_q_current_factor</ser>
         <ser>gpd_buffer_notify_left</ser>
         <ser>gpd_buffer_interpol</ser>
         <ser>gpd_current_filter_const</ser>
@@ -4209,6 +4232,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_fw_current_max</param>
                     <param>foc_fw_duty_start</param>
                     <param>foc_fw_ramp_time</param>
+                    <param>foc_fw_q_current_factor</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

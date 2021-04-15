@@ -901,7 +901,7 @@ Item {
 
                 Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs)
 
-                var updateAllParams = ["l_duty_start", "si_battery_type", "si_battery_cells"]
+                var updateAllParams = ["l_duty_start"]
 
                 // Temperature compensation means that the motor can be tracked at lower
                 // speed across a broader temperature range. Therefore openloop_erpm

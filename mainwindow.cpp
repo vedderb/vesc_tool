@@ -1727,7 +1727,7 @@ void MainWindow::on_actionLicense_triggered()
 
 void MainWindow::on_posBox_editingFinished()
 {
-    on_posButton_clicked();
+//    on_posButton_clicked();
 }
 
 void MainWindow::on_posBox_valueChanged(double arg1)

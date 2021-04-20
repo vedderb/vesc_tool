@@ -2534,7 +2534,7 @@ p, li { white-space: pre-wrap; }
             <vTx>9</vTx>
         </app_balance_conf.booster_current>
         <app_balance_conf.torquetilt_start_current>
-            <longName>Start Current</longName>
+            <longName>Start Current Threshold</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2599,8 +2599,8 @@ p, li { white-space: pre-wrap; }
             <suffix> °/s</suffix>
             <vTx>9</vTx>
         </app_balance_conf.torquetilt_speed>
-        <app_balance_conf.torquetilt_power>
-            <longName>Power</longName>
+        <app_balance_conf.torquetilt_strength>
+            <longName>Strength</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2608,7 +2608,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;How much tiltback should be applied based on output current.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_TORQUETILT_POWER</cDefine>
+            <cDefine>APPCONF_BALANCE_TORQUETILT_STRENGTH</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -2620,7 +2620,7 @@ p, li { white-space: pre-wrap; }
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> °/A</suffix>
             <vTx>9</vTx>
-        </app_balance_conf.torquetilt_power>
+        </app_balance_conf.torquetilt_strength>
         <app_balance_conf.torquetilt_filter>
             <longName>Current Filter</longName>
             <type>1</type>
@@ -2629,7 +2629,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Low pass filter on the current used for calculating the torquetilt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Low pass filter on the current used for calculating the torquetilt. This smooths out spikes in the current, and prevents torquetilt from being twitchy. At 1khz 0.95 is enough filtering for low strength values, higher filter values such as 0.99 will make current much smoother but also add a delay.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_BALANCE_TORQUETILT_FILTER</cDefine>
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -2643,16 +2643,16 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </app_balance_conf.torquetilt_filter>
-        <app_balance_conf.turntilt_power>
-            <longName>Power</longName>
+        <app_balance_conf.turntilt_strength>
+            <longName>Strength</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;How much tiltback should be applied based on the sine of the roll angle. A power value of N will give N degrees of tiltback when the vehicle is rolled to 90 degrees.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_TURNTILT_POWER</cDefine>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;How much tiltback should be applied based on the sine of the roll angle. A strength value of N will give N degrees of tiltback when the vehicle is rolled to 90 degrees.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_TURNTILT_STRENGTH</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -2664,7 +2664,7 @@ p, li { white-space: pre-wrap; }
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> </suffix>
             <vTx>9</vTx>
-        </app_balance_conf.turntilt_power>
+        </app_balance_conf.turntilt_strength>
         <app_balance_conf.turntilt_angle_limit>
             <longName>Tilitback Angle Limit</longName>
             <type>1</type>
@@ -2687,8 +2687,8 @@ p, li { white-space: pre-wrap; }
             <suffix> °</suffix>
             <vTx>9</vTx>
         </app_balance_conf.turntilt_angle_limit>
-        <app_balance_conf.turntilt_angle_cut>
-            <longName>Cutzone</longName>
+        <app_balance_conf.turntilt_start_angle>
+            <longName>Roll Angle Threshold</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2696,7 +2696,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Min angle threshold to apply turntilt. Similar to a deadzone, except after reaching the angle, it will apply as if it started from 0.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_TURNTILT_ANGLE_CUT</cDefine>
+            <cDefine>APPCONF_BALANCE_TURNTILT_START_ANGLE</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -2708,7 +2708,27 @@ p, li { white-space: pre-wrap; }
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix> °</suffix>
             <vTx>9</vTx>
-        </app_balance_conf.turntilt_angle_cut>
+        </app_balance_conf.turntilt_start_angle>
+        <app_balance_conf.turntilt_start_erpm>
+            <longName>ERPM Threshold</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;ERPM threshold to apply turntilt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_TURNTILT_START_ERPM</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>100000</maxInt>
+            <minInt>100</minInt>
+            <showDisplay>0</showDisplay>
+            <stepInt>100</stepInt>
+            <valInt>100</valInt>
+            <suffix> ERPM</suffix>
+            <vTx>3</vTx>
+        </app_balance_conf.turntilt_start_erpm>
         <app_balance_conf.turntilt_speed>
             <longName>Max Tiltback Speed</longName>
             <type>1</type>
@@ -2739,7 +2759,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;ERPM (absolute value) to end boosting the turn tilt effect, above this there will be your configured boost %.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Increase the strength based on ERPM. Boost percent is added linearly from 0 erpm (0% boost) to max erpm (Full configured boost % is applied).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_BALANCE_TURNTILT_ERPM_BOOST</cDefine>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -3527,11 +3547,12 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.torquetilt_start_current</ser>
         <ser>app_balance_conf.torquetilt_angle_limit</ser>
         <ser>app_balance_conf.torquetilt_speed</ser>
-        <ser>app_balance_conf.torquetilt_power</ser>
+        <ser>app_balance_conf.torquetilt_strength</ser>
         <ser>app_balance_conf.torquetilt_filter</ser>
-        <ser>app_balance_conf.turntilt_power</ser>
+        <ser>app_balance_conf.turntilt_strength</ser>
         <ser>app_balance_conf.turntilt_angle_limit</ser>
-        <ser>app_balance_conf.turntilt_angle_cut</ser>
+        <ser>app_balance_conf.turntilt_start_angle</ser>
+        <ser>app_balance_conf.turntilt_start_erpm</ser>
         <ser>app_balance_conf.turntilt_speed</ser>
         <ser>app_balance_conf.turntilt_erpm_boost</ser>
         <ser>app_balance_conf.turntilt_erpm_boost_end</ser>
@@ -3747,15 +3768,16 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.booster_ramp</param>
                     <param>app_balance_conf.booster_current</param>
                     <param>::sep::Torque Tiltback</param>
+                    <param>app_balance_conf.torquetilt_strength</param>
                     <param>app_balance_conf.torquetilt_start_current</param>
                     <param>app_balance_conf.torquetilt_angle_limit</param>
                     <param>app_balance_conf.torquetilt_speed</param>
-                    <param>app_balance_conf.torquetilt_power</param>
                     <param>app_balance_conf.torquetilt_filter</param>
                     <param>::sep::Turn/Roll Tiltback</param>
-                    <param>app_balance_conf.turntilt_power</param>
+                    <param>app_balance_conf.turntilt_strength</param>
                     <param>app_balance_conf.turntilt_angle_limit</param>
-                    <param>app_balance_conf.turntilt_angle_cut</param>
+                    <param>app_balance_conf.turntilt_start_angle</param>
+                    <param>app_balance_conf.turntilt_start_erpm</param>
                     <param>app_balance_conf.turntilt_speed</param>
                     <param>app_balance_conf.turntilt_erpm_boost</param>
                     <param>app_balance_conf.turntilt_erpm_boost_end</param>

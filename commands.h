@@ -88,6 +88,7 @@ signals:
     void motorLinkageReceived(double flux_linkage);
     void encoderParamReceived(double offset, double ratio, bool inverted);
     void customAppDataReceived(QByteArray data);
+    void customHwDataReceived(QByteArray data);
     void focHallTableReceived(QVector<int> hall_table, int res);
     void nrfPairingRes(int res);
     void mcConfigCheckResult(QStringList paramsNotSet);
@@ -115,6 +116,8 @@ signals:
     void customConfigChunkRx(int confInd, int lenConf, int ofsConf, QByteArray data);
     void customConfigRx(int confInd, QByteArray data);
     void pswStatusRx(PSW_STATUS stat);
+    void qmluiHwRx(int lenQml, int ofsQml, QByteArray data);
+    void qmluiAppRx(int lenQml, int ofsQml, QByteArray data);
 
 public slots:
     void processPacket(QByteArray data);
@@ -156,6 +159,7 @@ public slots:
     void measureHallFoc(double current);
     void sendCustomAppData(QByteArray data);
     void sendCustomAppData(unsigned char *data, unsigned int len);
+    void sendCustomHwData(QByteArray data);
     void setChukData(chuck_data &data);
     void pairNrf(int ms);
     void gpdSetFsw(float fsw);
@@ -205,6 +209,9 @@ public slots:
 
     void pswGetStatus(bool by_id, int id_ind);
     void pswSwitch(int id, bool is_on, bool plot);
+
+    void qmlUiHwGet(int len, int offset);
+    void qmlUiAppGet(int len, int offset);
 
 private slots:
     void timerSlot();

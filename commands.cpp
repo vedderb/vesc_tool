@@ -136,6 +136,15 @@ void Commands::processPacket(QByteArray data)
             params.hasPhaseFilters = vb.vbPopFrontInt8();
         }
 
+        if (vb.size() >= 2) {
+            auto qmlHw = vb.vbPopFrontInt8();
+            auto qmlApp = vb.vbPopFrontInt8();
+            params.hasQmlHw = qmlHw > 0;
+            params.qmlHwFullscreen = qmlHw == 2;
+            params.hasQmlApp = qmlApp > 0;
+            params.qmlAppFullscreen = qmlApp == 2;
+        }
+
         emit fwVersionReceived(params);
     } break;
 
@@ -389,6 +398,10 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_CUSTOM_APP_DATA:
         emit customAppDataReceived(vb);
+        break;
+
+    case COMM_CUSTOM_HW_DATA:
+        emit customHwDataReceived(vb);
         break;
 
     case COMM_NRF_START_PAIRING:
@@ -835,6 +848,18 @@ void Commands::processPacket(QByteArray data)
         }
     } break;
 
+    case COMM_GET_QML_UI_HW: {
+        int qmlSize = vb.vbPopFrontInt32();
+        int offset = vb.vbPopFrontInt32();
+        emit qmluiHwRx(qmlSize, offset, vb);
+    } break;
+
+    case COMM_GET_QML_UI_APP: {
+        int qmlSize = vb.vbPopFrontInt32();
+        int offset = vb.vbPopFrontInt32();
+        emit qmluiAppRx(qmlSize, offset, vb);
+    } break;
+
     default:
         break;
     }
@@ -1253,6 +1278,14 @@ void Commands::sendCustomAppData(unsigned char *data, unsigned int len)
 {
     QByteArray ba((char*)data, len);
     sendCustomAppData(ba);
+}
+
+void Commands::sendCustomHwData(QByteArray data)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_CUSTOM_HW_DATA);
+    vb.append(data);
+    emitData(vb);
 }
 
 void Commands::setChukData(chuck_data &data)
@@ -1726,6 +1759,24 @@ void Commands::pswSwitch(int id, bool is_on, bool plot)
     vb.vbAppendInt16(id);
     vb.vbAppendInt8(is_on);
     vb.vbAppendInt8(plot);
+    emitData(vb);
+}
+
+void Commands::qmlUiHwGet(int len, int offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_GET_QML_UI_HW);
+    vb.vbAppendInt32(len);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::qmlUiAppGet(int len, int offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_GET_QML_UI_APP);
+    vb.vbAppendInt32(len);
+    vb.vbAppendInt32(offset);
     emitData(vb);
 }
 

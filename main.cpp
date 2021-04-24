@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
         a->setStyle(QStyleFactory::create("Fusion"));
 
         // Register this to not stop on the import statement when reusing components
-        // from the mobile UI. In the mobile UI these are provided as singletins, whereas
+        // from the mobile UI. In the mobile UI these are provided as singletons, whereas
         // in the desktop GUI they are provided as context properties.
         qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
         qmlRegisterType<VescInterface>("Vedder.vesc.utility", 1, 0, "Utility2");

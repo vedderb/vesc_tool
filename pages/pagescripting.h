@@ -60,6 +60,10 @@ private slots:
     void on_clearRecentButton_clicked();
     void on_openExampleButton_clicked();
     void on_helpButton_clicked();
+    void on_exportCArrayHwButton_clicked();
+    void on_exportCArrayAppButton_clicked();
+    void on_openQmluiHwButton_clicked();
+    void on_openQmluiAppButton_clicked();
 
 private:
     Ui::PageScripting *ui;
@@ -72,7 +76,8 @@ private:
     void updateRecentList();
     void makeEditorConnections(QmlEditor *editor);
     void createEditorTab(QString fileName, QString content);
-    QString qmlToRun();
+    QString qmlToRun(bool importDir = true);
+    bool exportCArray(QString name);
 
 };
 

@@ -19,6 +19,7 @@
 * Added FOC wizard, setup data and profiles from mobile UI to desktop UI.
 * Added usage page to FOC wizard.
 * Added servo output control slider.
+* Added support for loading custom UI from firmware.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

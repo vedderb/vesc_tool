@@ -216,6 +216,11 @@ public:
     Q_INVOKABLE bool customConfigsLoaded();
     ConfigParams *customConfig(int configNum);
 
+    Q_INVOKABLE bool qmlHwLoaded();
+    Q_INVOKABLE bool qmlAppLoaded();
+    Q_INVOKABLE QString qmlHw();
+    Q_INVOKABLE QString qmlApp();
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -233,6 +238,7 @@ signals:
     void configurationChanged();
     void configurationBackupsChanged();
     void customConfigLoadDone();
+    void qmlLoadDone();
 
 public slots:
 
@@ -292,6 +298,11 @@ private:
     ConfigParams *mFwConfig;
     QVector<ConfigParams*> mCustomConfigs;
     bool mCustomConfigsLoaded;
+
+    bool mQmlHwLoaded;
+    QString mQmlHw;
+    bool mQmlAppLoaded;
+    QString mQmlApp;
 
     QTimer *mTimer;
     Packet *mPacket;

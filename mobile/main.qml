@@ -110,17 +110,6 @@ ApplicationWindow {
                 }
             }
 
-            Button {
-                Layout.fillWidth: true
-                text: "Controls"
-                flat: true
-
-                onClicked: {
-                    drawer.close()
-                    controls.openDialog()
-                }
-            }
-
             Item {
                 // Spacer
                 Layout.fillWidth: true
@@ -609,46 +598,57 @@ ApplicationWindow {
                     color: "#4f4f4f"
                 }
 
-                property int buttons: 8
-                property int buttonWidth: 120
+                property int buttonWidth: Math.max(120,
+                                                   tabBar.width /
+                                                   (rep.model.length +
+                                                    (uiHwPage.visible ? 1 : 0)) +
+                                                   (uiAppPage.visible ? 1 : 0))
 
-                TabButton {
-                    text: qsTr("Start")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("RT Data")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Profiles")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Motor Cfg")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("App Cfg")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Firmware")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Terminal")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("BMS")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Developer")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                Repeater {
+                    id: rep
+                    model: ["Start", "RT Data", "Profiles", "Motor Cfg",
+                        "App Cfg", "Firmware", "Terminal", "BMS", "Developer"]
+
+                    TabButton {
+                        text: modelData
+                        width: tabBar.buttonWidth
+                    }
                 }
             }
+        }
+    }
+
+    TabButton {
+        id: uiHwButton
+        visible: uiHwPage.visible
+        text: "HwUi"
+        width: tabBar.buttonWidth
+    }
+
+    Page {
+        id: uiHwPage
+        visible: false
+
+        Item {
+            id: uiHw
+            anchors.fill: parent
+        }
+    }
+
+    TabButton {
+        id: uiAppButton
+        visible: uiAppPage.visible
+        text: "AppUi"
+        width: tabBar.buttonWidth
+    }
+
+    Page {
+        id: uiAppPage
+        visible: false
+
+        Item {
+            id: uiApp
+            anchors.fill: parent
         }
     }
 
@@ -747,32 +747,32 @@ ApplicationWindow {
                     mCommands.getValuesSetup()
                     mCommands.getImuData(0xFFFF)
 
-                    if (tabBar.currentIndex == 7) {
+                    if (tabBar.currentIndex == (7 + indexOffset())) {
                         mCommands.bmsGetValues()
                     }
                 } else {
-                    if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0)) {
+                    if ((tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0)) {
                         interval = 50
                         mCommands.getValues()
                     }
 
-                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 1) {
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1) {
                         interval = 50
                         mCommands.getValuesSetup()
                     }
 
-                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
                         interval = 20
                         mCommands.getImuData(0x1FF)
                     }
 
-                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 3) {
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 3) {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getDecodedBalance()
                     }
 
-                    if (tabBar.currentIndex == 7) {
+                    if (tabBar.currentIndex == (7 + indexOffset())) {
                         interval = 100
                         mCommands.bmsGetValues()
                     }
@@ -814,6 +814,83 @@ ApplicationWindow {
         }
     }
 
+    property var hwUiObj: 0
+
+    function updateHwUi () {
+        if (hwUiObj != 0) {
+            hwUiObj.destroy()
+            hwUiObj = 0
+        }
+
+        swipeView.interactive = true
+        tabBar.visible = true
+        tabBar.enabled = true
+
+        if (VescIf.isPortConnected() && VescIf.qmlHwLoaded()) {
+            hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
+            uiHwButton.visible = true
+            swipeView.insertItem(1, uiHwPage)
+            tabBar.insertItem(1, uiHwButton)
+            uiHwPage.visible = true
+            swipeView.setCurrentIndex(0)
+            swipeView.setCurrentIndex(1)
+
+            if (VescIf.getLastFwRxParams().qmlHwFullscreen) {
+                swipeView.interactive = false
+                tabBar.visible = false
+                tabBar.enabled = false
+            }
+        } else {
+            uiHwPage.visible = false
+            uiHwPage.parent = null
+            uiHwButton.parent = null
+        }
+    }
+
+    property var appUiObj: 0
+
+    function updateAppUi () {
+        if (appUiObj != 0) {
+            appUiObj.destroy()
+            appUiObj = 0
+        }
+
+        swipeView.interactive = true
+        tabBar.visible = true
+        tabBar.enabled = true
+
+        if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
+            appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
+            uiAppButton.visible = true
+            swipeView.insertItem(1, uiAppPage)
+            tabBar.insertItem(1, uiAppButton)
+            uiAppPage.visible = true
+            swipeView.setCurrentIndex(0)
+            swipeView.setCurrentIndex(1)
+
+            if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
+                swipeView.interactive = false
+                tabBar.visible = false
+                tabBar.enabled = false
+            }
+        } else {
+            uiAppPage.visible = false
+            uiAppPage.parent = null
+            uiAppButton.parent = null
+        }
+    }
+
+    function indexOffset() {
+        var res = 0
+        if (uiHwButton.visible) {
+            res++
+        }
+        if (uiAppButton.visible) {
+            res++
+        }
+        return res
+    }
+
     Connections {
         target: VescIf
         onPortConnectedChanged: {
@@ -848,7 +925,7 @@ ApplicationWindow {
                 if (limited && !VescIf.getFwSupportsConfiguration()) {
                     confPageMotor.enabled = false
                     confPageApp.enabled = false
-                    swipeView.setCurrentIndex(5)
+                    swipeView.setCurrentIndex(5 + indexOffset())
                 } else {
                     confPageMotor.enabled = true
                     confPageApp.enabled = true
@@ -856,6 +933,14 @@ ApplicationWindow {
                     mCommands.getAppConf()
                 }
             }
+
+            updateHwUi()
+            updateAppUi()
+        }
+
+        onQmlLoadDone: {
+            updateHwUi()
+            updateAppUi()
         }
     }
 

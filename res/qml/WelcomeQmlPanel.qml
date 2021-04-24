@@ -75,7 +75,11 @@ Item {
                 color: "#4f4f4f"
             }
 
-            property int buttonWidth: 120
+            property int buttonWidth: Math.max(120,
+                                               tabBar.width /
+                                               (rep.model.length +
+                                                (uiHwPage.visible ? 1 : 0)) +
+                                               (uiAppPage.visible ? 1 : 0))
 
             Repeater {
                 id: rep
@@ -83,8 +87,42 @@ Item {
 
                 TabButton {
                     text: modelData
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / rep.model.length)
+                    width: tabBar.buttonWidth
                 }
+            }
+        }
+
+        TabButton {
+            id: uiHwButton
+            visible: uiHwPage.visible
+            text: "HwUi"
+            width: tabBar.buttonWidth
+        }
+
+        Page {
+            id: uiHwPage
+            visible: false
+
+            Item {
+                id: uiHw
+                anchors.fill: parent
+            }
+        }
+
+        TabButton {
+            id: uiAppButton
+            visible: uiAppPage.visible
+            text: "AppUi"
+            width: tabBar.buttonWidth
+        }
+
+        Page {
+            id: uiAppPage
+            visible: false
+
+            Item {
+                id: uiApp
+                anchors.fill: parent
             }
         }
 
@@ -118,6 +156,66 @@ Item {
             Layout.preferredWidth: 500
             visible: false
             hideAfterPair: true
+        }
+    }
+
+    property var hwUiObj: 0
+
+    function updateHwUi () {
+        if (hwUiObj != 0) {
+            hwUiObj.destroy()
+            hwUiObj = 0
+        }
+
+        if (VescIf.isPortConnected() && VescIf.qmlHwLoaded()) {
+            hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
+            uiHwButton.visible = true
+            swipeView.insertItem(0, uiHwPage)
+            tabBar.insertItem(0, uiHwButton)
+            uiHwPage.visible = true
+            swipeView.setCurrentIndex(1)
+            swipeView.setCurrentIndex(0)
+        } else {
+            uiHwPage.visible = false
+            uiHwPage.parent = null
+            uiHwButton.parent = null
+        }
+    }
+
+    property var appUiObj: 0
+
+    function updateAppUi () {
+        if (appUiObj != 0) {
+            appUiObj.destroy()
+            appUiObj = 0
+        }
+
+        if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
+            appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
+            uiAppButton.visible = true
+            swipeView.insertItem(0, uiAppPage)
+            tabBar.insertItem(0, uiAppButton)
+            uiAppPage.visible = true
+            swipeView.setCurrentIndex(1)
+            swipeView.setCurrentIndex(0)
+        } else {
+            uiAppPage.visible = false
+            uiAppPage.parent = null
+            uiAppButton.parent = null
+        }
+    }
+
+    Connections {
+        target: VescIf
+
+        onFwRxChanged: {
+            updateHwUi()
+            updateAppUi()
+        }
+
+        onQmlLoadDone: {
+            updateHwUi()
+            updateAppUi()
         }
     }
 

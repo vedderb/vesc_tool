@@ -476,6 +476,10 @@ struct FW_RX_PARAMS {
     Q_PROPERTY(int isTestFw MEMBER isTestFw)
     Q_PROPERTY(HW_TYPE hwType MEMBER hwType)
     Q_PROPERTY(int customConfigNum MEMBER customConfigNum)
+    Q_PROPERTY(bool hasQmlHw MEMBER hasQmlHw)
+    Q_PROPERTY(bool qmlHwFullscreen MEMBER qmlHwFullscreen)
+    Q_PROPERTY(bool hasQmlApp MEMBER hasQmlApp)
+    Q_PROPERTY(bool qmlAppFullscreen MEMBER qmlAppFullscreen)
 
 public:
     FW_RX_PARAMS() {
@@ -486,6 +490,10 @@ public:
         hwType = HW_TYPE_VESC;
         customConfigNum = 0;
         hasPhaseFilters = false;
+        hasQmlHw = false;
+        qmlHwFullscreen = false;
+        hasQmlApp = false;
+        qmlAppFullscreen = false;
     }
 
     Q_INVOKABLE QString hwTypeStr() {
@@ -516,6 +524,11 @@ public:
     HW_TYPE hwType;
     int customConfigNum;
     bool hasPhaseFilters;
+    bool hasQmlHw;
+    bool qmlHwFullscreen;
+    bool hasQmlApp;
+    bool qmlAppFullscreen;
+
 };
 
 Q_DECLARE_METATYPE(FW_RX_PARAMS)
@@ -783,6 +796,11 @@ typedef enum {
 
     COMM_BMS_FWD_CAN_RX,
     COMM_BMS_HW_DATA,
+    COMM_GET_BATTERY_CUT,
+    COMM_BM_HALT_REQ,
+    COMM_GET_QML_UI_HW,
+    COMM_GET_QML_UI_APP,
+    COMM_CUSTOM_HW_DATA,
 } COMM_PACKET_ID;
 
 // CAN commands

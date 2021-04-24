@@ -51,6 +51,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mInfoConfig = new ConfigParams(this);
     mFwConfig = new ConfigParams(this);
     mCustomConfigsLoaded = false;
+    mQmlHwLoaded = false;
+    mQmlAppLoaded = false;
     mPacket = new Packet(this);
     mCommands = new Commands(this);
 
@@ -3201,6 +3203,13 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_PSW_GET_STATUS));
         compCommands.append(int(COMM_PSW_SWITCH));
         compCommands.append(int(COMM_BMS_FWD_CAN_RX));
+
+        compCommands.append(int(COMM_BMS_HW_DATA));
+        compCommands.append(int(COMM_GET_BATTERY_CUT));
+        compCommands.append(int(COMM_BM_HALT_REQ));
+        compCommands.append(int(COMM_GET_QML_UI_HW));
+        compCommands.append(int(COMM_GET_QML_UI_APP));
+        compCommands.append(int(COMM_CUSTOM_HW_DATA));
     }
 
     if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {
@@ -3401,6 +3410,105 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     }
 
     emit customConfigLoadDone();
+
+    // Read qmlui
+    if (params.hasQmlHw) {
+        QByteArray qmlData;
+        int lenQmlLast = 0;
+        auto conn = connect(mCommands, &Commands::qmluiHwRx,
+                            [&](int lenQml, int ofsQml, QByteArray data) {
+            if (qmlData.size() <= ofsQml) {
+                qmlData.append(data);
+            }
+            lenQmlLast = lenQml;
+        });
+
+        auto getQmlChunk = [&](int size, int offset, int tries, int timeout) {
+            bool res = false;
+
+            for (int j = 0;j < tries;j++) {
+                mCommands->qmlUiHwGet(size, offset);
+                res = Utility::waitSignal(mCommands, SIGNAL(qmluiHwRx(int,int,QByteArray)), timeout);
+                if (res) {
+                    break;
+                }
+            }
+            return res;
+        };
+
+        if (getQmlChunk(10, 0, 5, 1500)) {
+            while (qmlData.size() < lenQmlLast) {
+                int dataLeft = lenQmlLast - qmlData.size();
+                if (!getQmlChunk(dataLeft > 400 ? 400 : dataLeft, qmlData.size(), 5, 1500)) {
+                    break;
+                }
+            }
+
+            if (qmlData.size() == lenQmlLast) {
+                mQmlHw = QString::fromUtf8(qUncompress(qmlData));
+                mQmlHwLoaded = true;
+                emitStatusMessage("Got qmlui HW", true);
+            } else {
+                mQmlHwLoaded = false;
+                emitMessageDialog("Get qmlui HW",
+                                  "Could not read qmlui HW from hardware",
+                                  false, false);
+                disconnect(conn);
+            }
+        }
+
+        disconnect(conn);
+    }
+
+    if (params.hasQmlApp) {
+        QByteArray qmlData;
+        int lenQmlLast = 0;
+        auto conn = connect(mCommands, &Commands::qmluiAppRx,
+                            [&](int lenQml, int ofsQml, QByteArray data) {
+            if (qmlData.size() <= ofsQml) {
+                qmlData.append(data);
+            }
+            lenQmlLast = lenQml;
+        });
+
+        auto getQmlChunk = [&](int size, int offset, int tries, int timeout) {
+            bool res = false;
+
+            for (int j = 0;j < tries;j++) {
+                mCommands->qmlUiAppGet(size, offset);
+                res = Utility::waitSignal(mCommands, SIGNAL(qmluiAppRx(int,int,QByteArray)), timeout);
+                if (res) {
+                    break;
+                }
+            }
+            return res;
+        };
+
+        if (getQmlChunk(10, 0, 5, 1500)) {
+            while (qmlData.size() < lenQmlLast) {
+                int dataLeft = lenQmlLast - qmlData.size();
+                if (!getQmlChunk(dataLeft > 400 ? 400 : dataLeft, qmlData.size(), 5, 1500)) {
+                    break;
+                }
+            }
+
+            if (qmlData.size() == lenQmlLast) {
+                mQmlApp = QString::fromUtf8(qUncompress(qmlData));
+                mQmlAppLoaded = true;
+                emitStatusMessage("Got qmlui App", true);
+            } else {
+                mQmlAppLoaded = false;
+                emitMessageDialog("Get qmlui App",
+                                  "Could not read qmlui App from hardware",
+                                  false, false);
+                disconnect(conn);
+            }
+        }
+
+        disconnect(conn);
+    }
+
+    emit qmlLoadDone();
 }
 
 void VescInterface::appconfUpdated()
@@ -3731,6 +3839,26 @@ ConfigParams *VescInterface::customConfig(int configNum)
     }
 }
 
+bool VescInterface::qmlHwLoaded()
+{
+    return mQmlHwLoaded;
+}
+
+bool VescInterface::qmlAppLoaded()
+{
+    return mQmlAppLoaded;
+}
+
+QString VescInterface::qmlHw()
+{
+    return mQmlHwLoaded ? mQmlHw : "";
+}
+
+QString VescInterface::qmlApp()
+{
+    return mQmlAppLoaded ? mQmlApp : "";
+}
+
 void VescInterface::updateFwRx(bool fwRx)
 {
     bool change = mFwVersionReceived != fwRx;
@@ -3741,6 +3869,8 @@ void VescInterface::updateFwRx(bool fwRx)
 
     if (!mFwVersionReceived) {
         mCustomConfigsLoaded = false;
+        mQmlHwLoaded = false;
+        mQmlAppLoaded = false;
     }
 }
 

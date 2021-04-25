@@ -601,8 +601,8 @@ ApplicationWindow {
                 property int buttonWidth: Math.max(120,
                                                    tabBar.width /
                                                    (rep.model.length +
-                                                    (uiHwPage.visible ? 1 : 0)) +
-                                                   (uiAppPage.visible ? 1 : 0))
+                                                    (uiHwPage.visible ? 1 : 0) +
+                                                   (uiAppPage.visible ? 1 : 0)))
 
                 Repeater {
                     id: rep

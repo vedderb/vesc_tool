@@ -63,6 +63,7 @@ void PageFoc::reloadParams()
         ui->hfiTab->clearParams();
         ui->filterTab->clearParams();
         ui->offsetTab->clearParams();
+        ui->fwTab->clearParams();
         ui->advancedTab->clearParams();
 
         ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "foc", "general");

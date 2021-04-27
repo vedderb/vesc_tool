@@ -487,63 +487,63 @@ Item {
             }
 
             Item {
-                ScrollView {
+                ColumnLayout {
                     anchors.fill: parent
-                    contentWidth: parent.width
-                    clip: true
 
-                    ColumnLayout {
-                        anchors.fill: parent
+                    ScrollView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        contentWidth: parent.width
+                        clip: true
 
                         ParamList {
                             id: paramListBatt
-                            Layout.fillHeight: true
-                            Layout.fillWidth: true
+                            anchors.fill: parent
                         }
+                    }
 
-                        GroupBox {
-                            Layout.fillWidth: true
+                    GroupBox {
+                        Layout.fillWidth: true
 
-                            label: CheckBox {
-                                id: overrideBattBox
-                                checked: false
-                                text: qsTr("Advanced (0 = defaults)")
+                        label: CheckBox {
+                            id: overrideBattBox
+                            checked: false
+                            text: qsTr("Advanced (0 = defaults)")
 
-                                onToggled: {
-                                    if (!checked) {
-                                        currentInMinBox.realValue = 0
-                                        currentInMaxBox.realValue = 0
-                                    }
+                            onToggled: {
+                                if (!checked) {
+                                    currentInMinBox.realValue = 0
+                                    currentInMaxBox.realValue = 0
                                 }
                             }
+                        }
 
-                            ColumnLayout {
-                                anchors.fill: parent
-                                enabled: overrideBattBox.checked
+                        ColumnLayout {
+                            anchors.fill: parent
+                            enabled: overrideBattBox.checked
 
-                                DoubleSpinBox {
-                                    Layout.fillWidth: true
-                                    id: currentInMinBox
-                                    decimals: 1
-                                    realStepSize: 5
-                                    realFrom: 0
-                                    realTo: -9999
-                                    realValue: 0
-                                    prefix: "Battery Current Regen: "
-                                    suffix: " A"
-                                }
+                            DoubleSpinBox {
+                                Layout.fillWidth: true
+                                id: currentInMinBox
+                                decimals: 1
+                                realStepSize: 5
+                                realFrom: 0
+                                realTo: -9999
+                                realValue: 0
+                                prefix: "Battery Current Regen: "
+                                suffix: " A"
+                            }
 
-                                DoubleSpinBox {
-                                    Layout.fillWidth: true
-                                    id: currentInMaxBox
-                                    decimals: 1
-                                    realStepSize: 5
-                                    realFrom: 0
-                                    realTo: 9999
-                                    realValue: 0
-                                    prefix: "Battery Current Max: "
-                                    suffix: " A"
-                                }
+                            DoubleSpinBox {
+                                Layout.fillWidth: true
+                                id: currentInMaxBox
+                                decimals: 1
+                                realStepSize: 5
+                                realFrom: 0
+                                realTo: 9999
+                                realValue: 0
+                                prefix: "Battery Current Max: "
+                                suffix: " A"
                             }
                         }
                     }

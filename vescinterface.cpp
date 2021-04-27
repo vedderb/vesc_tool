@@ -1209,16 +1209,6 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     mCancelFwUpload = false;
 
     if (fwdCan) {
-        if (mCommands->getSendCan()) {
-            emitMessageDialog("Firmware Upload",
-                              "CAN forwarding must be disabled when uploading firmware to "
-                              "all VESCs at the same time.", false, false);
-            mFwUploadStatus = "CAN check failed";
-            mFwUploadProgress = -1.0;
-            emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
-            return false;
-        }
-
         FW_RX_PARAMS fwParamsLocal;
         Utility::getFwVersionBlocking(this, &fwParamsLocal);
         if (fwParamsLocal.hw.isEmpty()) {
@@ -1230,6 +1220,16 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         }
 
         if (fwParamsLocal.hwType == HW_TYPE_VESC) {
+            if (mCommands->getSendCan()) {
+                emitMessageDialog("Firmware Upload",
+                                  "CAN forwarding must be disabled when uploading firmware to "
+                                  "all VESCs at the same time.", false, false);
+                mFwUploadStatus = "CAN check failed";
+                mFwUploadProgress = -1.0;
+                emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, false);
+                return false;
+            }
+
             mFwUploadStatus = "Scanning CAN bus...";
             emit fwUploadStatus(mFwUploadStatus, mFwUploadProgress, true);
             auto devs = scanCan();

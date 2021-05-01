@@ -118,6 +118,8 @@ signals:
     void pswStatusRx(PSW_STATUS stat);
     void qmluiHwRx(int lenQml, int ofsQml, QByteArray data);
     void qmluiAppRx(int lenQml, int ofsQml, QByteArray data);
+    void eraseQmluiResReceived(bool ok);
+    void writeQmluiResReceived(bool ok, quint32 offset);
 
 public slots:
     void processPacket(QByteArray data);
@@ -212,6 +214,8 @@ public slots:
 
     void qmlUiHwGet(int len, int offset);
     void qmlUiAppGet(int len, int offset);
+    void qmlUiErase();
+    void qmlUiWrite(QByteArray data, quint32 offset);
 
 private slots:
     void timerSlot();

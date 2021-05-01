@@ -860,6 +860,16 @@ void Commands::processPacket(QByteArray data)
         emit qmluiAppRx(qmlSize, offset, vb);
     } break;
 
+    case COMM_QMLUI_ERASE:
+        emit eraseQmluiResReceived(vb.at(0));
+        break;
+
+    case COMM_QMLUI_WRITE: {
+        bool ok = vb.vbPopFrontInt8();
+        quint32 offset = vb.vbPopFrontUint32();
+        emit writeQmluiResReceived(ok, offset);
+    } break;
+
     default:
         break;
     }
@@ -1777,6 +1787,22 @@ void Commands::qmlUiAppGet(int len, int offset)
     vb.vbAppendUint8(COMM_GET_QML_UI_APP);
     vb.vbAppendInt32(len);
     vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::qmlUiErase()
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_QMLUI_ERASE);
+    emitData(vb);
+}
+
+void Commands::qmlUiWrite(QByteArray data, quint32 offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_QMLUI_WRITE);
+    vb.vbAppendUint32(offset);
+    vb.append(data);
     emitData(vb);
 }
 

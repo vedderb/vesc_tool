@@ -20,6 +20,7 @@
 #include "pagescripting.h"
 #include "ui_pagescripting.h"
 #include "widgets/helpdialog.h"
+#include "packet.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -28,7 +29,7 @@
 #include <QDateTime>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QDirIterator>
+#include <QDir>
 #include <QVescCompleter>
 
 PageScripting::PageScripting(QWidget *parent) :
@@ -102,12 +103,10 @@ PageScripting::PageScripting(QWidget *parent) :
     updateRecentList();
 
     // Load examples
-    QDirIterator it("://res/qml/Examples/");
-    while (it.hasNext()) {
-        QFileInfo fi(it.next());
+    for (auto fi: QDir("://res/qml/Examples/").entryInfoList(QDir::NoFilter, QDir::Name)) {
         QListWidgetItem *item = new QListWidgetItem;
-        item->setText(it.fileName());
-        item->setData(Qt::UserRole, it.filePath());
+        item->setText(fi.fileName());
+        item->setData(Qt::UserRole, fi.filePath());
         ui->exampleList->addItem(item);
     }
 
@@ -478,6 +477,59 @@ bool PageScripting::exportCArray(QString name)
     return true;
 }
 
+bool PageScripting::eraseQml()
+{
+    if (!mVesc) {
+        return false;
+    }
+
+    if (!mVesc->isPortConnected()) {
+        ui->uploadTextEdit->appendPlainText("Not connected");
+        return false;
+    }
+
+    auto waitEraseRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(6000);
+        auto conn = connect(mVesc->commands(), &Commands::eraseQmluiResReceived,
+                            [&res,&loop](bool erRes) {
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    mVesc->commands()->qmlUiErase();
+
+    ui->uploadTextEdit->appendPlainText("Erasing QMLUI...");
+
+    int erRes = waitEraseRes();
+    if (erRes != 1) {
+        QString msg = "Unknown failure";
+
+        if (erRes == -10) {
+            msg = "Erase timed out";
+        } else if (erRes == -1) {
+            msg = "Erasing QMLUI failed";
+        }
+
+        ui->uploadTextEdit->appendPlainText(msg);
+        return false;
+    }
+
+    ui->uploadTextEdit->appendPlainText("Erase OK!");
+    return true;
+}
+
 void PageScripting::on_helpButton_clicked()
 {
     QString html = "<b>Keyboard Commands</b><br>"
@@ -534,4 +586,94 @@ void PageScripting::on_openQmluiAppButton_clicked()
         QMessageBox::critical(this, "Open Qmlui App",
                               "No App qmlui loaded.");
     }
+}
+
+void PageScripting::on_uploadButton_clicked()
+{
+    ui->uploadButton->setEnabled(false);
+    ui->eraseOnlyButton->setEnabled(false);
+
+    if (!eraseQml()) {
+        ui->uploadButton->setEnabled(true);
+        ui->eraseOnlyButton->setEnabled(true);
+        return;
+    }
+
+    auto waitWriteRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1000);
+        auto conn = connect(mVesc->commands(), &Commands::writeQmluiResReceived,
+                            [&res,&loop](bool erRes, quint32 offset) {
+            (void)offset;
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    VByteArray vb;
+    vb.vbAppendUint16(ui->uploadFullscreenBox->isChecked() ? 2 : 1);
+    vb.append(qCompress(qmlToRun(false).toUtf8(), 9));
+    quint16 crc = Packet::crc16((const unsigned char*)vb.constData(),
+                                uint32_t(vb.size()));
+    VByteArray data;
+    data.vbAppendUint32(vb.size() - 2);
+    data.vbAppendUint16(crc);
+    data.append(vb);
+
+    if (data.size() > (1024 * 120)) {
+        ui->uploadTextEdit->appendPlainText("Not enough space");
+        ui->uploadButton->setEnabled(true);
+        ui->eraseOnlyButton->setEnabled(true);
+        return;
+    }
+
+    ui->uploadTextEdit->appendPlainText("Writing data...");
+
+    quint32 offset = 0;
+    bool ok = true;
+    while (data.size() > 0) {
+        const int chunkSize = 384;
+        int sz = data.size() > chunkSize ? chunkSize : data.size();
+
+        mVesc->commands()->qmlUiWrite(data.mid(0, sz), offset);
+        if (!waitWriteRes()) {
+            ui->uploadTextEdit->appendPlainText("Write failed");
+            ok = false;
+            break;
+        }
+
+        offset += sz;
+        data.remove(0, sz);
+    }
+
+    if (ok) {
+        ui->uploadTextEdit->appendPlainText("Write OK!");
+    }
+
+    ui->uploadButton->setEnabled(true);
+    ui->eraseOnlyButton->setEnabled(true);
+}
+
+void PageScripting::on_eraseOnlyButton_clicked()
+{
+    ui->eraseOnlyButton->setEnabled(false);
+    eraseQml();
+    ui->eraseOnlyButton->setEnabled(true);
+}
+
+void PageScripting::on_calcSizeButton_clicked()
+{
+    QMessageBox::information(this, "QML Size",
+                             QString("Compressed QML size: %1").
+                             arg(qCompress(qmlToRun(false).toUtf8(), 9).size()));
 }

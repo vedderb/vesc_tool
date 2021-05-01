@@ -23,11 +23,37 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.12
 
 Item {
-    id: container
-
     Rectangle {
         anchors.fill: parent
         color: Material.background
+    }
+
+    ColumnLayout {
+        anchors.fill: parent
+
+        TabBar {
+            id: tabBar
+            Layout.fillWidth: true
+            implicitWidth: 0
+            clip: true
+            visible: false
+
+            background: Rectangle {
+                opacity: 1
+                color: "#4f4f4f"
+            }
+
+            TabButton {
+                text: "Test"
+            }
+        }
+
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            id: container
+            property var tabBarItem: tabBar
+        }
     }
 
     Connections {

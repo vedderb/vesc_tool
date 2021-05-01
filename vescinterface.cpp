@@ -248,6 +248,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mUseImperialUnits = mSettings.value("useImperialUnits", false).toBool();
     mKeepScreenOn = mSettings.value("keepScreenOn", true).toBool();
     mUseWakeLock = mSettings.value("useWakeLock", false).toBool();
+    mLoadQmlUiOnConnect = mSettings.value("loadQmlUiOnConnect", true).toBool();
 
     mCommands->setAppConfig(mAppConfig);
     mCommands->setMcConfig(mMcConfig);
@@ -600,6 +601,7 @@ void VescInterface::storeSettings()
     mSettings.setValue("useImperialUnits", mUseImperialUnits);
     mSettings.setValue("keepScreenOn", mKeepScreenOn);
     mSettings.setValue("useWakeLock", mUseWakeLock);
+    mSettings.setValue("loadQmlUiOnConnect", mLoadQmlUiOnConnect);
 
     mSettings.sync();
 }
@@ -1829,6 +1831,16 @@ bool VescInterface::setWakeLock(bool lock)
     (void)lock;
     return true;
 #endif
+}
+
+bool VescInterface::getLoadQmlUiOnConnect() const
+{
+    return mLoadQmlUiOnConnect;
+}
+
+void VescInterface::setLoadQmlUiOnConnect(bool loadQmlUiOnConnect)
+{
+    mLoadQmlUiOnConnect = loadQmlUiOnConnect;
 }
 
 #ifdef HAS_SERIALPORT
@@ -3203,13 +3215,14 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_PSW_GET_STATUS));
         compCommands.append(int(COMM_PSW_SWITCH));
         compCommands.append(int(COMM_BMS_FWD_CAN_RX));
-
         compCommands.append(int(COMM_BMS_HW_DATA));
         compCommands.append(int(COMM_GET_BATTERY_CUT));
         compCommands.append(int(COMM_BM_HALT_REQ));
         compCommands.append(int(COMM_GET_QML_UI_HW));
         compCommands.append(int(COMM_GET_QML_UI_APP));
         compCommands.append(int(COMM_CUSTOM_HW_DATA));
+        compCommands.append(int(COMM_QMLUI_ERASE));
+        compCommands.append(int(COMM_QMLUI_WRITE));
     }
 
     if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {
@@ -3412,7 +3425,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     emit customConfigLoadDone();
 
     // Read qmlui
-    if (params.hasQmlHw) {
+    if (mLoadQmlUiOnConnect && params.hasQmlHw) {
         QByteArray qmlData;
         int lenQmlLast = 0;
         auto conn = connect(mCommands, &Commands::qmluiHwRx,
@@ -3460,7 +3473,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         disconnect(conn);
     }
 
-    if (params.hasQmlApp) {
+    if (mLoadQmlUiOnConnect && params.hasQmlApp) {
         QByteArray qmlData;
         int lenQmlLast = 0;
         auto conn = connect(mCommands, &Commands::qmluiAppRx,

@@ -64,6 +64,9 @@ private slots:
     void on_exportCArrayAppButton_clicked();
     void on_openQmluiHwButton_clicked();
     void on_openQmluiAppButton_clicked();
+    void on_uploadButton_clicked();
+    void on_eraseOnlyButton_clicked();
+    void on_calcSizeButton_clicked();
 
 private:
     Ui::PageScripting *ui;
@@ -78,6 +81,7 @@ private:
     void createEditorTab(QString fileName, QString content);
     QString qmlToRun(bool importDir = true);
     bool exportCArray(QString name);
+    bool eraseQml();
 
 };
 

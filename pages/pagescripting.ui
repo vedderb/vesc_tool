@@ -327,6 +327,9 @@
              <string>Export C Array</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_5">
+             <property name="spacing">
+              <number>2</number>
+             </property>
              <item>
               <widget class="QPushButton" name="exportCArrayHwButton">
                <property name="text">
@@ -346,6 +349,20 @@
                <property name="icon">
                 <iconset resource="../res.qrc">
                  <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="calcSizeButton">
+               <property name="toolTip">
+                <string>Calculate compressed QML size</string>
+               </property>
+               <property name="text">
+                <string>Calculate Size</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/Calculator-96.png</normaloff>:/res/icons/Calculator-96.png</iconset>
                </property>
               </widget>
              </item>
@@ -371,6 +388,9 @@
              <string>Connected VESC</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_8">
+             <property name="spacing">
+              <number>2</number>
+             </property>
              <item>
               <widget class="QPushButton" name="openQmluiHwButton">
                <property name="text">
@@ -410,17 +430,92 @@
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+           <widget class="QGroupBox" name="groupBox_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
+            <property name="title">
+             <string>QML Upload</string>
             </property>
-           </spacer>
+            <layout class="QVBoxLayout" name="verticalLayout_9">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="uploadButton">
+                 <property name="text">
+                  <string>Erase &amp;&amp; Upload</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../res.qrc">
+                   <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="eraseOnlyButton">
+                 <property name="text">
+                  <string>Erase Only</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../res.qrc">
+                   <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="uploadFullscreenBox">
+                 <property name="toolTip">
+                  <string>Run uploaded UI in fullscreen mode.</string>
+                 </property>
+                 <property name="text">
+                  <string>Fullscreen</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="clearUploadTextButton">
+                 <property name="toolTip">
+                  <string>Clear text below</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../res.qrc">
+                   <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QPlainTextEdit" name="uploadTextEdit">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </item>
@@ -461,11 +556,27 @@
    <hints>
     <hint type="sourcelabel">
      <x>1415</x>
-     <y>473</y>
+     <y>148</y>
     </hint>
     <hint type="destinationlabel">
      <x>1128</x>
      <y>744</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearUploadTextButton</sender>
+   <signal>clicked()</signal>
+   <receiver>uploadTextEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1385</x>
+     <y>168</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1386</x>
+     <y>236</y>
     </hint>
    </hints>
   </connection>

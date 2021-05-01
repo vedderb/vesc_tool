@@ -55,6 +55,7 @@ private slots:
     void on_jsScanButton_clicked();
     void on_jsConnectButton_clicked();
     void on_jsResetConfigButton_clicked();
+    void on_loadQmlUiConnectBox_toggled(bool checked);
 
 private:
     Ui::PageSettings *ui;

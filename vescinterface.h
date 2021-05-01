@@ -150,6 +150,8 @@ public:
     Q_INVOKABLE bool useWakeLock();
     Q_INVOKABLE void setUseWakeLock(bool on);
     Q_INVOKABLE bool setWakeLock(bool lock);
+    Q_INVOKABLE bool getLoadQmlUiOnConnect() const;
+    Q_INVOKABLE void setLoadQmlUiOnConnect(bool loadQmlUiOnConnect);
 
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
@@ -399,6 +401,7 @@ private:
     bool mUseImperialUnits;
     bool mKeepScreenOn;
     bool mUseWakeLock;
+    bool mLoadQmlUiOnConnect;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

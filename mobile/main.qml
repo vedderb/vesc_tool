@@ -632,6 +632,7 @@ ApplicationWindow {
         Item {
             id: uiHw
             anchors.fill: parent
+            property var tabBarItem: tabBar
         }
     }
 
@@ -649,6 +650,7 @@ ApplicationWindow {
         Item {
             id: uiApp
             anchors.fill: parent
+            property var tabBarItem: tabBar
         }
     }
 
@@ -827,6 +829,12 @@ ApplicationWindow {
         tabBar.enabled = true
 
         if (VescIf.isPortConnected() && VescIf.qmlHwLoaded()) {
+            if (VescIf.getLastFwRxParams().qmlHwFullscreen) {
+                swipeView.interactive = false
+                tabBar.visible = false
+                tabBar.enabled = false
+            }
+
             hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
             uiHwButton.visible = true
             swipeView.insertItem(1, uiHwPage)
@@ -834,12 +842,6 @@ ApplicationWindow {
             uiHwPage.visible = true
             swipeView.setCurrentIndex(0)
             swipeView.setCurrentIndex(1)
-
-            if (VescIf.getLastFwRxParams().qmlHwFullscreen) {
-                swipeView.interactive = false
-                tabBar.visible = false
-                tabBar.enabled = false
-            }
         } else {
             uiHwPage.visible = false
             uiHwPage.parent = null
@@ -860,6 +862,12 @@ ApplicationWindow {
         tabBar.enabled = true
 
         if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
+            if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
+                swipeView.interactive = false
+                tabBar.visible = false
+                tabBar.enabled = false
+            }
+
             appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
             uiAppButton.visible = true
             swipeView.insertItem(1, uiAppPage)
@@ -867,12 +875,6 @@ ApplicationWindow {
             uiAppPage.visible = true
             swipeView.setCurrentIndex(0)
             swipeView.setCurrentIndex(1)
-
-            if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
-                swipeView.interactive = false
-                tabBar.visible = false
-                tabBar.enabled = false
-            }
         } else {
             uiAppPage.visible = false
             uiAppPage.parent = null

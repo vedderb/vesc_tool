@@ -149,6 +149,9 @@ VescInterface *PageSettings::vesc() const
 void PageSettings::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
+    if (mVesc) {
+        ui->loadQmlUiConnectBox->setChecked(mVesc->getLoadQmlUiOnConnect());
+    }
 }
 
 void PageSettings::setUseGamepadControl(bool useControl)
@@ -313,4 +316,11 @@ void PageSettings::on_jsResetConfigButton_clicked()
         QGamepadManager::instance()->resetConfiguration(mGamepad->deviceId());
     }
 #endif
+}
+
+void PageSettings::on_loadQmlUiConnectBox_toggled(bool checked)
+{
+    if (mVesc) {
+        mVesc->setLoadQmlUiOnConnect(checked);
+    }
 }

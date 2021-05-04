@@ -361,6 +361,22 @@ void PageFirmware::uploadFw(bool allOverCan)
                                   tr("The VESC is not connected. Please connect it."));
             return;
         }
+        if (!mVesc->deserializeFailedSinceConnected() && (mVesc->appConfig()->getParamEnum("app_to_use") == 9)) {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::warning(this,
+                                         tr("Warning"),
+                                         tr("Uploading new firmware while the Balance App is active "
+                                            "can be dangerous. Switch to UART App instead?"),
+                                         QMessageBox::Yes | QMessageBox::No | QMessageBox::Abort, QMessageBox::Yes);
+            if (reply == QMessageBox::Yes) {
+                mVesc->commands()->getAppConf();
+                mVesc->appConfig()->updateParamEnum("app_to_use", 3);
+                mVesc->commands()->setAppConf();
+            }
+            else if (reply == QMessageBox::Abort) {
+                return;
+            }
+        }
 
         QFile file;
 

@@ -22,16 +22,51 @@ Item {
     }
     
     TabBar {
+        id: localTabBar
         parent: parentTabBar
         anchors.fill: parent
+        currentIndex: swipeView.currentIndex
         
         background: Rectangle {
             opacity: 1
             color: "#4f4f4f"
         }
         
-        TabButton {
-            text: "Test Button"
+        property int buttonWidth: Math.max(120, localTabBar.width / (rep.model.length))
+
+        Repeater {
+            id: rep
+            model: ["Tab 1", "Tab 2"]
+            
+            TabButton {
+                text: modelData
+                width: localTabBar.buttonWidth
+            }
+        }
+    }
+    
+    SwipeView {
+        id: swipeView
+        currentIndex: localTabBar.currentIndex
+        anchors.fill: parent
+        clip: true
+        
+        Page {
+            Text {
+                anchors.fill: parent
+                anchors.margins: 5
+                text: "Tab 1"
+                color: "white"
+            }
+        }
+        
+        Page {
+            Text {
+                anchors.fill: parent
+                anchors.margins: 5
+                text: "Tab 2"
+                color: "white"
+            }
         }
     }
 }

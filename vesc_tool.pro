@@ -30,7 +30,11 @@ vt_test_version: {
 }
 
 CONFIG += c++11
-QMAKE_CXXFLAGS += -Wno-deprecated-copy
+!win32-msvc*: {
+    QMAKE_CXXFLAGS += -Wno-deprecated-copy
+}else: {
+    CONFIG+=resources_big
+}
 
 # Build mobile GUI
 #CONFIG += build_mobile

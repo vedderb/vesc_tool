@@ -263,10 +263,10 @@ void DetectFoc::updateColors()
     bool ki_ok = ui->kiBox->value() > 1e-10;
 
     QString style_red = "color: rgb(255, 255, 255);"
-                        "background-color: rgb(150, 0, 0);";
+                        "background-color: rgb(140,37,37);";
 
     QString style_green = "color: rgb(255, 255, 255);"
-                          "background-color: rgb(0, 150, 0);";
+                          "background-color: rgb(95,140,95)";
 
     ui->resistanceBox->setStyleSheet(QString("#resistanceBox {%1}").
                                      arg(r_ok ? style_green : style_red));

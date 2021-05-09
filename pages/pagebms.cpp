@@ -93,7 +93,7 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
         sensor.append(i + 1);
         temp.append(t);
         mTempBars.at(i)->setData(sensor, temp);
-        mTempBars.at(i)->setBrush(t > 55 ? Qt::red : Qt::blue);
+        mTempBars.at(i)->setBrush(t > 55 ? QColor(200,52,52) : QColor(77,127,196));
 
         textTicker2->addTick(i + 1, QString("T%1 (%2 °C)").
                             arg(i + 1).arg(t));

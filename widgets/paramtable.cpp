@@ -69,8 +69,9 @@ void ParamTable::addRowSeparator(QString text)
     label->setAlignment(Qt::AlignHCenter);
     QFont font;
     font.setBold(true);
+    label->setStyleSheet("QLabel { background-color : '#477589'; color : white; }");
     label->setFont(font);
-    label->setStyleSheet("QLabel { background-color : lightblue; color : black; }");
+    //label->setFixedHeight(font.pointSize()*2.5);
 
     setCellWidget(row, 0, label);
     setSpan(row, 0, 1, 2);

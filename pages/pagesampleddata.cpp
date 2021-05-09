@@ -145,19 +145,17 @@ void PageSampledData::timerSlot()
         ui->filterResponsePlot->addGraph();
         ui->filterResponsePlot->graph(0)->setData(filterIndex, response);
         ui->filterResponsePlot->graph(0)->setName("Filter Response");
-        ui->filterResponsePlot->graph(0)->setPen(QPen(Qt::red));
+        ui->filterResponsePlot->graph(0)->setPen(QPen(QColor(200,52,52)));
 
         ui->filterPlot->legend->setVisible(true);
         ui->filterPlot->legend->setFont(legendFont);
         ui->filterPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-        ui->filterPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
         ui->filterPlot->xAxis->setLabel("Index");
         ui->filterPlot->yAxis->setLabel("Value");
 
         ui->filterResponsePlot->legend->setVisible(true);
         ui->filterResponsePlot->legend->setFont(legendFont);
         ui->filterResponsePlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-        ui->filterResponsePlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
         ui->filterResponsePlot->xAxis->setLabel("Frequency (Hz)");
         ui->filterResponsePlot->yAxis->setLabel("Gain");
 
@@ -300,11 +298,11 @@ void PageSampledData::timerSlot()
 
             QPen phasePen;
             phasePen.setStyle(Qt::DotLine);
-            phasePen.setColor(Qt::blue);
+            phasePen.setColor(QColor(77,127,196));
 
             QPen phasePen2;
             phasePen2.setStyle(Qt::DotLine);
-            phasePen2.setColor(Qt::red);
+            phasePen2.setColor(QColor(200,52,52));
 
             int graphIndex = 0;
 
@@ -319,7 +317,7 @@ void PageSampledData::timerSlot()
             if (ui->showCurrent2Box->isChecked()) {
                 ui->currentPlot->addGraph();
                 ui->currentPlot->graph(graphIndex)->setData(xAxisCurrDec, curr2);
-                ui->currentPlot->graph(graphIndex)->setPen(QPen(Qt::red));
+                ui->currentPlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
                 ui->currentPlot->graph(graphIndex)->setName("Phase 2 Current");
                 graphIndex++;
             }
@@ -327,7 +325,7 @@ void PageSampledData::timerSlot()
             if (ui->showCurrent3Box->isChecked()) {
                 ui->currentPlot->addGraph();
                 ui->currentPlot->graph(graphIndex)->setData(xAxisCurrDec, curr3);
-                ui->currentPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+                ui->currentPlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
                 ui->currentPlot->graph(graphIndex)->setName("Phase 3 Current");
                 graphIndex++;
             }
@@ -335,7 +333,7 @@ void PageSampledData::timerSlot()
             if (ui->showMcTotalCurrentBox->isChecked()) {
                 ui->currentPlot->addGraph();
                 ui->currentPlot->graph(graphIndex)->setData(xAxisCurr, totCurrentMc);
-                ui->currentPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+                ui->currentPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
                 ui->currentPlot->graph(graphIndex)->setName("Total current filtered by MC");
                 graphIndex++;
             }
@@ -361,7 +359,7 @@ void PageSampledData::timerSlot()
             if (ui->showPh1Box->isChecked()) {
                 ui->voltagePlot->addGraph();
                 ui->voltagePlot->graph(graphIndex)->setData(xAxisVolt, ph1);
-                ui->voltagePlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+                ui->voltagePlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
                 ui->voltagePlot->graph(graphIndex)->setName("Phase 1 voltage");
                 graphIndex++;
             }
@@ -369,7 +367,7 @@ void PageSampledData::timerSlot()
             if (ui->showPh2Box->isChecked()) {
                 ui->voltagePlot->addGraph();
                 ui->voltagePlot->graph(graphIndex)->setData(xAxisVolt, ph2);
-                ui->voltagePlot->graph(graphIndex)->setPen(QPen(Qt::red));
+                ui->voltagePlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
                 ui->voltagePlot->graph(graphIndex)->setName("Phase 2 voltage");
                 graphIndex++;
             }
@@ -377,7 +375,7 @@ void PageSampledData::timerSlot()
             if (ui->showPh3Box->isChecked()) {
                 ui->voltagePlot->addGraph();
                 ui->voltagePlot->graph(graphIndex)->setData(xAxisVolt, ph3);
-                ui->voltagePlot->graph(graphIndex)->setPen(QPen(Qt::green));
+                ui->voltagePlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
                 ui->voltagePlot->graph(graphIndex)->setName("Phase 3 voltage");
                 graphIndex++;
             }
@@ -416,7 +414,6 @@ void PageSampledData::timerSlot()
             ui->currentPlot->legend->setVisible(true);
             ui->currentPlot->legend->setFont(legendFont);
             ui->currentPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-            ui->currentPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
             if (showFft) {
                 ui->currentPlot->xAxis->setLabel("Frequency (Hz)");
                 ui->currentPlot->yAxis->setLabel("Amplitude");
@@ -435,7 +432,6 @@ void PageSampledData::timerSlot()
             ui->voltagePlot->legend->setVisible(true);
             ui->voltagePlot->legend->setFont(legendFont);
             ui->voltagePlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-            ui->voltagePlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
             ui->voltagePlot->xAxis->setLabel("Seconds (s)");
             ui->voltagePlot->yAxis->setLabel("Volts (V)");
 

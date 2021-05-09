@@ -19,7 +19,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_original.qrc">
+   <iconset resource="res_neutral.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -64,7 +64,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_original.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_neutral.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -111,6 +111,12 @@
            </property>
            <property name="selectionBehavior">
             <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="resizeMode">
+            <enum>QListView::Adjust</enum>
+           </property>
+           <property name="viewMode">
+            <enum>QListView::ListMode</enum>
            </property>
           </widget>
           <widget class="QWidget" name="layoutWidget">
@@ -178,7 +184,7 @@
            <string>Scan CAN</string>
           </property>
           <property name="icon">
-           <iconset resource="res.qrc">
+           <iconset>
             <normaloff>:/res/icons/Refresh-96.png</normaloff>:/res/icons/Refresh-96.png</iconset>
           </property>
          </widget>
@@ -259,7 +265,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="res.qrc">
+         <iconset>
           <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
         </property>
        </widget>
@@ -273,7 +279,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="res.qrc">
+         <iconset>
           <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
         </property>
        </widget>
@@ -287,7 +293,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="res.qrc">
+         <iconset>
           <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
         </property>
        </widget>
@@ -301,7 +307,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="res.qrc">
+         <iconset>
           <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
         </property>
        </widget>
@@ -321,7 +327,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="res.qrc">
+         <iconset>
           <normaloff>:/res/icons/Stop Sign-96.png</normaloff>:/res/icons/Stop Sign-96.png</iconset>
         </property>
         <property name="iconSize">
@@ -347,7 +353,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="res.qrc">
+         <iconset>
           <normaloff>:/res/icons/Anchor-96.png</normaloff>:/res/icons/Anchor-96.png</iconset>
         </property>
         <property name="iconSize">
@@ -488,7 +494,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="res.qrc">
+         <iconset>
           <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
         </property>
        </widget>
@@ -502,7 +508,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="res.qrc">
+         <iconset>
           <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
         </property>
         <property name="flat">
@@ -623,7 +629,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>23</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -724,7 +730,7 @@
   </widget>
   <action name="actionReadMcconf">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/motor_up.png</normaloff>:/res/icons/motor_up.png</iconset>
    </property>
    <property name="text">
@@ -736,7 +742,7 @@
   </action>
   <action name="actionReadMcconfDefault">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/motor_default.png</normaloff>:/res/icons/motor_default.png</iconset>
    </property>
    <property name="text">
@@ -748,7 +754,7 @@
   </action>
   <action name="actionWriteMcconf">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/motor_down.png</normaloff>:/res/icons/motor_down.png</iconset>
    </property>
    <property name="text">
@@ -760,7 +766,7 @@
   </action>
   <action name="actionSaveMotorConfXml">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
    </property>
    <property name="text">
@@ -769,7 +775,7 @@
   </action>
   <action name="actionLoadMotorConfXml">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
    </property>
    <property name="text">
@@ -778,7 +784,7 @@
   </action>
   <action name="actionDisconnect">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Disconnected-96.png</normaloff>:/res/icons/Disconnected-96.png</iconset>
    </property>
    <property name="text">
@@ -790,7 +796,7 @@
   </action>
   <action name="actionReboot">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
    </property>
    <property name="text">
@@ -805,7 +811,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/can_off.png</normaloff>
      <normalon>:/res/icons/can_on.png</normalon>:/res/icons/can_off.png</iconset>
    </property>
@@ -818,7 +824,7 @@
   </action>
   <action name="actionReconnect">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Connected-96.png</normaloff>:/res/icons/Connected-96.png</iconset>
    </property>
    <property name="text">
@@ -833,7 +839,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/rt_off.png</normaloff>
      <normalon>:/res/icons/rt_on.png</normalon>:/res/icons/rt_off.png</iconset>
    </property>
@@ -846,7 +852,7 @@
   </action>
   <action name="actionReadAppconf">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/app_up.png</normaloff>:/res/icons/app_up.png</iconset>
    </property>
    <property name="text">
@@ -858,7 +864,7 @@
   </action>
   <action name="actionReadAppconfDefault">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/app_default.png</normaloff>:/res/icons/app_default.png</iconset>
    </property>
    <property name="text">
@@ -870,7 +876,7 @@
   </action>
   <action name="actionWriteAppconf">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/app_down.png</normaloff>:/res/icons/app_down.png</iconset>
    </property>
    <property name="text">
@@ -882,7 +888,7 @@
   </action>
   <action name="actionSaveAppconfXml">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
    </property>
    <property name="text">
@@ -891,7 +897,7 @@
   </action>
   <action name="actionLoadAppconfXml">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
    </property>
    <property name="text">
@@ -900,7 +906,7 @@
   </action>
   <action name="actionExit">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
    </property>
    <property name="text">
@@ -909,7 +915,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
    </property>
    <property name="text">
@@ -921,7 +927,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/keys_off.png</normaloff>
      <normalon>:/res/icons/keys_on.png</normalon>:/res/icons/keys_off.png</iconset>
    </property>
@@ -932,26 +938,26 @@
     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Enable keyboard control.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Key functions:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-weight:600;&quot;&gt;Up and Down Arrow Keys&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Current control using the current value in the lower&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;left corner.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-weight:600;&quot;&gt;Right and Left Arrow Keys&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Duty cycle control. Slowly ramps up and down the cuty&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;cycle. When e.g. starting with right and then also holding&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;left, the duty cycle is ramped higher.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-weight:600;&quot;&gt;Page Down&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Brake with the current set in the lower left corner.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Enable keyboard control.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Key functions:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Up and Down Arrow Keys&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Current control using the current value in the lower&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;left corner.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Right and Left Arrow Keys&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Duty cycle control. Slowly ramps up and down the cuty&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;cycle. When e.g. starting with right and then also holding&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;left, the duty cycle is ramped higher.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Page Down&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Brake with the current set in the lower left corner.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
   <action name="actionParameterEditorMcconf">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
    </property>
    <property name="text">
@@ -960,7 +966,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionParameterEditorAppconf">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
    </property>
    <property name="text">
@@ -969,7 +975,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSaveAppConfigurationHeader">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
    </property>
    <property name="text">
@@ -978,7 +984,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSaveMotorConfigurationHeader">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
    </property>
    <property name="text">
@@ -987,7 +993,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSaveAppConfigurationHeaderWrap">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
    </property>
    <property name="text">
@@ -996,7 +1002,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSaveMotorConfigurationHeaderWrap">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
    </property>
    <property name="text">
@@ -1008,7 +1014,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/rt_app_off.png</normaloff>
      <normalon>:/res/icons/rt_app_on.png</normalon>:/res/icons/rt_app_off.png</iconset>
    </property>
@@ -1021,7 +1027,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionTerminalPrintFaults">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Console-96.png</normaloff>:/res/icons/Console-96.png</iconset>
    </property>
    <property name="text">
@@ -1033,7 +1039,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionTerminalShowHelp">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
    </property>
    <property name="text">
@@ -1042,7 +1048,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionTerminalClear">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
    </property>
    <property name="text">
@@ -1051,7 +1057,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionTerminalPrintThreads">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Electronics-96.png</normaloff>:/res/icons/Electronics-96.png</iconset>
    </property>
    <property name="text">
@@ -1066,7 +1072,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/alive_off.png</normaloff>
      <normalon>:/res/icons/alive_on.png</normalon>:/res/icons/alive_off.png</iconset>
    </property>
@@ -1079,7 +1085,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionLibrariesUsed">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
    </property>
    <property name="text">
@@ -1088,7 +1094,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionMotorSetupWizard">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
    </property>
    <property name="text">
@@ -1100,7 +1106,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionAppSetupWizard">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
    </property>
    <property name="text">
@@ -1112,7 +1118,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionAboutQt">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
    </property>
    <property name="text">
@@ -1124,7 +1130,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionParameterEditorInfo">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
    </property>
    <property name="text">
@@ -1133,7 +1139,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSafetyInformation">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
    </property>
    <property name="text">
@@ -1142,7 +1148,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionWarrantyStatement">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
    </property>
    <property name="text">
@@ -1154,7 +1160,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionVESCToolChangelog">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
    </property>
    <property name="text">
@@ -1163,7 +1169,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionTerminalDRVResetLatchedFaults">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Bug-96.png</normaloff>:/res/icons/Bug-96.png</iconset>
    </property>
    <property name="text">
@@ -1172,7 +1178,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionVESCProjectForums">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/User Group Man Man-96.png</normaloff>:/res/icons/User Group Man Man-96.png</iconset>
    </property>
    <property name="text">
@@ -1181,7 +1187,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionFirmwareChangelog">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
    </property>
    <property name="text">
@@ -1190,7 +1196,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionLicense">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
    </property>
    <property name="text">
@@ -1199,7 +1205,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionAutoSetupFOC">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
    </property>
    <property name="text">
@@ -1208,7 +1214,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionExportConfigurationParser">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
    </property>
    <property name="text">
@@ -1220,7 +1226,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/imu_off.png</normaloff>
      <normalon>:/res/icons/imu_on.png</normalon>:/res/icons/imu_off.png</iconset>
    </property>
@@ -1233,7 +1239,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionLoadFirmwareConfigs">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Electronics-96.png</normaloff>:/res/icons/Electronics-96.png</iconset>
    </property>
    <property name="text">
@@ -1242,7 +1248,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionBackupConfiguration">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
    </property>
    <property name="text">
@@ -1254,7 +1260,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionRestoreConfiguration">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
    </property>
    <property name="text">
@@ -1266,7 +1272,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionClearConfigurationBackups">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
    </property>
    <property name="text">
@@ -1275,7 +1281,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionParameterEditorFW">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
    </property>
    <property name="text">
@@ -1287,7 +1293,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionBackupConfigurationsCAN">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
    </property>
    <property name="text">
@@ -1296,7 +1302,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionRestoreConfigurationsCAN">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
    </property>
    <property name="text">
@@ -1308,7 +1314,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/bms_off.png</normaloff>
      <normalon>:/res/icons/bms_on.png</normalon>:/res/icons/bms_off.png</iconset>
    </property>
@@ -1324,7 +1330,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Controller-96.png</normaloff>
      <normalon>:/res/icons/Controller-96_on.png</normalon>:/res/icons/Controller-96.png</iconset>
    </property>
@@ -1337,7 +1343,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionParameterEditorCustomConf0">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
    </property>
    <property name="text">
@@ -1346,7 +1352,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSetupMotorsFOCQuick">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
    </property>
    <property name="text">
@@ -1364,8 +1370,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_original.qrc"/>
-  <include location="res.qrc"/>
+  <include location="res_neutral.qrc"/>
  </resources>
  <connections/>
 </ui>

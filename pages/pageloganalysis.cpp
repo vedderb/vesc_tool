@@ -89,7 +89,6 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->plot->legend->setVisible(true);
     ui->plot->legend->setFont(legendFont);
     ui->plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->plot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->plot->xAxis->setLabel("Seconds (s)");
 
     auto addDataItem = [this](QString name, bool hasScale = true,
@@ -208,7 +207,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
             ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
 
             double upper = ui->plot->xAxis->range().upper;
-            double progress = ui->plot->xAxis->pixelToCoord(event->x()) / upper;
+            double progress = ui->plot->xAxis->pixelToCoord(event->position().x()) / upper;
             double diff = event->angleDelta().y();
             double d1 = diff * progress;
             double d2 = diff * (1.0 - progress);
@@ -723,12 +722,12 @@ void PageLogAnalysis::updateGraphs()
     ui->plot->clearGraphs();
 
     for (int i = 0;i < yAxes.size();i++) {
-        QPen pen = QPen(Qt::blue);
+        QPen pen = QPen(QColor(77,127,196));
 
         if (i == 1) {
             pen = QPen(Qt::magenta);
         } else if (i == 2) {
-            pen = QPen(Qt::green);
+            pen = QPen(QColor(127,200,127));
         } else if (i == 3) {
             pen = QPen(Qt::darkGreen);
         } else if (i == 4) {

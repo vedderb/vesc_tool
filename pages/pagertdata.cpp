@@ -54,46 +54,47 @@ PageRtData::PageRtData(QWidget *parent) :
     // Current and duty
     int graphIndex = 0;
     ui->currentPlot->addGraph();
-    ui->currentPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+
+    ui->currentPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
     ui->currentPlot->graph(graphIndex)->setName("Current in");
     graphIndex++;
 
     ui->currentPlot->addGraph();
-    ui->currentPlot->graph(graphIndex)->setPen(QPen(Qt::red));
+    ui->currentPlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
     ui->currentPlot->graph(graphIndex)->setName("Current motor");
     graphIndex++;
 
     ui->currentPlot->addGraph(ui->currentPlot->xAxis, ui->currentPlot->yAxis2);
-    ui->currentPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+    ui->currentPlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
     ui->currentPlot->graph(graphIndex)->setName("Duty cycle");
     graphIndex++;
 
     // RPM
     graphIndex = 0;
     ui->rpmPlot->addGraph();
-    ui->rpmPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+    ui->rpmPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
     ui->rpmPlot->graph(graphIndex)->setName("ERPM");
     graphIndex++;
 
     // FOC
     graphIndex = 0;
     ui->focPlot->addGraph();
-    ui->focPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+    ui->focPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
     ui->focPlot->graph(graphIndex)->setName("D Current");
     graphIndex++;
 
     ui->focPlot->addGraph();
-    ui->focPlot->graph(graphIndex)->setPen(QPen(Qt::red));
+    ui->focPlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
     ui->focPlot->graph(graphIndex)->setName("Q Current");
     graphIndex++;
 
     ui->focPlot->addGraph(ui->focPlot->xAxis, ui->focPlot->yAxis2);
-    ui->focPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+    ui->focPlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
     ui->focPlot->graph(graphIndex)->setName("D Voltage");
     graphIndex++;
 
     ui->focPlot->addGraph(ui->focPlot->xAxis, ui->focPlot->yAxis2);
-    ui->focPlot->graph(graphIndex)->setPen(QPen(Qt::darkGreen));
+    ui->focPlot->graph(graphIndex)->setPen(QPen(QColor(206,125,44)));
     ui->focPlot->graph(graphIndex)->setName("Q Voltage");
     graphIndex++;
 
@@ -103,7 +104,6 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->currentPlot->legend->setVisible(true);
     ui->currentPlot->legend->setFont(legendFont);
     ui->currentPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->currentPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->currentPlot->xAxis->setLabel("Seconds (s)");
     ui->currentPlot->yAxis->setLabel("Ampere (A)");
     ui->currentPlot->yAxis2->setLabel("Duty Cycle");
@@ -111,7 +111,6 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->tempPlot->legend->setVisible(true);
     ui->tempPlot->legend->setFont(legendFont);
     ui->tempPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->tempPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->tempPlot->xAxis->setLabel("Seconds (s)");
     ui->tempPlot->yAxis->setLabel("Temperature MOSFET (\u00B0C)");
     ui->tempPlot->yAxis2->setLabel("Temperature Motor (\u00B0C)");
@@ -119,14 +118,12 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->rpmPlot->legend->setVisible(true);
     ui->rpmPlot->legend->setFont(legendFont);
     ui->rpmPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->rpmPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->rpmPlot->xAxis->setLabel("Seconds (s)");
     ui->rpmPlot->yAxis->setLabel("ERPM");
 
     ui->focPlot->legend->setVisible(true);
     ui->focPlot->legend->setFont(legendFont);
     ui->focPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->focPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->focPlot->xAxis->setLabel("Seconds (s)");
     ui->focPlot->yAxis->setLabel("Current");
     ui->focPlot->yAxis2->setLabel("Voltage");
@@ -143,12 +140,11 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->focPlot->yAxis2->setVisible(true);
 
     ui->posPlot->addGraph();
-    ui->posPlot->graph(0)->setPen(QPen(Qt::blue));
+    ui->posPlot->graph(0)->setPen(QPen(QColor(77,127,196)));
     ui->posPlot->graph(0)->setName("Position");
     ui->posPlot->legend->setVisible(true);
     ui->posPlot->legend->setFont(legendFont);
     ui->posPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->posPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->posPlot->xAxis->setLabel("Sample");
     ui->posPlot->yAxis->setLabel("Degrees");
 
@@ -258,7 +254,7 @@ void PageRtData::timerSlot()
         graphIndex = 0;
 
         ui->tempPlot->addGraph();
-        ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+        ui->tempPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
         ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET");
         ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMosVec);
         ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMosfetBox->isChecked());
@@ -266,21 +262,21 @@ void PageRtData::timerSlot()
 
         if (!mTempMos1Vec.isEmpty() && mTempMos1Vec.last() != 0.0) {
             ui->tempPlot->addGraph();
-            ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+            ui->tempPlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
             ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET 1");
             ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMos1Vec);
             ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMosfetBox->isChecked());
             graphIndex++;
 
             ui->tempPlot->addGraph();
-            ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::darkGreen));
+            ui->tempPlot->graph(graphIndex)->setPen(QPen(QColor(206,125,44)));
             ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET 2");
             ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMos2Vec);
             ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMosfetBox->isChecked());
             graphIndex++;
 
             ui->tempPlot->addGraph();
-            ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::cyan));
+            ui->tempPlot->graph(graphIndex)->setPen(QPen(QColor(79,203,203)));
             ui->tempPlot->graph(graphIndex)->setName("Temperature MOSFET 3");
             ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMos3Vec);
             ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMosfetBox->isChecked());
@@ -288,7 +284,7 @@ void PageRtData::timerSlot()
         }
 
         ui->tempPlot->addGraph(ui->tempPlot->xAxis, ui->tempPlot->yAxis2);
-        ui->tempPlot->graph(graphIndex)->setPen(QPen(Qt::magenta));
+        ui->tempPlot->graph(graphIndex)->setPen(QPen(QColor(219,98,139)));
         ui->tempPlot->graph(graphIndex)->setName("Temperature Motor");
         ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMotorVec);
         ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMotorBox->isChecked());
@@ -355,6 +351,7 @@ void PageRtData::timerSlot()
             ui->experimentPlot->addGraph();
             ui->experimentPlot->graph()->setData(mExperimentPlots.at(i).xData, mExperimentPlots.at(i).yData);
             ui->experimentPlot->graph()->setName(mExperimentPlots.at(i).label);
+
             ui->experimentPlot->graph()->setPen(QPen(mExperimentPlots.at(i).color));
             if (ui->experimentScatterButton->isChecked()) {
                 ui->experimentPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
@@ -456,17 +453,17 @@ void PageRtData::plotAddGraphReceived(QString name)
     mExperimentPlots.last().label = name;
 
     if (mExperimentPlots.size() == 1) {
-        mExperimentPlots.last().color = "blue";
+        mExperimentPlots.last().color = QColor(77,127,196);
     } else if (mExperimentPlots.size() == 2) {
-        mExperimentPlots.last().color = "red";
+        mExperimentPlots.last().color = QColor(200,52,52);
     } else if (mExperimentPlots.size() == 3) {
-        mExperimentPlots.last().color = "magenta";
+        mExperimentPlots.last().color = QColor(127,200,127);
     } else if (mExperimentPlots.size() == 4) {
-        mExperimentPlots.last().color = "darkgreen";
+        mExperimentPlots.last().color = QColor(206,125,44);
     } else if (mExperimentPlots.size() == 5) {
-        mExperimentPlots.last().color = "cyan";
+        mExperimentPlots.last().color = QColor(79,203,203);
     } else {
-        mExperimentPlots.last().color = "orange";
+        mExperimentPlots.last().color = QColor(219,98,139);
     }
 
     mExperimentReplot = true;
@@ -655,7 +652,7 @@ void PageRtData::on_experimentLoadXmlButton_clicked()
                         if (name2 == "label") {
                             p.label = stream.readElementText();
                         } else if (name2 == "color") {
-                            p.color = stream.readElementText();
+                            p.color = QColor(stream.readElementText());
                         } else if (name2 == "point") {
                             while (stream.readNextStartElement()) {
                                 QString name3 = stream.name().toString();
@@ -734,7 +731,7 @@ void PageRtData::on_experimentSaveXmlButton_clicked()
     for (EXPERIMENT_PLOT p: mExperimentPlots) {
         stream.writeStartElement("graph");
         stream.writeTextElement("label", p.label);
-        stream.writeTextElement("color", p.color);
+        stream.writeTextElement("color", p.color.name());
         for (int i = 0;i < p.xData.size();i++) {
             stream.writeStartElement("point");
             stream.writeTextElement("x", QString::number(p.xData.at(i)));

@@ -167,7 +167,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res.qrc">
+            <iconset>
              <normaloff>:/res/icons/icons8-target-96.png</normaloff>:/res/icons/icons8-target-96.png</iconset>
            </property>
           </widget>
@@ -181,7 +181,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res.qrc">
+            <iconset>
              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
            </property>
            <property name="checkable">
@@ -392,7 +392,7 @@
               <string>Refresh</string>
              </property>
              <property name="icon">
-              <iconset resource="../res.qrc">
+              <iconset>
                <normaloff>:/res/icons/Refresh-96.png</normaloff>:/res/icons/Refresh-96.png</iconset>
              </property>
             </widget>
@@ -403,7 +403,7 @@
               <string>Open</string>
              </property>
              <property name="icon">
-              <iconset resource="../res.qrc">
+              <iconset>
                <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
              </property>
             </widget>
@@ -434,7 +434,7 @@
         <string>Open CSV</string>
        </property>
        <property name="icon">
-        <iconset resource="../res.qrc">
+        <iconset>
          <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
        </property>
       </widget>
@@ -445,7 +445,7 @@
         <string>Open Current</string>
        </property>
        <property name="icon">
-        <iconset resource="../res.qrc">
+        <iconset>
          <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
        </property>
       </widget>
@@ -510,7 +510,7 @@
         <string>PDF</string>
        </property>
        <property name="icon">
-        <iconset resource="../res.qrc">
+        <iconset>
          <normaloff>:/res/icons/Line Chart-96.png</normaloff>:/res/icons/Line Chart-96.png</iconset>
        </property>
       </widget>
@@ -524,7 +524,7 @@
         <string>PNG</string>
        </property>
        <property name="icon">
-        <iconset resource="../res.qrc">
+        <iconset>
          <normaloff>:/res/icons/Line Chart-96.png</normaloff>:/res/icons/Line Chart-96.png</iconset>
        </property>
       </widget>
@@ -538,7 +538,7 @@
         <string>PDF</string>
        </property>
        <property name="icon">
-        <iconset resource="../res.qrc">
+        <iconset>
          <normaloff>:/res/icons/Waypoint Map-96.png</normaloff>:/res/icons/Waypoint Map-96.png</iconset>
        </property>
       </widget>
@@ -552,7 +552,7 @@
         <string>PNG</string>
        </property>
        <property name="icon">
-        <iconset resource="../res.qrc">
+        <iconset>
          <normaloff>:/res/icons/Waypoint Map-96.png</normaloff>:/res/icons/Waypoint Map-96.png</iconset>
        </property>
       </widget>
@@ -580,8 +580,6 @@
    <header>widgets/superslider.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

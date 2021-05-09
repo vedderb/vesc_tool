@@ -264,8 +264,8 @@ int main(int argc, char *argv[])
         darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,QColor(127,127,127));
         darkPalette.setColor(QPalette::Base,QColor(48,48,48));
         darkPalette.setColor(QPalette::AlternateBase,QColor(66,66,66));
-        darkPalette.setColor(QPalette::ToolTipBase,QColor(180,180,180));
-        darkPalette.setColor(QPalette::ToolTipText,QColor(180,180,180));
+        darkPalette.setColor(QPalette::ToolTipBase,QColor(80,80,80));
+        darkPalette.setColor(QPalette::ToolTipText,QColor(220,220,220));
         darkPalette.setColor(QPalette::Text,QColor(220,220,220));
         darkPalette.setColor(QPalette::Disabled,QPalette::Text,QColor(127,127,127));
         darkPalette.setColor(QPalette::Dark,QColor(35,35,35));

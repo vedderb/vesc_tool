@@ -45,7 +45,7 @@
              <string>Run</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
             </property>
             <property name="flat">
@@ -59,7 +59,7 @@
              <string>Run in Window</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
             </property>
             <property name="flat">
@@ -73,7 +73,7 @@
              <string>Toggle Fullscreen</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/size_off.png</normaloff>:/res/icons/size_off.png</iconset>
             </property>
             <property name="flat">
@@ -87,7 +87,7 @@
              <string>Stop</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
             </property>
             <property name="flat">
@@ -117,7 +117,7 @@
              <string>Help</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
             </property>
             <property name="flat">
@@ -161,7 +161,7 @@
        <enum>QTabWidget::Triangular</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -185,7 +185,7 @@
              <string/>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
             </property>
            </widget>
@@ -229,7 +229,7 @@
              <string>Open</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
             </property>
            </widget>
@@ -243,7 +243,7 @@
              <string>Remove</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
             </property>
            </widget>
@@ -257,7 +257,7 @@
              <string>Clear</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
             </property>
            </widget>
@@ -295,7 +295,7 @@
              <string>Open</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
             </property>
            </widget>
@@ -339,7 +339,7 @@
                 <string>Export Array HW</string>
                </property>
                <property name="icon">
-                <iconset>
+                <iconset resource="../res.qrc">
                  <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
                </property>
               </widget>
@@ -350,7 +350,7 @@
                 <string>Export Array App</string>
                </property>
                <property name="icon">
-                <iconset>
+                <iconset resource="../res.qrc">
                  <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
                </property>
               </widget>
@@ -364,7 +364,7 @@
                 <string>Calculate Size</string>
                </property>
                <property name="icon">
-                <iconset>
+                <iconset resource="../res.qrc">
                  <normaloff>:/res/icons/Calculator-96.png</normaloff>:/res/icons/Calculator-96.png</iconset>
                </property>
               </widget>
@@ -400,7 +400,7 @@
                 <string>Open Qmlui HW</string>
                </property>
                <property name="icon">
-                <iconset>
+                <iconset resource="../res.qrc">
                  <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
                </property>
               </widget>
@@ -411,7 +411,7 @@
                 <string>Open Qmlui App</string>
                </property>
                <property name="icon">
-                <iconset>
+                <iconset resource="../res.qrc">
                  <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
                </property>
               </widget>
@@ -455,7 +455,7 @@
                   <string>Erase &amp;&amp; Upload</string>
                  </property>
                  <property name="icon">
-                  <iconset>
+                  <iconset resource="../res.qrc">
                    <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
                  </property>
                 </widget>
@@ -466,7 +466,7 @@
                   <string>Erase Only</string>
                  </property>
                  <property name="icon">
-                  <iconset>
+                  <iconset resource="../res.qrc">
                    <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
                  </property>
                 </widget>
@@ -503,7 +503,7 @@
                   <string/>
                  </property>
                  <property name="icon">
-                  <iconset>
+                  <iconset resource="../res.qrc">
                    <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
                  </property>
                 </widget>
@@ -547,7 +547,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>clearConsoleButton</sender>

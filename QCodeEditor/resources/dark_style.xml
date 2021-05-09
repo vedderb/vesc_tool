@@ -4,7 +4,7 @@
     <style name="Link" foreground="#8888ff"/>
     <style name="Selection" foreground="#eff0f1" background="#0d3e59"/>
     <style name="LineNumber" foreground="#6272a4"/>
-    <style name="SearchResult" background="#ffef0b"/>
+    <style name="SearchResult" background="#3f82a6"/>
     <style name="SearchScope" background="#2d5c76"/>
     <style name="Parentheses" foreground="#ff0000" background="#b4eeb4"/>
     <style name="ParenthesesMismatch" background="#ff00ff"/>

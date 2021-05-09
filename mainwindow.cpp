@@ -1450,7 +1450,7 @@ void MainWindow::reloadPages()
     ui->scanCanButton->setMaximumWidth(width);
 
     ui->pageList->setCurrentRow(0);
-    ui->pageList->setGridSize(QSize(width,height));
+    ui->pageList->setGridSize(QSize(width - 5, height));
     ui->pageWidget->setCurrentIndex(0);
 }
 

@@ -258,6 +258,30 @@ int main(int argc, char *argv[])
         QApplication *a = new QApplication(argc, argv);
         app = a;
 
+        QPalette darkPalette;
+        darkPalette.setColor(QPalette::Window,QColor(39,39,39));
+        darkPalette.setColor(QPalette::WindowText,QColor(180,180,180));
+        darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,QColor(127,127,127));
+        darkPalette.setColor(QPalette::Base,QColor(48,48,48));
+        darkPalette.setColor(QPalette::AlternateBase,QColor(66,66,66));
+        darkPalette.setColor(QPalette::ToolTipBase,QColor(180,180,180));
+        darkPalette.setColor(QPalette::ToolTipText,QColor(180,180,180));
+        darkPalette.setColor(QPalette::Text,QColor(220,220,220));
+        darkPalette.setColor(QPalette::Disabled,QPalette::Text,QColor(127,127,127));
+        darkPalette.setColor(QPalette::Dark,QColor(35,35,35));
+        darkPalette.setColor(QPalette::Shadow,QColor(20,20,20));
+        darkPalette.setColor(QPalette::Button,QColor(48,48,48));
+        darkPalette.setColor(QPalette::ButtonText,QColor(180,180,180));
+        darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,QColor(127,127,127));
+        darkPalette.setColor(QPalette::BrightText,QColor(129,212,250));
+        darkPalette.setColor(QPalette::Link,QColor(129,212,250));
+        darkPalette.setColor(QPalette::Highlight,QColor(71,117,137));
+        darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,QColor(80,80,80));
+        darkPalette.setColor(QPalette::HighlightedText,Qt::white);
+        darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,QColor(127,127,127));
+
+        qApp->setPalette(darkPalette);
+
         // Fonts
         QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
         QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Bold.ttf");

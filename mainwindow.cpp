@@ -534,7 +534,7 @@ void MainWindow::timerSlotDebugMsg()
         } else {
             QString strTmp;
             if (msg.isBad) {
-                strTmp = "<font color=\"red\">" + msg.msgLong + "</font><br>";
+                strTmp = "<font color=\"#81D4FA\">" + msg.msgLong + "</font><br>";
             } else {
                 strTmp = msg.msgLong + "<br>";
             }
@@ -753,7 +753,7 @@ void MainWindow::showStatusInfo(QString info, bool isGood)
         mPageDebugPrint->printConsole("Status: " + info + "<br>");
     } else {
         mStatusLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-        mPageDebugPrint->printConsole("<font color=\"red\">Status: " + info + "</font><br>");
+        mPageDebugPrint->printConsole("<font color=\"#81D4FA\">Status: " + info + "</font><br>");
     }
 
     mStatusInfoTime = (80 * 20) / mTimer->interval();
@@ -1081,7 +1081,11 @@ void MainWindow::on_handbrakeButton_clicked()
 
 void MainWindow::addPageItem(QString name, QString icon, QString groupIcon, bool bold, bool indented)
 {
+    QFontMetrics fm(this->font());
+    int width = fm.horizontalAdvance("Welcome & Wizards++++++++++");
+    int height = fm.height();
     QListWidgetItem *item = new QListWidgetItem();
+    item->setSizeHint(QSize(width,height));
     ui->pageList->addItem(item);
     PageListItem *li = new PageListItem(name, icon, groupIcon, this);
     li->setBold(bold);
@@ -1446,6 +1450,7 @@ void MainWindow::reloadPages()
     ui->scanCanButton->setMaximumWidth(width);
 
     ui->pageList->setCurrentRow(0);
+    ui->pageList->setGridSize(QSize(width,height));
     ui->pageWidget->setCurrentIndex(0);
 }
 

@@ -55,7 +55,7 @@ public:
      * @return Pointer to default style.
      */
     static QSyntaxStyle* defaultStyle();
-
+    static QSyntaxStyle* darkStyle();
 private:
 
     QString m_name;

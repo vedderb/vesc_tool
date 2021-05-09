@@ -28,7 +28,7 @@ PageListItem::PageListItem(QString name,
     mIconLabel = new QLabel;
     mNameLabel = new QLabel;
     mGroupLabel = new QLabel;
-    mSpaceStart = new QSpacerItem(2, 0);
+    mSpaceStart = new QSpacerItem(6, 0);
 
     mIconLabel->setScaledContents(true);
     mGroupLabel->setScaledContents(true);

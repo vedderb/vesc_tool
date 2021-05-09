@@ -1682,7 +1682,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         stepGrid /= 2.0;
     }
     const double zeroAxisWidth = 3;
-    const QColor zeroAxisColor = Qt::red;
+    const QColor zeroAxisColor = QColor(200,52,52);
     const QColor firstAxisColor = Qt::gray;
     const QColor secondAxisColor = Qt::blue;
     const QColor textColor = QPalette::Foreground;
@@ -1938,7 +1938,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
 
             if (ip.getColor() == Qt::darkGreen || ip.getColor() == Qt::green) {
                 pts_green.append(ip);
-            } else if (ip.getColor() == Qt::darkRed || ip.getColor() == Qt::red) {
+            } else if (ip.getColor() == Qt::darkRed || ip.getColor() == QColor(200,52,52)) {
                 pts_red.append(ip);
             } else {
                 pts_other.append(ip);
@@ -1977,7 +1977,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
 
     // Draw trace for the selected car
     pen.setWidthF(5.0 / mScaleFactor);
-    pen.setColor(Qt::red);
+    pen.setColor(QColor(200,52,52));
     painter.setPen(pen);
     painter.setTransform(drawTrans);
     for (int i = 1;i < mCarTrace.size();i++) {
@@ -2113,7 +2113,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         angle = pos.getYaw() * 180.0 / M_PI;
         painter.setTransform(drawTrans);
 
-        QColor col_sigma = Qt::red;
+        QColor col_sigma = QColor(200,52,52);
         QColor col_wheels = Qt::black;
         QColor col_bumper = Qt::green;
         QColor col_hull = carInfo.getColor();
@@ -2223,7 +2223,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         painter.rotate(-angle);
 
         QColor col_frame = copterInfo.getColor();
-        QColor col_prop_main = Qt::red;
+        QColor col_prop_main = QColor(200,52,52);
         QColor col_prop_other = Qt::green;
         QColor col_gps = Qt::magenta;
         QColor col_ap = copterInfo.getColor();
@@ -2302,7 +2302,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
         painter.setTransform(drawTrans);
 
         // Draw anchor
-        painter.setBrush(QBrush(Qt::red));
+        painter.setBrush(QBrush(QColor(200,52,52)));
         painter.translate(x, y);
 
         pt_txt.setX(x);

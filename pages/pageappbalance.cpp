@@ -44,12 +44,12 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
     int graphIndex = 0;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Qt::red));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
     ui->balancePlot->graph(graphIndex)->setName("PID Output");
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
     ui->balancePlot->graph(graphIndex)->setName("Pitch Angle");
     graphIndex++;
 
@@ -69,7 +69,6 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
     ui->balancePlot->legend->setVisible(true);
     ui->balancePlot->legend->setFont(legendFont);
     ui->balancePlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->balancePlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->balancePlot->xAxis->setLabel("Seconds (s)");
 
 }

@@ -158,3 +158,27 @@ QSyntaxStyle* QSyntaxStyle::defaultStyle()
 
     return &style;
 }
+
+
+QSyntaxStyle* QSyntaxStyle::darkStyle()
+{
+    static QSyntaxStyle style;
+
+    if (!style.isLoaded())
+    {
+        Q_INIT_RESOURCE(qcodeeditor_resources);
+        QFile fl(":/dark_style.xml");
+
+        if (!fl.open(QIODevice::ReadOnly))
+        {
+            return &style;
+        }
+
+        if (!style.load(fl.readAll()))
+        {
+            qDebug() << "Can't load dark style.";
+        }
+    }
+
+    return &style;
+}

@@ -54,7 +54,6 @@ PageExperiments::PageExperiments(QWidget *parent) :
     ui->plot->legend->setVisible(true);
     ui->plot->legend->setFont(legendFont);
     ui->plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignLeft);
-    ui->plot->legend->setBrush(QBrush(QColor(255,255,255,190)));
     ui->plot->xAxis->setLabel("Seconds (s)");
     ui->plot->yAxis2->setLabel("RPM");
     ui->plot->yAxis2->setVisible(true);
@@ -381,7 +380,7 @@ void PageExperiments::plotSamples(bool exportFormat)
         QVector<double> scaled = createScaledVector(mPowerVec, 150.0, scaleStr);
 
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::blue, lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(QColor(77,127,196), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Power (W)" + scaleStr);
         ui->plot->graph(graphIndex)->setData(mTimeVec, scaled);
         graphIndex++;
@@ -403,7 +402,7 @@ void PageExperiments::plotSamples(bool exportFormat)
         QVector<double> scaled = createScaledVector(mCurrentInVec, 150.0, scaleStr);
 
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::green, lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(QColor(127,200,127), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Current in (A)" + scaleStr);
         ui->plot->graph(graphIndex)->setData(mTimeVec, scaled);
         graphIndex++;
@@ -462,7 +461,7 @@ void PageExperiments::plotSamples(bool exportFormat)
     }
 
     ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
-    ui->plot->graph(graphIndex)->setPen(QPen(Qt::red, lineWidth));
+    ui->plot->graph(graphIndex)->setPen(QPen(QColor(200,52,52), lineWidth));
     ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " RPM");
     ui->plot->graph(graphIndex)->setData(mTimeVec, mRpmVec);
     graphIndex++;
@@ -475,7 +474,7 @@ void PageExperiments::plotSamples(bool exportFormat)
             QVector<double> scaled = createScaledVector(mCPowerVec, 150.0, scaleStr);
 
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(Qt::blue, lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(QColor(77,127,196), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Power (W)" + scaleStr);
             ui->plot->graph(graphIndex)->setData(mCTimeVec, scaled);
             graphIndex++;
@@ -497,7 +496,7 @@ void PageExperiments::plotSamples(bool exportFormat)
             QVector<double> scaled = createScaledVector(mCCurrentInVec, 150.0, scaleStr);
 
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(Qt::green, lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(QColor(127,200,127), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Current in (A)" + scaleStr);
             ui->plot->graph(graphIndex)->setData(mCTimeVec, scaled);
             graphIndex++;
@@ -556,7 +555,7 @@ void PageExperiments::plotSamples(bool exportFormat)
         }
 
         ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::red, lineWidth, penStyle));
+        ui->plot->graph(graphIndex)->setPen(QPen(QColor(200,52,52), lineWidth, penStyle));
         ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " RPM");
         ui->plot->graph(graphIndex)->setData(mCTimeVec, mCRpmVec);
         graphIndex++;

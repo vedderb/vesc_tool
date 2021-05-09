@@ -115,10 +115,10 @@ void RtDataText::paintEvent(QPaintEvent *event)
                 mValues.current_motor);
 
     painter.setOpacity(0.7);
-    painter.fillRect(0, 0, bbox_w, bbow_h, Qt::black);
+    painter.fillRect(0, 0, bbox_w, bbow_h, QColor(48,48,48));
     painter.setOpacity(1.0);
 
-    painter.setPen(Qt::white);
+    painter.setPen(QColor(180,180,180));
     painter.drawText(QRectF(mTxtOfs, mTxtOfs, mBoxW, mBoxH),
                      Qt::AlignLeft, str);
 
@@ -135,10 +135,10 @@ void RtDataText::paintEvent(QPaintEvent *event)
                 mValues.tachometer_abs);
 
     painter.setOpacity(0.7);
-    painter.fillRect(vidw / 2.0 - bbox_w / 2.0, 0, bbox_w, bbow_h, Qt::black);
+    painter.fillRect(vidw / 2.0 - bbox_w / 2.0, 0, bbox_w, bbow_h, QColor(48,48,48));
     painter.setOpacity(1.0);
 
-    painter.setPen(Qt::white);
+    painter.setPen(QColor(180,180,180));
     painter.drawText(QRectF(vidw / 2.0 - bbox_w / 2.0 + mTxtOfs, mTxtOfs, mBoxW, mBoxH),
                      Qt::AlignLeft, str);
 
@@ -156,10 +156,10 @@ void RtDataText::paintEvent(QPaintEvent *event)
 
     painter.setOpacity(0.7);
     painter.fillRect(vidw - bbox_w, 0, bbox_w,
-                     mBoxH + 2 * mTxtOfs, Qt::black);
+                     mBoxH + 2 * mTxtOfs, QColor(48,48,48));
     painter.setOpacity(1.0);
 
-    painter.setPen(Qt::white);
+    painter.setPen(QColor(180,180,180));
     painter.drawText(QRectF(vidw - bbox_w + mTxtOfs, mTxtOfs, mBoxW, mBoxH),
                      Qt::AlignLeft, str);
 }

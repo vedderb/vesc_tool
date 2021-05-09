@@ -44,9 +44,11 @@ void DisplayBar::paintEvent(QPaintEvent *event)
     painter.setBrush(Qt::black);
     painter.drawRoundedRect(event->rect(), 5.0, 5.0);
 
-    painter.setBrush(QBrush(Qt::red));
-    painter.fillRect(w / 2 - 1, 0, 2, h, Qt::darkRed);
-    painter.fillRect(0, h * f_disp - 1, w, 2, Qt::darkGreen);
+    painter.setBrush(QBrush(QColor(200,52,52)));
+    painter.fillRect(w / 2 - 1, 0, 2, h, QColor(150,37,37));
+    painter.fillRect(0, h * f_disp - 1, w, 2, QColor(71,117,137));
+
+
 
     QPen pen;
     QFont font;
@@ -79,10 +81,10 @@ void DisplayBar::paintEvent(QPaintEvent *event)
 
     if (fabs(valw) > 0.1) {
         if (valw >= 0.0) {
-            painter.setBrush(Qt::green);
+            painter.setBrush(QColor(127,200,127));
             painter.drawRect(xsp, 1, valw, valh);
         } else {
-            painter.setBrush(Qt::red);
+            painter.setBrush(QColor(200,52,52));
             painter.drawRect(xsm + valw, 1, -valw, valh);
         }
     }

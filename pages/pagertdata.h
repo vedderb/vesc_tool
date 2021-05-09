@@ -99,7 +99,7 @@ private:
 
     typedef struct {
         QString label;
-        QString color;
+        QColor color;
         QVector<double> xData;
         QVector<double> yData;
     } EXPERIMENT_PLOT;

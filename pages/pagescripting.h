@@ -56,9 +56,11 @@ private slots:
     void on_runWindowButton_clicked();
     void on_fullscreenButton_clicked();
     void on_openRecentButton_clicked();
+    void on_recentList_doubleClicked();
     void on_removeSelectedButton_clicked();
     void on_clearRecentButton_clicked();
     void on_openExampleButton_clicked();
+    void on_exampleList_doubleClicked();
     void on_helpButton_clicked();
     void on_exportCArrayHwButton_clicked();
     void on_exportCArrayAppButton_clicked();

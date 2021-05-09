@@ -39,7 +39,7 @@ OsmClient::OsmClient(QObject *parent) : QObject(parent)
             // Downloading
             p->fillRect(pix.rect(), Qt::white);
             p->setBrush(QBrush(QColor(200, 255, 200)));
-            p->setPen(QPen(QBrush(Qt::green), 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
+            p->setPen(QPen(QBrush(QColor(127,200,127)), 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
             QRect r(3, 3, 506, 506);
             p->drawRect(r);
             QString txt = "Downloading\ntile...";
@@ -73,7 +73,7 @@ OsmClient::OsmClient(QObject *parent) : QObject(parent)
             // Download error.
             p->fillRect(pix.rect(), Qt::white);
             p->setBrush(QBrush(QColor(255, 200, 200)));
-            p->setPen(QPen(QBrush(Qt::red), 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
+            p->setPen(QPen(QBrush(QColor(200,52,52)), 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
             QRect r(3, 3, 506, 506);
             p->drawRect(r);
             QString txt = "Download\nerror";
@@ -90,7 +90,7 @@ OsmClient::OsmClient(QObject *parent) : QObject(parent)
             // Not in map.
             p->fillRect(pix.rect(), Qt::white);
             p->setBrush(QBrush(QColor(255, 200, 200)));
-            p->setPen(QPen(QBrush(Qt::red), 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
+            p->setPen(QPen(QBrush(QColor(200,52,52)), 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
             QRect r(3, 3, 506, 506);
             p->drawRect(r);
             QString txt = "Tile outside\nof map";

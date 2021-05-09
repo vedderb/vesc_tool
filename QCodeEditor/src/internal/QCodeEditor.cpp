@@ -40,9 +40,10 @@ QCodeEditor::QCodeEditor(QWidget* widget) :
     m_replaceTab(true),
     m_tabReplace(QString(4, ' '))
 {
+
     initFont();
     performConnections();
-    setSyntaxStyle(QSyntaxStyle::defaultStyle());
+    setSyntaxStyle(QSyntaxStyle::darkStyle());
 }
 
 void QCodeEditor::initFont()

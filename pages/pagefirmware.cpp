@@ -245,7 +245,7 @@ void PageFirmware::updateBlList(FW_RX_PARAMS params)
 
     QString blDir = "://res/bootloaders";
 
-    if (params.hwType == HW_TYPE_VESC_BMS) {
+    if (params.hwType != HW_TYPE_VESC) {
         blDir = "://res/bootloaders_bms";
     }
 
@@ -396,9 +396,7 @@ void PageFirmware::uploadFw(bool allOverCan)
             }
 
             QFileInfo fileInfo(file.fileName());
-            if (!(fileInfo.fileName().toLower().startsWith("bldc_4") ||
-                  fileInfo.fileName().toLower().startsWith("vesc"))
-                    || !fileInfo.fileName().endsWith(".bin")) {
+            if (!fileInfo.fileName().endsWith(".bin")) {
                 QMessageBox::critical(this,
                                       tr("Upload Error"),
                                       tr("The selected file name seems to be invalid."));

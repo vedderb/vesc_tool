@@ -59,7 +59,7 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Qt::black));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
     ui->balancePlot->graph(graphIndex)->setName("Current");
     graphIndex++;
 

@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.3
 
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
-import "qrc:/mobile"
 
 Item {
     anchors.fill: parent
@@ -25,6 +24,7 @@ Item {
 //            mCommands.getValues()
 //            mCommands.getValuesSetup()
 //            mCommands.bmsGetValues()
+//            mCommands.ioBoardGetAll(255)
         }
     }
     
@@ -86,7 +86,7 @@ Item {
         }
         
         onBmsValuesRx: { // val
-            // Members of values
+            // Members of val
 //            val.v_tot
 //            val.v_charge
 //            val.i_in
@@ -103,6 +103,17 @@ Item {
 //            val.soc
 //            val.soh
 //            val.can_id
+        }
+        
+        onIoBoardValRx: {
+            // Members of val
+//            val.id
+//            val.adc_1_4[ch]
+//            val.adc_5_8[ch]
+//            val.digital[ch]
+//            val.adc_1_4_age
+//            val.adc_5_8_age
+//            val.digital_age
         }
     }
 }

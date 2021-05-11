@@ -870,6 +870,48 @@ void Commands::processPacket(QByteArray data)
         emit writeQmluiResReceived(ok, offset);
     } break;
 
+    case COMM_IO_BOARD_GET_ALL: {
+        IO_BOARD_VALUES val;
+        val.id = vb.vbPopFrontInt16();
+
+        while (vb.size() > 0) {
+            int type = vb.vbPopFrontInt8();
+            switch (type) {
+            case 1: {
+                val.adc_1_4_age = vb.vbPopFrontDouble32Auto();
+                val.adc_1_4.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_1_4.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_1_4.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_1_4.append(vb.vbPopFrontDouble16(1e2));
+            } break;
+
+            case 2: {
+                val.adc_5_8_age = vb.vbPopFrontDouble32Auto();
+                val.adc_5_8.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_5_8.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_5_8.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_5_8.append(vb.vbPopFrontDouble16(1e2));
+            } break;
+
+            case 3: {
+                val.digital_age = vb.vbPopFrontDouble32Auto();
+                uint64_t hi = vb.vbPopFrontUint32();
+                uint64_t lo = vb.vbPopFrontUint32();
+                uint64_t combined = (hi << 32) | lo;
+
+                for (int i = 0;i < 64;i++) {
+                    val.digital.append((combined >> i) & 1);
+                }
+            } break;
+
+            default:
+                break;
+            }
+        }
+
+        emit ioBoardValRx(val);
+    } break;
+
     default:
         break;
     }
@@ -1803,6 +1845,34 @@ void Commands::qmlUiWrite(QByteArray data, quint32 offset)
     vb.vbAppendUint8(COMM_QMLUI_WRITE);
     vb.vbAppendUint32(offset);
     vb.append(data);
+    emitData(vb);
+}
+
+void Commands::ioBoardGetAll(int id)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_IO_BOARD_GET_ALL);
+    vb.vbAppendInt16(id);
+    emitData(vb);
+}
+
+void Commands::ioBoardSetPwm(int id, int channel, double duty)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_IO_BOARD_SET_PWM);
+    vb.vbAppendInt16(id);
+    vb.vbAppendInt16(channel);
+    vb.vbAppendDouble32Auto(duty);
+    emitData(vb);
+}
+
+void Commands::ioBoardSetDigital(int id, int channel, bool on)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_IO_BOARD_SET_DIGITAL);
+    vb.vbAppendInt16(id);
+    vb.vbAppendInt16(channel);
+    vb.vbAppendInt8(on);
     emitData(vb);
 }
 

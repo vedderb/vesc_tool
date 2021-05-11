@@ -120,6 +120,7 @@ signals:
     void qmluiAppRx(int lenQml, int ofsQml, QByteArray data);
     void eraseQmluiResReceived(bool ok);
     void writeQmluiResReceived(bool ok, quint32 offset);
+    void ioBoardValRx(IO_BOARD_VALUES val);
 
 public slots:
     void processPacket(QByteArray data);
@@ -216,6 +217,10 @@ public slots:
     void qmlUiAppGet(int len, int offset);
     void qmlUiErase();
     void qmlUiWrite(QByteArray data, quint32 offset);
+
+    void ioBoardGetAll(int id);
+    void ioBoardSetPwm(int id, int channel, double duty);
+    void ioBoardSetDigital(int id, int channel, bool on);
 
 private slots:
     void timerSlot();

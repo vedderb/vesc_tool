@@ -85,6 +85,9 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("bmsResetCounters(ah, wh)");
         addItem("bmsForceBalance(bal_en)");
         addItem("bmsZeroCurrentOffset()");
+        addItem("ioBoardGetAll(id)");
+        addItem("ioBoardSetPwm(id, channel, duty)");
+        addItem("ioBoardSetDigital(id, channel, on)");
         level--;
     };
 

@@ -614,7 +614,6 @@ public:
     double ah_cnt_dis_total;
     double wh_cnt_dis_total;
     qint64 updateTime;
-
 };
 
 Q_DECLARE_METATYPE(BMS_VALUES)
@@ -658,6 +657,36 @@ public:
 };
 
 Q_DECLARE_METATYPE(PSW_STATUS)
+
+struct IO_BOARD_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(int id MEMBER id)
+    Q_PROPERTY(QVector<qreal> adc_1_4 MEMBER adc_1_4)
+    Q_PROPERTY(QVector<qreal> adc_5_8 MEMBER adc_5_8)
+    Q_PROPERTY(QVector<bool> digital MEMBER digital)
+    Q_PROPERTY(double adc_1_4_age MEMBER adc_1_4_age)
+    Q_PROPERTY(double adc_5_8_age MEMBER adc_5_8_age)
+    Q_PROPERTY(double digital_age MEMBER digital_age)
+
+public:
+    IO_BOARD_VALUES() {
+        id = -1;
+        adc_1_4_age = -1.0;
+        adc_5_8_age = -1.0;
+        digital_age = -1.0;
+    }
+
+    int id;
+    QVector<qreal> adc_1_4;
+    QVector<qreal> adc_5_8;
+    QVector<bool> digital;
+    double adc_1_4_age;
+    double adc_5_8_age;
+    double digital_age;
+};
+
+Q_DECLARE_METATYPE(IO_BOARD_VALUES)
 
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,
@@ -803,6 +832,11 @@ typedef enum {
     COMM_CUSTOM_HW_DATA,
     COMM_QMLUI_ERASE,
     COMM_QMLUI_WRITE,
+
+    // IO Board
+    COMM_IO_BOARD_GET_ALL,
+    COMM_IO_BOARD_SET_PWM,
+    COMM_IO_BOARD_SET_DIGITAL,
 } COMM_PACKET_ID;
 
 // CAN commands

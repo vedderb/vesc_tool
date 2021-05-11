@@ -15,5 +15,6 @@
         <file>res/qml/WelcomeQmlPanel.qml</file>
         <file>res/qml/Examples/TcpServer.qml</file>
         <file>res/qml/Examples/ParentTabBar.qml</file>
+        <file>res/qml/Examples/IoBoard.qml</file>
     </qresource>
 </RCC>

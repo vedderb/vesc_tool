@@ -154,8 +154,9 @@ void BleUart::addDevice(const QBluetoothDeviceInfo &dev)
         mDevs.insert(dev.deviceUuid().toString(), dev.name());
 #else
 
-        if(dev.serviceUuids().contains(QBluetoothUuid(QUuid("6e400001-b5a3-f393-e0a9-e50e24dcca9e"))))
+        if(dev.serviceUuids().contains(QBluetoothUuid(QUuid("6e400001-b5a3-f393-e0a9-e50e24dcca9e")))) {
             mDevs.insert(dev.address().toString(), dev.name());
+        }
 
 #endif
 

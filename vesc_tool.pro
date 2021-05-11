@@ -37,7 +37,7 @@ CONFIG += c++11
 }
 
 # Build mobile GUI
-#CONFIG += build_mobile
+CONFIG += build_mobile
 
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
@@ -259,6 +259,7 @@ DISTFILES += \
     android/AndroidManifest.xml \
     android/gradle/wrapper/gradle-wrapper.jar \
     android/gradlew \
+    android/gradlew.bat \
     android/res/values/libs.xml \
     android/build.gradle \
     android/gradle/wrapper/gradle-wrapper.properties \

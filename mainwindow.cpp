@@ -1188,6 +1188,8 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageMotorSettings);
     addPageItem(tr("Motor Settings"), "://res/icons/motor.png", "", true);
     mPageNameIdList.insert("motor", ui->pageList->count() - 1);
+    connect(mPageMotorSettings, SIGNAL(startFocWizard()),
+            mPageWelcome, SLOT(startSetupWizardFocQml()));
 
     mPageMotor = new PageMotor(this);
     mPageMotor->setVesc(mVesc);

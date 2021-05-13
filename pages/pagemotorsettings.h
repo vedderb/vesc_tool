@@ -39,6 +39,9 @@ public:
     void setVesc(VescInterface *vesc);
     void reloadParams();
 
+signals:
+    void startFocWizard();
+
 private slots:
     void on_motorSetupWizardButton_clicked();
 

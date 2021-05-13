@@ -63,8 +63,5 @@ void PageMotorSettings::reloadParams()
 
 void PageMotorSettings::on_motorSetupWizardButton_clicked()
 {
-    if (mVesc) {
-        SetupWizardMotor w(mVesc, this);
-        w.exec();
-    }
+    emit startFocWizard();
 }

@@ -184,7 +184,7 @@ void PageScripting::debugMsgRx(QtMsgType type, const QString msg)
     }
 
     ui->debugEdit->moveCursor(QTextCursor::End);
-    ui->debugEdit->insertHtml("<font color=\"blue\">" +
+    ui->debugEdit->insertHtml("<font color=\"#4d7fc4\">" +
                               QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss: ") +
                               "</font>" + str);
     ui->debugEdit->moveCursor(QTextCursor::End);

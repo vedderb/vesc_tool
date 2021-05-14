@@ -6,7 +6,7 @@ set -e
 export PATH=/opt/Qt/5.12-static/bin:$PATH
 rm -rf build/lin/*
 
-qmake -config release "CONFIG += release_lin build_original vt_test_version"
+qmake -config release "CONFIG += release_lin build_original"
 make clean
 make -j8
 rm -rf build/lin/obj

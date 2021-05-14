@@ -1684,10 +1684,7 @@ void MainWindow::on_actionTerminalPrintThreads_triggered()
 
 void MainWindow::on_actionTerminalDRVResetLatchedFaults_triggered()
 {
-    mVesc->commands()->sendTerminalCmd("drv8301_reset_faults");
-    mVesc->commands()->sendTerminalCmd("drv8323s_reset_faults");
-    mVesc->commands()->sendTerminalCmd("drv8320_reset_faults");
-    mVesc->commands()->sendTerminalCmd("drv8305_reset_faults");
+    mVesc->commands()->sendTerminalCmd("drv_reset_faults");
 }
 
 void MainWindow::on_actionCanFwd_toggled(bool arg1)

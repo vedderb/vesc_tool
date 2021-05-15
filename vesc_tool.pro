@@ -25,11 +25,11 @@ DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
 DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
 
 CONFIG += c++11
-!win32-msvc*: {
+CONFIG += resources_big
+
+!win32-msvc*: { !android: {
     QMAKE_CXXFLAGS += -Wno-deprecated-copy
-}else: {
-    CONFIG+=resources_big
-}
+}}
 
 # Build mobile GUI
 #CONFIG += build_mobile

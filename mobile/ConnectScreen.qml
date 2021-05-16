@@ -1,0 +1,350 @@
+/*
+    Copyright 2021 Benjamin Vedder	benjamin@vedder.se
+
+    This file is part of VESC Tool.
+
+    VESC Tool is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    VESC Tool is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    */
+
+import QtQuick 2.4
+import QtQuick.Controls 2.2
+import QtQuick.Layouts 1.3
+
+import Vedder.vesc.vescinterface 1.0
+import Vedder.vesc.bleuart 1.0
+import Vedder.vesc.commands 1.0
+import Vedder.vesc.utility 1.0
+
+Item {
+    id: rootItem
+
+    property BleUart mBle: VescIf.bleDevice()
+    property Commands mCommands: VescIf.commands()
+
+    Rectangle {
+        color: Qt.rgba(66 / 255, 66 / 255, 66 / 255, 1)
+        anchors.fill: parent
+    }
+
+    Component.onCompleted: {
+        mBle.startScan()
+        scanDotTimer.running = true
+    }
+
+    onYChanged: {
+        if (y > 1) {
+            enableDialog()
+        }
+    }
+
+    ColumnLayout {
+        id: column
+        anchors.fill: parent
+        anchors.margins: 10
+
+        Image {
+            id: image
+            Layout.preferredWidth: Math.min(column.width, column.height) * 0.8
+            Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+            Layout.topMargin: 20
+            Layout.bottomMargin: 20
+            source: "qrc:/res/logo_white.png"
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            Button {
+                text: qsTr("Hide")
+                Layout.preferredWidth: 120
+                flat: true
+
+                onClicked: {
+                    rootItem.y = rootItem.height
+                }
+            }
+
+            Text {
+                id: text
+                Layout.fillWidth: true
+                color: "white"
+                text: qsTr("Devices Found")
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+
+            Button {
+                id: scanButton
+                text: qsTr("Scan")
+                enabled: false
+                flat: true
+                Layout.preferredWidth: 120
+
+                onClicked: {
+                    scanButton.enabled = false
+                    scanDotTimer.running = true
+                    mBle.startScan()
+                }
+            }
+
+            Timer {
+                id: scanDotTimer
+                interval: 500
+                running: false
+                repeat: true
+
+                property int dots: 0
+                onTriggered: {
+                    var text = "Scanning"
+                    for (var i = 0;i < dots;i++) {
+                        text = "-" + text + "-"
+                    }
+
+                    dots++;
+                    if (dots > 3) {
+                        dots = 0;
+                    }
+
+                    scanButton.text = text
+                }
+            }
+        }
+
+        ListModel {
+            id: bleModel
+        }
+
+        ListView {
+            id: bleList
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            focus: true
+            clip: true
+            spacing: 5
+
+            Component {
+                id: bleDelegate
+
+                Rectangle {
+                    width: bleList.width
+                    height: 120
+                    color: Qt.rgba(48 / 255, 48 / 255, 48 / 255, 1)
+                    radius: 10
+
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 10
+
+                        Rectangle {
+                            Layout.leftMargin: 10
+                            Layout.fillWidth: true
+
+                            color: preferred ? Qt.rgba(71 / 255, 117 / 255, 137 / 255, 1) : "#33a8d9ff"
+                            height: column.height + 10
+                            radius: height / 2
+
+                            ColumnLayout {
+                                id: column
+                                anchors.centerIn: parent
+
+                                Image {
+                                    id: image
+                                    fillMode: Image.PreserveAspectFit
+                                    Layout.preferredWidth: 40
+                                    Layout.preferredHeight: 40
+                                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                                    source: "qrc:/res/icons/bluetooth.png"
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                                    text: name
+                                    horizontalAlignment: Text.AlignHCenter
+                                    color: "white"
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Text {
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                                Layout.rightMargin: 5
+                                color: "white"
+                                text: "Preferred"
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+
+                            Switch {
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                                enabled: true
+                                checked: preferred
+                                onToggled: {
+                                    VescIf.storeBlePreferred(bleAddr, checked)
+                                    mBle.emitScanDone()
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.rightMargin: 10
+                            spacing: -5
+
+                            Button {
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                                Layout.preferredHeight: 55
+                                text: "Connect"
+
+                                onClicked: {
+                                    disableDialog()
+                                    VescIf.connectBle(bleAddr)
+                                }
+                            }
+
+                            Button {
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                                Layout.preferredHeight: 55
+                                text: "Set Name"
+
+                                onClicked: {
+                                    bleNameDialog.addr = bleAddr
+                                    stringInput.text = setName
+                                    bleNameDialog.open()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            model: bleModel
+            delegate: bleDelegate
+        }
+    }
+
+    Connections {
+        target: mBle
+        onScanDone: {
+            if (done) {
+                scanDotTimer.running = false
+                scanButton.enabled = true
+                scanButton.text = qsTr("Scan")
+            }
+
+            bleModel.clear()
+
+            for (var addr in devs) {
+                var name = devs[addr]
+                var setName = VescIf.getBleName(addr)
+                var setNameShort = setName
+                var preferred = VescIf.getBlePreferred(addr)
+                if (setName.length > 0) {
+                    setName += "\n[" + addr + "]"
+                } else {
+                    setName = name + "\n[" + addr + "]"
+                }
+
+                if (preferred) {
+                    bleModel.insert(0, {"name": setName,
+                                          "setName": setNameShort,
+                                          "preferred": preferred,
+                                          "bleAddr": addr})
+                } else {
+                    bleModel.append({"name": setName,
+                                       "setName": setNameShort,
+                                       "preferred": preferred,
+                                       "bleAddr": addr})
+                }
+
+
+            }
+        }
+
+        onBleError: {
+            VescIf.emitMessageDialog("BLE Error", info, false, false)
+            enableDialog()
+        }
+    }
+
+    function disableDialog() {
+        commDialog.open()
+        column.enabled = false
+    }
+
+    function enableDialog() {
+        commDialog.close()
+        column.enabled = true
+    }
+
+    Dialog {
+        id: commDialog
+        title: "Connecting..."
+        closePolicy: Popup.NoAutoClose
+        modal: true
+        focus: true
+
+        width: parent.width - 20
+        x: 10
+        y: parent.height / 2 - height / 2
+        parent: ApplicationWindow.overlay
+
+        ProgressBar {
+            anchors.fill: parent
+            indeterminate: visible
+        }
+    }
+
+    Dialog {
+        property var addr: ""
+
+        id: bleNameDialog
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        modal: true
+        focus: true
+        title: "Set BLE Device Name"
+
+        width: parent.width - 20
+        height: 200
+        closePolicy: Popup.CloseOnEscape
+        x: 10
+        y: Math.max(parent.height / 4 - height / 2, 20)
+        parent: ApplicationWindow.overlay
+
+        Rectangle {
+            anchors.fill: parent
+            height: stringInput.implicitHeight + 14
+            border.width: 2
+            border.color: "#8d8d8d"
+            color: "#33a8a8a8"
+            radius: 3
+            TextInput {
+                id: stringInput
+                color: "#ffffff"
+                anchors.fill: parent
+                anchors.margins: 7
+                font.pointSize: 12
+                focus: true
+            }
+        }
+
+        onAccepted: {
+            VescIf.storeBleName(addr, stringInput.text)
+            VescIf.storeSettings()
+            mBle.emitScanDone()
+        }
+    }
+}

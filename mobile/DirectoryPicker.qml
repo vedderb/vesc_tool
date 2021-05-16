@@ -129,6 +129,7 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
+
         OldControls.TableView {
             id: view
             Layout.fillHeight: true

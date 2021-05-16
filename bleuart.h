@@ -39,6 +39,7 @@ public:
     Q_INVOKABLE void disconnectBle();
     Q_INVOKABLE bool isConnected();
     Q_INVOKABLE bool isConnecting();
+    Q_INVOKABLE void emitScanDone();
 
 signals:
     void dataRx(QByteArray data);
@@ -78,6 +79,7 @@ private:
     QString mServiceUuid;
     QString mRxUuid;
     QString mTxUuid;
+    bool mScanFinished;
 
 };
 

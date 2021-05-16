@@ -351,7 +351,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
 
             // MCConf should have been sent after the detection
             vesc->commands()->getAppConf();
-            waitSignal(ap, SIGNAL(updated()), 1500);
+            waitSignal(ap, SIGNAL(updated()), 4000);
 
             auto genRes = [&p, &ap]() {
                 QString sensors;
@@ -402,18 +402,18 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                 }
 
                 vesc->commands()->getMcconf();
-                waitSignal(p, SIGNAL(updated()), 1500);
+                waitSignal(p, SIGNAL(updated()), 4000);
                 vesc->commands()->getAppConf();
-                waitSignal(ap, SIGNAL(updated()), 1500);
+                waitSignal(ap, SIGNAL(updated()), 4000);
                 res += "\n\n" + genRes();
             }
 
             vesc->commands()->setSendCan(canLastFwd, canLastId);
             vesc->ignoreCanChange(false);
             vesc->commands()->getMcconf();
-            waitSignal(p, SIGNAL(updated()), 1500);
+            waitSignal(p, SIGNAL(updated()), 4000);
             vesc->commands()->getAppConf();
-            waitSignal(ap, SIGNAL(updated()), 1500);
+            waitSignal(ap, SIGNAL(updated()), 4000);
         } else {
             QString reason;
             switch (resDetect) {
@@ -468,7 +468,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 
     if (res) {
         vesc->commands()->getAppConf();
-        res = waitSignal(ap, SIGNAL(updated()), 1500);
+        res = waitSignal(ap, SIGNAL(updated()), 4000);
 
         if (!res) {
             qWarning() << "Appconf not received";
@@ -479,7 +479,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
         int canId = ap->getParamInt("controller_id");
         int canStatus = ap->getParamEnum("send_can_status");
         vesc->commands()->getAppConfDefault();
-        res = waitSignal(ap, SIGNAL(updated()), 1500);
+        res = waitSignal(ap, SIGNAL(updated()), 4000);
 
         if (!res) {
             qWarning() << "Default appconf not received";
@@ -489,7 +489,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             ap->updateParamInt("controller_id", canId);
             ap->updateParamEnum("send_can_status", canStatus);
             vesc->commands()->setAppConf();
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 3000);
+            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
             if (!res) {
                 qWarning() << "Appconf set no ack received";
@@ -521,7 +521,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             vesc->commands()->getAppConf();
-            res = waitSignal(ap, SIGNAL(updated()), 1500);
+            res = waitSignal(ap, SIGNAL(updated()), 4000);
 
             if (!res) {
                 qWarning() << "Appconf not received";
@@ -531,7 +531,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             int canId = ap->getParamInt("controller_id");
             int canStatus = ap->getParamEnum("send_can_status");
             vesc->commands()->getAppConfDefault();
-            res = waitSignal(ap, SIGNAL(updated()), 1500);
+            res = waitSignal(ap, SIGNAL(updated()), 4000);
 
             if (!res) {
                 qWarning() << "Default appconf not received";
@@ -541,7 +541,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             ap->updateParamInt("controller_id", canId);
             ap->updateParamEnum("send_can_status", canStatus);
             vesc->commands()->setAppConf();
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 3000);
+            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
             if (!res) {
                 qWarning() << "Appconf set no ack received";
@@ -552,7 +552,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 
     vesc->commands()->setSendCan(canLastFwd, canLastId);
     vesc->commands()->getAppConf();
-    if (!waitSignal(ap, SIGNAL(updated()), 1500)) {
+    if (!waitSignal(ap, SIGNAL(updated()), 4000)) {
         qWarning() << "Appconf not received";
         res = false;
     }
@@ -634,7 +634,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
 
         vesc->commands()->getMcconf();
 
-        if (!waitSignal(config, SIGNAL(updated()), 1500)) {
+        if (!waitSignal(config, SIGNAL(updated()), 4000)) {
             vesc->emitMessageDialog("Read Motor Configuration",
                                     "Could not read motor configuration.",
                                     false, false);
@@ -648,7 +648,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
 
         vesc->commands()->setMcconf(false);
 
-        if (!waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000)) {
+        if (!waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000)) {
             vesc->emitMessageDialog("Write Motor Configuration",
                                     "Could not write motor configuration.",
                                     false, false);
@@ -668,8 +668,6 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
         res = updateConf();
     }
 
-    res = updateConf();
-
     // Now every VESC on the CAN-bus
     if (res) {
         for (int id: canIds) {
@@ -688,7 +686,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
     vesc->canTmpOverrideEnd();
 
     vesc->commands()->getMcconf();
-    if (!waitSignal(config, SIGNAL(updated()), 1500)) {
+    if (!waitSignal(config, SIGNAL(updated()), 4000)) {
         res = false;
 
         if (!res) {
@@ -723,18 +721,18 @@ bool Utility::setInvertDirection(VescInterface *vesc, int canId, bool inverted)
 
     if (res) {
         vesc->commands()->getMcconf();
-        res = waitSignal(p, SIGNAL(updated()), 1500);
+        res = waitSignal(p, SIGNAL(updated()), 4000);
     }
 
     if (res) {
         p->updateParamBool("m_invert_direction", inverted);
         vesc->commands()->setMcconf(false);
-        res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+        res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
     }
 
     vesc->commands()->setSendCan(canLastFwd, canLastId);
     vesc->commands()->getMcconf();
-    if (!waitSignal(p, SIGNAL(updated()), 1500)) {
+    if (!waitSignal(p, SIGNAL(updated()), 4000)) {
         res = false;
     }
 
@@ -764,12 +762,12 @@ bool Utility::getInvertDirection(VescInterface *vesc, int canId)
 
     ConfigParams *p = vesc->mcConfig();
     vesc->commands()->getMcconf();
-    waitSignal(p, SIGNAL(updated()), 1500);
+    waitSignal(p, SIGNAL(updated()), 4000);
     res = p->getParamBool("m_invert_direction");
 
     vesc->commands()->setSendCan(canLastFwd, canLastId);
     vesc->commands()->getMcconf();
-    waitSignal(p, SIGNAL(updated()), 1500);
+    waitSignal(p, SIGNAL(updated()), 4000);
 
     vesc->ignoreCanChange(false);
 
@@ -864,22 +862,22 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
     if (mc) {
         ConfigParams *p = vesc->mcConfig();
         vesc->commands()->getMcconfDefault();
-        res = waitSignal(p, SIGNAL(updated()), 1500);
+        res = waitSignal(p, SIGNAL(updated()), 4000);
 
         if (res) {
             vesc->commands()->setMcconf(false);
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
         }
     }
 
     if (app) {
         ConfigParams *p = vesc->appConfig();
         vesc->commands()->getAppConfDefault();
-        res = waitSignal(p, SIGNAL(updated()), 1500);
+        res = waitSignal(p, SIGNAL(updated()), 4000);
 
         if (res) {
             vesc->commands()->setAppConf();
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
         }
     }
 
@@ -901,14 +899,14 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
             if (mc) {
                 ConfigParams *p = vesc->mcConfig();
                 vesc->commands()->getMcconfDefault();
-                res = waitSignal(p, SIGNAL(updated()), 1500);
+                res = waitSignal(p, SIGNAL(updated()), 4000);
 
                 if (!res) {
                     break;
                 }
 
                 vesc->commands()->setMcconf(false);
-                res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+                res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
                 if (!res) {
                     break;
@@ -918,14 +916,14 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
             if (app) {
                 ConfigParams *p = vesc->appConfig();
                 vesc->commands()->getAppConfDefault();
-                res = waitSignal(p, SIGNAL(updated()), 1500);
+                res = waitSignal(p, SIGNAL(updated()), 4000);
 
                 if (!res) {
                     break;
                 }
 
                 vesc->commands()->setAppConf();
-                res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+                res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
                 if (!res) {
                     break;
@@ -940,7 +938,7 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (mc) {
             ConfigParams *p = vesc->mcConfig();
             vesc->commands()->getMcconf();
-            if (!waitSignal(p, SIGNAL(updated()), 1500)) {
+            if (!waitSignal(p, SIGNAL(updated()), 4000)) {
                 res = false;
                 qWarning() << "Could not restore mc conf";
             }
@@ -949,7 +947,7 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (app) {
             ConfigParams *p = vesc->appConfig();
             vesc->commands()->getAppConf();
-            if (!waitSignal(p, SIGNAL(updated()), 1500)) {
+            if (!waitSignal(p, SIGNAL(updated()), 4000)) {
                 res = false;
                 qWarning() << "Could not restore app conf";
             }
@@ -1266,7 +1264,7 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
                vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 2000);
+    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 4000);
 
     disconnect(conn);
 
@@ -1302,7 +1300,7 @@ MC_VALUES Utility::getMcValuesBlocking(VescInterface *vesc)
     });
 
     vesc->commands()->getValues();
-    waitSignal(vesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 2000);
+    waitSignal(vesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 4000);
 
     disconnect(conn);
 
@@ -1597,7 +1595,7 @@ bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
 
     vesc->commands()->getFwVersion();
 
-    if (!waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 1500)) {
+    if (!waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 4000)) {
         vesc->emitMessageDialog("Load Config", "No response when reading firmware version.", false, false);
     }
 

@@ -176,6 +176,17 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         mSettings.endArray();
     }
 
+    {
+        int size = mSettings.beginReadArray("blePreferred");
+        for (int i = 0; i < size; ++i) {
+            mSettings.setArrayIndex(i);
+            QString address = mSettings.value("address").toString();
+            bool pref = mSettings.value("preferred").toBool();
+            mBlePreferred.insert(address, pref);
+        }
+        mSettings.endArray();
+    }
+
     connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
     connect(mBleUart, &BleUart::connected, [this]{
         setLastConnectionType(CONN_BLE);
@@ -552,6 +563,21 @@ void VescInterface::storeSettings()
             mSettings.setArrayIndex(ind);
             mSettings.setValue("address", i.key());
             mSettings.setValue("name", i.value());
+            ind++;
+        }
+        mSettings.endArray();
+    }
+
+    mSettings.remove("blePreferred");
+    {
+        mSettings.beginWriteArray("blePreferred");
+        QHashIterator<QString, bool> i(mBlePreferred);
+        int ind = 0;
+        while (i.hasNext()) {
+            i.next();
+            mSettings.setArrayIndex(ind);
+            mSettings.setValue("address", i.key());
+            mSettings.setValue("preferred", i.value());
             ind++;
         }
         mSettings.endArray();
@@ -1890,6 +1916,20 @@ QString VescInterface::getBleName(QString address)
 QString VescInterface::getLastBleAddr() const
 {
     return mLastBleAddr;
+}
+
+void VescInterface::storeBlePreferred(QString address, bool preferred)
+{
+    mBlePreferred.insert(address, preferred);
+}
+
+bool VescInterface::getBlePreferred(QString address)
+{
+    bool res = false;
+    if(mBlePreferred.contains(address)) {
+        res = mBlePreferred[address];
+    }
+    return res;
 }
 #endif
 

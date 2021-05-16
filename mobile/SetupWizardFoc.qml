@@ -875,7 +875,7 @@ Item {
                                           1 : (wheelPulleyBox.value / motorPulleyBox.value), null)
 
             mCommands.setMcconf(false)
-            Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)
+            Utility.waitSignal(mCommands, "2ackReceived(QString)", 4000)
 
             if (detectCanBox.checked) {
                 canDevs = Utility.scanCanVescOnly(VescIf)

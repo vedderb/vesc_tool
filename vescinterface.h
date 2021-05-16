@@ -158,6 +158,8 @@ public:
     Q_INVOKABLE void storeBleName(QString address, QString name);
     Q_INVOKABLE QString getBleName(QString address);
     Q_INVOKABLE QString getLastBleAddr() const;
+    Q_INVOKABLE void storeBlePreferred(QString address, bool preferred);
+    Q_INVOKABLE bool getBlePreferred(QString address);
 #endif
 
     // Connection
@@ -288,6 +290,7 @@ private:
 
     QSettings mSettings;
     QHash<QString, QString> mBleNames;
+    QHash<QString, bool> mBlePreferred;
     QHash<QString, CONFIG_BACKUP> mConfigurationBackups;
     QVariantList mProfiles;
     QStringList mPairedUuids;

@@ -20,6 +20,7 @@
 #include "mainwindow.h"
 #include "mobile/qmlui.h"
 #include "mobile/fwhelper.h"
+#include "mobile/vesc3ditem.h"
 #include "tcpserversimple.h"
 
 #include <QApplication>
@@ -68,6 +69,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");
     qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
     qmlRegisterType<TcpServerSimple>("Vedder.vesc.tcpserversimple", 1, 0, "TcpServerSimple");
+    qmlRegisterType<Vesc3dItem>("Vedder.vesc.vesc3ditem", 1, 0, "Vesc3dItem");
 
     qRegisterMetaType<MCCONF_TEMP>();
     qRegisterMetaType<MC_VALUES>();

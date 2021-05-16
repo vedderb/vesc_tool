@@ -21,6 +21,7 @@
 * Added servo output control slider.
 * Added support for loading custom UI from firmware.
 * Dark theme.
+* Mobile UI refactoring.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

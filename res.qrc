@@ -179,5 +179,6 @@
         <file>res/icons/Controller-96_on.png</file>
         <file>res/images/esk8.jpg</file>
         <file>res/images/propeller.jpg</file>
+        <file>res/icons/bluetooth.png</file>
     </qresource>
 </RCC>

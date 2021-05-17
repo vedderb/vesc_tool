@@ -1039,6 +1039,26 @@ bool Commands::bmsHasCanValues(int can_id)
     return mBmsValues.contains(can_id);
 }
 
+void Commands::emitPlotInit(QString xLabel, QString yLabel)
+{
+    emit plotInitReceived(xLabel, yLabel);
+}
+
+void Commands::emitPlotData(double x, double y)
+{
+    emit plotDataReceived(x, y);
+}
+
+void Commands::emitPlotAddGraph(QString name)
+{
+    emit plotAddGraphReceived(name);
+}
+
+void Commands::emitPlotSetGraph(int graph)
+{
+    emit plotSetGraphReceived(graph);
+}
+
 void Commands::sendTerminalCmd(QString cmd)
 {
     VByteArray vb;

@@ -66,6 +66,11 @@ public:
     Q_INVOKABLE BMS_VALUES bmsGetCanValues(int can_id);
     Q_INVOKABLE bool bmsHasCanValues(int can_id);
 
+    Q_INVOKABLE void emitPlotInit(QString xLabel, QString yLabel);
+    Q_INVOKABLE void emitPlotData(double x, double y);
+    Q_INVOKABLE void emitPlotAddGraph(QString name);
+    Q_INVOKABLE void emitPlotSetGraph(int graph);
+
 signals:
     void dataToSend(QByteArray &data);
 

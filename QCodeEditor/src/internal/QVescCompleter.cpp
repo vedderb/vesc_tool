@@ -88,6 +88,10 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("ioBoardGetAll(id)");
         addItem("ioBoardSetPwm(id, channel, duty)");
         addItem("ioBoardSetDigital(id, channel, on)");
+        addItem("emitPlotInit(xLabel, yLabel)");
+        addItem("emitPlotData(x, y)");
+        addItem("emitPlotAddGraph(name)");
+        addItem("emitPlotSetGraph(graph)");
         level--;
     };
 

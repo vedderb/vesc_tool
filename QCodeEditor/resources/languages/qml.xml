@@ -107,5 +107,6 @@
         <name>MenuItem</name>
         <name>Repeater</name>
         <name>TcpServerSimple</name>
+        <name>LogWriter</name>
     </section>
 </root>

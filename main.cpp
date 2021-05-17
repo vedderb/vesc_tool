@@ -21,6 +21,7 @@
 #include "mobile/qmlui.h"
 #include "mobile/fwhelper.h"
 #include "mobile/vesc3ditem.h"
+#include "mobile/logwriter.h"
 #include "tcpserversimple.h"
 
 #include <QApplication>
@@ -70,6 +71,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
     qmlRegisterType<TcpServerSimple>("Vedder.vesc.tcpserversimple", 1, 0, "TcpServerSimple");
     qmlRegisterType<Vesc3dItem>("Vedder.vesc.vesc3ditem", 1, 0, "Vesc3dItem");
+    qmlRegisterType<LogWriter>("Vedder.vesc.logwriter", 1, 0, "LogWriter");
 
     qRegisterMetaType<MCCONF_TEMP>();
     qRegisterMetaType<MC_VALUES>();

@@ -17,5 +17,6 @@
         <file>res/qml/Examples/ParentTabBar.qml</file>
         <file>res/qml/Examples/IoBoard.qml</file>
         <file>res/qml/Examples/ExperimentPlot.qml</file>
+        <file>res/qml/Examples/LogTextToFile.qml</file>
     </qresource>
 </RCC>

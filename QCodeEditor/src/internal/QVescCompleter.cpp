@@ -133,6 +133,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
     {
         level++;
         addItem("onCompleted:");
+        addItem("onDestruction:");
         level--;
     }
 

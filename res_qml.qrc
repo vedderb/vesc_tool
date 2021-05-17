@@ -16,5 +16,6 @@
         <file>res/qml/Examples/TcpServer.qml</file>
         <file>res/qml/Examples/ParentTabBar.qml</file>
         <file>res/qml/Examples/IoBoard.qml</file>
+        <file>res/qml/Examples/ExperimentPlot.qml</file>
     </qresource>
 </RCC>

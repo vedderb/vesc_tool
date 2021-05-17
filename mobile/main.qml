@@ -183,6 +183,10 @@ ApplicationWindow {
                 onRequestOpenControls: {
                     controls.openDialog()
                 }
+
+                onRequestConnect: {
+                    connScreen.y = 0
+                }
             }
         }
 

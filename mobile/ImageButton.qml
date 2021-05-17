@@ -25,7 +25,7 @@ Item {
     id: rootItem
     property var imageSrc: ""
     property var buttonText: ""
-    signal clicked
+    signal clicked()
 
     Button {
         id: control

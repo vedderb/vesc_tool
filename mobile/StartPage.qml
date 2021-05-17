@@ -32,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
     signal requestOpenControls()
+    signal requestConnect()
 
     ScrollView {
         anchors.fill: parent
@@ -66,6 +67,46 @@ Item {
                     columns: 2
                     columnSpacing: 5
                     rowSpacing: isHorizontal ? 5 : 0
+
+                    ImageButton {
+                        id: connectButton
+
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "Connect"
+                        imageSrc: "qrc:/res/icons/Connected-96.png"
+
+                        onClicked: {
+                            if (VescIf.isPortConnected()) {
+                                VescIf.disconnectPort()
+                            } else {
+                                topItem.requestConnect()
+                            }
+                        }
+                    }
+
+                    ImageButton {
+                        id: nrfPairButton
+
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "VESC Remote\nQuick Pair"
+                        imageSrc: "qrc:/res/icons/icons8-fantasy-96.png"
+
+                        onClicked: {
+                            if (!VescIf.isPortConnected()) {
+                                VescIf.emitMessageDialog("Quick Pair",
+                                                         "You are not connected to the VESC. Please connect in order " +
+                                                         "to quick pair an NRF-based remote.", false, false)
+                            } else {
+                                nrfPairStartDialog.open()
+                            }
+                        }
+                    }
 
                     ImageButton {
                         Layout.fillWidth: true
@@ -106,27 +147,6 @@ Item {
                                 enabled = false
                                 wizardInput.openDialog()
                                 enabled = true
-                            }
-                        }
-                    }
-
-                    ImageButton {
-                        id: nrfPairButton
-
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 80
-                        Layout.columnSpan: 2
-
-                        buttonText: "VESC Remote\nQuick Pair"
-                        imageSrc: "qrc:/res/icons/icons8-fantasy-96.png"
-
-                        onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("Quick Pair",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to quick pair an NRF-based remote.", false, false)
-                            } else {
-                                nrfPairStartDialog.open()
                             }
                         }
                     }
@@ -387,6 +407,17 @@ Item {
         onNrfPairingRes: {
             if (res != 0) {
                 nrfPairButton.visible = true
+            }
+        }
+    }
+
+    Connections {
+        target: VescIf
+        onPortConnectedChanged: {
+            if (VescIf.isPortConnected()) {
+                connectButton.buttonText = "Disconnect"
+            } else {
+                connectButton.buttonText = "Connect"
             }
         }
     }

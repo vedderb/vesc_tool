@@ -347,7 +347,7 @@ Item {
             }
 
             GroupBox {
-                title: qsTr("TCP Server")
+                title: qsTr("Wireless Bridge to Computer (TCP)")
                 Layout.fillWidth: true
 
                 TcpBox {

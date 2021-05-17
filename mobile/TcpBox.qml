@@ -43,7 +43,7 @@ Item {
 
         CheckBox {
             id: tcpServerEnBox
-            text: "Run TCP Server"
+            text: "Activate Bridge"
             Layout.fillWidth: true
             Layout.columnSpan: 2
 

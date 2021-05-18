@@ -46,11 +46,11 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab_1" native="true">
+      <widget class="QWidget" name="tab_1">
        <attribute name="title">
         <string>Tune</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="ParamTable" name="tunePane"/>
         </item>
@@ -58,67 +58,49 @@
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
+        <string>Tune Modifiers</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="ParamTable" name="modifiersPane"/>
+         </item>
+        </layout>
+      </widget>
+      <widget class="QWidget" name="tab_3">
+       <attribute name="title">
         <string>Startup</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="ParamTable" name="startupPane"/>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_3">
+      <widget class="QWidget" name="tab_4">
        <attribute name="title">
         <string>Tiltback</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <widget class="ParamTable" name="tiltbackPane"/>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_4">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QWidget" name="tab_5">
        <attribute name="title">
         <string>Fault</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
-         <widget class="ParamTable" name="faultPane">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
+         <widget class="ParamTable" name="faultPane"/>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_5">
+      <widget class="QWidget" name="tab_6">
        <attribute name="title">
         <string>Multi ESC</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
          <widget class="ParamTable" name="multiescPane"/>
         </item>
@@ -132,7 +114,7 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
         <widget class="QCustomPlot" name="balancePlot" native="true">
          <property name="sizePolicy">

@@ -101,12 +101,14 @@ void PageAppBalance::reloadParams()
 {
     if (mVesc) {
         ui->tunePane->clearParams();
+        ui->modifiersPane->clearParams();
         ui->startupPane->clearParams();
         ui->tiltbackPane->clearParams();
         ui->faultPane->clearParams();
         ui->multiescPane->clearParams();
 
         ui->tunePane->addParamSubgroup(mVesc->appConfig(), "balance", "tune");
+        ui->modifiersPane->addParamSubgroup(mVesc->appConfig(), "balance", "tune modifiers");
         ui->startupPane->addParamSubgroup(mVesc->appConfig(), "balance", "startup");
         ui->tiltbackPane->addParamSubgroup(mVesc->appConfig(), "balance", "tiltback");
         ui->faultPane->addParamSubgroup(mVesc->appConfig(), "balance", "fault");
@@ -198,7 +200,7 @@ void PageAppBalance::updateTextOutput(){
     }else if(mAppState == 4){
         output = output + "Running (Tiltback Low Voltage)";
     }else if(mAppState == 5){
-        output = output + "Running (Tiltback Constant)";
+        output = output + "Unknown"; // Formerly Constant Tiltback, currently unused
     }else if(mAppState == 6){
         output = output + "Fault (Pitch Angle)";
     }else if(mAppState == 7){

@@ -31,11 +31,7 @@ LogWriter::LogWriter(QObject *parent) : QObject(parent)
 bool LogWriter::openLogFile(QString fileName)
 {
     QSettings set;
-    QString logDir = "./log";
-
-    if (set.contains("pagertdata/lastcsvfile")) {
-        logDir = set.value("pagertdata/lastcsvfile").toString();
-    }
+    QString logDir = set.value("path_rt_log", "./log").toString();
 
     if (logDir.startsWith("file:/")) {
         logDir.remove(0, 6);

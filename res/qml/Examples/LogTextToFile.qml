@@ -18,8 +18,8 @@ Item {
     
     Text {
         anchors.fill: parent
-        id: "txt"
-        text: "Go to Realtime Data > Log to change the destination directory."
+        id: txt
+        text: "Go to Settings > Paths to change the destination directory."
         color: "white"
     }
     

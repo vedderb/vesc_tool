@@ -77,6 +77,8 @@ int main(int argc, char *argv[])
     qRegisterMetaType<MC_VALUES>();
     qRegisterMetaType<BMS_VALUES>();
     qRegisterMetaType<FW_RX_PARAMS>();
+    qRegisterMetaType<PSW_STATUS>();
+    qRegisterMetaType<IO_BOARD_VALUES>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD

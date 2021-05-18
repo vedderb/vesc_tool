@@ -21,6 +21,7 @@
 #include "ui_pagesettings.h"
 #include <QDebug>
 #include <cmath>
+#include <QFileDialog>
 #include "utility.h"
 
 PageSettings::PageSettings(QWidget *parent) :
@@ -42,13 +43,10 @@ PageSettings::PageSettings(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
 
-    if (mSettings.contains("app_scale_factor")) {
-        ui->uiScaleBox->setValue(mSettings.value("app_scale_factor").toDouble());
-    }
-
-    if (mSettings.contains("app_scale_auto")) {
-        ui->uiAutoScaleBox->setChecked(mSettings.value("app_scale_auto").toBool());
-    }
+    ui->uiScaleBox->setValue(mSettings.value("app_scale_factor", 1.0).toDouble());
+    ui->uiAutoScaleBox->setChecked(mSettings.value("app_scale_auto", false).toBool());
+    ui->pathRtLogEdit->setText(mSettings.value("path_rt_log", "./log").toString());
+    ui->pathScriptInputEdit->setText(mSettings.value("path_script_input", ".").toString());
 
     ui->uiScaleBox->setEnabled(!ui->uiAutoScaleBox->isChecked());
 
@@ -323,4 +321,28 @@ void PageSettings::on_loadQmlUiConnectBox_toggled(bool checked)
     if (mVesc) {
         mVesc->setLoadQmlUiOnConnect(checked);
     }
+}
+
+void PageSettings::on_pathRtLogChooseButton_clicked()
+{
+    ui->pathRtLogEdit->setText(
+                QFileDialog::getExistingDirectory(this, "Choose RT log output directory"));
+}
+
+void PageSettings::on_pathScriptInputChooseButton_clicked()
+{
+    ui->pathScriptInputEdit->setText(
+                QFileDialog::getExistingDirectory(this, "Choose script input file directory"));
+}
+
+void PageSettings::on_pathRtLogEdit_textChanged(const QString &arg1)
+{
+    mSettings.setValue("path_rt_log", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pathScriptInputEdit_textChanged(const QString &arg1)
+{
+    mSettings.setValue("path_script_input", arg1);
+    mSettings.sync();
 }

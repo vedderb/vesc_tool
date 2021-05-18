@@ -56,6 +56,10 @@ private slots:
     void on_jsConnectButton_clicked();
     void on_jsResetConfigButton_clicked();
     void on_loadQmlUiConnectBox_toggled(bool checked);
+    void on_pathRtLogChooseButton_clicked();
+    void on_pathScriptInputChooseButton_clicked();
+    void on_pathRtLogEdit_textChanged(const QString &arg1);
+    void on_pathScriptInputEdit_textChanged(const QString &arg1);
 
 private:
     Ui::PageSettings *ui;

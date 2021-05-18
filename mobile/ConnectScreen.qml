@@ -210,8 +210,13 @@ Item {
                                 text: "Connect"
 
                                 onClicked: {
-                                    disableDialog()
-                                    VescIf.connectBle(bleAddr)
+                                    if (!VescIf.getBlePreferred(bleAddr)) {
+                                        preferredDialog.bleAddr = bleAddr
+                                        preferredDialog.open()
+                                    } else {
+                                        disableDialog()
+                                        VescIf.connectBle(bleAddr)
+                                    }
                                 }
                             }
 
@@ -345,6 +350,41 @@ Item {
             VescIf.storeBleName(addr, stringInput.text)
             VescIf.storeSettings()
             mBle.emitScanDone()
+        }
+    }
+
+    Dialog {
+        id: preferredDialog
+        property var bleAddr: ""
+        standardButtons: Dialog.Yes | Dialog.No
+        modal: true
+        focus: true
+        rightMargin: 10
+        leftMargin: 10
+        closePolicy: Popup.CloseOnEscape
+        title: "Preferred BLE Devices"
+        y: 10 + parent.height / 2 - height / 2
+        parent: ApplicationWindow.overlay
+
+        Text {
+            color: "#ffffff"
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text: "Do you want to make this a preferred device? That will make it show " +
+                  "up a bit faster in BLE scans and it will be shown at the top of the device list."
+        }
+
+        onAccepted: {
+            VescIf.storeBlePreferred(bleAddr, true)
+            mBle.emitScanDone()
+            disableDialog()
+            VescIf.connectBle(bleAddr)
+        }
+
+        onRejected: {
+            disableDialog()
+            VescIf.connectBle(bleAddr)
         }
     }
 }

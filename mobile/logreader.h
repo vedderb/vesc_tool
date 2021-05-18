@@ -17,21 +17,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#ifndef LOGWRITER_H
-#define LOGWRITER_H
+#ifndef LOGREADER_H
+#define LOGREADER_H
 
 #include <QObject>
 #include <QFile>
 
-class LogWriter : public QObject
+class LogReader : public QObject
 {
     Q_OBJECT
 public:
-    explicit LogWriter(QObject *parent = nullptr);
-    ~LogWriter();
+    explicit LogReader(QObject *parent = nullptr);
+    ~LogReader();
 
     Q_INVOKABLE bool openLogFile(QString fileName);
-    Q_INVOKABLE bool writeToLogFile(QString text);
+    Q_INVOKABLE QString readLine();
+    Q_INVOKABLE QString readAll();
+    Q_INVOKABLE bool atEnd();
     Q_INVOKABLE void closeLogFile();
     Q_INVOKABLE bool isLogOpen();
 
@@ -42,4 +44,4 @@ private:
 
 };
 
-#endif // LOGWRITER_H
+#endif // LOGREADER_H

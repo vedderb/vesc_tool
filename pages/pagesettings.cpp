@@ -46,7 +46,8 @@ PageSettings::PageSettings(QWidget *parent) :
     ui->uiScaleBox->setValue(mSettings.value("app_scale_factor", 1.0).toDouble());
     ui->uiAutoScaleBox->setChecked(mSettings.value("app_scale_auto", false).toBool());
     ui->pathRtLogEdit->setText(mSettings.value("path_rt_log", "./log").toString());
-    ui->pathScriptInputEdit->setText(mSettings.value("path_script_input", ".").toString());
+    ui->pathScriptInputEdit->setText(mSettings.value("path_script_input", "./log").toString());
+    ui->pathScriptOutputEdit->setText(mSettings.value("path_script_output", "./log").toString());
 
     ui->uiScaleBox->setEnabled(!ui->uiAutoScaleBox->isChecked());
 
@@ -344,5 +345,17 @@ void PageSettings::on_pathRtLogEdit_textChanged(const QString &arg1)
 void PageSettings::on_pathScriptInputEdit_textChanged(const QString &arg1)
 {
     mSettings.setValue("path_script_input", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pathScriptOutputChooseButton_clicked()
+{
+    ui->pathScriptOutputEdit->setText(
+                QFileDialog::getExistingDirectory(this, "Choose script output file directory"));
+}
+
+void PageSettings::on_pathScriptOutputEdit_textChanged(const QString &arg1)
+{
+    mSettings.setValue("path_script_output", arg1);
     mSettings.sync();
 }

@@ -60,6 +60,8 @@ private slots:
     void on_pathScriptInputChooseButton_clicked();
     void on_pathRtLogEdit_textChanged(const QString &arg1);
     void on_pathScriptInputEdit_textChanged(const QString &arg1);
+    void on_pathScriptOutputChooseButton_clicked();
+    void on_pathScriptOutputEdit_textChanged(const QString &arg1);
 
 private:
     Ui::PageSettings *ui;

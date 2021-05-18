@@ -108,5 +108,6 @@
         <name>Repeater</name>
         <name>TcpServerSimple</name>
         <name>LogWriter</name>
+        <name>LogReader</name>
     </section>
 </root>

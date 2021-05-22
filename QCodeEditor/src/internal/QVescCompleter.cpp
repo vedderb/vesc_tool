@@ -119,6 +119,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("isPortConnected()");
         addItem("getConnectedPortName()");
         addItem("scanCANbus()");
+        addItem("getCanDevsLast()");
         addItem("ignoreCanChange(ignore)");
         addItem("mcConfig()");
         addConfigCmds();
@@ -126,6 +127,8 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addConfigCmds();
         addItem("canTmpOverride(fwdCan, canId)");
         addItem("canTmpOverrideEnd()");
+        addItem("emitMessageDialog(title, text, isGood, isRichText)");
+        addItem("emitStatusMessage(msg, isGood)");
         level--;
     }
 
@@ -194,6 +197,13 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         level--;
     }
 
+    addItem("ApplicationWindow");
+    {
+        level++;
+        addItem("overlay");
+        level--;
+    }
+
     addItem("anchors");
     {
         level++;
@@ -234,6 +244,16 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("bottomMargin: ");
         addItem("preferredWidth: ");
         addItem("preferredHeight: ");
+        level--;
+    }
+
+    addItem("Utility");
+    {
+        level++;
+        addItem("measureRLBlocking(VescIf)");
+        addItem("measureLinkageOpenloopBlocking(VescIf, current, erpm_per_sec, low_duty, resistance, inductance)");
+        addItem("measureHallFocBlocking(VescIf, current)");
+        addItem("getMcValuesBlocking(VescIf)");
         level--;
     }
 

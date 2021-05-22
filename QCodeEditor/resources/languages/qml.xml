@@ -109,5 +109,9 @@
         <name>TcpServerSimple</name>
         <name>LogWriter</name>
         <name>LogReader</name>
+        <name>ImageButton</name>
+        <name>GroupBox</name>
+        <name>Dialog</name>
+        <name>Utility</name>
     </section>
 </root>

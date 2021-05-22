@@ -54,6 +54,7 @@ public:
     Q_INVOKABLE static double measureLinkageOpenloopBlocking(VescInterface *vesc, double current, double erpm_per_sec, double low_duty,
                                                              double resistance, double inductance);
     Q_INVOKABLE static QVector<int> measureHallFocBlocking(VescInterface *vesc, double current);
+    Q_INVOKABLE static bool waitMotorStop(VescInterface *vesc, double erpmTres, int timeoutMs);
     Q_INVOKABLE static bool resetInputCan(VescInterface *vesc, QVector<int> canIds);
     Q_INVOKABLE static bool setBatteryCutCan(VescInterface *vesc, QVector<int> canIds, double cutStart, double cutEnd);
     Q_INVOKABLE static bool setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds);

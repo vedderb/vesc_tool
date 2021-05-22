@@ -501,6 +501,21 @@ QVector<int> Utility::measureHallFocBlocking(VescInterface *vesc, double current
     return resDetect;
 }
 
+bool Utility::waitMotorStop(VescInterface *vesc, double erpmTres, int timeoutMs)
+{
+    QTimer t;
+    t.start(timeoutMs);
+    t.setSingleShot(true);
+
+    auto val = getMcValuesBlocking(vesc);
+    while (t.isActive() && fabs(val.rpm) > erpmTres) {
+        val = getMcValuesBlocking(vesc);
+        sleepWithEventLoop(100);
+    }
+
+    return t.isActive();
+}
+
 bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 {
     bool res = true;

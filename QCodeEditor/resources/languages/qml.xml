@@ -113,5 +113,6 @@
         <name>GroupBox</name>
         <name>Dialog</name>
         <name>Utility</name>
+        <name>ApplicationWindow</name>
     </section>
 </root>

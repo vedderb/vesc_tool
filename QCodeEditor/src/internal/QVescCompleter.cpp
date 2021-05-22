@@ -254,6 +254,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("measureLinkageOpenloopBlocking(VescIf, current, erpm_per_sec, low_duty, resistance, inductance)");
         addItem("measureHallFocBlocking(VescIf, current)");
         addItem("getMcValuesBlocking(VescIf)");
+        addItem("waitMotorStop(VescIf, erpmTres, timeoutMs)");
         level--;
     }
 

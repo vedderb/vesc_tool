@@ -598,7 +598,6 @@ ApplicationWindow {
             }
 
             hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
-            uiHwButton.visible = true
             swipeView.insertItem(1, uiHwPage)
             tabBar.insertItem(1, uiHwButton)
             uiHwPage.visible = true
@@ -631,7 +630,6 @@ ApplicationWindow {
             }
 
             appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
-            uiAppButton.visible = true
             swipeView.insertItem(1, uiAppPage)
             tabBar.insertItem(1, uiAppButton)
             uiAppPage.visible = true

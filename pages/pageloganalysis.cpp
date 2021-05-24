@@ -43,6 +43,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->statSplitter->setStretchFactor(0, 6);
     ui->statSplitter->setStretchFactor(1, 1);
 
+    Utility::setPlotColors(ui->plot);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     ui->plot->axisRect()->setRangeZoom(Qt::Orientations());
     ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
@@ -168,7 +169,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     mVerticalLine = new QCPCurve(ui->plot->xAxis, ui->plot->yAxis);
     mVerticalLine->removeFromLegend();
-    mVerticalLine->setPen(QPen(Qt::black));
+    mVerticalLine->setPen(QPen(Utility::getAppQColor("white")));
     mVerticalLineMsLast = -1;
 
     auto updateMouse = [this](QMouseEvent *event) {
@@ -722,12 +723,12 @@ void PageLogAnalysis::updateGraphs()
     ui->plot->clearGraphs();
 
     for (int i = 0;i < yAxes.size();i++) {
-        QPen pen = QPen(QColor(77,127,196));
+        QPen pen = QPen(Utility::getAppQColor("blue"));
 
         if (i == 1) {
             pen = QPen(Qt::magenta);
         } else if (i == 2) {
-            pen = QPen(QColor(127,200,127));
+            pen = QPen(Utility::getAppQColor("green"));
         } else if (i == 3) {
             pen = QPen(Qt::darkGreen);
         } else if (i == 4) {

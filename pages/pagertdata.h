@@ -24,6 +24,7 @@
 #include <QVector>
 #include <QTimer>
 #include "vescinterface.h"
+#include "widgets/qcustomplot.h"
 
 namespace Ui {
 class PageRtData;

@@ -46,6 +46,10 @@ PageSettings::PageSettings(QWidget *parent) :
         ui->uiScaleBox->setValue(mSettings.value("app_scale_factor").toDouble());
     }
 
+    if (mSettings.contains("plot_line_width")) {
+        ui->uiPlotWidthBox->setValue(mSettings.value("plot_line_width").toDouble());
+    }
+
     if (mSettings.contains("app_scale_auto")) {
         ui->uiAutoScaleBox->setChecked(mSettings.value("app_scale_auto").toBool());
     }
@@ -277,6 +281,10 @@ void PageSettings::timerSlot()
 void PageSettings::on_uiScaleBox_valueChanged(double arg1)
 {
     mSettings.setValue("app_scale_factor", arg1);
+}
+void PageSettings::on_uiPlotWidthBox_valueChanged(double arg1)
+{
+    mSettings.setValue("plot_line_width", arg1);
 }
 
 void PageSettings::on_uiAutoScaleBox_toggled(bool checked)

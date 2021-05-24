@@ -51,6 +51,7 @@ private slots:
     void timerSlot();
 
     void on_uiScaleBox_valueChanged(double arg1);
+    void on_uiPlotWidthBox_valueChanged(double arg1);
     void on_uiAutoScaleBox_toggled(bool checked);
     void on_jsScanButton_clicked();
     void on_jsConnectButton_clicked();

@@ -39,7 +39,7 @@ PageScripting::PageScripting(QWidget *parent) :
     ui->setupUi(this);
     mVesc = nullptr;
     ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    ui->qmlWidget->setClearColor(QColor(48,48,48));
+    ui->qmlWidget->setClearColor(Utility::getAppQColor("normalBackground"));
 
     makeEditorConnections(ui->mainEdit);
 

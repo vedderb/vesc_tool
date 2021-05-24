@@ -19,6 +19,7 @@
 
 #include "pageappbalance.h"
 #include "ui_pageappbalance.h"
+#include "utility.h"
 
 PageAppBalance::PageAppBalance(QWidget *parent) :
     QWidget(parent),
@@ -43,13 +44,14 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
 
     int graphIndex = 0;
 
+    Utility::setPlotColors(ui->balancePlot);
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
     ui->balancePlot->graph(graphIndex)->setName("PID Output");
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
     ui->balancePlot->graph(graphIndex)->setName("Pitch Angle");
     graphIndex++;
 
@@ -59,7 +61,7 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
     ui->balancePlot->graph(graphIndex)->setName("Current");
     graphIndex++;
 

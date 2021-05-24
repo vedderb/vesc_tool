@@ -20,6 +20,8 @@
 #include "detectfoc.h"
 #include "ui_detectfoc.h"
 #include "helpdialog.h"
+#include "utility.h"
+
 #include <QMessageBox>
 
 DetectFoc::DetectFoc(QWidget *parent) :
@@ -33,6 +35,7 @@ DetectFoc::DetectFoc(QWidget *parent) :
     mAllValuesOk = false;
     mLastOkValuesApplied = false;
     mRunning = false;
+    mTempMotorLast = -100.0;
     updateColors();
 }
 
@@ -148,6 +151,13 @@ void DetectFoc::motorRLReceived(double r, double l)
         ui->kiBox->setValue(0.0);
         on_calcKpKiButton_clicked();
 
+        auto val = Utility::getMcValuesBlocking(mVesc);
+        if (val.temp_motor > 1.0) {
+            mTempMotorLast = val.temp_motor;
+        } else {
+            mTempMotorLast = -100.0;
+        }
+
         // TODO: Use some rule to calculate time constant?
 //        if (l > 50.0) {
 //            ui->tcBox->setValue(2000);
@@ -226,7 +236,12 @@ void DetectFoc::on_applyAllButton_clicked()
         mVesc->mcConfig()->updateParamDouble("foc_motor_l", l / 1e6);
         mVesc->mcConfig()->updateParamDouble("foc_motor_flux_linkage", lambda);
 
-        mVesc->emitStatusMessage(tr("R, L and \u03BB Applied"), true);
+        mVesc->emitStatusMessage(tr("R, L and \u03BB applied"), true);
+
+        if (mTempMotorLast > -10.0) {
+            mVesc->mcConfig()->updateParamDouble("foc_temp_comp_base_temp", mTempMotorLast);
+            mVesc->emitStatusMessage(tr("Temp comp base temp applied"), true);
+        }
 
         on_calcKpKiButton_clicked();
         on_calcGainButton_clicked();

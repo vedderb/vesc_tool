@@ -51,6 +51,11 @@ public:
     Q_INVOKABLE static QString detectAllFoc(VescInterface *vesc,
                                             bool detect_can, double max_power_loss, double min_current_in,
                                             double max_current_in, double openloop_rpm, double sl_erpm);
+    Q_INVOKABLE static QVector<double> measureRLBlocking(VescInterface *vesc);
+    Q_INVOKABLE static double measureLinkageOpenloopBlocking(VescInterface *vesc, double current, double erpm_per_sec, double low_duty,
+                                                             double resistance, double inductance);
+    Q_INVOKABLE static QVector<int> measureHallFocBlocking(VescInterface *vesc, double current);
+    Q_INVOKABLE static bool waitMotorStop(VescInterface *vesc, double erpmTres, int timeoutMs);
     Q_INVOKABLE static bool resetInputCan(VescInterface *vesc, QVector<int> canIds);
     Q_INVOKABLE static bool setBatteryCutCan(VescInterface *vesc, QVector<int> canIds, double cutStart, double cutEnd);
     Q_INVOKABLE static bool setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds);

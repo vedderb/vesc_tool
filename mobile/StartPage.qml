@@ -269,26 +269,34 @@ Item {
                 title: qsTr("Tools")
                 Layout.fillWidth: true
 
-                ColumnLayout {
+                GridLayout {
                     anchors.topMargin: -5
                     anchors.bottomMargin: -5
                     anchors.fill: parent
-                    spacing: isHorizontal ? -5 : -10
+                    columns: 2
+                    columnSpacing: 5
+                    rowSpacing: 0
 
-                    Button {
-                        text: "Controls"
+                    ImageButton {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "Controls"
+                        imageSrc: "qrc:/res/icons/Controller-96.png"
 
                         onClicked: {
                             requestOpenControls()
                         }
                     }
 
-                    Button {
-                        text: "Directions"
+                    ImageButton {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "Directions"
+                        imageSrc: "qrc:/res/icons/Process-96.png"
 
                         onClicked: {
                             if (!VescIf.isPortConnected()) {
@@ -304,30 +312,39 @@ Item {
                         }
                     }
 
-                    Button {
-                        text: "Backup Configuration(s)"
+                    ImageButton {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "Backup\nConfiguration(s)"
+                        imageSrc: "qrc:/res/icons/Save-96.png"
 
                         onClicked: {
                             backupConfigDialog.open()
                         }
                     }
 
-                    Button {
-                        text: "Restore Configuration(s)"
+                    ImageButton {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "Restore\nConfiguration(s)"
+                        imageSrc: "qrc:/res/icons/Open Folder-96.png"
 
                         onClicked: {
                             restoreConfigDialog.open()
                         }
                     }
 
-                    Button {
-                        text: "Pair BLE"
+                    ImageButton {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "Pair\nBLE"
+                        imageSrc: "qrc:/res/icons/bluetooth-white.png"
 
                         onClicked: {
                             pairDialog.openDialog()

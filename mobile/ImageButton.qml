@@ -48,12 +48,10 @@ Item {
 
                 Image {
                     id: img
-                    Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.preferredWidth: height
                     Layout.margins: 6
                     Layout.leftMargin: 6
-                    Layout.rightMargin: -6
                     fillMode: Image.PreserveAspectFit
                     horizontalAlignment: Image.AlignHCenter
                     source: imageSrc

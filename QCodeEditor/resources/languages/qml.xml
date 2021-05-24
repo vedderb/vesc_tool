@@ -108,5 +108,11 @@
         <name>Repeater</name>
         <name>TcpServerSimple</name>
         <name>LogWriter</name>
+        <name>LogReader</name>
+        <name>ImageButton</name>
+        <name>GroupBox</name>
+        <name>Dialog</name>
+        <name>Utility</name>
+        <name>ApplicationWindow</name>
     </section>
 </root>

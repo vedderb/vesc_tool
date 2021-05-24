@@ -192,17 +192,10 @@ PageRtData::PageRtData(QWidget *parent) :
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
-
-    QSettings set;
-    if (set.contains("pagertdata/lastcsvfile")) {
-        ui->csvFileEdit->setText(set.value("pagertdata/lastcsvfile").toString());
-    }
 }
 
 PageRtData::~PageRtData()
 {
-    QSettings set;
-    set.setValue("pagertdata/lastcsvfile", ui->csvFileEdit->text());
     delete ui;
 }
 
@@ -234,8 +227,8 @@ void PageRtData::setVesc(VescInterface *vesc)
 void PageRtData::timerSlot()
 {
     if (mVesc) {
-        if (mVesc->isRtLogOpen() != ui->csvEnableLogBox->isChecked()) {
-            ui->csvEnableLogBox->setChecked(mVesc->isRtLogOpen());
+        if (mVesc->isRtLogOpen() != ui->logRtButton->isChecked()) {
+            ui->logRtButton->setChecked(mVesc->isRtLogOpen());
         }
     }
 
@@ -592,28 +585,6 @@ void PageRtData::on_tempShowMotorBox_toggled(bool checked)
     }
 }
 
-void PageRtData::on_csvChooseDirButton_clicked()
-{
-    ui->csvFileEdit->setText(QFileDialog::getExistingDirectory(this,
-                                                               "Choose CSV output directory"));
-}
-
-void PageRtData::on_csvEnableLogBox_clicked(bool checked)
-{
-    if (checked) {
-        if (mVesc) {
-            mVesc->openRtLogFile(ui->csvFileEdit->text());
-        }
-    } else {
-        mVesc->closeRtLogFile();
-    }
-}
-
-void PageRtData::on_csvHelpButton_clicked()
-{
-    HelpDialog::showHelp(this, mVesc->infoConfig(), "help_rt_logging");
-}
-
 void PageRtData::on_experimentLoadXmlButton_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
@@ -793,4 +764,17 @@ void PageRtData::on_experimentClearDataButton_clicked()
         d.yData.clear();
     }
     mExperimentReplot = true;
+}
+
+void PageRtData::on_logRtButton_toggled(bool checked)
+{
+    QSettings set;
+    set.sync();
+    if (checked) {
+        if (mVesc) {
+            mVesc->openRtLogFile(set.value("path_rt_log", "./log").toString());
+        }
+    } else {
+        mVesc->closeRtLogFile();
+    }
 }

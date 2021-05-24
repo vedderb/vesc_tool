@@ -180,5 +180,6 @@
         <file>res/images/esk8.jpg</file>
         <file>res/images/propeller.jpg</file>
         <file>res/icons/bluetooth.png</file>
+        <file>res/icons/bluetooth-white.png</file>
     </qresource>
 </RCC>

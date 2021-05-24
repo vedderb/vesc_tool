@@ -17,26 +17,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#include "logwriter.h"
+#include "logreader.h"
 #include <QSettings>
 #include <QDir>
 #include <QtDebug>
 #include <QTextStream>
 
-LogWriter::LogWriter(QObject *parent) : QObject(parent)
+LogReader::LogReader(QObject *parent) : QObject(parent)
 {
 
 }
 
-LogWriter::~LogWriter()
+LogReader::~LogReader()
 {
     closeLogFile();
 }
 
-bool LogWriter::openLogFile(QString fileName)
+bool LogReader::openLogFile(QString fileName)
 {
     QSettings set;
-    QString logDir = set.value("path_script_output", "./log").toString();
+    QString logDir = set.value("path_script_input", "./log").toString();
 
     if (logDir.startsWith("file:/")) {
         logDir.remove(0, 6);
@@ -52,30 +52,50 @@ bool LogWriter::openLogFile(QString fileName)
     }
 
      mLogFile.setFileName(QString("%1/%2").arg(logDir).arg(fileName));
-     return mLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
+     return mLogFile.open(QIODevice::ReadOnly | QIODevice::Text);
 }
 
-bool LogWriter::writeToLogFile(QString text)
+QString LogReader::readLine()
 {
-    if (!isLogOpen()) {
-        return false;
+    QString res;
+
+    if (isLogOpen()) {
+        res = mLogFile.readLine();
     }
 
-    QTextStream os(&mLogFile);
-    os << text;
-    os.flush();
-
-    return true;
+    return res;
 }
 
-void LogWriter::closeLogFile()
+QString LogReader::readAll()
+{
+    QString res;
+
+    if (isLogOpen()) {
+        res = mLogFile.readAll();
+    }
+
+    return res;
+}
+
+bool LogReader::atEnd()
+{
+    bool res = true;
+
+    if (isLogOpen()) {
+        res = mLogFile.atEnd();
+    }
+
+    return res;
+}
+
+void LogReader::closeLogFile()
 {
     if (mLogFile.isOpen()) {
         mLogFile.close();
     }
 }
 
-bool LogWriter::isLogOpen()
+bool LogReader::isLogOpen()
 {
     return mLogFile.isOpen();
 }

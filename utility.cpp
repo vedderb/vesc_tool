@@ -466,6 +466,77 @@ QString Utility::detectAllFoc(VescInterface *vesc,
     return res;
 }
 
+QVector<double> Utility::measureRLBlocking(VescInterface *vesc)
+{
+    QVector<double> res;
+
+    vesc->commands()->measureRL();
+
+    auto conn = connect(vesc->commands(), &Commands::motorRLReceived, [&res](double r, double l) {
+        res.append(r);
+        res.append(l);
+    });
+
+    waitSignal(vesc->commands(), SIGNAL(motorRLReceived(double, double)), 8000);
+    disconnect(conn);
+
+    return res;
+}
+
+double Utility::measureLinkageOpenloopBlocking(VescInterface *vesc, double current,
+                                               double erpm_per_sec, double low_duty, double resistance, double inductance)
+{
+    double res = -1.0;
+
+    vesc->commands()->measureLinkageOpenloop(current, erpm_per_sec, low_duty, resistance, inductance);
+
+    auto conn = connect(vesc->commands(), &Commands::motorLinkageReceived, [&res](double flux_linkage) {
+        res = flux_linkage;
+    });
+
+    waitSignal(vesc->commands(), SIGNAL(motorLinkageReceived(double)), 12000);
+    disconnect(conn);
+
+    return res;
+}
+
+QVector<int> Utility::measureHallFocBlocking(VescInterface *vesc, double current)
+{
+    QVector<int> resDetect;
+
+    vesc->commands()->measureHallFoc(current);
+
+    auto conn = connect(vesc->commands(), &Commands::focHallTableReceived,
+                        [&resDetect](QVector<int> hall_table, int res) {
+            resDetect.append(res);
+            resDetect.append(hall_table);
+    });
+
+    bool rx = waitSignal(vesc->commands(), SIGNAL(focHallTableReceived(QVector<int>, int)), 12000);
+    disconnect(conn);
+
+    if (!rx) {
+        resDetect.append(-1);
+    }
+
+    return resDetect;
+}
+
+bool Utility::waitMotorStop(VescInterface *vesc, double erpmTres, int timeoutMs)
+{
+    QTimer t;
+    t.start(timeoutMs);
+    t.setSingleShot(true);
+
+    auto val = getMcValuesBlocking(vesc);
+    while (t.isActive() && fabs(val.rpm) > erpmTres) {
+        val = getMcValuesBlocking(vesc);
+        sleepWithEventLoop(100);
+    }
+
+    return t.isActive();
+}
+
 bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 {
     bool res = true;

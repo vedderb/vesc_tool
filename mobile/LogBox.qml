@@ -94,7 +94,7 @@ Item {
                 clip: true
 
                 QSettings.Settings {
-                    property alias rtLog: rtLogFileText.text
+                    property alias path_rt_log: rtLogFileText.text
                 }
             }
         }

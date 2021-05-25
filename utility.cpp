@@ -39,6 +39,27 @@
 #include <QAndroidJniEnvironment>
 #endif
 
+QMap<QString, QColor> Utility::mAppColors = {
+                                        {"lightestBackground", QColor(80,80,80)},
+                                       {"lightBackground", QColor(66,66,66)},
+                                       {"normalBackground", QColor(48,48,48)},
+                                       {"darkBackground", QColor(39,39,39)},
+                                       {"normalText", QColor(180,180,180)},
+                                       {"lightText", QColor(220,220,220)},
+                                       {"disabledText", QColor(127,127,127)},
+                                       {"lightAccentColor", QColor(129,212,250)},
+                                       {"darkAccentColor", QColor(71,117,137)},
+                                       {"pink", QColor(219,98,139)},
+                                       {"red", QColor(200,52,52)},
+                                       {"orange", QColor(206,125,44)},
+                                       {"yellow", QColor(210,210,127)},
+                                       {"green", QColor(127,200,127)},
+                                       {"cyan",QColor(79,203,203)},
+                                       {"blue", QColor(77,127,196)},
+                                       {"magenta", QColor(157,127,210)},
+                                       {"white", QColor(255,255,255)},
+                                       {"black", QColor(0,0,0)}};
+
 Utility::Utility(QObject *parent) : QObject(parent)
 {
 
@@ -1896,3 +1917,73 @@ void Utility::defaultFunc(ConfigParams *params, QTextStream &s) {
         }
     }
 }
+
+void Utility::setAppQColor(QString colorName, QColor color)
+{
+    if(mAppColors.contains(colorName))
+    {
+        mAppColors[colorName] = color;
+    }
+    else
+    {
+        mAppColors.insert(colorName , color);
+        qDebug() << colorName <<" not found in standard colors, adding it.";
+    }
+}
+
+QColor Utility::getAppQColor(QString colorName)
+{
+    if(mAppColors.contains(colorName))
+    {
+        return mAppColors[colorName];
+    }
+    else
+    {
+        qDebug() << colorName <<" not found in standard colors";
+        return Qt::red;
+    }
+}
+
+QString Utility::getAppHexColor(QString colorName)
+{
+    qDebug() << "hex color:" << getAppQColor(colorName).name();
+    return getAppQColor(colorName).name();
+}
+
+void Utility::setPlotColors(QCustomPlot* plot)
+{
+    plot->setBackground(QBrush(Utility::getAppQColor("darkBackground")));
+
+    plot->xAxis->setLabelColor(Utility::getAppQColor("lightText"));
+    plot->xAxis->setBasePen(QPen(Utility::getAppQColor("lightText")));
+    plot->xAxis->setTickPen(QPen(Utility::getAppQColor("lightText")));
+    plot->xAxis->setSubTickPen(QPen(Utility::getAppQColor("lightText")));
+    plot->xAxis->setTickLabelColor(Utility::getAppQColor("lightText"));
+
+    plot->xAxis->setBasePen(QPen(Utility::getAppQColor("lightText")));
+    plot->yAxis->setLabelColor(Utility::getAppQColor("lightText"));
+    plot->yAxis->setBasePen(QPen(Utility::getAppQColor("lightText")));
+    plot->yAxis->setTickPen(QPen(Utility::getAppQColor("lightText")));
+    plot->yAxis->setSubTickPen(QPen(Utility::getAppQColor("lightText")));
+    plot->yAxis->setTickLabelColor(Utility::getAppQColor("lightText"));
+    plot->yAxis->setBasePen(QPen(Utility::getAppQColor("lightText")));
+
+    plot->xAxis2->setLabelColor(Utility::getAppQColor("lightText"));
+    plot->xAxis2->setBasePen(QPen(Utility::getAppQColor("lightText")));
+    plot->xAxis2->setTickPen(QPen(Utility::getAppQColor("lightText")));
+    plot->xAxis2->setSubTickPen(QPen(Utility::getAppQColor("lightText")));
+    plot->xAxis2->setTickLabelColor(Utility::getAppQColor("lightText"));
+    plot->xAxis2->setBasePen(QPen(Utility::getAppQColor("lightText")));
+
+    plot->yAxis2->setLabelColor(Utility::getAppQColor("lightText"));
+    plot->yAxis2->setBasePen(QPen(Utility::getAppQColor("lightText")));
+    plot->yAxis2->setTickPen(QPen(Utility::getAppQColor("lightText")));
+    plot->yAxis2->setSubTickPen(QPen(Utility::getAppQColor("lightText")));
+    plot->yAxis2->setTickLabelColor(Utility::getAppQColor("lightText"));
+    plot->yAxis2->setBasePen(QPen(Utility::getAppQColor("lightText")));
+
+    plot->legend->setBrush(Utility::getAppQColor("darkBackground"));
+    plot->legend->setTextColor(Utility::getAppQColor("lightText"));
+    plot->legend->setBorderPen(QPen(Utility::getAppQColor("lightBackground")));
+}
+

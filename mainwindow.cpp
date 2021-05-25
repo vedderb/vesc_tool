@@ -121,6 +121,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
+
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(mStatusLabel);
@@ -1435,7 +1436,7 @@ void MainWindow::reloadPages()
 
     // Adjust sizes
     QFontMetrics fm(this->font());
-    int width = fm.horizontalAdvance("Welcome & Wizards++++++++++");
+    int width = fm.horizontalAdvance("Welcome & Wizards++++++++++++");
     int height = fm.height();
 
     for(int i = 0; i < ui->pageList->count(); i++) {
@@ -1452,7 +1453,7 @@ void MainWindow::reloadPages()
     ui->scanCanButton->setMaximumWidth(width);
 
     ui->pageList->setCurrentRow(0);
-    ui->pageList->setGridSize(QSize(width - 5, height));
+    ui->pageList->setGridSize(QSize(0.85*width , height));
     ui->pageWidget->setCurrentIndex(0);
 }
 
@@ -1541,7 +1542,7 @@ void MainWindow::checkUdev()
     }
 #endif
 }
-
+#ifdef Q_OS_LINUX
 bool MainWindow::waitProcess(QProcess &process, bool block, int timeoutMs)
 {
     bool wasEnables = isEnabled();
@@ -1582,6 +1583,7 @@ QString MainWindow::runCmd(QString cmd, QStringList args)
     process.close();
     return res;
 }
+#endif
 
 void MainWindow::on_pageList_currentRowChanged(int currentRow)
 {

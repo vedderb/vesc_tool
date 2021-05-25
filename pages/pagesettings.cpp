@@ -42,13 +42,12 @@ PageSettings::PageSettings(QWidget *parent) :
 
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-
     ui->uiScaleBox->setValue(mSettings.value("app_scale_factor", 1.0).toDouble());
+    ui->uiPlotWidthBox->setValue(mSettings.value("plot_line_width",4.0).toDouble());
     ui->uiAutoScaleBox->setChecked(mSettings.value("app_scale_auto", false).toBool());
     ui->pathRtLogEdit->setText(mSettings.value("path_rt_log", "./log").toString());
     ui->pathScriptInputEdit->setText(mSettings.value("path_script_input", "./log").toString());
     ui->pathScriptOutputEdit->setText(mSettings.value("path_script_output", "./log").toString());
-
     ui->uiScaleBox->setEnabled(!ui->uiAutoScaleBox->isChecked());
 
 #ifdef HAS_GAMEPAD
@@ -276,6 +275,10 @@ void PageSettings::timerSlot()
 void PageSettings::on_uiScaleBox_valueChanged(double arg1)
 {
     mSettings.setValue("app_scale_factor", arg1);
+}
+void PageSettings::on_uiPlotWidthBox_valueChanged(double arg1)
+{
+    mSettings.setValue("plot_line_width", arg1);
 }
 
 void PageSettings::on_uiAutoScaleBox_toggled(bool checked)

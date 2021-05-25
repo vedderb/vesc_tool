@@ -46,4 +46,4 @@ CMakeLists.txt.user*
 android-libvesc_tool.so-deployment-settings.json
 android_release_vesctool.keystore
 build_android_signed
-
+*.DS_Store

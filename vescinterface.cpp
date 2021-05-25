@@ -2134,7 +2134,13 @@ QString VescInterface::getConnectedPortName()
 
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
+#if  defined(Q_OS_IOS)|defined(Q_OS_MACX)
+        QStringList ids = mLastBleAddr.split('-');
+        QString id = ids[0].left(3) + '-' + ids[1].left(2) + '-' + ids[2].left(2) + '-' + ids[3].left(2) + '-' + ids[4].right(3);
+        res = tr("Connected (BLE) to %1").arg(id);
+#else
         res = tr("Connected (BLE) to %1").arg(mLastBleAddr);
+#endif
         connected = true;
     }
 #endif

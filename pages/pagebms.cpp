@@ -19,6 +19,7 @@
 
 #include "pagebms.h"
 #include "ui_pagebms.h"
+#include "utility.h"
 
 PageBms::PageBms(QWidget *parent) :
     QWidget(parent),
@@ -28,6 +29,8 @@ PageBms::PageBms(QWidget *parent) :
     mVesc = nullptr;
     ui->valTable->setColumnWidth(0, 200);
     ui->splitter->setSizes(QList<int>({1000, 500}));
+    Utility::setPlotColors(ui->plotCells);
+    Utility::setPlotColors(ui->plotTemp);
 }
 
 PageBms::~PageBms()
@@ -93,7 +96,7 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
         sensor.append(i + 1);
         temp.append(t);
         mTempBars.at(i)->setData(sensor, temp);
-        mTempBars.at(i)->setBrush(t > 55 ? QColor(200,52,52) : QColor(77,127,196));
+        mTempBars.at(i)->setBrush(t > 55 ? Utility::getAppQColor("red") : Utility::getAppQColor("blue"));
 
         textTicker2->addTick(i + 1, QString("T%1 (%2 °C)").
                             arg(i + 1).arg(t));

@@ -30,7 +30,6 @@ public:
     explicit RtDataText(QWidget *parent = 0);
     void setValues(const MC_VALUES &values);
 
-
     QSize sizeHint() const;
 
 signals:

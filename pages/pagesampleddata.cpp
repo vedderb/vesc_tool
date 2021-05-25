@@ -20,7 +20,6 @@
 #include "pagesampleddata.h"
 #include "ui_pagesampleddata.h"
 #include "digitalfiltering.h"
-#include "utility.h"
 
 PageSampledData::PageSampledData(QWidget *parent) :
     QWidget(parent),
@@ -39,12 +38,10 @@ PageSampledData::PageSampledData(QWidget *parent) :
     mTimer = new QTimer(this);
     mTimer->start(20);
 
-    QCustomPlot *plots[4] = {ui->currentPlot, ui->voltagePlot,ui->filterPlot, ui->filterResponsePlot};
-    for(int i = 0; i<4; i++)
-    {
-        Utility::setPlotColors(plots[i]);
-        plots[i]->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    }
+    ui->currentPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    ui->voltagePlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    ui->filterPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    ui->filterResponsePlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
@@ -148,7 +145,7 @@ void PageSampledData::timerSlot()
         ui->filterResponsePlot->addGraph();
         ui->filterResponsePlot->graph(0)->setData(filterIndex, response);
         ui->filterResponsePlot->graph(0)->setName("Filter Response");
-        ui->filterResponsePlot->graph(0)->setPen(QPen(Utility::getAppQColor("red")));
+        ui->filterResponsePlot->graph(0)->setPen(QPen(QColor(200,52,52)));
 
         ui->filterPlot->legend->setVisible(true);
         ui->filterPlot->legend->setFont(legendFont);
@@ -301,11 +298,11 @@ void PageSampledData::timerSlot()
 
             QPen phasePen;
             phasePen.setStyle(Qt::DotLine);
-            phasePen.setColor(Utility::getAppQColor("blue"));
+            phasePen.setColor(QColor(77,127,196));
 
             QPen phasePen2;
             phasePen2.setStyle(Qt::DotLine);
-            phasePen2.setColor(Utility::getAppQColor("red"));
+            phasePen2.setColor(QColor(200,52,52));
 
             int graphIndex = 0;
 
@@ -320,7 +317,7 @@ void PageSampledData::timerSlot()
             if (ui->showCurrent2Box->isChecked()) {
                 ui->currentPlot->addGraph();
                 ui->currentPlot->graph(graphIndex)->setData(xAxisCurrDec, curr2);
-                ui->currentPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
+                ui->currentPlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
                 ui->currentPlot->graph(graphIndex)->setName("Phase 2 Current");
                 graphIndex++;
             }
@@ -328,7 +325,7 @@ void PageSampledData::timerSlot()
             if (ui->showCurrent3Box->isChecked()) {
                 ui->currentPlot->addGraph();
                 ui->currentPlot->graph(graphIndex)->setData(xAxisCurrDec, curr3);
-                ui->currentPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
+                ui->currentPlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
                 ui->currentPlot->graph(graphIndex)->setName("Phase 3 Current");
                 graphIndex++;
             }
@@ -336,7 +333,7 @@ void PageSampledData::timerSlot()
             if (ui->showMcTotalCurrentBox->isChecked()) {
                 ui->currentPlot->addGraph();
                 ui->currentPlot->graph(graphIndex)->setData(xAxisCurr, totCurrentMc);
-                ui->currentPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
+                ui->currentPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
                 ui->currentPlot->graph(graphIndex)->setName("Total current filtered by MC");
                 graphIndex++;
             }
@@ -352,7 +349,7 @@ void PageSampledData::timerSlot()
             if (ui->showPhaseBox->isChecked()) {
                 ui->currentPlot->addGraph(ui->currentPlot->xAxis, ui->currentPlot->yAxis2);
                 ui->currentPlot->graph(graphIndex)->setData(xAxisVolt, phase);
-                ui->currentPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("black")));
+                ui->currentPlot->graph(graphIndex)->setPen(QPen(Qt::black));
                 ui->currentPlot->graph(graphIndex)->setName("FOC motor phase");
                 graphIndex++;
             }
@@ -362,7 +359,7 @@ void PageSampledData::timerSlot()
             if (ui->showPh1Box->isChecked()) {
                 ui->voltagePlot->addGraph();
                 ui->voltagePlot->graph(graphIndex)->setData(xAxisVolt, ph1);
-                ui->voltagePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
+                ui->voltagePlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
                 ui->voltagePlot->graph(graphIndex)->setName("Phase 1 voltage");
                 graphIndex++;
             }
@@ -370,7 +367,7 @@ void PageSampledData::timerSlot()
             if (ui->showPh2Box->isChecked()) {
                 ui->voltagePlot->addGraph();
                 ui->voltagePlot->graph(graphIndex)->setData(xAxisVolt, ph2);
-                ui->voltagePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
+                ui->voltagePlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
                 ui->voltagePlot->graph(graphIndex)->setName("Phase 2 voltage");
                 graphIndex++;
             }
@@ -378,7 +375,7 @@ void PageSampledData::timerSlot()
             if (ui->showPh3Box->isChecked()) {
                 ui->voltagePlot->addGraph();
                 ui->voltagePlot->graph(graphIndex)->setData(xAxisVolt, ph3);
-                ui->voltagePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
+                ui->voltagePlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
                 ui->voltagePlot->graph(graphIndex)->setName("Phase 3 voltage");
                 graphIndex++;
             }
@@ -408,7 +405,7 @@ void PageSampledData::timerSlot()
             if (ui->showPhaseVoltageBox->isChecked()) {
                 ui->voltagePlot->addGraph(ui->voltagePlot->xAxis, ui->voltagePlot->yAxis2);
                 ui->voltagePlot->graph(graphIndex)->setData(xAxisVolt, phase);
-                ui->voltagePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("black")));
+                ui->voltagePlot->graph(graphIndex)->setPen(QPen(Qt::black));
                 ui->voltagePlot->graph(graphIndex)->setName("FOC motor phase");
                 graphIndex++;
             }

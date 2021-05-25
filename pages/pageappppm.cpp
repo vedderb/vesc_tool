@@ -31,12 +31,10 @@ PageAppPpm::PageAppPpm(QWidget *parent) :
 
     ui->throttlePlot->addGraph();
     ui->throttlePlot->graph()->setName("Throttle Curve");
-    ui->throttlePlot->graph()->setPen(QPen(Utility::getAppQColor("blue")));
     ui->throttlePlot->xAxis->setLabel("Throttle Value");
     ui->throttlePlot->yAxis->setLabel("Output Value");
     ui->throttlePlot->legend->setVisible(true);
     ui->throttlePlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    Utility::setPlotColors(ui->throttlePlot);
 }
 
 PageAppPpm::~PageAppPpm()

@@ -24,7 +24,6 @@
 #include <QMetaEnum>
 #include <cstdint>
 #include "vescinterface.h"
-#include "widgets/qcustomplot.h"
 
 #define FE_WGS84        (1.0/298.257223563) // earth flattening (WGS84)
 #define RE_WGS84        6378137.0           // earth semimajor axis (WGS84) (m)
@@ -91,10 +90,6 @@ public:
     static QVector<QPair<int, int>> configSupportedFws();
     static bool configLoadCompatible(VescInterface *vesc, QString &uuidRx);
     Q_INVOKABLE static QVector<int> scanCanVescOnly(VescInterface *vesc);
-    Q_INVOKABLE static void setAppQColor(QString colorName, QColor color);
-    Q_INVOKABLE static QColor getAppQColor(QString colorName);
-    Q_INVOKABLE static QString getAppHexColor(QString colorName);
-    static void setPlotColors(QCustomPlot* plot);
 
     template<typename QEnum>
     static QString QEnumToQString (const QEnum value) {
@@ -109,9 +104,6 @@ private:
     static void serialFunc(ConfigParams *params, QTextStream &s);
     static void deserialFunc(ConfigParams *params, QTextStream &s);
     static void defaultFunc(ConfigParams *params, QTextStream &s);
-
-    static QMap<QString,QColor> mAppColors;
-
 
 };
 

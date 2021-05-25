@@ -20,10 +20,8 @@
 #include <QDebug>
 #include <math.h>
 #include <qmath.h>
-#ifndef Q_OS_IOS
 #include <QPrinter>
 #include <QPrintEngine>
-#endif
 #include <QTime>
 
 #include "mapwidget.h"
@@ -1152,7 +1150,6 @@ void MapWidget::setInfoTraceNow(int infoTraceNow)
 
 void MapWidget::printPdf(QString path, int width, int height)
 {
-#ifndef Q_OS_IOS
     if (width == 0) {
         width = this->width();
     }
@@ -1180,7 +1177,6 @@ void MapWidget::printPdf(QString path, int width, int height)
 
     QPainter painter(&printer);
     paint(painter, printer.pageRect().width(), printer.pageRect().height(), true);
-#endif
 }
 
 void MapWidget::printPng(QString path, int width, int height)

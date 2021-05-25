@@ -24,9 +24,6 @@
 #include "mobile/logwriter.h"
 #include "mobile/logreader.h"
 #include "tcpserversimple.h"
-#ifdef Q_OS_IOS
-#include "ios/src/notch.h"
-#endif
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -62,27 +59,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("vesc-project.com");
     QCoreApplication::setApplicationName("VESC Tool");
 
-    //Default Colors
-    Utility::setAppQColor("lightestBackground", QColor(80,80,80));
-    Utility::setAppQColor("lightBackground", QColor(66,66,66));
-    Utility::setAppQColor("normalBackground", QColor(48,48,48));
-    Utility::setAppQColor("darkBackground", QColor(39,39,39));
-    Utility::setAppQColor("normalText", QColor(180,180,180));
-    Utility::setAppQColor("lightText", QColor(220,220,220));
-    Utility::setAppQColor("disabledText", QColor(127,127,127));
-    Utility::setAppQColor("lightAccentColor", QColor(129,212,250));
-    Utility::setAppQColor("darkAccentColor", QColor(71,117,137));
-    Utility::setAppQColor("pink", QColor(219,98,139));
-    Utility::setAppQColor("red", QColor(200,52,52));
-    Utility::setAppQColor("orange", QColor(206,125,44));
-    Utility::setAppQColor("yellow", QColor(210,210,127));
-    Utility::setAppQColor("green", QColor(127,200,127));
-    Utility::setAppQColor("cyan",QColor(79,203,203));
-    Utility::setAppQColor("blue", QColor(77,127,196));
-    Utility::setAppQColor("magenta", QColor(157,127,210));
-    Utility::setAppQColor("white", QColor(255,255,255));
-    Utility::setAppQColor("black", QColor(0,0,0));
-
     // DPI settings
     // TODO: http://www.qcustomplot.com/index.php/support/forum/1344
 
@@ -111,8 +87,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 #else
-   // QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
 
 #ifdef Q_OS_LINUX
     signal(SIGINT, m_cleanup);
@@ -180,8 +155,6 @@ int main(int argc, char *argv[])
     } else {
         set.setValue("app_scale_auto", scaleAuto);
     }
-
-
 
     if (scaleAuto) {
         QApplication tmp(argc, argv);
@@ -257,8 +230,6 @@ int main(int argc, char *argv[])
     VescInterface *vesc = nullptr;
     MainWindow *w = nullptr;
 
-
-
     if (useTcp) {
         app = new QCoreApplication(argc, argv);
 
@@ -295,29 +266,27 @@ int main(int argc, char *argv[])
         QApplication *a = new QApplication(argc, argv);
         app = a;
 
-
-
         QPalette darkPalette;
-        darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
-        darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("normalText"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,Utility::getAppQColor("disabledText"));
-        darkPalette.setColor(QPalette::Base,Utility::getAppQColor("normalBackground"));
-        darkPalette.setColor(QPalette::AlternateBase,Utility::getAppQColor("lightBackground"));
-        darkPalette.setColor(QPalette::ToolTipBase,Utility::getAppQColor("lightestBackground"));
-        darkPalette.setColor(QPalette::ToolTipText,Utility::getAppQColor("lightText"));
-        darkPalette.setColor(QPalette::Text,Utility::getAppQColor("lightText"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::Text,Utility::getAppQColor("disabledText"));
+        darkPalette.setColor(QPalette::Window,QColor(39,39,39));
+        darkPalette.setColor(QPalette::WindowText,QColor(180,180,180));
+        darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,QColor(127,127,127));
+        darkPalette.setColor(QPalette::Base,QColor(48,48,48));
+        darkPalette.setColor(QPalette::AlternateBase,QColor(66,66,66));
+        darkPalette.setColor(QPalette::ToolTipBase,QColor(80,80,80));
+        darkPalette.setColor(QPalette::ToolTipText,QColor(220,220,220));
+        darkPalette.setColor(QPalette::Text,QColor(220,220,220));
+        darkPalette.setColor(QPalette::Disabled,QPalette::Text,QColor(127,127,127));
         darkPalette.setColor(QPalette::Dark,QColor(35,35,35));
         darkPalette.setColor(QPalette::Shadow,QColor(20,20,20));
-        darkPalette.setColor(QPalette::Button,Utility::getAppQColor("normalBackground"));
-        darkPalette.setColor(QPalette::ButtonText,Utility::getAppQColor("normalText"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,Utility::getAppQColor("disabledText"));
-        darkPalette.setColor(QPalette::BrightText,Utility::getAppQColor("lightAccentColor"));
-        darkPalette.setColor(QPalette::Link,Utility::getAppQColor("lightAccentColor"));
-        darkPalette.setColor(QPalette::Highlight,Utility::getAppQColor("darkAccentColor"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,Utility::getAppQColor("lightestBackground"));
-        darkPalette.setColor(QPalette::HighlightedText,Utility::getAppQColor("white"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
+        darkPalette.setColor(QPalette::Button,QColor(48,48,48));
+        darkPalette.setColor(QPalette::ButtonText,QColor(180,180,180));
+        darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,QColor(127,127,127));
+        darkPalette.setColor(QPalette::BrightText,QColor(129,212,250));
+        darkPalette.setColor(QPalette::Link,QColor(129,212,250));
+        darkPalette.setColor(QPalette::Highlight,QColor(71,117,137));
+        darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,QColor(80,80,80));
+        darkPalette.setColor(QPalette::HighlightedText,Qt::white);
+        darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,QColor(127,127,127));
 
         qApp->setPalette(darkPalette);
 
@@ -353,9 +322,6 @@ int main(int argc, char *argv[])
         w->show();
     }
 #endif
-    #ifdef Q_OS_IOS
-    Notch();
-    #endif
 
     int res = app->exec();
 

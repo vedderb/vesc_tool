@@ -50,7 +50,7 @@ void Vesc3dItem::paint(QPainter *painter)
 void Vesc3dItem::updateImage()
 {
     if (mVesc3d.size() != size().toSize()) {
-        mVesc3d.resize(size().toSize()*1.5);
+        mVesc3d.resize(size().toSize());
         mLastCornerImg = mVesc3d.grabFramebuffer();
         // The render seems to be needed after a resize
         mVesc3d.render(&mLastCornerImg, QPoint(), QRegion(), nullptr);

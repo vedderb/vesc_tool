@@ -18,7 +18,6 @@
     */
 
 #include "batttempplot.h"
-#include "utility.h"
 #include <QFont>
 #include <QPainter>
 #include <QPaintEvent>
@@ -88,7 +87,7 @@ void BattTempPlot::paintEvent(QPaintEvent *event)
         font.setFamily("DejaVu Sans Mono");
         font.setPointSize(72);
         painter.setFont(font);
-        painter.setPen(Utility::getAppQColor("green"));
+        painter.setPen(QColor(127,200,127));
 
         if (mVal.temps.size() >= 6) {
             painter.drawText(2985, 1840, QString("%1 °C").arg(mVal.temp_ic, 0, 'f', 1, QChar('0')));

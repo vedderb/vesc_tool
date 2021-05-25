@@ -19,6 +19,7 @@
 
 #include "pageimu.h"
 #include "ui_pageimu.h"
+#include "utility.h"
 
 #include <cmath>
 
@@ -39,76 +40,78 @@ PageImu::PageImu(QWidget *parent) :
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
 
-    ui->rpyPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    ui->accelPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    ui->gyroPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    ui->magPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    QCustomPlot *plots[4] = {ui->rpyPlot, ui->accelPlot, ui->gyroPlot, ui->magPlot };
+    for(int i = 0; i<4; i++)
+    {
+        Utility::setPlotColors(plots[i]);
+        plots[i]->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    }
 
     int graphIndex = 0;
 
     ui->rpyPlot->addGraph();
-    ui->rpyPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
     ui->rpyPlot->graph(graphIndex)->setName("Roll");
     graphIndex++;
 
     ui->rpyPlot->addGraph();
-    ui->rpyPlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
     ui->rpyPlot->graph(graphIndex)->setName("Pitch");
     graphIndex++;
 
     ui->rpyPlot->addGraph();
-    ui->rpyPlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
     ui->rpyPlot->graph(graphIndex)->setName("Yaw");
     graphIndex++;
 
     graphIndex = 0;
 
     ui->accelPlot->addGraph();
-    ui->accelPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
     ui->accelPlot->graph(graphIndex)->setName("Acc X");
     graphIndex++;
 
     ui->accelPlot->addGraph();
-    ui->accelPlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
     ui->accelPlot->graph(graphIndex)->setName("Acc Y");
     graphIndex++;
 
     ui->accelPlot->addGraph();
-    ui->accelPlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
     ui->accelPlot->graph(graphIndex)->setName("Acc Z");
     graphIndex++;
 
     graphIndex = 0;
 
     ui->gyroPlot->addGraph();
-    ui->gyroPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
     ui->gyroPlot->graph(graphIndex)->setName("Gyro X");
     graphIndex++;
 
     ui->gyroPlot->addGraph();
-    ui->gyroPlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
     ui->gyroPlot->graph(graphIndex)->setName("Gyro Y");
     graphIndex++;
 
     ui->gyroPlot->addGraph();
-    ui->gyroPlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
     ui->gyroPlot->graph(graphIndex)->setName("Gyro Z");
     graphIndex++;
 
     graphIndex = 0;
 
     ui->magPlot->addGraph();
-    ui->magPlot->graph(graphIndex)->setPen(QPen(QColor(77,127,196)));
+    ui->magPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
     ui->magPlot->graph(graphIndex)->setName("Mag X");
     graphIndex++;
 
     ui->magPlot->addGraph();
-    ui->magPlot->graph(graphIndex)->setPen(QPen(QColor(200,52,52)));
+    ui->magPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
     ui->magPlot->graph(graphIndex)->setName("Mag Y");
     graphIndex++;
 
     ui->magPlot->addGraph();
-    ui->magPlot->graph(graphIndex)->setPen(QPen(QColor(127,200,127)));
+    ui->magPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
     ui->magPlot->graph(graphIndex)->setName("Mag Z");
     graphIndex++;
 

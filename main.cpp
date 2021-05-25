@@ -111,7 +111,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 #else
-   // QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 #ifdef Q_OS_LINUX
@@ -180,8 +179,6 @@ int main(int argc, char *argv[])
     } else {
         set.setValue("app_scale_auto", scaleAuto);
     }
-
-
 
     if (scaleAuto) {
         QApplication tmp(argc, argv);
@@ -257,8 +254,6 @@ int main(int argc, char *argv[])
     VescInterface *vesc = nullptr;
     MainWindow *w = nullptr;
 
-
-
     if (useTcp) {
         app = new QCoreApplication(argc, argv);
 
@@ -294,8 +289,6 @@ int main(int argc, char *argv[])
     } else {
         QApplication *a = new QApplication(argc, argv);
         app = a;
-
-
 
         QPalette darkPalette;
         darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));

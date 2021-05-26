@@ -17,20 +17,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#include "vescinterface.h"
 #include <QDebug>
 #include <QHostInfo>
 #include <QNetworkDatagram>
 #include <QFileInfo>
 #include <QThread>
 #include <QEventLoop>
-#include <utility.h>
 #include <cmath>
 #include <QRegularExpression>
 #include <QDateTime>
 #include <QDir>
 #include <cmath>
 #include "lzokay/lzokay.hpp"
+#include "vescinterface.h"
+#include "utility.h"
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
@@ -2272,13 +2272,13 @@ QList<QString> VescInterface::listCANbusInterfaces()
     return res;
 }
 
-bool VescInterface::connectCANbus(QString backend, QString interface, int bitrate)
+bool VescInterface::connectCANbus(QString backend, QString ifName, int bitrate)
 {
 #ifdef HAS_CANBUS
     QString errorString;
 
     mCANbusScanning = false;
-    mCanDevice = QCanBus::instance()->createDevice(backend, interface, &errorString);
+    mCanDevice = QCanBus::instance()->createDevice(backend, ifName, &errorString);
     if (!mCanDevice) {
         QString msg = tr("Error creating device '%1' using backend '%2', reason: '%3'").arg(mLastCanDeviceInterface).arg(mLastCanBackend).arg(errorString);
         emit statusMessage(msg, false);
@@ -2310,7 +2310,7 @@ bool VescInterface::connectCANbus(QString backend, QString interface, int bitrat
     QThread::msleep(10);
 
     mLastCanBackend = backend;
-    mLastCanDeviceInterface = interface;
+    mLastCanDeviceInterface = ifName;
     mLastCanDeviceBitrate = bitrate;
 
     mSettings.setValue("CANbusBackend", mLastCanBackend);
@@ -2321,7 +2321,7 @@ bool VescInterface::connectCANbus(QString backend, QString interface, int bitrat
     return true;
 #else
     (void)backend;
-    (void)interface;
+    (void)ifName;
     (void)bitrate;
     emit messageDialog(tr("Connect serial"),
                        tr("CAN bus support is not enabled in this build "

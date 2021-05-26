@@ -383,6 +383,43 @@ MainWindow::MainWindow(QWidget *parent) :
     mDebugTimer->start(10);
     mTimer->start(20);
 
+    mPollRtTimer.start(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
+    mPollAppTimer.start(int(1000.0 / mSettings.value("poll_rate_app_data", 20).toDouble()));
+    mPollImuTimer.start(int(1000.0 / mSettings.value("poll_rate_imu_data", 50).toDouble()));
+    mPollBmsTimer.start(int(1000.0 / mSettings.value("poll_rate_bms_data", 10).toDouble()));
+
+    connect(&mPollRtTimer, &QTimer::timeout, [this]() {
+        if (ui->actionRtData->isChecked()) {
+            mVesc->commands()->getValues();
+            mVesc->commands()->getValuesSetup();
+            mPollRtTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
+        }
+    });
+
+    connect(&mPollAppTimer, &QTimer::timeout, [this]() {
+        if (ui->actionRtDataApp->isChecked()) {
+            mVesc->commands()->getDecodedAdc();
+            mVesc->commands()->getDecodedChuk();
+            mVesc->commands()->getDecodedPpm();
+            mVesc->commands()->getDecodedBalance();
+            mPollAppTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_app_data", 20).toDouble()));
+        }
+    });
+
+    connect(&mPollImuTimer, &QTimer::timeout, [this]() {
+        if (ui->actionIMU->isChecked()) {
+            mVesc->commands()->getImuData(0xFFFF);
+            mPollImuTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_imu_data", 50).toDouble()));
+        }
+    });
+
+    connect(&mPollBmsTimer, &QTimer::timeout, [this]() {
+        if (ui->actionrtDataBms->isChecked()) {
+            mVesc->commands()->bmsGetValues();
+            mPollBmsTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_bms_data", 10).toDouble()));
+        }
+    });
+
     // Restore size and position
     if (mSettings.contains("mainwindow/size")) {
         resize(mSettings.value("mainwindow/size").toSize());
@@ -604,30 +641,6 @@ void MainWindow::timerSlot()
         } else {
             ui->canList->setCurrentRow(0);
         }
-    }
-
-    // RT data
-    if (ui->actionRtData->isChecked()) {
-        mVesc->commands()->getValues();
-        mVesc->commands()->getValuesSetup();
-    }
-
-    // APP RT data
-    if (ui->actionRtDataApp->isChecked()) {
-        mVesc->commands()->getDecodedAdc();
-        mVesc->commands()->getDecodedChuk();
-        mVesc->commands()->getDecodedPpm();
-        mVesc->commands()->getDecodedBalance();
-    }
-
-    // IMU Data
-    if (ui->actionIMU->isChecked()) {
-        mVesc->commands()->getImuData(0xFFFF);
-    }
-
-    // BMS Data
-    if (ui->actionrtDataBms->isChecked()) {
-        mVesc->commands()->bmsGetValues();
     }
 
     // Send alive command once every 10 iterations

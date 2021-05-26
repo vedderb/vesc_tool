@@ -47,6 +47,10 @@ PageSettings::PageSettings(QWidget *parent) :
     ui->pathRtLogEdit->setText(mSettings.value("path_rt_log", "./log").toString());
     ui->pathScriptInputEdit->setText(mSettings.value("path_script_input", "./log").toString());
     ui->pathScriptOutputEdit->setText(mSettings.value("path_script_output", "./log").toString());
+    ui->pollRtDataBox->setValue(mSettings.value("poll_rate_rt_data", 50.0).toDouble());
+    ui->pollAppDataBox->setValue(mSettings.value("poll_rate_app_data", 20.0).toDouble());
+    ui->pollImuDataBox->setValue(mSettings.value("poll_rate_imu_data", 50.0).toDouble());
+    ui->pollBmsDataBox->setValue(mSettings.value("poll_rate_bms_data", 10.0).toDouble());
 
 #ifdef HAS_GAMEPAD
     auto confAxis = [](QGamepad *gp, QGamepadManager::GamepadAxis axis) {
@@ -353,4 +357,36 @@ void PageSettings::on_pathScriptOutputEdit_textChanged(const QString &arg1)
 {
     mSettings.setValue("path_script_output", arg1);
     mSettings.sync();
+}
+
+void PageSettings::on_pollRtDataBox_valueChanged(double arg1)
+{
+    mSettings.setValue("poll_rate_rt_data", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pollAppDataBox_valueChanged(double arg1)
+{
+    mSettings.setValue("poll_rate_app_data", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pollImuDataBox_valueChanged(double arg1)
+{
+    mSettings.setValue("poll_rate_imu_data", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pollBmsDataBox_valueChanged(double arg1)
+{
+    mSettings.setValue("poll_rate_bms_data", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pollRestoreButton_clicked()
+{
+    ui->pollRtDataBox->setValue(50.0);
+    ui->pollAppDataBox->setValue(20.0);
+    ui->pollImuDataBox->setValue(50.0);
+    ui->pollBmsDataBox->setValue(10.0);
 }

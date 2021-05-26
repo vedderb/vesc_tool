@@ -62,6 +62,11 @@ private slots:
     void on_pathScriptInputEdit_textChanged(const QString &arg1);
     void on_pathScriptOutputChooseButton_clicked();
     void on_pathScriptOutputEdit_textChanged(const QString &arg1);
+    void on_pollRtDataBox_valueChanged(double arg1);
+    void on_pollAppDataBox_valueChanged(double arg1);
+    void on_pollImuDataBox_valueChanged(double arg1);
+    void on_pollBmsDataBox_valueChanged(double arg1);
+    void on_pollRestoreButton_clicked();
 
 private:
     Ui::PageSettings *ui;

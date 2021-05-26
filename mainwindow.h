@@ -164,6 +164,11 @@ private:
     bool mAppConfRead;
     QMap<QString, int> mPageNameIdList;
 
+    QTimer mPollRtTimer;
+    QTimer mPollAppTimer;
+    QTimer mPollImuTimer;
+    QTimer mPollBmsTimer;
+
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;
     PageDataAnalysis *mPageDataAnalysis;

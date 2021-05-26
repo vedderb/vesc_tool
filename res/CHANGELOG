@@ -22,6 +22,9 @@
 * Added support for loading custom UI from firmware.
 * Dark theme.
 * Mobile UI refactoring.
+* Configurable data polling rates.
+* Better DPI scaling.
+* Configurable plot line thickness.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

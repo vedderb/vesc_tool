@@ -94,7 +94,7 @@ Item {
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
-                        buttonText: "VESC Remote\nQuick Pair"
+                        buttonText: "VESC\nRemote\nQuick Pair"
                         imageSrc: "qrc:/res/icons/icons8-fantasy-96.png"
 
                         onClicked: {
@@ -295,7 +295,7 @@ Item {
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
-                        buttonText: "Directions"
+                        buttonText: "Invert\nMotor\nDirections"
                         imageSrc: "qrc:/res/icons/Process-96.png"
 
                         onClicked: {
@@ -317,7 +317,7 @@ Item {
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
-                        buttonText: "Backup\nConfiguration(s)"
+                        buttonText: "Backup\nConfigs"
                         imageSrc: "qrc:/res/icons/Save-96.png"
 
                         onClicked: {
@@ -330,7 +330,7 @@ Item {
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
-                        buttonText: "Restore\nConfiguration(s)"
+                        buttonText: "Restore\nConfigs"
                         imageSrc: "qrc:/res/icons/Open Folder-96.png"
 
                         onClicked: {

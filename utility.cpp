@@ -512,11 +512,11 @@ QVector<int> Utility::measureHallFocBlocking(VescInterface *vesc, double current
             resDetect.append(hall_table);
     });
 
-    bool rx = waitSignal(vesc->commands(), SIGNAL(focHallTableReceived(QVector<int>, int)), 12000);
+    bool rx = waitSignal(vesc->commands(), SIGNAL(focHallTableReceived(QVector<int>, int)), 25000);
     disconnect(conn);
 
     if (!rx) {
-        resDetect.append(-1);
+        resDetect.append(-10);
     }
 
     return resDetect;

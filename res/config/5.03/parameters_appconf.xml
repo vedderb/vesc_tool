@@ -2487,6 +2487,50 @@ p, li { white-space: pre-wrap; }
             <suffix> Hz</suffix>
             <vTx>3</vTx>
         </app_balance_conf.kd_pt1_highpass_frequency>
+        <app_balance_conf.kd_biquad_lowpass>
+            <longName>D term Biquad Low Pass Filter</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;D term filter above this frequency. 0 = Disabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_KD_BIQUAD_LOWPASS</cDefine>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>500</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1.0</stepDouble>
+            <valDouble>0.0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> Hz</suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.kd_biquad_lowpass>
+        <app_balance_conf.kd_biquad_highpass>
+            <longName>D term Biquad High Pass Filter</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;D term filter below this frequency. 0 = Disabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_KD_BIQUAD_HIGHPASS</cDefine>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>500</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1.0</stepDouble>
+            <valDouble>0.0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> Hz</suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.kd_biquad_highpass>
         <app_balance_conf.booster_angle>
             <longName>Start Angle</longName>
             <type>1</type>
@@ -2567,7 +2611,7 @@ p, li { white-space: pre-wrap; }
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>100</maxDouble>
-            <minDouble>5</minDouble>
+            <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>2</stepDouble>
             <valDouble>10</valDouble>
@@ -2597,7 +2641,7 @@ p, li { white-space: pre-wrap; }
             <suffix> °</suffix>
             <vTx>9</vTx>
         </app_balance_conf.torquetilt_angle_limit>
-        <app_balance_conf.torquetilt_speed>
+        <app_balance_conf.torquetilt_on_speed>
             <longName>Max Tiltback Speed</longName>
             <type>1</type>
             <transmittable>1</transmittable>
@@ -2606,7 +2650,7 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Max speed at which torque tiltback will tilt to the desired angle (tilt will be slower if current increases slowly).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_TORQUETILT_SPEED</cDefine>
+            <cDefine>APPCONF_BALANCE_TORQUETILT_ON_SPEED</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -2618,7 +2662,29 @@ p, li { white-space: pre-wrap; }
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> °/s</suffix>
             <vTx>9</vTx>
-        </app_balance_conf.torquetilt_speed>
+        </app_balance_conf.torquetilt_on_speed>
+        <app_balance_conf.torquetilt_off_speed>
+            <longName>Max Tiltback Release Speed</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Max speed at which torque tiltback will release to the desired angle back to 0 (tilt will be slower if current decreases slowly).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_TORQUETILT_OFF_SPEED</cDefine>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>100</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>3</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> °/s</suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.torquetilt_off_speed>
         <app_balance_conf.torquetilt_strength>
             <longName>Strength</longName>
             <type>1</type>
@@ -2649,18 +2715,18 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Low pass filter on the current used for calculating the torquetilt. This smooths out spikes in the current, and prevents torquetilt from being twitchy. At 1khz 0.95 is enough filtering for low strength values, higher filter values such as 0.99 will make current much smoother but also add a delay.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Biquad Low pass filter on the current used for calculating the torquetilt. This smooths out spikes in the current, and prevents torquetilt from being twitchy.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_BALANCE_TORQUETILT_FILTER</cDefine>
-            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1</maxDouble>
+            <maxDouble>500</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>0.95</valDouble>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>2.0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix></suffix>
+            <suffix> Hz</suffix>
             <vTx>9</vTx>
         </app_balance_conf.torquetilt_filter>
         <app_balance_conf.turntilt_strength>
@@ -3562,12 +3628,15 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.yaw_current_clamp</ser>
         <ser>app_balance_conf.kd_pt1_lowpass_frequency</ser>
         <ser>app_balance_conf.kd_pt1_highpass_frequency</ser>
+        <ser>app_balance_conf.kd_biquad_lowpass</ser>
+        <ser>app_balance_conf.kd_biquad_highpass</ser>
         <ser>app_balance_conf.booster_angle</ser>
         <ser>app_balance_conf.booster_ramp</ser>
         <ser>app_balance_conf.booster_current</ser>
         <ser>app_balance_conf.torquetilt_start_current</ser>
         <ser>app_balance_conf.torquetilt_angle_limit</ser>
-        <ser>app_balance_conf.torquetilt_speed</ser>
+        <ser>app_balance_conf.torquetilt_on_speed</ser>
+        <ser>app_balance_conf.torquetilt_off_speed</ser>
         <ser>app_balance_conf.torquetilt_strength</ser>
         <ser>app_balance_conf.torquetilt_filter</ser>
         <ser>app_balance_conf.turntilt_strength</ser>
@@ -3785,6 +3854,8 @@ p, li { white-space: pre-wrap; }
                     <param>::sep::Filters</param>
                     <param>app_balance_conf.kd_pt1_lowpass_frequency</param>
                     <param>app_balance_conf.kd_pt1_highpass_frequency</param>
+                    <param>app_balance_conf.kd_biquad_lowpass</param>
+                    <param>app_balance_conf.kd_biquad_highpass</param>
                     <param>::sep::Experimental</param>
                     <param>app_balance_conf.deadzone</param>
                 </subgroupParams>
@@ -3803,7 +3874,8 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.torquetilt_strength</param>
                     <param>app_balance_conf.torquetilt_start_current</param>
                     <param>app_balance_conf.torquetilt_angle_limit</param>
-                    <param>app_balance_conf.torquetilt_speed</param>
+                    <param>app_balance_conf.torquetilt_on_speed</param>
+                    <param>app_balance_conf.torquetilt_off_speed</param>
                     <param>app_balance_conf.torquetilt_filter</param>
                     <param>::sep::Turn/Roll Tiltback</param>
                     <param>app_balance_conf.turntilt_strength</param>

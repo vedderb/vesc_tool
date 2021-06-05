@@ -2419,12 +2419,32 @@ p, li { white-space: pre-wrap; }
             <maxDouble>100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
+            <stepDouble>2.0</stepDouble>
             <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> A</suffix>
             <vTx>9</vTx>
         </app_balance_conf.brake_current>
+        <app_balance_conf.brake_timeout>
+            <longName>Brake Timeout</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Turn off the brake after this many seconds. It will automatically reactivate if the motor moves. 0 = Disabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_BRAKE_TIMEOUT</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>10000</maxInt>
+            <minInt>0</minInt>
+            <showDisplay>0</showDisplay>
+            <stepInt>5</stepInt>
+            <valInt>10</valInt>
+            <suffix> s</suffix>
+            <vTx>3</vTx>
+        </app_balance_conf.brake_timeout>
         <app_balance_conf.yaw_current_clamp>
             <longName>Yaw Current Clamp</longName>
             <type>1</type>
@@ -3625,6 +3645,7 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.roll_steer_kp</ser>
         <ser>app_balance_conf.roll_steer_erpm_kp</ser>
         <ser>app_balance_conf.brake_current</ser>
+        <ser>app_balance_conf.brake_timeout</ser>
         <ser>app_balance_conf.yaw_current_clamp</ser>
         <ser>app_balance_conf.kd_pt1_lowpass_frequency</ser>
         <ser>app_balance_conf.kd_pt1_highpass_frequency</ser>
@@ -3897,6 +3918,7 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.startup_speed</param>
                     <param>::sep::Holding</param>
                     <param>app_balance_conf.brake_current</param>
+                    <param>app_balance_conf.brake_timeout</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

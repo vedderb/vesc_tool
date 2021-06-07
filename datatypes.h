@@ -939,11 +939,12 @@ struct BALANCE_VALUES {
     Q_PROPERTY(double roll_angle MEMBER roll_angle)
     Q_PROPERTY(int diff_time MEMBER diff_time)
     Q_PROPERTY(double motor_current MEMBER motor_current)
-    Q_PROPERTY(double motor_position MEMBER motor_position)
     Q_PROPERTY(int state MEMBER state)
     Q_PROPERTY(int switch_value MEMBER switch_value)
     Q_PROPERTY(double adc1 MEMBER adc1)
     Q_PROPERTY(double adc2 MEMBER adc2)
+    Q_PROPERTY(double debug1 MEMBER debug1)
+    Q_PROPERTY(double debug2 MEMBER debug2)
 
 public:
     BALANCE_VALUES() {
@@ -952,11 +953,12 @@ public:
         roll_angle = 0;
         diff_time = 0;
         motor_current = 0;
-        motor_position = 0;
         state = 0;
         switch_value = 0;
         adc1 = 0;
         adc2 = 0;
+        debug1 = 0;
+        debug2 = 0;
     }
 
     double pid_output;
@@ -964,11 +966,12 @@ public:
     double roll_angle;
     int diff_time;
     double motor_current;
-    double motor_position;
     int state;
     int switch_value;
     double adc1;
     double adc2;
+    double debug1;
+    double debug2;
 };
 
 Q_DECLARE_METATYPE(BALANCE_VALUES)

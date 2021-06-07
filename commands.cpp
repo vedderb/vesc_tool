@@ -380,11 +380,12 @@ void Commands::processPacket(QByteArray data)
         values.roll_angle = vb.vbPopFrontDouble32(1e6);
         values.diff_time = vb.vbPopFrontUint32();
         values.motor_current = vb.vbPopFrontDouble32(1e6);
-        values.motor_position = vb.vbPopFrontDouble32(1e6);
+        values.debug1 = vb.vbPopFrontDouble32(1e6);
         values.state = vb.vbPopFrontUint16();
         values.switch_value = vb.vbPopFrontUint16();
         values.adc1 = vb.vbPopFrontDouble32(1e6);
         values.adc2 = vb.vbPopFrontDouble32(1e6);
+        values.debug2 = vb.vbPopFrontDouble32(1e6);
         emit decodedBalanceReceived(values);
     } break;
 

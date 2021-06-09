@@ -33,7 +33,7 @@ PageAppNunchuk::PageAppNunchuk(QWidget *parent) :
     Utility::setPlotColors(ui->throttlePlot);
     ui->throttlePlot->addGraph();
     ui->throttlePlot->graph()->setName("Throttle Curve");
-    ui->throttlePlot->graph()->setPen(QPen(Utility::getAppQColor("blue")));
+    ui->throttlePlot->graph()->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->throttlePlot->xAxis->setLabel("Throttle Value");
     ui->throttlePlot->yAxis->setLabel("Output Value");
     ui->throttlePlot->legend->setVisible(true);

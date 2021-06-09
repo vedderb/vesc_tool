@@ -46,12 +46,12 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
 
     Utility::setPlotColors(ui->balancePlot);
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->balancePlot->graph(graphIndex)->setName("PID Output");
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2")));
     ui->balancePlot->graph(graphIndex)->setName("Pitch Angle");
     graphIndex++;
 
@@ -61,18 +61,18 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3")));
     ui->balancePlot->graph(graphIndex)->setName("Current");
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("pink")));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph4")));
     ui->balancePlot->graph(graphIndex)->setName("Debug 1");
     ui->balancePlot->graph(graphIndex)->removeFromLegend();
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("yellow")));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph5")));
     ui->balancePlot->graph(graphIndex)->setName("Debug 2");
     ui->balancePlot->graph(graphIndex)->removeFromLegend();
     graphIndex++;

@@ -260,6 +260,14 @@ void Commands::processPacket(QByteArray data)
             }
         }
 
+        if (vb.size() >= 1) {
+            if (mask & (uint32_t(1) << 21)) {
+                quint8 status = vb.vbPopFrontUint8();
+                values.has_timeout = status & 1;
+                values.kill_sw_active = (status >> 1) & 1;
+            }
+        }
+
         emit valuesReceived(values, mask);
     } break;
 
@@ -578,6 +586,11 @@ void Commands::processPacket(QByteArray data)
         }
         if (mask & (uint32_t(1) << 15)) {
             values.q3 = vb.vbPopFrontDouble32Auto();
+        }
+        if (vb.size() >= 1) {
+            if (mask & (uint32_t(1) << 16)) {
+                values.vesc_id = vb.vbPopFrontUint8();
+            }
         }
 
         emit valuesImuReceived(values, mask);

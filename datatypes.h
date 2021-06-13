@@ -153,6 +153,8 @@ struct MC_VALUES {
     Q_PROPERTY(QString fault_str MEMBER fault_str)
     Q_PROPERTY(double vd MEMBER vd)
     Q_PROPERTY(double vq MEMBER vq)
+    Q_PROPERTY(bool has_timeout MEMBER has_timeout)
+    Q_PROPERTY(bool kill_sw_active MEMBER kill_sw_active)
 
 public:
     MC_VALUES() {
@@ -179,6 +181,8 @@ public:
         vesc_id = 0;
         vd = 0.0;
         vq = 0.0;
+        has_timeout = false;
+        kill_sw_active = false;
     }
 
     bool operator==(const MC_VALUES &other) const {
@@ -215,6 +219,8 @@ public:
     QString fault_str;
     double vd;
     double vq;
+    bool has_timeout;
+    bool kill_sw_active;
 };
 
 Q_DECLARE_METATYPE(MC_VALUES)
@@ -330,6 +336,8 @@ struct IMU_VALUES {
     Q_PROPERTY(double q2 MEMBER q2)
     Q_PROPERTY(double q3 MEMBER q3)
 
+    Q_PROPERTY(int vesc_id MEMBER vesc_id)
+
 public:
     IMU_VALUES() {
         roll = 0; pitch = 0; yaw = 0;
@@ -337,6 +345,7 @@ public:
         gyroX = 0; gyroY = 0; gyroZ = 0;
         magX = 0; magY = 0; magZ = 0;
         q0 = 1; q1 = 0; q2 = 0; q3 = 0;
+        vesc_id = 0;
     }
 
     bool operator==(const IMU_VALUES &other) const {
@@ -369,6 +378,8 @@ public:
     double q1;
     double q2;
     double q3;
+
+    int vesc_id;
 };
 
 Q_DECLARE_METATYPE(IMU_VALUES)

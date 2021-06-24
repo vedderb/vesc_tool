@@ -89,7 +89,7 @@ Item {
                                 ctx.lineTo(xOfsLeft + lineStep * i, heightBars)
                             }
 
-                            ctx.strokeStyle = "#81D4FA"
+                            ctx.strokeStyle = "#00A1E4"
                             ctx.lineWidth = 1.2
                             ctx.stroke()
 
@@ -218,7 +218,7 @@ Item {
                 anchors.bottom: valText.top
                 width: parent.width
                 height: 2
-                color: "#81D4FA"
+                color: "#00A1E4"
             }
 
             Layout.fillWidth: true

@@ -572,7 +572,7 @@ void MainWindow::timerSlotDebugMsg()
         } else {
             QString strTmp;
             if (msg.isBad) {
-                strTmp = "<font color=\"#81D4FA\">" + msg.msgLong + "</font><br>";
+                strTmp = "<font color=\"#00A1E4\">" + msg.msgLong + "</font><br>";
             } else {
                 strTmp = msg.msgLong + "<br>";
             }
@@ -767,7 +767,7 @@ void MainWindow::showStatusInfo(QString info, bool isGood)
         mPageDebugPrint->printConsole("Status: " + info + "<br>");
     } else {
         mStatusLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-        mPageDebugPrint->printConsole("<font color=\"#81D4FA\">Status: " + info + "</font><br>");
+        mPageDebugPrint->printConsole("<font color=\"#00A1E4\">Status: " + info + "</font><br>");
     }
 
     mStatusInfoTime = (80 * 20) / mTimer->interval();
@@ -1462,7 +1462,7 @@ void MainWindow::reloadPages()
     ui->canList->setMinimumWidth(width);
     ui->canList->setMaximumWidth(width);
     ui->pageLabel->setMaximumWidth(width);
-    ui->pageLabel->setMaximumHeight((394 * width) / 1549);
+    ui->pageLabel->setMaximumHeight((460 * width) / 1550);
     ui->scanCanButton->setMaximumWidth(width);
 
     ui->pageList->setCurrentRow(0);

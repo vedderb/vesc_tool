@@ -59,7 +59,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 height: 2
-                color: "#81D4FA"
+                color: "#00A1E4"
                 Layout.columnSpan: 3
                 Layout.margins: 0
             }

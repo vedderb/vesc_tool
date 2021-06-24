@@ -154,7 +154,7 @@ Item {
                 anchors.top: parent.top
                 width: parent.width
                 height: 2
-                color: "#81D4FA"
+                color: "#00A1E4"
             }
 
             Text {

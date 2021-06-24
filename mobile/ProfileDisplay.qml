@@ -59,7 +59,7 @@ Item {
 
     function checkActive() {
         if (VescIf.isProfileInUse(index)) {
-            rect.border.color = "#81D4FA"
+            rect.border.color = "#00A1E4"
             rect.border.width = 3
         } else {
             rect.border.color = "#919191"

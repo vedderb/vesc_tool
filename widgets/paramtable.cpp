@@ -18,6 +18,7 @@
     */
 
 #include "paramtable.h"
+#include "utility.h"
 #include <QDebug>
 #include <QHeaderView>
 #include <QLabel>
@@ -69,7 +70,7 @@ void ParamTable::addRowSeparator(QString text)
     label->setAlignment(Qt::AlignHCenter);
     QFont font;
     font.setBold(true);
-    label->setStyleSheet("QLabel { background-color : '#477589'; color : white; }");
+    label->setStyleSheet("QLabel { background-color : '" + Utility::getAppHexColor("darkAccentColor") + "'; color : white; }");
     label->setFont(font);
     //label->setFixedHeight(font.pointSize()*2.5);
 

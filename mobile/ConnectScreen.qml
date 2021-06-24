@@ -225,8 +225,7 @@ Item {
                                 Layout.preferredHeight: 55
                                 text: "Set Name"
 
-                                onClicked: {                                   
-                                    var ids = bleAddr.split('-')
+                                onClicked: {
                                     bleNameDialog.addr = bleAddr
                                     stringInput.text = setName
                                     bleNameDialog.open()
@@ -255,13 +254,11 @@ Item {
 
             for (var addr in devs) {
                 var name = devs[addr]
-                if(Qt.platform.os == "ios")
-                {
-                     var ids = addr.split('-')
-                     var shortAddr = ids[0].slice(1,3) + '-' + ids[1].slice(0,2) + '-' + ids[2].slice(0,2) + '-' + ids[3].slice(0,2) + '-' + ids[4].slice(0,2)
-                }
-                else
-                {
+                if(Qt.platform.os == "ios") {
+                    var ids = addr.split('-')
+                    var shortAddr = ids[0].slice(1,3) + '-' + ids[1].slice(0,2) + '-' +
+                            ids[2].slice(0,2) + '-' + ids[3].slice(0,2) + '-' + ids[4].slice(0,2)
+                } else {
                     shortAddr = addr;
                 }
                 var setName = VescIf.getBleName(addr)

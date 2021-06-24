@@ -46,12 +46,12 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
 
     Utility::setPlotColors(ui->balancePlot);
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->balancePlot->graph(graphIndex)->setName("PID Output");
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2")));
     ui->balancePlot->graph(graphIndex)->setName("Pitch Angle");
     graphIndex++;
 
@@ -61,8 +61,20 @@ PageAppBalance::PageAppBalance(QWidget *parent) :
     graphIndex++;
 
     ui->balancePlot->addGraph();
-    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3")));
     ui->balancePlot->graph(graphIndex)->setName("Current");
+    graphIndex++;
+
+    ui->balancePlot->addGraph();
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph4")));
+    ui->balancePlot->graph(graphIndex)->setName("Debug 1");
+    ui->balancePlot->graph(graphIndex)->removeFromLegend();
+    graphIndex++;
+
+    ui->balancePlot->addGraph();
+    ui->balancePlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph5")));
+    ui->balancePlot->graph(graphIndex)->setName("Debug 2");
+    ui->balancePlot->graph(graphIndex)->removeFromLegend();
     graphIndex++;
 
     QFont legendFont = font();
@@ -136,6 +148,22 @@ void PageAppBalance::timerSlot()
         ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppMAngleVec);
         ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppCAngleVec);
         ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppMotorCurrentVec);
+        if(mAppDebug2.size() < 2 || (mAppDebug1.rbegin()[0] == 0 && mAppDebug1.rbegin()[1] == 0)){
+            ui->balancePlot->graph(graphIndex)->setVisible(false);
+            ui->balancePlot->graph(graphIndex)->removeFromLegend();
+        }else{
+            ui->balancePlot->graph(graphIndex)->setVisible(true);
+            ui->balancePlot->graph(graphIndex)->addToLegend();
+        }
+        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppDebug1);
+        if(mAppDebug2.size() < 2 || (mAppDebug2.rbegin()[0] == 0 && mAppDebug2.rbegin()[1] == 0)){
+            ui->balancePlot->graph(graphIndex)->setVisible(false);
+            ui->balancePlot->graph(graphIndex)->removeFromLegend();
+        }else{
+            ui->balancePlot->graph(graphIndex)->setVisible(true);
+            ui->balancePlot->graph(graphIndex)->addToLegend();
+        }
+        ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppDebug2);
 
         ui->balancePlot->rescaleAxes();
 
@@ -154,11 +182,12 @@ void PageAppBalance::appValuesReceived(BALANCE_VALUES values) {
     appendDoubleAndTrunc(&mAppCAngleVec, values.roll_angle, maxS);
     mAppDiffTime = values.diff_time;
     appendDoubleAndTrunc(&mAppMotorCurrentVec, values.motor_current, maxS);
-    appendDoubleAndTrunc(&mAppMotorPositionVec, values.motor_position, maxS);
     mAppState = values.state;
     mAppSwitchValue = values.switch_value;
     mAppADC1 = values.adc1;
     mAppADC2 = values.adc2;
+    appendDoubleAndTrunc(&mAppDebug1, values.debug1, maxS);
+    appendDoubleAndTrunc(&mAppDebug2, values.debug2, maxS);
 
 
     qint64 tNow = QDateTime::currentMSecsSinceEpoch();
@@ -233,14 +262,6 @@ void PageAppBalance::updateTextOutput(){
     }else{
         output = output + "Unknown";
     }
-
-    output = output + "\tMotor Position: ";
-    if(mAppMotorPositionVec.empty() == false){
-        output = output + QString::number((int)mAppMotorPositionVec.last());
-    }else{
-        output = output + "Unknown";
-    }
-
 
     ui->textOutput->setText(output);
 }

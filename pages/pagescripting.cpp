@@ -452,9 +452,17 @@ QString PageScripting::qmlToRun(bool importDir)
 bool PageScripting::exportCArray(QString name)
 {
     QString filename;
+    QString dir = ".";
+
+    auto editor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
+    QFileInfo fileNow = QFileInfo(editor->fileNow());
+    if (fileNow.exists()) {
+        dir = fileNow.path();
+    }
+
     filename = QFileDialog::getSaveFileName(this,
                                         tr("Choose the .c or .h file name. Both files will be created."),
-                                        ".",
+                                        dir,
                                         tr("C Source/Header files (*.c *.h)"));
 
     if (filename.isNull()) {

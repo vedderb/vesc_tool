@@ -50,51 +50,51 @@ PageAppImu::PageAppImu(QWidget *parent) :
     int graphIndex = 0;
 
     ui->rpyPlot->addGraph();
-    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->rpyPlot->graph(graphIndex)->setName("Roll");
     graphIndex++;
 
     ui->rpyPlot->addGraph();
-    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2")));
     ui->rpyPlot->graph(graphIndex)->setName("Pitch");
     graphIndex++;
 
     ui->rpyPlot->addGraph();
-    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3")));
     ui->rpyPlot->graph(graphIndex)->setName("Yaw");
     graphIndex++;
 
     graphIndex = 0;
 
     ui->accelPlot->addGraph();
-    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->accelPlot->graph(graphIndex)->setName("Acc X");
     graphIndex++;
 
     ui->accelPlot->addGraph();
-    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2")));
     ui->accelPlot->graph(graphIndex)->setName("Acc Y");
     graphIndex++;
 
     ui->accelPlot->addGraph();
-    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3")));
     ui->accelPlot->graph(graphIndex)->setName("Acc Z");
     graphIndex++;
 
     graphIndex = 0;
 
     ui->gyroPlot->addGraph();
-    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("blue")));
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->gyroPlot->graph(graphIndex)->setName("Gyro X");
     graphIndex++;
 
     ui->gyroPlot->addGraph();
-    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("red")));
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2")));
     ui->gyroPlot->graph(graphIndex)->setName("Gyro Y");
     graphIndex++;
 
     ui->gyroPlot->addGraph();
-    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("green")));
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3")));
     ui->gyroPlot->graph(graphIndex)->setName("Gyro Z");
     graphIndex++;
 

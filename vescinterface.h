@@ -171,7 +171,7 @@ public:
     bool connectSerial(QString port, int baudrate = 115200);
     QList<VSerialInfo_t> listSerialPorts();
     QList<QString> listCANbusInterfaces();
-    Q_INVOKABLE bool connectCANbus(QString backend, QString interface, int bitrate);
+    Q_INVOKABLE bool connectCANbus(QString backend, QString ifName, int bitrate);
     Q_INVOKABLE bool isCANbusConnected();
     Q_INVOKABLE void setCANbusReceiverID(int node_ID);
     Q_INVOKABLE void scanCANbus();

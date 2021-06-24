@@ -49,7 +49,7 @@ Item {
                 Image {
                     id: img
                     Layout.fillHeight: true
-                    Layout.preferredWidth: height
+                    Layout.preferredWidth: height * 0.7
                     Layout.margins: 6
                     Layout.leftMargin: 6
                     fillMode: Image.PreserveAspectFit

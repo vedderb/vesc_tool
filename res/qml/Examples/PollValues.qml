@@ -57,6 +57,8 @@ Item {
 //            values.fault_str
 //            values.vd
 //            values.vq
+//            values.has_timeout
+//            values.kill_sw_active
         }
         
         onValuesSetupReceived: { // values, mask

@@ -63,6 +63,8 @@ private:
     uint16_t mAppSwitchValue;
     double mAppADC1;
     double mAppADC2;
+    QVector<double> mAppDebug1;
+    QVector<double> mAppDebug2;
 
     QVector<double> mSeconds;
 

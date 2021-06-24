@@ -153,6 +153,8 @@ struct MC_VALUES {
     Q_PROPERTY(QString fault_str MEMBER fault_str)
     Q_PROPERTY(double vd MEMBER vd)
     Q_PROPERTY(double vq MEMBER vq)
+    Q_PROPERTY(bool has_timeout MEMBER has_timeout)
+    Q_PROPERTY(bool kill_sw_active MEMBER kill_sw_active)
 
 public:
     MC_VALUES() {
@@ -179,6 +181,8 @@ public:
         vesc_id = 0;
         vd = 0.0;
         vq = 0.0;
+        has_timeout = false;
+        kill_sw_active = false;
     }
 
     bool operator==(const MC_VALUES &other) const {
@@ -215,6 +219,8 @@ public:
     QString fault_str;
     double vd;
     double vq;
+    bool has_timeout;
+    bool kill_sw_active;
 };
 
 Q_DECLARE_METATYPE(MC_VALUES)
@@ -330,6 +336,8 @@ struct IMU_VALUES {
     Q_PROPERTY(double q2 MEMBER q2)
     Q_PROPERTY(double q3 MEMBER q3)
 
+    Q_PROPERTY(int vesc_id MEMBER vesc_id)
+
 public:
     IMU_VALUES() {
         roll = 0; pitch = 0; yaw = 0;
@@ -337,6 +345,7 @@ public:
         gyroX = 0; gyroY = 0; gyroZ = 0;
         magX = 0; magY = 0; magZ = 0;
         q0 = 1; q1 = 0; q2 = 0; q3 = 0;
+        vesc_id = 0;
     }
 
     bool operator==(const IMU_VALUES &other) const {
@@ -369,6 +378,8 @@ public:
     double q1;
     double q2;
     double q3;
+
+    int vesc_id;
 };
 
 Q_DECLARE_METATYPE(IMU_VALUES)
@@ -939,11 +950,12 @@ struct BALANCE_VALUES {
     Q_PROPERTY(double roll_angle MEMBER roll_angle)
     Q_PROPERTY(int diff_time MEMBER diff_time)
     Q_PROPERTY(double motor_current MEMBER motor_current)
-    Q_PROPERTY(double motor_position MEMBER motor_position)
     Q_PROPERTY(int state MEMBER state)
     Q_PROPERTY(int switch_value MEMBER switch_value)
     Q_PROPERTY(double adc1 MEMBER adc1)
     Q_PROPERTY(double adc2 MEMBER adc2)
+    Q_PROPERTY(double debug1 MEMBER debug1)
+    Q_PROPERTY(double debug2 MEMBER debug2)
 
 public:
     BALANCE_VALUES() {
@@ -952,11 +964,12 @@ public:
         roll_angle = 0;
         diff_time = 0;
         motor_current = 0;
-        motor_position = 0;
         state = 0;
         switch_value = 0;
         adc1 = 0;
         adc2 = 0;
+        debug1 = 0;
+        debug2 = 0;
     }
 
     double pid_output;
@@ -964,11 +977,12 @@ public:
     double roll_angle;
     int diff_time;
     double motor_current;
-    double motor_position;
     int state;
     int switch_value;
     double adc1;
     double adc2;
+    double debug1;
+    double debug2;
 };
 
 Q_DECLARE_METATYPE(BALANCE_VALUES)

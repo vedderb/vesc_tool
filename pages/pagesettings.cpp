@@ -44,11 +44,13 @@ PageSettings::PageSettings(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     ui->uiScaleBox->setValue(mSettings.value("app_scale_factor", 1.0).toDouble());
     ui->uiPlotWidthBox->setValue(mSettings.value("plot_line_width",4.0).toDouble());
-    ui->uiAutoScaleBox->setChecked(mSettings.value("app_scale_auto", false).toBool());
     ui->pathRtLogEdit->setText(mSettings.value("path_rt_log", "./log").toString());
     ui->pathScriptInputEdit->setText(mSettings.value("path_script_input", "./log").toString());
     ui->pathScriptOutputEdit->setText(mSettings.value("path_script_output", "./log").toString());
-    ui->uiScaleBox->setEnabled(!ui->uiAutoScaleBox->isChecked());
+    ui->pollRtDataBox->setValue(mSettings.value("poll_rate_rt_data", 50.0).toDouble());
+    ui->pollAppDataBox->setValue(mSettings.value("poll_rate_app_data", 20.0).toDouble());
+    ui->pollImuDataBox->setValue(mSettings.value("poll_rate_imu_data", 50.0).toDouble());
+    ui->pollBmsDataBox->setValue(mSettings.value("poll_rate_bms_data", 10.0).toDouble());
 
 #ifdef HAS_GAMEPAD
     auto confAxis = [](QGamepad *gp, QGamepadManager::GamepadAxis axis) {
@@ -281,12 +283,6 @@ void PageSettings::on_uiPlotWidthBox_valueChanged(double arg1)
     mSettings.setValue("plot_line_width", arg1);
 }
 
-void PageSettings::on_uiAutoScaleBox_toggled(bool checked)
-{
-    mSettings.setValue("app_scale_auto", checked);
-    ui->uiScaleBox->setEnabled(!checked);
-}
-
 void PageSettings::on_jsScanButton_clicked()
 {
 #ifdef HAS_GAMEPAD
@@ -361,4 +357,36 @@ void PageSettings::on_pathScriptOutputEdit_textChanged(const QString &arg1)
 {
     mSettings.setValue("path_script_output", arg1);
     mSettings.sync();
+}
+
+void PageSettings::on_pollRtDataBox_valueChanged(double arg1)
+{
+    mSettings.setValue("poll_rate_rt_data", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pollAppDataBox_valueChanged(double arg1)
+{
+    mSettings.setValue("poll_rate_app_data", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pollImuDataBox_valueChanged(double arg1)
+{
+    mSettings.setValue("poll_rate_imu_data", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pollBmsDataBox_valueChanged(double arg1)
+{
+    mSettings.setValue("poll_rate_bms_data", arg1);
+    mSettings.sync();
+}
+
+void PageSettings::on_pollRestoreButton_clicked()
+{
+    ui->pollRtDataBox->setValue(50.0);
+    ui->pollAppDataBox->setValue(20.0);
+    ui->pollImuDataBox->setValue(50.0);
+    ui->pollBmsDataBox->setValue(10.0);
 }

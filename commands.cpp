@@ -260,6 +260,14 @@ void Commands::processPacket(QByteArray data)
             }
         }
 
+        if (vb.size() >= 1) {
+            if (mask & (uint32_t(1) << 21)) {
+                quint8 status = vb.vbPopFrontUint8();
+                values.has_timeout = status & 1;
+                values.kill_sw_active = (status >> 1) & 1;
+            }
+        }
+
         emit valuesReceived(values, mask);
     } break;
 
@@ -380,11 +388,12 @@ void Commands::processPacket(QByteArray data)
         values.roll_angle = vb.vbPopFrontDouble32(1e6);
         values.diff_time = vb.vbPopFrontUint32();
         values.motor_current = vb.vbPopFrontDouble32(1e6);
-        values.motor_position = vb.vbPopFrontDouble32(1e6);
+        values.debug1 = vb.vbPopFrontDouble32(1e6);
         values.state = vb.vbPopFrontUint16();
         values.switch_value = vb.vbPopFrontUint16();
         values.adc1 = vb.vbPopFrontDouble32(1e6);
         values.adc2 = vb.vbPopFrontDouble32(1e6);
+        values.debug2 = vb.vbPopFrontDouble32(1e6);
         emit decodedBalanceReceived(values);
     } break;
 
@@ -577,6 +586,11 @@ void Commands::processPacket(QByteArray data)
         }
         if (mask & (uint32_t(1) << 15)) {
             values.q3 = vb.vbPopFrontDouble32Auto();
+        }
+        if (vb.size() >= 1) {
+            if (mask & (uint32_t(1) << 16)) {
+                values.vesc_id = vb.vbPopFrontUint8();
+            }
         }
 
         emit valuesImuReceived(values, mask);

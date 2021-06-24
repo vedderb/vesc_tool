@@ -19,7 +19,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_gold.qrc">
+   <iconset resource="res_original.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -47,7 +47,19 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
-         <number>4</number>
+         <number>12</number>
+        </property>
+        <property name="leftMargin">
+         <number>12</number>
+        </property>
+        <property name="topMargin">
+         <number>12</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>12</number>
         </property>
         <item>
          <widget class="QLabel" name="pageLabel">
@@ -64,7 +76,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_gold.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_original.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -1370,7 +1382,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_gold.qrc"/>
+  <include location="res_original.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

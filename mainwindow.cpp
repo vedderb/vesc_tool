@@ -1450,7 +1450,7 @@ void MainWindow::reloadPages()
     // Adjust sizes
     QFontMetrics fm(this->font());
     int width = fm.horizontalAdvance("Welcome & Wizards++++++++++++");
-    int height = fm.height();
+    int height = fm.height()*1.25;
 
     for(int i = 0; i < ui->pageList->count(); i++) {
         QListWidgetItem *item = ui->pageList->item(i);
@@ -1468,6 +1468,7 @@ void MainWindow::reloadPages()
     ui->pageList->setCurrentRow(0);
     ui->pageList->setGridSize(QSize(0.85*width , height));
     ui->pageWidget->setCurrentIndex(0);
+
 }
 
 void MainWindow::checkUdev()

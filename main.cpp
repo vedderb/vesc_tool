@@ -28,6 +28,7 @@
 #include "ios/src/notch.h"
 #endif
 
+
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
@@ -70,8 +71,8 @@ int main(int argc, char *argv[])
     Utility::setAppQColor("normalText", QColor(180,180,180));
     Utility::setAppQColor("lightText", QColor(220,220,220));
     Utility::setAppQColor("disabledText", QColor(127,127,127));
-    Utility::setAppQColor("lightAccentColor", QColor(129,212,250));
-    Utility::setAppQColor("darkAccentColor", QColor(71,117,137));
+    Utility::setAppQColor("lightAccentColor", QColor(0,161,221));
+    Utility::setAppQColor("darkAccentColor", QColor(0,102,178));
     Utility::setAppQColor("pink", QColor(219,98,139));
     Utility::setAppQColor("red", QColor(200,52,52));
     Utility::setAppQColor("orange", QColor(206,125,44));

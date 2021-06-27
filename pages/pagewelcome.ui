@@ -99,9 +99,6 @@
             </item>
             <item row="1" column="0">
              <widget class="QPushButton" name="wizardAppButton">
-              <property name="toolTip">
-               <string>Guided Setup for Inputs including Remotes and Throttles</string>
-              </property>
               <property name="text">
                <string>Setup Input</string>
               </property>
@@ -122,9 +119,6 @@
             </item>
             <item row="1" column="1">
              <widget class="QPushButton" name="nrfPairButton">
-              <property name="toolTip">
-               <string>Quick Pairing for NRF based Devices like the Wand</string>
-              </property>
               <property name="text">
                <string>NRF Quick Pair</string>
               </property>

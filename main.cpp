@@ -319,22 +319,17 @@ int main(int argc, char *argv[])
         qApp->setFont(QFont("Roboto", 12));
 
         // Style
-        a->setStyleSheet("");
-        a->setStyle(QStyleFactory::create("Fusion"));
+        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0" + Utility::getAppHexColor("lightAccentColor") +
+                             ", stop: 0.4 " + Utility::getAppHexColor("darkAccentColor") + ");" +
+                             " border: none;}" +
+                             "QListView::item {border: none;};" + "QListView{outline: none;}");
+        a->setStyle(new Style_tweaks::QProxyStyle("Fusion"));
 
         // Register this to not stop on the import statement when reusing components
         // from the mobile UI. In the mobile UI these are provided as singletons, whereas
         // in the desktop GUI they are provided as context properties.
         qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
         qmlRegisterType<VescInterface>("Vedder.vesc.utility", 1, 0, "Utility2");
-
-        qApp->setStyle(new Style_tweaks);
-
-        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0" + Utility::getAppHexColor("lightAccentColor") +
-                             ", stop: 0.4 " + Utility::getAppHexColor("darkAccentColor") + ");" +
-                             " border: none;}" +
-                             "QListView::item {border: none;};" + "QListView{outline: none;}");
-
 
         w = new MainWindow;
         w->show();

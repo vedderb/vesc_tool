@@ -47,6 +47,7 @@
 class Style_tweaks : public QProxyStyle
 {
 public:
+    using QProxyStyle::QProxyStyle;
     void drawPrimitive(PrimitiveElement element, const QStyleOption *option,
         QPainter *painter, const QWidget *widget) const
     {
@@ -323,7 +324,8 @@ int main(int argc, char *argv[])
                              ", stop: 0.4 " + Utility::getAppHexColor("darkAccentColor") + ");" +
                              " border: none;}" +
                              "QListView::item {border: none;};" + "QListView{outline: none;}");
-        a->setStyle(new Style_tweaks::QProxyStyle("Fusion"));
+        QStyle *myStyle = new Style_tweaks("Fusion");
+        a->setStyle(myStyle);
 
         // Register this to not stop on the import statement when reusing components
         // from the mobile UI. In the mobile UI these are provided as singletons, whereas

@@ -40,6 +40,23 @@
 #endif
 
 #ifndef USE_MOBILE
+
+#include <QProxyStyle>
+
+// Disables focus drawing for all widgets
+class Style_tweaks : public QProxyStyle
+{
+public:
+    using QProxyStyle::QProxyStyle;
+    void drawPrimitive(PrimitiveElement element, const QStyleOption *option,
+        QPainter *painter, const QWidget *widget) const
+    {
+        if (element == QStyle::PE_FrameFocusRect) return;
+
+        QProxyStyle::drawPrimitive(element, option, painter, widget);
+    }
+};
+
 static void showHelp()
 {
     qDebug() << "Arguments";
@@ -72,7 +89,7 @@ int main(int argc, char *argv[])
     Utility::setAppQColor("lightText", QColor(220,220,220));
     Utility::setAppQColor("disabledText", QColor(127,127,127));
     Utility::setAppQColor("lightAccentColor", QColor(0,161,221));
-    Utility::setAppQColor("darkAccentColor", QColor(0,102,178));
+    Utility::setAppQColor("darkAccentColor", QColor(0,69,112));
     Utility::setAppQColor("pink", QColor(219,98,139));
     Utility::setAppQColor("red", QColor(200,52,52));
     Utility::setAppQColor("orange", QColor(206,125,44));
@@ -299,11 +316,16 @@ int main(int argc, char *argv[])
         QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
         QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
 
+
         qApp->setFont(QFont("Roboto", 12));
 
         // Style
-        a->setStyleSheet("");
-        a->setStyle(QStyleFactory::create("Fusion"));
+        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0" + Utility::getAppHexColor("lightAccentColor") +
+                             ", stop: 0.4 " + Utility::getAppHexColor("darkAccentColor") + ");" +
+                             " border: none;}" +
+                             "QListView::item {border: none;};" + "QListView{outline: none;}");
+        QStyle *myStyle = new Style_tweaks("Fusion");
+        a->setStyle(myStyle);
 
         // Register this to not stop on the import statement when reusing components
         // from the mobile UI. In the mobile UI these are provided as singletons, whereas

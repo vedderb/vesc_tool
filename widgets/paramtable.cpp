@@ -67,12 +67,17 @@ void ParamTable::addRowSeparator(QString text)
     setRowCount(row + 1);
 
     QLabel *label = new QLabel(text);
-    label->setAlignment(Qt::AlignHCenter);
+    label->setAlignment(Qt::AlignCenter);
     QFont font;
     font.setBold(true);
-    label->setStyleSheet("QLabel { background-color : '" + Utility::getAppHexColor("darkAccentColor") + "'; color : white; }");
+
+    label->setStyleSheet("QLabel { background: qlineargradient(x1: 0, y1: 0, x2: 1.0, y2: 0, stop: 0.0" + Utility::getAppHexColor("lightAccentColor") +
+                         ", stop: 0.2 " + Utility::getAppHexColor("darkAccentColor") +
+                         ", stop: 0.8 " + Utility::getAppHexColor("darkAccentColor") +
+                         ", stop: 1.0 " + Utility::getAppHexColor("lightAccentColor") +");" +
+                         " color : white; border: none;}");
     label->setFont(font);
-    //label->setFixedHeight(font.pointSize()*2.5);
+    label->setMargin(3);
 
     setCellWidget(row, 0, label);
     setSpan(row, 0, 1, 2);

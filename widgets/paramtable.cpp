@@ -71,10 +71,10 @@ void ParamTable::addRowSeparator(QString text)
     QFont font;
     font.setBold(true);
 
-    label->setStyleSheet("QLabel { background: qlineargradient(x1: 0, y1: 0, x2: 1.0, y2: 0, stop: 0.0" + Utility::getAppHexColor("lightAccentColor") +
-                         ", stop: 0.2 " + Utility::getAppHexColor("darkAccentColor") +
-                         ", stop: 0.8 " + Utility::getAppHexColor("darkAccentColor") +
-                         ", stop: 1.0 " + Utility::getAppHexColor("lightAccentColor") +");" +
+    label->setStyleSheet("QLabel { background: qlineargradient(x1: 0, y1: 0, x2: 1.0, y2: 0, stop: 0.0" + Utility::getAppHexColor("lightAccent") +
+                         ", stop: 0.2 " + Utility::getAppHexColor("darkAccent") +
+                         ", stop: 0.8 " + Utility::getAppHexColor("darkAccent") +
+                         ", stop: 1.0 " + Utility::getAppHexColor("lightAccent") +");" +
                          " color : white; border: none;}");
     label->setFont(font);
     label->setMargin(3);

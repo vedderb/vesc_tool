@@ -64,7 +64,7 @@ Item {
         Text {
             id: text
             Layout.fillWidth: true
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             text: qsTr("Select which VESCs have inverted motor direction. Press the FWD or REV button to try.")
             font.bold: true
             horizontalAlignment: Text.AlignHCenter
@@ -91,7 +91,7 @@ Item {
 
                     width: canIdList.width
                     height: 130
-                    color: "#30000000"
+                    color: Utility.getAppHexColor("darkBackground")
                     radius: 5
 
                     RowLayout {
@@ -102,7 +102,7 @@ Item {
                             Layout.leftMargin: 5
                             Layout.fillWidth: true
 
-                            color: "#33a8d9ff"
+                            color: Utility.getAppHexColor("lightAccent")
                             height: column.height
                             radius: height / 2
 
@@ -124,7 +124,7 @@ Item {
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                                     text: name + "\nID: " + canId
                                     horizontalAlignment: Text.AlignHCenter
-                                    color: "white"
+                                    color: Utility.getAppHexColor("lightText")
                                     wrapMode: Text.WordWrap
                                 }
                             }
@@ -134,7 +134,7 @@ Item {
                             Text {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.rightMargin: 5
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Inverted"
                                 horizontalAlignment: Text.AlignHCenter
                             }

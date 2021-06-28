@@ -19,8 +19,10 @@
 
 import QtQuick 2.7
 import QtQuick.Controls 2.2
+import QtQuick.Controls.Material 2.12
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0 as QSettings
+
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -34,6 +36,13 @@ ApplicationWindow {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mAppConf: VescIf.appConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+
+    Material.theme: QSettings.Settings.value("darkMode") ? "Dark" : "Light"
+    //Material.background: Utility.getAppHexColor("normalBackground")
+    //Material.primary: Utility.getAppHexColor("normalBackground")
+    //Material.foreground: Utility.getAppHexColor("lightText")
+    Material.accent: Utility.getAppHexColor("lightAccent")
+
 
     visible: true
     width: 500
@@ -81,10 +90,13 @@ ApplicationWindow {
 
             Image {
                 id: image
-                Layout.preferredWidth: Math.min(parent.width, parent.height)
-                Layout.preferredHeight: (394 * Layout.preferredWidth) / 1549
+                Layout.preferredWidth: Math.min(parent.width, parent.height)*0.8
+                Layout.preferredHeight: (464 * Layout.preferredWidth) / 1550
+                Layout.margins: Math.min(parent.width, parent.height)*0.1
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 source: "qrc:/res/logo_white.png"
+                antialiasing: true
+
             }
 
             Button {
@@ -196,7 +208,7 @@ ApplicationWindow {
                 spacing: 0
 
                 Rectangle {
-                    color: "#4f4f4f"
+                    color: Utility.getAppHexColor("lightBackground")
                     width: 16
                     Layout.fillHeight: true
                     Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
@@ -305,7 +317,7 @@ ApplicationWindow {
     }
 
     header: Rectangle {
-        color: "#5f5f5f"
+        color: Utility.getAppHexColor("lightestBackground")
         height: tabBar.height
 
         RowLayout {
@@ -321,7 +333,7 @@ ApplicationWindow {
                     anchors.centerIn: parent
                     width: tabBar.height * 0.5
                     height: tabBar.height * 0.5
-                    opacity: 0.5
+                    opacity: 1.0
                     source: "qrc:/res/icons/Settings-96.png"
                 }
 
@@ -343,7 +355,7 @@ ApplicationWindow {
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#4f4f4f"
+                    color: Utility.getAppHexColor("lightBackground")
                 }
 
                 property int buttonWidth: Math.max(120,
@@ -360,6 +372,7 @@ ApplicationWindow {
                     TabButton {
                         text: modelData
                         width: tabBar.buttonWidth
+
                     }
                 }
             }
@@ -412,11 +425,11 @@ ApplicationWindow {
 
     footer: Rectangle {
         id: connectedRect
-        color: "#4f4f4f"
+        color: Utility.getAppHexColor("lightBackground")
 
         Text {
             id: connectedText
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             text: VescIf.getConnectedPortName()
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
@@ -448,7 +461,7 @@ ApplicationWindow {
         repeat: false
         onTriggered: {
             connectedText.text = VescIf.getConnectedPortName()
-            connectedRect.color = "#4f4f4f"
+            connectedRect.color = Utility.getAppHexColor("lightBackground")
         }
     }
 
@@ -565,7 +578,7 @@ ApplicationWindow {
 
             Text {
                 id: vescDialogLabel
-                color: "#ffffff"
+                color: Utility.getAppHexColor("lightText")
                 linkColor: "lightblue"
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
@@ -672,7 +685,7 @@ ApplicationWindow {
 
         onStatusMessage: {
             connectedText.text = msg
-            connectedRect.color = isGood ? "green" : "red"
+            connectedRect.color = isGood ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("red")
             statusTimer.restart()
         }
 

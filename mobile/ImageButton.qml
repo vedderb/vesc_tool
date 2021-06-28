@@ -20,6 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import Vedder.vesc.utility 1.0
 
 Item {
     id: rootItem
@@ -39,8 +40,8 @@ Item {
         background: Rectangle {
             anchors.fill: parent
             radius: 10
-            color: control.pressed ? Qt.rgba(71 / 255, 117 / 255, 137 / 255, 1) : Qt.rgba(66 / 255, 66 / 255, 66 / 255, 1)
-            border.color: "#888"
+            color: control.pressed ? Utility.getAppHexColor("darkAccent") :Utility.getAppHexColor("normalBackground")
+            border.color: Utility.getAppHexColor("disabledText")
             border.width: control.activeFocus ? 2 : 1
 
             RowLayout {
@@ -62,7 +63,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     text: buttonText
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     verticalAlignment: Text.AlignVCenter
                 }
             }

@@ -300,7 +300,7 @@ Item {
 
         Text {
             id: detectRlLabel
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -331,7 +331,7 @@ Item {
         Text {
             anchors.fill: parent
             id: detectLambdaLabel
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.WordWrap
             text:

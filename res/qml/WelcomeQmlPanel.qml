@@ -23,11 +23,17 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
 import QtQuick.Window 2.2
 
+import Vedder.vesc.utility 1.0
+import Qt.labs.settings 1.0 as QSettings
+
 import "qrc:/mobile"
 
 Item {
     id: container
     width: 100
+    Material.theme:  "Dark"
+    Material.accent: Utility.getAppHexColor("lightAccent")
+
 
     function setupMotors() {
         if (!VescIf.isPortConnected()) {
@@ -72,7 +78,7 @@ Item {
 
             background: Rectangle {
                 opacity: 1
-                color: "#4f4f4f"
+                color: Utility.getAppHexColor("lightBackground")
             }
 
             property int buttonWidth: Math.max(120,
@@ -255,7 +261,7 @@ Item {
         y: parent.y + parent.height / 2 - height / 2
 
         Text {
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

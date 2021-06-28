@@ -12,6 +12,7 @@ QmlEditor::QmlEditor(QWidget *parent) :
 {
     ui->setupUi(this);
 
+
     ui->searchWidget->setVisible(false);
 
     ui->qmlEdit->setHighlighter(new QmlHighlighter);

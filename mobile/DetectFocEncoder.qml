@@ -162,7 +162,7 @@ Item {
 
         Text {
             id: detectLambdaLabel
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

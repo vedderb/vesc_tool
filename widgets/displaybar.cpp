@@ -47,7 +47,7 @@ void DisplayBar::paintEvent(QPaintEvent *event)
 
     painter.setBrush(QBrush(Utility::getAppQColor("red")));
     painter.fillRect(w / 2 - 1, 0, 2, h, QColor(150,37,37));
-    painter.fillRect(0, h * f_disp - 1, w, 2, Utility::getAppQColor("darkAccentColor"));
+    painter.fillRect(0, h * f_disp - 1, w, 2, Utility::getAppQColor("darkAccent"));
 
 
 

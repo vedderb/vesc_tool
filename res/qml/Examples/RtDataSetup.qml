@@ -143,7 +143,7 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Layout.fillWidth: true
             Layout.preferredHeight: valMetrics.height * 4 + 20
@@ -154,7 +154,7 @@ Item {
                 anchors.top: parent.top
                 width: parent.width
                 height: 2
-                color: "#00A1E4"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Text {

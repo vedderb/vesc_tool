@@ -94,6 +94,8 @@ public:
     Q_INVOKABLE static void setAppQColor(QString colorName, QColor color);
     Q_INVOKABLE static QColor getAppQColor(QString colorName);
     Q_INVOKABLE static QString getAppHexColor(QString colorName);
+    Q_INVOKABLE static QFileSelector* getFileSelector();
+    Q_INVOKABLE static void setFileSelector(QFileSelector* fileSelect);
     static void setPlotColors(QCustomPlot* plot);
 
     template<typename QEnum>
@@ -111,8 +113,6 @@ private:
     static void defaultFunc(ConfigParams *params, QTextStream &s);
 
     static QMap<QString,QColor> mAppColors;
-
-
 };
 
 #endif // UTILITY_H

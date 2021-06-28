@@ -49,7 +49,7 @@ class Style_tweaks : public QProxyStyle
 public:
     using QProxyStyle::QProxyStyle;
     void drawPrimitive(PrimitiveElement element, const QStyleOption *option,
-        QPainter *painter, const QWidget *widget) const
+                       QPainter *painter, const QWidget *widget) const
     {
         if (element == QStyle::PE_FrameFocusRect) return;
 
@@ -80,26 +80,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("vesc-project.com");
     QCoreApplication::setApplicationName("VESC Tool");
 
-    //Default Colors
-    Utility::setAppQColor("lightestBackground", QColor(80,80,80));
-    Utility::setAppQColor("lightBackground", QColor(66,66,66));
-    Utility::setAppQColor("normalBackground", QColor(48,48,48));
-    Utility::setAppQColor("darkBackground", QColor(39,39,39));
-    Utility::setAppQColor("normalText", QColor(180,180,180));
-    Utility::setAppQColor("lightText", QColor(220,220,220));
-    Utility::setAppQColor("disabledText", QColor(127,127,127));
-    Utility::setAppQColor("lightAccentColor", QColor(0,161,221));
-    Utility::setAppQColor("darkAccentColor", QColor(0,69,112));
-    Utility::setAppQColor("pink", QColor(219,98,139));
-    Utility::setAppQColor("red", QColor(200,52,52));
-    Utility::setAppQColor("orange", QColor(206,125,44));
-    Utility::setAppQColor("yellow", QColor(210,210,127));
-    Utility::setAppQColor("green", QColor(127,200,127));
-    Utility::setAppQColor("cyan",QColor(79,203,203));
-    Utility::setAppQColor("blue", QColor(77,127,196));
-    Utility::setAppQColor("magenta", QColor(157,127,210));
-    Utility::setAppQColor("white", QColor(255,255,255));
-    Utility::setAppQColor("black", QColor(0,0,0));
+
 
     // DPI settings
     // TODO: http://www.qcustomplot.com/index.php/support/forum/1344
@@ -275,30 +256,83 @@ int main(int argc, char *argv[])
     } else {
         QApplication *a = new QApplication(argc, argv);
         app = a;
+        bool isDark = set.value("darkMode", false).toBool();
 
-        QPalette darkPalette;
-        darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
-        darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("normalText"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,Utility::getAppQColor("disabledText"));
-        darkPalette.setColor(QPalette::Base,Utility::getAppQColor("normalBackground"));
-        darkPalette.setColor(QPalette::AlternateBase,Utility::getAppQColor("lightBackground"));
-        darkPalette.setColor(QPalette::ToolTipBase,Utility::getAppQColor("lightestBackground"));
-        darkPalette.setColor(QPalette::ToolTipText,Utility::getAppQColor("lightText"));
-        darkPalette.setColor(QPalette::Text,Utility::getAppQColor("lightText"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::Text,Utility::getAppQColor("disabledText"));
-        darkPalette.setColor(QPalette::Dark,QColor(35,35,35));
-        darkPalette.setColor(QPalette::Shadow,QColor(20,20,20));
-        darkPalette.setColor(QPalette::Button,Utility::getAppQColor("normalBackground"));
-        darkPalette.setColor(QPalette::ButtonText,Utility::getAppQColor("normalText"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,Utility::getAppQColor("disabledText"));
-        darkPalette.setColor(QPalette::BrightText,Utility::getAppQColor("lightAccentColor"));
-        darkPalette.setColor(QPalette::Link,Utility::getAppQColor("lightAccentColor"));
-        darkPalette.setColor(QPalette::Highlight,Utility::getAppQColor("darkAccentColor"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,Utility::getAppQColor("lightestBackground"));
-        darkPalette.setColor(QPalette::HighlightedText,Utility::getAppQColor("white"));
-        darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
+        QFileSelector selector;
+        QStringList extraSelectors;
+        if(!isDark){
+            extraSelectors << "theme_light";
+        }
+        selector.setExtraSelectors(extraSelectors);
+        Utility::setFileSelector(&selector);
 
-        qApp->setPalette(darkPalette);
+        if(isDark){
+            Utility::setAppQColor("lightestBackground", QColor(80,80,80));
+            Utility::setAppQColor("lightBackground", QColor(66,66,66));
+            Utility::setAppQColor("normalBackground", QColor(48,48,48));
+            Utility::setAppQColor("darkBackground", QColor(39,39,39));
+            Utility::setAppQColor("plotBackground", QColor(39,39,39));
+            Utility::setAppQColor("normalText", QColor(180,180,180));
+            Utility::setAppQColor("lightText", QColor(220,220,220));
+            Utility::setAppQColor("disabledText", QColor(127,127,127));
+            Utility::setAppQColor("lightAccent", QColor(0,161,221));
+            Utility::setAppQColor("midAccentColor", QColor(0,98,153));
+            Utility::setAppQColor("darkAccent", QColor(0,69,112));
+            Utility::setAppQColor("pink", QColor(219,98,139));
+            Utility::setAppQColor("red", QColor(200,52,52));
+            Utility::setAppQColor("orange", QColor(206,125,44));
+            Utility::setAppQColor("yellow", QColor(210,210,127));
+            Utility::setAppQColor("green", QColor(127,200,127));
+            Utility::setAppQColor("cyan",QColor(79,203,203));
+            Utility::setAppQColor("blue", QColor(77,127,196));
+            Utility::setAppQColor("magenta", QColor(157,127,210));
+            Utility::setAppQColor("white", QColor(255,255,255));
+            Utility::setAppQColor("black", QColor(0,0,0));
+        }else{
+            Utility::setAppQColor("lightestBackground", QColor(255,255,255));
+            Utility::setAppQColor("lightBackground", QColor(240,240,240));
+            Utility::setAppQColor("normalBackground", QColor(225,225,225));
+            Utility::setAppQColor("darkBackground", QColor(210,210,210));
+            Utility::setAppQColor("plotBackground", QColor(250,250,250));
+            Utility::setAppQColor("normalText", QColor(60,20,60));
+            Utility::setAppQColor("lightText", QColor(20,20,20));
+            Utility::setAppQColor("disabledText", QColor(110,110,110));
+            Utility::setAppQColor("lightAccent", QColor(0,98,153));
+            Utility::setAppQColor("midAccentColor", QColor(0,98,153));
+            Utility::setAppQColor("darkAccent", QColor(0,161,221));
+            Utility::setAppQColor("pink", QColor(219,98,139));
+            Utility::setAppQColor("red", QColor(200,52,52));
+            Utility::setAppQColor("orange", QColor(206,125,44));
+            Utility::setAppQColor("yellow", QColor(210,210,127));
+            Utility::setAppQColor("green", QColor(127,200,127));
+            Utility::setAppQColor("cyan",QColor(79,203,203));
+            Utility::setAppQColor("blue", QColor(77,127,196));
+            Utility::setAppQColor("magenta", QColor(157,127,210));
+            Utility::setAppQColor("white", QColor(255,255,255));
+            Utility::setAppQColor("black", QColor(0,0,0));
+        }
+
+        if(isDark){
+            QPalette darkPalette;
+            darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
+            darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("normalText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Base,Utility::getAppQColor("normalBackground"));
+            darkPalette.setColor(QPalette::AlternateBase,Utility::getAppQColor("lightBackground"));
+            darkPalette.setColor(QPalette::ToolTipBase,Utility::getAppQColor("lightestBackground"));
+            darkPalette.setColor(QPalette::ToolTipText,Utility::getAppQColor("lightText"));
+            darkPalette.setColor(QPalette::Text,Utility::getAppQColor("lightText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::Text,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Dark,QColor(35,35,35));
+            darkPalette.setColor(QPalette::Shadow,QColor(20,20,20));
+            darkPalette.setColor(QPalette::Button,Utility::getAppQColor("normalBackground"));
+            darkPalette.setColor(QPalette::ButtonText,Utility::getAppQColor("normalText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,Utility::getAppQColor("lightestBackground"));
+            darkPalette.setColor(QPalette::HighlightedText,Utility::getAppQColor("white"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
+            qApp->setPalette(darkPalette);
+        }
 
         // Fonts
         QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
@@ -320,10 +354,10 @@ int main(int argc, char *argv[])
         qApp->setFont(QFont("Roboto", 12));
 
         // Style
-        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0" + Utility::getAppHexColor("lightAccentColor") +
-                             ", stop: 0.4 " + Utility::getAppHexColor("darkAccentColor") + ");" +
-                             " border: none;}" +
-                             "QListView::item {border: none;};" + "QListView{outline: none;}");
+        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0" + Utility::getAppHexColor("lightAccent") +
+                            ", stop: 0.4 " + Utility::getAppHexColor("darkAccent") + ");" +
+                            " border: none;}" +
+                            "QListView::item {border: none;};" + "QListView{outline: none;}");
         QStyle *myStyle = new Style_tweaks("Fusion");
         a->setStyle(myStyle);
 
@@ -337,9 +371,9 @@ int main(int argc, char *argv[])
         w->show();
     }
 #endif
-    #ifdef Q_OS_IOS
+#ifdef Q_OS_IOS
     Notch();
-    #endif
+#endif
 
     int res = app->exec();
 

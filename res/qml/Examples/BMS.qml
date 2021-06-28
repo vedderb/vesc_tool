@@ -41,7 +41,7 @@ Item {
             spacing: 0
 
             Rectangle {
-                color: "#4f4f4f"
+                color: Utility.getAppHexColor("lightBackground")
                 width: 16
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
@@ -90,7 +90,7 @@ Item {
                                 ctx.lineTo(xOfsLeft + lineStep * i, heightBars)
                             }
 
-                            ctx.strokeStyle = "#00A1E4"
+                            ctx.strokeStyle = Utility.getAppHexColor("lightAccent")
                             ctx.lineWidth = 1.2
                             ctx.stroke()
 
@@ -213,13 +213,13 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Rectangle {
                 anchors.bottom: valText.top
                 width: parent.width
                 height: 2
-                color: "#00A1E4"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Layout.fillWidth: true

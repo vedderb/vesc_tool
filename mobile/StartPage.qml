@@ -49,10 +49,12 @@ Item {
             Image {
                 id: image
                 Layout.columnSpan: isHorizontal ? 2 : 1
-                Layout.preferredWidth: Math.min(topItem.width, topItem.height)
+                Layout.preferredWidth: Math.min(topItem.width, topItem.height) * 0.8
                 Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
+                Layout.margins: Math.min(topItem.width, topItem.height) * 0.1
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 source: "qrc:/res/logo_white.png"
+                antialiasing: true
             }
 
             GroupBox {
@@ -473,7 +475,7 @@ Item {
         y: topItem.y + topItem.height / 2 - height / 2
 
         Text {
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -503,7 +505,7 @@ Item {
         y: topItem.y + topItem.height / 2 - height / 2
 
         Text {
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -534,7 +536,7 @@ Item {
         y: topItem.y + topItem.height / 2 - height / 2
 
         Text {
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

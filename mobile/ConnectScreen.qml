@@ -33,7 +33,7 @@ Item {
     property Commands mCommands: VescIf.commands()
 
     Rectangle {
-        color: Qt.rgba(66 / 255, 66 / 255, 66 / 255, 1)
+        color: Utility.getAppHexColor("lightBackground")
         anchors.fill: parent
     }
 
@@ -79,7 +79,7 @@ Item {
             Text {
                 id: text
                 Layout.fillWidth: true
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: qsTr("Devices Found")
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
@@ -152,7 +152,7 @@ Item {
                             Layout.leftMargin: 10
                             Layout.fillWidth: true
 
-                            color: preferred ? Qt.rgba(71 / 255, 117 / 255, 137 / 255, 1) : "#33a8d9ff"
+                            color: preferred ? Utility.getAppHexColor("darkAccent") : Utility.getAppHexColor("normalBackground")
                             height: column.height + 10
                             radius: height / 2
 
@@ -174,7 +174,7 @@ Item {
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                                     text: name
                                     horizontalAlignment: Text.AlignHCenter
-                                    color: "white"
+                                    color: Utility.getAppHexColor("lightText")
                                     wrapMode: Text.WordWrap
                                 }
                             }
@@ -184,7 +184,7 @@ Item {
                             Text {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.rightMargin: 5
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Preferred"
                                 horizontalAlignment: Text.AlignHCenter
                             }
@@ -340,12 +340,12 @@ Item {
             anchors.fill: parent
             height: stringInput.implicitHeight + 14
             border.width: 2
-            border.color: "#8d8d8d"
-            color: "#33a8a8a8"
+            border.color: Utility.getAppHexColor("lightestBackground")
+            color: Utility.getAppHexColor("normalBackground")
             radius: 3
             TextInput {
                 id: stringInput
-                color: "#ffffff"
+                color: Utility.getAppHexColor("lightText")
                 anchors.fill: parent
                 anchors.margins: 7
                 font.pointSize: 12
@@ -374,7 +374,7 @@ Item {
         parent: ApplicationWindow.overlay
 
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

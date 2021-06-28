@@ -40,7 +40,7 @@ ios: {
 }}
 
 # Build mobile GUI
-#CONFIG += build_mobile
+# CONFIG += build_mobile
 
 
 # Debug build (e.g. F5 to reload QML files)

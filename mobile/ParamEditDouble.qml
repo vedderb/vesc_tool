@@ -23,6 +23,7 @@ import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: editor
@@ -75,9 +76,9 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: "#4c5a5a5a"
+        color: Utility.getAppHexColor("lightBackground")
         radius: 5
-        border.color: "#919191"
+        border.color:  Utility.getAppHexColor("disabledText")
         border.width: 2
 
         ColumnLayout {
@@ -88,7 +89,7 @@ Item {
 
             Text {
                 id: nameText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: paramName
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true

@@ -29,7 +29,7 @@ Item {
         
         background: Rectangle {
             opacity: 1
-            color: "#4f4f4f"
+            color: Utility.getAppHexColor("lightBackground")
         }
         
         property int buttonWidth: Math.max(120, localTabBar.width / (rep.model.length))

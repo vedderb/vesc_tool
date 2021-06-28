@@ -206,6 +206,7 @@ private:
     PageCustomConfig *mPageCustomConfig1;
     PageCustomConfig *mPageCustomConfig2;
     PageScripting *mPageScripting;
+    QFileSelector *mSelector;
 
     void addPageItem(QString name,
                      QString icon = "",

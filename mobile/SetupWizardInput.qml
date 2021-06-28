@@ -128,7 +128,7 @@ Item {
 
                     Text {
                         Layout.fillWidth: true
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: qsTr("Which VESC is the input connected to?")
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -155,7 +155,7 @@ Item {
 
                                 width: canIdList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? "#41418f" : "#30000000"
+                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
                                 radius: 5
                                 RowLayout {
                                     anchors.fill: parent
@@ -174,7 +174,7 @@ Item {
                                     Text {
                                         Layout.fillWidth: true
                                         text: name + "\nID: " + canId
-                                        color: "white"
+                                        color: Utility.getAppHexColor("lightText")
                                         wrapMode: Text.WordWrap
                                     }
                                 }
@@ -209,7 +209,7 @@ Item {
 
                     Text {
                         Layout.fillWidth: true
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: qsTr("Select Input Type")
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -261,7 +261,7 @@ Item {
 
                                 width: inputList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? "#41418f" : "#30000000"
+                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
                                 radius: 5
                                 RowLayout {
                                     anchors.fill: parent
@@ -299,7 +299,7 @@ Item {
 
                                     Text {
                                         Layout.fillWidth: true
-                                        text: '<font color="white">' + name
+                                        text: '<font color=Utility.getAppHexColor("lightText")>' + name
                                         wrapMode: Text.WordWrap
                                     }
                                 }
@@ -326,7 +326,7 @@ Item {
 
                     Text {
                         Layout.fillWidth: true
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: qsTr("Move the throttle(s) from min to max, then leave it in the center.")
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -387,7 +387,7 @@ Item {
         }
 
         header: Rectangle {
-            color: "#dbdbdb"
+            color: Utility.getAppHexColor("lightText")
             height: tabBar.height
 
             TabBar {
@@ -400,7 +400,7 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#4f4f4f"
+                    color: Utility.getAppHexColor("lightBackground")
                 }
 
                 property int buttons: 4
@@ -622,7 +622,7 @@ Item {
 
         Text {
             id: detectLambdaLabel
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

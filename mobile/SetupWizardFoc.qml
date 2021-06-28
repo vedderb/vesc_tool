@@ -128,7 +128,7 @@ Item {
 
                                 width: usageList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? "#41418f" : "#30000000"
+                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
                                 radius: 5
                                 RowLayout {
                                     anchors.fill: parent
@@ -169,7 +169,7 @@ Item {
                                     Text {
                                         Layout.fillWidth: true
                                         text: name
-                                        color: "white"
+                                        color: Utility.getAppHexColor("lightText")
                                         wrapMode: Text.WordWrap
                                     }
                                 }
@@ -332,7 +332,7 @@ Item {
 
                                 width: motorList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? "#41418f" : "#30000000"
+                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
                                 radius: 5
                                 RowLayout {
                                     anchors.fill: parent
@@ -373,7 +373,7 @@ Item {
                                     Text {
                                         Layout.fillWidth: true
                                         text: name
-                                        color: "white"
+                                        color: Utility.getAppHexColor("lightText")
                                         wrapMode: Text.WordWrap
                                     }
                                 }
@@ -422,7 +422,7 @@ Item {
 
                             Text {
                                 visible: !overrideBox.checked
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 font.family: "DejaVu Sans Mono"
                                 verticalAlignment: Text.AlignVCenter
                                 wrapMode: Text.WordWrap
@@ -581,7 +581,7 @@ Item {
                                         Layout.fillWidth: true
                                         Text {
                                             Layout.fillWidth: true
-                                            color: "white"
+                                            color: Utility.getAppHexColor("lightText")
                                             text: qsTr("Motor Pulley")
                                         }
 
@@ -603,7 +603,7 @@ Item {
                                         Layout.fillWidth: true
                                         Text {
                                             Layout.fillWidth: true
-                                            color: "white"
+                                            color: Utility.getAppHexColor("lightText")
                                             text: qsTr("Wheel Pulley")
                                         }
 
@@ -642,7 +642,7 @@ Item {
         }
 
         header: Rectangle {
-            color: "#dbdbdb"
+            color: Utility.getAppHexColor("lightText")
             height: tabBar.height
 
             TabBar {
@@ -655,7 +655,7 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#4f4f4f"
+                    color: Utility.getAppHexColor("lightBackground")
                 }
 
                 property int buttons: 5
@@ -747,7 +747,7 @@ Item {
         y: dialog.y + dialog.height / 2 - height / 2
 
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -776,7 +776,7 @@ Item {
         parent: dialogParent
 
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -819,7 +819,7 @@ Item {
         parent: dialogParent
 
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -854,7 +854,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                color: "#ffffff"
+                color: Utility.getAppHexColor("lightText")
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap
                 text: "This is going to spin up all motors. Make " +
@@ -958,7 +958,7 @@ Item {
 
             Text {
                 id: resultLabel
-                color: "#ffffff"
+                color: Utility.getAppHexColor("lightText")
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent

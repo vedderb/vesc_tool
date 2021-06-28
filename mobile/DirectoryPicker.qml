@@ -31,6 +31,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Window 2.0
 import Qt.labs.platform 1.1
 
+import Vedder.vesc.utility 1.0
 Item {
     id:picker
     signal dirSelected(string fileName)
@@ -81,7 +82,7 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         height: toolbarHeight
-        color: "#3c3c3c"
+        color: Utility.getAppHexColor("lightBackground")
         Button {
             id: button
             text: ".."
@@ -99,7 +100,7 @@ Item {
         }
         Text {
             id: filePath
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             text: folderListModel.folder.toString().replace("file:///", "►").replace("/", "►").replace("/", "►").replace("/", "►").replace("/", "►")
             renderType: Text.NativeRendering
             elide: Text.ElideMiddle
@@ -138,7 +139,7 @@ Item {
             headerDelegate:headerDelegate
             rowDelegate: Rectangle {
                 height: rowHeight
-                color: "#6f6f6f"
+                color: Utility.getAppHexColor("disabledText")
             }
 
             OldControls.TableViewColumn {
@@ -153,7 +154,7 @@ Item {
                 Item {
                     height: rowHeight
                     Rectangle {
-                        color: "#6f6f6f"
+                        color: Utility.getAppHexColor("disabledText")
                         anchors.fill: parent
                         MouseArea {
                             anchors.fill: parent
@@ -163,7 +164,7 @@ Item {
                         }
                         Text {
                             id: fileNameText
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             height: width
                             anchors.left: image.right
                             anchors.top: parent.top
@@ -189,14 +190,14 @@ Item {
                 id: headerDelegate
                 Rectangle {
                     height: rowHeight
-                    color: "#535353"
+                    color: Utility.getAppHexColor("lightestBackground")
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.horizontalCenter: parent.horizontalCenter
                         height: headerTextSize
                         font.bold: true
                         elide: Text.ElideMiddle
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: styleData.value !== undefined ? styleData.value : ""
                     }
                 }

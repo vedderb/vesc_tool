@@ -59,10 +59,10 @@ Item {
 
     function checkActive() {
         if (VescIf.isProfileInUse(index)) {
-            rect.border.color = "#00A1E4"
+            rect.border.color = Utility.getAppHexColor("lightText")
             rect.border.width = 3
         } else {
-            rect.border.color = "#919191"
+            rect.border.color =  Utility.getAppHexColor("lightestBackground")
             rect.border.width = 2
         }
     }
@@ -72,7 +72,7 @@ Item {
         anchors.fill: parent
         color: "#4c606060"
         radius: 5
-        border.color: "#919191"
+        border.color:  Utility.getAppHexColor("lightestBackground")
         border.width: 2
 
         ColumnLayout {
@@ -82,7 +82,7 @@ Item {
 
             Text {
                 id: nameText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -98,7 +98,7 @@ Item {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 id: infoText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 font.family: "DejaVu Sans Mono"
             }
 
@@ -184,7 +184,7 @@ Item {
                         implicitHeight: 0
 
                         Text {
-                            color: "#ffffff"
+                            color: Utility.getAppHexColor("lightText")
                             verticalAlignment: Text.AlignVCenter
                             anchors.fill: parent
                             wrapMode: Text.WordWrap

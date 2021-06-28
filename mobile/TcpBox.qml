@@ -58,7 +58,7 @@ Item {
 
         Text {
             text: "TCP Port"
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             Layout.fillWidth: true
             Layout.preferredWidth: 5000
         }
@@ -109,7 +109,7 @@ Item {
             Layout.fillWidth: true
             Layout.topMargin: 10
             Layout.bottomMargin: 10
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
         }
 
         Text {
@@ -117,7 +117,7 @@ Item {
             Layout.fillWidth: true
             Layout.topMargin: 10
             Layout.bottomMargin: 10
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
         }
     }
 }

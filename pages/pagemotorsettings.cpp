@@ -20,6 +20,7 @@
 #include "pagemotorsettings.h"
 #include "ui_pagemotorsettings.h"
 #include "setupwizardmotor.h"
+#include "utility.h"
 
 PageMotorSettings::PageMotorSettings(QWidget *parent) :
     QWidget(parent),
@@ -28,6 +29,15 @@ PageMotorSettings::PageMotorSettings(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
+
+    QString theme = Utility::getThemePath();
+    ui->motorSetupWizardButton->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    if(!Utility::isDarkMode())
+    {
+        QPalette mypalette = ui->textEdit->palette();
+        mypalette.setColor(QPalette::Base, Utility::getAppQColor("darkBackground"));
+        ui->textEdit->setPalette(mypalette);
+    }
 }
 
 PageMotorSettings::~PageMotorSettings()

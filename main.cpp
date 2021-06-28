@@ -285,13 +285,13 @@ int main(int argc, char *argv[])
             Utility::setAppQColor("lightestBackground", QColor(255,255,255));
             Utility::setAppQColor("lightBackground", QColor(240,240,240));
             Utility::setAppQColor("normalBackground", QColor(225,225,225));
-            Utility::setAppQColor("darkBackground", QColor(210,210,210));
+            Utility::setAppQColor("darkBackground", QColor(200,200,200));
             Utility::setAppQColor("plotBackground", QColor(250,250,250));
             Utility::setAppQColor("normalText", QColor(60,20,60));
             Utility::setAppQColor("lightText", QColor(20,20,20));
             Utility::setAppQColor("disabledText", QColor(110,110,110));
-            Utility::setAppQColor("lightAccent", QColor(0,98,153));
-            Utility::setAppQColor("midAccentColor", QColor(0,98,153));
+            Utility::setAppQColor("lightAccent", QColor(0,114,178));
+            Utility::setAppQColor("midAccentColor", QColor(0,114,178));
             Utility::setAppQColor("darkAccent", QColor(0,161,221));
             Utility::setAppQColor("pink", QColor(219,98,139));
             Utility::setAppQColor("red", QColor(200,52,52));

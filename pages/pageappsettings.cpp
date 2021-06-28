@@ -20,12 +20,22 @@
 #include "pageappsettings.h"
 #include "ui_pageappsettings.h"
 #include "setupwizardapp.h"
+#include "utility.h"
 
 PageAppSettings::PageAppSettings(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageAppSettings)
 {
     ui->setupUi(this);
+    QString theme = Utility::getThemePath();
+    ui->appWizardButton->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    if(!Utility::isDarkMode())
+    {
+        QPalette mypalette = ui->textEdit->palette();
+        mypalette.setColor(QPalette::Base, Utility::getAppQColor("darkBackground"));
+        ui->textEdit->setPalette(mypalette);
+    }
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 }

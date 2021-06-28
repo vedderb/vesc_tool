@@ -20,6 +20,8 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import QtQuick.Controls.Material 2.2
+import Vedder.vesc.utility 1.0
 
 import Vedder.vesc.commands 1.0
 
@@ -27,6 +29,9 @@ Item {
     property Commands mCommands: VescIf.commands()
     property var mVal
     property bool mValSet: false
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
     
     anchors.fill: parent
     anchors.margins: 10

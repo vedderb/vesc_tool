@@ -23,6 +23,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
 import Vedder.vesc.utility 1.0
 
+
 Item {
     Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
     Material.accent: Utility.getAppHexColor("lightAccent")

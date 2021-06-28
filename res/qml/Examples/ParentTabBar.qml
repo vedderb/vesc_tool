@@ -9,10 +9,14 @@ import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
+import Vedder.vesc.utility 1.0
 
 Item {
     id: mainItem
     anchors.fill: parent
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
 
     property var parentTabBar: parent.tabBarItem
     

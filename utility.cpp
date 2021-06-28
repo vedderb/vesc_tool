@@ -1995,9 +1995,9 @@ void Utility::setPlotColors(QCustomPlot* plot)
     plot->yAxis2->setTickLabelColor(Utility::getAppQColor("lightText"));
     plot->yAxis2->setBasePen(QPen(Utility::getAppQColor("lightText")));
 
-    plot->legend->setBrush(Utility::getAppQColor("darkBackground"));
+    plot->legend->setBrush(Utility::getAppQColor("normalBackground"));
     plot->legend->setTextColor(Utility::getAppQColor("lightText"));
-    plot->legend->setBorderPen(QPen(Utility::getAppQColor("lightBackground")));
+    plot->legend->setBorderPen(QPen(Utility::getAppQColor("darkBackground")));
 }
 
 void Utility::setDarkMode(bool isDarkSetting)
@@ -2014,10 +2014,10 @@ QString Utility::getThemePath()
 {
     if(isDark)
     {
-        return "://res/";
+        return ":/res/";
     }
     else
     {
-        return "://res/+theme_light/";
+        return ":/res/+theme_light/";
     }
 }

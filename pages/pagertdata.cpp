@@ -33,6 +33,35 @@ PageRtData::PageRtData(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 
+    QString theme = Utility::getThemePath();
+    ui->experimentClearDataButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->experimentShowLineButton->setIcon(QPixmap(theme + "icons/3ph_sine.png"));
+    ui->experimentScatterButton->setIcon(QPixmap(theme + "icons/Polyline-96.png"));
+    ui->rescaleButton->setIcon(QPixmap(theme + "icons/expand_off.png"));
+
+    QIcon mycon = QIcon(theme + "icons/expand_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    ui->zoomHButton->setIcon(mycon);
+    ui->experimentHZoomButton->setIcon(mycon);
+
+    mycon = QIcon(theme + "icons/expand_v_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    ui->zoomVButton->setIcon(mycon);
+    ui->experimentVZoomButton->setIcon(mycon);
+
+    mycon = QIcon(theme + "icons/size_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    ui->autoscaleButton->setIcon(mycon);
+    ui->experimentAutoScaleButton->setIcon(mycon);
+
+    mycon = QIcon(theme + "icons/rt_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/rt_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/rt_off.png"), QIcon::Normal, QIcon::Off);
+    ui->logRtButton->setIcon(mycon);
+
     mTimer = new QTimer(this);
     mTimer->start(20);
 

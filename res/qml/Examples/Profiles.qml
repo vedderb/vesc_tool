@@ -20,10 +20,15 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import QtQuick.Controls.Material 2.2
+import Vedder.vesc.utility 1.0
 
 Item {
     anchors.fill: parent
     anchors.margins: 5
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
     
     function updateVisibleProfiles() {
         for(var i = scrollCol.children.length;i > 0;i--) {

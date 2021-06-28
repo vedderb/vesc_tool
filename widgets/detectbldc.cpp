@@ -22,12 +22,18 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "helpdialog.h"
+#include "utility.h"
 
 DetectBldc::DetectBldc(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DetectBldc)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
     mResultReceived = false;

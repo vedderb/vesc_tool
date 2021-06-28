@@ -19,6 +19,7 @@
 
 #include "pagedataanalysis.h"
 #include "ui_pagedataanalysis.h"
+#include "utility.h"
 
 PageDataAnalysis::PageDataAnalysis(QWidget *parent) :
     QWidget(parent),
@@ -27,6 +28,13 @@ PageDataAnalysis::PageDataAnalysis(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
+
+    if(!Utility::isDarkMode())
+    {
+        QPalette mypalette = ui->textEdit->palette();
+        mypalette.setColor(QPalette::Base, Utility::getAppQColor("darkBackground"));
+        ui->textEdit->setPalette(mypalette);
+    }
 }
 
 PageDataAnalysis::~PageDataAnalysis()

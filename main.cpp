@@ -257,14 +257,7 @@ int main(int argc, char *argv[])
         QApplication *a = new QApplication(argc, argv);
         app = a;
         bool isDark = set.value("darkMode", false).toBool();
-
-        QFileSelector selector;
-        QStringList extraSelectors;
-        if(!isDark){
-            extraSelectors << "theme_light";
-        }
-        selector.setExtraSelectors(extraSelectors);
-        Utility::setFileSelector(&selector);
+        Utility::setDarkMode(isDark);
 
         if(isDark){
             Utility::setAppQColor("lightestBackground", QColor(80,80,80));
@@ -312,27 +305,7 @@ int main(int argc, char *argv[])
             Utility::setAppQColor("black", QColor(0,0,0));
         }
 
-        if(isDark){
-            QPalette darkPalette;
-            darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
-            darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("normalText"));
-            darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,Utility::getAppQColor("disabledText"));
-            darkPalette.setColor(QPalette::Base,Utility::getAppQColor("normalBackground"));
-            darkPalette.setColor(QPalette::AlternateBase,Utility::getAppQColor("lightBackground"));
-            darkPalette.setColor(QPalette::ToolTipBase,Utility::getAppQColor("lightestBackground"));
-            darkPalette.setColor(QPalette::ToolTipText,Utility::getAppQColor("lightText"));
-            darkPalette.setColor(QPalette::Text,Utility::getAppQColor("lightText"));
-            darkPalette.setColor(QPalette::Disabled,QPalette::Text,Utility::getAppQColor("disabledText"));
-            darkPalette.setColor(QPalette::Dark,QColor(35,35,35));
-            darkPalette.setColor(QPalette::Shadow,QColor(20,20,20));
-            darkPalette.setColor(QPalette::Button,Utility::getAppQColor("normalBackground"));
-            darkPalette.setColor(QPalette::ButtonText,Utility::getAppQColor("normalText"));
-            darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,Utility::getAppQColor("disabledText"));
-            darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,Utility::getAppQColor("lightestBackground"));
-            darkPalette.setColor(QPalette::HighlightedText,Utility::getAppQColor("white"));
-            darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
-            qApp->setPalette(darkPalette);
-        }
+
 
         // Fonts
         QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
@@ -360,6 +333,30 @@ int main(int argc, char *argv[])
                             "QListView::item {border: none;};" + "QListView{outline: none;}");
         QStyle *myStyle = new Style_tweaks("Fusion");
         a->setStyle(myStyle);
+
+        if(isDark){
+            QPalette darkPalette;
+            darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
+            darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("normalText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Base,Utility::getAppQColor("normalBackground"));
+            darkPalette.setColor(QPalette::AlternateBase,Utility::getAppQColor("lightBackground"));
+            darkPalette.setColor(QPalette::ToolTipBase,Utility::getAppQColor("lightestBackground"));
+            darkPalette.setColor(QPalette::ToolTipText,Utility::getAppQColor("lightText"));
+            darkPalette.setColor(QPalette::Text,Utility::getAppQColor("lightText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::Text,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Dark,QColor(35,35,35));
+            darkPalette.setColor(QPalette::Shadow,QColor(20,20,20));
+            darkPalette.setColor(QPalette::Button,Utility::getAppQColor("normalBackground"));
+            darkPalette.setColor(QPalette::ButtonText,Utility::getAppQColor("normalText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,Utility::getAppQColor("lightestBackground"));
+            darkPalette.setColor(QPalette::HighlightedText,Utility::getAppQColor("white"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
+            qApp->setPalette(darkPalette);
+        }else{
+            qApp->setPalette(qApp->style()->standardPalette());
+        }
 
         // Register this to not stop on the import statement when reusing components
         // from the mobile UI. In the mobile UI these are provided as singletons, whereas

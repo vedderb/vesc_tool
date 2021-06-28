@@ -74,8 +74,8 @@ void DirSetup::scanVescs(bool scanCan)
             auto *l = new QHBoxLayout;
 
             auto *imageLabel = new QLabel;
-            QFileSelector *mSelector = Utility::getFileSelector();
-            imageLabel->setPixmap(QPixmap(dev >= 0 ? mSelector->select("://res/icons/can_off.png") : mSelector->select("://res/icons/Connected-96.png")));
+            QString theme = Utility::getThemePath();
+            imageLabel->setPixmap(QPixmap(dev >= 0 ? theme +"icons/can_off.png" : theme +"icons/Connected-96.png"));
             imageLabel->setMaximumSize(50, 50);
             imageLabel->setScaledContents(true);
             l->addWidget(imageLabel);

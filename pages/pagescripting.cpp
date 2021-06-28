@@ -44,8 +44,8 @@ PageScripting::PageScripting(QWidget *parent) :
     makeEditorConnections(ui->mainEdit);
 
     QPushButton *plusButton = new QPushButton();
-    QFileSelector *mSelector = Utility::getFileSelector();
-    plusButton->setIcon(QIcon(mSelector->select("://res/icons/Plus Math-96.png")));
+    QString theme = Utility::getThemePath();
+    plusButton->setIcon(QIcon(theme +"icons/Plus Math-96.png"));
     plusButton->setFlat(true);
     plusButton->setText("New Tab");
     ui->fileTabs->setCornerWidget(plusButton);
@@ -114,7 +114,7 @@ PageScripting::PageScripting(QWidget *parent) :
 
     // Add close button that clears the main editor
     QPushButton *closeButton = new QPushButton();
-    closeButton->setIcon(QIcon(mSelector->select("://res/icons/Delete-96.png")));
+    closeButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(0, QTabBar::RightSide, closeButton);
 
@@ -423,10 +423,10 @@ void PageScripting::createEditorTab(QString fileName, QString content)
 
     editor->setFileNow(fileName);
     editor->editor()->setPlainText(content);
-    QFileSelector *mSelector = Utility::getFileSelector();
+    QString theme = Utility::getThemePath();
 
     QPushButton *closeButton = new QPushButton();
-    closeButton->setIcon(QIcon(mSelector->select("://res/icons/Cancel-96.png")));
+    closeButton->setIcon(QIcon(theme +"icons/Cancel-96.png"));
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(tabIndex, QTabBar::RightSide, closeButton);
 

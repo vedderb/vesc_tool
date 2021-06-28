@@ -116,48 +116,47 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    QString theme = Utility::getThemePath();
 
-    mSelector = Utility::getFileSelector();
+    ui->pageLabel->setPixmap(QPixmap(theme + "logo_white.png"));
 
-    ui->pageLabel->setPixmap(QPixmap(mSelector->select("://res/logo_white.png")));
+    ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-96.png"));
+    ui->actionDisconnect->setIcon(QIcon(theme + "icons/Disconnected-96.png"));
 
-    ui->actionReconnect->setIcon(QIcon(mSelector->select("://res/icons/Connected-96.png")));
-    ui->actionDisconnect->setIcon(QIcon(mSelector->select("://res/icons/Disconnected-96.png")));
+    ui->actionReadMcconf->setIcon(QIcon(theme + "icons/motor_up.png"));
+    ui->actionReadMcconfDefault->setIcon(QIcon(theme + "icons/motor_default.png"));
+    ui->actionWriteMcconf->setIcon(QIcon(theme + "icons/motor_down.png"));
 
-    ui->actionReadMcconf->setIcon(QIcon(mSelector->select("://res/icons/motor_up.png")));
-    ui->actionReadMcconfDefault->setIcon(QIcon(mSelector->select("://res/icons/motor_default.png")));
-    ui->actionWriteMcconf->setIcon(QIcon(mSelector->select("://res/icons/motor_down.png")));
+    ui->actionReadAppconf->setIcon(QIcon(theme + "icons/app_up.png"));
+    ui->actionReadAppconfDefault->setIcon(QIcon(theme + "icons/app_default.png"));
+    ui->actionWriteAppconf->setIcon(QIcon(theme + "icons/app_down.png"));
 
-    ui->actionReadAppconf->setIcon(QIcon(mSelector->select("://res/icons/app_up.png")));
-    ui->actionReadAppconfDefault->setIcon(QIcon(mSelector->select("://res/icons/app_default.png")));
-    ui->actionWriteAppconf->setIcon(QIcon(mSelector->select("://res/icons/app_down.png")));
-
-    QIcon mycon = QIcon(mSelector->select("://res/icons/keys_off.png"));
-    mycon.addPixmap(QPixmap(mSelector->select("://res/icons/keys_on.png")), QIcon::Normal, QIcon::On);
+    QIcon mycon = QIcon(theme + "icons/keys_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/keys_on.png"), QIcon::Normal, QIcon::On);
     ui->actionKeyboardControl->setIcon(mycon);
-    ui->actionGamepadControl->setIcon(QIcon(mSelector->select("://res/icons/Controller-96.png")));
-    mycon = QIcon(mSelector->select("://res/icons/rt_off.png"));
-    mycon.addPixmap(QPixmap(mSelector->select("://res/icons/rt_on.png")), QIcon::Normal, QIcon::On);
+    ui->actionGamepadControl->setIcon(QIcon(theme + "icons/Controller-96.png"));
+    mycon = QIcon(theme + "icons/rt_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/rt_on.png"), QIcon::Normal, QIcon::On);
     ui->actionRtData->setIcon(mycon);
-    mycon = QIcon(mSelector->select("://res/icons/rt_app_off.png"));
-    mycon.addPixmap(QPixmap(mSelector->select("://res/icons/rt_app_on.png")), QIcon::Normal, QIcon::On);
+    mycon = QIcon(theme + "icons/rt_app_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/rt_app_on.png"), QIcon::Normal, QIcon::On);
     ui->actionRtDataApp->setIcon(mycon);
-    mycon = QIcon(mSelector->select("://res/icons/imu_off.png"));
-    mycon.addPixmap(QPixmap(mSelector->select("://res/icons/imu_on.png")), QIcon::Normal, QIcon::On);
+    mycon = QIcon(theme + "icons/imu_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/imu_on.png"), QIcon::Normal, QIcon::On);
     ui->actionIMU->setIcon(mycon);
-    mycon = QIcon(mSelector->select("://res/icons/bms_off.png"));
-    mycon.addPixmap(QPixmap(mSelector->select("://res/icons/bms_on.png")), QIcon::Normal, QIcon::On);
+    mycon = QIcon(theme + "icons/bms_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/bms_on.png"), QIcon::Normal, QIcon::On);
     ui->actionrtDataBms->setIcon(mycon);
-    mycon = QIcon(mSelector->select("://res/icons/alive_off.png"));
-    mycon.addPixmap(QPixmap(mSelector->select("://res/icons/alive_on.png")), QIcon::Normal, QIcon::On);
+    mycon = QIcon(theme + "icons/alive_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/alive_on.png"), QIcon::Normal, QIcon::On);
     ui->actionSendAlive->setIcon(mycon);
-    mycon = QIcon(mSelector->select("://res/icons/can_off.png"));
-    mycon.addPixmap(QPixmap(mSelector->select("://res/icons/can_on.png")), QIcon::Normal, QIcon::On);
+    mycon = QIcon(theme + "icons/can_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/can_on.png"), QIcon::Normal, QIcon::On);
     ui->actionCanFwd->setIcon(mycon);
-    ui->scanCanButton->setIcon(QIcon(mSelector->select("://res/icons/Refresh-96.png")));
+    ui->scanCanButton->setIcon(QIcon(theme + "icons/Refresh-96.png"));
 
 
-    ui->fullBrakeButton->setIcon(QIcon(mSelector->select("://res/icons/Anchor-96.png")));
+    ui->fullBrakeButton->setIcon(QIcon(theme + "icons/Anchor-96.png"));
 
 
     qRegisterMetaType<QtMsgType>("QtMsgType");
@@ -207,8 +206,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *fwMenu = new QMenu(this);
     fwMenu->setTitle("Load Firmware Configs");
-    qDebug() << mSelector->allSelectors();
-    fwMenu->setIcon(QIcon( mSelector->select("://res/icons/Electronics-96.png")));
+    fwMenu->setIcon(QIcon( theme + "icons/Electronics-96.png"));
     for (auto fw: Utility::configSupportedFws()) {
         QAction *action = new QAction(fwMenu);
         action->setText(QString("%1.%2").arg(fw.first).arg(fw.second, 2, 10, QChar('0')));
@@ -224,10 +222,11 @@ MainWindow::MainWindow(QWidget *parent) :
     auto reloadBackupMenu = [this, backupMenu]() {
         backupMenu->clear();
         backupMenu->setTitle("Load Configuration Backups for UUID");
-        backupMenu->setIcon(QIcon( mSelector->select("://res/icons/Open Folder-96.png")));
+        QString theme = Utility::getThemePath();
+        backupMenu->setIcon(QIcon( theme + "icons/Open Folder-96.png"));
         for (auto uuid: mVesc->confListBackups()) {
             QAction *action = new QAction(backupMenu);
-            action->setIcon(QIcon( mSelector->select("://res/icons/Electronics-96.png")));
+            action->setIcon(QIcon( theme + "icons/Electronics-96.png"));
             QString txt = uuid;
             QString name = mVesc->confBackupName(uuid);
             if (!name.isEmpty()) {
@@ -1220,7 +1219,8 @@ void MainWindow::reloadPages()
     mPageWelcome = new PageWelcome(this);
     mPageWelcome->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageWelcome);
-    addPageItem(tr("Welcome & Wizards"),  mSelector->select("://res/icons/Home-96.png"), "", true);
+    QString theme = Utility::getThemePath();
+    addPageItem(tr("Welcome & Wizards"),  theme + "icons/Home-96.png", "", true);
     connect(ui->actionAutoSetupFOC, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardFocQml()));
     connect(ui->actionMotorSetupWizard, SIGNAL(triggered(bool)),
@@ -1234,17 +1234,17 @@ void MainWindow::reloadPages()
     mPageConnection = new PageConnection(this);
     mPageConnection->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageConnection);
-    addPageItem(tr("Connection"),  mSelector->select("://res/icons/Connected-96.png"), "", true);
+    addPageItem(tr("Connection"),  theme + "icons/Connected-96.png", "", true);
 
     mPageFirmware = new PageFirmware(this);
     mPageFirmware->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageFirmware);
-    addPageItem(tr("Firmware"),  mSelector->select("://res/icons/Electronics-96.png"), "", true);
+    addPageItem(tr("Firmware"),  theme + "icons/Electronics-96.png", "", true);
 
     mPageMotorSettings = new PageMotorSettings(this);
     mPageMotorSettings->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotorSettings);
-    addPageItem(tr("Motor Settings"),  mSelector->select("://res/icons/motor.png"), "", true);
+    addPageItem(tr("Motor Settings"),  theme + "icons/motor.png", "", true);
     mPageNameIdList.insert("motor", ui->pageList->count() - 1);
     connect(mPageMotorSettings, SIGNAL(startFocWizard()),
             mPageWelcome, SLOT(startSetupWizardFocQml()));
@@ -1252,133 +1252,133 @@ void MainWindow::reloadPages()
     mPageMotor = new PageMotor(this);
     mPageMotor->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotor);
-    addPageItem(tr("General"),  mSelector->select("://res/icons/Horizontal Settings Mixer-96.png"),
-                 mSelector->select("://res/icons/mcconf.png"), false, true);
+    addPageItem(tr("General"),  theme + "icons/Horizontal Settings Mixer-96.png",
+                 theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_general", ui->pageList->count() - 1);
 
     mPageBldc = new PageBldc(this);
     mPageBldc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageBldc);
-    addPageItem(tr("BLDC"),  mSelector->select("://res/icons/bldc.png"),
-                 mSelector->select("://res/icons/mcconf.png"), false, true);
+    addPageItem(tr("BLDC"),  theme + "icons/bldc.png",
+                 theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_bldc", ui->pageList->count() - 1);
 
     mPageDc = new PageDc(this);
     mPageDc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageDc);
-    addPageItem(tr("DC"),  mSelector->select("://res/icons/Car Battery-96.png"),
-                 mSelector->select("://res/icons/mcconf.png"), false, true);
+    addPageItem(tr("DC"),  theme + "icons/Car Battery-96.png",
+                 theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_dc", ui->pageList->count() - 1);
 
     mPageFoc = new PageFoc(this);
     mPageFoc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageFoc);
-    addPageItem(tr("FOC"),  mSelector->select("://res/icons/3ph_sine.png"),
-                 mSelector->select("://res/icons/mcconf.png"), false, true);
+    addPageItem(tr("FOC"),  theme + "icons/3ph_sine.png",
+                 theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_foc", ui->pageList->count() - 1);
 
     mPageGpd = new PageGPD(this);
     mPageGpd->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageGpd);
-    addPageItem(tr("GPDrive"),  mSelector->select("://res/icons/3ph_sine.png"),
-                 mSelector->select("://res/icons/mcconf.png"), false, true);
+    addPageItem(tr("GPDrive"),  theme + "icons/3ph_sine.png",
+                 theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_gpdrive", ui->pageList->count() - 1);
 
     mPageControllers = new PageControllers(this);
     mPageControllers->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageControllers);
-    addPageItem(tr("PID Controllers"),  mSelector->select("://res/icons/Speed-96.png"),
-                 mSelector->select("://res/icons/mcconf.png"), false, true);
+    addPageItem(tr("PID Controllers"),  theme + "icons/Speed-96.png",
+                 theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_pid", ui->pageList->count() - 1);
 
     mPageMotorInfo = new PageMotorInfo(this);
     mPageMotorInfo->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotorInfo);
-    addPageItem(tr("Additional Info"),  mSelector->select("://res/icons/About-96.png"),
-                mSelector->select("://res/icons/mcconf.png"), false, true);
+    addPageItem(tr("Additional Info"),  theme + "icons/About-96.png",
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_additional_info", ui->pageList->count() - 1);
 
     mPageExperiments = new PageExperiments(this);
     mPageExperiments->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageExperiments);
-    addPageItem(tr("Experiments"),  mSelector->select("://res/icons/Calculator-96.png"),
-                 mSelector->select("://res/icons/mcconf.png"), false, true);
+    addPageItem(tr("Experiments"),  theme + "icons/Calculator-96.png",
+                 theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_experiments", ui->pageList->count() - 1);
 
     mPageAppSettings = new PageAppSettings(this);
     mPageAppSettings->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppSettings);
-    addPageItem(tr("App Settings"),  mSelector->select("://res/icons/Outgoing Data-96.png"), "", true);
+    addPageItem(tr("App Settings"),  theme + "icons/Outgoing Data-96.png", "", true);
     mPageNameIdList.insert("app", ui->pageList->count() - 1);
 
     mPageAppGeneral = new PageAppGeneral(this);
     mPageAppGeneral->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppGeneral);
-    addPageItem(tr("General"),  mSelector->select("://res/icons/Horizontal Settings Mixer-96.png"),
-                 mSelector->select("://res/icons/appconf.png"), false, true);
+    addPageItem(tr("General"),  theme + "icons/Horizontal Settings Mixer-96.png",
+                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_general", ui->pageList->count() - 1);
 
     mPageAppPpm = new PageAppPpm(this);
     mPageAppPpm->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppPpm);
-    addPageItem(tr("PPM"),  mSelector->select("://res/icons/Controller-96.png"),
-                 mSelector->select("://res/icons/appconf.png"), false, true);
+    addPageItem(tr("PPM"),  theme + "icons/Controller-96.png",
+                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_ppm", ui->pageList->count() - 1);
 
     mPageAppAdc = new PageAppAdc(this);
     mPageAppAdc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppAdc);
-    addPageItem(tr("ADC"),  mSelector->select("://res/icons/Potentiometer-96.png"),
-                 mSelector->select("://res/icons/appconf.png"), false, true);
+    addPageItem(tr("ADC"),  theme + "icons/Potentiometer-96.png",
+                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_adc", ui->pageList->count() - 1);
 
     mPageAppUart = new PageAppUart(this);
     mPageAppUart->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppUart);
-    addPageItem(tr("UART"),  mSelector->select("://res/icons/Rs 232 Male-96.png"),
-                 mSelector->select("://res/icons/appconf.png"), false, true);
+    addPageItem(tr("UART"),  theme + "icons/Rs 232 Male-96.png",
+                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_uart", ui->pageList->count() - 1);
 
     mPageAppNunchuk = new PageAppNunchuk(this);
     mPageAppNunchuk->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNunchuk);
-    addPageItem(tr("VESC Remote"),  mSelector->select("://res/icons/icons8-fantasy-96.png"),
-                 mSelector->select("://res/icons/appconf.png"), false, true);
+    addPageItem(tr("VESC Remote"),  theme + "icons/icons8-fantasy-96.png",
+                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_vescremote", ui->pageList->count() - 1);
 
     mPageAppNrf = new PageAppNrf(this);
     mPageAppNrf->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNrf);
-    addPageItem(tr("Nrf"),  mSelector->select("://res/icons/Online-96.png"),
-                 mSelector->select("://res/icons/appconf.png"), false, true);
+    addPageItem(tr("Nrf"),  theme + "icons/Online-96.png",
+                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_nrf", ui->pageList->count() - 1);
 
     mPageAppBalance = new PageAppBalance(this);
     mPageAppBalance->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppBalance);
-    addPageItem(tr("Balance"),  mSelector->select("://res/icons/EUC-96.png"),
-                 mSelector->select("://res/icons/appconf.png"), false, true);
+    addPageItem(tr("Balance"),  theme + "icons/EUC-96.png",
+                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_balance", ui->pageList->count() - 1);
 
     mPageAppPas = new PageAppPas(this);
     mPageAppPas->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppPas);
-    addPageItem(tr("PAS"),  mSelector->select("://res/icons/icons8-fantasy-96.png"),
-                 mSelector->select("://res/icons/appconf.png"), false, true);
+    addPageItem(tr("PAS"),  theme + "icons/icons8-fantasy-96.png",
+                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_pas", ui->pageList->count() - 1);
 
     mPageAppImu = new PageAppImu(this);
     mPageAppImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppImu);
-    addPageItem(tr("IMU"),  mSelector->select("://res/icons/Gyroscope-96.png"),
-                 mSelector->select("://res/icons/appconf.png"), false, true);
+    addPageItem(tr("IMU"),  theme + "icons/Gyroscope-96.png",
+                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_imu", ui->pageList->count() - 1);
 
     mPageCustomConfig0 = new PageCustomConfig(this);
     mPageCustomConfig0->setVesc(mVesc);
     mPageCustomConfig0->setConfNum(0);
     ui->pageWidget->addWidget(mPageCustomConfig0);
-    addPageItem(tr("Config0"),  mSelector->select("://res/icons/Electronics-96.png"), "", true);
+    addPageItem(tr("Config0"),  theme + "icons/Electronics-96.png", "", true);
     mPageNameIdList.insert("app_custom_config_0", ui->pageList->count() - 1);
     ui->pageList->item(ui->pageList->count() - 1)->setHidden(true);
 
@@ -1386,7 +1386,7 @@ void MainWindow::reloadPages()
     mPageCustomConfig1->setVesc(mVesc);
     mPageCustomConfig1->setConfNum(1);
     ui->pageWidget->addWidget(mPageCustomConfig1);
-    addPageItem(tr("Config1"),  mSelector->select("://res/icons/Electronics-96.png"), "", true);
+    addPageItem(tr("Config1"),  theme + "icons/Electronics-96.png", "", true);
     mPageNameIdList.insert("app_custom_config_1", ui->pageList->count() - 1);
     ui->pageList->item(ui->pageList->count() - 1)->setHidden(true);
 
@@ -1394,72 +1394,72 @@ void MainWindow::reloadPages()
     mPageCustomConfig2->setVesc(mVesc);
     mPageCustomConfig2->setConfNum(2);
     ui->pageWidget->addWidget(mPageCustomConfig2);
-    addPageItem(tr("Config0"),  mSelector->select("://res/icons/Electronics-96.png"), "", true);
+    addPageItem(tr("Config0"),  theme + "icons/Electronics-96.png", "", true);
     mPageNameIdList.insert("app_custom_config_2", ui->pageList->count() - 1);
     ui->pageList->item(ui->pageList->count() - 1)->setHidden(true);
 
     mPageDataAnalysis = new PageDataAnalysis(this);
     mPageDataAnalysis->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageDataAnalysis);
-    addPageItem(tr("Data Analysis"),  mSelector->select("://res/icons/Line Chart-96.png"), "", true);
+    addPageItem(tr("Data Analysis"),  theme + "icons/Line Chart-96.png", "", true);
 
     mPageRtData = new PageRtData(this);
     mPageRtData->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageRtData);
-    addPageItem(tr("Realtime Data"),  mSelector->select("://res/icons/rt_off.png"), "", false, true);
+    addPageItem(tr("Realtime Data"),  theme + "icons/rt_off.png", "", false, true);
     mPageNameIdList.insert("data_rt", ui->pageList->count() - 1);
 
     mPageSampledData = new PageSampledData(this);
     mPageSampledData->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSampledData);
-    addPageItem(tr("Sampled Data"),  mSelector->select("://res/icons/Gyroscope-96.png"), "", false, true);
+    addPageItem(tr("Sampled Data"),  theme + "icons/Gyroscope-96.png", "", false, true);
     mPageNameIdList.insert("data_sampled", ui->pageList->count() - 1);
 
     mPageImu = new PageImu(this);
     mPageImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageImu);
-    addPageItem(tr("IMU Data"),  mSelector->select("://res/icons/Line Chart-96.png"), "", false, true);
+    addPageItem(tr("IMU Data"),  theme + "icons/Line Chart-96.png", "", false, true);
     mPageNameIdList.insert("data_imu", ui->pageList->count() - 1);
 
     mPageBms = new PageBms(this);
     mPageBms->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageBms);
-    addPageItem(tr("BMS Data"),  mSelector->select("://res/icons/icons8-battery-100.png"), "", false, true);
+    addPageItem(tr("BMS Data"),  theme + "icons/icons8-battery-100.png", "", false, true);
     mPageNameIdList.insert("data_bms", ui->pageList->count() - 1);
 
     mPageLogAnalysis = new PageLogAnalysis(this);
     mPageLogAnalysis->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageLogAnalysis);
-    addPageItem(tr("Log Analysis"),  mSelector->select("://res/icons/Waypoint Map-96.png"), "", false, true);
+    addPageItem(tr("Log Analysis"),  theme + "icons/Waypoint Map-96.png", "", false, true);
 
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
-    addPageItem(tr("VESC Terminal"),  mSelector->select("://res/icons/Console-96.png"), "", true);
+    addPageItem(tr("VESC Terminal"),  theme + "icons/Console-96.png", "", true);
 
     mPageSwdProg = new PageSwdProg(this);
     mPageSwdProg->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSwdProg);
-    addPageItem(tr("SWD Prog"),  mSelector->select("://res/icons/Electronics-96.png"), "", true);
+    addPageItem(tr("SWD Prog"),  theme + "icons/Electronics-96.png", "", true);
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageCanAnalyzer);
-    addPageItem(tr("CAN Analyzer"),  mSelector->select("://res/icons/can-off.png"), "", true);
+    addPageItem(tr("CAN Analyzer"),  theme + "icons/can-off.png", "", true);
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
-    addPageItem(tr("Debug Console"),  mSelector->select("://res/icons/Bug-96.png"), "", true);
+    addPageItem(tr("Debug Console"),  theme + "icons/Bug-96.png", "", true);
 
     mPageSettings = new PageSettings(this);
     mPageSettings->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSettings);
-    addPageItem(tr("Settings"),  mSelector->select("://res/icons/Settings-96.png"), "", true);
+    addPageItem(tr("Settings"),  theme + "icons/Settings-96.png", "", true);
 
     mPageScripting = new PageScripting(this);
     mPageScripting->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageScripting);
-    addPageItem(tr("Scripting"), mSelector->select("://res/icons_textedit/Outdent-96.png"), "", true);
+    addPageItem(tr("Scripting"), theme + "icons_textedit/Outdent-96.png", "", true);
 
     /*
      * Page IDs

@@ -19,7 +19,7 @@
 #include <QShortcut>
 #include <QMimeData>
 #include <QDebug>
-#include <QSettings>
+#include "utility.h"
 
 static QVector<QPair<QString, QString>> parentheses = {
     {"(", ")"},
@@ -44,9 +44,7 @@ QCodeEditor::QCodeEditor(QWidget* widget) :
 
     initFont();
     performConnections();
-    QSettings set;
-    bool isDark = set.value("darkMode", false).toBool();
-    if(isDark){
+    if(Utility::isDarkMode()){
         setSyntaxStyle(QSyntaxStyle::darkStyle());
     }else{
         setSyntaxStyle(QSyntaxStyle::defaultStyle());

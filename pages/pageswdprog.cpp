@@ -70,10 +70,10 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
         le->setFont(font);
         ui->uicrTable->setCellWidget(ui->uicrTable->rowCount() - 1, 2, le);
 
-        QFileSelector *mSelector = Utility::getFileSelector();
+        QString theme = Utility::getThemePath();
         QPushButton *readButton = new QPushButton;
         readButton->setText("Read");
-        readButton->setIcon(QIcon(mSelector->select("://res/icons/Upload-96.png")));
+        readButton->setIcon(QIcon(theme +"icons/Upload-96.png"));
         ui->uicrTable->setCellWidget(ui->uicrTable->rowCount() - 1, 3, readButton);
 
         connect(readButton, &QAbstractButton::clicked, [this, offset, le]() {
@@ -102,7 +102,7 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
 
         QPushButton *writeButton = new QPushButton;
         writeButton->setText("Write");
-        writeButton->setIcon(QIcon(mSelector->select("://res/icons/Download-96.png")));
+        writeButton->setIcon(QIcon(theme +"icons/Download-96.png"));
         ui->uicrTable->setCellWidget(ui->uicrTable->rowCount() - 1, 4, writeButton);
 
         connect(writeButton, &QAbstractButton::clicked, [this, offset, le, name]() {

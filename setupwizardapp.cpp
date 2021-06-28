@@ -24,15 +24,12 @@
 #include "utility.h"
 #include "setupwizardapp.h"
 
-QFileSelector *mSelector;
-
 SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     : QWizard(parent)
 {
     mVesc = vesc;
     mCanLastFwd = mVesc->commands()->getSendCan();
     mCanLastId = mVesc->commands()->getCanSendId();
-    mSelector = Utility::getFileSelector();
 
     setPage(Page_Intro, new AppIntroPage(vesc));
     setPage(Page_Connection, new AppConnectionPage(vesc));
@@ -48,7 +45,8 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
 
     setStartId(Page_Intro);
     setWizardStyle(ModernStyle);
-    setPixmap(QWizard::LogoPixmap, QPixmap("://res/icon.png").
+    QString theme = Utility::getThemePath();
+    setPixmap(QWizard::LogoPixmap, QPixmap(theme +"icon.png").
               scaled(40, 40,
                      Qt::KeepAspectRatio,
                      Qt::SmoothTransformation));
@@ -56,8 +54,9 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
 
     setWindowTitle(tr("App Setup Wizard"));
 
+
     mSideLabel = new AspectImgLabel(Qt::Vertical);
-    mSideLabel->setPixmap(QPixmap("://res/logo_vertical.png"));
+    mSideLabel->setPixmap(QPixmap(theme +"logo_vertical.png"));
     mSideLabel->setScaledContents(true);
     setSideWidget(mSideLabel);
 
@@ -246,14 +245,15 @@ void AppMultiPage::initializePage()
     QListWidgetItem *item = new QListWidgetItem;
     item->setText(tr("This VESC (ID: %1)").
                   arg(mVesc->appConfig()->getParamInt("controller_id")));
-    item->setIcon(QIcon(mSelector->select("://res/icons/Connected-96.png")));
+    QString theme = Utility::getThemePath();
+    item->setIcon(QIcon(theme +"icons/Connected-96.png"));
     item->setData(Qt::UserRole, -1);
     mCanFwdList->addItem(item);
 
     for (int dev: mVesc->getCanDevsLast()) {
         item = new QListWidgetItem;
         item->setText(tr("VESC with ID: %1").arg(dev));
-        item->setIcon(QIcon(mSelector->select("://res/icons/can_off.png")));
+        item->setIcon(QIcon(theme +"icons/can_off.png"));
         item->setData(Qt::UserRole, dev);
         mCanFwdList->addItem(item);
     }
@@ -390,7 +390,8 @@ AppNunchukPage::AppNunchukPage(VescInterface *vesc, QWidget *parent)
     mNrfPair = new NrfPair;
     mTimer = new QTimer(this);
     mWriteButton = new QPushButton(tr(" | Write Configuration To Vesc"));
-    mWriteButton->setIcon(QIcon(mSelector->select("://res/icons/app_down.png")));
+    QString theme = Utility::getThemePath();
+    mWriteButton->setIcon(QIcon(theme +"icons/app_down.png"));
     mWriteButton->setIconSize(QSize(24, 24));
 
     mNrfPair->setVesc(mVesc);
@@ -577,7 +578,8 @@ AppPpmPage::AppPpmPage(VescInterface *vesc, QWidget *parent)
 
     mParamTab = new ParamTable;
     mWriteButton = new QPushButton(tr(" | Write Configuration To Vesc"));
-    mWriteButton->setIcon(QIcon(mSelector->select("://res/icons/app_down.png")));
+    QString theme = Utility::getThemePath();
+    mWriteButton->setIcon(QIcon(theme +"icons/app_down.png"));
     mWriteButton->setIconSize(QSize(24, 24));
 
     QVBoxLayout *layout = new QVBoxLayout;
@@ -725,7 +727,8 @@ AppAdcPage::AppAdcPage(VescInterface *vesc, QWidget *parent)
 
     mParamTab = new ParamTable;
     mWriteButton = new QPushButton(tr(" | Write Configuration To Vesc"));
-    mWriteButton->setIcon(QIcon(mSelector->select("://res/icons/app_down.png")));
+    QString theme = Utility::getThemePath();
+    mWriteButton->setIcon(QIcon(theme +"icons/app_down.png"));
     mWriteButton->setIconSize(QSize(24, 24));
 
     QVBoxLayout *layout = new QVBoxLayout;

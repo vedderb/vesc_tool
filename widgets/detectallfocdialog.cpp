@@ -36,7 +36,7 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
     mPulleyWheelOld = 1;
 
     ui->dirSetup->setVesc(mVesc);
-    QFileSelector *mSelector = Utility::getFileSelector();
+    QString theme = Utility::getThemePath();
 
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
@@ -62,7 +62,7 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
 
     item = new QListWidgetItem;
     item->setText(tr("Large Outrunner (~2000 g)"));
-    item->setIcon(QIcon(mSelector->select("://res/icons/motor.png")));
+    item->setIcon(QIcon(theme +"icons/motor.png"));
     item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 700, 4000, 14)));
     ui->motorList->addItem(item);
 
@@ -80,7 +80,7 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
 
     item = new QListWidgetItem;
     item->setText(tr("Large Inrunner (~2000 g)"));
-    item->setIcon(QIcon(mSelector->select("://res/icons/motor.png")));
+    item->setIcon(QIcon(theme +"icons/motor.png"));
     item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 1000, 4000, 4)));
     ui->motorList->addItem(item);
 

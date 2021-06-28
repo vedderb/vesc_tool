@@ -36,11 +36,11 @@ PageWelcome::PageWelcome(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QFileSelector *mSelector = Utility::getFileSelector();
-    ui->autoConnectButton->setIcon(QIcon(mSelector->select("://res/icons/Connected-96.png")));
-    ui->wizardFocSimpleButton->setIcon(QIcon(mSelector->select("://res/icons/Wizard-96.png")));
-    ui->wizardAppButton->setIcon(QIcon(mSelector->select("://res/icons/Wizard-96.png")));
-    ui->nrfPairButton->setIcon(QIcon(mSelector->select("://res/icons/icons8-fantasy-96.png")));
+    QString theme = Utility::getThemePath();
+    ui->autoConnectButton->setIcon(QIcon(theme +"icons/Connected-96.png"));
+    ui->wizardFocSimpleButton->setIcon(QIcon(theme +"icons/Wizard-96.png"));
+    ui->wizardAppButton->setIcon(QIcon(theme +"icons/Wizard-96.png"));
+    ui->nrfPairButton->setIcon(QIcon(theme +"icons/icons8-fantasy-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;

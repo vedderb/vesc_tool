@@ -90,12 +90,15 @@ public:
     static bool configLoadLatest(VescInterface *vesc);
     static QVector<QPair<int, int>> configSupportedFws();
     static bool configLoadCompatible(VescInterface *vesc, QString &uuidRx);
+
     Q_INVOKABLE static QVector<int> scanCanVescOnly(VescInterface *vesc);
     Q_INVOKABLE static void setAppQColor(QString colorName, QColor color);
     Q_INVOKABLE static QColor getAppQColor(QString colorName);
     Q_INVOKABLE static QString getAppHexColor(QString colorName);
-    Q_INVOKABLE static QFileSelector* getFileSelector();
-    Q_INVOKABLE static void setFileSelector(QFileSelector* fileSelect);
+    Q_INVOKABLE static void setDarkMode(bool isDark);
+    Q_INVOKABLE static bool isDarkMode();
+    Q_INVOKABLE static QString getThemePath();
+
     static void setPlotColors(QCustomPlot* plot);
 
     template<typename QEnum>
@@ -113,6 +116,7 @@ private:
     static void defaultFunc(ConfigParams *params, QTextStream &s);
 
     static QMap<QString,QColor> mAppColors;
+    static bool isDark;
 };
 
 #endif // UTILITY_H

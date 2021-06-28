@@ -24,14 +24,13 @@ import QtQuick.Controls.Material 2.2
 import QtQuick.Window 2.2
 
 import Vedder.vesc.utility 1.0
-import Qt.labs.settings 1.0 as QSettings
 
 import "qrc:/mobile"
 
 Item {
     id: container
     width: 100
-    Material.theme:  "Dark"
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
     Material.accent: Utility.getAppHexColor("lightAccent")
 
 

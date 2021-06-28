@@ -71,7 +71,8 @@ QMap<QString, QColor> Utility::mAppColors = {
     {"plot_graph10", QColor(219,98,139)},
     {"plot_graph11", QColor(250,250,200)},
 };
-static QFileSelector * selector;
+
+bool Utility::isDark = false;
 
 Utility::Utility(QObject *parent) : QObject(parent)
 {
@@ -1999,12 +2000,24 @@ void Utility::setPlotColors(QCustomPlot* plot)
     plot->legend->setBorderPen(QPen(Utility::getAppQColor("lightBackground")));
 }
 
-QFileSelector* Utility::getFileSelector()
+void Utility::setDarkMode(bool isDarkSetting)
 {
-    return selector;
-}
-void  Utility::setFileSelector(QFileSelector* fileSelect)
-{
-    selector = fileSelect;
+    isDark = isDarkSetting;
 }
 
+bool Utility::isDarkMode()
+{
+  return isDark;
+}
+
+QString Utility::getThemePath()
+{
+    if(isDark)
+    {
+        return "://res/";
+    }
+    else
+    {
+        return "://res/+theme_light/";
+    }
+}

@@ -155,6 +155,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionCanFwd->setIcon(mycon);
     ui->scanCanButton->setIcon(QIcon(theme + "icons/Refresh-96.png"));
 
+    ui->dutyButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
+    ui->currentButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
+    ui->speedButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
+    ui->posButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
+    ui->brakeCurrentButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
+    ui->handbrakeButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
+
 
     ui->fullBrakeButton->setIcon(QIcon(theme + "icons/Anchor-96.png"));
 

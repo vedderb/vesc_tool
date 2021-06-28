@@ -21,8 +21,6 @@ import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Controls.Material 2.12
 import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.0 as QSettings
-
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -37,10 +35,7 @@ ApplicationWindow {
     property ConfigParams mAppConf: VescIf.appConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
 
-    Material.theme: QSettings.Settings.value("darkMode") ? "Dark" : "Light"
-    //Material.background: Utility.getAppHexColor("normalBackground")
-    //Material.primary: Utility.getAppHexColor("normalBackground")
-    //Material.foreground: Utility.getAppHexColor("lightText")
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
     Material.accent: Utility.getAppHexColor("lightAccent")
 
 

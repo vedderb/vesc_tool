@@ -22,10 +22,9 @@ import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
 import Vedder.vesc.utility 1.0
-import Qt.labs.settings 1.0 as QSettings
 
 Item {
-    Material.theme: QSettings.Settings.value("darkMode") ? "Dark" : "Light"
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
     Material.accent: Utility.getAppHexColor("lightAccent")
 
     Rectangle {

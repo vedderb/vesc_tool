@@ -21,6 +21,7 @@
 #include "ui_parameditenum.h"
 #include <QDebug>
 #include "helpdialog.h"
+#include "utility.h"
 
 ParamEditEnum::ParamEditEnum(QWidget *parent) :
     QWidget(parent),
@@ -28,6 +29,11 @@ ParamEditEnum::ParamEditEnum(QWidget *parent) :
 {
     ui->setupUi(this);
     mConfig = 0;
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->readButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
+    ui->readDefaultButton->setIcon(QPixmap(theme + "icons/Data Backup-96.png"));
 }
 
 ParamEditEnum::~ParamEditEnum()

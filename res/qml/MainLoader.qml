@@ -22,9 +22,7 @@ import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
 import QtQuick.Window 2.2
-
 import Vedder.vesc.utility 1.0
-import Qt.labs.settings 1.0 as QSettings
 
 ApplicationWindow {
     id: mainWindow
@@ -34,7 +32,7 @@ ApplicationWindow {
     height: 1080
     title: qsTr("VESC Custom GUI")
 
-    Material.theme: QSettings.Settings.value("darkMode") ? "Dark" : "Light"
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
     Material.accent: Utility.getAppHexColor("lightAccent")
 
     property string lastFile: ""

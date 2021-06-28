@@ -31,7 +31,6 @@ PageConnection::PageConnection(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-
     mVesc = nullptr;
     mTimer = new QTimer(this);
 
@@ -39,6 +38,38 @@ PageConnection::PageConnection(QWidget *parent) :
             this, SLOT(timerSlot()));
 
     mTimer->start(20);
+
+    QString theme = Utility::getThemePath();
+    ui->CANbusScanButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->canRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->CANbusConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->CANbusDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->tcpConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->tcpDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->udpConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->udpDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->serialRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->serialConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->serialDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->bleConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->bleDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->bleScanButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->CANbusScanButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->addConnectedButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->addUuidButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->unpairButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+    ui->deletePairedButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->clearPairedButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->canDefaultButton->setIcon(QPixmap(theme + "icons/Bug-96.png"));
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->autoConnectButton->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->bleSetNameButton->setIcon(QPixmap(theme + "icons/Ok-96.png"));
+    ui->pairConnectedButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+
+    QIcon mycon = QIcon(theme + "icons/can_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/can_off.png"), QIcon::Normal, QIcon::Off);
+    mycon.addPixmap(QPixmap(theme + "icons/can_on.png"), QIcon::Normal, QIcon::On);
+    ui->canFwdButton->setIcon(mycon);
 }
 
 PageConnection::~PageConnection()

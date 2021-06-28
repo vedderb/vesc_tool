@@ -21,12 +21,18 @@
 #include "ui_parameditbool.h"
 #include <QMessageBox>
 #include "helpdialog.h"
+#include "utility.h"
 
 ParamEditBool::ParamEditBool(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ParamEditBool)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->readButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
+    ui->readDefaultButton->setIcon(QPixmap(theme + "icons/Data Backup-96.png"));
 }
 
 ParamEditBool::~ParamEditBool()

@@ -78,7 +78,56 @@ int main(int argc, char *argv[])
     // Settings
     QCoreApplication::setOrganizationName("VESC");
     QCoreApplication::setOrganizationDomain("vesc-project.com");
-    QCoreApplication::setApplicationName("VESC Tool");
+    QCoreApplication::setApplicationName("VESC Tool");   
+    QSettings set;
+
+    bool isDark = set.value("darkMode", false).toBool();
+    Utility::setDarkMode(isDark);
+    if(isDark){
+        Utility::setAppQColor("lightestBackground", QColor(80,80,80));
+        Utility::setAppQColor("lightBackground", QColor(66,66,66));
+        Utility::setAppQColor("normalBackground", QColor(48,48,48));
+        Utility::setAppQColor("darkBackground", QColor(39,39,39));
+        Utility::setAppQColor("plotBackground", QColor(39,39,39));
+        Utility::setAppQColor("normalText", QColor(180,180,180));
+        Utility::setAppQColor("lightText", QColor(220,220,220));
+        Utility::setAppQColor("disabledText", QColor(127,127,127));
+        Utility::setAppQColor("lightAccent", QColor(0,161,221));
+        Utility::setAppQColor("midAccentColor", QColor(0,98,153));
+        Utility::setAppQColor("darkAccent", QColor(0,69,112));
+        Utility::setAppQColor("pink", QColor(219,98,139));
+        Utility::setAppQColor("red", QColor(200,52,52));
+        Utility::setAppQColor("orange", QColor(206,125,44));
+        Utility::setAppQColor("yellow", QColor(210,210,127));
+        Utility::setAppQColor("green", QColor(127,200,127));
+        Utility::setAppQColor("cyan",QColor(79,203,203));
+        Utility::setAppQColor("blue", QColor(77,127,196));
+        Utility::setAppQColor("magenta", QColor(157,127,210));
+        Utility::setAppQColor("white", QColor(255,255,255));
+        Utility::setAppQColor("black", QColor(0,0,0));
+    }else{
+        Utility::setAppQColor("lightestBackground", QColor(255,255,255));
+        Utility::setAppQColor("lightBackground", QColor(240,240,240));
+        Utility::setAppQColor("normalBackground", QColor(225,225,225));
+        Utility::setAppQColor("darkBackground", QColor(200,200,200));
+        Utility::setAppQColor("plotBackground", QColor(250,250,250));
+        Utility::setAppQColor("normalText", QColor(60,20,60));
+        Utility::setAppQColor("lightText", QColor(20,20,20));
+        Utility::setAppQColor("disabledText", QColor(110,110,110));
+        Utility::setAppQColor("lightAccent", QColor(0,114,178));
+        Utility::setAppQColor("midAccentColor", QColor(0,114,178));
+        Utility::setAppQColor("darkAccent", QColor(0,161,221));
+        Utility::setAppQColor("pink", QColor(219,98,139));
+        Utility::setAppQColor("red", QColor(200,52,52));
+        Utility::setAppQColor("orange", QColor(206,125,44));
+        Utility::setAppQColor("yellow", QColor(210,210,127));
+        Utility::setAppQColor("green", QColor(127,200,127));
+        Utility::setAppQColor("cyan",QColor(79,203,203));
+        Utility::setAppQColor("blue", QColor(77,127,196));
+        Utility::setAppQColor("magenta", QColor(157,127,210));
+        Utility::setAppQColor("white", QColor(255,255,255));
+        Utility::setAppQColor("black", QColor(0,0,0));
+    }
 
 
 
@@ -169,7 +218,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    QSettings set;
     double scale = set.value("app_scale_factor", 1.0).toDouble();
 
 #ifdef Q_OS_ANDROID
@@ -256,56 +304,6 @@ int main(int argc, char *argv[])
     } else {
         QApplication *a = new QApplication(argc, argv);
         app = a;
-        bool isDark = set.value("darkMode", false).toBool();
-        Utility::setDarkMode(isDark);
-
-        if(isDark){
-            Utility::setAppQColor("lightestBackground", QColor(80,80,80));
-            Utility::setAppQColor("lightBackground", QColor(66,66,66));
-            Utility::setAppQColor("normalBackground", QColor(48,48,48));
-            Utility::setAppQColor("darkBackground", QColor(39,39,39));
-            Utility::setAppQColor("plotBackground", QColor(39,39,39));
-            Utility::setAppQColor("normalText", QColor(180,180,180));
-            Utility::setAppQColor("lightText", QColor(220,220,220));
-            Utility::setAppQColor("disabledText", QColor(127,127,127));
-            Utility::setAppQColor("lightAccent", QColor(0,161,221));
-            Utility::setAppQColor("midAccentColor", QColor(0,98,153));
-            Utility::setAppQColor("darkAccent", QColor(0,69,112));
-            Utility::setAppQColor("pink", QColor(219,98,139));
-            Utility::setAppQColor("red", QColor(200,52,52));
-            Utility::setAppQColor("orange", QColor(206,125,44));
-            Utility::setAppQColor("yellow", QColor(210,210,127));
-            Utility::setAppQColor("green", QColor(127,200,127));
-            Utility::setAppQColor("cyan",QColor(79,203,203));
-            Utility::setAppQColor("blue", QColor(77,127,196));
-            Utility::setAppQColor("magenta", QColor(157,127,210));
-            Utility::setAppQColor("white", QColor(255,255,255));
-            Utility::setAppQColor("black", QColor(0,0,0));
-        }else{
-            Utility::setAppQColor("lightestBackground", QColor(255,255,255));
-            Utility::setAppQColor("lightBackground", QColor(240,240,240));
-            Utility::setAppQColor("normalBackground", QColor(225,225,225));
-            Utility::setAppQColor("darkBackground", QColor(200,200,200));
-            Utility::setAppQColor("plotBackground", QColor(250,250,250));
-            Utility::setAppQColor("normalText", QColor(60,20,60));
-            Utility::setAppQColor("lightText", QColor(20,20,20));
-            Utility::setAppQColor("disabledText", QColor(110,110,110));
-            Utility::setAppQColor("lightAccent", QColor(0,114,178));
-            Utility::setAppQColor("midAccentColor", QColor(0,114,178));
-            Utility::setAppQColor("darkAccent", QColor(0,161,221));
-            Utility::setAppQColor("pink", QColor(219,98,139));
-            Utility::setAppQColor("red", QColor(200,52,52));
-            Utility::setAppQColor("orange", QColor(206,125,44));
-            Utility::setAppQColor("yellow", QColor(210,210,127));
-            Utility::setAppQColor("green", QColor(127,200,127));
-            Utility::setAppQColor("cyan",QColor(79,203,203));
-            Utility::setAppQColor("blue", QColor(77,127,196));
-            Utility::setAppQColor("magenta", QColor(157,127,210));
-            Utility::setAppQColor("white", QColor(255,255,255));
-            Utility::setAppQColor("black", QColor(0,0,0));
-        }
-
-
 
         // Fonts
         QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");

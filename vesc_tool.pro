@@ -275,6 +275,10 @@ DISTFILES += \
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
+macx {
+    ICON        =   res/macIcon.icns
+}
+
 ios {
     QMAKE_INFO_PLIST = ios/Info.plist
     HEADERS += ios/src/notch.h

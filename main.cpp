@@ -325,10 +325,9 @@ int main(int argc, char *argv[])
         qApp->setFont(QFont("Roboto", 12));
 
         // Style
-        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0" + Utility::getAppHexColor("lightAccent") +
+        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0 " + Utility::getAppHexColor("lightAccent") +
                             ", stop: 0.4 " + Utility::getAppHexColor("darkAccent") + ");" +
-                            " border: none;}" +
-                            "QListView::item {border: none;};" + "QListView{outline: none;}");
+                            " border: none;} ");
         QStyle *myStyle = new Style_tweaks("Fusion");
         a->setStyle(myStyle);
 

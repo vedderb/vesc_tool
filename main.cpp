@@ -85,12 +85,12 @@ int main(int argc, char *argv[])
     Utility::setDarkMode(isDark);
     if(isDark){
         Utility::setAppQColor("lightestBackground", QColor(80,80,80));
-        Utility::setAppQColor("lightBackground", QColor(66,66,66));
+        Utility::setAppQColor("lightBackground", QColor(72,72,72));
         Utility::setAppQColor("normalBackground", QColor(48,48,48));
         Utility::setAppQColor("darkBackground", QColor(39,39,39));
         Utility::setAppQColor("plotBackground", QColor(39,39,39));
         Utility::setAppQColor("normalText", QColor(180,180,180));
-        Utility::setAppQColor("lightText", QColor(220,220,220));
+        Utility::setAppQColor("lightText", QColor(215,215,215));
         Utility::setAppQColor("disabledText", QColor(127,127,127));
         Utility::setAppQColor("lightAccent", QColor(0,161,221));
         Utility::setAppQColor("midAccentColor", QColor(0,98,153));
@@ -107,12 +107,12 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("black", QColor(0,0,0));
     }else{
         Utility::setAppQColor("lightestBackground", QColor(255,255,255));
-        Utility::setAppQColor("lightBackground", QColor(240,240,240));
-        Utility::setAppQColor("normalBackground", QColor(225,225,225));
+        Utility::setAppQColor("lightBackground", QColor(214,215,215));
+        Utility::setAppQColor("normalBackground", QColor(250,250,250));
         Utility::setAppQColor("darkBackground", QColor(200,200,200));
         Utility::setAppQColor("plotBackground", QColor(250,250,250));
         Utility::setAppQColor("normalText", QColor(60,20,60));
-        Utility::setAppQColor("lightText", QColor(20,20,20));
+        Utility::setAppQColor("lightText", QColor(33,33,33));
         Utility::setAppQColor("disabledText", QColor(110,110,110));
         Utility::setAppQColor("lightAccent", QColor(0,114,178));
         Utility::setAppQColor("midAccentColor", QColor(0,114,178));
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
         if(isDark){
             QPalette darkPalette;
             darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
-            darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("normalText"));
+            darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("lightText"));
             darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,Utility::getAppQColor("disabledText"));
             darkPalette.setColor(QPalette::Base,Utility::getAppQColor("normalBackground"));
             darkPalette.setColor(QPalette::AlternateBase,Utility::getAppQColor("lightBackground"));
@@ -345,14 +345,15 @@ int main(int argc, char *argv[])
             darkPalette.setColor(QPalette::Dark,QColor(35,35,35));
             darkPalette.setColor(QPalette::Shadow,QColor(20,20,20));
             darkPalette.setColor(QPalette::Button,Utility::getAppQColor("normalBackground"));
-            darkPalette.setColor(QPalette::ButtonText,Utility::getAppQColor("normalText"));
+            darkPalette.setColor(QPalette::ButtonText,Utility::getAppQColor("lightText"));
             darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,Utility::getAppQColor("disabledText"));
             darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,Utility::getAppQColor("lightestBackground"));
             darkPalette.setColor(QPalette::HighlightedText,Utility::getAppQColor("white"));
             darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
             qApp->setPalette(darkPalette);
         }else{
-            qApp->setPalette(qApp->style()->standardPalette());
+            QPalette lightPalette = qApp->style()->standardPalette();
+            qApp->setPalette(lightPalette);
         }
 
         // Register this to not stop on the import statement when reusing components

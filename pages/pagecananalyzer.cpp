@@ -19,12 +19,17 @@
 
 #include "pagecananalyzer.h"
 #include "ui_pagecananalyzer.h"
+#include "utility.h"
 
 PageCanAnalyzer::PageCanAnalyzer(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageCanAnalyzer)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    //ui->clearRxButton
+
     layout()->setContentsMargins(0, 0, 0, 0);
     ui->msgTable->setColumnWidth(1, 120);
     mVesc = nullptr;

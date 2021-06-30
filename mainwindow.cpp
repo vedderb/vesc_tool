@@ -117,16 +117,52 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     QString theme = Utility::getThemePath();
-
+    ui->actionParameterEditorMcconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorAppconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorFW->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorCustomConf0->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionSaveAppconfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionLoadAppconfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionSaveMotorConfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionLoadMotorConfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionSaveAppConfigurationHeader->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSaveAppConfigurationHeaderWrap->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSaveMotorConfigurationHeader->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSaveMotorConfigurationHeaderWrap->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionExportConfigurationParser->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionTerminalPrintFaults->setIcon(QPixmap(theme + "icons/Console-96.png"));
+    ui->actionTerminalShowHelp->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->actionTerminalClear->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->actionTerminalPrintThreads->setIcon(QPixmap(theme + "icons/Electronics-96.png"));
+    ui->actionTerminalDRVResetLatchedFaults->setIcon(QPixmap(theme + "icons/Bug-96.png"));
+    ui->actionLibrariesUsed->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionMotorSetupWizard->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->actionAppSetupWizard->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->actionAutoSetupFOC->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->actionSetupMotorsFOCQuick->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->actionAboutQt->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionParameterEditorInfo->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionSafetyInformation->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionVESCToolChangelog->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionFirmwareChangelog->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionWarrantyStatement->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionLicense->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionVESCProjectForums->setIcon(QPixmap(theme + "icons/User Group Man Man-96.png"));
+    ui->actionLoadFirmwareConfigs->setIcon(QPixmap(theme + "icons/Electronics-96.png"));
+    ui->actionBackupConfiguration->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->actionBackupConfigurationsCAN->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->actionRestoreConfiguration->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionRestoreConfigurationsCAN->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionClearConfigurationBackups->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->actionBackupConfiguration->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionReboot->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->actionExit->setIcon(QPixmap(theme + "icons/Shutdown-96.png"));
     ui->pageLabel->setPixmap(QPixmap(theme + "logo_white.png"));
-
     ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-96.png"));
     ui->actionDisconnect->setIcon(QIcon(theme + "icons/Disconnected-96.png"));
-
     ui->actionReadMcconf->setIcon(QIcon(theme + "icons/motor_up.png"));
     ui->actionReadMcconfDefault->setIcon(QIcon(theme + "icons/motor_default.png"));
     ui->actionWriteMcconf->setIcon(QIcon(theme + "icons/motor_down.png"));
-
     ui->actionReadAppconf->setIcon(QIcon(theme + "icons/app_up.png"));
     ui->actionReadAppconfDefault->setIcon(QIcon(theme + "icons/app_default.png"));
     ui->actionWriteAppconf->setIcon(QIcon(theme + "icons/app_down.png"));

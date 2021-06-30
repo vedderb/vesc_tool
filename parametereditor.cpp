@@ -34,6 +34,52 @@ ParameterEditor::ParameterEditor(QWidget *parent) :
     ui->setupUi(this);
     setEditorValues("new_parameter", ConfigParam());
 
+    QString theme = Utility::getThemePath();
+    windowIcon().addPixmap(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->paramRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->paramDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->paramUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->paramOpenButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->enumRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->enumMoveDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->enumMoveUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->enumAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->paramResetButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->paramSaveButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->serRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->serDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->serUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->serAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+
+    ui->groupRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->groupDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->groupUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->groupAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->groupEditButton->setIcon(QPixmap(theme + "icons/icons8-edit-96.png"));
+
+    ui->subgroupRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->subgroupDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->subgroupUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->subgroupAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->subgroupEditButton->setIcon(QPixmap(theme + "icons/icons8-edit-96.png"));
+
+    ui->groupParamRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->groupParamDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->groupParamUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->groupParamAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->groupParamEditButton->setIcon(QPixmap(theme + "icons/icons8-edit-96.png"));
+
+    ui->actionCalculatePacketSize->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->actionCalculateCompressedCArraySize->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->actionSave_XML_as->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionExportCompressedCArray->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSave_Configuration_C_Header_as->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSave_Configuration_C_Header_ifdef_wrapped_as->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSave_XML_and_export_config_parser_and_compressed_C_array->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionLoad_XML->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionExportConfigurationParser->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionDeleteAll->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(mStatusLabel);

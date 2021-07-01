@@ -31,6 +31,19 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->setupUi(this);
     mVesc = nullptr;
 
+    QString theme = Utility::getThemePath();
+    ui->centerButton->setIcon(QPixmap(theme + "icons/icons8-target-96.png"));
+    ui->playButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->logListRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->logListOpenButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->openCurrentButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->openCsvButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->savePlotPdfButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
+    ui->savePlotPngButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
+    ui->saveMapPdfButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
+    ui->saveMapPngButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
+
+
     updateTileServers();
 
     ui->spanSlider->setMinimum(0);

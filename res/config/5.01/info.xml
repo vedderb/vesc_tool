@@ -587,7 +587,7 @@ jqG2lIj3DGSGepr6XjBVV9b03QDt8IWHoScQ2RRSXTT4h5va6o6Yw2zxuaN9HDTSMnYUMMtZ/yCDZPO7
 4b7+wVYNrHtXA0PFeJBPOD+Or6FzQD6C3dwezsSvWgrcSZ0FN10sqKlH+RdEbQVzjshX8EgE2P5ttHtd
 tNJsp6DXbgdABEy2SBhUu5YfWIgt+VuN+279zzpFJJPFBUm5O6hleiGT4K9bnq/k7EVAN3dafdb//GM/
 x+/VnbD/vV3198lXlrK5rk7bAAAAABJRU5ErkJggg==&quot; width=&quot;25&quot; height=&quot;25&quot; /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If this button is toggled active (green), scolling with the mouse on the graph will zoom the graph horizontally.&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If this button is toggled active (blue), scolling with the mouse on the graph will zoom the graph horizontally.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;data:image/719885386.PNG;base64,i
 VBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAACKaAAAimgG+3fsqAAAAGXRFW
@@ -613,7 +613,7 @@ uh66q62Dv5FR7lf9pR7pkSmG9tKL3hxHLw6SAz3tG1b90h6rXukbTuQRqEY1XHg6xF7V2YUwj0MmPZsx
 4afJ0TK553wfT/MP0g4jgLvWT0Labv8PFl026Grmv6y75PkPDk27eCF50kpeZJEEPtR2ZNy29Y8AGsey
 G2HSOKcaDMhcF5kLJQuYGx0OzbcxyiM4/flvDJtUwLn0zWZuoqy0cWjtYaKl33sD3eUpR/3VRe9uAbPL
 zIWi30pNtP0v2uA0bP+u/4DiYs9rS0c1UcAAAAASUVORK5CYII=&quot; width=&quot;25&quot; height=&quot;25&quot; /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If this button is toggled active (green), scolling with the mouse on the graph will zoom the graph vertically. Often it is useful to deactivate this button and only zoom in the horizontal direction because the sampled data can be squeezed together horizontally for long sampling sequences.&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If this button is toggled active (blue), scolling with the mouse on the graph will zoom the graph vertically. Often it is useful to deactivate this button and only zoom in the horizontal direction because the sampled data can be squeezed together horizontally for long sampling sequences.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;data:image/1681692777.PNG;base64,i
 VBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAACdjAAAnYwEdzQRDAAAAGXRFW
@@ -640,7 +640,7 @@ Yq2G/gTN7EQQEsBdicH3tbWziC9cHu+UE2PeTYksD9+ts37HvUjuBFsAX/hdgGUasxrWclyIngyZwVNn
 xpz2d6CfM8uF7zlF5NmQ43IWlYrCC8FUOZV05w46ywpJMF06AdHvRLinhhzzqRTjrhmvSqchmg5ADLIk
 mlx1in7pX5G23Ni1z1vi+M+9I1JC+6vnzRz8cyjmVBurG1aJy16xoTTmvoNa0W/zP97Z2RRyZ2ibBGyE
 5zBuE332eMjTZF5kTmxaXHBg52ZcLarf47/8W9lfUjxjf/43/U3pE5Iq8YBubkAAAAASUVORK5CYII=&quot; width=&quot;25&quot; height=&quot;25&quot; /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This is the auto fit button. If the toggle verion of the button is active (green), new realtime data that drops in will cause a rezoom in the graph to fit all data. Deactivating this button can be useful of you want to zoom in on the realtime data manually while samples are dropping in.&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This is the auto fit button. If the toggle verion of the button is active (blue), new realtime data that drops in will cause a rezoom in the graph to fit all data. Deactivating this button can be useful of you want to zoom in on the realtime data manually while samples are dropping in.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;data:image/1681692777.PNG;base64,i
 VBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAACdjAAAnYwEdzQRDAAAAGXRFW

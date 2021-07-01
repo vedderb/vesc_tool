@@ -27,8 +27,10 @@ PageCanAnalyzer::PageCanAnalyzer(QWidget *parent) :
 {
     ui->setupUi(this);
 
+
     QString theme = Utility::getThemePath();
-    //ui->clearRxButton
+    ui->clearRxButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->sendButton->setIcon(QPixmap(theme + "icons/Send File-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     ui->msgTable->setColumnWidth(1, 120);

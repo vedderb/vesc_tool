@@ -34,6 +34,22 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 
+    QString theme = Utility::getThemePath();
+    ui->chooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->choose2Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->choose3Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->choose4Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->uicrReadButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
+    ui->uicrWriteButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
+    ui->uicrEraseButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->connectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->connectNrf5xButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->disconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->resetButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+    ui->eraseFlashButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->uploadButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
+    ui->cancelButton->setIcon(QPixmap(theme + "icons/Cancel-96.png"));
+
     mTimer = new QTimer(this);
     mTimer->start(500);
     mFlashOffset = 0;

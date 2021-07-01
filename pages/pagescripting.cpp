@@ -46,6 +46,25 @@ PageScripting::PageScripting(QWidget *parent) :
     QPushButton *plusButton = new QPushButton();
     QString theme = Utility::getThemePath();
     plusButton->setIcon(QIcon(theme +"icons/Plus Math-96.png"));
+    ui->runButton->setIcon(QIcon(theme +"icons/Circled Play-96.png"));
+    ui->runWindowButton->setIcon(QIcon(theme +"icons/Circled Play-96.png"));
+    ui->fullscreenButton->setIcon(QIcon(theme +"icons/size_off.png"));
+    ui->stopButton->setIcon(QIcon(theme +"icons/Shutdown-96.png"));
+    ui->helpButton->setIcon(QIcon(theme +"icons/Help-96.png"));
+    ui->clearConsoleButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->openRecentButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
+    ui->removeSelectedButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->clearRecentButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->openExampleButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
+    ui->exportCArrayAppButton->setIcon(QIcon(theme +"icons/Save as-96.png"));
+    ui->exportCArrayHwButton->setIcon(QIcon(theme +"icons/Save as-96.png"));
+    ui->calcSizeButton->setIcon(QIcon(theme +"icons/Calculator-96.png"));
+    ui->openQmluiAppButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
+    ui->openQmluiHwButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
+    ui->uploadButton->setIcon(QIcon(theme +"icons/Download-96.png"));
+    ui->eraseOnlyButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->clearUploadTextButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+
     plusButton->setFlat(true);
     plusButton->setText("New Tab");
     ui->fileTabs->setCornerWidget(plusButton);

@@ -33,7 +33,7 @@ Item {
     property Commands mCommands: VescIf.commands()
 
     Rectangle {
-        color: Utility.getAppHexColor("lightBackground")
+        color: Utility.getAppHexColor("darkBackground")
         anchors.fill: parent
     }
 
@@ -60,7 +60,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
             Layout.topMargin: 20
             Layout.bottomMargin: 20
-            source: "qrc:/res/logo_white.png"
+            source: "qrc" + Utility.getThemePath() + "/logo_white.png"
         }
 
         RowLayout {
@@ -141,7 +141,7 @@ Item {
                 Rectangle {
                     width: bleList.width
                     height: 120
-                    color: Qt.rgba(48 / 255, 48 / 255, 48 / 255, 1)
+                    color: Utility.getAppHexColor("normalBackground")
                     radius: 10
 
                     RowLayout {
@@ -151,8 +151,8 @@ Item {
                         Rectangle {
                             Layout.leftMargin: 10
                             Layout.fillWidth: true
-
-                            color: preferred ? Utility.getAppHexColor("darkAccent") : Utility.getAppHexColor("normalBackground")
+                            opacity: 1.0
+                            color: preferred ? ("#55" + Utility.getAppHexColor("lightAccent").slice(1)) : (Utility.getAppHexColor("lightestBackground") )
                             height: column.height + 10
                             radius: height / 2
 
@@ -254,7 +254,7 @@ Item {
 
             for (var addr in devs) {
                 var name = devs[addr]
-                if(Qt.platform.os == "ios") {
+                if(Qt.platform.os == "ios" || "mac") {
                     var ids = addr.split('-')
                     var shortAddr = ids[0].slice(1,3) + '-' + ids[1].slice(0,2) + '-' +
                             ids[2].slice(0,2) + '-' + ids[3].slice(0,2) + '-' + ids[4].slice(0,2)

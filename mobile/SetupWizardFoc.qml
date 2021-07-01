@@ -21,6 +21,7 @@ import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
+import QtQuick.Controls.Material 2.2
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -29,6 +30,9 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: topItem
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
 
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
@@ -83,30 +87,12 @@ Item {
 
                     ListModel {
                         id: usageModel
-
-                        ListElement {
-                            name: "Generic"
-                            usageImg: "qrc:/res/icons/motor.png"
-                            duty_start: 1.0
-                            hfi_start: false
-                        }
-                        ListElement {
-                            name: "E-Skate"
-                            usageImg: "qrc:/res/images/esk8.jpg"
-                            duty_start: 0.85
-                            hfi_start: true
-                        }
-                        ListElement {
-                            name: "EUC"
-                            usageImg: "qrc:/res/icons/EUC-96"
-                            duty_start: 1.0
-                            hfi_start: false
-                        }
-                        ListElement {
-                            name: "Propeller"
-                            usageImg: "qrc:/res/images/propeller.jpg"
-                            duty_start: 1.0
-                            hfi_start: false
+                        property string iconPath: "qrc" + Utility.getThemePath() + "icons/";
+                        Component.onCompleted: {
+                            append({name: "Generic", usageImg:iconPath + "motor.png", duty_start: 1.0, hfi_start: false})
+                            append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg", duty_start: 0.85, hfi_start: true})
+                            append({name: "EUC", usageImg:iconPath + "EUC-96.png", duty_start: 1.0, hfi_start: false})
+                            append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg", duty_start: 1.0, hfi_start: false})
                         }
                     }
 
@@ -194,7 +180,7 @@ Item {
 
                     GroupBox {
                         Layout.fillWidth: true
-//                        Layout.fillHeight: true
+                        //                        Layout.fillHeight: true
                         contentWidth: parent.width
 
                         label: CheckBox {
@@ -231,87 +217,29 @@ Item {
 
                     ListModel {
                         id: motorModel
-
-                        ListElement {
-                            name: "Mini Outrunner (~75 g)"
-                            motorImg: "qrc:/res/images/motors/outrunner_mini.jpg"
-                            maxLosses: 10
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            hfi_start: false
-                            poles: 14
-                        }
-                        ListElement {
-                            name: "Small Outrunner (~200 g)"
-                            motorImg: "qrc:/res/images/motors/outrunner_small.jpg"
-                            maxLosses: 25
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            hfi_start: false
-                            poles: 14
-                        }
-                        ListElement {
-                            name: "Medium Outrunner (~750 g)"
-                            motorImg: "qrc:/res/images/motors/6374.jpg"
-                            maxLosses: 60
-                            openloopErpm: 700
-                            sensorlessErpm: 4000
-                            hfi_start: true
-                            poles: 14
-                        }
-                        ListElement {
-                            name: "Large Outrunner (~2000 g)"
-                            motorImg: "qrc:/res/icons/motor.png"
-                            maxLosses: 200
-                            openloopErpm: 700
-                            sensorlessErpm: 4000
-                            hfi_start: false
-                            poles: 14
-                        }
-                        ListElement {
-                            name: "Small Inrunner (~200 g)"
-                            motorImg: "qrc:/res/images/motors/inrunner_small.jpg"
-                            maxLosses: 25
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            hfi_start: false
-                            poles: 2
-                        }
-                        ListElement {
-                            name: "Medium Inrunner (~750 g)"
-                            motorImg: "qrc:/res/images/motors/inrunner_medium.jpg"
-                            maxLosses: 70
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            hfi_start: false
-                            poles: 4
-                        }
-                        ListElement {
-                            name: "Large Inrunner (~2000 g)"
-                            motorImg: "qrc:/res/icons/motor.png"
-                            maxLosses: 200
-                            openloopErpm: 1000
-                            sensorlessErpm: 4000
-                            hfi_start: false
-                            poles: 4
-                        }
-                        ListElement {
-                            name: "E-Bike DD hub motor (~6 kg)"
-                            motorImg: "qrc:/res/images/motors/ebike_dd_1kw.jpg"
-                            maxLosses: 75
-                            openloopErpm: 300
-                            sensorlessErpm: 2000
-                            hfi_start: false
-                            poles: 46
-                        }
-                        ListElement {
-                            name: "EDF Inrunner Small (~200 g)"
-                            motorImg: "qrc:/res/images/motors/edf_small.jpg"
-                            maxLosses: 55
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            hfi_start: false
-                            poles: 6
+                        property string iconPath: "qrc" + Utility.getThemePath() + "icons/";
+                        Component.onCompleted: {
+                            [
+                            ["Mini Outrunner (~75 g)", "qrc:/res/images/motors/outrunner_mini.jpg", 10, 1400, 4000, false,14],
+                            ["Small Outrunner (~200 g)","qrc:/res/images/motors/outrunner_small.jpg", 25, 1400, 4000, false,14],
+                            ["Medium Outrunner (~750 g)","qrc:/res/images/motors/6374.jpg", 60, 700, 4000, true, 14],
+                            ["Large Outrunner (~2000 g)",iconPath + "motor.png", 200, 700, 4000, false, 14],
+                            ["Small Inrunner (~200 g)","qrc:/res/images/motors/inrunner_small.jpg", 25, 1400, 4000, false, 2],
+                            ["Medium Inrunner (~750 g)","qrc:/res/images/motors/inrunner_medium.jpg", 70, 1400, 4000, false, 4],
+                            ["Large Inrunner (~2000 g)",iconPath + "motor.png", 200, 1000, 4000, false, 4],
+                            ["E-Bike DD hub motor (~6 kg)","qrc:/res/images/motors/ebike_dd_1kw.jpg", 75, 300, 2000, false, 46],
+                            ["EDF Inrunner Small (~200 g)","qrc:/res/images/motors/edf_small.jpg", 55, 1400, 4000, false, 6]
+                            ].forEach(function(element) {
+                                append({
+                                           name: element[0],
+                                           motorImg: element[1],
+                                           maxLosses: element[2],
+                                           openloopErpm: element[3],
+                                           sensorlessErpm: element[4],
+                                           hfi_start: element[5],
+                                           poles: element[6]
+                                       });
+                            });
                         }
                     }
 

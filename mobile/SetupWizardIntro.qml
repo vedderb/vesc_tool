@@ -24,6 +24,7 @@ import QtGraphicalEffects 1.0
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     property ConfigParams mInfoConf: VescIf.infoConfig()

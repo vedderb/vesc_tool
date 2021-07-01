@@ -628,7 +628,7 @@ void VescInterface::storeSettings()
     mSettings.setValue("keepScreenOn", mKeepScreenOn);
     mSettings.setValue("useWakeLock", mUseWakeLock);
     mSettings.setValue("loadQmlUiOnConnect", mLoadQmlUiOnConnect);
-
+    mSettings.setValue("darkMode", Utility::isDarkMode());
     mSettings.sync();
 }
 

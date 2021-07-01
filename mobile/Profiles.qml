@@ -22,6 +22,7 @@ import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: topItem

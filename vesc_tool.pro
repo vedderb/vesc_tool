@@ -19,7 +19,7 @@ VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
 
 macx-clang: {
-   QMAKE_APPLE_DEVICE_ARCHS=arm64
+   #QMAKE_APPLE_DEVICE_ARCHS=arm64
 }
 
 # Ubuntu 18.04 (should work on raspbian buster too)
@@ -277,8 +277,8 @@ ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 macx {
     ICON        =  macos/appIcon.icns
-    QMAKE_INFO_PLIST = macos/app-Info.plist
-    DISTFILES += macos/app-Info.plist
+    #QMAKE_INFO_PLIST = macos/app-Info.plist
+   # DISTFILES += macos/app-Info.plist
 }
 
 ios {

@@ -53,7 +53,7 @@ Item {
                 Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
                 Layout.margins: Math.min(topItem.width, topItem.height) * 0.1
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                source: "qrc:/res/logo_white.png"
+                source: "qrc" + Utility.getThemePath() + "/logo_white.png"
                 antialiasing: true
             }
 
@@ -78,8 +78,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Connect"
-                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
-
+                        imageSrc: "qrc" + Utility.getThemePath() + (VescIf.isPortConnected() ? "icons/Disconnected-96.png" : "icons/Connected-96.png")
                         onClicked: {
                             if (VescIf.isPortConnected()) {
                                 VescIf.disconnectPort()
@@ -435,8 +434,10 @@ Item {
         onPortConnectedChanged: {
             if (VescIf.isPortConnected()) {
                 connectButton.buttonText = "Disconnect"
+                connectButton.imageSrc = "qrc" + Utility.getThemePath() + "icons/Disconnected-96.png"
             } else {
                 connectButton.buttonText = "Connect"
+                connectButton.imageSrc = "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
             }
         }
     }

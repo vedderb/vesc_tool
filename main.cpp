@@ -79,8 +79,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("VESC");
     QCoreApplication::setOrganizationDomain("vesc-project.com");
     QCoreApplication::setApplicationName("VESC Tool");   
-    QSettings set;
-
+    QSettings set;   
     bool isDark = set.value("darkMode", false).toBool();
     Utility::setDarkMode(isDark);
     if(isDark){
@@ -106,10 +105,10 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("white", QColor(255,255,255));
         Utility::setAppQColor("black", QColor(0,0,0));
     }else{
-        Utility::setAppQColor("lightestBackground", QColor(255,255,255));
-        Utility::setAppQColor("lightBackground", QColor(214,215,215));
-        Utility::setAppQColor("normalBackground", QColor(250,250,250));
-        Utility::setAppQColor("darkBackground", QColor(200,200,200));
+        Utility::setAppQColor("lightestBackground", QColor(200,200,200));
+        Utility::setAppQColor("lightBackground", QColor(225,225,225));
+        Utility::setAppQColor("normalBackground", QColor(240,240,240));
+        Utility::setAppQColor("darkBackground", QColor(255,255,255));
         Utility::setAppQColor("plotBackground", QColor(250,250,250));
         Utility::setAppQColor("normalText", QColor(60,20,60));
         Utility::setAppQColor("lightText", QColor(33,33,33));

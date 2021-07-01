@@ -79,7 +79,7 @@ Item {
                             Layout.fillWidth: true
                             height: 30;
                             border.width: 0
-                            color: Utility.getAppHexColor("darkAccent")
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
                             border.color: Utility.getAppHexColor("lightestBackground")
 
                             Text {
@@ -187,12 +187,13 @@ Item {
                         anchors.fill: parent
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
+                        anchors.topMargin: 10
 
                         Rectangle {
                             Layout.fillWidth: true
                             height: 30;
                             border.width: 0
-                            color: Utility.getAppHexColor("darkAccent")
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
 
                             border.color: "#00000000"
 
@@ -263,12 +264,13 @@ Item {
                         anchors.fill: parent
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
+                        anchors.topMargin: 10
 
                         Rectangle {
                             Layout.fillWidth: true
                             height: 30;
                             border.width: 0
-                            color: Utility.getAppHexColor("darkAccent")
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
                             border.color: "#00000000"
 
                             Text {

@@ -116,7 +116,7 @@ Item {
                                     Layout.preferredWidth: 60
                                     Layout.preferredHeight: 60
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: isCan ? "qrc:/res/icons/can_off.png" : "qrc:/res/icons/Connected-96.png"
+                                    source: isCan ? "qrc" + Utility.getThemePath() + "icons/can_off.png" : "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
                                 }
 
                                 Text {

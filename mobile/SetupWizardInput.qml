@@ -168,7 +168,7 @@ Item {
                                         Layout.preferredHeight: 80
                                         Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                                         Layout.leftMargin: 5
-                                        source: isCan ? "qrc:/res/icons/can_off.png" : "qrc:/res/icons/Connected-96.png"
+                                        source: isCan ? "qrc" + Utility.getThemePath() + "icons/can_off.png" : "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
                                     }
 
                                     Text {

@@ -40,7 +40,7 @@ ios: {
 }}
 
 # Build mobile GUI
-#CONFIG += build_mobile
+# CONFIG += build_mobile
 
 
 # Debug build (e.g. F5 to reload QML files)
@@ -276,7 +276,9 @@ DISTFILES += \
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 macx {
-    ICON        =   res/macIcon.icns
+    ICON        =  macos/appIcon.icns
+    QMAKE_INFO_PLIST = macos/app-Info.plist
+    DISTFILES += macos/app-Info.plist
 }
 
 ios {

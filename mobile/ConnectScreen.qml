@@ -166,7 +166,7 @@ Item {
                                     Layout.preferredWidth: 40
                                     Layout.preferredHeight: 40
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: "qrc:/res/icons/bluetooth.png"
+                                    source: "qrc" + Utility.getThemePath() + "icons/bluetooth.png"
                                 }
 
                                 Text {

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Need access to connect to VESC</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+        <string>VESC Tool searches Bluetooth LE Devices (WaiterLock, Barcode Scanner, eGK)</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Saves log files here</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+        <string>VESC Tool uses photos</string>
+</dict>
+</plist>

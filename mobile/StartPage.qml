@@ -78,7 +78,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Connect"
-                        imageSrc: "qrc:/res/icons/Connected-96.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
 
                         onClicked: {
                             if (VescIf.isPortConnected()) {
@@ -97,7 +97,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "VESC\nRemote\nQuick Pair"
-                        imageSrc: "qrc:/res/icons/icons8-fantasy-96.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/icons8-fantasy-96.png"
 
                         onClicked: {
                             if (!VescIf.isPortConnected()) {
@@ -116,7 +116,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Setup\nMotors"
-                        imageSrc: "qrc:/res/icons/motor.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/motor.png"
 
                         onClicked: {
                             if (!VescIf.isPortConnected()) {
@@ -135,7 +135,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Setup\nInput"
-                        imageSrc: "qrc:/res/icons/Wizard-96.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Wizard-96.png"
 
                         onClicked: {
                             if (!VescIf.isPortConnected()) {
@@ -285,7 +285,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Controls"
-                        imageSrc: "qrc:/res/icons/Controller-96.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Controller-96.png"
 
                         onClicked: {
                             requestOpenControls()
@@ -298,7 +298,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Invert\nMotor\nDirections"
-                        imageSrc: "qrc:/res/icons/Process-96.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Process-96.png"
 
                         onClicked: {
                             if (!VescIf.isPortConnected()) {
@@ -320,7 +320,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Backup\nConfigs"
-                        imageSrc: "qrc:/res/icons/Save-96.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Save-96.png"
 
                         onClicked: {
                             backupConfigDialog.open()
@@ -333,7 +333,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Restore\nConfigs"
-                        imageSrc: "qrc:/res/icons/Open Folder-96.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Open Folder-96.png"
 
                         onClicked: {
                             restoreConfigDialog.open()
@@ -346,7 +346,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Pair\nBLE"
-                        imageSrc: "qrc:/res/icons/bluetooth-white.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/bluetooth.png"
 
                         onClicked: {
                             pairDialog.openDialog()

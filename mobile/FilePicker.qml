@@ -176,8 +176,8 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: textmargin
                             anchors.verticalCenter: parent.verticalCenter
-                            source: isFolder(fileNameText.text) ? "qrc:/res/icons/ic_folder_open_black_48dp.png" :
-                                                                  "qrc:/res/icons/ic_insert_drive_file_black_48dp.png"
+                            source: isFolder(fileNameText.text) ? "qrc" + Utility.getThemePath() + "icons/ic_folder_open_black_48dp.png" :
+                                                                  "qrc" + Utility.getThemePath() + "icons/ic_insert_drive_file_black_48dp.png"
                         }
                     }
                 }

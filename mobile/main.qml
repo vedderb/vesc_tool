@@ -329,7 +329,7 @@ ApplicationWindow {
                     width: tabBar.height * 0.5
                     height: tabBar.height * 0.5
                     opacity: 1.0
-                    source: "qrc:/res/icons/Settings-96.png"
+                    source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
                 }
 
                 onClicked: {

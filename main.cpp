@@ -28,7 +28,6 @@
 #include "ios/src/notch.h"
 #endif
 
-
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
@@ -75,6 +74,7 @@ static void m_cleanup(int sig)
 
 int main(int argc, char *argv[])
 {
+
     // Settings
     QCoreApplication::setOrganizationName("VESC");
     QCoreApplication::setOrganizationDomain("vesc-project.com");
@@ -128,8 +128,6 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("white", QColor(255,255,255));
         Utility::setAppQColor("black", QColor(0,0,0));
     }
-
-
 
     // DPI settings
     // TODO: http://www.qcustomplot.com/index.php/support/forum/1344
@@ -234,6 +232,7 @@ int main(int argc, char *argv[])
 #ifdef USE_MOBILE
     QApplication *a = new QApplication(argc, argv);
     app = a;
+
 
     // Fonts
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");

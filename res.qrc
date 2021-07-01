@@ -61,7 +61,6 @@
         <file>res/+theme_light/logo_white.png</file>
         <file>res/logo_white.png</file>
         <file>res/icons/bluetooth.png</file>
-        <file>res/icons/bluetooth-white.png</file>
         <file>res/icons/minimize.png</file>
         <file>res/icons/icons8-battery-100.png</file>
         <file>res/icons/fullscreen.png</file>
@@ -310,5 +309,6 @@
         <file>res/+theme_light/icons_textedit/Align Justify-96.png</file>
         <file>res/+theme_light/icons_textedit/Align Center-96.png</file>
         <file>res/+theme_light/icons_textedit/Add Image-96.png</file>
+        <file>res/+theme_light/icons/bluetooth.png</file>
     </qresource>
 </RCC>

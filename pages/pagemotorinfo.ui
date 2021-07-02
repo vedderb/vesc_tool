@@ -20,7 +20,7 @@
       <enum>QTabWidget::Triangular</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab_4">
       <attribute name="title">
@@ -109,15 +109,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ParamTable</class>
+   <extends>QTableWidget</extends>
+   <header>widgets/paramtable.h</header>
+  </customwidget>
+  <customwidget>
    <class>MRichTextEdit</class>
    <extends>QWidget</extends>
    <header>widgets/mrichtextedit.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ParamTable</class>
-   <extends>QTableWidget</extends>
-   <header>widgets/paramtable.h</header>
   </customwidget>
  </customwidgets>
  <resources>

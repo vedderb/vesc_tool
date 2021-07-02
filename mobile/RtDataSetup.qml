@@ -26,6 +26,7 @@ import QtGraphicalEffects 1.0
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: rtData
@@ -142,7 +143,7 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Layout.fillWidth: true
             Layout.preferredHeight: valMetrics.height * 4 + 20
@@ -153,12 +154,12 @@ Item {
                 anchors.top: parent.top
                 width: parent.width
                 height: 2
-                color: "#00A1E4"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Text {
                 id: valText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
@@ -169,7 +170,7 @@ Item {
 
             Text {
                 id: valText2
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
@@ -222,7 +223,7 @@ Item {
                                 spacing: 0
 
                                 Text {
-                                    color: "white"
+                                    color: Utility.getAppHexColor("lightText")
                                     text: "Odometer"
                                     font.bold: true
                                     horizontalAlignment: Text.AlignHCenter

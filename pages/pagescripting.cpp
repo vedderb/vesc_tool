@@ -44,7 +44,27 @@ PageScripting::PageScripting(QWidget *parent) :
     makeEditorConnections(ui->mainEdit);
 
     QPushButton *plusButton = new QPushButton();
-    plusButton->setIcon(QIcon("://res/icons/Plus Math-96.png"));
+    QString theme = Utility::getThemePath();
+    plusButton->setIcon(QIcon(theme +"icons/Plus Math-96.png"));
+    ui->runButton->setIcon(QIcon(theme +"icons/Circled Play-96.png"));
+    ui->runWindowButton->setIcon(QIcon(theme +"icons/Circled Play-96.png"));
+    ui->fullscreenButton->setIcon(QIcon(theme +"icons/size_off.png"));
+    ui->stopButton->setIcon(QIcon(theme +"icons/Shutdown-96.png"));
+    ui->helpButton->setIcon(QIcon(theme +"icons/Help-96.png"));
+    ui->clearConsoleButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->openRecentButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
+    ui->removeSelectedButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->clearRecentButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->openExampleButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
+    ui->exportCArrayAppButton->setIcon(QIcon(theme +"icons/Save as-96.png"));
+    ui->exportCArrayHwButton->setIcon(QIcon(theme +"icons/Save as-96.png"));
+    ui->calcSizeButton->setIcon(QIcon(theme +"icons/Calculator-96.png"));
+    ui->openQmluiAppButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
+    ui->openQmluiHwButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
+    ui->uploadButton->setIcon(QIcon(theme +"icons/Download-96.png"));
+    ui->eraseOnlyButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->clearUploadTextButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+
     plusButton->setFlat(true);
     plusButton->setText("New Tab");
     ui->fileTabs->setCornerWidget(plusButton);
@@ -113,7 +133,7 @@ PageScripting::PageScripting(QWidget *parent) :
 
     // Add close button that clears the main editor
     QPushButton *closeButton = new QPushButton();
-    closeButton->setIcon(QIcon("://res/icons/Delete-96.png"));
+    closeButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(0, QTabBar::RightSide, closeButton);
 
@@ -422,9 +442,10 @@ void PageScripting::createEditorTab(QString fileName, QString content)
 
     editor->setFileNow(fileName);
     editor->editor()->setPlainText(content);
+    QString theme = Utility::getThemePath();
 
     QPushButton *closeButton = new QPushButton();
-    closeButton->setIcon(QIcon("://res/icons/Cancel-96.png"));
+    closeButton->setIcon(QIcon(theme +"icons/Cancel-96.png"));
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(tabIndex, QTabBar::RightSide, closeButton);
 

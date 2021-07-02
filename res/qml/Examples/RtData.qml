@@ -20,13 +20,17 @@
 import QtQuick 2.5
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-
+import QtQuick.Controls.Material 2.2
+import Vedder.vesc.utility 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 import "qrc:/mobile"
 
 Item {
     anchors.fill: parent
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
 
     id: rtData
     property Commands mCommands: VescIf.commands()
@@ -108,13 +112,13 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Rectangle {
                 anchors.bottom: valText.top
                 width: parent.width
                 height: 2
-                color: "#00A1E4"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Layout.fillWidth: true

@@ -29,6 +29,19 @@ DetectFoc::DetectFoc(QWidget *parent) :
     ui(new Ui::DetectFoc)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->pushButton->setIcon(QPixmap(theme + "icons/arrow_r.png"));
+    ui->pushButton_2->setIcon(QPixmap(theme + "icons/arrow_r.png"));
+    ui->pushButton_3->setIcon(QPixmap(theme + "icons/arrow_r.png"));
+    ui->rlButton->setIcon(QPixmap(theme + "icons/rl.png"));
+    ui->lambdaButton->setIcon(QPixmap(theme + "icons/lambda.png"));
+    ui->applyAllButton->setIcon(QPixmap(theme + "icons/apply.png"));
+    ui->calcGainButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->calcKpKiButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->calcApplyLocalButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
     mLastCalcOk = false;

@@ -20,6 +20,8 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import QtQuick.Controls.Material 2.2
+import Vedder.vesc.utility 1.0
 
 import Vedder.vesc.commands 1.0
 
@@ -27,6 +29,9 @@ Item {
     property Commands mCommands: VescIf.commands()
     property var mVal
     property bool mValSet: false
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
     
     anchors.fill: parent
     anchors.margins: 10
@@ -41,7 +46,7 @@ Item {
             spacing: 0
 
             Rectangle {
-                color: "#4f4f4f"
+                color: Utility.getAppHexColor("lightBackground")
                 width: 16
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
@@ -90,7 +95,7 @@ Item {
                                 ctx.lineTo(xOfsLeft + lineStep * i, heightBars)
                             }
 
-                            ctx.strokeStyle = "#00A1E4"
+                            ctx.strokeStyle = Utility.getAppHexColor("lightAccent")
                             ctx.lineWidth = 1.2
                             ctx.stroke()
 
@@ -213,13 +218,13 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Rectangle {
                 anchors.bottom: valText.top
                 width: parent.width
                 height: 2
-                color: "#00A1E4"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Layout.fillWidth: true

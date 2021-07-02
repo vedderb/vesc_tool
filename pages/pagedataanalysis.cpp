@@ -19,6 +19,7 @@
 
 #include "pagedataanalysis.h"
 #include "ui_pagedataanalysis.h"
+#include "utility.h"
 
 PageDataAnalysis::PageDataAnalysis(QWidget *parent) :
     QWidget(parent),
@@ -45,8 +46,25 @@ void PageDataAnalysis::setVesc(VescInterface *vesc)
 
     if (mVesc) {
         ConfigParam *p = mVesc->infoConfig()->getParam("data_analysis_description");
-        if (p != 0) {
-            ui->textEdit->setHtml(p->description);
+        if (p != nullptr) {
+            QRegExp rx("(<img src=)|( width=)");
+            QStringList htmls = p->description.split(rx);
+            QStringList imgs = {"expand_off","expand_on","expand_v_off","expand_v_on","size_off", "size_on","size_off","rt_on","Upload-96","motor"};
+            QString theme = "<img src=\"" + Utility::getThemePath() + "icons/";
+            QString out;
+            if(imgs.length() > htmls.length()/2 - 1)
+            {
+                for(int i =0; i < htmls.length()-1; i+=2){
+                    out.append(htmls[i] + theme + imgs[i/2]);
+                    out.append(".png\" width=");
+                }
+                out.append(htmls.last());
+                ui->textEdit->setHtml(out);
+            }
+            else
+            {
+                ui->textEdit->setHtml(p->description);
+            }
         } else {
             ui->textEdit->setText("Data Analysis Description not found.");
         }

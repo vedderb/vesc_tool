@@ -20,6 +20,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import Vedder.vesc.utility 1.0
 
 Item {
     Layout.fillWidth: true
@@ -30,12 +31,12 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: "#9e0000"
+        color: Utility.getAppHexColor("darkAccent")
         radius: 5
 
         Text {
             anchors.centerIn: parent
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             id: name
             text: sepName
             font.bold: true

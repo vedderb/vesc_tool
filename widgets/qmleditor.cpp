@@ -5,6 +5,7 @@
 #include <QVescCompleter>
 #include <QMessageBox>
 #include <QFileDialog>
+#include "utility.h"
 
 QmlEditor::QmlEditor(QWidget *parent) :
     QWidget(parent),
@@ -12,6 +13,11 @@ QmlEditor::QmlEditor(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QString theme = Utility::getThemePath();
+    ui->searchHideButton->setIcon(QPixmap(theme + "icons/Cancel-96.png"));
+    ui->openFileButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->saveButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->saveAsButton->setIcon(QPixmap(theme + "icons/Save as-96.png"));
     ui->searchWidget->setVisible(false);
 
     ui->qmlEdit->setHighlighter(new QmlHighlighter);

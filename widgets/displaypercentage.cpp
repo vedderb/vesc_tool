@@ -70,10 +70,10 @@ void DisplayPercentage::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     QColor c_bg = Utility::getAppQColor("black");
-    QColor c_hl = Utility::getAppQColor("darkAccentColor");
+    QColor c_hl = Utility::getAppQColor("darkAccent");
     QColor c_vl = Utility::getAppQColor("red");
     QColor c_neg = Utility::getAppQColor("red");
-    QColor c_pos = Utility::getAppQColor("lightAccentColor");
+    QColor c_pos = Utility::getAppQColor("lightAccent");
     QColor c_text = Utility::getAppQColor("white");
 
     if (!isEnabled()) {

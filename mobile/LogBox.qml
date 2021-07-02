@@ -80,12 +80,12 @@ Item {
             Layout.bottomMargin: 6
             height: rtLogFileText.implicitHeight + 14
             border.width: 2
-            border.color: "#8d8d8d"
-            color: "#33a8a8a8"
+            border.color: Utility.getAppHexColor("disabledText")
+            color: Utility.getAppHexColor("normalBackground")
             radius: 3
 
             TextInput {
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 id: rtLogFileText
                 anchors.fill: parent
                 anchors.margins: 7

@@ -61,7 +61,7 @@ Item {
             Text {
                 id: text
                 Layout.fillWidth: true
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: qsTr("These are the VESCs paired to this instance of VESC Tool.")
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
@@ -107,7 +107,7 @@ Item {
 
                             Text {
                                 Layout.fillWidth: true
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: uuid
                                 wrapMode: Text.Wrap
                             }
@@ -135,7 +135,7 @@ Item {
                                     parent: ApplicationWindow.overlay
 
                                     Text {
-                                        color: "#ffffff"
+                                        color: Utility.getAppHexColor("lightText")
                                         verticalAlignment: Text.AlignVCenter
                                         anchors.fill: parent
                                         wrapMode: Text.WordWrap
@@ -258,7 +258,7 @@ Item {
         parent: ApplicationWindow.overlay
 
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -295,7 +295,7 @@ Item {
         parent: ApplicationWindow.overlay
 
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -328,12 +328,12 @@ Item {
             anchors.fill: parent
             height: 20
             border.width: 2
-            border.color: "#8d8d8d"
-            color: "#33a8a8a8"
+            border.color: Utility.getAppHexColor("disabledText")
+            color: Utility.getAppHexColor("lightBackground")
             radius: 3
             TextInput {
                 id: stringInput
-                color: "#ffffff"
+                color: Utility.getAppHexColor("lightText")
                 anchors.fill: parent
                 anchors.margins: 7
                 font.pointSize: 12

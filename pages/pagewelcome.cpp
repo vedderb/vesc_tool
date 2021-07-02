@@ -35,6 +35,13 @@ PageWelcome::PageWelcome(QWidget *parent) :
     ui(new Ui::PageWelcome)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->autoConnectButton->setIcon(QIcon(theme +"icons/Connected-96.png"));
+    ui->wizardFocSimpleButton->setIcon(QIcon(theme +"icons/Wizard-96.png"));
+    ui->wizardAppButton->setIcon(QIcon(theme +"icons/Wizard-96.png"));
+    ui->nrfPairButton->setIcon(QIcon(theme +"icons/icons8-fantasy-96.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
     ui->bgWidget->setPixmap(QPixmap("://res/bg.png"));

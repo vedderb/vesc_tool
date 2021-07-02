@@ -40,7 +40,7 @@ Item {
             spacing: 0
 
             Rectangle {
-                color: "#4f4f4f"
+                color: Utility.getAppHexColor("lightestBackground")
                 width: 16
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
@@ -89,11 +89,11 @@ Item {
                                 ctx.lineTo(xOfsLeft + lineStep * i, heightBars)
                             }
 
-                            ctx.strokeStyle = "#00A1E4"
+                            ctx.strokeStyle = Utility.getAppHexColor("lightAccent")
                             ctx.lineWidth = 1.2
                             ctx.stroke()
 
-                            ctx.fillStyle = "white"
+                            ctx.fillStyle = Utility.getAppHexColor("lightAccent")
                             ctx.textBaseline = "top"
 
                             ctx.textAlign = "start";
@@ -122,7 +122,7 @@ Item {
                             ctx.textBaseline = "middle"
 
                             for (i = 0;i < cellNum;i++) {
-                                ctx.fillStyle = "white"
+                                ctx.fillStyle = Utility.getAppHexColor("lightAccent")
 
                                 var cellW = ((vCells[i] - 3.0) / 1.2) * cellWidth
                                 if (cellW > cellWidth) {
@@ -140,7 +140,7 @@ Item {
                                              xOfsLeft + cellWidth + valMetrics.width / 2, txtY)
 
                                 if (isBal[i]) {
-                                    ctx.fillStyle = "#FF6347"
+                                    ctx.fillStyle = Utility.getAppHexColor("orange")
                                 } else {
                                     ctx.fillStyle = Qt.rgba(0, 0.9, 0, 1)
                                 }
@@ -176,7 +176,7 @@ Item {
                             var cellWidth = width - xOfsLeft - xOfsRight
 
                             for (var i = 0;i < tempNum;i++) {
-                                ctx.fillStyle = "white"
+                                ctx.fillStyle = Utility.getAppHexColor("lightAccent")
                                 ctx.textAlign = "start";
                                 ctx.textBaseline = "middle";
                                 ctx.font = '%1pt %2'.arg(valText.font.pointSize).arg(valText.font.family)
@@ -212,13 +212,13 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Rectangle {
                 anchors.bottom: valText.top
                 width: parent.width
                 height: 2
-                color: "#00A1E4"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Layout.fillWidth: true
@@ -227,7 +227,7 @@ Item {
 
             Text {
                 id: valText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: "No Data"
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter

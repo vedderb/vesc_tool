@@ -22,7 +22,8 @@ import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
-
+import QtQuick.Controls.Material 2.2
+import Vedder.vesc.utility 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
@@ -30,6 +31,9 @@ Item {
     id: rtData
     
     anchors.fill: parent
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
     
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
@@ -143,7 +147,7 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Layout.fillWidth: true
             Layout.preferredHeight: valMetrics.height * 4 + 20
@@ -154,7 +158,7 @@ Item {
                 anchors.top: parent.top
                 width: parent.width
                 height: 2
-                color: "#00A1E4"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Text {

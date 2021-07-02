@@ -21,6 +21,7 @@
 #include "ui_detectallfocdialog.h"
 #include "utility.h"
 #include "helpdialog.h"
+#include "utility.h"
 
 #include <QMessageBox>
 
@@ -30,13 +31,26 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QString theme = Utility::getThemePath();
+    ui->tabWidget->setTabIcon(0, QPixmap(theme + "icons/Wizard-96.png"));
+    ui->tabWidget->setTabIcon(1, QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->nextMotorButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->prevBattButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->nextBattButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->prevSetupButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->prevDirButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->runButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->runNoCanButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->runAdvancedButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->finishButton->setIcon(QPixmap(theme + "icons/Circled Ok-96.png"));
+
+
     mVesc = vesc;
     mRejectOk = true;
     mPulleyMotorOld = 1;
     mPulleyWheelOld = 1;
 
     ui->dirSetup->setVesc(mVesc);
-
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
@@ -61,7 +75,7 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
 
     item = new QListWidgetItem;
     item->setText(tr("Large Outrunner (~2000 g)"));
-    item->setIcon(QIcon("://res/icons/motor.png"));
+    item->setIcon(QIcon(theme +"icons/motor.png"));
     item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 700, 4000, 14)));
     ui->motorList->addItem(item);
 
@@ -79,7 +93,7 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
 
     item = new QListWidgetItem;
     item->setText(tr("Large Inrunner (~2000 g)"));
-    item->setIcon(QIcon("://res/icons/motor.png"));
+    item->setIcon(QIcon(theme +"icons/motor.png"));
     item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 1000, 4000, 4)));
     ui->motorList->addItem(item);
 

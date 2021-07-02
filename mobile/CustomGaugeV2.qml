@@ -34,7 +34,7 @@ Item {
     property string tickmarkSuffix: ""
     property double labelStep: 10
     property double tickmarkScale: 1
-    property color traceColor: "#606060"
+    property color traceColor: Utility.getAppHexColor("lightestBackground")
     property double maxAngle: 144
     property double minAngle: -144
 
@@ -75,12 +75,12 @@ Item {
                     ctx.reset()
                     ctx.beginPath()
 
-                    ctx.fillStyle = "#30202020"
+                    ctx.fillStyle = Utility.getAppHexColor("normalBackground")
                     ctx.arc(outerRadius, outerRadius, outerRadius, 0, Math.PI * 2)
                     ctx.fill()
 
                     ctx.beginPath();
-                    ctx.strokeStyle = "#50202020"
+                    ctx.strokeStyle = Utility.getAppHexColor("darkBackground")
                     ctx.lineWidth = outerRadius
                     ctx.arc(outerRadius,
                             outerRadius,
@@ -104,7 +104,7 @@ Item {
                     ctx.stroke();
 
                     ctx.beginPath();
-                    ctx.strokeStyle = "darkGray"
+                    ctx.strokeStyle = Utility.getAppHexColor("normalText")
                     ctx.lineWidth = 1
                     ctx.arc(outerRadius,
                             outerRadius,
@@ -114,7 +114,7 @@ Item {
 
                     if (gauge.value < 0) {
                         ctx.beginPath();
-                        ctx.strokeStyle = "#0ddc00"
+                        ctx.strokeStyle = Utility.getAppHexColor("lightAccent")
                         ctx.lineWidth = outerRadius * 0.1
                         ctx.arc(outerRadius,
                                 outerRadius,
@@ -124,7 +124,7 @@ Item {
                         ctx.stroke();
                     } else {
                         ctx.beginPath();
-                        ctx.strokeStyle = "#0ddc00"
+                        ctx.strokeStyle = Utility.getAppHexColor("lightAccent")
                         ctx.lineWidth = outerRadius * 0.1
                         ctx.arc(outerRadius,
                                 outerRadius,
@@ -142,7 +142,7 @@ Item {
                 Rectangle {
                     id: needle
                     height: parent.height
-                    color: "#08b300"
+                    color: Utility.getAppHexColor("darkAccent")
                     width: height * 0.13
                     antialiasing: true
                     radius: 10
@@ -153,7 +153,7 @@ Item {
                     radius: 5
                     samples: 10
                     spread: 0.6
-                    color: "#0bff00"
+                    color: Utility.getAppHexColor("lightAccent")
                     source: needle
                 }
             }
@@ -166,7 +166,7 @@ Item {
                     text: gauge.value.toFixed(0)
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.3
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     antialiasing: true
                 }
 
@@ -177,7 +177,7 @@ Item {
                     anchors.top: speedLabel.bottom
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.15
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     antialiasing: true
                 }
 
@@ -191,7 +191,7 @@ Item {
                     anchors.bottomMargin: outerRadius * 0.05
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.15
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     antialiasing: true
                 }
             }
@@ -214,7 +214,7 @@ Item {
             tickmarkLabel:  Text {
                 font.pixelSize: outerRadius * 0.15
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix
-                color: isCovered(styleData.value) ? "white" : "gray"
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("lightestBackground")
                 antialiasing: true
             }
 
@@ -224,7 +224,7 @@ Item {
 
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? "white" : "gray"
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("lightestBackground")
             }
 
             minorTickmark: Rectangle {
@@ -233,7 +233,7 @@ Item {
 
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? "white" : "darkGray"
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
             }
         }
     }

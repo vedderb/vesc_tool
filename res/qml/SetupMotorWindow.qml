@@ -23,6 +23,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
 import QtQuick.Window 2.2
 
+import Vedder.vesc.utility 1.0
 import "qrc:/mobile"
 
 ApplicationWindow {
@@ -32,6 +33,9 @@ ApplicationWindow {
     width: 500
     height: 800
     title: qsTr("Motor Setup")
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
 
     Component.onCompleted: {
         x = Screen.width / 2 - width / 2

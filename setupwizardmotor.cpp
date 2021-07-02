@@ -49,7 +49,7 @@ SetupWizardMotor::SetupWizardMotor(VescInterface *vesc, QWidget *parent)
     setWindowTitle(tr("Motor Setup Wizard"));
 
     mSideLabel = new AspectImgLabel(Qt::Vertical);
-    mSideLabel->setPixmap(QPixmap("://res/logo_wizard.png"));
+    mSideLabel->setPixmap(QPixmap("://res/logo_vertical.png"));
     mSideLabel->setScaledContents(true);
     setSideWidget(mSideLabel);
 

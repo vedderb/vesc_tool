@@ -41,6 +41,22 @@ PageSettings::PageSettings(QWidget *parent) :
             this, SLOT(timerSlot()));
 
     ui->setupUi(this);
+    QString theme = Utility::getThemePath();
+
+    ui->pollRestoreButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+    ui->pathScriptInputChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->pathRtLogChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->pathScriptOutputChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->jsConf1Button->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->jsConf2Button->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->jsConf3Button->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->jsConf4Button->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->jsConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->jsScanButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->jsResetConfigButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+
+
+
     layout()->setContentsMargins(0, 0, 0, 0);
     ui->uiScaleBox->setValue(mSettings.value("app_scale_factor", 1.0).toDouble());
     ui->uiPlotWidthBox->setValue(mSettings.value("plot_line_width",4.0).toDouble());
@@ -51,6 +67,7 @@ PageSettings::PageSettings(QWidget *parent) :
     ui->pollAppDataBox->setValue(mSettings.value("poll_rate_app_data", 20.0).toDouble());
     ui->pollImuDataBox->setValue(mSettings.value("poll_rate_imu_data", 50.0).toDouble());
     ui->pollBmsDataBox->setValue(mSettings.value("poll_rate_bms_data", 10.0).toDouble());
+    ui->darkModeBox->setChecked(Utility::isDarkMode());
 
 #ifdef HAS_GAMEPAD
     auto confAxis = [](QGamepad *gp, QGamepadManager::GamepadAxis axis) {
@@ -389,4 +406,9 @@ void PageSettings::on_pollRestoreButton_clicked()
     ui->pollAppDataBox->setValue(20.0);
     ui->pollImuDataBox->setValue(50.0);
     ui->pollBmsDataBox->setValue(10.0);
+}
+
+void PageSettings::on_darkModeBox_toggled(bool checked)
+{
+    Utility::setDarkMode(checked);
 }

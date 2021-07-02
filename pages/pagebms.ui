@@ -229,22 +229,22 @@
          </item>
          <item row="12" column="0">
           <property name="text">
-           <string> </string>
+           <string/>
           </property>
          </item>
          <item row="13" column="0">
           <property name="text">
-           <string> </string>
+           <string/>
           </property>
          </item>
          <item row="14" column="0">
           <property name="text">
-           <string> </string>
+           <string/>
           </property>
          </item>
          <item row="15" column="0">
           <property name="text">
-           <string> </string>
+           <string/>
           </property>
          </item>
         </widget>
@@ -259,12 +259,20 @@
            <property name="text">
             <string>Reset Ah</string>
            </property>
+           <property name="icon">
+            <iconset resource="../res.qrc">
+             <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="resetWhButton">
            <property name="text">
             <string>Reset Wh</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../res.qrc">
+             <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
            </property>
           </widget>
          </item>
@@ -278,12 +286,20 @@
              <property name="text">
               <string>Bal On</string>
              </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="balOffButton">
              <property name="text">
               <string>Bal Off</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/Stop-96.png</normaloff>:/res/icons/Stop-96.png</iconset>
              </property>
             </widget>
            </item>
@@ -293,6 +309,10 @@
           <widget class="QPushButton" name="zeroCurrentButton">
            <property name="text">
             <string>Cal Zero Current</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../res.qrc">
+             <normaloff>:/res/icons/Refresh-96.png</normaloff>:/res/icons/Refresh-96.png</iconset>
            </property>
           </widget>
          </item>
@@ -306,12 +326,20 @@
              <property name="text">
               <string>Chg En</string>
              </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="chgDisButton">
              <property name="text">
               <string>Chg Dis</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../res.qrc">
+               <normaloff>:/res/icons/Stop-96.png</normaloff>:/res/icons/Stop-96.png</iconset>
              </property>
             </widget>
            </item>
@@ -352,6 +380,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

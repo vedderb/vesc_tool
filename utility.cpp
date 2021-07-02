@@ -47,8 +47,8 @@ QMap<QString, QColor> Utility::mAppColors = {
     {"normalText", QColor(180,180,180)},
     {"lightText", QColor(220,220,220)},
     {"disabledText", QColor(127,127,127)},
-    {"lightAccentColor", QColor(129,212,250)},
-    {"darkAccentColor", QColor(71,117,137)},
+    {"lightAccent", QColor(129,212,250)},
+    {"darkAccent", QColor(71,117,137)},
     {"pink", QColor(219,98,139)},
     {"red", QColor(200,52,52)},
     {"orange", QColor(206,125,44)},
@@ -71,6 +71,8 @@ QMap<QString, QColor> Utility::mAppColors = {
     {"plot_graph10", QColor(219,98,139)},
     {"plot_graph11", QColor(250,250,200)},
 };
+
+bool Utility::isDark = false;
 
 Utility::Utility(QObject *parent) : QObject(parent)
 {
@@ -1963,7 +1965,7 @@ QString Utility::getAppHexColor(QString colorName)
 
 void Utility::setPlotColors(QCustomPlot* plot)
 {
-    plot->setBackground(QBrush(Utility::getAppQColor("darkBackground")));
+    plot->setBackground(QBrush(Utility::getAppQColor("plotBackground")));
 
     plot->xAxis->setLabelColor(Utility::getAppQColor("lightText"));
     plot->xAxis->setBasePen(QPen(Utility::getAppQColor("lightText")));
@@ -1993,8 +1995,29 @@ void Utility::setPlotColors(QCustomPlot* plot)
     plot->yAxis2->setTickLabelColor(Utility::getAppQColor("lightText"));
     plot->yAxis2->setBasePen(QPen(Utility::getAppQColor("lightText")));
 
-    plot->legend->setBrush(Utility::getAppQColor("darkBackground"));
+    plot->legend->setBrush(Utility::getAppQColor("normalBackground"));
     plot->legend->setTextColor(Utility::getAppQColor("lightText"));
-    plot->legend->setBorderPen(QPen(Utility::getAppQColor("lightBackground")));
+    plot->legend->setBorderPen(QPen(Utility::getAppQColor("darkBackground")));
 }
 
+void Utility::setDarkMode(bool isDarkSetting)
+{
+    isDark = isDarkSetting;
+}
+
+bool Utility::isDarkMode()
+{
+  return isDark;
+}
+
+QString Utility::getThemePath()
+{
+    if(isDark)
+    {
+        return ":/res/";
+    }
+    else
+    {
+        return ":/res/+theme_light/";
+    }
+}

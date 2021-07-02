@@ -33,7 +33,7 @@ Item {
     property Commands mCommands: VescIf.commands()
 
     Rectangle {
-        color: Qt.rgba(66 / 255, 66 / 255, 66 / 255, 1)
+        color: Utility.getAppHexColor("darkBackground")
         anchors.fill: parent
     }
 
@@ -60,7 +60,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
             Layout.topMargin: 20
             Layout.bottomMargin: 20
-            source: "qrc:/res/logo_white.png"
+            source: "qrc" + Utility.getThemePath() + "/logo_white.png"
         }
 
         RowLayout {
@@ -79,7 +79,7 @@ Item {
             Text {
                 id: text
                 Layout.fillWidth: true
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: qsTr("Devices Found")
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
@@ -141,7 +141,7 @@ Item {
                 Rectangle {
                     width: bleList.width
                     height: 120
-                    color: Qt.rgba(48 / 255, 48 / 255, 48 / 255, 1)
+                    color: Utility.getAppHexColor("normalBackground")
                     radius: 10
 
                     RowLayout {
@@ -151,8 +151,8 @@ Item {
                         Rectangle {
                             Layout.leftMargin: 10
                             Layout.fillWidth: true
-
-                            color: preferred ? Qt.rgba(71 / 255, 117 / 255, 137 / 255, 1) : "#33a8d9ff"
+                            opacity: 1.0
+                            color: preferred ? ("#55" + Utility.getAppHexColor("lightAccent").slice(1)) : (Utility.getAppHexColor("lightestBackground") )
                             height: column.height + 10
                             radius: height / 2
 
@@ -166,7 +166,7 @@ Item {
                                     Layout.preferredWidth: 40
                                     Layout.preferredHeight: 40
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: "qrc:/res/icons/bluetooth.png"
+                                    source: "qrc" + Utility.getThemePath() + "icons/bluetooth.png"
                                 }
 
                                 Text {
@@ -174,7 +174,7 @@ Item {
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                                     text: name
                                     horizontalAlignment: Text.AlignHCenter
-                                    color: "white"
+                                    color: Utility.getAppHexColor("lightText")
                                     wrapMode: Text.WordWrap
                                 }
                             }
@@ -184,7 +184,7 @@ Item {
                             Text {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.rightMargin: 5
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Preferred"
                                 horizontalAlignment: Text.AlignHCenter
                             }
@@ -254,7 +254,7 @@ Item {
 
             for (var addr in devs) {
                 var name = devs[addr]
-                if(Qt.platform.os == "ios") {
+                if(Qt.platform.os == "ios" || "mac") {
                     var ids = addr.split('-')
                     var shortAddr = ids[0].slice(1,3) + '-' + ids[1].slice(0,2) + '-' +
                             ids[2].slice(0,2) + '-' + ids[3].slice(0,2) + '-' + ids[4].slice(0,2)
@@ -340,12 +340,12 @@ Item {
             anchors.fill: parent
             height: stringInput.implicitHeight + 14
             border.width: 2
-            border.color: "#8d8d8d"
-            color: "#33a8a8a8"
+            border.color: Utility.getAppHexColor("lightestBackground")
+            color: Utility.getAppHexColor("normalBackground")
             radius: 3
             TextInput {
                 id: stringInput
-                color: "#ffffff"
+                color: Utility.getAppHexColor("lightText")
                 anchors.fill: parent
                 anchors.margins: 7
                 font.pointSize: 12
@@ -374,7 +374,7 @@ Item {
         parent: ApplicationWindow.overlay
 
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

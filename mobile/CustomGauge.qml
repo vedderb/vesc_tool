@@ -24,6 +24,7 @@ import QtQuick.Extras 1.4
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Material 2.2
+import Vedder.vesc.utility 1.0
 
 Item {
     property alias minimumValue: gauge.minimumValue
@@ -34,7 +35,7 @@ Item {
     property string tickmarkSuffix: ""
     property double labelStep: 10
     property double tickmarkScale: 1
-    property color traceColor: "#606060"
+    property color traceColor: Utility.getAppHexColor("lightestBackground")
     property double maxAngle: 144
     property double minAngle: -144
     property double precision: 0
@@ -107,7 +108,7 @@ Item {
                     ctx.stroke();
 
                     ctx.beginPath();
-                    ctx.strokeStyle = "darkGray"
+                    ctx.strokeStyle = Utility.getAppHexColor("normalText")
                     ctx.lineWidth = 1
                     ctx.arc(outerRadius,
                             outerRadius,
@@ -146,7 +147,7 @@ Item {
                     text: gauge.value.toFixed(precision)
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.3
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     antialiasing: true
                 }
 
@@ -157,7 +158,7 @@ Item {
                     anchors.top: speedLabel.bottom
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.15
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     antialiasing: true
                 }
 
@@ -170,7 +171,7 @@ Item {
                     anchors.bottomMargin: outerRadius * 0.1
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.15
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     antialiasing: true
                 }
             }
@@ -193,7 +194,7 @@ Item {
             tickmarkLabel:  Text {
                 font.pixelSize: outerRadius * 0.15
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix
-                color: isCovered(styleData.value) ? "white" : "darkGray"
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
                 antialiasing: true
             }
 
@@ -203,7 +204,7 @@ Item {
 
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? "white" : "darkGray"
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
             }
 
             minorTickmark: Rectangle {
@@ -212,7 +213,7 @@ Item {
 
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? "white" : "darkGray"
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
             }
         }
     }

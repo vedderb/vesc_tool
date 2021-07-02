@@ -74,6 +74,16 @@ Item {
                 checked: VescIf.getLoadQmlUiOnConnect()
             }
 
+            CheckBox {
+                id: darkModeBox
+                Layout.fillWidth: true
+                text: "Use Dark Mode"
+                checked: Utility.isDarkMode()
+                onCheckedChanged: {
+                    Utility.setDarkMode(checked)
+                }
+            }
+
             Item {
                 // Spacer
                 Layout.fillWidth: true

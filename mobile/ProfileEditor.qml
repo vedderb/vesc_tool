@@ -23,6 +23,7 @@ import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: editor
@@ -159,7 +160,7 @@ Item {
                     spacing: 0
 
                     Text {
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: "Profile Name"
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -173,13 +174,13 @@ Item {
                         Layout.bottomMargin: 20
                         height: nameInput.implicitHeight + 14
                         border.width: 2
-                        border.color: "#8d8d8d"
+                        border.color: Utility.getAppHexColor("disabledText")
                         color: "#33a8a8a8"
                         radius: 3
                         TextInput {
                             id: nameInput
                             text: ""
-                            color: "#ffffff"
+                            color: Utility.getAppHexColor("lightText")
                             anchors.fill: parent
                             anchors.margins: 7
                             font.pointSize: 12
@@ -188,7 +189,7 @@ Item {
                     }
 
                     Text {
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: "Speed Limit"
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -222,7 +223,7 @@ Item {
                     }
 
                     Text {
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: "Motor Current Scale"
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter

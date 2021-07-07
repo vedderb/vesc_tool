@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("vesc-project.com");
     QCoreApplication::setApplicationName("VESC Tool");   
     QSettings set;   
-    bool isDark = set.value("darkMode", false).toBool();
+    bool isDark = set.value("darkMode", true).toBool();
     Utility::setDarkMode(isDark);
     if(isDark){
         Utility::setAppQColor("lightestBackground", QColor(80,80,80));

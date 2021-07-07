@@ -38,7 +38,6 @@ ApplicationWindow {
     Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
     Material.accent: Utility.getAppHexColor("lightAccent")
 
-
     visible: true
     width: 500
     height: 850

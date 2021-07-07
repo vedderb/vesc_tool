@@ -58,8 +58,8 @@ Item {
             Layout.preferredWidth: Math.min(column.width, column.height) * 0.8
             Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
             Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-            Layout.topMargin: 20
-            Layout.bottomMargin: 20
+            Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
+            Layout.bottomMargin: 0
             source: "qrc" + Utility.getThemePath() + "/logo_white.png"
         }
 

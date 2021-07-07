@@ -55,6 +55,8 @@ Item {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 source: "qrc" + Utility.getThemePath() + "/logo_white.png"
                 antialiasing: true
+                Layout.bottomMargin: 0
+                Layout.topMargin: Math.min(topItem.width, topItem.height) * 0.025
             }
 
             GroupBox {

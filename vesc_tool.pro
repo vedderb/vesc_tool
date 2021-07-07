@@ -9,7 +9,7 @@ VT_VERSION = 3.01
 VT_INTRO_VERSION = 1
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 22
+VT_IS_TEST_VERSION = 24
 
 VT_ANDROID_VERSION_ARMV7 = 95
 VT_ANDROID_VERSION_ARM64 = 96
@@ -40,8 +40,7 @@ ios: {
 }}
 
 # Build mobile GUI
-# CONFIG += build_mobile
-
+#CONFIG += build_mobile
 
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
@@ -54,7 +53,9 @@ ios: {
 # sudo service bluetooth restart
 
 # Bluetooth available
-DEFINES += HAS_BLUETOOTH
+!win32: {
+    DEFINES += HAS_BLUETOOTH
+}
 
 # CAN bus available
 # Adding serialbus to Qt seems to break the serial port on static builds. TODO: Figure out why.

@@ -114,5 +114,7 @@
         <name>Dialog</name>
         <name>Utility</name>
         <name>ApplicationWindow</name>
+        <name>ProgressBar</name>
+        <name>Gamepad</name>
     </section>
 </root>

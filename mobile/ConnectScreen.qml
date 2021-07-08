@@ -254,7 +254,7 @@ Item {
 
             for (var addr in devs) {
                 var name = devs[addr]
-                if(Qt.platform.os == "ios" || "mac") {
+                if(Qt.platform.os == "ios" || Qt.platform.os == "mac") {
                     var ids = addr.split('-')
                     var shortAddr = ids[0].slice(1,3) + '-' + ids[1].slice(0,2) + '-' +
                             ids[2].slice(0,2) + '-' + ids[3].slice(0,2) + '-' + ids[4].slice(0,2)

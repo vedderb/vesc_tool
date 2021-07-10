@@ -42,8 +42,20 @@ Item {
 
     function openDialog() {
         dialog.open()
-        updateUsageListParams()
-        loadDefaultDialog.open()
+        openTimer.start()
+    }
+
+    Timer {
+        id: openTimer
+
+        running: false
+        interval: 100
+        repeat: false
+
+        onTriggered: {
+            updateUsageListParams()
+            loadDefaultDialog.open()
+        }
     }
 
     function updateUsageListParams() {

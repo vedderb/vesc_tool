@@ -19,6 +19,7 @@
 
 #include "pagecontrollers.h"
 #include "ui_pagecontrollers.h"
+#include "utility.h"
 
 PageControllers::PageControllers(QWidget *parent) :
     QWidget(parent),
@@ -27,6 +28,9 @@ PageControllers::PageControllers(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
+
+    QString theme = Utility::getThemePath();
+    ui->posOffsetApplyButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
 }
 
 PageControllers::~PageControllers()
@@ -53,5 +57,13 @@ void PageControllers::reloadParams()
     if (mVesc) {
         ui->paramTab->clearParams();
         ui->paramTab->addParamSubgroup(mVesc->mcConfig(), "pid controllers", "general");
+    }
+}
+
+void PageControllers::on_posOffsetApplyButton_clicked()
+{
+    if (mVesc) {
+        mVesc->commands()->sendTerminalCmdSync(QString("update_pid_pos_offset %1 1").arg(ui->posOffsetBox->value()));
+        mVesc->commands()->getMcconf();
     }
 }

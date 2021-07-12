@@ -2642,6 +2642,27 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </gpd_current_ki>
+        <sp_pid_loop_rate>
+            <longName>PID Loop Rate</longName>
+            <type>4</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Rate at which the position and speed controllers run.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_SP_PID_LOOP_RATE</cDefine>
+            <valInt>5</valInt>
+            <enumNames>25 Hz</enumNames>
+            <enumNames>50 Hz</enumNames>
+            <enumNames>100 Hz</enumNames>
+            <enumNames>250 Hz</enumNames>
+            <enumNames>500 Hz</enumNames>
+            <enumNames>1000 Hz</enumNames>
+            <enumNames>2500 Hz</enumNames>
+            <enumNames>5000 Hz</enumNames>
+            <enumNames>10000 Hz</enumNames>
+        </sp_pid_loop_rate>
         <s_pid_kp>
             <longName>Speed PID Kp</longName>
             <type>1</type>
@@ -3340,6 +3361,12 @@ p, li { white-space: pre-wrap; }
             <enumNames>Unused</enumNames>
             <enumNames>On when running</enumNames>
             <enumNames>On when not running</enumNames>
+            <enumNames>Temp motor &gt; 50 C</enumNames>
+            <enumNames>Temp mosfet &gt; 50 C</enumNames>
+            <enumNames>Temp motor &gt; 70 C</enumNames>
+            <enumNames>Temp mosfet &gt; 70 C</enumNames>
+            <enumNames>Temp motor or mosfet &gt; 50 C</enumNames>
+            <enumNames>Temp motor or mosfet &gt; 70 C</enumNames>
         </m_out_aux_mode>
         <m_motor_temp_sens_type>
             <longName>Motor Temperature Sensor Type</longName>
@@ -3994,6 +4021,7 @@ p, li { white-space: pre-wrap; }
         <ser>gpd_current_filter_const</ser>
         <ser>gpd_current_kp</ser>
         <ser>gpd_current_ki</ser>
+        <ser>sp_pid_loop_rate</ser>
         <ser>s_pid_kp</ser>
         <ser>s_pid_ki</ser>
         <ser>s_pid_kd</ser>
@@ -4342,6 +4370,8 @@ p, li { white-space: pre-wrap; }
             <subgroup>
                 <subgroupName>General</subgroupName>
                 <subgroupParams>
+                    <param>::sep::Common</param>
+                    <param>sp_pid_loop_rate</param>
                     <param>::sep::Speed Controller</param>
                     <param>s_pid_kp</param>
                     <param>s_pid_ki</param>

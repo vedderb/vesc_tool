@@ -39,6 +39,9 @@ public:
     void setVesc(VescInterface *vesc);
     void reloadParams();
 
+private slots:
+    void on_posOffsetApplyButton_clicked();
+
 private:
     Ui::PageControllers *ui;
     VescInterface *mVesc;

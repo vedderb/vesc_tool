@@ -35,9 +35,6 @@ ApplicationWindow {
     property ConfigParams mAppConf: VescIf.appConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
 
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
-
     visible: true
     width: 500
     height: 850

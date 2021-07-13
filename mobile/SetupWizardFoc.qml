@@ -31,9 +31,6 @@ import Vedder.vesc.utility 1.0
 Item {
     id: topItem
 
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
-
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
     property var dialogParent: ApplicationWindow.overlay

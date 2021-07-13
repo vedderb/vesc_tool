@@ -82,7 +82,10 @@ int main(int argc, char *argv[])
     QSettings set;   
     bool isDark = set.value("darkMode", true).toBool();
     Utility::setDarkMode(isDark);
-    if(isDark){
+
+    if (isDark) {
+        qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2_dark.conf");
+
         Utility::setAppQColor("lightestBackground", QColor(80,80,80));
         Utility::setAppQColor("lightBackground", QColor(72,72,72));
         Utility::setAppQColor("normalBackground", QColor(48,48,48));
@@ -104,7 +107,9 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("magenta", QColor(157,127,210));
         Utility::setAppQColor("white", QColor(255,255,255));
         Utility::setAppQColor("black", QColor(0,0,0));
-    }else{
+    } else {
+        qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2.conf");
+
         Utility::setAppQColor("lightestBackground", QColor(200,200,200));
         Utility::setAppQColor("lightBackground", QColor(225,225,225));
         Utility::setAppQColor("normalBackground", QColor(240,240,240));

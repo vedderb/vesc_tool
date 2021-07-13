@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
+        <file>qtquickcontrols2_dark.conf</file>
     </qresource>
     <qresource prefix="/mobile">
         <file>main.qml</file>

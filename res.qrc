@@ -310,5 +310,6 @@
         <file>res/+theme_light/icons_textedit/Align Center-96.png</file>
         <file>res/+theme_light/icons_textedit/Add Image-96.png</file>
         <file>res/+theme_light/icons/bluetooth.png</file>
+        <file>res/other_fw/vesc_power_switch_120.bin</file>
     </qresource>
 </RCC>

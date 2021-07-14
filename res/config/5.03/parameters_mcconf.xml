@@ -2730,7 +2730,7 @@ p, li { white-space: pre-wrap; }
             <vTx>9</vTx>
         </s_pid_kd>
         <s_pid_kd_filter>
-            <longName>Speed PID Kd Filer</longName>
+            <longName>Speed PID Kd Filter</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2918,7 +2918,7 @@ p, li { white-space: pre-wrap; }
             <vTx>9</vTx>
         </p_pid_kd_proc>
         <p_pid_kd_filter>
-            <longName>Position PID Kd Filer</longName>
+            <longName>Position PID Kd Filter</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;

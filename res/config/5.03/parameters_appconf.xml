@@ -299,7 +299,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The APP to use. With multiple VESC connected over CAN only the master needs to have an app to use set up. Notice that using the NRF nunchuk needs the NRF app.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_APP_TO_USE</cDefine>
-            <valInt>3</valInt>
+            <valInt>1</valInt>
             <enumNames>No App</enumNames>
             <enumNames>PPM</enumNames>
             <enumNames>ADC</enumNames>
@@ -498,6 +498,18 @@ p, li { white-space: pre-wrap; }
             <cDefine>APPCONF_PPM_SAFE_START</cDefine>
             <valInt>1</valInt>
         </app_ppm_conf.safe_start>
+        <app_ppm_conf.safe_start_ignore_motor_faults>
+            <longName>Safe Start Ignore Motor Faults</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;When true, safe start ignores motor faults and will only apply after boot and after configuration updates. Useful if you have an application with frequent motor faults that needs quick recovery.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_PPM_SAFE_START_IGNORE_MOTOR_FAULTS</cDefine>
+            <valInt>0</valInt>
+        </app_ppm_conf.safe_start_ignore_motor_faults>
         <app_ppm_conf.throttle_exp>
             <longName>Throttle Expo</longName>
             <type>1</type>
@@ -3653,6 +3665,7 @@ p, li { white-space: pre-wrap; }
         <ser>app_ppm_conf.pulse_center</ser>
         <ser>app_ppm_conf.median_filter</ser>
         <ser>app_ppm_conf.safe_start</ser>
+        <ser>app_ppm_conf.safe_start_ignore_motor_faults</ser>
         <ser>app_ppm_conf.throttle_exp</ser>
         <ser>app_ppm_conf.throttle_exp_brake</ser>
         <ser>app_ppm_conf.throttle_exp_mode</ser>
@@ -3833,6 +3846,7 @@ p, li { white-space: pre-wrap; }
                     <param>app_ppm_conf.ctrl_type</param>
                     <param>app_ppm_conf.median_filter</param>
                     <param>app_ppm_conf.safe_start</param>
+                    <param>app_ppm_conf.safe_start_ignore_motor_faults</param>
                     <param>app_ppm_conf.pid_max_erpm</param>
                     <param>app_ppm_conf.ramp_time_pos</param>
                     <param>app_ppm_conf.ramp_time_neg</param>

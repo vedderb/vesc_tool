@@ -372,6 +372,22 @@ void PageFirmware::uploadFw(bool allOverCan)
                                   tr("The VESC is not connected. Please connect it."));
             return;
         }
+        if (!mVesc->deserializeFailedSinceConnected() && (mVesc->appConfig()->getParamEnum("app_to_use") == 9)) {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::warning(this,
+                                         tr("Warning"),
+                                         tr("Uploading new firmware while the Balance App is active "
+                                            "can be dangerous. Switch to UART App instead?"),
+                                         QMessageBox::Yes | QMessageBox::No | QMessageBox::Abort, QMessageBox::Yes);
+            if (reply == QMessageBox::Yes) {
+                mVesc->commands()->getAppConf();
+                mVesc->appConfig()->updateParamEnum("app_to_use", 3);
+                mVesc->commands()->setAppConf();
+            }
+            else if (reply == QMessageBox::Abort) {
+                return;
+            }
+        }
 
         QFile file;
 
@@ -455,8 +471,8 @@ void PageFirmware::uploadFw(bool allOverCan)
             reply = QMessageBox::warning(this,
                                          tr("Warning"),
                                          tr("Uploading new firmware will clear all settings on your VESC "
-                                            "and you have to do the configuration again. Do you want to "
-                                            "continue?"),
+                                            "and you have to do the configuration again or restore it from "
+                                            "a backup. Do you want to continue?"),
                                          QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         } else if ((ui->fwTabWidget->currentIndex() == 0 && ui->hwList->count() > 1) || ui->fwTabWidget->currentIndex() == 1) {
             reply = QMessageBox::warning(this,
@@ -493,9 +509,15 @@ void PageFirmware::uploadFw(bool allOverCan)
             if (!isBootloader && fwRes) {
                 QMessageBox::warning(this,
                                      tr("Warning"),
-                                     tr("The firmware upload is done. You must wait at least "
+                                     tr("The firmware upload is almost done. You must wait at least "
                                         "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
-                                        "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
+                                        "VESC will become bricked. If that happens you need a SWD programmer to recover it."
+                                        ));
+                QMessageBox::warning(this,
+                                     tr("Reminder"),
+                                     tr("The configuration on your VESC has been reset to defaults. "
+                                        "Don't forget to reconnect to your VESC and restore its configuration."
+                                        ));
             }
         }
     }

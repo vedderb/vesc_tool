@@ -1376,6 +1376,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     int uploadSize = 2;
     int compChunks = 0;
     int nonCompChunks = 0;
+    int skipChunks = 0;
 
     if (!isBootloader) {
         quint16 crc = Packet::crc16((const unsigned char*)newFirmware.constData(),
@@ -1387,6 +1388,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     }
 
     int lzoFailures = 0;
+    const int chunkSize = 384;
     while (newFirmware.size() > 0) {
         if (mCancelFwUpload) {
             mFwUploadProgress = -1.0;
@@ -1395,52 +1397,63 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             return false;
         }
 
-        const int chunkSize = 384;
-
         int sz = newFirmware.size() > chunkSize ? chunkSize : newFirmware.size();
 
         QByteArray in = newFirmware.mid(0, sz);
-        std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
-        unsigned char out[1000];
-        std::size_t out_len = sz;
 
-        if (isLzo && supportsLzo) {
-            lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out,outMaxSize, out_len);
-            if (error < lzokay::EResult::Success) {
-                qWarning() << "LZO Compress Error" << int(error);
-                isLzo = false;
+        bool hasData = false;
+        for (auto b: in) {
+            if (b != (char)0xff) {
+                hasData = true;
+                break;
             }
         }
 
         int res = 1;
-        if (isLzo && supportsLzo && (out_len + 2) < uint32_t(sz)) {
-            compChunks++;
-            uploadSize += out_len + 2;
-            res = writeChunk(uint32_t(addr), QByteArray((const char*)out, int(out_len)),
-                             true, uint16_t(sz));
+        if (hasData) {
+            std::size_t outMaxSize = chunkSize + chunkSize / 16 + 64 + 3;
+            unsigned char out[1000];
+            std::size_t out_len = sz;
 
-            if (res != 1) {
-                res = writeChunk(uint32_t(addr), in, false, 0);
+            if (isLzo && supportsLzo) {
+                lzokay::EResult error = lzokay::compress((const uint8_t*)in.constData(), sz, out,outMaxSize, out_len);
+                if (error < lzokay::EResult::Success) {
+                    qWarning() << "LZO Compress Error" << int(error);
+                    isLzo = false;
+                }
+            }
 
-                // This actually can happen for at least one block of data, which is strange. Probably some
-                // incompatibility between lzokay and minilzo. TODO: figure out what the problem is.
-                if (res == 1) {
-                    qWarning() << "Writing LZO failed, but regular write was OK.";
-                    qWarning() << out_len << sz;
-                    lzoFailures++;
+            if (isLzo && supportsLzo && (out_len + 2) < uint32_t(sz)) {
+                compChunks++;
+                uploadSize += out_len + 2;
+                res = writeChunk(uint32_t(addr), QByteArray((const char*)out, int(out_len)),
+                                 true, uint16_t(sz));
 
-                    if (lzoFailures > 3) {
-                        qWarning() << "Lzo does not seem to work with the current FW, disabling it for this upload.";
-                        supportsLzo = false;
+                if (res != 1) {
+                    res = writeChunk(uint32_t(addr), in, false, 0);
+
+                    // This actually can happen for at least one block of data, which is strange. Probably some
+                    // incompatibility between lzokay and minilzo. TODO: figure out what the problem is.
+                    if (res == 1) {
+                        qWarning() << "Writing LZO failed, but regular write was OK.";
+                        qWarning() << out_len << sz;
+                        lzoFailures++;
+
+                        if (lzoFailures > 3) {
+                            qWarning() << "Lzo does not seem to work with the current FW, disabling it for this upload.";
+                            supportsLzo = false;
+                        }
                     }
+                } else {
+                    lzoFailures = 0;
                 }
             } else {
-                lzoFailures = 0;
+                nonCompChunks++;
+                uploadSize += sz;
+                res = writeChunk(uint32_t(addr), in, false, 0);
             }
         } else {
-            nonCompChunks++;
-            uploadSize += sz;
-            res = writeChunk(uint32_t(addr), in, false, 0);
+            skipChunks++;
         }
 
         newFirmware.remove(0, sz);
@@ -1478,8 +1491,10 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
 
     if (supportsLzo && isLzo) {
         qDebug() << "Uploaded:" << uploadSize << "Initial Size:" << szTot << "Compression Ratio:"
-                 << double(uploadSize) / double(szTot) << "Compressed chunks:" << compChunks
-                 << "Incompressible chunks:" << nonCompChunks;
+                 << double(uploadSize) / double(szTot - skipChunks * chunkSize)
+                 << "\nCompressed chunks:" << compChunks << "Incompressible chunks:"
+                 << nonCompChunks << "\nSkipped chunks:" << skipChunks
+                 << "(" << skipChunks * chunkSize << "b )";
     }
 
     if (!isBootloader) {

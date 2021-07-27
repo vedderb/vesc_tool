@@ -25,6 +25,7 @@
 #include "pageswdprog.h"
 #include "ui_pageswdprog.h"
 #include "utility.h"
+#include "hexfile.h"
 
 PageSwdProg::PageSwdProg(QWidget *parent) :
     QWidget(parent),
@@ -201,7 +202,7 @@ void PageSwdProg::on_chooseButton_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
 
     if (filename.isNull()) {
         return;
@@ -214,7 +215,7 @@ void PageSwdProg::on_choose2Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File 2"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
 
     if (filename.isNull()) {
         return;
@@ -227,7 +228,7 @@ void PageSwdProg::on_choose3Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File 3"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
 
     if (filename.isNull()) {
         return;
@@ -240,7 +241,7 @@ void PageSwdProg::on_choose4Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File 4"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
 
     if (filename.isNull()) {
         return;
@@ -270,6 +271,25 @@ void PageSwdProg::on_uploadButton_clicked()
             return;
         }
 
+        auto uploadHex = [this](QString name) {
+            QMap<quint32, QByteArray> fwData;
+            bool fwRes = HexFile::parseFile(name, fwData);
+
+            if (fwRes) {
+                QMapIterator<quint32, QByteArray> i(fwData);
+
+                while (i.hasNext()) {
+                    i.next();
+                    QByteArray data = i.value();
+                    fwRes = mVesc->swdUploadFw(data, i.key(),
+                                               ui->verifyBox->isChecked());
+                    if (!fwRes) {
+                        break;
+                    }
+                }
+            }
+        };
+
         if (ui->tabWidget->currentIndex() == 0) {
             auto current = ui->fwList->currentItem();
 
@@ -295,7 +315,16 @@ void PageSwdProg::on_uploadButton_clicked()
                     return;
                 }
 
-                mVesc->swdUploadFw(file.readAll(), mFlashOffset + fw.addr, ui->verifyBox->isChecked());
+                bool isHex = false;
+                if (file.fileName().toLower().endsWith(".hex")) {
+                    isHex = true;
+                }
+
+                if (isHex) {
+                    uploadHex(file.fileName());
+                } else {
+                    mVesc->swdUploadFw(file.readAll(), mFlashOffset + fw.addr, ui->verifyBox->isChecked());
+                }
 
                 if (!fw.bootloaderPath.isEmpty()) {
                     QFile file2(fw.bootloaderPath);
@@ -313,7 +342,16 @@ void PageSwdProg::on_uploadButton_clicked()
                         return;
                     }
 
-                    mVesc->swdUploadFw(file2.readAll(), mFlashOffset + fw.bootloaderAddr, ui->verifyBox->isChecked());
+                    isHex = false;
+                    if (file2.fileName().toLower().endsWith(".hex")) {
+                        isHex = true;
+                    }
+
+                    if (isHex) {
+                        uploadHex(file2.fileName());
+                    } else {
+                        mVesc->swdUploadFw(file2.readAll(), mFlashOffset + fw.bootloaderAddr, ui->verifyBox->isChecked());
+                    }
                 }
             } else {
                 QMessageBox::critical(this,
@@ -348,7 +386,13 @@ void PageSwdProg::on_uploadButton_clicked()
                                       tr("Could not open file. Make sure that the path is valid."));
                 return;
             }
-            if (file.size() > (1024 * 1024 * 5)) {
+
+            bool isHex = false;
+            if (file.fileName().toLower().endsWith(".hex")) {
+                isHex = true;
+            }
+
+            if (!isHex && file.size() > (1024 * 1024 * 5)) {
                 QMessageBox::critical(this,
                                       tr("Upload Error"),
                                       tr("The selected file is too large to be a firmware."));
@@ -357,7 +401,12 @@ void PageSwdProg::on_uploadButton_clicked()
             if (!mVesc->swdEraseFlash()) {
                 return;
             }
-            mVesc->swdUploadFw(file.readAll(), mFlashOffset, ui->verifyBox->isChecked());
+
+            if (isHex) {
+                uploadHex(file.fileName());
+            } else {
+                mVesc->swdUploadFw(file.readAll(), mFlashOffset, ui->verifyBox->isChecked());
+            }
         }
 
         mVesc->swdReboot();

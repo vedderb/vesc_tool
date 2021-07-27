@@ -194,7 +194,8 @@ SOURCES += main.cpp\
     setupwizardmotor.cpp \
     startupwizard.cpp \
     utility.cpp \
-    tcpserversimple.cpp
+    tcpserversimple.cpp \
+    hexfile.cpp
 
 HEADERS  += mainwindow.h \
     packet.h \
@@ -211,7 +212,8 @@ HEADERS  += mainwindow.h \
     setupwizardmotor.h \
     startupwizard.h \
     utility.h \
-    tcpserversimple.h
+    tcpserversimple.h \
+    hexfile.h
 
 FORMS    += mainwindow.ui \
     parametereditor.ui

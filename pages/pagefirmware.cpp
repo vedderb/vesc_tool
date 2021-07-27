@@ -21,6 +21,7 @@
 #include "ui_pagefirmware.h"
 #include "widgets/helpdialog.h"
 #include "utility.h"
+#include "hexfile.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDirIterator>
@@ -298,7 +299,7 @@ void PageFirmware::on_chooseButton_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
     if (!filename.isNull()) {
         ui->fwEdit->setText(filename);
     }
@@ -308,7 +309,7 @@ void PageFirmware::on_choose2Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
     if (!filename.isNull()) {
         ui->fw2Edit->setText(filename);
     }
@@ -318,7 +319,7 @@ void PageFirmware::on_choose3Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
     if (!filename.isNull()) {
         ui->fw3Edit->setText(filename);
     }
@@ -328,7 +329,7 @@ void PageFirmware::on_choose4Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
     if (!filename.isNull()) {
         ui->fw4Edit->setText(filename);
     }
@@ -407,7 +408,8 @@ void PageFirmware::uploadFw(bool allOverCan)
             }
 
             QFileInfo fileInfo(file.fileName());
-            if (!fileInfo.fileName().endsWith(".bin")) {
+            if (!fileInfo.fileName().toLower().endsWith(".bin") &&
+                    !fileInfo.fileName().toLower().endsWith(".hex")) {
                 QMessageBox::critical(this,
                                       tr("Upload Error"),
                                       tr("The selected file name seems to be invalid."));
@@ -441,7 +443,12 @@ void PageFirmware::uploadFw(bool allOverCan)
             return;
         }
 
-        if (file.size() > 400000) {
+        bool isHex = false;
+        if (file.fileName().toLower().endsWith(".hex")) {
+            isHex = true;
+        }
+
+        if (file.size() > 400000 && !isHex) {
             QMessageBox::critical(this,
                                   tr("Upload Error"),
                                   tr("The selected file is too large to be a firmware."));
@@ -487,8 +494,39 @@ void PageFirmware::uploadFw(bool allOverCan)
         }
 
         if (reply == QMessageBox::Yes) {
-            QByteArray data = file.readAll();
-            bool fwRes = mVesc->fwUpload(data, isBootloader, allOverCan);
+            bool fwRes = false;
+
+            if (isHex) {
+                QMap<quint32, QByteArray> fwData;
+                fwRes = HexFile::parseFile(file.fileName(), fwData);
+
+                if (fwRes) {
+                    QMapIterator<quint32, QByteArray> i(fwData);
+
+                    QByteArray data;
+                    bool startSet = false;
+                    unsigned int startOffset = 0;
+
+                    while (i.hasNext()) {
+                        i.next();
+                        if (!startSet) {
+                            startSet = true;
+                            startOffset = i.key();
+                        }
+
+                        while ((data.size() + startOffset) < i.key()) {
+                            data.append(0xFF);
+                        }
+
+                        data.append(i.value());
+                    }
+
+                    fwRes = mVesc->fwUpload(data, isBootloader, allOverCan);
+                }
+            } else {
+                QByteArray data = file.readAll();
+                fwRes = mVesc->fwUpload(data, isBootloader, allOverCan);
+            }
 
             if (!isBootloader && fwRes) {
                 QMessageBox::warning(this,

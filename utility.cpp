@@ -1934,25 +1934,18 @@ void Utility::defaultFunc(ConfigParams *params, QTextStream &s) {
 
 void Utility::setAppQColor(QString colorName, QColor color)
 {
-    if(mAppColors.contains(colorName))
-    {
+    if(mAppColors.contains(colorName)) {
         mAppColors[colorName] = color;
-    }
-    else
-    {
+    } else {
         mAppColors.insert(colorName , color);
-        qDebug() << colorName <<" not found in standard colors, adding it.";
     }
 }
 
 QColor Utility::getAppQColor(QString colorName)
 {
-    if(mAppColors.contains(colorName))
-    {
+    if(mAppColors.contains(colorName)) {
         return mAppColors[colorName];
-    }
-    else
-    {
+    } else {
         qDebug() << colorName <<" not found in standard colors";
         return Qt::red;
     }

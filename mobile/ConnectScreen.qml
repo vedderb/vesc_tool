@@ -298,7 +298,7 @@ Item {
                 bleModel.insert(0, {"name": "Serial Port",
                                     "setName": "",
                                     "preferred": true,
-                                    "bleAddr": 0,
+                                    "bleAddr": "",
                                     "isSerial": true})
             }
         }

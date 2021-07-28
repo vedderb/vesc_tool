@@ -207,8 +207,10 @@ Item {
         onTriggered: {
             mCommands.getValues()
             
-            if (motor_running) {
-                mCommands.setRpm(bpm_to_erpm(bpmSetGauge.value))
+            var erpm = bpm_to_erpm(bpmSetGauge.value)
+            
+            if (motor_running && Math.abs(erpm) > 200) {
+                mCommands.setRpm(erpm)
             } else {
                 mCommands.setCurrent(0)
             }

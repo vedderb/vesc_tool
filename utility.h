@@ -106,6 +106,14 @@ public:
         return QString(QMetaEnum::fromType<QEnum>().valueToKey(value));
     }
 
+    Q_INVOKABLE static bool hasSerialport() {
+#ifdef HAS_SERIALPORT
+        return true;
+#else
+        return false;
+#endif
+    };
+
 signals:
 
 public slots:

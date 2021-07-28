@@ -166,7 +166,7 @@ Item {
                                     Layout.preferredWidth: 40
                                     Layout.preferredHeight: 40
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: "qrc" + Utility.getThemePath() + "icons/bluetooth.png"
+                                    source: "qrc" + Utility.getThemePath() + (isSerial ? "icons/Connected-96.png" : "icons/bluetooth.png")
                                 }
 
                                 Text {
@@ -181,6 +181,8 @@ Item {
                         }
 
                         ColumnLayout {
+                            visible: !isSerial
+
                             Text {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.rightMargin: 5
@@ -207,15 +209,19 @@ Item {
                             Button {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
-                                text: "Connect"
+                                text: isSerial ? "Autoconnect" : "Connect"
 
                                 onClicked: {
-                                    if (!VescIf.getBlePreferred(bleAddr)) {
-                                        preferredDialog.bleAddr = bleAddr
-                                        preferredDialog.open()
+                                    if (isSerial) {
+                                        VescIf.autoconnect()
                                     } else {
-                                        disableDialog()
-                                        VescIf.connectBle(bleAddr)
+                                        if (!VescIf.getBlePreferred(bleAddr)) {
+                                            preferredDialog.bleAddr = bleAddr
+                                            preferredDialog.open()
+                                        } else {
+                                            disableDialog()
+                                            VescIf.connectBle(bleAddr)
+                                        }
                                     }
                                 }
                             }
@@ -224,6 +230,7 @@ Item {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
                                 text: "Set Name"
+                                visible: !isSerial
 
                                 onClicked: {
                                     bleNameDialog.addr = bleAddr
@@ -272,17 +279,27 @@ Item {
 
                 if (preferred) {
                     bleModel.insert(0, {"name": setName,
-                                          "setName": setNameShort,
-                                          "preferred": preferred,
-                                          "bleAddr": addr})
+                                        "setName": setNameShort,
+                                        "preferred": preferred,
+                                        "bleAddr": addr,
+                                        "isSerial": false})
                 } else {
                     bleModel.append({"name": setName,
-                                       "setName": setNameShort,
-                                       "preferred": preferred,
-                                       "bleAddr": addr})
+                                        "setName": setNameShort,
+                                        "preferred": preferred,
+                                        "bleAddr": addr,
+                                        "isSerial": false})
                 }
 
 
+            }
+
+            if (Utility.hasSerialport()) {
+                bleModel.insert(0, {"name": "Serial Port",
+                                    "setName": "",
+                                    "preferred": true,
+                                    "bleAddr": 0,
+                                    "isSerial": true})
             }
         }
 

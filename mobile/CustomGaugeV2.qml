@@ -25,6 +25,8 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Material 2.2
 
+import Vedder.vesc.utility 1.0
+
 Item {
     property alias minimumValue: gauge.minimumValue
     property alias maximumValue: gauge.maximumValue

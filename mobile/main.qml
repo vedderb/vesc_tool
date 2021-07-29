@@ -85,7 +85,7 @@ ApplicationWindow {
                 Layout.preferredHeight: (464 * Layout.preferredWidth) / 1550
                 Layout.margins: Math.min(parent.width, parent.height)*0.1
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                source: "qrc" + Utility.getThemePath() + "/logo_white.png"
+                source: "qrc" + Utility.getThemePath() + "/logo.png"
                 antialiasing: true
 
             }

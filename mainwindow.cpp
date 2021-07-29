@@ -157,7 +157,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionBackupConfiguration->setIcon(QPixmap(theme + "icons/Save as-96.png"));
     ui->actionReboot->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
     ui->actionExit->setIcon(QPixmap(theme + "icons/Shutdown-96.png"));
-    ui->pageLabel->setPixmap(QPixmap(theme + "logo_white.png"));
+    ui->pageLabel->setPixmap(QPixmap(theme + "logo.png"));
     ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-96.png"));
     ui->actionDisconnect->setIcon(QIcon(theme + "icons/Disconnected-96.png"));
     ui->actionReadMcconf->setIcon(QIcon(theme + "icons/motor_up.png"));

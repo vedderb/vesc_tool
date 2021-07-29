@@ -53,7 +53,7 @@ Item {
                 Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
                 Layout.margins: Math.min(topItem.width, topItem.height) * 0.1
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                source: "qrc" + Utility.getThemePath() + "/logo_white.png"
+                source: "qrc" + Utility.getThemePath() + "/logo.png"
                 antialiasing: true
                 Layout.bottomMargin: 0
                 Layout.topMargin: Math.min(topItem.width, topItem.height) * 0.025

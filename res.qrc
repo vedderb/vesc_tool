@@ -6,7 +6,6 @@
         <file>res/images/nunchuk.jpg</file>
         <file>res/images/vedder_nunchuk.jpg</file>
         <file>res/firmwares/CHANGELOG</file>
-        <file>res/logo_intro_wizard.png</file>
         <file>res/CHANGELOG</file>
         <file>res/images/multi_master.png</file>
         <file>res/images/multi_single.png</file>
@@ -58,8 +57,6 @@
         <file>res/images/esk8.jpg</file>
         <file>res/images/propeller.jpg</file>
         <file>res/+theme_light/logo_vertical.png</file>
-        <file>res/+theme_light/logo_white.png</file>
-        <file>res/logo_white.png</file>
         <file>res/icons/bluetooth.png</file>
         <file>res/icons/minimize.png</file>
         <file>res/icons/icons8-battery-100.png</file>

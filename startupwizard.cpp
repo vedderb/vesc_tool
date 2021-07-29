@@ -22,6 +22,7 @@
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QDesktopServices>
+#include "utility.h"
 
 StartupWizard::StartupWizard(VescInterface *vesc, QWidget *parent)
     : QWizard(parent)
@@ -33,9 +34,10 @@ StartupWizard::StartupWizard(VescInterface *vesc, QWidget *parent)
     setPage(Page_Warranty, new StartupWarrantyPage(vesc));
     setPage(Page_Conclusion, new StartupConclusionPage(vesc));
 
+    QString theme = Utility::getThemePath();
     setStartId(Page_Intro);
     setWizardStyle(ModernStyle);
-    setPixmap(QWizard::LogoPixmap, QPixmap("://res/icon.png").
+    setPixmap(QWizard::LogoPixmap, QPixmap(theme + "icon.png").
               scaled(40, 40,
                      Qt::KeepAspectRatio,
                      Qt::SmoothTransformation));
@@ -44,7 +46,7 @@ StartupWizard::StartupWizard(VescInterface *vesc, QWidget *parent)
     setWindowTitle(tr("VESC Tool Introduction"));
 
     mSideLabel = new AspectImgLabel(Qt::Vertical);
-    mSideLabel->setPixmap(QPixmap("://res/logo_vertical.png"));
+    mSideLabel->setPixmap(QPixmap(theme + "logo_vertical.png"));
     mSideLabel->setScaledContents(true);
     setSideWidget(mSideLabel);
 

@@ -17,46 +17,42 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#ifndef PAGEWELCOME_H
-#define PAGEWELCOME_H
+#ifndef CANLISTITEM_H
+#define CANLISTITEM_H
 
 #include <QWidget>
-#include "vescinterface.h"
-#include "mobile/qmlui.h"
-#include "utility.h"
+#include <QPixmap>
+#include <QLabel>
+#include <QSpacerItem>
+#include <QResizeEvent>
+#include "datatypes.h"
 
-namespace Ui {
-class PageWelcome;
-}
-
-class PageWelcome : public QWidget
+class CANListItem : public QWidget
 {
     Q_OBJECT
-
 public:
-    explicit PageWelcome(QWidget *parent = 0);
-    ~PageWelcome();
+    explicit CANListItem(FW_RX_PARAMS p,
+                         int ID,
+                         bool ok,
+                         QWidget *parent = 0);
+    void setName(const QString &name);
+    void setIcon(const QString &path);
+    void setID(int canID);
+    Q_INVOKABLE int getID();
+    QString name();
+    void setBold(bool bold);
+    void setIndented(bool indented);
 
-    VescInterface *vesc() const;
-    void setVesc(VescInterface *vesc);
+signals:
 
 public slots:
-    void startSetupWizardFocSimple();
-    void startSetupWizardFocQml();
-    void startSetupWizardMotor();
-    void startSetupWizardApp();
-    void startPreferences();
-
-private slots:
-    void on_autoConnectButton_clicked();
-    void on_nrfPairButton_clicked();
 
 private:
-    Ui::PageWelcome *ui;
-    VescInterface *mVesc;
-    QmlUi mQmlUi;
-    Utility mUtil;
-
+    QLabel *mIconLabel;
+    QLabel *mNameLabel;
+    QLabel *mIdLabel;
+    int ID;
+    QSpacerItem *mSpaceStart;
 };
 
-#endif // PAGEWELCOME_H
+#endif // CANLISTITEM_H

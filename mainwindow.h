@@ -28,6 +28,7 @@
 #include <QMap>
 #include "vescinterface.h"
 #include "widgets/pagelistitem.h"
+#include "widgets/canlistitem.h"
 #include "mobile/qmlui.h"
 
 #include "pages/pagewelcome.h"
@@ -146,7 +147,8 @@ private slots:
     void on_actionRestoreConfigurationsCAN_triggered();
     void on_scanCanButton_clicked();
     void on_canList_currentRowChanged(int currentRow);
-    void on_actionGamepadControl_triggered(bool checked);
+    void on_actionGamepadControl_triggered(bool checked);   
+    void on_actionPreferences_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -175,7 +177,6 @@ private:
     PageRtData *mPageRtData;
     PageSampledData *mPageSampledData;
     PageImu *mPageImu;
-    PageTerminal *mPageTerminal;
     PageFirmware *mPageFirmware;
     PageDebugPrint *mPageDebugPrint;
     PageMotorSettings *mPageMotorSettings;
@@ -195,17 +196,19 @@ private:
     PageAppNunchuk *mPageAppNunchuk;
     PageAppNrf *mPageAppNrf;
     PageAppBalance *mPageAppBalance;
+    PageCanAnalyzer *mPageCanAnalyzer;
+    PageTerminal *mPageTerminal;
     PageAppPas *mPageAppPas;
     PageSettings *mPageSettings;
     PageSwdProg *mPageSwdProg;
     PageAppImu *mPageAppImu;
     PageLogAnalysis *mPageLogAnalysis;
-    PageCanAnalyzer *mPageCanAnalyzer;
     PageBms *mPageBms;
     PageCustomConfig *mPageCustomConfig0;
     PageCustomConfig *mPageCustomConfig1;
     PageCustomConfig *mPageCustomConfig2;
     PageScripting *mPageScripting;
+    QTabWidget *mPageVESCDev;
 
     void addPageItem(QString name,
                      QString icon = "",

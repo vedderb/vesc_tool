@@ -74,7 +74,7 @@ win32: {
 
 # Options
 #CONFIG += build_original
-#CONFIG += build_platinum
+CONFIG += build_platinum
 #CONFIG += build_gold
 #CONFIG += build_silver
 #CONFIG += build_bronze
@@ -177,6 +177,7 @@ build_mobile {
 SOURCES += main.cpp\
         mainwindow.cpp \
     packet.cpp \
+    preferences.cpp \
     udpserversimple.cpp \
     vbytearray.cpp \
     commands.cpp \
@@ -194,6 +195,7 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     packet.h \
+    preferences.h \
     udpserversimple.h \
     vbytearray.h \
     commands.h \
@@ -211,7 +213,8 @@ HEADERS  += mainwindow.h \
     hexfile.h
 
 FORMS    += mainwindow.ui \
-    parametereditor.ui
+    parametereditor.ui \
+    preferences.ui
 
 contains(DEFINES, HAS_BLUETOOTH) {
     SOURCES += bleuart.cpp
@@ -273,11 +276,13 @@ DISTFILES += \
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
+macx-clang:contains(QMAKE_HOST.arch, arm.*): {
+   QMAKE_APPLE_DEVICE_ARCHS=arm64
+}
+
 macx {
     ICON        =  macos/appIcon.icns
-    macx-clang:contains(QMAKE_HOST.arch, arm.*): {
-       QMAKE_APPLE_DEVICE_ARCHS=arm64
-    }
+
     #QMAKE_INFO_PLIST = macos/app-Info.plist
     # DISTFILES += macos/app-Info.plist
 }

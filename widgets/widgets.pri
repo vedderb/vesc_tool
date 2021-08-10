@@ -22,6 +22,7 @@ FORMS += \
 
 HEADERS += \
     $$PWD/batttempplot.h \
+    $$PWD/canlistitem.h \
     $$PWD/parameditbool.h \
     $$PWD/parameditdouble.h \
     $$PWD/parameditenum.h \
@@ -58,6 +59,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/batttempplot.cpp \
+    $$PWD/canlistitem.cpp \
     $$PWD/parameditbool.cpp \
     $$PWD/parameditdouble.cpp \
     $$PWD/parameditenum.cpp \

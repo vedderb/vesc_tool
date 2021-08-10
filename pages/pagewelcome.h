@@ -45,7 +45,6 @@ public slots:
     void startSetupWizardFocQml();
     void startSetupWizardMotor();
     void startSetupWizardApp();
-    void startPreferences();
 
 private slots:
     void on_autoConnectButton_clicked();

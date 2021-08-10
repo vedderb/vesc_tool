@@ -21,7 +21,6 @@
 #include "ui_pagewelcome.h"
 #include "setupwizardmotor.h"
 #include "setupwizardapp.h"
-#include "preferences.h"
 #include "widgets/detectallfocdialog.h"
 
 #include <QMessageBox>
@@ -87,12 +86,6 @@ void PageWelcome::startSetupWizardApp()
         SetupWizardApp w(mVesc, this);
         w.exec();
     }
-}
-
-void PageWelcome::startPreferences()
-{
-        Preferences w(this);
-        w.exec();
 }
 
 VescInterface *PageWelcome::vesc() const

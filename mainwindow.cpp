@@ -118,7 +118,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     QString theme = Utility::getThemePath();
-
     ui->actionParameterEditorMcconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
     ui->actionParameterEditorAppconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
     ui->actionParameterEditorFW->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
@@ -1502,7 +1501,6 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageScripting);
     addPageItem(tr("Scripting"), theme + "icons_textedit/Outdent-96.png", "", true);
 
-
     mPageSwdProg = new PageSwdProg(this);
     mPageSwdProg->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSwdProg);
@@ -1944,7 +1942,6 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
     FW_RX_PARAMS params;
     bool ok = false;
     QListWidgetItem *item = nullptr;
-    QString theme = Utility::getThemePath();
     QFontMetrics fm(this->font());
     int width = fm.horizontalAdvance("Welcome & Wizards++++++++++");
     int height = fm.height()*1.1;

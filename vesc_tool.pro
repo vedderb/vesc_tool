@@ -74,7 +74,7 @@ win32: {
 
 # Options
 #CONFIG += build_original
-CONFIG += build_platinum
+#CONFIG += build_platinum
 #CONFIG += build_gold
 #CONFIG += build_silver
 #CONFIG += build_bronze

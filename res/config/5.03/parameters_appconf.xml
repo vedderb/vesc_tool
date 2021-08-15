@@ -2113,9 +2113,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
             <valDouble>15</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_balance_conf.tiltback_angle>
         <app_balance_conf.tiltback_speed>
             <longName>Tiltback Speed</longName>
@@ -2135,9 +2135,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
             <valDouble>5</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °/s</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_balance_conf.tiltback_speed>
         <app_balance_conf.tiltback_duty>
             <longName>Duty Cycle Tiltback</longName>
@@ -2159,7 +2159,7 @@ p, li { white-space: pre-wrap; }
             <valDouble>0.75</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_balance_conf.tiltback_duty>
         <app_balance_conf.tiltback_hv_angle>
             <longName>HV Tiltback Angle</longName>
@@ -2179,9 +2179,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
             <valDouble>10</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_balance_conf.tiltback_hv_angle>
         <app_balance_conf.tiltback_hv_speed>
             <longName>HV Tiltback Speed</longName>
@@ -2201,9 +2201,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
             <valDouble>2</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °/s</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_balance_conf.tiltback_hv_speed>
         <app_balance_conf.tiltback_high_voltage>
             <longName>High Voltage Tiltback</longName>
@@ -2245,9 +2245,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
             <valDouble>15</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_balance_conf.tiltback_lv_angle>
         <app_balance_conf.tiltback_lv_speed>
             <longName>LV Tiltback Speed</longName>
@@ -2267,9 +2267,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
             <valDouble>2</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °/s</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_balance_conf.tiltback_lv_speed>
         <app_balance_conf.tiltback_low_voltage>
             <longName>Low Voltage Tiltback</longName>
@@ -2311,9 +2311,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
             <valDouble>2</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °/s</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_balance_conf.tiltback_return_speed>
         <app_balance_conf.tiltback_constant>
             <longName>Constant Tiltback</longName>
@@ -2419,9 +2419,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>0.5</stepDouble>
             <valDouble>5</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °/s</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </app_balance_conf.noseangling_speed>
         <app_balance_conf.startup_pitch_tolerance>
             <longName>Startup Pitch Axis Angle Tolerance</longName>

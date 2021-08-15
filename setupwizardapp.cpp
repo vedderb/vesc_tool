@@ -46,7 +46,7 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     setStartId(Page_Intro);
     setWizardStyle(ModernStyle);
     QString theme = Utility::getThemePath();
-    QPixmap icon_logo = QPixmap(theme +"icons/v_icon-96.png");
+    QPixmap icon_logo = QPixmap(theme +"icon.png").scaledToHeight(96,Qt::SmoothTransformation);
     icon_logo.setDevicePixelRatio(2);
     setPixmap(QWizard::LogoPixmap, icon_logo);
     resize(800, 450);

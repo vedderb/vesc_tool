@@ -308,5 +308,15 @@
         <file>res/+theme_light/icons_textedit/Add Image-96.png</file>
         <file>res/+theme_light/icons/bluetooth.png</file>
         <file>res/other_fw/vesc_power_switch_120.bin</file>
+        <file>res/+theme_light/icons/v_icon-256.png</file>
+        <file>res/+theme_light/icons/v_icon-96.png</file>
+        <file>res/icons/v_icon-96.png</file>
+        <file>res/icons/v_icon-256.png</file>
+        <file>res/+theme_light/icons/vesc-96.png</file>
+        <file>res/icons/vesc-96.png</file>
+        <file>res/icons/stormcore-96.png</file>
+        <file>res/+theme_light/icons/stormcore-96.png</file>
+        <file>res/+theme_light/icons/motor_side.png</file>
+        <file>res/icons/motor_side.png</file>
     </qresource>
 </RCC>

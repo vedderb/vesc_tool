@@ -61,7 +61,7 @@ void PageListItem::setIcon(const QString &path)
         mIconLabel->setPixmap(QPixmap(path));
 
         QFontMetrics fm(this->font());
-        int height = fm.height() * 0.9;
+        int height = fm.height() * 1.1;
 
         mIconLabel->setFixedSize(height, height);
     } else {
@@ -76,7 +76,7 @@ void PageListItem::setGroupIcon(const QString &path)
         mGroupLabel->setPixmap(pix);
 
         QFontMetrics fm(this->font());
-        int height = fm.height() * 0.9;
+        int height = fm.height();
 
         mGroupLabel->setFixedSize((height * pix.width()) / pix.height(), height);
     } else {

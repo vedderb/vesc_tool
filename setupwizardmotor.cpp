@@ -40,10 +40,10 @@ SetupWizardMotor::SetupWizardMotor(VescInterface *vesc, QWidget *parent)
 
     setStartId(Page_Intro);
     setWizardStyle(ModernStyle);
-    setPixmap(QWizard::LogoPixmap, QPixmap("://res/icon.png").
-              scaled(40, 40,
-                     Qt::KeepAspectRatio,
-                     Qt::SmoothTransformation));
+    QString theme = Utility::getThemePath();
+    QPixmap icon_logo = QPixmap(":/res/icon.png").scaledToHeight(96,Qt::SmoothTransformation);
+    icon_logo.setDevicePixelRatio(2);
+    setPixmap(QWizard::LogoPixmap, icon_logo);
     resize(800, 450);
 
     setWindowTitle(tr("Motor Setup Wizard"));

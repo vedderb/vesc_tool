@@ -1776,25 +1776,29 @@ void MainWindow::on_actionSaveAppConfigurationHeaderWrap_triggered()
 void MainWindow::on_actionTerminalPrintFaults_triggered()
 {
     mVesc->commands()->sendTerminalCmd("faults");
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalShowHelp_triggered()
 {
     mVesc->commands()->sendTerminalCmd("help");
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalClear_triggered()
 {
     mPageTerminal->clearTerminal();
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalPrintThreads_triggered()
 {
     mVesc->commands()->sendTerminalCmd("threads");
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalDRVResetLatchedFaults_triggered()

@@ -30,6 +30,7 @@
 #include "widgets/pagelistitem.h"
 #include "widgets/canlistitem.h"
 #include "mobile/qmlui.h"
+#include "preferences.h"
 
 #include "pages/pagewelcome.h"
 #include "pages/pageconnection.h"
@@ -55,7 +56,6 @@
 #include "pages/pageappnrf.h"
 #include "pages/pageappbalance.h"
 #include "pages/pageapppas.h"
-#include "pages/pagesettings.h"
 #include "pages/pagegpd.h"
 #include "pages/pageexperiments.h"
 #include "pages/pageimu.h"
@@ -199,7 +199,6 @@ private:
     PageCanAnalyzer *mPageCanAnalyzer;
     PageTerminal *mPageTerminal;
     PageAppPas *mPageAppPas;
-    PageSettings *mPageSettings;
     PageSwdProg *mPageSwdProg;
     PageAppImu *mPageAppImu;
     PageLogAnalysis *mPageLogAnalysis;
@@ -209,6 +208,7 @@ private:
     PageCustomConfig *mPageCustomConfig2;
     PageScripting *mPageScripting;
     QTabWidget *mPageVESCDev;
+    Preferences *mPreferences;
 
     void addPageItem(QString name,
                      QString icon = "",

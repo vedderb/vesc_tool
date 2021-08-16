@@ -18,7 +18,6 @@
     */
 
 #include "mainwindow.h"
-#include "preferences.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QDebug>
@@ -118,7 +117,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-
 #ifdef Q_OS_LINUX
     //Fix antialiasing issue with window icon in Ubuntu
     QPixmap winIcon = QPixmap(":/res/icon.png").scaledToHeight(64,Qt::SmoothTransformation);
@@ -207,15 +205,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->posButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
     ui->brakeCurrentButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
     ui->handbrakeButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
-
-
     ui->fullBrakeButton->setIcon(QIcon(theme + "icons/Anchor-96.png"));
-
 
     qRegisterMetaType<QtMsgType>("QtMsgType");
 
     mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
+    mPreferences = new Preferences(this);
+    mPreferences->setVesc(mVesc);
 
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
@@ -1721,9 +1718,7 @@ void MainWindow::on_actionParameterEditorAppconf_triggered()
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    Preferences *p = new Preferences(this);
-    p->setAttribute(Qt::WA_DeleteOnClose);
-    p->show();
+    mPreferences->show();
 }
 
 void MainWindow::on_actionParameterEditorInfo_triggered()
@@ -2011,11 +2006,9 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
 
 void MainWindow::on_actionGamepadControl_triggered(bool checked)
 {
-    mPageSettings->setUseGamepadControl(checked);
+    mPreferences->setUseGamepadControl(checked);
 
-    if (!mPageSettings->isUsingGamepadControl()) {
+    if (!mPreferences->isUsingGamepadControl()) {
         ui->actionGamepadControl->setChecked(false);
     }
 }
-
-

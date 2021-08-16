@@ -1125,6 +1125,9 @@ p, li { white-space: pre-wrap; }
    <property name="toolTip">
     <string>Start the Motor Setup Wizard</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionAppSetupWizard">
    <property name="icon">
@@ -1136,6 +1139,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="toolTip">
     <string>Start the App Setup Wizard</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionAboutQt">
@@ -1232,6 +1238,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Setup Motors FOC</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionExportConfigurationParser">
@@ -1379,6 +1388,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Setup Motors FOC (old)</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionPreferences">

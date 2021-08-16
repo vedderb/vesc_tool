@@ -19,7 +19,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_original.qrc">
+   <iconset resource="res_platinum.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -76,7 +76,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_original.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_platinum.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -644,7 +644,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>24</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -670,7 +670,6 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionPreferences"/>
     <addaction name="separator"/>
     <addaction name="actionVESCProjectForums"/>
     <addaction name="separator"/>
@@ -707,6 +706,8 @@
     <addaction name="actionTerminalDRVResetLatchedFaults"/>
     <addaction name="separator"/>
     <addaction name="actionTerminalClear"/>
+    <addaction name="separator"/>
+    <addaction name="actionReboot"/>
    </widget>
    <widget class="QMenu" name="menuCommands">
     <property name="font">
@@ -715,9 +716,9 @@
      </font>
     </property>
     <property name="title">
-     <string>Commands</string>
+     <string>Edit</string>
     </property>
-    <addaction name="actionReboot"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <widget class="QMenu" name="menuWizards">
     <property name="title">
@@ -739,9 +740,9 @@
     <addaction name="actionClearConfigurationBackups"/>
    </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuCommands"/>
    <addaction name="menuTools_2"/>
    <addaction name="menuWizards"/>
-   <addaction name="menuCommands"/>
    <addaction name="menuTerminal"/>
    <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
@@ -1403,8 +1404,8 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_original.qrc"/>
   <include location="res.qrc"/>
+  <include location="res_platinum.qrc"/>
  </resources>
  <connections/>
 </ui>

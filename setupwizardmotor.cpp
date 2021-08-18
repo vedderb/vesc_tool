@@ -41,8 +41,8 @@ SetupWizardMotor::SetupWizardMotor(VescInterface *vesc, QWidget *parent)
     setStartId(Page_Intro);
     setWizardStyle(ModernStyle);
     QString theme = Utility::getThemePath();
-    QPixmap icon_logo = QPixmap(":/res/icon.png").scaledToHeight(96,Qt::SmoothTransformation);
-    icon_logo.setDevicePixelRatio(2);
+    QPixmap icon_logo = QIcon(":/res/icon.svg").pixmap(QSize(this->devicePixelRatioF() * 48, this->devicePixelRatioF() * 48));
+    icon_logo.setDevicePixelRatio(this->devicePixelRatioF());
     setPixmap(QWizard::LogoPixmap, icon_logo);
     resize(800, 450);
 

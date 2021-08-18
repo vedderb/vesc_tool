@@ -117,11 +117,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-#ifdef Q_OS_LINUX
-    //Fix antialiasing issue with window icon in Ubuntu
-    QPixmap winIcon = QPixmap(":/res/icon.png").scaledToHeight(64,Qt::SmoothTransformation);
-    this->setWindowIcon(QIcon(winIcon));
-#endif
+    this->setWindowIcon(QIcon(":/res/icon.svg"));
 
     QString theme = Utility::getThemePath();
     ui->actionParameterEditorMcconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));

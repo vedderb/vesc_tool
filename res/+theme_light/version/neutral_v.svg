@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Design"
+   x="0px"
+   y="0px"
+   viewBox="0 0 100 100"
+   xml:space="preserve"
+   sodipodi:docname="neutral_v.svg"
+   width="100"
+   height="100"
+   inkscape:version="1.0.2 (e86c8708, 2021-01-15)"><metadata
+   id="metadata32"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+   id="defs30" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1440"
+   inkscape:window-height="761"
+   id="namedview28"
+   showgrid="false"
+   inkscape:zoom="0.92451703"
+   inkscape:cx="-61.125309"
+   inkscape:cy="-113.47203"
+   inkscape:window-x="0"
+   inkscape:window-y="25"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="Design" />
+<style
+   type="text/css"
+   id="style10">
+	.st0{fill:url(#SVGID_1_);}
+	.st1{fill:#007DC4;}
+	.st2{fill:#0066B2;}
+	.st3{fill:#00A1E4;}
+</style>
+<linearGradient
+   id="SVGID_1_"
+   gradientUnits="userSpaceOnUse"
+   x1="512"
+   y1="1024"
+   x2="512"
+   y2="-9.094947e-13"
+   gradientTransform="scale(0.09765625)">
+	<stop
+   offset="0"
+   style="stop-color:#000025"
+   id="stop12" />
+	<stop
+   offset="1"
+   style="stop-color:#1C1147"
+   id="stop14" />
+</linearGradient>
+<rect
+   class="st0"
+   width="100"
+   height="100"
+   id="rect17"
+   x="0"
+   y="0"
+   rx="195.3125"
+   style="fill:url(#SVGID_1_);stroke-width:0.0976562" />
+<g
+   id="g25"
+   transform="scale(0.09765625)">
+	<polygon
+   class="st1"
+   points="356,762 427.5,762 297.6,315.8 226.1,315.8 "
+   id="polygon19" />
+	<polygon
+   class="st2"
+   points="253.5,762 284.5,762 154.6,315.8 123.6,315.8 "
+   id="polygon21" />
+	<path
+   class="st3"
+   d="M 900.4,315.8 H 786.2 c -10.9,0 -20.7,6.5 -24.9,16.5 l -130,308 h -41 l -88.8,-305 c -3.4,-11.5 -13.9,-19.5 -26,-19.5 H 369.1 L 499,762 h 213 z"
+   id="path23" />
+</g>
+</svg>

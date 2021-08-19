@@ -57,9 +57,9 @@
                 -->
             <meta-data android:name='"android.app.extract_android_style"' android:value='"full"'/>
             <!-- extract android style -->
-            <!-- meta-data android:name='"android.app.splash_screen_drawable"' android:resource='"@drawable/splashscreen"'-->
-            <!-- meta-data android:name='"android.app.splash_screen_drawable_portrait"' android:resource='"@drawable/splashscreen_port"'-->
-            <!-- meta-data android:name='"android.app.splash_screen_drawable_landscape"' android:resource='"@drawable/splashscreen_land"'-->
+            <meta-data android:name='"android.app.splash_screen_drawable"' android:resource='"@drawable/splashscreen"'/>
+            <meta-data android:name='"android.app.splash_screen_drawable_portrait"' android:resource='"@drawable/splashscreen_port"'/>
+            <meta-data android:name='"android.app.splash_screen_drawable_landscape"' android:resource='"@drawable/splashscreen_land"'/>
     </activity>
     
     <service

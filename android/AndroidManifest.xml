@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<manifest package="vedder.vesctool" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="3.01" android:versionCode="95" android:installLocation="auto">
+<manifest package="vedder.vesctool" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="3.01" android:versionCode="96" android:installLocation="auto">
     <application android:hardwareAccelerated="true" android:name="org.qtproject.qt5.android.bindings.QtApplication" android:label="VESC Tool" android:icon="@drawable/icon" android:requestLegacyExternalStorage="true">
         <activity android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation" android:name="org.qtproject.qt5.android.bindings.QtActivity" android:label="VESC Tool" android:screenOrientation="unspecified" android:launchMode="singleTop">
             <intent-filter>
@@ -57,9 +57,9 @@
                 -->
             <meta-data android:name="android.app.extract_android_style" android:value="full"/>
             <!-- extract android style -->
-            <!-- meta-data android:name="android.app.splash_screen_drawable" android:resource="@drawable/splashscreen"-->
-            <!-- meta-data android:name="android.app.splash_screen_drawable_portrait" android:resource="@drawable/splashscreen_port"-->
-            <!-- meta-data android:name="android.app.splash_screen_drawable_landscape" android:resource="@drawable/splashscreen_land"-->
+            <meta-data android:name="android.app.splash_screen_drawable" android:resource="@drawable/splashscreen"/>
+            <meta-data android:name="android.app.splash_screen_drawable_portrait" android:resource="@drawable/splashscreen_port"/>
+            <meta-data android:name="android.app.splash_screen_drawable_landscape" android:resource="@drawable/splashscreen_land"/>
     </activity>
     
     <service

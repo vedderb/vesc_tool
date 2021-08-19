@@ -3389,6 +3389,7 @@ p, li { white-space: pre-wrap; }
             <valInt>0</valInt>
             <enumNames>AHRS_MODE_MADGWICK</enumNames>
             <enumNames>AHRS_MODE_MAHONY</enumNames>
+            <enumNames>AHRS_MODE_MADGWICK_FUSION</enumNames>
         </imu_conf.mode>
         <imu_conf.sample_rate_hz>
             <longName>Sample Rate</longName>

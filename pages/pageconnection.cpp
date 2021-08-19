@@ -294,7 +294,7 @@ void PageConnection::pairingListUpdated()
     for (QString uuid: mVesc->getPairedUuids()) {
         QListWidgetItem *item = new QListWidgetItem;
         item->setText("UUID: " + uuid);
-        item->setIcon(QIcon("://res/icon.png"));
+        item->setIcon(QIcon("://res/icon.svg"));
         item->setData(Qt::UserRole, uuid);
         ui->pairedListWidget->addItem(item);
     }

@@ -46,10 +46,9 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     setStartId(Page_Intro);
     setWizardStyle(ModernStyle);
     QString theme = Utility::getThemePath();
-    setPixmap(QWizard::LogoPixmap, QPixmap(theme +"icon.png").
-              scaled(40, 40,
-                     Qt::KeepAspectRatio,
-                     Qt::SmoothTransformation));
+    QPixmap icon_logo = QIcon(":/res/icon.svg").pixmap(QSize(this->devicePixelRatioF() * 48, this->devicePixelRatioF() * 48));
+    icon_logo.setDevicePixelRatio(this->devicePixelRatioF());
+    setPixmap(QWizard::LogoPixmap, icon_logo);
     resize(800, 450);
 
     setWindowTitle(tr("App Setup Wizard"));

@@ -116,12 +116,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    this->setWindowIcon(QIcon(":/res/icon.svg"));
+
     QString theme = Utility::getThemePath();
     ui->actionParameterEditorMcconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
     ui->actionParameterEditorAppconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
     ui->actionParameterEditorFW->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
     ui->actionParameterEditorCustomConf0->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
     ui->actionSaveAppconfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionPreferences->setIcon(QPixmap(theme + "icons/Settings-96.png"));
     ui->actionLoadAppconfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
     ui->actionSaveMotorConfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
     ui->actionLoadMotorConfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
@@ -197,15 +201,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->posButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
     ui->brakeCurrentButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
     ui->handbrakeButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
-
-
     ui->fullBrakeButton->setIcon(QIcon(theme + "icons/Anchor-96.png"));
-
 
     qRegisterMetaType<QtMsgType>("QtMsgType");
 
     mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
+    mPreferences = new Preferences(this);
+    mPreferences->setVesc(mVesc);
 
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
@@ -384,7 +387,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(true);
-//            ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(true);
+            //            ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("data_sampled"))->setHidden(true);
         }
     });
@@ -526,7 +529,6 @@ MainWindow::MainWindow(QWidget *parent) :
     updateAppToUse();
 
     ui->leftSplitter->setSizes(QList<int>({1000, 80}));
-
     mPageDebugPrint->printConsole("VESC® Tool " + mVersion + " started<br>");
 }
 
@@ -1274,6 +1276,7 @@ void MainWindow::reloadPages()
             mPageWelcome, SLOT(startSetupWizardFocSimple()));
 
 
+
     mPageConnection = new PageConnection(this);
     mPageConnection->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageConnection);
@@ -1296,42 +1299,42 @@ void MainWindow::reloadPages()
     mPageMotor->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotor);
     addPageItem(tr("General"),  theme + "icons/Horizontal Settings Mixer-96.png",
-                 theme + "icons/mcconf.png", false, true);
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_general", ui->pageList->count() - 1);
 
     mPageBldc = new PageBldc(this);
     mPageBldc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageBldc);
     addPageItem(tr("BLDC"),  theme + "icons/bldc.png",
-                 theme + "icons/mcconf.png", false, true);
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_bldc", ui->pageList->count() - 1);
 
     mPageDc = new PageDc(this);
     mPageDc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageDc);
     addPageItem(tr("DC"),  theme + "icons/Car Battery-96.png",
-                 theme + "icons/mcconf.png", false, true);
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_dc", ui->pageList->count() - 1);
 
     mPageFoc = new PageFoc(this);
     mPageFoc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageFoc);
     addPageItem(tr("FOC"),  theme + "icons/3ph_sine.png",
-                 theme + "icons/mcconf.png", false, true);
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_foc", ui->pageList->count() - 1);
 
     mPageGpd = new PageGPD(this);
     mPageGpd->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageGpd);
     addPageItem(tr("GPDrive"),  theme + "icons/3ph_sine.png",
-                 theme + "icons/mcconf.png", false, true);
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_gpdrive", ui->pageList->count() - 1);
 
     mPageControllers = new PageControllers(this);
     mPageControllers->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageControllers);
     addPageItem(tr("PID Controllers"),  theme + "icons/Speed-96.png",
-                 theme + "icons/mcconf.png", false, true);
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_pid", ui->pageList->count() - 1);
 
     mPageMotorInfo = new PageMotorInfo(this);
@@ -1345,7 +1348,7 @@ void MainWindow::reloadPages()
     mPageExperiments->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageExperiments);
     addPageItem(tr("Experiments"),  theme + "icons/Calculator-96.png",
-                 theme + "icons/mcconf.png", false, true);
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_experiments", ui->pageList->count() - 1);
 
     mPageAppSettings = new PageAppSettings(this);
@@ -1358,63 +1361,63 @@ void MainWindow::reloadPages()
     mPageAppGeneral->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppGeneral);
     addPageItem(tr("General"),  theme + "icons/Horizontal Settings Mixer-96.png",
-                 theme + "icons/appconf.png", false, true);
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_general", ui->pageList->count() - 1);
 
     mPageAppPpm = new PageAppPpm(this);
     mPageAppPpm->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppPpm);
     addPageItem(tr("PPM"),  theme + "icons/Controller-96.png",
-                 theme + "icons/appconf.png", false, true);
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_ppm", ui->pageList->count() - 1);
 
     mPageAppAdc = new PageAppAdc(this);
     mPageAppAdc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppAdc);
     addPageItem(tr("ADC"),  theme + "icons/Potentiometer-96.png",
-                 theme + "icons/appconf.png", false, true);
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_adc", ui->pageList->count() - 1);
 
     mPageAppUart = new PageAppUart(this);
     mPageAppUart->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppUart);
     addPageItem(tr("UART"),  theme + "icons/Rs 232 Male-96.png",
-                 theme + "icons/appconf.png", false, true);
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_uart", ui->pageList->count() - 1);
 
     mPageAppNunchuk = new PageAppNunchuk(this);
     mPageAppNunchuk->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNunchuk);
     addPageItem(tr("VESC Remote"),  theme + "icons/icons8-fantasy-96.png",
-                 theme + "icons/appconf.png", false, true);
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_vescremote", ui->pageList->count() - 1);
 
     mPageAppNrf = new PageAppNrf(this);
     mPageAppNrf->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNrf);
     addPageItem(tr("Nrf"),  theme + "icons/Online-96.png",
-                 theme + "icons/appconf.png", false, true);
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_nrf", ui->pageList->count() - 1);
 
     mPageAppBalance = new PageAppBalance(this);
     mPageAppBalance->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppBalance);
     addPageItem(tr("Balance"),  theme + "icons/EUC-96.png",
-                 theme + "icons/appconf.png", false, true);
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_balance", ui->pageList->count() - 1);
 
     mPageAppPas = new PageAppPas(this);
     mPageAppPas->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppPas);
     addPageItem(tr("PAS"),  theme + "icons/icons8-fantasy-96.png",
-                 theme + "icons/appconf.png", false, true);
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_pas", ui->pageList->count() - 1);
 
     mPageAppImu = new PageAppImu(this);
     mPageAppImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppImu);
     addPageItem(tr("IMU"),  theme + "icons/Gyroscope-96.png",
-                 theme + "icons/appconf.png", false, true);
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_imu", ui->pageList->count() - 1);
 
     mPageCustomConfig0 = new PageCustomConfig(this);
@@ -1475,34 +1478,34 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageLogAnalysis);
     addPageItem(tr("Log Analysis"),  theme + "icons/Waypoint Map-96.png", "", false, true);
 
+    mPageVESCDev = new QTabWidget(this);
+    mPageVESCDev->setTabShape(QTabWidget::Triangular);
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
-    addPageItem(tr("VESC Terminal"),  theme + "icons/Console-96.png", "", true);
-
-    mPageSwdProg = new PageSwdProg(this);
-    mPageSwdProg->setVesc(mVesc);
-    ui->pageWidget->addWidget(mPageSwdProg);
-    addPageItem(tr("SWD Prog"),  theme + "icons/Electronics-96.png", "", true);
+    mPageVESCDev->addTab(mPageTerminal,QIcon(theme + "icons/Console-96.png"), tr("VESC Terminal"));
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageCanAnalyzer);
-    addPageItem(tr("CAN Analyzer"),  theme + "icons/can_off.png", "", true);
+    mPageVESCDev->addTab(mPageCanAnalyzer,QIcon(theme + "icons/can_off.png"), tr("CAN Analyzer"));
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
-    addPageItem(tr("Debug Console"),  theme + "icons/Bug-96.png", "", true);
+    mPageVESCDev->addTab(mPageDebugPrint,QIcon(theme + "icons/Bug-96.png"), tr("Debug Console"));
 
-    mPageSettings = new PageSettings(this);
-    mPageSettings->setVesc(mVesc);
-    ui->pageWidget->addWidget(mPageSettings);
-    addPageItem(tr("Settings"),  theme + "icons/Settings-96.png", "", true);
+    ui->pageWidget->addWidget(mPageVESCDev);
+    addPageItem(tr("VESC Dev Tools"),  theme + "icons/Console-96.png", "", true);
 
     mPageScripting = new PageScripting(this);
     mPageScripting->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageScripting);
     addPageItem(tr("Scripting"), theme + "icons_textedit/Outdent-96.png", "", true);
+
+    mPageSwdProg = new PageSwdProg(this);
+    mPageSwdProg->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageSwdProg);
+    addPageItem(tr("SWD Programmer"),  theme + "icons/Electronics-96.png", "", true);
 
     /*
      * Page IDs
@@ -1709,6 +1712,11 @@ void MainWindow::on_actionParameterEditorAppconf_triggered()
     p->show();
 }
 
+void MainWindow::on_actionPreferences_triggered()
+{
+    mPreferences->show();
+}
+
 void MainWindow::on_actionParameterEditorInfo_triggered()
 {
     ParameterEditor *p = new ParameterEditor(this);
@@ -1764,25 +1772,29 @@ void MainWindow::on_actionSaveAppConfigurationHeaderWrap_triggered()
 void MainWindow::on_actionTerminalPrintFaults_triggered()
 {
     mVesc->commands()->sendTerminalCmd("faults");
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalShowHelp_triggered()
 {
     mVesc->commands()->sendTerminalCmd("help");
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalClear_triggered()
 {
     mPageTerminal->clearTerminal();
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalPrintThreads_triggered()
 {
     mVesc->commands()->sendTerminalCmd("threads");
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalDRVResetLatchedFaults_triggered()
@@ -1834,13 +1846,13 @@ void MainWindow::on_actionLicense_triggered()
 
 void MainWindow::on_posBox_editingFinished()
 {
-//    on_posButton_clicked();
+    //    on_posButton_clicked();
 }
 
 void MainWindow::on_posBox_valueChanged(double arg1)
 {
     (void)arg1;
-//    on_posButton_clicked();
+    //    on_posButton_clicked();
 }
 
 void MainWindow::on_actionExportConfigurationParser_triggered()
@@ -1928,44 +1940,33 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
     if (isTimeout || ui->canList->count() > 0) {
         return;
     }
-
     ui->scanCanButton->setEnabled(false);
-
     ui->canList->clear();
     FW_RX_PARAMS params;
-
-    auto typeToStr = [](FW_RX_PARAMS p, QString idStr, bool ok) {
-        QString res;
-
-        if (ok) {
-            if (p.hwType == HW_TYPE_VESC) {
-                res = "Motor (" + p.hw + "): " + idStr;
-            } else if (p.hwType == HW_TYPE_VESC_BMS) {
-                res = "BMS (" + p.hw + "): " + idStr;
-            } else {
-                res = "Device (" + p.hw + "): " + idStr;
-            }
-        } else {
-            res = "Unknown: " + idStr;
-        }
-
-        return res;
-    };
-
     bool ok = false;
     QListWidgetItem *item = nullptr;
+    QFontMetrics fm(this->font());
+    int width = fm.horizontalAdvance("Welcome & Wizards++++++++++");
+    int height = fm.height()*1.1;
     for (int dev: devs) {
         ok = Utility::getFwVersionBlockingCan(mVesc, &params, dev);
-        item = new QListWidgetItem(typeToStr(params, QString::number(dev), ok));
+        item = new QListWidgetItem();
+        item->setSizeHint(QSize(width,height));
+        ui->canList->addItem(item);
+        CANListItem *li = new CANListItem(params, dev, ok, this);
+        ui->canList->setItemWidget(item, li);
         ui->canList->addItem(item);
     }
-
     // Read local firmware version last so that firmware pages show the correct info.
     ok = Utility::getFwVersionBlocking(mVesc, &params);
-    item = new QListWidgetItem(typeToStr(params, "Local", ok));
+    item = new QListWidgetItem();
+    item->setSizeHint(QSize(width,height));
     ui->canList->insertItem(0, item);
+    CANListItem *li = new CANListItem(params, -1, ok, this);
+    ui->canList->setItemWidget(item, li);
+    ui->canList->setIconSize(QSize(20,20));
+    ui->canList->setGridSize(QSize(0.85*width , 1.25*height));
     ui->canList->setCurrentRow(0);
-
     ui->scanCanButton->setEnabled(true);
 }
 
@@ -1983,8 +1984,11 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
                 });
             }
         } else {
-            int id = ui->canList->currentItem()->text().split(" ").last().toInt();
-            if (id >= 0 && id < 255) {
+            QWidget *current = ui->canList->itemWidget(ui->canList->currentItem());
+            int id;
+            bool ok = QMetaObject::invokeMethod(current, "getID", Q_RETURN_ARG(int, id));
+            qDebug() << quint32(id);
+            if (id >= 0 && id < 255  && ok) {
                 if (!mVesc->commands()->getSendCan() || mVesc->commands()->getCanSendId() != id) {
                     mVesc->commands()->setCanSendId(quint32(id));
                     mVesc->commands()->setSendCan(true);
@@ -2002,9 +2006,9 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
 
 void MainWindow::on_actionGamepadControl_triggered(bool checked)
 {
-    mPageSettings->setUseGamepadControl(checked);
+    mPreferences->setUseGamepadControl(checked);
 
-    if (!mPageSettings->isUsingGamepadControl()) {
+    if (!mPreferences->isUsingGamepadControl()) {
         ui->actionGamepadControl->setChecked(false);
     }
 }

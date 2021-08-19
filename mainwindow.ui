@@ -19,7 +19,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_free.qrc">
+   <iconset resource="res_platinum.qrc">
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -76,7 +76,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_free.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_platinum.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -158,7 +158,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>80</height>
+                <height>100</height>
                </size>
               </property>
               <property name="font">
@@ -644,7 +644,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>24</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -663,12 +663,14 @@
     <addaction name="actionSaveAppConfigurationHeader"/>
     <addaction name="actionSaveAppConfigurationHeaderWrap"/>
     <addaction name="separator"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="separator"/>
     <addaction name="actionVESCProjectForums"/>
     <addaction name="separator"/>
     <addaction name="actionVESCToolChangelog"/>
@@ -704,6 +706,8 @@
     <addaction name="actionTerminalDRVResetLatchedFaults"/>
     <addaction name="separator"/>
     <addaction name="actionTerminalClear"/>
+    <addaction name="separator"/>
+    <addaction name="actionReboot"/>
    </widget>
    <widget class="QMenu" name="menuCommands">
     <property name="font">
@@ -712,9 +716,9 @@
      </font>
     </property>
     <property name="title">
-     <string>Commands</string>
+     <string>Edit</string>
     </property>
-    <addaction name="actionReboot"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <widget class="QMenu" name="menuWizards">
     <property name="title">
@@ -736,9 +740,9 @@
     <addaction name="actionClearConfigurationBackups"/>
    </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuCommands"/>
    <addaction name="menuTools_2"/>
    <addaction name="menuWizards"/>
-   <addaction name="menuCommands"/>
    <addaction name="menuTerminal"/>
    <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
@@ -926,6 +930,9 @@
    </property>
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -1118,6 +1125,9 @@ p, li { white-space: pre-wrap; }
    <property name="toolTip">
     <string>Start the Motor Setup Wizard</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionAppSetupWizard">
    <property name="icon">
@@ -1129,6 +1139,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="toolTip">
     <string>Start the App Setup Wizard</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionAboutQt">
@@ -1225,6 +1238,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Setup Motors FOC</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionExportConfigurationParser">
@@ -1373,6 +1389,21 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>Setup Motors FOC (old)</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Settings-96.png</normaloff>:/res/icons/Settings-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>false</bool>
+   </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
@@ -1385,8 +1416,8 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_free.qrc"/>
   <include location="res.qrc"/>
+  <include location="res_platinum.qrc"/>
  </resources>
  <connections/>
 </ui>

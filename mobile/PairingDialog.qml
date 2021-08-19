@@ -98,11 +98,12 @@ Item {
                             Image {
                                 id: image
                                 fillMode: Image.PreserveAspectFit
+                                mipmap: true
                                 Layout.preferredWidth: 40
                                 Layout.preferredHeight: 40
                                 Layout.alignment: Qt.AlignVCenter
                                 Layout.leftMargin: 10
-                                source: "qrc:/res/icon.png"
+                                source: "qrc:/res/icon.svg"
                             }
 
                             Text {

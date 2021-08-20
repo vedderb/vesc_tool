@@ -2119,8 +2119,8 @@ p, li { white-space: pre-wrap; }
             <suffix> ERPM</suffix>
             <vTx>3</vTx>
         </app_balance_conf.fault_adc_half_erpm>
-        <app_balance_conf.tiltback_angle>
-            <longName>Duty Tiltback Angle</longName>
+        <app_balance_conf.tiltback_duty_angle>
+            <longName>Angle</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2128,21 +2128,21 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Angle of rise for duty cycle tiltback.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_TILTBACK_ANGLE</cDefine>
+            <cDefine>APPCONF_BALANCE_TILTBACK_DUTY_ANGLE</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>45</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.1</stepDouble>
-            <valDouble>15</valDouble>
+            <stepDouble>1.0</stepDouble>
+            <valDouble>10</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °</suffix>
             <vTx>7</vTx>
-        </app_balance_conf.tiltback_angle>
-        <app_balance_conf.tiltback_speed>
-            <longName>Tiltback Speed</longName>
+        </app_balance_conf.tiltback_duty_angle>
+        <app_balance_conf.tiltback_duty_speed>
+            <longName>Speed</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2150,21 +2150,21 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Speed at which vehicle is being tilted back when exceeding duty cycle limit (fast tiltback can be dangerous!).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_TILTBACK_SPEED</cDefine>
+            <cDefine>APPCONF_BALANCE_TILTBACK_DUTY_SPEED</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.1</stepDouble>
-            <valDouble>5</valDouble>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>3</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °/s</suffix>
             <vTx>7</vTx>
-        </app_balance_conf.tiltback_speed>
+        </app_balance_conf.tiltback_duty_speed>
         <app_balance_conf.tiltback_duty>
-            <longName>Duty Cycle Tiltback</longName>
+            <longName>Duty Cycle</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2186,7 +2186,7 @@ p, li { white-space: pre-wrap; }
             <vTx>7</vTx>
         </app_balance_conf.tiltback_duty>
         <app_balance_conf.tiltback_hv_angle>
-            <longName>HV Tiltback Angle</longName>
+            <longName>Angle</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2201,14 +2201,14 @@ p, li { white-space: pre-wrap; }
             <maxDouble>45</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.1</stepDouble>
+            <stepDouble>1.0</stepDouble>
             <valDouble>10</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °</suffix>
             <vTx>7</vTx>
         </app_balance_conf.tiltback_hv_angle>
         <app_balance_conf.tiltback_hv_speed>
-            <longName>HV Tiltback Speed</longName>
+            <longName>Speed</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2223,36 +2223,36 @@ p, li { white-space: pre-wrap; }
             <maxDouble>100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.1</stepDouble>
-            <valDouble>2</valDouble>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>3</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °/s</suffix>
             <vTx>7</vTx>
         </app_balance_conf.tiltback_hv_speed>
-        <app_balance_conf.tiltback_high_voltage>
-            <longName>High Voltage Tiltback</longName>
+        <app_balance_conf.tiltback_hv>
+            <longName>High Voltage</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;High voltage threshold to trigger a safety tiltback (Tiltback raises the nose of the vehicle to alert you). High voltage tiltback is most likely to be triggered when braking or going downhill on a full battery, sometimes resulting in a tail drag on Onewheel style vehicles. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_TILTBACK_HIGH_V</cDefine>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;High voltage threshold to trigger a safety tiltback (Tiltback raises the nose of the vehicle to alert you). High voltage tiltback is most likely to be triggered when braking or going downhill on a full battery, sometimes resulting in a tail drag on board shaped vehicles. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_TILTBACK_HV</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>700</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
+            <stepDouble>0.10</stepDouble>
             <valDouble>100</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>9</vTx>
-        </app_balance_conf.tiltback_high_voltage>
+        </app_balance_conf.tiltback_hv>
         <app_balance_conf.tiltback_lv_angle>
-            <longName>LV Tiltback Angle</longName>
+            <longName>Angle</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2267,14 +2267,14 @@ p, li { white-space: pre-wrap; }
             <maxDouble>45</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.1</stepDouble>
-            <valDouble>15</valDouble>
+            <stepDouble>1.0</stepDouble>
+            <valDouble>10</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °</suffix>
             <vTx>7</vTx>
         </app_balance_conf.tiltback_lv_angle>
         <app_balance_conf.tiltback_lv_speed>
-            <longName>LV Tiltback Speed</longName>
+            <longName>Speed</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2289,14 +2289,14 @@ p, li { white-space: pre-wrap; }
             <maxDouble>100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.1</stepDouble>
-            <valDouble>2</valDouble>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>3</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °/s</suffix>
             <vTx>7</vTx>
         </app_balance_conf.tiltback_lv_speed>
-        <app_balance_conf.tiltback_low_voltage>
-            <longName>Low Voltage Tiltback</longName>
+        <app_balance_conf.tiltback_lv>
+            <longName>Low Voltage</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2304,19 +2304,19 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Low voltage threshold to trigger a safety tiltback (Tiltback raises the nose of the vehicle informing you to slow down). &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_BALANCE_TILTBACK_LOW_V</cDefine>
+            <cDefine>APPCONF_BALANCE_TILTBACK_LV</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>700</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
+            <stepDouble>0.1</stepDouble>
             <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>9</vTx>
-        </app_balance_conf.tiltback_low_voltage>
+        </app_balance_conf.tiltback_lv>
         <app_balance_conf.tiltback_return_speed>
             <longName>Return To Level Speed</longName>
             <type>1</type>
@@ -2333,8 +2333,8 @@ p, li { white-space: pre-wrap; }
             <maxDouble>100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.1</stepDouble>
-            <valDouble>2</valDouble>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>1</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °/s</suffix>
             <vTx>7</vTx>
@@ -3884,15 +3884,15 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.fault_delay_switch_half</ser>
         <ser>app_balance_conf.fault_delay_switch_full</ser>
         <ser>app_balance_conf.fault_adc_half_erpm</ser>
-        <ser>app_balance_conf.tiltback_angle</ser>
-        <ser>app_balance_conf.tiltback_speed</ser>
+        <ser>app_balance_conf.tiltback_duty_angle</ser>
+        <ser>app_balance_conf.tiltback_duty_speed</ser>
         <ser>app_balance_conf.tiltback_duty</ser>
         <ser>app_balance_conf.tiltback_hv_angle</ser>
         <ser>app_balance_conf.tiltback_hv_speed</ser>
-        <ser>app_balance_conf.tiltback_high_voltage</ser>
+        <ser>app_balance_conf.tiltback_hv</ser>
         <ser>app_balance_conf.tiltback_lv_angle</ser>
         <ser>app_balance_conf.tiltback_lv_speed</ser>
-        <ser>app_balance_conf.tiltback_low_voltage</ser>
+        <ser>app_balance_conf.tiltback_lv</ser>
         <ser>app_balance_conf.tiltback_return_speed</ser>
         <ser>app_balance_conf.tiltback_constant</ser>
         <ser>app_balance_conf.tiltback_constant_erpm</ser>
@@ -4194,20 +4194,20 @@ p, li { white-space: pre-wrap; }
             <subgroup>
                 <subgroupName>Tiltback</subgroupName>
                 <subgroupParams>
+                    <param>::sep::General Config</param>
+                    <param>app_balance_conf.tiltback_return_speed</param>
                     <param>::sep::Duty Cycle Tiltback</param>
                     <param>app_balance_conf.tiltback_duty</param>
-                    <param>app_balance_conf.tiltback_angle</param>
-                    <param>app_balance_conf.tiltback_speed</param>
+                    <param>app_balance_conf.tiltback_duty_angle</param>
+                    <param>app_balance_conf.tiltback_duty_speed</param>
                     <param>::sep::High Voltage Tiltback</param>
-                    <param>app_balance_conf.tiltback_high_voltage</param>
+                    <param>app_balance_conf.tiltback_hv</param>
                     <param>app_balance_conf.tiltback_hv_angle</param>
                     <param>app_balance_conf.tiltback_hv_speed</param>
                     <param>::sep::Low Voltage Tiltback</param>
-                    <param>app_balance_conf.tiltback_low_voltage</param>
+                    <param>app_balance_conf.tiltback_lv</param>
                     <param>app_balance_conf.tiltback_lv_angle</param>
                     <param>app_balance_conf.tiltback_lv_speed</param>
-                    <param>::sep::Tiltback Config</param>
-                    <param>app_balance_conf.tiltback_return_speed</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

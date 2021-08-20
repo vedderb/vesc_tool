@@ -733,6 +733,16 @@ ApplicationWindow {
             vesc3d.setRotation(values.roll, values.pitch,
                                useYawBox.checked ? values.yaw : 0)
         }
+
+        onDeserializeConfigFailed: {
+            if (isMc) {
+                confTimer.mcConfRx = true
+            }
+
+            if (isApp) {
+                confTimer.appConfRx = true
+            }
+        }
     }
 
     Dialog {

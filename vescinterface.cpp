@@ -3582,7 +3582,9 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         disconnect(conn);
     }
 
-    emit qmlLoadDone();
+    if (params.hasQmlApp || params.hasQmlHw) {
+        emit qmlLoadDone();
+    }
 }
 
 void VescInterface::appconfUpdated()

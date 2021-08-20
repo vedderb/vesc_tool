@@ -29,7 +29,7 @@ import QtQuick.Controls 2.1
 import Qt.labs.folderlistmodel 2.1
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.0
-import Qt.labs.platform 1.1
+import Qt.labs.platform 1.0
 
 import Vedder.vesc.utility 1.0
 Item {

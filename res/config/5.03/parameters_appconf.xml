@@ -2135,7 +2135,7 @@ p, li { white-space: pre-wrap; }
             <maxDouble>45</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>1.0</stepDouble>
+            <stepDouble>1</stepDouble>
             <valDouble>10</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °</suffix>
@@ -2201,7 +2201,7 @@ p, li { white-space: pre-wrap; }
             <maxDouble>45</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>1.0</stepDouble>
+            <stepDouble>1</stepDouble>
             <valDouble>10</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °</suffix>
@@ -2245,7 +2245,7 @@ p, li { white-space: pre-wrap; }
             <maxDouble>700</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>0.10</stepDouble>
+            <stepDouble>0.1</stepDouble>
             <valDouble>100</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> V</suffix>
@@ -2267,7 +2267,7 @@ p, li { white-space: pre-wrap; }
             <maxDouble>45</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
-            <stepDouble>1.0</stepDouble>
+            <stepDouble>1</stepDouble>
             <valDouble>10</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> °</suffix>
@@ -3697,94 +3697,6 @@ p, li { white-space: pre-wrap; }
             <suffix> °/s</suffix>
             <vTx>9</vTx>
         </imu_conf.gyro_offsets__2>
-        <imu_conf.gyro_offset_comp_fact__0>
-            <longName>Gyro Offset Comp X</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Gyro offset compensation for X axis. Setting this value to a positive number will integrate the gyro offset towards the current gyro value with this rate. This is useful in order to remove gyro bias on axes that do not rotate on average, such as roll and pitch on most applications.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_IMU_G_OFFSET_COMP_FACT_0</cDefine>
-            <editorDecimalsDouble>4</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.001</stepDouble>
-            <valDouble>0</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
-            <suffix> °/s</suffix>
-            <vTx>9</vTx>
-        </imu_conf.gyro_offset_comp_fact__0>
-        <imu_conf.gyro_offset_comp_fact__1>
-            <longName>Gyro Offset Comp Y</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Gyro offset compensation for Y axis. Setting this value to a positive number will integrate the gyro offset towards the current gyro value with this rate. This is useful in order to remove gyro bias on axes that do not rotate on average, such as roll and pitch on most applications.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_IMU_G_OFFSET_COMP_FACT_1</cDefine>
-            <editorDecimalsDouble>4</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.001</stepDouble>
-            <valDouble>0</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
-            <suffix> °/s</suffix>
-            <vTx>9</vTx>
-        </imu_conf.gyro_offset_comp_fact__1>
-        <imu_conf.gyro_offset_comp_fact__2>
-            <longName>Gyro Offset Comp Z</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Gyro offset compensation for Z axis. Setting this value to a positive number will integrate the gyro offset towards the current gyro value with this rate. This is useful in order to remove gyro bias on axes that do not rotate on average, such as roll and pitch on most applications.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_IMU_G_OFFSET_COMP_FACT_2</cDefine>
-            <editorDecimalsDouble>4</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.001</stepDouble>
-            <valDouble>0</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
-            <suffix> °/s</suffix>
-            <vTx>9</vTx>
-        </imu_conf.gyro_offset_comp_fact__2>
-        <imu_conf.gyro_offset_comp_clamp>
-            <longName>Gyro Offset Comp Clamp</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Gyro offset compensation clamping. This value clamps the integrated gyro offsets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_IMU_G_OFFSET_COMP_CLAMP</cDefine>
-            <editorDecimalsDouble>3</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1000</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.1</stepDouble>
-            <valDouble>5</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
-            <suffix> °/s</suffix>
-            <vTx>9</vTx>
-        </imu_conf.gyro_offset_comp_clamp>
     </Params>
     <SerOrder>
         <ser>controller_id</ser>
@@ -3959,10 +3871,6 @@ p, li { white-space: pre-wrap; }
         <ser>imu_conf.gyro_offsets__0</ser>
         <ser>imu_conf.gyro_offsets__1</ser>
         <ser>imu_conf.gyro_offsets__2</ser>
-        <ser>imu_conf.gyro_offset_comp_fact__0</ser>
-        <ser>imu_conf.gyro_offset_comp_fact__1</ser>
-        <ser>imu_conf.gyro_offset_comp_fact__2</ser>
-        <ser>imu_conf.gyro_offset_comp_clamp</ser>
     </SerOrder>
     <Grouping>
         <group>
@@ -4269,10 +4177,6 @@ p, li { white-space: pre-wrap; }
                     <param>imu_conf.gyro_offsets__0</param>
                     <param>imu_conf.gyro_offsets__1</param>
                     <param>imu_conf.gyro_offsets__2</param>
-                    <param>imu_conf.gyro_offset_comp_fact__0</param>
-                    <param>imu_conf.gyro_offset_comp_fact__1</param>
-                    <param>imu_conf.gyro_offset_comp_fact__2</param>
-                    <param>imu_conf.gyro_offset_comp_clamp</param>
                 </subgroupParams>
             </subgroup>
         </group>

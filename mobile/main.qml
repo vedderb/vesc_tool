@@ -63,6 +63,10 @@ ApplicationWindow {
         parentHeight: appWindow.height - footer.height - tabBar.height
     }
 
+    MultiSettings {
+        id: multiSettings
+    }
+
     Settings {
         id: settings
     }
@@ -189,6 +193,10 @@ ApplicationWindow {
 
                 onRequestConnect: {
                     connScreen.y = 0
+                }
+
+                onRequestOpenMultiSettings: {
+                    multiSettings.openDialog()
                 }
             }
         }
@@ -755,7 +763,7 @@ ApplicationWindow {
         closePolicy: Popup.CloseOnEscape
         title: "Load Custom User Interface"
 
-        parent: container
+        parent: ApplicationWindow.overlay
         y: parent.y + parent.height / 2 - height / 2
 
         Text {

@@ -51,9 +51,26 @@
             </sizepolicy>
            </property>
            <property name="title">
-            <string>Wizards</string>
+            <string>Quick Configuration</string>
            </property>
            <layout class="QGridLayout" name="gridLayout">
+            <item row="1" column="1">
+             <widget class="QPushButton" name="nrfPairButton">
+              <property name="text">
+               <string>NRF Quick Pair</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/icons/icons8-fantasy-96.png</normaloff>:/res/icons/icons8-fantasy-96.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="0">
              <widget class="QPushButton" name="autoConnectButton">
               <property name="toolTip">
@@ -117,14 +134,31 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QPushButton" name="nrfPairButton">
+            <item row="2" column="0">
+             <widget class="QPushButton" name="multiSettingButton">
               <property name="text">
-               <string>NRF Quick Pair</string>
+               <string>Multi Settings</string>
               </property>
               <property name="icon">
                <iconset resource="../res.qrc">
-                <normaloff>:/res/icons/icons8-fantasy-96.png</normaloff>:/res/icons/icons8-fantasy-96.png</iconset>
+                <normaloff>:/res/icons/Settings-96.png</normaloff>:/res/icons/Settings-96.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QPushButton" name="invertDirButton">
+              <property name="text">
+               <string>Invert Motor Directions</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/icons/Process-96.png</normaloff>:/res/icons/Process-96.png</iconset>
               </property>
               <property name="iconSize">
                <size>

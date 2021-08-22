@@ -33,6 +33,7 @@ Item {
     property bool isHorizontal: width > height
     signal requestOpenControls()
     signal requestConnect()
+    signal requestOpenMultiSettings()
 
     ScrollView {
         anchors.fill: parent
@@ -351,6 +352,19 @@ Item {
 
                         onClicked: {
                             pairDialog.openDialog()
+                        }
+                    }
+
+                    ImageButton {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "Multi\nSettings"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
+
+                        onClicked: {
+                            requestOpenMultiSettings()
                         }
                     }
                 }

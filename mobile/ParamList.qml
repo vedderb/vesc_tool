@@ -24,20 +24,24 @@ import QtQuick.Layouts 1.3
 Item {
     implicitHeight: scrollCol.implicitHeight
     property var editorsVisible: []
+    property var paramNames: []
 
     function clear() {
         for (var i = 0;i < editorsVisible.length;i++) {
             editorsVisible[i].destroy();
         }
         editorsVisible = []
+        paramNames = []
     }
 
     function addEditorMc(param) {
         editorsVisible.push(editors.createEditorMc(scrollCol, param))
+        paramNames.push(param)
     }
 
     function addEditorApp(param) {
         editorsVisible.push(editors.createEditorApp(scrollCol, param))
+        paramNames.push(param)
     }
 
     function addSpacer() {
@@ -46,6 +50,10 @@ Item {
 
     function addSeparator(text) {
         editorsVisible.push(editors.createSeparator(scrollCol, text))
+    }
+
+    function getParamNames() {
+        return paramNames
     }
 
     ParamEditors {

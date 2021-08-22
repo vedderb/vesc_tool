@@ -52,5 +52,6 @@
         <file>ImageButton.qml</file>
         <file>LogBox.qml</file>
         <file>TcpBox.qml</file>
+        <file>MultiSettings.qml</file>
     </qresource>
 </RCC>

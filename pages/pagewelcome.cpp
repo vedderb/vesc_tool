@@ -37,10 +37,12 @@ PageWelcome::PageWelcome(QWidget *parent) :
     ui->setupUi(this);
 
     QString theme = Utility::getThemePath();
-    ui->autoConnectButton->setIcon(QIcon(theme +"icons/Connected-96.png"));
-    ui->wizardFocSimpleButton->setIcon(QIcon(theme +"icons/Wizard-96.png"));
-    ui->wizardAppButton->setIcon(QIcon(theme +"icons/Wizard-96.png"));
-    ui->nrfPairButton->setIcon(QIcon(theme +"icons/icons8-fantasy-96.png"));
+    ui->autoConnectButton->setIcon(QIcon(theme + "icons/Connected-96.png"));
+    ui->wizardFocSimpleButton->setIcon(QIcon(theme + "icons/Wizard-96.png"));
+    ui->wizardAppButton->setIcon(QIcon(theme + "icons/Wizard-96.png"));
+    ui->nrfPairButton->setIcon(QIcon(theme + "icons/icons8-fantasy-96.png"));
+    ui->multiSettingButton->setIcon(QIcon(theme + "icons/Settings-96.png"));
+    ui->invertDirButton->setIcon(QIcon(theme + "icons/Process-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
@@ -49,8 +51,17 @@ PageWelcome::PageWelcome(QWidget *parent) :
     connect(ui->wizardFocSimpleButton, &QPushButton::clicked, [this]() {
         QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "setupMotors");
     });
+
     connect(ui->wizardAppButton, SIGNAL(clicked(bool)),
             this, SLOT(startSetupWizardApp()));
+
+    connect(ui->multiSettingButton, &QPushButton::clicked, [this]() {
+        QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "openMultiSettings");
+    });
+
+    connect(ui->invertDirButton, &QPushButton::clicked, [this]() {
+        QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "dirSetup");
+    });
 }
 
 PageWelcome::~PageWelcome()

@@ -259,8 +259,8 @@ Item {
 
             erpmGauge.value = values.rpm / 100
 
-            voltageGauge.maximumValue = Math.ceil(mAppConf.getParamDouble("app_balance_conf.tiltback_high_voltage"))
-            voltageGauge.minimumValue = Math.floor(mAppConf.getParamDouble("app_balance_conf.tiltback_low_voltage"))
+            voltageGauge.maximumValue = Math.ceil(mAppConf.getParamDouble("app_balance_conf.tiltback_hv"))
+            voltageGauge.minimumValue = Math.floor(mAppConf.getParamDouble("app_balance_conf.tiltback_lv"))
             voltageGauge.value = values.v_in
 
             var useImperial = VescIf.useImperialUnits()

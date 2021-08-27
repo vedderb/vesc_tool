@@ -80,6 +80,9 @@ private:
     QString mRxUuid;
     QString mTxUuid;
     bool mScanFinished;
+    bool mInitDone;
+
+    void init();
 
 };
 

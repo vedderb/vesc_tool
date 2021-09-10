@@ -40,6 +40,10 @@ public:
     void setVesc(VescInterface *vesc);
     void reloadParams();
 
+private slots:
+    void on_servoSlider_valueChanged(int position);
+    void on_servoCenterButton_clicked();
+
 private:
     Ui::PageAppGeneral *ui;
     VescInterface *mVesc;

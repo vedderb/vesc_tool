@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
+import QtQuick 2.11
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
@@ -45,7 +45,7 @@ Item {
             spacing: 0
 
             Rectangle {
-                color: "#4f4f4f"
+                color: Utility.getAppHexColor("normalBackground")
                 width: 16
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
@@ -73,34 +73,18 @@ Item {
                         anchors.fill: parent
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
+                        anchors.topMargin: 10
 
                         Rectangle {
                             Layout.fillWidth: true
                             height: 30;
                             border.width: 0
-                            gradient: Gradient {
-                                GradientStop {
-                                    position: 0.00;
-                                    color: "#002dcbff";
-                                }
-                                GradientStop {
-                                    position: 0.3;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 0.7;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 1.00;
-                                    color: "#000dc3ff";
-                                }
-                            }
-                            border.color: "#00000000"
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
+                            border.color: Utility.getAppHexColor("lightestBackground")
 
                             Text {
                                 anchors.centerIn: parent
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Included Files"
                                 font.bold: true
                                 verticalAlignment: Text.AlignVCenter
@@ -115,7 +99,7 @@ Item {
                         }
 
                         Text {
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             Layout.fillWidth: true
                             height: 30;
                             text: "Hardware"
@@ -134,7 +118,7 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                updateHw("")
+                                updateHw(VescIf.getLastFwRxParams())
                             }
 
                             onCurrentIndexChanged: {
@@ -159,7 +143,7 @@ Item {
                         }
 
                         Text {
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             Layout.fillWidth: true
                             height: 30;
                             text: "Firmware"
@@ -203,34 +187,19 @@ Item {
                         anchors.fill: parent
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
+                        anchors.topMargin: 10
 
                         Rectangle {
                             Layout.fillWidth: true
                             height: 30;
                             border.width: 0
-                            gradient: Gradient {
-                                GradientStop {
-                                    position: 0.00;
-                                    color: "#002dcbff";
-                                }
-                                GradientStop {
-                                    position: 0.3;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 0.7;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 1.00;
-                                    color: "#000dc3ff";
-                                }
-                            }
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
+
                             border.color: "#00000000"
 
                             Text {
                                 anchors.centerIn: parent
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Custom File"
                                 font.bold: true
                                 verticalAlignment: Text.AlignVCenter
@@ -245,7 +214,7 @@ Item {
                         }
 
                         TextInput {
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             id: customFwText
                             Layout.fillWidth: true
                         }
@@ -295,34 +264,18 @@ Item {
                         anchors.fill: parent
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
+                        anchors.topMargin: 10
 
                         Rectangle {
                             Layout.fillWidth: true
                             height: 30;
                             border.width: 0
-                            gradient: Gradient {
-                                GradientStop {
-                                    position: 0.00;
-                                    color: "#002dcbff";
-                                }
-                                GradientStop {
-                                    position: 0.3;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 0.7;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 1.00;
-                                    color: "#000dc3ff";
-                                }
-                            }
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
                             border.color: "#00000000"
 
                             Text {
                                 anchors.centerIn: parent
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Bootloader"
                                 font.bold: true
                                 verticalAlignment: Text.AlignVCenter
@@ -337,7 +290,7 @@ Item {
                         }
 
                         Text {
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             Layout.fillWidth: true
                             height: 30;
                             text: "Hardware"
@@ -356,7 +309,7 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                updateBl("")
+                                updateBl(VescIf.getLastFwRxParams())
                             }
                         }
 
@@ -373,7 +326,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: asd.implicitHeight + 20
-            color: "#414141"
+            color: Utility.getAppHexColor("lightBackground")
 
             ColumnLayout {
                 id: asd
@@ -382,7 +335,7 @@ Item {
 
                 Text {
                     Layout.fillWidth: true
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     id: uploadText
                     text: qsTr("Not Uploading")
                     horizontalAlignment: Text.AlignHCenter
@@ -431,7 +384,7 @@ Item {
                 Text {
                     Layout.fillWidth: true
                     id: versionText
-                    color: "#e0e0e0"
+                    color: Utility.getAppHexColor("lightText")
                     text:
                         "FW   : \n" +
                         "HW   : \n" +
@@ -456,7 +409,7 @@ Item {
         y: (parent.height - height) / 2
 
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             id: uploadDialogLabel
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent

@@ -150,12 +150,16 @@ public:
     Q_INVOKABLE bool useWakeLock();
     Q_INVOKABLE void setUseWakeLock(bool on);
     Q_INVOKABLE bool setWakeLock(bool lock);
+    Q_INVOKABLE bool getLoadQmlUiOnConnect() const;
+    Q_INVOKABLE void setLoadQmlUiOnConnect(bool loadQmlUiOnConnect);
 
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
     Q_INVOKABLE void storeBleName(QString address, QString name);
     Q_INVOKABLE QString getBleName(QString address);
     Q_INVOKABLE QString getLastBleAddr() const;
+    Q_INVOKABLE void storeBlePreferred(QString address, bool preferred);
+    Q_INVOKABLE bool getBlePreferred(QString address);
 #endif
 
     // Connection
@@ -167,7 +171,7 @@ public:
     bool connectSerial(QString port, int baudrate = 115200);
     QList<VSerialInfo_t> listSerialPorts();
     QList<QString> listCANbusInterfaces();
-    Q_INVOKABLE bool connectCANbus(QString backend, QString interface, int bitrate);
+    Q_INVOKABLE bool connectCANbus(QString backend, QString ifName, int bitrate);
     Q_INVOKABLE bool isCANbusConnected();
     Q_INVOKABLE void setCANbusReceiverID(int node_ID);
     Q_INVOKABLE void scanCANbus();
@@ -181,6 +185,8 @@ public:
     Q_INVOKABLE QVector<int> getCanDevsLast() const;
     Q_INVOKABLE void ignoreCanChange(bool ignore);
     Q_INVOKABLE bool isIgnoringCanChanges();
+    Q_INVOKABLE void canTmpOverride(bool fwdCan, int canId);
+    Q_INVOKABLE void canTmpOverrideEnd();
 
     Q_INVOKABLE bool tcpServerStart(int port);
     Q_INVOKABLE void tcpServerStop();
@@ -214,6 +220,11 @@ public:
     Q_INVOKABLE bool customConfigsLoaded();
     ConfigParams *customConfig(int configNum);
 
+    Q_INVOKABLE bool qmlHwLoaded();
+    Q_INVOKABLE bool qmlAppLoaded();
+    Q_INVOKABLE QString qmlHw();
+    Q_INVOKABLE QString qmlApp();
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -231,6 +242,7 @@ signals:
     void configurationChanged();
     void configurationBackupsChanged();
     void customConfigLoadDone();
+    void qmlLoadDone();
 
 public slots:
 
@@ -278,6 +290,7 @@ private:
 
     QSettings mSettings;
     QHash<QString, QString> mBleNames;
+    QHash<QString, bool> mBlePreferred;
     QHash<QString, CONFIG_BACKUP> mConfigurationBackups;
     QVariantList mProfiles;
     QStringList mPairedUuids;
@@ -290,6 +303,11 @@ private:
     ConfigParams *mFwConfig;
     QVector<ConfigParams*> mCustomConfigs;
     bool mCustomConfigsLoaded;
+
+    bool mQmlHwLoaded;
+    QString mQmlHw;
+    bool mQmlAppLoaded;
+    QString mQmlApp;
 
     QTimer *mTimer;
     Packet *mPacket;
@@ -374,6 +392,10 @@ private:
     double mAutoconnectProgress;
     bool mIgnoreCanChange;
 
+    bool mCanTmpFwdActive;
+    bool mCanTmpFwdSendCanLast;
+    int mCanTmpFwdIdLast;
+
     QVector<int> mCanDevsLast;
 
     FW_RX_PARAMS mLastFwParams;
@@ -382,6 +404,7 @@ private:
     bool mUseImperialUnits;
     bool mKeepScreenOn;
     bool mUseWakeLock;
+    bool mLoadQmlUiOnConnect;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

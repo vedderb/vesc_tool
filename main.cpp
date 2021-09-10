@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -18,9 +18,16 @@
     */
 
 #include "mainwindow.h"
-#include "utility.h"
 #ifdef USE_MOBILE
 #include "mobile/qmlui.h"
+#endif
+#include "mobile/fwhelper.h"
+#include "mobile/vesc3ditem.h"
+#include "mobile/logwriter.h"
+#include "mobile/logreader.h"
+#include "tcpserversimple.h"
+#ifdef Q_OS_IOS
+#include "ios/src/notch.h"
 #endif
 
 #include <QApplication>
@@ -34,6 +41,23 @@
 #endif
 
 #ifndef USE_MOBILE
+
+#include <QProxyStyle>
+
+// Disables focus drawing for all widgets
+class Style_tweaks : public QProxyStyle
+{
+public:
+    using QProxyStyle::QProxyStyle;
+    void drawPrimitive(PrimitiveElement element, const QStyleOption *option,
+                       QPainter *painter, const QWidget *widget) const
+    {
+        if (element == QStyle::PE_FrameFocusRect) return;
+
+        QProxyStyle::drawPrimitive(element, option, painter, widget);
+    }
+};
+
 static void showHelp()
 {
     qDebug() << "Arguments";
@@ -52,22 +76,94 @@ static void m_cleanup(int sig)
 
 int main(int argc, char *argv[])
 {
+
     // Settings
     QCoreApplication::setOrganizationName("VESC");
     QCoreApplication::setOrganizationDomain("vesc-project.com");
-    QCoreApplication::setApplicationName("VESC Tool");
+    QCoreApplication::setApplicationName("VESC Tool");   
+    QSettings set;   
+    bool isDark = set.value("darkMode", true).toBool();
+    Utility::setDarkMode(isDark);
+
+    if (isDark) {
+        qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2_dark.conf");
+
+        Utility::setAppQColor("lightestBackground", QColor(80,80,80));
+        Utility::setAppQColor("lightBackground", QColor(72,72,72));
+        Utility::setAppQColor("normalBackground", QColor(48,48,48));
+        Utility::setAppQColor("darkBackground", QColor(39,39,39));
+        Utility::setAppQColor("plotBackground", QColor(39,39,39));
+        Utility::setAppQColor("normalText", QColor(180,180,180));
+        Utility::setAppQColor("lightText", QColor(215,215,215));
+        Utility::setAppQColor("disabledText", QColor(127,127,127));
+        Utility::setAppQColor("lightAccent", QColor(0,161,221));
+        Utility::setAppQColor("midAccentColor", QColor(0,98,153));
+        Utility::setAppQColor("darkAccent", QColor(0,69,112));
+        Utility::setAppQColor("pink", QColor(219,98,139));
+        Utility::setAppQColor("red", QColor(200,52,52));
+        Utility::setAppQColor("orange", QColor(206,125,44));
+        Utility::setAppQColor("yellow", QColor(210,210,127));
+        Utility::setAppQColor("green", QColor(127,200,127));
+        Utility::setAppQColor("cyan",QColor(79,203,203));
+        Utility::setAppQColor("blue", QColor(77,127,196));
+        Utility::setAppQColor("magenta", QColor(157,127,210));
+        Utility::setAppQColor("white", QColor(255,255,255));
+        Utility::setAppQColor("black", QColor(0,0,0));
+    } else {
+        qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2.conf");
+
+        Utility::setAppQColor("lightestBackground", QColor(200,200,200));
+        Utility::setAppQColor("lightBackground", QColor(225,225,225));
+        Utility::setAppQColor("normalBackground", QColor(240,240,240));
+        Utility::setAppQColor("darkBackground", QColor(255,255,255));
+        Utility::setAppQColor("plotBackground", QColor(250,250,250));
+        Utility::setAppQColor("normalText", QColor(60,20,60));
+        Utility::setAppQColor("lightText", QColor(33,33,33));
+        Utility::setAppQColor("disabledText", QColor(110,110,110));
+        Utility::setAppQColor("lightAccent", QColor(0,114,178));
+        Utility::setAppQColor("midAccentColor", QColor(0,114,178));
+        Utility::setAppQColor("darkAccent", QColor(0,161,221));
+        Utility::setAppQColor("pink", QColor(219,98,139));
+        Utility::setAppQColor("red", QColor(200,52,52));
+        Utility::setAppQColor("orange", QColor(206,125,44));
+        Utility::setAppQColor("yellow", QColor(210,210,127));
+        Utility::setAppQColor("green", QColor(127,200,127));
+        Utility::setAppQColor("cyan",QColor(79,203,203));
+        Utility::setAppQColor("blue", QColor(77,127,196));
+        Utility::setAppQColor("magenta", QColor(157,127,210));
+        Utility::setAppQColor("white", QColor(255,255,255));
+        Utility::setAppQColor("black", QColor(0,0,0));
+    }
 
     // DPI settings
     // TODO: http://www.qcustomplot.com/index.php/support/forum/1344
 
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
+#ifdef HAS_BLUETOOTH
+    qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
+#endif
+    qmlRegisterType<Commands>("Vedder.vesc.commands", 1, 0, "Commands");
+    qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");
+    qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
+    qmlRegisterType<TcpServerSimple>("Vedder.vesc.tcpserversimple", 1, 0, "TcpServerSimple");
+    qmlRegisterType<Vesc3dItem>("Vedder.vesc.vesc3ditem", 1, 0, "Vesc3dItem");
+    qmlRegisterType<LogWriter>("Vedder.vesc.logwriter", 1, 0, "LogWriter");
+    qmlRegisterType<LogReader>("Vedder.vesc.logreader", 1, 0, "LogReader");
+
+    qRegisterMetaType<MCCONF_TEMP>();
+    qRegisterMetaType<MC_VALUES>();
+    qRegisterMetaType<BMS_VALUES>();
+    qRegisterMetaType<FW_RX_PARAMS>();
+    qRegisterMetaType<PSW_STATUS>();
+    qRegisterMetaType<IO_BOARD_VALUES>();
+
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 #else
-    QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 #ifdef Q_OS_LINUX
     signal(SIGINT, m_cleanup);
@@ -126,40 +222,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    QSettings set;
-    bool scaleAuto = true;
-    double scale = 1.0;
-
-    if (set.contains("app_scale_auto")) {
-        scaleAuto = set.value("app_scale_auto").toBool();
-    } else {
-        set.setValue("app_scale_auto", scaleAuto);
-    }
-
-    if (scaleAuto) {
-        QApplication tmp(argc, argv);
-        QRect rec = tmp.desktop()->screenGeometry();
-        int height = rec.height();
-        int width = rec.width();
-        double ptFont = tmp.font().pointSizeF();
-        if (ptFont < 0.0) {
-            ptFont = tmp.font().pixelSize();
-        }
-
-        if (width > 3000 && height > 1700) {
-            scale = 1.5;
-        } else {
-            if (ptFont > 11.0) {
-                scale = ptFont / 11.0;
-            }
-        }
-
-        set.setValue("app_scale_factor", scale);
-    } else if (set.contains("app_scale_factor")) {
-        scale = set.value("app_scale_factor").toDouble();
-    }
-
-    set.setValue("app_scale_factor", scale);
+    double scale = set.value("app_scale_factor", 1.0).toDouble();
 
 #ifdef Q_OS_ANDROID
     scale = 1.0;
@@ -175,6 +238,7 @@ int main(int argc, char *argv[])
 #ifdef USE_MOBILE
     QApplication *a = new QApplication(argc, argv);
     app = a;
+
 
     // Fonts
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
@@ -262,15 +326,53 @@ int main(int argc, char *argv[])
         QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
         QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
 
+
         qApp->setFont(QFont("Roboto", 12));
 
         // Style
-        a->setStyleSheet("");
-        a->setStyle(QStyleFactory::create("Fusion"));
+        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0 " + Utility::getAppHexColor("lightAccent") +
+                            ", stop: 0.4 " + Utility::getAppHexColor("darkAccent") + ");" +
+                            " border: none;} ");
+        QStyle *myStyle = new Style_tweaks("Fusion");
+        a->setStyle(myStyle);
+
+        if(isDark){
+            QPalette darkPalette;
+            darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
+            darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("lightText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Base,Utility::getAppQColor("normalBackground"));
+            darkPalette.setColor(QPalette::AlternateBase,Utility::getAppQColor("lightBackground"));
+            darkPalette.setColor(QPalette::ToolTipBase,Utility::getAppQColor("lightestBackground"));
+            darkPalette.setColor(QPalette::ToolTipText,Utility::getAppQColor("lightText"));
+            darkPalette.setColor(QPalette::Text,Utility::getAppQColor("lightText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::Text,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Dark,QColor(35,35,35));
+            darkPalette.setColor(QPalette::Shadow,QColor(20,20,20));
+            darkPalette.setColor(QPalette::Button,Utility::getAppQColor("normalBackground"));
+            darkPalette.setColor(QPalette::ButtonText,Utility::getAppQColor("lightText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,Utility::getAppQColor("lightestBackground"));
+            darkPalette.setColor(QPalette::HighlightedText,Utility::getAppQColor("white"));
+            darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
+            qApp->setPalette(darkPalette);
+        }else{
+            QPalette lightPalette = qApp->style()->standardPalette();
+            qApp->setPalette(lightPalette);
+        }
+
+        // Register this to not stop on the import statement when reusing components
+        // from the mobile UI. In the mobile UI these are provided as singletons, whereas
+        // in the desktop GUI they are provided as context properties.
+        qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
+        qmlRegisterType<VescInterface>("Vedder.vesc.utility", 1, 0, "Utility2");
 
         w = new MainWindow;
         w->show();
     }
+#endif
+#ifdef Q_OS_IOS
+    Notch();
 #endif
 
     int res = app->exec();

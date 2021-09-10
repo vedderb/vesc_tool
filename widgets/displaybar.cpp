@@ -18,6 +18,7 @@
     */
 
 #include "displaybar.h"
+#include "utility.h"
 #include <QPainter>
 #include <cmath>
 
@@ -41,18 +42,20 @@ void DisplayBar::paintEvent(QPaintEvent *event)
     double f_val = 1.0 - f_disp;
 
     painter.fillRect(event->rect(), Qt::transparent);
-    painter.setBrush(Qt::black);
+    painter.setBrush(Utility::getAppQColor("black"));
     painter.drawRoundedRect(event->rect(), 5.0, 5.0);
 
-    painter.setBrush(QBrush(Qt::red));
-    painter.fillRect(w / 2 - 1, 0, 2, h, Qt::darkRed);
-    painter.fillRect(0, h * f_disp - 1, w, 2, Qt::darkGreen);
+    painter.setBrush(QBrush(Utility::getAppQColor("red")));
+    painter.fillRect(w / 2 - 1, 0, 2, h, QColor(150,37,37));
+    painter.fillRect(0, h * f_disp - 1, w, 2, Utility::getAppQColor("darkAccent"));
+
+
 
     QPen pen;
     QFont font;
 
     // Name
-    pen.setColor(Qt::white);
+    pen.setColor(Utility::getAppQColor("white"));
     font.setFamily("Monospace");
     font.setBold(true);
     font.setPixelSize(h * f_val - 2);
@@ -62,7 +65,7 @@ void DisplayBar::paintEvent(QPaintEvent *event)
                      Qt::AlignCenter, mName);
 
     // Value
-    pen.setColor(Qt::white);
+    pen.setColor(Utility::getAppQColor("white"));
     font.setFamily("Monospace");
     font.setBold(true);
     font.setPixelSize(h * f_val - 2);
@@ -79,10 +82,10 @@ void DisplayBar::paintEvent(QPaintEvent *event)
 
     if (fabs(valw) > 0.1) {
         if (valw >= 0.0) {
-            painter.setBrush(Qt::green);
+            painter.setBrush(Utility::getAppQColor("green"));
             painter.drawRect(xsp, 1, valw, valh);
         } else {
-            painter.setBrush(Qt::red);
+            painter.setBrush(Utility::getAppQColor("red"));
             painter.drawRect(xsm + valw, 1, -valw, valh);
         }
     }

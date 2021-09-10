@@ -24,6 +24,7 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     property int parentWidth: 10
@@ -36,18 +37,6 @@ Item {
     function openDialog() {
         dialog.open()
         opacitySlider.value = 1
-    }
-
-    function testConnected() {
-        if (VescIf.isPortConnected()) {
-            return true
-        } else {
-            VescIf.emitMessageDialog(
-                        "Connection Error",
-                        "The VESC is not connected. Please connect it to run detection.",
-                        false, false)
-            return false
-        }
     }
 
     Dialog {
@@ -388,7 +377,7 @@ Item {
                 Layout.fillWidth: true
 
                 Text {
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     text: qsTr("Opacity")
                 }
 
@@ -403,7 +392,7 @@ Item {
         }
 
         header: Rectangle {
-            color: "#dbdbdb"
+            color: Utility.getAppHexColor("lightText")
             height: tabBar.height
             opacity: opacitySlider.value
 
@@ -416,27 +405,19 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#4f4f4f"
+                    color: Utility.getAppHexColor("lightestBackground")
                 }
 
-                property int buttons: 4
-                property int buttonWidth: 120
+                property int buttonWidth: Math.max(120, tabBar.width / (rep.model.length))
 
-                TabButton {
-                    text: qsTr("Current")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Duty")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("RPM")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Position")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                Repeater {
+                    id: rep
+                    model: ["Current", "Duty", "RPM", "Position"]
+
+                    TabButton {
+                        text: modelData
+                        width: tabBar.buttonWidth
+                    }
                 }
             }
         }

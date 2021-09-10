@@ -60,6 +60,7 @@ private:
     bool mAllValuesOk;
     bool mLastOkValuesApplied;
     bool mRunning;
+    double mTempMotorLast;
 
     void updateColors();
 

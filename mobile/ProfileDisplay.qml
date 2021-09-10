@@ -24,8 +24,10 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
+    property var dialogParent: ApplicationWindow.overlay
     property alias name: nameText.text
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
@@ -58,10 +60,10 @@ Item {
 
     function checkActive() {
         if (VescIf.isProfileInUse(index)) {
-            rect.border.color = "#81D4FA"
+            rect.border.color = Utility.getAppHexColor("lightText")
             rect.border.width = 3
         } else {
-            rect.border.color = "#919191"
+            rect.border.color =  Utility.getAppHexColor("lightestBackground")
             rect.border.width = 2
         }
     }
@@ -71,7 +73,7 @@ Item {
         anchors.fill: parent
         color: "#4c606060"
         radius: 5
-        border.color: "#919191"
+        border.color:  Utility.getAppHexColor("lightestBackground")
         border.width: 2
 
         ColumnLayout {
@@ -81,7 +83,7 @@ Item {
 
             Text {
                 id: nameText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -97,7 +99,7 @@ Item {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 id: infoText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 font.family: "DejaVu Sans Mono"
             }
 
@@ -174,14 +176,16 @@ Item {
                         modal: true
                         focus: true
                         width: parent.width - 20
+                        height: 200
                         closePolicy: Popup.CloseOnEscape
                         title: "Use Profile Permanently"
                         x: 10
                         y: 10 + parent.height / 2 - height / 2
-                        parent: ApplicationWindow.overlay
+                        parent: dialogParent
+                        implicitHeight: 0
 
                         Text {
-                            color: "#ffffff"
+                            color: Utility.getAppHexColor("lightText")
                             verticalAlignment: Text.AlignVCenter
                             anchors.fill: parent
                             wrapMode: Text.WordWrap

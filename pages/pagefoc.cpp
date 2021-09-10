@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -19,6 +19,7 @@
 
 #include "pagefoc.h"
 #include "ui_pagefoc.h"
+#include <QMessageBox>
 
 PageFoc::PageFoc(QWidget *parent) :
     QWidget(parent),
@@ -60,6 +61,9 @@ void PageFoc::reloadParams()
         ui->hallTab->clearParams();
         ui->encoderTab->clearParams();
         ui->hfiTab->clearParams();
+        ui->filterTab->clearParams();
+        ui->offsetTab->clearParams();
+        ui->fwTab->clearParams();
         ui->advancedTab->clearParams();
 
         ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "foc", "general");
@@ -67,6 +71,9 @@ void PageFoc::reloadParams()
         ui->hallTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hall sensors");
         ui->encoderTab->addParamSubgroup(mVesc->mcConfig(), "foc", "encoder");
         ui->hfiTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hfi");
+        ui->filterTab->addParamSubgroup(mVesc->mcConfig(), "foc", "filters");
+        ui->offsetTab->addParamSubgroup(mVesc->mcConfig(), "foc", "offsets");
+        ui->fwTab->addParamSubgroup(mVesc->mcConfig(), "foc", "field weakening");
         ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "foc", "advanced");
     }
 }
@@ -121,4 +128,34 @@ void PageFoc::on_openloopHeavyInertialButton_clicked()
     mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time", 0.2);
     mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_lock", 0.5);
     mVesc->mcConfig()->updateParamDouble("foc_sl_openloop_time_ramp", 0.5);
+}
+
+void PageFoc::on_offsetMeasureButton_clicked()
+{
+    if (mVesc) {
+        if (!mVesc->isPortConnected()) {
+            QMessageBox::critical(this,
+                                  tr("Connection Error"),
+                                  tr("The VESC is not connected. Please connect it."));
+            return;
+        }
+
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::information(this,
+                                         tr("Measure Offsets"),
+                                         tr("This is going to measure and store all offsets. Make sure "
+                                            "that the motor is not moving or disconnected. Motor rotation "
+                                            "during the measurement will cause an invalid result. Do you "
+                                            "want to continue?"),
+                                         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+        if (reply == QMessageBox::Yes) {
+            ui->offsetMeasureButton->setEnabled(false);
+            mVesc->commands()->sendTerminalCmd("foc_dc_cal");
+            QTimer::singleShot(5000, [this]() {
+                mVesc->commands()->getMcconf();
+                ui->offsetMeasureButton->setEnabled(true);
+            });
+        }
+    }
 }

@@ -29,21 +29,18 @@ VescInterface *QmlUi::mVesc = nullptr;
 
 QmlUi::QmlUi(QObject *parent) : QObject(parent)
 {
-    mEngine = new QQmlApplicationEngine(this);
+    mEngine = nullptr;
 #ifdef DEBUG_BUILD
     qApp->installEventFilter(this);
 #endif
-
-#ifdef HAS_BLUETOOTH
-    qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
-#endif
-    qmlRegisterType<Commands>("Vedder.vesc.commands", 1, 0, "Commands");
-    qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");
-    qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
 }
 
 bool QmlUi::startQmlUi()
 {
+    if (!mEngine) {
+        mEngine = new QQmlApplicationEngine(this);
+    }
+
     qmlRegisterSingletonType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf", vescinterface_singletontype_provider);
     qmlRegisterSingletonType<Utility>("Vedder.vesc.utility", 1, 0, "Utility", utility_singletontype_provider);
 
@@ -78,14 +75,16 @@ bool QmlUi::eventFilter(QObject *object, QEvent *e)
 
 void QmlUi::setVisible(bool visible)
 {
-    QObject *rootObject = mEngine->rootObjects().first();
-    QQuickWindow *window = qobject_cast<QQuickWindow *>(rootObject);
-    if (window) {
-        window->setVisible(visible);
+    if (mEngine) {
+        QObject *rootObject = mEngine->rootObjects().first();
+        QQuickWindow *window = qobject_cast<QQuickWindow *>(rootObject);
+        if (window) {
+            window->setVisible(visible);
+        }
     }
 }
 
-void QmlUi::startCustomGui(VescInterface *vesc)
+void QmlUi::startCustomGui(VescInterface *vesc, QString qmlFile)
 {
     if (mEngine) {
         mEngine->deleteLater();
@@ -95,7 +94,12 @@ void QmlUi::startCustomGui(VescInterface *vesc)
     mEngine = new QQmlApplicationEngine(this);
     mEngine->rootContext()->setContextProperty("QmlUi", this);
     mEngine->rootContext()->setContextProperty("VescIf", vesc);
-    mEngine->load(QUrl(QLatin1String("qrc:/res/qml/MainLoader.qml")));
+    mEngine->rootContext()->setContextProperty("Utility", &mUtil);
+    mEngine->load(QUrl(qmlFile));
+
+    if (!mImportPathList.isEmpty()) {
+        mEngine->setImportPathList(mImportPathList);
+    }
 }
 
 void QmlUi::stopCustomGui()
@@ -106,15 +110,39 @@ void QmlUi::stopCustomGui()
     }
 }
 
-void QmlUi::reloadCustomGui(QString fileName)
+bool QmlUi::isCustomGuiRunning()
+{
+    return mEngine != nullptr;
+}
+
+void QmlUi::emitReloadCustomGui(QString fileName)
 {
     emit reloadFile(fileName);
+}
+
+void QmlUi::emitReloadQml(QString str)
+{
+    emit reloadQml(str);
+}
+
+void QmlUi::emitToggleFullscreen()
+{
+    emit toggleFullscreen();
 }
 
 void QmlUi::clearQmlCache()
 {
     if (mEngine) {
         mEngine->clearComponentCache();
+    }
+}
+
+void QmlUi::setImportPathList(QStringList paths)
+{
+    mImportPathList = paths;
+
+    if (mEngine) {
+        mEngine->setImportPathList(paths);
     }
 }
 

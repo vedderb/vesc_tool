@@ -154,6 +154,7 @@ public slots:
     void updateParamEnum(QString name, int param, QObject *src = nullptr);
     void updateParamString(QString name, QString param, QObject *src = nullptr);
     void updateParamBool(QString name, bool param, QObject *src = nullptr);
+    void updateParamFromOther(QString name, const ConfigParam &other, QObject *src);
     void requestUpdate();
     void requestUpdateDefault();
     void updateDone();

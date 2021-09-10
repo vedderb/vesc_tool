@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: root
@@ -15,7 +16,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         height: valMetrics.height * 3 + 12
-        color: "#272727"
+        color: Utility.getAppHexColor("darkBackground")
 
         GridLayout {
             anchors.fill: parent
@@ -24,7 +25,7 @@ Item {
 
             Text {
                 id: valText1
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 font.family: "DejaVu Sans Mono"
                 Layout.margins: 0
                 Layout.leftMargin: 5
@@ -36,7 +37,7 @@ Item {
 
             Text {
                 id: valText2
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 font.family: "DejaVu Sans Mono"
                 Layout.margins: 0
                 Layout.preferredWidth: parent.width/3
@@ -47,7 +48,7 @@ Item {
 
             Text {
                 id: valText3
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 font.family: "DejaVu Sans Mono"
                 Layout.margins: 0
                 Layout.preferredWidth: parent.width/3
@@ -59,7 +60,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 height: 2
-                color: "#81D4FA"
+                color: Utility.getAppHexColor("lightAccent")
                 Layout.columnSpan: 3
                 Layout.margins: 0
             }

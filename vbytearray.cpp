@@ -95,6 +95,12 @@ void VByteArray::vbAppendDouble16(double number, double scale)
 
 void VByteArray::vbAppendDouble32Auto(double number)
 {
+    // Set subnormal numbers to 0 as they are not handled properly
+    // using this method.
+    if (fabs(number) < 1.5e-38) {
+        number = 0.0;
+    }
+
     int e = 0;
     float fr = frexpf(number, &e);
     float fr_abs = fabsf(fr);

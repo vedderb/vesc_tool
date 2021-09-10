@@ -35,20 +35,28 @@ public:
     bool eventFilter(QObject *object, QEvent *e);
     void setVisible(bool visible);
 
-    void startCustomGui(VescInterface *vesc);
+    void startCustomGui(VescInterface *vesc, QString qmlFile = "qrc:/res/qml/MainLoader.qml");
     void stopCustomGui();
-    void reloadCustomGui(QString fileName);
+    bool isCustomGuiRunning();
+    void emitReloadCustomGui(QString fileName);
+    void emitReloadQml(QString str);
+    void emitToggleFullscreen();
     Q_INVOKABLE void clearQmlCache();
+    void setImportPathList(QStringList paths);
 
     static VescInterface *vesc();
 
 signals:
     void reloadFile(QString fileName);
+    void reloadQml(QString str);
+    void toggleFullscreen();
 
 public slots:
 
 private:
     QQmlApplicationEngine *mEngine;
+    QStringList mImportPathList;
+    Utility mUtil;
 
     static VescInterface *mVesc;
     static QObject *vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine);

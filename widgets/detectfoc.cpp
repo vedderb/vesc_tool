@@ -20,6 +20,8 @@
 #include "detectfoc.h"
 #include "ui_detectfoc.h"
 #include "helpdialog.h"
+#include "utility.h"
+
 #include <QMessageBox>
 
 DetectFoc::DetectFoc(QWidget *parent) :
@@ -27,12 +29,26 @@ DetectFoc::DetectFoc(QWidget *parent) :
     ui(new Ui::DetectFoc)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->pushButton->setIcon(QPixmap(theme + "icons/arrow_r.png"));
+    ui->pushButton_2->setIcon(QPixmap(theme + "icons/arrow_r.png"));
+    ui->pushButton_3->setIcon(QPixmap(theme + "icons/arrow_r.png"));
+    ui->rlButton->setIcon(QPixmap(theme + "icons/rl.png"));
+    ui->lambdaButton->setIcon(QPixmap(theme + "icons/lambda.png"));
+    ui->applyAllButton->setIcon(QPixmap(theme + "icons/apply.png"));
+    ui->calcGainButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->calcKpKiButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->calcApplyLocalButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
     mLastCalcOk = false;
     mAllValuesOk = false;
     mLastOkValuesApplied = false;
     mRunning = false;
+    mTempMotorLast = -100.0;
     updateColors();
 }
 
@@ -148,6 +164,13 @@ void DetectFoc::motorRLReceived(double r, double l)
         ui->kiBox->setValue(0.0);
         on_calcKpKiButton_clicked();
 
+        auto val = Utility::getMcValuesBlocking(mVesc);
+        if (val.temp_motor > 1.0) {
+            mTempMotorLast = val.temp_motor;
+        } else {
+            mTempMotorLast = -100.0;
+        }
+
         // TODO: Use some rule to calculate time constant?
 //        if (l > 50.0) {
 //            ui->tcBox->setValue(2000);
@@ -226,7 +249,12 @@ void DetectFoc::on_applyAllButton_clicked()
         mVesc->mcConfig()->updateParamDouble("foc_motor_l", l / 1e6);
         mVesc->mcConfig()->updateParamDouble("foc_motor_flux_linkage", lambda);
 
-        mVesc->emitStatusMessage(tr("R, L and \u03BB Applied"), true);
+        mVesc->emitStatusMessage(tr("R, L and \u03BB applied"), true);
+
+        if (mTempMotorLast > -10.0) {
+            mVesc->mcConfig()->updateParamDouble("foc_temp_comp_base_temp", mTempMotorLast);
+            mVesc->emitStatusMessage(tr("Temp comp base temp applied"), true);
+        }
 
         on_calcKpKiButton_clicked();
         on_calcGainButton_clicked();
@@ -263,10 +291,10 @@ void DetectFoc::updateColors()
     bool ki_ok = ui->kiBox->value() > 1e-10;
 
     QString style_red = "color: rgb(255, 255, 255);"
-                        "background-color: rgb(150, 0, 0);";
+                        "background-color: rgb(140,37,37);";
 
     QString style_green = "color: rgb(255, 255, 255);"
-                          "background-color: rgb(0, 150, 0);";
+                          "background-color: rgb(95,140,95)";
 
     ui->resistanceBox->setStyleSheet(QString("#resistanceBox {%1}").
                                      arg(r_ok ? style_green : style_red));

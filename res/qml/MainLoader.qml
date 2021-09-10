@@ -20,17 +20,27 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
-import QtQuick.Controls.Material 2.12
+import QtQuick.Controls.Material 2.2
 import QtQuick.Window 2.2
+import Vedder.vesc.utility 1.0
 
 ApplicationWindow {
     id: mainWindow
     visible: true
-    visibility: Window.Windowed//myObject.visIsFullscreen() ? Window.FullScreen : Window.Windowed
+    visibility: Window.Windowed
     width: 1920
     height: 1080
     title: qsTr("VESC Custom GUI")
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
+
     property string lastFile: ""
+    property bool wasFullscreen: false
+
+    onClosing: {
+        loader.source = ""
+    }
 
     Loader {
         id: loader
@@ -45,6 +55,15 @@ ApplicationWindow {
             QmlUi.clearQmlCache()
             loadTimer.start()
             lastFile = fileName
+        }
+
+        onToggleFullscreen: {
+            wasFullscreen = !wasFullscreen
+            if (wasFullscreen) {
+                mainWindow.visibility = Window.FullScreen
+            } else {
+                mainWindow.visibility = Window.Windowed
+            }
         }
     }
 

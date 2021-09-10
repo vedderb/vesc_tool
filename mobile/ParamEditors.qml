@@ -24,7 +24,6 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
-
 Item {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mAppConf: VescIf.appConfig()

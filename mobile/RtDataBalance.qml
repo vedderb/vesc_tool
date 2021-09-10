@@ -6,6 +6,7 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: rtData
@@ -144,7 +145,7 @@ Item {
         }
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
             Layout.columnSpan: isHorizontal? 2 : 1
             Layout.fillWidth: true
             Layout.minimumHeight: valMetrics.height * 6 + 12
@@ -154,7 +155,7 @@ Item {
             Rectangle {
                 width: parent.width
                 height: 2
-                color: "#81D4FA"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Column{
@@ -165,7 +166,7 @@ Item {
 
                 Text {
                     id: valText
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     text: VescIf.getConnectedPortName()
                     font.family: "DejaVu Sans Mono"
                     Layout.margins: 0
@@ -174,7 +175,7 @@ Item {
 
                 Text {
                     id: valText2
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     text: ""
                     font.family: "DejaVu Sans Mono"
                     Layout.margins: 0
@@ -258,8 +259,8 @@ Item {
 
             erpmGauge.value = values.rpm / 100
 
-            voltageGauge.maximumValue = Math.ceil(mAppConf.getParamDouble("app_balance_conf.tiltback_high_voltage"))
-            voltageGauge.minimumValue = Math.floor(mAppConf.getParamDouble("app_balance_conf.tiltback_low_voltage"))
+            voltageGauge.maximumValue = Math.ceil(mAppConf.getParamDouble("app_balance_conf.tiltback_hv"))
+            voltageGauge.minimumValue = Math.floor(mAppConf.getParamDouble("app_balance_conf.tiltback_lv"))
             voltageGauge.value = values.v_in
 
             var useImperial = VescIf.useImperialUnits()

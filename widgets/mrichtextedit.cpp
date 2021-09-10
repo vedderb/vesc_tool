@@ -22,6 +22,7 @@
 */
 
 #include "mrichtextedit.h"
+#include "utility.h"
 #include <QApplication>
 #include <QClipboard>
 #include <QMimeData>
@@ -42,7 +43,31 @@
 MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     setupUi(this);
     m_lastBlockList = 0;
-    f_textedit->setTabStopWidth(40);
+    f_textedit->setTabStopDistance(40);
+
+    QString theme = Utility::getThemePath();
+    f_undo->setIcon(QPixmap(theme + "icons_textedit/Undo-96.png"));
+    f_redo->setIcon(QPixmap(theme + "icons_textedit/Undo-96.png"));
+    f_cut->setIcon(QPixmap(theme + "icons_textedit/Cut-96.png"));
+    f_copy->setIcon(QPixmap(theme + "icons_textedit/Copy-96.png"));
+    f_paste->setIcon(QPixmap(theme + "icons_textedit/Paste-96.png"));
+    f_link->setIcon(QPixmap(theme + "icons_textedit/Link-96.png"));
+    f_image->setIcon(QPixmap(theme + "icons_textedit/Add Image-96.png"));
+    f_menu->setIcon(QPixmap(theme + "icons_textedit/Menu 2-96.png"));
+    f_bold->setIcon(QPixmap(theme + "icons_textedit/Bold-96.png"));
+    f_italic->setIcon(QPixmap(theme + "icons_textedit/Italic-96.png"));
+    f_underline->setIcon(QPixmap(theme + "icons_textedit/Text Color-96.png"));
+    f_strikeout->setIcon(QPixmap(theme + "icons_textedit/Strikethrough-96.png"));
+    f_list_bullet->setIcon(QPixmap(theme + "icons_textedit/Bulleted List-96.png"));
+    f_list_ordered->setIcon(QPixmap(theme + "icons_textedit/Numbered List-96.png"));
+    f_indent_dec->setIcon(QPixmap(theme + "icons_textedit/Indent-96.png"));
+    f_indent_inc->setIcon(QPixmap(theme + "icons_textedit/Outdent-96.png"));
+    f_bgcolor->setIcon(QPixmap(theme + "icons_textedit/Fill Color-96.png"));
+    f_fgcolor->setIcon(QPixmap(theme + "icons_textedit/Fill Color-96.png"));
+    f_align_left->setIcon(QPixmap(theme + "icons_textedit/Align Left-96.png"));
+    f_align_center->setIcon(QPixmap(theme + "icons_textedit/Align Center-96.png"));
+    f_align_right->setIcon(QPixmap(theme + "icons_textedit/Align Right-96.png"));
+    f_align_justify->setIcon(QPixmap(theme + "icons_textedit/Align Justify-96.png"));
 
     connect(f_textedit, SIGNAL(currentCharFormatChanged(QTextCharFormat)),
             this, SLOT(slotCurrentCharFormatChanged(QTextCharFormat)));
@@ -182,12 +207,12 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     // text color
 
     QPixmap pix(16, 16);
-    pix.fill(QApplication::palette().background().color());
+    pix.fill(QApplication::palette().window().color());
     f_bgcolor->setIcon(pix);
     connect(f_bgcolor, SIGNAL(clicked()), this, SLOT(textBgColor()));
 
     QPixmap pix2(16, 16);
-    pix2.fill(QApplication::palette().foreground().color());
+    pix2.fill(QApplication::palette().windowText().color());
     f_fgcolor->setIcon(pix2);
     connect(f_fgcolor, SIGNAL(clicked()), this, SLOT(textFgColor()));
 
@@ -615,7 +640,7 @@ void MRichTextEdit::bgColorChanged(const QColor &c) {
     if (c.isValid()) {
         pix.fill(c);
     } else {
-        pix.fill(QApplication::palette().background().color());
+        pix.fill(QApplication::palette().window().color());
     }
     f_bgcolor->setIcon(pix);
 }
@@ -626,7 +651,7 @@ void MRichTextEdit::fgColorChanged(const QColor &c)
     if (c.isValid()) {
         pix.fill(c);
     } else {
-        pix.fill(QApplication::palette().foreground().color());
+        pix.fill(QApplication::palette().windowText().color());
     }
     f_fgcolor->setIcon(pix);
 }

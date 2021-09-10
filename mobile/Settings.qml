@@ -67,6 +67,23 @@ Item {
                 checked: VescIf.useWakeLock()
             }
 
+            CheckBox {
+                id: qmlUiBox
+                Layout.fillWidth: true
+                text: "Load QML UI on Connect"
+                checked: VescIf.getLoadQmlUiOnConnect()
+            }
+
+            CheckBox {
+                id: darkModeBox
+                Layout.fillWidth: true
+                text: "Use Dark Mode"
+                checked: Utility.isDarkMode()
+                onCheckedChanged: {
+                    Utility.setDarkMode(checked)
+                }
+            }
+
             Item {
                 // Spacer
                 Layout.fillWidth: true
@@ -78,6 +95,7 @@ Item {
             VescIf.setUseImperialUnits(imperialBox.checked)
             VescIf.setKeepScreenOn(screenOnBox.checked)
             VescIf.setUseWakeLock(wakeLockBox.checked)
+            VescIf.setLoadQmlUiOnConnect(qmlUiBox.checked)
             VescIf.storeSettings()
 
             Utility.keepScreenOn(VescIf.keepScreenOn())

@@ -24,6 +24,7 @@ import QtGraphicalEffects 1.0
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     property ConfigParams mInfoConf: VescIf.infoConfig()
@@ -60,7 +61,7 @@ Item {
             Item {
                 Text {
                     id: introText
-                    color: "#ffffff"
+                    color: Utility.getAppHexColor("lightText")
                     linkColor: "lightblue"
                     verticalAlignment: Text.AlignVCenter
                     anchors.fill: parent
@@ -84,7 +85,7 @@ Item {
 
                         Text {
                             id: usageText
-                            color: "#ffffff"
+                            color: Utility.getAppHexColor("lightText")
                             linkColor: "lightblue"
                             verticalAlignment: Text.AlignVCenter
                             width: parent.parent.width - 20
@@ -120,7 +121,7 @@ Item {
 
                         Text {
                             id: warrantyText
-                            color: "#ffffff"
+                            color: Utility.getAppHexColor("lightText")
                             linkColor: "lightblue"
                             verticalAlignment: Text.AlignVCenter
                             width: parent.parent.width - 20
@@ -147,7 +148,7 @@ Item {
             Item {
                 Text {
                     id: conclusionText
-                    color: "#ffffff"
+                    color: Utility.getAppHexColor("lightText")
                     linkColor: "lightblue"
                     verticalAlignment: Text.AlignVCenter
                     anchors.fill: parent
@@ -161,7 +162,7 @@ Item {
         }
 
         header: Rectangle {
-            color: "#dbdbdb"
+            color: Utility.getAppHexColor("lightText")
             height: tabBar.height
 
             TabBar {
@@ -174,7 +175,7 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#4f4f4f"
+                    color: Utility.getAppHexColor("lightBackground")
                 }
 
                 property int buttons: 3
@@ -260,7 +261,7 @@ Item {
 
             Text {
                 id: resultLabel
-                color: "#ffffff"
+                color: Utility.getAppHexColor("lightText")
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
                 wrapMode: Text.WordWrap

@@ -140,6 +140,43 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_8">
+      <attribute name="title">
+       <string>Filters</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="ParamTable" name="filterTab"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_7">
+      <attribute name="title">
+       <string>Offsets</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="ParamTable" name="offsetTab"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="offsetMeasureButton">
+         <property name="text">
+          <string>Measure Offsets</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_9">
+      <attribute name="title">
+       <string>Field Weakening</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_10">
+       <item>
+        <widget class="ParamTable" name="fwTab"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
        <string>Advanced</string>

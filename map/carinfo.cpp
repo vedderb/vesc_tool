@@ -24,7 +24,7 @@ CarInfo::CarInfo(int id, Qt::GlobalColor color)
     mId = id;
     mColor = color;
     mName = "";
-    mName.sprintf("Car %d", mId);
+    mName = QString::asprintf("Car %d", mId);
     mTime = 0;
     mLength = 0.8;
     mWidth = 0.335;
@@ -42,7 +42,7 @@ void CarInfo::setId(int id, bool changeName)
 
     if (changeName) {
         mName = "";
-        mName.sprintf("Car %d", mId);
+        mName = QString::asprintf("Car %d", mId);
     }
 }
 

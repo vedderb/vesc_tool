@@ -826,6 +826,34 @@ void ConfigParams::updateParamBool(QString name, bool param, QObject *src)
     }
 }
 
+void ConfigParams::updateParamFromOther(QString name, const ConfigParam &other, QObject *src)
+{
+    switch (other.type) {
+    case CFG_T_DOUBLE: {
+        updateParamDouble(name, other.valDouble, src);
+    } break;
+
+    case CFG_T_INT: {
+        updateParamInt(name, other.valInt, src);
+    } break;
+
+    case CFG_T_ENUM: {
+        updateParamEnum(name, other.valInt, src);
+    } break;
+
+    case CFG_T_QSTRING: {
+        updateParamString(name, other.valString, src);
+    } break;
+
+    case CFG_T_BOOL: {
+        updateParamBool(name, other.valInt, src);
+    } break;
+
+    default:
+        break;
+    }
+}
+
 void ConfigParams::requestUpdate()
 {
     emit updateRequested();

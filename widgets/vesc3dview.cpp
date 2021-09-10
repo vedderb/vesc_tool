@@ -59,6 +59,14 @@ Vesc3DView::~Vesc3DView()
     doneCurrent();
 }
 
+void Vesc3DView::setBgColor(double r, double g, double b, double a)
+{
+    mBgColor.setRedF(r);
+    mBgColor.setGreenF(g);
+    mBgColor.setBlueF(b);
+    mBgColor.setAlphaF(a);
+}
+
 QSize Vesc3DView::minimumSizeHint() const
 {
     return QSize(0, 0);

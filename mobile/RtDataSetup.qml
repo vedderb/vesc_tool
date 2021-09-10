@@ -26,9 +26,11 @@ import QtGraphicalEffects 1.0
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: rtData
+    property var dialogParent: ApplicationWindow.overlay
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property int odometerValue: 0
@@ -96,7 +98,7 @@ Item {
             Layout.preferredHeight: gaugeSize
             minimumValue: 0
             maximumValue: 60
-            minAngle: -250
+            minAngle: -180
             maxAngle: 70
             labelStep: maximumValue > 60 ? 20 : 10
             value: 20
@@ -141,7 +143,7 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Layout.fillWidth: true
             Layout.preferredHeight: valMetrics.height * 4 + 20
@@ -152,12 +154,12 @@ Item {
                 anchors.top: parent.top
                 width: parent.width
                 height: 2
-                color: "#81D4FA"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Text {
                 id: valText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
@@ -168,7 +170,7 @@ Item {
 
             Text {
                 id: valText2
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
@@ -200,7 +202,7 @@ Item {
                     closePolicy: Popup.CloseOnEscape
                     x: 10
                     y: Math.max((parent.height - height) / 2, 10)
-                    parent: ApplicationWindow.overlay
+                    parent: dialogParent
                     standardButtons: Dialog.Ok | Dialog.Cancel
                     onAccepted: { 
                         var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
@@ -221,7 +223,7 @@ Item {
                                 spacing: 0
 
                                 Text {
-                                    color: "white"
+                                    color: Utility.getAppHexColor("lightText")
                                     text: "Odometer"
                                     font.bold: true
                                     horizontalAlignment: Text.AlignHCenter
@@ -249,7 +251,7 @@ Item {
 
         onValuesSetupReceived: {
             currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
-            currentGauge.minimumValue = -currentGauge.maximumValue
+            currentGauge.minimumValue = -Math.ceil(-mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
 
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
@@ -267,10 +269,10 @@ Item {
 
             if (Math.abs(speedGauge.maximumValue - speedMaxRound) > 6.0) {
                 speedGauge.maximumValue = speedMaxRound
-                speedGauge.minimumValue = -speedMaxRound
+                speedGauge.minimumValue = 0.0
             }
 
-            speedGauge.value = values.speed * 3.6 * impFact
+            speedGauge.value = Math.abs(values.speed * 3.6 * impFact)
             speedGauge.unitText = useImperial ? "mph" : "km/h"
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
@@ -278,9 +280,14 @@ Item {
                                     mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
+            var powerMin = Math.min(values.v_in * Math.min(-mMcConf.getParamDouble("l_in_current_min"),
+                                                           -mMcConf.getParamDouble("l_current_min")),
+                                    -mMcConf.getParamDouble("l_watt_min")) * values.num_vescs
+            var powerMinRound = -(Math.ceil(powerMin / 1000.0) * 1000.0)
+            
             if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
                 powerGauge.maximumValue = powerMaxRound
-                powerGauge.minimumValue = -powerMaxRound
+                powerGauge.minimumValue = powerMinRound
             }
 
             powerGauge.value = (values.current_in * values.v_in)

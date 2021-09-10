@@ -1,3 +1,31 @@
+== 3.01 ==
+* Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.
+* Fixed configuration backup and restore over CAN-bus.
+* Added test version information to about dialog.
+* Added scripting page
+ - Syntax highlighting.
+ - Recent files.
+ - Example files.
+ - Auto-completion tree.
+ - Run in widget, window or full screen.
+ - Debug print output.
+ - Toggle line comment.
+ - Auto-indentation of line or block.
+ - Search, highlight and replace text.
+* Only capture esc key for stopping the motor when connected.
+* Fixed FOC detect all no can when connected over CAN.
+* Increased motor and mosfet temperature limit editor range.
+* Mobile RT display update. See: https://github.com/vedderb/vesc_tool/pull/115
+* Added FOC wizard, setup data and profiles from mobile UI to desktop UI.
+* Added usage page to FOC wizard.
+* Added servo output control slider.
+* Added support for loading custom UI from firmware.
+* Dark theme.
+* Mobile UI refactoring.
+* Configurable data polling rates.
+* Better DPI scaling.
+* Configurable plot line thickness.
+
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.
  - Added hw type setting.

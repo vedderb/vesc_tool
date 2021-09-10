@@ -24,6 +24,7 @@
 #include <QVector>
 #include <QTimer>
 #include "vescinterface.h"
+#include "widgets/qcustomplot.h"
 
 namespace Ui {
 class PageRtData;
@@ -61,14 +62,12 @@ private slots:
     void on_posStopButton_clicked();
     void on_tempShowMosfetBox_toggled(bool checked);
     void on_tempShowMotorBox_toggled(bool checked);
-    void on_csvChooseDirButton_clicked();
-    void on_csvEnableLogBox_clicked(bool checked);
-    void on_csvHelpButton_clicked();
     void on_experimentLoadXmlButton_clicked();
     void on_experimentSaveXmlButton_clicked();
     void on_experimentSavePngButton_clicked();
     void on_experimentSavePdfButton_clicked();
     void on_experimentClearDataButton_clicked();
+    void on_logRtButton_toggled(bool checked);
 
 private:
     Ui::PageRtData *ui;
@@ -99,7 +98,7 @@ private:
 
     typedef struct {
         QString label;
-        QString color;
+        QColor color;
         QVector<double> xData;
         QVector<double> yData;
     } EXPERIMENT_PLOT;

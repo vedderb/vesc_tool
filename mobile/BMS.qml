@@ -40,7 +40,7 @@ Item {
             spacing: 0
 
             Rectangle {
-                color: "#4f4f4f"
+                color: Utility.getAppHexColor("lightestBackground")
                 width: 16
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
@@ -89,11 +89,11 @@ Item {
                                 ctx.lineTo(xOfsLeft + lineStep * i, heightBars)
                             }
 
-                            ctx.strokeStyle = "#81D4FA"
+                            ctx.strokeStyle = Utility.getAppHexColor("lightAccent")
                             ctx.lineWidth = 1.2
                             ctx.stroke()
 
-                            ctx.fillStyle = "white"
+                            ctx.fillStyle = Utility.getAppHexColor("lightAccent")
                             ctx.textBaseline = "top"
 
                             ctx.textAlign = "start";
@@ -122,7 +122,7 @@ Item {
                             ctx.textBaseline = "middle"
 
                             for (i = 0;i < cellNum;i++) {
-                                ctx.fillStyle = "white"
+                                ctx.fillStyle = Utility.getAppHexColor("lightAccent")
 
                                 var cellW = ((vCells[i] - 3.0) / 1.2) * cellWidth
                                 if (cellW > cellWidth) {
@@ -140,7 +140,7 @@ Item {
                                              xOfsLeft + cellWidth + valMetrics.width / 2, txtY)
 
                                 if (isBal[i]) {
-                                    ctx.fillStyle = "#FF6347"
+                                    ctx.fillStyle = Utility.getAppHexColor("orange")
                                 } else {
                                     ctx.fillStyle = Qt.rgba(0, 0.9, 0, 1)
                                 }
@@ -176,7 +176,7 @@ Item {
                             var cellWidth = width - xOfsLeft - xOfsRight
 
                             for (var i = 0;i < tempNum;i++) {
-                                ctx.fillStyle = "white"
+                                ctx.fillStyle = Utility.getAppHexColor("lightAccent")
                                 ctx.textAlign = "start";
                                 ctx.textBaseline = "middle";
                                 ctx.font = '%1pt %2'.arg(valText.font.pointSize).arg(valText.font.family)
@@ -212,22 +212,22 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Rectangle {
                 anchors.bottom: valText.top
                 width: parent.width
                 height: 2
-                color: "#81D4FA"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Layout.fillWidth: true
-            Layout.preferredHeight: valMetrics.height * 10 + 20
+            Layout.preferredHeight: valMetrics.height * 12 + 20
             Layout.alignment: Qt.AlignBottom
 
             Text {
                 id: valText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: "No Data"
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
@@ -325,9 +325,11 @@ Item {
                     "Wh Cnt     : " + parseFloat(val.wh_cnt).toFixed(2) + " Wh\n" +
                     "Power      : " + parseFloat(val.v_tot * val.i_in_ic).toFixed(2) + " W\n" +
                     "Humidity   : " + parseFloat(val.humidity).toFixed(1) + " %\n" +
-                    "Temp Max   : " + parseFloat(val.temp_cells_highest).toFixed(1) + " %\n" +
+                    "Temp Hum   : " + parseFloat(val.temp_hum_sensor).toFixed(1) + " \u00B0C\n" +
+                    "Temp Max   : " + parseFloat(val.temp_cells_highest).toFixed(1) + " \u00B0C\n" +
                     "SoC        : " + parseFloat(val.soc * 100).toFixed(1) + " %\n" +
-                    "SoH        : " + parseFloat(val.soh * 100).toFixed(1) + " %"
+                    "SoH        : " + parseFloat(val.soh * 100).toFixed(1) + " %\n" +
+                    "Ah Chg Tot : " + parseFloat(val.ah_cnt_chg_total).toFixed(3) + " Ah"
 
             cellCanvas.requestPaint()
             tempCanvas.requestPaint()

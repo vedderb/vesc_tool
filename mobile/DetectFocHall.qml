@@ -24,6 +24,7 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     property var table: []
@@ -174,7 +175,7 @@ Item {
 
         Text {
             id: detectLambdaLabel
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

@@ -1,10 +1,11 @@
 <RCC>
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
+        <file>qtquickcontrols2_dark.conf</file>
     </qresource>
     <qresource prefix="/mobile">
         <file>main.qml</file>
-        <file>ConnectBle.qml</file>
+        <file>StartPage.qml</file>
         <file>RtData.qml</file>
         <file>FwUpdate.qml</file>
         <file>FilePicker.qml</file>
@@ -47,5 +48,10 @@
         <file>RtDataIMU.qml</file>
         <file>BMS.qml</file>
         <file>CustomGaugeV2.qml</file>
+        <file>ConnectScreen.qml</file>
+        <file>ImageButton.qml</file>
+        <file>LogBox.qml</file>
+        <file>TcpBox.qml</file>
+        <file>MultiSettings.qml</file>
     </qresource>
 </RCC>

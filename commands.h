@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QMap>
 #include "vbytearray.h"
 #include "datatypes.h"
 #include "packet.h"
@@ -61,6 +62,15 @@ public:
 
     Q_INVOKABLE void setOdometer(unsigned odometer_meters);
 
+    Q_INVOKABLE int bmsGetCanDevNum();
+    Q_INVOKABLE BMS_VALUES bmsGetCanValues(int can_id);
+    Q_INVOKABLE bool bmsHasCanValues(int can_id);
+
+    Q_INVOKABLE void emitPlotInit(QString xLabel, QString yLabel);
+    Q_INVOKABLE void emitPlotData(double x, double y);
+    Q_INVOKABLE void emitPlotAddGraph(QString name);
+    Q_INVOKABLE void emitPlotSetGraph(int graph);
+
 signals:
     void dataToSend(QByteArray &data);
 
@@ -83,6 +93,7 @@ signals:
     void motorLinkageReceived(double flux_linkage);
     void encoderParamReceived(double offset, double ratio, bool inverted);
     void customAppDataReceived(QByteArray data);
+    void customHwDataReceived(QByteArray data);
     void focHallTableReceived(QVector<int> hall_table, int res);
     void nrfPairingRes(int res);
     void mcConfigCheckResult(QStringList paramsNotSet);
@@ -109,6 +120,12 @@ signals:
     void bmsValuesRx(BMS_VALUES val);
     void customConfigChunkRx(int confInd, int lenConf, int ofsConf, QByteArray data);
     void customConfigRx(int confInd, QByteArray data);
+    void pswStatusRx(PSW_STATUS stat);
+    void qmluiHwRx(int lenQml, int ofsQml, QByteArray data);
+    void qmluiAppRx(int lenQml, int ofsQml, QByteArray data);
+    void eraseQmluiResReceived(bool ok);
+    void writeQmluiResReceived(bool ok, quint32 offset);
+    void ioBoardValRx(IO_BOARD_VALUES val);
 
 public slots:
     void processPacket(QByteArray data);
@@ -150,6 +167,7 @@ public slots:
     void measureHallFoc(double current);
     void sendCustomAppData(QByteArray data);
     void sendCustomAppData(unsigned char *data, unsigned int len);
+    void sendCustomHwData(QByteArray data);
     void setChukData(chuck_data &data);
     void pairNrf(int ms);
     void gpdSetFsw(float fsw);
@@ -166,7 +184,7 @@ public slots:
     void getValuesSelective(unsigned int mask);
     void getValuesSetupSelective(unsigned int mask);
     void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty,
-                                double resistance, double inductanec);
+                                double resistance, double inductance);
     void detectAllFoc(bool detect_can, double max_power_loss, double min_current_in,
                       double max_current_in, double openloop_rpm, double sl_erpm);
     void pingCan();
@@ -197,6 +215,18 @@ public slots:
     void customConfigGet(int confInd, bool isDefault);
     void customConfigSet(int confInd, QByteArray confData);
 
+    void pswGetStatus(bool by_id, int id_ind);
+    void pswSwitch(int id, bool is_on, bool plot);
+
+    void qmlUiHwGet(int len, int offset);
+    void qmlUiAppGet(int len, int offset);
+    void qmlUiErase();
+    void qmlUiWrite(QByteArray data, quint32 offset);
+
+    void ioBoardGetAll(int id);
+    void ioBoardSetPwm(int id, int channel, double duty);
+    void ioBoardSetDigital(int id, int channel, bool on);
+
 private slots:
     void timerSlot();
 
@@ -210,6 +240,7 @@ private:
     bool mLimitedSupportsFwdAllCan;
     bool mLimitedSupportsEraseBootloader;
     QVector<int> mCompatibilityCommands; // int to be QML-compatible
+    QMap<int, BMS_VALUES> mBmsValues;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;

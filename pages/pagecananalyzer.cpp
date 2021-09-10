@@ -19,12 +19,19 @@
 
 #include "pagecananalyzer.h"
 #include "ui_pagecananalyzer.h"
+#include "utility.h"
 
 PageCanAnalyzer::PageCanAnalyzer(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageCanAnalyzer)
 {
     ui->setupUi(this);
+
+
+    QString theme = Utility::getThemePath();
+    ui->clearRxButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->sendButton->setIcon(QPixmap(theme + "icons/Send File-96.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     ui->msgTable->setColumnWidth(1, 120);
     mVesc = nullptr;

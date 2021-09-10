@@ -19,6 +19,7 @@
 
 #include "pageexperiments.h"
 #include "ui_pageexperiments.h"
+#include "utility.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -39,6 +40,36 @@ PageExperiments::PageExperiments(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
 
+    QString theme = Utility::getThemePath();
+    ui->currentRunButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->dutyRunButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->rpmRunButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->rescaleButton->setIcon(QPixmap(theme + "icons/size_off.png"));
+    ui->victronRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->victronConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->victronDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->openButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->openCompButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->saveCsvButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->savePngButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->savePdfButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
+
+    QIcon mycon = QIcon(theme + "icons/expand_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    ui->zoomHButton->setIcon(mycon);
+
+    mycon = QIcon(theme + "icons/expand_v_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    ui->zoomVButton->setIcon(mycon);
+
+    mycon = QIcon(theme + "icons/size_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    ui->autoscaleButton->setIcon(mycon);
+
+
     mTimer = new QTimer(this);
     mTimer->start(ui->sampleIntervalBox->value());
     mState = EXPERIMENT_OFF;
@@ -51,10 +82,10 @@ PageExperiments::PageExperiments(QWidget *parent) :
     QFont legendFont = font();
     legendFont.setPointSize(9);
 
+    Utility::setPlotColors(ui->plot);
     ui->plot->legend->setVisible(true);
     ui->plot->legend->setFont(legendFont);
     ui->plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignLeft);
-    ui->plot->legend->setBrush(QBrush(QColor(255,255,255,190)));
     ui->plot->xAxis->setLabel("Seconds (s)");
     ui->plot->yAxis2->setLabel("RPM");
     ui->plot->yAxis2->setVisible(true);
@@ -381,7 +412,7 @@ void PageExperiments::plotSamples(bool exportFormat)
         QVector<double> scaled = createScaledVector(mPowerVec, 150.0, scaleStr);
 
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::blue, lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Power (W)" + scaleStr);
         ui->plot->graph(graphIndex)->setData(mTimeVec, scaled);
         graphIndex++;
@@ -392,7 +423,7 @@ void PageExperiments::plotSamples(bool exportFormat)
         QVector<double> scaled = createScaledVector(mCurrentMotorVec, 150.0, scaleStr);
 
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::magenta, lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Current motor (A)" + scaleStr);
         ui->plot->graph(graphIndex)->setData(mTimeVec, scaled);
         graphIndex++;
@@ -403,7 +434,7 @@ void PageExperiments::plotSamples(bool exportFormat)
         QVector<double> scaled = createScaledVector(mCurrentInVec, 150.0, scaleStr);
 
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::green, lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Current in (A)" + scaleStr);
         ui->plot->graph(graphIndex)->setData(mTimeVec, scaled);
         graphIndex++;
@@ -411,7 +442,7 @@ void PageExperiments::plotSamples(bool exportFormat)
 
     if (ui->showVoltageButton->isChecked()) {
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::darkGreen, lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph4"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Voltage in (V)");
         ui->plot->graph(graphIndex)->setData(mTimeVec, mVoltageVec);
         graphIndex++;
@@ -419,7 +450,7 @@ void PageExperiments::plotSamples(bool exportFormat)
 
     if (ui->showTempFetButton->isChecked()) {
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::cyan, lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph5"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Temp MOSFET (\u00B0C)");
         ui->plot->graph(graphIndex)->setData(mTimeVec, mTempFetVec);
         graphIndex++;
@@ -427,19 +458,19 @@ void PageExperiments::plotSamples(bool exportFormat)
 
     if (ui->showTempFetIndButton->isChecked()) {
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(QColor("#01DFD7"), lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph6"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Temp MOSFET 1 (\u00B0C)");
         ui->plot->graph(graphIndex)->setData(mTimeVec, mTempFet1Vec);
         graphIndex++;
 
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(QColor("#04B4AE"), lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph7"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Temp MOSFET 2 (\u00B0C)");
         ui->plot->graph(graphIndex)->setData(mTimeVec, mTempFet2Vec);
         graphIndex++;
 
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(QColor("#088A85"), lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph8"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Temp MOSFET 3 (\u00B0C)");
         ui->plot->graph(graphIndex)->setData(mTimeVec, mTempFet3Vec);
         graphIndex++;
@@ -447,7 +478,7 @@ void PageExperiments::plotSamples(bool exportFormat)
 
     if (ui->showTempMotorButton->isChecked()) {
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::darkGray, lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph9"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Temp Motor (\u00B0C)");
         ui->plot->graph(graphIndex)->setData(mTimeVec, mTempMotorVec);
         graphIndex++;
@@ -455,14 +486,14 @@ void PageExperiments::plotSamples(bool exportFormat)
 
     if (ui->showDutyButton->isChecked()) {
         ui->plot->addGraph();
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::darkYellow, lineWidth));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph10"), lineWidth));
         ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " Duty cycle (%)");
         ui->plot->graph(graphIndex)->setData(mTimeVec, mDutyVec);
         graphIndex++;
     }
 
     ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
-    ui->plot->graph(graphIndex)->setPen(QPen(Qt::red, lineWidth));
+    ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph11"), lineWidth));
     ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " RPM");
     ui->plot->graph(graphIndex)->setData(mTimeVec, mRpmVec);
     graphIndex++;
@@ -475,7 +506,7 @@ void PageExperiments::plotSamples(bool exportFormat)
             QVector<double> scaled = createScaledVector(mCPowerVec, 150.0, scaleStr);
 
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(Qt::blue, lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Power (W)" + scaleStr);
             ui->plot->graph(graphIndex)->setData(mCTimeVec, scaled);
             graphIndex++;
@@ -486,7 +517,7 @@ void PageExperiments::plotSamples(bool exportFormat)
             QVector<double> scaled = createScaledVector(mCCurrentMotorVec, 150.0, scaleStr);
 
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(Qt::magenta, lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Current motor (A)" + scaleStr);
             ui->plot->graph(graphIndex)->setData(mCTimeVec, scaled);
             graphIndex++;
@@ -497,7 +528,7 @@ void PageExperiments::plotSamples(bool exportFormat)
             QVector<double> scaled = createScaledVector(mCCurrentInVec, 150.0, scaleStr);
 
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(Qt::green, lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Current in (A)" + scaleStr);
             ui->plot->graph(graphIndex)->setData(mCTimeVec, scaled);
             graphIndex++;
@@ -505,7 +536,7 @@ void PageExperiments::plotSamples(bool exportFormat)
 
         if (ui->showCVoltageButton->isChecked()) {
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(Qt::darkGreen, lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph4"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Voltage in (V)");
             ui->plot->graph(graphIndex)->setData(mCTimeVec, mCVoltageVec);
             graphIndex++;
@@ -513,7 +544,7 @@ void PageExperiments::plotSamples(bool exportFormat)
 
         if (ui->showCTempFetButton->isChecked()) {
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(Qt::cyan, lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph5"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Temp MOSFET (\u00B0C)");
             ui->plot->graph(graphIndex)->setData(mCTimeVec, mCTempFetVec);
             graphIndex++;
@@ -521,19 +552,19 @@ void PageExperiments::plotSamples(bool exportFormat)
 
         if (ui->showCTempFetIndButton->isChecked()) {
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(QColor("#01DFD7"), lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph6"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Temp MOSFET 1 (\u00B0C)");
             ui->plot->graph(graphIndex)->setData(mCTimeVec, mCTempFet1Vec);
             graphIndex++;
 
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(QColor("#04B4AE"), lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph7"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Temp MOSFET 2 (\u00B0C)");
             ui->plot->graph(graphIndex)->setData(mCTimeVec, mCTempFet2Vec);
             graphIndex++;
 
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(QColor("#088A85"), lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph8"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Temp MOSFET 3 (\u00B0C)");
             ui->plot->graph(graphIndex)->setData(mCTimeVec, mCTempFet3Vec);
             graphIndex++;
@@ -541,7 +572,7 @@ void PageExperiments::plotSamples(bool exportFormat)
 
         if (ui->showCTempMotorButton->isChecked()) {
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(Qt::darkGray, lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph9"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Temp Motor (\u00B0C)");
             ui->plot->graph(graphIndex)->setData(mCTimeVec, mCTempMotorVec);
             graphIndex++;
@@ -549,14 +580,14 @@ void PageExperiments::plotSamples(bool exportFormat)
 
         if (ui->showCDutyButton->isChecked()) {
             ui->plot->addGraph();
-            ui->plot->graph(graphIndex)->setPen(QPen(Qt::darkYellow, lineWidth, penStyle));
+            ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph10"), lineWidth, penStyle));
             ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " Duty cycle (%)");
             ui->plot->graph(graphIndex)->setData(mCTimeVec, mCDutyVec);
             graphIndex++;
         }
 
         ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
-        ui->plot->graph(graphIndex)->setPen(QPen(Qt::red, lineWidth, penStyle));
+        ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph11"), lineWidth, penStyle));
         ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " RPM");
         ui->plot->graph(graphIndex)->setData(mCTimeVec, mCRpmVec);
         graphIndex++;

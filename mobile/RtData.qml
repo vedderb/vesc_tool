@@ -24,6 +24,7 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: rtData
@@ -106,13 +107,13 @@ Item {
 
         Rectangle {
             id: textRect
-            color: "#272727"
+            color: Utility.getAppHexColor("darkBackground")
 
             Rectangle {
                 anchors.bottom: valText.top
                 width: parent.width
                 height: 2
-                color: "#81D4FA"
+                color: Utility.getAppHexColor("lightAccent")
             }
 
             Layout.fillWidth: true
@@ -121,7 +122,7 @@ Item {
 
             Text {
                 id: valText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter

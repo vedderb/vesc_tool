@@ -18,9 +18,7 @@
     */
 
 #include "mainwindow.h"
-#ifdef USE_MOBILE
 #include "mobile/qmlui.h"
-#endif
 #include "mobile/fwhelper.h"
 #include "mobile/vesc3ditem.h"
 #include "mobile/logwriter.h"

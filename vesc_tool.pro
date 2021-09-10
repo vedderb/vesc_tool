@@ -31,7 +31,7 @@ ios: {
 }
 
 !win32-msvc*: { !android: {
-    QMAKE_CXXFLAGS += -Wno-deprecated-copy
+    QMAKE_CXXFLAGS += -Wno-deprecated
 }}
 
 # Build mobile GUI
@@ -57,9 +57,7 @@ ios: {
 #DEFINES += HAS_CANBUS
 
 # Positioning
-build_mobile {
-    DEFINES += HAS_POS
-}
+DEFINES += HAS_POS
 
 !ios: {
     QT       += printsupport
@@ -226,9 +224,7 @@ contains(DEFINES, HAS_BLUETOOTH) {
 
 include(pages/pages.pri)
 include(widgets/widgets.pri)
-build_mobile {
-    include(mobile/mobile.pri)
-}
+include(mobile/mobile.pri)
 include(map/map.pri)
 include(lzokay/lzokay.pri)
 include(QCodeEditor/qcodeeditor.pri)

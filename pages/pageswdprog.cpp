@@ -185,7 +185,9 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
     addDataItem("PSELRESET[0]", "0x200", "0xFFFFFFFF");
     addDataItem("PSELRESET[1]", "0x204", "0xFFFFFFFF");
     addDataItem("APPROTECT", "0x208", "0xFFFFFFFF");
-    addDataItem("NRFPINS", "0x20C", "0xFFFFFFFF");
+    addDataItem("NFCPINS", "0x20C", "0xFFFFFFFF");
+    addDataItem("DEBUGCTRL", "0x210", "0xFFFFFFFF");
+    addDataItem("REGOUT0", "0x304", "0xFFFFFFFF");
 }
 
 PageSwdProg::~PageSwdProg()
@@ -695,7 +697,7 @@ void PageSwdProg::on_uicrWriteButton_clicked()
         }
 
         VByteArray vb;
-        for (int i = 0;i < ui->uicrTable->rowCount();i++) {
+        for (int i = 0;i < (ui->uicrTable->rowCount() - 1);i++) {
             if (QLineEdit *le = qobject_cast<QLineEdit*>(ui->uicrTable->cellWidget(i, 2))) {
                 QString txt = le->text();
                 int base = 10;

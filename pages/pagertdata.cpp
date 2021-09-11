@@ -102,8 +102,6 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->currentPlot->graph(graphIndex)->setName("Duty cycle");
     graphIndex++;
 
-
-
     // RPM
     graphIndex = 0;
     ui->rpmPlot->addGraph();
@@ -143,10 +141,12 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->currentPlot->yAxis->setLabel("Ampere (A)");
     ui->currentPlot->yAxis2->setLabel("Duty Cycle");
 
+    ui->tempPlot->legend->setVisible(true);
+    ui->tempPlot->legend->setFont(legendFont);
+    ui->tempPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
     ui->tempPlot->xAxis->setLabel("Seconds (s)");
     ui->tempPlot->yAxis->setLabel("Temperature MOSFET (\u00B0C)");
     ui->tempPlot->yAxis2->setLabel("Temperature Motor (\u00B0C)");
-
 
     ui->rpmPlot->legend->setVisible(true);
     ui->rpmPlot->legend->setFont(legendFont);

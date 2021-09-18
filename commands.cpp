@@ -2024,6 +2024,7 @@ QString Commands::faultToStr(mc_fault_code fault)
     case FAULT_CODE_FLASH_CORRUPTION_MC_CFG: return "FAULT_CODE_FLASH_CORRUPTION_MC_CFG";
     case FAULT_CODE_ENCODER_NO_MAGNET: return "FAULT_CODE_ENCODER_NO_MAGNET";
     case FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: return "FAULT_CODE_ENCODER_MAGNET_TOO_STRONG";
+    case FAULT_CODE_OVER_DUTY: return "FAULT_CODE_OVER_DUTY";
     }
 
     return "Unknown fault";

@@ -1953,7 +1953,7 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
         item = new QListWidgetItem();
         item->setSizeHint(QSize(width,height));
         ui->canList->addItem(item);
-        CANListItem *li = new CANListItem(params, dev, ok, this);
+        CANListItem *li = new CANListItem(params, dev, ok, ui->canList);
         ui->canList->setItemWidget(item, li);
         ui->canList->addItem(item);
     }
@@ -1962,7 +1962,7 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
     item = new QListWidgetItem();
     item->setSizeHint(QSize(width,height));
     ui->canList->insertItem(0, item);
-    CANListItem *li = new CANListItem(params, -1, ok, this);
+    CANListItem *li = new CANListItem(params, -1, ok, ui->canList);
     ui->canList->setItemWidget(item, li);
     ui->canList->setIconSize(QSize(20,20));
     ui->canList->setGridSize(QSize(0.85*width , 1.25*height));

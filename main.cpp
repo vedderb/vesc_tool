@@ -61,6 +61,7 @@ static void showHelp()
     qDebug() << "Arguments";
     qDebug() << "-h, --help : Show help text";
     qDebug() << "--tcpServer [port] : Autoconnect to VESC and start TCP server on [port]";
+    qDebug() << "--retryTcp : Keep trying to reconnect to the VESC when the connection fails";
 }
 
 #ifdef Q_OS_LINUX
@@ -71,6 +72,29 @@ static void m_cleanup(int sig)
 }
 #endif
 #endif
+
+static void startVescTcp(VescInterface *vesc, int tcpPort, bool retry) {
+    bool ok = vesc->autoconnect();
+
+    if (ok) {
+        ok = vesc->tcpServerStart(tcpPort);
+
+        if (!ok) {
+            qCritical() << "Could not start TCP server on port" << tcpPort;
+            qApp->quit();
+        }
+    } else {
+        qCritical() << "Could not autoconnect to VESC";
+
+        if (retry) {
+            QTimer::singleShot(1000, [vesc, tcpPort]() {
+                startVescTcp(vesc, tcpPort, true);
+            });
+        } else {
+            qApp->quit();
+        }
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -175,6 +199,7 @@ int main(int argc, char *argv[])
     }
 
     bool useTcp = false;
+    bool retryTcp = false;
     int tcpPort = 65102;
 
     for (int i = 0;i < args.size();i++) {
@@ -206,6 +231,11 @@ int main(int argc, char *argv[])
                 useTcp = true;
                 found = true;
             }
+        }
+
+        if (str == "--retryTcp") {
+            retryTcp = true;
+            found = true;
         }
 
         if (!found) {
@@ -273,6 +303,8 @@ int main(int argc, char *argv[])
     MainWindow *w = nullptr;
 
     if (useTcp) {
+        qputenv("QT_QPA_PLATFORM", "offscreen");
+
         app = new QCoreApplication(argc, argv);
 
         vesc = new VescInterface;
@@ -280,28 +312,22 @@ int main(int argc, char *argv[])
         Utility::configLoadLatest(vesc);
 
         QTimer::singleShot(1000, [&]() {
-            bool ok = vesc->autoconnect();
-
-            if (ok) {
-                ok = vesc->tcpServerStart(tcpPort);
-
-                if (!ok) {
-                    qCritical() << "Could not start TCP server on port" << tcpPort;
-                    qApp->quit();
-                }
-            } else {
-                qCritical() << "Could not autoconnect to VESC";
-                qApp->quit();
-            }
+            startVescTcp(vesc, tcpPort, retryTcp);
         });
 
-        QObject::connect(vesc, &VescInterface::statusMessage, [](QString msg, bool isGood) {
+        QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
             if (isGood) {
                 qDebug() << msg;
             } else  {
-                qWarning() << msg;
-                qWarning() << "Closing...";
-                qApp->quit();
+                if (retryTcp && !vesc->isPortConnected()) {
+                    QTimer::singleShot(1000, [&]() {
+                        vesc->autoconnect();
+                    });
+                } else {
+                    qWarning() << msg;
+                    qWarning() << "Closing...";
+                    qApp->quit();
+                }
             }
         });
     } else {

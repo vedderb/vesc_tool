@@ -1681,6 +1681,10 @@ bool VescInterface::loadRtLogFile(QString file)
         while (!in.atEnd()) {
             QStringList tokens = in.readLine().split(";");
 
+            if (tokens.size() == 1) {
+                tokens = tokens.at(0).split(",");
+            }
+
             if (tokens.size() < 22) {
                 continue;
             }

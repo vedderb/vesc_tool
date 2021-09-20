@@ -112,7 +112,6 @@ void CANListItem::setID(int canID)
         f.setPointSize(this->font().pointSize()*0.9);
     }
     mIdLabel->setMinimumWidth(30);
-    mIdLabel->setAutoFillBackground(true);
     mIdLabel->setFrameStyle(QFrame::Panel);
     f.setBold(true);
     mIdLabel->setAlignment(Qt::AlignCenter);

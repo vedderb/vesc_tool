@@ -78,6 +78,7 @@ static void startVescTcp(VescInterface *vesc, int tcpPort, bool retry) {
 
     if (ok) {
         ok = vesc->tcpServerStart(tcpPort);
+        qDebug() << "Connected to VESC. Starting TCP server at" << tcpPort;
 
         if (!ok) {
             qCritical() << "Could not start TCP server on port" << tcpPort;
@@ -319,15 +320,17 @@ int main(int argc, char *argv[])
             if (isGood) {
                 qDebug() << msg;
             } else  {
-                if (retryTcp && !vesc->isPortConnected()) {
-                    QTimer::singleShot(1000, [&]() {
-                        vesc->autoconnect();
-                    });
-                } else {
-                    qWarning() << msg;
-                    qWarning() << "Closing...";
-                    qApp->quit();
-                }
+                QTimer::singleShot(1000, [&]() {
+                    if (retryTcp && !vesc->isPortConnected()) {
+                        QTimer::singleShot(1000, [&]() {
+                            vesc->autoconnect();
+                        });
+                    } else {
+                        qWarning() << msg;
+                        qWarning() << "Closing...";
+                        qApp->quit();
+                    }
+                });
             }
         });
     } else {

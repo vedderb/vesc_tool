@@ -43,7 +43,6 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->saveMapPdfButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
     ui->saveMapPngButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
 
-
     updateTileServers();
 
     ui->spanSlider->setMinimum(0);
@@ -1229,4 +1228,10 @@ void PageLogAnalysis::on_logListOpenButton_clicked()
 void PageLogAnalysis::on_logListRefreshButton_clicked()
 {
     logListRefresh();
+}
+
+void PageLogAnalysis::on_logTable_cellDoubleClicked(int row, int column)
+{
+    (void)row; (void)column;
+    on_logListOpenButton_clicked();
 }

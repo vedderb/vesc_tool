@@ -54,6 +54,7 @@ private slots:
     void on_centerButton_clicked();
     void on_logListOpenButton_clicked();
     void on_logListRefreshButton_clicked();
+    void on_logTable_cellDoubleClicked(int row, int column);
 
 private:
     Ui::PageLogAnalysis *ui;

@@ -1987,7 +1987,6 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
             QWidget *current = ui->canList->itemWidget(ui->canList->currentItem());
             int id;
             bool ok = QMetaObject::invokeMethod(current, "getID", Q_RETURN_ARG(int, id));
-            qDebug() << quint32(id);
             if (id >= 0 && id < 255  && ok) {
                 if (!mVesc->commands()->getSendCan() || mVesc->commands()->getCanSendId() != id) {
                     mVesc->commands()->setCanSendId(quint32(id));

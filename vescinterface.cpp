@@ -1319,39 +1319,34 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         supportsLzo = false;
     }
 
-    auto waitWriteRes = [this]() {
-        int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(3000);
-        auto conn = connect(mCommands, &Commands::writeNewAppDataResReceived,
-                            [&res,&loop](bool ok, bool hasOffset, quint32 offset) {
-            (void)offset;
-            (void)hasOffset;
-            res = ok ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
-
-        return res;
-    };
-
-    auto writeChunk = [this, &waitWriteRes, &fwdCan]
-            (uint32_t addr, QByteArray chunk, bool fwIsLzo, quint16 decompressedLen) {
+    auto writeChunk = [this, &fwdCan](uint32_t addr, QByteArray chunk, bool fwIsLzo, quint16 decompressedLen) {
         for (int i = 0;i < 3;i++) {
+            int res = -10;
+            QEventLoop loop;
+            QTimer timeoutTimer;
+            timeoutTimer.setSingleShot(true);
+            timeoutTimer.start(3000);
+            auto conn = connect(mCommands, &Commands::writeNewAppDataResReceived,
+                                [&res,&loop](bool ok, bool hasOffset, quint32 offset) {
+                (void)offset;
+                (void)hasOffset;
+                res = ok ? 1 : -1;
+                loop.quit();
+            });
+
             if (fwIsLzo) {
                 mCommands->writeNewAppDataLzo(chunk, addr, decompressedLen, fwdCan);
             } else {
                 mCommands->writeNewAppData(chunk, addr, fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
             }
 
-            int res = waitWriteRes();
+            connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+            loop.exec();
+            disconnect(conn);
+
+            if (res != 1) {
+                qDebug() << "Write chunk failed:" << res << "LZO:" << fwIsLzo << "Addr:" << addr << "Size:" << chunk.size();
+            }
 
             if (res != -10) {
                 return res;
@@ -1436,7 +1431,6 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
                     // incompatibility between lzokay and minilzo. TODO: figure out what the problem is.
                     if (res == 1) {
                         qWarning() << "Writing LZO failed, but regular write was OK.";
-                        qWarning() << out_len << sz;
                         lzoFailures++;
 
                         if (lzoFailures > 3) {

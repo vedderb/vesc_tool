@@ -284,8 +284,8 @@ macx-clang:contains(QMAKE_HOST.arch, arm.*): {
 macx {
     ICON        =  macos/appIcon.icns
 
-    #QMAKE_INFO_PLIST = macos/app-Info.plist
-    # DISTFILES += macos/app-Info.plist
+    QMAKE_INFO_PLIST = macos/Info.plist
+     DISTFILES += macos/Info.plist
 }
 
 ios {

@@ -392,6 +392,8 @@ int main(int argc, char *argv[])
             qApp->setPalette(darkPalette);
         }else{
             QPalette lightPalette = qApp->style()->standardPalette();
+            lightPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
+            lightPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("midAccent"));
             qApp->setPalette(lightPalette);
         }
 

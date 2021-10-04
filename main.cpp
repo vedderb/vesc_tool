@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("lightText", QColor(215,215,215));
         Utility::setAppQColor("disabledText", QColor(127,127,127));
         Utility::setAppQColor("lightAccent", QColor(0,161,221));
-        Utility::setAppQColor("midAccentColor", QColor(0,98,153));
+        Utility::setAppQColor("midAccent", QColor(0,98,153));
         Utility::setAppQColor("darkAccent", QColor(0,69,112));
         Utility::setAppQColor("pink", QColor(219,98,139));
         Utility::setAppQColor("red", QColor(200,52,52));
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("lightText", QColor(33,33,33));
         Utility::setAppQColor("disabledText", QColor(110,110,110));
         Utility::setAppQColor("lightAccent", QColor(0,114,178));
-        Utility::setAppQColor("midAccentColor", QColor(0,114,178));
+        Utility::setAppQColor("midAccent", QColor(0,114,178));
         Utility::setAppQColor("darkAccent", QColor(0,161,221));
         Utility::setAppQColor("pink", QColor(219,98,139));
         Utility::setAppQColor("red", QColor(200,52,52));
@@ -369,6 +369,7 @@ int main(int argc, char *argv[])
 
         if(isDark){
             QPalette darkPalette;
+            //QPalette::Inactive
             darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
             darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("lightText"));
             darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,Utility::getAppQColor("disabledText"));
@@ -385,6 +386,8 @@ int main(int argc, char *argv[])
             darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,Utility::getAppQColor("disabledText"));
             darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,Utility::getAppQColor("lightestBackground"));
             darkPalette.setColor(QPalette::HighlightedText,Utility::getAppQColor("white"));
+            darkPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("midAccent"));
+            darkPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
             darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
             qApp->setPalette(darkPalette);
         }else{

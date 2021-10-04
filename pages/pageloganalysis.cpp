@@ -181,7 +181,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     mVerticalLine = new QCPCurve(ui->plot->xAxis, ui->plot->yAxis);
     mVerticalLine->removeFromLegend();
-    mVerticalLine->setPen(QPen(Utility::getAppQColor("white")));
+    mVerticalLine->setPen(QPen(Utility::getAppQColor("normalText")));
     mVerticalLineMsLast = -1;
 
     auto updateMouse = [this](QMouseEvent *event) {
@@ -735,18 +735,18 @@ void PageLogAnalysis::updateGraphs()
     ui->plot->clearGraphs();
 
     for (int i = 0;i < yAxes.size();i++) {
-        QPen pen = QPen(Utility::getAppQColor("blue"));
+        QPen pen = QPen(Utility::getAppQColor("plot_graph1"));
 
         if (i == 1) {
             pen = QPen(Qt::magenta);
         } else if (i == 2) {
-            pen = QPen(Utility::getAppQColor("green"));
+            pen = QPen(Utility::getAppQColor("plot_graph2"));
         } else if (i == 3) {
-            pen = QPen(Qt::darkGreen);
+            pen = QPen(Utility::getAppQColor("plot_graph3"));
         } else if (i == 4) {
             pen = QPen(Qt::cyan);
         } else if (i == 5) {
-            pen = QPen(QColor("#01DFD7"));
+            pen = QPen(Utility::getAppQColor("plot_graph4"));
         }
 
         ui->plot->addGraph();

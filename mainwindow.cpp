@@ -1480,10 +1480,16 @@ void MainWindow::reloadPages()
 
     mPageVESCDev = new QTabWidget(this);
     mPageVESCDev->setTabShape(QTabWidget::Triangular);
+
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
     mPageVESCDev->addTab(mPageTerminal,QIcon(theme + "icons/Console-96.png"), tr("VESC Terminal"));
+
+    mPageScripting = new PageScripting(this);
+    mPageScripting->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageScripting);
+    mPageVESCDev->addTab(mPageScripting, QIcon(theme + "icons_textedit/Outdent-96.png"), tr("Scripting"));
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
@@ -1496,11 +1502,6 @@ void MainWindow::reloadPages()
 
     ui->pageWidget->addWidget(mPageVESCDev);
     addPageItem(tr("VESC Dev Tools"),  theme + "icons/Console-96.png", "", true);
-
-    mPageScripting = new PageScripting(this);
-    mPageScripting->setVesc(mVesc);
-    ui->pageWidget->addWidget(mPageScripting);
-    addPageItem(tr("Scripting"), theme + "icons_textedit/Outdent-96.png", "", true);
 
     mPageSwdProg = new PageSwdProg(this);
     mPageSwdProg->setVesc(mVesc);

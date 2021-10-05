@@ -102,7 +102,6 @@ static void startVescTcp(VescInterface *vesc, int tcpPort, bool retry) {
 
 int main(int argc, char *argv[])
 {
-
     // Settings
     QCoreApplication::setOrganizationName("VESC");
     QCoreApplication::setOrganizationDomain("vesc-project.com");

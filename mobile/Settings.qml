@@ -133,8 +133,8 @@ Item {
             anchors.fill: parent
             wrapMode: Text.WordWrap
             text:
-                "Theme changed. This requires restarting Vesc Tool to take effect. " +
-                "Do you want to close now?"
+                "The theme has been changed. This requires restarting VESC Tool to take effect. " +
+                "Do you want to close VESC Tool now?"
         }
 
         onAccepted: {

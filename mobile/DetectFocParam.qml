@@ -288,7 +288,7 @@ Item {
 
     Dialog {
         id: detectRlDialog
-        standardButtons: Dialog.Ok
+        standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
         width: parent.width - 20

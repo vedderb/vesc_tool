@@ -409,6 +409,9 @@ void Preferences::on_pollRestoreButton_clicked()
 
 void Preferences::on_darkModeBox_toggled(bool checked)
 {
+    mVesc->emitMessageDialog("Theme Changed",
+                             "Please restart VESC Tool for the theme changes to take effect.",
+                             false, false);
     Utility::setDarkMode(checked);
 }
 

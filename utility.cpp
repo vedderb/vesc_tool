@@ -2000,17 +2000,14 @@ void Utility::setDarkMode(bool isDarkSetting)
 
 bool Utility::isDarkMode()
 {
-  return isDark;
+    return isDark;
 }
 
 QString Utility::getThemePath()
 {
-    if(isDark)
-    {
+    if(isDark) {
         return ":/res/";
-    }
-    else
-    {
+    } else {
         return ":/res/+theme_light/";
     }
 }

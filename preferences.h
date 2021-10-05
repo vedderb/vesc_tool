@@ -61,6 +61,9 @@ public:
     void setUseGamepadControl(bool useControl);
     bool isUsingGamepadControl();
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private slots:
     void timerSlot();
     void on_uiScaleBox_valueChanged(double arg1);
@@ -94,6 +97,11 @@ private:
     QGamepad *mGamepad;
     bool mUseGamepadControl;
 #endif
+
+    double mLastScaling;
+    bool mLastIsDark;
+
+    void saveSettingsChanged();
 
 };
 

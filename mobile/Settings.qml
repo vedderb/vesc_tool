@@ -25,7 +25,10 @@ import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    property bool mLastDarkMode: false
+
     function openDialog() {
+        mLastDarkMode = Utility.isDarkMode()
         dialog.open()
     }
 
@@ -103,6 +106,39 @@ Item {
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
+
+            if (Utility.isDarkMode() !== mLastDarkMode) {
+                darkChangedDialog.open()
+            }
+        }
+    }
+
+    Dialog {
+        id: darkChangedDialog
+        standardButtons: Dialog.Yes | Dialog.No
+        modal: true
+        focus: true
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        title: "Theme Changed"
+
+        x: 10
+        y: Math.max((parent.height - height) / 2, 10)
+        parent: ApplicationWindow.overlay
+
+        Text {
+            id: detectRlLabel
+            color: Utility.getAppHexColor("lightText")
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text:
+                "Theme changed. This requires restarting Vesc Tool to take effect. " +
+                "Do you want to close now?"
+        }
+
+        onAccepted: {
+            Qt.quit()
         }
     }
 }

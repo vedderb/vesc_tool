@@ -67,14 +67,17 @@ void DetectFoc::on_rlButton_clicked()
             return;
         }
 
-        QMessageBox::information(this,
-                              tr("Measure R & L"),
-                              tr("When measuring R & L the motor is going to make some noises, but "
-                                 "not rotate. These noises are completely normal, so don't unplug "
-                                 "anything unless you see smoke."));
+        QMessageBox::StandardButton reply = QMessageBox::warning(this,
+                                     tr("Measure R & L"),
+                                     tr("When measuring R & L the motor is going to make some noises, but "
+                                        "not rotate. These noises are completely normal, so don't unplug "
+                                        "anything unless you see smoke."),
+                                     QMessageBox::Ok | QMessageBox::Cancel);
 
-        mVesc->commands()->measureRL();
-        mRunning = true;
+        if (reply == QMessageBox::Ok) {
+            mVesc->commands()->measureRL();
+            mRunning = true;
+        }
     }
 }
 
@@ -95,8 +98,7 @@ void DetectFoc::on_lambdaButton_clicked()
             return;
         }
 
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::warning(this,
+        QMessageBox::StandardButton reply = QMessageBox::warning(this,
                                      tr("Warning"),
                                      tr("<font color=\"red\">Warning: </font>"
                                         "This is going to spin up the motor. Make "

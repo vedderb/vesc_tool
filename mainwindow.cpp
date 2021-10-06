@@ -698,7 +698,7 @@ void MainWindow::timerSlot()
     // Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
     static int disconected_cnt = 0;
     disconected_cnt++;
-    if (disconected_cnt >= 20 && ui->canList->count() > 0) {
+    if (disconected_cnt >= 40 && ui->canList->count() > 0) {
         ui->canList->clear();
         mVesc->commands()->setSendCan(false);
         ui->scanCanButton->setEnabled(true);
@@ -707,7 +707,7 @@ void MainWindow::timerSlot()
         ui->pageList->item(mPageNameIdList.value("app_custom_config_2"))->setHidden(true);
     }
 
-    if (disconected_cnt >= 20 && !mVesc->isPortConnected()) {
+    if (disconected_cnt >= 40 && !mVesc->isPortConnected()) {
         ui->scanCanButton->setEnabled(true);
     }
 
@@ -1938,9 +1938,12 @@ void MainWindow::on_scanCanButton_clicked()
 
 void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
 {
-    if (isTimeout || ui->canList->count() > 0) {
+    (void)isTimeout;
+
+    if (ui->canList->count() > 0) {
         return;
     }
+
     ui->scanCanButton->setEnabled(false);
     ui->canList->clear();
     FW_RX_PARAMS params;

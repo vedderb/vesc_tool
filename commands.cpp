@@ -1931,6 +1931,7 @@ void Commands::timerSlot()
         mTimeoutPingCan--;
         if (mTimeoutPingCan == 0) {
             emit pingCanRx(QVector<int>(), true);
+            qWarning() << "CAN ping timed out";
         }
     }
     if (mTimeoutCustomConf > 0) mTimeoutCustomConf--;

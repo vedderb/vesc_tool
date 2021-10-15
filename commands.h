@@ -71,6 +71,9 @@ public:
     Q_INVOKABLE void emitPlotAddGraph(QString name);
     Q_INVOKABLE void emitPlotSetGraph(int graph);
 
+    Q_INVOKABLE bool getMaxPowerLossBug() const;
+    void setMaxPowerLossBug(bool maxPowerLossBug);
+
 signals:
     void dataToSend(QByteArray &data);
 
@@ -239,6 +242,7 @@ private:
     bool mIsLimitedMode;
     bool mLimitedSupportsFwdAllCan;
     bool mLimitedSupportsEraseBootloader;
+    bool mMaxPowerLossBug;
     QVector<int> mCompatibilityCommands; // int to be QML-compatible
     QMap<int, BMS_VALUES> mBmsValues;
 

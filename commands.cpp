@@ -28,6 +28,7 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mIsLimitedMode = false;
     mLimitedSupportsFwdAllCan = false;
     mLimitedSupportsEraseBootloader = false;
+    mMaxPowerLossBug = false;
     mCheckNextMcConfig = false;
 
     mTimer = new QTimer(this);
@@ -1575,6 +1576,10 @@ void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, doubl
 void Commands::detectAllFoc(bool detect_can, double max_power_loss, double min_current_in,
                             double max_current_in, double openloop_rpm, double sl_erpm)
 {
+    if (mMaxPowerLossBug) {
+        max_power_loss /= 3.0;
+    }
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_DETECT_APPLY_ALL_FOC);
     vb.vbAppendInt8(detect_can);
@@ -1963,6 +1968,16 @@ void Commands::emitData(QByteArray data)
     }
 
     emit dataToSend(data);
+}
+
+bool Commands::getMaxPowerLossBug() const
+{
+    return mMaxPowerLossBug;
+}
+
+void Commands::setMaxPowerLossBug(bool maxPowerLossBug)
+{
+    mMaxPowerLossBug = maxPowerLossBug;
 }
 
 bool Commands::getLimitedSupportsFwdAllCan() const

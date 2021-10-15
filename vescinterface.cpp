@@ -3137,6 +3137,21 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     mCommands->setLimitedSupportsFwdAllCan(fw_connected >= qMakePair(3, 45));
     mCommands->setLimitedSupportsEraseBootloader(fw_connected >= qMakePair(3, 59));
 
+    // This bug is fixed in firmware 5.03 beta 53.
+    if (fw_connected >= qMakePair(5, 03)) {
+        if (fw_connected == qMakePair(5, 03)) {
+            if (params.isTestFw == 0 || params.isTestFw > 52) {
+                mCommands->setMaxPowerLossBug(false);
+            } else {
+                mCommands->setMaxPowerLossBug(true);
+            }
+        } else {
+            mCommands->setMaxPowerLossBug(false);
+        }
+    } else {
+        mCommands->setMaxPowerLossBug(true);
+    }
+
     QVector<int> compCommands;
     if (fw_connected >= qMakePair(3, 47)) {
         compCommands.append(int(COMM_GET_VALUES));

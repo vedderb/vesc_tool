@@ -229,15 +229,15 @@ Item {
                         property string iconPath: "qrc" + Utility.getThemePath() + "icons/";
                         Component.onCompleted: {
                             [
-                            ["Mini Outrunner (~75 g)", "qrc:/res/images/motors/outrunner_mini.jpg", 30, 1400, 4000, false,14],
-                            ["Small Outrunner (~200 g)","qrc:/res/images/motors/outrunner_small.jpg", 75, 1400, 4000, false,14],
-                            ["Medium Outrunner (~750 g)","qrc:/res/images/motors/6374.jpg", 180, 700, 4000, true, 14],
-                            ["Large Outrunner (~2000 g)",iconPath + "motor.png", 600, 700, 4000, false, 14],
-                            ["Small Inrunner (~200 g)","qrc:/res/images/motors/inrunner_small.jpg", 75, 1400, 4000, false, 2],
-                            ["Medium Inrunner (~750 g)","qrc:/res/images/motors/inrunner_medium.jpg", 210, 1400, 4000, false, 4],
-                            ["Large Inrunner (~2000 g)",iconPath + "motor.png", 600, 1000, 4000, false, 4],
-                            ["E-Bike DD hub motor (~6 kg)","qrc:/res/images/motors/ebike_dd_1kw.jpg", 225, 300, 2000, false, 46],
-                            ["EDF Inrunner Small (~200 g)","qrc:/res/images/motors/edf_small.jpg", 165, 1400, 4000, false, 6]
+                            ["Mini Outrunner (~75 g)", "qrc:/res/images/motors/outrunner_mini.jpg", 20, 1400, 4000, false,14],
+                            ["Small Outrunner (~200 g)","qrc:/res/images/motors/outrunner_small.jpg", 50, 1400, 4000, false,14],
+                            ["Medium Outrunner (~750 g)","qrc:/res/images/motors/6374.jpg", 120, 700, 4000, true, 14],
+                            ["Large Outrunner (~2000 g)",iconPath + "motor.png", 400, 700, 4000, false, 14],
+                            ["Small Inrunner (~200 g)","qrc:/res/images/motors/inrunner_small.jpg", 50, 1400, 4000, false, 2],
+                            ["Medium Inrunner (~750 g)","qrc:/res/images/motors/inrunner_medium.jpg", 140, 1400, 4000, false, 4],
+                            ["Large Inrunner (~2000 g)",iconPath + "motor.png", 400, 1000, 4000, false, 4],
+                            ["E-Bike DD hub motor (~6 kg)","qrc:/res/images/motors/ebike_dd_1kw.jpg", 150, 300, 2000, false, 46],
+                            ["EDF Inrunner Small (~200 g)","qrc:/res/images/motors/edf_small.jpg", 110, 1400, 4000, false, 6]
                             ].forEach(function(element) {
                                 append({
                                            name: element[0],

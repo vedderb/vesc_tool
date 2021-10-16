@@ -1577,7 +1577,7 @@ void Commands::detectAllFoc(bool detect_can, double max_power_loss, double min_c
                             double max_current_in, double openloop_rpm, double sl_erpm)
 {
     if (mMaxPowerLossBug) {
-        max_power_loss /= 3.0;
+        max_power_loss /= 2.0;
     }
 
     VByteArray vb;

@@ -1146,13 +1146,14 @@ void Commands::setDetect(disp_pos_mode mode)
     emitData(vb);
 }
 
-void Commands::samplePrint(debug_sampling_mode mode, int sample_len, int dec)
+void Commands::samplePrint(debug_sampling_mode mode, int sample_len, int dec, bool raw)
 {
     VByteArray vb;
     vb.vbAppendInt8(COMM_SAMPLE_PRINT);
     vb.vbAppendInt8(mode);
     vb.vbAppendUint16(sample_len);
     vb.vbAppendUint8(dec);
+    vb.vbAppendInt8(raw);
     emitData(vb);
 }
 

@@ -149,7 +149,7 @@ public slots:
     void setPos(double pos);
     void setHandbrake(double current);
     void setDetect(disp_pos_mode mode);
-    void samplePrint(debug_sampling_mode mode, int sample_len, int dec);
+    void samplePrint(debug_sampling_mode mode, int sample_len, int dec, bool raw);
     void getMcconf();
     void getMcconfDefault();
     void setMcconf(bool check = true);

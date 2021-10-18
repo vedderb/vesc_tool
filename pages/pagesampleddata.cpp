@@ -534,7 +534,8 @@ void PageSampledData::on_sampleNowButton_clicked()
 {
     if (mVesc) {
         clearBuffers();
-        mVesc->commands()->samplePrint(DEBUG_SAMPLING_NOW, ui->samplesBox->value(), ui->decimationBox->value());
+        mVesc->commands()->samplePrint(DEBUG_SAMPLING_NOW, ui->samplesBox->value(),
+                                       ui->decimationBox->value(), ui->rawBox->isChecked());
         mSamplesToWait = ui->samplesBox->value();
     }
 }
@@ -543,7 +544,8 @@ void PageSampledData::on_sampleStartButton_clicked()
 {
     if (mVesc) {
         clearBuffers();
-        mVesc->commands()->samplePrint(DEBUG_SAMPLING_START, ui->samplesBox->value(), ui->decimationBox->value());
+        mVesc->commands()->samplePrint(DEBUG_SAMPLING_START, ui->samplesBox->value(),
+                                       ui->decimationBox->value(), ui->rawBox->isChecked());
         mSamplesToWait = ui->samplesBox->value();
     }
 }
@@ -552,7 +554,8 @@ void PageSampledData::on_sampleTriggerStartButton_clicked()
 {
     if (mVesc) {
         clearBuffers();
-        mVesc->commands()->samplePrint(DEBUG_SAMPLING_TRIGGER_START, ui->samplesBox->value(), ui->decimationBox->value());
+        mVesc->commands()->samplePrint(DEBUG_SAMPLING_TRIGGER_START, ui->samplesBox->value(),
+                                       ui->decimationBox->value(), ui->rawBox->isChecked());
         mSamplesToWait = ui->samplesBox->maximum();
     }
 }
@@ -561,7 +564,8 @@ void PageSampledData::on_sampleTriggerFaultButton_clicked()
 {
     if (mVesc) {
         clearBuffers();
-        mVesc->commands()->samplePrint(DEBUG_SAMPLING_TRIGGER_FAULT, ui->samplesBox->value(), ui->decimationBox->value());
+        mVesc->commands()->samplePrint(DEBUG_SAMPLING_TRIGGER_FAULT, ui->samplesBox->value(),
+                                       ui->decimationBox->value(), ui->rawBox->isChecked());
         mSamplesToWait = ui->samplesBox->maximum();
     }
 }
@@ -570,7 +574,8 @@ void PageSampledData::on_sampleTriggerStartNosendButton_clicked()
 {
     if (mVesc) {
         clearBuffers();
-        mVesc->commands()->samplePrint(DEBUG_SAMPLING_TRIGGER_START_NOSEND, ui->samplesBox->value(), ui->decimationBox->value());
+        mVesc->commands()->samplePrint(DEBUG_SAMPLING_TRIGGER_START_NOSEND, ui->samplesBox->value(),
+                                       ui->decimationBox->value(), ui->rawBox->isChecked());
         mSamplesToWait = ui->samplesBox->maximum();
     }
 }
@@ -579,7 +584,8 @@ void PageSampledData::on_sampleTriggerFaultNosendButton_clicked()
 {
     if (mVesc) {
         clearBuffers();
-        mVesc->commands()->samplePrint(DEBUG_SAMPLING_TRIGGER_FAULT_NOSEND, ui->samplesBox->value(), ui->decimationBox->value());
+        mVesc->commands()->samplePrint(DEBUG_SAMPLING_TRIGGER_FAULT_NOSEND, ui->samplesBox->value(),
+                                       ui->decimationBox->value(), ui->rawBox->isChecked());
         mSamplesToWait = ui->samplesBox->maximum();
     }
 }
@@ -588,7 +594,8 @@ void PageSampledData::on_sampleLastButton_clicked()
 {
     if (mVesc) {
         clearBuffers();
-        mVesc->commands()->samplePrint(DEBUG_SAMPLING_SEND_LAST_SAMPLES, ui->samplesBox->value(), ui->decimationBox->value());
+        mVesc->commands()->samplePrint(DEBUG_SAMPLING_SEND_LAST_SAMPLES, ui->samplesBox->value(),
+                                       ui->decimationBox->value(), ui->rawBox->isChecked());
         mSamplesToWait = ui->samplesBox->maximum();
     }
 }
@@ -596,7 +603,8 @@ void PageSampledData::on_sampleLastButton_clicked()
 void PageSampledData::on_sampleStopButton_clicked()
 {
     if (mVesc) {
-        mVesc->commands()->samplePrint(DEBUG_SAMPLING_OFF, ui->samplesBox->value(), ui->decimationBox->value());
+        mVesc->commands()->samplePrint(DEBUG_SAMPLING_OFF, ui->samplesBox->value(),
+                                       ui->decimationBox->value(), ui->rawBox->isChecked());
     }
 }
 

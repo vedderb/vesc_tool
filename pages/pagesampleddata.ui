@@ -625,6 +625,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="rawBox">
+       <property name="toolTip">
+        <string>Use raw ADC values instead of scaled voltages and currents.</string>
+       </property>
+       <property name="text">
+        <string>Raw</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

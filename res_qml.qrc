@@ -19,5 +19,6 @@
         <file>res/qml/Examples/ExperimentPlot.qml</file>
         <file>res/qml/Examples/LogTextToFile.qml</file>
         <file>res/qml/Examples/MMXGui.qml</file>
+        <file>res/qml/Examples/BrakeBench.qml</file>
     </qresource>
 </RCC>

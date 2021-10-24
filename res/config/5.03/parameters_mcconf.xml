@@ -1364,11 +1364,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The difference between Ld and Lq inductance. It represents the motor saliency. This can be measured using the &lt;/span&gt;&lt;span style=&quot; font-family:'Roboto'; font-style:italic;&quot;&gt;measure_ind&lt;/span&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt; terminal command, but the regular detection interface does not print it yet.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;A value different than zero will enable the Maximum Torque Per Amp (MTPA) algorithm that injects a negative id current to follow the optimum torque trajectory. This is specially valuable on Interior Permanent Magnet (IPM) motors because they have large saliency and can yield a substantial torque increase.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Note:&lt;/span&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt; Only enable this feature if you know very well what you are doing. IPM motors are not popular and injecting negative id current can increase the motor speed. If id current suddenly collapses (under a fault condition for example) the DC Bus voltage can increase well beyond the powerstage rating causing a fire and maximum braking power at the motor shaft.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The difference between Ld and Lq inductance. It represents the motor saliency. This can be measured using the &lt;span style=&quot; font-style:italic;&quot;&gt;measure_ind&lt;/span&gt; terminal command, but the regular detection interface does not print it yet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_MOTOR_LD_LQ_DIFF</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1e+06</editorScale>
@@ -2450,6 +2446,20 @@ p, li { white-space: pre-wrap; }
             <suffix> ERPM</suffix>
             <vTx>9</vTx>
         </foc_phase_filter_max_erpm>
+        <foc_use_mtpa>
+            <longName>Use MTPA Algorithm</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This parameter will enable the Maximum Torque Per Amp (MTPA) algorithm that injects a negative d axis current to follow the optimum torque trajectory. This is specially valuable on Interior Permanent Magnet (IPM) motors because they have large saliency and can yield a substantial torque increase.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; Only enable this feature if you know very well what you are doing. IPM motors are not popular and injecting negative id current can increase the motor speed. If id current suddenly collapses (under a fault condition for example) the DC Bus voltage can increase well beyond the powerstage rating causing a fire and maximum braking power at the motor shaft.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_USE_MTPA</cDefine>
+            <valInt>0</valInt>
+        </foc_use_mtpa>
         <foc_fw_current_max>
             <longName>Field Weakening Current Max</longName>
             <type>1</type>
@@ -4014,6 +4024,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_offsets_voltage_undriven__2</ser>
         <ser>foc_phase_filter_enable</ser>
         <ser>foc_phase_filter_max_erpm</ser>
+        <ser>foc_use_mtpa</ser>
         <ser>foc_fw_current_max</ser>
         <ser>foc_fw_duty_start</ser>
         <ser>foc_fw_ramp_time</ser>
@@ -4236,6 +4247,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_sensor_mode</param>
                     <param>foc_motor_r</param>
                     <param>foc_motor_l</param>
+                    <param>foc_motor_ld_lq_diff</param>
                     <param>foc_motor_flux_linkage</param>
                     <param>foc_current_kp</param>
                     <param>foc_current_ki</param>
@@ -4347,9 +4359,9 @@ p, li { white-space: pre-wrap; }
                     <param>foc_current_filter_const</param>
                     <param>foc_cc_decoupling</param>
                     <param>foc_observer_type</param>
-                    <param>foc_motor_ld_lq_diff</param>
                     <param>foc_d_gain_scale_start</param>
                     <param>foc_d_gain_scale_max_mod</param>
+                    <param>foc_use_mtpa</param>
                 </subgroupParams>
             </subgroup>
         </group>

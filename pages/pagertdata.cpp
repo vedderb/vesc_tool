@@ -20,6 +20,8 @@
 #include "pagertdata.h"
 #include "ui_pagertdata.h"
 #include "widgets/helpdialog.h"
+#include <QFileDialog>
+#include <QMessageBox>
 #include "utility.h"
 
 #include <QXmlStreamWriter>

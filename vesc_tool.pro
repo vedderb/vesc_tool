@@ -36,6 +36,10 @@ ios: {
 
 # Build mobile GUI
 #CONFIG += build_mobile
+ios: {
+    CONFIG    += build_mobile
+    DEFINES   += QT_NO_PRINTER
+}
 
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
@@ -110,8 +114,16 @@ contains(DEFINES, HAS_GAMEPAD) {
 
 android: QT += androidextras
 
-android: TARGET = vesc_tool
-!android: TARGET = vesc_tool_$$VT_VERSION
+ios: {
+    TARGET = "VESC Tool"
+}else: {
+    android:{
+        TARGET = "vesc_tool"
+    }else:{
+
+        TARGET = vesc_tool_$$VT_VERSION
+    }
+}
 
 ANDROID_VERSION = 1
 

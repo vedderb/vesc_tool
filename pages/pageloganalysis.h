@@ -22,6 +22,7 @@
 #define PAGELOGANALYSIS_H
 
 #include <QWidget>
+#include <QCheckBox>
 #include <vescinterface.h>
 #include "widgets/qcustomplot.h"
 #include "widgets/vesc3dview.h"

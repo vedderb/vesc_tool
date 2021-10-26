@@ -21,6 +21,7 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QDebug>
+#include <QInputDialog>
 #include <QFileDialog>
 #include <QListWidgetItem>
 #include <cmath>

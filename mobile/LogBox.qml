@@ -21,6 +21,7 @@ import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0 as QSettings
+import Qt.labs.platform 1.1
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
@@ -42,7 +43,7 @@ Item {
         rowSpacing: -10
         columnSpacing: 5
         rows: 3
-        columns: 2
+        columns: 3
 
         Button {
             text: "Help"
@@ -57,11 +58,21 @@ Item {
         }
 
         Button {
-            text: "Choose Log Directory..."
+            text: "Reset"
+            Layout.fillWidth: true
+
+            onClicked: {
+                rtLogFileText.text = StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
+            }
+        }
+
+        Button {
+            text: "Browse"
             Layout.fillWidth: true
 
             onClicked: {
                 if (Utility.requestFilePermission()) {
+                    logFilePicker.folder = rtLogFileText.text
                     logFilePicker.enabled = true
                     logFilePicker.visible = true
                 } else {
@@ -75,7 +86,7 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.columnSpan: 2
+            Layout.columnSpan: 3
             Layout.topMargin: 6
             Layout.bottomMargin: 6
             height: rtLogFileText.implicitHeight + 14
@@ -90,9 +101,8 @@ Item {
                 anchors.fill: parent
                 anchors.margins: 7
                 font.pointSize: 12
-                text: "./log"
+                text: StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
                 clip: true
-
                 QSettings.Settings {
                     property alias path_rt_log: rtLogFileText.text
                 }
@@ -103,16 +113,20 @@ Item {
             id: rtLogEnBox
             text: "Enable RT Data Logging"
             Layout.fillWidth: true
-            Layout.columnSpan: 2
+            Layout.columnSpan: 3
 
             onClicked: {
                 if (checked) {
                     if (VescIf.openRtLogFile(rtLogFileText.text)) {
+                        VescIf.emitStatusMessage("Logging Started", true)
                         Utility.startGnssForegroundService()
                         VescIf.setWakeLock(true)
+                    }else{
+                        VescIf.emitStatusMessage("Logging Failed", false)
                     }
                 } else {
                     VescIf.closeRtLogFile()
+                    VescIf.emitStatusMessage("Log Saved", true)
                     Utility.stopGnssForegroundService()
 
                     if (!VescIf.useWakeLock()) {

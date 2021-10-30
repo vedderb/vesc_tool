@@ -21,6 +21,8 @@
 #include "ui_pagesampleddata.h"
 #include "digitalfiltering.h"
 #include "utility.h"
+#include <QFileDialog>
+#include <QMessageBox>
 
 PageSampledData::PageSampledData(QWidget *parent) :
     QWidget(parent),

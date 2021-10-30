@@ -23,7 +23,7 @@
                     </variation>
                 </label>
                 <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" misplaced="YES" image="LaunchImage.png" translatesAutoresizingMaskIntoConstraints="NO" id="nSS-cA-hgK">
-                    <rect key="frame" x="20" y="38" width="407" height="404"/>
+                    <rect key="frame" x="134" y="38" width="178" height="404"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="236" id="I0e-Ga-462"/>
                         <constraint firstAttribute="height" constant="236" id="NkP-5d-NN7"/>
@@ -68,6 +68,6 @@
         </view>
     </objects>
     <resources>
-        <image name="LaunchImage.png" width="743.52001953125" height="189.1199951171875"/>
+        <image name="LaunchImage.png" width="174.921630859375" height="52.363636016845703"/>
     </resources>
 </document>

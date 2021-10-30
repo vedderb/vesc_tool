@@ -101,6 +101,7 @@ Item {
         title: "Remove profile"
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
 
         Text {
             color: Utility.getAppHexColor("lightText")

@@ -680,6 +680,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Load Default Parameters"
         parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
 
         y: dialog.y + dialog.height / 2 - height / 2
 
@@ -711,6 +712,7 @@ Item {
         title: "Motor Selection"
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -754,6 +756,7 @@ Item {
         title: "Battery Settings"
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -782,6 +785,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Detect FOC Parameters"
         parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
         property var canDevs: []
 
         y: dialog.y + dialog.height / 2 - height / 2

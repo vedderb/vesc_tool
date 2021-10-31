@@ -1554,11 +1554,17 @@ QStringList ConfigParams::checkDifference(ConfigParams *config)
                     }
                     break;
 
-                case CFG_T_DOUBLE:
-                    if (!almostEqual(thisParam->valDouble, otherParam->valDouble, 0.0001)) {
+                case CFG_T_DOUBLE: {
+                    float eps = 0.0001;
+
+                    if (thisParam->vTx == VESC_TX_DOUBLE16) {
+                        eps = 0.01;
+                    }
+
+                    if (!almostEqual(thisParam->valDouble, otherParam->valDouble, eps)) {
                         res.append(p);
                     }
-                    break;
+                } break;
 
                 case CFG_T_QSTRING:
                     if (thisParam->valString != otherParam->valString) {

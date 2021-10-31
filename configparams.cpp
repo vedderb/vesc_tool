@@ -36,6 +36,8 @@ ConfigParams::ConfigParams(QObject *parent) : QObject(parent)
     mUpdateOnlyName.clear();
     mXmlStatus = tr("OK");
     mUpdatesEnabled = true;
+    mConfigVersion = -1;
+    mStoreConfigVersion = true;
 }
 
 void ConfigParams::addParam(const QString &name, ConfigParam param)
@@ -871,6 +873,21 @@ void ConfigParams::updateDone()
     emit updated();
 }
 
+bool ConfigParams::getStoreConfigVersion() const
+{
+    return mStoreConfigVersion;
+}
+
+void ConfigParams::setStoreConfigVersion(bool storeConfigVersion)
+{
+    mStoreConfigVersion = storeConfigVersion;
+}
+
+int ConfigParams::getConfigVersion() const
+{
+    return mConfigVersion;
+}
+
 // http://realtimecollisiondetection.net/blog/?p=89
 bool ConfigParams::almostEqual(float A, float B, float eps)
 {
@@ -914,6 +931,8 @@ bool ConfigParams::deSerialize(VByteArray &vb)
         setParamSerial(vb, mSerializeOrder.at(i));
     }
 
+    mConfigVersion = VT_CONFIG_VERSION;
+
     return true;
 }
 
@@ -921,6 +940,10 @@ void ConfigParams::getXML(QXmlStreamWriter &stream, QString configName)
 {
     stream.writeStartDocument();
     stream.writeStartElement(configName);
+
+    if (mStoreConfigVersion) {
+        stream.writeTextElement("ConfigVersion", QString::number(VT_CONFIG_VERSION));
+    }
 
     for (QString s: mParamList) {
         const ConfigParam p = mParams[s];
@@ -961,10 +984,14 @@ bool ConfigParams::setXML(QXmlStreamReader &stream, QString configName)
     }
 
     if (nameFound) {
+        mConfigVersion = -1;
+
         while (stream.readNextStartElement()) {
             QString name = stream.name().toString();
 
-            if (mParams.contains(name)) {
+            if (name == "ConfigVersion") {
+                mConfigVersion = stream.readElementText().toInt();
+            } else if (mParams.contains(name)) {
                 ConfigParam &p = mParams[name];
                 QString text = stream.readElementText();
                 int valInt = text.toInt();

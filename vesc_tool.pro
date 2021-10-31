@@ -7,9 +7,10 @@
 # Version
 VT_VERSION = 3.01
 VT_INTRO_VERSION = 1
+VT_CONFIG_VERSION = 1
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 33
+VT_IS_TEST_VERSION = 36
 
 VT_ANDROID_VERSION_ARMV7 = 95
 VT_ANDROID_VERSION_ARM64 = 96
@@ -22,6 +23,7 @@ VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
 DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
+DEFINES += VT_CONFIG_VERSION=$$VT_CONFIG_VERSION
 DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
 
 CONFIG += c++11
@@ -36,6 +38,7 @@ ios: {
 
 # Build mobile GUI
 #CONFIG += build_mobile
+
 ios: {
     CONFIG    += build_mobile
     DEFINES   += QT_NO_PRINTER

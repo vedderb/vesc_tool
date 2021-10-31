@@ -3319,6 +3319,10 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         mFwSupportsConfiguration = true;
     }
 
+    // Only store the config version if the loaded firmware is the latest one. This will
+    // give a warning when that config is loaded with a new firmware version.
+    mMcConfig->setStoreConfigVersion(Utility::configLatestSupported() == fw_connected);
+
     // Hack for old unity devices with a firmware fork
     if ((fw_connected >= qMakePair(3, 100) && fw_connected <= qMakePair(3, 103)) ||
         (fw_connected >= qMakePair(23, 34) && fw_connected <= qMakePair(23, 46))) {
@@ -3613,6 +3617,23 @@ void VescInterface::appconfUpdated()
 void VescInterface::mcconfUpdated()
 {
     emit statusMessage(tr("MC configuration updated"), true);
+
+    if (isPortConnected() && fwRx()) {
+        QPair<int, int> fw_connected = qMakePair(mLastFwParams.major, mLastFwParams.minor);
+
+        if (fw_connected >= qMakePair(5, 03)) {
+            if (mMcConfig->getConfigVersion() != VT_CONFIG_VERSION) {
+                emitMessageDialog("Configuration Loaded",
+                                  "The loaded motor configuration file is from a different firmware and/or different "
+                                  "version of VESC Tool. If it does not work properly you should run the motor wizard "
+                                  "again or re-measure the parameters manually.\n\n"
+                                  ""
+                                  "The main reason for this is that the motor resistance and induction values are defined "
+                                  "differently after firmware 5.03, so old configs will not run properly.",
+                                  false);
+            }
+        }
+    }
 }
 
 void VescInterface::ackReceived(QString ackType)

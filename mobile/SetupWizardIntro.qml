@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 
@@ -53,6 +53,10 @@ Item {
         bottomMargin: 0
         rightMargin: 0
         padding: 10
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         StackLayout {
             id: stackLayout
@@ -250,6 +254,10 @@ Item {
         height: Math.min(implicitHeight, parent.height - 40)
         closePolicy: Popup.CloseOnEscape
         parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2

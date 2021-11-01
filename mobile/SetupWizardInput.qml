@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 
@@ -93,6 +93,10 @@ Item {
         modal: true
         focus: true
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         width: parent.width - 20
         x: 10
         y: parent.height / 2 - height / 2
@@ -117,6 +121,10 @@ Item {
         bottomMargin: 0
         rightMargin: 0
         padding: 10
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         StackLayout {
             id: stackLayout
@@ -615,6 +623,10 @@ Item {
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         parent: ApplicationWindow.overlay
         x: 10

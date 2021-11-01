@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.0
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -183,6 +183,10 @@ Item {
                         y: 10 + parent.height / 2 - height / 2
                         parent: dialogParent
                         implicitHeight: 0
+
+                        Overlay.modal: Rectangle {
+                            color: "#AA000000"
+                        }
 
                         Text {
                             color: Utility.getAppHexColor("lightText")

@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -65,6 +65,10 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: 20
         y: 10
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Component.onCompleted: {
             // General
@@ -338,6 +342,10 @@ Item {
         closePolicy: Popup.NoAutoClose
         modal: true
         focus: true
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         x: 10

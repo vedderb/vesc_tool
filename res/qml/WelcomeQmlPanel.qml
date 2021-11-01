@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
 import QtQuick.Window 2.2
@@ -88,6 +88,10 @@ Item {
         modal: true
         focus: true
         padding: 10
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 10
         closePolicy: Popup.CloseOnEscape
@@ -298,6 +302,10 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         parent: container
         y: parent.y + parent.height / 2 - height / 2
 
@@ -326,6 +334,10 @@ Item {
         leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Load Custom User Interface"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         parent: container
         y: parent.y + parent.height / 2 - height / 2

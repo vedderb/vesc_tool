@@ -37,15 +37,14 @@ ios: {
 }}
 
 # Build mobile GUI
-#CONFIG += build_mobile
-
+CONFIG += build_mobile
 ios: {
     CONFIG    += build_mobile
     DEFINES   += QT_NO_PRINTER
 }
 
 # Debug build (e.g. F5 to reload QML files)
-#DEFINES += DEBUG_BUILD
+DEFINES += DEBUG_BUILD
 
 # If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
 # sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'
@@ -94,6 +93,7 @@ QT       += quick
 QT       += quickcontrols2
 QT       += quickwidgets
 QT       += svg
+QT       += gui-private
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
@@ -191,6 +191,7 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
+    ios/src/setIosParameters.mm \
         mainwindow.cpp \
     packet.cpp \
     preferences.cpp \
@@ -305,8 +306,9 @@ macx {
 
 ios {
     QMAKE_INFO_PLIST = ios/Info.plist
-    HEADERS += ios/src/notch.h
-    SOURCES += ios/src/notch.mm
+    HEADERS += \
+    ios/src/setIosParameters.h
+    SOURCES +=
     DISTFILES += ios/Info.plist
 
     QMAKE_ASSET_CATALOGS = $$PWD/ios/Images.xcassets

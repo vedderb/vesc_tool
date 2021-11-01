@@ -17,10 +17,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
+import QtQuick.Window 2.12
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -40,17 +41,50 @@ ApplicationWindow {
     height: 850
     title: qsTr("VESC Tool")
 
+    // Full screen iPhone X workaround:
+    property int safeWidth
+    property int notchTop
+    property int notchLeft
+    property int notchRight
+    property int notchBot
+    flags: Qt.platform.os === "ios"? Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint : Qt.Window
+    // https://github.com/ekke/c2gQtWS_x/blob/master/qml/main.qml
+    function updateNotch() {
+        console.log("Orientation Changed")
+        console.log("safe margins =", JSON.stringify(Utility.getSafeAreaMargins(appWindow)))
+        notchTop   = Utility.getSafeAreaMargins(appWindow)["top"]
+        notchLeft  = Utility.getSafeAreaMargins(appWindow)["left"]
+        notchRight = Utility.getSafeAreaMargins(appWindow)["right"]
+        notchBot = Utility.getSafeAreaMargins(appWindow)["bottom"]/2 //leaving too much room at the bottom
+        safeWidth  = appWindow.width - Utility.getSafeAreaMargins(appWindow)["left"] - Utility.getSafeAreaMargins(appWindow)["right"]
+        connScreen.notchTop = notchTop
+    }
+    Timer {
+        id: oriTimer
+        interval: 100; running: true; repeat: false
+        onTriggered: {
+            updateNotch()
+        }
+    }
+
+    Screen.orientationUpdateMask: Qt.LandscapeOrientation | Qt.PortraitOrientation
+    Screen.onPrimaryOrientationChanged: {
+        oriTimer.start()
+    }
+
+
+
     Component.onCompleted: {
         if (!VescIf.isIntroDone()) {
             introWizard.openDialog()
         }
-
+        updateNotch()
         Utility.keepScreenOn(VescIf.keepScreenOn())
         Utility.stopGnssForegroundService()
     }
 
     onHeightChanged: {
-        connScreen.y = VescIf.isPortConnected() ? connScreen.height : 0.0
+        connScreen.y =  (connScreen.y > 1) ? connScreen.height : 0.0
     }
 
     SetupWizardIntro {
@@ -72,11 +106,31 @@ ApplicationWindow {
     }
 
     Drawer {
+        id: canDrawer
+        edge: Qt.RightEdge
+        width: 0.5 * appWindow.width
+        height: appWindow.height - footer.height - tabBar.height
+        y: tabBar.height
+        dragMargin: 20
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        CanScreen{
+            anchors.fill: parent
+        }
+    }
+
+    Drawer {
         id: drawer
         width: 0.5 * appWindow.width
         height: appWindow.height - footer.height - tabBar.height
         y: tabBar.height
         dragMargin: 20
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -167,10 +221,18 @@ ApplicationWindow {
                 flat: true
 
                 onClicked: {
-                    VescIf.emitMessageDialog(
-                                mInfoConf.getLongName("gpl_text"),
-                                mInfoConf.getDescription("gpl_text"),
-                                true, true)
+                    if(Qt.platform.os == "ios"){
+                        VescIf.emitMessageDialog(
+                                    mInfoConf.getLongName("ios_license_text"),
+                                    mInfoConf.getDescription("ios_license_text"),
+                                    true, true)
+                    }else{
+                        VescIf.emitMessageDialog(
+                                    mInfoConf.getLongName("gpl_text"),
+                                    mInfoConf.getDescription("gpl_text"),
+                                    true, true)
+                    }
+
                 }
             }
         }
@@ -180,12 +242,18 @@ ApplicationWindow {
         id: swipeView
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
+        anchors.left:parent.anchors.left
+        anchors.leftMargin: notchLeft
+        anchors.right:parent.anchors.left
+        anchors.rightMargin: notchRight
+        clip: true
 
         Page {
             StartPage {
                 id: connBle
                 anchors.fill: parent
-                anchors.margins: 10
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
 
                 onRequestOpenControls: {
                     controls.openDialog()
@@ -317,33 +385,17 @@ ApplicationWindow {
 
     header: Rectangle {
         color: Utility.getAppHexColor("lightestBackground")
-        height: tabBar.height
+        height: tabBar.implicitHeight + notchTop // iPhone X Workaround
+        anchors.left: parent.left // iPhoneX workaround
+        anchors.leftMargin: Math.max(notchLeft, notchRight)/2 // iPhoneX workaround
+        anchors.bottom: parent.bottom // iPhoneX workaround
 
         RowLayout {
-            anchors.fill: parent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
             spacing: 0
 
-            ToolButton {
-                Layout.preferredHeight: tabBar.height
-                Layout.preferredWidth: tabBar.height - 10
-
-                Image {
-                    id: manuButton
-                    anchors.centerIn: parent
-                    width: tabBar.height * 0.5
-                    height: tabBar.height * 0.5
-                    opacity: 1.0
-                    source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
-                }
-
-                onClicked: {
-                    if (drawer.visible) {
-                        drawer.close()
-                    } else {
-                        drawer.open()
-                    }
-                }
-            }
 
             TabBar {
                 id: tabBar
@@ -361,7 +413,7 @@ ApplicationWindow {
                                                    tabBar.width /
                                                    (rep.model.length +
                                                     (uiHwPage.visible ? 1 : 0) +
-                                                   (uiAppPage.visible ? 1 : 0)))
+                                                    (uiAppPage.visible ? 1 : 0)))
 
                 Repeater {
                     id: rep
@@ -375,6 +427,8 @@ ApplicationWindow {
                     }
                 }
             }
+
+
         }
     }
 
@@ -424,19 +478,103 @@ ApplicationWindow {
 
     footer: Rectangle {
         id: connectedRect
+        clip: true
         color: Utility.getAppHexColor("lightBackground")
-
-        Text {
-            id: connectedText
-            color: Utility.getAppHexColor("lightText")
-            text: VescIf.getConnectedPortName()
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-            anchors.fill: parent
+        width: parent.width
+        height: 35 + notchBot
+        Behavior on color {
+            ColorAnimation {
+                duration: 200;
+                easing.type: Easing.OutBounce
+                easing.overshoot: 3
+            }
         }
 
-        width: parent.width
-        height: 20
+        RowLayout{
+            enabled:true
+            anchors.fill: parent
+            spacing: 0
+            ToolButton {
+                id:settingsButton
+                Layout.fillHeight: true
+                Layout.preferredWidth: 70
+                Image {
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: -notchBot/2
+                    antialiasing: true
+                    height: parent.width*0.35
+                    width: height
+                    source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
+                }
+                onClicked: {
+                    if (drawer.visible) {
+                        drawer.close()
+                    } else {
+                        drawer.open()
+                    }
+                }
+
+            }
+            Rectangle{
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                color: Utility.getAppHexColor("darkBackground")
+            }
+            Rectangle{
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                color: Utility.getAppHexColor("disabledText")
+            }
+            ColumnLayout{
+                spacing: 0
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Text {
+                    id: connectedText
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    color: Utility.getAppHexColor("lightText")
+                    text: VescIf.getConnectedPortName()
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.Wrap
+                }
+                Rectangle{
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: notchBot
+                    opacity: 0
+                }
+            }
+            Rectangle{
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                color: Utility.getAppHexColor("darkBackground")
+            }
+            Rectangle{
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                color: Utility.getAppHexColor("disabledText")
+            }
+            ToolButton {
+                Layout.fillHeight: true
+                Layout.preferredWidth: 70
+                Image {
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: -notchBot/2
+                    antialiasing: true
+                    height: parent.width*0.35
+                    width: height
+                    source: "qrc" + Utility.getThemePath() + "icons/can_off.png"
+                }
+                onClicked: {
+                    if (canDrawer.visible) {
+                        canDrawer.close()
+                    } else {
+                        canDrawer.open()
+                    }
+                }
+            }
+        }
     }
 
     ConnectScreen {
@@ -447,10 +585,6 @@ ApplicationWindow {
         y: 0
         height: parent.height
         width: parent.width
-
-        Behavior on y {
-            NumberAnimation { duration: 500; easing.type: Easing.InOutSine }
-        }
     }
 
     Timer {
@@ -563,6 +697,10 @@ ApplicationWindow {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         height: Math.min(implicitHeight, parent.height - 40)
@@ -764,6 +902,10 @@ ApplicationWindow {
         leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Load Custom User Interface"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         parent: ApplicationWindow.overlay
         y: parent.y + parent.height / 2 - height / 2

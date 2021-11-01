@@ -24,9 +24,7 @@
 #include "mobile/logwriter.h"
 #include "mobile/logreader.h"
 #include "tcpserversimple.h"
-#ifdef Q_OS_IOS
-#include "ios/src/notch.h"
-#endif
+
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -34,7 +32,11 @@
 #include <QDesktopWidget>
 #include <QFontDatabase>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_IOS
+#include "ios/src/setIosParameters.h"
+#endif
+
+#ifdef _LINUX
 #include <signal.h>
 #endif
 
@@ -407,7 +409,7 @@ int main(int argc, char *argv[])
     }
 #endif
 #ifdef Q_OS_IOS
-    Notch();
+    SetIosParams();
 #endif
 
     int res = app->exec();

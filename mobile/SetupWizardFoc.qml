@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Material 2.2
@@ -84,6 +84,9 @@ Item {
         bottomMargin: 0
         rightMargin: 0
         padding: 10
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         StackLayout {
             id: stackLayout
@@ -681,6 +684,9 @@ Item {
         title: "Load Default Parameters"
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         y: dialog.y + dialog.height / 2 - height / 2
 
@@ -713,6 +719,9 @@ Item {
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -757,6 +766,9 @@ Item {
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -787,6 +799,9 @@ Item {
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
         property var canDevs: []
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         y: dialog.y + dialog.height / 2 - height / 2
 
@@ -888,6 +903,9 @@ Item {
         height: parent.height - 40
         closePolicy: Popup.CloseOnEscape
         parent: dialogParent
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
@@ -961,6 +979,10 @@ Item {
         closePolicy: Popup.NoAutoClose
         modal: true
         focus: true
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         x: 10

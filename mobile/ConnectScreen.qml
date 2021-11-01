@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.4
+import QtQuick 2.12
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
@@ -31,6 +31,17 @@ Item {
 
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
+    property int notchTop: 0
+    property int animationSpeed: 500
+    Behavior on y {
+        NumberAnimation {
+            duration: animationSpeed;
+            easing.type: Easing.InOutSine
+        }
+    }
+
+
+
 
     Rectangle {
         color: Utility.getAppHexColor("darkBackground")
@@ -47,11 +58,17 @@ Item {
             enableDialog()
         }
     }
-
     ColumnLayout {
         id: column
         anchors.fill: parent
         anchors.margins: 10
+        Rectangle{
+            Layout.preferredHeight: notchTop
+            Layout.fillWidth: true
+            opacity: 0
+        }
+
+
 
         Image {
             id: image
@@ -61,6 +78,34 @@ Item {
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
             Layout.bottomMargin: 0
             source: "qrc" + Utility.getThemePath() + "/logo.png"
+
+            DragHandler {
+                id: handler
+                target:rootItem
+                margin: image.height/2
+                xAxis.enabled: false
+                yAxis.maximum: rootItem.height
+                yAxis.minimum: 0
+                onCentroidChanged: {
+                    if(handler.active){
+                        rootItem.y = rootItem.y + handler.centroid.position.y
+                    }
+                }
+                onActiveChanged: {
+                    console.log("active changed =", JSON.stringify(rootItem.y))
+                    console.log("active changed =", JSON.stringify(rootItem.height/6))
+                    if(handler.active){
+                        animationSpeed = 3
+                    } else {
+                        animationSpeed = 500
+                        if(rootItem.y > rootItem.height/4)
+                            rootItem.y = rootItem.height
+                        else{
+                            rootItem.y = 0
+                        }
+                    }
+                }
+            }
         }
 
         RowLayout {
@@ -93,9 +138,11 @@ Item {
                 flat: true
                 Layout.preferredWidth: 120
 
+
                 onClicked: {
                     scanButton.enabled = false
                     scanDotTimer.running = true
+                    bleModel.clear()
                     mBle.startScan()
                 }
             }
@@ -128,6 +175,25 @@ Item {
         }
 
         ListView {
+            // transitions for insertion/deletation of elements
+            add: Transition {
+                NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 200 }
+                NumberAnimation { property: "scale"; easing.type: Easing.OutBack; from: 0; to: 1.0; duration: 800 }
+            }
+
+            addDisplaced: Transition {
+                NumberAnimation { properties: "y"; duration: 600; easing.type: Easing.InBack }
+            }
+
+            remove: Transition {
+                NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 200 }
+                NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 200 }
+            }
+
+            removeDisplaced: Transition {
+                NumberAnimation { properties: "x,y"; duration: 500; easing.type: Easing.OutExpo }
+            }
+
             id: bleList
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -139,6 +205,14 @@ Item {
                 id: bleDelegate
 
                 Rectangle {
+                    Component.onCompleted: showAnim.start();
+                    transform: Rotation { id:rt; origin.x: 0; origin.y: height; axis { x: 0.3; y: 1; z: 0 } angle: 0}//     <--- I like this one more!
+                    SequentialAnimation {
+                        id: showAnim
+                        running: false
+                        RotationAnimation { target: rt; from: 180; to: 0; duration: 800; easing.type: Easing.OutExpo; property: "angle" }
+                    }
+
                     width: bleList.width
                     height: 120
                     color: Utility.getAppHexColor("normalBackground")
@@ -245,7 +319,26 @@ Item {
 
             model: bleModel
             delegate: bleDelegate
+
+            footer: BusyIndicator {
+                Layout.alignment: Qt.AlignCenter
+                Layout.fillHeight: true
+                running: !scanButton.enabled
+                width: parent.width
+                height: BusyIndicator.implicitHeight*1.5
+
+                Behavior on y {
+                    NumberAnimation {
+                        duration: 300;
+                        easing.type: Easing.InOutSine
+                    }
+                }
+
+            }
         }
+
+
+
     }
 
     Connections {
@@ -257,7 +350,7 @@ Item {
                 scanButton.text = qsTr("Scan")
             }
 
-            bleModel.clear()
+            //bleModel.clear()
 
             for (var addr in devs) {
                 var name = devs[addr]
@@ -276,25 +369,38 @@ Item {
                 } else {
                     setName = name + "\n[" + shortAddr + "]"
                 }
-
-                if (preferred) {
-                    bleModel.insert(0, {"name": setName,
-                                        "setName": setNameShort,
-                                        "preferred": preferred,
-                                        "bleAddr": addr,
-                                        "isSerial": false})
-                } else {
-                    bleModel.append({"name": setName,
-                                        "setName": setNameShort,
-                                        "preferred": preferred,
-                                        "bleAddr": addr,
-                                        "isSerial": false})
+                var addToList = true
+                var j = 0
+                for(j=0; j < bleModel.count; j++) {
+                    if(bleModel.get(j).bleAddr === addr){
+                        addToList  = false
+                    }
                 }
 
+                if(addToList){
+                    if (preferred) {
+                        bleModel.insert(0, {"name": setName,
+                                            "setName": setNameShort,
+                                            "preferred": preferred,
+                                            "bleAddr": addr,
+                                            "isSerial": false})
+                    } else {
+                        bleModel.append({"name": setName,
+                                            "setName": setNameShort,
+                                            "preferred": preferred,
+                                            "bleAddr": addr,
+                                            "isSerial": false})
+                    }
 
+                }
             }
-
-            if (Utility.hasSerialport()) {
+            addToList = true
+            for(j=0; j < bleModel.count; j++) {
+                if(bleModel.get(j).name.contains("Serial Port")){
+                    addToList  = false
+                }
+            }
+            if (Utility.hasSerialport() && addToList) {
                 bleModel.insert(0, {"name": "Serial Port",
                                     "setName": "",
                                     "preferred": true,

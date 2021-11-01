@@ -170,103 +170,7 @@ Item {
                 }
             }
 
-            GroupBox {
-                id: canFwdBox
-                Layout.preferredHeight: isHorizontal ? wizardBox.height : -1
-                title: qsTr("CAN Forwarding")
-                Layout.fillWidth: true
 
-                ColumnLayout {
-                    anchors.topMargin: -5
-                    anchors.bottomMargin: -5
-                    anchors.fill: parent
-                    spacing: -10
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.bottomMargin: isHorizontal ? 5 : 0
-
-                        ComboBox {
-                            id: canIdBox
-                            Layout.fillWidth: true
-
-                            textRole: "key"
-                            model: ListModel {
-                                id: canItems
-                            }
-
-                            onCurrentIndexChanged: {
-                                if (fwdCanBox.checked && canItems.rowCount() > 0) {
-                                    mCommands.setCanSendId(canItems.get(canIdBox.currentIndex).value)
-                                }
-                            }
-                        }
-
-                        CheckBox {
-                            id: fwdCanBox
-                            text: qsTr("Activate")
-                            enabled: canIdBox.currentIndex >= 0 && canIdBox.count > 0
-
-                            onClicked: {
-                                mCommands.setSendCan(fwdCanBox.checked, canItems.get(canIdBox.currentIndex).value)
-                                canScanButton.enabled = !checked
-                                canAllButton.enabled = !checked
-                            }
-                        }
-                    }
-
-                    ProgressBar {
-                        id: canScanBar
-                        visible: false
-                        Layout.fillWidth: true
-                        indeterminate: true
-                        Layout.preferredHeight: canAllButton.height
-                    }
-
-                    RowLayout {
-                        id: canButtonLayout
-                        Layout.fillWidth: true
-
-                        Button {
-                            id: canAllButton
-                            text: "List All (no Scan)"
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-
-                            onClicked: {
-                                canItems.clear()
-                                for (var i = 0;i < 255;i++) {
-                                    var name = "VESC " + i
-                                    canItems.append({ key: name, value: i })
-                                }
-                                canIdBox.currentIndex = 0
-                            }
-                        }
-
-                        Button {
-                            id: canScanButton
-                            text: "Scan CAN Bus"
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-
-                            onClicked: {
-                                canScanBar.indeterminate = true
-                                canButtonLayout.visible = false
-                                canScanBar.visible = true
-                                canItems.clear()
-                                enabled = false
-                                canAllButton.enabled = false
-                                mCommands.pingCan()
-                            }
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                        visible: isHorizontal
-                    }
-                }
-            }
 
             GroupBox {
                 id: toolsBox
@@ -403,40 +307,10 @@ Item {
         id: pairDialog
     }
 
-    Timer {
-        repeat: true
-        interval: 1000
-        running: true
 
-        onTriggered: {
-            if (!VescIf.isPortConnected()) {
-                canItems.clear()
-                mCommands.setSendCan(false, -1)
-                fwdCanBox.checked = false
-                canScanButton.enabled = true
-                canAllButton.enabled = true
-            }
-        }
-    }
 
     Connections {
         target: mCommands
-
-        onPingCanRx: {
-            if (canItems.count == 0) {
-                for (var i = 0;i < devs.length;i++) {
-                    var params = Utility.getFwVersionBlockingCan(VescIf, devs[i])
-                    var name = params.hwTypeStr() + " " + devs[i]
-                    canItems.append({ key: name, value: devs[i] })
-                }
-                canScanButton.enabled = true
-                canAllButton.enabled = true
-                canIdBox.currentIndex = 0
-                canButtonLayout.visible = true
-                canScanBar.visible = false
-                canScanBar.indeterminate = false
-            }
-        }
 
         onNrfPairingRes: {
             if (res != 0) {
@@ -587,4 +461,6 @@ Item {
             indeterminate: visible
         }
     }
+
+
 }

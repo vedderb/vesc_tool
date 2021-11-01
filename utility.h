@@ -23,6 +23,8 @@
 #include <QObject>
 #include <QMetaEnum>
 #include <cstdint>
+#include <QQuickWindow>
+#include <QtGui/qpa/qplatformwindow.h>
 #include "vescinterface.h"
 #include "widgets/qcustomplot.h"
 
@@ -98,6 +100,7 @@ public:
     Q_INVOKABLE static void setDarkMode(bool isDark);
     Q_INVOKABLE static bool isDarkMode();
     Q_INVOKABLE static QString getThemePath();
+    Q_INVOKABLE static QVariantMap getSafeAreaMargins(QQuickWindow *window);
 
     static void setPlotColors(QCustomPlot* plot);
 

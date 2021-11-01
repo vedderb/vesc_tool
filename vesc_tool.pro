@@ -35,7 +35,7 @@ ios: {
 }}
 
 # Build mobile GUI
-#CONFIG += build_mobile
+CONFIG += build_mobile
 ios: {
     CONFIG    += build_mobile
     DEFINES   += QT_NO_PRINTER
@@ -91,6 +91,7 @@ QT       += quick
 QT       += quickcontrols2
 QT       += quickwidgets
 QT       += svg
+QT       += gui-private
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
@@ -188,6 +189,7 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
+    ios/src/setIosParameters.mm \
         mainwindow.cpp \
     packet.cpp \
     preferences.cpp \
@@ -302,8 +304,9 @@ macx {
 
 ios {
     QMAKE_INFO_PLIST = ios/Info.plist
-    HEADERS += ios/src/notch.h
-    SOURCES += ios/src/notch.mm
+    HEADERS += \
+    ios/src/setIosParameters.h
+    SOURCES +=
     DISTFILES += ios/Info.plist
 
     QMAKE_ASSET_CATALOGS = $$PWD/ios/Images.xcassets

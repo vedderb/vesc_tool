@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Material 2.2
@@ -84,6 +84,9 @@ Item {
         bottomMargin: 0
         rightMargin: 0
         padding: 10
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         StackLayout {
             id: stackLayout
@@ -229,15 +232,15 @@ Item {
                         property string iconPath: "qrc" + Utility.getThemePath() + "icons/";
                         Component.onCompleted: {
                             [
-                            ["Mini Outrunner (~75 g)", "qrc:/res/images/motors/outrunner_mini.jpg", 10, 1400, 4000, false,14],
-                            ["Small Outrunner (~200 g)","qrc:/res/images/motors/outrunner_small.jpg", 25, 1400, 4000, false,14],
-                            ["Medium Outrunner (~750 g)","qrc:/res/images/motors/6374.jpg", 60, 700, 4000, true, 14],
-                            ["Large Outrunner (~2000 g)",iconPath + "motor.png", 200, 700, 4000, false, 14],
-                            ["Small Inrunner (~200 g)","qrc:/res/images/motors/inrunner_small.jpg", 25, 1400, 4000, false, 2],
-                            ["Medium Inrunner (~750 g)","qrc:/res/images/motors/inrunner_medium.jpg", 70, 1400, 4000, false, 4],
-                            ["Large Inrunner (~2000 g)",iconPath + "motor.png", 200, 1000, 4000, false, 4],
-                            ["E-Bike DD hub motor (~6 kg)","qrc:/res/images/motors/ebike_dd_1kw.jpg", 75, 300, 2000, false, 46],
-                            ["EDF Inrunner Small (~200 g)","qrc:/res/images/motors/edf_small.jpg", 55, 1400, 4000, false, 6]
+                            ["Mini Outrunner (~75 g)", "qrc:/res/images/motors/outrunner_mini.jpg", 20, 1400, 4000, false,14],
+                            ["Small Outrunner (~200 g)","qrc:/res/images/motors/outrunner_small.jpg", 50, 1400, 4000, false,14],
+                            ["Medium Outrunner (~750 g)","qrc:/res/images/motors/6374.jpg", 120, 700, 4000, true, 14],
+                            ["Large Outrunner (~2000 g)",iconPath + "motor.png", 400, 700, 4000, false, 14],
+                            ["Small Inrunner (~200 g)","qrc:/res/images/motors/inrunner_small.jpg", 50, 1400, 4000, false, 2],
+                            ["Medium Inrunner (~750 g)","qrc:/res/images/motors/inrunner_medium.jpg", 140, 1400, 4000, false, 4],
+                            ["Large Inrunner (~2000 g)",iconPath + "motor.png", 400, 1000, 4000, false, 4],
+                            ["E-Bike DD hub motor (~6 kg)","qrc:/res/images/motors/ebike_dd_1kw.jpg", 150, 300, 2000, false, 46],
+                            ["EDF Inrunner Small (~200 g)","qrc:/res/images/motors/edf_small.jpg", 110, 1400, 4000, false, 6]
                             ].forEach(function(element) {
                                 append({
                                            name: element[0],
@@ -680,6 +683,10 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Load Default Parameters"
         parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         y: dialog.y + dialog.height / 2 - height / 2
 
@@ -711,6 +718,10 @@ Item {
         title: "Motor Selection"
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -754,6 +765,10 @@ Item {
         title: "Battery Settings"
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -782,7 +797,11 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Detect FOC Parameters"
         parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
         property var canDevs: []
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         y: dialog.y + dialog.height / 2 - height / 2
 
@@ -884,6 +903,9 @@ Item {
         height: parent.height - 40
         closePolicy: Popup.CloseOnEscape
         parent: dialogParent
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
@@ -957,6 +979,10 @@ Item {
         closePolicy: Popup.NoAutoClose
         modal: true
         focus: true
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         x: 10

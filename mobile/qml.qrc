@@ -53,5 +53,6 @@
         <file>LogBox.qml</file>
         <file>TcpBox.qml</file>
         <file>MultiSettings.qml</file>
+        <file>CanScreen.qml</file>
     </qresource>
 </RCC>

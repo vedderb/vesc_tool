@@ -82,7 +82,7 @@ Item {
                 background: Rectangle {
                     implicitHeight: 35
                     color: enumBox.hovered ? Utility.getAppHexColor("lightBackground") : Utility.getAppHexColor("normalBackground")
-                    border.color: enumBox.hovered ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("midAccentColor")
+                    border.color: enumBox.hovered ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("midAccent")
                     border.width: enumBox.visualFocus ? 2 : 1
                     radius: 5
                 }

@@ -7,9 +7,10 @@
 # Version
 VT_VERSION = 3.01
 VT_INTRO_VERSION = 1
+VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 29
+VT_IS_TEST_VERSION = 37
 
 VT_ANDROID_VERSION_ARMV7 = 95
 VT_ANDROID_VERSION_ARM64 = 96
@@ -18,10 +19,11 @@ VT_ANDROID_VERSION_X86 = 97
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
 # Ubuntu 18.04 (should work on raspbian buster too)
-# sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev qtdeclarative5-dev qtconnectivity5-dev qtmultimedia5-dev qtpositioning5-dev qtpositioning5-dev libqt5gamepad5-dev qml-module-qt-labs-settings qml-module-qt-labs-platform
+# sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev qtdeclarative5-dev qtconnectivity5-dev qtmultimedia5-dev qtpositioning5-dev qtpositioning5-dev libqt5gamepad5-dev qml-module-qt-labs-settings qml-module-qt-labs-platform libqt5svg5-dev
 
 DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
+DEFINES += VT_CONFIG_VERSION=$$VT_CONFIG_VERSION
 DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
 
 CONFIG += c++11
@@ -35,10 +37,14 @@ ios: {
 }}
 
 # Build mobile GUI
-#CONFIG += build_mobile
+CONFIG += build_mobile
+ios: {
+    CONFIG    += build_mobile
+    DEFINES   += QT_NO_PRINTER
+}
 
 # Debug build (e.g. F5 to reload QML files)
-#DEFINES += DEBUG_BUILD
+DEFINES += DEBUG_BUILD
 
 # If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
 # sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'
@@ -87,6 +93,7 @@ QT       += quick
 QT       += quickcontrols2
 QT       += quickwidgets
 QT       += svg
+QT       += gui-private
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
@@ -110,8 +117,16 @@ contains(DEFINES, HAS_GAMEPAD) {
 
 android: QT += androidextras
 
-android: TARGET = vesc_tool
-!android: TARGET = vesc_tool_$$VT_VERSION
+ios: {
+    TARGET = "VESC Tool"
+}else: {
+    android:{
+        TARGET = "vesc_tool"
+    }else:{
+
+        TARGET = vesc_tool_$$VT_VERSION
+    }
+}
 
 ANDROID_VERSION = 1
 
@@ -176,6 +191,7 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
+    ios/src/setIosParameters.mm \
         mainwindow.cpp \
     packet.cpp \
     preferences.cpp \
@@ -284,14 +300,15 @@ macx-clang:contains(QMAKE_HOST.arch, arm.*): {
 macx {
     ICON        =  macos/appIcon.icns
 
-    #QMAKE_INFO_PLIST = macos/app-Info.plist
-    # DISTFILES += macos/app-Info.plist
+    QMAKE_INFO_PLIST = macos/Info.plist
+     DISTFILES += macos/Info.plist
 }
 
 ios {
     QMAKE_INFO_PLIST = ios/Info.plist
-    HEADERS += ios/src/notch.h
-    SOURCES += ios/src/notch.mm
+    HEADERS += \
+    ios/src/setIosParameters.h
+    SOURCES +=
     DISTFILES += ios/Info.plist
 
     QMAKE_ASSET_CATALOGS = $$PWD/ios/Images.xcassets

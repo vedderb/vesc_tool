@@ -22,6 +22,7 @@
 #include <QDir>
 #include <QtDebug>
 #include <QTextStream>
+#include <QStandardPaths>
 
 LogWriter::LogWriter(QObject *parent) : QObject(parent)
 {

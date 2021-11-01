@@ -45,7 +45,7 @@ Item {
     property bool showDotAndDotDot: false
     property bool showHidden: true
     property bool showDirsFirst: true
-    property string folder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
+    property string folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
     property string nameFilters: ""
 
     function currentFolder() {
@@ -130,6 +130,7 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
+        spacing: 0
 
         OldControls.TableView {
             id: view
@@ -203,31 +204,38 @@ Item {
                 }
             }
         }
-
-        RowLayout {
+        Rectangle {
+            id: buttonBackground
             Layout.fillWidth: true
-            Layout.leftMargin: 10
-            Layout.rightMargin: 10
-            Layout.bottomMargin: 5
+            height: toolbarHeight
+            color: Utility.getAppHexColor("lightBackground")
 
-            Button {
+            RowLayout {
+                anchors.fill: parent
                 Layout.fillWidth: true
-                text: "Cancel"
+                Layout.leftMargin: 10
+                Layout.rightMargin: 10
+                Layout.bottomMargin: 5
 
-                onClicked: {
-                    picker.enabled = false
-                    picker.visible = false
+                Button {
+                    Layout.fillWidth: true
+                    text: "Cancel"
+
+                    onClicked: {
+                        picker.enabled = false
+                        picker.visible = false
+                    }
                 }
-            }
 
-            Button {
-                Layout.fillWidth: true
-                text: "Ok"
+                Button {
+                    Layout.fillWidth: true
+                    text: "Ok"
 
-                onClicked: {
-                    dirSelected(folderListModel.folder)
-                    picker.enabled = false
-                    picker.visible = false
+                    onClicked: {
+                        dirSelected(folderListModel.folder)
+                        picker.enabled = false
+                        picker.visible = false
+                    }
                 }
             }
         }

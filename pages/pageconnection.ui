@@ -848,7 +848,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Populate box without scaning, in case there are problames with scanning or the firmware does not support it.</string>
+         <string>Populate box without scanning, in case there are problems with scanning or the firmware does not support it.</string>
         </property>
         <property name="text">
          <string>Manual</string>

@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.5
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
@@ -200,6 +200,11 @@ Item {
                     width: parent.width - 20
                     height: Math.min(implicitHeight, parent.height - 60)
                     closePolicy: Popup.CloseOnEscape
+
+                    Overlay.modal: Rectangle {
+                        color: "#AA000000"
+                    }
+
                     x: 10
                     y: Math.max((parent.height - height) / 2, 10)
                     parent: dialogParent
@@ -293,9 +298,10 @@ Item {
             powerGauge.value = (values.current_in * values.v_in)
 
             valText.text =
-                    "VESCs  : " + values.num_vescs + "\n" +
-                    "mAh Out: " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + "\n" +
-                    "mAh In : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1)
+                    "Temp MOS : " + parseFloat(values.temp_mos).toFixed(2) + " \u00B0C\n" +
+                    "Temp Mot : " + parseFloat(values.temp_motor).toFixed(2) + " \u00B0C\n" +
+                    "mAh Out  : " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + "\n" +
+                    "mAh In   : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1)
 
             odometerValue = values.odometer;
             

@@ -21,6 +21,7 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QDebug>
+#include <QInputDialog>
 #include <QFileDialog>
 #include <QListWidgetItem>
 #include <cmath>
@@ -698,7 +699,7 @@ void MainWindow::timerSlot()
     // Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
     static int disconected_cnt = 0;
     disconected_cnt++;
-    if (disconected_cnt >= 20 && ui->canList->count() > 0) {
+    if (disconected_cnt >= 40 && ui->canList->count() > 0) {
         ui->canList->clear();
         mVesc->commands()->setSendCan(false);
         ui->scanCanButton->setEnabled(true);
@@ -707,7 +708,7 @@ void MainWindow::timerSlot()
         ui->pageList->item(mPageNameIdList.value("app_custom_config_2"))->setHidden(true);
     }
 
-    if (disconected_cnt >= 20 && !mVesc->isPortConnected()) {
+    if (disconected_cnt >= 40 && !mVesc->isPortConnected()) {
         ui->scanCanButton->setEnabled(true);
     }
 
@@ -1479,10 +1480,16 @@ void MainWindow::reloadPages()
 
     mPageVESCDev = new QTabWidget(this);
     mPageVESCDev->setTabShape(QTabWidget::Triangular);
+
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
     mPageVESCDev->addTab(mPageTerminal,QIcon(theme + "icons/Console-96.png"), tr("VESC Terminal"));
+
+    mPageScripting = new PageScripting(this);
+    mPageScripting->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageScripting);
+    mPageVESCDev->addTab(mPageScripting, QIcon(theme + "icons_textedit/Outdent-96.png"), tr("Scripting"));
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
@@ -1495,11 +1502,6 @@ void MainWindow::reloadPages()
 
     ui->pageWidget->addWidget(mPageVESCDev);
     addPageItem(tr("VESC Dev Tools"),  theme + "icons/Console-96.png", "", true);
-
-    mPageScripting = new PageScripting(this);
-    mPageScripting->setVesc(mVesc);
-    ui->pageWidget->addWidget(mPageScripting);
-    addPageItem(tr("Scripting"), theme + "icons_textedit/Outdent-96.png", "", true);
 
     mPageSwdProg = new PageSwdProg(this);
     mPageSwdProg->setVesc(mVesc);
@@ -1936,9 +1938,12 @@ void MainWindow::on_scanCanButton_clicked()
 
 void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
 {
-    if (isTimeout || ui->canList->count() > 0) {
+    (void)isTimeout;
+
+    if (ui->canList->count() > 0) {
         return;
     }
+
     ui->scanCanButton->setEnabled(false);
     ui->canList->clear();
     FW_RX_PARAMS params;
@@ -1952,7 +1957,7 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
         item = new QListWidgetItem();
         item->setSizeHint(QSize(width,height));
         ui->canList->addItem(item);
-        CANListItem *li = new CANListItem(params, dev, ok, this);
+        CANListItem *li = new CANListItem(params, dev, ok, ui->canList);
         ui->canList->setItemWidget(item, li);
         ui->canList->addItem(item);
     }
@@ -1961,7 +1966,7 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
     item = new QListWidgetItem();
     item->setSizeHint(QSize(width,height));
     ui->canList->insertItem(0, item);
-    CANListItem *li = new CANListItem(params, -1, ok, this);
+    CANListItem *li = new CANListItem(params, -1, ok, ui->canList);
     ui->canList->setItemWidget(item, li);
     ui->canList->setIconSize(QSize(20,20));
     ui->canList->setGridSize(QSize(0.85*width , 1.25*height));
@@ -1986,7 +1991,6 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
             QWidget *current = ui->canList->itemWidget(ui->canList->currentItem());
             int id;
             bool ok = QMetaObject::invokeMethod(current, "getID", Q_RETURN_ARG(int, id));
-            qDebug() << quint32(id);
             if (id >= 0 && id < 255  && ok) {
                 if (!mVesc->commands()->getSendCan() || mVesc->commands()->getCanSendId() != id) {
                     mVesc->commands()->setCanSendId(quint32(id));

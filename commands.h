@@ -71,6 +71,9 @@ public:
     Q_INVOKABLE void emitPlotAddGraph(QString name);
     Q_INVOKABLE void emitPlotSetGraph(int graph);
 
+    Q_INVOKABLE bool getMaxPowerLossBug() const;
+    void setMaxPowerLossBug(bool maxPowerLossBug);
+
 signals:
     void dataToSend(QByteArray &data);
 
@@ -146,7 +149,7 @@ public slots:
     void setPos(double pos);
     void setHandbrake(double current);
     void setDetect(disp_pos_mode mode);
-    void samplePrint(debug_sampling_mode mode, int sample_len, int dec);
+    void samplePrint(debug_sampling_mode mode, int sample_len, int dec, bool raw);
     void getMcconf();
     void getMcconfDefault();
     void setMcconf(bool check = true);
@@ -239,6 +242,7 @@ private:
     bool mIsLimitedMode;
     bool mLimitedSupportsFwdAllCan;
     bool mLimitedSupportsEraseBootloader;
+    bool mMaxPowerLossBug;
     QVector<int> mCompatibilityCommands; // int to be QML-compatible
     QMap<int, BMS_VALUES> mBmsValues;
 

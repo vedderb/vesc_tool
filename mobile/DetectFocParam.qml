@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -120,6 +120,10 @@ Item {
         width: parent.width - 20
         height: column.height - 40
         closePolicy: Popup.CloseOnEscape
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
@@ -288,7 +292,7 @@ Item {
 
     Dialog {
         id: detectRlDialog
-        standardButtons: Dialog.Ok
+        standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
         width: parent.width - 20
@@ -298,6 +302,10 @@ Item {
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             id: detectRlLabel
@@ -328,6 +336,10 @@ Item {
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             anchors.fill: parent

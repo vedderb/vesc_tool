@@ -18,14 +18,17 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    property bool mLastDarkMode: false
+
     function openDialog() {
+        mLastDarkMode = Utility.isDarkMode()
         dialog.open()
     }
 
@@ -35,6 +38,10 @@ Item {
         modal: true
         focus: true
         title: "VESC Tool Settings"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
@@ -103,6 +110,43 @@ Item {
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
+
+            if (Utility.isDarkMode() !== mLastDarkMode) {
+                darkChangedDialog.open()
+            }
+        }
+    }
+
+    Dialog {
+        id: darkChangedDialog
+        standardButtons: Dialog.Yes | Dialog.No
+        modal: true
+        focus: true
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        title: "Theme Changed"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        x: 10
+        y: Math.max((parent.height - height) / 2, 10)
+        parent: ApplicationWindow.overlay
+
+        Text {
+            id: detectRlLabel
+            color: Utility.getAppHexColor("lightText")
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text:
+                "The theme has been changed. This requires restarting VESC Tool to take effect. " +
+                "Do you want to close VESC Tool now?"
+        }
+
+        onAccepted: {
+            Qt.quit()
         }
     }
 }

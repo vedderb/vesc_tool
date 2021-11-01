@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -170,103 +170,7 @@ Item {
                 }
             }
 
-            GroupBox {
-                id: canFwdBox
-                Layout.preferredHeight: isHorizontal ? wizardBox.height : -1
-                title: qsTr("CAN Forwarding")
-                Layout.fillWidth: true
 
-                ColumnLayout {
-                    anchors.topMargin: -5
-                    anchors.bottomMargin: -5
-                    anchors.fill: parent
-                    spacing: -10
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.bottomMargin: isHorizontal ? 5 : 0
-
-                        ComboBox {
-                            id: canIdBox
-                            Layout.fillWidth: true
-
-                            textRole: "key"
-                            model: ListModel {
-                                id: canItems
-                            }
-
-                            onCurrentIndexChanged: {
-                                if (fwdCanBox.checked && canItems.rowCount() > 0) {
-                                    mCommands.setCanSendId(canItems.get(canIdBox.currentIndex).value)
-                                }
-                            }
-                        }
-
-                        CheckBox {
-                            id: fwdCanBox
-                            text: qsTr("Activate")
-                            enabled: canIdBox.currentIndex >= 0 && canIdBox.count > 0
-
-                            onClicked: {
-                                mCommands.setSendCan(fwdCanBox.checked, canItems.get(canIdBox.currentIndex).value)
-                                canScanButton.enabled = !checked
-                                canAllButton.enabled = !checked
-                            }
-                        }
-                    }
-
-                    ProgressBar {
-                        id: canScanBar
-                        visible: false
-                        Layout.fillWidth: true
-                        indeterminate: true
-                        Layout.preferredHeight: canAllButton.height
-                    }
-
-                    RowLayout {
-                        id: canButtonLayout
-                        Layout.fillWidth: true
-
-                        Button {
-                            id: canAllButton
-                            text: "List All (no Scan)"
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-
-                            onClicked: {
-                                canItems.clear()
-                                for (var i = 0;i < 255;i++) {
-                                    var name = "VESC " + i
-                                    canItems.append({ key: name, value: i })
-                                }
-                                canIdBox.currentIndex = 0
-                            }
-                        }
-
-                        Button {
-                            id: canScanButton
-                            text: "Scan CAN Bus"
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-
-                            onClicked: {
-                                canScanBar.indeterminate = true
-                                canButtonLayout.visible = false
-                                canScanBar.visible = true
-                                canItems.clear()
-                                enabled = false
-                                canAllButton.enabled = false
-                                mCommands.pingCan()
-                            }
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                        visible: isHorizontal
-                    }
-                }
-            }
 
             GroupBox {
                 id: toolsBox
@@ -403,40 +307,10 @@ Item {
         id: pairDialog
     }
 
-    Timer {
-        repeat: true
-        interval: 1000
-        running: true
 
-        onTriggered: {
-            if (!VescIf.isPortConnected()) {
-                canItems.clear()
-                mCommands.setSendCan(false, -1)
-                fwdCanBox.checked = false
-                canScanButton.enabled = true
-                canAllButton.enabled = true
-            }
-        }
-    }
 
     Connections {
         target: mCommands
-
-        onPingCanRx: {
-            if (canItems.count == 0) {
-                for (var i = 0;i < devs.length;i++) {
-                    var params = Utility.getFwVersionBlockingCan(VescIf, devs[i])
-                    var name = params.hwTypeStr() + " " + devs[i]
-                    canItems.append({ key: name, value: devs[i] })
-                }
-                canScanButton.enabled = true
-                canAllButton.enabled = true
-                canIdBox.currentIndex = 0
-                canButtonLayout.visible = true
-                canScanBar.visible = false
-                canScanBar.indeterminate = false
-            }
-        }
 
         onNrfPairingRes: {
             if (res != 0) {
@@ -472,6 +346,10 @@ Item {
         y: parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         DirectionSetup {
             id: directionSetup
             anchors.fill: parent
@@ -490,6 +368,10 @@ Item {
         parent: ApplicationWindow.overlay
         x: 10
         y: topItem.y + topItem.height / 2 - height / 2
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -520,6 +402,10 @@ Item {
         parent: ApplicationWindow.overlay
         x: 10
         y: topItem.y + topItem.height / 2 - height / 2
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -552,6 +438,10 @@ Item {
         x: 10
         y: topItem.y + topItem.height / 2 - height / 2
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
             color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
@@ -582,9 +472,15 @@ Item {
         y: parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         ProgressBar {
             anchors.fill: parent
             indeterminate: visible
         }
     }
+
+
 }

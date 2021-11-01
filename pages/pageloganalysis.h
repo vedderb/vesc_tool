@@ -22,6 +22,7 @@
 #define PAGELOGANALYSIS_H
 
 #include <QWidget>
+#include <QCheckBox>
 #include <vescinterface.h>
 #include "widgets/qcustomplot.h"
 #include "widgets/vesc3dview.h"
@@ -54,6 +55,7 @@ private slots:
     void on_centerButton_clicked();
     void on_logListOpenButton_clicked();
     void on_logListRefreshButton_clicked();
+    void on_logTable_cellDoubleClicked(int row, int column);
 
 private:
     Ui::PageLogAnalysis *ui;

@@ -46,5 +46,6 @@
         <file>res/firmwares/STORMCORE_100D_V2/VESC_default_no_hw_limits.bin</file>
         <file>res/firmwares/Warrior6/VESC_default.bin</file>
         <file>res/firmwares/Raiden7/VESC_default.bin</file>
+        <file>res/firmwares/UBOX_SINGLE/VESC_default.bin</file>
     </qresource>
 </RCC>

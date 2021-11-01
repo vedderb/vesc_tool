@@ -20,6 +20,7 @@
 #include "vesc3ditem.h"
 #include <QtDebug>
 #include "utility.h"
+#include <QApplication>
 
 Vesc3dItem::Vesc3dItem(QQuickItem *parent) : QQuickPaintedItem(parent)
 {
@@ -52,12 +53,21 @@ void Vesc3dItem::paint(QPainter *painter)
 
 void Vesc3dItem::updateImage()
 {
-    if (mVesc3d.size() != size().toSize()) {
-        mVesc3d.resize(size().toSize()*1.5);
-        mLastCornerImg = mVesc3d.grabFramebuffer();
-        // The render seems to be needed after a resize
-        mVesc3d.render(&mLastCornerImg, QPoint(), QRegion(), nullptr);
-    }
+    if(qApp->applicationState() == Qt::ApplicationState::ApplicationActive)
+    {
+        double scale = 1.0;
 
-    mLastCornerImg = mVesc3d.grabFramebuffer();
+#ifdef Q_OS_IOS
+        scale = 1.5;
+#endif
+
+        if (mVesc3d.size() != size().toSize()) {
+            mVesc3d.resize(size().toSize() * scale);
+            mLastCornerImg = mVesc3d.grabFramebuffer();
+            // The render seems to be needed after a resize
+            mVesc3d.render(&mLastCornerImg, QPoint(), QRegion(), nullptr);
+        }
+
+        mLastCornerImg = mVesc3d.grabFramebuffer();
+    }
 }

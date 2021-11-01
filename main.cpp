@@ -24,9 +24,7 @@
 #include "mobile/logwriter.h"
 #include "mobile/logreader.h"
 #include "tcpserversimple.h"
-#ifdef Q_OS_IOS
-#include "ios/src/notch.h"
-#endif
+
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -34,7 +32,11 @@
 #include <QDesktopWidget>
 #include <QFontDatabase>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_IOS
+#include "ios/src/setIosParameters.h"
+#endif
+
+#ifdef _LINUX
 #include <signal.h>
 #endif
 
@@ -61,6 +63,7 @@ static void showHelp()
     qDebug() << "Arguments";
     qDebug() << "-h, --help : Show help text";
     qDebug() << "--tcpServer [port] : Autoconnect to VESC and start TCP server on [port]";
+    qDebug() << "--retryTcp : Keep trying to reconnect to the VESC when the connection fails";
 }
 
 #ifdef Q_OS_LINUX
@@ -72,14 +75,40 @@ static void m_cleanup(int sig)
 #endif
 #endif
 
+static void startVescTcp(VescInterface *vesc, int tcpPort, bool retry) {
+    bool ok = vesc->autoconnect();
+
+    if (ok) {
+        if (!vesc->tcpServerIsRunning()) {
+            ok = vesc->tcpServerStart(tcpPort);
+        }
+
+        qDebug() << "Connected to VESC. TCP listening at port" << tcpPort;
+
+        if (!ok) {
+            qCritical() << "Could not start TCP server on port" << tcpPort;
+            qApp->quit();
+        }
+    } else {
+        qCritical() << "Could not autoconnect to VESC";
+
+        if (retry) {
+            QTimer::singleShot(1000, [vesc, tcpPort]() {
+                startVescTcp(vesc, tcpPort, true);
+            });
+        } else {
+            qApp->quit();
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
-
     // Settings
     QCoreApplication::setOrganizationName("VESC");
     QCoreApplication::setOrganizationDomain("vesc-project.com");
-    QCoreApplication::setApplicationName("VESC Tool");   
-    QSettings set;   
+    QCoreApplication::setApplicationName("VESC Tool");
+    QSettings set;
     bool isDark = set.value("darkMode", true).toBool();
     Utility::setDarkMode(isDark);
 
@@ -95,7 +124,7 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("lightText", QColor(215,215,215));
         Utility::setAppQColor("disabledText", QColor(127,127,127));
         Utility::setAppQColor("lightAccent", QColor(0,161,221));
-        Utility::setAppQColor("midAccentColor", QColor(0,98,153));
+        Utility::setAppQColor("midAccent", QColor(0,98,153));
         Utility::setAppQColor("darkAccent", QColor(0,69,112));
         Utility::setAppQColor("pink", QColor(219,98,139));
         Utility::setAppQColor("red", QColor(200,52,52));
@@ -119,7 +148,7 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("lightText", QColor(33,33,33));
         Utility::setAppQColor("disabledText", QColor(110,110,110));
         Utility::setAppQColor("lightAccent", QColor(0,114,178));
-        Utility::setAppQColor("midAccentColor", QColor(0,114,178));
+        Utility::setAppQColor("midAccent", QColor(0,114,178));
         Utility::setAppQColor("darkAccent", QColor(0,161,221));
         Utility::setAppQColor("pink", QColor(219,98,139));
         Utility::setAppQColor("red", QColor(200,52,52));
@@ -175,6 +204,7 @@ int main(int argc, char *argv[])
     }
 
     bool useTcp = false;
+    bool retryTcp = false;
     int tcpPort = 65102;
 
     for (int i = 0;i < args.size();i++) {
@@ -206,6 +236,11 @@ int main(int argc, char *argv[])
                 useTcp = true;
                 found = true;
             }
+        }
+
+        if (str == "--retryTcp") {
+            retryTcp = true;
+            found = true;
         }
 
         if (!found) {
@@ -273,6 +308,8 @@ int main(int argc, char *argv[])
     MainWindow *w = nullptr;
 
     if (useTcp) {
+        qputenv("QT_QPA_PLATFORM", "offscreen");
+
         app = new QCoreApplication(argc, argv);
 
         vesc = new VescInterface;
@@ -280,28 +317,25 @@ int main(int argc, char *argv[])
         Utility::configLoadLatest(vesc);
 
         QTimer::singleShot(1000, [&]() {
-            bool ok = vesc->autoconnect();
-
-            if (ok) {
-                ok = vesc->tcpServerStart(tcpPort);
-
-                if (!ok) {
-                    qCritical() << "Could not start TCP server on port" << tcpPort;
-                    qApp->quit();
-                }
-            } else {
-                qCritical() << "Could not autoconnect to VESC";
-                qApp->quit();
-            }
+            startVescTcp(vesc, tcpPort, retryTcp);
         });
 
-        QObject::connect(vesc, &VescInterface::statusMessage, [](QString msg, bool isGood) {
+        QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
             if (isGood) {
                 qDebug() << msg;
             } else  {
                 qWarning() << msg;
-                qWarning() << "Closing...";
-                qApp->quit();
+
+                QTimer::singleShot(100, [&]() {
+                    if (retryTcp && !vesc->isPortConnected()) {
+                        QTimer::singleShot(1000, [&]() {
+                            startVescTcp(vesc, tcpPort, retryTcp);
+                        });
+                    } else {
+                        qWarning() << "Closing...";
+                        qApp->quit();
+                    }
+                });
             }
         });
     } else {
@@ -336,6 +370,7 @@ int main(int argc, char *argv[])
 
         if(isDark){
             QPalette darkPalette;
+            //QPalette::Inactive
             darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
             darkPalette.setColor(QPalette::WindowText,Utility::getAppQColor("lightText"));
             darkPalette.setColor(QPalette::Disabled,QPalette::WindowText,Utility::getAppQColor("disabledText"));
@@ -352,10 +387,14 @@ int main(int argc, char *argv[])
             darkPalette.setColor(QPalette::Disabled,QPalette::ButtonText,Utility::getAppQColor("disabledText"));
             darkPalette.setColor(QPalette::Disabled,QPalette::Highlight,Utility::getAppQColor("lightestBackground"));
             darkPalette.setColor(QPalette::HighlightedText,Utility::getAppQColor("white"));
+            darkPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("midAccent"));
+            darkPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
             darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
             qApp->setPalette(darkPalette);
         }else{
             QPalette lightPalette = qApp->style()->standardPalette();
+            lightPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
+            lightPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("midAccent"));
             qApp->setPalette(lightPalette);
         }
 
@@ -370,7 +409,7 @@ int main(int argc, char *argv[])
     }
 #endif
 #ifdef Q_OS_IOS
-    Notch();
+    SetIosParams();
 #endif
 
     int res = app->exec();

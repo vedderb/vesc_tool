@@ -28,6 +28,7 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mIsLimitedMode = false;
     mLimitedSupportsFwdAllCan = false;
     mLimitedSupportsEraseBootloader = false;
+    mMaxPowerLossBug = false;
     mCheckNextMcConfig = false;
 
     mTimer = new QTimer(this);
@@ -1145,13 +1146,14 @@ void Commands::setDetect(disp_pos_mode mode)
     emitData(vb);
 }
 
-void Commands::samplePrint(debug_sampling_mode mode, int sample_len, int dec)
+void Commands::samplePrint(debug_sampling_mode mode, int sample_len, int dec, bool raw)
 {
     VByteArray vb;
     vb.vbAppendInt8(COMM_SAMPLE_PRINT);
     vb.vbAppendInt8(mode);
     vb.vbAppendUint16(sample_len);
     vb.vbAppendUint8(dec);
+    vb.vbAppendInt8(raw);
     emitData(vb);
 }
 
@@ -1575,6 +1577,10 @@ void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, doubl
 void Commands::detectAllFoc(bool detect_can, double max_power_loss, double min_current_in,
                             double max_current_in, double openloop_rpm, double sl_erpm)
 {
+    if (mMaxPowerLossBug) {
+        max_power_loss /= 2.0;
+    }
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_DETECT_APPLY_ALL_FOC);
     vb.vbAppendInt8(detect_can);
@@ -1931,6 +1937,7 @@ void Commands::timerSlot()
         mTimeoutPingCan--;
         if (mTimeoutPingCan == 0) {
             emit pingCanRx(QVector<int>(), true);
+            qWarning() << "CAN ping timed out";
         }
     }
     if (mTimeoutCustomConf > 0) mTimeoutCustomConf--;
@@ -1962,6 +1969,16 @@ void Commands::emitData(QByteArray data)
     }
 
     emit dataToSend(data);
+}
+
+bool Commands::getMaxPowerLossBug() const
+{
+    return mMaxPowerLossBug;
+}
+
+void Commands::setMaxPowerLossBug(bool maxPowerLossBug)
+{
+    mMaxPowerLossBug = maxPowerLossBug;
 }
 
 bool Commands::getLimitedSupportsFwdAllCan() const

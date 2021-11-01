@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -145,6 +145,10 @@ Item {
         x: 10
         y: 50
         parent: dialogParent
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         ColumnLayout {
             id: scrollColumn

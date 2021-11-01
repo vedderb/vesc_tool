@@ -55,8 +55,6 @@ Preferences::Preferences(QWidget *parent) :
     ui->jsScanButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
     ui->jsResetConfigButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
 
-
-
     ui->uiScaleBox->setValue(mSettings.value("app_scale_factor", 1.0).toDouble());
     ui->uiPlotWidthBox->setValue(mSettings.value("plot_line_width",4.0).toDouble());
     ui->pathRtLogEdit->setText(mSettings.value("path_rt_log", "./log").toString());
@@ -133,6 +131,8 @@ Preferences::Preferences(QWidget *parent) :
         }
     }
 #endif
+
+    saveSettingsChanged();
 }
 
 Preferences::~Preferences()
@@ -198,6 +198,25 @@ bool Preferences::isUsingGamepadControl()
 #else
     return false;
 #endif
+}
+
+void Preferences::closeEvent(QCloseEvent *event)
+{
+    if (Utility::isDarkMode() != mLastIsDark) {
+        mVesc->emitMessageDialog("Theme Changed",
+                                 "Please restart VESC Tool for the theme changes to take effect.",
+                                 false, false);
+    }
+
+    if (!Utility::almostEqual(mLastScaling,
+                              mSettings.value("app_scale_factor", 1.0).toDouble(), 0.001)) {
+        mVesc->emitMessageDialog("Scaling Changed",
+                                 "Please restart VESC Tool for the scaling change to take effect.",
+                                 false, false);
+    }
+
+    saveSettingsChanged();
+    event->accept();
 }
 
 void Preferences::timerSlot()
@@ -294,6 +313,7 @@ void Preferences::on_uiScaleBox_valueChanged(double arg1)
 {
     mSettings.setValue("app_scale_factor", arg1);
 }
+
 void Preferences::on_uiPlotWidthBox_valueChanged(double arg1)
 {
     mSettings.setValue("plot_line_width", arg1);
@@ -414,4 +434,10 @@ void Preferences::on_darkModeBox_toggled(bool checked)
 
 void Preferences::on_okButton_clicked(){
     close();
+}
+
+void Preferences::saveSettingsChanged()
+{
+    mLastScaling = mSettings.value("app_scale_factor", 1.0).toDouble();
+    mLastIsDark = Utility::isDarkMode();
 }

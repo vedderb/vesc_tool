@@ -18,6 +18,9 @@
     */
 
 #include "utility.h"
+#ifdef Q_OS_IOS
+#include "ios/src/setIosParameters.h"
+#endif
 #include <cmath>
 #include <QProgressDialog>
 #include <QEventLoop>
@@ -32,6 +35,7 @@
 #include <QtGlobal>
 #include <QNetworkInterface>
 #include <QDirIterator>
+
 
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
@@ -285,6 +289,9 @@ bool Utility::requestFilePermission()
 
 void Utility::keepScreenOn(bool on)
 {
+#ifdef Q_OS_IOS
+
+#endif
 #ifdef Q_OS_ANDROID
     QtAndroid::runOnAndroidThread([on]{
         QAndroidJniObject activity = QtAndroid::androidActivity();
@@ -1388,6 +1395,13 @@ bool Utility::getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params,
     return res;
 }
 
+FW_RX_PARAMS Utility::getFwVersionBlocking(VescInterface *vesc)
+{
+    FW_RX_PARAMS params;
+    getFwVersionBlocking(vesc, &params);
+    return params;
+}
+
 FW_RX_PARAMS Utility::getFwVersionBlockingCan(VescInterface *vesc, int canId)
 {
     FW_RX_PARAMS params;
@@ -2000,17 +2014,26 @@ void Utility::setDarkMode(bool isDarkSetting)
 
 bool Utility::isDarkMode()
 {
-  return isDark;
+    return isDark;
 }
 
 QString Utility::getThemePath()
 {
-    if(isDark)
-    {
+    if(isDark) {
         return ":/res/";
-    }
-    else
-    {
+    } else {
         return ":/res/+theme_light/";
     }
+}
+
+QVariantMap Utility::getSafeAreaMargins(QQuickWindow *window)
+{
+    QPlatformWindow *platformWindow = static_cast<QPlatformWindow *>(window->handle());
+    QMargins margins = platformWindow->safeAreaMargins();
+    QVariantMap map;
+    map["top"] = margins.top();
+    map["right"] = margins.right();
+    map["bottom"] = margins.bottom();
+    map["left"] = margins.left();
+    return map;
 }

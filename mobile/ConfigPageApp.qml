@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -40,6 +40,11 @@ Item {
         modal: true
         focus: true
 
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         x: 10
@@ -58,6 +63,10 @@ Item {
         modal: true
         focus: true
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         x: 10
@@ -75,6 +84,10 @@ Item {
         standardButtons: Dialog.Close
         modal: true
         focus: true
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
@@ -99,6 +112,10 @@ Item {
         x: 10
         y: (parent.height - height) / 2
         parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         DetectIMU {
             anchors.fill: parent

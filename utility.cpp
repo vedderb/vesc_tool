@@ -1395,6 +1395,13 @@ bool Utility::getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params,
     return res;
 }
 
+FW_RX_PARAMS Utility::getFwVersionBlocking(VescInterface *vesc)
+{
+    FW_RX_PARAMS params;
+    getFwVersionBlocking(vesc, &params);
+    return params;
+}
+
 FW_RX_PARAMS Utility::getFwVersionBlockingCan(VescInterface *vesc, int canId)
 {
     FW_RX_PARAMS params;

@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.5
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
@@ -200,6 +200,11 @@ Item {
                     width: parent.width - 20
                     height: Math.min(implicitHeight, parent.height - 60)
                     closePolicy: Popup.CloseOnEscape
+
+                    Overlay.modal: Rectangle {
+                        color: "#AA000000"
+                    }
+
                     x: 10
                     y: Math.max((parent.height - height) / 2, 10)
                     parent: dialogParent

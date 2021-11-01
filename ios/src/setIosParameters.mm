@@ -1,8 +1,8 @@
 #include "setIosParameters.h"
-#include <UIKit/UIKit.h>
 #include <CoreLocation/CoreLocation.h>
 
 #ifdef Q_OS_IOS
+#include <UIKit/UIKit.h>
 SetIosParams::SetIosParams()
 {
     //Top

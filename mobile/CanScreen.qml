@@ -119,7 +119,7 @@ GroupBox {
 
 
 import QtQuick 2.12
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -142,11 +142,10 @@ Item {
 
         onTriggered: {
             if (!VescIf.isPortConnected()) {
-                canModel.clear()
+                //canModel.clear()
                 mCommands.setSendCan(false, -1)
                 canList.currentIndex = 0;
                 scanButton.enabled = true
-                canAllButton.enabled = true
             }
         }
     }
@@ -168,60 +167,19 @@ Item {
         }
         RowLayout {
             Layout.fillWidth: true
-            Button {
-                id: canAllButton
-                text: qsTr("List All")
-                Layout.preferredWidth: 120
-                onClicked: {
-                    canModel.clear()
-                    for (var i = 0;i < 255;i++) {
-                        var name = "VESC " + i
 
-                        canModel.append({"name": name,
-                                            "ID": i}
-                                            )
-                    }
-                    canIdBox.currentIndex = 0
-                }
-            }
 
             Button {
                 id: scanButton
                 text: qsTr("CAN Scan")
                 enabled: false
-                // flat: true
-                Layout.preferredWidth: 120
-
-
+                Layout.fillWidth: true
+                flat: true
                 onClicked: {
                     scanButton.enabled = false
-                    scanDotTimer.running = true
                     canModel.clear()
-                    enabled = false
-                    canAllButton.enabled = false
+                    scanDialog.open()
                     mCommands.pingCan()
-                }
-            }
-
-            Timer {
-                id: scanDotTimer
-                interval: 500
-                running: false
-                repeat: true
-
-                property int dots: 0
-                onTriggered: {
-                    var text = "Scanning"
-                    for (var i = 0;i < dots;i++) {
-                        text = "-" + text + "-"
-                    }
-
-                    dots++;
-                    if (dots > 3) {
-                        dots = 0;
-                    }
-
-                    scanButton.text = text
                 }
             }
         }
@@ -269,19 +227,33 @@ Item {
                     }
                     width: canList.width
                     height: 40
-                    color: Utility.getAppHexColor("normalBackground")
+                    color: canList.currentIndex == index ? Utility.getAppHexColor("darkAccent") : Utility.getAppHexColor("normalBackground")
                     radius: 10
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+                            canList.currentIndex = index
+                            if(index == 0){
+                                mCommands.setSendCan(false,0)
+                            }else{
+                                mCommands.setSendCan(true,ID)
+                            }
+                        }
+                    }
 
                     RowLayout {
                         anchors.fill: parent
                         spacing: 10
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+
                         Image {
                             id: image
                             fillMode: Image.PreserveAspectFit
                             Layout.preferredWidth: 30
                             Layout.preferredHeight: 30
                             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                            source: "qrc" + Utility.getThemePath() + ("icons/motor_side.png")
+                            source: deviceIconPath
                         }
                         Text {
                             Layout.fillWidth: true
@@ -291,6 +263,27 @@ Item {
                             color: Utility.getAppHexColor("lightText")
                             wrapMode: Text.WordWrap
                         }
+                        Rectangle{
+                            color: "#00000000"
+                            Layout.preferredWidth: 50
+                            Layout.preferredHeight: idText.implicitHeight*1.5
+                            border.color: Utility.getAppHexColor("lightText")
+                            border.width: 2
+                            radius: 2
+                            Text {
+                                id:idText
+                                textFormat: Text.RichText
+                                anchors.centerIn: parent
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                                text: ID
+                                font.bold: true
+                                horizontalAlignment: Text.AlignHCenter
+                                color: Utility.getAppHexColor("lightText")
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+
+
 
                     }
                 }
@@ -327,6 +320,33 @@ Item {
         modal: true
         focus: true
 
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        width: parent.width - 20
+        x: 10
+        y: parent.height / 2 - height / 2
+        parent: ApplicationWindow.overlay
+
+        ProgressBar {
+            anchors.fill: parent
+            indeterminate: visible
+        }
+    }
+
+    Dialog {
+        id: scanDialog
+        title: "Scanning CAN Bus..."
+        closePolicy: Popup.NoAutoClose
+        modal: true
+        focus: true
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         width: parent.width - 20
         x: 10
         y: parent.height / 2 - height / 2
@@ -342,26 +362,68 @@ Item {
         target: mCommands
 
         onPingCanRx: {
-            scanDotTimer.running = false
             scanButton.enabled = true
             scanButton.text = qsTr("Scan")
-
-            if (canModel.count == 0) {
-                for (var i = 0;i < devs.length;i++) {
-                    var params = Utility.getFwVersionBlockingCan(VescIf, devs[i])
-                    var name = params.hwTypeStr() + " " + devs[i]
-                    canModel.append({"name": name,
-                                        "ID": devs[i]})
+            if (VescIf.isPortConnected()) {
+                canModel.clear()
+                mCommands.setSendCan(0,0);
+                var params = Utility.getFwVersionBlocking(VescIf)
+                var name = params.hw
+                var theme ="qrc"  + Utility.getThemePath()
+                var devicePath
+                var logoPath = " "
+                if (params.major === -1){
+                    devicePath = theme + "icons/Help-96.png"
+                    name = "Unknown"
+                } else if (params.hwTypeStr() === "VESC") { //is a motor
+                    devicePath = theme + "icons/motor_side.png"
+                    name = params.hw
+                } else if (params.hwTypeStr() === "VESC BMS") { //is a bms
+                    devicePath = theme + "icons/icons8-battery-100.png"
+                    name = "BMS (" + params.hw + "):"
+                } else {
+                    devicePath = theme + "icons/Electronics-96.png"
+                    name = "BMS (" + params.hw + "):"
                 }
-                scanButton.enabled = true
-                canAllButton.enabled = true
+
+                canModel.append({"name": name,
+                                    "ID": "LOCAL",
+                                    "deviceIconPath": devicePath,
+                                    "logoIconPath": logoPath})
+                for (var i = 0;i < devs.length;i++) {
+                    params = Utility.getFwVersionBlockingCan(VescIf, devs[i])
+                    name = params.hw
+                    if (params.hwTypeStr() === "VESC") { //is a motor
+                        devicePath = theme + "icons/motor_side.png"
+                        name = params.hw;
+                    } else if (params.hwTypeStr() === "VESC BMS") { //is a bms
+                        devicePath = theme + "icons/icons8-battery-100.png"
+                        name = "BMS (" + params.hw + "):";
+                    } else {
+                        devicePath = theme + "icons/Electronics-96.png"
+                        name = params.hw;
+                    }
+                    canModel.append({"name": name,
+                                        "ID": devs[i].toString(),
+                                        "deviceIconPath": devicePath,
+                                        "logoIconPath": logoPath})
+                }
                 canList.currentIndex = 0
-
-
-
+                if(!isTimeout){
+                    scanDialog.close()
+                    scanButton.enabled = true
+                    VescIf.emitStatusMessage("CAN Scan Finished", true)
+                }else{
+                    scanDialog.close()
+                    scanButton.enabled = true
+                    VescIf.emitStatusMessage("CAN Scan Timed Out", false)
+                }
+            }else{
+                scanDialog.close()
+                scanButton.enabled = true
+                VescIf.emitStatusMessage("Device not connected", false)
             }
         }
-
 
     }
 }

@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
 import Vedder.vesc.utility 1.0
@@ -101,6 +101,10 @@ Item {
         y: 10 + parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
             color: "#ffffff"
             verticalAlignment: Text.AlignVCenter
@@ -180,6 +184,10 @@ Item {
 
         x: 10
         y: column.y + column.height / 2 - height / 2
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             color: "#ffffff"

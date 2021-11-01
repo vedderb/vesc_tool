@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.12
@@ -108,10 +108,13 @@ ApplicationWindow {
     Drawer {
         id: canDrawer
         edge: Qt.RightEdge
-        width: 0.7 * appWindow.width
+        width: 0.5 * appWindow.width
         height: appWindow.height - footer.height - tabBar.height
         y: tabBar.height
         dragMargin: 20
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         CanScreen{
             anchors.fill: parent
@@ -124,6 +127,10 @@ ApplicationWindow {
         height: appWindow.height - footer.height - tabBar.height
         y: tabBar.height
         dragMargin: 20
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -235,12 +242,18 @@ ApplicationWindow {
         id: swipeView
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
+        anchors.left:parent.anchors.left
+        anchors.leftMargin: notchLeft
+        anchors.right:parent.anchors.left
+        anchors.rightMargin: notchRight
+        clip: true
 
         Page {
             StartPage {
                 id: connBle
                 anchors.fill: parent
-                anchors.margins: 10
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
 
                 onRequestOpenControls: {
                     controls.openDialog()
@@ -465,10 +478,10 @@ ApplicationWindow {
 
     footer: Rectangle {
         id: connectedRect
+        clip: true
         color: Utility.getAppHexColor("lightBackground")
         width: parent.width
-        height: 40
-
+        height: 35 + notchBot
         Behavior on color {
             ColorAnimation {
                 duration: 200;
@@ -476,69 +489,83 @@ ApplicationWindow {
                 easing.overshoot: 3
             }
         }
+
         RowLayout{
             enabled:true
-            anchors.top: parent.top
-            anchors.left:parent.left
-            anchors.right:parent.right
-            height: parent.height
+            anchors.fill: parent
             spacing: 0
-
-            Button {
+            ToolButton {
+                id:settingsButton
                 Layout.fillHeight: true
                 Layout.preferredWidth: 70
-                flat: true
                 Image {
-                    id: manuButton
                     anchors.centerIn: parent
-                    width: 30
-                    height: 30
-                    opacity: 1.0
+                    anchors.verticalCenterOffset: -notchBot/2
+                    antialiasing: true
+                    height: parent.width*0.35
+                    width: height
                     source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
                 }
                 onClicked: {
-                     drawer.open()
                     if (drawer.visible) {
-                       // drawer.close()
+                        drawer.close()
                     } else {
                         drawer.open()
                     }
                 }
+
             }
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
                 color: Utility.getAppHexColor("darkBackground")
             }
-            Text {
-                id: connectedText
+            Rectangle{
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                color: Utility.getAppHexColor("disabledText")
+            }
+            ColumnLayout{
+                spacing: 0
                 Layout.fillWidth: true
-                Layout.preferredHeight: 40
-                color: Utility.getAppHexColor("lightText")
-                text: VescIf.getConnectedPortName()
-                verticalAlignment: Text.AlignVTop
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.Wrap
-
+                Layout.fillHeight: true
+                Text {
+                    id: connectedText
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    color: Utility.getAppHexColor("lightText")
+                    text: VescIf.getConnectedPortName()
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.Wrap
+                }
+                Rectangle{
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: notchBot
+                    opacity: 0
+                }
             }
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
                 color: Utility.getAppHexColor("darkBackground")
             }
-            Button {
+            Rectangle{
                 Layout.fillHeight: true
-                Layout.preferredWidth: 80
-                flat: true
-                    Image {
-                        id: canMenuButton
-                        anchors.centerIn: parent
-                        width: 30
-                        height: 30
-                        source: "qrc" + Utility.getThemePath() + "icons/can_off.png"
-                    }
-
-
+                Layout.preferredWidth: 1
+                color: Utility.getAppHexColor("disabledText")
+            }
+            ToolButton {
+                Layout.fillHeight: true
+                Layout.preferredWidth: 70
+                Image {
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: -notchBot/2
+                    antialiasing: true
+                    height: parent.width*0.35
+                    width: height
+                    source: "qrc" + Utility.getThemePath() + "icons/can_off.png"
+                }
                 onClicked: {
                     if (canDrawer.visible) {
                         canDrawer.close()
@@ -670,6 +697,10 @@ ApplicationWindow {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         height: Math.min(implicitHeight, parent.height - 40)
@@ -871,6 +902,10 @@ ApplicationWindow {
         leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Load Custom User Interface"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         parent: ApplicationWindow.overlay
         y: parent.y + parent.height / 2 - height / 2

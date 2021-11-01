@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -346,6 +346,10 @@ Item {
         y: parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         DirectionSetup {
             id: directionSetup
             anchors.fill: parent
@@ -364,6 +368,10 @@ Item {
         parent: ApplicationWindow.overlay
         x: 10
         y: topItem.y + topItem.height / 2 - height / 2
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -394,6 +402,10 @@ Item {
         parent: ApplicationWindow.overlay
         x: 10
         y: topItem.y + topItem.height / 2 - height / 2
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -426,6 +438,10 @@ Item {
         x: 10
         y: topItem.y + topItem.height / 2 - height / 2
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
             color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
@@ -455,6 +471,10 @@ Item {
         x: 10
         y: parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         ProgressBar {
             anchors.fill: parent

@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -54,6 +54,10 @@ Item {
         y: 50
         parent: ApplicationWindow.overlay
         padding: 10
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -134,6 +138,10 @@ Item {
                                     x: 10
                                     y: 10 + parent.height / 2 - height / 2
                                     parent: ApplicationWindow.overlay
+
+                                    Overlay.modal: Rectangle {
+                                        color: "#AA000000"
+                                    }
 
                                     Text {
                                         color: Utility.getAppHexColor("lightText")
@@ -258,6 +266,10 @@ Item {
         y: 10 + Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
             color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
@@ -295,6 +307,10 @@ Item {
         y: 10 + parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
             color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
@@ -324,6 +340,10 @@ Item {
         x: 10
         y: parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Rectangle {
             anchors.fill: parent

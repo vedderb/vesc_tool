@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -103,6 +103,10 @@ Item {
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
             color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
@@ -180,6 +184,10 @@ Item {
         leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Remove all profiles"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         y: column.y + column.height / 2 - height / 2
 

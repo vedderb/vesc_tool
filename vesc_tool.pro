@@ -44,7 +44,7 @@ ios: {
 }
 
 # Debug build (e.g. F5 to reload QML files)
-#DEFINES += DEBUG_BUILD
+DEFINES += DEBUG_BUILD
 
 # If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
 # sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'

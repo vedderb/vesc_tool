@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.12
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -82,7 +82,7 @@ Item {
             DragHandler {
                 id: handler
                 target:rootItem
-                margin: image.height/2
+                margin: 0
                 xAxis.enabled: false
                 yAxis.maximum: rootItem.height
                 yAxis.minimum: 0
@@ -178,20 +178,20 @@ Item {
             // transitions for insertion/deletation of elements
             add: Transition {
                 NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 200 }
-                NumberAnimation { property: "scale"; easing.type: Easing.OutBack; from: 0; to: 1.0; duration: 800 }
+                NumberAnimation { property: "scale"; easing.type: Easing.OutExpo; from: 0; to: 1.0; duration: 300 }
             }
 
             addDisplaced: Transition {
-                NumberAnimation { properties: "y"; duration: 600; easing.type: Easing.InBack }
+                NumberAnimation { properties: "y"; duration: 300; easing.type: Easing.InOutBack }
             }
 
             remove: Transition {
-                NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 200 }
+                NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 100 }
                 NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 200 }
             }
 
             removeDisplaced: Transition {
-                NumberAnimation { properties: "x,y"; duration: 500; easing.type: Easing.OutExpo }
+                NumberAnimation { properties: "x,y"; duration: 300; easing.type: Easing.InExpo }
             }
 
             id: bleList
@@ -205,13 +205,13 @@ Item {
                 id: bleDelegate
 
                 Rectangle {
-                    Component.onCompleted: showAnim.start();
-                    transform: Rotation { id:rt; origin.x: 0; origin.y: height; axis { x: 0.3; y: 1; z: 0 } angle: 0}//     <--- I like this one more!
-                    SequentialAnimation {
-                        id: showAnim
-                        running: false
-                        RotationAnimation { target: rt; from: 180; to: 0; duration: 800; easing.type: Easing.OutExpo; property: "angle" }
-                    }
+                    //Component.onCompleted: showAnim.start();
+                    //transform: Rotation { id:rt; origin.x: 0; origin.y: height; axis { x: 0.3; y: 1; z: 0 } angle: 0}//     <--- I like this one more!
+                    //SequentialAnimation {
+                    //    id: showAnim
+                    //    running: false
+                    //    RotationAnimation { target: rt; from: 180; to: 0; duration: 800; easing.type: Easing.OutExpo; property: "angle" }
+                    //}
 
                     width: bleList.width
                     height: 120
@@ -396,7 +396,7 @@ Item {
             }
             addToList = true
             for(j=0; j < bleModel.count; j++) {
-                if(bleModel.get(j).name.contains("Serial Port")){
+                if(bleModel.get(j).name === ("Serial Port")){
                     addToList  = false
                 }
             }
@@ -430,7 +430,11 @@ Item {
         title: "Connecting..."
         closePolicy: Popup.NoAutoClose
         modal: true
-        focus: true
+        focus: true        
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         x: 10
@@ -451,6 +455,11 @@ Item {
         modal: true
         focus: true
         title: "Set BLE Device Name"
+
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         height: 200
@@ -494,7 +503,11 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Preferred BLE Devices"
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: ApplicationWindow.overlay      
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
 
         Text {
             color: Utility.getAppHexColor("lightText")

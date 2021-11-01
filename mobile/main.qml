@@ -678,6 +678,7 @@ ApplicationWindow {
         parent: ApplicationWindow.overlay
 
         ScrollView {
+            id: vescDialogScroll
             anchors.fill: parent
             clip: true
             contentWidth: parent.width - 20
@@ -799,6 +800,7 @@ ApplicationWindow {
             vescDialog.title = title
             vescDialogLabel.text = (richText ? "<style>a:link { color: lightblue; }</style>" : "") + msg
             vescDialogLabel.textFormat = richText ? Text.RichText : Text.AutoText
+            vescDialogScroll.ScrollBar.vertical.position = 0
             vescDialog.open()
         }
 

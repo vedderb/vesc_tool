@@ -25,7 +25,6 @@
 #include "mobile/logreader.h"
 #include "tcpserversimple.h"
 
-
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
@@ -36,7 +35,7 @@
 #include "ios/src/setIosParameters.h"
 #endif
 
-#ifdef _LINUX
+#ifdef Q_OS_LINUX
 #include <signal.h>
 #endif
 

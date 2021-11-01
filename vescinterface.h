@@ -152,6 +152,8 @@ public:
     Q_INVOKABLE bool setWakeLock(bool lock);
     Q_INVOKABLE bool getLoadQmlUiOnConnect() const;
     Q_INVOKABLE void setLoadQmlUiOnConnect(bool loadQmlUiOnConnect);
+    Q_INVOKABLE bool getAllowScreenRotation() const;
+    Q_INVOKABLE void setAllowScreenRotation(bool allowScreenRotation);
 
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
@@ -405,6 +407,7 @@ private:
     bool mKeepScreenOn;
     bool mUseWakeLock;
     bool mLoadQmlUiOnConnect;
+    bool mAllowScreenRotation;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

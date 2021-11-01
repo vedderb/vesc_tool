@@ -1,7 +1,7 @@
 #include "setIosParameters.h"
-#include <CoreLocation/CoreLocation.h>
 
 #ifdef Q_OS_IOS
+#include <CoreLocation/CoreLocation.h>
 #include <UIKit/UIKit.h>
 SetIosParams::SetIosParams()
 {

@@ -260,6 +260,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mKeepScreenOn = mSettings.value("keepScreenOn", true).toBool();
     mUseWakeLock = mSettings.value("useWakeLock", false).toBool();
     mLoadQmlUiOnConnect = mSettings.value("loadQmlUiOnConnect", true).toBool();
+    mAllowScreenRotation = mSettings.value("allowScreenRotation", false).toBool();
 
     mCommands->setAppConfig(mAppConfig);
     mCommands->setMcConfig(mMcConfig);
@@ -629,6 +630,7 @@ void VescInterface::storeSettings()
     mSettings.setValue("useWakeLock", mUseWakeLock);
     mSettings.setValue("loadQmlUiOnConnect", mLoadQmlUiOnConnect);
     mSettings.setValue("darkMode", Utility::isDarkMode());
+    mSettings.setValue("allowScreenRotation", mAllowScreenRotation);
     mSettings.sync();
 }
 
@@ -1885,6 +1887,17 @@ bool VescInterface::getLoadQmlUiOnConnect() const
 void VescInterface::setLoadQmlUiOnConnect(bool loadQmlUiOnConnect)
 {
     mLoadQmlUiOnConnect = loadQmlUiOnConnect;
+}
+
+bool VescInterface::getAllowScreenRotation() const
+{
+    return mAllowScreenRotation;
+}
+
+void VescInterface::setAllowScreenRotation(bool allowScreenRotation)
+{
+    mAllowScreenRotation = allowScreenRotation;
+    Utility::allowScreenRotation(allowScreenRotation);
 }
 
 #ifdef HAS_SERIALPORT

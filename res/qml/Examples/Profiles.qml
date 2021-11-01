@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.12
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
 import Vedder.vesc.utility 1.0

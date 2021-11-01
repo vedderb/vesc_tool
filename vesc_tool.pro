@@ -10,7 +10,7 @@ VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 37
+VT_IS_TEST_VERSION = 38
 
 VT_ANDROID_VERSION_ARMV7 = 95
 VT_ANDROID_VERSION_ARM64 = 96
@@ -37,14 +37,15 @@ ios: {
 }}
 
 # Build mobile GUI
-CONFIG += build_mobile
+#CONFIG += build_mobile
+
 ios: {
     CONFIG    += build_mobile
     DEFINES   += QT_NO_PRINTER
 }
 
 # Debug build (e.g. F5 to reload QML files)
-DEFINES += DEBUG_BUILD
+#DEFINES += DEBUG_BUILD
 
 # If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
 # sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'
@@ -191,8 +192,7 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
-    ios/src/setIosParameters.mm \
-        mainwindow.cpp \
+    mainwindow.cpp \
     packet.cpp \
     preferences.cpp \
     udpserversimple.cpp \
@@ -299,16 +299,14 @@ macx-clang:contains(QMAKE_HOST.arch, arm.*): {
 
 macx {
     ICON        =  macos/appIcon.icns
-
     QMAKE_INFO_PLIST = macos/Info.plist
-     DISTFILES += macos/Info.plist
+    DISTFILES += macos/Info.plist
 }
 
 ios {
     QMAKE_INFO_PLIST = ios/Info.plist
-    HEADERS += \
-    ios/src/setIosParameters.h
-    SOURCES +=
+    HEADERS += ios/src/setIosParameters.h
+    SOURCES += ios/src/setIosParameters.mm
     DISTFILES += ios/Info.plist
 
     QMAKE_ASSET_CATALOGS = $$PWD/ios/Images.xcassets

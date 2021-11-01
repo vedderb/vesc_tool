@@ -61,7 +61,8 @@ bool QmlUi::eventFilter(QObject *object, QEvent *e)
             case Qt::Key_F5:
                 delete mEngine;
                 mEngine = new QQmlApplicationEngine(this);
-                mEngine->load(QUrl(QLatin1String("mobile/main.qml")));
+//                mEngine->load(QUrl(QLatin1String("mobile/main.qml")));
+                mEngine->load(QUrl(QLatin1String("/home/benjamin/Nextcloud/Dokument/QtCreator/vesc_tool/mobile/main.qml")));
                 return true;
 
             default:

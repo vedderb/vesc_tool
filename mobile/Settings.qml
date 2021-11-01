@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.12
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -68,10 +68,10 @@ Item {
             }
 
             CheckBox {
-                id: wakeLockBox
+                id: screenRotBox
                 Layout.fillWidth: true
-                text: "Use Wake Lock (experimental)"
-                checked: VescIf.useWakeLock()
+                text: "Allow Screen Rotation"
+                checked: VescIf.getAllowScreenRotation()
             }
 
             CheckBox {
@@ -101,7 +101,7 @@ Item {
         onClosed: {
             VescIf.setUseImperialUnits(imperialBox.checked)
             VescIf.setKeepScreenOn(screenOnBox.checked)
-            VescIf.setUseWakeLock(wakeLockBox.checked)
+            VescIf.setAllowScreenRotation(screenRotBox.checked)
             VescIf.setLoadQmlUiOnConnect(qmlUiBox.checked)
             VescIf.storeSettings()
 

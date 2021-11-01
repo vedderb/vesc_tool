@@ -17,109 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-/*
-GroupBox {
-    id: canFwdBox
-    Layout.preferredHeight: isHorizontal ? wizardBox.height : -1
-    title: qsTr("CAN Forwarding")
-    Layout.fillWidth: true
-
-    ColumnLayout {
-        anchors.topMargin: -5
-        anchors.bottomMargin: -5
-        anchors.fill: parent
-        spacing: -10
-
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.bottomMargin: isHorizontal ? 5 : 0
-
-            ComboBox {
-                id: canIdBox
-                Layout.fillWidth: true
-
-                textRole: "key"
-                model: ListModel {
-                    id: canItems
-                }
-
-                onCurrentIndexChanged: {
-                    if (fwdCanBox.checked && canItems.rowCount() > 0) {
-                        mCommands.setCanSendId(canItems.get(canIdBox.currentIndex).value)
-                    }
-                }
-            }
-
-            CheckBox {
-                id: fwdCanBox
-                text: qsTr("Activate")
-                enabled: canIdBox.currentIndex >= 0 && canIdBox.count > 0
-
-                onClicked: {
-                    mCommands.setSendCan(fwdCanBox.checked, canItems.get(canIdBox.currentIndex).value)
-                    canScanButton.enabled = !checked
-                    canAllButton.enabled = !checked
-                }
-            }
-        }
-
-        ProgressBar {
-            id: canScanBar
-            visible: false
-            Layout.fillWidth: true
-            indeterminate: true
-            Layout.preferredHeight: canAllButton.height
-        }
-
-        RowLayout {
-            id: canButtonLayout
-            Layout.fillWidth: true
-
-            Button {
-                id: canAllButton
-                text: "List All (no Scan)"
-                Layout.fillWidth: true
-                Layout.preferredWidth: 500
-
-                onClicked: {
-                    canItems.clear()
-                    for (var i = 0;i < 255;i++) {
-                        var name = "VESC " + i
-                        canItems.append({ key: name, value: i })
-                    }
-                    canIdBox.currentIndex = 0
-                }
-            }
-
-            Button {
-                id: canScanButton
-                text: "Scan CAN Bus"
-                Layout.fillWidth: true
-                Layout.preferredWidth: 500
-
-                onClicked: {
-                    canScanBar.indeterminate = true
-                    canButtonLayout.visible = false
-                    canScanBar.visible = true
-                    canItems.clear()
-                    enabled = false
-                    canAllButton.enabled = false
-                    mCommands.pingCan()
-                }
-            }
-        }
-
-        Item {
-            Layout.fillHeight: true
-            visible: isHorizontal
-        }
-    }
-}
-*/
-
-
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.10
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -135,6 +34,10 @@ Item {
     property int notchTop: 0
     property int animationSpeed: 500
 
+    Component.onCompleted: {
+        scanButton.enabled = VescIf.isPortConnected()
+    }
+
     Timer {
         repeat: true
         interval: 1000
@@ -142,14 +45,13 @@ Item {
 
         onTriggered: {
             if (!VescIf.isPortConnected()) {
-                //canModel.clear()
                 mCommands.setSendCan(false, -1)
                 canList.currentIndex = 0;
-                scanButton.enabled = true
+                canModel.clear()
+                scanButton.enabled = VescIf.isPortConnected()
             }
         }
     }
-
 
     ColumnLayout {
         id: column
@@ -165,30 +67,12 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
         }
-        RowLayout {
-            Layout.fillWidth: true
-
-
-            Button {
-                id: scanButton
-                text: qsTr("CAN Scan")
-                enabled: false
-                Layout.fillWidth: true
-                flat: true
-                onClicked: {
-                    scanButton.enabled = false
-                    canModel.clear()
-                    scanDialog.open()
-                    mCommands.pingCan()
-                }
-            }
-        }
-
-        ListModel {
-            id: canModel
-        }
 
         ListView {
+            ListModel {
+                id: canModel
+            }
+
             // transitions for insertion/deletation of elements
             add: Transition {
                 NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 200 }
@@ -250,8 +134,8 @@ Item {
                         Image {
                             id: image
                             fillMode: Image.PreserveAspectFit
-                            Layout.preferredWidth: 30
-                            Layout.preferredHeight: 30
+                            Layout.preferredWidth: 20
+                            Layout.preferredHeight: 20
                             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                             source: deviceIconPath
                         }
@@ -265,11 +149,18 @@ Item {
                         }
                         Rectangle{
                             color: "#00000000"
-                            Layout.preferredWidth: 50
-                            Layout.preferredHeight: idText.implicitHeight*1.5
+                            Layout.preferredWidth: t_metrics.boundingRect.width + 10
+                            Layout.preferredHeight: idText.implicitHeight * 1.5
                             border.color: Utility.getAppHexColor("lightText")
                             border.width: 2
                             radius: 2
+
+                            TextMetrics {
+                                id:     t_metrics
+                                font:   idText.font
+                                text:   "LOCAL"
+                            }
+
                             Text {
                                 id:idText
                                 textFormat: Text.RichText
@@ -282,20 +173,29 @@ Item {
                                 wrapMode: Text.WordWrap
                             }
                         }
-
-
-
                     }
                 }
             }
             model: canModel
             delegate: canDelegate
         }
+
+        Button {
+            id: scanButton
+            text: qsTr("CAN Scan")
+            enabled: false
+            Layout.fillWidth: true
+            onClicked: {
+                scanButton.enabled = false
+                canModel.clear()
+                scanDialog.open()
+                mCommands.pingCan()
+            }
+        }
     }
 
     Connections {
         target: mBle
-
 
         onBleError: {
             VescIf.emitMessageDialog("BLE Error", info, false, false)
@@ -319,7 +219,6 @@ Item {
         closePolicy: Popup.NoAutoClose
         modal: true
         focus: true
-
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -359,6 +258,14 @@ Item {
     }
 
     Connections {
+        target: VescIf
+
+        onPortConnectedChanged: {
+            scanButton.enabled = VescIf.isPortConnected()
+        }
+    }
+
+    Connections {
         target: mCommands
 
         onPingCanRx: {
@@ -380,10 +287,10 @@ Item {
                     name = params.hw
                 } else if (params.hwTypeStr() === "VESC BMS") { //is a bms
                     devicePath = theme + "icons/icons8-battery-100.png"
-                    name = "BMS (" + params.hw + "):"
+                    name = "BMS (" + params.hw + ")"
                 } else {
                     devicePath = theme + "icons/Electronics-96.png"
-                    name = "BMS (" + params.hw + "):"
+                    name = "BMS (" + params.hw + ")"
                 }
 
                 canModel.append({"name": name,
@@ -398,7 +305,7 @@ Item {
                         name = params.hw;
                     } else if (params.hwTypeStr() === "VESC BMS") { //is a bms
                         devicePath = theme + "icons/icons8-battery-100.png"
-                        name = "BMS (" + params.hw + "):";
+                        name = "BMS (" + params.hw + ")";
                     } else {
                         devicePath = theme + "icons/Electronics-96.png"
                         name = params.hw;
@@ -409,23 +316,20 @@ Item {
                                         "logoIconPath": logoPath})
                 }
                 canList.currentIndex = 0
-                if(!isTimeout){
+                if (!isTimeout){
                     scanDialog.close()
                     scanButton.enabled = true
                     VescIf.emitStatusMessage("CAN Scan Finished", true)
-                }else{
+                } else {
                     scanDialog.close()
                     scanButton.enabled = true
                     VescIf.emitStatusMessage("CAN Scan Timed Out", false)
                 }
-            }else{
+            } else {
                 scanDialog.close()
                 scanButton.enabled = true
                 VescIf.emitStatusMessage("Device not connected", false)
             }
         }
-
     }
 }
-
-

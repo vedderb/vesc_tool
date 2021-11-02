@@ -48,6 +48,7 @@ public:
     Q_INVOKABLE static QString uuid2Str(QByteArray uuid, bool space);
     Q_INVOKABLE static bool requestFilePermission();
     Q_INVOKABLE static void keepScreenOn(bool on);
+    Q_INVOKABLE static void allowScreenRotation(bool enabled);
     Q_INVOKABLE static bool waitSignal(QObject *sender, QString signal, int timeoutMs);
     Q_INVOKABLE static void sleepWithEventLoop(int timeMs);
     Q_INVOKABLE static QString detectAllFoc(VescInterface *vesc,

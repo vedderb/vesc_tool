@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.12
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -39,7 +39,6 @@ Item {
         standardButtons: Dialog.Close
         modal: true
         focus: true
-
 
         Overlay.modal: Rectangle {
             color: "#AA000000"

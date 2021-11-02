@@ -318,6 +318,25 @@ void Utility::keepScreenOn(bool on)
 #endif
 }
 
+void Utility::allowScreenRotation(bool enabled)
+{
+#ifdef Q_OS_ANDROID
+    if (enabled) {
+        QAndroidJniObject activity = QtAndroid::androidActivity();
+        activity.callMethod<void>("setRequestedOrientation", "(I)V",
+                                  QAndroidJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
+                                                                         "SCREEN_ORIENTATION_UNSPECIFIED"));
+    } else {
+        QAndroidJniObject activity = QtAndroid::androidActivity();
+        activity.callMethod<void>("setRequestedOrientation", "(I)V",
+                                  QAndroidJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
+                                                                         "SCREEN_ORIENTATION_PORTRAIT"));
+    }
+#else
+    (void)enabled;
+#endif
+}
+
 bool Utility::waitSignal(QObject *sender, QString signal, int timeoutMs)
 {
     QEventLoop loop;

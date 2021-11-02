@@ -25,6 +25,9 @@
 * Configurable data polling rates.
 * Better DPI scaling.
 * Configurable plot line thickness.
+* Mobile:
+ - New CAN forwarding bar.
+ - Setting to disable screen rotation.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

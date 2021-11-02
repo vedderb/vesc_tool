@@ -40,9 +40,6 @@ Item {
         }
     }
 
-
-
-
     Rectangle {
         color: Utility.getAppHexColor("darkBackground")
         anchors.fill: parent
@@ -58,6 +55,7 @@ Item {
             enableDialog()
         }
     }
+
     ColumnLayout {
         id: column
         anchors.fill: parent
@@ -67,8 +65,6 @@ Item {
             Layout.fillWidth: true
             opacity: 0
         }
-
-
 
         Image {
             id: image
@@ -86,21 +82,15 @@ Item {
                 xAxis.enabled: false
                 yAxis.maximum: rootItem.height
                 yAxis.minimum: 0
-                onCentroidChanged: {
-                    if(handler.active){
-                        rootItem.y = rootItem.y + handler.centroid.position.y
-                    }
-                }
+
                 onActiveChanged: {
-                    console.log("active changed =", JSON.stringify(rootItem.y))
-                    console.log("active changed =", JSON.stringify(rootItem.height/6))
-                    if(handler.active){
+                    if (handler.active) {
                         animationSpeed = 3
                     } else {
                         animationSpeed = 500
-                        if(rootItem.y > rootItem.height/4)
+                        if (rootItem.y > rootItem.height / 4) {
                             rootItem.y = rootItem.height
-                        else{
+                        } else {
                             rootItem.y = 0
                         }
                     }
@@ -137,7 +127,6 @@ Item {
                 enabled: false
                 flat: true
                 Layout.preferredWidth: 120
-
 
                 onClicked: {
                     scanButton.enabled = false
@@ -336,9 +325,6 @@ Item {
 
             }
         }
-
-
-
     }
 
     Connections {
@@ -377,7 +363,7 @@ Item {
                     }
                 }
 
-                if(addToList){
+                if (addToList) {
                     if (preferred) {
                         bleModel.insert(0, {"name": setName,
                                             "setName": setNameShort,
@@ -456,7 +442,6 @@ Item {
         focus: true
         title: "Set BLE Device Name"
 
-
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -507,7 +492,6 @@ Item {
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
-
 
         Text {
             color: Utility.getAppHexColor("lightText")

@@ -17,11 +17,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.10
+import QtQuick.Controls 2.10
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
-import QtQuick.Window 2.12
+import QtQuick.Window 2.10
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -47,11 +47,11 @@ ApplicationWindow {
     property int notchLeft
     property int notchRight
     property int notchBot
-    flags: Qt.platform.os === "ios"? Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint : Qt.Window
+
     // https://github.com/ekke/c2gQtWS_x/blob/master/qml/main.qml
+    flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
+
     function updateNotch() {
-        console.log("Orientation Changed")
-        console.log("safe margins =", JSON.stringify(Utility.getSafeAreaMargins(appWindow)))
         notchTop   = Utility.getSafeAreaMargins(appWindow)["top"]
         notchLeft  = Utility.getSafeAreaMargins(appWindow)["left"]
         notchRight = Utility.getSafeAreaMargins(appWindow)["right"]
@@ -59,6 +59,7 @@ ApplicationWindow {
         safeWidth  = appWindow.width - Utility.getSafeAreaMargins(appWindow)["left"] - Utility.getSafeAreaMargins(appWindow)["right"]
         connScreen.notchTop = notchTop
     }
+
     Timer {
         id: oriTimer
         interval: 100; running: true; repeat: false
@@ -72,14 +73,13 @@ ApplicationWindow {
         oriTimer.start()
     }
 
-
-
     Component.onCompleted: {
         if (!VescIf.isIntroDone()) {
             introWizard.openDialog()
         }
         updateNotch()
         Utility.keepScreenOn(VescIf.keepScreenOn())
+        Utility.allowScreenRotation(VescIf.getAllowScreenRotation())
         Utility.stopGnssForegroundService()
     }
 
@@ -108,7 +108,7 @@ ApplicationWindow {
     Drawer {
         id: canDrawer
         edge: Qt.RightEdge
-        width: 0.5 * appWindow.width
+        width: 0.60 * appWindow.width
         height: appWindow.height - footer.height - tabBar.height
         y: tabBar.height
         dragMargin: 20
@@ -116,7 +116,7 @@ ApplicationWindow {
             color: "#AA000000"
         }
 
-        CanScreen{
+        CanScreen {
             anchors.fill: parent
         }
     }
@@ -338,6 +338,7 @@ ApplicationWindow {
         Page {
             Profiles {
                 anchors.fill: parent
+                anchors.topMargin: 5
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
             }
@@ -396,7 +397,6 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
             spacing: 0
 
-
             TabBar {
                 id: tabBar
                 currentIndex: swipeView.currentIndex
@@ -427,8 +427,6 @@ ApplicationWindow {
                     }
                 }
             }
-
-
         }
     }
 

@@ -683,7 +683,7 @@
         <string>Samp: </string>
        </property>
        <property name="maximum">
-        <number>2000</number>
+        <number>2048</number>
        </property>
        <property name="singleStep">
         <number>100</number>

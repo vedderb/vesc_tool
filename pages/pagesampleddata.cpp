@@ -502,6 +502,7 @@ void PageSampledData::samplesReceived(QByteArray bytes)
     tmpVZeroVector.append(vb.vbPopFrontDouble32Auto());
     tmpCurrTotVector.append(vb.vbPopFrontDouble32Auto());
     tmpFSwVector.append(vb.vbPopFrontDouble32Auto());
+    tmpFrfDVector.append(vb.vbPopFrontDouble32Auto());
     tmpStatusArray.append(vb.vbPopFrontInt8());
     tmpPhaseArray.append(vb.vbPopFrontInt8());
 
@@ -517,6 +518,7 @@ void PageSampledData::samplesReceived(QByteArray bytes)
         vZeroVector = tmpVZeroVector;
         currTotVector = tmpCurrTotVector;
         fSwVector = tmpFSwVector;
+        frfDVector = tmpFrfDVector;
         statusArray = tmpStatusArray;
         phaseArray = tmpPhaseArray;
 
@@ -648,6 +650,7 @@ void PageSampledData::clearBuffers()
     tmpVZeroVector.clear();
     tmpCurrTotVector.clear();
     tmpFSwVector.clear();
+    tmpFrfDVector.clear();
     tmpStatusArray.clear();
     tmpPhaseArray.clear();
 }
@@ -712,7 +715,7 @@ void PageSampledData::on_saveDataButton_clicked()
             prev_t += 1.0 / fSwVector[i];
         }
 
-        stream << "T;I1;I2;I3;V1;V2;V3;I_tot;V_zero;Phase\n";
+        stream << "T;I1;I2;I3;V1;V2;V3;I_tot;V_zero;FRF_d;Phase;PRBS\n";
 
         for (int i = 0;i < curr1Vector.size();i++) {
             stream << timeVec.at(i) << ";";
@@ -724,7 +727,9 @@ void PageSampledData::on_saveDataButton_clicked()
             stream << ph3Vector.at(i) << ";";
             stream << currTotVector.at(i) << ";";
             stream << vZeroVector.at(i) << ";";
+            stream << frfDVector.at(i) << ";";
             stream << (double)((quint8)phaseArray.at(i)) / 250.0 * 360.0 << ";";
+            stream << ((quint8)statusArray.at(i) >> 7) << ";";
 
             if (i < (curr1Vector.size() - 1)) {
                 stream << "\n";

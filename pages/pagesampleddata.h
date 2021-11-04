@@ -75,6 +75,7 @@ private:
     QVector<double> vZeroVector;
     QVector<double> currTotVector;
     QVector<double> fSwVector;
+    QVector<double> frfDVector;
     QByteArray statusArray;
     QByteArray phaseArray;
 
@@ -86,6 +87,7 @@ private:
     QVector<double> tmpVZeroVector;
     QVector<double> tmpCurrTotVector;
     QVector<double> tmpFSwVector;
+    QVector<double> tmpFrfDVector;
     QByteArray tmpStatusArray;
     QByteArray tmpPhaseArray;
 

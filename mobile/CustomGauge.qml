@@ -399,7 +399,7 @@ Item {
             tickmarkLabel:  Text {
                 font.pixelSize: outerRadius * 0.15
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
                 antialiasing: true
             }
 
@@ -409,7 +409,7 @@ Item {
 
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
             }
 
             minorTickmark: Rectangle {
@@ -418,7 +418,7 @@ Item {
 
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
             }
         }
     }

@@ -42,9 +42,6 @@ Item {
 
     CircularGauge {
         id: gauge
-        maximumValue: 100
-        minimumValue: -100
-        value: 0
         anchors.fill: parent
 
         Behavior on value {

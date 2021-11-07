@@ -55,27 +55,24 @@ Item {
             id: style
             labelStepSize: labelStep
             tickmarkStepSize: labelStep
-            labelInset: outerRadius * 0.28
-            tickmarkInset: 2
-            minorTickmarkInset: 2
+            labelInset: outerRadius * 0.28 + outerRadius*0.03
+            tickmarkInset: outerRadius*0.07
+            minorTickmarkInset: outerRadius*0.07
             minimumValueAngle: minAngle
             maximumValueAngle: maxAngle
 
             background:
                 Canvas {
                 property double value: gauge.value
-
                 anchors.fill: parent
                 onValueChanged: requestPaint()
 
                 function d2r(degrees) {
                     return degrees * (Math.PI / 180.0);
                 }
-
                 onPaint: {
                     var ctx = getContext("2d");
                     ctx.reset();
-
                     ctx.beginPath();
                     var gradient = ctx.createRadialGradient(outerRadius, outerRadius, 0,
                                                             outerRadius, outerRadius, outerRadius)
@@ -106,38 +103,179 @@ Item {
                             d2r(valueToAngle(gauge.maximumValue) - 90),
                             d2r(valueToAngle(gauge.minimumValue) - 90));
                     ctx.stroke();
+                    ctx.reset();
 
                     ctx.beginPath();
-                    ctx.strokeStyle = Utility.getAppHexColor("normalText")
-                    ctx.lineWidth = 1
+                    var gradient2 = ctx.createLinearGradient(parent.width*0.5,0,0 ,parent.height);
+
+                    // Add three color stops
+                    gradient2.addColorStop(1, '#111111');
+                    gradient2.addColorStop(0.2, '#222222');
+                    gradient2.addColorStop(0.7, '#222222');
+                    gradient2.addColorStop(0, '#111111');
+
+                    ctx.fillStyle = gradient2;
+                    ctx.lineWidth = 0;
                     ctx.arc(outerRadius,
                             outerRadius,
-                            outerRadius - 0.5,
+                            outerRadius  ,
+                            0, 2 * Math.PI);
+                    //ctx.fill();
+
+
+                    var gradient6 = ctx.createRadialGradient(outerRadius, outerRadius, outerRadius - outerRadius * 0.13, outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
+                    gradient6.addColorStop(0, '#00000000');
+                    gradient6.addColorStop(1, '#ffffdd80');
+
+                    if (gauge.value < 0) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = gradient6
+                        ctx.lineWidth = outerRadius * 0.18
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius - outerRadius * 0.1,
+                                d2r(valueToAngle(gauge.value) - 90),
+                                d2r(valueToAngle(0) - 90));
+                        ctx.stroke();
+                    } else {
+                        ctx.beginPath();
+                        ctx.strokeStyle = gradient6
+                        ctx.lineWidth = outerRadius * 0.18
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius - outerRadius * 0.1,
+                                d2r(valueToAngle(0) - 90),
+                                d2r(valueToAngle(gauge.value) - 90));
+                        ctx.stroke();
+                    }
+
+
+                    ctx.beginPath();
+                    var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+
+                    // Add three color stops
+                    gradient3.addColorStop(1, '#dddddd');
+                    gradient3.addColorStop(0.7, '#333333');
+                    gradient3.addColorStop(0.1, '#eeeeee');
+
+                    ctx.strokeStyle = gradient3;
+                    ctx.lineWidth = outerRadius*0.03
+                    ctx.arc(outerRadius,
+                            outerRadius,
+                            outerRadius*0.985  ,
                             0, 2 * Math.PI);
                     ctx.stroke();
+
+                    ctx.beginPath();
+                    var gradient4 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+
+                    // Add three color stops
+                    gradient4.addColorStop(1, '#333333');
+                    gradient4.addColorStop(0.8, '#dddddd');
+                    gradient4.addColorStop(0, '#555555');
+
+                    ctx.strokeStyle = gradient4;
+                    ctx.lineWidth = outerRadius*0.03
+                    ctx.arc(outerRadius,
+                            outerRadius,
+                            0.96*outerRadius ,
+                            0, 2 * Math.PI);
+                    ctx.stroke();
+
+
+                    ctx.beginPath();
+                    var gradient5 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+
+                    // Add three color stops
+                    gradient5.addColorStop(1, '#333333');
+                    gradient5.addColorStop(0.8, '#dddddd');
+                    gradient5.addColorStop(0, '#555555');
+
+                    ctx.strokeStyle = gradient5;
+                    ctx.lineWidth = outerRadius*0.03
+                    ctx.arc(outerRadius,
+                            outerRadius,
+                            0.96*outerRadius ,
+                            0, 2 * Math.PI);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = outerRadius*0.005
+                    ctx.arc(outerRadius,
+                            outerRadius,
+                            outerRadius*0.94  ,
+                            0, 2 * Math.PI);
+                    ctx.stroke();
+
+
+
                 }
             }
 
             needle: Item {
-                y: -outerRadius * 0.82
+                y: -outerRadius * 0.82 + outerRadius*0.06
                 height: outerRadius * 0.18
-                Rectangle {
-                    id: needle
-                    height: parent.height
-                    color: "red"
-                    width: height * 0.13
-                    antialiasing: true
-                    radius: 10
-                }
+                width: outerRadius * 0.15
 
-                Glow {
-                    anchors.fill: needle
-                    radius: 5
-                    samples: 10
-                    spread: 0.6
-                    color: "darkred"
-                    source: needle
+                Canvas{
+                    id: pointerNib
+                    anchors.fill:parent
+                    onPaint:{
+                        var ctx = getContext("2d");
+
+                        // the triangle
+                        ctx.beginPath();
+                        ctx.moveTo(parent.width/2, 0);
+                        ctx.lineTo(parent.width, parent.height*0.015);
+                        ctx.quadraticCurveTo(parent.width*0.7, parent.height/4, parent.width*0.58, parent.height);
+                        ctx.lineTo(parent.width/2, parent.height);
+                        ctx.closePath();
+
+                        var gradient = ctx.createLinearGradient(parent.width,parent.height*0.02,parent.width/2,0);
+                        gradient.addColorStop(0, '#776600');
+                        gradient.addColorStop(0.80, '#ffbb00');
+                        gradient.addColorStop(0.92, '#ffffff');
+                        gradient.addColorStop(1, '#ffffff');
+
+
+                        // the fill color
+                        ctx.fillStyle = gradient;
+                        ctx.fill();
+
+                        // the triangle
+                        ctx.beginPath();
+                        ctx.moveTo(parent.width/2, 0);
+                        ctx.lineTo(0, parent.height*0.015);
+                        ctx.quadraticCurveTo(parent.width*0.3, parent.height/4, parent.width*0.42, parent.height);
+                        ctx.lineTo(parent.width/2, parent.height);
+                        ctx.closePath();
+
+                        var gradient2 = ctx.createLinearGradient(0,parent.height*0.02,parent.width/2,0);
+                        gradient2.addColorStop(0, '#ffbb00');
+                        gradient2.addColorStop(0.80, '#776600');
+                        gradient2.addColorStop(0.92, '#ffffff');
+                        gradient2.addColorStop(1, '#ffffff');
+                        // the fill color
+                        ctx.fillStyle = gradient2;
+                        ctx.fill();
+                    }
                 }
+                DropShadow
+                       {
+                           anchors.fill: pointerNib
+                           horizontalOffset: 0
+                           verticalOffset: 0
+                           radius: pointerNib.width/6
+                           samples: 10
+                           color: "#90000000"
+                           source: pointerNib
+                       }
+
+
+
+
             }
 
             foreground: Item {
@@ -174,6 +312,70 @@ Item {
                     color: Utility.getAppHexColor("lightText")
                     antialiasing: true
                 }
+
+
+                RadialGradient{
+                    id: glassEffect2
+                    x: outerRadius - width/2
+                    y: outerRadius - height/2
+                    height: 2*outerRadius*0.96
+                    width: height
+                    visible: false
+
+                    gradient: Gradient {
+                        GradientStop { position: 1.0; color: "transparent" }
+                        GradientStop { position: 0.5; color: "transparent" }
+                        GradientStop { position: 0.495; color: "white" } // Just a part of the canvas
+                    }
+                }
+                RadialGradient{
+                    id: glassEffect3
+                    horizontalOffset: outerRadius*0.8 - width/2
+                    horizontalRadius: outerRadius*1.9
+                    verticalOffset: outerRadius*2.3 - height/2
+                    verticalRadius: outerRadius*1.9
+                    anchors.fill: glassEffect2
+                    visible:  false
+                    z: glassEffect2.z + 1
+                    gradient: Gradient {
+                        GradientStop { position: 1.2; color: "#33000000" }
+                        GradientStop { position: 1.1; color: "#44000000" }
+                        GradientStop { position: 1.05; color: "#33000000" }
+                        GradientStop { position: 1; color: "#22000000" }
+                        GradientStop { position: 0.98; color: "transparent" } // Just a part of the canvas
+                    }
+                }
+                OpacityMask {
+                    id: glassEffect4
+                    anchors.fill: glassEffect2
+                    source: glassEffect2
+                    maskSource: glassEffect3
+                    invert: false
+                    visible: true
+                }
+
+                LinearGradient {
+                    id: glassEffect5
+                    anchors.fill: glassEffect2
+                    start: Qt.point(0.6*outerRadius, outerRadius)
+                    end: Qt.point(outerRadius, 0.2*outerRadius)
+
+                    gradient: Gradient {
+                        GradientStop { position: 1.8; color: "transparent" }
+                        GradientStop { position: -6; color: "white" } // Just a part of the canvas
+                    }
+                    visible: false// Not visible (it will be painted by the mask)
+                }
+
+                OpacityMask {
+                    id: glassEffect6
+                    anchors.fill: glassEffect2
+                    source: glassEffect4
+                    maskSource: glassEffect5
+                    invert: false
+                    visible: false
+                }
+
             }
 
             function isCovered(value) {
@@ -194,7 +396,7 @@ Item {
             tickmarkLabel:  Text {
                 font.pixelSize: outerRadius * 0.15
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
                 antialiasing: true
             }
 
@@ -204,7 +406,7 @@ Item {
 
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
             }
 
             minorTickmark: Rectangle {
@@ -213,8 +415,9 @@ Item {
 
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("normalText")
+                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
             }
         }
     }
 }
+

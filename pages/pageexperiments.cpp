@@ -748,12 +748,13 @@ void PageExperiments::on_savePdfButton_clicked()
         QString title = ui->titleEdit->text();
 
         if (!title.isEmpty()) {
+            auto element = new QCPTextElement(ui->plot,
+                                              title,
+                                              QFont("sans", 12, QFont::Bold));
+            element->setTextColor(Utility::getAppQColor("lightText"));
+
             ui->plot->plotLayout()->insertRow(0);
-            ui->plot->plotLayout()->
-                    addElement(0, 0,
-                               new QCPTextElement(ui->plot,
-                                                  title,
-                                                  QFont("sans", 12, QFont::Bold)));
+            ui->plot->plotLayout()->addElement(0, 0,element);
         }
 
         plotSamples(true);
@@ -785,12 +786,13 @@ void PageExperiments::on_savePngButton_clicked()
         QString title = ui->titleEdit->text();
 
         if (!title.isEmpty()) {
+            auto element = new QCPTextElement(ui->plot,
+                                              title,
+                                              QFont("sans", 12, QFont::Bold));
+            element->setTextColor(Utility::getAppQColor("lightText"));
+
             ui->plot->plotLayout()->insertRow(0);
-            ui->plot->plotLayout()->
-                    addElement(0, 0,
-                               new QCPTextElement(ui->plot,
-                                                  title,
-                                                  QFont("sans", 12, QFont::Bold)));
+            ui->plot->plotLayout()->addElement(0, 0, element);
         }
 
         plotSamples(true);

@@ -70,6 +70,7 @@ Item {
                 function d2r(degrees) {
                     return degrees * (Math.PI / 180.0);
                 }
+
                 onPaint: {
                     var ctx = getContext("2d");
                     ctx.reset();
@@ -122,7 +123,6 @@ Item {
                             0, 2 * Math.PI);
                     //ctx.fill();
 
-
                     var gradient6 = ctx.createRadialGradient(outerRadius, outerRadius, outerRadius - outerRadius * 0.13, outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
                     gradient6.addColorStop(0, '#00000000');
                     gradient6.addColorStop(1, '#ffffdd80');
@@ -148,7 +148,6 @@ Item {
                                 d2r(valueToAngle(gauge.value) - 90));
                         ctx.stroke();
                     }
-
 
                     ctx.beginPath();
                     var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
@@ -182,7 +181,6 @@ Item {
                             0, 2 * Math.PI);
                     ctx.stroke();
 
-
                     ctx.beginPath();
                     var gradient5 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
 
@@ -208,9 +206,6 @@ Item {
                             outerRadius*0.94  ,
                             0, 2 * Math.PI);
                     ctx.stroke();
-
-
-
                 }
             }
 
@@ -219,7 +214,7 @@ Item {
                 height: outerRadius * 0.18
                 width: outerRadius * 0.15
 
-                Canvas{
+                Canvas {
                     id: pointerNib
                     anchors.fill:parent
                     onPaint:{
@@ -238,7 +233,6 @@ Item {
                         gradient.addColorStop(0.80, '#ffbb00');
                         gradient.addColorStop(0.92, '#ffffff');
                         gradient.addColorStop(1, '#ffffff');
-
 
                         // the fill color
                         ctx.fillStyle = gradient;
@@ -262,20 +256,16 @@ Item {
                         ctx.fill();
                     }
                 }
-                DropShadow
-                       {
-                           anchors.fill: pointerNib
-                           horizontalOffset: 0
-                           verticalOffset: 0
-                           radius: pointerNib.width/6
-                           samples: 10
-                           color: "#90000000"
-                           source: pointerNib
-                       }
 
-
-
-
+                DropShadow {
+                    anchors.fill: pointerNib
+                    horizontalOffset: 0
+                    verticalOffset: 0
+                    radius: pointerNib.width/6
+                    samples: 10
+                    color: "#90000000"
+                    source: pointerNib
+                }
             }
 
             foreground: Item {
@@ -313,8 +303,7 @@ Item {
                     antialiasing: true
                 }
 
-
-                RadialGradient{
+                RadialGradient {
                     id: glassEffect2
                     x: outerRadius - width/2
                     y: outerRadius - height/2
@@ -328,7 +317,8 @@ Item {
                         GradientStop { position: 0.495; color: "white" } // Just a part of the canvas
                     }
                 }
-                RadialGradient{
+
+                RadialGradient {
                     id: glassEffect3
                     horizontalOffset: outerRadius*0.8 - width/2
                     horizontalRadius: outerRadius*1.9
@@ -345,6 +335,7 @@ Item {
                         GradientStop { position: 0.98; color: "transparent" } // Just a part of the canvas
                     }
                 }
+
                 OpacityMask {
                     id: glassEffect4
                     anchors.fill: glassEffect2
@@ -375,7 +366,6 @@ Item {
                     invert: false
                     visible: false
                 }
-
             }
 
             function isCovered(value) {
@@ -420,4 +410,3 @@ Item {
         }
     }
 }
-

@@ -123,9 +123,11 @@ Item {
                             0, 2 * Math.PI);
                     //ctx.fill();
 
-                    var gradient6 = ctx.createRadialGradient(outerRadius, outerRadius, outerRadius - outerRadius * 0.13, outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
+                    var gradient6 = ctx.createRadialGradient(outerRadius, outerRadius,
+                                                             outerRadius - outerRadius * 0.18,
+                                                             outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
                     gradient6.addColorStop(0, '#00000000');
-                    gradient6.addColorStop(1, '#ffffdd80');
+                    gradient6.addColorStop(1, '#ff10ee10');
 
                     if (gauge.value < 0) {
                         ctx.beginPath();

@@ -34,9 +34,6 @@ Item {
     property var dialogParent: ApplicationWindow.overlay
     anchors.fill: parent
 
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
-
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property int odometerValue: 0
@@ -44,17 +41,15 @@ Item {
     property bool isHorizontal: rtData.width > rtData.height
 
     property int gaugeSize: (isHorizontal ? Math.min((height - valMetrics.height * 4)/1.3 - 30, width / 2.65 - 10) :
-    Math.min(width / 1.4, (height - valMetrics.height * 4) / 2.3 - 10))
-
-
+                                            Math.min(width / 1.4, (height - valMetrics.height * 4) / 2.3 - 10))
     property int gaugeSize2: gaugeSize * 0.575
+
     Component.onCompleted: {
         mCommands.emitEmptySetupValues()
     }
 
     GridLayout {
         anchors.fill: parent
-        //anchors.topMargin: 5
         columns: isHorizontal ? 2 : 1
         columnSpacing: 0
         rowSpacing: 0
@@ -72,8 +67,7 @@ Item {
                 anchors.verticalCenterOffset: 0.1*gaugeSize2
                 minimumValue: -60
                 maximumValue: 60
-                labelStep: 10
-                value:40
+                labelStep: maximumValue > 60 ? 20 : 10
                 nibColor: Utility.getAppHexColor("tertiary1")
                 unitText: "A"
                 typeText: "Current"
@@ -208,7 +202,7 @@ Item {
 
             Text {
                 id: valText
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
@@ -219,7 +213,7 @@ Item {
 
             Text {
                 id: valText2
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
@@ -236,6 +230,7 @@ Item {
 
             MouseArea {
                 anchors.fill: parent
+
                 onClicked: {
                     var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
                     odometerBox.realValue = odometerValue*impFact/1000.0
@@ -256,7 +251,7 @@ Item {
 
                     x: 10
                     y: Math.max((parent.height - height) / 2, 10)
-                    parent: ApplicationWindow.overlay
+                    parent: dialogParent
                     standardButtons: Dialog.Ok | Dialog.Cancel
                     onAccepted: {
                         var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
@@ -277,7 +272,7 @@ Item {
                                 spacing: 0
 
                                 Text {
-                                    color: "white"
+                                    color: Utility.getAppHexColor("lightText")
                                     text: "Odometer"
                                     font.bold: true
                                     horizontalAlignment: Text.AlignHCenter
@@ -300,16 +295,6 @@ Item {
         }
     }
 
-    Timer {
-        running: true
-        repeat: true
-        interval: 50
-
-        onTriggered: {
-            mCommands.getValuesSetup()
-        }
-    }
-
     Connections {
         target: mCommands
 
@@ -327,8 +312,8 @@ Item {
             var fl = mMcConf.getParamDouble("foc_motor_flux_linkage")
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var speedFact = ((mMcConf.getParamInt("si_motor_poles") / 2.0) * 60.0 *
-            mMcConf.getParamDouble("si_gear_ratio")) /
-            (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
+                             mMcConf.getParamDouble("si_gear_ratio")) /
+                             (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
             var speedMax = 3.6 * rpmMax / speedFact
             var impFact = useImperial ? 0.621371192 : 1.0
             var speedMaxRound = (Math.ceil((speedMax * impFact) / 10.0) * 10.0)
@@ -346,8 +331,8 @@ Item {
             speedGauge.unitText = useImperial ? "mph" : "km/h"
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
-            mMcConf.getParamDouble("l_current_max")),
-            mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
+                                                           mMcConf.getParamDouble("l_current_max")),
+                                    mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
             if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
@@ -363,13 +348,12 @@ Item {
             efficiencyGauge.value = efficiency_lpf
 
             valText.text =
-            "VESCs  : " + values.num_vescs + "\n" +
-            "mAh Out: " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + "\n" +
-            "mAh In : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1)
+                    "Temp MOS : " + parseFloat(values.temp_mos).toFixed(2) + " \u00B0C\n" +
+                    "Temp Mot : " + parseFloat(values.temp_motor).toFixed(2) + " \u00B0C\n" +
+                    "mAh Out  : " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + "\n" +
+                    "mAh In   : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1)
 
-            odometerValue = values.odometer;
-
-
+            odometerValue = values.odometer
 
             var l1Txt = useImperial ? "mi Trip : " : "km Trip : "
             var l2Txt = useImperial ? "mi ODO  : " : "km ODO  : "
@@ -377,10 +361,10 @@ Item {
             var l4Txt = useImperial ? "mi Range: " : "km Range: "
 
             valText2.text =
-            l1Txt + parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(3) + "\n" +
-            l2Txt + parseFloat((values.odometer * impFact) / 1000.0).toFixed(odometerBox.decimals) + "\n" +
-            l3Txt + parseFloat(wh_km_total / impFact).toFixed(1) + "\n" +
-            l4Txt + parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(2)
+                l1Txt + parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(3) + "\n" +
+                l2Txt + parseFloat((values.odometer * impFact) / 1000.0).toFixed(odometerBox.decimals) + "\n" +
+                l3Txt + parseFloat(wh_km_total / impFact).toFixed(1) + "\n" +
+                l4Txt + parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(2)
         }
     }
 }

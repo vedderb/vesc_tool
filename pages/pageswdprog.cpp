@@ -576,6 +576,8 @@ void PageSwdProg::bmConnRes(int res)
                  "://res/other_fw/nrf52840_vesc_ble_rx26_tx25_led27.bin");
         addSwdFw("Wand Remote",
                  "://res/other_fw/nrf52840_stick_remote.bin");
+        addSwdFw("Stormcore Builtin - RX: 31 TX: 30 LED: 5",
+                 "://res/other_fw/nrf52840_stormcore_ble_rx31_tx30_led5.bin");
         break;
 
     case 10:

@@ -29,6 +29,9 @@ import Vedder.vesc.utility 1.0
 Item {
     property var dialogParent: ApplicationWindow.overlay
 
+    property int notchTop: 0
+    property int notchBot: 0
+
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
@@ -61,10 +64,10 @@ Item {
         modal: true
         focus: true
         width: parent.width - 40
-        height: parent.height - 40
+        height: parent.height - 40 - notchBot - notchTop
         closePolicy: Popup.CloseOnEscape
         x: 20
-        y: 10
+        y: 10 + notchTop
 
         Overlay.modal: Rectangle {
             color: "#AA000000"

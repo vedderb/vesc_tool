@@ -34,6 +34,8 @@ Item {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
     property var dialogParent: ApplicationWindow.overlay
+    property int notchTop: 0
+    property int notchBot: 0
 
     signal dialogClosed()
 
@@ -74,12 +76,14 @@ Item {
     Dialog {
         id: dialog
         modal: true
-        focus: true
+        focus: true      
+
+
         width: parent.width - 10
-        height: parent.height - 10
+        height: parent.height - 10 - notchBot - notchTop
         closePolicy: Popup.NoAutoClose
         x: 5
-        y: 5
+        y: 5 + notchTop
         parent: dialogParent
         bottomMargin: 0
         rightMargin: 0

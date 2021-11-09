@@ -32,6 +32,8 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool mSendCanAtStart: false
     property int mCanIdAtStart: 0
+    property int notchTop: 0
+    property int notchBot: 0
 
     function openDialog() {
         canIdModel.clear()
@@ -98,8 +100,9 @@ Item {
         }
 
         width: parent.width - 20
+        height: parent.height - 20 - notchBot -notchTop
         x: 10
-        y: parent.height / 2 - height / 2
+        y: 10 + notchTop
         parent: ApplicationWindow.overlay
 
         ProgressBar {

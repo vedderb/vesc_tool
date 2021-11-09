@@ -336,8 +336,6 @@ Item {
                 scanButton.text = qsTr("Scan")
             }
 
-            //bleModel.clear()
-
             for (var addr in devs) {
                 var name = devs[addr]
                 if(Qt.platform.os == "ios" || Qt.platform.os == "mac") {

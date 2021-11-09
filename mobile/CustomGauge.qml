@@ -43,14 +43,12 @@ Item {
     CircularGauge {
         id: gauge
         anchors.fill: parent
-
         Behavior on value {
             NumberAnimation {
                 easing.type: Easing.OutCirc
                 duration: 100
             }
         }
-
         style: CircularGaugeStyle {
             id: style
             labelStepSize: labelStep
@@ -60,154 +58,121 @@ Item {
             minorTickmarkInset: outerRadius*0.07
             minimumValueAngle: minAngle
             maximumValueAngle: maxAngle
-
-            background:
+            background: Item {
                 Canvas {
-                property double value: gauge.value
-                anchors.fill: parent
-                onValueChanged: requestPaint()
+                    id:backgroundpaint
+                    property double value: gauge.value
+                    anchors.fill: parent
+                    onValueChanged: requestPaint()
 
-                function d2r(degrees) {
-                    return degrees * (Math.PI / 180.0);
-                }
-
-                onPaint: {
-                    var ctx = getContext("2d");
-                    ctx.reset();
-                    ctx.beginPath();
-                    var gradient = ctx.createRadialGradient(outerRadius, outerRadius, 0,
-                                                            outerRadius, outerRadius, outerRadius)
-                    gradient.addColorStop(0.7, Material.background)
-                    gradient.addColorStop(1, traceColor)
-                    ctx.fillStyle = gradient
-                    ctx.arc(outerRadius, outerRadius, outerRadius, 0, Math.PI * 2)
-                    ctx.fill()
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = Material.background
-                    ctx.lineWidth = outerRadius
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius / 2,
-                            d2r(valueToAngle(Math.max(gauge.value, 0)) - 90),
-                            d2r(valueToAngle(gauge.maximumValue + 1) - 90));
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius / 2,
-                            d2r(valueToAngle(gauge.minimumValue) - 90),
-                            d2r(valueToAngle(Math.min(gauge.value, 0)) - 90));
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius / 2,
-                            d2r(valueToAngle(gauge.maximumValue) - 90),
-                            d2r(valueToAngle(gauge.minimumValue) - 90));
-                    ctx.stroke();
-                    ctx.reset();
-
-                    ctx.beginPath();
-                    var gradient2 = ctx.createLinearGradient(parent.width*0.5,0,0 ,parent.height);
-
-                    // Add three color stops
-                    gradient2.addColorStop(1, '#111111');
-                    gradient2.addColorStop(0.2, '#222222');
-                    gradient2.addColorStop(0.7, '#222222');
-                    gradient2.addColorStop(0, '#111111');
-
-                    ctx.fillStyle = gradient2;
-                    ctx.lineWidth = 0;
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius  ,
-                            0, 2 * Math.PI);
-                    //ctx.fill();
-
-                    var gradient6 = ctx.createRadialGradient(outerRadius, outerRadius,
-                                                             outerRadius - outerRadius * 0.18,
-                                                             outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
-                    gradient6.addColorStop(0, '#00000000');
-                    gradient6.addColorStop(1, '#ff10ee10');
-
-                    if (gauge.value < 0) {
+                    function d2r(degrees) {
+                        return degrees * (Math.PI / 180.0);
+                    }
+                    onPaint: {
+                        var ctx = getContext("2d");
+                        ctx.reset()
+                        //Draw background color with highlighted pie slice
+                        ctx.beginPath()
+                        ctx.fillStyle = Utility.getAppHexColor("normalBackground")
+                        ctx.arc(outerRadius, outerRadius, outerRadius, 0, Math.PI * 2)
+                        ctx.fill()
                         ctx.beginPath();
-                        ctx.strokeStyle = gradient6
-                        ctx.lineWidth = outerRadius * 0.18
+                        ctx.strokeStyle = Utility.getAppHexColor("darkBackground")
+                        ctx.lineWidth = outerRadius
                         ctx.arc(outerRadius,
                                 outerRadius,
-                                outerRadius - outerRadius * 0.1,
-                                d2r(valueToAngle(gauge.value) - 90),
-                                d2r(valueToAngle(0) - 90));
+                                outerRadius / 2,
+                                d2r(valueToAngle(Math.max(gauge.value, 0)) - 90),
+                                d2r(valueToAngle(gauge.maximumValue) - 90));
                         ctx.stroke();
-                    } else {
                         ctx.beginPath();
-                        ctx.strokeStyle = gradient6
-                        ctx.lineWidth = outerRadius * 0.18
                         ctx.arc(outerRadius,
                                 outerRadius,
-                                outerRadius - outerRadius * 0.1,
-                                d2r(valueToAngle(0) - 90),
-                                d2r(valueToAngle(gauge.value) - 90));
+                                outerRadius / 2,
+                                d2r(valueToAngle(gauge.minimumValue) - 90),
+                                d2r(valueToAngle(Math.min(gauge.value, 0)) - 90));
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius / 2,
+                                d2r(valueToAngle(gauge.maximumValue) - 90),
+                                d2r(valueToAngle(gauge.minimumValue) - 90));
+                        ctx.stroke();
+
+                        //create radial glow around outside of gauge
+                        var gradient1 = ctx.createRadialGradient(outerRadius, outerRadius, outerRadius - outerRadius * 0.13, outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
+                        gradient1.addColorStop(0, '#00000000');
+                        gradient1.addColorStop(1, '#ffffdd80');
+                        if (gauge.value < 0) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = gradient1
+                            ctx.lineWidth = outerRadius * 0.18
+                            ctx.arc(outerRadius,
+                                    outerRadius,
+                                    outerRadius - outerRadius * 0.1,
+                                    d2r(valueToAngle(gauge.value) - 90),
+                                    d2r(valueToAngle(0) - 90));
+                            ctx.stroke();
+                        } else {
+                            ctx.beginPath();
+                            ctx.strokeStyle = gradient1
+                            ctx.lineWidth = outerRadius * 0.18
+                            ctx.arc(outerRadius,
+                                    outerRadius,
+                                    outerRadius - outerRadius * 0.1,
+                                    d2r(valueToAngle(0) - 90),
+                                    d2r(valueToAngle(gauge.value) - 90));
+                            ctx.stroke();
+                        }
+
+                        //create outer gauge metal bezel effect
+                        ctx.beginPath();
+                        var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+                        // Add three color stops
+                        gradient2.addColorStop(1, '#cccccc');
+                        gradient2.addColorStop(0.7, '#333333');
+                        gradient2.addColorStop(0.1, '#eeeeee');
+                        ctx.strokeStyle = gradient2;
+                        ctx.lineWidth = outerRadius*0.03
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius*0.985  ,
+                                0, 2 * Math.PI);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+                        // Add three color stops
+                        gradient3.addColorStop(1, '#111111');
+                        gradient3.addColorStop(0.8, '#cccccc');
+                        gradient3.addColorStop(0, '#222222');
+                        ctx.strokeStyle = gradient3;
+                        ctx.lineWidth = outerRadius*0.03
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                0.96*outerRadius ,
+                                0, 2 * Math.PI);
+                        ctx.stroke();
+
+                        //small black inset line on inner gauge to give seam
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = outerRadius*0.002
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius*0.942  ,
+                                0, 2 * Math.PI);
                         ctx.stroke();
                     }
-
-                    ctx.beginPath();
-                    var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-
-                    // Add three color stops
-                    gradient3.addColorStop(1, '#dddddd');
-                    gradient3.addColorStop(0.7, '#333333');
-                    gradient3.addColorStop(0.1, '#eeeeee');
-
-                    ctx.strokeStyle = gradient3;
-                    ctx.lineWidth = outerRadius*0.03
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius*0.985  ,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    var gradient4 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-
-                    // Add three color stops
-                    gradient4.addColorStop(1, '#333333');
-                    gradient4.addColorStop(0.8, '#dddddd');
-                    gradient4.addColorStop(0, '#555555');
-
-                    ctx.strokeStyle = gradient4;
-                    ctx.lineWidth = outerRadius*0.03
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            0.96*outerRadius ,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    var gradient5 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-
-                    // Add three color stops
-                    gradient5.addColorStop(1, '#333333');
-                    gradient5.addColorStop(0.8, '#dddddd');
-                    gradient5.addColorStop(0, '#555555');
-
-                    ctx.strokeStyle = gradient5;
-                    ctx.lineWidth = outerRadius*0.03
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            0.96*outerRadius ,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = outerRadius*0.005
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius*0.94  ,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
+                }
+                DropShadow {
+                    anchors.fill: parent
+                    horizontalOffset: -1
+                    verticalOffset: 1
+                    radius: 3
+                    samples: 1 + radius*2
+                    color: "#40000000"
+                    source: backgroundpaint
                 }
             }
 
@@ -236,6 +201,7 @@ Item {
                         gradient.addColorStop(0.92, '#ffffff');
                         gradient.addColorStop(1, '#ffffff');
 
+
                         // the fill color
                         ctx.fillStyle = gradient;
                         ctx.fill();
@@ -258,8 +224,8 @@ Item {
                         ctx.fill();
                     }
                 }
-
-                DropShadow {
+                DropShadow
+                {
                     anchors.fill: pointerNib
                     horizontalOffset: 0
                     verticalOffset: 0
@@ -305,8 +271,9 @@ Item {
                     antialiasing: true
                 }
 
+                //white circle to overlay glass
                 RadialGradient {
-                    id: glassEffect2
+                    id: glassEffect1
                     x: outerRadius - width/2
                     y: outerRadius - height/2
                     height: 2*outerRadius*0.96
@@ -319,54 +286,32 @@ Item {
                         GradientStop { position: 0.495; color: "white" } // Just a part of the canvas
                     }
                 }
-
-                RadialGradient {
-                    id: glassEffect3
+                //Cutout circle for part where glare isn't
+                RadialGradient{
+                    id: glassEffect2
                     horizontalOffset: outerRadius*0.8 - width/2
                     horizontalRadius: outerRadius*1.9
                     verticalOffset: outerRadius*2.3 - height/2
                     verticalRadius: outerRadius*1.9
-                    anchors.fill: glassEffect2
+                    anchors.fill: glassEffect1
                     visible:  false
-                    z: glassEffect2.z + 1
+                    z: glassEffect1.z + 1
                     gradient: Gradient {
-                        GradientStop { position: 1.2; color: "#33000000" }
-                        GradientStop { position: 1.1; color: "#44000000" }
-                        GradientStop { position: 1.05; color: "#33000000" }
-                        GradientStop { position: 1; color: "#22000000" }
+                        GradientStop { position: 1.2; color: "#22000000" }
+                        GradientStop { position: 1.1; color: "#33000000" }
+                        GradientStop { position: 1.05; color: "#22000000" }
+                        GradientStop { position: 1; color: "#11000000" }
                         GradientStop { position: 0.98; color: "transparent" } // Just a part of the canvas
                     }
                 }
-
+                //Subtract both
                 OpacityMask {
-                    id: glassEffect4
-                    anchors.fill: glassEffect2
-                    source: glassEffect2
-                    maskSource: glassEffect3
+                    id: glassEffect3
+                    anchors.fill: glassEffect1
+                    source: glassEffect1
+                    maskSource: glassEffect2
                     invert: false
                     visible: true
-                }
-
-                LinearGradient {
-                    id: glassEffect5
-                    anchors.fill: glassEffect2
-                    start: Qt.point(0.6*outerRadius, outerRadius)
-                    end: Qt.point(outerRadius, 0.2*outerRadius)
-
-                    gradient: Gradient {
-                        GradientStop { position: 1.8; color: "transparent" }
-                        GradientStop { position: -6; color: "white" } // Just a part of the canvas
-                    }
-                    visible: false// Not visible (it will be painted by the mask)
-                }
-
-                OpacityMask {
-                    id: glassEffect6
-                    anchors.fill: glassEffect2
-                    source: glassEffect4
-                    maskSource: glassEffect5
-                    invert: false
-                    visible: false
                 }
             }
 
@@ -381,17 +326,14 @@ Item {
                         res = true
                     }
                 }
-
                 return res
             }
-
             tickmarkLabel:  Text {
                 font.pixelSize: outerRadius * 0.15
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix
                 color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
                 antialiasing: true
             }
-
             tickmark: Rectangle {
                 implicitWidth: 2
                 implicitHeight: outerRadius * 0.09
@@ -400,7 +342,6 @@ Item {
                 smooth: true
                 color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
             }
-
             minorTickmark: Rectangle {
                 implicitWidth: 1.5
                 implicitHeight: outerRadius * 0.05
@@ -412,3 +353,4 @@ Item {
         }
     }
 }
+

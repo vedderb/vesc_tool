@@ -28,12 +28,13 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: topItem
-
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
     signal requestOpenControls()
     signal requestConnect()
     signal requestOpenMultiSettings()
+    property int notchTop: 0
+    property int notchBot: 0
 
     ScrollView {
         anchors.fill: parent
@@ -297,14 +298,20 @@ Item {
 
     SetupWizardFoc {
         id: wizardFoc
+        notchBot: topItem.notchBot
+        notchTop: topItem.notchTop
     }
 
     SetupWizardInput {
         id: wizardInput
+        notchBot: topItem.notchBot
+        notchTop: topItem.notchTop
     }
 
     PairingDialog {
         id: pairDialog
+        notchTop: topItem.notchTop
+        notchBot: topItem.notchBot
     }
 
 
@@ -343,7 +350,7 @@ Item {
         width: parent.width - 10
         closePolicy: Popup.CloseOnEscape
         x: 5
-        y: parent.height / 2 - height / 2
+        y: parent.height / 2 - height / 2 + notchTop
         parent: ApplicationWindow.overlay
 
         Overlay.modal: Rectangle {
@@ -367,7 +374,7 @@ Item {
 
         parent: ApplicationWindow.overlay
         x: 10
-        y: topItem.y + topItem.height / 2 - height / 2
+        y: topItem.y + topItem.height / 2 - height / 2 + notchTop
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -401,7 +408,7 @@ Item {
 
         parent: ApplicationWindow.overlay
         x: 10
-        y: topItem.y + topItem.height / 2 - height / 2
+        y: topItem.y + topItem.height / 2 - height / 2 + notchTop
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -436,7 +443,7 @@ Item {
 
         parent: ApplicationWindow.overlay
         x: 10
-        y: topItem.y + topItem.height / 2 - height / 2
+        y: topItem.y + topItem.height / 2 - height / 2 + notchTop
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -469,7 +476,7 @@ Item {
 
         width: parent.width - 20
         x: 10
-        y: parent.height / 2 - height / 2
+        y: parent.height / 2 - height / 2 + notchTop
         parent: ApplicationWindow.overlay
 
         Overlay.modal: Rectangle {

@@ -27,6 +27,8 @@ import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    property int notchTop: 0
+    property int notchBot: 0
     property ConfigParams mInfoConf: VescIf.infoConfig()
 
     function openDialog() {
@@ -45,10 +47,10 @@ Item {
         modal: true
         focus: true
         width: parent.width - 10
-        height: parent.height - 10
+        height: parent.height - 10 - notchBot - notchTop
         closePolicy: Popup.NoAutoClose
         x: 5
-        y: 5
+        y: 5 + notchTop
         parent: ApplicationWindow.overlay
         bottomMargin: 0
         rightMargin: 0
@@ -85,7 +87,7 @@ Item {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         clip: true
-                        contentWidth: parent.width - 20
+                        contentWidth: availableWidth
 
                         Text {
                             id: usageText

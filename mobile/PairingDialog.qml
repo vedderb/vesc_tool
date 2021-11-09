@@ -26,7 +26,10 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
-Item {
+Item {   
+    property int notchBot: 0
+    property int notchTop: 0
+
     function openDialog() {
         dialog.open()
         loadUuids()
@@ -48,10 +51,10 @@ Item {
         modal: true
         focus: true
         width: parent.width - 20
-        height: parent.height - 60
+        height: parent.height - 60 - notchBot - notchTop
         closePolicy: Popup.CloseOnEscape
         x: 10
-        y: 50
+        y: 50 + notchTop
         parent: ApplicationWindow.overlay
         padding: 10
 

@@ -307,7 +307,8 @@ ios {
     QMAKE_INFO_PLIST = ios/Info.plist
     HEADERS += ios/src/setIosParameters.h
     SOURCES += ios/src/setIosParameters.mm
-    DISTFILES += ios/Info.plist
+    DISTFILES += ios/Info.plist \
+                 ios/*.storyboard
 
     QMAKE_ASSET_CATALOGS = $$PWD/ios/Images.xcassets
     QMAKE_ASSET_CATALOGS_APP_ICON = "AppIcon"
@@ -316,7 +317,7 @@ ios {
     QMAKE_BUNDLE_DATA += ios_artwork
     app_launch_images.files = $$files($$PWD/ios/LaunchImage*.png)
     QMAKE_BUNDLE_DATA += app_launch_images
-    app_launch_screen.files = $$files($$PWD/ios/MyLaunchScreen.xib)
+    app_launch_screen.files = $$files($$PWD/ios/MyLaunchScreen.storyboard)
     QMAKE_BUNDLE_DATA += app_launch_screen
 
     #QMAKE_IOS_DEPLOYMENT_TARGET = 11.0

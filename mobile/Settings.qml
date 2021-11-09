@@ -65,6 +65,8 @@ Item {
                 Layout.fillWidth: true
                 text: "Keep Screen On"
                 checked: VescIf.keepScreenOn()
+                visible: Qt.platform.os !== "ios"
+                enabled: Qt.platform.os !== "ios"
             }
 
             CheckBox {
@@ -72,6 +74,8 @@ Item {
                 Layout.fillWidth: true
                 text: "Allow Screen Rotation"
                 checked: VescIf.getAllowScreenRotation()
+                visible: Qt.platform.os !== "ios"
+                enabled: Qt.platform.os !== "ios"
             }
 
             CheckBox {

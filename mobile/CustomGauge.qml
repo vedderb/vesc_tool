@@ -61,157 +61,170 @@ Item {
             minimumValueAngle: minAngle
             maximumValueAngle: maxAngle
 
-            background:
+            background: Item {
                 Canvas {
-                property double value: gauge.value
-                anchors.fill: parent
-                onValueChanged: requestPaint()
+                    id:backgroundpaint
+                    property double value: gauge.value
+                    anchors.fill: parent
+                    onValueChanged: requestPaint()
 
-                function d2r(degrees) {
-                    return degrees * (Math.PI / 180.0);
-                }
-                onPaint: {
-                    var ctx = getContext("2d");
-                    ctx.reset();
-                    ctx.beginPath();
-                    var gradient = ctx.createRadialGradient(outerRadius, outerRadius, 0,
-                                                            outerRadius, outerRadius, outerRadius)
-                    gradient.addColorStop(0.7, Material.background)
-                    gradient.addColorStop(1, traceColor)
-                    ctx.fillStyle = gradient
-                    ctx.arc(outerRadius, outerRadius, outerRadius, 0, Math.PI * 2)
-                    ctx.fill()
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = Material.background
-                    ctx.lineWidth = outerRadius
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius / 2,
-                            d2r(valueToAngle(Math.max(gauge.value, 0)) - 90),
-                            d2r(valueToAngle(gauge.maximumValue + 1) - 90));
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius / 2,
-                            d2r(valueToAngle(gauge.minimumValue) - 90),
-                            d2r(valueToAngle(Math.min(gauge.value, 0)) - 90));
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius / 2,
-                            d2r(valueToAngle(gauge.maximumValue) - 90),
-                            d2r(valueToAngle(gauge.minimumValue) - 90));
-                    ctx.stroke();
-                    ctx.reset();
-
-                    ctx.beginPath();
-                    var gradient2 = ctx.createLinearGradient(parent.width*0.5,0,0 ,parent.height);
-
-                    // Add three color stops
-                    gradient2.addColorStop(1, '#111111');
-                    gradient2.addColorStop(0.2, '#222222');
-                    gradient2.addColorStop(0.7, '#222222');
-                    gradient2.addColorStop(0, '#111111');
-
-                    ctx.fillStyle = gradient2;
-                    ctx.lineWidth = 0;
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius  ,
-                            0, 2 * Math.PI);
-                    //ctx.fill();
-
-
-                    var gradient6 = ctx.createRadialGradient(outerRadius, outerRadius, outerRadius - outerRadius * 0.13, outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
-                    gradient6.addColorStop(0, '#00000000');
-                    gradient6.addColorStop(1, '#ffffdd80');
-
-                    if (gauge.value < 0) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = gradient6
-                        ctx.lineWidth = outerRadius * 0.18
-                        ctx.arc(outerRadius,
-                                outerRadius,
-                                outerRadius - outerRadius * 0.1,
-                                d2r(valueToAngle(gauge.value) - 90),
-                                d2r(valueToAngle(0) - 90));
-                        ctx.stroke();
-                    } else {
-                        ctx.beginPath();
-                        ctx.strokeStyle = gradient6
-                        ctx.lineWidth = outerRadius * 0.18
-                        ctx.arc(outerRadius,
-                                outerRadius,
-                                outerRadius - outerRadius * 0.1,
-                                d2r(valueToAngle(0) - 90),
-                                d2r(valueToAngle(gauge.value) - 90));
-                        ctx.stroke();
+                    function d2r(degrees) {
+                        return degrees * (Math.PI / 180.0);
                     }
+                    onPaint: {
+                        var ctx = getContext("2d");
+                        ctx.reset()
+                        ctx.beginPath()
+
+                        ctx.fillStyle = Utility.getAppHexColor("normalBackground")
+                        ctx.arc(outerRadius, outerRadius, outerRadius, 0, Math.PI * 2)
+                        ctx.fill()
+
+                        ctx.beginPath();
+                        ctx.strokeStyle = Utility.getAppHexColor("darkBackground")
+                        ctx.lineWidth = outerRadius
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius / 2,
+                                d2r(valueToAngle(Math.max(gauge.value, 0)) - 90),
+                                d2r(valueToAngle(gauge.maximumValue) - 90));
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius / 2,
+                                d2r(valueToAngle(gauge.minimumValue) - 90),
+                                d2r(valueToAngle(Math.min(gauge.value, 0)) - 90));
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius / 2,
+                                d2r(valueToAngle(gauge.maximumValue) - 90),
+                                d2r(valueToAngle(gauge.minimumValue) - 90));
+                        ctx.stroke();
 
 
-                    ctx.beginPath();
-                    var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+                        ctx.beginPath();
+                        var gradient2 = ctx.createLinearGradient(parent.width*0.5,0,0 ,parent.height);
 
-                    // Add three color stops
-                    gradient3.addColorStop(1, '#dddddd');
-                    gradient3.addColorStop(0.7, '#333333');
-                    gradient3.addColorStop(0.1, '#eeeeee');
+                        // Add three color stops
+                        gradient2.addColorStop(1, '#111111');
+                        gradient2.addColorStop(0.2, '#222222');
+                        gradient2.addColorStop(0.7, '#222222');
+                        gradient2.addColorStop(0, '#111111');
 
-                    ctx.strokeStyle = gradient3;
-                    ctx.lineWidth = outerRadius*0.03
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius*0.985  ,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    var gradient4 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-
-                    // Add three color stops
-                    gradient4.addColorStop(1, '#333333');
-                    gradient4.addColorStop(0.8, '#dddddd');
-                    gradient4.addColorStop(0, '#555555');
-
-                    ctx.strokeStyle = gradient4;
-                    ctx.lineWidth = outerRadius*0.03
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            0.96*outerRadius ,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
+                        ctx.fillStyle = gradient2;
+                        ctx.lineWidth = 0;
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius  ,
+                                0, 2 * Math.PI);
+                        //ctx.fill();
 
 
-                    ctx.beginPath();
-                    var gradient5 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+                        var gradient6 = ctx.createRadialGradient(outerRadius, outerRadius, outerRadius - outerRadius * 0.13, outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
+                        gradient6.addColorStop(0, '#00000000');
+                        gradient6.addColorStop(1, '#ffffdd80');
 
-                    // Add three color stops
-                    gradient5.addColorStop(1, '#333333');
-                    gradient5.addColorStop(0.8, '#dddddd');
-                    gradient5.addColorStop(0, '#555555');
-
-                    ctx.strokeStyle = gradient5;
-                    ctx.lineWidth = outerRadius*0.03
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            0.96*outerRadius ,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = outerRadius*0.005
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius*0.94  ,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
-
+                        if (gauge.value < 0) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = gradient6
+                            ctx.lineWidth = outerRadius * 0.18
+                            ctx.arc(outerRadius,
+                                    outerRadius,
+                                    outerRadius - outerRadius * 0.1,
+                                    d2r(valueToAngle(gauge.value) - 90),
+                                    d2r(valueToAngle(0) - 90));
+                            ctx.stroke();
+                        } else {
+                            ctx.beginPath();
+                            ctx.strokeStyle = gradient6
+                            ctx.lineWidth = outerRadius * 0.18
+                            ctx.arc(outerRadius,
+                                    outerRadius,
+                                    outerRadius - outerRadius * 0.1,
+                                    d2r(valueToAngle(0) - 90),
+                                    d2r(valueToAngle(gauge.value) - 90));
+                            ctx.stroke();
+                        }
 
 
+                        ctx.beginPath();
+                        var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+
+                        // Add three color stops
+                        gradient3.addColorStop(1, '#cccccc');
+                        gradient3.addColorStop(0.7, '#333333');
+                        gradient3.addColorStop(0.1, '#eeeeee');
+
+                        ctx.strokeStyle = gradient3;
+                        ctx.lineWidth = outerRadius*0.03
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius*0.985  ,
+                                0, 2 * Math.PI);
+                        ctx.stroke();
+
+                        ctx.beginPath();
+                        var gradient4 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+
+                        // Add three color stops
+                        gradient4.addColorStop(1, '#111111');
+                        gradient4.addColorStop(0.8, '#cccccc');
+                        gradient4.addColorStop(0, '#222222');
+
+                        ctx.strokeStyle = gradient4;
+                        ctx.lineWidth = outerRadius*0.03
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                0.96*outerRadius ,
+                                0, 2 * Math.PI);
+                        ctx.stroke();
+
+
+                        ctx.beginPath();
+                        var gradient5 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+
+                        // Add three color stops
+                        gradient5.addColorStop(1, '#222222');
+                        gradient5.addColorStop(0.8, '#cccccc');
+                        gradient5.addColorStop(0, '#333333');
+
+                        ctx.strokeStyle = gradient5;
+                        ctx.lineWidth = outerRadius*0.03
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                0.96*outerRadius ,
+                                0, 2 * Math.PI);
+                        ctx.stroke();
+
+                        ctx.beginPath();
+
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = outerRadius*0.002
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius*0.942  ,
+                                0, 2 * Math.PI);
+                        ctx.stroke();
+
+
+
+                    }
                 }
+                DropShadow
+                       {
+                           anchors.fill: parent
+                           horizontalOffset: -1
+                           verticalOffset: 1
+                           radius: 3
+                           samples: 1 + radius*2
+
+
+                           color: "#40000000"
+                           source: backgroundpaint
+                       }
             }
 
             needle: Item {
@@ -263,15 +276,15 @@ Item {
                     }
                 }
                 DropShadow
-                       {
-                           anchors.fill: pointerNib
-                           horizontalOffset: 0
-                           verticalOffset: 0
-                           radius: pointerNib.width/6
-                           samples: 10
-                           color: "#90000000"
-                           source: pointerNib
-                       }
+                {
+                    anchors.fill: pointerNib
+                    horizontalOffset: 0
+                    verticalOffset: 0
+                    radius: pointerNib.width/6
+                    samples: 10
+                    color: "#90000000"
+                    source: pointerNib
+                }
 
 
 
@@ -338,10 +351,10 @@ Item {
                     visible:  false
                     z: glassEffect2.z + 1
                     gradient: Gradient {
-                        GradientStop { position: 1.2; color: "#33000000" }
-                        GradientStop { position: 1.1; color: "#44000000" }
-                        GradientStop { position: 1.05; color: "#33000000" }
-                        GradientStop { position: 1; color: "#22000000" }
+                        GradientStop { position: 1.2; color: "#22000000" }
+                        GradientStop { position: 1.1; color: "#33000000" }
+                        GradientStop { position: 1.05; color: "#22000000" }
+                        GradientStop { position: 1; color: "#11000000" }
                         GradientStop { position: 0.98; color: "transparent" } // Just a part of the canvas
                     }
                 }

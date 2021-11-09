@@ -42,11 +42,10 @@ ApplicationWindow {
     title: qsTr("VESC Tool")
 
     // Full screen iPhone X workaround:
-    property int safeWidth
-    property int notchTop
-    property int notchLeft
-    property int notchRight
-    property int notchBot
+    property int notchLeft: 0
+    property int notchRight: 0
+    property int notchBot: 0
+    property int notchTop: 0
 
     // https://github.com/ekke/c2gQtWS_x/blob/master/qml/main.qml
     flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
@@ -56,8 +55,6 @@ ApplicationWindow {
         notchLeft  = Utility.getSafeAreaMargins(appWindow)["left"]
         notchRight = Utility.getSafeAreaMargins(appWindow)["right"]
         notchBot = Utility.getSafeAreaMargins(appWindow)["bottom"]/2 //leaving too much room at the bottom
-        safeWidth  = appWindow.width - Utility.getSafeAreaMargins(appWindow)["left"] - Utility.getSafeAreaMargins(appWindow)["right"]
-        connScreen.notchTop = notchTop
     }
 
     Timer {
@@ -89,16 +86,20 @@ ApplicationWindow {
 
     SetupWizardIntro {
         id: introWizard
+        notchBot: appWindow.notchBot
+        notchTop: appWindow.notchTop
     }
 
     Controls {
         id: controls
         parentWidth: appWindow.width
-        parentHeight: appWindow.height - footer.height - tabBar.height
+        parentHeight: appWindow.height - footer.height - headerBar.height
     }
 
     MultiSettings {
         id: multiSettings
+        notchBot: appWindow.notchBot
+        notchTop: appWindow.notchTop
     }
 
     Settings {
@@ -109,8 +110,8 @@ ApplicationWindow {
         id: canDrawer
         edge: Qt.RightEdge
         width: 0.60 * appWindow.width
-        height: appWindow.height - footer.height - tabBar.height
-        y: tabBar.height
+        height: appWindow.height - footer.height - headerBar.height
+        y: headerBar.height
         dragMargin: 20
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -124,8 +125,8 @@ ApplicationWindow {
     Drawer {
         id: drawer
         width: 0.5 * appWindow.width
-        height: appWindow.height - footer.height - tabBar.height
-        y: tabBar.height
+        height: appWindow.height - footer.height - headerBar.height
+        y: headerBar.height
         dragMargin: 20
 
         Overlay.modal: Rectangle {
@@ -242,9 +243,7 @@ ApplicationWindow {
         id: swipeView
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
-        anchors.left:parent.anchors.left
         anchors.leftMargin: notchLeft
-        anchors.right:parent.anchors.left
         anchors.rightMargin: notchRight
         clip: true
 
@@ -254,6 +253,8 @@ ApplicationWindow {
                 anchors.fill: parent
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
+                notchBot: appWindow.notchBot
+                notchTop: appWindow.notchTop
 
                 onRequestOpenControls: {
                     controls.openDialog()
@@ -385,11 +386,9 @@ ApplicationWindow {
     }
 
     header: Rectangle {
+        id: headerBar
         color: Utility.getAppHexColor("lightestBackground")
         height: tabBar.implicitHeight + notchTop // iPhone X Workaround
-        anchors.left: parent.left // iPhoneX workaround
-        anchors.leftMargin: Math.max(notchLeft, notchRight)/2 // iPhoneX workaround
-        anchors.bottom: parent.bottom // iPhoneX workaround
 
         RowLayout {
             anchors.left: parent.left
@@ -578,7 +577,7 @@ ApplicationWindow {
     ConnectScreen {
         id: connScreen
         parent: ApplicationWindow.overlay
-
+        notchTop: appWindow.notchTop
         x: 0
         y: 0
         height: parent.height
@@ -695,22 +694,21 @@ ApplicationWindow {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape
-
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
 
         width: parent.width - 20
-        height: Math.min(implicitHeight, parent.height - 40)
+        height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
         x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+        y: (parent.height - height + notchTop) / 2
         parent: ApplicationWindow.overlay
 
         ScrollView {
             id: vescDialogScroll
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width - 20
+            contentWidth: availableWidth
 
             Text {
                 id: vescDialogLabel
@@ -718,7 +716,7 @@ ApplicationWindow {
                 linkColor: "lightblue"
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
-                wrapMode: Text.WordWrap
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 textFormat: Text.RichText
                 onLinkActivated: {
                     Qt.openUrlExternally(link)

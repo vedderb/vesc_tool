@@ -292,6 +292,7 @@ Item {
                     devicePath = theme + "icons/Electronics-96.png"
                     name = "BMS (" + params.hw + ")"
                 }
+                name = name.replace("_", " ")
 
                 canModel.append({"name": name,
                                     "ID": "LOCAL",
@@ -310,6 +311,7 @@ Item {
                         devicePath = theme + "icons/Electronics-96.png"
                         name = params.hw;
                     }
+                    name = name.replace("_", " ")
                     canModel.append({"name": name,
                                         "ID": devs[i].toString(),
                                         "deviceIconPath": devicePath,

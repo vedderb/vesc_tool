@@ -150,6 +150,9 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("lightText", QColor(33,33,33));
         Utility::setAppQColor("disabledText", QColor(110,110,110));
         Utility::setAppQColor("lightAccent", QColor(0,114,178));
+        Utility::setAppQColor("tertiary1",QColor(229, 207, 51));
+        Utility::setAppQColor("tertiary2",QColor(51, 180, 229));
+        Utility::setAppQColor("tertiary3",QColor(136, 51, 229));
         Utility::setAppQColor("midAccent", QColor(0,114,178));
         Utility::setAppQColor("darkAccent", QColor(0,161,221));
         Utility::setAppQColor("pink", QColor(219,98,139));

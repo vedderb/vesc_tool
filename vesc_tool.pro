@@ -10,7 +10,7 @@ VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 38
+VT_IS_TEST_VERSION = 39
 
 VT_ANDROID_VERSION_ARMV7 = 95
 VT_ANDROID_VERSION_ARM64 = 96
@@ -247,36 +247,30 @@ include(QCodeEditor/qcodeeditor.pri)
 
 RESOURCES += res.qrc \
     res_fw_bms.qrc \
+    res_fw.qrc \
     res_qml.qrc
 RESOURCES += res_config.qrc
 
 build_original {
-    RESOURCES += res_original.qrc \
-    res_fw_original.qrc
+    RESOURCES += res_original.qrc
     DEFINES += VER_ORIGINAL
 } else:build_platinum {
-    RESOURCES += res_platinum.qrc \
-    res_fw.qrc
+    RESOURCES += res_platinum.qrc
     DEFINES += VER_PLATINUM
 } else:build_gold {
-    RESOURCES += res_gold.qrc \
-    res_fw.qrc
+    RESOURCES += res_gold.qrc
     DEFINES += VER_GOLD
 } else:build_silver {
-    RESOURCES += res_silver.qrc \
-    res_fw.qrc
+    RESOURCES += res_silver.qrc
     DEFINES += VER_SILVER
 } else:build_bronze {
-    RESOURCES += res_bronze.qrc \
-    res_fw.qrc
+    RESOURCES += res_bronze.qrc
     DEFINES += VER_BRONZE
 } else:build_free {
-    RESOURCES += res_free.qrc \
-    res_fw.qrc
+    RESOURCES += res_free.qrc
     DEFINES += VER_FREE
 } else {
-    RESOURCES += res_neutral.qrc \
-    res_fw.qrc
+    RESOURCES += res_neutral.qrc
     DEFINES += VER_NEUTRAL
 }
 

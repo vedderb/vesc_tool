@@ -48,6 +48,12 @@ Item {
         mCommands.emitEmptySetupValues()
     }
 
+    // Make background slightly darker
+    Rectangle {
+        color: "#4d000000"
+        anchors.fill: parent
+    }
+
     GridLayout {
         anchors.fill: parent
         columns: isHorizontal ? 2 : 1

@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2018 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -22,133 +22,182 @@ import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
+import QtQuick.Controls.Material 2.2
 
 import Vedder.vesc.vescinterface 1.0
+import Vedder.vesc.utility 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
 
 Item {
     id: rtData
     property var dialogParent: ApplicationWindow.overlay
+    anchors.fill: parent
+
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
+
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property int odometerValue: 0
+    property double efficiency_lpf: 0
     property bool isHorizontal: rtData.width > rtData.height
 
-    property int gaugeSize: isHorizontal ? Math.min((height - valMetrics.height * 4) - 30, width / 3.5 - 10) :
-                                           Math.min(width / 1.4,
-                                                    (height - valMetrics.height * 4) / 2.3 - 10)
+    property int gaugeSize: (isHorizontal ? Math.min((height - valMetrics.height * 4)/1.3 - 30, width / 2.65 - 10) :
+    Math.min(width / 1.4, (height - valMetrics.height * 4) / 2.3 - 10))
 
 
-    property int gaugeSize2: gaugeSize * 0.65
-    property int gaugeVMargin: isHorizontal ? 0 : -gaugeSize * 0.05
-    property int gaugeHMargin: isHorizontal ? -gaugeSize * 0.1 : gaugeSize * 0.02
-
+    property int gaugeSize2: gaugeSize * 0.575
     Component.onCompleted: {
         mCommands.emitEmptySetupValues()
     }
 
     GridLayout {
         anchors.fill: parent
-        anchors.topMargin: 5
-        columns: isHorizontal ? 3 : 1
+        //anchors.topMargin: 5
+        columns: isHorizontal ? 2 : 1
         columnSpacing: 0
-
-        RowLayout {
+        rowSpacing: 0
+        Rectangle {            
             Layout.alignment: Qt.AlignHCenter
-            Layout.bottomMargin: gaugeVMargin
-            Layout.preferredHeight: isHorizontal ? gaugeSize : gaugeSize2
-            spacing: 0
-
-            CustomGauge {
-                id: powerGauge
-                Layout.preferredWidth: gaugeSize2
-                Layout.preferredHeight: gaugeSize2
-                Layout.alignment: (isHorizontal ? Qt.AlignTop : Qt.AlignVCenter)
-                Layout.rightMargin: gaugeHMargin
-                maximumValue: 10000
-                minimumValue: -10000
-                tickmarkScale: 0.001
-                tickmarkSuffix: "k"
-                labelStep: 1000
-                value: 1000
-                unitText: "W"
-                typeText: "Power"
-            }
-
+            Layout.fillWidth: true
+            Layout.preferredHeight: gaugeSize2*1.1
+            color: "transparent"
             CustomGauge {
                 id: currentGauge
-                Layout.preferredWidth: gaugeSize2
-                Layout.preferredHeight: gaugeSize2
-                Layout.alignment: isHorizontal ? Qt.AlignBottom : Qt.AlignVCenter
-                Layout.rightMargin: gaugeHMargin
-                minimumValue: 0
+                width:gaugeSize2
+                height:gaugeSize2
+                anchors.centerIn: parent
+                anchors.horizontalCenterOffset: -0.675*gaugeSize2
+                anchors.verticalCenterOffset: 0.1*gaugeSize2
+                minimumValue: -60
                 maximumValue: 60
-                labelStep: maximumValue > 60 ? 20 : 10
+                labelStep: 10
+                value:40
+                nibColor: Utility.getAppHexColor("tertiary1")
                 unitText: "A"
                 typeText: "Current"
+                minAngle: -210
+                maxAngle: 15
+                CustomGauge {
+                    id: dutyGauge
+                    width: gaugeSize2
+                    height: gaugeSize2
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: gaugeSize2*1.35
+                    maximumValue: 100
+                    minimumValue: -100
+                    minAngle: 210
+                    maxAngle: -15
+                    isInverted: -1
+                    labelStep: 25
+                    value: 0
+                    unitText: "%"
+                    typeText: "Duty"
+                    nibColor: Utility.getAppHexColor("tertiary3")
+                    CustomGauge {
+                        id: powerGauge
+                        width: gaugeSize2*1.05
+                        height: gaugeSize2*1.05
+                        anchors.centerIn: parent
+                        anchors.horizontalCenterOffset: -0.675*gaugeSize2
+                        anchors.verticalCenterOffset: -0.1*gaugeSize2
+                        maximumValue: 10000
+                        minimumValue: -10000
+                        tickmarkScale: 0.001
+                        tickmarkSuffix: "k"
+                        labelStep: 1000
+                        value: 1000
+                        unitText: "W"
+                        typeText: "Power"
+                        nibColor: Utility.getAppHexColor("tertiary2")
+                    }
+                }
             }
         }
-        
-        CustomGauge {
-            id: speedGauge
+
+        Rectangle {
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: gaugeSize
+            Layout.fillWidth: true
             Layout.preferredHeight: gaugeSize
-            minimumValue: 0
-            maximumValue: 60
-            minAngle: -180
-            maxAngle: 70
-            labelStep: maximumValue > 60 ? 20 : 10
-            value: 20
-            unitText: VescIf.useImperialUnits() ? "mph" : "km/h"
-            typeText: "Speed"
+            color: "transparent"
+            Layout.rowSpan: isHorizontal ? 2:1
+            CustomGauge {
+                id: speedGauge
+                width:parent.height
+                height:parent.height
+                anchors.centerIn: parent
+                anchors.horizontalCenterOffset: (width/4 - gaugeSize2)/2
+                minimumValue: 0
+                maximumValue: 60
+                minAngle: -225
+                maxAngle: 45
+                labelStep: maximumValue > 60 ? 20 : 10
+                value: 20
+                unitText: VescIf.useImperialUnits() ? "mph" : "km/h"
+                typeText: "Speed"
+                CustomGauge {
+                    id: batteryGauge
+                    width: gaugeSize2
+                    height: gaugeSize2
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: parent.width/4 + width/2
+                    minAngle: -225
+                    maxAngle: 45
+                    minimumValue: 0
+                    maximumValue: 100
+                    value: 95
+                    unitText: "%"
+                    typeText: "Battery"
+                    nibColor: value > 50 ? "green" : (value > 20 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("red"))
+
+                    Behavior on nibColor {
+                        ColorAnimation {
+                            duration: 1000;
+                            easing.type: Easing.InOutSine
+                            easing.overshoot: 3
+                        }
+                    }
+                }
+            }
         }
 
-        RowLayout {
+        Rectangle {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: gaugeVMargin
-            Layout.preferredHeight: isHorizontal ? gaugeSize : gaugeSize2
-            spacing: 0
-
+            Layout.fillWidth: true
+            Layout.preferredHeight: 0.85*gaugeSize2
+            color: "transparent"
             CustomGauge {
-                id: batteryGauge
-                Layout.preferredWidth: gaugeSize2
-                Layout.preferredHeight: gaugeSize2
-                Layout.alignment: isHorizontal ? Qt.AlignBottom : Qt.AlignVCenter
-                Layout.leftMargin: gaugeHMargin
-                minimumValue: 0
-                maximumValue: 100
-                value: 95
-                unitText: "%"
-                typeText: "Battery"
-                traceColor: "green"
-            }
-
-            CustomGauge {
-                id: dutyGauge
-                Layout.preferredWidth: gaugeSize2
-                Layout.preferredHeight: gaugeSize2
-                Layout.alignment: isHorizontal ? Qt.AlignTop : Qt.AlignVCenter
-                Layout.leftMargin: gaugeHMargin
-                maximumValue: 100
-                minimumValue: -100
-                labelStep: 20
-                value: 0
-                unitText: "%"
-                typeText: "Duty"
+                id: efficiencyGauge
+                width: gaugeSize2
+                height: gaugeSize2
+                anchors.centerIn: parent
+                anchors.horizontalCenterOffset: 3*gaugeSize/8
+                anchors.verticalCenterOffset: isHorizontal ? 0 : -gaugeSize2*0.15
+                minimumValue: -50
+                maximumValue:  50
+                labelStep: maximumValue > 60 ? 20 : 10
+                value: 20
+                unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
+                typeText: "Consump"
+                nibColor: value < 15 ? "green" : (value < 30 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("red"))
+                Behavior on nibColor {
+                    ColorAnimation {
+                        duration: 1000;
+                        easing.type: Easing.InOutSine
+                        easing.overshoot: 3
+                    }
+                }
             }
         }
 
         Rectangle {
             id: textRect
             color: Utility.getAppHexColor("darkBackground")
-
             Layout.fillWidth: true
             Layout.preferredHeight: valMetrics.height * 4 + 20
             Layout.alignment: Qt.AlignBottom
-            Layout.columnSpan: isHorizontal ? 3 : 1
+            Layout.columnSpan: isHorizontal ? 2 : 1
 
             Rectangle {
                 anchors.top: parent.top
@@ -159,7 +208,7 @@ Item {
 
             Text {
                 id: valText
-                color: Utility.getAppHexColor("lightText")
+                color: "white"
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
@@ -170,7 +219,7 @@ Item {
 
             Text {
                 id: valText2
-                color: Utility.getAppHexColor("lightText")
+                color: "white"
                 text: VescIf.getConnectedPortName()
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
@@ -184,15 +233,15 @@ Item {
                 font: valText.font
                 text: valText.text
             }
-                        
+
             MouseArea {
                 anchors.fill: parent
-                onClicked: {  
-                   var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
-                   odometerBox.realValue = odometerValue*impFact/1000.0
-                   tripDialog.open() 
+                onClicked: {
+                    var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
+                    odometerBox.realValue = odometerValue*impFact/1000.0
+                    tripDialog.open()
                 }
-              
+
                 Dialog {
                     id: tripDialog
                     modal: true
@@ -207,11 +256,11 @@ Item {
 
                     x: 10
                     y: Math.max((parent.height - height) / 2, 10)
-                    parent: dialogParent
+                    parent: ApplicationWindow.overlay
                     standardButtons: Dialog.Ok | Dialog.Cancel
-                    onAccepted: { 
+                    onAccepted: {
                         var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
-                        mCommands.setOdometer(Math.round(odometerBox.realValue*1000/impFact)) 
+                        mCommands.setOdometer(Math.round(odometerBox.realValue*1000/impFact))
                     }
 
                     ColumnLayout {
@@ -228,7 +277,7 @@ Item {
                                 spacing: 0
 
                                 Text {
-                                    color: Utility.getAppHexColor("lightText")
+                                    color: "white"
                                     text: "Odometer"
                                     font.bold: true
                                     horizontalAlignment: Text.AlignHCenter
@@ -251,12 +300,24 @@ Item {
         }
     }
 
+    Timer {
+        running: true
+        repeat: true
+        interval: 50
+
+        onTriggered: {
+            mCommands.getValuesSetup()
+        }
+    }
+
     Connections {
         target: mCommands
 
         onValuesSetupReceived: {
             currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
-            currentGauge.minimumValue = -Math.ceil(-mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
+            currentGauge.minimumValue = -currentGauge.maximumValue
+            currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
+
 
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
@@ -266,46 +327,49 @@ Item {
             var fl = mMcConf.getParamDouble("foc_motor_flux_linkage")
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var speedFact = ((mMcConf.getParamInt("si_motor_poles") / 2.0) * 60.0 *
-                    mMcConf.getParamDouble("si_gear_ratio")) /
-                    (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
+            mMcConf.getParamDouble("si_gear_ratio")) /
+            (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
             var speedMax = 3.6 * rpmMax / speedFact
             var impFact = useImperial ? 0.621371192 : 1.0
             var speedMaxRound = (Math.ceil((speedMax * impFact) / 10.0) * 10.0)
 
+            var dist = values.tachometer_abs / 1000.0
+            var wh_consume = values.watt_hours - values.watt_hours_charged
+            var wh_km_total = wh_consume / dist
+
             if (Math.abs(speedGauge.maximumValue - speedMaxRound) > 6.0) {
                 speedGauge.maximumValue = speedMaxRound
-                speedGauge.minimumValue = 0.0
+                speedGauge.minimumValue = -speedMaxRound
             }
 
-            speedGauge.value = Math.abs(values.speed * 3.6 * impFact)
+            speedGauge.value = values.speed * 3.6 * impFact
             speedGauge.unitText = useImperial ? "mph" : "km/h"
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
-                                                           mMcConf.getParamDouble("l_current_max")),
-                                    mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
+            mMcConf.getParamDouble("l_current_max")),
+            mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
-            var powerMin = Math.min(values.v_in * Math.min(-mMcConf.getParamDouble("l_in_current_min"),
-                                                           -mMcConf.getParamDouble("l_current_min")),
-                                    -mMcConf.getParamDouble("l_watt_min")) * values.num_vescs
-            var powerMinRound = -(Math.ceil(powerMin / 1000.0) * 1000.0)
-            
             if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
                 powerGauge.maximumValue = powerMaxRound
-                powerGauge.minimumValue = powerMinRound
+                powerGauge.minimumValue = -powerMaxRound
             }
 
             powerGauge.value = (values.current_in * values.v_in)
 
+            var alpha = 0.05
+            var efficiencyNow = Math.max( Math.min(values.current_in * values.v_in/Math.max(values.speed * 3.6 * impFact, 1e-6) , 60) , -60)
+            efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow
+            efficiencyGauge.value = efficiency_lpf
+
             valText.text =
-                    "Temp MOS : " + parseFloat(values.temp_mos).toFixed(2) + " \u00B0C\n" +
-                    "Temp Mot : " + parseFloat(values.temp_motor).toFixed(2) + " \u00B0C\n" +
-                    "mAh Out  : " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + "\n" +
-                    "mAh In   : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1)
+            "VESCs  : " + values.num_vescs + "\n" +
+            "mAh Out: " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + "\n" +
+            "mAh In : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1)
 
             odometerValue = values.odometer;
-            
-            var wh_km = (values.watt_hours - values.watt_hours_charged) / (values.tachometer_abs / 1000.0)
+
+
 
             var l1Txt = useImperial ? "mi Trip : " : "km Trip : "
             var l2Txt = useImperial ? "mi ODO  : " : "km ODO  : "
@@ -313,10 +377,10 @@ Item {
             var l4Txt = useImperial ? "mi Range: " : "km Range: "
 
             valText2.text =
-                    l1Txt + parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(3) + "\n" +
-                    l2Txt + parseFloat((values.odometer * impFact) / 1000.0).toFixed(odometerBox.decimals) + "\n" +
-                    l3Txt + parseFloat(wh_km / impFact).toFixed(1) + "\n" +
-                    l4Txt + parseFloat(values.battery_wh / (wh_km / impFact)).toFixed(2)
+            l1Txt + parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(3) + "\n" +
+            l2Txt + parseFloat((values.odometer * impFact) / 1000.0).toFixed(odometerBox.decimals) + "\n" +
+            l3Txt + parseFloat(wh_km_total / impFact).toFixed(1) + "\n" +
+            l4Txt + parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(2)
         }
     }
 }

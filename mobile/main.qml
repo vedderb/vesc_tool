@@ -293,11 +293,11 @@ ApplicationWindow {
                     id: rtSwipeView
                     enabled: true
                     clip: true
+                    currentIndex: 1
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     orientation: Qt.Vertical
-
                     Page {
                         RtData {
                             anchors.fill: parent

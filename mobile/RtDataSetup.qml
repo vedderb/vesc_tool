@@ -122,6 +122,7 @@ Item {
             Layout.preferredHeight: gaugeSize
             color: "transparent"
             Layout.rowSpan: isHorizontal ? 2:1
+
             CustomGauge {
                 id: speedGauge
                 width:parent.height
@@ -150,6 +151,25 @@ Item {
                     unitText: "%"
                     typeText: "Battery"
                     nibColor: value > 50 ? "green" : (value > 20 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("red"))
+                    Text{
+                        id: rideTime
+                        color: "white"
+                        text: "01:23:45"
+                        font.pixelSize: gaugeSize2/8.0
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.centerIn: parent
+                        anchors.verticalCenterOffset: -gaugeSize2*0.7
+                        font.letterSpacing: gaugeSize2*0.001
+                        anchors.margins: 10
+                        font.family:  "Exan"
+                    }
+                    Glow{
+                        anchors.fill: rideTime
+                                radius: 4
+                                samples: 9
+                                color: "#55ffffff"
+                                source: rideTime
+                    }
 
                     Behavior on nibColor {
                         ColorAnimation {

@@ -168,6 +168,7 @@ Item {
                     font.pixelSize: outerRadius * 0.3
                     color: Utility.getAppHexColor("lightText")
                     antialiasing: true
+                    font.family: "Roboto Mono"
                 }
 
                 Text {
@@ -176,9 +177,11 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: speedLabel.bottom
                     horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: outerRadius * 0.15
+                    font.pixelSize: outerRadius * 0.12
                     color: Utility.getAppHexColor("lightText")
                     antialiasing: true
+                    font.family: "Roboto Mono"
+                    font.capitalization: Font.AllUppercase
                 }
 
                 Text {
@@ -187,11 +190,13 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: speedLabel.top
-                    anchors.bottomMargin: outerRadius * 0.1
+                    //anchors.bottomMargin: outerRadius * 0.1
                     horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: outerRadius * 0.15
+                    font.pixelSize: outerRadius * 0.12
                     color: Utility.getAppHexColor("lightText")
                     antialiasing: true
+                    font.family: "Roboto Mono"
+                    font.capitalization: Font.AllUppercase
                 }
 
                 Item {
@@ -321,10 +326,11 @@ Item {
                 return res
             }
             tickmarkLabel:  Text {
-                font.pixelSize: outerRadius * 0.15
+                font.pixelSize: outerRadius * 0.12
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix
                 color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
                 antialiasing: true
+                font.family: "Roboto Mono"
             }
             tickmark: Rectangle {
                 implicitWidth: 2

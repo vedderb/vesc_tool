@@ -500,6 +500,9 @@ void Commands::processPacket(QByteArray data)
         if (mask & (uint32_t(1) << 20)) {
             values.odometer = vb.vbPopFrontUint32();
         }
+        if (mask & (uint32_t(1) << 21)) {
+            values.uptime_ms = vb.vbPopFrontUint32();
+        }
 
         emit valuesSetupReceived(values, mask);
     } break;

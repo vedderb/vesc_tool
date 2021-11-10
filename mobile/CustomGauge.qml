@@ -41,6 +41,7 @@ Item {
     property double minAngle: -144
     property double precision: 0
     property int isInverted: 1
+    property bool centerTextVisible: true
 
     CircularGauge {
         id: gauge
@@ -163,6 +164,7 @@ Item {
                 Text {
                     id: speedLabel
                     anchors.centerIn: parent
+                    visible: centerTextVisible
                     text: gauge.value.toFixed(precision)
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.3
@@ -174,6 +176,7 @@ Item {
                 Text {
                     id: speedLabelUnit
                     text: unitText
+                    visible: centerTextVisible
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: speedLabel.bottom
                     horizontalAlignment: Text.AlignHCenter
@@ -187,6 +190,7 @@ Item {
                 Text {
                     id: typeLabel
                     text: typeText
+                    visible: centerTextVisible
                     verticalAlignment: Text.AlignVCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: speedLabel.top

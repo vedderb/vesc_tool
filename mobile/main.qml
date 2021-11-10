@@ -271,69 +271,60 @@ ApplicationWindow {
         }
 
         Page {
-            RowLayout {
-                anchors.fill: parent
-                spacing: 0
+            PageIndicator {
+                count: rtSwipeView.count
+                currentIndex: rtSwipeView.currentIndex
+                anchors.right: parent.right
+                width:25
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: parent.height*0.44
+                rotation: 90
+                z:2
+            }
 
-                Rectangle {
-                    color: Utility.getAppHexColor("lightBackground")
-                    width: 16
-                    Layout.fillHeight: true
-                    Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
-
-                    PageIndicator {
-                        count: rtSwipeView.count
-                        currentIndex: rtSwipeView.currentIndex
-                        anchors.centerIn: parent
-                        rotation: 90
+            SwipeView {
+                id: rtSwipeView
+                enabled: true
+                clip: true
+                currentIndex: 1
+                anchors.fill:parent
+                orientation: Qt.Vertical
+                Page {
+                    RtData {
+                        anchors.fill: parent
                     }
                 }
 
-                SwipeView {
-                    id: rtSwipeView
-                    enabled: true
-                    clip: true
-                    currentIndex: 1
-
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    orientation: Qt.Vertical
-                    Page {
-                        RtData {
-                            anchors.fill: parent
-                        }
+                Page {
+                    RtDataSetup {
+                        anchors.fill: parent
                     }
+                }
 
-                    Page {
-                        RtDataSetup {
-                            anchors.fill: parent
+                Page {
+                    ColumnLayout {
+                        anchors.fill: parent
+
+                        RtDataIMU {
+                            Layout.fillWidth: true
                         }
-                    }
 
-                    Page {
-                        ColumnLayout {
-                            anchors.fill: parent
+                        CheckBox {
+                            Layout.fillWidth: true
+                            id: useYawBox
+                            text: "Use Yaw (will drift)"
+                            checked: false
+                        }
 
-                            RtDataIMU {
-                                Layout.fillWidth: true
-                            }
-
-                            CheckBox {
-                                Layout.fillWidth: true
-                                id: useYawBox
-                                text: "Use Yaw (will drift)"
-                                checked: false
-                            }
-
-                            Vesc3dItem {
-                                id: vesc3d
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                            }
+                        Vesc3dItem {
+                            id: vesc3d
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
                         }
                     }
                 }
             }
+
         }
 
         Page {

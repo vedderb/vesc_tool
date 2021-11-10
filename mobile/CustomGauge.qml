@@ -41,6 +41,7 @@ Item {
     property double minAngle: -144
     property double precision: 0
     property int isInverted: 1
+    property bool centerTextVisible: true
 
     CircularGauge {
         id: gauge
@@ -163,46 +164,54 @@ Item {
                 Text {
                     id: speedLabel
                     anchors.centerIn: parent
+                    visible: centerTextVisible
                     text: gauge.value.toFixed(precision)
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.3
                     color: Utility.getAppHexColor("lightText")
                     antialiasing: true
+                    font.family: "Roboto Mono"
                 }
 
                 Text {
                     id: speedLabelUnit
                     text: unitText
+                    visible: centerTextVisible
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: speedLabel.bottom
                     horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: outerRadius * 0.15
+                    font.pixelSize: outerRadius * 0.12
                     color: Utility.getAppHexColor("lightText")
                     antialiasing: true
+                    font.family: "Roboto Mono"
+                    font.capitalization: Font.AllUppercase
                 }
 
                 Text {
                     id: typeLabel
                     text: typeText
+                    visible: centerTextVisible
                     verticalAlignment: Text.AlignVCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: speedLabel.top
-                    anchors.bottomMargin: outerRadius * 0.1
+                    //anchors.bottomMargin: outerRadius * 0.1
                     horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: outerRadius * 0.15
+                    font.pixelSize: outerRadius * 0.12
                     color: Utility.getAppHexColor("lightText")
                     antialiasing: true
+                    font.family: "Roboto Mono"
+                    font.capitalization: Font.AllUppercase
                 }
 
                 Item {
                     x: outerRadius - width/2
                     y: outerRadius * 0.058
                     height: outerRadius * 0.18
-                    width: outerRadius * 0.15
+                    width: outerRadius * 0.12
 
                     transform: Rotation {
                         id:needleTransform
-                        origin.x: outerRadius * 0.15/2
+                        origin.x: outerRadius * 0.12/2
                         origin.y: outerRadius*(1-0.058)
                         angle: valueToAngle(gauge.value)
                     }
@@ -217,7 +226,7 @@ Item {
                             ctx.beginPath();
                             ctx.moveTo(parent.width/2, 0);
                             ctx.lineTo(parent.width, parent.height*0.015);
-                            ctx.quadraticCurveTo(parent.width*0.7, parent.height/4, parent.width*0.58, parent.height);
+                            ctx.quadraticCurveTo(parent.width*0.7, parent.height/4, parent.width*0.62, parent.height);
                             ctx.lineTo(parent.width/2, parent.height);
                             ctx.closePath();
 
@@ -321,10 +330,11 @@ Item {
                 return res
             }
             tickmarkLabel:  Text {
-                font.pixelSize: outerRadius * 0.15
+                font.pixelSize: outerRadius * 0.12
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix
                 color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
                 antialiasing: true
+                font.family: "Roboto Mono"
             }
             tickmark: Rectangle {
                 implicitWidth: 2

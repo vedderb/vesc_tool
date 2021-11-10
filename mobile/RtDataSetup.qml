@@ -40,18 +40,17 @@ Item {
     property double efficiency_lpf: 0
     property bool isHorizontal: rtData.width > rtData.height
 
-    property int gaugeSize: (isHorizontal ? Math.min((height - valMetrics.height * 4)/1.3 - 30, width / 2.65 - 10) :
-                                            Math.min(width / 1.4, (height - valMetrics.height * 4) / 2.3 - 10))
-    property int gaugeSize2: gaugeSize * 0.575
-
+    property int gaugeSize: (isHorizontal ? Math.min((height - valMetrics.height * 4)/1.2 - 30, width / 2.6 - 20) :
+    Math.min(width / 1.37, (height - valMetrics.height * 4) / 2.1 - 10))
+    property int gaugeSize2: gaugeSize * 0.55
     Component.onCompleted: {
         mCommands.emitEmptySetupValues()
     }
 
     // Make background slightly darker
-    Rectangle {
-        color: "#4d000000"
+     Rectangle {
         anchors.fill: parent
+        color: Utility.getAppHexColor("darkBackground")
     }
 
     GridLayout {
@@ -59,7 +58,8 @@ Item {
         columns: isHorizontal ? 2 : 1
         columnSpacing: 0
         rowSpacing: 0
-        Rectangle {            
+        //anchors.bottomMargin: gaugeSize2*2
+        Rectangle {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             Layout.preferredHeight: gaugeSize2*1.1
@@ -122,12 +122,14 @@ Item {
             Layout.preferredHeight: gaugeSize
             color: "transparent"
             Layout.rowSpan: isHorizontal ? 2:1
+
             CustomGauge {
                 id: speedGauge
                 width:parent.height
                 height:parent.height
                 anchors.centerIn: parent
                 anchors.horizontalCenterOffset: (width/4 - gaugeSize2)/2
+                //anchors.verticalCenterOffset: gaugeSize2*0.1
                 minimumValue: 0
                 maximumValue: 60
                 minAngle: -225
@@ -149,8 +151,101 @@ Item {
                     value: 95
                     unitText: "%"
                     typeText: "Battery"
+                    centerTextVisible: false
                     nibColor: value > 50 ? "green" : (value > 20 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("red"))
+                    Text {
+                        id: batteryLabel
+                        color: Utility.getAppHexColor("lightText")
+                        text: "BATTERY"
+                        font.pixelSize: gaugeSize2/18.0
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.centerIn: parent
+                        anchors.verticalCenterOffset: - gaugeSize2*0.175
+                        anchors.margins: 10
+                        font.family:  "Roboto mono"
+                        Text {
+                            id: rangeValLabel
+                            color: Utility.getAppHexColor("lightText")
+                            text: "20.0"
+                            font.pixelSize: gaugeSize2/8.0
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.centerIn: parent
+                            anchors.verticalCenterOffset: gaugeSize2*0.11
+                            anchors.margins: 10
+                            font.family:  "Roboto mono"
+                            Text {
+                                id: rangeLabel
+                                color: Utility.getAppHexColor("lightText")
+                                text: "KM RANGE"
+                                font.pixelSize: gaugeSize2/20.0
+                                verticalAlignment: Text.AlignVCenter
+                                anchors.centerIn: parent
+                                anchors.horizontalCenterOffset: gaugeSize2*0.3
+                                anchors.margins: 10
+                                font.family:  "Roboto mono"
+                            }
+                        }
+                        Text {
+                            id: battValLabel
+                            color: Utility.getAppHexColor("lightText")
+                            text: "50"
+                            font.pixelSize: gaugeSize2/8.0
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.centerIn: parent
+                            anchors.verticalCenterOffset: gaugeSize2*0.24
+                            //anchors.horizontalCenterOffset: (width -parent.width)/2
+                            anchors.margins: 10
+                            font.family:  "Roboto mono"
+                            Text {
+                                id: battLabel
+                                color: Utility.getAppHexColor("lightText")
+                                width:rangeLabel.width
+                                //height: parent.height
+                                text: "%"
+                                font.pixelSize: gaugeSize2/15.0
+                                verticalAlignment: Text.AlignVCenter
+                                horizontalAlignment:Text.AlignLeft
+                                anchors.centerIn: parent
+                                anchors.verticalCenterOffset: 0.1*height
+                                anchors.horizontalCenterOffset: gaugeSize2*0.3
+                                anchors.margins: 10
+                                font.family:  "Roboto mono"
+                            }
+                        }
+                    }
 
+                    Rectangle {
+                        id:clockRect
+                        width:rideTime.implicitWidth + gaugeSize2*0.1
+                        height: rideTime.implicitHeight + gaugeSize2*0.05
+                        anchors.centerIn: parent
+                        color: "transparent"
+                        anchors.verticalCenterOffset: -gaugeSize2*0.72
+                        anchors.horizontalCenterOffset: gaugeSize2*0.1
+                        border.color: "#333333"
+                        border.width: 2
+                        radius: gaugeSize2*0.03
+
+
+                        Text{
+                            id: rideTime
+                            color: Utility.getAppHexColor("lightText")
+                            text: "00:00:00"
+                            font.pixelSize: gaugeSize2/10.0
+                            verticalAlignment: Text.AlignVCenter
+                            font.letterSpacing: gaugeSize2*0.001
+                            anchors.centerIn: parent
+                            anchors.margins: 10
+                            font.family:  "Exan"
+                        }
+                        Glow{
+                            anchors.fill: rideTime
+                            radius: 4
+                            samples: 9
+                            color: "#55ffffff"
+                            source: rideTime
+                        }
+                    }
                     Behavior on nibColor {
                         ColorAnimation {
                             duration: 1000;
@@ -160,81 +255,122 @@ Item {
                     }
                 }
             }
-        }
 
-        Rectangle {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.fillWidth: true
-            Layout.preferredHeight: 0.85*gaugeSize2
-            color: "transparent"
-            CustomGauge {
-                id: efficiencyGauge
-                width: gaugeSize2
-                height: gaugeSize2
+            Rectangle {
+                id: inclineCanvas
+                property double incline:0
                 anchors.centerIn: parent
-                anchors.horizontalCenterOffset: 3*gaugeSize/8
-                anchors.verticalCenterOffset: isHorizontal ? 0 : -gaugeSize2*0.15
-                minimumValue: -50
-                maximumValue:  50
-                labelStep: maximumValue > 60 ? 20 : 10
-                value: 20
-                unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
-                typeText: "Consump"
-                nibColor: value < 15 ? "green" : (value < 30 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("red"))
-                Behavior on nibColor {
-                    ColorAnimation {
-                        duration: 1000;
-                        easing.type: Easing.InOutSine
-                        easing.overshoot: 3
+                visible:true
+                color: "transparent"
+                anchors.horizontalCenterOffset: 3.45*gaugeSize/8
+                anchors.verticalCenterOffset: gaugeSize2*0.75
+                z:-1
+                Rectangle {
+                    id: incline1
+                    height:2
+                    width: 1.75*inclineText.height
+                    radius:2
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: 1.25*width
+                    color: Utility.getAppHexColor("disabledText")
+                    transform: Rotation {
+                        id:inclineTransform
+                        origin.x: -1.25*incline1.width/2
+                        origin.y: 0
+                        angle: 180/3.14*Math.atan(inclineCanvas.incline/100.0)
+                    }
+                    Rectangle {
+                        id: incline2
+                        height:2
+                        width: parent.width
+                        radius:2
+                        color: parent.color
+                        anchors.centerIn: parent
+                        anchors.horizontalCenterOffset: -2.5*width
                     }
                 }
-            }
-
-            Canvas {
-                id: inclineCanvas
-
-                property double incline: 0
-
-                parent: efficiencyGauge
-                anchors.centerIn: parent
-                anchors.horizontalCenterOffset: -parent.width * 1.05
-
-                width: efficiencyGauge.width * 0.8
-                height: efficiencyGauge.height * 0.7
-
+                Text {
+                    id: inclineText
+                    anchors.centerIn: parent
+                    color: Utility.getAppHexColor("lightText")
+                    text: parseFloat(inclineCanvas.incline).toFixed(0) + "%"
+                    font.pixelSize: gaugeSize2/12.0
+                    verticalAlignment: Text.AlignVCenter
+                    //font.letterSpacing: gaugeSize2*0.001
+                    anchors.margins: 10
+                    font.family:  "Roboto mono"
+                }
+                width: gaugeSize2*0.7
+                height: gaugeSize2*0.7
                 Behavior on incline {
                     NumberAnimation {
                         easing.type: Easing.Linear
                         duration: 1000
                     }
                 }
+            }
 
-                onPaint: {
-                    var ctx = getContext("2d");
-                    ctx.reset()
+        }
 
-                    var color = Utility.getAppHexColor("lightAccent")
-
-                    ctx.strokeStyle = color
-                    ctx.lineWidth = 3
-                    ctx.beginPath()
-
-                    ctx.moveTo(0, height / 2 + width * incline / 200)
-                    ctx.lineTo(width, height / 2 - width * incline / 200)
-                    ctx.stroke()
-
-                    ctx.textAlign = "center"
-                    ctx.textBaseline = "middle"
-                    ctx.font = '%1pt %2'.arg(valText.font.pointSize * 1.5).arg(valText.font.family)
-
-                    var text = parseFloat(incline).toFixed(0) + "%"
-
-                    var textW = ctx.measureText(text).width * 1.3
-                    var textH = valText.font.pixelSize * 1.5 * 1.5
-                    ctx.clearRect(width / 2 - textW / 2, height / 2 - textH / 2, textW, textH)
-
-                    ctx.fillStyle = color
-                    ctx.fillText(text, width / 2, height / 2)
+        Rectangle {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            Layout.preferredHeight: gaugeSize2*1.1
+            color: "transparent"
+            CustomGauge {
+                id: escTempGauge
+                width:gaugeSize2
+                height:gaugeSize2
+                anchors.centerIn: parent
+                anchors.horizontalCenterOffset: -0.675*gaugeSize2
+                anchors.verticalCenterOffset: -0.1*gaugeSize2
+                minimumValue: 0
+                maximumValue:150
+                labelStep: 15
+                nibColor: Utility.getAppHexColor("tertiary2")
+                unitText: "°C"
+                typeText: "MAX \n ESC TEMP"
+                minAngle: -195
+                maxAngle: 30
+                CustomGauge {
+                    id: motTempGauge
+                    width: gaugeSize2
+                    height: gaugeSize2
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: gaugeSize2*1.35
+                    maximumValue: 150
+                    minimumValue: 0
+                    minAngle: 195
+                    maxAngle: -30
+                    isInverted: -1
+                    labelStep: 15
+                    value: 0
+                    unitText: "°C"
+                    typeText: "MAX \n MOT TEMP"
+                    nibColor: Utility.getAppHexColor("tertiary2")
+                    CustomGauge {
+                        id: efficiencyGauge
+                        width: gaugeSize2*1.05
+                        height: gaugeSize2*1.05
+                        anchors.centerIn: parent
+                        anchors.horizontalCenterOffset: -0.675*gaugeSize2
+                        anchors.verticalCenterOffset: 0.1*gaugeSize2
+                        minimumValue: -50
+                        maximumValue:  50
+                        labelStep: maximumValue > 60 ? 20 : 10
+                        value: 20
+                        unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
+                        typeText: "Consump."
+                        nibColor: value < 15 ? "green" : (value < 30 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("red"))
+                        Behavior on nibColor {
+                            ColorAnimation {
+                                duration: 1000;
+                                easing.type: Easing.InOutSine
+                                easing.overshoot: 3
+                            }
+                        }
+                        nibColor: Utility.getAppHexColor("tertiary2")
+                    }
                 }
             }
         }
@@ -243,10 +379,10 @@ Item {
             id: textRect
             color: Utility.getAppHexColor("darkBackground")
             Layout.fillWidth: true
-            Layout.preferredHeight: valMetrics.height * 4 + 20
+            Layout.preferredHeight: 0
             Layout.alignment: Qt.AlignBottom
             Layout.columnSpan: isHorizontal ? 2 : 1
-
+            visible: false
             Rectangle {
                 anchors.top: parent.top
                 width: parent.width
@@ -264,7 +400,6 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 10
             }
-
             Text {
                 id: valText2
                 color: Utility.getAppHexColor("lightText")
@@ -371,8 +506,8 @@ Item {
             var fl = mMcConf.getParamDouble("foc_motor_flux_linkage")
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var speedFact = ((mMcConf.getParamInt("si_motor_poles") / 2.0) * 60.0 *
-                             mMcConf.getParamDouble("si_gear_ratio")) /
-                             (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
+            mMcConf.getParamDouble("si_gear_ratio")) /
+            (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
             var speedMax = 3.6 * rpmMax / speedFact
             var impFact = useImperial ? 0.621371192 : 1.0
             var speedMaxRound = (Math.ceil((speedMax * impFact) / 10.0) * 10.0)
@@ -390,8 +525,8 @@ Item {
             speedGauge.unitText = useImperial ? "mph" : "km/h"
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
-                                                           mMcConf.getParamDouble("l_current_max")),
-                                    mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
+            mMcConf.getParamDouble("l_current_max")),
+            mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
             if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
@@ -407,12 +542,14 @@ Item {
             efficiencyGauge.value = efficiency_lpf
 
             valText.text =
-                    "Temp MOS : " + parseFloat(values.temp_mos).toFixed(2) + " \u00B0C\n" +
-                    "Temp Mot : " + parseFloat(values.temp_motor).toFixed(2) + " \u00B0C\n" +
-                    "mAh Out  : " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + "\n" +
-                    "mAh In   : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1)
+            "Temp MOS : " + parseFloat(values.temp_mos).toFixed(2) + " \u00B0C\n" +
+            "Temp Mot : " + parseFloat(values.temp_motor).toFixed(2) + " \u00B0C\n" +
+            "mAh Out  : " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + "\n" +
+            "mAh In   : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1)
 
             odometerValue = values.odometer
+            batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) +
+            useImperial ? " mi range " : "km range: "
 
             var l1Txt = useImperial ? "mi Trip : " : "km Trip : "
             var l2Txt = useImperial ? "mi ODO  : " : "km ODO  : "
@@ -420,10 +557,10 @@ Item {
             var l4Txt = useImperial ? "mi Range: " : "km Range: "
 
             valText2.text =
-                l1Txt + parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(3) + "\n" +
-                l2Txt + parseFloat((values.odometer * impFact) / 1000.0).toFixed(odometerBox.decimals) + "\n" +
-                l3Txt + parseFloat(wh_km_total / impFact).toFixed(1) + "\n" +
-                l4Txt + parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(2)
+            l1Txt + parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(3) + "\n" +
+            l2Txt + parseFloat((values.odometer * impFact) / 1000.0).toFixed(odometerBox.decimals) + "\n" +
+            l3Txt + parseFloat(wh_km_total / impFact).toFixed(1) + "\n" +
+            l4Txt + parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(2)
         }
     }
 }

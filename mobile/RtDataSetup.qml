@@ -41,20 +41,16 @@ Item {
     property bool isHorizontal: rtData.width > rtData.height
 
     property int gaugeSize: (isHorizontal ? Math.min((height - valMetrics.height * 4)/1.2 - 30, width / 2.6 - 20) :
-    Math.min(width / 1.3, (height - valMetrics.height * 4) / 2.1 - 10))
+    Math.min(width / 1.37, (height - valMetrics.height * 4) / 2.1 - 10))
     property int gaugeSize2: gaugeSize * 0.55
-
     Component.onCompleted: {
         mCommands.emitEmptySetupValues()
     }
 
     // Make background slightly darker
-     RadialGradient {
+     Rectangle {
         anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0; color: "#10ffffff" }
-            GradientStop { position: 0.5; color: Utility.getAppHexColor("darkBackground") }
-        }
+        color: Utility.getAppHexColor("darkBackground")
     }
 
     GridLayout {
@@ -174,8 +170,7 @@ Item {
                             font.pixelSize: gaugeSize2/8.0
                             verticalAlignment: Text.AlignVCenter
                             anchors.centerIn: parent
-                            anchors.verticalCenterOffset: gaugeSize2*0.115
-                            //anchors.horizontalCenterOffset: (width -parent.width)/2
+                            anchors.verticalCenterOffset: gaugeSize2*0.11
                             anchors.margins: 10
                             font.family:  "Roboto mono"
                             Text {
@@ -185,7 +180,6 @@ Item {
                                 font.pixelSize: gaugeSize2/20.0
                                 verticalAlignment: Text.AlignVCenter
                                 anchors.centerIn: parent
-                                // anchors.verticalCenterOffset: //(-height +parent.height)/2
                                 anchors.horizontalCenterOffset: gaugeSize2*0.3
                                 anchors.margins: 10
                                 font.family:  "Roboto mono"
@@ -198,7 +192,7 @@ Item {
                             font.pixelSize: gaugeSize2/8.0
                             verticalAlignment: Text.AlignVCenter
                             anchors.centerIn: parent
-                            anchors.verticalCenterOffset: gaugeSize2*0.235
+                            anchors.verticalCenterOffset: gaugeSize2*0.24
                             //anchors.horizontalCenterOffset: (width -parent.width)/2
                             anchors.margins: 10
                             font.family:  "Roboto mono"
@@ -235,7 +229,7 @@ Item {
 
                         Text{
                             id: rideTime
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             text: "00:00:00"
                             font.pixelSize: gaugeSize2/10.0
                             verticalAlignment: Text.AlignVCenter
@@ -298,7 +292,7 @@ Item {
                 Text {
                     id: inclineText
                     anchors.centerIn: parent
-                    color: "white"
+                    color: Utility.getAppHexColor("lightText")
                     text: parseFloat(inclineCanvas.incline).toFixed(0) + "%"
                     font.pixelSize: gaugeSize2/12.0
                     verticalAlignment: Text.AlignVCenter
@@ -313,17 +307,6 @@ Item {
                         easing.type: Easing.Linear
                         duration: 1000
                     }
-                }
-                Glow{
-                    width: inclineCanvas.width
-                    height: inclineCanvas.height
-                    anchors.fill: inclineText
-                    anchors.horizontalCenterOffset: 3.45*gaugeSize/8
-                    anchors.verticalCenterOffset: gaugeSize2*0.75
-                    radius: 3
-                    samples: 7
-                    color: "#55ffffff"
-                    source: inclineText
                 }
             }
 
@@ -377,7 +360,7 @@ Item {
                         labelStep: maximumValue > 60 ? 20 : 10
                         value: 20
                         unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
-                        typeText: "Consump"
+                        typeText: "Consump."
                         nibColor: value < 15 ? "green" : (value < 30 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("red"))
                         Behavior on nibColor {
                             ColorAnimation {

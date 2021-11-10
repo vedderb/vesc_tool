@@ -209,6 +209,54 @@ Item {
                     }
                 }
             }
+
+            Canvas {
+                id: inclineCanvas
+
+                property double incline: 0
+
+                parent: efficiencyGauge
+                anchors.centerIn: parent
+                anchors.horizontalCenterOffset: -parent.width * 1.05
+
+                width: efficiencyGauge.width * 0.8
+                height: efficiencyGauge.height * 0.7
+
+                Behavior on incline {
+                    NumberAnimation {
+                        easing.type: Easing.Linear
+                        duration: 1000
+                    }
+                }
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    ctx.reset()
+
+                    var color = Utility.getAppHexColor("lightAccent")
+
+                    ctx.strokeStyle = color
+                    ctx.lineWidth = 3
+                    ctx.beginPath()
+
+                    ctx.moveTo(0, height / 2 + width * incline / 200)
+                    ctx.lineTo(width, height / 2 - width * incline / 200)
+                    ctx.stroke()
+
+                    ctx.textAlign = "center"
+                    ctx.textBaseline = "middle"
+                    ctx.font = '%1pt %2'.arg(valText.font.pointSize * 1.5).arg(valText.font.family)
+
+                    var text = parseFloat(incline).toFixed(0) + "%"
+
+                    var textW = ctx.measureText(text).width * 1.3
+                    var textH = valText.font.pixelSize * 1.5 * 1.5
+                    ctx.clearRect(width / 2 - textW / 2, height / 2 - textH / 2, textW, textH)
+
+                    ctx.fillStyle = color
+                    ctx.fillText(text, width / 2, height / 2)
+                }
+            }
         }
 
         Rectangle {
@@ -323,6 +371,11 @@ Item {
 
     Connections {
         target: mCommands
+
+        onValuesImuReceived: {
+            inclineCanvas.incline = Math.tan(values.pitch) * 100
+            inclineCanvas.requestPaint()
+        }
 
         onValuesSetupReceived: {
             currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs

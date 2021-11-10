@@ -666,6 +666,7 @@ ApplicationWindow {
                     if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1) {
                         interval = 50
                         mCommands.getValuesSetup()
+                        mCommands.getImuData(0x2)
                     }
 
                     if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {

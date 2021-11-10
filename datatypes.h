@@ -25,6 +25,7 @@
 #include <QStringList>
 #include <QVector>
 #include <QDateTime>
+#include <QTime>
 #include <stdint.h>
 
 typedef struct {
@@ -252,6 +253,7 @@ struct SETUP_VALUES {
     Q_PROPERTY(double battery_wh MEMBER battery_wh)
     Q_PROPERTY(QString fault_str MEMBER fault_str)
     Q_PROPERTY(unsigned odometer MEMBER odometer)
+    Q_PROPERTY(unsigned uptime_ms MEMBER uptime_ms)
 
 public:
     SETUP_VALUES() {
@@ -276,6 +278,7 @@ public:
         num_vescs = 0;
         battery_wh = 0.0;
         odometer = 0;
+        uptime_ms = 0;
     }
 
     bool operator==(const SETUP_VALUES &other) const {
@@ -286,6 +289,12 @@ public:
 
     bool operator!=(SETUP_VALUES const &other) const {
         return !(*this == other);
+    }
+
+    Q_INVOKABLE QString uptimeString() {
+        QTime t(0, 0);
+        t = t.addMSecs(uptime_ms);
+        return t.toString("hh:mm:ss");
     }
 
     double temp_mos;
@@ -310,6 +319,7 @@ public:
     double battery_wh;
     QString fault_str;
     unsigned odometer;
+    unsigned uptime_ms;
 };
 
 Q_DECLARE_METATYPE(SETUP_VALUES)

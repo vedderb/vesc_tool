@@ -223,9 +223,9 @@ Item {
                             end: Qt.point(0,height)
                             source: bg1
                             gradient: Gradient {
-                            GradientStop { position: 0 ; color: "#777777"  }
-                            GradientStop { position: 0.7 ; color: "#222222"  }
-                            GradientStop { position: 1; color: "#666666"  }
+                            GradientStop { position: 0 ; color: Utility.getAppHexColor("lightestBackground") }
+                            GradientStop { position: 0.7 ; color: Utility.getAppHexColor("darkBackground") }
+                            GradientStop { position: 1; color: Utility.getAppHexColor("lightestBackground")  }
                             }
                         }
                         //color: button.down ? "#d6d6d6" : Utility.getAppHexColor("darkBackground")
@@ -244,13 +244,13 @@ Item {
                                 end: Qt.point(0,height)
                                 source: bg2
                                 gradient: Gradient {
-                                GradientStop { position: 0 ; color: "#222222"  }
-                                GradientStop { position: 0.8 ; color: "#666666"  }
-                                GradientStop { position: 1; color: "#111111"  }
+                                GradientStop { position: 0 ; color: Utility.getAppHexColor("darkBackground")  }
+                                GradientStop { position: 0.8 ; color: Utility.getAppHexColor("lightestBackground")  }
+                                GradientStop { position: 1; color: Utility.getAppHexColor("darkBackground")  }
                                 }
                             }
                             Rectangle{
-                                color: "#333333"
+                                color: Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")
                                 opacity: button.down ? 0 : 1
                                 anchors.centerIn: parent
                                 width:parent.width -4
@@ -501,10 +501,9 @@ Item {
                 width:2*gaugeSize2
                 height: rideTime.implicitHeight + gaugeSize2*0.025
                 anchors.centerIn: parent
-                color: "#1f1f1f"
+                color: Utility.getAppHexColor("darkBackground")
                 anchors.verticalCenterOffset: gaugeSize2*0.005
-                //anchors.horizontalCenterOffset: gaugeSize2*0.1
-                border.color: Utility.getAppHexColor("lightBackground")
+                border.color: Utility.getAppHexColor("lightestBackground")
                 border.width: 1
                 radius: gaugeSize2*0.03
                 Text{

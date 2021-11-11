@@ -74,9 +74,9 @@ Item {
                     onPaint: {
                         var ctx = getContext("2d");
                         ctx.reset()
-                        //Draw background color with highlighted pie slice
+
                         ctx.beginPath()
-                        ctx.fillStyle = Utility.getAppHexColor("darkBackground")
+                        ctx.fillStyle = Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")
                         ctx.arc(outerRadius, outerRadius, outerRadius, 0, Math.PI * 2)
                         ctx.fill()
                         ctx.beginPath();
@@ -248,9 +248,9 @@ Item {
                         ctx.beginPath();
                         var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
                         // Add three color stops
-                        gradient2.addColorStop(1, '#666666');
-                        gradient2.addColorStop(0.7, '#222222');
-                        gradient2.addColorStop(0.1, '#888888');
+                        gradient2.addColorStop(1, Utility.getAppHexColor("lightestBackground"));
+                        gradient2.addColorStop(0.7, Utility.getAppHexColor("darkBackground"));
+                        gradient2.addColorStop(0.1, Utility.getAppHexColor("lightestBackground"));
                         ctx.strokeStyle = gradient2;
                         ctx.lineWidth = outerRadius*0.03
                         ctx.arc(outerRadius,
@@ -261,9 +261,9 @@ Item {
                         ctx.beginPath();
                         var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
                         // Add three color stops
-                        gradient3.addColorStop(1, '#111111');
-                        gradient3.addColorStop(0.8, '#666666');
-                        gradient3.addColorStop(0, '#222222');
+                        gradient3.addColorStop(1, Utility.getAppHexColor("darkBackground"));
+                        gradient3.addColorStop(0.8, Utility.getAppHexColor("lightestBackground"));
+                        gradient3.addColorStop(0, Utility.getAppHexColor("darkBackground"));
                         ctx.strokeStyle = gradient3;
                         ctx.lineWidth = outerRadius*0.03
                         ctx.arc(outerRadius,

@@ -489,7 +489,6 @@ Item {
 
         onValuesImuReceived: {
             inclineCanvas.incline = Math.tan(values.pitch) * 100
-            inclineCanvas.requestPaint()
         }
 
         onValuesSetupReceived: {

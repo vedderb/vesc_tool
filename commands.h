@@ -129,6 +129,7 @@ signals:
     void eraseQmluiResReceived(bool ok);
     void writeQmluiResReceived(bool ok, quint32 offset);
     void ioBoardValRx(IO_BOARD_VALUES val);
+    void statsRx(STAT_VALUES val, unsigned int mask);
 
 public slots:
     void processPacket(QByteArray data);
@@ -230,6 +231,9 @@ public slots:
     void ioBoardSetPwm(int id, int channel, double duty);
     void ioBoardSetDigital(int id, int channel, bool on);
 
+    void getStats(unsigned int mask);
+    void resetStats(bool sendAck);
+
 private slots:
     void timerSlot();
 
@@ -265,6 +269,7 @@ private:
     int mTimeoutPingCan;
     int mTimeoutCustomConf;
     int mTimeoutBmsVal;
+    int mTimeoutStats;
 
 };
 

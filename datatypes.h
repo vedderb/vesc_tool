@@ -396,6 +396,73 @@ public:
 
 Q_DECLARE_METATYPE(IMU_VALUES)
 
+struct STAT_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(double speed_avg MEMBER speed_avg)
+    Q_PROPERTY(double speed_max MEMBER speed_max)
+    Q_PROPERTY(double power_avg MEMBER power_avg)
+    Q_PROPERTY(double power_max MEMBER power_max)
+    Q_PROPERTY(double temp_motor_avg MEMBER temp_motor_avg)
+    Q_PROPERTY(double temp_motor_max MEMBER temp_motor_max)
+    Q_PROPERTY(double temp_mos_avg MEMBER temp_mos_avg)
+    Q_PROPERTY(double temp_mos_max MEMBER temp_mos_max)
+    Q_PROPERTY(double current_avg MEMBER current_avg)
+    Q_PROPERTY(double current_max MEMBER current_max)
+    Q_PROPERTY(double count_time MEMBER count_time)
+
+public:
+    STAT_VALUES() {
+        speed_avg = 0.0;
+        speed_max = 0.0;
+        power_avg = 0.0;
+        power_max = 0.0;
+        temp_motor_avg = 0.0;
+        temp_motor_max = 0.0;
+        temp_mos_avg = 0.0;
+        temp_mos_max = 0.0;
+        current_avg = 0.0;
+        current_max = 0.0;
+        count_time = 0.0;
+    }
+
+    bool operator==(const STAT_VALUES &other) const {
+        (void)other;
+        // compare members
+        return true;
+    }
+
+    bool operator!=(STAT_VALUES const &other) const {
+        return !(*this == other);
+    }
+
+    Q_INVOKABLE double distance() { // Meters
+        return speed_avg * count_time;
+    }
+
+    Q_INVOKABLE double energy() { // Wh
+        return power_avg * count_time / 60.0 / 60.0;
+    }
+
+    Q_INVOKABLE double efficiency() { // Wh / km
+        return energy() / (distance() / 1000.0);
+    }
+
+    double speed_avg;
+    double speed_max;
+    double power_avg;
+    double power_max;
+    double temp_motor_avg;
+    double temp_motor_max;
+    double temp_mos_avg;
+    double temp_mos_max;
+    double current_avg;
+    double current_max;
+    double count_time;
+};
+
+Q_DECLARE_METATYPE(STAT_VALUES)
+
 struct LOG_DATA {
     Q_GADGET
 
@@ -860,6 +927,12 @@ typedef enum {
     COMM_IO_BOARD_GET_ALL,
     COMM_IO_BOARD_SET_PWM,
     COMM_IO_BOARD_SET_DIGITAL,
+
+    COMM_BM_MEM_WRITE,
+    COMM_BMS_BLNC_SELFTEST,
+    COMM_GET_EXT_HUM_TMP,
+    COMM_GET_STATS,
+    COMM_RESET_STATS,
 } COMM_PACKET_ID;
 
 // CAN commands

@@ -930,6 +930,24 @@ void Commands::processPacket(QByteArray data)
         emit ioBoardValRx(val);
     } break;
 
+    case COMM_GET_STATS: {
+        mTimeoutStats = 0;
+        STAT_VALUES values;
+        uint32_t mask = vb.vbPopFrontUint32();
+        if (mask & ((uint32_t)1 << 0)) { values.speed_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 1)) { values.speed_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 2)) { values.power_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 3)) { values.power_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 4)) { values.current_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 5)) { values.current_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 6)) { values.temp_mos_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 7)) { values.temp_mos_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 8)) { values.temp_motor_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 9)) { values.temp_motor_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 10)) { values.count_time = vb.vbPopFrontDouble32Auto(); }
+        emit statsRx(values, mask);
+    } break;
+
     default:
         break;
     }
@@ -1919,6 +1937,28 @@ void Commands::ioBoardSetDigital(int id, int channel, bool on)
     emitData(vb);
 }
 
+void Commands::getStats(unsigned int mask)
+{
+    if (mTimeoutStats > 0) {
+        return;
+    }
+
+    mTimeoutStats = mTimeoutCount;
+
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_STATS);
+    vb.vbAppendUint16(mask);
+    emitData(vb);
+}
+
+void Commands::resetStats(bool sendAck)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_RESET_STATS);
+    vb.vbAppendInt8(sendAck);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;
@@ -1945,6 +1985,7 @@ void Commands::timerSlot()
     }
     if (mTimeoutCustomConf > 0) mTimeoutCustomConf--;
     if (mTimeoutBmsVal > 0) mTimeoutBmsVal--;
+    if (mTimeoutStats > 0) mTimeoutStats--;
 }
 
 void Commands::emitData(QByteArray data)

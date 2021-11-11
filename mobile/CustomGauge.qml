@@ -56,7 +56,7 @@ Item {
             id: style
             labelStepSize: labelStep
             tickmarkStepSize: labelStep
-            labelInset: outerRadius * 0.28 + outerRadius*0.03
+            labelInset: outerRadius * 0.28 + outerRadius*0.06
             tickmarkInset: outerRadius*0.07
             minorTickmarkInset: outerRadius*0.07
             minimumValueAngle: minAngle
@@ -84,11 +84,11 @@ Item {
                         //create radial glow around outside of gauge
                         var gradient1 = ctx.createRadialGradient(outerRadius, outerRadius, outerRadius - outerRadius * 0.13, outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
                         gradient1.addColorStop(0, '#00000000');
-                        gradient1.addColorStop(0.8, traceColor);
+                        gradient1.addColorStop(1, traceColor);
                         if (gauge.value*isInverted < 0) {
                             ctx.beginPath();
                             ctx.strokeStyle = gradient1
-                            ctx.lineWidth = outerRadius * 0.18
+                            ctx.lineWidth = outerRadius * 0.2
                             ctx.arc(outerRadius,
                                     outerRadius,
                                     outerRadius - outerRadius * 0.1,
@@ -98,7 +98,7 @@ Item {
                         } else {
                             ctx.beginPath();
                             ctx.strokeStyle = gradient1
-                            ctx.lineWidth = outerRadius * 0.18
+                            ctx.lineWidth = outerRadius * 0.2
                             ctx.arc(outerRadius,
                                     outerRadius,
                                     outerRadius - outerRadius * 0.1,
@@ -107,43 +107,7 @@ Item {
                             ctx.stroke();
                         }
 
-                        //create outer gauge metal bezel effect
-                        ctx.beginPath();
-                        var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                        // Add three color stops
-                        gradient2.addColorStop(1, '#cccccc');
-                        gradient2.addColorStop(0.7, '#333333');
-                        gradient2.addColorStop(0.1, '#eeeeee');
-                        ctx.strokeStyle = gradient2;
-                        ctx.lineWidth = outerRadius*0.03
-                        ctx.arc(outerRadius,
-                                outerRadius,
-                                outerRadius*0.985  ,
-                                0, 2 * Math.PI);
-                        ctx.stroke();
-                        ctx.beginPath();
-                        var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                        // Add three color stops
-                        gradient3.addColorStop(1, '#111111');
-                        gradient3.addColorStop(0.8, '#cccccc');
-                        gradient3.addColorStop(0, '#222222');
-                        ctx.strokeStyle = gradient3;
-                        ctx.lineWidth = outerRadius*0.03
-                        ctx.arc(outerRadius,
-                                outerRadius,
-                                0.96*outerRadius ,
-                                0, 2 * Math.PI);
-                        ctx.stroke();
 
-                        //small black inset line on inner gauge to give seam
-                        ctx.beginPath();
-                        ctx.strokeStyle = 'black';
-                        ctx.lineWidth = outerRadius*0.002
-                        ctx.arc(outerRadius,
-                                outerRadius,
-                                outerRadius*0.942  ,
-                                0, 2 * Math.PI);
-                        ctx.stroke();
                     }
                 }
                 DropShadow {
@@ -172,6 +136,8 @@ Item {
                     antialiasing: true
                     font.family: "Roboto Mono"
                 }
+
+
 
                 Text {
                     id: speedLabelUnit
@@ -205,14 +171,14 @@ Item {
 
                 Item {
                     x: outerRadius - width/2
-                    y: outerRadius * 0.058
-                    height: outerRadius * 0.18
+                    y: outerRadius * 0.05
+                    height: outerRadius * 0.22
                     width: outerRadius * 0.12
 
                     transform: Rotation {
                         id:needleTransform
                         origin.x: outerRadius * 0.12/2
-                        origin.y: outerRadius*(1-0.058)
+                        origin.y: outerRadius*(1-0.05)
                         angle: valueToAngle(gauge.value)
                     }
                     Canvas {
@@ -226,8 +192,8 @@ Item {
                             ctx.beginPath();
                             ctx.moveTo(parent.width/2, 0);
                             ctx.lineTo(parent.width, parent.height*0.015);
-                            ctx.quadraticCurveTo(parent.width*0.7, parent.height/4, parent.width*0.62, parent.height);
-                            ctx.lineTo(parent.width/2, parent.height);
+                            ctx.quadraticCurveTo(parent.width*0.7, parent.height/4, 0.6*parent.width , 0.9*parent.height);
+                            ctx.quadraticCurveTo(parent.width*0.6, parent.height, parent.width/2, parent.height);
                             ctx.closePath();
 
                             var gradient = ctx.createLinearGradient(parent.width,parent.height*0.02,parent.width/2,0);
@@ -245,8 +211,8 @@ Item {
                             ctx.beginPath();
                             ctx.moveTo(parent.width/2, 0);
                             ctx.lineTo(0, parent.height*0.015);
-                            ctx.quadraticCurveTo(parent.width*0.3, parent.height/4, parent.width*0.42, parent.height);
-                            ctx.lineTo(parent.width/2, parent.height);
+                            ctx.quadraticCurveTo(parent.width*0.3, parent.height/4, 0.4*parent.width, 0.9*parent.height);
+                            ctx.quadraticCurveTo(parent.width*0.4, parent.height, parent.width/2, parent.height);
                             ctx.closePath();
 
                             var gradient2 = ctx.createLinearGradient(0,parent.height*0.02,parent.width/2,0);
@@ -269,7 +235,53 @@ Item {
                         color: "#90000000"
                         source: pointerNib
                     }
+                }
+                Canvas {
+                    id:foregroundpaint
+                    anchors.fill: parent
+                    opacity: 1
+                    property double value: gauge.value
+                    onValueChanged: requestPaint()
+                    onPaint: {
+                        var ctx = getContext("2d");
+                        //create outer gauge metal bezel effect
+                        ctx.beginPath();
+                        var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+                        // Add three color stops
+                        gradient2.addColorStop(1, '#666666');
+                        gradient2.addColorStop(0.7, '#222222');
+                        gradient2.addColorStop(0.1, '#888888');
+                        ctx.strokeStyle = gradient2;
+                        ctx.lineWidth = outerRadius*0.03
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius*0.985  ,
+                                0, 2 * Math.PI);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+                        // Add three color stops
+                        gradient3.addColorStop(1, '#111111');
+                        gradient3.addColorStop(0.8, '#666666');
+                        gradient3.addColorStop(0, '#222222');
+                        ctx.strokeStyle = gradient3;
+                        ctx.lineWidth = outerRadius*0.03
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                0.96*outerRadius ,
+                                0, 2 * Math.PI);
+                        ctx.stroke();
 
+                        //small black inset line on inner gauge to give seam
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = outerRadius*0.002
+                        ctx.arc(outerRadius,
+                                outerRadius,
+                                outerRadius*0.942  ,
+                                0, 2 * Math.PI);
+                        ctx.stroke();
+                    }
                 }
 
                 //white circle to overlay glass
@@ -337,15 +349,15 @@ Item {
                 font.family: "Roboto Mono"
             }
             tickmark: Rectangle {
-                implicitWidth: 2
-                implicitHeight: outerRadius * 0.09
+                implicitWidth: outerRadius * 0.02
+                implicitHeight: outerRadius * 0.1
                 antialiasing: true
                 smooth: true
                 color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
             }
             minorTickmark: Rectangle {
-                implicitWidth: 1.5
-                implicitHeight: outerRadius * 0.05
+                implicitWidth: outerRadius * 0.015
+                implicitHeight: outerRadius * 0.07
                 antialiasing: true
                 smooth: true
                 color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")

@@ -208,7 +208,7 @@ Item {
                     Image {
                         anchors.centerIn: parent
                         antialiasing: true
-                        opacity: 0.85
+                        opacity: 0.5
                         height: parent.width*0.6
                         width: height
                         source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"

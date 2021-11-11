@@ -35,7 +35,7 @@ Item {
     property string tickmarkSuffix: ""
     property double labelStep: 10
     property double tickmarkScale: 1
-    property color nibColor: Utility.getAppHexColor("tertiary1")
+    property color nibColor: Utility.getAppHexColor("tertiary2")
     property color traceColor: Qt.lighter(nibColor,1.5)
     property double maxAngle: 144
     property double minAngle: -144

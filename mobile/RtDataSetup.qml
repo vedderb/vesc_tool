@@ -415,7 +415,7 @@ Item {
                 labelStep: 15
                 nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
                 unitText: "°C"
-                typeText: "MAX \n ESC TEMP"
+                typeText: "TEMP\nESC"
                 minAngle: -195
                 maxAngle: 30
                 CustomGauge {
@@ -432,7 +432,7 @@ Item {
                     labelStep: 15
                     value: 0
                     unitText: "°C"
-                    typeText: "MAX \n MOT TEMP"
+                    typeText: "TEMP\nMOTOR"
                     property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                     property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                     property color redColor: {redColor = Utility.getAppHexColor("red")}
@@ -670,7 +670,7 @@ Item {
             odometerValue = values.odometer
             batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) + "%"
 
-            rangeLabel.text = useImperial ? "MI RANGE" : "KM RANGE"
+            rangeLabel.text = useImperial ? "MI\nRANGE" : "KM\nRANGE"
             if( values.battery_wh / (wh_km_total / impFact) < 999.0) {
                 rangeValLabel.text = parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(1)
             } else {

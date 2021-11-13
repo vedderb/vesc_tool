@@ -602,9 +602,15 @@ Item {
     }
 
     Connections {
-        target: mCommands
+        target: VescIf
 
         function onFwVersionReceived(params) {
+            if (!rx) {
+                return;
+            }
+
+            var params = VescIf.getLastFwRxParams()
+
             updateHw(params)
             updateBl(params)
 

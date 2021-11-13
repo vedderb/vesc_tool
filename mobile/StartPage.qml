@@ -288,6 +288,7 @@ Item {
             GroupBox {
                 title: qsTr("Wireless Bridge to Computer (TCP)")
                 Layout.fillWidth: true
+                Layout.bottomMargin: 10
 
                 TcpBox {
                     anchors.fill: parent

@@ -604,7 +604,12 @@ Item {
     Connections {
         target: VescIf
 
-        function onFwVersionReceived(params) {
+        function onFwRxChanged(rx) {
+            if (!rx) {
+                return;
+            }
+
+            var params = VescIf.getLastFwRxParams()
             if (!rx) {
                 return;
             }

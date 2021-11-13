@@ -138,6 +138,18 @@ Item {
                 value: 20
                 unitText: VescIf.useImperialUnits() ? "mph" : "km/h"
                 typeText: "Speed"
+
+                Image {
+                    anchors.centerIn: parent
+                    antialiasing: true
+                    opacity: 0.4
+                    height: parent.height*0.05
+                    fillMode: Image.PreserveAspectFit
+                    source: "qrc" + Utility.getThemePath() + "icons/vesc-96.png"
+                    anchors.horizontalCenterOffset: (gaugeSize)/3.25 + gaugeSize2/2
+                    anchors.verticalCenterOffset: -0.8*(gaugeSize)/2
+                }
+
                 Button {
                     id: button
                     anchors.centerIn:  parent

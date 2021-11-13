@@ -41,7 +41,7 @@ Item {
     property bool isHorizontal: rtData.width > rtData.height
 
     property int gaugeSize: (isHorizontal ? Math.min((height)/1.2 - 30, width / 2.8 - 20) :
-    Math.min(width / 1.37, (height) / 2.4 - 10 ))
+                                            Math.min(width / 1.37, (height) / 2.4 - 10 ))
     property int gaugeSize2: gaugeSize * 0.55
     Component.onCompleted: {
         mCommands.emitEmptySetupValues()
@@ -223,9 +223,9 @@ Item {
                             end: Qt.point(0,height)
                             source: bg1
                             gradient: Gradient {
-                            GradientStop { position: 0 ; color: Utility.getAppHexColor("lightestBackground") }
-                            GradientStop { position: 0.7 ; color: Utility.getAppHexColor("darkBackground") }
-                            GradientStop { position: 1; color: Utility.getAppHexColor("lightestBackground")  }
+                                GradientStop { position: 0 ; color: Utility.getAppHexColor("lightestBackground") }
+                                GradientStop { position: 0.7 ; color: Utility.getAppHexColor("darkBackground") }
+                                GradientStop { position: 1; color: Utility.getAppHexColor("lightestBackground")  }
                             }
                         }
                         //color: button.down ? "#d6d6d6" : Utility.getAppHexColor("darkBackground")
@@ -244,9 +244,9 @@ Item {
                                 end: Qt.point(0,height)
                                 source: bg2
                                 gradient: Gradient {
-                                GradientStop { position: 0 ; color: Utility.getAppHexColor("darkBackground")  }
-                                GradientStop { position: 0.8 ; color: Utility.getAppHexColor("lightestBackground")  }
-                                GradientStop { position: 1; color: Utility.getAppHexColor("darkBackground")  }
+                                    GradientStop { position: 0 ; color: Utility.getAppHexColor("darkBackground")  }
+                                    GradientStop { position: 0.8 ; color: Utility.getAppHexColor("lightestBackground")  }
+                                    GradientStop { position: 1; color: Utility.getAppHexColor("darkBackground")  }
                                 }
                             }
                             Rectangle{
@@ -436,11 +436,35 @@ Item {
                         anchors.verticalCenterOffset: 0.1*gaugeSize2
                         minimumValue: -50
                         maximumValue:  50
+                        minAngle: -127
+                        maxAngle: 127
                         labelStep: maximumValue > 60 ? 20 : 10
                         value: 20
                         unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
                         typeText: "Consump."
-                        nibColor: value >70 ? "red" : (value > 40 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("tertiary2"))
+                        nibColor: value >70 ? "red" : (value > 40 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("tertiary2")  )
+                        Text {
+                            id: consumValLabel
+                            color: Utility.getAppHexColor("lightText")
+                            text: "0"
+                            font.pixelSize: gaugeSize2*0.15
+                            anchors.verticalCenterOffset: 0.265*gaugeSize2
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.centerIn: parent
+                            anchors.margins: 10
+                            font.family:  "Roboto mono"
+                            Text {
+                                id: avgLabel
+                                color: Utility.getAppHexColor("lightText")
+                                text: "AVG"
+                                font.pixelSize: gaugeSize2*0.06
+                                anchors.verticalCenterOffset: 0.135*gaugeSize2
+                                verticalAlignment: Text.AlignVCenter
+                                anchors.centerIn: parent
+                                anchors.margins: 10
+                                font.family:  "Roboto mono"
+                            }
+                        }
                         Behavior on nibColor {
                             ColorAnimation {
                                 duration: 1000;
@@ -587,8 +611,8 @@ Item {
             var fl = mMcConf.getParamDouble("foc_motor_flux_linkage")
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var speedFact = ((mMcConf.getParamInt("si_motor_poles") / 2.0) * 60.0 *
-            mMcConf.getParamDouble("si_gear_ratio")) /
-            (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
+                             mMcConf.getParamDouble("si_gear_ratio")) /
+                    (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
             var speedMax = 3.6 * rpmMax / speedFact
             var impFact = useImperial ? 0.621371192 : 1.0
             var speedMaxRound = (Math.ceil((speedMax * impFact) / 10.0) * 10.0)
@@ -606,8 +630,8 @@ Item {
             speedGauge.unitText = useImperial ? "mph" : "km/h"
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
-            mMcConf.getParamDouble("l_current_max")),
-            mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
+                                                           mMcConf.getParamDouble("l_current_max")),
+                                    mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
             if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
@@ -617,10 +641,11 @@ Item {
 
             powerGauge.value = (values.current_in * values.v_in)
             var alpha = 0.05
-            var efficiencyNow = Math.max( Math.min(values.current_in * values.v_in/Math.max(values.speed * 3.6 * impFact, 1e-6) , 60) , -60)
+            var efficiencyNow = Math.max( Math.min(values.current_in * values.v_in/Math.max(Math.abs(values.speed * 3.6 * impFact), 1e-6) , 60) , -60)
             efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow
             efficiencyGauge.value = efficiency_lpf
             efficiencyGauge.unitText = useImperial ? "WH/MI" : "WH/KM"
+            consumValLabel = parseFloat(wh_km_total / impFact).toFixed(1)
 
             odometerValue = values.odometer
             batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) + "%"

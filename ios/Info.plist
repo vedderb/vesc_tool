@@ -42,10 +42,10 @@
 	<string>Saves log files here</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Used for Ride Tracking</string>
-        <key>NSLocationAlwaysUsageDescription</key>
-        <string>Used for Ride Tracking</string>
-        <key>NSLocationWhenInUseUsageDescription</key>
-        <string>Used for Ride Tracking</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Used for Ride Tracking</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used for Ride Tracking</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>$(PRODUCT_NAME) uses photos</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
@@ -53,6 +53,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
+		<string>external-accessory</string>
 		<string>bluetooth-central</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
@@ -94,7 +95,7 @@
 	<string>MyLaunchScreen</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
-                <string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>UISupportsDocumentBrowser</key>
 	<true/>

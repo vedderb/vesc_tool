@@ -131,7 +131,7 @@ Item {
     Connections {
         target: params
 
-        onParamChangedBool: {
+        function onParamChangedBool(src, name, newParam) {
             if (src !== editor && name == paramName) {
                 boolSwitch.checked = newParam
             }

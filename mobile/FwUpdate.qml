@@ -588,7 +588,7 @@ Item {
     Connections {
         target: VescIf
 
-        onFwUploadStatus: {
+        function onFwUploadStatus(status, progress, isOngoing) {
             if (isOngoing) {
                 uploadText.text = status + " (" + parseFloat(progress * 100.0).toFixed(2) + " %)"
             } else {
@@ -604,7 +604,7 @@ Item {
     Connections {
         target: mCommands
 
-        onFwVersionReceived: {
+        function onFwVersionReceived(params) {
             updateHw(params)
             updateBl(params)
 

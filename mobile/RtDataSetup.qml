@@ -50,7 +50,7 @@ Item {
     // Make background slightly darker
     Rectangle {
         anchors.fill: parent
-        color: Utility.getAppHexColor("darkBackground")
+        color: {color = Utility.getAppHexColor("darkBackground")}
     }
 
     GridLayout {
@@ -74,7 +74,7 @@ Item {
                 minimumValue: -60
                 maximumValue: 60
                 labelStep: maximumValue > 60 ? 20 : 10
-                nibColor: Utility.getAppHexColor("tertiary1")
+                nibColor: {nibColor = Utility.getAppHexColor("tertiary1")}
                 unitText: "A"
                 typeText: "Current"
                 minAngle: -210
@@ -94,7 +94,7 @@ Item {
                     value: 0
                     unitText: "%"
                     typeText: "Duty"
-                    nibColor: Utility.getAppHexColor("tertiary3")
+                    nibColor: {nibColor = Utility.getAppHexColor("tertiary3")}
                     CustomGauge {
                         id: powerGauge
                         width: gaugeSize2*1.05
@@ -110,7 +110,7 @@ Item {
                         value: 1000
                         unitText: "W"
                         typeText: "Power"
-                        nibColor: Utility.getAppHexColor("tertiary2")
+                        nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
                     }
                 }
             }
@@ -145,7 +145,7 @@ Item {
                     opacity: 0.4
                     height: parent.height*0.05
                     fillMode: Image.PreserveAspectFit
-                    source: "qrc" + Utility.getThemePath() + "icons/vesc-96.png"
+                    source: {source = "qrc" + Utility.getThemePath() + "icons/vesc-96.png"}
                     anchors.horizontalCenterOffset: (gaugeSize)/3.25 + gaugeSize2/2
                     anchors.verticalCenterOffset: -0.8*(gaugeSize)/2
                 }
@@ -196,7 +196,7 @@ Item {
                                     spacing: 0
 
                                     Text {
-                                        color: Utility.getAppHexColor("lightText")
+                                        color: {color = Utility.getAppHexColor("lightText")}
                                         text: "Odometer"
                                         font.bold: true
                                         horizontalAlignment: Text.AlignHCenter
@@ -223,7 +223,7 @@ Item {
                         opacity: 0.5
                         height: parent.width*0.6
                         width: height
-                        source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
+                        source: {source = "qrc" + Utility.getThemePath() + "icons/Settings-96.png"}
                     }
                     background: Rectangle {
                         id:bg1
@@ -235,9 +235,9 @@ Item {
                             end: Qt.point(0,height)
                             source: bg1
                             gradient: Gradient {
-                                GradientStop { position: 0 ; color: Utility.getAppHexColor("lightestBackground") }
-                                GradientStop { position: 0.7 ; color: Utility.getAppHexColor("darkBackground") }
-                                GradientStop { position: 1; color: Utility.getAppHexColor("lightestBackground")  }
+                                GradientStop { position: 0 ; color: {color = Utility.getAppHexColor("lightestBackground")} }
+                                GradientStop { position: 0.7 ; color: {color = Utility.getAppHexColor("darkBackground")} }
+                                GradientStop { position: 1; color: {color = Utility.getAppHexColor("lightestBackground") } }
                             }
                         }
                         //color: button.down ? "#d6d6d6" : Utility.getAppHexColor("darkBackground")
@@ -256,13 +256,13 @@ Item {
                                 end: Qt.point(0,height)
                                 source: bg2
                                 gradient: Gradient {
-                                    GradientStop { position: 0 ; color: Utility.getAppHexColor("darkBackground")  }
-                                    GradientStop { position: 0.8 ; color: Utility.getAppHexColor("lightestBackground")  }
-                                    GradientStop { position: 1; color: Utility.getAppHexColor("darkBackground")  }
+                                    GradientStop { position: 0 ; color: {color = Utility.getAppHexColor("darkBackground")  }}
+                                    GradientStop { position: 0.8 ; color: {color = Utility.getAppHexColor("lightestBackground")  }}
+                                    GradientStop { position: 1; color: {color = Utility.getAppHexColor("darkBackground")  }}
                                 }
                             }
                             Rectangle{
-                                color: Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")
+                                color: {color = Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")}
                                 opacity: button.down ? 0 : 1
                                 anchors.centerIn: parent
                                 width:parent.width -4
@@ -284,10 +284,13 @@ Item {
                     maximumValue: 100
                     value: 95
                     centerTextVisible: false
-                    nibColor: value > 50 ? "green" : (value > 20 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("red"))
+                    property color greenColor: "green"
+                    property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
+                    property color redColor: {redColor = Utility.getAppHexColor("red")}
+                    nibColor: value > 50 ? greenColor : (value > 20 ? orangeColor: redColor)
                     Text {
                         id: batteryLabel
-                        color: Utility.getAppHexColor("lightText")
+                        color: {color = Utility.getAppHexColor("lightText")}
                         text: "BATTERY"
                         font.pixelSize: gaugeSize2/18.0
                         verticalAlignment: Text.AlignVCenter
@@ -298,7 +301,7 @@ Item {
                     }
                     Text {
                         id: rangeValLabel
-                        color: Utility.getAppHexColor("lightText")
+                        color: {color = Utility.getAppHexColor("lightText")}
                         text: "∞"
                         font.pixelSize: text === "∞"? gaugeSize2/4.3 : gaugeSize2/8.0
                         anchors.verticalCenterOffset: text === "∞"? -0.015*gaugeSize2 : 0
@@ -309,7 +312,7 @@ Item {
                     }
                     Text {
                         id: rangeLabel
-                        color: Utility.getAppHexColor("lightText")
+                        color: {color = Utility.getAppHexColor("lightText")}
                         text: "KM RANGE"
                         font.pixelSize: gaugeSize2/20.0
                         verticalAlignment: Text.AlignVCenter
@@ -320,7 +323,7 @@ Item {
                     }
                     Text {
                         id: battValLabel
-                        color: Utility.getAppHexColor("lightText")
+                        color: {color = Utility.getAppHexColor("lightText")}
                         text: parseFloat(batteryGauge.value).toFixed(0) +"%"
                         font.pixelSize: gaugeSize2/12.0
                         verticalAlignment: Text.AlignVCenter
@@ -356,7 +359,7 @@ Item {
                     radius:2
                     anchors.centerIn: parent
                     anchors.horizontalCenterOffset: 1.25*width
-                    color: Utility.getAppHexColor("disabledText")
+                    color: {color = Utility.getAppHexColor("disabledText")}
                     transform: Rotation {
                         id:inclineTransform
                         origin.x: -1.25*incline1.width/2
@@ -376,11 +379,10 @@ Item {
                 Text {
                     id: inclineText
                     anchors.centerIn: parent
-                    color: Utility.getAppHexColor("lightText")
+                    color: {color = Utility.getAppHexColor("lightText")}
                     text: parseFloat(inclineCanvas.incline).toFixed(0) + "%"
                     font.pixelSize: gaugeSize2/12.0
                     verticalAlignment: Text.AlignVCenter
-                    //font.letterSpacing: gaugeSize2*0.001
                     anchors.margins: 10
                     font.family:  "Roboto mono"
                 }
@@ -411,7 +413,7 @@ Item {
                 minimumValue: 0
                 maximumValue:150
                 labelStep: 15
-                nibColor: Utility.getAppHexColor("tertiary2")
+                nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
                 unitText: "°C"
                 typeText: "MAX \n ESC TEMP"
                 minAngle: -195
@@ -431,7 +433,10 @@ Item {
                     value: 0
                     unitText: "°C"
                     typeText: "MAX \n MOT TEMP"
-                    nibColor: value >70 ? "red" : (value > 40 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("tertiary2"))
+                    property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
+                    property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
+                    property color redColor: {redColor = Utility.getAppHexColor("red")}
+                    nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
                     Behavior on nibColor {
                         ColorAnimation {
                             duration: 1000;
@@ -454,10 +459,13 @@ Item {
                         value: 20
                         unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
                         typeText: "Consump."
-                        nibColor: value >70 ? "red" : (value > 40 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("tertiary2")  )
+                        property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
+                        property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
+                        property color redColor: {redColor = Utility.getAppHexColor("red")}
+                        nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
                         Text {
                             id: consumValLabel
-                            color: Utility.getAppHexColor("lightText")
+                            color: {color = Utility.getAppHexColor("lightText")}
                             text: "0"
                             font.pixelSize: gaugeSize2*0.15
                             anchors.verticalCenterOffset: 0.265*gaugeSize2
@@ -467,7 +475,7 @@ Item {
                             font.family:  "Roboto mono"
                             Text {
                                 id: avgLabel
-                                color: Utility.getAppHexColor("lightText")
+                                color: {color = Utility.getAppHexColor("lightText")}
                                 text: "AVG"
                                 font.pixelSize: gaugeSize2*0.06
                                 anchors.verticalCenterOffset: 0.135*gaugeSize2
@@ -498,7 +506,7 @@ Item {
             Layout.columnSpan: isHorizontal ? 2 : 1
             Text {
                 id: odoLabel
-                color: Utility.getAppHexColor("lightText")
+                color: {color = Utility.getAppHexColor("lightText")}
                 text: "ODOMETER"
                 anchors.horizontalCenterOffset:  gaugeSize2*-2/3
                 font.pixelSize: gaugeSize2/18.0
@@ -510,7 +518,7 @@ Item {
             }
             Text {
                 id: timeLabel
-                color: Utility.getAppHexColor("lightText")
+                color: {color = Utility.getAppHexColor("lightText")}
                 text: "UP-TIME"
                 anchors.horizontalCenterOffset:  gaugeSize2*2/3
                 font.pixelSize: gaugeSize2/18.0
@@ -522,7 +530,7 @@ Item {
             }
             Text {
                 id: tripLabel
-                color: Utility.getAppHexColor("lightText")
+                color: {color = Utility.getAppHexColor("lightText")}
                 text: "TRIP"
                 anchors.horizontalCenterOffset:  0
                 font.pixelSize: gaugeSize2/18.0
@@ -537,14 +545,14 @@ Item {
                 width:2*gaugeSize2
                 height: rideTime.implicitHeight + gaugeSize2*0.025
                 anchors.centerIn: parent
-                color: Utility.getAppHexColor("darkBackground")
+                color:  {color = Utility.getAppHexColor("darkBackground")}
                 anchors.verticalCenterOffset: gaugeSize2*0.005
-                border.color: Utility.getAppHexColor("lightestBackground")
+                border.color:  {border.color = Utility.getAppHexColor("lightestBackground")}
                 border.width: 1
                 radius: gaugeSize2*0.03
                 Text{
                     id: rideTime
-                    color: Utility.getAppHexColor("lightText")
+                    color: {color = Utility.getAppHexColor("lightText")}
                     anchors.horizontalCenterOffset: gaugeSize2*2/3
                     text: "00:00:00"
                     font.pixelSize: gaugeSize2/10.0
@@ -563,7 +571,7 @@ Item {
                 }
                 Text{
                     id: odometer
-                    color: Utility.getAppHexColor("lightText")
+                    color: {color = Utility.getAppHexColor("lightText")}
                     anchors.horizontalCenterOffset:  gaugeSize2*-2/3
                     text: "0.0"
                     font.pixelSize: gaugeSize2/10.0
@@ -582,7 +590,7 @@ Item {
                 }
                 Text{
                     id: trip
-                    color: Utility.getAppHexColor("lightText")
+                    color: {color = Utility.getAppHexColor("lightText")}
                     anchors.horizontalCenterOffset: 0
                     text: "0.0"
                     font.pixelSize: gaugeSize2/10.0
@@ -606,11 +614,11 @@ Item {
     Connections {
         target: mCommands
 
-        onValuesImuReceived: {
+        function onValuesImuReceived(values, mask) {
             inclineCanvas.incline = Math.tan(values.pitch) * 100
         }
 
-        onValuesSetupReceived: {
+        function onValuesSetupReceived(values, mask) {
             currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
             currentGauge.minimumValue = -currentGauge.maximumValue
             currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
@@ -657,7 +665,7 @@ Item {
             efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow
             efficiencyGauge.value = efficiency_lpf
             efficiencyGauge.unitText = useImperial ? "WH/MI" : "WH/KM"
-            consumValLabel = parseFloat(wh_km_total / impFact).toFixed(1)
+            consumValLabel.text = parseFloat(wh_km_total / impFact).toFixed(1)
 
             odometerValue = values.odometer
             batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) + "%"

@@ -55,9 +55,9 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: Utility.getAppHexColor("lightBackground")
+        color: { color = Utility.getAppHexColor("lightBackground") }
         radius: 5
-        border.color:  Utility.getAppHexColor("disabledText")
+        border.color: { border.color = Utility.getAppHexColor("disabledText") }
         border.width: 2
 
         ColumnLayout {
@@ -68,7 +68,7 @@ Item {
 
             Text {
                 id: nameText
-                color: Utility.getAppHexColor("lightText")
+                color: {color = Utility.getAppHexColor("lightText")}
                 text: paramName
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -81,8 +81,12 @@ Item {
 
                 background: Rectangle {
                     implicitHeight: 35
-                    color: enumBox.hovered ? Utility.getAppHexColor("lightBackground") : Utility.getAppHexColor("normalBackground")
-                    border.color: enumBox.hovered ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("midAccent")
+                    property color hoveredColor: { hoveredColor = Utility.getAppHexColor("lightBackground")}
+                    property color unhoveredColor: { unhoveredColor = Utility.getAppHexColor("normalBackground")}
+                    property color hoveredBorder: { hoveredBorder = Utility.getAppHexColor("lightText")}
+                    property color unhoveredBorder: { unhoveredBorder = Utility.getAppHexColor("midAccent")}
+                    color: enumBox.hovered ? hoveredColor : unhoveredColor
+                    border.color: enumBox.hovered ? hoveredBorder : unhoveredBorder
                     border.width: enumBox.visualFocus ? 2 : 1
                     radius: 5
                 }
@@ -142,9 +146,8 @@ Item {
 
     Connections {
         target: params
-
-        onParamChangedEnum: {
-            if (src !== editor && name == paramName) {
+        function onParamChangedEnum(src, name, newParam) {
+            if (src !== editor && name === paramName) {
                 enumBox.currentIndex = newParam
             }
         }

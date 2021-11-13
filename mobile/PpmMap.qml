@@ -156,7 +156,7 @@ Item {
     Connections {
         target: mCommands
 
-        onDecodedPpmReceived: {
+        function onDecodedPpmReceived(value, last_len) {
             valueNow = value
             msNow = last_len
 

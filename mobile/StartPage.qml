@@ -319,8 +319,8 @@ Item {
     Connections {
         target: mCommands
 
-        onNrfPairingRes: {
-            if (res != 0) {
+        function onNrfPairingRes(res) {
+            if (res !== 0) {
                 nrfPairButton.visible = true
             }
         }
@@ -328,7 +328,7 @@ Item {
 
     Connections {
         target: VescIf
-        onPortConnectedChanged: {
+        function onPortConnectedChanged() {
             if (VescIf.isPortConnected()) {
                 connectButton.buttonText = "Disconnect"
                 connectButton.imageSrc = "qrc" + Utility.getThemePath() + "icons/Disconnected-96.png"

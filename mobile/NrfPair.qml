@@ -115,7 +115,7 @@ Item {
     Connections {
         target: mCommands
 
-        onNrfPairingRes: {
+        function onNrfPairingRes(res) {
             if (!visible) {
                 return
             }

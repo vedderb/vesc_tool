@@ -130,7 +130,7 @@ Item {
     Connections {
         target: VescIf
 
-        onUseImperialUnitsChanged: {
+        function onUseImperialUnitsChanged(useImperialUnits) {
             updateSpeedBoxes()
         }
     }
@@ -164,7 +164,7 @@ Item {
                     spacing: 0
 
                     Text {
-                        color: Utility.getAppHexColor("lightText")
+                        color: {color = Utility.getAppHexColor("lightText")}
                         text: "Profile Name"
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -178,13 +178,13 @@ Item {
                         Layout.bottomMargin: 20
                         height: nameInput.implicitHeight + 14
                         border.width: 2
-                        border.color: Utility.getAppHexColor("disabledText")
+                        border.color: {border.color = Utility.getAppHexColor("disabledText")}
                         color: "#33a8a8a8"
                         radius: 3
                         TextInput {
                             id: nameInput
                             text: ""
-                            color: Utility.getAppHexColor("lightText")
+                            color: {color = Utility.getAppHexColor("lightText")}
                             anchors.fill: parent
                             anchors.margins: 7
                             font.pointSize: 12
@@ -193,7 +193,7 @@ Item {
                     }
 
                     Text {
-                        color: Utility.getAppHexColor("lightText")
+                        color: {color = Utility.getAppHexColor("lightText")}
                         text: "Speed Limit"
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -227,7 +227,7 @@ Item {
                     }
 
                     Text {
-                        color: Utility.getAppHexColor("lightText")
+                        color: {color = Utility.getAppHexColor("lightText")}
                         text: "Motor Current Scale"
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter

@@ -77,9 +77,9 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: Utility.getAppHexColor("lightBackground")
+        color: {color = Utility.getAppHexColor("lightBackground")}
         radius: 5
-        border.color:  Utility.getAppHexColor("disabledText")
+        border.color:  {border.color = Utility.getAppHexColor("disabledText")}
         border.width: 2
 
         ColumnLayout {
@@ -90,7 +90,7 @@ Item {
 
             Text {
                 id: nameText
-                color: Utility.getAppHexColor("lightText")
+                color: {color = Utility.getAppHexColor("lightText")}
                 text: paramName
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -203,7 +203,7 @@ Item {
     Connections {
         target: params
 
-        onParamChangedInt: {
+        function onParamChangedInt(src, name, newParam) {
             if (src !== editor && name == paramName) {
                 valueBox.value = newParam * params.getParamEditorScale(paramName)
                 percentageBox.value = Math.round((100.0 * newParam) / maxVal)

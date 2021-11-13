@@ -126,7 +126,7 @@ Item {
     Connections {
         target: mCommands
 
-        onPrintReceived: {
+        function onPrintReceived(str) {
             terminalText.text += "\n" + str
         }
     }

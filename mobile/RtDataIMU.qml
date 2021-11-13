@@ -76,7 +76,7 @@ Item {
     Connections {
         target: mCommands
 
-        onValuesImuReceived: {
+        function onValuesImuReceived(values, mask) {
             valText1.text =
                     "Roll   : " + (values.roll * 57.2958).toFixed(2) + "\n" +
                     "Acc X  : " + values.accX.toFixed(2) + "\n" +

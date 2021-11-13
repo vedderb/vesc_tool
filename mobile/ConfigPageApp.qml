@@ -24,6 +24,7 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     property Commands mCommands: VescIf.commands()
@@ -225,6 +226,15 @@ Item {
                 Layout.fillWidth: true
                 text: "Read"
 
+                Image {
+                    anchors.centerIn: parent
+                    antialiasing: true
+                    opacity: 0.5
+                    height: parent.width*0.6
+                    width: height
+                    source: {source = "qrc" + Utility.getThemePath() + "icons/app_up.png"}
+                }
+
                 onClicked: {
                     mCommands.getAppConf()
                 }
@@ -277,7 +287,7 @@ Item {
 
     Connections {
         target: VescIf
-        onConfigurationChanged: {
+        function onConfigurationChanged() {
             pageBox.model = VescIf.appConfig().getParamGroups()
 
             var tabTextOld = tabBox.currentText

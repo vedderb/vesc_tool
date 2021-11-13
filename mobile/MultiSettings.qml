@@ -298,7 +298,7 @@ Item {
         }
 
         header: Rectangle {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             height: tabBar.height
 
             TabBar {
@@ -310,7 +310,7 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: Utility.getAppHexColor("lightestBackground")
+                    color: { color = Utility.getAppHexColor("lightestBackground") }
                 }
 
                 property int buttonWidth: Math.max(120, tabBar.width / (rep.model.length))

@@ -35,7 +35,7 @@ Item {
     property string tickmarkSuffix: ""
     property double labelStep: 10
     property double tickmarkScale: 1
-    property color nibColor: Utility.getAppHexColor("tertiary2")
+    property color nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
     property color traceColor: Qt.lighter(nibColor,1.5)
     property double maxAngle: 144
     property double minAngle: -144
@@ -132,7 +132,7 @@ Item {
                     text: gauge.value.toFixed(precision)
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.3
-                    color: Utility.getAppHexColor("lightText")
+                    color: { color = Utility.getAppHexColor("lightText") }
                     antialiasing: true
                     font.family: "Roboto Mono"
                 }
@@ -147,7 +147,7 @@ Item {
                     anchors.top: speedLabel.bottom
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.12
-                    color: Utility.getAppHexColor("lightText")
+                    color: { color = Utility.getAppHexColor("lightText")}
                     antialiasing: true
                     font.family: "Roboto Mono"
                     font.capitalization: Font.AllUppercase
@@ -163,7 +163,7 @@ Item {
                     //anchors.bottomMargin: outerRadius * 0.1
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: outerRadius * 0.12
-                    color: Utility.getAppHexColor("lightText")
+                    color: {color = Utility.getAppHexColor("lightText")}
                     antialiasing: true
                     font.family: "Roboto Mono"
                     font.capitalization: Font.AllUppercase
@@ -344,7 +344,9 @@ Item {
             tickmarkLabel:  Text {
                 font.pixelSize: outerRadius * 0.12
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
+                property color coveredColor: {coveredColor = Utility.getAppHexColor("lightText")}
+                property color uncoveredColor: {uncoveredColor = Utility.getAppHexColor("disabledText")}
+                color: isCovered(styleData.value) ? coveredColor : uncoveredColor
                 antialiasing: true
                 font.family: "Roboto Mono"
             }
@@ -353,14 +355,18 @@ Item {
                 implicitHeight: outerRadius * 0.1
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
+                property color coveredColor: {coveredColor = Utility.getAppHexColor("lightText")}
+                property color uncoveredColor: {uncoveredColor = Utility.getAppHexColor("disabledText")}
+                color: isCovered(styleData.value) ? coveredColor : uncoveredColor
             }
             minorTickmark: Rectangle {
                 implicitWidth: outerRadius * 0.015
                 implicitHeight: outerRadius * 0.07
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
+                property color coveredColor: {coveredColor = Utility.getAppHexColor("lightText")}
+                property color uncoveredColor: {uncoveredColor = Utility.getAppHexColor("disabledText")}
+                color: isCovered(styleData.value) ? coveredColor : uncoveredColor
             }
         }
     }

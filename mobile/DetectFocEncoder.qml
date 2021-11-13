@@ -188,7 +188,7 @@ Item {
     Connections {
         target: mCommands
 
-        onEncoderParamReceived: {
+        function onEncoderParamReceived(current) {
             if (offset > 1000.0) {
                 VescIf.emitStatusMessage("Encoder not enabled in firmware", false)
                 VescIf.emitMessageDialog("Error",

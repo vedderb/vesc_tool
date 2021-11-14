@@ -126,7 +126,7 @@ Item {
         standardButtons: Dialog.Yes | Dialog.No
         modal: true
         focus: true
-        width: parent.width - 20
+        width: appWindow.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "Theme Changed"
 

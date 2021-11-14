@@ -295,7 +295,7 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        width: appWindow.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "Measure R & L"
 

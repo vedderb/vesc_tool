@@ -15,7 +15,7 @@ Item {
     Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
     Material.accent: Utility.getAppHexColor("lightAccent")
     
-    property var cnt: 0
+    property int cnt: 0
     
     LogWriter {
         id: mLogWriter

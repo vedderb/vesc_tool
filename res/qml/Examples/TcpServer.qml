@@ -26,7 +26,7 @@ Item {
     TcpServerSimple {
         id: tcp
         
-        property var str: ""
+        property string str: ""
         
         onDataRx: {
             // Put bytes in a string as they come and process for every newline character
@@ -41,7 +41,7 @@ Item {
                     
                     var tokens = str.split(" ")
                                         
-                    if (tokens[0] == "set_current") {
+                    if (tokens[0] === "set_current") {
                         var current = parseInt(tokens[1], 10)
                         if (!isNaN(current)) {
                             console.log("Setting motor current to " + current + " A")

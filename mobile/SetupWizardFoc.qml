@@ -687,7 +687,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Load Default Parameters"
         parent: dialogParent
-        width: parent.width - (rightMargin + leftMargin)
+        width: appWindow.width - (rightMargin + leftMargin)
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -720,9 +720,9 @@ Item {
         leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Motor Selection"
-        y: 10 + parent.height / 2 - height / 2
+        y: 10 + appWindow.height / 2 - height / 2
         parent: dialogParent
-        width: parent.width - (rightMargin + leftMargin)
+        width: appWindow.width - (rightMargin + leftMargin)
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -769,7 +769,7 @@ Item {
         title: "Battery Settings"
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
-        width: parent.width - (rightMargin + leftMargin)
+        width:appWindow.width - (rightMargin + leftMargin)
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }

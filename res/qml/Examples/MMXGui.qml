@@ -30,8 +30,8 @@ Item {
         220
     ]
     
-    property var bpm_ind: 0
-    property var motor_poles: 14
+    property int bpm_ind: 0
+    property int motor_poles: 14
     
     function bpm_to_erpm(bpm) {
         var motor_poles = 14

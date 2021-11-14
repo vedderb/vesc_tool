@@ -213,7 +213,7 @@ Item {
         }
     }
 
-    property var hwUiObj: 0
+    property int hwUiObj: 0
 
     function updateHwUi () {
         if (hwUiObj != 0) {
@@ -246,7 +246,7 @@ Item {
         }
     }
 
-    property var appUiObj: 0
+    property int appUiObj: 0
 
     function updateAppUi () {
         if (appUiObj != 0) {

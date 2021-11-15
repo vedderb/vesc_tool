@@ -866,8 +866,10 @@ ApplicationWindow {
         target: mCommands
 
         onValuesImuReceived: {
-            vesc3d.setRotation(values.roll, values.pitch,
-                               useYawBox.checked ? values.yaw : 0)
+            if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
+                vesc3d.setRotation(values.roll, values.pitch,
+                                   useYawBox.checked ? values.yaw : 0)
+            }
         }
 
         onDeserializeConfigFailed: {

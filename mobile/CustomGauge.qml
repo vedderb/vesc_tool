@@ -329,22 +329,24 @@ Item {
             }
 
             function isCovered(value) {
-                var res = false
-                if (gauge.value > 0) {
-                    if (value <= gauge.value && value >= 0) {
-                        res = true
-                    }
-                } else {
-                    if (value >= gauge.value && value <= 0) {
-                        res = true
-                    }
+                if (value === 0) {
+                    return true
                 }
-                return res
+
+                if (value > 0) {
+                    return gauge.value >= value
+                }
+
+                return gauge.value <= value
             }
+
+            property color colCovered: Utility.getAppHexColor("lightText")
+            property color colUnCovered: Utility.getAppHexColor("disabledText")
+
             tickmarkLabel:  Text {
                 font.pixelSize: outerRadius * 0.12
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
+                color: isCovered(styleData.value) ? colCovered : colUnCovered
                 antialiasing: true
                 font.family: "Roboto Mono"
             }
@@ -353,14 +355,14 @@ Item {
                 implicitHeight: outerRadius * 0.1
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
+                color: isCovered(styleData.value) ? colCovered : colUnCovered
             }
             minorTickmark: Rectangle {
                 implicitWidth: outerRadius * 0.015
                 implicitHeight: outerRadius * 0.07
                 antialiasing: true
                 smooth: true
-                color: isCovered(styleData.value) ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("disabledText")
+                color: isCovered(styleData.value) ? colCovered : colUnCovered
             }
         }
     }

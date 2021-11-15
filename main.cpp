@@ -248,6 +248,10 @@ int main(int argc, char *argv[])
             found = true;
         }
 
+        if (str.startsWith("-qmljsdebugger")) {
+            found = true;
+        }
+
         if (!found) {
             if (dash) {
                 qCritical() << "At least one of the flags is invalid:" << str;

@@ -454,7 +454,12 @@ Item {
                         value: 20
                         unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
                         typeText: "Consump."
-                        nibColor: value >70 ? "red" : (value > 40 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("tertiary2")  )
+
+                        property color colHigh: "red"
+                        property color colMid: Utility.getAppHexColor("orange")
+                        property color colLow: Utility.getAppHexColor("tertiary2")
+                        nibColor: value > 70 ? colHigh : (value > 40 ? colMid : colLow)
+
                         Text {
                             id: consumValLabel
                             color: Utility.getAppHexColor("lightText")
@@ -611,9 +616,18 @@ Item {
         }
 
         onValuesSetupReceived: {
-            currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
-            currentGauge.minimumValue = -currentGauge.maximumValue
-            currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
+            var currentMax = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
+            var currentStep = Math.ceil(currentGauge.maximumValue / 20) * 5
+            var currentLabelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
+
+            if (Math.abs(currentGauge.maximumValue - currentMax) > 0.5) {
+                currentGauge.maximumValue = currentMax
+                currentGauge.minimumValue = -currentMax
+            }
+
+            if (Math.abs(currentGauge.labelStep - currentLabelStep) > 0.1) {
+                currentGauge.labelStep = currentLabelStep
+            }
 
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0

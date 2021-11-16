@@ -295,7 +295,7 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: appWindow.width - 20
+        width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "Measure R & L"
 
@@ -362,7 +362,7 @@ Item {
     Connections {
         target: mCommands
 
-        function onMotorRLReceived(r,l) {
+        onMotorRLReceived: {
             if (r < 1e-9 && l < 1e-9) {
                 VescIf.emitStatusMessage("Bad FOC Detection Result Received", false)
                 VescIf.emitMessageDialog("Bad Detection Result",
@@ -376,7 +376,7 @@ Item {
             }
         }
 
-        function onMotorLinkageReceived(flux_linkage) {
+        onMotorLinkageReceived: {
             if (flux_linkage < 1e-9) {
                 VescIf.emitStatusMessage("Bad FOC Detection Result Received", false)
                 VescIf.emitMessageDialog("Bad Detection Result",
@@ -394,8 +394,8 @@ Item {
     Connections {
         target: mMcConf
 
-        function onParamChangedDouble(src, name, newParam) {
-            if (name === "l_current_max") {
+        onParamChangedDouble: {
+            if (name == "l_current_max") {
                 currentBox.realValue = newParam / 3.0
             }
         }

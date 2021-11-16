@@ -601,7 +601,7 @@ Item {
     Connections {
         target: VescIf
 
-        function onFwUploadStatus(status, progress, isOngoing) {
+        onFwUploadStatus: {
             if (isOngoing) {
                 uploadText.text = status + " (" + parseFloat(progress * 100.0).toFixed(2) + " %)"
             } else {
@@ -617,7 +617,7 @@ Item {
     Connections {
         target: VescIf
 
-        function onFwRxChanged(rx) {
+        onFwRxChanged: {
             if (!rx) {
                 return;
             }
@@ -628,7 +628,6 @@ Item {
             }
 
             var params = VescIf.getLastFwRxParams()
-
             updateHw(params)
             updateBl(params)
 

@@ -194,7 +194,7 @@ Item {
     Connections {
         target: mCommands
 
-        function onDecodedBalanceReceived(values) {
+        onDecodedBalanceReceived: {
             pitchGauge.value = values.pitch_angle
             rollGauge.value = values.roll_angle
 
@@ -246,7 +246,7 @@ Item {
                     "Loop Time    : " + values.diff_time + " uS"
         }
 
-        function onValuesSetupReceived(values, mask) {
+        onValuesSetupReceived: {
             motorCurrentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
             motorCurrentGauge.minimumValue = -motorCurrentGauge.maximumValue
             motorCurrentGauge.value = values.current_motor

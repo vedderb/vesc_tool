@@ -83,7 +83,7 @@ Item {
 
             Text {
                 id: nameText
-                color: { color = Utility.getAppHexColor("lightText") }
+                color: Utility.getAppHexColor("lightText")
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -99,7 +99,7 @@ Item {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 id: infoText
-                color: { color = Utility.getAppHexColor("lightText") }
+                color: Utility.getAppHexColor("lightText")
                 font.family: "DejaVu Sans Mono"
             }
 
@@ -189,7 +189,7 @@ Item {
                         }
 
                         Text {
-                            color: { color = Utility.getAppHexColor("lightText") }
+                            color: Utility.getAppHexColor("lightText")
                             verticalAlignment: Text.AlignVCenter
                             anchors.fill: parent
                             wrapMode: Text.WordWrap
@@ -220,7 +220,7 @@ Item {
     Connections {
         target: mMcConf
 
-        function onParamChangedDouble(src, name, newParam) {
+        onParamChangedDouble: {
             checkActive()
         }
     }
@@ -228,7 +228,7 @@ Item {
     Connections {
         target: VescIf
 
-        function onUseImperialUnitsChanged(useImperialUnits) {
+        onUseImperialUnitsChanged: {
             setFromMcConfTemp(VescIf.getProfile(index))
         }
     }

@@ -30,8 +30,8 @@ import "qrc:/mobile"
 Item {
     id: container
     width: 100
-    Material.theme:{Material.theme = Utility.isDarkMode() ? "Dark" : "Light"}
-    Material.accent: {Material.accent = Utility.getAppHexColor("lightAccent")}
+    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
+    Material.accent: Utility.getAppHexColor("lightAccent")
 
 
     function setupMotors() {
@@ -124,7 +124,7 @@ Item {
 
             background: Rectangle {
                 opacity: 1
-                color: { color = Utility.getAppHexColor("lightBackground")}
+                color: Utility.getAppHexColor("lightBackground")
             }
 
             property int buttonWidth: Math.max(120,
@@ -213,7 +213,7 @@ Item {
         }
     }
 
-    property int hwUiObj: 0
+    property var hwUiObj: 0
 
     function updateHwUi () {
         if (hwUiObj != 0) {
@@ -246,7 +246,7 @@ Item {
         }
     }
 
-    property int appUiObj: 0
+    property var appUiObj: 0
 
     function updateAppUi () {
         if (appUiObj != 0) {
@@ -310,7 +310,7 @@ Item {
         y: parent.y + parent.height / 2 - height / 2
 
         Text {
-            color: { color = Utility.getAppHexColor("lightText") }
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -343,7 +343,7 @@ Item {
         y: parent.y + parent.height / 2 - height / 2
 
         Text {
-            color: { color = Utility.getAppHexColor("lightText") }
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

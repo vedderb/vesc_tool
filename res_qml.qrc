@@ -21,5 +21,6 @@
         <file>res/qml/Examples/MMXGui.qml</file>
         <file>res/qml/Examples/BrakeBench.qml</file>
         <file>res/qml/Examples/PositionControl.qml</file>
+        <file>res/qml/Examples/GaugeTest.qml</file>
     </qresource>
 </RCC>

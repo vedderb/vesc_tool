@@ -623,7 +623,7 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: appWindow.width - 20
+        width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
 

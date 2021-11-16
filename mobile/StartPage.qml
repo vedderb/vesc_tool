@@ -320,8 +320,8 @@ Item {
     Connections {
         target: mCommands
 
-        function onNrfPairingRes(res) {
-            if (res !== 0) {
+        onNrfPairingRes: {
+            if (res != 0) {
                 nrfPairButton.visible = true
             }
         }
@@ -329,7 +329,7 @@ Item {
 
     Connections {
         target: VescIf
-        function onPortConnectedChanged() {
+        onPortConnectedChanged: {
             if (VescIf.isPortConnected()) {
                 connectButton.buttonText = "Disconnect"
                 connectButton.imageSrc = "qrc" + Utility.getThemePath() + "icons/Disconnected-96.png"
@@ -369,7 +369,7 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: appWindow.width - 20
+        width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
 
@@ -403,7 +403,7 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: appWindow.width - 20
+        width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "Backup configuration(s)"
 
@@ -438,7 +438,7 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: appWindow.width - 20
+        width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         title: "Restore configuration backup(s)"
 

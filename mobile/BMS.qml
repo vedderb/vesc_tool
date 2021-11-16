@@ -312,7 +312,8 @@ Item {
 
     Connections {
         target: mCommands
-        function onBmsValuesRx(val) {
+
+        onBmsValuesRx: {
             mVal = val
             mValSet = true
 

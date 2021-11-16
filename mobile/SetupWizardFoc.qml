@@ -103,7 +103,7 @@ Item {
 
                     ListModel {
                         id: usageModel
-                        property string iconPath: { iconPath = "qrc" + Utility.getThemePath() + "icons/" }
+                        property string iconPath: "qrc" + Utility.getThemePath() + "icons/";
                         Component.onCompleted: {
                             append({name: "Generic", usageImg:iconPath + "motor.png", duty_start: 1.0, hfi_start: false})
                             append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg", duty_start: 0.85, hfi_start: true})
@@ -233,7 +233,7 @@ Item {
 
                     ListModel {
                         id: motorModel
-                        property string iconPath: {iconPath = "qrc" + Utility.getThemePath() + "icons/" }
+                        property string iconPath: "qrc" + Utility.getThemePath() + "icons/";
                         Component.onCompleted: {
                             [
                             ["Mini Outrunner (~75 g)", "qrc:/res/images/motors/outrunner_mini.jpg", 20, 1400, 4000, false,14],
@@ -366,7 +366,7 @@ Item {
 
                             Text {
                                 visible: !overrideBox.checked
-                                color: { color = Utility.getAppHexColor("lightText") }
+                                color: Utility.getAppHexColor("lightText")
                                 font.family: "DejaVu Sans Mono"
                                 verticalAlignment: Text.AlignVCenter
                                 wrapMode: Text.WordWrap
@@ -525,7 +525,7 @@ Item {
                                         Layout.fillWidth: true
                                         Text {
                                             Layout.fillWidth: true
-                                            color: { color = Utility.getAppHexColor("lightText") }
+                                            color: Utility.getAppHexColor("lightText")
                                             text: qsTr("Motor Pulley")
                                         }
 
@@ -547,7 +547,7 @@ Item {
                                         Layout.fillWidth: true
                                         Text {
                                             Layout.fillWidth: true
-                                            color: { color = Utility.getAppHexColor("lightText") }
+                                            color: Utility.getAppHexColor("lightText")
                                             text: qsTr("Wheel Pulley")
                                         }
 
@@ -586,7 +586,7 @@ Item {
         }
 
         header: Rectangle {
-            color: { color = Utility.getAppHexColor("lightText")}
+            color: Utility.getAppHexColor("lightText")
             height: tabBar.height
 
             TabBar {
@@ -599,7 +599,7 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: { color = Utility.getAppHexColor("lightBackground")}
+                    color: Utility.getAppHexColor("lightBackground")
                 }
 
                 property int buttons: 5
@@ -687,7 +687,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Load Default Parameters"
         parent: dialogParent
-        width: appWindow.width - (rightMargin + leftMargin)
+        width: parent.width - (rightMargin + leftMargin)
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -695,7 +695,7 @@ Item {
         y: dialog.y + dialog.height / 2 - height / 2
 
         Text {
-            color: { color = Utility.getAppHexColor("lightText") }
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -720,15 +720,15 @@ Item {
         leftMargin: 10
         closePolicy: Popup.CloseOnEscape
         title: "Motor Selection"
-        y: 10 + appWindow.height / 2 - height / 2
+        y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
-        width: appWindow.width - (rightMargin + leftMargin)
+        width: parent.width - (rightMargin + leftMargin)
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
 
         Text {
-            color: { color = Utility.getAppHexColor("lightText") }
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -769,13 +769,13 @@ Item {
         title: "Battery Settings"
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
-        width:appWindow.width - (rightMargin + leftMargin)
+        width: parent.width - (rightMargin + leftMargin)
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
 
         Text {
-            color: {color = Utility.getAppHexColor("lightText")}
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -814,7 +814,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                color: { color = Utility.getAppHexColor("lightText") }
+                color: Utility.getAppHexColor("lightText")
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap
                 text: "This is going to spin up all motors. Make " +
@@ -921,7 +921,7 @@ Item {
 
             Text {
                 id: resultLabel
-                color: {color = Utility.getAppHexColor("lightText")}
+                color: Utility.getAppHexColor("lightText")
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent

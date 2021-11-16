@@ -191,7 +191,7 @@ Item {
     Connections {
         target: params
 
-        function onParamChangedDouble(src, name, newParam) {
+        onParamChangedDouble: {
             if (src !== editor && name == paramName) {
                 valueBox.realValue = newParam * params.getParamEditorScale(paramName)
                 percentageBox.value = Math.round((100.0 * newParam) / maxVal)

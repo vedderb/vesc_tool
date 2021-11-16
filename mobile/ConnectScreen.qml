@@ -329,7 +329,7 @@ Item {
 
     Connections {
         target: mBle
-        function onScanDone(devs, done) {
+        onScanDone: {
             if (done) {
                 scanDotTimer.running = false
                 scanButton.enabled = true
@@ -393,7 +393,7 @@ Item {
             }
         }
 
-        function onBleError(info) {
+        onBleError: {
             VescIf.emitMessageDialog("BLE Error", info, false, false)
             enableDialog()
         }

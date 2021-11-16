@@ -168,7 +168,7 @@ Item {
     Connections {
         target: mCommands
 
-        function onImuCalibrationReceived(cal) {
+        onImuCalibrationReceived: {
             calState = 3
             mCal = cal
             updateDisplay()

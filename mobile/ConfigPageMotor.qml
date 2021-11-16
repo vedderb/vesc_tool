@@ -238,7 +238,7 @@ Item {
         target: mCommands
 
         // TODO: For some reason this does not work
-        function onMcConfigCheckResult(paramsNotSet) {
+        onMcConfigCheckResult: {
             if (paramsNotSet.length > 0) {
                 var notUpdated = "The following parameters were truncated because " +
                         "they were beyond the hardware limits:\n"
@@ -254,7 +254,7 @@ Item {
 
     Connections {
         target: VescIf
-        function onConfigurationChanged() {
+        onConfigurationChanged: {
             pageBox.model = VescIf.mcConfig().getParamGroups()
 
             var tabTextOld = tabBox.currentText

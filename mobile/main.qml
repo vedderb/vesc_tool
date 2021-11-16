@@ -794,7 +794,7 @@ ApplicationWindow {
 
     Connections {
         target: VescIf
-        function onPortConnectedChanged() {
+        onPortConnectedChanged: {
             connectedText.text = VescIf.getConnectedPortName()
             if (!VescIf.isPortConnected()) {
                 confTimer.mcConfRx = false
@@ -809,13 +809,13 @@ ApplicationWindow {
             connScreen.y = VescIf.isPortConnected() ? connScreen.height : 0.0
         }
 
-        function onStatusMessage(msg, isGood) {
+        onStatusMessage: {
             connectedText.text = msg
             connectedRect.color = isGood ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("red")
             statusTimer.restart()
         }
 
-        function onMessageDialog(title, msg, isGood, richText) {
+        onMessageDialog: {
             vescDialog.title = title
             vescDialogLabel.text = (richText ? "<style>a:link { color: lightblue; }</style>" : "") + msg
             vescDialogLabel.textFormat = richText ? Text.RichText : Text.AutoText
@@ -823,7 +823,7 @@ ApplicationWindow {
             vescDialog.open()
         }
 
-        function onFwRxChanged(rx, limited) {
+        onFwRxChanged: {
             if (rx) {
                 if (limited && !VescIf.getFwSupportsConfiguration()) {
                     confPageMotor.enabled = false
@@ -841,7 +841,7 @@ ApplicationWindow {
             updateAppUi()
         }
 
-        function onQmlLoadDone() {
+        onQmlLoadDone: {
             qmlLoadDialog.open()
         }
     }
@@ -849,7 +849,7 @@ ApplicationWindow {
     Connections {
         target: mMcConf
 
-        function onUpdated() {
+        onUpdated: {
             confTimer.mcConfRx = true
         }
     }
@@ -857,7 +857,7 @@ ApplicationWindow {
     Connections {
         target: mAppConf
 
-        function onUpdated() {
+        onUpdated: {
             confTimer.appConfRx = true
         }
     }
@@ -871,7 +871,7 @@ ApplicationWindow {
             }
         }
 
-        function onDeserializeConfigFailed(isMc, isApp) {
+        onDeserializeConfigFailed: {
             if (isMc) {
                 confTimer.mcConfRx = true
             }

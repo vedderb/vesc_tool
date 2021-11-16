@@ -287,7 +287,7 @@ Item {
 
     Connections {
         target: VescIf
-        function onConfigurationChanged() {
+        onConfigurationChanged: {
             pageBox.model = VescIf.appConfig().getParamGroups()
 
             var tabTextOld = tabBox.currentText

@@ -197,7 +197,7 @@ Item {
     Connections {
         target: mBle
 
-        function onBleError(info) {
+        onBleError: {
             VescIf.emitMessageDialog("BLE Error", info, false, false)
             enableDialog()
         }
@@ -260,7 +260,7 @@ Item {
     Connections {
         target: VescIf
 
-        function onPortConnectedChanged() {
+        onPortConnectedChanged: {
             scanButton.enabled = VescIf.isPortConnected()
         }
     }
@@ -268,11 +268,7 @@ Item {
     Connections {
         target: mCommands
 
-        function onPingCanRx(devs, isTimeout) {
-            if (scanButton.enabled) {
-                return
-            }
-            
+        onPingCanRx: {
             scanButton.enabled = true
             scanButton.text = qsTr("Scan")
             if (VescIf.isPortConnected()) {

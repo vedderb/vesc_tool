@@ -374,12 +374,20 @@ void PageFirmware::uploadFw(bool allOverCan)
             return;
         }
 
-        QFile file;
+        QFile file, fileBl;
 
         if (ui->fwTabWidget->currentIndex() == 0) {
             QListWidgetItem *item = ui->fwList->currentItem();
             if (item) {
                 file.setFileName(item->data(Qt::UserRole).toString());
+
+                if (mVesc->commands()->getLimitedSupportsEraseBootloader()) {
+                    item = ui->blList->currentItem();
+
+                    if (item) {
+                        fileBl.setFileName(item->data(Qt::UserRole).toString());
+                    }
+                }
             } else {
                 if (ui->hwList->count() == 0) {
                     QMessageBox::warning(this,
@@ -419,7 +427,7 @@ void PageFirmware::uploadFw(bool allOverCan)
             QListWidgetItem *item = ui->blList->currentItem();
 
             if (item) {
-                file.setFileName(item->data(Qt::UserRole).toString());
+                fileBl.setFileName(item->data(Qt::UserRole).toString());
             } else {
                 if (ui->blList->count() == 0) {
                     QMessageBox::warning(this,
@@ -436,19 +444,25 @@ void PageFirmware::uploadFw(bool allOverCan)
             }
         }
 
-        if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this,
-                                  tr("Upload Error"),
-                                  tr("Could not open file. Make sure that the path is valid."));
-            return;
+        if (!fileBl.fileName().isEmpty()) {
+            if (!fileBl.open(QIODevice::ReadOnly)) {
+                QMessageBox::critical(this,
+                                      tr("Upload Error"),
+                                      tr("Could not open bootloader file. Make sure that the path is valid."));
+                return;
+            }
         }
 
-        bool isHex = false;
-        if (file.fileName().toLower().endsWith(".hex")) {
-            isHex = true;
+        if (!file.fileName().isEmpty()) {
+            if (!file.open(QIODevice::ReadOnly)) {
+                QMessageBox::critical(this,
+                                      tr("Upload Error"),
+                                      tr("Could not open file. Make sure that the path is valid."));
+                return;
+            }
         }
 
-        if (file.size() > 400000 && !isHex) {
+        if (file.size() > 400000 && !(file.fileName().toLower().endsWith(".hex"))) {
             QMessageBox::critical(this,
                                   tr("Upload Error"),
                                   tr("The selected file is too large to be a firmware."));
@@ -456,7 +470,6 @@ void PageFirmware::uploadFw(bool allOverCan)
         }
 
         QMessageBox::StandardButton reply;
-        bool isBootloader = false;
 
         if (ui->fwTabWidget->currentIndex() == 0 && ui->hwList->count() == 1) {
             reply = QMessageBox::warning(this,
@@ -488,17 +501,16 @@ void PageFirmware::uploadFw(bool allOverCan)
                                                 "you want to continue?"),
                                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
             }
-            isBootloader = true;
         } else {
             reply = QMessageBox::No;
         }
 
-        if (reply == QMessageBox::Yes) {
+        auto uploadFw = [this](QFile *file, bool isBootloader, bool allOverCan) {
             bool fwRes = false;
 
-            if (isHex) {
+            if (file->fileName().toLower().endsWith(".hex")) {
                 QMap<quint32, QByteArray> fwData;
-                fwRes = HexFile::parseFile(file.fileName(), fwData);
+                fwRes = HexFile::parseFile(file->fileName(), fwData);
 
                 if (fwRes) {
                     QMapIterator<quint32, QByteArray> i(fwData);
@@ -524,16 +536,26 @@ void PageFirmware::uploadFw(bool allOverCan)
                     fwRes = mVesc->fwUpload(data, isBootloader, allOverCan);
                 }
             } else {
-                QByteArray data = file.readAll();
+                QByteArray data = file->readAll();
                 fwRes = mVesc->fwUpload(data, isBootloader, allOverCan);
             }
 
-            if (!isBootloader && fwRes) {
-                QMessageBox::warning(this,
-                                     tr("Warning"),
-                                     tr("The firmware upload is done. You must wait at least "
-                                        "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
-                                        "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
+            return fwRes;
+        };
+
+        if (reply == QMessageBox::Yes) {
+            if (!fileBl.fileName().isEmpty()) {
+                uploadFw(&fileBl, true, allOverCan);
+            }
+
+            if (!file.fileName().isEmpty()) {
+                if (uploadFw(&file, false, allOverCan)) {
+                    QMessageBox::warning(this,
+                                         tr("Warning"),
+                                         tr("The firmware upload is done. You must wait at least "
+                                            "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
+                                            "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
+                }
             }
         }
     }

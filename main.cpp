@@ -281,7 +281,6 @@ int main(int argc, char *argv[])
     QApplication *a = new QApplication(argc, argv);
     app = a;
 
-
     // Fonts
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans-Bold.ttf");
@@ -372,13 +371,14 @@ int main(int argc, char *argv[])
         qApp->setFont(QFont("Roboto", 12));
 
         // Style
-        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0 " + Utility::getAppHexColor("lightAccent") +
+        qApp->setStyleSheet("QListView::item::selected {background: qlineargradient(x1: 1.0, y1: 0.0, x2: 0, y2: 0, stop: 0 " +
+                            Utility::getAppHexColor("lightAccent") +
                             ", stop: 0.4 " + Utility::getAppHexColor("darkAccent") + ");" +
                             " border: none;} ");
         QStyle *myStyle = new Style_tweaks("Fusion");
         a->setStyle(myStyle);
 
-        if(isDark){
+        if (isDark) {
             QPalette darkPalette;
             //QPalette::Inactive
             darkPalette.setColor(QPalette::Window,Utility::getAppQColor("darkBackground"));
@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
             darkPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
             darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
             qApp->setPalette(darkPalette);
-        }else{
+        } else {
             QPalette lightPalette = qApp->style()->standardPalette();
             lightPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
             lightPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("midAccent"));

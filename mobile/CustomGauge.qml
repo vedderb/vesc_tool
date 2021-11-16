@@ -329,18 +329,20 @@ Item {
             }
 
             function isCovered(value) {
-                var res = false
-                if (gauge.value > 0) {
-                    if (value <= gauge.value && value >= 0) {
-                        res = true
-                    }
-                } else {
-                    if (value >= gauge.value && value <= 0) {
-                        res = true
-                    }
+                if (value === 0) {
+                    return true
                 }
-                return res
+
+                if (value > 0) {
+                    return gauge.value >= value
+                }
+
+                return gauge.value <= value
             }
+
+            property color colCovered: Utility.getAppHexColor("lightText")
+            property color colUnCovered: Utility.getAppHexColor("disabledText")
+
             tickmarkLabel:  Text {
                 font.pixelSize: outerRadius * 0.12
                 text: parseFloat(styleData.value * tickmarkScale).toFixed(0) + tickmarkSuffix

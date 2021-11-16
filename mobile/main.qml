@@ -864,10 +864,11 @@ ApplicationWindow {
 
     Connections {
         target: mCommands
-
-        function onValuesImuReceived(values, mask) {
-            vesc3d.setRotation(values.roll, values.pitch,
-                               useYawBox.checked ? values.yaw : 0)
+        onValuesImuReceived: {
+            if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
+                vesc3d.setRotation(values.roll, values.pitch,
+                                   useYawBox.checked ? values.yaw : 0)
+            }
         }
 
         function onDeserializeConfigFailed(isMc, isApp) {

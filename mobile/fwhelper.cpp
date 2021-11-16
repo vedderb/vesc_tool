@@ -140,7 +140,5 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
     }
 
     QByteArray data = file.readAll();
-    vesc->fwUpload(data, isBootloader, fwdCan);
-
-    return true;
+    return vesc->fwUpload(data, isBootloader, fwdCan);
 }

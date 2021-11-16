@@ -459,10 +459,10 @@ Item {
                         value: 20
                         unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
                         typeText: "Consump."
-                        property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
-                        property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
-                        property color redColor: {redColor = Utility.getAppHexColor("red")}
-                        nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
+                        property color colHigh: "red"
+                        property color colMid: Utility.getAppHexColor("orange")
+                        property color colLow: Utility.getAppHexColor("tertiary2")
+                        nibColor: value > 70 ? colHigh : (value > 40 ? colMid : colLow)
                         Text {
                             id: consumValLabel
                             color: {color = Utility.getAppHexColor("lightText")}
@@ -618,10 +618,20 @@ Item {
             inclineCanvas.incline = Math.tan(values.pitch) * 100
         }
 
-        function onValuesSetupReceived(values, mask) {
-            currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
-            currentGauge.minimumValue = -currentGauge.maximumValue
-            currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
+
+        onValuesSetupReceived: {
+            var currentMax = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
+            var currentStep = Math.ceil(currentGauge.maximumValue / 20) * 5
+            var currentLabelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
+
+            if (Math.abs(currentGauge.maximumValue - currentMax) > 0.5) {
+                currentGauge.maximumValue = currentMax
+                currentGauge.minimumValue = -currentMax
+            }
+
+            if (Math.abs(currentGauge.labelStep - currentLabelStep) > 0.1) {
+                currentGauge.labelStep = currentLabelStep
+            }
 
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0

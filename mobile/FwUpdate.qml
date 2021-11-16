@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -421,12 +421,25 @@ Item {
         }
 
         onAccepted: {
+            var okUploadFw = false
+
             if (swipeView.currentIndex == 0) {
-                fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan)
+                if (mCommands.getLimitedSupportsEraseBootloader() && blItems.count > 0) {
+                    fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
+                }
+                okUploadFw = fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan)
             } else if (swipeView.currentIndex == 1) {
-                fwHelper.uploadFirmware(customFwText.text, VescIf, false, true, fwdCan)
+                okUploadFw = fwHelper.uploadFirmware(customFwText.text, VescIf, false, true, fwdCan)
             } else if (swipeView.currentIndex == 2) {
                 fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
+            }
+
+            if (okUploadFw) {
+                VescIf.emitMessageDialog("Warning",
+                                         "The firmware upload is done. You must wait at least " +
+                                         "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your " +
+                                         "VESC will become bricked. If that happens you need a SWD programmer to recover it.",
+                                         true, false)
             }
         }
     }

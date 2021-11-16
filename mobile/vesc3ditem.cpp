@@ -27,6 +27,7 @@ Vesc3dItem::Vesc3dItem(QQuickItem *parent) : QQuickPaintedItem(parent)
     mVesc3d.setBgColor(Utility::getAppQColor("normalBackground").redF(),
                        Utility::getAppQColor("normalBackground").greenF(),
                        Utility::getAppQColor("normalBackground").blueF(), 1.0);
+    setRenderTarget(QQuickPaintedItem::FramebufferObject);
 }
 
 void Vesc3dItem::setRotation(double roll, double pitch, double yaw)

@@ -705,7 +705,7 @@ ApplicationWindow {
             Text {
                 id: vescDialogLabel
                 color: {color = Utility.getAppHexColor("lightText")}
-                linkColor: {linkColor = Utility.getAppHexColor("accent")}
+                linkColor: {linkColor = Utility.getAppHexColor("lightAccent")}
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere

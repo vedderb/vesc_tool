@@ -11,13 +11,13 @@ Item {
     id: mainItem
     anchors.fill: parent
     anchors.margins: 5
-    
+
     Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
     Material.accent: Utility.getAppHexColor("lightAccent")
-    
+
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
-    
+
     ColumnLayout {
         id: gaugeColumn
         anchors.fill: parent
@@ -37,7 +37,7 @@ Item {
                 unitText: "VAL"
                 typeText: "SLIDER 1"
             }
-            
+
             CustomGauge {
                 id: adc2Gauge
                 Layout.fillWidth: true
@@ -63,7 +63,7 @@ Item {
             Layout.fillWidth: true
             Slider {
                 id:slider1
-                Layout.fillWidth: true                
+                Layout.fillWidth: true
                 from: -120
                 to: 120
                 value: 0
@@ -71,11 +71,41 @@ Item {
             Slider {
                 id:slider2
                 Layout.fillWidth: true
-                from: -120
-                to: 120
+                from: -200
+                to: 200
                 value: 0
             }
         }
+        RowLayout {
+            Button{
+                Layout.fillWidth: true
+                text: "change lims"
+                onClicked: {
+                    if(adc2Gauge.maximumValue === 12) {
+                        adc2Gauge.labelStep = 3
+                        adc2Gauge.maximumValue = 21
+                        adc2Gauge.minimumValue = -18
+                    } else {
+                        adc2Gauge.labelStep = 3
+                        adc2Gauge.maximumValue = 12
+                        adc2Gauge.minimumValue = -12
+                    }
+                }
+            }
+            Button{
+                Layout.fillWidth: true
+                text: "change angle"
+                onClicked: {
+                    if(adc2Gauge.maxAngle === -230) {
+                        adc2Gauge.maxAngle = 230
+                        adc2Gauge.minAngle = -50
+                    } else {
+                        adc2Gauge.maxAngle = -230
+                        adc2Gauge.minAngle = 50
+                    }
+
+                }
+            }
+        }
     }
-    
 }

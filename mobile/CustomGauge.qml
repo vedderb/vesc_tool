@@ -18,13 +18,12 @@
     */
 
 import QtQuick 2.0
-import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Extras 1.4
-import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Material 2.2
 import Vedder.vesc.utility 1.0
+
 Item {
     property double value: 0
     property double outerRadius: width/2
@@ -43,7 +42,7 @@ Item {
     property double minimumValue: 0
     property double maximumValue: 100
 
-    onTickmarkCountChanged: valueTextModel.update()
+
 
     property string unitText: ""
     property string typeText: ""
@@ -55,6 +54,8 @@ Item {
 
     property bool tickmarksVisible: true
     property bool centerTextVisible: true
+
+        onTickmarkCountChanged: valueTextModel.update()
 
     function valueToAngle(value) {
         var normalised = (value - minimumValue) / (maximumValue - minimumValue);
@@ -298,7 +299,7 @@ Item {
             invert: false
             visible: true
         }
-        Component{
+        Component {
             id: tickmarkLabel
             Text {
                 font.pixelSize: outerRadius * 0.12
@@ -310,7 +311,7 @@ Item {
                 font.family: "Roboto"
             }
         }
-        Component{
+        Component {
             id: tickmark
             Rectangle {
                 implicitWidth: outerRadius * 0.02
@@ -322,7 +323,7 @@ Item {
                 color: isCovered(value) ? coveredColor : uncoveredColor
             }
         }
-        Component{
+        Component {
             id: minorTickmark
             Rectangle {
                 implicitWidth: outerRadius * 0.015
@@ -443,7 +444,6 @@ Item {
                             remove(count - 1);
                         }
                     }
-
                     var index = 0;
                     for (var value = minimumValue;
                          value <= maximumValue && index < count;

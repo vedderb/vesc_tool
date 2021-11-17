@@ -269,6 +269,10 @@ Item {
         target: mCommands
 
         onPingCanRx: {
+            if (scanButton.enabled) {
+                return
+            }
+
             scanButton.enabled = true
             scanButton.text = qsTr("Scan")
             if (VescIf.isPortConnected()) {

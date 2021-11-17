@@ -37,7 +37,7 @@ ios: {
 }}
 
 # Build mobile GUI
-#CONFIG += build_mobile
+# CONFIG += build_mobile
 
 ios: {
     CONFIG    += build_mobile
@@ -303,7 +303,6 @@ ios {
     SOURCES += ios/src/setIosParameters.mm
     DISTFILES += ios/Info.plist \
                  ios/*.storyboard
-
     QMAKE_ASSET_CATALOGS = $$PWD/ios/Images.xcassets
     QMAKE_ASSET_CATALOGS_APP_ICON = "AppIcon"
 

@@ -29,8 +29,7 @@ Item {
     property double value: 0
     property double outerRadius: width/2
     height: width
-    property double labelStepSize: labelStep
-    property double tickmarkStepSize: labelStep
+    property double labelStep: 10
     property double labelInset: outerRadius * 0.28 + outerRadius*0.06
     property double tickmarkInset: outerRadius*0.07
     property double minorTickmarkInset: outerRadius*0.07
@@ -39,21 +38,16 @@ Item {
     property int isInverted: maxAngle > minAngle ? 1 : -1
 
     property real angleRange: maxAngle - minAngle
-    property int tickmarkCount: Math.floor(tickmarkStepSize > 0 ? (maximumValue - minimumValue) / tickmarkStepSize + 1 : 0)
+    property int tickmarkCount: Math.floor(labelStep > 0 ? (maximumValue - minimumValue) / labelStep + 1 : 0)
     property int minorTickmarkCount:4
-    property int labelCount:tickmarkCount
     property double minimumValue: 0
     property double maximumValue: 100
 
-    onMinimumValueChanged: valueTextModel.update()
-    onMaximumValueChanged: valueTextModel.update()
-    onTickmarkStepSizeChanged: valueTextModel.update()
-    onLabelStepSizeChanged: valueTextModel.update()
+    onTickmarkCountChanged: valueTextModel.update()
 
     property string unitText: ""
     property string typeText: ""
     property string tickmarkSuffix: ""
-    property double labelStep: 10
     property double tickmarkScale: 1
     property color nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
     property color traceColor: Qt.lighter(nibColor,1.5)
@@ -64,6 +58,7 @@ Item {
 
     function valueToAngle(value) {
         var normalised = (value - minimumValue) / (maximumValue - minimumValue);
+        normalised = normalised > 1 ? 1 : normalised < 0 ? 0 : normalised
         return (maxAngle - minAngle) * normalised + minAngle;
     }
     function d2r(degrees) {
@@ -159,7 +154,7 @@ Item {
                 id: pointerNib
                 property double value: gauge.value
                 property double gAngle: needleTransform.angle
-                onValueChanged: requestPaint()
+                onGAngleChanged: requestPaint()
                 anchors.fill:parent
                 onPaint:{
                     var ctx = getContext("2d");
@@ -206,8 +201,8 @@ Item {
             anchors.fill: parent
             opacity: 1
             z:3
-            property double value: gauge.value
-            onValueChanged: requestPaint()
+            property double angle: needleTransform.angle
+            onAngleChanged: requestPaint()
             onPaint: {
                 var ctx = getContext("2d");
                 ctx.reset();
@@ -220,49 +215,45 @@ Item {
                 ctx.lineWidth = outerRadius * 0.2
                 ctx.arc(outerRadius,
                         outerRadius,
-                        outerRadius - outerRadius * 0.1,
+                        outerRadius - outerRadius * 0.12,
                         d2r(valueToAngle(0.0) - 90),
-                        d2r(valueToAngle(gauge.value) - 90),
+                        d2r(needleTransform.angle - 90),
                         (gauge.value*isInverted) < 0);
                 ctx.stroke();
-
-                //create outer gauge metal bezel effect
-                ctx.beginPath();
-                var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                // Add three color stops
-                gradient2.addColorStop(1, Utility.getAppHexColor("lightestBackground"));
-                gradient2.addColorStop(0.7, Utility.getAppHexColor("darkBackground"));
-                gradient2.addColorStop(0.1, Utility.getAppHexColor("lightestBackground"));
-                ctx.strokeStyle = gradient2;
-                ctx.lineWidth = outerRadius*0.03
-                ctx.arc(outerRadius,
-                        outerRadius,
-                        outerRadius*0.985  ,
-                        0, 2 * Math.PI);
-                ctx.stroke();
-                ctx.beginPath();
-                var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                // Add three color stops
-                gradient3.addColorStop(1, Utility.getAppHexColor("darkBackground"));
-                gradient3.addColorStop(0.8, Utility.getAppHexColor("lightestBackground"));
-                gradient3.addColorStop(0, Utility.getAppHexColor("darkBackground"));
-                ctx.strokeStyle = gradient3;
-                ctx.lineWidth = outerRadius*0.03
-                ctx.arc(outerRadius,
-                        outerRadius,
-                        0.96*outerRadius ,
-                        0, 2 * Math.PI);
-                ctx.stroke();
-
-                //small black inset line on inner gauge to give seam
-                ctx.beginPath();
-                ctx.strokeStyle = 'black';
-                ctx.lineWidth = outerRadius*0.002
-                ctx.arc(outerRadius,
-                        outerRadius,
-                        outerRadius*0.942  ,
-                        0, 2 * Math.PI);
-                ctx.stroke();
+            }
+            Canvas {
+                anchors.fill: parent
+                Component.onCompleted: requestPaint()
+                onPaint: {
+                    var ctx = getContext("2d");
+                    //create outer gauge metal bezel effect
+                    ctx.beginPath();
+                    var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+                    // Add three color stops
+                    gradient2.addColorStop(1, Utility.getAppHexColor("lightestBackground"));
+                    gradient2.addColorStop(0.7, Utility.getAppHexColor("darkBackground"));
+                    gradient2.addColorStop(0.1, Utility.getAppHexColor("lightestBackground"));
+                    ctx.strokeStyle = gradient2;
+                    ctx.lineWidth = outerRadius*0.03
+                    ctx.arc(outerRadius,
+                            outerRadius,
+                            outerRadius*0.985  ,
+                            0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
+                    // Add three color stops
+                    gradient3.addColorStop(1, Utility.getAppHexColor("darkBackground"));
+                    gradient3.addColorStop(0.8, Utility.getAppHexColor("lightestBackground"));
+                    gradient3.addColorStop(0, Utility.getAppHexColor("darkBackground"));
+                    ctx.strokeStyle = gradient3;
+                    ctx.lineWidth = outerRadius*0.03
+                    ctx.arc(outerRadius,
+                            outerRadius,
+                            0.96*outerRadius ,
+                            0, 2 * Math.PI);
+                    ctx.stroke();
+                }
             }
         }
 
@@ -347,7 +338,7 @@ Item {
             return (((count - 1) * stepSize) / (maximumValue - minimumValue)) * angleRange;
         }
 
-        property real tickmarkSectionSize: rangeUsed(tickmarkCount, tickmarkStepSize) / (tickmarkCount - 1)
+        property real tickmarkSectionSize: rangeUsed(tickmarkCount, labelStep) / (tickmarkCount - 1)
         property real tickmarkSectionValue: (maximumValue - minimumValue) / (tickmarkCount - 1)
         property real minorTickmarkSectionSize: tickmarkSectionSize / (minorTickmarkCount + 1)
         property real minorTickmarkSectionValue: tickmarkSectionValue / (minorTickmarkCount + 1)
@@ -360,7 +351,6 @@ Item {
             // We'll try to display as many minor tickmarks as we can to fill up the space.
             count + tickmarksNotDisplayed / minorSectionPercentage;
         }
-        property real labelSectionSize: rangeUsed(labelCount, labelStepSize) / (labelCount - 1)
         /*!
                     Returns the angle of \a marker (in the range 0 ... n - 1, where n
                     is the amount of markers) on the gauge where sections are of size
@@ -368,10 +358,6 @@ Item {
                 */
         function tickmarkAngleFromIndex(tickmarkIndex) {
             return tickmarkIndex * tickmarkSectionSize + minAngle;
-        }
-
-        function labelAngleFromIndex(labelIndex) {
-            return labelIndex * labelSectionSize + minAngle;
         }
 
         function minorTickmarkAngleFromIndex(minorTickmarkIndex) {
@@ -442,12 +428,12 @@ Item {
             model: ListModel {
                 id: valueTextModel
                 function update() {
-                    if (labelStepSize === 0) {
+                    if (labelStep === 0) {
                         return;
                     }
                     // Make bigger if it's too small and vice versa.
                     // +1 because we want to show 11 values, with, for example: 0, 10, 20... 100.
-                    var difference = labelCount - count;
+                    var difference = tickmarkCount - count;
                     if (difference > 0) {
                         for (; difference > 0; --difference) {
                             append({ value: 0 });
@@ -461,7 +447,7 @@ Item {
                     var index = 0;
                     for (var value = minimumValue;
                          value <= maximumValue && index < count;
-                         value += labelStepSize, ++index) {
+                         value += labelStep, ++index) {
                         setProperty(index, "value", value);
                     }
                 }
@@ -469,8 +455,8 @@ Item {
             delegate: Loader {
                 id: tickmarkLabelDelegateLoader
                 sourceComponent: tickmarkLabel
-                x: (outerRadius - width / 2) + ((outerRadius - labelInset) * Math.cos((d2r(gauge.labelAngleFromIndex(index) - 90))))
-                y: (outerRadius - height / 2) + ((outerRadius - labelInset) * Math.sin((d2r(gauge.labelAngleFromIndex(index) - 90))))
+                x: (outerRadius - width / 2) + ((outerRadius - labelInset) * Math.cos((d2r(gauge.tickmarkAngleFromIndex(index) - 90))))
+                y: (outerRadius - height / 2) + ((outerRadius - labelInset) * Math.sin((d2r(gauge.tickmarkAngleFromIndex(index) - 90))))
                 property real value: index > -1 ? labelItemRepeater.model.get(index).value : 0
             }
         }

@@ -73,6 +73,7 @@ Item {
                 anchors.verticalCenterOffset: 0.1*gaugeSize2
                 minimumValue: -60
                 maximumValue: 60
+                value: 0
                 labelStep: maximumValue > 60 ? 20 : 10
                 nibColor: Utility.getAppHexColor("tertiary1")
                 unitText: "A"
@@ -89,7 +90,6 @@ Item {
                     minimumValue: -100
                     minAngle: 210
                     maxAngle: -15
-                    isInverted: -1
                     labelStep: 25
                     value: 0
                     unitText: "%"
@@ -107,7 +107,7 @@ Item {
                         tickmarkScale: 0.001
                         tickmarkSuffix: "k"
                         labelStep: 1000
-                        value: 1000
+                        value: 0
                         unitText: "W"
                         typeText: "Power"
                         nibColor: Utility.getAppHexColor("tertiary2")
@@ -135,7 +135,7 @@ Item {
                 minAngle: -225
                 maxAngle: 45
                 labelStep: maximumValue > 60 ? 20 : 10
-                value: 20
+                value: 0
                 unitText: VescIf.useImperialUnits() ? "mph" : "km/h"
                 typeText: "Speed"
 
@@ -282,7 +282,7 @@ Item {
                     maxAngle: 45
                     minimumValue: 0
                     maximumValue: 100
-                    value: 95
+                    value: 0
                     centerTextVisible: false
                     nibColor: value > 50 ? "green" : (value > 20 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("red"))
                     Text {
@@ -294,18 +294,18 @@ Item {
                         anchors.centerIn: parent
                         anchors.verticalCenterOffset: - gaugeSize2*0.12
                         anchors.margins: 10
-                        font.family:  "Roboto mono"
+                        font.family:  "Roboto"
                     }
                     Text {
                         id: rangeValLabel
                         color: Utility.getAppHexColor("lightText")
                         text: "∞"
-                        font.pixelSize: text === "∞"? gaugeSize2/4.3 : gaugeSize2/8.0
+                        font.pixelSize: text === "∞"? gaugeSize2/6.3 : gaugeSize2/8.0
                         anchors.verticalCenterOffset: text === "∞"? -0.015*gaugeSize2 : 0
                         verticalAlignment: Text.AlignVCenter
                         anchors.centerIn: parent
                         anchors.margins: 10
-                        font.family:  "Roboto mono"
+                        font.family:  "Roboto"
                     }
                     Text {
                         id: rangeLabel
@@ -316,7 +316,7 @@ Item {
                         anchors.centerIn: parent
                         anchors.horizontalCenterOffset: gaugeSize2*0.3
                         anchors.margins: 10
-                        font.family:  "Roboto mono"
+                        font.family:  "Roboto"
                     }
                     Text {
                         id: battValLabel
@@ -328,7 +328,7 @@ Item {
                         anchors.verticalCenterOffset: gaugeSize2*0.15
                         //anchors.horizontalCenterOffset: (width -parent.width)/2
                         anchors.margins: 10
-                        font.family:  "Roboto mono"
+                        font.family:  "Roboto"
                     }
                     Behavior on nibColor {
                         ColorAnimation {
@@ -382,7 +382,7 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     //font.letterSpacing: gaugeSize2*0.001
                     anchors.margins: 10
-                    font.family:  "Roboto mono"
+                    font.family:  "Roboto"
                 }
                 width: gaugeSize2*0.7
                 height: gaugeSize2*0.7
@@ -410,6 +410,7 @@ Item {
                 anchors.verticalCenterOffset: -0.1*gaugeSize2
                 minimumValue: 0
                 maximumValue:150
+                value: 0
                 labelStep: 15
                 nibColor: Utility.getAppHexColor("tertiary2")
                 unitText: "°C"
@@ -426,13 +427,15 @@ Item {
                     minimumValue: 0
                     minAngle: 195
                     maxAngle: -30
-                    isInverted: -1
                     labelStep: 15
                     value: 0
                     unitText: "°C"
                     typeText: "TEMP\nMOTOR"
-                    nibColor: value >70 ? "red" : (value > 40 ? Utility.getAppHexColor("orange") : Utility.getAppHexColor("tertiary2"))
-                    Behavior on nibColor {
+                    property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
+                    property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
+                    property color redColor: {redColor = "red"}
+                    nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
+                   Behavior on nibColor {
                         ColorAnimation {
                             duration: 1000;
                             easing.type: Easing.InOutSine
@@ -451,15 +454,13 @@ Item {
                         minAngle: -127
                         maxAngle: 127
                         labelStep: maximumValue > 60 ? 20 : 10
-                        value: 20
+                        value: 0
                         unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
                         typeText: "Consump."
-
                         property color colHigh: "red"
                         property color colMid: Utility.getAppHexColor("orange")
                         property color colLow: Utility.getAppHexColor("tertiary2")
                         nibColor: value > 70 ? colHigh : (value > 40 ? colMid : colLow)
-
                         Text {
                             id: consumValLabel
                             color: Utility.getAppHexColor("lightText")
@@ -469,7 +470,7 @@ Item {
                             verticalAlignment: Text.AlignVCenter
                             anchors.centerIn: parent
                             anchors.margins: 10
-                            font.family:  "Roboto mono"
+                            font.family:  "Roboto"
                             Text {
                                 id: avgLabel
                                 color: Utility.getAppHexColor("lightText")
@@ -479,7 +480,7 @@ Item {
                                 verticalAlignment: Text.AlignVCenter
                                 anchors.centerIn: parent
                                 anchors.margins: 10
-                                font.family:  "Roboto mono"
+                                font.family:  "Roboto"
                             }
                         }
                         Behavior on nibColor {
@@ -511,7 +512,7 @@ Item {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: - gaugeSize2*0.12
                 anchors.margins: 10
-                font.family:  "Roboto mono"
+                font.family:  "Roboto"
             }
             Text {
                 id: timeLabel
@@ -523,7 +524,7 @@ Item {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: - gaugeSize2*0.12
                 anchors.margins: 10
-                font.family:  "Roboto mono"
+                font.family:  "Roboto"
             }
             Text {
                 id: tripLabel
@@ -535,7 +536,7 @@ Item {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: - gaugeSize2*0.12
                 anchors.margins: 10
-                font.family:  "Roboto mono"
+                font.family:  "Roboto"
             }
             Rectangle {
                 id:clockRect
@@ -616,18 +617,9 @@ Item {
         }
 
         onValuesSetupReceived: {
-            var currentMax = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
-            var currentStep = Math.ceil(currentGauge.maximumValue / 20) * 5
-            var currentLabelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
-
-            if (Math.abs(currentGauge.maximumValue - currentMax) > 0.5) {
-                currentGauge.maximumValue = currentMax
-                currentGauge.minimumValue = -currentMax
-            }
-
-            if (Math.abs(currentGauge.labelStep - currentLabelStep) > 0.1) {
-                currentGauge.labelStep = currentLabelStep
-            }
+            currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
+            currentGauge.minimumValue = -currentGauge.maximumValue
+            currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
 
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
@@ -645,7 +637,7 @@ Item {
 
             var dist = values.tachometer_abs / 1000.0
             var wh_consume = values.watt_hours - values.watt_hours_charged
-            var wh_km_total = wh_consume / dist
+            var wh_km_total = wh_consume / Math.max(dist , 1e-10)
 
             if (Math.abs(speedGauge.maximumValue - speedMaxRound) > 6.0) {
                 speedGauge.maximumValue = speedMaxRound

@@ -704,8 +704,8 @@ ApplicationWindow {
 
             Text {
                 id: vescDialogLabel
-                color: Utility.getAppHexColor("lightText")
-                linkColor: "lightblue"
+                color: {color = Utility.getAppHexColor("lightText")}
+                linkColor: {linkColor = Utility.getAppHexColor("accent")}
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -864,7 +864,6 @@ ApplicationWindow {
 
     Connections {
         target: mCommands
-
         onValuesImuReceived: {
             if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
                 vesc3d.setRotation(values.roll, values.pitch,

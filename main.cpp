@@ -291,12 +291,15 @@ int main(int argc, char *argv[])
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-BoldOblique.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Oblique.ttf");
 
-    QFontDatabase::addApplicationFont("://res/fonts/Exan-Regular.ttf");
+
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Regular.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Medium.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bolf.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
+    QFontDatabase::addApplicationFont(":/res/fonts/Roboto/RobotoMono-VariableFont_wght.ttf");
+
+    QFontDatabase::addApplicationFont("://res/fonts/Exan-Regular.ttf");
 
     qApp->setFont(QFont("Roboto", 12));
 
@@ -366,6 +369,9 @@ int main(int argc, char *argv[])
         QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bolf.ttf");
         QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
         QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
+        QFontDatabase::addApplicationFont(":/res/fonts/Roboto/RobotoMono-VariableFont_wght.ttf");
+
+        QFontDatabase::addApplicationFont("://res/fonts/Exan-Regular.ttf");
 
 
         qApp->setFont(QFont("Roboto", 12));

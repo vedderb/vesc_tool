@@ -320,5 +320,6 @@
         <file>res/icons/motor_side.png</file>
         <file>res/other_fw/nrf52840_stormcore_ble_rx31_tx30_led5.bin</file>
         <file>res/fonts/Exan-Regular.ttf</file>
+        <file>res/fonts/Roboto/RobotoMono-VariableFont_wght.ttf</file>
     </qresource>
 </RCC>

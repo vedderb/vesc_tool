@@ -64,7 +64,7 @@ Item {
         Text {
             id: text
             Layout.fillWidth: true
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             text: qsTr("Select which VESCs have inverted motor direction. Press the FWD or REV button to try.")
             font.bold: true
             horizontalAlignment: Text.AlignHCenter

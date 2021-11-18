@@ -396,16 +396,17 @@ ApplicationWindow {
                         asynchronous: true
                         visible: status == Loader.Ready
                         anchors.centerIn: parent
-                        width:  parent.width*1.5
-                        height: parent.height*1.5//width
+                        width:  parent.width*Screen.devicePixelRatio
+                        antialiasing: true
+                        height: width
                         z:1
                         sourceComponent:
                             Vesc3dItem {
                             id: vesc3d
                             anchors.centerIn: parent
-                            width:  parent.width*1.5
+                            width:  parent.width*Screen.devicePixelRatio
                             height: width
-                            scale: 0.66
+                            scale: 1.0 / Screen.devicePixelRatio
                             z:1
                         }
 }

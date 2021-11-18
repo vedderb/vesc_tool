@@ -45,6 +45,9 @@ private slots:
 private:
     Vesc3DView mVesc3d;
     QImage mLastCornerImg;
+    double mRoll = 0;
+    double mPitch = 0;
+    double mYaw = 0;
 
     void updateImage();
 

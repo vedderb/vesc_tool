@@ -357,6 +357,7 @@ ApplicationWindow {
                         visible: status == Loader.Ready
                         sourceComponent: RtData {
                             anchors.fill: parent
+                            updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0
                         }
                     }
                 }
@@ -368,36 +369,47 @@ ApplicationWindow {
                         visible: status == Loader.Ready
                         sourceComponent: RtDataSetup {
                             anchors.fill: parent
+                            updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1
                         }
                     }
                 }
 
                 Page {
+                    RtDataIMU {
+                        id: rtIMU
+                        visible: false
+                        anchors.top: parent.top
+                        width: parent.width
+                        Layout.fillWidth: true
+                        z:2
+                    }
+                    CheckBox {
+                        anchors.top: rtIMU.bottom
+                        Layout.fillWidth: true
+                        id: useYawBox
+                        text: "Use Yaw (will drift)"
+                        checked: false
+                        z:2
+                    }
                     Loader {
                         id: vesc3dLoader
                         asynchronous: true
                         visible: status == Loader.Ready
-                        anchors.fill: parent
-                        sourceComponent: Vesc3dItem {
+                        anchors.centerIn: parent
+                        width:  parent.width*1.5
+                        height: parent.height*1.5//width
+                        z:1
+                        sourceComponent:
+                            Vesc3dItem {
                             id: vesc3d
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            property alias useYaw: useYawBox.checked
-                            RtDataIMU {
-                                id: rtIMU
-                                anchors.top: parent.top
-                                width: parent.width
-                                Layout.fillWidth: true
-                            }
-                            CheckBox {
-                                anchors.top: rtIMU.bottom
-                                Layout.fillWidth: true
-                                id: useYawBox
-                                text: "Use Yaw (will drift)"
-                                checked: false
-                            }
+                            anchors.centerIn: parent
+                            width:  parent.width*1.5
+                            height: width
+                            scale: 0.66
+                            z:1
                         }
-                    }
+}
+
                 }
             }
 
@@ -995,7 +1007,8 @@ ApplicationWindow {
         onValuesImuReceived: {
             if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
                 vesc3dLoader.item.setRotation(values.roll, values.pitch,
-                                              vesc3dLoader.item.useYaw.checked ? values.yaw : 0)
+                                              useYawBox.checked ? values.yaw : 0)
+                rtIMU.updateText(values)
             }
         }
 

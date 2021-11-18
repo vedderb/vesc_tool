@@ -510,6 +510,25 @@
              </widget>
             </item>
             <item>
+             <widget class="QDoubleSpinBox" name="m1TempIncBox">
+              <property name="prefix">
+               <string>Temp Increase: </string>
+              </property>
+              <property name="suffix">
+               <string> °C</string>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="minimum">
+               <double>-200.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>200.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QGroupBox" name="groupBox_2">
               <property name="title">
                <string>Motor Configuration</string>
@@ -650,6 +669,22 @@
               </property>
               <property name="minimum">
                <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="m2TempIncBox">
+              <property name="prefix">
+               <string>Temp Increase: </string>
+              </property>
+              <property name="suffix">
+               <string> °C</string>
+              </property>
+              <property name="minimum">
+               <double>-200.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>200.000000000000000</double>
               </property>
              </widget>
             </item>

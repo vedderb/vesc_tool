@@ -77,14 +77,16 @@ private:
             vbus_min = 0.0;
         }
 
-        void update(ConfigParams &config, double rpm,
-                    double torque, double gearing, double motors) {
+        void update(ConfigParams &config, double rpm, double torque,
+                    double gearing, double motors, double temp_inc) {
 
             double r = config.getParamDouble("foc_motor_r");
             double l = config.getParamDouble("foc_motor_l");
             double lambda = config.getParamDouble("foc_motor_flux_linkage");
             double i_nl = config.getParamDouble("si_motor_nl_current");
             double poles_pairs = double(config.getParamInt("si_motor_poles")) / 2.0;
+
+            r += r * 0.00386 * (temp_inc);
 
             torque_out = torque;
             rpm_out = rpm;

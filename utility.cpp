@@ -31,6 +31,7 @@
 #include <QNetworkReply>
 #include <QMessageBox>
 #include <QFile>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QtGlobal>
 #include <QNetworkInterface>

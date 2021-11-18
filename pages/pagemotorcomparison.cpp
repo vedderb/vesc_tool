@@ -20,6 +20,7 @@
 #include "pagemotorcomparison.h"
 #include "ui_pagemotorcomparison.h"
 #include "utility.h"
+#include <QFileDialog>
 
 PageMotorComparison::PageMotorComparison(QWidget *parent) :
     QWidget(parent),

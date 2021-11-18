@@ -20,7 +20,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
-
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.bleuart 1.0
 import Vedder.vesc.commands 1.0
@@ -31,12 +30,20 @@ Drawer {
     width: appWindow.width
     height: appWindow.height
     position: 1.0
-    interactive: true
+    interactive: false
     edge: Qt.BottomEdge
-    dragMargin: parent.height/4
     Overlay.modal: Rectangle {
         color: "#AA000000"
     }
+    property int animationSpeed: 50
+
+    Behavior on position {
+        NumberAnimation {
+            duration: animationSpeed
+            easing.type: Easing.InOutSine
+        }
+    }
+
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
     property int notchTop: 0
@@ -73,6 +80,25 @@ Drawer {
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
             Layout.bottomMargin: 0
             source: "qrc" + Utility.getThemePath() + "/logo.png"
+            MouseArea {
+                anchors.fill: parent
+                property real yLast: 0
+                onPressed: {
+                    yLast = mouseY
+                    animationSpeed = 0
+                }
+                onMouseYChanged: {
+                    rootItem.position = rootItem.position - (mouseY - yLast)/rootItem.height
+                }
+                onReleased: {
+                    animationSpeed = 50
+                    if(rootItem.position > 0.9) {
+                        rootItem.position = 1
+                    }else{
+                        rootItem.close()
+                    }
+                }
+            }
         }
 
         RowLayout {

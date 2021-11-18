@@ -226,15 +226,6 @@ Item {
                 Layout.fillWidth: true
                 text: "Read"
 
-                Image {
-                    anchors.centerIn: parent
-                    antialiasing: true
-                    opacity: 0.5
-                    height: parent.width*0.6
-                    width: height
-                    source: {source = "qrc" + Utility.getThemePath() + "icons/app_up.png"}
-                }
-
                 onClicked: {
                     mCommands.getAppConf()
                 }

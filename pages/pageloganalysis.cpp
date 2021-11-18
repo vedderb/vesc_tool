@@ -1174,36 +1174,12 @@ void PageLogAnalysis::on_saveMapPngButton_clicked()
 
 void PageLogAnalysis::on_savePlotPdfButton_clicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save PDF"), "",
-                                                    tr("PDF Files (*.pdf)"));
-
-    if (!fileName.isEmpty()) {
-        if (!fileName.toLower().endsWith(".pdf")) {
-            fileName.append(".pdf");
-        }
-
-        ui->plot->savePdf(fileName,
-                          ui->saveWidthBox->value(),
-                          ui->saveHeightBox->value());
-    }
+    Utility::plotSavePdf(ui->plot, ui->saveWidthBox->value(), ui->saveHeightBox->value());
 }
 
 void PageLogAnalysis::on_savePlotPngButton_clicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save Image"), "",
-                                                    tr("PNG Files (*.png)"));
-
-    if (!fileName.isEmpty()) {
-        if (!fileName.toLower().endsWith(".png")) {
-            fileName.append(".png");
-        }
-
-        ui->plot->savePng(fileName,
-                          ui->saveWidthBox->value(),
-                          ui->saveHeightBox->value());
-    }
+    Utility::plotSavePng(ui->plot, ui->saveWidthBox->value(), ui->saveHeightBox->value());
 }
 
 void PageLogAnalysis::on_centerButton_clicked()

@@ -105,6 +105,8 @@ public:
     Q_INVOKABLE static QVariantMap getSafeAreaMargins(QQuickWindow *window);
 
     static void setPlotColors(QCustomPlot* plot);
+    static void plotSavePdf(QCustomPlot* plot, int width = 1280, int height = 720, QString title = "");
+    static void plotSavePng(QCustomPlot* plot, int width = 1280, int height = 720, QString title = "");
 
     template<typename QEnum>
     static QString QEnumToQString (const QEnum value) {

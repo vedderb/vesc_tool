@@ -642,11 +642,7 @@ Item {
             }
 
             var params = VescIf.getLastFwRxParams()
-            if (!rx) {
-                return;
-            }
 
-            var params = VescIf.getLastFwRxParams()
             updateHw(params)
             updateBl(params)
 

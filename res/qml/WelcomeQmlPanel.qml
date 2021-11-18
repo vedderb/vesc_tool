@@ -30,8 +30,8 @@ import "qrc:/mobile"
 Item {
     id: container
     width: 100
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
+    Material.theme: {Material.theme = Utility.isDarkMode() ? "Dark" : "Light"}
+    Material.accent: {Material.accent = Utility.getAppHexColor("lightAccent")}
 
 
     function setupMotors() {
@@ -124,7 +124,7 @@ Item {
 
             background: Rectangle {
                 opacity: 1
-                color: Utility.getAppHexColor("lightBackground")
+                color: {color = Utility.getAppHexColor("lightBackground")}
             }
 
             property int buttonWidth: Math.max(120,
@@ -310,7 +310,7 @@ Item {
         y: parent.y + parent.height / 2 - height / 2
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -343,7 +343,7 @@ Item {
         y: parent.y + parent.height / 2 - height / 2
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

@@ -26,19 +26,24 @@ import Vedder.vesc.bleuart 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.utility 1.0
 
-Item {
+Drawer {
     id: rootItem
-
+    width: appWindow.width
+    height: appWindow.height
+    position: 1.0
+    interactive: true
+    edge: Qt.BottomEdge
+    dragMargin: parent.height/4
+    Overlay.modal: Rectangle {
+        color: "#AA000000"
+    }
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
     property int notchTop: 0
-    property int animationSpeed: 500
-    Behavior on y {
-        NumberAnimation {
-            duration: animationSpeed;
-            easing.type: Easing.InOutSine
-        }
-    }
+    onClosed: enableDialog()
+
+    enter: Transition { SmoothedAnimation { velocity: 3 } }
+    exit: Transition { SmoothedAnimation { velocity: 3 } }
 
     Rectangle {
         color: Utility.getAppHexColor("darkBackground")
@@ -48,12 +53,6 @@ Item {
     Component.onCompleted: {
         mBle.startScan()
         scanDotTimer.running = true
-    }
-
-    onYChanged: {
-        if (y > 1) {
-            enableDialog()
-        }
     }
 
     ColumnLayout {
@@ -74,40 +73,16 @@ Item {
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
             Layout.bottomMargin: 0
             source: "qrc" + Utility.getThemePath() + "/logo.png"
-
-            DragHandler {
-                id: handler
-                target:rootItem
-                margin: 0
-                xAxis.enabled: false
-                yAxis.maximum: rootItem.height
-                yAxis.minimum: 0
-
-                onActiveChanged: {
-                    if (handler.active) {
-                        animationSpeed = 3
-                    } else {
-                        animationSpeed = 500
-                        if (rootItem.y > rootItem.height / 4) {
-                            rootItem.y = rootItem.height
-                        } else {
-                            rootItem.y = 0
-                        }
-                    }
-                }
-            }
         }
 
         RowLayout {
             Layout.fillWidth: true
-
             Button {
                 text: qsTr("Hide")
                 Layout.preferredWidth: 120
                 flat: true
-
                 onClicked: {
-                    rootItem.y = rootItem.height
+                    rootItem.close()
                 }
             }
 
@@ -189,6 +164,7 @@ Item {
             focus: true
             clip: true
             spacing: 5
+            z:2
 
             Component {
                 id: bleDelegate
@@ -391,6 +367,7 @@ Item {
                                     "bleAddr": "",
                                     "isSerial": true})
             }
+            enableDialog()
         }
 
         onBleError: {
@@ -414,7 +391,7 @@ Item {
         title: "Connecting..."
         closePolicy: Popup.NoAutoClose
         modal: true
-        focus: true        
+        focus: true
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -424,7 +401,6 @@ Item {
         x: 10
         y: parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
-
         ProgressBar {
             anchors.fill: parent
             indeterminate: visible
@@ -486,7 +462,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Preferred BLE Devices"
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay      
+        parent: ApplicationWindow.overlay
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }

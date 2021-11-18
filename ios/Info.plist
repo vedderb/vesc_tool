@@ -9,7 +9,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>Created by Qt/QMake</string>
 	<key>CFBundleIdentifier</key>
-	<string>test.vesc-tool-3-00</string>
+        <string>com.vesc-project.vesc-tool</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -97,6 +97,8 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+        <key>UIRequiresFullScreen</key>
+        <true/>
 	<key>UISupportsDocumentBrowser</key>
 	<true/>
 	<key>UIViewEdgeAntialiasing</key>

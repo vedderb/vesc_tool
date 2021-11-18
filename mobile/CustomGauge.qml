@@ -153,6 +153,7 @@ Item {
                 id: pointerNib
                 property double value: gauge.value
                 property double gAngle: needleTransform.angle
+                Component.onCompleted: requestPaint()
                 onGAngleChanged: requestPaint()
                 anchors.fill:parent
                 onPaint:{

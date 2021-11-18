@@ -88,29 +88,19 @@ ApplicationWindow {
     }
 
 
-    Loader {
-        id: controlsLoader
-        anchors.fill: parent
-        asynchronous: true
-        visible: status == Loader.Ready
-        sourceComponent: Controls {
-            id: controls
-            parentWidth: appWindow.width
-            parentHeight: appWindow.height - footer.height - headerBar.height
-        }
+    Controls {
+        id: controls
+        parentWidth: appWindow.width
+        parentHeight: appWindow.height - footer.height - headerBar.height
     }
 
-    Loader {
-        id: multiSettingsLoader
-        anchors.fill: parent
-        asynchronous: false
-        visible: status == Loader.Ready
-        sourceComponent: MultiSettings {
-            id: multiSettings
-            notchBot: appWindow.notchBot
-            notchTop: appWindow.notchTop
-        }
+
+    MultiSettings {
+        id: multiSettings
+        notchBot: appWindow.notchBot
+        notchTop: appWindow.notchTop
     }
+
 
     Loader {
         id: settingsLoader
@@ -302,7 +292,7 @@ ApplicationWindow {
                     notchTop: appWindow.notchTop
 
                     onRequestOpenControls: {
-                        controlsLoader.item.openDialog()
+                        controls.openDialog()
                     }
 
                     onRequestConnect: {
@@ -310,7 +300,7 @@ ApplicationWindow {
                     }
 
                     onRequestOpenMultiSettings: {
-                        multiSettingsLoader.item.openDialog()
+                        multiSettings.openDialog()
                     }
                 }
             }
@@ -703,11 +693,11 @@ ApplicationWindow {
 
 
 
-        ConnectScreen {
-            id: connScreen
-            notchTop: appWindow.notchTop
-            Component.onCompleted: open()
-        }
+    ConnectScreen {
+        id: connScreen
+        notchTop: appWindow.notchTop
+        Component.onCompleted: open()
+    }
 
     Timer {
         id: statusTimer
@@ -941,11 +931,7 @@ ApplicationWindow {
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
-
             reconnectButton.enabled = !VescIf.isPortConnected()
-            if(!VescIf.isPortConnected()) {
-
-            }
             if(VescIf.isPortConnected()) {
                 connScreen.close();
             }

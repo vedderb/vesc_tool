@@ -398,6 +398,9 @@ ApplicationWindow {
                         width:  parent.width*Screen.devicePixelRatio
                         antialiasing: true
                         height: width
+                        onLoaded: {
+                            item.setRotation(0.1, 0.75, 0.4)
+                        }
                         z:1
                         sourceComponent:
                             Vesc3dItem {

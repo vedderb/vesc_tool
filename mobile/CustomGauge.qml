@@ -18,13 +18,12 @@
     */
 
 import QtQuick 2.0
-import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Extras 1.4
-import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Material 2.2
 import Vedder.vesc.utility 1.0
+
 Item {
     property double value: 0
     property double outerRadius: width/2
@@ -43,8 +42,6 @@ Item {
     property double minimumValue: 0
     property double maximumValue: 100
 
-    onTickmarkCountChanged: valueTextModel.update()
-
     property string unitText: ""
     property string typeText: ""
     property string tickmarkSuffix: ""
@@ -55,6 +52,8 @@ Item {
 
     property bool tickmarksVisible: true
     property bool centerTextVisible: true
+
+    onTickmarkCountChanged: valueTextModel.update()
 
     function valueToAngle(value) {
         var normalised = (value - minimumValue) / (maximumValue - minimumValue);
@@ -116,7 +115,7 @@ Item {
             anchors.top: speedLabel.bottom
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: outerRadius * 0.12
-            color: { color = Utility.getAppHexColor("lightText")}
+            color: {color = Utility.getAppHexColor("lightText")}
             antialiasing: true
             font.family: "Roboto"
             font.capitalization: Font.AllUppercase
@@ -154,45 +153,47 @@ Item {
                 id: pointerNib
                 property double value: gauge.value
                 property double gAngle: needleTransform.angle
+                Component.onCompleted: requestPaint()
                 onGAngleChanged: requestPaint()
                 anchors.fill:parent
                 onPaint:{
                     var ctx = getContext("2d");
+                    if(nibColor != null) {
+                        // the triangle
+                        ctx.beginPath();
+                        ctx.moveTo(parent.width/2, 0);
+                        ctx.lineTo(parent.width, parent.height*0.015);
+                        ctx.quadraticCurveTo(parent.width*0.7, parent.height/4, 0.6*parent.width , 0.9*parent.height);
+                        ctx.quadraticCurveTo(parent.width*0.6, parent.height, parent.width/2, parent.height);
+                        ctx.closePath();
 
-                    // the triangle
-                    ctx.beginPath();
-                    ctx.moveTo(parent.width/2, 0);
-                    ctx.lineTo(parent.width, parent.height*0.015);
-                    ctx.quadraticCurveTo(parent.width*0.7, parent.height/4, 0.6*parent.width , 0.9*parent.height);
-                    ctx.quadraticCurveTo(parent.width*0.6, parent.height, parent.width/2, parent.height);
-                    ctx.closePath();
+                        var gradient = ctx.createLinearGradient(parent.width,parent.height*0.02,parent.width/2,0);
+                        gradient.addColorStop(0, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle - 36))));
+                        gradient.addColorStop(0.80, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle))));
+                        gradient.addColorStop(0.92, '#ffffff');
+                        gradient.addColorStop(1, '#ffffff');
 
-                    var gradient = ctx.createLinearGradient(parent.width,parent.height*0.02,parent.width/2,0);
-                    gradient.addColorStop(0, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle - 36))));
-                    gradient.addColorStop(0.80, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle))));
-                    gradient.addColorStop(0.92, '#ffffff');
-                    gradient.addColorStop(1, '#ffffff');
+                        // the fill color
+                        ctx.fillStyle = gradient;
+                        ctx.fill();
 
-                    // the fill color
-                    ctx.fillStyle = gradient;
-                    ctx.fill();
+                        // the triangle
+                        ctx.beginPath();
+                        ctx.moveTo(parent.width/2, 0);
+                        ctx.lineTo(0, parent.height*0.015);
+                        ctx.quadraticCurveTo(parent.width*0.3, parent.height/4, 0.4*parent.width, 0.9*parent.height);
+                        ctx.quadraticCurveTo(parent.width*0.4, parent.height, parent.width/2, parent.height);
+                        ctx.closePath();
 
-                    // the triangle
-                    ctx.beginPath();
-                    ctx.moveTo(parent.width/2, 0);
-                    ctx.lineTo(0, parent.height*0.015);
-                    ctx.quadraticCurveTo(parent.width*0.3, parent.height/4, 0.4*parent.width, 0.9*parent.height);
-                    ctx.quadraticCurveTo(parent.width*0.4, parent.height, parent.width/2, parent.height);
-                    ctx.closePath();
-
-                    var gradient2 = ctx.createLinearGradient(0,parent.height*0.02,parent.width/2,0);
-                    gradient2.addColorStop(0, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle + 144))));
-                    gradient2.addColorStop(0.80, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle + 180))));
-                    gradient2.addColorStop(0.92, '#ffffff');
-                    gradient2.addColorStop(1, '#ffffff');
-                    // the fill color
-                    ctx.fillStyle = gradient2;
-                    ctx.fill();
+                        var gradient2 = ctx.createLinearGradient(0,parent.height*0.02,parent.width/2,0);
+                        gradient2.addColorStop(0, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle + 144))));
+                        gradient2.addColorStop(0.80, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle + 180))));
+                        gradient2.addColorStop(0.92, '#ffffff');
+                        gradient2.addColorStop(1, '#ffffff');
+                        // the fill color
+                        ctx.fillStyle = gradient2;
+                        ctx.fill();
+                    }
                 }
             }
         }
@@ -223,6 +224,9 @@ Item {
             }
             Canvas {
                 anchors.fill: parent
+                property color lightBG: {lightBG = Utility.getAppHexColor("lightestBackground")}
+                property color darkBG: {darkBG = Utility.getAppHexColor("darkBackground")}
+                property real borderWidth: outerRadius*0.035;
                 Component.onCompleted: requestPaint()
                 onPaint: {
                     var ctx = getContext("2d");
@@ -230,27 +234,27 @@ Item {
                     ctx.beginPath();
                     var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
                     // Add three color stops
-                    gradient2.addColorStop(1, Utility.getAppHexColor("lightestBackground"));
-                    gradient2.addColorStop(0.7, Utility.getAppHexColor("darkBackground"));
-                    gradient2.addColorStop(0.1, Utility.getAppHexColor("lightestBackground"));
+                    gradient2.addColorStop(1, lightBG);
+                    gradient2.addColorStop(0.7, darkBG);
+                    gradient2.addColorStop(0.1, lightBG);
                     ctx.strokeStyle = gradient2;
-                    ctx.lineWidth = outerRadius*0.03
+                    ctx.lineWidth = borderWidth
                     ctx.arc(outerRadius,
                             outerRadius,
-                            outerRadius*0.985  ,
+                            outerRadius - borderWidth/2,
                             0, 2 * Math.PI);
                     ctx.stroke();
                     ctx.beginPath();
                     var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
                     // Add three color stops
-                    gradient3.addColorStop(1, Utility.getAppHexColor("darkBackground"));
-                    gradient3.addColorStop(0.8, Utility.getAppHexColor("lightestBackground"));
-                    gradient3.addColorStop(0, Utility.getAppHexColor("darkBackground"));
+                    gradient3.addColorStop(1, darkBG);
+                    gradient3.addColorStop(0.8, lightBG);
+                    gradient3.addColorStop(0, darkBG);
                     ctx.strokeStyle = gradient3;
-                    ctx.lineWidth = outerRadius*0.03
+                    ctx.lineWidth = borderWidth
                     ctx.arc(outerRadius,
                             outerRadius,
-                            0.96*outerRadius ,
+                            outerRadius - borderWidth*3/2 + 1,
                             0, 2 * Math.PI);
                     ctx.stroke();
                 }
@@ -298,7 +302,7 @@ Item {
             invert: false
             visible: true
         }
-        Component{
+        Component {
             id: tickmarkLabel
             Text {
                 font.pixelSize: outerRadius * 0.12
@@ -310,7 +314,7 @@ Item {
                 font.family: "Roboto"
             }
         }
-        Component{
+        Component {
             id: tickmark
             Rectangle {
                 implicitWidth: outerRadius * 0.02
@@ -322,7 +326,7 @@ Item {
                 color: isCovered(value) ? coveredColor : uncoveredColor
             }
         }
-        Component{
+        Component {
             id: minorTickmark
             Rectangle {
                 implicitWidth: outerRadius * 0.015
@@ -443,7 +447,6 @@ Item {
                             remove(count - 1);
                         }
                     }
-
                     var index = 0;
                     for (var value = minimumValue;
                          value <= maximumValue && index < count;

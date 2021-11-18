@@ -25,6 +25,8 @@ DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
 DEFINES += VT_CONFIG_VERSION=$$VT_CONFIG_VERSION
 DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
+QT_LOGGING_RULES="qt.qml.connections=false"
+#CONFIG += qtquickcompiler
 
 CONFIG += c++11
 CONFIG += resources_big
@@ -118,7 +120,7 @@ contains(DEFINES, HAS_GAMEPAD) {
 
 android: QT += androidextras
 
-ios: {
+ios | macx: {
     TARGET = "VESC Tool"
 }else: {
     android:{
@@ -294,7 +296,11 @@ macx-clang:contains(QMAKE_HOST.arch, arm.*): {
 macx {
     ICON        =  macos/appIcon.icns
     QMAKE_INFO_PLIST = macos/Info.plist
-    DISTFILES += macos/Info.plist
+    DISTFILES += macos/Info.plist    
+    QMAKE_CFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
+    QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO
+    QMAKE_OBJECTIVE_CFLAGS_RELEASE = $$QMAKE_OBJECTIVE_CFLAGS_RELEASE_WITH_DEBUGINFO
+    QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO
 }
 
 ios {

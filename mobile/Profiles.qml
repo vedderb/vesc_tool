@@ -108,7 +108,7 @@ Item {
         }
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color:{color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -192,7 +192,7 @@ Item {
         y: column.y + column.height / 2 - height / 2
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

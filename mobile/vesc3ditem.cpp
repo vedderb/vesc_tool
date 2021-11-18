@@ -59,7 +59,7 @@ void Vesc3dItem::updateImage()
         double scale = 1.0;
 
 #ifdef Q_OS_IOS
-        scale = 1.5;
+     //   scale = 1.5;
 #endif
 
         if (mVesc3d.size() != size().toSize()) {

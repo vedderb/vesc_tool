@@ -9,11 +9,13 @@
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>VESC Tool uses bluetooth to connect to embedded devices</string>
 	<key>CFBundleExecutable</key>
-	<string>vesc_tool_3.01</string>
+	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIconFile</key>
 	<string>appIcon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.vesc.vesc-tool-3.01</string>
+        <string>com.vesc.vesc-tool-3.01</string>
+	<key>CFBundleDisplayName</key>
+        <string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>

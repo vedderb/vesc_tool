@@ -80,9 +80,6 @@ ApplicationWindow {
         Utility.stopGnssForegroundService()
     }
 
-    onHeightChanged: {
-        connScreen.y =  (connScreen.y > 1) ? connScreen.height : 0.0
-    }
 
     SetupWizardIntro {
         id: introWizard
@@ -90,11 +87,13 @@ ApplicationWindow {
         notchTop: appWindow.notchTop
     }
 
+
     Controls {
         id: controls
         parentWidth: appWindow.width
         parentHeight: appWindow.height - footer.height - headerBar.height
     }
+
 
     MultiSettings {
         id: multiSettings
@@ -102,23 +101,36 @@ ApplicationWindow {
         notchTop: appWindow.notchTop
     }
 
-    Settings {
-        id: settings
+
+    Loader {
+        id: settingsLoader
+        anchors.fill: parent
+        asynchronous: true
+        visible: status == Loader.Ready
+        sourceComponent: Settings {
+            id: settings
+        }
     }
 
-    Drawer {
-        id: canDrawer
-        edge: Qt.RightEdge
-        width: 0.60 * appWindow.width
-        height: appWindow.height - footer.height - headerBar.height
-        y: headerBar.height
-        dragMargin: 20
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+    Loader {
+        id: canDrawerLoader
+        anchors.fill: parent
+        asynchronous: true
+        visible: status == Loader.Ready
+        sourceComponent: Drawer {
+            id: canDrawer
+            edge: Qt.RightEdge
+            width: 0.60 * appWindow.width
+            height: appWindow.height - footer.height - headerBar.height
+            y: headerBar.height
+            dragMargin: 20
+            Overlay.modal: Rectangle {
+                color: "#AA000000"
+            }
 
-        CanScreen {
-            anchors.fill: parent
+            CanScreen {
+                anchors.fill: parent
+            }
         }
     }
 
@@ -157,8 +169,7 @@ ApplicationWindow {
                 flat: true
 
                 onClicked: {
-                    connScreen.y = 0
-                    drawer.close()
+                    connScreen.open()
                 }
             }
 
@@ -186,7 +197,7 @@ ApplicationWindow {
 
                 onClicked: {
                     drawer.close()
-                    settings.openDialog()
+                    settingsLoader.item.openDialog()
                 }
             }
 
@@ -194,7 +205,6 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "About"
                 flat: true
-
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 "About",
@@ -239,6 +249,7 @@ ApplicationWindow {
         }
     }
 
+
     SwipeView {
         id: swipeView
         currentIndex: tabBar.currentIndex
@@ -246,40 +257,70 @@ ApplicationWindow {
         anchors.leftMargin: notchLeft
         anchors.rightMargin: notchRight
         clip: true
+        contentItem: ListView {
+            model: swipeView.contentModel
+            interactive: swipeView.interactive
+            currentIndex: swipeView.currentIndex
+
+            spacing: swipeView.spacing
+            orientation: swipeView.orientation
+            snapMode: ListView.SnapOneItem
+            boundsBehavior: Flickable.StopAtBounds
+
+            highlightRangeMode: ListView.StrictlyEnforceRange
+            preferredHighlightBegin: 0
+            preferredHighlightEnd: 0
+            highlightMoveDuration: 250
+
+            maximumFlickVelocity: 8 * (swipeView.orientation ===
+                                       Qt.Horizontal ? width : height)
+        }
+
+
 
         Page {
-            StartPage {
-                id: connBle
+            Loader {
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                notchBot: appWindow.notchBot
-                notchTop: appWindow.notchTop
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: StartPage {
+                    id: connBle
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    notchBot: appWindow.notchBot
+                    notchTop: appWindow.notchTop
 
-                onRequestOpenControls: {
-                    controls.openDialog()
-                }
+                    onRequestOpenControls: {
+                        controls.openDialog()
+                    }
 
-                onRequestConnect: {
-                    connScreen.y = 0
-                }
+                    onRequestConnect: {
+                        connScreen.open()
+                    }
 
-                onRequestOpenMultiSettings: {
-                    multiSettings.openDialog()
+                    onRequestOpenMultiSettings: {
+                        multiSettings.openDialog()
+                    }
                 }
             }
         }
 
         Page {
-            PageIndicator {
-                count: rtSwipeView.count
-                currentIndex: rtSwipeView.currentIndex
-                anchors.right: parent.right
-                width:25
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.verticalCenterOffset: parent.height*0.44
-                rotation: 90
-                z:2
+            Loader {
+                anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: PageIndicator {
+                    count: rtSwipeView.count
+                    currentIndex: rtSwipeView.currentIndex
+                    anchors.right: parent.right
+                    width:25
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenterOffset: parent.height*0.44
+                    rotation: 90
+                    z:2
+                }
             }
 
             SwipeView {
@@ -289,37 +330,72 @@ ApplicationWindow {
                 currentIndex: 1
                 anchors.fill:parent
                 orientation: Qt.Vertical
+
+                contentItem: ListView {
+                    model: rtSwipeView.contentModel
+                    interactive: rtSwipeView.interactive
+                    currentIndex: rtSwipeView.currentIndex
+
+                    spacing: rtSwipeView.spacing
+                    orientation: rtSwipeView.orientation
+                    snapMode: ListView.SnapOneItem
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    highlightRangeMode: ListView.StrictlyEnforceRange
+                    preferredHighlightBegin: 0
+                    preferredHighlightEnd: 0
+                    highlightMoveDuration: 250
+
+                    maximumFlickVelocity: 8 * (rtSwipeView.orientation ===
+                                               Qt.Horizontal ? width : height)
+                }
+
                 Page {
-                    RtData {
+                    Loader {
                         anchors.fill: parent
+                        asynchronous: true
+                        visible: status == Loader.Ready
+                        sourceComponent: RtData {
+                            anchors.fill: parent
+                        }
                     }
                 }
 
                 Page {
-                    RtDataSetup {
+                    Loader {
                         anchors.fill: parent
+                        asynchronous: true
+                        visible: status == Loader.Ready
+                        sourceComponent: RtDataSetup {
+                            anchors.fill: parent
+                        }
                     }
                 }
 
                 Page {
-                    ColumnLayout {
+                    Loader {
+                        id: vesc3dLoader
+                        asynchronous: true
+                        visible: status == Loader.Ready
                         anchors.fill: parent
-
-                        RtDataIMU {
-                            Layout.fillWidth: true
-                        }
-
-                        CheckBox {
-                            Layout.fillWidth: true
-                            id: useYawBox
-                            text: "Use Yaw (will drift)"
-                            checked: false
-                        }
-
-                        Vesc3dItem {
+                        sourceComponent: Vesc3dItem {
                             id: vesc3d
                             Layout.fillWidth: true
                             Layout.fillHeight: true
+                            property alias useYaw: useYawBox.checked
+                            RtDataIMU {
+                                id: rtIMU
+                                anchors.top: parent.top
+                                width: parent.width
+                                Layout.fillWidth: true
+                            }
+                            CheckBox {
+                                anchors.top: rtIMU.bottom
+                                Layout.fillWidth: true
+                                id: useYawBox
+                                text: "Use Yaw (will drift)"
+                                checked: false
+                            }
                         }
                     }
                 }
@@ -328,50 +404,82 @@ ApplicationWindow {
         }
 
         Page {
-            Profiles {
+            Loader {
                 anchors.fill: parent
-                anchors.topMargin: 5
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: Profiles {
+                    anchors.fill: parent
+                    anchors.topMargin: 5
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                }
             }
         }
 
         Page {
-            BMS {
+            Loader {
                 anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: BMS {
+                    anchors.fill: parent
+                }
             }
         }
 
         Page {
-            FwUpdate {
+            Loader {
                 anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: FwUpdate {
+                    anchors.fill: parent
+                }
             }
         }
 
         Page {
-            ConfigPageMotor {
+            Loader {
                 id: confPageMotor
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: ConfigPageMotor {
+                    //id: confPageMotor
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                }
             }
         }
 
         Page {
-            ConfigPageApp {
+            Loader {
                 id: confPageApp
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: ConfigPageApp {
+                    //id: confPageApp
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                }
             }
         }
 
         Page {
-            Terminal {
+            Loader {
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                anchors.topMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: Terminal {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    anchors.topMargin: 10
+                }
             }
         }
     }
@@ -431,10 +539,16 @@ ApplicationWindow {
         id: uiHwPage
         visible: false
 
-        Item {
-            id: uiHw
+        Loader {
+            active: parent.visible
             anchors.fill: parent
-            property var tabBarItem: tabBar
+            asynchronous: true
+            visible: status == Loader.Ready
+            sourceComponent: Item {
+                id: uiHw
+                anchors.fill: parent
+                property var tabBarItem: tabBar
+            }
         }
     }
 
@@ -449,18 +563,30 @@ ApplicationWindow {
         id: uiAppPage
         visible: false
 
-        Item {
-            id: uiApp
+        Loader {
             anchors.fill: parent
-            property var tabBarItem: tabBar
+            asynchronous: true
+            visible: status == Loader.Ready
+            active: parent.visible
+            sourceComponent: Item {
+                id: uiApp
+                anchors.fill: parent
+                property var tabBarItem: tabBar
+            }
         }
     }
 
     Page {
         id: rtDataBalance
         visible: false
-        RtDataBalance {
+        Loader {
             anchors.fill: parent
+            asynchronous: true
+            active: parent.visible
+            visible: status == Loader.Ready
+            sourceComponent: RtDataBalance {
+                anchors.fill: parent
+            }
         }
     }
 
@@ -555,24 +681,22 @@ ApplicationWindow {
                     source: "qrc" + Utility.getThemePath() + "icons/can_off.png"
                 }
                 onClicked: {
-                    if (canDrawer.visible) {
-                        canDrawer.close()
+                    if (canDrawerLoader.item.visible) {
+                        canDrawerLoader.item.close()
                     } else {
-                        canDrawer.open()
+                        canDrawerLoader.item.open()
                     }
                 }
             }
         }
     }
 
+
+
     ConnectScreen {
         id: connScreen
-        parent: ApplicationWindow.overlay
         notchTop: appWindow.notchTop
-        x: 0
-        y: 0
-        height: parent.height
-        width: parent.width
+        Component.onCompleted: open()
     }
 
     Timer {
@@ -586,6 +710,7 @@ ApplicationWindow {
         }
     }
 
+
     Timer {
         id: uiTimer
         interval: 1000
@@ -597,6 +722,7 @@ ApplicationWindow {
             }
         }
     }
+
 
     Timer {
         id: confTimer
@@ -797,6 +923,7 @@ ApplicationWindow {
         onPortConnectedChanged: {
             connectedText.text = VescIf.getConnectedPortName()
             if (!VescIf.isPortConnected()) {
+                connScreen.open();
                 confTimer.mcConfRx = false
                 confTimer.appConfRx = false
             }
@@ -804,9 +931,10 @@ ApplicationWindow {
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
-
             reconnectButton.enabled = !VescIf.isPortConnected()
-            connScreen.y = VescIf.isPortConnected() ? connScreen.height : 0.0
+            if(VescIf.isPortConnected()) {
+                connScreen.close();
+            }
         }
 
         onStatusMessage: {
@@ -866,8 +994,8 @@ ApplicationWindow {
         target: mCommands
         onValuesImuReceived: {
             if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
-                vesc3d.setRotation(values.roll, values.pitch,
-                                   useYawBox.checked ? values.yaw : 0)
+                vesc3dLoader.item.setRotation(values.roll, values.pitch,
+                                              vesc3dLoader.item.useYaw.checked ? values.yaw : 0)
             }
         }
 

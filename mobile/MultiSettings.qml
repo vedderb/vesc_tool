@@ -130,6 +130,25 @@ Item {
                 Layout.fillWidth: true
                 clip: true
 
+                contentItem: ListView {
+                    model: swipeView.contentModel
+                    interactive: swipeView.interactive
+                    currentIndex: swipeView.currentIndex
+
+                    spacing: swipeView.spacing
+                    orientation: swipeView.orientation
+                    snapMode: ListView.SnapOneItem
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    highlightRangeMode: ListView.StrictlyEnforceRange
+                    preferredHighlightBegin: 0
+                    preferredHighlightEnd: 0
+                    highlightMoveDuration: 250
+
+                    maximumFlickVelocity: 8 * (swipeView.orientation ===
+                                               Qt.Horizontal ? width : height)
+                }
+
                 Page {
                     background: Rectangle {
                         opacity: 0.0

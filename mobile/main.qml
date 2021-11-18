@@ -377,7 +377,6 @@ ApplicationWindow {
                 Page {
                     RtDataIMU {
                         id: rtIMU
-                        visible: false
                         anchors.top: parent.top
                         width: parent.width
                         Layout.fillWidth: true

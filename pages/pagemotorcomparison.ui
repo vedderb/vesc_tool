@@ -54,6 +54,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QRadioButton" name="testModeRpmPowerButton">
+            <property name="toolTip">
+             <string>Sweep from 0 to the set RPM at the set Power.</string>
+            </property>
+            <property name="text">
+             <string>RPM/Power Sweep</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QDoubleSpinBox" name="testTorqueBox">
             <property name="prefix">
              <string/>
@@ -90,7 +100,57 @@
              <double>100.000000000000000</double>
             </property>
             <property name="value">
-             <double>9000.000000000000000</double>
+             <double>8000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="testRpmStartBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="prefix">
+             <string>Start: </string>
+            </property>
+            <property name="suffix">
+             <string> RPM</string>
+            </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>10.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>500.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="testPowerBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="prefix">
+             <string>Pwr: </string>
+            </property>
+            <property name="suffix">
+             <string> W</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="minimum">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>2000.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -488,6 +548,9 @@
               <property name="maximum">
                <double>999.000000000000000</double>
               </property>
+              <property name="singleStep">
+               <double>0.050000000000000</double>
+              </property>
               <property name="value">
                <double>1.000000000000000</double>
               </property>
@@ -650,6 +713,9 @@
               </property>
               <property name="maximum">
                <double>999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.050000000000000</double>
               </property>
               <property name="value">
                <double>1.000000000000000</double>

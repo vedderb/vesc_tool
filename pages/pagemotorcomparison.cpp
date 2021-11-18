@@ -129,6 +129,8 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
 
     connect(ui->testModeTorqueButton, &QRadioButton::toggled,
             [this]() { settingChanged(); });
+    connect(ui->testModeRpmButton, &QRadioButton::toggled,
+            [this]() { settingChanged(); });
 
     connect(ui->testLiveUpdateBox, &QCheckBox::toggled,
             [this](bool checked) { (void)checked; settingChanged(); });
@@ -136,6 +138,10 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     connect(ui->testRpmBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
     connect(ui->testTorqueBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double value) { (void)value; settingChanged(); });
+    connect(ui->testPowerBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double value) { (void)value; settingChanged(); });
+    connect(ui->testRpmStartBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
 
     connect(ui->m1GearingBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
@@ -255,6 +261,10 @@ void PageMotorComparison::setVesc(VescInterface *vesc)
 
 void PageMotorComparison::settingChanged()
 {
+    ui->testTorqueBox->setEnabled(!ui->testModeRpmPowerButton->isChecked());
+    ui->testPowerBox->setEnabled(ui->testModeRpmPowerButton->isChecked());
+    ui->testRpmStartBox->setEnabled(ui->testModeRpmPowerButton->isChecked());
+
     if (ui->testLiveUpdateBox->isChecked()) {
         on_testRunButton_clicked();
     }
@@ -339,12 +349,23 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         md.update(mM2Config, ui->testRpmBox->value(), posx, ui->m2GearingBox->value(),
                   ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         updateTable(md, ui->m2PlotTable);
-    } else {
+    } else if (ui->testModeRpmButton->isChecked()) {
         MotorData md;
         md.update(mM1Config, posx, ui->testTorqueBox->value(), ui->m1GearingBox->value(),
                   ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
         updateTable(md, ui->m1PlotTable);
         md.update(mM2Config, posx, ui->testTorqueBox->value(), ui->m2GearingBox->value(),
+                  ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
+        updateTable(md, ui->m2PlotTable);
+    } else {
+        double rps = posx * 2.0 * M_PI / 60.0;
+        double torque = ui->testPowerBox->value() / rps;
+
+        MotorData md;
+        md.update(mM1Config, posx, torque, ui->m1GearingBox->value(),
+                  ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
+        updateTable(md, ui->m1PlotTable);
+        md.update(mM2Config, posx, torque, ui->m2GearingBox->value(),
                   ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         updateTable(md, ui->m2PlotTable);
     }
@@ -532,6 +553,30 @@ void PageMotorComparison::on_testRunButton_clicked()
         updateGraphs(xAxis, yAxes, names);
     };
 
+    auto plotPowerSweep = [this, updateData, updateGraphs](QTableWidget *table,
+            ConfigParams &config, double gearing, double motors, double temp_inc) {
+        double rpm = ui->testRpmBox->value();
+        double rpm_start = ui->testRpmStartBox->value();
+        double power = ui->testPowerBox->value();
+
+        QVector<double> xAxis;
+        QVector<QVector<double> > yAxes;
+        QVector<QString> names;
+
+        for (double r = rpm_start;r < rpm;r += (rpm / 1000.0)) {
+            double rps = r * 2.0 * M_PI / 60.0;
+            double torque = power / rps;
+
+            MotorData md;
+            md.update(config, r, torque, gearing, motors,temp_inc);
+            xAxis.append(r);
+            updateData(md, table, yAxes, names);
+        }
+
+        ui->plot->xAxis->setLabel("RPM");
+        updateGraphs(xAxis, yAxes, names);
+    };
+
     if (ui->testModeTorqueButton->isChecked()) {
         ui->plot->clearGraphs();
         plotTorqueSweep(ui->m1PlotTable, mM1Config, ui->m1GearingBox->value(),
@@ -540,12 +585,20 @@ void PageMotorComparison::on_testRunButton_clicked()
             plotTorqueSweep(ui->m2PlotTable, mM2Config, ui->m2GearingBox->value(),
                             ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         }
-    } else {
+    } else if (ui->testModeRpmButton->isChecked()) {
         ui->plot->clearGraphs();
         plotRpmSweep(ui->m1PlotTable, mM1Config, ui->m1GearingBox->value(),
                      ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
         if (!ui->testSingleBox->isChecked()) {
             plotRpmSweep(ui->m2PlotTable, mM2Config, ui->m2GearingBox->value(),
+                         ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
+        }
+    } else {
+        ui->plot->clearGraphs();
+        plotPowerSweep(ui->m1PlotTable, mM1Config, ui->m1GearingBox->value(),
+                     ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
+        if (!ui->testSingleBox->isChecked()) {
+            plotPowerSweep(ui->m2PlotTable, mM2Config, ui->m2GearingBox->value(),
                          ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         }
     }

@@ -2026,6 +2026,70 @@ void Utility::setPlotColors(QCustomPlot* plot)
     plot->legend->setBorderPen(QPen(Utility::getAppQColor("darkBackground")));
 }
 
+void Utility::plotSavePdf(QCustomPlot *plot, int width, int height, QString title)
+{
+    QString fileName = QFileDialog::getSaveFileName(plot,
+                                                    tr("Save PDF"), "",
+                                                    tr("PDF Files (*.pdf)"));
+
+    if (!fileName.isEmpty()) {
+        if (!fileName.toLower().endsWith(".pdf")) {
+            fileName.append(".pdf");
+        }
+
+        if (!title.isEmpty()) {
+            auto element = new QCPTextElement(plot,
+                                              title,
+                                              QFont("sans", 12, QFont::Bold));
+            element->setTextColor(Utility::getAppQColor("lightText"));
+
+            plot->plotLayout()->insertRow(0);
+            plot->plotLayout()->addElement(0, 0, element);
+            plot->replot();
+        }
+
+        plot->savePdf(fileName, width, height);
+
+        if (!title.isEmpty()) {
+            delete plot->plotLayout()->element(0, 0);
+            plot->plotLayout()->simplify();
+            plot->replot();
+        }
+    }
+}
+
+void Utility::plotSavePng(QCustomPlot *plot, int width, int height, QString title)
+{
+    QString fileName = QFileDialog::getSaveFileName(plot,
+                                                    tr("Save Image"), "",
+                                                    tr("PNG Files (*.png)"));
+
+    if (!fileName.isEmpty()) {
+        if (!fileName.toLower().endsWith(".png")) {
+            fileName.append(".png");
+        }
+
+        if (!title.isEmpty()) {
+            auto element = new QCPTextElement(plot,
+                                              title,
+                                              QFont("sans", 12, QFont::Bold));
+            element->setTextColor(Utility::getAppQColor("lightText"));
+
+            plot->plotLayout()->insertRow(0);
+            plot->plotLayout()->addElement(0, 0, element);
+            plot->replot();
+        }
+
+        plot->savePng(fileName, width, height);
+
+        if (!title.isEmpty()) {
+            delete plot->plotLayout()->element(0, 0);
+            plot->plotLayout()->simplify();
+            plot->replot();
+        }
+    }
+}
+
 void Utility::setDarkMode(bool isDarkSetting)
 {
     isDark = isDarkSetting;

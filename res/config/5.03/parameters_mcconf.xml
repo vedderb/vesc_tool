@@ -3588,6 +3588,30 @@ p, li { white-space: pre-wrap; }
             <suffix> Ah</suffix>
             <vTx>9</vTx>
         </si_battery_ah>
+        <si_motor_nl_current>
+            <longName>Motor No Load Current</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;No load current for the motor. Can be measured by running the motor at around 50% duty cycle without load and noting the motor current draw.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The no load current can be used in the motor comparison tool for calculating efficiencies and comparing different motors, gear ratios etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_SI_MOTOR_NL_CURRENT</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>999</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>1</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix> A</suffix>
+            <vTx>9</vTx>
+        </si_motor_nl_current>
         <motor_brand>
             <longName>Motor Brand</longName>
             <type>3</type>
@@ -3634,26 +3658,6 @@ p, li { white-space: pre-wrap; }
             <suffix> g</suffix>
             <vTx>9</vTx>
         </motor_weight>
-        <motor_poles>
-            <longName>Motor Poles</longName>
-            <type>2</type>
-            <transmittable>0</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The number of motor poles. This is always a multiple of two.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine></cDefine>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxInt>100</maxInt>
-            <minInt>2</minInt>
-            <showDisplay>0</showDisplay>
-            <stepInt>2</stepInt>
-            <valInt>14</valInt>
-            <suffix></suffix>
-            <vTx>1</vTx>
-        </motor_poles>
         <motor_sensor_type>
             <longName>Position Sensor</longName>
             <type>4</type>
@@ -3683,28 +3687,6 @@ p, li { white-space: pre-wrap; }
             <cDefine></cDefine>
             <valString>A motor description can be edited here.</valString>
         </motor_description>
-        <motor_loss_torque>
-            <longName>Motor Loss Torque</longName>
-            <type>1</type>
-            <transmittable>0</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The motor loss torque in nm.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine></cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>99</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>0.03</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
-            <suffix> nm</suffix>
-            <vTx>9</vTx>
-        </motor_loss_torque>
         <motor_quality_bearings>
             <longName>Bearing Quality</longName>
             <type>2</type>
@@ -4090,6 +4072,7 @@ p, li { white-space: pre-wrap; }
         <ser>si_battery_type</ser>
         <ser>si_battery_cells</ser>
         <ser>si_battery_ah</ser>
+        <ser>si_motor_nl_current</ser>
         <ser>bms.type</ser>
         <ser>bms.t_limit_start</ser>
         <ser>bms.t_limit_end</ser>
@@ -4431,6 +4414,7 @@ p, li { white-space: pre-wrap; }
                     <param>si_battery_type</param>
                     <param>si_battery_cells</param>
                     <param>si_battery_ah</param>
+                    <param>si_motor_nl_current</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>
@@ -4439,9 +4423,7 @@ p, li { white-space: pre-wrap; }
                     <param>motor_brand</param>
                     <param>motor_model</param>
                     <param>motor_weight</param>
-                    <param>motor_poles</param>
                     <param>motor_sensor_type</param>
-                    <param>motor_loss_torque</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

@@ -351,6 +351,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("motor_pid"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("motor_additional_info"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("motor_experiments"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_comparison"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_general"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden(false);
@@ -378,6 +379,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("motor_pid"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("motor_additional_info"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("motor_experiments"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_comparison"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_general"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden(true);
@@ -1352,6 +1354,13 @@ void MainWindow::reloadPages()
                 theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_experiments", ui->pageList->count() - 1);
 
+    mPageMotorComparison = new PageMotorComparison(this);
+    mPageMotorComparison->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageMotorComparison);
+    addPageItem(tr("Comparison"),  theme + "icons/Calculator-96.png",
+                theme + "icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_comparison", ui->pageList->count() - 1);
+
     mPageAppSettings = new PageAppSettings(this);
     mPageAppSettings->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppSettings);
@@ -1521,6 +1530,7 @@ void MainWindow::reloadPages()
      * motor_pid
      * motor_additional_info
      * motor_experiments
+     * motor_comparison
      * app
      * app_general
      * app_ppm

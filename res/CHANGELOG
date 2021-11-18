@@ -30,6 +30,7 @@
  - Setting to disable screen rotation.
  - New RT Data page and gauges.
 * Upload bootloader before firmware if firmware has bootloader erase support.
+* Added motor comparison tool.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

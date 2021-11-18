@@ -50,6 +50,9 @@ Item {
     property color traceColor: Qt.lighter(nibColor,1.5)
     property double precision: 0
 
+    property color coveredColor: {coveredColor = Utility.getAppHexColor("lightText")}
+    property color uncoveredColor: {uncoveredColor = Utility.getAppHexColor("disabledText")}
+
     property bool tickmarksVisible: true
     property bool centerTextVisible: true
 
@@ -67,17 +70,16 @@ Item {
         return radians * (180.0 / Math.PI);
     }
     function isCovered(value) {
-        var res = false
         if (gauge.value > 0) {
             if (value <= gauge.value && value >= 0) {
-                res = true
+                return true
             }
         } else {
             if (value >= gauge.value && value <= 0) {
-                res = true
+                return true
             }
         }
-        return res
+        return false
     }
 
     Rectangle {
@@ -200,7 +202,6 @@ Item {
         Canvas {
             id:foregroundpaint
             anchors.fill: parent
-            opacity: 1
             z:3
             property double angle: needleTransform.angle
             onAngleChanged: requestPaint()
@@ -307,8 +308,6 @@ Item {
             Text {
                 font.pixelSize: outerRadius * 0.12
                 text: parseFloat(value * tickmarkScale).toFixed(0) + tickmarkSuffix
-                property color coveredColor: {coveredColor = Utility.getAppHexColor("lightText")}
-                property color uncoveredColor: {uncoveredColor = Utility.getAppHexColor("disabledText")}
                 color: isCovered(value) ? coveredColor : uncoveredColor
                 antialiasing: true
                 font.family: "Roboto"
@@ -321,8 +320,6 @@ Item {
                 implicitHeight: outerRadius * 0.1
                 antialiasing: true
                 smooth: true
-                property color coveredColor: {coveredColor = Utility.getAppHexColor("lightText")}
-                property color uncoveredColor: {uncoveredColor = Utility.getAppHexColor("disabledText")}
                 color: isCovered(value) ? coveredColor : uncoveredColor
             }
         }
@@ -333,8 +330,6 @@ Item {
                 implicitHeight: outerRadius * 0.07
                 antialiasing: true
                 smooth: true
-                property color coveredColor: {coveredColor = Utility.getAppHexColor("lightText")}
-                property color uncoveredColor: {uncoveredColor = Utility.getAppHexColor("disabledText")}
                 color: isCovered(value) ? coveredColor : uncoveredColor
             }
         }

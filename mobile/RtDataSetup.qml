@@ -18,6 +18,7 @@
     */
 
 import QtQuick 2.5
+import QtQml 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
@@ -33,6 +34,7 @@ Item {
     id: rtData
     property var dialogParent: ApplicationWindow.overlay
     anchors.fill: parent
+    property alias updateData: commandsUpdate.enabled
 
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
@@ -620,6 +622,7 @@ Item {
     }
 
     Connections {
+        id: commandsUpdate
         target: mCommands
 
         onValuesImuReceived: {

@@ -10,6 +10,22 @@ import Vedder.vesc.utility 1.0
 Item {
     id: root
     height: rect.height
+    function updateText(values) {
+        valText1.text =
+                "Roll   : " + (values.roll * 57.2958).toFixed(2) + "\n" +
+                "Acc X  : " + values.accX.toFixed(2) + "\n" +
+                "Gyro X : " + values.gyroX.toFixed(2)
+
+        valText2.text =
+                "Pitch  : " + (values.pitch * 57.2958).toFixed(2) + "\n" +
+                "Acc Y  : " + values.accY.toFixed(2) + "\n" +
+                "Gyro Y : " + values.gyroY.toFixed(2)
+
+        valText3.text =
+                "yaw    : " + (values.yaw * 57.2958).toFixed(2) + "\n" +
+                "Acc Z  : " + values.accZ.toFixed(2) + "\n" +
+                "Gyro Z : " + values.gyroZ.toFixed(2)
+    }
 
     Rectangle {
         id: rect
@@ -71,26 +87,5 @@ Item {
         id: valMetrics
         font: valText1.font
         text: valText1.text
-    }
-
-    Connections {
-        target: mCommands
-
-        onValuesImuReceived: {
-            valText1.text =
-                    "Roll   : " + (values.roll * 57.2958).toFixed(2) + "\n" +
-                    "Acc X  : " + values.accX.toFixed(2) + "\n" +
-                    "Gyro X : " + values.gyroX.toFixed(2)
-
-            valText2.text =
-                    "Pitch  : " + (values.pitch * 57.2958).toFixed(2) + "\n" +
-                    "Acc Y  : " + values.accY.toFixed(2) + "\n" +
-                    "Gyro Y : " + values.gyroY.toFixed(2)
-
-            valText3.text =
-                    "yaw    : " + (values.yaw * 57.2958).toFixed(2) + "\n" +
-                    "Acc Z  : " + values.accZ.toFixed(2) + "\n" +
-                    "Gyro Z : " + values.gyroZ.toFixed(2)
-        }
     }
 }

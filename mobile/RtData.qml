@@ -28,6 +28,7 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: rtData
+    property alias updateData: commandsUpdate.enabled
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property bool isHorizontal: rtData.width > rtData.height
@@ -149,6 +150,7 @@ Item {
     }
 
     Connections {
+        id: commandsUpdate
         target: mCommands
 
         onValuesReceived: {

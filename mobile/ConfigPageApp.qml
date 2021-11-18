@@ -179,7 +179,7 @@ Item {
                     tabBox.model = subgroups
                     tabBox.visible = subgroups.length > 1
 
-                    if (tabTextOld === tabBox.currentText) {
+                    if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
                         updateEditors()
                     }
                 }

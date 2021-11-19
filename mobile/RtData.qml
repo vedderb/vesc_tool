@@ -97,7 +97,7 @@ Item {
                 minimumValue: -10000
                 tickmarkScale: 0.001
                 tickmarkSuffix: "k"
-                labelStep: 1000
+                labelStep: 2000
                 value: 0
                 unitText: "W"
                 typeText: "Power"

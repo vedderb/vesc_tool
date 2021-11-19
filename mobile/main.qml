@@ -614,9 +614,10 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top:parent.top
-            height: parent.height/2
+            height: parent.height/2.0
             gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#19ffffff"}
+                    GradientStop { position: 0.0; color: "#15ffffff"}
+                    GradientStop { position: 0.3; color: "#04ffffff"}
                     GradientStop { position: 1.0; color: "transparent" }
                 }
         }

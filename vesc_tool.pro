@@ -39,7 +39,7 @@ ios: {
 }}
 
 # Build mobile GUI
-#CONFIG += build_mobile
+CONFIG += build_mobile
 
 ios: {
     CONFIG    += build_mobile

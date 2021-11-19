@@ -83,7 +83,7 @@ Item {
                 maximumValue: 100
                 minimumValue: -100
                 labelStep: 20
-                value: -10
+                value: 0
                 unitText: "x1000"
                 typeText: "ERPM"
                 Layout.preferredWidth: gaugeSize

@@ -21,6 +21,7 @@
 #define PAGEMOTORCOMPARISON_H
 
 #include <QWidget>
+#include <QPair>
 #include "vescinterface.h"
 #include "configparams.h"
 #include "widgets/qcustomplot.h"
@@ -56,6 +57,7 @@ private:
     bool mM2ConfigLoaded;
     QCPCurve *mVerticalLine;
     double mVerticalLinePosLast;
+    QPair<double, double> mVerticalLineYLast;
     bool mRunDone;
 
     struct MotorData {
@@ -66,8 +68,10 @@ private:
             rpm_motor_shaft = 0.0;
             erpm = 0.0;
             iq = 0.0;
-            loss_res = 0.0;
-            loss_other = 0.0;
+            loss_motor_res = 0.0;
+            loss_motor_other = 0.0;
+            loss_motor_tot = 0.0;
+            loss_gearing = 0.0;
             loss_tot = 0.0;
             p_out = 0.0;
             p_in = 0.0;
@@ -78,7 +82,7 @@ private:
         }
 
         void update(ConfigParams &config, double rpm, double torque,
-                    double gearing, double motors, double temp_inc) {
+                    double gearing, double gear_eff, double motors, double temp_inc) {
 
             double r = config.getParamDouble("foc_motor_r");
             double l = config.getParamDouble("foc_motor_l");
@@ -92,17 +96,20 @@ private:
             rpm_out = rpm;
             rpm_motor_shaft = rpm * gearing;
             erpm = rpm_motor_shaft * poles_pairs;
-            torque_motor_shaft = torque / (gearing * motors);
+            torque_motor_shaft = torque / (gearing * motors * gear_eff);
 
-            double rps = rpm * gearing * 2.0 * M_PI / 60.0;
-            double e_rps = rps * poles_pairs;
+            double rps_out = rpm * 2.0 * M_PI / 60.0;
+            double rps_motor = rps_out * gearing;
+            double e_rps = rps_motor * poles_pairs;
 
             iq = (torque_motor_shaft / (lambda * poles_pairs)) + i_nl;
-            loss_res = iq * iq * r * 1.5 * motors;
-            loss_other = e_rps * lambda * i_nl * motors;
-            loss_tot = loss_res + loss_other;
-            p_out = rps * torque_motor_shaft * motors;
-            p_in = p_out + loss_tot;
+            loss_motor_res = iq * iq * r * 1.5 * motors;
+            loss_motor_other = e_rps * lambda * i_nl * motors;
+            loss_motor_tot = loss_motor_res + loss_motor_other;
+            loss_gearing = torque_motor_shaft * (1.0 - gear_eff) * rps_motor;
+            loss_tot = loss_motor_tot + loss_gearing;
+            p_out = rps_out * torque_out;
+            p_in = rps_motor * torque_motor_shaft * motors + loss_motor_tot;
             efficiency = p_out / p_in;
             vq = r * iq + e_rps * lambda;
             vd = -e_rps * l * iq;
@@ -115,8 +122,10 @@ private:
         double rpm_motor_shaft;
         double erpm;
         double iq;
-        double loss_res;
-        double loss_other;
+        double loss_motor_res;
+        double loss_motor_other;
+        double loss_motor_tot;
+        double loss_gearing;
         double loss_tot;
         double p_out;
         double p_in;

@@ -29,14 +29,19 @@ Item {
     property Commands mCommands: VescIf.commands()
     property var mVal
     property bool mValSet: false
+    property bool isHorizontal: width > height
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
-        spacing: 0
-
+        columns: isHorizontal ? 2 : 1
+        rows: isHorizontal ? 1 : 2
         RowLayout {
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.column: isHorizontal ? 1 : 0
+            Layout.row: 0
+            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
+            Layout.preferredHeight: parent.height*2/3
             spacing: 0
 
             Rectangle {
@@ -111,8 +116,8 @@ Item {
                             var vCells = mVal.v_cells
                             var isBal = mVal.is_balancing
 
-//                            var vCells = [3.1, 2.7, 3.3, 3.4, 3.5, 3.4, 3.3, 4.4, 4.1, 4.2]
-//                            var isBal = [false, false, false, false, true, true, false, false, false, true]
+                            //                            var vCells = [3.1, 2.7, 3.3, 3.4, 3.5, 3.4, 3.3, 4.4, 4.1, 4.2]
+                            //                            var isBal = [false, false, false, false, true, true, false, false, false, true]
 
                             var cellNum = vCells.length
                             var cellHeight = (heightBars / cellNum) * 0.6
@@ -210,99 +215,109 @@ Item {
             }
         }
 
-        Rectangle {
-            id: textRect
-            color: Utility.getAppHexColor("darkBackground")
-
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
+            Layout.column:0
+            Layout.row: isHorizontal ? 0 : 1
+            Layout.preferredHeight: valMetrics.height * 12 + 20 + menuButton.implicitHeight
+            spacing: 0
             Rectangle {
-                anchors.bottom: valText.top
-                width: parent.width
-                height: 2
-                color: Utility.getAppHexColor("lightAccent")
-            }
+                id: textRect
+                color: Utility.getAppHexColor("darkBackground")
 
-            Layout.fillWidth: true
-            Layout.preferredHeight: valMetrics.height * 12 + 20
-            Layout.alignment: Qt.AlignBottom
+                Rectangle {
+                    anchors.top: textRect.top
+                    width: parent.width
+                    height: 2
+                    color: Utility.getAppHexColor("lightAccent")
+                }
 
-            Text {
-                id: valText
-                color: Utility.getAppHexColor("lightText")
-                text: "No Data"
-                font.family: "DejaVu Sans Mono"
-                verticalAlignment: Text.AlignVCenter
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.topMargin: 5
-            }
-
-            TextMetrics {
-                id: valMetrics
-                font: valText.font
-                text: "A"
-            }
-        }
-
-        RowLayout {
-            Layout.leftMargin: 10
-            Layout.rightMargin: 10
-            Layout.fillWidth: true
-
-            Item {
                 Layout.fillWidth: true
-                Layout.preferredWidth: 150
+                Layout.preferredHeight: valMetrics.height * 12 + 20
+                Layout.alignment: Qt.AlignBottom
+
+                Text {
+                    id: valText
+                    color: Utility.getAppHexColor("lightText")
+                    text: "No Data"
+                    font.family: "DejaVu Sans Mono"
+                    verticalAlignment: Text.AlignVCenter
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.topMargin: 5
+                }
+
+                TextMetrics {
+                    id: valMetrics
+                    font: valText.font
+                    text: "A"
+                }
             }
 
-            Button {
-                Layout.preferredWidth: 50
+            RowLayout {
+                Layout.leftMargin: 10
+                Layout.rightMargin: 10
                 Layout.fillWidth: true
-                text: "..."
-                onClicked: menu.open()
 
-                Menu {
-                    id: menu
-                    width: 500
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 150
+                }
 
-                    MenuItem {
-                        text: "Balance On"
-                        onTriggered: {
-                            mCommands.bmsForceBalance(true)
+                Button {
+                    id: menuButton
+                    Layout.preferredWidth: 50
+                    Layout.fillWidth: true
+                    text: "..."
+                    onClicked: menu.open()
+
+                    Menu {
+                        id: menu
+                        width: 500
+
+                        MenuItem {
+                            text: "Balance On"
+                            onTriggered: {
+                                mCommands.bmsForceBalance(true)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Balance Off"
-                        onTriggered: {
-                            mCommands.bmsForceBalance(false)
+                        MenuItem {
+                            text: "Balance Off"
+                            onTriggered: {
+                                mCommands.bmsForceBalance(false)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Reset Ah Counter"
-                        onTriggered: {
-                            mCommands.bmsResetCounters(true, false)
+                        MenuItem {
+                            text: "Reset Ah Counter"
+                            onTriggered: {
+                                mCommands.bmsResetCounters(true, false)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Reset Wh Counter"
-                        onTriggered: {
-                            mCommands.bmsResetCounters(false, true)
+                        MenuItem {
+                            text: "Reset Wh Counter"
+                            onTriggered: {
+                                mCommands.bmsResetCounters(false, true)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Allow Charging"
-                        onTriggered: {
-                            mCommands.bmsSetChargeAllowed(true)
+                        MenuItem {
+                            text: "Allow Charging"
+                            onTriggered: {
+                                mCommands.bmsSetChargeAllowed(true)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Disable Charging"
-                        onTriggered: {
-                            mCommands.bmsSetChargeAllowed(false)
+                        MenuItem {
+                            text: "Disable Charging"
+                            onTriggered: {
+                                mCommands.bmsSetChargeAllowed(false)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Zero Current Offset"
-                        onTriggered: {
-                            mCommands.bmsZeroCurrentOffset()
+                        MenuItem {
+                            text: "Zero Current Offset"
+                            onTriggered: {
+                                mCommands.bmsZeroCurrentOffset()
+                            }
                         }
                     }
                 }

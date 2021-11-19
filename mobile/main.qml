@@ -246,8 +246,8 @@ ApplicationWindow {
         id: swipeView
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
-        anchors.leftMargin: notchLeft*0.5
-        anchors.rightMargin: notchRight*0.5
+        anchors.leftMargin: notchLeft*0.75
+        anchors.rightMargin: notchRight*0.75
         clip: true
         contentItem: ListView {
             model: swipeView.contentModel

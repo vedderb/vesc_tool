@@ -53,11 +53,8 @@ Item {
             anchors.bottomMargin: 15
             columnSpacing: 10
             rowSpacing: 5
-            property int gridItemPreferredWidth: isHorizontal ? parent.width/2.0 - 15 : parent.width - 10
-
             Item {
                 Layout.columnSpan: 1
-                Layout.preferredWidth: gridItemPreferredWidth
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 implicitHeight: image.height
@@ -74,7 +71,6 @@ Item {
             GroupBox {
                 id: wizardBox
                 title: qsTr("Configuration")
-                Layout.preferredWidth: gridItemPreferredWidth
                 Layout.fillWidth: true
                 GridLayout {
                     anchors.topMargin: -5
@@ -190,7 +186,6 @@ Item {
             GroupBox {
                 id: toolsBox
                 title: qsTr("Tools")
-                Layout.preferredWidth: gridItemPreferredWidth
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.rowSpan: isHorizontal ? 2 : 1
@@ -300,7 +295,6 @@ Item {
 
             GroupBox {
                 title: qsTr("Realtime Data Logging")
-                Layout.preferredWidth: gridItemPreferredWidth
                 Layout.fillWidth: true
 
                 LogBox {
@@ -312,7 +306,6 @@ Item {
             GroupBox {
                 title: qsTr("Wireless Bridge to Computer (TCP)")
                 Layout.bottomMargin: isHorizontal ? 0 : 10
-                Layout.preferredWidth: gridItemPreferredWidth
                 Layout.fillWidth: true
 
                 TcpBox {

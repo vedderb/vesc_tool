@@ -50,11 +50,15 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             columns: isHorizontal ? 4 : 2
-
+            Layout.leftMargin: 5
+            Layout.rightMargin: 5
+            Layout.topMargin: 5
+            Layout.bottomMargin: 5
             CustomGauge {
                 id: currentGauge
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 maximumValue: 100
                 minimumValue: -100
                 labelStep: maximumValue > 60 ? 20 : 10
@@ -69,6 +73,7 @@ Item {
                 id: dutyGauge
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 maximumValue: 100
                 minimumValue: -100
                 labelStep: 20
@@ -83,6 +88,7 @@ Item {
                 id: rpmGauge
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 maximumValue: 100
                 minimumValue: -100
                 labelStep: 20
@@ -97,6 +103,7 @@ Item {
                 id: powerGauge
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 maximumValue: 10000
                 minimumValue: -10000
                 tickmarkScale: 0.001
@@ -115,7 +122,7 @@ Item {
             color: Utility.getAppHexColor("darkBackground")
 
             Rectangle {
-                anchors.bottom: valText.top
+                anchors.bottom: parent.top
                 width: parent.width
                 height: 2
                 color: Utility.getAppHexColor("lightAccent")
@@ -124,16 +131,13 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: isHorizontal ? valMetrics.height * 5 + 20 : valMetrics.height * 10 + 20
             Layout.alignment: Qt.AlignBottom
-            GridLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.topMargin: 5
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                columns: isHorizontal ? 2 : 1
-
                 Text {
                     id: valText
+                    anchors.top: parent.top
+                    anchors.topMargin: 10
+                    anchors.leftMargin: 10
+                    anchors.left: parent.left
+                    width: isHorizontal ? parent.width/2 : parent.width
                     color: Utility.getAppHexColor("lightText")
                     text: VescIf.getConnectedPortName()
                     Layout.fillWidth: true
@@ -143,14 +147,18 @@ Item {
                 }
                 Text {
                     id: valText2
+                    anchors.topMargin:  isHorizontal ? 10 : -10
+                    anchors.leftMargin: 10
+                    anchors.top: isHorizontal ? parent.top : valText.bottom
+                    width: isHorizontal ? parent.width/2 : parent.width
+                    anchors.left: isHorizontal ? valText.right : parent.left
                     color: Utility.getAppHexColor("lightText")
-                    text: VescIf.getConnectedPortName()
+                    text: ""
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     font.family: "DejaVu Sans Mono"
                     verticalAlignment: Text.AlignVCenter
                 }
-            }
 
             TextMetrics {
                 id: valMetrics

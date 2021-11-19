@@ -53,6 +53,7 @@ Item {
             anchors.bottomMargin: 15
             columnSpacing: 10
             rowSpacing: 5
+            property int gridItemPreferredWidth: isHorizontal ? parent.width/2.0 - 15 : parent.width - 10
 
             Item {
                 Layout.columnSpan: 1

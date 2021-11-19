@@ -944,15 +944,13 @@ ApplicationWindow {
                 confTimer.mcConfRx = false
                 confTimer.appConfRx = false
                 connected = false
+            } else {
+                connScreen.close();
+                connected = true
             }
 
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
-            }
-            reconnectButton.enabled = !VescIf.isPortConnected()
-            if(VescIf.isPortConnected()) {
-                connScreen.close();
-                connected = true
             }
         }
 

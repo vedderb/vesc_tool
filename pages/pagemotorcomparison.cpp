@@ -72,6 +72,7 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     });
 
     connect(ui->rescaleButton, &QPushButton::clicked, [this]() {
+        on_testRunButton_clicked();
         ui->plot->rescaleAxes();
         ui->plot->replot();
     });
@@ -319,6 +320,8 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
     mVerticalLine->setVisible(true);
     ui->plot->replot();
     mVerticalLinePosLast = posx;
+    mVerticalLineYLast.first = yMin;
+    mVerticalLineYLast.second = yMax;
 
     auto updateTable = [](MotorData &md, QTableWidget *table) {
         table->item(0, 1)->setText(QString::number(md.efficiency * 100.0, 'f', 1) + " %");
@@ -467,6 +470,11 @@ void PageMotorComparison::on_testRunButton_clicked()
         double min = yAxes.first().first();
         double max = min;
 
+        if (graphsStart != 0) {
+            min = mVerticalLineYLast.first;
+            max = mVerticalLineYLast.second;
+        }
+
         for (auto a: yAxes) {
             for (auto b: a) {
                 if (b < min) {
@@ -510,7 +518,10 @@ void PageMotorComparison::on_testRunButton_clicked()
             ui->plot->graph(graphNow)->setData(xAxis, yAxes.at(i));
         }
 
-        ui->plot->rescaleAxes();
+        if (ui->autoscaleButton->isChecked()) {
+            ui->plot->rescaleAxes();
+        }
+
         ui->plot->replot();
     };
 

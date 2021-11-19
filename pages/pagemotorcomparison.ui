@@ -77,6 +77,9 @@
             <property name="maximum">
              <double>9999.000000000000000</double>
             </property>
+            <property name="singleStep">
+             <double>0.500000000000000</double>
+            </property>
             <property name="value">
              <double>3.000000000000000</double>
             </property>
@@ -124,6 +127,9 @@
             <property name="maximum">
              <double>999999.000000000000000</double>
             </property>
+            <property name="singleStep">
+             <double>100.000000000000000</double>
+            </property>
             <property name="value">
              <double>500.000000000000000</double>
             </property>
@@ -148,6 +154,9 @@
             </property>
             <property name="maximum">
              <double>999999.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>100.000000000000000</double>
             </property>
             <property name="value">
              <double>2000.000000000000000</double>
@@ -280,7 +289,7 @@
                  </font>
                 </property>
                 <property name="toolTip">
-                 <string>Autoscale plots with incoming samples</string>
+                 <string>Autoscale plots after updates.</string>
                 </property>
                 <property name="text">
                  <string/>

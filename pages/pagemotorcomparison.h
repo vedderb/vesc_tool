@@ -21,6 +21,7 @@
 #define PAGEMOTORCOMPARISON_H
 
 #include <QWidget>
+#include <QPair>
 #include "vescinterface.h"
 #include "configparams.h"
 #include "widgets/qcustomplot.h"
@@ -56,6 +57,7 @@ private:
     bool mM2ConfigLoaded;
     QCPCurve *mVerticalLine;
     double mVerticalLinePosLast;
+    QPair<double, double> mVerticalLineYLast;
     bool mRunDone;
 
     struct MotorData {

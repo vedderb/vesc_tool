@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1380</width>
-    <height>787</height>
+    <width>1344</width>
+    <height>790</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,171 +28,220 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <widget class="QRadioButton" name="testModeTorqueButton">
-            <property name="toolTip">
-             <string>Sweep from 0 to the set torque at the set RPM.</string>
-            </property>
-            <property name="text">
-             <string>Torque Sweep</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="0">
+             <widget class="QRadioButton" name="testModeTorqueButton">
+              <property name="toolTip">
+               <string>Sweep from 0 to the set torque at the set RPM.</string>
+              </property>
+              <property name="text">
+               <string>Torque</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="testModeRpmButton">
+              <property name="toolTip">
+               <string>Sweep from 0 to the set RPM at the set torque.</string>
+              </property>
+              <property name="text">
+               <string>RPM</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QRadioButton" name="testModeRpmPowerButton">
+              <property name="toolTip">
+               <string>Sweep from 0 to the set RPM at the set Power.</string>
+              </property>
+              <property name="text">
+               <string>RPM/Power</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QRadioButton" name="testModePropButton">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Propeller mode. Sweep from 0 to full RPM and use the propeller exponent on the RPM to derive the propeller power requirement. The test will be scaled such that the specified power is at the full RPM. &lt;span style=&quot; font-weight:600;&quot;&gt;Note&lt;/span&gt;: This test does not take the propeller efficiency into account, only the motor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Propeller</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="QRadioButton" name="testModeRpmButton">
-            <property name="toolTip">
-             <string>Sweep from 0 to the set RPM at the set torque.</string>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <property name="spacing">
+             <number>2</number>
             </property>
-            <property name="text">
-             <string>RPM Sweep</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
+            <item row="1" column="1">
+             <widget class="QDoubleSpinBox" name="testRpmBox">
+              <property name="toolTip">
+               <string>End RPM</string>
+              </property>
+              <property name="prefix">
+               <string/>
+              </property>
+              <property name="suffix">
+               <string> RPM</string>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <double>999999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>8000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QDoubleSpinBox" name="testPowerBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="prefix">
+               <string>Pwr: </string>
+              </property>
+              <property name="suffix">
+               <string> W</string>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>999999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>2000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QDoubleSpinBox" name="testTorqueBox">
+              <property name="prefix">
+               <string/>
+              </property>
+              <property name="suffix">
+               <string> Nm</string>
+              </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="maximum">
+               <double>9999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.500000000000000</double>
+              </property>
+              <property name="value">
+               <double>3.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QDoubleSpinBox" name="testRpmStartBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Start RPM</string>
+              </property>
+              <property name="prefix">
+               <string/>
+              </property>
+              <property name="suffix">
+               <string> RPM</string>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="minimum">
+               <double>10.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>999999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>500.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="2">
+             <widget class="QDoubleSpinBox" name="testPropExpBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Propeller RPM exponent to get power.</string>
+              </property>
+              <property name="prefix">
+               <string>Prop Exp: </string>
+              </property>
+              <property name="minimum">
+               <double>2.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>3.500000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="value">
+               <double>2.700000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="QRadioButton" name="testModeRpmPowerButton">
-            <property name="toolTip">
-             <string>Sweep from 0 to the set RPM at the set Power.</string>
-            </property>
-            <property name="text">
-             <string>RPM/Power Sweep</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="testTorqueBox">
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="suffix">
-             <string> Nm</string>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>9999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.500000000000000</double>
-            </property>
-            <property name="value">
-             <double>3.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="testRpmBox">
-            <property name="prefix">
-             <string/>
-            </property>
-            <property name="suffix">
-             <string> RPM</string>
-            </property>
-            <property name="decimals">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <double>999999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>100.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>8000.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="testRpmStartBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="prefix">
-             <string>Start: </string>
-            </property>
-            <property name="suffix">
-             <string> RPM</string>
-            </property>
-            <property name="decimals">
-             <number>0</number>
-            </property>
-            <property name="minimum">
-             <double>10.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>999999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>100.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>500.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="testPowerBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="prefix">
-             <string>Pwr: </string>
-            </property>
-            <property name="suffix">
-             <string> W</string>
-            </property>
-            <property name="decimals">
-             <number>1</number>
-            </property>
-            <property name="minimum">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>999999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>100.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>2000.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="testRunButton">
-            <property name="text">
-             <string>Run</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Process-96.png</normaloff>:/res/icons/Process-96.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="testLiveUpdateBox">
-            <property name="toolTip">
-             <string>Re-run tests any time settings are changed.</string>
-            </property>
-            <property name="text">
-             <string>Live Update</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="testSingleBox">
-            <property name="text">
-             <string>Single Motor</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QPushButton" name="testRunButton">
+              <property name="text">
+               <string>Run</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/icons/Process-96.png</normaloff>:/res/icons/Process-96.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="testLiveUpdateBox">
+              <property name="toolTip">
+               <string>Re-run tests any time settings are changed.</string>
+              </property>
+              <property name="text">
+               <string>Live Update</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
            <spacer name="verticalSpacer_4">
@@ -540,6 +589,9 @@
           </property>
           <widget class="QWidget" name="layoutWidget1">
            <layout class="QVBoxLayout" name="verticalLayout_2">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <item>
              <widget class="QDoubleSpinBox" name="m1GearingBox">
               <property name="toolTip">
@@ -562,6 +614,31 @@
               </property>
               <property name="value">
                <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="m1GearEfficiencyBox">
+              <property name="prefix">
+               <string>Gear Eff: </string>
+              </property>
+              <property name="suffix">
+               <string> %</string>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.200000000000000</double>
+              </property>
+              <property name="value">
+               <double>100.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -706,6 +783,9 @@
           </property>
           <widget class="QWidget" name="layoutWidget_3">
            <layout class="QVBoxLayout" name="verticalLayout_6">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <item>
              <widget class="QDoubleSpinBox" name="m2GearingBox">
               <property name="toolTip">
@@ -728,6 +808,31 @@
               </property>
               <property name="value">
                <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="m2GearEfficiencyBox">
+              <property name="prefix">
+               <string>Gear Eff: </string>
+              </property>
+              <property name="suffix">
+               <string> %</string>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.200000000000000</double>
+              </property>
+              <property name="value">
+               <double>100.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -769,26 +874,6 @@
                <string>Motor Configuration</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_2">
-               <item row="0" column="0">
-                <widget class="QRadioButton" name="m2ConfLocalButton">
-                 <property name="toolTip">
-                  <string>Use mcconf from connected VESC</string>
-                 </property>
-                 <property name="text">
-                  <string>Local</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QRadioButton" name="m2ConfFileButton">
-                 <property name="text">
-                  <string>File</string>
-                 </property>
-                </widget>
-               </item>
                <item row="1" column="1">
                 <widget class="QLineEdit" name="m2ConfFileEdit"/>
                </item>
@@ -800,6 +885,26 @@
                  <property name="icon">
                   <iconset resource="../res.qrc">
                    <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QRadioButton" name="m2ConfFileButton">
+                 <property name="text">
+                  <string>File</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QRadioButton" name="m2ConfLocalButton">
+                 <property name="toolTip">
+                  <string>Use mcconf from connected VESC</string>
+                 </property>
+                 <property name="text">
+                  <string>Local</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>

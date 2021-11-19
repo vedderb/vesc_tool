@@ -223,6 +223,7 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     addDataItemBoth("Mot Loss Res");
     addDataItemBoth("Mot Loss Other");
     addDataItemBoth("Gearing Loss");
+    addDataItemBoth("Total Losses");
     addDataItemBoth("id (per motor)");
     addDataItemBoth("Power In");
     addDataItemBoth("Power Out");
@@ -331,22 +332,24 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
     mVerticalLineYLast.second = yMax;
 
     auto updateTable = [](MotorData &md, QTableWidget *table) {
-        table->item(0, 1)->setText(QString::number(md.efficiency * 100.0, 'f', 1) + " %");
-        table->item(1, 1)->setText(QString::number(md.loss_motor_tot, 'f', 1) + " W");
-        table->item(2, 1)->setText(QString::number(md.loss_motor_res, 'f', 1) + " W");
-        table->item(3, 1)->setText(QString::number(md.loss_motor_other, 'f', 1) + " W");
-        table->item(4, 1)->setText(QString::number(md.loss_gearing, 'f', 1) + " W");
-        table->item(5, 1)->setText(QString::number(md.iq, 'f', 1) + " A");
-        table->item(6, 1)->setText(QString::number(md.p_in, 'f', 1) + " W");
-        table->item(7, 1)->setText(QString::number(md.p_out, 'f', 1) + " W");
-        table->item(8, 1)->setText(QString::number(md.vq, 'f', 1) + " V");
-        table->item(9, 1)->setText(QString::number(md.vd, 'f', 1) + " V");
-        table->item(10, 1)->setText(QString::number(md.vbus_min, 'f', 1) + " V");
-        table->item(11, 1)->setText(QString::number(md.torque_out, 'f', 1) + " Nm");
-        table->item(12, 1)->setText(QString::number(md.torque_motor_shaft, 'f', 1) + " Nm");
-        table->item(13, 1)->setText(QString::number(md.rpm_out, 'f', 1));
-        table->item(14, 1)->setText(QString::number(md.rpm_motor_shaft, 'f', 1));
-        table->item(15, 1)->setText(QString::number(md.erpm, 'f', 1));
+        int ind = 0;
+        table->item(ind++, 1)->setText(QString::number(md.efficiency * 100.0, 'f', 1) + " %");
+        table->item(ind++, 1)->setText(QString::number(md.loss_motor_tot, 'f', 1) + " W");
+        table->item(ind++, 1)->setText(QString::number(md.loss_motor_res, 'f', 1) + " W");
+        table->item(ind++, 1)->setText(QString::number(md.loss_motor_other, 'f', 1) + " W");
+        table->item(ind++, 1)->setText(QString::number(md.loss_gearing, 'f', 1) + " W");
+        table->item(ind++, 1)->setText(QString::number(md.loss_tot, 'f', 1) + " W");
+        table->item(ind++, 1)->setText(QString::number(md.iq, 'f', 1) + " A");
+        table->item(ind++, 1)->setText(QString::number(md.p_in, 'f', 1) + " W");
+        table->item(ind++, 1)->setText(QString::number(md.p_out, 'f', 1) + " W");
+        table->item(ind++, 1)->setText(QString::number(md.vq, 'f', 1) + " V");
+        table->item(ind++, 1)->setText(QString::number(md.vd, 'f', 1) + " V");
+        table->item(ind++, 1)->setText(QString::number(md.vbus_min, 'f', 1) + " V");
+        table->item(ind++, 1)->setText(QString::number(md.torque_out, 'f', 1) + " Nm");
+        table->item(ind++, 1)->setText(QString::number(md.torque_motor_shaft, 'f', 1) + " Nm");
+        table->item(ind++, 1)->setText(QString::number(md.rpm_out, 'f', 1));
+        table->item(ind++, 1)->setText(QString::number(md.rpm_motor_shaft, 'f', 1));
+        table->item(ind++, 1)->setText(QString::number(md.erpm, 'f', 1));
     };
 
     if (!mRunDone || !reloadConfigs()) {
@@ -413,7 +416,6 @@ void PageMotorComparison::on_testRunButton_clicked()
         for (int r = 0;r < rows.size();r++) {
             int row = rows.at(r).row();
             double rowScale = 1.0;
-            QString cellTxt = table->item(row, 0)->text();
 
             if (QDoubleSpinBox *sb = qobject_cast<QDoubleSpinBox*>(table->cellWidget(row, 2))) {
                 rowScale = sb->value();
@@ -426,7 +428,7 @@ void PageMotorComparison::on_testRunButton_clicked()
                 namePrefix = ui->compBEdit->text() + " ";
             }
 
-            namePrefix += cellTxt + " ";
+            namePrefix += table->item(row, 0)->text() + " ";
 
             switch (row) {
             case 0:
@@ -456,30 +458,35 @@ void PageMotorComparison::on_testRunButton_clicked()
                 rowInd++; break;
             case 5:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(md.loss_tot * rowScale);
+                names.append(namePrefix + QString("(W * %1)").arg(rowScale));
+                rowInd++; break;
+            case 6:
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.iq * rowScale);
                 names.append(namePrefix + QString("(A * %1)").arg(rowScale));
                 rowInd++; break;
-            case 6:
+            case 7:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.p_in * rowScale);
                 names.append(namePrefix + QString("(W * %1)").arg(rowScale));
                 rowInd++; break;
-            case 7:
+            case 8:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.p_out * rowScale);
                 names.append(namePrefix + QString("(W * %1)").arg(rowScale));
                 rowInd++; break;
-            case 8:
+            case 9:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.vq * rowScale);
                 names.append(namePrefix + QString("(V * %1)").arg(rowScale));
                 rowInd++; break;
-            case 9:
+            case 10:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.vd * rowScale);
                 names.append(namePrefix + QString("(V * %1)").arg(rowScale));
                 rowInd++; break;
-            case 10:
+            case 11:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.vbus_min * rowScale);
                 names.append(namePrefix + QString("(V * %1)").arg(rowScale));

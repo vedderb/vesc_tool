@@ -72,6 +72,7 @@ private:
             loss_motor_other = 0.0;
             loss_motor_tot = 0.0;
             loss_gearing = 0.0;
+            loss_tot = 0.0;
             p_out = 0.0;
             p_in = 0.0;
             efficiency = 0.0;
@@ -106,6 +107,7 @@ private:
             loss_motor_other = e_rps * lambda * i_nl * motors;
             loss_motor_tot = loss_motor_res + loss_motor_other;
             loss_gearing = torque_motor_shaft * (1.0 - gear_eff) * rps_motor;
+            loss_tot = loss_motor_tot + loss_gearing;
             p_out = rps_out * torque_out;
             p_in = rps_motor * torque_motor_shaft * motors + loss_motor_tot;
             efficiency = p_out / p_in;
@@ -124,6 +126,7 @@ private:
         double loss_motor_other;
         double loss_motor_tot;
         double loss_gearing;
+        double loss_tot;
         double p_out;
         double p_in;
         double efficiency;

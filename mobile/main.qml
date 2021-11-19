@@ -610,6 +610,16 @@ ApplicationWindow {
         color: Utility.getAppHexColor("lightBackground")
         width: parent.width
         height: 35 + notchBot
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top:parent.top
+            height: parent.height/2
+            gradient: Gradient {
+                    GradientStop { position: 0.0; color: "#19ffffff"}
+                    GradientStop { position: 1.0; color: "transparent" }
+                }
+        }
         Behavior on color {
             ColorAnimation {
                 duration: 200;
@@ -646,12 +656,12 @@ ApplicationWindow {
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Utility.getAppHexColor("darkBackground")
+                color: "#33000000"
             }
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Utility.getAppHexColor("disabledText")
+                color:  "#33ffffff"
             }
             ColumnLayout{
                 spacing: 0
@@ -676,12 +686,12 @@ ApplicationWindow {
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Utility.getAppHexColor("darkBackground")
+                color: "#33000000"
             }
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Utility.getAppHexColor("disabledText")
+                color: "#33ffffff"
             }
             ToolButton {
                 Layout.fillHeight: true

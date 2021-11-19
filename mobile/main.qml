@@ -35,6 +35,7 @@ ApplicationWindow {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mAppConf: VescIf.appConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    property bool connected: false
 
     visible: true
     width: 500
@@ -120,9 +121,9 @@ ApplicationWindow {
         sourceComponent: Drawer {
             id: canDrawer
             edge: Qt.RightEdge
-            width: 0.60 * appWindow.width
-            height: appWindow.height - footer.height - headerBar.height
-            y: headerBar.height
+            width: Math.min(0.6 *appWindow.width, 0.8 *appWindow.height)
+            height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
+            y: appWindow.height > appWindow.width ?  headerBar.height : 0
             dragMargin: 20
             Overlay.modal: Rectangle {
                 color: "#AA000000"
@@ -136,9 +137,9 @@ ApplicationWindow {
 
     Drawer {
         id: drawer
-        width: 0.5 * appWindow.width
-        height: appWindow.height - footer.height - headerBar.height
-        y: headerBar.height
+        width: Math.min(0.5 *appWindow.width, 0.75 *appWindow.height)
+        height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
+        y: appWindow.height > appWindow.width ?  headerBar.height : 0
         dragMargin: 20
 
         Overlay.modal: Rectangle {
@@ -153,7 +154,7 @@ ApplicationWindow {
             Image {
                 id: image
                 Layout.preferredWidth: Math.min(parent.width, parent.height)*0.8
-                Layout.preferredHeight: (464 * Layout.preferredWidth) / 1550
+                Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
                 Layout.margins: Math.min(parent.width, parent.height)*0.1
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 source: "qrc" + Utility.getThemePath() + "/logo.png"
@@ -163,24 +164,15 @@ ApplicationWindow {
 
             Button {
                 id: reconnectButton
-
                 Layout.fillWidth: true
-                text: "Connect"
+                text: connected ? "Disconnect" : "Connect"
                 flat: true
-
                 onClicked: {
-                    connScreen.open()
-                }
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Disconnect"
-                flat: true
-
-                onClicked: {
-                    VescIf.disconnectPort()
-                    drawer.close()
+                    if(connected) {
+                        VescIf.disconnectPort()
+                    } else {
+                        connScreen.open()
+                    }
                 }
             }
 
@@ -254,8 +246,8 @@ ApplicationWindow {
         id: swipeView
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
-        anchors.leftMargin: notchLeft
-        anchors.rightMargin: notchRight
+        anchors.leftMargin: notchLeft*0.5
+        anchors.rightMargin: notchRight*0.5
         clip: true
         contentItem: ListView {
             model: swipeView.contentModel
@@ -951,6 +943,7 @@ ApplicationWindow {
                 connScreen.open();
                 confTimer.mcConfRx = false
                 confTimer.appConfRx = false
+                connected = false
             }
 
             if (VescIf.useWakeLock()) {
@@ -959,6 +952,7 @@ ApplicationWindow {
             reconnectButton.enabled = !VescIf.isPortConnected()
             if(VescIf.isPortConnected()) {
                 connScreen.close();
+                connected = true
             }
         }
 

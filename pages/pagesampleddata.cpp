@@ -715,7 +715,7 @@ void PageSampledData::on_saveDataButton_clicked()
             prev_t += 1.0 / fSwVector[i];
         }
 
-        stream << "T;I1;I2;I3;V1;V2;V3;I_tot;V_zero;FRF_d;Phase;PRBS\n";
+        stream << "T;I1;I2;I3;V1;V2;V3;I_tot;V_zero;FRF_d;Phase;PRBS;\n";
 
         for (int i = 0;i < curr1Vector.size();i++) {
             stream << timeVec.at(i) << ";";

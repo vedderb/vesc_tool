@@ -395,7 +395,8 @@ ApplicationWindow {
                         asynchronous: true
                         visible: status == Loader.Ready
                         anchors.centerIn: parent
-                        width:  parent.width*Screen.devicePixelRatio
+                        anchors.verticalCenterOffset: rtIMU.height/2
+                        width:  Math.min(parent.width*Screen.devicePixelRatio, (parent.height - rtIMU.height)*Screen.devicePixelRatio)
                         antialiasing: true
                         height: width
                         onLoaded: {
@@ -405,9 +406,7 @@ ApplicationWindow {
                         sourceComponent:
                             Vesc3dItem {
                             id: vesc3d
-                            anchors.centerIn: parent
-                            width:  parent.width*Screen.devicePixelRatio
-                            height: width
+                            anchors.fill: parent
                             scale: 1.0 / Screen.devicePixelRatio
                             z:1
                         }

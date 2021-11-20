@@ -48,7 +48,7 @@
             <item row="0" column="1">
              <widget class="QRadioButton" name="testModeRpmButton">
               <property name="toolTip">
-               <string>Sweep from 0 to the set RPM at the set torque.</string>
+               <string>Sweep from 0 to the end RPM at the set torque.</string>
               </property>
               <property name="text">
                <string>RPM</string>
@@ -61,7 +61,7 @@
             <item row="1" column="0">
              <widget class="QRadioButton" name="testModeRpmPowerButton">
               <property name="toolTip">
-               <string>Sweep from 0 to the set RPM at the set Power.</string>
+               <string>Sweep from the start RPM to the end RPM at the set Power.</string>
               </property>
               <property name="text">
                <string>RPM/Power</string>
@@ -71,7 +71,7 @@
             <item row="1" column="1">
              <widget class="QRadioButton" name="testModePropButton">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Propeller mode. Sweep from 0 to full RPM and use the propeller exponent on the RPM to derive the propeller power requirement. The test will be scaled such that the specified power is at the full RPM. &lt;span style=&quot; font-weight:600;&quot;&gt;Note&lt;/span&gt;: This test does not take the propeller efficiency into account, only the motor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Propeller mode. Sweep from 0 to end RPM and use the propeller exponent on the RPM to derive the propeller power requirement. The test will be scaled such that the specified power is at the full RPM. &lt;span style=&quot; font-weight:600;&quot;&gt;Note&lt;/span&gt;: This test does not take the propeller efficiency into account, only the motor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Propeller</string>

@@ -39,45 +39,51 @@ Item {
     ScrollView {
         anchors.fill: parent
         contentWidth: parent.width
+        contentHeight: grid.height + 30
+        property int gridItemPreferredWidth: isHorizontal ? parent.width/2.0 - 15 : parent.width - 10
         clip: true
 
         GridLayout {
             id: grid
-            anchors.fill: parent
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
             columns: isHorizontal ? 2 : 1
-            columnSpacing: 5
-            rowSpacing: 10
-
-            Image {
-                id: image
-                Layout.columnSpan: isHorizontal ? 2 : 1
-                Layout.preferredWidth: Math.min(topItem.width, topItem.height) * 0.8
-                Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
-                Layout.margins: Math.min(topItem.width, topItem.height) * 0.1
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                source: "qrc" + Utility.getThemePath() + "/logo.png"
-                antialiasing: true
-                Layout.bottomMargin: 0
-                Layout.topMargin: Math.min(topItem.width, topItem.height) * 0.025
+            anchors.topMargin: 15
+            anchors.bottomMargin: 15
+            columnSpacing: 10
+            rowSpacing: 5
+            Item {
+                Layout.columnSpan: 1
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                implicitHeight: image.height
+                Image {
+                    id: image
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width * 0.8, 0.4 * sourceSize.width * wizardBox.height/sourceSize.height)
+                    height: (sourceSize.height * width) / sourceSize.width
+                    source: "qrc" + Utility.getThemePath() + "/logo.png"
+                    antialiasing: true
+                }
             }
 
             GroupBox {
                 id: wizardBox
                 title: qsTr("Configuration")
                 Layout.fillWidth: true
-
                 GridLayout {
                     anchors.topMargin: -5
                     anchors.bottomMargin: -5
                     anchors.fill: parent
                     columns: 2
                     columnSpacing: 5
-                    rowSpacing: isHorizontal ? 5 : 0
+                    rowSpacing: 5
 
                     ImageButton {
                         id: connectButton
-
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -96,6 +102,7 @@ Item {
                         id: nrfPairButton
 
                         Layout.fillWidth: true
+                         Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -115,6 +122,7 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -134,6 +142,7 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -159,6 +168,7 @@ Item {
                     NrfPair {
                         id: nrfPair
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.columnSpan: 2
                         visible: false
                         hideAfterPair: true
@@ -177,6 +187,8 @@ Item {
                 id: toolsBox
                 title: qsTr("Tools")
                 Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.rowSpan: isHorizontal ? 2 : 1
 
                 GridLayout {
                     anchors.topMargin: -5
@@ -184,10 +196,11 @@ Item {
                     anchors.fill: parent
                     columns: 2
                     columnSpacing: 5
-                    rowSpacing: 0
+                    rowSpacing: 5
 
                     ImageButton {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -201,6 +214,7 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -223,6 +237,7 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -236,6 +251,7 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -249,6 +265,7 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -262,6 +279,7 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -287,8 +305,8 @@ Item {
 
             GroupBox {
                 title: qsTr("Wireless Bridge to Computer (TCP)")
+                Layout.bottomMargin: isHorizontal ? 0 : 10
                 Layout.fillWidth: true
-                Layout.bottomMargin: 10
 
                 TcpBox {
                     anchors.fill: parent

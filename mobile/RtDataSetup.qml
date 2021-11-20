@@ -42,7 +42,7 @@ Item {
     property double efficiency_lpf: 0
     property bool isHorizontal: rtData.width > rtData.height
 
-    property int gaugeSize: (isHorizontal ? Math.min((height)/1.3 - 30, width / 2.8 - 20) :
+    property int gaugeSize: (isHorizontal ? Math.min((height)/1.25, width / 2.5 - 20) :
                                             Math.min(width / 1.37, (height) / 2.4 - 10 ))
     property int gaugeSize2: gaugeSize * 0.55
     Component.onCompleted: {
@@ -64,6 +64,7 @@ Item {
         Rectangle {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
+            Layout.rowSpan: 1
             Layout.preferredHeight: gaugeSize2*1.1
             color: "transparent"
             CustomGauge {
@@ -123,7 +124,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: gaugeSize
             color: "transparent"
-            Layout.rowSpan: isHorizontal ? 2:1
+            Layout.rowSpan: isHorizontal ? 3:1
 
             CustomGauge {
                 id: speedGauge
@@ -402,6 +403,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             Layout.preferredHeight: gaugeSize2*1.1
+            Layout.rowSpan: 3
             color: "transparent"
             CustomGauge {
                 id: escTempGauge
@@ -513,7 +515,8 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight:  gaugeSize2*0.26
             Layout.alignment: Qt.AlignBottom
-            Layout.columnSpan: isHorizontal ? 2 : 1
+            Layout.rowSpan: 1
+            //Layout.columnSpan: isHorizontal ? 2 : 1
             Text {
                 id: odoLabel
                 color: {color = Utility.getAppHexColor("lightText")}

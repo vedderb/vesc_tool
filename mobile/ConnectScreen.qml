@@ -74,7 +74,7 @@ Drawer {
 
         Image {
             id: image
-            Layout.preferredWidth: Math.min(column.width, column.height) * 0.8
+            Layout.preferredWidth: Math.min(column.width, column.height*0.8) * 0.8
             Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
             Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025

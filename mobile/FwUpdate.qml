@@ -30,18 +30,25 @@ import Vedder.vesc.utility 1.0
 Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    property bool isHorizontal: width > height
+    anchors.fill: parent
 
     FwHelper {
         id: fwHelper
     }
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
-        spacing: 0
+        columns: isHorizontal ? 2 : 1
+        rows: isHorizontal ? 1 : 2
 
         RowLayout {
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.column: isHorizontal ? 1 : 0
+            Layout.row: 0
+            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
+            Layout.preferredHeight: parent.height*2/3
             spacing: 0
 
             Rectangle {
@@ -344,20 +351,32 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            height: asd.implicitHeight + 20
+            Layout.fillHeight: true
+            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
+            Layout.column:0
+            Layout.row: isHorizontal ? 0 : 1
+            Layout.preferredHeight: asd.implicitHeight
             color: Utility.getAppHexColor("lightBackground")
+            Rectangle {
+                width: parent.width
+                height:10
+                anchors.left: parent.left
+                anchors.top:parent.top
+                color: Utility.getAppHexColor("normalBackground")
+            }
 
             ColumnLayout {
                 id: asd
                 anchors.fill: parent
                 anchors.margins: 10
-
                 Text {
                     Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignBottom
                     color: Utility.getAppHexColor("lightText")
                     id: uploadText
                     text: qsTr("Not Uploading")
-                    horizontalAlignment: Text.AlignHCenter
                 }
 
                 ProgressBar {

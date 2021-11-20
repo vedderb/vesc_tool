@@ -21,6 +21,7 @@
 #include "ui_pagemotorcomparison.h"
 #include "utility.h"
 #include <QFileDialog>
+#include <QFileInfo>
 
 PageMotorComparison::PageMotorComparison(QWidget *parent) :
     QWidget(parent),
@@ -81,7 +82,6 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
         mM1ConfigLoaded = false;
         settingChanged();
     });
-
     connect(ui->m2ConfLocalButton, &QRadioButton::toggled, [this]() {
         mM2ConfigLoaded = false;
         settingChanged();
@@ -91,9 +91,19 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     ui->m1ConfFileEdit->setText(set.value("pagemotorcomparison/m1confpath", "").toString());
     ui->m2ConfFileEdit->setText(set.value("pagemotorcomparison/m2confpath", "").toString());
 
+    connect(ui->m1ConfFileEdit, &QLineEdit::textChanged, [=]() {
+        mM1ConfigLoaded = false;
+        settingChanged();
+    });
+    connect(ui->m2ConfFileEdit, &QLineEdit::textChanged, [=]() {
+        mM2ConfigLoaded = false;
+        settingChanged();
+    });
+
     connect(ui->m1ConfChooseButton, &QPushButton::clicked, [this]() {
         QString fileName = QFileDialog::getOpenFileName(this,
-                                                        tr("McConf XML File"), "",
+                                                        tr("McConf XML File"),
+                                                        QFileInfo(ui->m1ConfFileEdit->text()).canonicalFilePath(),
                                                         tr("XML files (*.xml)"));
 
         if (!fileName.isEmpty()) {
@@ -105,7 +115,8 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
 
     connect(ui->m2ConfChooseButton, &QPushButton::clicked, [this]() {
         QString fileName = QFileDialog::getOpenFileName(this,
-                                                        tr("McConf XML File"), "",
+                                                        tr("McConf XML File"),
+                                                        QFileInfo(ui->m2ConfFileEdit->text()).canonicalFilePath(),
                                                         tr("XML files (*.xml)"));
 
         if (!fileName.isEmpty()) {
@@ -161,6 +172,11 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     connect(ui->m2MotorNumBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged();});
 
+    connect(ui->m1FwBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double value) { (void)value; settingChanged(); });
+    connect(ui->m2FwBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double value) { (void)value; settingChanged();});
+
     connect(ui->m1TempIncBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
     connect(ui->m2TempIncBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
@@ -175,6 +191,17 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
             [=]() {settingChanged();});
     connect(ui->compBEdit, &QLineEdit::textChanged,
             [=]() {settingChanged();});
+
+    connect(ui->m1SetupGearingButton, &QPushButton::clicked, [this]() {
+        if (reloadConfigs()) {
+            ui->m1GearingBox->setValue(mM1Config.getParamDouble("si_gear_ratio"));
+        }
+    });
+    connect(ui->m2SetupGearingButton, &QPushButton::clicked, [this]() {
+        if (reloadConfigs()) {
+            ui->m2GearingBox->setValue(mM2Config.getParamDouble("si_gear_ratio"));
+        }
+    });
 
     auto updateMouse = [this](QMouseEvent *event) {
         if (event->buttons() & Qt::RightButton) {
@@ -224,6 +251,7 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     addDataItemBoth("Mot Loss Other");
     addDataItemBoth("Gearing Loss");
     addDataItemBoth("Total Losses");
+    addDataItemBoth("iq (per motor)");
     addDataItemBoth("id (per motor)");
     addDataItemBoth("Power In");
     addDataItemBoth("Power Out");
@@ -235,6 +263,14 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     addDataItemBoth("RPM Out", false);
     addDataItemBoth("RPM Shaft", false);
     addDataItemBoth("ERPM", false);
+    addDataItemBoth("km/h", false);
+    addDataItemBoth("mph", false);
+    addDataItemBoth("wh/km", false);
+    addDataItemBoth("wh/mi", false);
+    addDataItemBoth("KV (BLDC)", false);
+    addDataItemBoth("KV Noload (BLDC)", false);
+
+
 }
 
 PageMotorComparison::~PageMotorComparison()
@@ -340,6 +376,7 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         table->item(ind++, 1)->setText(QString::number(md.loss_gearing, 'f', 1) + " W");
         table->item(ind++, 1)->setText(QString::number(md.loss_tot, 'f', 1) + " W");
         table->item(ind++, 1)->setText(QString::number(md.iq, 'f', 1) + " A");
+        table->item(ind++, 1)->setText(QString::number(md.id, 'f', 1) + " A");
         table->item(ind++, 1)->setText(QString::number(md.p_in, 'f', 1) + " W");
         table->item(ind++, 1)->setText(QString::number(md.p_out, 'f', 1) + " W");
         table->item(ind++, 1)->setText(QString::number(md.vq, 'f', 1) + " V");
@@ -350,6 +387,12 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         table->item(ind++, 1)->setText(QString::number(md.rpm_out, 'f', 1));
         table->item(ind++, 1)->setText(QString::number(md.rpm_motor_shaft, 'f', 1));
         table->item(ind++, 1)->setText(QString::number(md.erpm, 'f', 1));
+        table->item(ind++, 1)->setText(QString::number(md.km_h, 'f', 1) + " km/h");
+        table->item(ind++, 1)->setText(QString::number(md.mph, 'f', 1) + " mph");
+        table->item(ind++, 1)->setText(QString::number(md.wh_km, 'f', 1) + " wh/km");
+        table->item(ind++, 1)->setText(QString::number(md.wh_mi, 'f', 1) + " wh/mi");
+        table->item(ind++, 1)->setText(QString::number(md.kv_bldc, 'f', 1) + " RPM/V");
+        table->item(ind++, 1)->setText(QString::number(md.kv_bldc_noload, 'f', 1) + " RPM/V");
     };
 
     if (!mRunDone || !reloadConfigs()) {
@@ -358,18 +401,22 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
 
     if (ui->testModeTorqueButton->isChecked()) {
         MotorData md;
-        md.update(mM1Config, ui->testRpmBox->value(), posx, ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
+        md.update(mM1Config, ui->testRpmBox->value(), posx,ui->m1FwBox->value(),
+                  ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
                   ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
         updateTable(md, ui->m1PlotTable);
-        md.update(mM2Config, ui->testRpmBox->value(), posx, ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
+        md.update(mM2Config, ui->testRpmBox->value(), posx, ui->m2FwBox->value(),
+                  ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
                   ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         updateTable(md, ui->m2PlotTable);
     } else if (ui->testModeRpmButton->isChecked()) {
         MotorData md;
-        md.update(mM1Config, posx, ui->testTorqueBox->value(), ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
+        md.update(mM1Config, posx, ui->testTorqueBox->value(), ui->m1FwBox->value(),
+                  ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
                   ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
         updateTable(md, ui->m1PlotTable);
-        md.update(mM2Config, posx, ui->testTorqueBox->value(), ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
+        md.update(mM2Config, posx, ui->testTorqueBox->value(), ui->m2FwBox->value(),
+                  ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
                   ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         updateTable(md, ui->m2PlotTable);
     } else if (ui->testModeRpmPowerButton->isChecked()) {
@@ -377,10 +424,12 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         double torque = ui->testPowerBox->value() / rps;
 
         MotorData md;
-        md.update(mM1Config, posx, torque, ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
+        md.update(mM1Config, posx, torque, ui->m1GearingBox->value(), ui->m1FwBox->value(),
+                  ui->m1GearEfficiencyBox->value() / 100.0,
                   ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
         updateTable(md, ui->m1PlotTable);
-        md.update(mM2Config, posx, torque, ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
+        md.update(mM2Config, posx, torque, ui->m2GearingBox->value(), ui->m2FwBox->value(),
+                  ui->m2GearEfficiencyBox->value() / 100.0,
                   ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         updateTable(md, ui->m2PlotTable);
     } else {
@@ -390,10 +439,12 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         double torque = (p_max_const * pow(posx, prop_exp)) / rps;
 
         MotorData md;
-        md.update(mM1Config, posx, torque, ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
+        md.update(mM1Config, posx, torque, ui->m1GearingBox->value(), ui->m1FwBox->value(),
+                  ui->m1GearEfficiencyBox->value() / 100.0,
                   ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
         updateTable(md, ui->m1PlotTable);
-        md.update(mM2Config, posx, torque, ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
+        md.update(mM2Config, posx, torque, ui->m2GearingBox->value(), ui->m2FwBox->value(),
+                  ui->m2GearEfficiencyBox->value() / 100.0,
                   ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         updateTable(md, ui->m2PlotTable);
     }
@@ -468,25 +519,30 @@ void PageMotorComparison::on_testRunButton_clicked()
                 rowInd++; break;
             case 7:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(md.p_in * rowScale);
-                names.append(namePrefix + QString("(W * %1)").arg(rowScale));
+                yAxes[rowInd].append(md.id * rowScale);
+                names.append(namePrefix + QString("(A * %1)").arg(rowScale));
                 rowInd++; break;
             case 8:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(md.p_out * rowScale);
+                yAxes[rowInd].append(md.p_in * rowScale);
                 names.append(namePrefix + QString("(W * %1)").arg(rowScale));
                 rowInd++; break;
             case 9:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(md.p_out * rowScale);
+                names.append(namePrefix + QString("(W * %1)").arg(rowScale));
+                rowInd++; break;
+            case 10:
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.vq * rowScale);
                 names.append(namePrefix + QString("(V * %1)").arg(rowScale));
                 rowInd++; break;
-            case 10:
+            case 11:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.vd * rowScale);
                 names.append(namePrefix + QString("(V * %1)").arg(rowScale));
                 rowInd++; break;
-            case 11:
+            case 12:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.vbus_min * rowScale);
                 names.append(namePrefix + QString("(V * %1)").arg(rowScale));
@@ -566,7 +622,7 @@ void PageMotorComparison::on_testRunButton_clicked()
     };
 
     auto plotTorqueSweep = [this, updateData, updateGraphs](QTableWidget *table, ConfigParams &config,
-            double gearing, double gear_eff, double motors, double temp_inc) {
+            double i_fw, double gearing, double gear_eff, double motors, double temp_inc) {
         double torque = ui->testTorqueBox->value();
         double rpm = ui->testRpmBox->value();
 
@@ -576,7 +632,7 @@ void PageMotorComparison::on_testRunButton_clicked()
 
         for (double t = torque / 1000.0;t < torque;t += (torque / 1000.0)) {
             MotorData md;
-            md.update(config, rpm, t, gearing, gear_eff, motors, temp_inc);
+            md.update(config, rpm, t, i_fw, gearing, gear_eff, motors, temp_inc);
             xAxis.append(t);
             updateData(md, table, yAxes, names);
         }
@@ -586,7 +642,7 @@ void PageMotorComparison::on_testRunButton_clicked()
     };
 
     auto plotRpmSweep = [this, updateData, updateGraphs](QTableWidget *table, ConfigParams &config,
-            double gearing, double gear_eff, double motors, double temp_inc) {
+            double i_fw, double gearing, double gear_eff, double motors, double temp_inc) {
         double torque = ui->testTorqueBox->value();
         double rpm = ui->testRpmBox->value();
 
@@ -596,7 +652,7 @@ void PageMotorComparison::on_testRunButton_clicked()
 
         for (double r = rpm / 1000.0;r < rpm;r += (rpm / 1000.0)) {
             MotorData md;
-            md.update(config, r, torque, gearing, gear_eff, motors,temp_inc);
+            md.update(config, r, torque, i_fw, gearing, gear_eff, motors,temp_inc);
             xAxis.append(r);
             updateData(md, table, yAxes, names);
         }
@@ -606,7 +662,7 @@ void PageMotorComparison::on_testRunButton_clicked()
     };
 
     auto plotPowerSweep = [this, updateData, updateGraphs](QTableWidget *table, ConfigParams &config,
-            double gearing, double gear_eff, double motors, double temp_inc) {
+            double i_fw, double gearing, double gear_eff, double motors, double temp_inc) {
         double rpm = ui->testRpmBox->value();
         double rpm_start = ui->testRpmStartBox->value();
         double power = ui->testPowerBox->value();
@@ -620,7 +676,7 @@ void PageMotorComparison::on_testRunButton_clicked()
             double torque = power / rps;
 
             MotorData md;
-            md.update(config, r, torque, gearing, gear_eff, motors,temp_inc);
+            md.update(config, r, torque, i_fw, gearing, gear_eff, motors,temp_inc);
             xAxis.append(r);
             updateData(md, table, yAxes, names);
         }
@@ -630,7 +686,7 @@ void PageMotorComparison::on_testRunButton_clicked()
     };
 
     auto plotPropSweep = [this, updateData, updateGraphs](QTableWidget *table, ConfigParams &config,
-            double gearing, double gear_eff, double motors, double temp_inc) {
+            double i_fw, double gearing, double gear_eff, double motors, double temp_inc) {
         double rpm = ui->testRpmBox->value();
         double power = ui->testPowerBox->value();
         double prop_exp = ui->testPropExpBox->value();
@@ -646,7 +702,7 @@ void PageMotorComparison::on_testRunButton_clicked()
             double torque = power / rps;
 
             MotorData md;
-            md.update(config, r, torque, gearing, gear_eff, motors,temp_inc);
+            md.update(config, r, torque, i_fw, gearing, gear_eff, motors,temp_inc);
             xAxis.append(r);
             updateData(md, table, yAxes, names);
         }
@@ -657,28 +713,28 @@ void PageMotorComparison::on_testRunButton_clicked()
 
     if (ui->testModeTorqueButton->isChecked()) {
         ui->plot->clearGraphs();
-        plotTorqueSweep(ui->m1PlotTable, mM1Config, ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
-                        ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
-        plotTorqueSweep(ui->m2PlotTable, mM2Config, ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
-                        ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
+        plotTorqueSweep(ui->m1PlotTable, mM1Config, ui->m1FwBox->value(), ui->m1GearingBox->value(),
+                        ui->m1GearEfficiencyBox->value() / 100.0, ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
+        plotTorqueSweep(ui->m2PlotTable, mM2Config, ui->m2FwBox->value(), ui->m2GearingBox->value(),
+                        ui->m2GearEfficiencyBox->value() / 100.0, ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
     } else if (ui->testModeRpmButton->isChecked()) {
         ui->plot->clearGraphs();
-        plotRpmSweep(ui->m1PlotTable, mM1Config, ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
-                     ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
-        plotRpmSweep(ui->m2PlotTable, mM2Config, ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
-                     ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
+        plotRpmSweep(ui->m1PlotTable, mM1Config, ui->m1FwBox->value(), ui->m1GearingBox->value(),
+                     ui->m1GearEfficiencyBox->value() / 100.0, ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
+        plotRpmSweep(ui->m2PlotTable, mM2Config, ui->m2FwBox->value(), ui->m2GearingBox->value(),
+                     ui->m2GearEfficiencyBox->value() / 100.0, ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
     } else if (ui->testModeRpmPowerButton->isChecked()) {
         ui->plot->clearGraphs();
-        plotPowerSweep(ui->m1PlotTable, mM1Config, ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
-                       ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
-        plotPowerSweep(ui->m2PlotTable, mM2Config, ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
-                       ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
+        plotPowerSweep(ui->m1PlotTable, mM1Config, ui->m1FwBox->value(), ui->m1GearingBox->value(),
+                       ui->m1GearEfficiencyBox->value() / 100.0, ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
+        plotPowerSweep(ui->m2PlotTable, mM2Config, ui->m2FwBox->value(), ui->m2GearingBox->value(),
+                       ui->m2GearEfficiencyBox->value() / 100.0, ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
     } else {
         ui->plot->clearGraphs();
-        plotPropSweep(ui->m1PlotTable, mM1Config, ui->m1GearingBox->value(), ui->m1GearEfficiencyBox->value() / 100.0,
-                       ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
-        plotPropSweep(ui->m2PlotTable, mM2Config, ui->m2GearingBox->value(), ui->m2GearEfficiencyBox->value() / 100.0,
-                       ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
+        plotPropSweep(ui->m1PlotTable, mM1Config, ui->m1FwBox->value(), ui->m1GearingBox->value(),
+                      ui->m1GearEfficiencyBox->value() / 100.0, ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
+        plotPropSweep(ui->m2PlotTable, mM2Config, ui->m2FwBox->value(), ui->m2GearingBox->value(),
+                      ui->m2GearEfficiencyBox->value() / 100.0, ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
     }
 
     mRunDone = true;

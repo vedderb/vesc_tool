@@ -68,6 +68,7 @@ private:
             rpm_motor_shaft = 0.0;
             erpm = 0.0;
             iq = 0.0;
+            id = 0.0;
             loss_motor_res = 0.0;
             loss_motor_other = 0.0;
             loss_motor_tot = 0.0;
@@ -79,16 +80,26 @@ private:
             vq = 0.0;
             vd = 0.0;
             vbus_min = 0.0;
+            km_h = 0.0;
+            mph = 0.0;
+            wh_km = 0.0;
+            wh_mi = 0.0;
+            kv_bldc = 0.0;
+            kv_bldc_noload = 0.0;
         }
 
-        void update(ConfigParams &config, double rpm, double torque,
+        void update(ConfigParams &config, double rpm, double torque, double i_fw,
                     double gearing, double gear_eff, double motors, double temp_inc) {
 
             double r = config.getParamDouble("foc_motor_r");
             double l = config.getParamDouble("foc_motor_l");
+            double ld_lq_diff = config.getParamDouble("foc_motor_ld_lq_diff");
+            double lq = l + ld_lq_diff / 2.0;
+            double ld = l - ld_lq_diff / 2.0;
             double lambda = config.getParamDouble("foc_motor_flux_linkage");
             double i_nl = config.getParamDouble("si_motor_nl_current");
             double poles_pairs = double(config.getParamInt("si_motor_poles")) / 2.0;
+            double wheel_diam = config.getParamDouble("si_wheel_diameter");
 
             r += r * 0.00386 * (temp_inc);
 
@@ -102,18 +113,29 @@ private:
             double rps_motor = rps_out * gearing;
             double e_rps = rps_motor * poles_pairs;
 
-            iq = (torque_motor_shaft / (lambda * poles_pairs)) + i_nl;
-            loss_motor_res = iq * iq * r * 1.5 * motors;
-            loss_motor_other = e_rps * lambda * i_nl * motors;
+            iq = (torque_motor_shaft * (2.0 / 3.0) / (lambda * poles_pairs)) + i_nl;
+            id = -i_fw;
+            double i_mag = sqrt(iq * iq + id * id);
+            loss_motor_res = i_mag * i_mag * r * (3.0 / 2.0) * motors;
+            loss_motor_other = e_rps * lambda * i_nl * (3.0 / 2.0) * motors;
             loss_motor_tot = loss_motor_res + loss_motor_other;
             loss_gearing = torque_motor_shaft * (1.0 - gear_eff) * rps_motor;
             loss_tot = loss_motor_tot + loss_gearing;
             p_out = rps_out * torque_out;
             p_in = rps_motor * torque_motor_shaft * motors + loss_motor_tot;
             efficiency = p_out / p_in;
-            vq = r * iq + e_rps * lambda;
-            vd = -e_rps * l * iq;
+            vq = r * iq + e_rps * (lambda + id * ld);
+            vd = r * id - e_rps * lq * iq;
             vbus_min = (3.0 / 2.0) * sqrt(vq * vq + vd * vd) / (sqrt(3.0) / 2.0) / 0.95;
+
+            km_h = 3.6 * M_PI * wheel_diam * rpm_out / 60.0;
+            mph = km_h * 0.621371192;
+
+            wh_km = p_in / km_h;
+            wh_mi = p_in / mph;
+
+            kv_bldc = rpm_motor_shaft / (vbus_min * (sqrt(3.0) / 2.0));
+            kv_bldc_noload = (60.0 * 0.95) / (lambda * (3.0 / 2.0) * M_PI * 2.0 * poles_pairs);
         }
 
         double torque_out;
@@ -122,6 +144,7 @@ private:
         double rpm_motor_shaft;
         double erpm;
         double iq;
+        double id;
         double loss_motor_res;
         double loss_motor_other;
         double loss_motor_tot;
@@ -133,6 +156,12 @@ private:
         double vq;
         double vd;
         double vbus_min;
+        double km_h;
+        double mph;
+        double wh_km;
+        double wh_mi;
+        double kv_bldc;
+        double kv_bldc_noload;
     };
 };
 

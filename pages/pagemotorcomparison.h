@@ -92,6 +92,9 @@ private:
         void update(ConfigParams &config, double rpm, double torque, double i_fw,
                     double gearing, double gear_eff, double motors, double temp_inc) {
 
+            // See https://www.mathworks.com/help/physmod/sps/ref/pmsm.html
+            // for the motor equations
+
             double r = config.getParamDouble("foc_motor_r");
             double l = config.getParamDouble("foc_motor_l");
             double ld_lq_diff = config.getParamDouble("foc_motor_ld_lq_diff");
@@ -126,6 +129,7 @@ private:
                 iq -= 0.2 * iq * (torque_motor_shaft_updated - torque_motor_shaft) / fmax(fabs(torque_motor_shaft_updated), 1.0);
                 iq += iq_adj;
 
+                // See https://github.com/vedderb/bldc/pull/179
                 if (use_mpta && fabs(ld_lq_diff) > 1e-9) {
                     id = (lambda - sqrt(SQ(lambda) + 8.0 * SQ(ld_lq_diff) * SQ(iq))) / (4.0 * ld_lq_diff);
                     iq_adj = iq - SIGN(iq) * sqrt(SQ(iq) - SQ(id));

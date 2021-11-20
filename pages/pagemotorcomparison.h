@@ -25,6 +25,7 @@
 #include "vescinterface.h"
 #include "configparams.h"
 #include "widgets/qcustomplot.h"
+#include "utility.h"
 
 namespace Ui {
 class PageMotorComparison;
@@ -98,30 +99,53 @@ private:
             double ld = l - ld_lq_diff / 2.0;
             double lambda = config.getParamDouble("foc_motor_flux_linkage");
             double i_nl = config.getParamDouble("si_motor_nl_current");
-            double poles_pairs = double(config.getParamInt("si_motor_poles")) / 2.0;
+            double pole_pairs = double(config.getParamInt("si_motor_poles")) / 2.0;
             double wheel_diam = config.getParamDouble("si_wheel_diameter");
+            bool use_mpta = config.getParamEnum("foc_mtpa_mode");
 
             r += r * 0.00386 * (temp_inc);
 
             torque_out = torque;
             rpm_out = rpm;
             rpm_motor_shaft = rpm * gearing;
-            erpm = rpm_motor_shaft * poles_pairs;
+            erpm = rpm_motor_shaft * pole_pairs;
             torque_motor_shaft = torque / (gearing * motors * gear_eff);
 
             double rps_out = rpm * 2.0 * M_PI / 60.0;
             double rps_motor = rps_out * gearing;
-            double e_rps = rps_motor * poles_pairs;
+            double e_rps = rps_motor * pole_pairs;
+            double t_nl = (3.0 / 2.0) * i_nl * lambda * pole_pairs; // No-load torque from core losses
 
-            iq = (torque_motor_shaft * (2.0 / 3.0) / (lambda * poles_pairs)) + i_nl;
+            iq = ((torque_motor_shaft + t_nl) * (2.0 / 3.0) / (lambda * pole_pairs));
             id = -i_fw;
+
+            // Iterate taking motor saliency into account to get the current that produces the desired torque
+            double torque_motor_shaft_updated = torque_motor_shaft;
+            double iq_adj = 0.0;
+            for (int i = 0;i < 50;i++) {
+                iq -= 0.2 * iq * (torque_motor_shaft_updated - torque_motor_shaft) / fmax(fabs(torque_motor_shaft_updated), 1.0);
+                iq += iq_adj;
+
+                if (use_mpta && fabs(ld_lq_diff) > 1e-9) {
+                    id = (lambda - sqrt(SQ(lambda) + 8.0 * SQ(ld_lq_diff) * SQ(iq))) / (4.0 * ld_lq_diff);
+                    iq_adj = iq - SIGN(iq) * sqrt(SQ(iq) - SQ(id));
+                    iq = SIGN(iq) * sqrt(SQ(iq) - SQ(id));
+                    id -= i_fw;
+                }
+
+                torque_motor_shaft_updated = (3.0 / 2.0) * pole_pairs * (iq * lambda + iq * id * (ld - lq)) - t_nl;
+            }
+
+            torque_motor_shaft = torque_motor_shaft_updated;
+            torque_out = torque_motor_shaft * gearing * motors * gear_eff;
+
             double i_mag = sqrt(iq * iq + id * id);
             loss_motor_res = i_mag * i_mag * r * (3.0 / 2.0) * motors;
-            loss_motor_other = e_rps * lambda * i_nl * (3.0 / 2.0) * motors;
+            loss_motor_other = rps_out * t_nl * motors;
             loss_motor_tot = loss_motor_res + loss_motor_other;
             loss_gearing = torque_motor_shaft * (1.0 - gear_eff) * rps_motor;
             loss_tot = loss_motor_tot + loss_gearing;
-            p_out = rps_out * torque_out;
+            p_out = rps_motor * torque_motor_shaft * motors * gear_eff;
             p_in = rps_motor * torque_motor_shaft * motors + loss_motor_tot;
             efficiency = p_out / p_in;
             vq = r * iq + e_rps * (lambda + id * ld);
@@ -135,7 +159,7 @@ private:
             wh_mi = p_in / mph;
 
             kv_bldc = rpm_motor_shaft / (vbus_min * (sqrt(3.0) / 2.0));
-            kv_bldc_noload = (60.0 * 0.95) / (lambda * (3.0 / 2.0) * M_PI * 2.0 * poles_pairs);
+            kv_bldc_noload = (60.0 * 0.95) / (lambda * (3.0 / 2.0) * M_PI * 2.0 * pole_pairs);
         }
 
         double torque_out;

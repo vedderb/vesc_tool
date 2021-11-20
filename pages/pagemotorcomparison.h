@@ -145,7 +145,7 @@ private:
 
             double i_mag = sqrt(iq * iq + id * id);
             loss_motor_res = i_mag * i_mag * r * (3.0 / 2.0) * motors;
-            loss_motor_other = rps_out * t_nl * motors;
+            loss_motor_other = rps_motor * t_nl * motors;
             loss_motor_tot = loss_motor_res + loss_motor_other;
             loss_gearing = torque_motor_shaft * (1.0 - gear_eff) * rps_motor;
             loss_tot = loss_motor_tot + loss_gearing;

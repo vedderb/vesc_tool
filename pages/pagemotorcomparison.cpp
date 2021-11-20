@@ -301,6 +301,10 @@ void PageMotorComparison::setVesc(VescInterface *vesc)
         if (ui->m2ConfLocalButton->isChecked()) {
             mM2ConfigLoaded = false;
         }
+
+        if (mRunDone) {
+            settingChanged();
+        }
     });
 }
 
@@ -424,11 +428,11 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         double torque = ui->testPowerBox->value() / rps;
 
         MotorData md;
-        md.update(mM1Config, posx, torque, ui->m1GearingBox->value(), ui->m1FwBox->value(),
+        md.update(mM1Config, posx, torque, ui->m1FwBox->value(), ui->m1GearingBox->value(),
                   ui->m1GearEfficiencyBox->value() / 100.0,
                   ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
         updateTable(md, ui->m1PlotTable);
-        md.update(mM2Config, posx, torque, ui->m2GearingBox->value(), ui->m2FwBox->value(),
+        md.update(mM2Config, posx, torque, ui->m2FwBox->value(), ui->m2GearingBox->value(),
                   ui->m2GearEfficiencyBox->value() / 100.0,
                   ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         updateTable(md, ui->m2PlotTable);
@@ -439,11 +443,11 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         double torque = (p_max_const * pow(posx, prop_exp)) / rps;
 
         MotorData md;
-        md.update(mM1Config, posx, torque, ui->m1GearingBox->value(), ui->m1FwBox->value(),
+        md.update(mM1Config, posx, torque, ui->m1FwBox->value(), ui->m1GearingBox->value(),
                   ui->m1GearEfficiencyBox->value() / 100.0,
                   ui->m1MotorNumBox->value(), ui->m1TempIncBox->value());
         updateTable(md, ui->m1PlotTable);
-        md.update(mM2Config, posx, torque, ui->m2GearingBox->value(), ui->m2FwBox->value(),
+        md.update(mM2Config, posx, torque, ui->m2FwBox->value(), ui->m2GearingBox->value(),
                   ui->m2GearEfficiencyBox->value() / 100.0,
                   ui->m2MotorNumBox->value(), ui->m2TempIncBox->value());
         updateTable(md, ui->m2PlotTable);

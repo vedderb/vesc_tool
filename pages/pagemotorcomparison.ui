@@ -618,31 +618,6 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0" colspan="3">
-             <widget class="QDoubleSpinBox" name="m1GearEfficiencyBox">
-              <property name="prefix">
-               <string>Gear Eff: </string>
-              </property>
-              <property name="suffix">
-               <string> %</string>
-              </property>
-              <property name="decimals">
-               <number>1</number>
-              </property>
-              <property name="minimum">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>100.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.200000000000000</double>
-              </property>
-              <property name="value">
-               <double>100.000000000000000</double>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="0">
              <widget class="QDoubleSpinBox" name="m1MotorNumBox">
               <property name="toolTip">
@@ -722,6 +697,50 @@
               </property>
               <property name="maximum">
                <double>999.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QDoubleSpinBox" name="m1GearEfficiencyBox">
+              <property name="prefix">
+               <string>Gear Eff: </string>
+              </property>
+              <property name="suffix">
+               <string> %</string>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.200000000000000</double>
+              </property>
+              <property name="value">
+               <double>100.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QDoubleSpinBox" name="m1MaxRpmBox">
+              <property name="toolTip">
+               <string>Maximum motor shaft RPM</string>
+              </property>
+              <property name="prefix">
+               <string>Max RPM: </string>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <double>500000.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>50000.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -890,31 +909,6 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0" colspan="3">
-             <widget class="QDoubleSpinBox" name="m2GearEfficiencyBox">
-              <property name="prefix">
-               <string>Gear Eff: </string>
-              </property>
-              <property name="suffix">
-               <string> %</string>
-              </property>
-              <property name="decimals">
-               <number>1</number>
-              </property>
-              <property name="minimum">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>100.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.200000000000000</double>
-              </property>
-              <property name="value">
-               <double>100.000000000000000</double>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="0">
              <widget class="QDoubleSpinBox" name="m2MotorNumBox">
               <property name="toolTip">
@@ -960,6 +954,50 @@
               </property>
               <property name="maximum">
                <double>200.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QDoubleSpinBox" name="m2GearEfficiencyBox">
+              <property name="prefix">
+               <string>Gear Eff: </string>
+              </property>
+              <property name="suffix">
+               <string> %</string>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.200000000000000</double>
+              </property>
+              <property name="value">
+               <double>100.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QDoubleSpinBox" name="m2MaxRpmBox">
+              <property name="toolTip">
+               <string>Maximum motor shaft RPM</string>
+              </property>
+              <property name="prefix">
+               <string>Max RPM: </string>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <double>500000.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>50000.000000000000000</double>
               </property>
              </widget>
             </item>

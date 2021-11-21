@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1344</width>
-    <height>790</height>
+    <height>792</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,6 +30,9 @@
           <set>Qt::AlignCenter</set>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
+          <property name="spacing">
+           <number>2</number>
+          </property>
           <item>
            <layout class="QGridLayout" name="gridLayout_4">
             <item row="0" column="0">
@@ -69,12 +72,12 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QRadioButton" name="testModePropButton">
+             <widget class="QRadioButton" name="testModeExpButton">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Propeller mode. Sweep from 0 to end RPM and use the propeller exponent on the RPM to derive the propeller power requirement. The test will be scaled such that the specified power is at the full RPM. &lt;span style=&quot; font-weight:600;&quot;&gt;Note&lt;/span&gt;: This test does not take the propeller efficiency into account, only the motor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Torque + RPM Exponential mode. Sweep from 0 to end RPM and use the base torque + exponent on the RPM to derive the power requirement. The test will be scaled such that the specified power is at the full RPM. The power for the base torque will be required in addition to that.&lt;/p&gt;&lt;p&gt;Propellers and impellers in air and water usually just have the exponent while traction vehicles have a base torque from the rolling resistance + an exponent from wind resistance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
-               <string>Propeller</string>
+               <string>Torque + Exp</string>
               </property>
              </widget>
             </item>
@@ -191,22 +194,22 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0" colspan="2">
-             <widget class="QDoubleSpinBox" name="testPropExpBox">
+            <item row="2" column="1">
+             <widget class="QDoubleSpinBox" name="testExpBox">
               <property name="enabled">
                <bool>false</bool>
               </property>
               <property name="toolTip">
-               <string>Propeller RPM exponent to get power.</string>
+               <string>RPM exponent</string>
               </property>
               <property name="prefix">
-               <string>Prop Exp: </string>
+               <string>Exp: </string>
               </property>
               <property name="minimum">
-               <double>2.000000000000000</double>
+               <double>0.000000000000000</double>
               </property>
               <property name="maximum">
-               <double>3.500000000000000</double>
+               <double>4.000000000000000</double>
               </property>
               <property name="singleStep">
                <double>0.100000000000000</double>
@@ -216,7 +219,35 @@
               </property>
              </widget>
             </item>
+            <item row="2" column="0">
+             <widget class="QDoubleSpinBox" name="testExpBaseTorqueBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Base Torque</string>
+              </property>
+              <property name="prefix">
+               <string>B: </string>
+              </property>
+              <property name="suffix">
+               <string> Nm</string>
+              </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="maximum">
+               <double>999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.200000000000000</double>
+              </property>
+             </widget>
+            </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QComboBox" name="testTorqueExpPresetBox"/>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -752,6 +783,9 @@
              <string>Motor Configuration</string>
             </property>
             <layout class="QGridLayout" name="gridLayout">
+             <property name="spacing">
+              <number>2</number>
+             </property>
              <item row="0" column="0">
               <widget class="QRadioButton" name="m1ConfLocalButton">
                <property name="toolTip">
@@ -765,16 +799,6 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QRadioButton" name="m1ConfFileButton">
-               <property name="text">
-                <string>File</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="m1ConfFileEdit"/>
-             </item>
              <item row="1" column="2">
               <widget class="QPushButton" name="m1ConfChooseButton">
                <property name="text">
@@ -783,6 +807,36 @@
                <property name="icon">
                 <iconset resource="../res.qrc">
                  <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="m1ConfFileEdit"/>
+             </item>
+             <item row="1" column="0">
+              <widget class="QRadioButton" name="m1ConfFileButton">
+               <property name="text">
+                <string>File</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QPushButton" name="m1LoadConfButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Load selected motor configuration in VESC Tool</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/motor_up.png</normaloff>:/res/icons/motor_up.png</iconset>
                </property>
               </widget>
              </item>
@@ -1009,6 +1063,9 @@
              <string>Motor Configuration</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
+             <property name="spacing">
+              <number>2</number>
+             </property>
              <item row="1" column="1">
               <widget class="QLineEdit" name="m2ConfFileEdit"/>
              </item>
@@ -1023,13 +1080,6 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QRadioButton" name="m2ConfFileButton">
-               <property name="text">
-                <string>File</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="0">
               <widget class="QRadioButton" name="m2ConfLocalButton">
                <property name="toolTip">
@@ -1040,6 +1090,33 @@
                </property>
                <property name="checked">
                 <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QRadioButton" name="m2ConfFileButton">
+               <property name="text">
+                <string>File</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QPushButton" name="m2LoadConfButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Load selected motor configuration in VESC Tool</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="../res.qrc">
+                 <normaloff>:/res/icons/motor_up.png</normaloff>:/res/icons/motor_up.png</iconset>
                </property>
               </widget>
              </item>

@@ -126,6 +126,27 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
         }
     });
 
+    connect(ui->m1LoadConfButton, &QPushButton::clicked, [this]() {
+        bool res = mVesc->mcConfig()->loadXml(ui->m1ConfFileEdit->text(), "MCConfiguration");
+        if (res) {
+            mVesc->emitStatusMessage("Loaded motor configuration", true);
+        } else {
+            mVesc->emitMessageDialog(tr("Load motor configuration"),
+                              tr("Could not load motor configuration:<BR>"
+                                 "%1").arg(mVesc->mcConfig()->xmlStatus()), false, false);
+        }
+    });
+    connect(ui->m2LoadConfButton, &QPushButton::clicked, [this]() {
+        bool res = mVesc->mcConfig()->loadXml(ui->m2ConfFileEdit->text(), "MCConfiguration");
+        if (res) {
+            mVesc->emitStatusMessage("Loaded motor configuration", true);
+        } else {
+            mVesc->emitMessageDialog(tr("Load motor configuration"),
+                              tr("Could not load motor configuration:<BR>"
+                                 "%1").arg(mVesc->mcConfig()->xmlStatus()), false, false);
+        }
+    });
+
     connect(ui->savePlotPdfButton, &QPushButton::clicked, [this]() {
         Utility::plotSavePdf(ui->plot, ui->saveWidthBox->value(),
                              ui->saveHeightBox->value(), ui->titleEdit->text());
@@ -154,7 +175,9 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
             [this](double value) { (void)value; settingChanged(); });
     connect(ui->testRpmStartBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
-    connect(ui->testPropExpBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(ui->testExpBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double value) { (void)value; settingChanged(); });
+    connect(ui->testExpBaseTorqueBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
 
     connect(ui->m1GearingBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
@@ -317,9 +340,10 @@ void PageMotorComparison::setVesc(VescInterface *vesc)
 void PageMotorComparison::settingChanged()
 {
     ui->testTorqueBox->setEnabled(ui->testModeTorqueButton->isChecked() || ui->testModeRpmButton->isChecked());
-    ui->testPowerBox->setEnabled(ui->testModeRpmPowerButton->isChecked() || ui->testModePropButton->isChecked());
+    ui->testPowerBox->setEnabled(ui->testModeRpmPowerButton->isChecked() || ui->testModeExpButton->isChecked());
     ui->testRpmStartBox->setEnabled(ui->testModeRpmPowerButton->isChecked());
-    ui->testPropExpBox->setEnabled(ui->testModePropButton->isChecked());
+    ui->testExpBox->setEnabled(ui->testModeExpButton->isChecked());
+    ui->testExpBaseTorqueBox->setEnabled(ui->testModeExpButton->isChecked());
 
     if (ui->testLiveUpdateBox->isChecked()) {
         on_testRunButton_clicked();
@@ -432,9 +456,13 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         updateTable(md, ui->m2PlotTable);
     } else {
         double rps = posx * 2.0 * M_PI / 60.0;
-        double prop_exp = ui->testPropExpBox->value();
-        double p_max_const = ui->testPowerBox->value() / pow(ui->testRpmBox->value(), prop_exp);
+        double prop_exp = ui->testExpBox->value();
+        double baseTorque = ui->testExpBaseTorqueBox->value();
+        double topRpm = ui->testRpmBox->value();
+        double power = ui->testPowerBox->value();
+        double p_max_const = power / pow(topRpm, prop_exp);
         double torque = (p_max_const * pow(posx, prop_exp)) / rps;
+        torque += baseTorque;
 
         MotorData md;
         md.update(mM1Config, posx, torque, getParamsUi(1));
@@ -719,7 +747,8 @@ void PageMotorComparison::on_testRunButton_clicked()
             ConfigParams &config, TestParams param) {
         double rpm = ui->testRpmBox->value();
         double power = ui->testPowerBox->value();
-        double prop_exp = ui->testPropExpBox->value();
+        double prop_exp = ui->testExpBox->value();
+        double baseTorque = ui->testExpBaseTorqueBox->value();
         double p_max_const = power / pow(rpm, prop_exp);
 
         QVector<double> xAxis;
@@ -730,6 +759,7 @@ void PageMotorComparison::on_testRunButton_clicked()
             double rps = r * 2.0 * M_PI / 60.0;
             double power = p_max_const * pow(r, prop_exp);
             double torque = power / rps;
+            torque += baseTorque;
 
             MotorData md;
             md.update(config, r, torque, param);

@@ -413,13 +413,14 @@ Item {
                 anchors.horizontalCenterOffset: -0.675*gaugeSize2
                 anchors.verticalCenterOffset: -0.1*gaugeSize2
                 minimumValue: 0
-                maximumValue:150
+                maximumValue:Math.ciel(mMcConf.getParamDouble("l_temp_fet_end") / 5) * 5
                 value: 0
-                labelStep: 15
+                labelStep: Math.ciel(maximumValue/ 25) * 5
+                property real throttleStartValue: Math.ciel(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
                 property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                 property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                 property color redColor: {redColor = "red"}
-                nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
+                nibColor: value > throttleStartValue ? redColor : (value > 40 ? orangeColor: blueColor)
                 Behavior on nibColor {
                     ColorAnimation {
                         duration: 1000;
@@ -437,18 +438,19 @@ Item {
                     height: gaugeSize2
                     anchors.centerIn: parent
                     anchors.horizontalCenterOffset: gaugeSize2*1.35
-                    maximumValue: 150
+                    maximumValue: Math.ciel(mMcConf.getParamDouble("l_temp_motor_end") / 5) * 5
                     minimumValue: 0
                     minAngle: 195
                     maxAngle: -30
-                    labelStep: 15
+                    labelStep: Math.ciel(maximumValue/ 25) * 5
                     value: 0
                     unitText: "°C"
                     typeText: "TEMP\nMOTOR"
+                    property real throttleStartValue: Math.floor(mMcConf.getParamDouble("l_temp_motor_start") / 5) * 5
                     property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                     property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                     property color redColor: {redColor = "red"}
-                    nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
+                    nibColor: value > throttleStartValue ? redColor : (value > 40 ? orangeColor: blueColor)
                     Behavior on nibColor {
                         ColorAnimation {
                             duration: 1000;
@@ -634,8 +636,11 @@ Item {
 
         onValuesSetupReceived: {
             currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
-            currentGauge.minimumValue = -currentGauge.maximumValue
-            currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
+            currentGauge.minimumValue =  Math.floor(mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
+            currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 25) * 5
+
+
+
 
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
@@ -657,8 +662,14 @@ Item {
 
             if (Math.abs(speedGauge.maximumValue - speedMaxRound) > 6.0) {
                 speedGauge.maximumValue = speedMaxRound
-                speedGauge.minimumValue = -speedMaxRound
+                if( currentGauge.minimumValue < -0.1) {
+                    speedGauge.minimumValue = -speedMaxRound
+                } else {
+                    speedGauge.minimumValue = 0
+                }
             }
+            var speedTotalDiff = speedGauge.maximumValue - speedGauge.minimumValue
+            speedGauge.labelStep = Math.ciel(speedTotalDiff/25.0) * 5.0
 
             speedGauge.value = values.speed * 3.6 * impFact
             speedGauge.unitText = useImperial ? "mph" : "km/h"
@@ -666,14 +677,19 @@ Item {
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
                                                            mMcConf.getParamDouble("l_current_max")),
                                     mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
+            var powerMin = Math.max(values.v_in * Math.max(mMcConf.getParamDouble("l_in_current_min"),
+                                                           mMcConf.getParamDouble("l_current_min")),
+                                    mMcConf.getParamDouble("l_watt_min")) * values.num_vescs
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
+            var powerMinRound = (Math.floor(powerMin / 1000.0) * 1000.0)
 
             if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
                 powerGauge.maximumValue = powerMaxRound
-                powerGauge.minimumValue = -powerMaxRound
+                powerGauge.minimumValue = powerMinRound
             }
 
             powerGauge.value = (values.current_in * values.v_in)
+            powerGauge.labelStep = Math.ciel((powerMaxRound - powerMinRound)/5000.0) * 1000.0
             var alpha = 0.05
             var efficiencyNow = Math.max( Math.min(values.current_in * values.v_in/Math.max(Math.abs(values.speed * 3.6 * impFact), 1e-6) , 60) , -60)
             efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow

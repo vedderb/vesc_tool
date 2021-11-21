@@ -513,12 +513,13 @@ QVector<double> Utility::measureRLBlocking(VescInterface *vesc)
 
     vesc->commands()->measureRL();
 
-    auto conn = connect(vesc->commands(), &Commands::motorRLReceived, [&res](double r, double l) {
+    auto conn = connect(vesc->commands(), &Commands::motorRLReceived, [&res](double r, double l, double ld_lq_diff) {
         res.append(r);
         res.append(l);
+        res.append(ld_lq_diff);
     });
 
-    waitSignal(vesc->commands(), SIGNAL(motorRLReceived(double, double)), 8000);
+    waitSignal(vesc->commands(), SIGNAL(motorRLReceived(double, double, double)), 8000);
     disconnect(conn);
 
     return res;

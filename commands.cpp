@@ -335,7 +335,11 @@ void Commands::processPacket(QByteArray data)
     case COMM_DETECT_MOTOR_R_L: {
         double r = vb.vbPopFrontDouble32(1e6);
         double l = vb.vbPopFrontDouble32(1e3);
-        emit motorRLReceived(r, l);
+        double ld_lq_diff = 0.0;
+        if (vb.size() >= 4) {
+            ld_lq_diff = vb.vbPopFrontDouble32(1e3);
+        }
+        emit motorRLReceived(r, l, ld_lq_diff);
     } break;
 
     case COMM_DETECT_MOTOR_FLUX_LINKAGE: {

@@ -31,6 +31,9 @@
 #define FE_WGS84        (1.0/298.257223563) // earth flattening (WGS84)
 #define RE_WGS84        6378137.0           // earth semimajor axis (WGS84) (m)
 
+#define SIGN(x)         ((x < 0) ? -1 : 1)
+#define SQ(x)           ((x) * (x))
+
 class Utility : public QObject
 {
     Q_OBJECT

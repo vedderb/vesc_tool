@@ -92,7 +92,7 @@ signals:
     void decodedAdcReceived(double value, double voltage, double value2, double voltage2);
     void decodedChukReceived(double value);
     void decodedBalanceReceived(BALANCE_VALUES values);
-    void motorRLReceived(double r, double l);
+    void motorRLReceived(double r, double l, double ld_lq_diff);
     void motorLinkageReceived(double flux_linkage);
     void encoderParamReceived(double offset, double ratio, bool inverted);
     void customAppDataReceived(QByteArray data);

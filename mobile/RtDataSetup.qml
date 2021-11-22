@@ -413,10 +413,10 @@ Item {
                 anchors.horizontalCenterOffset: -0.675*gaugeSize2
                 anchors.verticalCenterOffset: -0.1*gaugeSize2
                 minimumValue: 0
-                maximumValue:Math.ciel(mMcConf.getParamDouble("l_temp_fet_end") / 5) * 5
+                maximumValue:Math.ceil(mMcConf.getParamDouble("l_temp_fet_end") / 5) * 5
                 value: 0
-                labelStep: Math.ciel(maximumValue/ 25) * 5
-                property real throttleStartValue: Math.ciel(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
+                labelStep: Math.ceil(maximumValue/ 25) * 5
+                property real throttleStartValue: Math.ceil(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
                 property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                 property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                 property color redColor: {redColor = "red"}
@@ -438,11 +438,11 @@ Item {
                     height: gaugeSize2
                     anchors.centerIn: parent
                     anchors.horizontalCenterOffset: gaugeSize2*1.35
-                    maximumValue: Math.ciel(mMcConf.getParamDouble("l_temp_motor_end") / 5) * 5
+                    maximumValue: Math.ceil(mMcConf.getParamDouble("l_temp_motor_end") / 5) * 5
                     minimumValue: 0
                     minAngle: 195
                     maxAngle: -30
-                    labelStep: Math.ciel(maximumValue/ 25) * 5
+                    labelStep: Math.ceil(maximumValue/ 25) * 5
                     value: 0
                     unitText: "°C"
                     typeText: "TEMP\nMOTOR"
@@ -639,9 +639,6 @@ Item {
             currentGauge.minimumValue =  Math.floor(mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
             currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 25) * 5
 
-
-
-
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
             batteryGauge.value = values.battery_level * 100.0
@@ -669,8 +666,7 @@ Item {
                 }
             }
             var speedTotalDiff = speedGauge.maximumValue - speedGauge.minimumValue
-            speedGauge.labelStep = Math.ciel(speedTotalDiff/25.0) * 5.0
-
+            speedGauge.labelStep = Math.ceil(speedTotalDiff/25.0) * 5.0
             speedGauge.value = values.speed * 3.6 * impFact
             speedGauge.unitText = useImperial ? "mph" : "km/h"
 
@@ -689,7 +685,7 @@ Item {
             }
 
             powerGauge.value = (values.current_in * values.v_in)
-            powerGauge.labelStep = Math.ciel((powerMaxRound - powerMinRound)/5000.0) * 1000.0
+            powerGauge.labelStep = Math.ceil((powerMaxRound - powerMinRound)/5000.0) * 1000.0
             var alpha = 0.05
             var efficiencyNow = Math.max( Math.min(values.current_in * values.v_in/Math.max(Math.abs(values.speed * 3.6 * impFact), 1e-6) , 60) , -60)
             efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow
@@ -699,7 +695,6 @@ Item {
 
             odometerValue = values.odometer
             batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) + "%"
-
             rangeLabel.text = useImperial ? "MI\nRANGE" : "KM\nRANGE"
             if( values.battery_wh / (wh_km_total / impFact) < 999.0) {
                 rangeValLabel.text = parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(1)

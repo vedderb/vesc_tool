@@ -284,6 +284,7 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     addDataItemBoth("Total Losses");
     addDataItemBoth("iq (per motor)");
     addDataItemBoth("id (per motor)");
+    addDataItemBoth("i_abs (per motor)");
     addDataItemBoth("Power In");
     addDataItemBoth("Power Out");
     addDataItemBoth("Vq");
@@ -413,6 +414,7 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         table->item(ind++, 1)->setText(QString::number(md.loss_tot, 'f', 1) + " W");
         table->item(ind++, 1)->setText(QString::number(md.iq, 'f', 1) + " A");
         table->item(ind++, 1)->setText(QString::number(md.id, 'f', 1) + " A");
+        table->item(ind++, 1)->setText(QString::number(md.i_mag, 'f', 1) + " A");
         table->item(ind++, 1)->setText(QString::number(md.p_in, 'f', 1) + " W");
         table->item(ind++, 1)->setText(QString::number(md.p_out, 'f', 1) + " W");
         table->item(ind++, 1)->setText(QString::number(md.vq, 'f', 1) + " V");
@@ -571,25 +573,30 @@ void PageMotorComparison::on_testRunButton_clicked()
                 rowInd++; break;
             case 8:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(md.p_in * rowScale);
-                names.append(namePrefix + QString("(W * %1)").arg(rowScale));
+                yAxes[rowInd].append(md.i_mag * rowScale);
+                names.append(namePrefix + QString("(A * %1)").arg(rowScale));
                 rowInd++; break;
             case 9:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(md.p_out * rowScale);
+                yAxes[rowInd].append(md.p_in * rowScale);
                 names.append(namePrefix + QString("(W * %1)").arg(rowScale));
                 rowInd++; break;
             case 10:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(md.p_out * rowScale);
+                names.append(namePrefix + QString("(W * %1)").arg(rowScale));
+                rowInd++; break;
+            case 11:
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.vq * rowScale);
                 names.append(namePrefix + QString("(V * %1)").arg(rowScale));
                 rowInd++; break;
-            case 11:
+            case 12:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.vd * rowScale);
                 names.append(namePrefix + QString("(V * %1)").arg(rowScale));
                 rowInd++; break;
-            case 12:
+            case 13:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.vbus_min * rowScale);
                 names.append(namePrefix + QString("(V * %1)").arg(rowScale));

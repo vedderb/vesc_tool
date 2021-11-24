@@ -166,6 +166,8 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
 
     connect(ui->testLiveUpdateBox, &QCheckBox::toggled,
             [this](bool checked) { (void)checked; settingChanged(); });
+    connect(ui->testNegativeBox, &QCheckBox::toggled,
+            [this](bool checked) { (void)checked; settingChanged(); });
 
     connect(ui->testRpmBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
@@ -387,7 +389,7 @@ bool PageMotorComparison::reloadConfigs()
 
 void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMax)
 {
-    if (posx < 0.0) {
+    if (posx < 0.0 && !ui->testNegativeBox->isChecked()) {
         posx = 0.0;
     }
 
@@ -668,14 +670,19 @@ void PageMotorComparison::on_testRunButton_clicked()
 
     auto plotTorqueSweep = [this, updateData, updateGraphs](QTableWidget *table,
             ConfigParams &config, TestParams param) {
-        double torque = ui->testTorqueBox->value();
+        double torque = fabs(ui->testTorqueBox->value());
         double rpm = ui->testRpmBox->value();
 
         QVector<double> xAxis;
         QVector<QVector<double> > yAxes;
         QVector<QString> names;
 
-        for (double t = torque / 1000.0;t < torque;t += (torque / 1000.0)) {
+        double torque_start = -torque;
+        if (!ui->testNegativeBox->isChecked()) {
+            torque_start = torque / 1000.0;
+        }
+
+        for (double t = torque_start;t < torque;t += (torque / 1000.0)) {
             MotorData md;
             md.update(config, rpm, t, param);
             xAxis.append(t);
@@ -700,7 +707,12 @@ void PageMotorComparison::on_testRunButton_clicked()
         QVector<QVector<double> > yAxes;
         QVector<QString> names;
 
-        for (double r = rpm / 1000.0;r < rpm;r += (rpm / 1000.0)) {
+        double rpm_start = -rpm;
+        if (!ui->testNegativeBox->isChecked()) {
+            rpm_start = rpm / 1000.0;
+        }
+
+        for (double r = rpm_start;r < rpm;r += (rpm / 1000.0)) {
             MotorData md;
             md.update(config, r, torque, param);
             xAxis.append(r);

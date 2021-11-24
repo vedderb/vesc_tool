@@ -88,81 +88,6 @@
             <property name="spacing">
              <number>2</number>
             </property>
-            <item row="1" column="1">
-             <widget class="QDoubleSpinBox" name="testRpmBox">
-              <property name="toolTip">
-               <string>End RPM</string>
-              </property>
-              <property name="prefix">
-               <string/>
-              </property>
-              <property name="suffix">
-               <string> RPM</string>
-              </property>
-              <property name="decimals">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <double>999999.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>100.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>8000.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QDoubleSpinBox" name="testPowerBox">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="prefix">
-               <string>Pwr: </string>
-              </property>
-              <property name="suffix">
-               <string> W</string>
-              </property>
-              <property name="decimals">
-               <number>1</number>
-              </property>
-              <property name="minimum">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>999999.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>100.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>2000.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QDoubleSpinBox" name="testTorqueBox">
-              <property name="prefix">
-               <string/>
-              </property>
-              <property name="suffix">
-               <string> Nm</string>
-              </property>
-              <property name="decimals">
-               <number>3</number>
-              </property>
-              <property name="maximum">
-               <double>9999.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.500000000000000</double>
-              </property>
-              <property name="value">
-               <double>3.000000000000000</double>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QDoubleSpinBox" name="testRpmStartBox">
               <property name="enabled">
@@ -194,31 +119,6 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QDoubleSpinBox" name="testExpBox">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>RPM exponent</string>
-              </property>
-              <property name="prefix">
-               <string>Exp: </string>
-              </property>
-              <property name="minimum">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>4.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="value">
-               <double>2.700000000000000</double>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="0">
              <widget class="QDoubleSpinBox" name="testExpBaseTorqueBox">
               <property name="enabled">
@@ -244,10 +144,120 @@
               </property>
              </widget>
             </item>
+            <item row="0" column="1">
+             <widget class="QDoubleSpinBox" name="testTorqueBox">
+              <property name="prefix">
+               <string/>
+              </property>
+              <property name="suffix">
+               <string> Nm</string>
+              </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="minimum">
+               <double>-9999.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>9999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.500000000000000</double>
+              </property>
+              <property name="value">
+               <double>3.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QDoubleSpinBox" name="testPowerBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="prefix">
+               <string>Pwr: </string>
+              </property>
+              <property name="suffix">
+               <string> W</string>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>999999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>2000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QDoubleSpinBox" name="testRpmBox">
+              <property name="toolTip">
+               <string>End RPM</string>
+              </property>
+              <property name="prefix">
+               <string/>
+              </property>
+              <property name="suffix">
+               <string> RPM</string>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <double>999999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>100.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>8000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QDoubleSpinBox" name="testExpBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>RPM exponent</string>
+              </property>
+              <property name="prefix">
+               <string>Exp: </string>
+              </property>
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>4.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="value">
+               <double>2.700000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="2">
+             <widget class="QCheckBox" name="testNegativeBox">
+              <property name="toolTip">
+               <string>Include negative RPM and Torque in tests.</string>
+              </property>
+              <property name="text">
+               <string>Include Negative</string>
+              </property>
+             </widget>
+            </item>
            </layout>
-          </item>
-          <item>
-           <widget class="QComboBox" name="testTorqueExpPresetBox"/>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_5">

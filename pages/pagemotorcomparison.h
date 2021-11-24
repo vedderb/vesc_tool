@@ -135,7 +135,7 @@ private:
             double rps_out = rpm * 2.0 * M_PI / 60.0;
             double rps_motor = rps_out * params.gearing;
             double e_rps = rps_motor * pole_pairs;
-            double t_nl = (3.0 / 2.0) * i_nl * lambda * pole_pairs; // No-load torque from core losses
+            double t_nl = SIGN(rpm) * (3.0 / 2.0) * i_nl * lambda * pole_pairs; // No-load torque from core losses
 
             iq = ((torque_motor_shaft + t_nl) * (2.0 / 3.0) / (lambda * pole_pairs));
             id = -params.fwCurrent;
@@ -169,7 +169,9 @@ private:
             loss_tot = loss_motor_tot + loss_gearing;
             p_out = rps_motor * torque_motor_shaft * params.motorNum * params.gearingEfficiency;
             p_in = rps_motor * torque_motor_shaft * params.motorNum + loss_motor_tot;
-            efficiency = p_out / p_in;
+
+            efficiency = fmin(fabs(p_out), fabs(p_in)) / fmax(fabs(p_out), fabs(p_in));
+
             vq = r * iq + e_rps * (lambda + id * ld);
             vd = r * id - e_rps * lq * iq;
             vbus_min = (3.0 / 2.0) * sqrt(vq * vq + vd * vd) / (sqrt(3.0) / 2.0) / 0.95;

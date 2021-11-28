@@ -71,6 +71,7 @@ void PageFoc::reloadParams()
         ui->hallTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hall sensors");
         ui->encoderTab->addParamSubgroup(mVesc->mcConfig(), "foc", "encoder");
         ui->hfiTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hfi");
+        ui->vssTab->addParamSubgroup(mVesc->mcConfig(), "foc", "vss");
         ui->filterTab->addParamSubgroup(mVesc->mcConfig(), "foc", "filters");
         ui->offsetTab->addParamSubgroup(mVesc->mcConfig(), "foc", "offsets");
         ui->fwTab->addParamSubgroup(mVesc->mcConfig(), "foc", "field weakening");

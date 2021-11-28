@@ -89,6 +89,7 @@ private:
             erpm = 0.0;
             iq = 0.0;
             id = 0.0;
+            i_mag = 0.0;
             loss_motor_res = 0.0;
             loss_motor_other = 0.0;
             loss_motor_tot = 0.0;
@@ -135,7 +136,7 @@ private:
             double rps_out = rpm * 2.0 * M_PI / 60.0;
             double rps_motor = rps_out * params.gearing;
             double e_rps = rps_motor * pole_pairs;
-            double t_nl = (3.0 / 2.0) * i_nl * lambda * pole_pairs; // No-load torque from core losses
+            double t_nl = SIGN(rpm) * (3.0 / 2.0) * i_nl * lambda * pole_pairs; // No-load torque from core losses
 
             iq = ((torque_motor_shaft + t_nl) * (2.0 / 3.0) / (lambda * pole_pairs));
             id = -params.fwCurrent;
@@ -144,7 +145,8 @@ private:
             double torque_motor_shaft_updated = torque_motor_shaft;
             double iq_adj = 0.0;
             for (int i = 0;i < 50;i++) {
-                iq -= 0.2 * iq * (torque_motor_shaft_updated - torque_motor_shaft) / fmax(fabs(torque_motor_shaft_updated), 1.0);
+                iq -= 0.2 * iq * (torque_motor_shaft_updated - torque_motor_shaft) /
+                        (SIGN(torque_motor_shaft_updated) * fmax(fabs(torque_motor_shaft_updated), 1.0));
                 iq += iq_adj;
 
                 // See https://github.com/vedderb/bldc/pull/179
@@ -161,7 +163,7 @@ private:
             torque_motor_shaft = torque_motor_shaft_updated;
             torque_out = torque_motor_shaft * params.gearing * params.motorNum * params.gearingEfficiency;
 
-            double i_mag = sqrt(iq * iq + id * id);
+            i_mag = sqrt(iq * iq + id * id);
             loss_motor_res = i_mag * i_mag * r * (3.0 / 2.0) * params.motorNum;
             loss_motor_other = rps_motor * t_nl * params.motorNum;
             loss_motor_tot = loss_motor_res + loss_motor_other;
@@ -169,7 +171,9 @@ private:
             loss_tot = loss_motor_tot + loss_gearing;
             p_out = rps_motor * torque_motor_shaft * params.motorNum * params.gearingEfficiency;
             p_in = rps_motor * torque_motor_shaft * params.motorNum + loss_motor_tot;
-            efficiency = p_out / p_in;
+
+            efficiency = fmin(fabs(p_out), fabs(p_in)) / fmax(fabs(p_out), fabs(p_in));
+
             vq = r * iq + e_rps * (lambda + id * ld);
             vd = r * id - e_rps * lq * iq;
             vbus_min = (3.0 / 2.0) * sqrt(vq * vq + vd * vd) / (sqrt(3.0) / 2.0) / 0.95;
@@ -191,6 +195,7 @@ private:
         double erpm;
         double iq;
         double id;
+        double i_mag;
         double loss_motor_res;
         double loss_motor_other;
         double loss_motor_tot;

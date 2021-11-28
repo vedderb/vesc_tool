@@ -413,10 +413,10 @@ Item {
                 anchors.horizontalCenterOffset: -0.675*gaugeSize2
                 anchors.verticalCenterOffset: -0.1*gaugeSize2
                 minimumValue: 0
-                maximumValue:Math.ceil(mMcConf.getParamDouble("l_temp_fet_end") / 5) * 5
+                maximumValue: 100
                 value: 0
-                labelStep: Math.ceil(maximumValue/ 25) * 5
-                property real throttleStartValue: Math.ceil(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
+                labelStep: 20
+                property real throttleStartValue: 70
                 property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                 property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                 property color redColor: {redColor = "red"}
@@ -438,15 +438,15 @@ Item {
                     height: gaugeSize2
                     anchors.centerIn: parent
                     anchors.horizontalCenterOffset: gaugeSize2*1.35
-                    maximumValue: Math.ceil(mMcConf.getParamDouble("l_temp_motor_end") / 5) * 5
+                    maximumValue: 100
                     minimumValue: 0
                     minAngle: 195
                     maxAngle: -30
-                    labelStep: Math.ceil(maximumValue/ 25) * 5
+                    labelStep: 20
                     value: 0
                     unitText: "°C"
                     typeText: "TEMP\nMOTOR"
-                    property real throttleStartValue: Math.floor(mMcConf.getParamDouble("l_temp_motor_start") / 5) * 5
+                    property real throttleStartValue: 70
                     property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                     property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                     property color redColor: {redColor = "red"}
@@ -476,7 +476,7 @@ Item {
                         property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                         property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                         property color redColor: {redColor = "red"}
-                        nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
+                        nibColor: value > 45.0 ? redColor : (value > 25.0 ? orangeColor: blueColor)
                         Text {
                             id: consumValLabel
                             color: {color = Utility.getAppHexColor("lightText")}
@@ -501,9 +501,8 @@ Item {
                         }
                         Behavior on nibColor {
                             ColorAnimation {
-                                duration: 1000;
+                                duration: 100;
                                 easing.type: Easing.InOutSine
-                                easing.overshoot: 3
                             }
                         }
                     }
@@ -706,7 +705,13 @@ Item {
             trip.text = parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(1)
 
             escTempGauge.value = values.temp_mos
+            escTempGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_end") / 5) * 5
+            motTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
+            escTempGauge.labelStep = Math.ceil(escTempGauge.maximumValue/ 50) * 5
             motTempGauge.value = values.temp_motor
+            motTempGauge.labelStep = Math.ceil(motTempGauge.maximumValue/ 50) * 5
+            motTempGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_end") / 5) * 5
+            motTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_start") / 5) * 5
         }
     }
 }

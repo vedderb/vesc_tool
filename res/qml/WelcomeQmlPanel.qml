@@ -30,9 +30,6 @@ import "qrc:/mobile"
 Item {
     id: container
     width: 100
-    Material.theme: {Material.theme = Utility.isDarkMode() ? "Dark" : "Light"}
-    Material.accent: {Material.accent = Utility.getAppHexColor("lightAccent")}
-
 
     function setupMotors() {
         if (!VescIf.isPortConnected()) {
@@ -188,9 +185,37 @@ Item {
             clip: true
 
             Page {
-                RtDataSetup {
+                PageIndicator {
+                    count: rtSwipeView.count
+                    currentIndex: rtSwipeView.currentIndex
+                    anchors.left: parent.left
+                    width:25
+                    anchors.verticalCenter: parent.verticalCenter
+                    rotation: 90
+                    z:2
+                }
+
+                SwipeView {
+                    id: rtSwipeView
+                    enabled: true
+                    clip: true
+                    currentIndex: 0
                     anchors.fill: parent
-                    dialogParent: container
+                    orientation: Qt.Vertical
+
+                    Page {
+                        RtDataSetup {
+                            anchors.fill: parent
+                            dialogParent: container
+                        }
+                    }
+
+                    Page {
+                        StatPage {
+                            anchors.fill: parent
+                            anchors.margins: 20
+                        }
+                    }
                 }
             }
 

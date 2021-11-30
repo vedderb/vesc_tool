@@ -45,6 +45,7 @@ public:
     void checkMcConfig();
     Q_INVOKABLE void emitEmptyValues();
     Q_INVOKABLE void emitEmptySetupValues();
+    Q_INVOKABLE void emitEmptyStats();
 
     Q_INVOKABLE bool getLimitedSupportsFwdAllCan() const;
     void setLimitedSupportsFwdAllCan(bool limitedSupportsFwdAllCan);

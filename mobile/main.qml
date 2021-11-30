@@ -246,7 +246,6 @@ ApplicationWindow {
         }
     }
 
-
     SwipeView {
         id: swipeView
         currentIndex: tabBar.currentIndex
@@ -272,8 +271,6 @@ ApplicationWindow {
             maximumFlickVelocity: 8 * (swipeView.orientation ===
                                        Qt.Horizontal ? width : height)
         }
-
-
 
         Page {
             Loader {
@@ -304,20 +301,15 @@ ApplicationWindow {
         }
 
         Page {
-            Loader {
-                anchors.fill: parent
-                asynchronous: true
-                visible: status == Loader.Ready
-                sourceComponent: PageIndicator {
-                    count: rtSwipeView.count
-                    currentIndex: rtSwipeView.currentIndex
-                    anchors.right: parent.right
-                    width:25
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.verticalCenterOffset: parent.height*0.44
-                    rotation: 90
-                    z:2
-                }
+            PageIndicator {
+                count: rtSwipeView.count
+                currentIndex: rtSwipeView.currentIndex
+                anchors.right: parent.right
+                width:25
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: parent.height*0.4
+                rotation: 90
+                z:2
             }
 
             SwipeView {
@@ -407,11 +399,22 @@ ApplicationWindow {
                             scale: 1.0 / Screen.devicePixelRatio
                             z:1
                         }
-}
+                    }
+                }
 
+                Page {
+                    id: statPage
+                    Loader {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        asynchronous: true
+
+                        sourceComponent: StatPage {
+                            anchors.fill: parent
+                        }
+                    }
                 }
             }
-
         }
 
         Page {
@@ -713,8 +716,6 @@ ApplicationWindow {
         }
     }
 
-
-
     ConnectScreen {
         id: connScreen
         parent: ApplicationWindow.overlay
@@ -748,7 +749,6 @@ ApplicationWindow {
         }
     }
 
-
     Timer {
         id: uiTimer
         interval: 1000
@@ -760,7 +760,6 @@ ApplicationWindow {
             }
         }
     }
-
 
     Timer {
         id: confTimer
@@ -791,11 +790,11 @@ ApplicationWindow {
         repeat: true
 
         onTriggered: {
-            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 3){
+            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 4) {
                 rtSwipeView.addItem(rtDataBalance)
                 rtDataBalance.visible = true
-            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 4){
-                rtSwipeView.removeItem(3)
+            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 5) {
+                rtSwipeView.removeItem(4)
                 rtDataBalance.visible = false
             }
 
@@ -830,6 +829,12 @@ ApplicationWindow {
                     }
 
                     if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 3) {
+                        interval = 100
+                        mCommands.getValuesSetupSelective(0x7E00)
+                        mCommands.getStats(0xFFFFFFFF)
+                    }
+
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 4) {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getDecodedBalance()

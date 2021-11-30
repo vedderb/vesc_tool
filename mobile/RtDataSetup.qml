@@ -725,7 +725,7 @@ Item {
             } else {
                 rangeValLabel.text = "∞"
             }
-            rideTime.text = new Date(values.uptime_ms).toISOString().substr(11, 8);
+            rideTime.text = new Date(values.uptime_ms).toISOString().substr(11, 8)
             odometer.text = parseFloat((values.odometer * impFact) / 1000.0).toFixed(1)
             trip.text = parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(1)
 

@@ -50,60 +50,74 @@ Item {
         y: Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
 
-        ColumnLayout {
+        ScrollView {
             anchors.fill: parent
 
-            CheckBox {
-                id: imperialBox
-                Layout.fillWidth: true
-                text: "Use Imperial Units"
-                checked: VescIf.useImperialUnits()
-            }
+            ColumnLayout {
+                anchors.fill: parent
 
-            CheckBox {
-                id: screenOnBox
-                Layout.fillWidth: true
-                text: "Keep Screen On"
-                checked: VescIf.keepScreenOn()
-                visible: Qt.platform.os !== "ios"
-                enabled: Qt.platform.os !== "ios"
-            }
+                CheckBox {
+                    id: imperialBox
+                    Layout.fillWidth: true
+                    text: "Use Imperial Units"
+                    checked: VescIf.useImperialUnits()
+                }
 
-            CheckBox {
-                id: screenRotBox
-                Layout.fillWidth: true
-                text: "Allow Screen Rotation"
-                checked: VescIf.getAllowScreenRotation()
-                visible: Qt.platform.os !== "ios"
-                enabled: Qt.platform.os !== "ios"
-            }
+                CheckBox {
+                    id: negativeSpeedBox
+                    Layout.fillWidth: true
+                    text: "Use Negative Speed"
+                    checked: VescIf.speedGaugeUseNegativeValues()
+                }
 
-            CheckBox {
-                id: qmlUiBox
-                Layout.fillWidth: true
-                text: "Load QML UI on Connect"
-                checked: VescIf.getLoadQmlUiOnConnect()
-            }
+                CheckBox {
+                    id: screenOnBox
+                    Layout.fillWidth: true
+                    text: "Keep Screen On"
+                    checked: VescIf.keepScreenOn()
+                    visible: Qt.platform.os !== "ios"
+                    enabled: Qt.platform.os !== "ios"
+                }
 
-            CheckBox {
-                id: darkModeBox
-                Layout.fillWidth: true
-                text: "Use Dark Mode"
-                checked: Utility.isDarkMode()
-                onCheckedChanged: {
-                    Utility.setDarkMode(checked)
+                CheckBox {
+                    id: screenRotBox
+                    Layout.fillWidth: true
+                    text: "Allow Screen Rotation"
+                    checked: VescIf.getAllowScreenRotation()
+                    visible: Qt.platform.os !== "ios"
+                    enabled: Qt.platform.os !== "ios"
+                }
+
+                CheckBox {
+                    id: qmlUiBox
+                    Layout.fillWidth: true
+                    text: "Load QML UI on Connect"
+                    checked: VescIf.getLoadQmlUiOnConnect()
+                }
+
+                CheckBox {
+                    id: darkModeBox
+                    Layout.fillWidth: true
+                    text: "Use Dark Mode"
+                    checked: Utility.isDarkMode()
+                    onCheckedChanged: {
+                        Utility.setDarkMode(checked)
+                    }
                 }
             }
+        }
 
-            Item {
-                // Spacer
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-            }
+        onOpened: {
+            imperialBox.checked = VescIf.useImperialUnits()
+            negativeSpeedBox.checked = VescIf.speedGaugeUseNegativeValues()
+            screenOnBox.checked = VescIf.keepScreenOn()
+            screenRotBox.checked = VescIf.getAllowScreenRotation()
+            qmlUiBox.checked = VescIf.getLoadQmlUiOnConnect()
         }
 
         onClosed: {
             VescIf.setUseImperialUnits(imperialBox.checked)
+            VescIf.setSpeedGaugeUseNegativeValues(negativeSpeedBox.checked)
             VescIf.setKeepScreenOn(screenOnBox.checked)
             VescIf.setAllowScreenRotation(screenRotBox.checked)
             VescIf.setLoadQmlUiOnConnect(qmlUiBox.checked)
@@ -118,6 +132,8 @@ Item {
             if (Utility.isDarkMode() !== mLastDarkMode) {
                 darkChangedDialog.open()
             }
+
+            VescIf.commands().emitEmptySetupValues()
         }
     }
 

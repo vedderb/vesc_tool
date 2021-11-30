@@ -48,7 +48,6 @@ Item {
             Layout.column: isHorizontal ? 1 : 0
             Layout.row: 0
             Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
-            Layout.preferredHeight: parent.height*2/3
             spacing: 0
 
             Rectangle {
@@ -351,19 +350,12 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
+            Layout.fillHeight: isHorizontal ? true : false
+            Layout.preferredWidth: isHorizontal ? parent.width / 2 : parent.width
             Layout.column:0
             Layout.row: isHorizontal ? 0 : 1
-            Layout.preferredHeight: asd.implicitHeight
+            Layout.preferredHeight: asd.implicitHeight + asd.anchors.margins * 2
             color: Utility.getAppHexColor("lightBackground")
-            Rectangle {
-                width: parent.width
-                height:10
-                anchors.left: parent.left
-                anchors.top:parent.top
-                color: Utility.getAppHexColor("normalBackground")
-            }
 
             ColumnLayout {
                 id: asd

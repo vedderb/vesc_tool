@@ -172,8 +172,14 @@ Item {
         target: mMcConf
 
         onUpdated: {
-            currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5
-            currentGauge.minimumValue = -currentGauge.maximumValue
+            var currentMaxRound = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5
+
+            if (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7)) {
+                currentGauge.maximumValue = currentMaxRound
+                currentGauge.minimumValue = -currentMaxRound
+            }
+
+            currentGauge.labelStep = Math.ceil(currentMaxRound / 20) * 5
         }
     }
 
@@ -189,7 +195,7 @@ Item {
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var rpmMaxRound = (Math.ceil(rpmMax / 5000.0) * 5000.0) / 1000
 
-            if (Math.abs(rpmGauge.maximumValue - rpmMaxRound) > 6) {
+            if (rpmMaxRound > rpmGauge.maximumValue || rpmMaxRound < (rpmGauge.maximumValue * 0.6)) {
                 rpmGauge.maximumValue = rpmMaxRound
                 rpmGauge.minimumValue = -rpmMaxRound
             }
@@ -201,7 +207,7 @@ Item {
                                     mMcConf.getParamDouble("l_watt_max"))
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
-            if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
+            if (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6)) {
                 powerGauge.maximumValue = powerMaxRound
                 powerGauge.minimumValue = -powerMaxRound
             }

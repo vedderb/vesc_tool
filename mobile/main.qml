@@ -81,6 +81,9 @@ ApplicationWindow {
         Utility.stopGnssForegroundService()
     }
 
+    onHeightChanged: {
+        connScreen.y = (connScreen.y > 1) ? connScreen.height : 0
+    }
 
     SetupWizardIntro {
         id: introWizard
@@ -88,20 +91,17 @@ ApplicationWindow {
         notchTop: appWindow.notchTop
     }
 
-
     Controls {
         id: controls
         parentWidth: appWindow.width
         parentHeight: appWindow.height - footer.height - headerBar.height
     }
 
-
     MultiSettings {
         id: multiSettings
         notchBot: appWindow.notchBot
         notchTop: appWindow.notchTop
     }
-
 
     Loader {
         id: settingsLoader
@@ -125,6 +125,8 @@ ApplicationWindow {
             height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
             y: appWindow.height > appWindow.width ?  headerBar.height : 0
             dragMargin: 20
+            interactive: false
+
             Overlay.modal: Rectangle {
                 color: "#AA000000"
             }
@@ -141,6 +143,7 @@ ApplicationWindow {
         height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
         y: appWindow.height > appWindow.width ?  headerBar.height : 0
         dragMargin: 20
+        interactive: false
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -168,11 +171,13 @@ ApplicationWindow {
                 text: connected ? "Disconnect" : "Connect"
                 flat: true
                 onClicked: {
-                    if(connected) {
+                    if (connected) {
                         VescIf.disconnectPort()
                     } else {
-                        connScreen.open()
+                        connScreen.y = 0
                     }
+
+                    drawer.close()
                 }
             }
 
@@ -288,7 +293,7 @@ ApplicationWindow {
                     }
 
                     onRequestConnect: {
-                        connScreen.open()
+                        connScreen.y = 0
                     }
 
                     onRequestOpenMultiSettings: {
@@ -712,8 +717,24 @@ ApplicationWindow {
 
     ConnectScreen {
         id: connScreen
+        parent: ApplicationWindow.overlay
         notchTop: appWindow.notchTop
-        Component.onCompleted: open()
+        x: 0
+        y: 0
+        height: parent.height
+        width: parent.width
+
+        onYChanged: {
+            if (y < (height * 0.9)) {
+                drawer.interactive = false
+                canDrawerLoader.item.interactive = false
+                drawer.close()
+                canDrawerLoader.item.close()
+            } else {
+                drawer.interactive = true
+                canDrawerLoader.item.interactive = true
+            }
+        }
     }
 
     Timer {
@@ -940,18 +961,18 @@ ApplicationWindow {
         onPortConnectedChanged: {
             connectedText.text = VescIf.getConnectedPortName()
             if (!VescIf.isPortConnected()) {
-                connScreen.open();
                 confTimer.mcConfRx = false
                 confTimer.appConfRx = false
                 connected = false
             } else {
-                connScreen.close();
                 connected = true
             }
 
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
+
+            connScreen.y = VescIf.isPortConnected() ? connScreen.height : 0
         }
 
         onStatusMessage: {

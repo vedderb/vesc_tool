@@ -109,7 +109,7 @@ Item {
                         minimumValue: -10000
                         tickmarkScale: 0.001
                         tickmarkSuffix: "k"
-                        labelStep: 2000
+                        labelStep: maximumValue > 6000 ? 2000 : 1000
                         value: 0
                         unitText: "W"
                         typeText: "Power"
@@ -132,7 +132,6 @@ Item {
                 height:parent.height
                 anchors.centerIn: parent
                 anchors.horizontalCenterOffset: (width/4 - gaugeSize2)/2
-                //anchors.verticalCenterOffset: gaugeSize2*0.1
                 minimumValue: 0
                 maximumValue: 60
                 minAngle: -225
@@ -180,9 +179,14 @@ Item {
                         y: Math.max((parent.height - height) / 2, 10)
                         parent: dialogParent
                         standardButtons: Dialog.Ok | Dialog.Cancel
+
+                        onOpened: {
+                            negSpeedBox.checked = VescIf.speedGaugeUseNegativeValues()
+                        }
+
                         onAccepted: {
-                            var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
-                            mCommands.setOdometer(Math.round(odometerBox.realValue*1000/impFact))
+                            VescIf.setSpeedGaugeUseNegativeValues(negSpeedBox.checked)
+                            mCommands.emitEmptySetupValues()
                         }
 
                         ColumnLayout {
@@ -194,25 +198,47 @@ Item {
                                 Layout.fillHeight: true
                                 clip: true
                                 contentWidth: parent.width
+
                                 ColumnLayout {
                                     anchors.fill: parent
-                                    spacing: 0
+                                    spacing: 10
 
-                                    Text {
-                                        color: {color = Utility.getAppHexColor("lightText")}
-                                        text: "Odometer"
-                                        font.bold: true
-                                        horizontalAlignment: Text.AlignHCenter
+                                    GroupBox {
+                                        title: qsTr("Update Odometer")
                                         Layout.fillWidth: true
-                                        font.pointSize: 12
+
+                                        RowLayout {
+                                            anchors.fill: parent
+
+                                            DoubleSpinBox {
+                                                id: odometerBox
+                                                decimals: 2
+                                                realFrom: 0.0
+                                                realTo: 20000000
+                                                Layout.fillWidth: true
+                                            }
+
+                                            Button {
+                                                text: "Set"
+
+                                                onClicked: {
+                                                    var impFact = VescIf.useImperialUnits() ? 0.621371192 : 1.0
+                                                    mCommands.setOdometer(Math.round(odometerBox.realValue*1000/impFact))
+                                                }
+                                            }
+                                        }
                                     }
 
-                                    DoubleSpinBox {
-                                        id: odometerBox
-                                        decimals: 2
-                                        realFrom: 0.0
-                                        realTo: 20000000
+                                    GroupBox {
+                                        title: qsTr("Settings")
                                         Layout.fillWidth: true
+
+                                        CheckBox {
+                                            id: negSpeedBox
+                                            anchors.fill: parent
+                                            text: "Use Negative Speed"
+                                            checked: VescIf.speedGaugeUseNegativeValues()
+                                        }
                                     }
                                 }
                             }
@@ -633,15 +659,22 @@ Item {
         }
 
         onValuesSetupReceived: {
-            currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
-            currentGauge.minimumValue = -currentGauge.maximumValue
-            currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 20) * 5
+            var currentMaxRound = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
+
+            if (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7)) {
+                currentGauge.maximumValue = currentMaxRound
+                currentGauge.minimumValue = -currentMaxRound
+            }
+
+            currentGauge.labelStep = Math.ceil(currentMaxRound / 20) * 5
 
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
             batteryGauge.value = values.battery_level * 100.0
 
             var useImperial = VescIf.useImperialUnits()
+            var useNegativeSpeedValues = VescIf.speedGaugeUseNegativeValues()
+
             var fl = mMcConf.getParamDouble("foc_motor_flux_linkage")
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var speedFact = ((mMcConf.getParamInt("si_motor_poles") / 2.0) * 60.0 *
@@ -649,18 +682,20 @@ Item {
                     (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
             var speedMax = 3.6 * rpmMax / speedFact
             var impFact = useImperial ? 0.621371192 : 1.0
-            var speedMaxRound = (Math.ceil((speedMax * impFact) / 10.0) * 10.0)
+            var speedMaxRound = Math.ceil((speedMax * impFact) / 10.0) * 10.0
 
             var dist = values.tachometer_abs / 1000.0
             var wh_consume = values.watt_hours - values.watt_hours_charged
             var wh_km_total = wh_consume / Math.max(dist , 1e-10)
 
-            if (Math.abs(speedGauge.maximumValue - speedMaxRound) > 6.0) {
+            if (speedMaxRound > speedGauge.maximumValue || speedMaxRound < (speedGauge.maximumValue * 0.6) ||
+                    useNegativeSpeedValues !== speedGauge.minimumValue < 0) {
                 speedGauge.maximumValue = speedMaxRound
-                speedGauge.minimumValue = -speedMaxRound
+                speedGauge.minimumValue = useNegativeSpeedValues ? -speedMaxRound : 0
             }
 
-            speedGauge.value = values.speed * 3.6 * impFact
+            var speedNow = values.speed * 3.6 * impFact
+            speedGauge.value = useNegativeSpeedValues ? speedNow : Math.abs(speedNow)
             speedGauge.unitText = useImperial ? "mph" : "km/h"
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
@@ -668,7 +703,7 @@ Item {
                                     mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
-            if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
+            if (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6)) {
                 powerGauge.maximumValue = powerMaxRound
                 powerGauge.minimumValue = -powerMaxRound
             }

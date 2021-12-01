@@ -25,32 +25,19 @@ import Vedder.vesc.bleuart 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.utility 1.0
 
-Drawer {
+Item {
     id: rootItem
-    width: appWindow.width
-    height: appWindow.height
-    position: 1.0
-    interactive: false
-    edge: Qt.BottomEdge
-    Overlay.modal: Rectangle {
-        color: "#AA000000"
-    }
-    property int animationSpeed: 50
-
-    Behavior on position {
-        NumberAnimation {
-            duration: animationSpeed
-            easing.type: Easing.InOutSine
-        }
-    }
-
+    property int animationDuration: 500
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
     property int notchTop: 0
-    onClosed: enableDialog()
 
-    enter: Transition { SmoothedAnimation { velocity: 3 } }
-    exit: Transition { SmoothedAnimation { velocity: 3 } }
+    Behavior on y {
+        NumberAnimation {
+            duration: animationDuration
+            easing.type: Easing.InOutSine
+        }
+    }
 
     Rectangle {
         color: Utility.getAppHexColor("darkBackground")
@@ -60,6 +47,12 @@ Drawer {
     Component.onCompleted: {
         mBle.startScan()
         scanDotTimer.running = true
+    }
+
+    onYChanged: {
+        if (y > 1) {
+            enableDialog()
+        }
     }
 
     ColumnLayout {
@@ -80,22 +73,24 @@ Drawer {
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
             Layout.bottomMargin: 0
             source: "qrc" + Utility.getThemePath() + "/logo.png"
-            MouseArea {
-                anchors.fill: parent
-                property real yLast: 0
-                onPressed: {
-                    yLast = mouseY
-                    animationSpeed = 0
-                }
-                onMouseYChanged: {
-                    rootItem.position = rootItem.position - (mouseY - yLast)/rootItem.height
-                }
-                onReleased: {
-                    animationSpeed = 50
-                    if(rootItem.position > 0.9) {
-                        rootItem.position = 1
-                    }else{
-                        rootItem.close()
+            DragHandler {
+                id: handler
+                target: rootItem
+                margin: 0
+                xAxis.enabled: false
+                yAxis.maximum: rootItem.height
+                yAxis.minimum: 0
+
+                onActiveChanged: {
+                    if (handler.active) {
+                        animationDuration = 3
+                    } else {
+                        animationDuration = 500
+                        if (rootItem.y > (rootItem.height / 4)) {
+                            rootItem.y = rootItem.height
+                        } else {
+                            rootItem.y = 0
+                        }
                     }
                 }
             }
@@ -108,7 +103,7 @@ Drawer {
                 Layout.preferredWidth: 120
                 flat: true
                 onClicked: {
-                    rootItem.close()
+                    rootItem.y = rootItem.height
                 }
             }
 
@@ -165,25 +160,6 @@ Drawer {
         }
 
         ListView {
-            // transitions for insertion/deletation of elements
-            add: Transition {
-                NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 200 }
-                NumberAnimation { property: "scale"; easing.type: Easing.OutExpo; from: 0; to: 1.0; duration: 300 }
-            }
-
-            addDisplaced: Transition {
-                NumberAnimation { properties: "y"; duration: 300; easing.type: Easing.InOutBack }
-            }
-
-            remove: Transition {
-                NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 100 }
-                NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 200 }
-            }
-
-            removeDisplaced: Transition {
-                NumberAnimation { properties: "x,y"; duration: 300; easing.type: Easing.InExpo }
-            }
-
             id: bleList
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -196,14 +172,6 @@ Drawer {
                 id: bleDelegate
 
                 Rectangle {
-                    //Component.onCompleted: showAnim.start();
-                    //transform: Rotation { id:rt; origin.x: 0; origin.y: height; axis { x: 0.3; y: 1; z: 0 } angle: 0}//     <--- I like this one more!
-                    //SequentialAnimation {
-                    //    id: showAnim
-                    //    running: false
-                    //    RotationAnimation { target: rt; from: 180; to: 0; duration: 800; easing.type: Easing.OutExpo; property: "angle" }
-                    //}
-
                     width: bleList.width
                     height: 120
                     color: Utility.getAppHexColor("normalBackground")
@@ -262,6 +230,7 @@ Drawer {
                                 checked: preferred
                                 onToggled: {
                                     VescIf.storeBlePreferred(bleAddr, checked)
+                                    bleModel.clear()
                                     mBle.emitScanDone()
                                 }
                             }
@@ -393,7 +362,6 @@ Drawer {
                                     "bleAddr": "",
                                     "isSerial": true})
             }
-            enableDialog()
         }
 
         onBleError: {
@@ -473,6 +441,7 @@ Drawer {
         onAccepted: {
             VescIf.storeBleName(addr, stringInput.text)
             VescIf.storeSettings()
+            bleModel.clear()
             mBle.emitScanDone()
         }
     }
@@ -504,6 +473,7 @@ Drawer {
 
         onAccepted: {
             VescIf.storeBlePreferred(bleAddr, true)
+            bleModel.clear()
             mBle.emitScanDone()
             disableDialog()
             VescIf.connectBle(bleAddr)

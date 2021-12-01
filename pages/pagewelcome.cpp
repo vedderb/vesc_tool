@@ -45,7 +45,7 @@ PageWelcome::PageWelcome(QWidget *parent) :
     ui->invertDirButton->setIcon(QIcon(theme + "icons/Process-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
     ui->bgWidget->setPixmap(QPixmap("://res/bg.png"));
 
     connect(ui->wizardFocSimpleButton, &QPushButton::clicked, [this]() {

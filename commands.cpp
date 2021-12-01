@@ -2216,3 +2216,10 @@ void Commands::emitEmptySetupValues()
 
     emit valuesSetupReceived(values, 0xFFFFFFFF);
 }
+
+void Commands::emitEmptyStats()
+{
+    STAT_VALUES stat;
+
+    emit statsRx(stat, 0xFFFFFFFF);
+}

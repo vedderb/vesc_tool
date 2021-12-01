@@ -81,6 +81,9 @@ ApplicationWindow {
         Utility.stopGnssForegroundService()
     }
 
+    onHeightChanged: {
+        connScreen.y = (connScreen.y > 1) ? connScreen.height : 0
+    }
 
     SetupWizardIntro {
         id: introWizard
@@ -88,20 +91,17 @@ ApplicationWindow {
         notchTop: appWindow.notchTop
     }
 
-
     Controls {
         id: controls
         parentWidth: appWindow.width
         parentHeight: appWindow.height - footer.height - headerBar.height
     }
 
-
     MultiSettings {
         id: multiSettings
         notchBot: appWindow.notchBot
         notchTop: appWindow.notchTop
     }
-
 
     Loader {
         id: settingsLoader
@@ -125,6 +125,8 @@ ApplicationWindow {
             height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
             y: appWindow.height > appWindow.width ?  headerBar.height : 0
             dragMargin: 20
+            interactive: false
+
             Overlay.modal: Rectangle {
                 color: "#AA000000"
             }
@@ -141,6 +143,7 @@ ApplicationWindow {
         height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
         y: appWindow.height > appWindow.width ?  headerBar.height : 0
         dragMargin: 20
+        interactive: false
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -168,11 +171,13 @@ ApplicationWindow {
                 text: connected ? "Disconnect" : "Connect"
                 flat: true
                 onClicked: {
-                    if(connected) {
+                    if (connected) {
                         VescIf.disconnectPort()
                     } else {
-                        connScreen.open()
+                        connScreen.y = 0
                     }
+
+                    drawer.close()
                 }
             }
 
@@ -241,7 +246,6 @@ ApplicationWindow {
         }
     }
 
-
     SwipeView {
         id: swipeView
         currentIndex: tabBar.currentIndex
@@ -268,8 +272,6 @@ ApplicationWindow {
                                        Qt.Horizontal ? width : height)
         }
 
-
-
         Page {
             Loader {
                 anchors.fill: parent
@@ -288,7 +290,7 @@ ApplicationWindow {
                     }
 
                     onRequestConnect: {
-                        connScreen.open()
+                        connScreen.y = 0
                     }
 
                     onRequestOpenMultiSettings: {
@@ -299,20 +301,15 @@ ApplicationWindow {
         }
 
         Page {
-            Loader {
-                anchors.fill: parent
-                asynchronous: true
-                visible: status == Loader.Ready
-                sourceComponent: PageIndicator {
-                    count: rtSwipeView.count
-                    currentIndex: rtSwipeView.currentIndex
-                    anchors.right: parent.right
-                    width:25
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.verticalCenterOffset: parent.height*0.44
-                    rotation: 90
-                    z:2
-                }
+            PageIndicator {
+                count: rtSwipeView.count
+                currentIndex: rtSwipeView.currentIndex
+                anchors.right: parent.right
+                width:25
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: parent.height*0.4
+                rotation: 90
+                z:2
             }
 
             SwipeView {
@@ -402,11 +399,22 @@ ApplicationWindow {
                             scale: 1.0 / Screen.devicePixelRatio
                             z:1
                         }
-}
+                    }
+                }
 
+                Page {
+                    id: statPage
+                    Loader {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        asynchronous: true
+
+                        sourceComponent: StatPage {
+                            anchors.fill: parent
+                        }
+                    }
                 }
             }
-
         }
 
         Page {
@@ -708,12 +716,26 @@ ApplicationWindow {
         }
     }
 
-
-
     ConnectScreen {
         id: connScreen
+        parent: ApplicationWindow.overlay
         notchTop: appWindow.notchTop
-        Component.onCompleted: open()
+        x: 0
+        y: 0
+        height: parent.height
+        width: parent.width
+
+        onYChanged: {
+            if (y < (height * 0.9)) {
+                drawer.interactive = false
+                canDrawerLoader.item.interactive = false
+                drawer.close()
+                canDrawerLoader.item.close()
+            } else {
+                drawer.interactive = true
+                canDrawerLoader.item.interactive = true
+            }
+        }
     }
 
     Timer {
@@ -727,7 +749,6 @@ ApplicationWindow {
         }
     }
 
-
     Timer {
         id: uiTimer
         interval: 1000
@@ -739,7 +760,6 @@ ApplicationWindow {
             }
         }
     }
-
 
     Timer {
         id: confTimer
@@ -770,11 +790,11 @@ ApplicationWindow {
         repeat: true
 
         onTriggered: {
-            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 3){
+            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 4) {
                 rtSwipeView.addItem(rtDataBalance)
                 rtDataBalance.visible = true
-            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 4){
-                rtSwipeView.removeItem(3)
+            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 5) {
+                rtSwipeView.removeItem(4)
                 rtDataBalance.visible = false
             }
 
@@ -809,6 +829,12 @@ ApplicationWindow {
                     }
 
                     if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 3) {
+                        interval = 100
+                        mCommands.getValuesSetupSelective(0x7E00)
+                        mCommands.getStats(0xFFFFFFFF)
+                    }
+
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 4) {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getDecodedBalance()
@@ -940,18 +966,18 @@ ApplicationWindow {
         onPortConnectedChanged: {
             connectedText.text = VescIf.getConnectedPortName()
             if (!VescIf.isPortConnected()) {
-                connScreen.open();
                 confTimer.mcConfRx = false
                 confTimer.appConfRx = false
                 connected = false
             } else {
-                connScreen.close();
                 connected = true
             }
 
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
+
+            connScreen.y = VescIf.isPortConnected() ? connScreen.height : 0
         }
 
         onStatusMessage: {

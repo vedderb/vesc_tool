@@ -476,7 +476,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mTimer->start(20);
 
     mPollRtTimer.start(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
-    mPollAppTimer.start(int(1000.0 / mSettings.value("poll_rate_app_data", 20).toDouble()));
+    mPollAppTimer.start(int(1000.0 / mSettings.value("poll_rate_app_data", 50).toDouble()));
     mPollImuTimer.start(int(1000.0 / mSettings.value("poll_rate_imu_data", 50).toDouble()));
     mPollBmsTimer.start(int(1000.0 / mSettings.value("poll_rate_bms_data", 10).toDouble()));
 
@@ -484,6 +484,7 @@ MainWindow::MainWindow(QWidget *parent) :
         if (ui->actionRtData->isChecked()) {
             mVesc->commands()->getValues();
             mVesc->commands()->getValuesSetup();
+            mVesc->commands()->getStats(0xFFFFFFFF);
             mPollRtTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
         }
     });
@@ -494,7 +495,7 @@ MainWindow::MainWindow(QWidget *parent) :
             mVesc->commands()->getDecodedChuk();
             mVesc->commands()->getDecodedPpm();
             mVesc->commands()->getDecodedBalance();
-            mPollAppTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_app_data", 20).toDouble()));
+            mPollAppTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_app_data", 50).toDouble()));
         }
     });
 

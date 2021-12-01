@@ -139,6 +139,7 @@ Item {
 //            val.distance() // Meters
 //            val.energy() // Wh
 //            val.efficiency() // Wh / km
+//            val.ah()
         }
     }
 }

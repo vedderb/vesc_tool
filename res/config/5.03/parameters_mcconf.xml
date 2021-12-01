@@ -1277,10 +1277,10 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;HFI&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;High Frequency Injection. Track the position down to 0 speed by injecting voltage pulses and analyzing the response of the motor. Works on most motors that have enough difference in D-axis and Q-axis inductance.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Vedder Sensorless Start&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use HFI just after starting the motor to resolve the initial position and set the observer state to that position. This can help the observer track the motor correctly from 0 speed. As this also is based on saturation it can help start some motors with low saliency.&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;VSS&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vedder Sensorless Start. Use HFI just after starting the motor to resolve the initial position and set the observer state to that position. This can help the observer track the motor correctly from 0 speed. As this also is based on saturation it can help start some motors with low saliency.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NOTE:&lt;/span&gt; HFI and Vedder Sensorless Start only work when the FOC switching frequency is below 30 KHz. &lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NOTE:&lt;/span&gt; HFI and VSS only work when the FOC switching frequency is at or below 30 KHz. &lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_SENSOR_MODE</cDefine>
             <valInt>0</valInt>
@@ -1288,7 +1288,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>Encoder</enumNames>
             <enumNames>Hall Sensors</enumNames>
             <enumNames>HFI</enumNames>
-            <enumNames>Vedder Sensorless Start</enumNames>
+            <enumNames>VSS</enumNames>
         </foc_sensor_mode>
         <foc_pll_kp>
             <longName>Speed Tracker Kp</longName>
@@ -4305,6 +4305,15 @@ p, li { white-space: pre-wrap; }
                     <param>foc_sl_erpm_hfi</param>
                     <param>foc_hfi_start_samples</param>
                     <param>foc_hfi_obs_ovr_sec</param>
+                </subgroupParams>
+            </subgroup>
+            <subgroup>
+                <subgroupName>VSS</subgroupName>
+                <subgroupParams>
+                    <param>foc_hfi_samples</param>
+                    <param>foc_hfi_voltage_start</param>
+                    <param>foc_hfi_start_samples</param>
+                    <param>foc_openloop_rpm</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

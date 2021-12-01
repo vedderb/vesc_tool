@@ -61,15 +61,11 @@ void Vesc3dItem::paint(QPainter *painter)
 
 void Vesc3dItem::updateImage()
 {
-    if(qApp->applicationState() == Qt::ApplicationState::ApplicationActive)
-    {
+    if (qApp->applicationState() == Qt::ApplicationState::ApplicationActive) {
         double scale = 1.0;
 
         if (mVesc3d.size() != size().toSize()) {
             mVesc3d.resize(size().toSize() * scale);
-            //mLastCornerImg = mVesc3d.grabFramebuffer();
-           //  The render seems to be needed after a resize
-            qDebug() << "resizing";
             mVesc3d.render(&mLastCornerImg, QPoint(), QRegion(), nullptr);
         }
 

@@ -54,5 +54,6 @@
         <file>TcpBox.qml</file>
         <file>MultiSettings.qml</file>
         <file>CanScreen.qml</file>
+        <file>StatPage.qml</file>
     </qresource>
 </RCC>

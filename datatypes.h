@@ -444,6 +444,10 @@ public:
         return power_avg * count_time / 60.0 / 60.0;
     }
 
+    Q_INVOKABLE double ah() {
+        return current_avg * count_time / 60.0 / 60.0;
+    }
+
     Q_INVOKABLE double efficiency() { // Wh / km
         return energy() / (distance() / 1000.0);
     }

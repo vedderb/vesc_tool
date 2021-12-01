@@ -73,7 +73,9 @@ Item {
                 Button {
                     text: "Reset"
                     Layout.fillWidth: true
-                    onClicked: mCommands.getStats(0xFFFFFFFF)
+                    onClicked: {
+                        mCommands.resetStats(false)
+                    }
                 }
             }
         }

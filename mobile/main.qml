@@ -81,10 +81,6 @@ ApplicationWindow {
         Utility.stopGnssForegroundService()
     }
 
-//    onHeightChanged: {
-//        connScreen.y = (!opened) ? connScreen.height : 0
-//    }
-
     SetupWizardIntro {
         id: introWizard
     }

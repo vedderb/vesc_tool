@@ -502,7 +502,7 @@ void PageSampledData::samplesReceived(QByteArray bytes)
     tmpVZeroVector.append(vb.vbPopFrontDouble32Auto());
     tmpCurrTotVector.append(vb.vbPopFrontDouble32Auto());
     tmpFSwVector.append(vb.vbPopFrontDouble32Auto());
-    tmpFrfDVector.append(vb.vbPopFrontDouble32Auto());
+    tmpFrfVector.append(vb.vbPopFrontDouble32Auto());
     tmpStatusArray.append(vb.vbPopFrontInt8());
     tmpPhaseArray.append(vb.vbPopFrontInt8());
 
@@ -518,7 +518,7 @@ void PageSampledData::samplesReceived(QByteArray bytes)
         vZeroVector = tmpVZeroVector;
         currTotVector = tmpCurrTotVector;
         fSwVector = tmpFSwVector;
-        frfDVector = tmpFrfDVector;
+        frfVector = tmpFrfVector;
         statusArray = tmpStatusArray;
         phaseArray = tmpPhaseArray;
 
@@ -650,7 +650,7 @@ void PageSampledData::clearBuffers()
     tmpVZeroVector.clear();
     tmpCurrTotVector.clear();
     tmpFSwVector.clear();
-    tmpFrfDVector.clear();
+    tmpFrfVector.clear();
     tmpStatusArray.clear();
     tmpPhaseArray.clear();
 }
@@ -727,7 +727,7 @@ void PageSampledData::on_saveDataButton_clicked()
             stream << ph3Vector.at(i) << ";";
             stream << currTotVector.at(i) << ";";
             stream << vZeroVector.at(i) << ";";
-            stream << frfDVector.at(i) << ";";
+            stream << frfVector.at(i) << ";";
             stream << (double)((quint8)phaseArray.at(i)) / 250.0 * 360.0 << ";";
             stream << ((quint8)statusArray.at(i) >> 7) << ";";
 

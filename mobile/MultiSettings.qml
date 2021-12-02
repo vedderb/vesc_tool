@@ -66,6 +66,8 @@ Item {
         y: 10 + notchTop
         topPadding: 5
         bottomPadding: 0
+        leftMargin: 5
+        rightMargin: 5
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -118,9 +120,12 @@ Item {
             paramListBms.addEditorMc("bms.soc_limit_end")
         }
 
-        ColumnLayout {
+        contentItem: ColumnLayout {
             anchors.fill: parent
             spacing: 0
+            anchors.margins: 10
+            anchors.topMargin: tabBar.height + 10
+            anchors.bottomMargin: 5
 
             SwipeView {
                 id: swipeView

@@ -29,6 +29,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
 
+
     ParamEditors {
         id: editors
     }
@@ -61,9 +62,9 @@ Item {
             color: "#AA000000"
         }
 
-        width: parent.width - 10
+        width: parent.width - 10 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
-        x: 5
+        x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         parent: ApplicationWindow.overlay
 
@@ -183,6 +184,7 @@ Item {
             }
 
             Button {
+                id: menuButton
                 Layout.preferredWidth: 50
                 Layout.fillWidth: true
                 text: "..."
@@ -190,7 +192,14 @@ Item {
 
                 Menu {
                     id: menu
-                    width: 500
+                    bottomPadding: notchBot
+                    leftPadding: notchLeft
+                    rightPadding: notchRight
+                    parent: Overlay.overlay
+                    y: parent.height - implicitHeight
+                    width: parent.width
+
+
 
                     MenuItem {
                         text: "Read Default Settings"

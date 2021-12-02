@@ -87,8 +87,6 @@ ApplicationWindow {
 
     SetupWizardIntro {
         id: introWizard
-        notchBot: appWindow.notchBot
-        notchTop: appWindow.notchTop
     }
 
     Controls {
@@ -99,8 +97,6 @@ ApplicationWindow {
 
     MultiSettings {
         id: multiSettings
-        notchBot: appWindow.notchBot
-        notchTop: appWindow.notchTop
     }
 
     Loader {
@@ -282,8 +278,6 @@ ApplicationWindow {
                     anchors.fill: parent
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
-                    notchBot: appWindow.notchBot
-                    notchTop: appWindow.notchTop
 
                     onRequestOpenControls: {
                         controls.openDialog()
@@ -719,7 +713,6 @@ ApplicationWindow {
     ConnectScreen {
         id: connScreen
         parent: ApplicationWindow.overlay
-        notchTop: appWindow.notchTop
         x: 0
         y: 0
         height: parent.height
@@ -859,7 +852,7 @@ ApplicationWindow {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
         x: (parent.width - width) / 2
         y: (parent.height - height + notchTop) / 2

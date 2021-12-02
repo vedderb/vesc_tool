@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -80,7 +80,12 @@ Item {
 
                 Menu {
                     id: menu
-                    width: 500
+                    bottomPadding: notchBot
+                    leftPadding: notchLeft
+                    rightPadding: notchRight
+                    parent: Overlay.overlay
+                    y: parent.height - implicitHeight
+                    width: parent.width
 
                     MenuItem {
                         text: "Print Faults"

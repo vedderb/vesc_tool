@@ -31,7 +31,6 @@ Item {
 
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
-    property int notchTop: 0
     property int animationSpeed: 500
 
     Component.onCompleted: {

@@ -60,6 +60,8 @@ Item {
     ColumnLayout {
         id: column
         anchors.fill: parent
+        anchors.leftMargin: notchLeft
+        anchors.rightMargin: notchRight
 
         Text {
             id: text

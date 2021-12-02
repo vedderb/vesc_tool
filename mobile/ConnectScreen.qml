@@ -30,7 +30,6 @@ Item {
     property int animationDuration: 500
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
-    property int notchTop: 0
 
     Behavior on y {
         NumberAnimation {
@@ -59,6 +58,8 @@ Item {
         id: column
         anchors.fill: parent
         anchors.margins: 10
+        anchors.leftMargin: notchLeft
+        anchors.rightMargin: notchRight
         Rectangle{
             Layout.preferredHeight: notchTop
             Layout.fillWidth: true
@@ -391,8 +392,8 @@ Item {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
-        x: 10
+        width: parent.width - 20 - notchLeft - notchRight
+        x: parent.width/2 - width/2
         y: parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
         ProgressBar {
@@ -414,10 +415,10 @@ Item {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         height: 200
         closePolicy: Popup.CloseOnEscape
-        x: 10
+        x: parent.width/2 - width/2
         y: Math.max(parent.height / 4 - height / 2, 20)
         parent: ApplicationWindow.overlay
 
@@ -457,6 +458,8 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Preferred BLE Devices"
         y: 10 + parent.height / 2 - height / 2
+        x: parent.width/2 - width/2
+        width: parent.width - 20 - notchLeft - notchRight
         parent: ApplicationWindow.overlay
         Overlay.modal: Rectangle {
             color: "#AA000000"

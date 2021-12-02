@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -257,8 +257,8 @@ Item {
             }
 
             RowLayout {
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
+                Layout.leftMargin: 10 + notchLeft
+                Layout.rightMargin: 10 + notchRight
                 Layout.fillWidth: true
 
                 Item {
@@ -275,7 +275,12 @@ Item {
 
                     Menu {
                         id: menu
-                        width: 500
+                        bottomPadding: notchBot
+                        leftPadding: notchLeft
+                        rightPadding: notchRight
+                        parent: Overlay.overlay
+                        y: parent.height - implicitHeight
+                        width: parent.width
 
                         MenuItem {
                             text: "Balance On"

@@ -44,11 +44,11 @@ Item {
         standardButtons: Dialog.Close
         modal: false
         focus: true
-        width: parentWidth - 40
-        height: parentHeight - 40
+        width: parentWidth - 40 - notchLeft - notchRight
+        height: parentHeight - 40 - notchBot - notchTop
         closePolicy: Popup.CloseOnEscape
-        x: 20
-        y: 10
+        x: (parentWidth - width)/2
+        y: (parentHeight - height)/2
         background.opacity: opacitySlider.value
 
         ColumnLayout {

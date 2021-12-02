@@ -29,9 +29,6 @@ import Vedder.vesc.utility 1.0
 Item {
     property var dialogParent: ApplicationWindow.overlay
 
-    property int notchTop: 0
-    property int notchBot: 0
-
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
@@ -60,14 +57,15 @@ Item {
     Dialog {
         id: dialog
         parent: dialogParent
-        standardButtons: Dialog.Close
         modal: true
         focus: true
-        width: parent.width - 40
+        width: parent.width - 40 - notchLeft - notchRight
         height: parent.height - 40 - notchBot - notchTop
         closePolicy: Popup.CloseOnEscape
-        x: 20
+        x: 20 + (notchLeft + notchRight)/2
         y: 10 + notchTop
+        topPadding: 5
+        bottomPadding: 0
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -122,6 +120,7 @@ Item {
 
         ColumnLayout {
             anchors.fill: parent
+            spacing: 0
 
             SwipeView {
                 id: swipeView
@@ -169,14 +168,23 @@ Item {
                             }
                         }
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Write General to All VESCs"
+                        RowLayout {
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Write General to All VESCs"
 
-                            onClicked: {
-                                disableDialog("Writing Parameters...")
-                                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListGeneral.getParamNames())
-                                enableDialog()
+                                onClicked: {
+                                    disableDialog("Writing Parameters...")
+                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListGeneral.getParamNames())
+                                    enableDialog()
+                                }
+                            }
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Close"
+                                onClicked: {
+                                    dialog.close()
+                                }
                             }
                         }
                     }
@@ -201,15 +209,23 @@ Item {
                                 anchors.fill: parent
                             }
                         }
+                        RowLayout {
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Write Limits to All VESCs"
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Write Limits to All VESCs"
-
-                            onClicked: {
-                                disableDialog("Writing Parameters...")
-                                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListLimits.getParamNames())
-                                enableDialog()
+                                onClicked: {
+                                    disableDialog("Writing Parameters...")
+                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListLimits.getParamNames())
+                                    enableDialog()
+                                }
+                            }
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Close"
+                                onClicked: {
+                                    dialog.close()
+                                }
                             }
                         }
                     }
@@ -267,15 +283,23 @@ Item {
                                 }
                             }
                         }
+                        RowLayout {
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Write FOC to All VESCs"
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Write FOC to All VESCs"
-
-                            onClicked: {
-                                disableDialog("Writing Parameters...")
-                                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListFoc.getParamNames())
-                                enableDialog()
+                                onClicked: {
+                                    disableDialog("Writing Parameters...")
+                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListFoc.getParamNames())
+                                    enableDialog()
+                                }
+                            }
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Close"
+                                onClicked: {
+                                    dialog.close()
+                                }
                             }
                         }
                     }
@@ -300,15 +324,23 @@ Item {
                                 anchors.fill: parent
                             }
                         }
+                        RowLayout {
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Write BMS to All VESCs"
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Write BMS to All VESCs"
-
-                            onClicked: {
-                                disableDialog("Writing Parameters...")
-                                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListBms.getParamNames())
-                                enableDialog()
+                                onClicked: {
+                                    disableDialog("Writing Parameters...")
+                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListBms.getParamNames())
+                                    enableDialog()
+                                }
+                            }
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Close"
+                                onClicked: {
+                                    dialog.close()
+                                }
                             }
                         }
                     }
@@ -369,8 +401,8 @@ Item {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
-        x: 10
+        width: parent.width - 20 - notchLeft - notchRight
+        x: 10 + (notchLeft + notchRight)/2
         y: parent.height / 2 - height / 2
         parent: dialogParent
 

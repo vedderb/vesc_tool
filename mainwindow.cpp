@@ -574,7 +574,6 @@ bool MainWindow::eventFilter(QObject *object, QEvent *e)
     if (            QString(qApp->focusWidget()->metaObject()->className()).contains("edit",Qt::CaseInsensitive) ||
                     QString(qApp->focusWidget()->metaObject()->className()).contains("spin",Qt::CaseInsensitive)) {
         ui->actionKeyboardControl->setDisabled(true);
-        ui->actionKeyboardControl->setCheckable(true);
         return false;
     }
     ui->actionKeyboardControl->setEnabled(true);

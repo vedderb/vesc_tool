@@ -30,6 +30,16 @@ Item {
     property int animationDuration: 500
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
+    property bool opened: true
+
+    onOpenedChanged: {
+        if(opened){
+            animationDuration = 500
+            y = 0
+        } else {
+            y = Qt.binding(function() {return parent.height})
+        }
+    }
 
     Behavior on y {
         NumberAnimation {
@@ -59,6 +69,9 @@ Item {
     onYChanged: {
         if (y > 1) {
             enableDialog()
+        }
+        if(!opened & y == height){
+            animationDuration = 0
         }
     }
 
@@ -96,10 +109,12 @@ Item {
                         animationDuration = 3
                     } else {
                         animationDuration = 500
-                        if (rootItem.y > (rootItem.height / 4)) {
-                            rootItem.y = rootItem.height
-                        } else {
-                            rootItem.y = 0
+                        if(opened) {
+                            if (rootItem.y > (rootItem.height / 4)) {
+                                rootItem.opened = false
+                            } else {
+                                rootItem.y = 0
+                            }
                         }
                     }
                 }
@@ -113,7 +128,7 @@ Item {
                 Layout.preferredWidth: 120
                 flat: true
                 onClicked: {
-                    rootItem.y = rootItem.height
+                    rootItem.opened = false
                 }
             }
 

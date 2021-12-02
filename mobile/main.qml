@@ -710,23 +710,30 @@ ApplicationWindow {
         }
     }
 
-    ConnectScreen {
-        id: connScreen
+    Rectangle {
         parent: ApplicationWindow.overlay
-        x: 0
-        y: 0
-        height: parent.height
-        width: parent.width
+        anchors.fill: parent
+        color: "black"
 
-        onYChanged: {
-            if (y < (height * 0.9)) {
-                drawer.interactive = false
-                canDrawerLoader.item.interactive = false
-                drawer.close()
-                canDrawerLoader.item.close()
-            } else {
-                drawer.interactive = true
-                canDrawerLoader.item.interactive = true
+        ConnectScreen {
+            id: connScreen
+            x: 0
+            y: 0
+            height: parent.height
+            width: parent.width
+
+            onYChanged: {
+                parent.color.a = Math.min(1, Math.max(1 - y / height, 0))
+
+                if (y < (height * 0.9)) {
+                    drawer.interactive = false
+                    canDrawerLoader.item.interactive = false
+                    drawer.close()
+                    canDrawerLoader.item.close()
+                } else {
+                    drawer.interactive = true
+                    canDrawerLoader.item.interactive = true
+                }
             }
         }
     }

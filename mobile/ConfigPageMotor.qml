@@ -26,6 +26,7 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
 Item {
+    id: confPageMotorItem
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
 
@@ -195,7 +196,7 @@ Item {
                     bottomPadding: notchBot
                     leftPadding: notchLeft
                     rightPadding: notchRight
-                    parent: Overlay.overlay
+                    parent: confPageMotorItem
                     y: parent.height - implicitHeight
                     width: parent.width
 

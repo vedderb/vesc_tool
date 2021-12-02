@@ -26,6 +26,7 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    id: bmsPageItem
     property Commands mCommands: VescIf.commands()
     property var mVal
     property bool mValSet: false
@@ -278,7 +279,7 @@ Item {
                         bottomPadding: notchBot
                         leftPadding: notchLeft
                         rightPadding: notchRight
-                        parent: Overlay.overlay
+                        parent: bmsPageItem
                         y: parent.height - implicitHeight
                         width: parent.width
 

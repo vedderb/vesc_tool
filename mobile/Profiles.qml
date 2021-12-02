@@ -165,7 +165,7 @@ Item {
                     bottomPadding: notchBot
                     leftPadding: notchLeft
                     rightPadding: notchRight
-                    parent: Overlay.overlay
+                    parent: topItem
                     y: parent.height - implicitHeight
                     width: parent.width
 

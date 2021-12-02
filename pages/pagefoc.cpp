@@ -61,6 +61,7 @@ void PageFoc::reloadParams()
         ui->hallTab->clearParams();
         ui->encoderTab->clearParams();
         ui->hfiTab->clearParams();
+        ui->prbsTab->clearParams();
         ui->filterTab->clearParams();
         ui->offsetTab->clearParams();
         ui->fwTab->clearParams();
@@ -72,6 +73,7 @@ void PageFoc::reloadParams()
         ui->encoderTab->addParamSubgroup(mVesc->mcConfig(), "foc", "encoder");
         ui->hfiTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hfi");
         ui->vssTab->addParamSubgroup(mVesc->mcConfig(), "foc", "vss");
+        ui->prbsTab->addParamSubgroup(mVesc->mcConfig(), "foc", "prbs");
         ui->filterTab->addParamSubgroup(mVesc->mcConfig(), "foc", "filters");
         ui->offsetTab->addParamSubgroup(mVesc->mcConfig(), "foc", "offsets");
         ui->fwTab->addParamSubgroup(mVesc->mcConfig(), "foc", "field weakening");

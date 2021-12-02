@@ -150,6 +150,16 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_prbs">
+      <attribute name="title">
+       <string>PRBS</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_prbs">
+       <item>
+        <widget class="ParamTable" name="prbsTab"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab_8">
       <attribute name="title">
        <string>Filters</string>

@@ -2202,6 +2202,66 @@ p, li { white-space: pre-wrap; }
             <enumNames>16</enumNames>
             <enumNames>32</enumNames>
         </foc_hfi_samples>
+
+        <foc_prbs_voltage>
+            <longName>Perturbation Voltage</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>ZAAAAP</description>
+            <cDefine>MCCONF_FOC_PRBS_VOLTAGE</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>700</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>3</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>9</vTx>
+        </foc_prbs_voltage>
+        <foc_prbs_current>
+            <longName>Perturbation Current</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>ZAAAAP</description>
+            <cDefine>MCCONF_FOC_PRBS_CURRENT</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>700</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>1</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> A</suffix>
+            <vTx>9</vTx>
+        </foc_prbs_current>
+        <foc_prbs_mode>
+            <longName>PRBS Mode</longName>
+            <type>4</type>
+            <transmittable>1</transmittable>
+            <description></description>
+            <cDefine>MCCONF_FOC_PRBS_MODE</cDefine>
+            <valInt>0</valInt>
+            <enumNames>Disabled</enumNames>
+            <enumNames>Inject on I</enumNames>
+            <enumNames>Inject on V</enumNames>
+        </foc_prbs_mode>
+        <foc_prbs_channel>
+            <longName>PRBS Channel</longName>
+            <type>4</type>
+            <transmittable>1</transmittable>
+            <description></description>
+            <cDefine>MCCONF_FOC_PRBS_CHANNEL</cDefine>
+            <valInt>0</valInt>
+            <enumNames>D</enumNames>
+            <enumNames>Q</enumNames>
+            <enumNames>D and Q</enumNames>
+        </foc_prbs_channel>
+
         <foc_offsets_cal_on_boot>
             <longName>Run calibration at boot</longName>
             <type>5</type>
@@ -4008,6 +4068,10 @@ p, li { white-space: pre-wrap; }
         <ser>foc_hfi_start_samples</ser>
         <ser>foc_hfi_obs_ovr_sec</ser>
         <ser>foc_hfi_samples</ser>
+        <ser>foc_prbs_voltage</ser>
+        <ser>foc_prbs_current</ser>
+        <ser>foc_prbs_channel</ser>
+        <ser>foc_prbs_mode</ser>
         <ser>foc_offsets_cal_on_boot</ser>
         <ser>foc_offsets_current__0</ser>
         <ser>foc_offsets_current__1</ser>
@@ -4314,6 +4378,15 @@ p, li { white-space: pre-wrap; }
                     <param>foc_hfi_voltage_start</param>
                     <param>foc_hfi_start_samples</param>
                     <param>foc_openloop_rpm</param>
+                </subgroupParams>
+            </subgroup>
+            <subgroup>
+                <subgroupName>PRBS</subgroupName>
+                <subgroupParams>
+                    <param>foc_prbs_voltage</param>
+                    <param>foc_prbs_current</param>
+                    <param>foc_prbs_channel</param>
+                    <param>foc_prbs_mode</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

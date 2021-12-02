@@ -27,6 +27,7 @@ import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    id: appPageItem
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
 
@@ -239,7 +240,12 @@ Item {
 
                 Menu {
                     id: menu
-                    width: 500
+                    bottomPadding: notchBot
+                    leftPadding: notchLeft
+                    rightPadding: notchRight
+                    parent: appPageItem
+                    y: parent.height - implicitHeight
+                    width: parent.width
 
                     MenuItem {
                         text: "Read Default Settings"

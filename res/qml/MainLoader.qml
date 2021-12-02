@@ -32,6 +32,12 @@ ApplicationWindow {
     height: 1080
     title: qsTr("VESC Custom GUI")
 
+    // Full screen iPhone X workaround:
+    property int notchLeft: 0
+    property int notchRight: 0
+    property int notchBot: 0
+    property int notchTop: 0
+
     Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
     Material.accent: Utility.getAppHexColor("lightAccent")
 

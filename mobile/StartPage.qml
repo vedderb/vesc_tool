@@ -33,8 +33,6 @@ Item {
     signal requestOpenControls()
     signal requestConnect()
     signal requestOpenMultiSettings()
-    property int notchTop: 0
-    property int notchBot: 0
 
     ScrollView {
         anchors.fill: parent
@@ -317,20 +315,14 @@ Item {
 
     SetupWizardFoc {
         id: wizardFoc
-        notchBot: topItem.notchBot
-        notchTop: topItem.notchTop
     }
 
     SetupWizardInput {
         id: wizardInput
-        notchBot: topItem.notchBot
-        notchTop: topItem.notchTop
     }
 
     PairingDialog {
         id: pairDialog
-        notchTop: topItem.notchTop
-        notchBot: topItem.notchBot
     }
 
 
@@ -366,9 +358,9 @@ Item {
         focus: true
         padding: 10
 
-        width: parent.width - 10
+        width: parent.width - 10 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
-        x: 5
+        x: parent.width/2 - width/2
         y: parent.height / 2 - height / 2 + notchTop
         parent: ApplicationWindow.overlay
 
@@ -387,12 +379,12 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
 
         parent: ApplicationWindow.overlay
-        x: 10
+        x: parent.width/2 - width/2
         y: topItem.y + topItem.height / 2 - height / 2 + notchTop
 
         Overlay.modal: Rectangle {
@@ -421,12 +413,12 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
         title: "Backup configuration(s)"
 
         parent: ApplicationWindow.overlay
-        x: 10
+        x: parent.width/2 - width/2
         y: topItem.y + topItem.height / 2 - height / 2 + notchTop
 
         Overlay.modal: Rectangle {
@@ -456,12 +448,12 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
         title: "Restore configuration backup(s)"
 
         parent: ApplicationWindow.overlay
-        x: 10
+        x: parent.width/2 - width/2
         y: topItem.y + topItem.height / 2 - height / 2 + notchTop
 
         Overlay.modal: Rectangle {
@@ -493,8 +485,8 @@ Item {
         modal: true
         focus: true
 
-        width: parent.width - 20
-        x: 10
+        width: parent.width - 20 - notchLeft - notchRight
+        x: parent.width/2 - width/2
         y: parent.height / 2 - height / 2 + notchTop
         parent: ApplicationWindow.overlay
 

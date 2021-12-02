@@ -29,7 +29,13 @@ import "qrc:/mobile"
 
 Item {
     id: container
-    width: 100
+    width: 100   
+
+    // Full screen iPhone X workaround:
+    property int notchLeft: 0
+    property int notchRight: 0
+    property int notchBot: 0
+    property int notchTop: 0
 
     function setupMotors() {
         if (!VescIf.isPortConnected()) {

@@ -439,13 +439,14 @@ Item {
                 anchors.horizontalCenterOffset: -0.675*gaugeSize2
                 anchors.verticalCenterOffset: -0.1*gaugeSize2
                 minimumValue: 0
-                maximumValue:150
+                maximumValue: 100
                 value: 0
-                labelStep: 15
+                labelStep: 20
+                property real throttleStartValue: 70
                 property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                 property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                 property color redColor: {redColor = "red"}
-                nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
+                nibColor: value > throttleStartValue ? redColor : (value > 40 ? orangeColor: blueColor)
                 Behavior on nibColor {
                     ColorAnimation {
                         duration: 1000;
@@ -463,18 +464,19 @@ Item {
                     height: gaugeSize2
                     anchors.centerIn: parent
                     anchors.horizontalCenterOffset: gaugeSize2*1.35
-                    maximumValue: 150
+                    maximumValue: 100
                     minimumValue: 0
                     minAngle: 195
                     maxAngle: -30
-                    labelStep: 15
+                    labelStep: 20
                     value: 0
                     unitText: "°C"
                     typeText: "TEMP\nMOTOR"
+                    property real throttleStartValue: 70
                     property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                     property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                     property color redColor: {redColor = "red"}
-                    nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
+                    nibColor: value > throttleStartValue ? redColor : (value > 40 ? orangeColor: blueColor)
                     Behavior on nibColor {
                         ColorAnimation {
                             duration: 1000;
@@ -500,7 +502,7 @@ Item {
                         property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
                         property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                         property color redColor: {redColor = "red"}
-                        nibColor: value > 70 ? redColor : (value > 40 ? orangeColor: blueColor)
+                        nibColor: value > 45.0 ? redColor : (value > 25.0 ? orangeColor: blueColor)
                         Text {
                             id: consumValLabel
                             color: {color = Utility.getAppHexColor("lightText")}
@@ -525,9 +527,8 @@ Item {
                         }
                         Behavior on nibColor {
                             ColorAnimation {
-                                duration: 1000;
+                                duration: 100;
                                 easing.type: Easing.InOutSine
-                                easing.overshoot: 3
                             }
                         }
                     }
@@ -667,7 +668,6 @@ Item {
             }
 
             currentGauge.labelStep = Math.ceil(currentMaxRound / 20) * 5
-
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
             batteryGauge.value = values.battery_level * 100.0
@@ -696,19 +696,25 @@ Item {
 
             var speedNow = values.speed * 3.6 * impFact
             speedGauge.value = useNegativeSpeedValues ? speedNow : Math.abs(speedNow)
+
             speedGauge.unitText = useImperial ? "mph" : "km/h"
 
             var powerMax = Math.min(values.v_in * Math.min(mMcConf.getParamDouble("l_in_current_max"),
                                                            mMcConf.getParamDouble("l_current_max")),
                                     mMcConf.getParamDouble("l_watt_max")) * values.num_vescs
+            var powerMin = Math.max(values.v_in * Math.max(mMcConf.getParamDouble("l_in_current_min"),
+                                                           mMcConf.getParamDouble("l_current_min")),
+                                    mMcConf.getParamDouble("l_watt_min")) * values.num_vescs
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
+            var powerMinRound = (Math.floor(powerMin / 1000.0) * 1000.0)
 
             if (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6)) {
                 powerGauge.maximumValue = powerMaxRound
-                powerGauge.minimumValue = -powerMaxRound
+                powerGauge.minimumValue = powerMinRound
             }
 
             powerGauge.value = (values.current_in * values.v_in)
+            powerGauge.labelStep = Math.ceil((powerMaxRound - powerMinRound)/5000.0) * 1000.0
             var alpha = 0.05
             var efficiencyNow = Math.max( Math.min(values.current_in * values.v_in/Math.max(Math.abs(values.speed * 3.6 * impFact), 1e-6) , 60) , -60)
             efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow
@@ -718,7 +724,6 @@ Item {
 
             odometerValue = values.odometer
             batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) + "%"
-
             rangeLabel.text = useImperial ? "MI\nRANGE" : "KM\nRANGE"
             if( values.battery_wh / (wh_km_total / impFact) < 999.0) {
                 rangeValLabel.text = parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(1)
@@ -730,7 +735,13 @@ Item {
             trip.text = parseFloat((values.tachometer_abs * impFact) / 1000.0).toFixed(1)
 
             escTempGauge.value = values.temp_mos
+            escTempGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_end") / 5) * 5
+            motTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
+            escTempGauge.labelStep = Math.ceil(escTempGauge.maximumValue/ 50) * 5
             motTempGauge.value = values.temp_motor
+            motTempGauge.labelStep = Math.ceil(motTempGauge.maximumValue/ 50) * 5
+            motTempGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_end") / 5) * 5
+            motTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_start") / 5) * 5
         }
     }
 }

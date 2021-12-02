@@ -43,6 +43,14 @@ Item {
         anchors.fill: parent
     }
 
+    // Prevents events from passing to components behind
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.AllButtons
+        onWheel: {wheel.accepted=true}
+        hoverEnabled: true
+    }
+
     Component.onCompleted: {
         mBle.startScan()
         scanDotTimer.running = true
@@ -60,6 +68,7 @@ Item {
         anchors.margins: 10
         anchors.leftMargin: notchLeft
         anchors.rightMargin: notchRight
+
         Rectangle{
             Layout.preferredHeight: notchTop
             Layout.fillWidth: true

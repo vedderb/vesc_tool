@@ -571,7 +571,12 @@ bool MainWindow::eventFilter(QObject *object, QEvent *e)
     if (!ui->actionKeyboardControl->isChecked()) {
         return false;
     }
-
+    if (            QString(qApp->focusWidget()->metaObject()->className()).contains("edit",Qt::CaseInsensitive) ||
+                    QString(qApp->focusWidget()->metaObject()->className()).contains("spin",Qt::CaseInsensitive)) {
+        ui->actionKeyboardControl->setDisabled(true);
+        return false;
+    }
+    ui->actionKeyboardControl->setEnabled(true);
     if (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
         bool isPress = e->type() == QEvent::KeyPress;
 

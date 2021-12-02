@@ -81,10 +81,6 @@ ApplicationWindow {
         Utility.stopGnssForegroundService()
     }
 
-    onHeightChanged: {
-        connScreen.y = (connScreen.y > 1) ? connScreen.height : 0
-    }
-
     SetupWizardIntro {
         id: introWizard
     }
@@ -170,7 +166,7 @@ ApplicationWindow {
                     if (connected) {
                         VescIf.disconnectPort()
                     } else {
-                        connScreen.y = 0
+                        connScreen.opened = true
                     }
 
                     drawer.close()
@@ -284,7 +280,7 @@ ApplicationWindow {
                     }
 
                     onRequestConnect: {
-                        connScreen.y = 0
+                        connScreen.opened = true
                     }
 
                     onRequestOpenMultiSettings: {
@@ -721,11 +717,11 @@ ApplicationWindow {
             y: 0
             height: parent.height
             width: parent.width
-
+            opened: true
             onYChanged: {
                 parent.color.a = Math.min(1, Math.max(1 - y / height, 0))
 
-                if (y < (height * 0.9)) {
+                if (opened) {
                     drawer.interactive = false
                     canDrawerLoader.item.interactive = false
                     drawer.close()
@@ -977,7 +973,7 @@ ApplicationWindow {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
 
-            connScreen.y = VescIf.isPortConnected() ? connScreen.height : 0
+            connScreen.opened = VescIf.isPortConnected() ? false : true
         }
 
         onStatusMessage: {

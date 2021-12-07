@@ -21,7 +21,12 @@ package com.vedder.vesc;
 
 import android.content.Context;
 import android.content.Intent;
- 
+import android.provider.Settings;
+import android.os.Build;
+import android.text.TextUtils;
+import android.provider.Settings.SettingNotFoundException;
+import android.location.LocationManager;
+
 public class Utils
 {
     public static void startVForegroundService(Context ctx) {
@@ -35,5 +40,26 @@ public class Utils
         intent.setAction(VForegroundService.ACTION_STOP_FOREGROUND_SERVICE);
         ctx.startService(intent);
     }
-}
 
+    public static boolean checkLocationEnabled(Context ctx) {
+        int locationMode = 0;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            LocationManager lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+            return lm.isLocationEnabled();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(ctx.getContentResolver(), Settings.Secure.LOCATION_MODE);
+            } catch (SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+        } else {
+            locationProviders = Settings.Secure.getString(ctx.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+    }
+}

@@ -1497,6 +1497,18 @@ void Utility::stopGnssForegroundService()
 #endif
 }
 
+bool Utility::isBleScanEnabled()
+{
+#ifdef Q_OS_ANDROID
+    return QAndroidJniObject::callStaticMethod<jboolean>("com/vedder/vesc/Utils",
+                                                         "checkLocationEnabled",
+                                                         "(Landroid/content/Context;)Z",
+                                                         QtAndroid::androidActivity().object());
+#else
+    return true;
+#endif
+}
+
 void Utility::llhToXyz(double lat, double lon, double height, double *x, double *y, double *z)
 {
     double sinp = sin(lat * M_PI / 180.0);

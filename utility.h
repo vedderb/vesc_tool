@@ -84,6 +84,7 @@ public:
     Q_INVOKABLE static QVariantList getNetworkAddresses();
     Q_INVOKABLE static void startGnssForegroundService();
     Q_INVOKABLE static void stopGnssForegroundService();
+    Q_INVOKABLE static bool isBleScanEnabled();
 
     static void llhToXyz(double lat, double lon, double height, double *x, double *y, double *z);
     static void xyzToLlh(double x, double y, double z, double *lat, double *lon, double *height);

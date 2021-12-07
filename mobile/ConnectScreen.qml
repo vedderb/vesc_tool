@@ -64,6 +64,10 @@ Item {
     Component.onCompleted: {
         mBle.startScan()
         scanDotTimer.running = true
+
+        if (!Utility.isBleScanEnabled()) {
+            bleEn.open()
+        }
     }
 
     onYChanged: {
@@ -509,6 +513,34 @@ Item {
         onRejected: {
             disableDialog()
             VescIf.connectBle(bleAddr)
+        }
+    }
+
+    Dialog {
+        id: bleEn
+        standardButtons: Dialog.Ok
+        modal: true
+        focus: true
+        rightMargin: 10
+        leftMargin: 10
+        closePolicy: Popup.CloseOnEscape
+        y: 10 + parent.height / 2 - height / 2
+        x: parent.width/2 - width/2
+        width: parent.width - 20 - notchLeft - notchRight
+        parent: ApplicationWindow.overlay
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        title: "BLE scan"
+
+        Text {
+            color: Utility.getAppHexColor("lightText")
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text: "BLE scan does not seem to be possible. Make sure that the " +
+                  "location service is enabled on your device."
         }
     }
 }

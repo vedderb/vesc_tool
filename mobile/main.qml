@@ -543,16 +543,10 @@ ApplicationWindow {
         id: uiHwPage
         visible: false
 
-        Loader {
-            active: parent.visible
+        Item {
+            id: uiHw
             anchors.fill: parent
-            asynchronous: true
-            visible: status == Loader.Ready
-            sourceComponent: Item {
-                id: uiHw
-                anchors.fill: parent
-                property var tabBarItem: tabBar
-            }
+            property var tabBarItem: tabBar
         }
     }
 
@@ -567,16 +561,10 @@ ApplicationWindow {
         id: uiAppPage
         visible: false
 
-        Loader {
+        Item {
+            id: uiApp
             anchors.fill: parent
-            asynchronous: true
-            visible: status == Loader.Ready
-            active: parent.visible
-            sourceComponent: Item {
-                id: uiApp
-                anchors.fill: parent
-                property var tabBarItem: tabBar
-            }
+            property var tabBarItem: tabBar
         }
     }
 

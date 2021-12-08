@@ -879,13 +879,13 @@ ApplicationWindow {
         }
 
         swipeView.interactive = true
-        tabBar.visible = true
+        headerBar.visible = true
         tabBar.enabled = true
 
         if (VescIf.isPortConnected() && VescIf.qmlHwLoaded()) {
             if (VescIf.getLastFwRxParams().qmlHwFullscreen) {
                 swipeView.interactive = false
-                tabBar.visible = false
+                headerBar.visible = false
                 tabBar.enabled = false
             }
 
@@ -911,13 +911,13 @@ ApplicationWindow {
         }
 
         swipeView.interactive = true
-        tabBar.visible = true
+        headerBar.visible = true
         tabBar.enabled = true
 
         if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
             if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
                 swipeView.interactive = false
-                tabBar.visible = false
+                headerBar.visible = false
                 tabBar.enabled = false
             }
 

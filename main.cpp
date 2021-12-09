@@ -77,51 +77,6 @@ static void m_cleanup(int sig)
 #endif
 #endif
 
-static void startVescTcp(VescInterface *vesc, int tcpPort, bool retry) {
-    bool ok = vesc->autoconnect();
-
-    if (ok) {
-        if (!vesc->tcpServerIsRunning()) {
-            ok = vesc->tcpServerStart(tcpPort);
-        }
-
-        qDebug() << "Connected to VESC. TCP listening at port" << tcpPort;
-
-        if (!ok) {
-            qCritical() << "Could not start TCP server on port" << tcpPort;
-            qApp->quit();
-        }
-    } else {
-        qCritical() << "Could not autoconnect to VESC";
-
-        if (retry) {
-            QTimer::singleShot(1000, [vesc, tcpPort]() {
-                startVescTcp(vesc, tcpPort, true);
-            });
-        } else {
-            qApp->quit();
-        }
-    }
-}
-
-static void autoConnect(VescInterface *vesc, bool retry) {
-    bool ok = vesc->autoconnect();
-
-    if (ok) {
-        qDebug() << "Connected";
-    } else {
-        qCritical() << "Could not autoconnect to VESC";
-
-        if (retry) {
-            QTimer::singleShot(1000, [vesc]() {
-                autoConnect(vesc, true);
-            });
-        } else {
-            qApp->quit();
-        }
-    }
-}
-
 int main(int argc, char *argv[])
 {
     // Settings
@@ -367,6 +322,24 @@ int main(int argc, char *argv[])
     QmlUi *qmlUi = nullptr;
     QString qmlStr;
 
+    QTimer connTimer;
+    connTimer.setInterval(1000);
+    QObject::connect(&connTimer, &QTimer::timeout, [&]() {
+        if (!vesc->isPortConnected()) {
+            bool ok = vesc->autoconnect();
+
+            if (ok) {
+                qDebug() << "Connected";
+            } else {
+                qDebug() << "Could not autoconnect";
+
+                if (!retryConn) {
+                    qApp->quit();
+                }
+            }
+        }
+    });
+
     if (useTcp) {
         qputenv("QT_QPA_PLATFORM", "offscreen");
 
@@ -376,8 +349,13 @@ int main(int argc, char *argv[])
         vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
         Utility::configLoadLatest(vesc);
 
-        QTimer::singleShot(1000, [&]() {
-            startVescTcp(vesc, tcpPort, retryConn);
+        QTimer::singleShot(10, [&]() {
+            if (vesc->tcpServerStart(tcpPort)) {
+                connTimer.start();
+            } else {
+                qCritical() << "Could not start TCP server on port" << tcpPort;
+                qApp->quit();
+            }
         });
 
         QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
@@ -385,17 +363,6 @@ int main(int argc, char *argv[])
                 qDebug() << msg;
             } else  {
                 qWarning() << msg;
-
-                QTimer::singleShot(100, [&]() {
-                    if (retryConn && !vesc->isPortConnected()) {
-                        QTimer::singleShot(1000, [&]() {
-                            startVescTcp(vesc, tcpPort, retryConn);
-                        });
-                    } else {
-                        qWarning() << "Closing...";
-                        qApp->quit();
-                    }
-                });
             }
         });
     } else {
@@ -478,7 +445,7 @@ int main(int argc, char *argv[])
 
                 qmlStr.prepend("import \"qrc:/mobile\";");
                 qmlStr.prepend("import Vedder.vesc.vescinterface 1.0;");
-                qmlStr.prepend("import \"file:/" + fi.path() + "\";");
+                qmlStr.prepend("import \"file:/" + fi.canonicalPath() + "\";");
 
                 vesc = new VescInterface;
                 vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
@@ -498,7 +465,15 @@ int main(int argc, char *argv[])
                 QTimer::singleShot(1000, [&]() {
                     qmlUi->emitReloadQml(qmlStr);
                     if (qmlAutoConn) {
-                        autoConnect(vesc, retryConn);
+                        connTimer.start();
+                    }
+                });
+
+                QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
+                    if (isGood) {
+                        qDebug() << msg;
+                    } else  {
+                        qWarning() << msg;
                     }
                 });
             } else {

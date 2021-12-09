@@ -19,6 +19,7 @@
 
 #include "fwhelper.h"
 #include <QDirIterator>
+#include "hexfile.h"
 
 FwHelper::FwHelper(QObject *parent) : QObject(parent)
 {
@@ -113,9 +114,8 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
     QFileInfo fileInfo(filename);
 
     if (checkName) {
-        if (!(fileInfo.fileName().toLower().startsWith("bldc_4") ||
-              fileInfo.fileName().toLower().startsWith("vesc"))
-                || !fileInfo.fileName().endsWith(".bin")) {
+        if (!fileInfo.fileName().toLower().endsWith(".bin") &&
+                !fileInfo.fileName().toLower().endsWith(".hex")) {
             vesc->emitMessageDialog(
                         tr("Upload Error"),
                         tr("The selected file name seems to be invalid."),
@@ -139,6 +139,39 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
         return false;
     }
 
-    QByteArray data = file.readAll();
-    return vesc->fwUpload(data, isBootloader, fwdCan);
+    bool fwRes = false;
+
+    if (file.fileName().toLower().endsWith(".hex")) {
+        QMap<quint32, QByteArray> fwData;
+        fwRes = HexFile::parseFile(file.fileName(), fwData);
+
+        if (fwRes) {
+            QMapIterator<quint32, QByteArray> i(fwData);
+
+            QByteArray data;
+            bool startSet = false;
+            unsigned int startOffset = 0;
+
+            while (i.hasNext()) {
+                i.next();
+                if (!startSet) {
+                    startSet = true;
+                    startOffset = i.key();
+                }
+
+                while ((quint32(data.size()) + startOffset) < i.key()) {
+                    data.append(char(0xFF));
+                }
+
+                data.append(i.value());
+            }
+
+            fwRes = vesc->fwUpload(data, isBootloader, fwdCan);
+        }
+    } else {
+        QByteArray data = file.readAll();
+        fwRes = vesc->fwUpload(data, isBootloader, fwdCan);
+    }
+
+    return fwRes;
 }

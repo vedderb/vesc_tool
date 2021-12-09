@@ -36,10 +36,10 @@ export PATH=$PATH:$ANDROID_HOME/Sdk/tools:/usr/bin:$JAVA_HOME/bin
 
 rm -rf build/android/*
 
-# arm64_v8a
-export PATH=/opt/Qt3/5.12.7/android_arm64_v8a/bin/:$PATH
-export ANDROID_NDK_TOOLCHAIN_PREFIX=aarch64-linux-android
-export ANDROID_NDK_TOOLS_PREFIX=aarch64-linux-android
+# armv7
+export PATH=/opt/Qt3/5.12.7/android_armv7/bin/:$PATH
+export ANDROID_NDK_TOOLCHAIN_PREFIX=arm-linux-androideabi
+export ANDROID_NDK_TOOLS_PREFIX=arm-linux-androideabi
 
 # Mobile
 qmake -config release "CONFIG += release_android build_mobile vt_test_version"

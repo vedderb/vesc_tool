@@ -15,9 +15,6 @@ Item {
     id: mainItem
     anchors.fill: parent
 
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
-
     property var parentTabBar: parent.tabBarItem
     
     Component.onCompleted: {

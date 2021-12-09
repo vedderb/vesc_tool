@@ -11,9 +11,6 @@ Item {
     id: mainItem
     anchors.fill: parent
     anchors.margins: 5
-
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
     
     property var cnt: 0
     

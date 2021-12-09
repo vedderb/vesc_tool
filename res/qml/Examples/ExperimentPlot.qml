@@ -10,9 +10,6 @@ Item {
     id: mainItem
     anchors.fill: parent
     anchors.margins: 5
-
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
     
     property Commands mCommands: VescIf.commands()
     property var plotx: 0

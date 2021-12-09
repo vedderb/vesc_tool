@@ -62,7 +62,10 @@ static void showHelp()
     qDebug() << "Arguments";
     qDebug() << "-h, --help : Show help text";
     qDebug() << "--tcpServer [port] : Autoconnect to VESC and start TCP server on [port]";
-    qDebug() << "--retryTcp : Keep trying to reconnect to the VESC when the connection fails";
+    qDebug() << "--loadQml [file] : Load QML file UI instead of regular VESC Tool UI";
+    qDebug() << "--qmlAutoConn : Autoconnect over USB before loading the QML UI";
+    qDebug() << "--qmlFullscreen : Run QML UI in fullscreen mode";
+    qDebug() << "--retryConn : Keep trying to reconnect to the VESC when the connection fails";
 }
 
 #ifdef Q_OS_LINUX
@@ -94,6 +97,24 @@ static void startVescTcp(VescInterface *vesc, int tcpPort, bool retry) {
         if (retry) {
             QTimer::singleShot(1000, [vesc, tcpPort]() {
                 startVescTcp(vesc, tcpPort, true);
+            });
+        } else {
+            qApp->quit();
+        }
+    }
+}
+
+static void autoConnect(VescInterface *vesc, bool retry) {
+    bool ok = vesc->autoconnect();
+
+    if (ok) {
+        qDebug() << "Connected";
+    } else {
+        qCritical() << "Could not autoconnect to VESC";
+
+        if (retry) {
+            QTimer::singleShot(1000, [vesc]() {
+                autoConnect(vesc, true);
             });
         } else {
             qApp->quit();
@@ -209,8 +230,11 @@ int main(int argc, char *argv[])
     }
 
     bool useTcp = false;
-    bool retryTcp = false;
+    bool retryConn = false;
     int tcpPort = 65102;
+    QString loadQml = "";
+    bool qmlAutoConn = false;
+    bool qmlFullscreen = false;
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -243,8 +267,30 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (str == "--retryTcp") {
-            retryTcp = true;
+        if (str == "--retryConn") {
+            retryConn = true;
+            found = true;
+        }
+
+        if (str == "--loadQml") {
+            if ((i + 1) < args.size()) {
+                i++;
+                loadQml = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path to qml UI file";
+                return 1;
+            }
+        }
+
+        if (str == "--qmlAutoConn") {
+            qmlAutoConn = true;
+            found = true;
+        }
+
+        if (str == "--qmlFullscreen") {
+            qmlFullscreen = true;
             found = true;
         }
 
@@ -318,6 +364,8 @@ int main(int argc, char *argv[])
 #else
     VescInterface *vesc = nullptr;
     MainWindow *w = nullptr;
+    QmlUi *qmlUi = nullptr;
+    QString qmlStr;
 
     if (useTcp) {
         qputenv("QT_QPA_PLATFORM", "offscreen");
@@ -329,7 +377,7 @@ int main(int argc, char *argv[])
         Utility::configLoadLatest(vesc);
 
         QTimer::singleShot(1000, [&]() {
-            startVescTcp(vesc, tcpPort, retryTcp);
+            startVescTcp(vesc, tcpPort, retryConn);
         });
 
         QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
@@ -339,9 +387,9 @@ int main(int argc, char *argv[])
                 qWarning() << msg;
 
                 QTimer::singleShot(100, [&]() {
-                    if (retryTcp && !vesc->isPortConnected()) {
+                    if (retryConn && !vesc->isPortConnected()) {
                         QTimer::singleShot(1000, [&]() {
-                            startVescTcp(vesc, tcpPort, retryTcp);
+                            startVescTcp(vesc, tcpPort, retryConn);
                         });
                     } else {
                         qWarning() << "Closing...";
@@ -420,8 +468,48 @@ int main(int argc, char *argv[])
         qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
         qmlRegisterType<VescInterface>("Vedder.vesc.utility", 1, 0, "Utility2");
 
-        w = new MainWindow;
-        w->show();
+        if (!loadQml.isEmpty()) {
+            QFile qmlFile(loadQml);
+            if (qmlFile.exists() && qmlFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QFileInfo fi(loadQml);
+
+                qmlStr = QString::fromUtf8(qmlFile.readAll());
+                qmlFile.close();
+
+                qmlStr.prepend("import \"qrc:/mobile\";");
+                qmlStr.prepend("import Vedder.vesc.vescinterface 1.0;");
+                qmlStr.prepend("import \"file:/" + fi.path() + "\";");
+
+                vesc = new VescInterface;
+                vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+                Utility::configLoadLatest(vesc);
+
+                qmlUi = new QmlUi;
+                qmlUi->startCustomGui(vesc);
+
+                if (qmlFullscreen) {
+                    qmlUi->emitToggleFullscreen();
+                }
+
+                QTimer::singleShot(10, [&]() {
+                    qmlUi->emitReloadCustomGui("qrc:/res/qml/DynamicLoader.qml");
+                });
+
+                QTimer::singleShot(1000, [&]() {
+                    qmlUi->emitReloadQml(qmlStr);
+                    if (qmlAutoConn) {
+                        autoConnect(vesc, retryConn);
+                    }
+                });
+            } else {
+                qCritical() << "Could not open" << loadQml;
+                delete app;
+                return -1;
+            }
+        } else {
+            w = new MainWindow;
+            w->show();
+        }
     }
 #endif
 #ifdef Q_OS_IOS
@@ -439,6 +527,10 @@ int main(int argc, char *argv[])
 
     if (w) {
         delete w;
+    }
+
+    if (qmlUi) {
+        delete qmlUi;
     }
 #endif
 

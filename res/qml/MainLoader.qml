@@ -68,6 +68,17 @@ ApplicationWindow {
                 mainWindow.visibility = Window.Windowed
             }
         }
+
+        onMoveToOtherScreen: {
+            var screenInd = Qt.application.screens.length - 1
+            mainWindow.x = Qt.application.screens[screenInd].virtualX;
+            mainWindow.y = Qt.application.screens[screenInd].virtualY;
+        }
+
+        onMoveToFirstScreen: {
+            mainWindow.x = Qt.application.screens[0].virtualX;
+            mainWindow.y = Qt.application.screens[0].virtualY;
+        }
     }
 
     Timer {

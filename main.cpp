@@ -62,9 +62,11 @@ static void showHelp()
     qDebug() << "Arguments";
     qDebug() << "-h, --help : Show help text";
     qDebug() << "--tcpServer [port] : Autoconnect to VESC and start TCP server on [port]";
-    qDebug() << "--loadQml [file] : Load QML file UI instead of regular VESC Tool UI";
+    qDebug() << "--loadQml [file] : Load QML UI from file instead of the regular VESC Tool UI";
+    qDebug() << "--loadQmlVesc : Load QML UI from the connected VESC instead of the regular VESC Tool UI";
     qDebug() << "--qmlAutoConn : Autoconnect over USB before loading the QML UI";
     qDebug() << "--qmlFullscreen : Run QML UI in fullscreen mode";
+    qDebug() << "--qmlOtherScreen : Run QML UI on other screen";
     qDebug() << "--retryConn : Keep trying to reconnect to the VESC when the connection fails";
 }
 
@@ -190,6 +192,8 @@ int main(int argc, char *argv[])
     QString loadQml = "";
     bool qmlAutoConn = false;
     bool qmlFullscreen = false;
+    bool loadQmlVesc = false;
+    bool qmlOtherScreen = false;
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -239,6 +243,11 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (str == "--loadQmlVesc") {
+            loadQmlVesc = true;
+            found = true;
+        }
+
         if (str == "--qmlAutoConn") {
             qmlAutoConn = true;
             found = true;
@@ -246,6 +255,11 @@ int main(int argc, char *argv[])
 
         if (str == "--qmlFullscreen") {
             qmlFullscreen = true;
+            found = true;
+        }
+
+        if (str == "--qmlOtherScreen") {
+            qmlOtherScreen = true;
             found = true;
         }
 
@@ -435,52 +449,81 @@ int main(int argc, char *argv[])
         qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
         qmlRegisterType<VescInterface>("Vedder.vesc.utility", 1, 0, "Utility2");
 
-        if (!loadQml.isEmpty()) {
-            QFile qmlFile(loadQml);
-            if (qmlFile.exists() && qmlFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QFileInfo fi(loadQml);
+        if (!loadQml.isEmpty() || loadQmlVesc) {
+            vesc = new VescInterface;
+            vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+            Utility::configLoadLatest(vesc);
 
-                qmlStr = QString::fromUtf8(qmlFile.readAll());
-                qmlFile.close();
-
-                qmlStr.prepend("import \"qrc:/mobile\";");
-                qmlStr.prepend("import Vedder.vesc.vescinterface 1.0;");
-                qmlStr.prepend("import \"file:/" + fi.canonicalPath() + "\";");
-
-                vesc = new VescInterface;
-                vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
-                Utility::configLoadLatest(vesc);
-
-                qmlUi = new QmlUi;
-                qmlUi->startCustomGui(vesc);
-
-                if (qmlFullscreen) {
-                    qmlUi->emitToggleFullscreen();
-                }
-
-                QTimer::singleShot(10, [&]() {
-                    qmlUi->emitReloadCustomGui("qrc:/res/qml/DynamicLoader.qml");
-                });
-
-                QTimer::singleShot(1000, [&]() {
-                    qmlUi->emitReloadQml(qmlStr);
-                    if (qmlAutoConn) {
-                        connTimer.start();
+            if (loadQmlVesc) {
+                QObject::connect(vesc, &VescInterface::qmlLoadDone, [&]() {
+                    if (vesc->qmlAppLoaded()) {
+                        qmlStr = vesc->qmlApp();
+                    } else if (vesc->qmlHwLoaded()) {
+                        qmlStr = vesc->qmlHw();
+                    } else {
+                        qmlStr = "";
                     }
+
+                    qmlUi->clearQmlCache();
+
+                    QTimer::singleShot(10, [&]() {
+                        qmlUi->emitReloadCustomGui("qrc:/res/qml/DynamicLoader.qml");
+                    });
+
+                    QTimer::singleShot(1000, [&]() {
+                        qmlUi->emitReloadQml(qmlStr);
+                    });
                 });
 
-                QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
-                    if (isGood) {
-                        qDebug() << msg;
-                    } else  {
-                        qWarning() << msg;
-                    }
-                });
+                connTimer.start();
             } else {
-                qCritical() << "Could not open" << loadQml;
-                delete app;
-                return -1;
+                QFile qmlFile(loadQml);
+                if (qmlFile.exists() && qmlFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                    QFileInfo fi(loadQml);
+
+                    qmlStr = QString::fromUtf8(qmlFile.readAll());
+                    qmlFile.close();
+
+                    qmlStr.prepend("import \"qrc:/mobile\";");
+                    qmlStr.prepend("import Vedder.vesc.vescinterface 1.0;");
+                    qmlStr.prepend("import \"file:/" + fi.canonicalPath() + "\";");
+
+                    QTimer::singleShot(10, [&]() {
+                        qmlUi->emitReloadCustomGui("qrc:/res/qml/DynamicLoader.qml");
+                    });
+
+                    QTimer::singleShot(1000, [&]() {
+                        qmlUi->emitReloadQml(qmlStr);
+                        if (qmlAutoConn) {
+                            connTimer.start();
+                        }
+                    });
+                } else {
+                    qCritical() << "Could not open" << loadQml;
+                    delete app;
+                    delete vesc;
+                    return -1;
+                }
             }
+
+            qmlUi = new QmlUi;
+            qmlUi->startCustomGui(vesc);
+
+            if (qmlFullscreen) {
+                qmlUi->emitToggleFullscreen();
+            }
+
+            if (qmlOtherScreen) {
+                qmlUi->emitMoveToOtherScreen();
+            }
+
+            QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
+                if (isGood) {
+                    qDebug() << msg;
+                } else  {
+                    qWarning() << msg;
+                }
+            });
         } else {
             w = new MainWindow;
             w->show();

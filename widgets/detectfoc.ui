@@ -501,7 +501,7 @@
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ERPM/sec to ramp up the motor in openloop mode with.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="prefix">
-         <string>ω: </string>
+         <string>α: </string>
         </property>
         <property name="suffix">
          <string> ERPM/s</string>

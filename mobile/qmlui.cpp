@@ -141,6 +141,11 @@ void QmlUi::emitMoveToFirstScreen()
     emit moveToFirstScreen();
 }
 
+void QmlUi::emitRotateScreen(double rot)
+{
+    emit rotateScreen(rot);
+}
+
 void QmlUi::clearQmlCache()
 {
     if (mEngine) {

@@ -67,8 +67,10 @@ static void showHelp()
     qDebug() << "--qmlAutoConn : Autoconnect over USB before loading the QML UI";
     qDebug() << "--qmlFullscreen : Run QML UI in fullscreen mode";
     qDebug() << "--qmlOtherScreen : Run QML UI on other screen";
+    qDebug() << "--qmlRotation [deg] : Rotate screen by deg degrees";
     qDebug() << "--retryConn : Keep trying to reconnect to the VESC when the connection fails";
     qDebug() << "--useMobileUi : Start the mobile UI instead of the full desktop UI";
+
 }
 
 #ifdef Q_OS_LINUX
@@ -218,6 +220,7 @@ int main(int argc, char *argv[])
     bool loadQmlVesc = false;
     bool qmlOtherScreen = false;
     bool useMobileUi = false;
+    double qmlRot = 0.0;
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -294,6 +297,18 @@ int main(int argc, char *argv[])
 
         if (str.startsWith("-qmljsdebugger")) {
             found = true;
+        }
+
+        if (str == "--qmlRotation") {
+            if ((i + 1) < args.size()) {
+                i++;
+                qmlRot = args.at(i).toDouble();
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No rotation specified";
+                return 1;
+            }
         }
 
         if (!found) {
@@ -505,6 +520,8 @@ int main(int argc, char *argv[])
             if (qmlOtherScreen) {
                 qmlUi->emitMoveToOtherScreen();
             }
+
+            qmlUi->emitRotateScreen(qmlRot);
 
             QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
                 if (isGood) {

@@ -43,6 +43,7 @@ public:
     void emitToggleFullscreen();
     void emitMoveToOtherScreen();
     void emitMoveToFirstScreen();
+    void emitRotateScreen(double rot);
     Q_INVOKABLE void clearQmlCache();
     void setImportPathList(QStringList paths);
 
@@ -54,6 +55,7 @@ signals:
     void toggleFullscreen();
     void moveToOtherScreen();
     void moveToFirstScreen();
+    void rotateScreen(double rot);
 
 public slots:
 

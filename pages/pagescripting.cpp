@@ -454,6 +454,54 @@ void PageScripting::createEditorTab(QString fileName, QString content)
     });
 }
 
+/**
+ * @brief PageScripting::setEditorDirtySet the editor as dirty, i.e. having text modifications
+ * @param qmlEditor
+ */
+void PageScripting::setEditorDirty(QmlEditor *qmlEditor)
+{
+    // Check if the editor is not already dirty
+    if (qmlEditor->isDirty == false) {
+        // Set editor as dirty
+        qmlEditor->isDirty = true;
+
+        // Get editor index
+        int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+
+        // Append a `*` to signify a dirty editor
+        QString tabText = ui->fileTabs->tabText(tabIdx);
+        ui->fileTabs->setTabText(tabIdx, tabText + "*");
+    }
+}
+
+
+/**
+ * @brief PageScripting::setEditorClean Set the editor as clean, i.e. having no text modifications
+ * @param qmlEditor
+ */
+void PageScripting::setEditorClean(QmlEditor *qmlEditor)
+{
+    // Check if the editor is not already clean
+    if (qmlEditor->isDirty == true) {
+        // Set editor as clean
+        qmlEditor->isDirty = false;
+
+        // Get editor index
+        int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+
+        // Get the tab's label
+        QString tabText = ui->fileTabs->tabText(tabIdx);
+
+        // Check if the final character is a `*`, which indicated it was a dirty file
+        if (tabText.back() == "*") {
+            // Remove the terminal `*`
+            tabText.chop(1);
+            ui->fileTabs->setTabText(tabIdx, tabText);
+        }
+    }
+}
+
+
 QString PageScripting::qmlToRun(bool importDir)
 {
     QString res = ui->mainEdit->codeEditor()->toPlainText();

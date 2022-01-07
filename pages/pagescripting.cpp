@@ -137,10 +137,10 @@ PageScripting::PageScripting(QWidget *parent) :
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(0, QTabBar::RightSide, closeButton);
 
-    auto editor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
-    connect(closeButton, &QPushButton::clicked, [editor]() {
-        editor->editor()->clear();
-        editor->setFileNow("");
+    QmlEditor *mainQmlEditor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
+    connect(closeButton, &QPushButton::clicked, [this, mainQmlEditor]() {
+        // Clear main tab
+        removeEditor(mainQmlEditor);
     });
 
     ui->splitter_2->setSizes(QList<int>({1000, 600}));
@@ -425,12 +425,58 @@ void PageScripting::createEditorTab(QString fileName, QString content)
     ui->fileTabs->tabBar()->setTabButton(tabIndex, QTabBar::RightSide, closeButton);
 
     connect(closeButton, &QPushButton::clicked, [this, editor]() {
-        ui->fileTabs->removeTab(ui->fileTabs->indexOf(editor));
+       removeEditor(editor);
     });
 
     // Do this at the end to make sure to account for the changes from loading the initial text
     setEditorClean(editor);
 }
+
+
+/**
+ * @brief PageScripting::removeEditor Removes the editor (unless it is the 0th, in which case it simply clears it)
+ * @param qmlEditor
+ */
+void PageScripting::removeEditor(QmlEditor *qmlEditor)
+{
+   bool shouldCloseTab = false;
+
+   // Check if tab is dirty
+   if (qmlEditor->isDirty == true) {
+       // Ask user for confirmation
+       QMessageBox::StandardButton answer = QMessageBox::question(
+            this,
+            tr("Delete the tab"),
+            tr("Do you want to delete the tab contents?"),
+            QMessageBox::Yes | QMessageBox::No
+       );
+
+       if (answer == QMessageBox::Yes) {
+          shouldCloseTab = true;
+       } else {
+          shouldCloseTab = false;
+       }
+
+   } else {
+       shouldCloseTab = true;
+   }
+
+   // Only close if appropriate
+   if (shouldCloseTab) {
+       // Get index for this tab
+       int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+
+       // Special handling of tabIdx == 0
+       if (tabIdx == 0) {
+            qmlEditor->codeEditor()->clear();
+            qmlEditor->setFileNow("");
+       } else {
+           ui->fileTabs->removeTab(tabIdx);
+       }
+   }
+
+}
+
 
 /**
  * @brief PageScripting::setEditorDirtySet the editor as dirty, i.e. having text modifications

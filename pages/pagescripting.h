@@ -81,6 +81,7 @@ private:
     void updateRecentList();
     void makeEditorConnections(QmlEditor *editor);
     void createEditorTab(QString fileName, QString content);
+    void removeEditor(QmlEditor *qmlEditor);
     void setEditorDirty(QmlEditor * qmlEditor);
     void setEditorClean(QmlEditor * qmlEditor);
     QString qmlToRun(bool importDir = true);

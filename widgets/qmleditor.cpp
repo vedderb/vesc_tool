@@ -43,7 +43,7 @@ QmlEditor::~QmlEditor()
     delete ui;
 }
 
-QCodeEditor *QmlEditor::editor()
+QCodeEditor *QmlEditor::codeEditor()
 {
     return ui->qmlEdit;
 }

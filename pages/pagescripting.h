@@ -86,6 +86,8 @@ private:
     QString qmlToRun(bool importDir = true);
     bool exportCArray(QString name);
     bool eraseQml();
+    void openExample();
+    void openRecentList();
 
 };
 

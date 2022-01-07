@@ -248,7 +248,7 @@ void PageScripting::on_fullscreenButton_clicked()
     mQmlUi.emitToggleFullscreen();
 }
 
-void PageScripting::on_openRecentButton_clicked()
+void PageScripting::openRecentList()
 {
     auto *item = ui->recentList->currentItem();
 
@@ -275,32 +275,16 @@ void PageScripting::on_openRecentButton_clicked()
                               "Please select a file.");
     }
 }
+
+void PageScripting::on_openRecentButton_clicked()
+{
+   openRecentList();
+}
+
+// Recent add list
 void PageScripting::on_recentList_doubleClicked()
 {
-    auto *item = ui->recentList->currentItem();
-
-    if (item) {
-        QString fileName = item->text();
-        QFile file(fileName);
-
-        if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Open QML File",
-                                  "Could not open\n " + fileName + " for reading");
-            return;
-        }
-
-        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-            ui->mainEdit->editor()->setPlainText(file.readAll());
-            ui->mainEdit->setFileNow(fileName);
-        } else {
-            createEditorTab(fileName, file.readAll());
-        }
-
-        file.close();
-    } else {
-        QMessageBox::critical(this, "Open Recent",
-                              "Please select a file.");
-    }
+   openRecentList();
 }
 
 void PageScripting::on_removeSelectedButton_clicked()
@@ -325,9 +309,11 @@ void PageScripting::on_clearRecentButton_clicked()
     }
 }
 
-void PageScripting::on_openExampleButton_clicked()
+
+
+void PageScripting::openExample()
 {
-    auto *item = ui->exampleList->currentItem();
+    QListWidgetItem *item = ui->exampleList->currentItem();
 
     if (item) {
         QFile file(item->data(Qt::UserRole).toString());
@@ -338,9 +324,11 @@ void PageScripting::on_openExampleButton_clicked()
             return;
         }
 
-        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-            ui->mainEdit->editor()->setPlainText(file.readAll());
+        if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
+            ui->mainEdit->codeEditor()->setPlainText(file.readAll());
             ui->mainEdit->setFileNow("");
+
+            setEditorClean(ui->mainEdit);
         } else {
             createEditorTab("", file.readAll());
         }
@@ -352,31 +340,13 @@ void PageScripting::on_openExampleButton_clicked()
     }
 }
 
+void PageScripting::on_openExampleButton_clicked()
+{
+    openExample();
+}
 void PageScripting::on_exampleList_doubleClicked()
 {
-    auto *item = ui->exampleList->currentItem();
-
-    if (item) {
-        QFile file(item->data(Qt::UserRole).toString());
-
-        if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Open QML File",
-                                  "Could not open example for reading");
-            return;
-        }
-
-        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-            ui->mainEdit->editor()->setPlainText(file.readAll());
-            ui->mainEdit->setFileNow("");
-        } else {
-            createEditorTab("", file.readAll());
-        }
-
-        file.close();
-    } else {
-        QMessageBox::critical(this, "Open Example",
-                              "Please select one example.");
-    }
+    openExample();
 }
 
 void PageScripting::updateRecentList()

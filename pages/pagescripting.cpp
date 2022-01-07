@@ -359,6 +359,9 @@ void PageScripting::updateRecentList()
 
 void PageScripting::makeEditorConnections(QmlEditor *editor)
 {
+    connect(editor->codeEditor(), &QCodeEditor::textChanged, [editor, this]() {
+       setEditorDirty(editor);
+    });
     connect(editor->codeEditor(), &QCodeEditor::runEmbeddedTriggered, [this]() {
         on_runButton_clicked();
     });
@@ -377,7 +380,7 @@ void PageScripting::makeEditorConnections(QmlEditor *editor)
             updateRecentList();
         }
     });
-    connect(editor, &QmlEditor::fileSaved, [this](QString fileName) {
+    connect(editor, &QmlEditor::fileSaved, [editor, this](QString fileName) {
         if (mVesc) {
             mVesc->emitStatusMessage("Saved " + fileName, true);
         }
@@ -386,6 +389,8 @@ void PageScripting::makeEditorConnections(QmlEditor *editor)
             mRecentFiles.append(fileName);
             updateRecentList();
         }
+
+        setEditorClean(editor);
     });
 }
 
@@ -422,6 +427,9 @@ void PageScripting::createEditorTab(QString fileName, QString content)
     connect(closeButton, &QPushButton::clicked, [this, editor]() {
         ui->fileTabs->removeTab(ui->fileTabs->indexOf(editor));
     });
+
+    // Do this at the end to make sure to account for the changes from loading the initial text
+    setEditorClean(editor);
 }
 
 /**

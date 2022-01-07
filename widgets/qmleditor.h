@@ -20,6 +20,8 @@ public:
     QString fileNow();
     void setFileNow(QString fileName);
 
+    bool isDirty = false;
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 

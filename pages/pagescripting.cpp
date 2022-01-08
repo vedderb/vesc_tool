@@ -108,8 +108,8 @@ PageScripting::PageScripting(QWidget *parent) :
             if (f.exists()) {
                 QFile file(path);
                 if (file.open(QIODevice::ReadOnly)) {
-                    if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-                        ui->mainEdit->editor()->setPlainText(file.readAll());
+                    if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
+                        ui->mainEdit->codeEditor()->setPlainText(file.readAll());
                         ui->mainEdit->setFileNow(path);
                     } else {
                         createEditorTab(path, file.readAll());
@@ -137,10 +137,10 @@ PageScripting::PageScripting(QWidget *parent) :
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(0, QTabBar::RightSide, closeButton);
 
-    auto editor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
-    connect(closeButton, &QPushButton::clicked, [editor]() {
-        editor->editor()->clear();
-        editor->setFileNow("");
+    QmlEditor *mainQmlEditor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
+    connect(closeButton, &QPushButton::clicked, [this, mainQmlEditor]() {
+        // Clear main tab
+        removeEditor(mainQmlEditor);
     });
 
     ui->splitter_2->setSizes(QList<int>({1000, 600}));
@@ -248,7 +248,7 @@ void PageScripting::on_fullscreenButton_clicked()
     mQmlUi.emitToggleFullscreen();
 }
 
-void PageScripting::on_openRecentButton_clicked()
+void PageScripting::openRecentList()
 {
     auto *item = ui->recentList->currentItem();
 
@@ -262,8 +262,8 @@ void PageScripting::on_openRecentButton_clicked()
             return;
         }
 
-        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-            ui->mainEdit->editor()->setPlainText(file.readAll());
+        if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
+            ui->mainEdit->codeEditor()->setPlainText(file.readAll());
             ui->mainEdit->setFileNow(fileName);
         } else {
             createEditorTab(fileName, file.readAll());
@@ -275,32 +275,16 @@ void PageScripting::on_openRecentButton_clicked()
                               "Please select a file.");
     }
 }
+
+void PageScripting::on_openRecentButton_clicked()
+{
+   openRecentList();
+}
+
+// Recent add list
 void PageScripting::on_recentList_doubleClicked()
 {
-    auto *item = ui->recentList->currentItem();
-
-    if (item) {
-        QString fileName = item->text();
-        QFile file(fileName);
-
-        if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Open QML File",
-                                  "Could not open\n " + fileName + " for reading");
-            return;
-        }
-
-        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-            ui->mainEdit->editor()->setPlainText(file.readAll());
-            ui->mainEdit->setFileNow(fileName);
-        } else {
-            createEditorTab(fileName, file.readAll());
-        }
-
-        file.close();
-    } else {
-        QMessageBox::critical(this, "Open Recent",
-                              "Please select a file.");
-    }
+   openRecentList();
 }
 
 void PageScripting::on_removeSelectedButton_clicked()
@@ -325,9 +309,11 @@ void PageScripting::on_clearRecentButton_clicked()
     }
 }
 
-void PageScripting::on_openExampleButton_clicked()
+
+
+void PageScripting::openExample()
 {
-    auto *item = ui->exampleList->currentItem();
+    QListWidgetItem *item = ui->exampleList->currentItem();
 
     if (item) {
         QFile file(item->data(Qt::UserRole).toString());
@@ -338,9 +324,11 @@ void PageScripting::on_openExampleButton_clicked()
             return;
         }
 
-        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-            ui->mainEdit->editor()->setPlainText(file.readAll());
+        if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
+            ui->mainEdit->codeEditor()->setPlainText(file.readAll());
             ui->mainEdit->setFileNow("");
+
+            setEditorClean(ui->mainEdit);
         } else {
             createEditorTab("", file.readAll());
         }
@@ -352,31 +340,13 @@ void PageScripting::on_openExampleButton_clicked()
     }
 }
 
+void PageScripting::on_openExampleButton_clicked()
+{
+    openExample();
+}
 void PageScripting::on_exampleList_doubleClicked()
 {
-    auto *item = ui->exampleList->currentItem();
-
-    if (item) {
-        QFile file(item->data(Qt::UserRole).toString());
-
-        if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Open QML File",
-                                  "Could not open example for reading");
-            return;
-        }
-
-        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-            ui->mainEdit->editor()->setPlainText(file.readAll());
-            ui->mainEdit->setFileNow("");
-        } else {
-            createEditorTab("", file.readAll());
-        }
-
-        file.close();
-    } else {
-        QMessageBox::critical(this, "Open Example",
-                              "Please select one example.");
-    }
+    openExample();
 }
 
 void PageScripting::updateRecentList()
@@ -389,16 +359,19 @@ void PageScripting::updateRecentList()
 
 void PageScripting::makeEditorConnections(QmlEditor *editor)
 {
-    connect(editor->editor(), &QCodeEditor::runEmbeddedTriggered, [this]() {
+    connect(editor->codeEditor(), &QCodeEditor::textChanged, [editor, this]() {
+       setEditorDirty(editor);
+    });
+    connect(editor->codeEditor(), &QCodeEditor::runEmbeddedTriggered, [this]() {
         on_runButton_clicked();
     });
-    connect(editor->editor(), &QCodeEditor::runWindowTriggered, [this]() {
+    connect(editor->codeEditor(), &QCodeEditor::runWindowTriggered, [this]() {
         on_runWindowButton_clicked();
     });
-    connect(editor->editor(), &QCodeEditor::stopTriggered, [this]() {
+    connect(editor->codeEditor(), &QCodeEditor::stopTriggered, [this]() {
         on_stopButton_clicked();
     });
-    connect(editor->editor(), &QCodeEditor::clearConsoleTriggered, [this]() {
+    connect(editor->codeEditor(), &QCodeEditor::clearConsoleTriggered, [this]() {
         ui->debugEdit->clear();
     });
     connect(editor, &QmlEditor::fileOpened, [this](QString fileName) {
@@ -407,7 +380,7 @@ void PageScripting::makeEditorConnections(QmlEditor *editor)
             updateRecentList();
         }
     });
-    connect(editor, &QmlEditor::fileSaved, [this](QString fileName) {
+    connect(editor, &QmlEditor::fileSaved, [editor, this](QString fileName) {
         if (mVesc) {
             mVesc->emitStatusMessage("Saved " + fileName, true);
         }
@@ -416,6 +389,8 @@ void PageScripting::makeEditorConnections(QmlEditor *editor)
             mRecentFiles.append(fileName);
             updateRecentList();
         }
+
+        setEditorClean(editor);
     });
 }
 
@@ -441,7 +416,7 @@ void PageScripting::createEditorTab(QString fileName, QString content)
     });
 
     editor->setFileNow(fileName);
-    editor->editor()->setPlainText(content);
+    editor->codeEditor()->setPlainText(content);
     QString theme = Utility::getThemePath();
 
     QPushButton *closeButton = new QPushButton();
@@ -450,13 +425,110 @@ void PageScripting::createEditorTab(QString fileName, QString content)
     ui->fileTabs->tabBar()->setTabButton(tabIndex, QTabBar::RightSide, closeButton);
 
     connect(closeButton, &QPushButton::clicked, [this, editor]() {
-        ui->fileTabs->removeTab(ui->fileTabs->indexOf(editor));
+       removeEditor(editor);
     });
+
+    // Do this at the end to make sure to account for the changes from loading the initial text
+    setEditorClean(editor);
 }
+
+
+/**
+ * @brief PageScripting::removeEditor Removes the editor (unless it is the 0th, in which case it simply clears it)
+ * @param qmlEditor
+ */
+void PageScripting::removeEditor(QmlEditor *qmlEditor)
+{
+   bool shouldCloseTab = false;
+
+   // Check if tab is dirty
+   if (qmlEditor->isDirty == true) {
+       // Ask user for confirmation
+       QMessageBox::StandardButton answer = QMessageBox::question(
+            this,
+            tr("Delete the tab"),
+            tr("Do you want to delete the tab contents?"),
+            QMessageBox::Yes | QMessageBox::No
+       );
+
+       if (answer == QMessageBox::Yes) {
+          shouldCloseTab = true;
+       } else {
+          shouldCloseTab = false;
+       }
+
+   } else {
+       shouldCloseTab = true;
+   }
+
+   // Only close if appropriate
+   if (shouldCloseTab) {
+       // Get index for this tab
+       int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+
+       // Special handling of tabIdx == 0
+       if (tabIdx == 0) {
+            qmlEditor->codeEditor()->clear();
+            qmlEditor->setFileNow("");
+       } else {
+           ui->fileTabs->removeTab(tabIdx);
+       }
+   }
+
+}
+
+
+/**
+ * @brief PageScripting::setEditorDirtySet the editor as dirty, i.e. having text modifications
+ * @param qmlEditor
+ */
+void PageScripting::setEditorDirty(QmlEditor *qmlEditor)
+{
+    // Check if the editor is not already dirty
+    if (qmlEditor->isDirty == false) {
+        // Set editor as dirty
+        qmlEditor->isDirty = true;
+
+        // Get editor index
+        int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+
+        // Append a `*` to signify a dirty editor
+        QString tabText = ui->fileTabs->tabText(tabIdx);
+        ui->fileTabs->setTabText(tabIdx, tabText + "*");
+    }
+}
+
+
+/**
+ * @brief PageScripting::setEditorClean Set the editor as clean, i.e. having no text modifications
+ * @param qmlEditor
+ */
+void PageScripting::setEditorClean(QmlEditor *qmlEditor)
+{
+    // Check if the editor is not already clean
+    if (qmlEditor->isDirty == true) {
+        // Set editor as clean
+        qmlEditor->isDirty = false;
+
+        // Get editor index
+        int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+
+        // Get the tab's label
+        QString tabText = ui->fileTabs->tabText(tabIdx);
+
+        // Check if the final character is a `*`, which indicated it was a dirty file
+        if (tabText.back() == "*") {
+            // Remove the terminal `*`
+            tabText.chop(1);
+            ui->fileTabs->setTabText(tabIdx, tabText);
+        }
+    }
+}
+
 
 QString PageScripting::qmlToRun(bool importDir)
 {
-    QString res = ui->mainEdit->editor()->toPlainText();
+    QString res = ui->mainEdit->codeEditor()->toPlainText();
     res.prepend("import \"qrc:/mobile\";");
     res.prepend("import Vedder.vesc.vescinterface 1.0;");
 
@@ -645,8 +717,8 @@ void PageScripting::on_exportCArrayAppButton_clicked()
 void PageScripting::on_openQmluiHwButton_clicked()
 {
     if (mVesc && mVesc->isPortConnected() && mVesc->qmlHwLoaded()) {
-        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-            ui->mainEdit->editor()->setPlainText(mVesc->qmlHw());
+        if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
+            ui->mainEdit->codeEditor()->setPlainText(mVesc->qmlHw());
             ui->fileTabs->setTabText(ui->fileTabs->indexOf(ui->mainEdit), "VESC Hw");
         } else {
             createEditorTab("VESC Hw", mVesc->qmlHw());
@@ -660,8 +732,8 @@ void PageScripting::on_openQmluiHwButton_clicked()
 void PageScripting::on_openQmluiAppButton_clicked()
 {
     if (mVesc && mVesc->isPortConnected() && mVesc->qmlAppLoaded()) {
-        if (ui->mainEdit->editor()->toPlainText().isEmpty()) {
-            ui->mainEdit->editor()->setPlainText(mVesc->qmlApp());
+        if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
+            ui->mainEdit->codeEditor()->setPlainText(mVesc->qmlApp());
             ui->fileTabs->setTabText(ui->fileTabs->indexOf(ui->mainEdit), "VESC App");
         } else {
             createEditorTab("VESC App", mVesc->qmlApp());

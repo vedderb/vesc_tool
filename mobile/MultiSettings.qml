@@ -105,7 +105,7 @@ Item {
             paramListLimits.addEditorMc("l_watt_min")
 
             // FOC
-            paramListFoc.addEditorMc("foc_f_sw")
+            paramListFoc.addEditorMc("foc_f_zv")
             paramListFoc.addEditorMc("foc_openloop_rpm")
             paramListFoc.addEditorMc("foc_motor_r")
             paramListFoc.addEditorMc("foc_motor_l")

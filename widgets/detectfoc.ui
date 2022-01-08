@@ -52,7 +52,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -92,7 +92,7 @@
        <widget class="QDoubleSpinBox" name="obsGainBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -132,7 +132,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -162,7 +162,7 @@
        <widget class="QDoubleSpinBox" name="currentBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -239,7 +239,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -437,7 +437,7 @@
        <widget class="QDoubleSpinBox" name="dutyBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -470,7 +470,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="readOnly">
@@ -494,7 +494,7 @@
        <widget class="QDoubleSpinBox" name="erpmBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -538,7 +538,7 @@
        <widget class="QDoubleSpinBox" name="kiBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -574,7 +574,7 @@
        <widget class="QDoubleSpinBox" name="kpBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -616,7 +616,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">

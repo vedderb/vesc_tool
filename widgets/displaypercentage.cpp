@@ -114,7 +114,7 @@ void DisplayPercentage::paintEvent(QPaintEvent *event)
 
     // Text
     pen.setColor(c_text);
-    font.setFamily("Monospace");
+    font.setFamily("DejaVu Sans Mono");
     font.setBold(true);
     font.setPixelSize(2 * h / 3 - 2);
     painter.setPen(pen);

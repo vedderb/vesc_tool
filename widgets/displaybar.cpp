@@ -56,7 +56,7 @@ void DisplayBar::paintEvent(QPaintEvent *event)
 
     // Name
     pen.setColor(Utility::getAppQColor("white"));
-    font.setFamily("Monospace");
+    font.setFamily("DejaVu Sans Mono");
     font.setBold(true);
     font.setPixelSize(h * f_val - 2);
     painter.setPen(pen);
@@ -66,7 +66,7 @@ void DisplayBar::paintEvent(QPaintEvent *event)
 
     // Value
     pen.setColor(Utility::getAppQColor("white"));
-    font.setFamily("Monospace");
+    font.setFamily("DejaVu Sans Mono");
     font.setBold(true);
     font.setPixelSize(h * f_val - 2);
     painter.setPen(pen);

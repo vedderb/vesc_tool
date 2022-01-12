@@ -245,7 +245,7 @@ void DetectFoc::on_applyAllButton_clicked()
         if (lambda < 1e-10) {
             QMessageBox::critical(this,
                                   tr("Apply Error"),
-                                  tr("\u03BB is 0. Please measure it first."));
+                                  tr(u8"\u03BB is 0. Please measure it first."));
             return;
         }
 
@@ -261,7 +261,7 @@ void DetectFoc::on_applyAllButton_clicked()
         mVesc->mcConfig()->updateParamDouble("foc_motor_ld_lq_diff", ld_lq_diff / 1e6);
         mVesc->mcConfig()->updateParamDouble("foc_motor_flux_linkage", lambda);
 
-        mVesc->emitStatusMessage(tr("R, L and \u03BB applied"), true);
+        mVesc->emitStatusMessage(tr(u8"R, L and \u03BB applied"), true);
 
         if (mTempMotorLast > -10.0) {
             mVesc->mcConfig()->updateParamDouble("foc_temp_comp_base_temp", mTempMotorLast);
@@ -372,7 +372,7 @@ void DetectFoc::on_calcGainButton_clicked()
     if (lambda < 1e-10) {
         QMessageBox::critical(this,
                               tr("Calculate Error"),
-                              tr("\u03BB is 0. Please measure it first."));
+                              tr(u8"\u03BB is 0. Please measure it first."));
         return;
     }
 

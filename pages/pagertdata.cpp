@@ -263,7 +263,7 @@ void PageRtData::timerSlot()
         }
     }
 
-    if (mUpdateValPlot) {
+    if (mUpdateValPlot == true) {
         int dataSize = mTempMosVec.size();
 
         QVector<double> xAxis(dataSize);
@@ -346,7 +346,7 @@ void PageRtData::timerSlot()
         mUpdateValPlot = false;
     }
 
-    if (mUpdatePosPlot) {
+    if (mUpdatePosPlot == true) {
         QVector<double> xAxis(mPositionVec.size());
         for (int i = 0;i < mPositionVec.size();i++) {
             xAxis[i] = double(i);
@@ -364,7 +364,7 @@ void PageRtData::timerSlot()
         mUpdatePosPlot = false;
     }
 
-    if (mExperimentReplot) {
+    if (mExperimentReplot == true) {
         ui->experimentPlot->clearGraphs();
 
         for (int i = 0;i < mExperimentPlots.size();i++) {

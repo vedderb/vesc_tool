@@ -18,6 +18,7 @@
     */
 
 #include "rtdatatext.h"
+#include "utility.h"
 #include <QFont>
 #include <QPainter>
 #include <QPaintEvent>
@@ -103,7 +104,7 @@ void RtDataText::paintEvent(QPaintEvent *event)
     const double vidw = event->rect().width();
 
     // Left info box
-    str.sprintf("Power   : %.1f W\n"
+    str = QString::asprintf("Power   : %.1f W\n"
                 "Duty    : %.2f %%\n"
                 "ERPM    : %.1f\n"
                 "I Batt  : %.2f A\n"
@@ -115,15 +116,15 @@ void RtDataText::paintEvent(QPaintEvent *event)
                 mValues.current_motor);
 
     painter.setOpacity(0.7);
-    painter.fillRect(0, 0, bbox_w, bbow_h, Qt::black);
+    painter.fillRect(0, 0, bbox_w, bbow_h, Utility::getAppQColor("normalBackground"));
     painter.setOpacity(1.0);
 
-    painter.setPen(Qt::white);
+    painter.setPen(Utility::getAppQColor("normalText"));
     painter.drawText(QRectF(mTxtOfs, mTxtOfs, mBoxW, mBoxH),
                      Qt::AlignLeft, str);
 
     // Middle info box
-    str.sprintf("T FET   : %.2f \u00B0C\n"
+    str = QString::asprintf("T FET   : %.2f \u00B0C\n"
                 "T Motor : %.2f \u00B0C\n"
                 "Fault   : %s\n"
                 "Tac     : %i\n"
@@ -135,15 +136,15 @@ void RtDataText::paintEvent(QPaintEvent *event)
                 mValues.tachometer_abs);
 
     painter.setOpacity(0.7);
-    painter.fillRect(vidw / 2.0 - bbox_w / 2.0, 0, bbox_w, bbow_h, Qt::black);
+    painter.fillRect(vidw / 2.0 - bbox_w / 2.0, 0, bbox_w, bbow_h, Utility::getAppQColor("normalBackground"));
     painter.setOpacity(1.0);
 
-    painter.setPen(Qt::white);
+    painter.setPen(Utility::getAppQColor("normalText"));
     painter.drawText(QRectF(vidw / 2.0 - bbox_w / 2.0 + mTxtOfs, mTxtOfs, mBoxW, mBoxH),
                      Qt::AlignLeft, str);
 
     // Right info box
-    str.sprintf("Ah Draw   : %.1f mAh\n"
+    str = QString::asprintf("Ah Draw   : %.1f mAh\n"
                 "Ah Charge : %.1f mAh\n"
                 "Wh Draw   : %.2f Wh\n"
                 "Wh Charge : %.2f Wh\n"
@@ -156,10 +157,10 @@ void RtDataText::paintEvent(QPaintEvent *event)
 
     painter.setOpacity(0.7);
     painter.fillRect(vidw - bbox_w, 0, bbox_w,
-                     mBoxH + 2 * mTxtOfs, Qt::black);
+                     mBoxH + 2 * mTxtOfs, Utility::getAppQColor("normalBackground"));
     painter.setOpacity(1.0);
 
-    painter.setPen(Qt::white);
+    painter.setPen(Utility::getAppQColor("normalText"));
     painter.drawText(QRectF(vidw - bbox_w + mTxtOfs, mTxtOfs, mBoxW, mBoxH),
                      Qt::AlignLeft, str);
 }

@@ -21,14 +21,21 @@
 #include "ui_detectfochall.h"
 #include "helpdialog.h"
 #include <QMessageBox>
+#include "utility.h"
 
 DetectFocHall::DetectFocHall(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DetectFocHall)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->startButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 }
 
 DetectFocHall::~DetectFocHall()

@@ -40,16 +40,16 @@ SetupWizardMotor::SetupWizardMotor(VescInterface *vesc, QWidget *parent)
 
     setStartId(Page_Intro);
     setWizardStyle(ModernStyle);
-    setPixmap(QWizard::LogoPixmap, QPixmap("://res/icon.png").
-              scaled(40, 40,
-                     Qt::KeepAspectRatio,
-                     Qt::SmoothTransformation));
+    QString theme = Utility::getThemePath();
+    QPixmap icon_logo = QIcon(":/res/icon.svg").pixmap(QSize(this->devicePixelRatioF() * 48, this->devicePixelRatioF() * 48));
+    icon_logo.setDevicePixelRatio(this->devicePixelRatioF());
+    setPixmap(QWizard::LogoPixmap, icon_logo);
     resize(800, 450);
 
     setWindowTitle(tr("Motor Setup Wizard"));
 
     mSideLabel = new AspectImgLabel(Qt::Vertical);
-    mSideLabel->setPixmap(QPixmap("://res/logo_wizard.png"));
+    mSideLabel->setPixmap(QPixmap("://res/logo_vertical.png"));
     mSideLabel->setScaledContents(true);
     setSideWidget(mSideLabel);
 
@@ -549,9 +549,7 @@ void BldcPage::initializePage()
     if (field("SensorMode").toInt() == SetupWizardMotor::Sensor_Hall) {
         mParamTab->addParamRow(mVesc->mcConfig(), "hall_sl_erpm");
         for (int i = 0;i < 8;i++) {
-            QString str;
-            str.sprintf("hall_table_%d", i);
-            mParamTab->addParamRow(mVesc->mcConfig(), str);
+            mParamTab->addParamRow(mVesc->mcConfig(), QString("hall_table_%1").arg(i));
         }
     }
 }

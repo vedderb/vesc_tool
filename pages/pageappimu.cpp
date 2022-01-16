@@ -19,6 +19,7 @@
 
 #include "pageappimu.h"
 #include "ui_pageappimu.h"
+#include "utility.h"
 #include <QDateTime>
 #include <QQuickItem>
 #include <cmath>
@@ -39,57 +40,61 @@ PageAppImu::PageAppImu(QWidget *parent) :
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
 
-    ui->rpyPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    ui->gyroPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    QCustomPlot *plots[3] = {ui->rpyPlot, ui->accelPlot, ui->gyroPlot};
+    for(int i = 0; i<3; i++)
+    {
+        Utility::setPlotColors(plots[i]);
+        plots[i]->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    }
 
     int graphIndex = 0;
 
     ui->rpyPlot->addGraph();
-    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->rpyPlot->graph(graphIndex)->setName("Roll");
     graphIndex++;
 
     ui->rpyPlot->addGraph();
-    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Qt::red));
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2")));
     ui->rpyPlot->graph(graphIndex)->setName("Pitch");
     graphIndex++;
 
     ui->rpyPlot->addGraph();
-    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+    ui->rpyPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3")));
     ui->rpyPlot->graph(graphIndex)->setName("Yaw");
     graphIndex++;
 
     graphIndex = 0;
 
     ui->accelPlot->addGraph();
-    ui->accelPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->accelPlot->graph(graphIndex)->setName("Acc X");
     graphIndex++;
 
     ui->accelPlot->addGraph();
-    ui->accelPlot->graph(graphIndex)->setPen(QPen(Qt::red));
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2")));
     ui->accelPlot->graph(graphIndex)->setName("Acc Y");
     graphIndex++;
 
     ui->accelPlot->addGraph();
-    ui->accelPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+    ui->accelPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3")));
     ui->accelPlot->graph(graphIndex)->setName("Acc Z");
     graphIndex++;
 
     graphIndex = 0;
 
     ui->gyroPlot->addGraph();
-    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Qt::blue));
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->gyroPlot->graph(graphIndex)->setName("Gyro X");
     graphIndex++;
 
     ui->gyroPlot->addGraph();
-    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Qt::red));
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph2")));
     ui->gyroPlot->graph(graphIndex)->setName("Gyro Y");
     graphIndex++;
 
     ui->gyroPlot->addGraph();
-    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Qt::green));
+    ui->gyroPlot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph3")));
     ui->gyroPlot->graph(graphIndex)->setName("Gyro Z");
     graphIndex++;
 
@@ -99,21 +104,18 @@ PageAppImu::PageAppImu(QWidget *parent) :
     ui->accelPlot->legend->setVisible(true);
     ui->accelPlot->legend->setFont(legendFont);
     ui->accelPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->accelPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->accelPlot->xAxis->setLabel("Seconds (s)");
     ui->accelPlot->yAxis->setLabel("Acceleration (G)");
 
     ui->rpyPlot->legend->setVisible(true);
     ui->rpyPlot->legend->setFont(legendFont);
     ui->rpyPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->rpyPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->rpyPlot->xAxis->setLabel("Seconds (s)");
     ui->rpyPlot->yAxis->setLabel("Angle (Deg)");
 
     ui->gyroPlot->legend->setVisible(true);
     ui->gyroPlot->legend->setFont(legendFont);
     ui->gyroPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->gyroPlot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->gyroPlot->xAxis->setLabel("Seconds (s)");
     ui->gyroPlot->yAxis->setLabel("Angular Velocity (Deg/s)");
 

@@ -22,6 +22,8 @@
 
 #include <QWidget>
 #include "vescinterface.h"
+#include "mobile/qmlui.h"
+#include "utility.h"
 
 namespace Ui {
 class PageWelcome;
@@ -40,15 +42,19 @@ public:
 
 public slots:
     void startSetupWizardFocSimple();
+    void startSetupWizardFocQml();
     void startSetupWizardMotor();
     void startSetupWizardApp();
 
 private slots:
     void on_autoConnectButton_clicked();
+    void on_nrfPairButton_clicked();
 
 private:
     Ui::PageWelcome *ui;
     VescInterface *mVesc;
+    QmlUi mQmlUi;
+    Utility mUtil;
 
 };
 

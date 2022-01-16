@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 
@@ -32,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool mSendCanAtStart: false
     property int mCanIdAtStart: 0
+    property bool isHorizontal: width > height
 
     function openDialog() {
         canIdModel.clear()
@@ -93,9 +94,14 @@ Item {
         modal: true
         focus: true
 
-        width: parent.width - 20
-        x: 10
-        y: parent.height / 2 - height / 2
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        width: parent.width - 20 -notchLeft - notchRight
+        height: parent.height - 20 - notchBot - notchTop
+        x: 10 + (notchLeft + notchRight)/2
+        y: 10 + notchTop
         parent: ApplicationWindow.overlay
 
         ProgressBar {
@@ -108,15 +114,19 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 10
-        height: parent.height - 10
+        width: parent.width - 10 -notchLeft - notchRight
+        height: parent.height - 10 - notchBot - notchTop
+        x: 5 + (notchLeft + notchRight)/2
+        y: 5 + notchTop
         closePolicy: Popup.NoAutoClose
-        x: 5
-        y: 5
         parent: ApplicationWindow.overlay
         bottomMargin: 0
         rightMargin: 0
         padding: 10
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         StackLayout {
             id: stackLayout
@@ -128,7 +138,7 @@ Item {
 
                     Text {
                         Layout.fillWidth: true
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: qsTr("Which VESC is the input connected to?")
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -155,7 +165,7 @@ Item {
 
                                 width: canIdList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? "#41418f" : "#30000000"
+                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
                                 radius: 5
                                 RowLayout {
                                     anchors.fill: parent
@@ -168,13 +178,13 @@ Item {
                                         Layout.preferredHeight: 80
                                         Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                                         Layout.leftMargin: 5
-                                        source: isCan ? "qrc:/res/icons/can_off.png" : "qrc:/res/icons/Connected-96.png"
+                                        source: isCan ? "qrc" + Utility.getThemePath() + "icons/can_off.png" : "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
                                     }
 
                                     Text {
                                         Layout.fillWidth: true
                                         text: name + "\nID: " + canId
-                                        color: "white"
+                                        color: Utility.getAppHexColor("lightText")
                                         wrapMode: Text.WordWrap
                                     }
                                 }
@@ -209,7 +219,7 @@ Item {
 
                     Text {
                         Layout.fillWidth: true
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: qsTr("Select Input Type")
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -261,7 +271,7 @@ Item {
 
                                 width: inputList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? "#41418f" : "#30000000"
+                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
                                 radius: 5
                                 RowLayout {
                                     anchors.fill: parent
@@ -299,7 +309,7 @@ Item {
 
                                     Text {
                                         Layout.fillWidth: true
-                                        text: '<font color="white">' + name
+                                        text: '<font color=Utility.getAppHexColor("lightText")>' + name
                                         wrapMode: Text.WordWrap
                                     }
                                 }
@@ -326,7 +336,7 @@ Item {
 
                     Text {
                         Layout.fillWidth: true
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: qsTr("Move the throttle(s) from min to max, then leave it in the center.")
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -387,7 +397,7 @@ Item {
         }
 
         header: Rectangle {
-            color: "#dbdbdb"
+            color: Utility.getAppHexColor("lightText")
             height: tabBar.height
 
             TabBar {
@@ -400,7 +410,7 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#4f4f4f"
+                    color: Utility.getAppHexColor("lightBackground")
                 }
 
                 property int buttons: 4
@@ -489,12 +499,12 @@ Item {
                             nrfPairBox.visible = false
                             paramsMap.clear()
 
-                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 0, 0)
-                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 0, 0)
-                            mAppConf.updateParamEnum("app_to_use", apptype, 0)
-                            mAppConf.updateParamBool("app_ppm_conf.multi_esc", true, 0)
-                            mAppConf.updateParamBool("app_adc_conf.multi_esc", true, 0)
-                            mAppConf.updateParamBool("app_chuk_conf.multi_esc", true, 0)
+                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 0, null)
+                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 0, null)
+                            mAppConf.updateParamEnum("app_to_use", apptype, null)
+                            mAppConf.updateParamBool("app_ppm_conf.multi_esc", true, null)
+                            mAppConf.updateParamBool("app_adc_conf.multi_esc", true, null)
+                            mAppConf.updateParamBool("app_chuk_conf.multi_esc", true, null)
                             mCommands.setAppConf()
 
                             if (apptype === 4) {
@@ -532,8 +542,8 @@ Item {
 
                             // Setup page
                             paramsConf.clear()
-                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 3, 0)
-                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 1, 0)
+                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 3, null)
+                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 1, null)
                             mCommands.setAppConf()
                             Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)
 
@@ -612,17 +622,23 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+
+        width: parent.width - 20 -notchLeft - notchRight
+        x: 10 + (notchLeft + notchRight)/2
+        y: dialog.y + dialog.height / 2 - height / 2
+
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         parent: ApplicationWindow.overlay
-        x: 10
-        y: dialog.y + dialog.height / 2 - height / 2
 
         Text {
             id: detectLambdaLabel
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

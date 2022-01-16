@@ -29,6 +29,8 @@ import QtQuick.Controls 2.1
 import Qt.labs.folderlistmodel 2.1
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.0
+import Qt.labs.platform 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id:picker
@@ -42,7 +44,7 @@ Item {
     property bool showDotAndDotDot: false
     property bool showHidden: true
     property bool showDirsFirst: true
-    property string folder: "file:///sdcard"
+    property string folder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
     property string nameFilters: "*.*"
 
     function currentFolder() {
@@ -77,7 +79,7 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         height: toolbarHeight
-        color: "#3c3c3c"
+        color: Utility.getAppHexColor("lightBackground")
         Button {
             id: button
             text: ".."
@@ -95,7 +97,7 @@ Item {
         }
         Text {
             id: filePath
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             text: folderListModel.folder.toString().replace("file:///", "►").replace("/", "►").replace("/", "►").replace("/", "►").replace("/", "►")
             renderType: Text.NativeRendering
             elide: Text.ElideMiddle
@@ -133,7 +135,7 @@ Item {
             headerDelegate:headerDelegate
             rowDelegate: Rectangle {
                 height: rowHeight
-                color: "#6f6f6f"
+                color: Utility.getAppHexColor("lightBackground")
             }
 
             OldControls.TableViewColumn {
@@ -148,7 +150,7 @@ Item {
                 Item {
                     height: rowHeight
                     Rectangle {
-                        color: "#6f6f6f"
+                        color: Utility.getAppHexColor("normalBackground")
                         anchors.fill: parent
                         MouseArea {
                             anchors.fill: parent
@@ -158,7 +160,7 @@ Item {
                         }
                         Text {
                             id: fileNameText
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             height: width
                             anchors.left: image.right
                             anchors.top: parent.top
@@ -174,8 +176,8 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: textmargin
                             anchors.verticalCenter: parent.verticalCenter
-                            source: isFolder(fileNameText.text) ? "qrc:/res/icons/ic_folder_open_black_48dp.png" :
-                                                                  "qrc:/res/icons/ic_insert_drive_file_black_48dp.png"
+                            source: isFolder(fileNameText.text) ? "qrc" + Utility.getThemePath() + "icons/ic_folder_open_black_48dp.png" :
+                                                                  "qrc" + Utility.getThemePath() + "icons/ic_insert_drive_file_black_48dp.png"
                         }
                     }
                 }
@@ -184,14 +186,14 @@ Item {
                 id: headerDelegate
                 Rectangle {
                     height: rowHeight
-                    color: "#535353"
+                    color: Utility.getAppHexColor("lightestBackground")
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.horizontalCenter: parent.horizontalCenter
                         height: headerTextSize
                         font.bold: true
                         elide: Text.ElideMiddle
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: styleData.value !== undefined ? styleData.value : ""
                     }
                 }

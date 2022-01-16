@@ -22,6 +22,7 @@
 #include <QMessageBox>
 #include <cstdlib>
 #include "helpdialog.h"
+#include "utility.h"
 
 ParamEditInt::ParamEditInt(QWidget *parent) :
     QWidget(parent),
@@ -30,6 +31,11 @@ ParamEditInt::ParamEditInt(QWidget *parent) :
     ui->setupUi(this);
     mConfig = 0;
     mMaxVal = 1;
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->readButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
+    ui->readDefaultButton->setIcon(QPixmap(theme + "icons/Data Backup-96.png"));
 
     mDisplay = new DisplayPercentage(this);
     mIntBox = new QSpinBox(this);

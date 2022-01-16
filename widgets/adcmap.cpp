@@ -20,6 +20,7 @@
 #include "adcmap.h"
 #include "ui_adcmap.h"
 #include "helpdialog.h"
+#include "utility.h"
 #include <QMessageBox>
 
 AdcMap::AdcMap(QWidget *parent) :
@@ -27,6 +28,12 @@ AdcMap::AdcMap(QWidget *parent) :
     ui(new Ui::AdcMap)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->resetButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
     mResetDone = true;

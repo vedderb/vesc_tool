@@ -21,6 +21,7 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QDebug>
+#include <QInputDialog>
 #include <QFileDialog>
 #include <QListWidgetItem>
 #include <cmath>
@@ -51,6 +52,26 @@ void stepTowards(double &value, double goal, double step) {
     }
 }
 
+struct DebugMsg {
+public:
+    DebugMsg() {
+        type = QtDebugMsg;
+        line = -1;
+        isBad = false;
+    }
+
+    QtMsgType type;
+    QString msg;
+    QString msgLong;
+    bool isBad;
+    QString file;
+    int line;
+    QString function;
+};
+
+QMutex myDebugMsgMutex;
+QVector<DebugMsg> myDebugMsgs;
+
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     QByteArray localMsg = msg.toLocal8Bit();
@@ -69,19 +90,21 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         break;
     }
 
-    str.sprintf("%s (%s:%u %s): %s", typeStr.toLocal8Bit().data(),
-                context.file, context.line, context.function, localMsg.constData());
+    str = QString("%1 (%2:%3 %4): %5").arg(typeStr).arg(QString::fromLocal8Bit(context.file)).
+            arg(context.line).arg(QString::fromLocal8Bit(context.function)).arg(QString::fromLocal8Bit(localMsg));
 
-    if (PageDebugPrint::currentMsgHandler) {
-        QString strTmp;
-        if (isBad) {
-            strTmp = "<font color=\"red\">" + str + "</font><br>";
-        } else {
-            strTmp = str + "<br>";
-        }
+    DebugMsg dmsg;
+    dmsg.msg = msg;
+    dmsg.msgLong = str;
+    dmsg.isBad = isBad;
+    dmsg.type = type;
+    dmsg.file = context.file;
+    dmsg.line = context.line;
+    dmsg.function = context.function;
 
-        QMetaObject::invokeMethod(PageDebugPrint::currentMsgHandler, "printConsole",
-                                  Qt::QueuedConnection, Q_ARG(QString, strTmp));
+    {
+        QMutexLocker locker(&myDebugMsgMutex);
+        myDebugMsgs.append(dmsg);
     }
 
     printf("%s\n", str.toLocal8Bit().data());
@@ -95,15 +118,109 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    this->setWindowIcon(QIcon(":/res/icon.svg"));
+
+    QString theme = Utility::getThemePath();
+    ui->actionParameterEditorMcconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorAppconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorFW->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorCustomConf0->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionSaveAppconfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionPreferences->setIcon(QPixmap(theme + "icons/Settings-96.png"));
+    ui->actionLoadAppconfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionSaveMotorConfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionLoadMotorConfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionSaveAppConfigurationHeader->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSaveAppConfigurationHeaderWrap->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSaveMotorConfigurationHeader->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSaveMotorConfigurationHeaderWrap->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionExportConfigurationParser->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionTerminalPrintFaults->setIcon(QPixmap(theme + "icons/Console-96.png"));
+    ui->actionTerminalShowHelp->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->actionTerminalClear->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->actionTerminalPrintThreads->setIcon(QPixmap(theme + "icons/Electronics-96.png"));
+    ui->actionTerminalDRVResetLatchedFaults->setIcon(QPixmap(theme + "icons/Bug-96.png"));
+    ui->actionLibrariesUsed->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionMotorSetupWizard->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->actionAppSetupWizard->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->actionAutoSetupFOC->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->actionSetupMotorsFOCQuick->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->actionAboutQt->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionParameterEditorInfo->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->actionSafetyInformation->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionVESCToolChangelog->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionFirmwareChangelog->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionWarrantyStatement->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionLicense->setIcon(QPixmap(theme + "icons/About-96.png"));
+    ui->actionVESCProjectForums->setIcon(QPixmap(theme + "icons/User Group Man Man-96.png"));
+    ui->actionLoadFirmwareConfigs->setIcon(QPixmap(theme + "icons/Electronics-96.png"));
+    ui->actionBackupConfiguration->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->actionBackupConfigurationsCAN->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->actionRestoreConfiguration->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionRestoreConfigurationsCAN->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionClearConfigurationBackups->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->actionBackupConfiguration->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionReboot->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->actionExit->setIcon(QPixmap(theme + "icons/Shutdown-96.png"));
+    ui->pageLabel->setPixmap(QPixmap(theme + "logo.png"));
+    ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-96.png"));
+    ui->actionDisconnect->setIcon(QIcon(theme + "icons/Disconnected-96.png"));
+    ui->actionReadMcconf->setIcon(QIcon(theme + "icons/motor_up.png"));
+    ui->actionReadMcconfDefault->setIcon(QIcon(theme + "icons/motor_default.png"));
+    ui->actionWriteMcconf->setIcon(QIcon(theme + "icons/motor_down.png"));
+    ui->actionReadAppconf->setIcon(QIcon(theme + "icons/app_up.png"));
+    ui->actionReadAppconfDefault->setIcon(QIcon(theme + "icons/app_default.png"));
+    ui->actionWriteAppconf->setIcon(QIcon(theme + "icons/app_down.png"));
+
+    QIcon mycon = QIcon(theme + "icons/keys_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/keys_on.png"), QIcon::Normal, QIcon::On);
+    ui->actionKeyboardControl->setIcon(mycon);
+    ui->actionGamepadControl->setIcon(QIcon(theme + "icons/Controller-96.png"));
+    mycon = QIcon(theme + "icons/rt_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/rt_on.png"), QIcon::Normal, QIcon::On);
+    ui->actionRtData->setIcon(mycon);
+    mycon = QIcon(theme + "icons/rt_app_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/rt_app_on.png"), QIcon::Normal, QIcon::On);
+    ui->actionRtDataApp->setIcon(mycon);
+    mycon = QIcon(theme + "icons/imu_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/imu_on.png"), QIcon::Normal, QIcon::On);
+    ui->actionIMU->setIcon(mycon);
+    mycon = QIcon(theme + "icons/bms_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/bms_on.png"), QIcon::Normal, QIcon::On);
+    ui->actionrtDataBms->setIcon(mycon);
+    mycon = QIcon(theme + "icons/alive_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/alive_on.png"), QIcon::Normal, QIcon::On);
+    ui->actionSendAlive->setIcon(mycon);
+    mycon = QIcon(theme + "icons/can_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/can_on.png"), QIcon::Normal, QIcon::On);
+    ui->actionCanFwd->setIcon(mycon);
+    ui->scanCanButton->setIcon(QIcon(theme + "icons/Refresh-96.png"));
+
+    ui->dutyButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
+    ui->currentButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
+    ui->speedButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
+    ui->posButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
+    ui->brakeCurrentButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
+    ui->handbrakeButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
+    ui->fullBrakeButton->setIcon(QIcon(theme + "icons/Anchor-96.png"));
+
+    qRegisterMetaType<QtMsgType>("QtMsgType");
+
     mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
+    mPreferences = new Preferences(this);
+    mPreferences->setVesc(mVesc);
+
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(mStatusLabel);
+    mDebugTimer = new QTimer(this);
     mTimer = new QTimer(this);
     mKeyLeft = false;
     mKeyRight = false;
 
+    connect(mDebugTimer, SIGNAL(timeout()),
+            this, SLOT(timerSlotDebugMsg()));
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
     connect(mVesc, SIGNAL(statusMessage(QString,bool)),
@@ -136,7 +253,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *fwMenu = new QMenu(this);
     fwMenu->setTitle("Load Firmware Configs");
-    fwMenu->setIcon(QIcon("://res/icons/Electronics-96.png"));
+    fwMenu->setIcon(QIcon( theme + "icons/Electronics-96.png"));
     for (auto fw: Utility::configSupportedFws()) {
         QAction *action = new QAction(fwMenu);
         action->setText(QString("%1.%2").arg(fw.first).arg(fw.second, 2, 10, QChar('0')));
@@ -152,10 +269,11 @@ MainWindow::MainWindow(QWidget *parent) :
     auto reloadBackupMenu = [this, backupMenu]() {
         backupMenu->clear();
         backupMenu->setTitle("Load Configuration Backups for UUID");
-        backupMenu->setIcon(QIcon("://res/icons/Open Folder-96.png"));
+        QString theme = Utility::getThemePath();
+        backupMenu->setIcon(QIcon( theme + "icons/Open Folder-96.png"));
         for (auto uuid: mVesc->confListBackups()) {
             QAction *action = new QAction(backupMenu);
-            action->setIcon(QIcon("://res/icons/Electronics-96.png"));
+            action->setIcon(QIcon( theme + "icons/Electronics-96.png"));
             QString txt = uuid;
             QString name = mVesc->confBackupName(uuid);
             if (!name.isEmpty()) {
@@ -233,6 +351,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("motor_pid"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("motor_additional_info"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("motor_experiments"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_comparison"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_general"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden(false);
@@ -260,6 +379,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("motor_pid"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("motor_additional_info"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("motor_experiments"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_comparison"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_general"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden(true);
@@ -270,7 +390,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(true);
-//            ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(true);
+            //            ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("data_sampled"))->setHidden(true);
         }
     });
@@ -301,6 +421,7 @@ MainWindow::MainWindow(QWidget *parent) :
         mPageAppImu->reloadParams();
         mPageFirmware->reloadParams();
         mPageCanAnalyzer->reloadParams();
+        mPageScripting->reloadParams();
 
         updateMotortype();
         updateAppToUse();
@@ -351,7 +472,46 @@ MainWindow::MainWindow(QWidget *parent) :
     qApp->installEventFilter(this);
     qInstallMessageHandler(myMessageOutput);
 
+    mDebugTimer->start(10);
     mTimer->start(20);
+
+    mPollRtTimer.start(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
+    mPollAppTimer.start(int(1000.0 / mSettings.value("poll_rate_app_data", 50).toDouble()));
+    mPollImuTimer.start(int(1000.0 / mSettings.value("poll_rate_imu_data", 50).toDouble()));
+    mPollBmsTimer.start(int(1000.0 / mSettings.value("poll_rate_bms_data", 10).toDouble()));
+
+    connect(&mPollRtTimer, &QTimer::timeout, [this]() {
+        if (ui->actionRtData->isChecked()) {
+            mVesc->commands()->getValues();
+            mVesc->commands()->getValuesSetup();
+            mVesc->commands()->getStats(0xFFFFFFFF);
+            mPollRtTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
+        }
+    });
+
+    connect(&mPollAppTimer, &QTimer::timeout, [this]() {
+        if (ui->actionRtDataApp->isChecked()) {
+            mVesc->commands()->getDecodedAdc();
+            mVesc->commands()->getDecodedChuk();
+            mVesc->commands()->getDecodedPpm();
+            mVesc->commands()->getDecodedBalance();
+            mPollAppTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_app_data", 50).toDouble()));
+        }
+    });
+
+    connect(&mPollImuTimer, &QTimer::timeout, [this]() {
+        if (ui->actionIMU->isChecked()) {
+            mVesc->commands()->getImuData(0xFFFF);
+            mPollImuTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_imu_data", 50).toDouble()));
+        }
+    });
+
+    connect(&mPollBmsTimer, &QTimer::timeout, [this]() {
+        if (ui->actionrtDataBms->isChecked()) {
+            mVesc->commands()->bmsGetValues();
+            mPollBmsTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_bms_data", 10).toDouble()));
+        }
+    });
 
     // Restore size and position
     if (mSettings.contains("mainwindow/size")) {
@@ -373,7 +533,6 @@ MainWindow::MainWindow(QWidget *parent) :
     updateAppToUse();
 
     ui->leftSplitter->setSizes(QList<int>({1000, 80}));
-
     mPageDebugPrint->printConsole("VESC® Tool " + mVersion + " started<br>");
 }
 
@@ -396,12 +555,30 @@ bool MainWindow::eventFilter(QObject *object, QEvent *e)
 {
     (void)object;
 
-    if (!mVesc->isPortConnected() || !ui->actionKeyboardControl->isChecked()) {
+    if (!mVesc->isPortConnected()) {
         return false;
     }
 
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
+
+    if (e->type() == QEvent::KeyPress) {
+        if (keyEvent->key() == Qt::Key_Escape) {
+            ui->stopButton->animateClick();
+            return false; // Return false to pass the escape-event on
+        }
+    }
+
+    if (!ui->actionKeyboardControl->isChecked()) {
+        return false;
+    }
+
+    if (qApp->focusWidget() && QString(qApp->focusWidget()->metaObject()->className()).contains("edit",Qt::CaseInsensitive)) {
+        ui->actionKeyboardControl->setEnabled(false);
+        return false;
+    }
+    ui->actionKeyboardControl->setEnabled(true);
+
     if (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
         bool isPress = e->type() == QEvent::KeyPress;
 
         switch(keyEvent->key()) {
@@ -477,6 +654,31 @@ bool MainWindow::eventFilter(QObject *object, QEvent *e)
     return false;
 }
 
+void MainWindow::timerSlotDebugMsg()
+{
+    QMutexLocker locker(&myDebugMsgMutex);
+
+    while (!myDebugMsgs.isEmpty()) {
+        auto msg = myDebugMsgs.first();
+        myDebugMsgs.removeFirst();
+
+        if (msg.file.contains("qrc:/res/qml/myCode") ||
+                msg.file.contains("qrc:/res/qml/DynamicLoader") ||
+                msg.file.contains("qrc:/res/qml/MainLoader") ||
+                msg.file.toLower().endsWith(".qml")) {
+            mPageScripting->debugMsgRx(msg.type, msg.msg);
+        } else {
+            QString strTmp;
+            if (msg.isBad) {
+                strTmp = "<font color=\"#00A1E4\">" + msg.msgLong + "</font><br>";
+            } else {
+                strTmp = msg.msgLong + "<br>";
+            }
+            mPageDebugPrint->printConsole(strTmp);
+        }
+    }
+}
+
 void MainWindow::timerSlot()
 {
     // Update status label
@@ -506,7 +708,7 @@ void MainWindow::timerSlot()
     // Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
     static int disconected_cnt = 0;
     disconected_cnt++;
-    if (disconected_cnt >= 20 && ui->canList->count() > 0) {
+    if (disconected_cnt >= 40 && ui->canList->count() > 0) {
         ui->canList->clear();
         mVesc->commands()->setSendCan(false);
         ui->scanCanButton->setEnabled(true);
@@ -515,7 +717,7 @@ void MainWindow::timerSlot()
         ui->pageList->item(mPageNameIdList.value("app_custom_config_2"))->setHidden(true);
     }
 
-    if (disconected_cnt >= 20 && !mVesc->isPortConnected()) {
+    if (disconected_cnt >= 40 && !mVesc->isPortConnected()) {
         ui->scanCanButton->setEnabled(true);
     }
 
@@ -537,32 +739,6 @@ void MainWindow::timerSlot()
         } else {
             ui->canList->setCurrentRow(0);
         }
-    }
-
-    // RT data
-    if (ui->actionRtData->isChecked()) {
-        mVesc->commands()->getValues();
-        if (mVesc->isRtLogOpen()) {
-            mVesc->commands()->getValuesSetup();
-        }
-    }
-
-    // APP RT data
-    if (ui->actionRtDataApp->isChecked()) {
-        mVesc->commands()->getDecodedAdc();
-        mVesc->commands()->getDecodedChuk();
-        mVesc->commands()->getDecodedPpm();
-        mVesc->commands()->getDecodedBalance();
-    }
-
-    // IMU Data
-    if (ui->actionIMU->isChecked()) {
-        mVesc->commands()->getImuData(0xFFFF);
-    }
-
-    // BMS Data
-    if (ui->actionrtDataBms->isChecked()) {
-        mVesc->commands()->bmsGetValues();
     }
 
     // Send alive command once every 10 iterations
@@ -689,7 +865,7 @@ void MainWindow::showStatusInfo(QString info, bool isGood)
         mPageDebugPrint->printConsole("Status: " + info + "<br>");
     } else {
         mStatusLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-        mPageDebugPrint->printConsole("<font color=\"red\">Status: " + info + "</font><br>");
+        mPageDebugPrint->printConsole("<font color=\"#00A1E4\">Status: " + info + "</font><br>");
     }
 
     mStatusInfoTime = (80 * 20) / mTimer->interval();
@@ -1017,7 +1193,11 @@ void MainWindow::on_handbrakeButton_clicked()
 
 void MainWindow::addPageItem(QString name, QString icon, QString groupIcon, bool bold, bool indented)
 {
+    QFontMetrics fm(this->font());
+    int width = fm.horizontalAdvance("Welcome & Wizards++++++++++");
+    int height = fm.height();
     QListWidgetItem *item = new QListWidgetItem();
+    item->setSizeHint(QSize(width,height));
     ui->pageList->addItem(item);
     PageListItem *li = new PageListItem(name, icon, groupIcon, this);
     li->setBold(bold);
@@ -1094,160 +1274,174 @@ void MainWindow::reloadPages()
     mPageWelcome = new PageWelcome(this);
     mPageWelcome->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageWelcome);
-    addPageItem(tr("Welcome & Wizards"), "://res/icons/Home-96.png", "", true);
+    QString theme = Utility::getThemePath();
+    addPageItem(tr("Welcome & Wizards"),  theme + "icons/Home-96.png", "", true);
     connect(ui->actionAutoSetupFOC, SIGNAL(triggered(bool)),
-            mPageWelcome, SLOT(startSetupWizardFocSimple()));
+            mPageWelcome, SLOT(startSetupWizardFocQml()));
     connect(ui->actionMotorSetupWizard, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardMotor()));
     connect(ui->actionAppSetupWizard, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardApp()));
+    connect(ui->actionSetupMotorsFOCQuick, SIGNAL(triggered(bool)),
+            mPageWelcome, SLOT(startSetupWizardFocSimple()));
+
+
 
     mPageConnection = new PageConnection(this);
     mPageConnection->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageConnection);
-    addPageItem(tr("Connection"), "://res/icons/Connected-96.png", "", true);
+    addPageItem(tr("Connection"),  theme + "icons/Connected-96.png", "", true);
 
     mPageFirmware = new PageFirmware(this);
     mPageFirmware->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageFirmware);
-    addPageItem(tr("Firmware"), "://res/icons/Electronics-96.png", "", true);
+    addPageItem(tr("Firmware"),  theme + "icons/Electronics-96.png", "", true);
 
     mPageMotorSettings = new PageMotorSettings(this);
     mPageMotorSettings->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotorSettings);
-    addPageItem(tr("Motor Settings"), "://res/icons/motor.png", "", true);
+    addPageItem(tr("Motor Settings"),  theme + "icons/motor.png", "", true);
     mPageNameIdList.insert("motor", ui->pageList->count() - 1);
+    connect(mPageMotorSettings, SIGNAL(startFocWizard()),
+            mPageWelcome, SLOT(startSetupWizardFocQml()));
 
     mPageMotor = new PageMotor(this);
     mPageMotor->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotor);
-    addPageItem(tr("General"), "://res/icons/Horizontal Settings Mixer-96.png",
-                "://res/icons/mcconf.png", false, true);
+    addPageItem(tr("General"),  theme + "icons/Horizontal Settings Mixer-96.png",
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_general", ui->pageList->count() - 1);
 
     mPageBldc = new PageBldc(this);
     mPageBldc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageBldc);
-    addPageItem(tr("BLDC"), "://res/icons/bldc.png",
-                "://res/icons/mcconf.png", false, true);
+    addPageItem(tr("BLDC"),  theme + "icons/bldc.png",
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_bldc", ui->pageList->count() - 1);
 
     mPageDc = new PageDc(this);
     mPageDc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageDc);
-    addPageItem(tr("DC"), "://res/icons/Car Battery-96.png",
-                "://res/icons/mcconf.png", false, true);
+    addPageItem(tr("DC"),  theme + "icons/Car Battery-96.png",
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_dc", ui->pageList->count() - 1);
 
     mPageFoc = new PageFoc(this);
     mPageFoc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageFoc);
-    addPageItem(tr("FOC"), "://res/icons/3ph_sine.png",
-                "://res/icons/mcconf.png", false, true);
+    addPageItem(tr("FOC"),  theme + "icons/3ph_sine.png",
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_foc", ui->pageList->count() - 1);
 
     mPageGpd = new PageGPD(this);
     mPageGpd->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageGpd);
-    addPageItem(tr("GPDrive"), "://res/icons/3ph_sine.png",
-                "://res/icons/mcconf.png", false, true);
+    addPageItem(tr("GPDrive"),  theme + "icons/3ph_sine.png",
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_gpdrive", ui->pageList->count() - 1);
 
     mPageControllers = new PageControllers(this);
     mPageControllers->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageControllers);
-    addPageItem(tr("PID Controllers"), "://res/icons/Speed-96.png",
-                "://res/icons/mcconf.png", false, true);
+    addPageItem(tr("PID Controllers"),  theme + "icons/Speed-96.png",
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_pid", ui->pageList->count() - 1);
 
     mPageMotorInfo = new PageMotorInfo(this);
     mPageMotorInfo->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageMotorInfo);
-    addPageItem(tr("Additional Info"), "://res/icons/About-96.png",
-                "://res/icons/mcconf.png", false, true);
+    addPageItem(tr("Additional Info"),  theme + "icons/About-96.png",
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_additional_info", ui->pageList->count() - 1);
 
     mPageExperiments = new PageExperiments(this);
     mPageExperiments->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageExperiments);
-    addPageItem(tr("Experiments"), "://res/icons/Calculator-96.png",
-                "://res/icons/mcconf.png", false, true);
+    addPageItem(tr("Experiments"),  theme + "icons/Calculator-96.png",
+                theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_experiments", ui->pageList->count() - 1);
+
+    mPageMotorComparison = new PageMotorComparison(this);
+    mPageMotorComparison->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageMotorComparison);
+    addPageItem(tr("Comparison"),  theme + "icons/Calculator-96.png",
+                theme + "icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_comparison", ui->pageList->count() - 1);
 
     mPageAppSettings = new PageAppSettings(this);
     mPageAppSettings->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppSettings);
-    addPageItem(tr("App Settings"), "://res/icons/Outgoing Data-96.png", "", true);
+    addPageItem(tr("App Settings"),  theme + "icons/Outgoing Data-96.png", "", true);
     mPageNameIdList.insert("app", ui->pageList->count() - 1);
 
     mPageAppGeneral = new PageAppGeneral(this);
     mPageAppGeneral->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppGeneral);
-    addPageItem(tr("General"), "://res/icons/Horizontal Settings Mixer-96.png",
-                "://res/icons/appconf.png", false, true);
+    addPageItem(tr("General"),  theme + "icons/Horizontal Settings Mixer-96.png",
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_general", ui->pageList->count() - 1);
 
     mPageAppPpm = new PageAppPpm(this);
     mPageAppPpm->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppPpm);
-    addPageItem(tr("PPM"), "://res/icons/Controller-96.png",
-                "://res/icons/appconf.png", false, true);
+    addPageItem(tr("PPM"),  theme + "icons/Controller-96.png",
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_ppm", ui->pageList->count() - 1);
 
     mPageAppAdc = new PageAppAdc(this);
     mPageAppAdc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppAdc);
-    addPageItem(tr("ADC"), "://res/icons/Potentiometer-96.png",
-                "://res/icons/appconf.png", false, true);
+    addPageItem(tr("ADC"),  theme + "icons/Potentiometer-96.png",
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_adc", ui->pageList->count() - 1);
 
     mPageAppUart = new PageAppUart(this);
     mPageAppUart->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppUart);
-    addPageItem(tr("UART"), "://res/icons/Rs 232 Male-96.png",
-                "://res/icons/appconf.png", false, true);
+    addPageItem(tr("UART"),  theme + "icons/Rs 232 Male-96.png",
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_uart", ui->pageList->count() - 1);
 
     mPageAppNunchuk = new PageAppNunchuk(this);
     mPageAppNunchuk->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNunchuk);
-    addPageItem(tr("VESC Remote"), "://res/icons/icons8-fantasy-96.png",
-                "://res/icons/appconf.png", false, true);
+    addPageItem(tr("VESC Remote"),  theme + "icons/icons8-fantasy-96.png",
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_vescremote", ui->pageList->count() - 1);
 
     mPageAppNrf = new PageAppNrf(this);
     mPageAppNrf->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNrf);
-    addPageItem(tr("Nrf"), "://res/icons/Online-96.png",
-                "://res/icons/appconf.png", false, true);
+    addPageItem(tr("Nrf"),  theme + "icons/Online-96.png",
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_nrf", ui->pageList->count() - 1);
 
     mPageAppBalance = new PageAppBalance(this);
     mPageAppBalance->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppBalance);
-    addPageItem(tr("Balance"), "://res/icons/EUC-96.png",
-                "://res/icons/appconf.png", false, true);
+    addPageItem(tr("Balance"),  theme + "icons/EUC-96.png",
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_balance", ui->pageList->count() - 1);
 
     mPageAppPas = new PageAppPas(this);
     mPageAppPas->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppPas);
-    addPageItem(tr("PAS"), "://res/icons/icons8-fantasy-96.png",
-                "://res/icons/appconf.png", false, true);
+    addPageItem(tr("PAS"),  theme + "icons/icons8-fantasy-96.png",
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_pas", ui->pageList->count() - 1);
 
     mPageAppImu = new PageAppImu(this);
     mPageAppImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppImu);
-    addPageItem(tr("IMU"), "://res/icons/Gyroscope-96.png",
-                "://res/icons/appconf.png", false, true);
+    addPageItem(tr("IMU"),  theme + "icons/Gyroscope-96.png",
+                theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_imu", ui->pageList->count() - 1);
 
     mPageCustomConfig0 = new PageCustomConfig(this);
     mPageCustomConfig0->setVesc(mVesc);
     mPageCustomConfig0->setConfNum(0);
     ui->pageWidget->addWidget(mPageCustomConfig0);
-    addPageItem(tr("Config0"), "://res/icons/Electronics-96.png", "", true);
+    addPageItem(tr("Config0"),  theme + "icons/Electronics-96.png", "", true);
     mPageNameIdList.insert("app_custom_config_0", ui->pageList->count() - 1);
     ui->pageList->item(ui->pageList->count() - 1)->setHidden(true);
 
@@ -1255,7 +1449,7 @@ void MainWindow::reloadPages()
     mPageCustomConfig1->setVesc(mVesc);
     mPageCustomConfig1->setConfNum(1);
     ui->pageWidget->addWidget(mPageCustomConfig1);
-    addPageItem(tr("Config1"), "://res/icons/Electronics-96.png", "", true);
+    addPageItem(tr("Config1"),  theme + "icons/Electronics-96.png", "", true);
     mPageNameIdList.insert("app_custom_config_1", ui->pageList->count() - 1);
     ui->pageList->item(ui->pageList->count() - 1)->setHidden(true);
 
@@ -1263,67 +1457,73 @@ void MainWindow::reloadPages()
     mPageCustomConfig2->setVesc(mVesc);
     mPageCustomConfig2->setConfNum(2);
     ui->pageWidget->addWidget(mPageCustomConfig2);
-    addPageItem(tr("Config0"), "://res/icons/Electronics-96.png", "", true);
+    addPageItem(tr("Config0"),  theme + "icons/Electronics-96.png", "", true);
     mPageNameIdList.insert("app_custom_config_2", ui->pageList->count() - 1);
     ui->pageList->item(ui->pageList->count() - 1)->setHidden(true);
 
     mPageDataAnalysis = new PageDataAnalysis(this);
     mPageDataAnalysis->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageDataAnalysis);
-    addPageItem(tr("Data Analysis"), "://res/icons/Line Chart-96.png", "", true);
+    addPageItem(tr("Data Analysis"),  theme + "icons/Line Chart-96.png", "", true);
 
     mPageRtData = new PageRtData(this);
     mPageRtData->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageRtData);
-    addPageItem(tr("Realtime Data"), "://res/icons/rt_off.png", "", false, true);
+    addPageItem(tr("Realtime Data"),  theme + "icons/rt_off.png", "", false, true);
     mPageNameIdList.insert("data_rt", ui->pageList->count() - 1);
 
     mPageSampledData = new PageSampledData(this);
     mPageSampledData->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSampledData);
-    addPageItem(tr("Sampled Data"), "://res/icons/Gyroscope-96.png", "", false, true);
+    addPageItem(tr("Sampled Data"),  theme + "icons/Gyroscope-96.png", "", false, true);
     mPageNameIdList.insert("data_sampled", ui->pageList->count() - 1);
 
     mPageImu = new PageImu(this);
     mPageImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageImu);
-    addPageItem(tr("IMU Data"), "://res/icons/Line Chart-96.png", "", false, true);
+    addPageItem(tr("IMU Data"),  theme + "icons/Line Chart-96.png", "", false, true);
     mPageNameIdList.insert("data_imu", ui->pageList->count() - 1);
 
     mPageBms = new PageBms(this);
     mPageBms->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageBms);
-    addPageItem(tr("BMS Data"), "://res/icons/icons8-battery-100.png", "", false, true);
+    addPageItem(tr("BMS Data"),  theme + "icons/icons8-battery-100.png", "", false, true);
     mPageNameIdList.insert("data_bms", ui->pageList->count() - 1);
 
     mPageLogAnalysis = new PageLogAnalysis(this);
     mPageLogAnalysis->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageLogAnalysis);
-    addPageItem(tr("Log Analysis"), "://res/icons/Waypoint Map-96.png", "", false, true);
+    addPageItem(tr("Log Analysis"),  theme + "icons/Waypoint Map-96.png", "", false, true);
+
+    mPageVESCDev = new QTabWidget(this);
+    mPageVESCDev->setTabShape(QTabWidget::Triangular);
 
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
-    addPageItem(tr("VESC Terminal"), "://res/icons/Console-96.png", "", true);
+    mPageVESCDev->addTab(mPageTerminal,QIcon(theme + "icons/Console-96.png"), tr("VESC Terminal"));
 
-    mPageSwdProg = new PageSwdProg(this);
-    mPageSwdProg->setVesc(mVesc);
-    ui->pageWidget->addWidget(mPageSwdProg);
-    addPageItem(tr("SWD Prog"), "://res/icons/Electronics-96.png", "", true);
+    mPageScripting = new PageScripting(this);
+    mPageScripting->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageScripting);
+    mPageVESCDev->addTab(mPageScripting, QIcon(theme + "icons_textedit/Outdent-96.png"), tr("Scripting"));
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageCanAnalyzer);
-    addPageItem(tr("CAN Analyzer"), "://res/icons/can_off.png", "", true);
+    mPageVESCDev->addTab(mPageCanAnalyzer,QIcon(theme + "icons/can_off.png"), tr("CAN Analyzer"));
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
-    addPageItem(tr("Debug Console"), "://res/icons/Bug-96.png", "", true);
+    mPageVESCDev->addTab(mPageDebugPrint,QIcon(theme + "icons/Bug-96.png"), tr("Debug Console"));
 
-    mPageSettings = new PageSettings(this);
-    mPageSettings->setVesc(mVesc);
-    ui->pageWidget->addWidget(mPageSettings);
-    addPageItem(tr("Settings"), "://res/icons/Settings-96.png", "", true);
+    ui->pageWidget->addWidget(mPageVESCDev);
+    addPageItem(tr("VESC Dev Tools"),  theme + "icons/Console-96.png", "", true);
+
+    mPageSwdProg = new PageSwdProg(this);
+    mPageSwdProg->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageSwdProg);
+    addPageItem(tr("SWD Programmer"),  theme + "icons/Electronics-96.png", "", true);
 
     /*
      * Page IDs
@@ -1337,6 +1537,7 @@ void MainWindow::reloadPages()
      * motor_pid
      * motor_additional_info
      * motor_experiments
+     * motor_comparison
      * app
      * app_general
      * app_ppm
@@ -1357,8 +1558,8 @@ void MainWindow::reloadPages()
 
     // Adjust sizes
     QFontMetrics fm(this->font());
-    int width = fm.width("Welcome & Wizards++++++++++");
-    int height = fm.height();
+    int width = fm.horizontalAdvance("Welcome & Wizards++++++++++++");
+    int height = fm.height()*1.25;
 
     for(int i = 0; i < ui->pageList->count(); i++) {
         QListWidgetItem *item = ui->pageList->item(i);
@@ -1370,11 +1571,13 @@ void MainWindow::reloadPages()
     ui->canList->setMinimumWidth(width);
     ui->canList->setMaximumWidth(width);
     ui->pageLabel->setMaximumWidth(width);
-    ui->pageLabel->setMaximumHeight((394 * width) / 1549);
+    ui->pageLabel->setMaximumHeight((460 * width) / 1550);
     ui->scanCanButton->setMaximumWidth(width);
 
     ui->pageList->setCurrentRow(0);
+    ui->pageList->setGridSize(QSize(0.85*width , height));
     ui->pageWidget->setCurrentIndex(0);
+
 }
 
 void MainWindow::checkUdev()
@@ -1387,7 +1590,7 @@ void MainWindow::checkUdev()
         if (!fi_vesc.exists()) {
             QMessageBox::StandardButton reply;
             reply = QMessageBox::information(this,
-                                             tr("Modemmenager"),
+                                             tr("Modemmanager"),
                                              tr("It looks like modemmanager is installed on your system, and that "
                                                 "there are no VESC udev rules installed. This will cause a delay "
                                                 "from when you plug in the VESC until you can use it. Would you like "
@@ -1419,7 +1622,7 @@ void MainWindow::checkUdev()
                 if (process.exitCode() == 0) {
                     QMessageBox::StandardButton reply;
                     reply = QMessageBox::information(this,
-                                                     tr("Modemmenager"),
+                                                     tr("Modemmanager"),
                                                      tr("The udev rule was created successfully. Would you like "
                                                         "to reload udev to apply the new rule?"),
                                                      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
@@ -1462,7 +1665,7 @@ void MainWindow::checkUdev()
     }
 #endif
 }
-
+#ifdef Q_OS_LINUX
 bool MainWindow::waitProcess(QProcess &process, bool block, int timeoutMs)
 {
     bool wasEnables = isEnabled();
@@ -1503,6 +1706,7 @@ QString MainWindow::runCmd(QString cmd, QStringList args)
     process.close();
     return res;
 }
+#endif
 
 void MainWindow::on_pageList_currentRowChanged(int currentRow)
 {
@@ -1525,6 +1729,11 @@ void MainWindow::on_actionParameterEditorAppconf_triggered()
     p->setAttribute(Qt::WA_DeleteOnClose);
     p->setParams(mVesc->appConfig());
     p->show();
+}
+
+void MainWindow::on_actionPreferences_triggered()
+{
+    mPreferences->show();
 }
 
 void MainWindow::on_actionParameterEditorInfo_triggered()
@@ -1582,33 +1791,34 @@ void MainWindow::on_actionSaveAppConfigurationHeaderWrap_triggered()
 void MainWindow::on_actionTerminalPrintFaults_triggered()
 {
     mVesc->commands()->sendTerminalCmd("faults");
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalShowHelp_triggered()
 {
     mVesc->commands()->sendTerminalCmd("help");
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalClear_triggered()
 {
     mPageTerminal->clearTerminal();
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalPrintThreads_triggered()
 {
     mVesc->commands()->sendTerminalCmd("threads");
-    showPage("VESC Terminal");
+    showPage("VESC Dev Tools");
+    mPageVESCDev->setCurrentIndex(0);
 }
 
 void MainWindow::on_actionTerminalDRVResetLatchedFaults_triggered()
 {
-    mVesc->commands()->sendTerminalCmd("drv8301_reset_faults");
-    mVesc->commands()->sendTerminalCmd("drv8323s_reset_faults");
-    mVesc->commands()->sendTerminalCmd("drv8320_reset_faults");
-    mVesc->commands()->sendTerminalCmd("drv8305_reset_faults");
+    mVesc->commands()->sendTerminalCmd("drv_reset_faults");
 }
 
 void MainWindow::on_actionCanFwd_toggled(bool arg1)
@@ -1655,13 +1865,13 @@ void MainWindow::on_actionLicense_triggered()
 
 void MainWindow::on_posBox_editingFinished()
 {
-    on_posButton_clicked();
+    //    on_posButton_clicked();
 }
 
 void MainWindow::on_posBox_valueChanged(double arg1)
 {
     (void)arg1;
-//    on_posButton_clicked();
+    //    on_posButton_clicked();
 }
 
 void MainWindow::on_actionExportConfigurationParser_triggered()
@@ -1746,47 +1956,39 @@ void MainWindow::on_scanCanButton_clicked()
 
 void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
 {
-    if (isTimeout || ui->canList->count() > 0) {
+    (void)isTimeout;
+
+    if (ui->canList->count() > 0) {
         return;
     }
 
     ui->scanCanButton->setEnabled(false);
-
     ui->canList->clear();
     FW_RX_PARAMS params;
-
-    auto typeToStr = [](FW_RX_PARAMS p, QString idStr, bool ok) {
-        QString res;
-
-        if (ok) {
-            if (p.hwType == HW_TYPE_VESC) {
-                res = "Motor (" + p.hw + "): " + idStr;
-            } else if (p.hwType == HW_TYPE_VESC_BMS) {
-                res = "BMS (" + p.hw + "): " + idStr;
-            } else {
-                res = "Device (" + p.hw + "): " + idStr;
-            }
-        } else {
-            res = "Unknown: " + idStr;
-        }
-
-        return res;
-    };
-
     bool ok = false;
     QListWidgetItem *item = nullptr;
+    QFontMetrics fm(this->font());
+    int width = fm.horizontalAdvance("Welcome & Wizards++++++++++");
+    int height = fm.height()*1.1;
     for (int dev: devs) {
         ok = Utility::getFwVersionBlockingCan(mVesc, &params, dev);
-        item = new QListWidgetItem(typeToStr(params, QString::number(dev), ok));
+        item = new QListWidgetItem();
+        item->setSizeHint(QSize(width,height));
+        ui->canList->addItem(item);
+        CANListItem *li = new CANListItem(params, dev, ok, ui->canList);
+        ui->canList->setItemWidget(item, li);
         ui->canList->addItem(item);
     }
-
     // Read local firmware version last so that firmware pages show the correct info.
     ok = Utility::getFwVersionBlocking(mVesc, &params);
-    item = new QListWidgetItem(typeToStr(params, "Local", ok));
+    item = new QListWidgetItem();
+    item->setSizeHint(QSize(width,height));
     ui->canList->insertItem(0, item);
+    CANListItem *li = new CANListItem(params, -1, ok, ui->canList);
+    ui->canList->setItemWidget(item, li);
+    ui->canList->setIconSize(QSize(20,20));
+    ui->canList->setGridSize(QSize(0.85*width , 1.25*height));
     ui->canList->setCurrentRow(0);
-
     ui->scanCanButton->setEnabled(true);
 }
 
@@ -1804,8 +2006,10 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
                 });
             }
         } else {
-            int id = ui->canList->currentItem()->text().split(" ").last().toInt();
-            if (id >= 0 && id < 255) {
+            QWidget *current = ui->canList->itemWidget(ui->canList->currentItem());
+            int id;
+            bool ok = QMetaObject::invokeMethod(current, "getID", Q_RETURN_ARG(int, id));
+            if (id >= 0 && id < 255  && ok) {
                 if (!mVesc->commands()->getSendCan() || mVesc->commands()->getCanSendId() != id) {
                     mVesc->commands()->setCanSendId(quint32(id));
                     mVesc->commands()->setSendCan(true);
@@ -1823,20 +2027,9 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
 
 void MainWindow::on_actionGamepadControl_triggered(bool checked)
 {
-    mPageSettings->setUseGamepadControl(checked);
+    mPreferences->setUseGamepadControl(checked);
 
-    if (!mPageSettings->isUsingGamepadControl()) {
+    if (!mPreferences->isUsingGamepadControl()) {
         ui->actionGamepadControl->setChecked(false);
     }
-}
-
-void MainWindow::on_actionLoadMeters_triggered()
-{
-    mQmlUi.startCustomGui(mVesc);
-    mQmlUi.reloadCustomGui("qrc:/res/qml/Meters.qml");
-}
-
-void MainWindow::on_actionCloseCustomGUI_triggered()
-{
-    mQmlUi.stopCustomGui();
 }

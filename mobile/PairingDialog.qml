@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -26,7 +26,7 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
-Item {
+Item {   
     function openDialog() {
         dialog.open()
         loadUuids()
@@ -47,13 +47,17 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 20
-        height: parent.height - 60
+        width: parent.width - 20 - notchLeft - notchRight
+        height: parent.height - 60 - notchBot - notchTop
         closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: 50
+        x: (parent.width - width)/2
+        y: 50 + notchTop
         parent: ApplicationWindow.overlay
         padding: 10
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -61,7 +65,7 @@ Item {
             Text {
                 id: text
                 Layout.fillWidth: true
-                color: "white"
+                color: Utility.getAppHexColor("lightText")
                 text: qsTr("These are the VESCs paired to this instance of VESC Tool.")
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
@@ -98,16 +102,17 @@ Item {
                             Image {
                                 id: image
                                 fillMode: Image.PreserveAspectFit
+                                mipmap: true
                                 Layout.preferredWidth: 40
                                 Layout.preferredHeight: 40
                                 Layout.alignment: Qt.AlignVCenter
                                 Layout.leftMargin: 10
-                                source: "qrc:/res/icon.png"
+                                source: "qrc:/res/icon.svg"
                             }
 
                             Text {
                                 Layout.fillWidth: true
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: uuid
                                 wrapMode: Text.Wrap
                             }
@@ -134,8 +139,12 @@ Item {
                                     y: 10 + parent.height / 2 - height / 2
                                     parent: ApplicationWindow.overlay
 
+                                    Overlay.modal: Rectangle {
+                                        color: "#AA000000"
+                                    }
+
                                     Text {
-                                        color: "#ffffff"
+                                        color: Utility.getAppHexColor("lightText")
                                         verticalAlignment: Text.AlignVCenter
                                         anchors.fill: parent
                                         wrapMode: Text.WordWrap
@@ -250,15 +259,19 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
         title: "Pair connected VESC"
-        x: 10
+        x: (parent.width - width)/2
         y: 10 + Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -287,15 +300,19 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
         title: "Unpair connected VESC"
-        x: 10
+        x: (parent.width - width)/2
         y: 10 + parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -317,23 +334,27 @@ Item {
         focus: true
         title: "Add UUID"
 
-        width: parent.width - 20
+        width: parent.width - 20  - notchLeft - notchRight
         height: 200
         closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: parent.height / 2 - height / 2
+        x: (parent.width - width)/2
+        y: (parent.height - height)/2
         parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Rectangle {
             anchors.fill: parent
             height: 20
             border.width: 2
-            border.color: "#8d8d8d"
-            color: "#33a8a8a8"
+            border.color: Utility.getAppHexColor("disabledText")
+            color: Utility.getAppHexColor("lightBackground")
             radius: 3
             TextInput {
                 id: stringInput
-                color: "#ffffff"
+                color: Utility.getAppHexColor("lightText")
                 anchors.fill: parent
                 anchors.margins: 7
                 font.pointSize: 12

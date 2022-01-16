@@ -28,6 +28,12 @@ PpmMap::PpmMap(QWidget *parent) :
     ui(new Ui::PpmMap)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
+    ui->resetButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
     mResetDone = true;

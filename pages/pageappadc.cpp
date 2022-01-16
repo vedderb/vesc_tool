@@ -29,8 +29,10 @@ PageAppAdc::PageAppAdc(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 
+    Utility::setPlotColors(ui->throttlePlot);
     ui->throttlePlot->addGraph();
     ui->throttlePlot->graph()->setName("Throttle Curve");
+    ui->throttlePlot->graph()->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->throttlePlot->xAxis->setLabel("Throttle Value");
     ui->throttlePlot->yAxis->setLabel("Output Value");
     ui->throttlePlot->legend->setVisible(true);

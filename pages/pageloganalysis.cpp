@@ -21,6 +21,7 @@
 #include "pageloganalysis.h"
 #include "ui_pageloganalysis.h"
 #include "utility.h"
+#include <QFileDialog>
 #include <cmath>
 #include <QStandardPaths>
 
@@ -30,6 +31,18 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 {
     ui->setupUi(this);
     mVesc = nullptr;
+
+    QString theme = Utility::getThemePath();
+    ui->centerButton->setIcon(QPixmap(theme + "icons/icons8-target-96.png"));
+    ui->playButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->logListRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->logListOpenButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->openCurrentButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->openCsvButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->savePlotPdfButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
+    ui->savePlotPngButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
+    ui->saveMapPdfButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
+    ui->saveMapPngButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
 
     updateTileServers();
 
@@ -43,9 +56,10 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->statSplitter->setStretchFactor(0, 6);
     ui->statSplitter->setStretchFactor(1, 1);
 
+    Utility::setPlotColors(ui->plot);
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    ui->plot->axisRect()->setRangeZoom(nullptr);
-    ui->plot->axisRect()->setRangeDrag(nullptr);
+    ui->plot->axisRect()->setRangeZoom(Qt::Orientations());
+    ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
 
     ui->dataTable->setColumnWidth(0, 140);
     ui->dataTable->setColumnWidth(1, 120);
@@ -89,7 +103,6 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->plot->legend->setVisible(true);
     ui->plot->legend->setFont(legendFont);
     ui->plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
-    ui->plot->legend->setBrush(QBrush(QColor(255,255,255,230)));
     ui->plot->xAxis->setLabel("Seconds (s)");
 
     auto addDataItem = [this](QString name, bool hasScale = true,
@@ -169,7 +182,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     mVerticalLine = new QCPCurve(ui->plot->xAxis, ui->plot->yAxis);
     mVerticalLine->removeFromLegend();
-    mVerticalLine->setPen(QPen(Qt::black));
+    mVerticalLine->setPen(QPen(Utility::getAppQColor("normalText")));
     mVerticalLineMsLast = -1;
 
     auto updateMouse = [this](QMouseEvent *event) {
@@ -177,8 +190,8 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
             ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
             ui->plot->axisRect()->setRangeDrag(Qt::Vertical);
         } else {
-            ui->plot->axisRect()->setRangeZoom(nullptr);
-            ui->plot->axisRect()->setRangeDrag(nullptr);
+            ui->plot->axisRect()->setRangeZoom(Qt::Orientations());
+            ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
         }
 
         if (event->buttons() & Qt::LeftButton) {
@@ -204,12 +217,12 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
             ui->plot->axisRect()->setRangeZoom(Qt::Vertical);
             ui->plot->axisRect()->setRangeDrag(Qt::Vertical);
         } else {
-            ui->plot->axisRect()->setRangeZoom(nullptr);
-            ui->plot->axisRect()->setRangeDrag(nullptr);
+            ui->plot->axisRect()->setRangeZoom(Qt::Orientations());
+            ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
 
             double upper = ui->plot->xAxis->range().upper;
             double progress = ui->plot->xAxis->pixelToCoord(event->x()) / upper;
-            double diff = event->delta();
+            double diff = event->angleDelta().y();
             double d1 = diff * progress;
             double d2 = diff * (1.0 - progress);
 
@@ -371,9 +384,7 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
             LocPoint p;
             p.setXY(xyz[0], xyz[1]);
             p.setRadius(5);
-            QString info;
-            info.sprintf("%d", d.valTime);
-            p.setInfo(info);
+            p.setInfo(QString("%1").arg(d.valTime));
 
             ui->map->addInfoPoint(p, false);
             posTimeLast = d.posTime;
@@ -725,18 +736,18 @@ void PageLogAnalysis::updateGraphs()
     ui->plot->clearGraphs();
 
     for (int i = 0;i < yAxes.size();i++) {
-        QPen pen = QPen(Qt::blue);
+        QPen pen = QPen(Utility::getAppQColor("plot_graph1"));
 
         if (i == 1) {
             pen = QPen(Qt::magenta);
         } else if (i == 2) {
-            pen = QPen(Qt::green);
+            pen = QPen(Utility::getAppQColor("plot_graph2"));
         } else if (i == 3) {
-            pen = QPen(Qt::darkGreen);
+            pen = QPen(Utility::getAppQColor("plot_graph3"));
         } else if (i == 4) {
             pen = QPen(Qt::cyan);
         } else if (i == 5) {
-            pen = QPen(QColor("#01DFD7"));
+            pen = QPen(Utility::getAppQColor("plot_graph4"));
         }
 
         ui->plot->addGraph();
@@ -1163,36 +1174,12 @@ void PageLogAnalysis::on_saveMapPngButton_clicked()
 
 void PageLogAnalysis::on_savePlotPdfButton_clicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save PDF"), "",
-                                                    tr("PDF Files (*.pdf)"));
-
-    if (!fileName.isEmpty()) {
-        if (!fileName.toLower().endsWith(".pdf")) {
-            fileName.append(".pdf");
-        }
-
-        ui->plot->savePdf(fileName,
-                          ui->saveWidthBox->value(),
-                          ui->saveHeightBox->value());
-    }
+    Utility::plotSavePdf(ui->plot, ui->saveWidthBox->value(), ui->saveHeightBox->value());
 }
 
 void PageLogAnalysis::on_savePlotPngButton_clicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save Image"), "",
-                                                    tr("PNG Files (*.png)"));
-
-    if (!fileName.isEmpty()) {
-        if (!fileName.toLower().endsWith(".png")) {
-            fileName.append(".png");
-        }
-
-        ui->plot->savePng(fileName,
-                          ui->saveWidthBox->value(),
-                          ui->saveHeightBox->value());
-    }
+    Utility::plotSavePng(ui->plot, ui->saveWidthBox->value(), ui->saveHeightBox->value());
 }
 
 void PageLogAnalysis::on_centerButton_clicked()
@@ -1218,4 +1205,10 @@ void PageLogAnalysis::on_logListOpenButton_clicked()
 void PageLogAnalysis::on_logListRefreshButton_clicked()
 {
     logListRefresh();
+}
+
+void PageLogAnalysis::on_logTable_cellDoubleClicked(int row, int column)
+{
+    (void)row; (void)column;
+    on_logListOpenButton_clicked();
 }

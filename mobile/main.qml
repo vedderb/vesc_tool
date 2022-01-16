@@ -17,15 +17,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.10
+import QtQuick.Controls 2.10
+import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.0 as QSettings
+import QtQuick.Window 2.10
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
+import Vedder.vesc.vesc3ditem 1.0
 
 ApplicationWindow {
     id: appWindow
@@ -33,22 +35,49 @@ ApplicationWindow {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mAppConf: VescIf.appConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    property bool connected: false
 
     visible: true
     width: 500
     height: 850
     title: qsTr("VESC Tool")
 
-    Component.onCompleted: {
-//        Utility.checkVersion(VescIf)
-//        swipeView.setCurrentIndex(7)
-//        rtSwipeView.setCurrentIndex(1)
+    // Full screen iPhone X workaround:
+    property int notchLeft: 0
+    property int notchRight: 0
+    property int notchBot: 0
+    property int notchTop: 0
 
+    // https://github.com/ekke/c2gQtWS_x/blob/master/qml/main.qml
+    flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
+
+    function updateNotch() {
+        notchTop   = Utility.getSafeAreaMargins(appWindow)["top"]
+        notchLeft  = Utility.getSafeAreaMargins(appWindow)["left"]
+        notchRight = Utility.getSafeAreaMargins(appWindow)["right"]
+        notchBot = Utility.getSafeAreaMargins(appWindow)["bottom"]/2 //leaving too much room at the bottom
+    }
+
+    Timer {
+        id: oriTimer
+        interval: 100; running: true; repeat: false
+        onTriggered: {
+            updateNotch()
+        }
+    }
+
+    Screen.orientationUpdateMask: Qt.LandscapeOrientation | Qt.PortraitOrientation
+    Screen.onPrimaryOrientationChanged: {
+        oriTimer.start()
+    }
+
+    Component.onCompleted: {
         if (!VescIf.isIntroDone()) {
             introWizard.openDialog()
         }
-
+        updateNotch()
         Utility.keepScreenOn(VescIf.keepScreenOn())
+        Utility.allowScreenRotation(VescIf.getAllowScreenRotation())
         Utility.stopGnssForegroundService()
     }
 
@@ -59,19 +88,58 @@ ApplicationWindow {
     Controls {
         id: controls
         parentWidth: appWindow.width
-        parentHeight: appWindow.height - footer.height - tabBar.height
+        parentHeight: appWindow.height - footer.height - headerBar.height
     }
 
-    Settings {
-        id: settings
+    MultiSettings {
+        id: multiSettings
+    }
+
+    Loader {
+        id: settingsLoader
+        anchors.fill: parent
+        asynchronous: true
+        visible: status == Loader.Ready
+        sourceComponent: Settings {
+            id: settings
+        }
+    }
+
+    Loader {
+        id: canDrawerLoader
+        anchors.fill: parent
+        asynchronous: true
+        visible: status == Loader.Ready
+        sourceComponent: Drawer {
+            id: canDrawer
+            edge: Qt.RightEdge
+            width: Math.min(0.6 *appWindow.width, 0.8 *appWindow.height)
+            height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
+            y: appWindow.height > appWindow.width ?  headerBar.height : 0
+            dragMargin: 20
+            interactive: false
+
+            Overlay.modal: Rectangle {
+                color: "#AA000000"
+            }
+
+            CanScreen {
+                anchors.fill: parent
+            }
+        }
     }
 
     Drawer {
         id: drawer
-        width: 0.5 * appWindow.width
-        height: appWindow.height - footer.height - tabBar.height
-        y: tabBar.height
+        width: Math.min(0.5 *appWindow.width, 0.75 *appWindow.height)
+        height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
+        y: appWindow.height > appWindow.width ?  headerBar.height : 0
         dragMargin: 20
+        interactive: false
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -80,44 +148,28 @@ ApplicationWindow {
 
             Image {
                 id: image
-                Layout.preferredWidth: Math.min(parent.width, parent.height)
-                Layout.preferredHeight: (394 * Layout.preferredWidth) / 1549
+                Layout.preferredWidth: Math.min(parent.width, parent.height)*0.8
+                Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
+                Layout.margins: Math.min(parent.width, parent.height)*0.1
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                source: "qrc:/res/logo_white.png"
+                source: "qrc" + Utility.getThemePath() + "/logo.png"
+                antialiasing: true
+
             }
 
             Button {
                 id: reconnectButton
-
                 Layout.fillWidth: true
-                text: "Reconnect"
-                enabled: false
+                text: connected ? "Disconnect" : "Connect"
                 flat: true
-
                 onClicked: {
-                    VescIf.reconnectLastPort()
-                }
-            }
+                    if (connected) {
+                        VescIf.disconnectPort()
+                    } else {
+                        connScreen.opened = true
+                    }
 
-            Button {
-                Layout.fillWidth: true
-                text: "Disconnect"
-                enabled: connBle.disconnectButton.enabled
-                flat: true
-
-                onClicked: {
-                    VescIf.disconnectPort()
-                }
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Controls"
-                flat: true
-
-                onClicked: {
                     drawer.close()
-                    controls.openDialog()
                 }
             }
 
@@ -134,7 +186,7 @@ ApplicationWindow {
 
                 onClicked: {
                     drawer.close()
-                    settings.openDialog()
+                    settingsLoader.item.openDialog()
                 }
             }
 
@@ -142,7 +194,6 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "About"
                 flat: true
-
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 "About",
@@ -170,10 +221,18 @@ ApplicationWindow {
                 flat: true
 
                 onClicked: {
-                    VescIf.emitMessageDialog(
-                                mInfoConf.getLongName("gpl_text"),
-                                mInfoConf.getDescription("gpl_text"),
-                                true, true)
+                    if(Qt.platform.os == "ios"){
+                        VescIf.emitMessageDialog(
+                                    mInfoConf.getLongName("ios_license_text"),
+                                    mInfoConf.getDescription("ios_license_text"),
+                                    true, true)
+                    }else{
+                        VescIf.emitMessageDialog(
+                                    mInfoConf.getLongName("gpl_text"),
+                                    mInfoConf.getDescription("gpl_text"),
+                                    true, true)
+                    }
+
                 }
             }
         }
@@ -183,95 +242,165 @@ ApplicationWindow {
         id: swipeView
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
+        anchors.leftMargin: notchLeft*0.75
+        anchors.rightMargin: notchRight*0.75
+        clip: true
+        contentItem: ListView {
+            model: swipeView.contentModel
+            interactive: swipeView.interactive
+            currentIndex: swipeView.currentIndex
+
+            spacing: swipeView.spacing
+            orientation: swipeView.orientation
+            snapMode: ListView.SnapOneItem
+            boundsBehavior: Flickable.StopAtBounds
+
+            highlightRangeMode: ListView.StrictlyEnforceRange
+            preferredHighlightBegin: 0
+            preferredHighlightEnd: 0
+            highlightMoveDuration: 250
+
+            maximumFlickVelocity: 8 * (swipeView.orientation ===
+                                       Qt.Horizontal ? width : height)
+        }
 
         Page {
-            ConnectBle {
-                id: connBle
+            Loader {
                 anchors.fill: parent
-                anchors.margins: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: StartPage {
+                    id: connBle
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
 
-                onRequestOpenControls: {
-                    controls.openDialog()
+                    onRequestOpenControls: {
+                        controls.openDialog()
+                    }
+
+                    onRequestConnect: {
+                        connScreen.opened = true
+                    }
+
+                    onRequestOpenMultiSettings: {
+                        multiSettings.openDialog()
+                    }
                 }
             }
         }
 
         Page {
-            RowLayout {
-                anchors.fill: parent
-                spacing: 0
+            PageIndicator {
+                count: rtSwipeView.count
+                currentIndex: rtSwipeView.currentIndex
+                anchors.right: parent.right
+                width:25
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: parent.height*0.4
+                rotation: 90
+                z:2
+            }
 
-                Rectangle {
-                    color: "#4f4f4f"
-                    width: 16
-                    Layout.fillHeight: true
-                    Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
+            SwipeView {
+                id: rtSwipeView
+                enabled: true
+                clip: true
+                currentIndex: 1
+                anchors.fill:parent
+                orientation: Qt.Vertical
 
-                    PageIndicator {
-                        count: rtSwipeView.count
-                        currentIndex: rtSwipeView.currentIndex
+                contentItem: ListView {
+                    model: rtSwipeView.contentModel
+                    interactive: rtSwipeView.interactive
+                    currentIndex: rtSwipeView.currentIndex
+
+                    spacing: rtSwipeView.spacing
+                    orientation: rtSwipeView.orientation
+                    snapMode: ListView.SnapOneItem
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    highlightRangeMode: ListView.StrictlyEnforceRange
+                    preferredHighlightBegin: 0
+                    preferredHighlightEnd: 0
+                    highlightMoveDuration: 250
+
+                    maximumFlickVelocity: 8 * (rtSwipeView.orientation ===
+                                               Qt.Horizontal ? width : height)
+                }
+
+                Page {
+                    Loader {
+                        anchors.fill: parent
+                        asynchronous: true
+                        visible: status == Loader.Ready
+                        sourceComponent: RtData {
+                            anchors.fill: parent
+                            updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0
+                        }
+                    }
+                }
+
+                Page {
+                    Loader {
+                        anchors.fill: parent
+                        asynchronous: true
+                        visible: status == Loader.Ready
+                        sourceComponent: RtDataSetup {
+                            anchors.fill: parent
+                            updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1
+                        }
+                    }
+                }
+
+                Page {
+                    RtDataIMU {
+                        id: rtIMU
+                        anchors.top: parent.top
+                        width: parent.width
+                        Layout.fillWidth: true
+                        z:2
+                    }
+                    CheckBox {
+                        anchors.top: rtIMU.bottom
+                        Layout.fillWidth: true
+                        id: useYawBox
+                        text: "Use Yaw (will drift)"
+                        checked: false
+                        z:2
+                    }
+                    Loader {
+                        id: vesc3dLoader
+                        asynchronous: true
+                        visible: status == Loader.Ready
                         anchors.centerIn: parent
-                        rotation: 90
+                        anchors.verticalCenterOffset: rtIMU.height/2
+                        width:  Math.min(parent.width*Screen.devicePixelRatio, (parent.height - rtIMU.height)*Screen.devicePixelRatio)
+                        antialiasing: true
+                        height: width
+                        onLoaded: {
+                            item.setRotation(0.1, 0.75, 0.4)
+                        }
+                        z:1
+                        sourceComponent:
+                            Vesc3dItem {
+                            id: vesc3d
+                            anchors.fill: parent
+                            scale: 1.0 / Screen.devicePixelRatio
+                            z:1
+                        }
                     }
                 }
 
-                SwipeView {
-                    id: rtSwipeView
-                    enabled: true
-                    clip: true
+                Page {
+                    id: statPage
+                    Loader {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        asynchronous: true
 
-                    property var vesc3dViewNow: 0
-
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    orientation: Qt.Vertical
-
-                    Page {
-                        RtData {
+                        sourceComponent: StatPage {
                             anchors.fill: parent
-                        }
-                    }
-
-                    Page {
-                        RtDataSetup {
-                            anchors.fill: parent
-                        }
-                    }
-
-                    Page {
-                        ColumnLayout {
-                            anchors.fill: parent
-
-                            RtDataIMU {
-                                Layout.fillWidth: true
-                            }
-
-                            CheckBox {
-                                Layout.fillWidth: true
-                                id: useYawBox
-                                text: "Use Yaw (will drift)"
-                                checked: false
-                            }
-
-                            Item {
-                                id: item3d
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                            }
-                        }
-                    }
-
-                    // Create 3d view on demand, due to high CPU usage even when hidden
-                    onCurrentIndexChanged: {
-                        if (currentIndex == 2) {
-                            var component = Qt.createComponent("Vesc3DView.qml");
-                            vesc3dViewNow = component.createObject(item3d, {"anchors.fill": item3d})
-                            vesc3dViewNow.setRotation(0.1, 0.1, 0.1)
-                        } else {
-                            if (vesc3dViewNow != 0) {
-                                vesc3dViewNow.destroy()
-                                vesc3dViewNow = 0
-                            }
                         }
                     }
                 }
@@ -279,323 +408,96 @@ ApplicationWindow {
         }
 
         Page {
-            Profiles {
+            Loader {
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: Profiles {
+                    anchors.fill: parent
+                    anchors.topMargin: 5
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                }
             }
         }
 
         Page {
-            ConfigPageMotor {
+            Loader {
+                anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: BMS {
+                    anchors.fill: parent
+                }
+            }
+        }
+
+        Page {
+            Loader {
+                anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: FwUpdate {
+                    anchors.fill: parent
+                }
+            }
+        }
+
+        Page {
+            Loader {
                 id: confPageMotor
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: ConfigPageMotor {
+                    //id: confPageMotor
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                }
             }
         }
 
         Page {
-            ConfigPageApp {
+            Loader {
                 id: confPageApp
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-            }
-        }
-
-        Page {
-            FwUpdate {
-                anchors.fill: parent
-            }
-        }
-
-        Page {
-            Terminal {
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                anchors.topMargin: 10
-            }
-        }
-
-        Page {
-            BMS {
-                anchors.fill: parent
-            }
-        }
-
-        Page {
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                anchors.topMargin: 10
-
-                GroupBox {
-                    id: bleConnBox
-                    title: qsTr("Realtime Data Logging")
-                    Layout.fillWidth: true
-                    Layout.columnSpan: 1
-
-                    GridLayout {
-                        anchors.topMargin: -5
-                        anchors.bottomMargin: -5
-                        anchors.fill: parent
-
-                        clip: false
-                        visible: true
-                        rowSpacing: -10
-                        columnSpacing: 5
-                        rows: 3
-                        columns: 2
-
-                        Button {
-                            text: "Help"
-                            Layout.fillWidth: true
-
-                            onClicked: {
-                                VescIf.emitMessageDialog(
-                                            mInfoConf.getLongName("help_rt_logging"),
-                                            mInfoConf.getDescription("help_rt_logging"),
-                                            true, true)
-                            }
-                        }
-
-                        Button {
-                            text: "Choose Log Directory..."
-                            Layout.fillWidth: true
-
-                            onClicked: {
-                                if (Utility.requestFilePermission()) {
-                                    logFilePicker.enabled = true
-                                    logFilePicker.visible = true
-                                } else {
-                                    VescIf.emitMessageDialog(
-                                                "File Permissions",
-                                                "Unable to request file system permission.",
-                                                false, false)
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.columnSpan: 2
-                            Layout.topMargin: 6
-                            Layout.bottomMargin: 6
-                            height: rtLogFileText.implicitHeight + 14
-                            border.width: 2
-                            border.color: "#8d8d8d"
-                            color: "#33a8a8a8"
-                            radius: 3
-
-                            TextInput {
-                                color: "white"
-                                id: rtLogFileText
-                                anchors.fill: parent
-                                anchors.margins: 7
-                                font.pointSize: 12
-                                text: "./log"
-
-                                QSettings.Settings {
-                                    property alias rtLog: rtLogFileText.text
-                                }
-                            }
-                        }
-
-                        CheckBox {
-                            id: rtLogEnBox
-                            text: "Enable RT Data Logging"
-                            Layout.fillWidth: true
-                            Layout.columnSpan: 2
-
-                            onClicked: {
-                                if (checked) {
-                                    if (VescIf.openRtLogFile(rtLogFileText.text)) {
-                                        Utility.startGnssForegroundService()
-                                        VescIf.setWakeLock(true)
-                                    }
-                                } else {
-                                    VescIf.closeRtLogFile()
-                                    Utility.stopGnssForegroundService()
-
-                                    if (!VescIf.useWakeLock()) {
-                                        VescIf.setWakeLock(false)
-                                    }
-                                }
-                            }
-
-                            Timer {
-                                repeat: true
-                                running: true
-                                interval: 500
-
-                                onTriggered: {
-                                    if (rtLogEnBox.checked && !VescIf.isRtLogOpen()) {
-                                        Utility.stopGnssForegroundService()
-
-                                        if (!VescIf.useWakeLock()) {
-                                            VescIf.setWakeLock(false)
-                                        }
-                                    }
-
-                                    rtLogEnBox.checked = VescIf.isRtLogOpen()
-                                }
-                            }
-                        }
-                    }
-                }
-
-                GroupBox {
-                    id: tcpServerBox
-                    title: qsTr("TCP Server")
-                    Layout.fillWidth: true
-                    Layout.columnSpan: 1
-
-                    GridLayout {
-                        anchors.topMargin: -5
-                        anchors.bottomMargin: -5
-                        anchors.fill: parent
-
-                        clip: false
-                        visible: true
-                        rowSpacing: -10
-                        columnSpacing: 5
-                        rows: 3
-                        columns: 2
-
-                        CheckBox {
-                            id: tcpServerEnBox
-                            text: "Run TCP Server"
-                            Layout.fillWidth: true
-                            Layout.columnSpan: 2
-
-                            onClicked: {
-                                if (checked) {
-                                    VescIf.tcpServerStart(tcpServerPortBox.value)
-                                } else {
-                                    VescIf.tcpServerStop()
-                                }
-                            }
-                        }
-
-                        Text {
-                            text: "TCP Port"
-                            color: "white"
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 5000
-                        }
-
-                        SpinBox {
-                            id: tcpServerPortBox
-                            from: 0
-                            to: 65535
-                            value: 65102
-                            enabled: !tcpServerEnBox.checked
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 5000
-                            editable: true
-                        }
-
-                        Timer {
-                            repeat: true
-                            running: true
-                            interval: 500
-
-                            onTriggered: {
-                                tcpServerEnBox.checked = VescIf.tcpServerIsRunning()
-
-                                if (VescIf.tcpServerIsRunning()) {
-                                    var ipTxt = "IP(s)\n"
-                                    var addresses = Utility.getNetworkAddresses()
-                                    for (var i = 0;i < addresses.length;i++) {
-                                        ipTxt += addresses[i]
-                                        if (i < (addresses.length - 1)) {
-                                            ipTxt += "\n"
-                                        }
-                                    }
-                                    tcpLocalAddress.text = ipTxt
-                                } else {
-                                    tcpLocalAddress.text = "IP(s)"
-                                }
-
-                                tcpRemoteAddress.text = "Connected Client"
-
-                                if (VescIf.tcpServerIsClientConnected()) {
-                                    tcpRemoteAddress.text += "\n" + VescIf.tcpServerClientIp()
-                                }
-                            }
-                        }
-
-                        Text {
-                            id: tcpLocalAddress
-                            Layout.fillWidth: true
-                            Layout.topMargin: 10
-                            Layout.bottomMargin: 10
-                            color: "white"
-                        }
-
-                        Text {
-                            id: tcpRemoteAddress
-                            Layout.fillWidth: true
-                            Layout.topMargin: 10
-                            Layout.bottomMargin: 10
-                            color: "white"
-                        }
-                    }
-                }
-
-                Item {
-                    // Spacer
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: ConfigPageApp {
+                    //id: confPageApp
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
                 }
             }
+        }
 
-            DirectoryPicker {
-                id: logFilePicker
+        Page {
+            Loader {
                 anchors.fill: parent
-                showDotAndDotDot: true
-                visible: false
-                enabled: false
-
-                onDirSelected: {
-                    rtLogFileText.text = fileName
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: Terminal {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    anchors.topMargin: 10
                 }
             }
         }
     }
 
     header: Rectangle {
-        color: "#5f5f5f"
-        height: tabBar.height
+        id: headerBar
+        color: Utility.getAppHexColor("lightestBackground")
+        height: tabBar.implicitHeight + notchTop // iPhone X Workaround
 
         RowLayout {
-            anchors.fill: parent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
             spacing: 0
-
-            ToolButton {
-                Layout.preferredHeight: tabBar.height
-                Layout.preferredWidth: tabBar.height - 10
-
-                Image {
-                    id: manuButton
-                    anchors.centerIn: parent
-                    width: tabBar.height * 0.5
-                    height: tabBar.height * 0.5
-                    opacity: 0.5
-                    source: "qrc:/res/icons/Settings-96.png"
-                }
-
-                onClicked: {
-                    if (drawer.visible) {
-                        drawer.close()
-                    } else {
-                        drawer.open()
-                    }
-                }
-            }
 
             TabBar {
                 id: tabBar
@@ -606,75 +508,218 @@ ApplicationWindow {
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#4f4f4f"
+                    color: Utility.getAppHexColor("lightBackground")
                 }
 
-                property int buttons: 8
-                property int buttonWidth: 120
+                property int buttonWidth: Math.max(120,
+                                                   tabBar.width /
+                                                   (rep.model.length +
+                                                    (uiHwPage.visible ? 1 : 0) +
+                                                    (uiAppPage.visible ? 1 : 0)))
 
-                TabButton {
-                    text: qsTr("Start")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("RT Data")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Profiles")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Motor Cfg")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("App Cfg")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Firmware")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Terminal")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("BMS")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Developer")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                Repeater {
+                    id: rep
+                    model: ["Start", "RT Data", "Profiles", "BMS", "Firmware", "Motor Cfg",
+                        "App Cfg", "Terminal"]
+
+                    TabButton {
+                        text: modelData
+                        width: tabBar.buttonWidth
+
+                    }
                 }
             }
+        }
+    }
+
+    TabButton {
+        id: uiHwButton
+        visible: uiHwPage.visible
+        text: "HwUi"
+        width: tabBar.buttonWidth
+    }
+
+    Page {
+        id: uiHwPage
+        visible: false
+
+        Item {
+            id: uiHw
+            anchors.fill: parent
+            property var tabBarItem: tabBar
+        }
+    }
+
+    TabButton {
+        id: uiAppButton
+        visible: uiAppPage.visible
+        text: "AppUi"
+        width: tabBar.buttonWidth
+    }
+
+    Page {
+        id: uiAppPage
+        visible: false
+
+        Item {
+            id: uiApp
+            anchors.fill: parent
+            property var tabBarItem: tabBar
         }
     }
 
     Page {
         id: rtDataBalance
         visible: false
-        RtDataBalance {
+        Loader {
             anchors.fill: parent
+            asynchronous: true
+            active: parent.visible
+            visible: status == Loader.Ready
+            sourceComponent: RtDataBalance {
+                anchors.fill: parent
+            }
         }
     }
 
     footer: Rectangle {
         id: connectedRect
-        color: "#4f4f4f"
-
-        Text {
-            id: connectedText
-            color: "white"
-            text: VescIf.getConnectedPortName()
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-            anchors.fill: parent
+        clip: true
+        color: Utility.getAppHexColor("lightBackground")
+        width: parent.width
+        height: 35 + notchBot
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top:parent.top
+            height: parent.height/2.0
+            gradient: Gradient {
+                    GradientStop { position: 0.0; color: "#15ffffff"}
+                    GradientStop { position: 0.3; color: "#04ffffff"}
+                    GradientStop { position: 1.0; color: "transparent" }
+                }
+        }
+        Behavior on color {
+            ColorAnimation {
+                duration: 200;
+                easing.type: Easing.OutBounce
+                easing.overshoot: 3
+            }
         }
 
-        width: parent.width
-        height: 20
+        RowLayout{
+            enabled:true
+            anchors.fill: parent
+            spacing: 0
+            ToolButton {
+                id:settingsButton
+                Layout.fillHeight: true
+                Layout.preferredWidth: 70
+                Image {
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: -notchBot/2
+                    antialiasing: true
+                    height: parent.width*0.35
+                    width: height
+                    source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
+                }
+                onClicked: {
+                    if (drawer.visible) {
+                        drawer.close()
+                    } else {
+                        drawer.open()
+                    }
+                }
+
+            }
+            Rectangle{
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                color: "#33000000"
+            }
+            Rectangle{
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                color:  "#33ffffff"
+            }
+            ColumnLayout{
+                spacing: 0
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Text {
+                    id: connectedText
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    color: Utility.getAppHexColor("lightText")
+                    text: VescIf.getConnectedPortName()
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.Wrap
+                }
+                Rectangle{
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: notchBot
+                    opacity: 0
+                }
+            }
+            Rectangle{
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                color: "#33000000"
+            }
+            Rectangle{
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                color: "#33ffffff"
+            }
+            ToolButton {
+                Layout.fillHeight: true
+                Layout.preferredWidth: 70
+                Image {
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: -notchBot/2
+                    antialiasing: true
+                    height: parent.width*0.35
+                    width: height
+                    source: "qrc" + Utility.getThemePath() + "icons/can_off.png"
+                }
+                onClicked: {
+                    if (canDrawerLoader.item.visible) {
+                        canDrawerLoader.item.close()
+                    } else {
+                        canDrawerLoader.item.open()
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        parent: ApplicationWindow.overlay
+        anchors.fill: parent
+        color: "black"
+
+        ConnectScreen {
+            id: connScreen
+            x: 0
+            y: 0
+            height: parent.height
+            width: parent.width
+            opened: true
+            onYChanged: {
+                parent.color.a = Math.min(1, Math.max(1 - y / height, 0))
+
+                if (opened) {
+                    drawer.interactive = false
+                    canDrawerLoader.item.interactive = false
+                    drawer.close()
+                    canDrawerLoader.item.close()
+                } else {
+                    drawer.interactive = true
+                    canDrawerLoader.item.interactive = true
+                }
+            }
+        }
     }
 
     Timer {
@@ -684,7 +729,7 @@ ApplicationWindow {
         repeat: false
         onTriggered: {
             connectedText.text = VescIf.getConnectedPortName()
-            connectedRect.color = "#4f4f4f"
+            connectedRect.color = Utility.getAppHexColor("lightBackground")
         }
     }
 
@@ -729,11 +774,11 @@ ApplicationWindow {
         repeat: true
 
         onTriggered: {
-            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 3){
+            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 4) {
                 rtSwipeView.addItem(rtDataBalance)
                 rtDataBalance.visible = true
-            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 4){
-                rtSwipeView.removeItem(3)
+            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 5) {
+                rtSwipeView.removeItem(4)
                 rtDataBalance.visible = false
             }
 
@@ -747,32 +792,39 @@ ApplicationWindow {
                     mCommands.getValuesSetup()
                     mCommands.getImuData(0xFFFF)
 
-                    if (tabBar.currentIndex == 7) {
+                    if (tabBar.currentIndex == (3 + indexOffset())) {
                         mCommands.bmsGetValues()
                     }
                 } else {
-                    if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0)) {
+                    if ((tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0)) {
                         interval = 50
                         mCommands.getValues()
                     }
 
-                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 1) {
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1) {
                         interval = 50
                         mCommands.getValuesSetup()
+                        mCommands.getImuData(0x2)
                     }
 
-                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
                         interval = 20
                         mCommands.getImuData(0x1FF)
                     }
 
-                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 3) {
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 3) {
+                        interval = 100
+                        mCommands.getValuesSetupSelective(0x7E00)
+                        mCommands.getStats(0xFFFFFFFF)
+                    }
+
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 4) {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getDecodedBalance()
                     }
 
-                    if (tabBar.currentIndex == 7) {
+                    if (tabBar.currentIndex == (3 + indexOffset())) {
                         interval = 100
                         mCommands.bmsGetValues()
                     }
@@ -787,25 +839,29 @@ ApplicationWindow {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
-        width: parent.width - 20
-        height: Math.min(implicitHeight, parent.height - 40)
+        width: parent.width - 20 - notchLeft - notchRight
+        height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
         x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+        y: (parent.height - height + notchTop) / 2
         parent: ApplicationWindow.overlay
 
         ScrollView {
+            id: vescDialogScroll
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width - 20
+            contentWidth: availableWidth
 
             Text {
                 id: vescDialogLabel
-                color: "#ffffff"
-                linkColor: "lightblue"
+                color: {color = Utility.getAppHexColor("lightText")}
+                linkColor: {linkColor = Utility.getAppHexColor("lightAccent")}
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
-                wrapMode: Text.WordWrap
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 textFormat: Text.RichText
                 onLinkActivated: {
                     Qt.openUrlExternally(link)
@@ -814,25 +870,103 @@ ApplicationWindow {
         }
     }
 
+    property var hwUiObj: 0
+
+    function updateHwUi () {
+        if (hwUiObj != 0) {
+            hwUiObj.destroy()
+            hwUiObj = 0
+        }
+
+        swipeView.interactive = true
+        headerBar.visible = true
+        tabBar.enabled = true
+
+        if (VescIf.isPortConnected() && VescIf.qmlHwLoaded()) {
+            if (VescIf.getLastFwRxParams().qmlHwFullscreen) {
+                swipeView.interactive = false
+                headerBar.visible = false
+                tabBar.enabled = false
+            }
+
+            hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
+            swipeView.insertItem(1, uiHwPage)
+            tabBar.insertItem(1, uiHwButton)
+            uiHwPage.visible = true
+            swipeView.setCurrentIndex(0)
+            swipeView.setCurrentIndex(1)
+        } else {
+            uiHwPage.visible = false
+            uiHwPage.parent = null
+            uiHwButton.parent = null
+        }
+    }
+
+    property var appUiObj: 0
+
+    function updateAppUi () {
+        if (appUiObj != 0) {
+            appUiObj.destroy()
+            appUiObj = 0
+        }
+
+        swipeView.interactive = true
+        headerBar.visible = true
+        tabBar.enabled = true
+
+        if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
+            if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
+                swipeView.interactive = false
+                headerBar.visible = false
+                tabBar.enabled = false
+            }
+
+            appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
+            swipeView.insertItem(1, uiAppPage)
+            tabBar.insertItem(1, uiAppButton)
+            uiAppPage.visible = true
+            swipeView.setCurrentIndex(0)
+            swipeView.setCurrentIndex(1)
+        } else {
+            uiAppPage.visible = false
+            uiAppPage.parent = null
+            uiAppButton.parent = null
+        }
+    }
+
+    function indexOffset() {
+        var res = 0
+        if (uiHwButton.visible) {
+            res++
+        }
+        if (uiAppButton.visible) {
+            res++
+        }
+        return res
+    }
+
     Connections {
         target: VescIf
         onPortConnectedChanged: {
             connectedText.text = VescIf.getConnectedPortName()
-            if (VescIf.isPortConnected()) {
-                reconnectButton.enabled = true
-            } else {
+            if (!VescIf.isPortConnected()) {
                 confTimer.mcConfRx = false
                 confTimer.appConfRx = false
+                connected = false
+            } else {
+                connected = true
             }
 
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
+
+            connScreen.opened = VescIf.isPortConnected() ? false : true
         }
 
         onStatusMessage: {
             connectedText.text = msg
-            connectedRect.color = isGood ? "green" : "red"
+            connectedRect.color = isGood ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("red")
             statusTimer.restart()
         }
 
@@ -840,6 +974,7 @@ ApplicationWindow {
             vescDialog.title = title
             vescDialogLabel.text = (richText ? "<style>a:link { color: lightblue; }</style>" : "") + msg
             vescDialogLabel.textFormat = richText ? Text.RichText : Text.AutoText
+            vescDialogScroll.ScrollBar.vertical.position = 0
             vescDialog.open()
         }
 
@@ -848,7 +983,7 @@ ApplicationWindow {
                 if (limited && !VescIf.getFwSupportsConfiguration()) {
                     confPageMotor.enabled = false
                     confPageApp.enabled = false
-                    swipeView.setCurrentIndex(5)
+                    swipeView.setCurrentIndex(4 + indexOffset())
                 } else {
                     confPageMotor.enabled = true
                     confPageApp.enabled = true
@@ -856,6 +991,13 @@ ApplicationWindow {
                     mCommands.getAppConf()
                 }
             }
+
+            updateHwUi()
+            updateAppUi()
+        }
+
+        onQmlLoadDone: {
+            qmlLoadDialog.open()
         }
     }
 
@@ -877,13 +1019,61 @@ ApplicationWindow {
 
     Connections {
         target: mCommands
-
         onValuesImuReceived: {
-            if (rtSwipeView.vesc3dViewNow != 0) {
-                rtSwipeView.vesc3dViewNow.setRotation(
-                            values.roll, values.pitch,
-                            useYawBox.checked ? values.yaw : -Math.PI / 2.0)
+            if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
+                vesc3dLoader.item.setRotation(values.roll, values.pitch,
+                                              useYawBox.checked ? values.yaw : 0)
+                rtIMU.updateText(values)
             }
+        }
+
+        onDeserializeConfigFailed: {
+            if (isMc) {
+                confTimer.mcConfRx = true
+            }
+
+            if (isApp) {
+                confTimer.appConfRx = true
+            }
+        }
+    }
+
+    Dialog {
+        id: qmlLoadDialog
+        standardButtons: Dialog.Yes | Dialog.Cancel
+        modal: true
+        focus: true
+        rightMargin: 10
+        leftMargin: 10
+        closePolicy: Popup.CloseOnEscape
+        title: "Load Custom User Interface"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        parent: ApplicationWindow.overlay
+        y: parent.y + parent.height / 2 - height / 2
+
+        Text {
+            color: Utility.getAppHexColor("lightText")
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text:
+                "The hardware you are connecting to contains code that will alter the " +
+                "user interface of VESC Tool. This code has not been verified by the " +
+                "authors of VESC Tool and could contain bugs and security problems. \n\n" +
+                "Do you want to load this custom user interface?"
+        }
+
+        onAccepted: {
+            updateHwUi()
+            updateAppUi()
+        }
+
+        onRejected: {
+            VescIf.disconnectPort()
         }
     }
 }

@@ -20,6 +20,8 @@
 #include "detectfoc.h"
 #include "ui_detectfoc.h"
 #include "helpdialog.h"
+#include "utility.h"
+
 #include <QMessageBox>
 
 DetectFoc::DetectFoc(QWidget *parent) :
@@ -27,12 +29,26 @@ DetectFoc::DetectFoc(QWidget *parent) :
     ui(new Ui::DetectFoc)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->pushButton->setIcon(QPixmap(theme + "icons/arrow_r.png"));
+    ui->pushButton_2->setIcon(QPixmap(theme + "icons/arrow_r.png"));
+    ui->pushButton_3->setIcon(QPixmap(theme + "icons/arrow_r.png"));
+    ui->rlButton->setIcon(QPixmap(theme + "icons/rl.png"));
+    ui->lambdaButton->setIcon(QPixmap(theme + "icons/lambda.png"));
+    ui->applyAllButton->setIcon(QPixmap(theme + "icons/apply.png"));
+    ui->calcGainButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->calcKpKiButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->calcApplyLocalButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
     mLastCalcOk = false;
     mAllValuesOk = false;
     mLastOkValuesApplied = false;
     mRunning = false;
+    mTempMotorLast = -100.0;
     updateColors();
 }
 
@@ -51,14 +67,17 @@ void DetectFoc::on_rlButton_clicked()
             return;
         }
 
-        QMessageBox::information(this,
-                              tr("Measure R & L"),
-                              tr("When measuring R & L the motor is going to make some noises, but "
-                                 "not rotate. These noises are completely normal, so don't unplug "
-                                 "anything unless you see smoke."));
+        QMessageBox::StandardButton reply = QMessageBox::warning(this,
+                                     tr("Measure R & L"),
+                                     tr("When measuring R & L the motor is going to make some noises, but "
+                                        "not rotate. These noises are completely normal, so don't unplug "
+                                        "anything unless you see smoke."),
+                                     QMessageBox::Ok | QMessageBox::Cancel);
 
-        mVesc->commands()->measureRL();
-        mRunning = true;
+        if (reply == QMessageBox::Ok) {
+            mVesc->commands()->measureRL();
+            mRunning = true;
+        }
     }
 }
 
@@ -79,8 +98,7 @@ void DetectFoc::on_lambdaButton_clicked()
             return;
         }
 
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::warning(this,
+        QMessageBox::StandardButton reply = QMessageBox::warning(this,
                                      tr("Warning"),
                                      tr("<font color=\"red\">Warning: </font>"
                                         "This is going to spin up the motor. Make "
@@ -116,8 +134,8 @@ void DetectFoc::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(motorRLReceived(double,double)),
-                this, SLOT(motorRLReceived(double,double)));
+        connect(mVesc->commands(), SIGNAL(motorRLReceived(double,double,double)),
+                this, SLOT(motorRLReceived(double,double,double)));
         connect(mVesc->commands(), SIGNAL(motorLinkageReceived(double)),
                 this, SLOT(motorLinkageReceived(double)));
         connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
@@ -127,7 +145,7 @@ void DetectFoc::setVesc(VescInterface *vesc)
     }
 }
 
-void DetectFoc::motorRLReceived(double r, double l)
+void DetectFoc::motorRLReceived(double r, double l, double ld_lq_diff)
 {
     if (!mRunning) {
         return;
@@ -144,9 +162,17 @@ void DetectFoc::motorRLReceived(double r, double l)
         mVesc->emitStatusMessage(tr("FOC Detection Result Received"), true);
         ui->resistanceBox->setValue(r * 1e3);
         ui->inductanceBox->setValue(l);
+        ui->inductanceDiffBox->setValue(ld_lq_diff);
         ui->kpBox->setValue(0.0);
         ui->kiBox->setValue(0.0);
         on_calcKpKiButton_clicked();
+
+        auto val = Utility::getMcValuesBlocking(mVesc);
+        if (val.temp_motor > 1.0) {
+            mTempMotorLast = val.temp_motor;
+        } else {
+            mTempMotorLast = -100.0;
+        }
 
         // TODO: Use some rule to calculate time constant?
 //        if (l > 50.0) {
@@ -199,6 +225,7 @@ void DetectFoc::on_applyAllButton_clicked()
     if (mVesc) {
         double r = ui->resistanceBox->value() / 1e3;
         double l = ui->inductanceBox->value();
+        double ld_lq_diff = ui->inductanceDiffBox->value();
         double lambda = ui->lambdaBox->value() / 1e3;
 
         if (r < 1e-10) {
@@ -218,15 +245,28 @@ void DetectFoc::on_applyAllButton_clicked()
         if (lambda < 1e-10) {
             QMessageBox::critical(this,
                                   tr("Apply Error"),
-                                  tr("\u03BB is 0. Please measure it first."));
+                                  tr(u8"\u03BB is 0. Please measure it first."));
             return;
+        }
+
+        if (ld_lq_diff > (l / 4.0)) {
+            QMessageBox::information(this,
+                                  tr("Salient Motor"),
+                                  tr("This motor has some saliency and could benefit from the MTPA-algorithm. You "
+                                     "can activate it from the FOC->Advanced page. Be careful when testing!"));
         }
 
         mVesc->mcConfig()->updateParamDouble("foc_motor_r", r);
         mVesc->mcConfig()->updateParamDouble("foc_motor_l", l / 1e6);
+        mVesc->mcConfig()->updateParamDouble("foc_motor_ld_lq_diff", ld_lq_diff / 1e6);
         mVesc->mcConfig()->updateParamDouble("foc_motor_flux_linkage", lambda);
 
-        mVesc->emitStatusMessage(tr("R, L and \u03BB Applied"), true);
+        mVesc->emitStatusMessage(tr(u8"R, L and \u03BB applied"), true);
+
+        if (mTempMotorLast > -10.0) {
+            mVesc->mcConfig()->updateParamDouble("foc_temp_comp_base_temp", mTempMotorLast);
+            mVesc->emitStatusMessage(tr("Temp comp base temp applied"), true);
+        }
 
         on_calcKpKiButton_clicked();
         on_calcGainButton_clicked();
@@ -257,21 +297,24 @@ void DetectFoc::updateColors()
 {
     bool r_ok = ui->resistanceBox->value() > 1e-10;
     bool l_ok = ui->inductanceBox->value() > 1e-10;
+    bool l_diff_ok = ui->inductanceDiffBox->value() > 1e-10;
     bool lambda_ok = ui->lambdaBox->value() > 1e-10;
     bool gain_ok = ui->obsGainBox->value() > 1e-10;
     bool kp_ok = ui->kpBox->value() > 1e-10;
     bool ki_ok = ui->kiBox->value() > 1e-10;
 
     QString style_red = "color: rgb(255, 255, 255);"
-                        "background-color: rgb(150, 0, 0);";
+                        "background-color: rgb(140,37,37);";
 
     QString style_green = "color: rgb(255, 255, 255);"
-                          "background-color: rgb(0, 150, 0);";
+                          "background-color: rgb(95,140,95)";
 
     ui->resistanceBox->setStyleSheet(QString("#resistanceBox {%1}").
                                      arg(r_ok ? style_green : style_red));
     ui->inductanceBox->setStyleSheet(QString("#inductanceBox {%1}").
                                      arg(l_ok ? style_green : style_red));
+    ui->inductanceDiffBox->setStyleSheet(QString("#inductanceDiffBox {%1}").
+                                     arg(l_diff_ok ? style_green : style_red));
     ui->lambdaBox->setStyleSheet(QString("#lambdaBox {%1}").
                                  arg(lambda_ok ? style_green : style_red));
     ui->obsGainBox->setStyleSheet(QString("#obsGainBox {%1}").
@@ -329,7 +372,7 @@ void DetectFoc::on_calcGainButton_clicked()
     if (lambda < 1e-10) {
         QMessageBox::critical(this,
                               tr("Calculate Error"),
-                              tr("\u03BB is 0. Please measure it first."));
+                              tr(u8"\u03BB is 0. Please measure it first."));
         return;
     }
 

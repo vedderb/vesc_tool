@@ -18,9 +18,10 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
+import QtQuick.Controls.Material 2.2
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -28,18 +29,40 @@ import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    id: topItem
+
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
+    property var dialogParent: ApplicationWindow.overlay
+
+    signal dialogClosed()
 
     function openDialog() {
-        // Set few battery cells by default to avoid confusion
-        // if the motor does not spin due to battery cut.
-        mMcConf.updateParamInt("si_battery_cells", 3)
         dialog.open()
-        loadDefaultDialog.open()
+        openTimer.start()
+        tabBar.currentIndex = 0
+    }
+
+    Timer {
+        id: openTimer
+
+        running: false
+        interval: 100
+        repeat: false
+
+        onTriggered: {
+            updateUsageListParams()
+            loadDefaultDialog.open()
+        }
+    }
+
+    function updateUsageListParams() {
+        mMcConf.updateParamDouble("l_duty_start", usageList.currentItem.modelData.duty_start, null)
     }
 
     Component.onCompleted: {
+        paramListUsage.addEditorMc("l_duty_start")
+
         paramListBatt.addEditorMc("si_battery_type")
         paramListBatt.addEditorMc("si_battery_cells")
         paramListBatt.addEditorMc("si_battery_ah")
@@ -53,109 +76,204 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 10
-        height: parent.height - 10
+        property bool isHorizontal: width > height
+        width: parent.width - 10 - notchLeft - notchRight
+        height: parent.height - 10 - notchBot - notchTop
         closePolicy: Popup.NoAutoClose
-        x: 5
-        y: 5
-        parent: ApplicationWindow.overlay
+        x: 5 + notchLeft
+        y: 5 + notchTop
+        parent: dialogParent
         bottomMargin: 0
         rightMargin: 0
         padding: 10
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         StackLayout {
             id: stackLayout
             anchors.fill: parent
+            onCurrentIndexChanged: {tabBar.currentIndex = currentIndex}
 
             Item {
-                ColumnLayout {
-                    id: motorColumn
-                    anchors.fill: parent
-
-                    ListModel {
-                        id: motorModel
-
-                        ListElement {
-                            name: "Mini Outrunner (~75 g)"
-                            motorImg: "qrc:/res/images/motors/outrunner_mini.jpg"
-                            maxLosses: 10
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            poles: 14
-                        }
-                        ListElement {
-                            name: "Small Outrunner (~200 g)"
-                            motorImg: "qrc:/res/images/motors/outrunner_small.jpg"
-                            maxLosses: 25
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            poles: 14
-                        }
-                        ListElement {
-                            name: "Medium Outrunner (~750 g)"
-                            motorImg: "qrc:/res/images/motors/6374.jpg"
-                            maxLosses: 60
-                            openloopErpm: 700
-                            sensorlessErpm: 4000
-                            poles: 14
-                        }
-                        ListElement {
-                            name: "Large Outrunner (~2000 g)"
-                            motorImg: "qrc:/res/icons/motor.png"
-                            maxLosses: 200
-                            openloopErpm: 700
-                            sensorlessErpm: 4000
-                            poles: 14
-                        }
-                        ListElement {
-                            name: "Small Inrunner (~200 g)"
-                            motorImg: "qrc:/res/images/motors/inrunner_small.jpg"
-                            maxLosses: 25
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            poles: 2
-                        }
-                        ListElement {
-                            name: "Medium Inrunner (~750 g)"
-                            motorImg: "qrc:/res/images/motors/inrunner_medium.jpg"
-                            maxLosses: 70
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            poles: 4
-                        }
-                        ListElement {
-                            name: "Large Inrunner (~2000 g)"
-                            motorImg: "qrc:/res/icons/motor.png"
-                            maxLosses: 200
-                            openloopErpm: 1000
-                            sensorlessErpm: 4000
-                            poles: 4
-                        }
-                        ListElement {
-                            name: "E-Bike DD hub motor (~6 kg)"
-                            motorImg: "qrc:/res/images/motors/ebike_dd_1kw.jpg"
-                            maxLosses: 75
-                            openloopErpm: 300
-                            sensorlessErpm: 2000
-                            poles: 46
-                        }
-                        ListElement {
-                            name: "EDF Inrunner Small (~200 g)"
-                            motorImg: "qrc:/res/images/motors/edf_small.jpg"
-                            maxLosses: 55
-                            openloopErpm: 1400
-                            sensorlessErpm: 4000
-                            poles: 6
-                        }
+                ListModel {
+                    id: usageModel
+                    property string iconPath: {iconPath = "qrc" + Utility.getThemePath() + "icons/"}
+                    Component.onCompleted: {
+                        append({name: "Generic", usageImg:iconPath + "motor.png", duty_start: 1.0, hfi_start: false})
+                        append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg", duty_start: 0.85, hfi_start: true})
+                        append({name: "EUC", usageImg:iconPath + "EUC-96.png", duty_start: 1.0, hfi_start: false})
+                        append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg", duty_start: 1.0, hfi_start: false})
                     }
+                }
 
+                GridLayout {
+                    id: usageColumn
+                    anchors.fill: parent
+                    columns: dialog.isHorizontal ? 2 : 1
+                    rows: dialog.isHorizontal ? 1 : 2
                     ListView {
-                        id: motorList
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        id: usageList
                         focus: true
                         clip: true
                         spacing: 5
+                        Layout.row: 0
+                        Layout.fillHeight: true
+                        Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
+                        Layout.column: dialog.isHorizontal ? 1 : 0
+
+                        Component {
+                            id: usageDelegate
+
+                            Rectangle {
+                                id: imgRect2
+                                property variant modelData: model
+
+                                width: usageList.width
+                                height: 90
+                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
+                                radius: 5
+                                RowLayout {
+                                    anchors.fill: parent
+                                    spacing: 10
+
+                                    Item {
+                                        Layout.preferredWidth: 80
+                                        Layout.preferredHeight: 80
+                                        Layout.leftMargin: 5
+                                        opacity: imgRect2.ListView.isCurrentItem ? 1.0 : 0.5
+
+                                        Image {
+                                            id: image2
+                                            fillMode: Image.PreserveAspectFit
+                                            source: usageImg
+                                            width: 80
+                                            height: 80
+                                            smooth: true
+                                            mipmap: false
+                                            visible: false
+                                        }
+
+                                        Rectangle {
+                                            id: mask2
+                                            width: 80
+                                            height: 80
+                                            radius: 40
+                                            visible: false
+                                        }
+
+                                        OpacityMask {
+                                            anchors.fill: image2
+                                            source: image2
+                                            maskSource: mask2
+                                        }
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: name
+                                        color: Utility.getAppHexColor("lightText")
+                                        wrapMode: Text.WordWrap
+                                    }
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onPressed: {
+                                        usageList.currentIndex = index
+                                        usageList.focus = true
+                                    }
+                                }
+                            }
+                        }
+
+                        model: usageModel
+                        delegate: usageDelegate
+
+                        onCurrentIndexChanged: {
+                            updateUsageListParams()
+                        }
+                    }
+
+                    GroupBox {
+                        Layout.preferredHeight: implicitHeight
+                        Layout.fillWidth: true
+                        Layout.column: 0
+                        Layout.row: dialog.isHorizontal ? 0 : 1
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
+
+                        label: CheckBox {
+                            id: overrideUsageBox
+                            checked: false
+                            text: qsTr("Override (Advanced)")
+
+                            onToggled: {
+                                if (!checked) {
+                                    currentInMinBox.realValue = 0
+                                    currentInMaxBox.realValue = 0
+                                }
+                            }
+                        }
+
+                        ScrollView {
+                            anchors.fill: parent
+                            clip: true
+
+                            ParamList {
+                                id: paramListUsage
+                                enabled: overrideUsageBox.checked
+                                anchors.fill: parent
+                            }
+                        }
+                    }
+                }
+            }
+
+            Item {
+
+                ListModel {
+                    id: motorModel
+                    property string iconPath: {iconPath = "qrc" + Utility.getThemePath() + "icons/"}
+                    Component.onCompleted: {
+                        [
+                        ["Mini Outrunner (~75 g)", "qrc:/res/images/motors/outrunner_mini.jpg", 20, 1400, 4000, false,14],
+                        ["Small Outrunner (~200 g)","qrc:/res/images/motors/outrunner_small.jpg", 50, 1400, 4000, false,14],
+                        ["Medium Outrunner (~750 g)","qrc:/res/images/motors/6374.jpg", 120, 700, 4000, true, 14],
+                        ["Large Outrunner (~2000 g)",iconPath + "motor.png", 400, 700, 4000, false, 14],
+                        ["Small Inrunner (~200 g)","qrc:/res/images/motors/inrunner_small.jpg", 50, 1400, 4000, false, 2],
+                        ["Medium Inrunner (~750 g)","qrc:/res/images/motors/inrunner_medium.jpg", 140, 1400, 4000, false, 4],
+                        ["Large Inrunner (~2000 g)",iconPath + "motor.png", 400, 1000, 4000, false, 4],
+                        ["E-Bike DD hub motor (~6 kg)","qrc:/res/images/motors/ebike_dd_1kw.jpg", 150, 300, 2000, false, 46],
+                        ["EDF Inrunner Small (~200 g)","qrc:/res/images/motors/edf_small.jpg", 110, 1400, 4000, false, 6]
+                        ].forEach(function(element) {
+                            append({
+                                       name: element[0],
+                                       motorImg: element[1],
+                                       maxLosses: element[2],
+                                       openloopErpm: element[3],
+                                       sensorlessErpm: element[4],
+                                       hfi_start: element[5],
+                                       poles: element[6]
+                                   });
+                        });
+                    }
+                }
+
+                GridLayout {
+                    id: motorColumn
+                    anchors.fill: parent
+                    columns: dialog.isHorizontal ? 2 : 1
+                    rows: dialog.isHorizontal ? 1 : 2
+
+                    ListView {
+                        id: motorList
+                        focus: true
+                        clip: true
+                        spacing: 5
+                        Layout.row: 0
+                        Layout.fillHeight: true
+                        Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
+                        Layout.column: dialog.isHorizontal ? 1 : 0
 
                         Component {
                             id: motorDelegate
@@ -166,7 +284,7 @@ Item {
 
                                 width: motorList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? "#41418f" : "#30000000"
+                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
                                 radius: 5
                                 RowLayout {
                                     anchors.fill: parent
@@ -185,6 +303,7 @@ Item {
                                             width: 80
                                             height: 80
                                             smooth: true
+                                            mipmap: false
                                             visible: false
                                         }
 
@@ -206,7 +325,7 @@ Item {
                                     Text {
                                         Layout.fillWidth: true
                                         text: name
-                                        color: "white"
+                                        color: Utility.getAppHexColor("lightText")
                                         wrapMode: Text.WordWrap
                                     }
                                 }
@@ -233,7 +352,11 @@ Item {
                     }
 
                     GroupBox {
+                        Layout.preferredHeight: implicitHeight
                         Layout.fillWidth: true
+                        Layout.column: 0
+                        Layout.row: dialog.isHorizontal ? 0 : 1
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
                         label: CheckBox {
                             id: overrideBox
@@ -255,7 +378,7 @@ Item {
 
                             Text {
                                 visible: !overrideBox.checked
-                                color: "white"
+                                color: {color = Utility.getAppHexColor("lightText")}
                                 font.family: "DejaVu Sans Mono"
                                 verticalAlignment: Text.AlignVCenter
                                 wrapMode: Text.WordWrap
@@ -320,63 +443,71 @@ Item {
             }
 
             Item {
-                ScrollView {
+                GridLayout {
                     anchors.fill: parent
-                    contentWidth: parent.width
-                    clip: true
+                    columns: dialog.isHorizontal ? 2 : 1
+                    rows: dialog.isHorizontal ? 1 : 2
 
-                    ColumnLayout {
-                        anchors.fill: parent
+                    ScrollView {
+                        Layout.row: 0
+                        Layout.fillHeight: true
+                        Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
+                        Layout.column: dialog.isHorizontal ? 1 : 0
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
+                        clip: true
 
                         ParamList {
                             id: paramListBatt
-                            Layout.fillHeight: true
-                            Layout.fillWidth: true
+                            anchors.fill: parent
                         }
+                    }
 
-                        GroupBox {
-                            Layout.fillWidth: true
+                    GroupBox {
+                        Layout.preferredHeight: implicitHeight
+                        Layout.fillWidth: true
+                        Layout.column: 0
+                        Layout.row: dialog.isHorizontal ? 0 : 1
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
-                            label: CheckBox {
-                                id: overrideBattBox
-                                checked: false
-                                text: qsTr("Advanced (0 = defaults)")
+                        label: CheckBox {
+                            id: overrideBattBox
+                            checked: false
+                            text: qsTr("Advanced (0 = defaults)")
 
-                                onToggled: {
-                                    if (!checked) {
-                                        currentInMinBox.realValue = 0
-                                        currentInMaxBox.realValue = 0
-                                    }
+                            onToggled: {
+                                if (!checked) {
+                                    currentInMinBox.realValue = 0
+                                    currentInMaxBox.realValue = 0
                                 }
                             }
+                        }
 
-                            ColumnLayout {
-                                anchors.fill: parent
-                                enabled: overrideBattBox.checked
+                        ColumnLayout {
+                            anchors.fill: parent
+                            enabled: overrideBattBox.checked
 
-                                DoubleSpinBox {
-                                    Layout.fillWidth: true
-                                    id: currentInMinBox
-                                    decimals: 1
-                                    realStepSize: 5
-                                    realFrom: 0
-                                    realTo: -9999
-                                    realValue: 0
-                                    prefix: "Battery Current Regen: "
-                                    suffix: " A"
-                                }
+                            DoubleSpinBox {
+                                Layout.fillWidth: true
+                                id: currentInMinBox
+                                decimals: 1
+                                realStepSize: 5
+                                realFrom: 0
+                                realTo: -9999
+                                realValue: 0
+                                prefix: "Battery Current Regen: "
+                                suffix: " A"
+                            }
 
-                                DoubleSpinBox {
-                                    Layout.fillWidth: true
-                                    id: currentInMaxBox
-                                    decimals: 1
-                                    realStepSize: 5
-                                    realFrom: 0
-                                    realTo: 9999
-                                    realValue: 0
-                                    prefix: "Battery Current Max: "
-                                    suffix: " A"
-                                }
+                            DoubleSpinBox {
+                                Layout.fillWidth: true
+                                id: currentInMaxBox
+                                decimals: 1
+                                realStepSize: 5
+                                realFrom: 0
+                                realTo: 9999
+                                realValue: 0
+                                prefix: "Battery Current Max: "
+                                suffix: " A"
                             }
                         }
                     }
@@ -384,82 +515,84 @@ Item {
             }
 
             Item {
-                ColumnLayout {
+                GridLayout {
                     anchors.fill: parent
-
-                    ScrollView {
+                    columns: dialog.isHorizontal ? 2 : 1
+                    GroupBox {
+                        id: gearRatioBox
+                        title: qsTr("Gear Ratio")
+                        Layout.preferredHeight: implicitHeight
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        contentWidth: parent.width
-                        clip: true
+                        Layout.column: 0
+                        Layout.row: 0
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
                         ColumnLayout {
                             anchors.fill: parent
 
-                            GroupBox {
-                                id: canFwdBox
-                                title: qsTr("Gear Ratio")
+                            CheckBox {
+                                id: directDriveBox
+                                text: "Direct Drive"
                                 Layout.fillWidth: true
+                            }
 
-                                ColumnLayout {
-                                    anchors.fill: parent
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text {
+                                    Layout.fillWidth: true
+                                    color: {color = Utility.getAppHexColor("lightText")}
+                                    text: qsTr("Motor Pulley")
+                                }
 
-                                    CheckBox {
-                                        id: directDriveBox
-                                        text: "Direct Drive"
-                                        Layout.fillWidth: true
-                                    }
+                                SpinBox {
+                                    enabled: !directDriveBox.checked
+                                    id: motorPulleyBox
+                                    from: 1
+                                    to: 999
+                                    value: 13
+                                    editable: true
 
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        Text {
-                                            Layout.fillWidth: true
-                                            color: "white"
-                                            text: qsTr("Motor Pulley")
-                                        }
-
-                                        SpinBox {
-                                            enabled: !directDriveBox.checked
-                                            id: motorPulleyBox
-                                            from: 1
-                                            to: 999
-                                            value: 13
-                                            editable: true
-
-                                            textFromValue: function(value) {
-                                                return !directDriveBox.checked ? value : 1
-                                            }
-                                        }
-                                    }
-
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        Text {
-                                            Layout.fillWidth: true
-                                            color: "white"
-                                            text: qsTr("Wheel Pulley")
-                                        }
-
-                                        SpinBox {
-                                            enabled: !directDriveBox.checked
-                                            id: wheelPulleyBox
-                                            from: 1
-                                            to: 999
-                                            value: 36
-                                            editable: true
-
-                                            textFromValue: function(value) {
-                                                return !directDriveBox.checked ? value : 1
-                                            }
-                                        }
+                                    textFromValue: function(value) {
+                                        return !directDriveBox.checked ? value : 1
                                     }
                                 }
                             }
 
-                            ParamList {
-                                id: paramListSetup
+                            RowLayout {
                                 Layout.fillWidth: true
+                                Text {
+                                    Layout.fillWidth: true
+                                    color: {color = Utility.getAppHexColor("lightText")}
+                                    text: qsTr("Wheel Pulley")
+                                }
+
+                                SpinBox {
+                                    enabled: !directDriveBox.checked
+                                    id: wheelPulleyBox
+                                    from: 1
+                                    to: 999
+                                    value: 36
+                                    editable: true
+
+                                    textFromValue: function(value) {
+                                        return !directDriveBox.checked ? value : 1
+                                    }
+                                }
                             }
+                        }
+                    }
+                    ScrollView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.row: dialog.isHorizontal ? 0 : 1
+                        Layout.column: dialog.isHorizontal ? 1 : 0
+                        Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
+                        contentWidth: availableWidth
+                        clip: true
+                        ParamList {
+                            id: paramListSetup
+                            anchors.fill: parent
+
                         }
                     }
                 }
@@ -469,45 +602,35 @@ Item {
                 DirectionSetup {
                     id: dirSetup
                     anchors.fill: parent
+                    dialogParent: topItem.dialogParent
                 }
             }
         }
 
         header: Rectangle {
-            color: "#dbdbdb"
-            height: tabBar.height
+            color: {color = Utility.getAppHexColor("lightText")}
+            height: tabBar.implicitHeight
 
             TabBar {
                 id: tabBar
-                currentIndex: stackLayout.currentIndex
+                currentIndex: 0
                 anchors.fill: parent
-                implicitWidth: 0
                 clip: true
                 enabled: false
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#4f4f4f"
+                    color: {color = Utility.getAppHexColor("lightBackground")}
                 }
-
-                property int buttons: 4
+                property int buttons: 5
                 property int buttonWidth: 120
 
-                TabButton {
-                    text: qsTr("Motor")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Battery")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Setup")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Direction")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                Repeater {
+                    model: ["Usage", "Motor", "Battery", "Setup", "Direction"]
+                    TabButton {
+                        text: modelData
+                        width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                    }
                 }
             }
         }
@@ -524,6 +647,7 @@ Item {
                 onClicked: {
                     if (stackLayout.currentIndex == 0) {
                         dialog.close()
+                        dialogClosed()
                     } else {
                         stackLayout.currentIndex--
                     }
@@ -541,14 +665,16 @@ Item {
 
                 onClicked: {
                     if (stackLayout.currentIndex == 0) {
-                        startWarningDialog.open()
+                        stackLayout.currentIndex++
                     } else if (stackLayout.currentIndex == 1) {
+                        startWarningDialog.open()
+                    } else if (stackLayout.currentIndex == 2) {
                         if (overrideBattBox.checked) {
                             stackLayout.currentIndex++
                         } else {
                             batteryWarningDialog.open()
                         }
-                    } else if (stackLayout.currentIndex == 2) {
+                    } else if (stackLayout.currentIndex == 3) {
                         if (stackLayout.currentIndex == (stackLayout.count - 2)) {
                             if (VescIf.isPortConnected()) {
                                 detectDialog.open()
@@ -558,9 +684,10 @@ Item {
                                                          false, false)
                             }
                         }
-                    } else if (stackLayout.currentIndex == 3) {
+                    } else if (stackLayout.currentIndex == 4) {
                         stackLayout.currentIndex = 0
                         dialog.close()
+                        dialogClosed()
                     }
 
                     updateButtonText()
@@ -574,16 +701,20 @@ Item {
         standardButtons: Dialog.Yes | Dialog.No
         modal: true
         focus: true
-        width: parent.width - 20
+        rightMargin: 10 + notchRight
+        leftMargin: 10 + notchLeft
         closePolicy: Popup.CloseOnEscape
         title: "Load Default Parameters"
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
-        x: 10
         y: dialog.y + dialog.height / 2 - height / 2
 
         Text {
-            color: "#ffffff"
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -604,15 +735,19 @@ Item {
         standardButtons: Dialog.Yes | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        rightMargin: 10 + notchRight
+        leftMargin: 10 + notchLeft
         closePolicy: Popup.CloseOnEscape
         title: "Motor Selection"
-        x: 10
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
-            color: "#ffffff"
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -624,6 +759,20 @@ Item {
         onAccepted: {
             stackLayout.currentIndex++
             updateButtonText()
+
+            // Check if a 12s battery seems to be used and set the default number of cells accordingly.
+            // The reason is that this is one of the most common configurations and several people
+            // have damaged their battery by forgetting to set this number properly and overdischarge
+            // their battery.
+            disableDialog()
+            var val = Utility.getMcValuesBlocking(VescIf)
+            enableDialog()
+
+            if (val.v_in > 39.0 && val.v_in < 51.0) {
+                mMcConf.updateParamInt("si_battery_cells", 12)
+            } else {
+                mMcConf.updateParamInt("si_battery_cells", 3)
+            }
         }
     }
 
@@ -633,15 +782,19 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        rightMargin: 10 + notchRight
+        leftMargin: 10 + notchLeft
         closePolicy: Popup.CloseOnEscape
         title: "Battery Settings"
-        x: 10
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         Text {
-            color: "#ffffff"
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -662,38 +815,59 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        rightMargin: 10 + notchRight
+        leftMargin: 10 + notchLeft
         closePolicy: Popup.CloseOnEscape
         title: "Detect FOC Parameters"
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
+        width: parent.width - (rightMargin + leftMargin)
+        property var canDevs: []
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
-        x: 10
         y: dialog.y + dialog.height / 2 - height / 2
 
-        Text {
-            color: "#ffffff"
-            verticalAlignment: Text.AlignVCenter
+        ColumnLayout {
             anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text: "This is going to spin up all motors. Make " +
-                  "sure that nothing is in the way."
+
+            Text {
+                Layout.fillWidth: true
+                color: {color = Utility.getAppHexColor("lightText")}
+                verticalAlignment: Text.AlignVCenter
+                wrapMode: Text.WordWrap
+                text: "This is going to spin up all motors. Make " +
+                      "sure that nothing is in the way."
+            }
+
+            CheckBox {
+                id: detectCanBox
+                checked: true
+                text: "Detect all motors over CAN Bus"
+            }
         }
 
         onAccepted: {
             disableDialog()
 
             mMcConf.updateParamDouble("si_gear_ratio", directDriveBox.checked ?
-                                          1 : (wheelPulleyBox.value / motorPulleyBox.value), 0)
+                                          1 : (wheelPulleyBox.value / motorPulleyBox.value), null)
 
             mCommands.setMcconf(false)
-            Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)
-            var canDevs = Utility.scanCanVescOnly(VescIf)
+            Utility.waitSignal(mCommands, "2ackReceived(QString)", 4000)
+
+            if (detectCanBox.checked) {
+                canDevs = Utility.scanCanVescOnly(VescIf)
+            } else {
+                canDevs: []
+            }
+
             if (!Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0)) {
                 enableDialog()
                 return
             }
 
-            var res  = Utility.detectAllFoc(VescIf, true,
+            var res  = Utility.detectAllFoc(VescIf, detectCanBox.checked,
                                             maxPowerLossBox.realValue,
                                             currentInMinBox.realValue,
                                             currentInMaxBox.realValue,
@@ -703,7 +877,31 @@ Item {
             var resDetect = false
             if (res.startsWith("Success!")) {
                 resDetect = true
-                Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs);
+
+                Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs)
+
+                var updateAllParams = ["l_duty_start"]
+
+                // Temperature compensation means that the motor can be tracked at lower
+                // speed across a broader temperature range. Therefore openloop_erpm
+                // can be decreased.
+                if (mMcConf.getParamBool("foc_temp_comp")) {
+                    var openloopErpm = mMcConf.getParamDouble("foc_openloop_rpm")
+                    mMcConf.updateParamDouble("foc_openloop_rpm", openloopErpm / 2.0, null)
+                    updateAllParams.push("foc_openloop_rpm")
+                }
+
+                // Set sensor mode to HFI start if the motor is sensorless, the firmware supports it
+                // and the motor and application suggest it.
+                if (mMcConf.getParamEnumNames("foc_sensor_mode").length >= 5 &&
+                        mMcConf.getParamEnum("foc_sensor_mode") === 0 &&
+                        usageList.currentItem.modelData.hfi_start &&
+                        motorList.currentItem.modelData.hfi_start) {
+                    mMcConf.updateParamEnum("foc_sensor_mode", 4, null)
+                    updateAllParams.push("foc_sensor_mode")
+                }
+
+                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, updateAllParams)
             }
 
             enableDialog()
@@ -724,10 +922,13 @@ Item {
         standardButtons: Dialog.Ok
         modal: true
         focus: true
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         height: parent.height - 40
         closePolicy: Popup.CloseOnEscape
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
@@ -735,11 +936,11 @@ Item {
         ScrollView {
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width - 20
+            contentWidth: availableWidth
 
             Text {
                 id: resultLabel
-                color: "#ffffff"
+                color: {color = Utility.getAppHexColor("lightText")}
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
@@ -761,7 +962,7 @@ Item {
         running: false
 
         onTriggered: {
-            dirSetup.scanCan()
+            dirSetup.setCanDevs(detectDialog.canDevs)
         }
     }
 
@@ -802,10 +1003,14 @@ Item {
         modal: true
         focus: true
 
-        width: parent.width - 20
-        x: 10
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        width: parent.width - 20 - notchLeft - notchRight
+        x: parent.width / 2 - width / 2
         y: parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         ProgressBar {
             anchors.fill: parent

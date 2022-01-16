@@ -24,7 +24,7 @@ CopterInfo::CopterInfo(int id, Qt::GlobalColor color)
     mId = id;
     mColor = color;
     mName = "";
-    mName.sprintf("Copter %d", mId);
+    mName = QString::asprintf("Copter %d", mId);
     mTime = 0;
 }
 
@@ -39,7 +39,7 @@ void CopterInfo::setId(int id, bool changeName)
 
     if (changeName) {
         mName = "";
-        mName.sprintf("Copter %d", mId);
+        mName = QString::asprintf("Copter %d", mId);
     }
 }
 

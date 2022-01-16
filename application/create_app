@@ -84,6 +84,8 @@ cp ../widgets/parameditstring.h $APP_NAME/widgets
 cp ../widgets/parameditstring.ui $APP_NAME/widgets
 cp ../widgets/vtextbrowser.cpp $APP_NAME/widgets
 cp ../widgets/vtextbrowser.h $APP_NAME/widgets
+cp ../widgets/qcustomplot.cpp $APP_NAME/widgets
+cp ../widgets/qcustomplot.h $APP_NAME/widgets
 cp template/widgets.pri $APP_NAME/widgets
 
 cp ../lzokay/lzokay.cpp $APP_NAME/lzokay

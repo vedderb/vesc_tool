@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.11
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -30,22 +30,28 @@ import Vedder.vesc.utility 1.0
 Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    property bool isHorizontal: width > height
+    anchors.fill: parent
 
     FwHelper {
         id: fwHelper
     }
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
-        spacing: 0
+        columns: isHorizontal ? 2 : 1
+        rows: isHorizontal ? 1 : 2
 
         RowLayout {
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.column: isHorizontal ? 1 : 0
+            Layout.row: 0
+            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
             spacing: 0
 
             Rectangle {
-                color: "#4f4f4f"
+                color: Utility.getAppHexColor("normalBackground")
                 width: 16
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
@@ -68,39 +74,42 @@ Item {
                 Layout.fillHeight: true
                 orientation: Qt.Vertical
 
+                contentItem: ListView {
+                    model: swipeView.contentModel
+                    interactive: swipeView.interactive
+                    currentIndex: swipeView.currentIndex
+
+                    spacing: swipeView.spacing
+                    orientation: swipeView.orientation
+                    snapMode: ListView.SnapOneItem
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    highlightRangeMode: ListView.StrictlyEnforceRange
+                    preferredHighlightBegin: 0
+                    preferredHighlightEnd: 0
+                    highlightMoveDuration: 250
+
+                    maximumFlickVelocity: 8 * (swipeView.orientation ===
+                                               Qt.Horizontal ? width : height)
+                }
+
                 Page {
                     ColumnLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
+                        anchors.topMargin: 10
 
                         Rectangle {
                             Layout.fillWidth: true
                             height: 30;
                             border.width: 0
-                            gradient: Gradient {
-                                GradientStop {
-                                    position: 0.00;
-                                    color: "#002dcbff";
-                                }
-                                GradientStop {
-                                    position: 0.3;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 0.7;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 1.00;
-                                    color: "#000dc3ff";
-                                }
-                            }
-                            border.color: "#00000000"
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
+                            border.color: Utility.getAppHexColor("lightestBackground")
 
                             Text {
                                 anchors.centerIn: parent
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Included Files"
                                 font.bold: true
                                 verticalAlignment: Text.AlignVCenter
@@ -115,7 +124,7 @@ Item {
                         }
 
                         Text {
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             Layout.fillWidth: true
                             height: 30;
                             text: "Hardware"
@@ -134,7 +143,7 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                updateHw("")
+                                updateHw(VescIf.getLastFwRxParams())
                             }
 
                             onCurrentIndexChanged: {
@@ -159,7 +168,7 @@ Item {
                         }
 
                         Text {
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             Layout.fillWidth: true
                             height: 30;
                             text: "Firmware"
@@ -203,34 +212,19 @@ Item {
                         anchors.fill: parent
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
+                        anchors.topMargin: 10
 
                         Rectangle {
                             Layout.fillWidth: true
                             height: 30;
                             border.width: 0
-                            gradient: Gradient {
-                                GradientStop {
-                                    position: 0.00;
-                                    color: "#002dcbff";
-                                }
-                                GradientStop {
-                                    position: 0.3;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 0.7;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 1.00;
-                                    color: "#000dc3ff";
-                                }
-                            }
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
+
                             border.color: "#00000000"
 
                             Text {
                                 anchors.centerIn: parent
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Custom File"
                                 font.bold: true
                                 verticalAlignment: Text.AlignVCenter
@@ -245,7 +239,7 @@ Item {
                         }
 
                         TextInput {
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             id: customFwText
                             Layout.fillWidth: true
                         }
@@ -295,34 +289,18 @@ Item {
                         anchors.fill: parent
                         anchors.leftMargin: 10
                         anchors.rightMargin: 10
+                        anchors.topMargin: 10
 
                         Rectangle {
                             Layout.fillWidth: true
                             height: 30;
                             border.width: 0
-                            gradient: Gradient {
-                                GradientStop {
-                                    position: 0.00;
-                                    color: "#002dcbff";
-                                }
-                                GradientStop {
-                                    position: 0.3;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 0.7;
-                                    color: "#80014cb2";
-                                }
-                                GradientStop {
-                                    position: 1.00;
-                                    color: "#000dc3ff";
-                                }
-                            }
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
                             border.color: "#00000000"
 
                             Text {
                                 anchors.centerIn: parent
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Bootloader"
                                 font.bold: true
                                 verticalAlignment: Text.AlignVCenter
@@ -337,7 +315,7 @@ Item {
                         }
 
                         Text {
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             Layout.fillWidth: true
                             height: 30;
                             text: "Hardware"
@@ -356,7 +334,7 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                updateBl("")
+                                updateBl(VescIf.getLastFwRxParams())
                             }
                         }
 
@@ -372,20 +350,25 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            height: asd.implicitHeight + 20
-            color: "#414141"
+            Layout.fillHeight: isHorizontal ? true : false
+            Layout.preferredWidth: isHorizontal ? parent.width / 2 : parent.width
+            Layout.column:0
+            Layout.row: isHorizontal ? 0 : 1
+            Layout.preferredHeight: asd.implicitHeight + asd.anchors.margins * 2
+            color: Utility.getAppHexColor("lightBackground")
 
             ColumnLayout {
                 id: asd
                 anchors.fill: parent
                 anchors.margins: 10
-
                 Text {
                     Layout.fillWidth: true
-                    color: "white"
+                    Layout.fillHeight: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignBottom
+                    color: Utility.getAppHexColor("lightText")
                     id: uploadText
                     text: qsTr("Not Uploading")
-                    horizontalAlignment: Text.AlignHCenter
                 }
 
                 ProgressBar {
@@ -431,7 +414,7 @@ Item {
                 Text {
                     Layout.fillWidth: true
                     id: versionText
-                    color: "#e0e0e0"
+                    color: Utility.getAppHexColor("lightText")
                     text:
                         "FW   : \n" +
                         "HW   : \n" +
@@ -452,11 +435,15 @@ Item {
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
 
         Text {
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             id: uploadDialogLabel
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
@@ -464,12 +451,25 @@ Item {
         }
 
         onAccepted: {
+            var okUploadFw = false
+
             if (swipeView.currentIndex == 0) {
-                fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan)
+                if (mCommands.getLimitedSupportsEraseBootloader() && blItems.count > 0) {
+                    fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
+                }
+                okUploadFw = fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan)
             } else if (swipeView.currentIndex == 1) {
-                fwHelper.uploadFirmware(customFwText.text, VescIf, false, true, fwdCan)
+                okUploadFw = fwHelper.uploadFirmware(customFwText.text, VescIf, false, true, fwdCan)
             } else if (swipeView.currentIndex == 2) {
                 fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
+            }
+
+            if (okUploadFw) {
+                VescIf.emitMessageDialog("Warning",
+                                         "The firmware upload is done. You must wait at least " +
+                                         "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your " +
+                                         "VESC will become bricked. If that happens you need a SWD programmer to recover it.",
+                                         true, false)
             }
         }
     }
@@ -645,9 +645,15 @@ Item {
     }
 
     Connections {
-        target: mCommands
+        target: VescIf
 
-        onFwVersionReceived: {
+        onFwRxChanged: {
+            if (!rx) {
+                return;
+            }
+
+            var params = VescIf.getLastFwRxParams()
+
             updateHw(params)
             updateBl(params)
 

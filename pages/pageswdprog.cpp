@@ -545,6 +545,8 @@ void PageSwdProg::bmConnRes(int res)
                  0, ":/res/bootloaders/generic.bin");
         addSwdFw("STORMCORE 100DX", ":/res/firmwares/STORMCORE_100Dx/VESC_default.bin",
                  0, ":/res/bootloaders/generic.bin");
+        addSwdFw("VESC 60v2 Alva", ":/res/firmwares/60v2_alva/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
         break;
 
     case 2:

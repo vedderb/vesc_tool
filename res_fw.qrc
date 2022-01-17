@@ -53,5 +53,6 @@
         <file>res/firmwares/STORMCORE_60Dxs/VESC_default_no_hw_limits.bin</file>
         <file>res/firmwares/STORMCORE_100DX/VESC_default.bin</file>
         <file>res/firmwares/STORMCORE_100DX/VESC_default_no_hw_limits.bin</file>
+        <file>res/firmwares/60v2_alva/VESC_default.bin</file>
     </qresource>
 </RCC>

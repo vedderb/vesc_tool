@@ -41,6 +41,9 @@ public:
     void emitReloadCustomGui(QString fileName);
     void emitReloadQml(QString str);
     void emitToggleFullscreen();
+    void emitMoveToOtherScreen();
+    void emitMoveToFirstScreen();
+    void emitRotateScreen(double rot);
     Q_INVOKABLE void clearQmlCache();
     void setImportPathList(QStringList paths);
 
@@ -50,6 +53,9 @@ signals:
     void reloadFile(QString fileName);
     void reloadQml(QString str);
     void toggleFullscreen();
+    void moveToOtherScreen();
+    void moveToFirstScreen();
+    void rotateScreen(double rot);
 
 public slots:
 

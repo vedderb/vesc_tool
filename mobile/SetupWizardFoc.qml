@@ -40,6 +40,7 @@ Item {
     function openDialog() {
         dialog.open()
         openTimer.start()
+        tabBar.currentIndex = 0
     }
 
     Timer {
@@ -75,11 +76,12 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 10
-        height: parent.height - 10
+        property bool isHorizontal: width > height
+        width: parent.width - 10 - notchLeft - notchRight
+        height: parent.height - 10 - notchBot - notchTop
         closePolicy: Popup.NoAutoClose
-        x: 5
-        y: 5
+        x: 5 + notchLeft
+        y: 5 + notchTop
         parent: dialogParent
         bottomMargin: 0
         rightMargin: 0
@@ -91,31 +93,34 @@ Item {
         StackLayout {
             id: stackLayout
             anchors.fill: parent
+            onCurrentIndexChanged: {tabBar.currentIndex = currentIndex}
 
             Item {
-                ColumnLayout {
+                ListModel {
+                    id: usageModel
+                    property string iconPath: {iconPath = "qrc" + Utility.getThemePath() + "icons/"}
+                    Component.onCompleted: {
+                        append({name: "Generic", usageImg:iconPath + "motor.png", duty_start: 1.0, hfi_start: false})
+                        append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg", duty_start: 0.85, hfi_start: true})
+                        append({name: "EUC", usageImg:iconPath + "EUC-96.png", duty_start: 1.0, hfi_start: false})
+                        append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg", duty_start: 1.0, hfi_start: false})
+                    }
+                }
+
+                GridLayout {
                     id: usageColumn
                     anchors.fill: parent
-
-                    ListModel {
-                        id: usageModel
-                        property string iconPath: "qrc" + Utility.getThemePath() + "icons/";
-                        Component.onCompleted: {
-                            append({name: "Generic", usageImg:iconPath + "motor.png", duty_start: 1.0, hfi_start: false})
-                            append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg", duty_start: 0.85, hfi_start: true})
-                            append({name: "EUC", usageImg:iconPath + "EUC-96.png", duty_start: 1.0, hfi_start: false})
-                            append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg", duty_start: 1.0, hfi_start: false})
-                        }
-                    }
-
+                    columns: dialog.isHorizontal ? 2 : 1
+                    rows: dialog.isHorizontal ? 1 : 2
                     ListView {
                         id: usageList
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.preferredHeight: 500
                         focus: true
                         clip: true
                         spacing: 5
+                        Layout.row: 0
+                        Layout.fillHeight: true
+                        Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
+                        Layout.column: dialog.isHorizontal ? 1 : 0
 
                         Component {
                             id: usageDelegate
@@ -191,9 +196,11 @@ Item {
                     }
 
                     GroupBox {
+                        Layout.preferredHeight: implicitHeight
                         Layout.fillWidth: true
-                        //                        Layout.fillHeight: true
-                        contentWidth: parent.width
+                        Layout.column: 0
+                        Layout.row: dialog.isHorizontal ? 0 : 1
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
                         label: CheckBox {
                             id: overrideUsageBox
@@ -223,45 +230,50 @@ Item {
             }
 
             Item {
-                ColumnLayout {
+
+                ListModel {
+                    id: motorModel
+                    property string iconPath: {iconPath = "qrc" + Utility.getThemePath() + "icons/"}
+                    Component.onCompleted: {
+                        [
+                        ["Mini Outrunner (~75 g)", "qrc:/res/images/motors/outrunner_mini.jpg", 20, 1400, 4000, false,14],
+                        ["Small Outrunner (~200 g)","qrc:/res/images/motors/outrunner_small.jpg", 50, 1400, 4000, false,14],
+                        ["Medium Outrunner (~750 g)","qrc:/res/images/motors/6374.jpg", 120, 700, 4000, true, 14],
+                        ["Large Outrunner (~2000 g)",iconPath + "motor.png", 400, 700, 4000, false, 14],
+                        ["Small Inrunner (~200 g)","qrc:/res/images/motors/inrunner_small.jpg", 50, 1400, 4000, false, 2],
+                        ["Medium Inrunner (~750 g)","qrc:/res/images/motors/inrunner_medium.jpg", 140, 1400, 4000, false, 4],
+                        ["Large Inrunner (~2000 g)",iconPath + "motor.png", 400, 1000, 4000, false, 4],
+                        ["E-Bike DD hub motor (~6 kg)","qrc:/res/images/motors/ebike_dd_1kw.jpg", 150, 300, 2000, false, 46],
+                        ["EDF Inrunner Small (~200 g)","qrc:/res/images/motors/edf_small.jpg", 110, 1400, 4000, false, 6]
+                        ].forEach(function(element) {
+                            append({
+                                       name: element[0],
+                                       motorImg: element[1],
+                                       maxLosses: element[2],
+                                       openloopErpm: element[3],
+                                       sensorlessErpm: element[4],
+                                       hfi_start: element[5],
+                                       poles: element[6]
+                                   });
+                        });
+                    }
+                }
+
+                GridLayout {
                     id: motorColumn
                     anchors.fill: parent
-
-                    ListModel {
-                        id: motorModel
-                        property string iconPath: "qrc" + Utility.getThemePath() + "icons/";
-                        Component.onCompleted: {
-                            [
-                            ["Mini Outrunner (~75 g)", "qrc:/res/images/motors/outrunner_mini.jpg", 20, 1400, 4000, false,14],
-                            ["Small Outrunner (~200 g)","qrc:/res/images/motors/outrunner_small.jpg", 50, 1400, 4000, false,14],
-                            ["Medium Outrunner (~750 g)","qrc:/res/images/motors/6374.jpg", 120, 700, 4000, true, 14],
-                            ["Large Outrunner (~2000 g)",iconPath + "motor.png", 400, 700, 4000, false, 14],
-                            ["Small Inrunner (~200 g)","qrc:/res/images/motors/inrunner_small.jpg", 50, 1400, 4000, false, 2],
-                            ["Medium Inrunner (~750 g)","qrc:/res/images/motors/inrunner_medium.jpg", 140, 1400, 4000, false, 4],
-                            ["Large Inrunner (~2000 g)",iconPath + "motor.png", 400, 1000, 4000, false, 4],
-                            ["E-Bike DD hub motor (~6 kg)","qrc:/res/images/motors/ebike_dd_1kw.jpg", 150, 300, 2000, false, 46],
-                            ["EDF Inrunner Small (~200 g)","qrc:/res/images/motors/edf_small.jpg", 110, 1400, 4000, false, 6]
-                            ].forEach(function(element) {
-                                append({
-                                           name: element[0],
-                                           motorImg: element[1],
-                                           maxLosses: element[2],
-                                           openloopErpm: element[3],
-                                           sensorlessErpm: element[4],
-                                           hfi_start: element[5],
-                                           poles: element[6]
-                                       });
-                            });
-                        }
-                    }
+                    columns: dialog.isHorizontal ? 2 : 1
+                    rows: dialog.isHorizontal ? 1 : 2
 
                     ListView {
                         id: motorList
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
                         focus: true
                         clip: true
                         spacing: 5
+                        Layout.row: 0
+                        Layout.fillHeight: true
+                        Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
+                        Layout.column: dialog.isHorizontal ? 1 : 0
 
                         Component {
                             id: motorDelegate
@@ -340,7 +352,11 @@ Item {
                     }
 
                     GroupBox {
+                        Layout.preferredHeight: implicitHeight
                         Layout.fillWidth: true
+                        Layout.column: 0
+                        Layout.row: dialog.isHorizontal ? 0 : 1
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
                         label: CheckBox {
                             id: overrideBox
@@ -362,7 +378,7 @@ Item {
 
                             Text {
                                 visible: !overrideBox.checked
-                                color: Utility.getAppHexColor("lightText")
+                                color: {color = Utility.getAppHexColor("lightText")}
                                 font.family: "DejaVu Sans Mono"
                                 verticalAlignment: Text.AlignVCenter
                                 wrapMode: Text.WordWrap
@@ -427,13 +443,17 @@ Item {
             }
 
             Item {
-                ColumnLayout {
+                GridLayout {
                     anchors.fill: parent
+                    columns: dialog.isHorizontal ? 2 : 1
+                    rows: dialog.isHorizontal ? 1 : 2
 
                     ScrollView {
-                        Layout.fillWidth: true
+                        Layout.row: 0
                         Layout.fillHeight: true
-                        contentWidth: parent.width
+                        Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
+                        Layout.column: dialog.isHorizontal ? 1 : 0
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
                         clip: true
 
                         ParamList {
@@ -443,7 +463,11 @@ Item {
                     }
 
                     GroupBox {
+                        Layout.preferredHeight: implicitHeight
                         Layout.fillWidth: true
+                        Layout.column: 0
+                        Layout.row: dialog.isHorizontal ? 0 : 1
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
                         label: CheckBox {
                             id: overrideBattBox
@@ -491,82 +515,84 @@ Item {
             }
 
             Item {
-                ColumnLayout {
+                GridLayout {
                     anchors.fill: parent
-
-                    ScrollView {
+                    columns: dialog.isHorizontal ? 2 : 1
+                    GroupBox {
+                        id: gearRatioBox
+                        title: qsTr("Gear Ratio")
+                        Layout.preferredHeight: implicitHeight
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        contentWidth: parent.width
-                        clip: true
+                        Layout.column: 0
+                        Layout.row: 0
+                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
                         ColumnLayout {
                             anchors.fill: parent
 
-                            GroupBox {
-                                id: canFwdBox
-                                title: qsTr("Gear Ratio")
+                            CheckBox {
+                                id: directDriveBox
+                                text: "Direct Drive"
                                 Layout.fillWidth: true
+                            }
 
-                                ColumnLayout {
-                                    anchors.fill: parent
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text {
+                                    Layout.fillWidth: true
+                                    color: {color = Utility.getAppHexColor("lightText")}
+                                    text: qsTr("Motor Pulley")
+                                }
 
-                                    CheckBox {
-                                        id: directDriveBox
-                                        text: "Direct Drive"
-                                        Layout.fillWidth: true
-                                    }
+                                SpinBox {
+                                    enabled: !directDriveBox.checked
+                                    id: motorPulleyBox
+                                    from: 1
+                                    to: 999
+                                    value: 13
+                                    editable: true
 
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        Text {
-                                            Layout.fillWidth: true
-                                            color: Utility.getAppHexColor("lightText")
-                                            text: qsTr("Motor Pulley")
-                                        }
-
-                                        SpinBox {
-                                            enabled: !directDriveBox.checked
-                                            id: motorPulleyBox
-                                            from: 1
-                                            to: 999
-                                            value: 13
-                                            editable: true
-
-                                            textFromValue: function(value) {
-                                                return !directDriveBox.checked ? value : 1
-                                            }
-                                        }
-                                    }
-
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        Text {
-                                            Layout.fillWidth: true
-                                            color: Utility.getAppHexColor("lightText")
-                                            text: qsTr("Wheel Pulley")
-                                        }
-
-                                        SpinBox {
-                                            enabled: !directDriveBox.checked
-                                            id: wheelPulleyBox
-                                            from: 1
-                                            to: 999
-                                            value: 36
-                                            editable: true
-
-                                            textFromValue: function(value) {
-                                                return !directDriveBox.checked ? value : 1
-                                            }
-                                        }
+                                    textFromValue: function(value) {
+                                        return !directDriveBox.checked ? value : 1
                                     }
                                 }
                             }
 
-                            ParamList {
-                                id: paramListSetup
+                            RowLayout {
                                 Layout.fillWidth: true
+                                Text {
+                                    Layout.fillWidth: true
+                                    color: {color = Utility.getAppHexColor("lightText")}
+                                    text: qsTr("Wheel Pulley")
+                                }
+
+                                SpinBox {
+                                    enabled: !directDriveBox.checked
+                                    id: wheelPulleyBox
+                                    from: 1
+                                    to: 999
+                                    value: 36
+                                    editable: true
+
+                                    textFromValue: function(value) {
+                                        return !directDriveBox.checked ? value : 1
+                                    }
+                                }
                             }
+                        }
+                    }
+                    ScrollView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.row: dialog.isHorizontal ? 0 : 1
+                        Layout.column: dialog.isHorizontal ? 1 : 0
+                        Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
+                        contentWidth: availableWidth
+                        clip: true
+                        ParamList {
+                            id: paramListSetup
+                            anchors.fill: parent
+
                         }
                     }
                 }
@@ -582,28 +608,25 @@ Item {
         }
 
         header: Rectangle {
-            color: Utility.getAppHexColor("lightText")
-            height: tabBar.height
+            color: {color = Utility.getAppHexColor("lightText")}
+            height: tabBar.implicitHeight
 
             TabBar {
                 id: tabBar
-                currentIndex: stackLayout.currentIndex
+                currentIndex: 0
                 anchors.fill: parent
-                implicitWidth: 0
                 clip: true
                 enabled: false
 
                 background: Rectangle {
                     opacity: 1
-                    color: Utility.getAppHexColor("lightBackground")
+                    color: {color = Utility.getAppHexColor("lightBackground")}
                 }
-
                 property int buttons: 5
                 property int buttonWidth: 120
 
                 Repeater {
                     model: ["Usage", "Motor", "Battery", "Setup", "Direction"]
-
                     TabButton {
                         text: modelData
                         width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
@@ -678,8 +701,8 @@ Item {
         standardButtons: Dialog.Yes | Dialog.No
         modal: true
         focus: true
-        rightMargin: 10
-        leftMargin: 10
+        rightMargin: 10 + notchRight
+        leftMargin: 10 + notchLeft
         closePolicy: Popup.CloseOnEscape
         title: "Load Default Parameters"
         parent: dialogParent
@@ -691,7 +714,7 @@ Item {
         y: dialog.y + dialog.height / 2 - height / 2
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -712,8 +735,8 @@ Item {
         standardButtons: Dialog.Yes | Dialog.Cancel
         modal: true
         focus: true
-        rightMargin: 10
-        leftMargin: 10
+        rightMargin: 10 + notchRight
+        leftMargin: 10 + notchLeft
         closePolicy: Popup.CloseOnEscape
         title: "Motor Selection"
         y: 10 + parent.height / 2 - height / 2
@@ -724,7 +747,7 @@ Item {
         }
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -759,8 +782,8 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        rightMargin: 10
-        leftMargin: 10
+        rightMargin: 10 + notchRight
+        leftMargin: 10 + notchLeft
         closePolicy: Popup.CloseOnEscape
         title: "Battery Settings"
         y: 10 + parent.height / 2 - height / 2
@@ -771,7 +794,7 @@ Item {
         }
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -792,8 +815,8 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        rightMargin: 10
-        leftMargin: 10
+        rightMargin: 10 + notchRight
+        leftMargin: 10 + notchLeft
         closePolicy: Popup.CloseOnEscape
         title: "Detect FOC Parameters"
         parent: dialogParent
@@ -810,7 +833,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                color: Utility.getAppHexColor("lightText")
+                color: {color = Utility.getAppHexColor("lightText")}
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap
                 text: "This is going to spin up all motors. Make " +
@@ -820,7 +843,7 @@ Item {
             CheckBox {
                 id: detectCanBox
                 checked: true
-                text: "Detect CAN"
+                text: "Detect all motors over CAN Bus"
             }
         }
 
@@ -899,7 +922,7 @@ Item {
         standardButtons: Dialog.Ok
         modal: true
         focus: true
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         height: parent.height - 40
         closePolicy: Popup.CloseOnEscape
         parent: dialogParent
@@ -913,11 +936,11 @@ Item {
         ScrollView {
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width - 20
+            contentWidth: availableWidth
 
             Text {
                 id: resultLabel
-                color: Utility.getAppHexColor("lightText")
+                color: {color = Utility.getAppHexColor("lightText")}
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
@@ -984,8 +1007,8 @@ Item {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
-        x: 10
+        width: parent.width - 20 - notchLeft - notchRight
+        x: parent.width / 2 - width / 2
         y: parent.height / 2 - height / 2
         parent: dialogParent
 

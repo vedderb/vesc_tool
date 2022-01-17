@@ -16,9 +16,11 @@ public:
     explicit QmlEditor(QWidget *parent = nullptr);
     ~QmlEditor();
 
-    QCodeEditor *editor();
+    QCodeEditor *codeEditor();
     QString fileNow();
     void setFileNow(QString fileName);
+
+    bool isDirty = false;
 
 protected:
     void keyPressEvent(QKeyEvent *event);

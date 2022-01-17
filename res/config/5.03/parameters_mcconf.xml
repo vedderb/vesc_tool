@@ -1043,18 +1043,29 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </foc_current_ki>
-        <foc_f_sw>
-            <longName>Switching Frequency</longName>
+        <foc_f_zv>
+            <longName>Zero Vector Frequency</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The switching frequency. The controllers and estimators will run at half of this frequency.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;If the option &lt;/span&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Sample in V0 and V7&lt;/span&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt; is active the controllers and estimators will run at the full switching frequency, but this option is only available on hardware with phase shunts.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_F_SW</cDefine>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The frequency at which the output toggles between the zero vectors (V0 and V7) in the space vector modulation.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The controllers and estimators run at half of this frequency. If the option &lt;span style=&quot; font-weight:600;&quot;&gt;Sample in V0 and V7&lt;/span&gt; is active the controllers and estimators run at the full zero vector frequency, but this option is only available on hardware with phase shunts.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NOTE&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;There has been some confusion on what the zero vector frequency is referring to. It is the rate between the zero vectors V0 (when all low-side switches are on) and V7 (when all high-side switches are on).&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If you scope one of the phases you will see a signal at half the set frequency, which is what the timer runs at. That is because the motor phases will be shorted both when the signal is low and when it is high. This is one of the core concepts of space-vector modulation and how you can effectively double the switching frequency with the same amount of switching.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;There is also some frequency content at half of this frequency depending on the modulated vector, but it is mainly at the set switching frequency and this is also what matters when e.g. calculating ripple current due to motor inductance.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Some links to discussions about this:&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;https://vesc-project.com/node/3278&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;https://github.com/vedderb/bldc/pull/397&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_F_ZV</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>0.001</editorScale>
             <editAsPercentage>0</editAsPercentage>
@@ -1066,7 +1077,7 @@ p, li { white-space: pre-wrap; }
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> kHz</suffix>
             <vTx>9</vTx>
-        </foc_f_sw>
+        </foc_f_zv>
         <foc_dt_us>
             <longName>Dead Time Compensation</longName>
             <type>1</type>
@@ -1277,10 +1288,10 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;HFI&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;High Frequency Injection. Track the position down to 0 speed by injecting voltage pulses and analyzing the response of the motor. Works on most motors that have enough difference in D-axis and Q-axis inductance.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Vedder Sensorless Start&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use HFI just after starting the motor to resolve the initial position and set the observer state to that position. This can help the observer track the motor correctly from 0 speed. As this also is based on saturation it can help start some motors with low saliency.&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;VSS&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vedder Sensorless Start. Use HFI just after starting the motor to resolve the initial position and set the observer state to that position. This can help the observer track the motor correctly from 0 speed. As this also is based on saturation it can help start some motors with low saliency.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NOTE:&lt;/span&gt; HFI and Vedder Sensorless Start only work when the FOC switching frequency is below 30 KHz. &lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NOTE:&lt;/span&gt; HFI and VSS only work when the FOC switching frequency is at or below 30 KHz. &lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_SENSOR_MODE</cDefine>
             <valInt>0</valInt>
@@ -1288,7 +1299,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>Encoder</enumNames>
             <enumNames>Hall Sensors</enumNames>
             <enumNames>HFI</enumNames>
-            <enumNames>Vedder Sensorless Start</enumNames>
+            <enumNames>VSS</enumNames>
         </foc_sensor_mode>
         <foc_pll_kp>
             <longName>Speed Tracker Kp</longName>
@@ -1466,6 +1477,35 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </foc_observer_gain_slow>
+        <foc_observer_offset>
+            <longName>Observer Offset</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Observer offset in switching cycles.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;There is some delay between when the current ant voltage measurements are taken and when the output is applied. This will cause the observer phase to lag behind the motor phase at high speed when the zero vector frequency is low in comparison.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This parameter adds an offset to the observer phase in multiples of the zero vector frequency to compensate for that delay. The default value should be good for most hardwares, but if needed this value can be fine-tuned using and encoder and/or a power analyzer.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Important Note&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Before changing this value, make sure that any phase delay is not caused by incorrect motor parameters or incorrect measurements. Only change this value if you have excluded other possible causes and you know what you are doing.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OBSERVER_OFFSET</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>5</maxDouble>
+            <minDouble>-5</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>-1</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>7</vTx>
+        </foc_observer_offset>
         <foc_duty_dowmramp_kp>
             <longName>Duty Downramp Kp</longName>
             <type>1</type>
@@ -3588,6 +3628,30 @@ p, li { white-space: pre-wrap; }
             <suffix> Ah</suffix>
             <vTx>9</vTx>
         </si_battery_ah>
+        <si_motor_nl_current>
+            <longName>Motor No Load Current</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;No load current for the motor. Can be measured by running the motor at around 50% duty cycle without load and noting the motor current draw.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The no load current can be used in the motor comparison tool for calculating efficiencies and comparing different motors, gear ratios etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_SI_MOTOR_NL_CURRENT</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>999</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>1</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix> A</suffix>
+            <vTx>9</vTx>
+        </si_motor_nl_current>
         <motor_brand>
             <longName>Motor Brand</longName>
             <type>3</type>
@@ -3634,26 +3698,6 @@ p, li { white-space: pre-wrap; }
             <suffix> g</suffix>
             <vTx>9</vTx>
         </motor_weight>
-        <motor_poles>
-            <longName>Motor Poles</longName>
-            <type>2</type>
-            <transmittable>0</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The number of motor poles. This is always a multiple of two.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine></cDefine>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxInt>100</maxInt>
-            <minInt>2</minInt>
-            <showDisplay>0</showDisplay>
-            <stepInt>2</stepInt>
-            <valInt>14</valInt>
-            <suffix></suffix>
-            <vTx>1</vTx>
-        </motor_poles>
         <motor_sensor_type>
             <longName>Position Sensor</longName>
             <type>4</type>
@@ -3683,28 +3727,6 @@ p, li { white-space: pre-wrap; }
             <cDefine></cDefine>
             <valString>A motor description can be edited here.</valString>
         </motor_description>
-        <motor_loss_torque>
-            <longName>Motor Loss Torque</longName>
-            <type>1</type>
-            <transmittable>0</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The motor loss torque in nm.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine></cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>99</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>0.03</valDouble>
-            <vTxDoubleScale>1</vTxDoubleScale>
-            <suffix> nm</suffix>
-            <vTx>9</vTx>
-        </motor_loss_torque>
         <motor_quality_bearings>
             <longName>Bearing Quality</longName>
             <type>2</type>
@@ -3972,7 +3994,7 @@ p, li { white-space: pre-wrap; }
         <ser>hall_sl_erpm</ser>
         <ser>foc_current_kp</ser>
         <ser>foc_current_ki</ser>
-        <ser>foc_f_sw</ser>
+        <ser>foc_f_zv</ser>
         <ser>foc_dt_us</ser>
         <ser>foc_encoder_inverted</ser>
         <ser>foc_encoder_offset</ser>
@@ -3991,6 +4013,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_motor_flux_linkage</ser>
         <ser>foc_observer_gain</ser>
         <ser>foc_observer_gain_slow</ser>
+        <ser>foc_observer_offset</ser>
         <ser>foc_duty_dowmramp_kp</ser>
         <ser>foc_duty_dowmramp_ki</ser>
         <ser>foc_openloop_rpm</ser>
@@ -4090,6 +4113,7 @@ p, li { white-space: pre-wrap; }
         <ser>si_battery_type</ser>
         <ser>si_battery_cells</ser>
         <ser>si_battery_ah</ser>
+        <ser>si_motor_nl_current</ser>
         <ser>bms.type</ser>
         <ser>bms.t_limit_start</ser>
         <ser>bms.t_limit_end</ser>
@@ -4325,6 +4349,15 @@ p, li { white-space: pre-wrap; }
                 </subgroupParams>
             </subgroup>
             <subgroup>
+                <subgroupName>VSS</subgroupName>
+                <subgroupParams>
+                    <param>foc_hfi_samples</param>
+                    <param>foc_hfi_voltage_start</param>
+                    <param>foc_hfi_start_samples</param>
+                    <param>foc_openloop_rpm</param>
+                </subgroupParams>
+            </subgroup>
+            <subgroup>
                 <subgroupName>Filters</subgroupName>
                 <subgroupParams>
                     <param>foc_phase_filter_enable</param>
@@ -4361,7 +4394,7 @@ p, li { white-space: pre-wrap; }
             <subgroup>
                 <subgroupName>Advanced</subgroupName>
                 <subgroupParams>
-                    <param>foc_f_sw</param>
+                    <param>foc_f_zv</param>
                     <param>foc_dt_us</param>
                     <param>foc_pll_kp</param>
                     <param>foc_pll_ki</param>
@@ -4376,6 +4409,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_d_gain_scale_start</param>
                     <param>foc_d_gain_scale_max_mod</param>
                     <param>foc_mtpa_mode</param>
+                    <param>foc_observer_offset</param>
                 </subgroupParams>
             </subgroup>
         </group>
@@ -4431,6 +4465,7 @@ p, li { white-space: pre-wrap; }
                     <param>si_battery_type</param>
                     <param>si_battery_cells</param>
                     <param>si_battery_ah</param>
+                    <param>si_motor_nl_current</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>
@@ -4439,9 +4474,7 @@ p, li { white-space: pre-wrap; }
                     <param>motor_brand</param>
                     <param>motor_model</param>
                     <param>motor_weight</param>
-                    <param>motor_poles</param>
                     <param>motor_sensor_type</param>
-                    <param>motor_loss_torque</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

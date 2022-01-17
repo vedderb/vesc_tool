@@ -9,9 +9,6 @@ import Vedder.vesc.configparams 1.0
 Item {
     anchors.fill: parent
     anchors.margins: 10
-
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
     
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
@@ -29,6 +26,7 @@ Item {
 //            mCommands.getValuesSetup()
 //            mCommands.bmsGetValues()
 //            mCommands.ioBoardGetAll(255)
+//            mCommands.getStats(0xFFFFFFFF);
         }
     }
     
@@ -120,6 +118,25 @@ Item {
 //            val.adc_1_4_age
 //            val.adc_5_8_age
 //            val.digital_age
+        }
+        
+        onStatsRx: { // val, mask
+            // Members of val
+//            val.speed_avg
+//            val.speed_max
+//            val.power_avg
+//            val.power_max
+//            val.temp_motor_avg
+//            val.temp_motor_max
+//            val.temp_mos_avg
+//            val.temp_mos_max
+//            val.current_avg
+//            val.current_max
+//            val.count_time
+//            val.distance() // Meters
+//            val.energy() // Wh
+//            val.efficiency() // Wh / km
+//            val.ah()
         }
     }
 }

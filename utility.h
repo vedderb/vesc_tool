@@ -31,6 +31,9 @@
 #define FE_WGS84        (1.0/298.257223563) // earth flattening (WGS84)
 #define RE_WGS84        6378137.0           // earth semimajor axis (WGS84) (m)
 
+#define SIGN(x)         ((x < 0) ? -1 : 1)
+#define SQ(x)           ((x) * (x))
+
 class Utility : public QObject
 {
     Q_OBJECT
@@ -81,6 +84,7 @@ public:
     Q_INVOKABLE static QVariantList getNetworkAddresses();
     Q_INVOKABLE static void startGnssForegroundService();
     Q_INVOKABLE static void stopGnssForegroundService();
+    Q_INVOKABLE static bool isBleScanEnabled();
 
     static void llhToXyz(double lat, double lon, double height, double *x, double *y, double *z);
     static void xyzToLlh(double x, double y, double z, double *lat, double *lon, double *height);
@@ -105,6 +109,8 @@ public:
     Q_INVOKABLE static QVariantMap getSafeAreaMargins(QQuickWindow *window);
 
     static void setPlotColors(QCustomPlot* plot);
+    static void plotSavePdf(QCustomPlot* plot, int width = 1280, int height = 720, QString title = "");
+    static void plotSavePng(QCustomPlot* plot, int width = 1280, int height = 720, QString title = "");
 
     template<typename QEnum>
     static QString QEnumToQString (const QEnum value) {

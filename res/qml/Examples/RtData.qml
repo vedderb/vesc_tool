@@ -29,9 +29,6 @@ import "qrc:/mobile"
 Item {
     anchors.fill: parent
 
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
-
     id: rtData
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()

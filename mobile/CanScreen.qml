@@ -31,7 +31,6 @@ Item {
 
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
-    property int notchTop: 0
     property int animationSpeed: 500
 
     Component.onCompleted: {
@@ -269,6 +268,10 @@ Item {
         target: mCommands
 
         onPingCanRx: {
+            if (scanButton.enabled) {
+                return
+            }
+
             scanButton.enabled = true
             scanButton.text = qsTr("Scan")
             if (VescIf.isPortConnected()) {
@@ -292,6 +295,7 @@ Item {
                     devicePath = theme + "icons/Electronics-96.png"
                     name = "BMS (" + params.hw + ")"
                 }
+                name = name.replace("_", " ")
 
                 canModel.append({"name": name,
                                     "ID": "LOCAL",
@@ -310,6 +314,7 @@ Item {
                         devicePath = theme + "icons/Electronics-96.png"
                         name = params.hw;
                     }
+                    name = name.replace("_", " ")
                     canModel.append({"name": name,
                                         "ID": devs[i].toString(),
                                         "deviceIconPath": devicePath,

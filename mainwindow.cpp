@@ -351,6 +351,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("motor_pid"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("motor_additional_info"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("motor_experiments"))->setHidden(false);
+            ui->pageList->item(mPageNameIdList.value("motor_comparison"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_general"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden(false);
@@ -378,6 +379,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("motor_pid"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("motor_additional_info"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("motor_experiments"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("motor_comparison"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_general"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden(true);
@@ -474,7 +476,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mTimer->start(20);
 
     mPollRtTimer.start(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
-    mPollAppTimer.start(int(1000.0 / mSettings.value("poll_rate_app_data", 20).toDouble()));
+    mPollAppTimer.start(int(1000.0 / mSettings.value("poll_rate_app_data", 50).toDouble()));
     mPollImuTimer.start(int(1000.0 / mSettings.value("poll_rate_imu_data", 50).toDouble()));
     mPollBmsTimer.start(int(1000.0 / mSettings.value("poll_rate_bms_data", 10).toDouble()));
 
@@ -482,6 +484,7 @@ MainWindow::MainWindow(QWidget *parent) :
         if (ui->actionRtData->isChecked()) {
             mVesc->commands()->getValues();
             mVesc->commands()->getValuesSetup();
+            mVesc->commands()->getStats(0xFFFFFFFF);
             mPollRtTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
         }
     });
@@ -492,7 +495,7 @@ MainWindow::MainWindow(QWidget *parent) :
             mVesc->commands()->getDecodedChuk();
             mVesc->commands()->getDecodedPpm();
             mVesc->commands()->getDecodedBalance();
-            mPollAppTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_app_data", 20).toDouble()));
+            mPollAppTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_app_data", 50).toDouble()));
         }
     });
 
@@ -568,6 +571,12 @@ bool MainWindow::eventFilter(QObject *object, QEvent *e)
     if (!ui->actionKeyboardControl->isChecked()) {
         return false;
     }
+
+    if (qApp->focusWidget() && QString(qApp->focusWidget()->metaObject()->className()).contains("edit",Qt::CaseInsensitive)) {
+        ui->actionKeyboardControl->setEnabled(false);
+        return false;
+    }
+    ui->actionKeyboardControl->setEnabled(true);
 
     if (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
         bool isPress = e->type() == QEvent::KeyPress;
@@ -1351,6 +1360,13 @@ void MainWindow::reloadPages()
                 theme + "icons/mcconf.png", false, true);
     mPageNameIdList.insert("motor_experiments", ui->pageList->count() - 1);
 
+    mPageMotorComparison = new PageMotorComparison(this);
+    mPageMotorComparison->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageMotorComparison);
+    addPageItem(tr("Comparison"),  theme + "icons/Calculator-96.png",
+                theme + "icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_comparison", ui->pageList->count() - 1);
+
     mPageAppSettings = new PageAppSettings(this);
     mPageAppSettings->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppSettings);
@@ -1520,6 +1536,7 @@ void MainWindow::reloadPages()
      * motor_pid
      * motor_additional_info
      * motor_experiments
+     * motor_comparison
      * app
      * app_general
      * app_ppm

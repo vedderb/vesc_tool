@@ -379,7 +379,7 @@ void MRichTextEdit::textStyle(int index) {
     }
     if (index == ParagraphMonospace) {
         fmt = cursor.charFormat();
-        fmt.setFontFamily("Monospace");
+        fmt.setFontFamily("DejaVu Sans Mono");
         fmt.setFontStyleHint(QFont::Monospace);
         fmt.setFontFixedPitch(true);
     }
@@ -611,7 +611,7 @@ void MRichTextEdit::fontChanged(const QFont &f) {
     } else if (f.pointSize() == m_fontsize_h4) {
         f_paragraph->setCurrentIndex(ParagraphHeading4);
     } else {
-        if (f.fixedPitch() && f.family() == "Monospace") {
+        if (f.fixedPitch() && f.family() == "DejaVu Sans Mono") {
             f_paragraph->setCurrentIndex(ParagraphMonospace);
         } else {
             f_paragraph->setCurrentIndex(ParagraphStandard);

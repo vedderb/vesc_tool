@@ -57,14 +57,17 @@ Item {
     Dialog {
         id: dialog
         parent: dialogParent
-        standardButtons: Dialog.Close
         modal: true
         focus: true
-        width: parent.width - 40
-        height: parent.height - 40
+        width: parent.width - 40 - notchLeft - notchRight
+        height: parent.height - 40 - notchBot - notchTop
         closePolicy: Popup.CloseOnEscape
-        x: 20
-        y: 10
+        x: 20 + (notchLeft + notchRight)/2
+        y: 10 + notchTop
+        topPadding: 5
+        bottomPadding: 0
+        leftMargin: 5
+        rightMargin: 5
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -102,7 +105,7 @@ Item {
             paramListLimits.addEditorMc("l_watt_min")
 
             // FOC
-            paramListFoc.addEditorMc("foc_f_sw")
+            paramListFoc.addEditorMc("foc_f_zv")
             paramListFoc.addEditorMc("foc_openloop_rpm")
             paramListFoc.addEditorMc("foc_motor_r")
             paramListFoc.addEditorMc("foc_motor_l")
@@ -117,8 +120,12 @@ Item {
             paramListBms.addEditorMc("bms.soc_limit_end")
         }
 
-        ColumnLayout {
+        contentItem: ColumnLayout {
             anchors.fill: parent
+            spacing: 0
+            anchors.margins: 10
+            anchors.topMargin: tabBar.height + 10
+            anchors.bottomMargin: 5
 
             SwipeView {
                 id: swipeView
@@ -126,6 +133,25 @@ Item {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 clip: true
+
+                contentItem: ListView {
+                    model: swipeView.contentModel
+                    interactive: swipeView.interactive
+                    currentIndex: swipeView.currentIndex
+
+                    spacing: swipeView.spacing
+                    orientation: swipeView.orientation
+                    snapMode: ListView.SnapOneItem
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    highlightRangeMode: ListView.StrictlyEnforceRange
+                    preferredHighlightBegin: 0
+                    preferredHighlightEnd: 0
+                    highlightMoveDuration: 250
+
+                    maximumFlickVelocity: 8 * (swipeView.orientation ===
+                                               Qt.Horizontal ? width : height)
+                }
 
                 Page {
                     background: Rectangle {
@@ -147,14 +173,23 @@ Item {
                             }
                         }
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Write General to All VESCs"
+                        RowLayout {
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Write General to All VESCs"
 
-                            onClicked: {
-                                disableDialog("Writing Parameters...")
-                                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListGeneral.getParamNames())
-                                enableDialog()
+                                onClicked: {
+                                    disableDialog("Writing Parameters...")
+                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListGeneral.getParamNames())
+                                    enableDialog()
+                                }
+                            }
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Close"
+                                onClicked: {
+                                    dialog.close()
+                                }
                             }
                         }
                     }
@@ -179,15 +214,23 @@ Item {
                                 anchors.fill: parent
                             }
                         }
+                        RowLayout {
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Write Limits to All VESCs"
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Write Limits to All VESCs"
-
-                            onClicked: {
-                                disableDialog("Writing Parameters...")
-                                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListLimits.getParamNames())
-                                enableDialog()
+                                onClicked: {
+                                    disableDialog("Writing Parameters...")
+                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListLimits.getParamNames())
+                                    enableDialog()
+                                }
+                            }
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Close"
+                                onClicked: {
+                                    dialog.close()
+                                }
                             }
                         }
                     }
@@ -245,15 +288,23 @@ Item {
                                 }
                             }
                         }
+                        RowLayout {
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Write FOC to All VESCs"
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Write FOC to All VESCs"
-
-                            onClicked: {
-                                disableDialog("Writing Parameters...")
-                                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListFoc.getParamNames())
-                                enableDialog()
+                                onClicked: {
+                                    disableDialog("Writing Parameters...")
+                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListFoc.getParamNames())
+                                    enableDialog()
+                                }
+                            }
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Close"
+                                onClicked: {
+                                    dialog.close()
+                                }
                             }
                         }
                     }
@@ -278,15 +329,23 @@ Item {
                                 anchors.fill: parent
                             }
                         }
+                        RowLayout {
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Write BMS to All VESCs"
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Write BMS to All VESCs"
-
-                            onClicked: {
-                                disableDialog("Writing Parameters...")
-                                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListBms.getParamNames())
-                                enableDialog()
+                                onClicked: {
+                                    disableDialog("Writing Parameters...")
+                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListBms.getParamNames())
+                                    enableDialog()
+                                }
+                            }
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Close"
+                                onClicked: {
+                                    dialog.close()
+                                }
                             }
                         }
                     }
@@ -295,7 +354,7 @@ Item {
         }
 
         header: Rectangle {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             height: tabBar.height
 
             TabBar {
@@ -307,7 +366,7 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: Utility.getAppHexColor("lightestBackground")
+                    color: { color = Utility.getAppHexColor("lightestBackground") }
                 }
 
                 property int buttonWidth: Math.max(120, tabBar.width / (rep.model.length))
@@ -347,8 +406,8 @@ Item {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
-        x: 10
+        width: parent.width - 20 - notchLeft - notchRight
+        x: 10 + (notchLeft + notchRight)/2
         y: parent.height / 2 - height / 2
         parent: dialogParent
 

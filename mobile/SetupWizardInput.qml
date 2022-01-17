@@ -32,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool mSendCanAtStart: false
     property int mCanIdAtStart: 0
+    property bool isHorizontal: width > height
 
     function openDialog() {
         canIdModel.clear()
@@ -97,9 +98,10 @@ Item {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
-        x: 10
-        y: parent.height / 2 - height / 2
+        width: parent.width - 20 -notchLeft - notchRight
+        height: parent.height - 20 - notchBot - notchTop
+        x: 10 + (notchLeft + notchRight)/2
+        y: 10 + notchTop
         parent: ApplicationWindow.overlay
 
         ProgressBar {
@@ -112,11 +114,11 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 10
-        height: parent.height - 10
+        width: parent.width - 10 -notchLeft - notchRight
+        height: parent.height - 10 - notchBot - notchTop
+        x: 5 + (notchLeft + notchRight)/2
+        y: 5 + notchTop
         closePolicy: Popup.NoAutoClose
-        x: 5
-        y: 5
         parent: ApplicationWindow.overlay
         bottomMargin: 0
         rightMargin: 0
@@ -620,7 +622,11 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+
+        width: parent.width - 20 -notchLeft - notchRight
+        x: 10 + (notchLeft + notchRight)/2
+        y: dialog.y + dialog.height / 2 - height / 2
+
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
 
@@ -629,8 +635,6 @@ Item {
         }
 
         parent: ApplicationWindow.overlay
-        x: 10
-        y: dialog.y + dialog.height / 2 - height / 2
 
         Text {
             id: detectLambdaLabel

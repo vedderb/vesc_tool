@@ -45,6 +45,7 @@ public:
     void checkMcConfig();
     Q_INVOKABLE void emitEmptyValues();
     Q_INVOKABLE void emitEmptySetupValues();
+    Q_INVOKABLE void emitEmptyStats();
 
     Q_INVOKABLE bool getLimitedSupportsFwdAllCan() const;
     void setLimitedSupportsFwdAllCan(bool limitedSupportsFwdAllCan);
@@ -92,7 +93,7 @@ signals:
     void decodedAdcReceived(double value, double voltage, double value2, double voltage2);
     void decodedChukReceived(double value);
     void decodedBalanceReceived(BALANCE_VALUES values);
-    void motorRLReceived(double r, double l);
+    void motorRLReceived(double r, double l, double ld_lq_diff);
     void motorLinkageReceived(double flux_linkage);
     void encoderParamReceived(double offset, double ratio, bool inverted);
     void customAppDataReceived(QByteArray data);
@@ -129,6 +130,7 @@ signals:
     void eraseQmluiResReceived(bool ok);
     void writeQmluiResReceived(bool ok, quint32 offset);
     void ioBoardValRx(IO_BOARD_VALUES val);
+    void statsRx(STAT_VALUES val, unsigned int mask);
 
 public slots:
     void processPacket(QByteArray data);
@@ -230,6 +232,9 @@ public slots:
     void ioBoardSetPwm(int id, int channel, double duty);
     void ioBoardSetDigital(int id, int channel, bool on);
 
+    void getStats(unsigned int mask);
+    void resetStats(bool sendAck);
+
 private slots:
     void timerSlot();
 
@@ -265,6 +270,7 @@ private:
     int mTimeoutPingCan;
     int mTimeoutCustomConf;
     int mTimeoutBmsVal;
+    int mTimeoutStats;
 
 };
 

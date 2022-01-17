@@ -28,6 +28,10 @@
 * Mobile:
  - New CAN forwarding bar.
  - Setting to disable screen rotation.
+ - New RT Data page and gauges.
+ - Statistics page.
+* Upload bootloader before firmware if firmware has bootloader erase support.
+* Added motor comparison tool.
 
 == 3.00 ==
 * Focus for this release: External hardware and BMS support.

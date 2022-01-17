@@ -34,8 +34,11 @@ ApplicationWindow {
     height: 800
     title: qsTr("Motor Setup")
 
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
+    // Full screen iPhone X workaround:
+    property int notchLeft: 0
+    property int notchRight: 0
+    property int notchBot: 0
+    property int notchTop: 0
 
     Component.onCompleted: {
         x = Screen.width / 2 - width / 2

@@ -66,6 +66,7 @@
 #include "pages/pagebms.h"
 #include "pages/pagecustomconfig.h"
 #include "pages/pagescripting.h"
+#include "pages/pagemotorcomparison.h"
 
 namespace Ui {
 class MainWindow;
@@ -188,6 +189,7 @@ private:
     PageControllers *mPageControllers;
     PageMotorInfo *mPageMotorInfo;
     PageExperiments *mPageExperiments;
+    PageMotorComparison *mPageMotorComparison;
     PageAppSettings *mPageAppSettings;
     PageAppGeneral *mPageAppGeneral;
     PageAppPpm *mPageAppPpm;

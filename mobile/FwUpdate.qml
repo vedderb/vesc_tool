@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2021 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -30,18 +30,24 @@ import Vedder.vesc.utility 1.0
 Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    property bool isHorizontal: width > height
+    anchors.fill: parent
 
     FwHelper {
         id: fwHelper
     }
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
-        spacing: 0
+        columns: isHorizontal ? 2 : 1
+        rows: isHorizontal ? 1 : 2
 
         RowLayout {
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.column: isHorizontal ? 1 : 0
+            Layout.row: 0
+            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
             spacing: 0
 
             Rectangle {
@@ -67,6 +73,25 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 orientation: Qt.Vertical
+
+                contentItem: ListView {
+                    model: swipeView.contentModel
+                    interactive: swipeView.interactive
+                    currentIndex: swipeView.currentIndex
+
+                    spacing: swipeView.spacing
+                    orientation: swipeView.orientation
+                    snapMode: ListView.SnapOneItem
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    highlightRangeMode: ListView.StrictlyEnforceRange
+                    preferredHighlightBegin: 0
+                    preferredHighlightEnd: 0
+                    highlightMoveDuration: 250
+
+                    maximumFlickVelocity: 8 * (swipeView.orientation ===
+                                               Qt.Horizontal ? width : height)
+                }
 
                 Page {
                     ColumnLayout {
@@ -325,20 +350,25 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            height: asd.implicitHeight + 20
+            Layout.fillHeight: isHorizontal ? true : false
+            Layout.preferredWidth: isHorizontal ? parent.width / 2 : parent.width
+            Layout.column:0
+            Layout.row: isHorizontal ? 0 : 1
+            Layout.preferredHeight: asd.implicitHeight + asd.anchors.margins * 2
             color: Utility.getAppHexColor("lightBackground")
 
             ColumnLayout {
                 id: asd
                 anchors.fill: parent
                 anchors.margins: 10
-
                 Text {
                     Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignBottom
                     color: Utility.getAppHexColor("lightText")
                     id: uploadText
                     text: qsTr("Not Uploading")
-                    horizontalAlignment: Text.AlignHCenter
                 }
 
                 ProgressBar {
@@ -421,12 +451,25 @@ Item {
         }
 
         onAccepted: {
+            var okUploadFw = false
+
             if (swipeView.currentIndex == 0) {
-                fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan)
+                if (mCommands.getLimitedSupportsEraseBootloader() && blItems.count > 0) {
+                    fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
+                }
+                okUploadFw = fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan)
             } else if (swipeView.currentIndex == 1) {
-                fwHelper.uploadFirmware(customFwText.text, VescIf, false, true, fwdCan)
+                okUploadFw = fwHelper.uploadFirmware(customFwText.text, VescIf, false, true, fwdCan)
             } else if (swipeView.currentIndex == 2) {
                 fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
+            }
+
+            if (okUploadFw) {
+                VescIf.emitMessageDialog("Warning",
+                                         "The firmware upload is done. You must wait at least " +
+                                         "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your " +
+                                         "VESC will become bricked. If that happens you need a SWD programmer to recover it.",
+                                         true, false)
             }
         }
     }
@@ -602,9 +645,15 @@ Item {
     }
 
     Connections {
-        target: mCommands
+        target: VescIf
 
-        onFwVersionReceived: {
+        onFwRxChanged: {
+            if (!rx) {
+                return;
+            }
+
+            var params = VescIf.getLastFwRxParams()
+
             updateHw(params)
             updateBl(params)
 

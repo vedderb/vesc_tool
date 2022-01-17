@@ -131,6 +131,21 @@ void QmlUi::emitToggleFullscreen()
     emit toggleFullscreen();
 }
 
+void QmlUi::emitMoveToOtherScreen()
+{
+    emit moveToOtherScreen();
+}
+
+void QmlUi::emitMoveToFirstScreen()
+{
+    emit moveToFirstScreen();
+}
+
+void QmlUi::emitRotateScreen(double rot)
+{
+    emit rotateScreen(rot);
+}
+
 void QmlUi::clearQmlCache()
 {
     if (mEngine) {

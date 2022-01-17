@@ -108,7 +108,7 @@ Item {
         }
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color:{color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -162,7 +162,12 @@ Item {
 
                 Menu {
                     id: menu
-                    width: 500
+                    bottomPadding: notchBot
+                    leftPadding: notchLeft
+                    rightPadding: notchRight
+                    parent: topItem
+                    y: parent.height - implicitHeight
+                    width: parent.width
 
                     MenuItem {
                         text: "Remove All Profiles"
@@ -192,7 +197,7 @@ Item {
         y: column.y + column.height / 2 - height / 2
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

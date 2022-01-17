@@ -242,7 +242,7 @@
        <widget class="QDoubleSpinBox" name="brakeCurrentBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -405,7 +405,7 @@
        <widget class="QDoubleSpinBox" name="speedBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -438,7 +438,7 @@
        <widget class="QDoubleSpinBox" name="handbrakeBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -468,7 +468,7 @@
        <widget class="QDoubleSpinBox" name="dutyBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -532,7 +532,7 @@
        <widget class="QDoubleSpinBox" name="posBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -559,7 +559,7 @@
        <widget class="QDoubleSpinBox" name="currentBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">

@@ -35,6 +35,7 @@ ApplicationWindow {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mAppConf: VescIf.appConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    property bool connected: false
 
     visible: true
     width: 500
@@ -42,11 +43,10 @@ ApplicationWindow {
     title: qsTr("VESC Tool")
 
     // Full screen iPhone X workaround:
-    property int safeWidth
-    property int notchTop
-    property int notchLeft
-    property int notchRight
-    property int notchBot
+    property int notchLeft: 0
+    property int notchRight: 0
+    property int notchBot: 0
+    property int notchTop: 0
 
     // https://github.com/ekke/c2gQtWS_x/blob/master/qml/main.qml
     flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
@@ -56,8 +56,6 @@ ApplicationWindow {
         notchLeft  = Utility.getSafeAreaMargins(appWindow)["left"]
         notchRight = Utility.getSafeAreaMargins(appWindow)["right"]
         notchBot = Utility.getSafeAreaMargins(appWindow)["bottom"]/2 //leaving too much room at the bottom
-        safeWidth  = appWindow.width - Utility.getSafeAreaMargins(appWindow)["left"] - Utility.getSafeAreaMargins(appWindow)["right"]
-        connScreen.notchTop = notchTop
     }
 
     Timer {
@@ -83,10 +81,6 @@ ApplicationWindow {
         Utility.stopGnssForegroundService()
     }
 
-    onHeightChanged: {
-        connScreen.y =  (connScreen.y > 1) ? connScreen.height : 0.0
-    }
-
     SetupWizardIntro {
         id: introWizard
     }
@@ -94,39 +88,54 @@ ApplicationWindow {
     Controls {
         id: controls
         parentWidth: appWindow.width
-        parentHeight: appWindow.height - footer.height - tabBar.height
+        parentHeight: appWindow.height - footer.height - headerBar.height
     }
 
     MultiSettings {
         id: multiSettings
     }
 
-    Settings {
-        id: settings
+    Loader {
+        id: settingsLoader
+        anchors.fill: parent
+        asynchronous: true
+        visible: status == Loader.Ready
+        sourceComponent: Settings {
+            id: settings
+        }
     }
 
-    Drawer {
-        id: canDrawer
-        edge: Qt.RightEdge
-        width: 0.60 * appWindow.width
-        height: appWindow.height - footer.height - tabBar.height
-        y: tabBar.height
-        dragMargin: 20
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+    Loader {
+        id: canDrawerLoader
+        anchors.fill: parent
+        asynchronous: true
+        visible: status == Loader.Ready
+        sourceComponent: Drawer {
+            id: canDrawer
+            edge: Qt.RightEdge
+            width: Math.min(0.6 *appWindow.width, 0.8 *appWindow.height)
+            height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
+            y: appWindow.height > appWindow.width ?  headerBar.height : 0
+            dragMargin: 20
+            interactive: false
 
-        CanScreen {
-            anchors.fill: parent
+            Overlay.modal: Rectangle {
+                color: "#AA000000"
+            }
+
+            CanScreen {
+                anchors.fill: parent
+            }
         }
     }
 
     Drawer {
         id: drawer
-        width: 0.5 * appWindow.width
-        height: appWindow.height - footer.height - tabBar.height
-        y: tabBar.height
+        width: Math.min(0.5 *appWindow.width, 0.75 *appWindow.height)
+        height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
+        y: appWindow.height > appWindow.width ?  headerBar.height : 0
         dragMargin: 20
+        interactive: false
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -140,7 +149,7 @@ ApplicationWindow {
             Image {
                 id: image
                 Layout.preferredWidth: Math.min(parent.width, parent.height)*0.8
-                Layout.preferredHeight: (464 * Layout.preferredWidth) / 1550
+                Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
                 Layout.margins: Math.min(parent.width, parent.height)*0.1
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 source: "qrc" + Utility.getThemePath() + "/logo.png"
@@ -150,24 +159,16 @@ ApplicationWindow {
 
             Button {
                 id: reconnectButton
-
                 Layout.fillWidth: true
-                text: "Connect"
+                text: connected ? "Disconnect" : "Connect"
                 flat: true
-
                 onClicked: {
-                    connScreen.y = 0
-                    drawer.close()
-                }
-            }
+                    if (connected) {
+                        VescIf.disconnectPort()
+                    } else {
+                        connScreen.opened = true
+                    }
 
-            Button {
-                Layout.fillWidth: true
-                text: "Disconnect"
-                flat: true
-
-                onClicked: {
-                    VescIf.disconnectPort()
                     drawer.close()
                 }
             }
@@ -185,7 +186,7 @@ ApplicationWindow {
 
                 onClicked: {
                     drawer.close()
-                    settings.openDialog()
+                    settingsLoader.item.openDialog()
                 }
             }
 
@@ -193,7 +194,6 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "About"
                 flat: true
-
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 "About",
@@ -242,93 +242,165 @@ ApplicationWindow {
         id: swipeView
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
-        anchors.left:parent.anchors.left
-        anchors.leftMargin: notchLeft
-        anchors.right:parent.anchors.left
-        anchors.rightMargin: notchRight
+        anchors.leftMargin: notchLeft*0.75
+        anchors.rightMargin: notchRight*0.75
         clip: true
+        contentItem: ListView {
+            model: swipeView.contentModel
+            interactive: swipeView.interactive
+            currentIndex: swipeView.currentIndex
+
+            spacing: swipeView.spacing
+            orientation: swipeView.orientation
+            snapMode: ListView.SnapOneItem
+            boundsBehavior: Flickable.StopAtBounds
+
+            highlightRangeMode: ListView.StrictlyEnforceRange
+            preferredHighlightBegin: 0
+            preferredHighlightEnd: 0
+            highlightMoveDuration: 250
+
+            maximumFlickVelocity: 8 * (swipeView.orientation ===
+                                       Qt.Horizontal ? width : height)
+        }
 
         Page {
-            StartPage {
-                id: connBle
+            Loader {
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: StartPage {
+                    id: connBle
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
 
-                onRequestOpenControls: {
-                    controls.openDialog()
-                }
+                    onRequestOpenControls: {
+                        controls.openDialog()
+                    }
 
-                onRequestConnect: {
-                    connScreen.y = 0
-                }
+                    onRequestConnect: {
+                        connScreen.opened = true
+                    }
 
-                onRequestOpenMultiSettings: {
-                    multiSettings.openDialog()
+                    onRequestOpenMultiSettings: {
+                        multiSettings.openDialog()
+                    }
                 }
             }
         }
 
         Page {
-            RowLayout {
-                anchors.fill: parent
-                spacing: 0
+            PageIndicator {
+                count: rtSwipeView.count
+                currentIndex: rtSwipeView.currentIndex
+                anchors.right: parent.right
+                width:25
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: parent.height*0.4
+                rotation: 90
+                z:2
+            }
 
-                Rectangle {
-                    color: Utility.getAppHexColor("lightBackground")
-                    width: 16
-                    Layout.fillHeight: true
-                    Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
+            SwipeView {
+                id: rtSwipeView
+                enabled: true
+                clip: true
+                currentIndex: 1
+                anchors.fill:parent
+                orientation: Qt.Vertical
 
-                    PageIndicator {
-                        count: rtSwipeView.count
-                        currentIndex: rtSwipeView.currentIndex
+                contentItem: ListView {
+                    model: rtSwipeView.contentModel
+                    interactive: rtSwipeView.interactive
+                    currentIndex: rtSwipeView.currentIndex
+
+                    spacing: rtSwipeView.spacing
+                    orientation: rtSwipeView.orientation
+                    snapMode: ListView.SnapOneItem
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    highlightRangeMode: ListView.StrictlyEnforceRange
+                    preferredHighlightBegin: 0
+                    preferredHighlightEnd: 0
+                    highlightMoveDuration: 250
+
+                    maximumFlickVelocity: 8 * (rtSwipeView.orientation ===
+                                               Qt.Horizontal ? width : height)
+                }
+
+                Page {
+                    Loader {
+                        anchors.fill: parent
+                        asynchronous: true
+                        visible: status == Loader.Ready
+                        sourceComponent: RtData {
+                            anchors.fill: parent
+                            updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0
+                        }
+                    }
+                }
+
+                Page {
+                    Loader {
+                        anchors.fill: parent
+                        asynchronous: true
+                        visible: status == Loader.Ready
+                        sourceComponent: RtDataSetup {
+                            anchors.fill: parent
+                            updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1
+                        }
+                    }
+                }
+
+                Page {
+                    RtDataIMU {
+                        id: rtIMU
+                        anchors.top: parent.top
+                        width: parent.width
+                        Layout.fillWidth: true
+                        z:2
+                    }
+                    CheckBox {
+                        anchors.top: rtIMU.bottom
+                        Layout.fillWidth: true
+                        id: useYawBox
+                        text: "Use Yaw (will drift)"
+                        checked: false
+                        z:2
+                    }
+                    Loader {
+                        id: vesc3dLoader
+                        asynchronous: true
+                        visible: status == Loader.Ready
                         anchors.centerIn: parent
-                        rotation: 90
-                    }
-                }
-
-                SwipeView {
-                    id: rtSwipeView
-                    enabled: true
-                    clip: true
-
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    orientation: Qt.Vertical
-
-                    Page {
-                        RtData {
-                            anchors.fill: parent
+                        anchors.verticalCenterOffset: rtIMU.height/2
+                        width:  Math.min(parent.width*Screen.devicePixelRatio, (parent.height - rtIMU.height)*Screen.devicePixelRatio)
+                        antialiasing: true
+                        height: width
+                        onLoaded: {
+                            item.setRotation(0.1, 0.75, 0.4)
                         }
-                    }
-
-                    Page {
-                        RtDataSetup {
-                            anchors.fill: parent
-                        }
-                    }
-
-                    Page {
-                        ColumnLayout {
-                            anchors.fill: parent
-
-                            RtDataIMU {
-                                Layout.fillWidth: true
-                            }
-
-                            CheckBox {
-                                Layout.fillWidth: true
-                                id: useYawBox
-                                text: "Use Yaw (will drift)"
-                                checked: false
-                            }
-
+                        z:1
+                        sourceComponent:
                             Vesc3dItem {
-                                id: vesc3d
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                            }
+                            id: vesc3d
+                            anchors.fill: parent
+                            scale: 1.0 / Screen.devicePixelRatio
+                            z:1
+                        }
+                    }
+                }
+
+                Page {
+                    id: statPage
+                    Loader {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        asynchronous: true
+
+                        sourceComponent: StatPage {
+                            anchors.fill: parent
                         }
                     }
                 }
@@ -336,60 +408,90 @@ ApplicationWindow {
         }
 
         Page {
-            Profiles {
+            Loader {
                 anchors.fill: parent
-                anchors.topMargin: 5
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: Profiles {
+                    anchors.fill: parent
+                    anchors.topMargin: 5
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                }
             }
         }
 
         Page {
-            BMS {
+            Loader {
                 anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: BMS {
+                    anchors.fill: parent
+                }
             }
         }
 
         Page {
-            FwUpdate {
+            Loader {
                 anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: FwUpdate {
+                    anchors.fill: parent
+                }
             }
         }
 
         Page {
-            ConfigPageMotor {
+            Loader {
                 id: confPageMotor
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: ConfigPageMotor {
+                    //id: confPageMotor
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                }
             }
         }
 
         Page {
-            ConfigPageApp {
+            Loader {
                 id: confPageApp
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: ConfigPageApp {
+                    //id: confPageApp
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                }
             }
         }
 
         Page {
-            Terminal {
+            Loader {
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                anchors.topMargin: 10
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: Terminal {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    anchors.topMargin: 10
+                }
             }
         }
     }
 
     header: Rectangle {
+        id: headerBar
         color: Utility.getAppHexColor("lightestBackground")
         height: tabBar.implicitHeight + notchTop // iPhone X Workaround
-        anchors.left: parent.left // iPhoneX workaround
-        anchors.leftMargin: Math.max(notchLeft, notchRight)/2 // iPhoneX workaround
-        anchors.bottom: parent.bottom // iPhoneX workaround
 
         RowLayout {
             anchors.left: parent.left
@@ -469,8 +571,14 @@ ApplicationWindow {
     Page {
         id: rtDataBalance
         visible: false
-        RtDataBalance {
+        Loader {
             anchors.fill: parent
+            asynchronous: true
+            active: parent.visible
+            visible: status == Loader.Ready
+            sourceComponent: RtDataBalance {
+                anchors.fill: parent
+            }
         }
     }
 
@@ -480,6 +588,17 @@ ApplicationWindow {
         color: Utility.getAppHexColor("lightBackground")
         width: parent.width
         height: 35 + notchBot
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top:parent.top
+            height: parent.height/2.0
+            gradient: Gradient {
+                    GradientStop { position: 0.0; color: "#15ffffff"}
+                    GradientStop { position: 0.3; color: "#04ffffff"}
+                    GradientStop { position: 1.0; color: "transparent" }
+                }
+        }
         Behavior on color {
             ColorAnimation {
                 duration: 200;
@@ -516,12 +635,12 @@ ApplicationWindow {
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Utility.getAppHexColor("darkBackground")
+                color: "#33000000"
             }
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Utility.getAppHexColor("disabledText")
+                color:  "#33ffffff"
             }
             ColumnLayout{
                 spacing: 0
@@ -546,12 +665,12 @@ ApplicationWindow {
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Utility.getAppHexColor("darkBackground")
+                color: "#33000000"
             }
             Rectangle{
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Utility.getAppHexColor("disabledText")
+                color: "#33ffffff"
             }
             ToolButton {
                 Layout.fillHeight: true
@@ -565,24 +684,42 @@ ApplicationWindow {
                     source: "qrc" + Utility.getThemePath() + "icons/can_off.png"
                 }
                 onClicked: {
-                    if (canDrawer.visible) {
-                        canDrawer.close()
+                    if (canDrawerLoader.item.visible) {
+                        canDrawerLoader.item.close()
                     } else {
-                        canDrawer.open()
+                        canDrawerLoader.item.open()
                     }
                 }
             }
         }
     }
 
-    ConnectScreen {
-        id: connScreen
+    Rectangle {
         parent: ApplicationWindow.overlay
+        anchors.fill: parent
+        color: "black"
 
-        x: 0
-        y: 0
-        height: parent.height
-        width: parent.width
+        ConnectScreen {
+            id: connScreen
+            x: 0
+            y: 0
+            height: parent.height
+            width: parent.width
+            opened: true
+            onYChanged: {
+                parent.color.a = Math.min(1, Math.max(1 - y / height, 0))
+
+                if (opened) {
+                    drawer.interactive = false
+                    canDrawerLoader.item.interactive = false
+                    drawer.close()
+                    canDrawerLoader.item.close()
+                } else {
+                    drawer.interactive = true
+                    canDrawerLoader.item.interactive = true
+                }
+            }
+        }
     }
 
     Timer {
@@ -637,11 +774,11 @@ ApplicationWindow {
         repeat: true
 
         onTriggered: {
-            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 3){
+            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 4) {
                 rtSwipeView.addItem(rtDataBalance)
                 rtDataBalance.visible = true
-            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 4){
-                rtSwipeView.removeItem(3)
+            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 5) {
+                rtSwipeView.removeItem(4)
                 rtDataBalance.visible = false
             }
 
@@ -667,6 +804,7 @@ ApplicationWindow {
                     if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1) {
                         interval = 50
                         mCommands.getValuesSetup()
+                        mCommands.getImuData(0x2)
                     }
 
                     if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
@@ -675,6 +813,12 @@ ApplicationWindow {
                     }
 
                     if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 3) {
+                        interval = 100
+                        mCommands.getValuesSetupSelective(0x7E00)
+                        mCommands.getStats(0xFFFFFFFF)
+                    }
+
+                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 4) {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getDecodedBalance()
@@ -695,30 +839,29 @@ ApplicationWindow {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape
-
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
-        height: Math.min(implicitHeight, parent.height - 40)
+        width: parent.width - 20 - notchLeft - notchRight
+        height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
         x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+        y: (parent.height - height + notchTop) / 2
         parent: ApplicationWindow.overlay
 
         ScrollView {
             id: vescDialogScroll
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width - 20
+            contentWidth: availableWidth
 
             Text {
                 id: vescDialogLabel
-                color: Utility.getAppHexColor("lightText")
-                linkColor: "lightblue"
+                color: {color = Utility.getAppHexColor("lightText")}
+                linkColor: {linkColor = Utility.getAppHexColor("lightAccent")}
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
-                wrapMode: Text.WordWrap
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 textFormat: Text.RichText
                 onLinkActivated: {
                     Qt.openUrlExternally(link)
@@ -736,13 +879,13 @@ ApplicationWindow {
         }
 
         swipeView.interactive = true
-        tabBar.visible = true
+        headerBar.visible = true
         tabBar.enabled = true
 
         if (VescIf.isPortConnected() && VescIf.qmlHwLoaded()) {
             if (VescIf.getLastFwRxParams().qmlHwFullscreen) {
                 swipeView.interactive = false
-                tabBar.visible = false
+                headerBar.visible = false
                 tabBar.enabled = false
             }
 
@@ -768,13 +911,13 @@ ApplicationWindow {
         }
 
         swipeView.interactive = true
-        tabBar.visible = true
+        headerBar.visible = true
         tabBar.enabled = true
 
         if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
             if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
                 swipeView.interactive = false
-                tabBar.visible = false
+                headerBar.visible = false
                 tabBar.enabled = false
             }
 
@@ -809,14 +952,16 @@ ApplicationWindow {
             if (!VescIf.isPortConnected()) {
                 confTimer.mcConfRx = false
                 confTimer.appConfRx = false
+                connected = false
+            } else {
+                connected = true
             }
 
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
 
-            reconnectButton.enabled = !VescIf.isPortConnected()
-            connScreen.y = VescIf.isPortConnected() ? connScreen.height : 0.0
+            connScreen.opened = VescIf.isPortConnected() ? false : true
         }
 
         onStatusMessage: {
@@ -874,10 +1019,12 @@ ApplicationWindow {
 
     Connections {
         target: mCommands
-
         onValuesImuReceived: {
-            vesc3d.setRotation(values.roll, values.pitch,
-                               useYawBox.checked ? values.yaw : 0)
+            if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
+                vesc3dLoader.item.setRotation(values.roll, values.pitch,
+                                              useYawBox.checked ? values.yaw : 0)
+                rtIMU.updateText(values)
+            }
         }
 
         onDeserializeConfigFailed: {

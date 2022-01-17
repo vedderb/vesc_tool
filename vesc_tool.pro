@@ -10,11 +10,11 @@ VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 38
+VT_IS_TEST_VERSION = 0
 
-VT_ANDROID_VERSION_ARMV7 = 95
-VT_ANDROID_VERSION_ARM64 = 96
-VT_ANDROID_VERSION_X86 = 97
+VT_ANDROID_VERSION_ARMV7 = 98
+VT_ANDROID_VERSION_ARM64 = 99
+VT_ANDROID_VERSION_X86 = 100
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -25,6 +25,8 @@ DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
 DEFINES += VT_CONFIG_VERSION=$$VT_CONFIG_VERSION
 DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
+QT_LOGGING_RULES="qt.qml.connections=false"
+#CONFIG += qtquickcompiler
 
 CONFIG += c++11
 CONFIG += resources_big
@@ -119,7 +121,7 @@ contains(DEFINES, HAS_GAMEPAD) {
 
 android: QT += androidextras
 
-ios: {
+ios | macx: {
     TARGET = "VESC Tool"
 }else: {
     android:{
@@ -248,36 +250,30 @@ include(QCodeEditor/qcodeeditor.pri)
 
 RESOURCES += res.qrc \
     res_fw_bms.qrc \
+    res_fw.qrc \
     res_qml.qrc
 RESOURCES += res_config.qrc
 
 build_original {
-    RESOURCES += res_original.qrc \
-    res_fw_original.qrc
+    RESOURCES += res_original.qrc
     DEFINES += VER_ORIGINAL
 } else:build_platinum {
-    RESOURCES += res_platinum.qrc \
-    res_fw.qrc
+    RESOURCES += res_platinum.qrc
     DEFINES += VER_PLATINUM
 } else:build_gold {
-    RESOURCES += res_gold.qrc \
-    res_fw.qrc
+    RESOURCES += res_gold.qrc
     DEFINES += VER_GOLD
 } else:build_silver {
-    RESOURCES += res_silver.qrc \
-    res_fw.qrc
+    RESOURCES += res_silver.qrc
     DEFINES += VER_SILVER
 } else:build_bronze {
-    RESOURCES += res_bronze.qrc \
-    res_fw.qrc
+    RESOURCES += res_bronze.qrc
     DEFINES += VER_BRONZE
 } else:build_free {
-    RESOURCES += res_free.qrc \
-    res_fw.qrc
+    RESOURCES += res_free.qrc
     DEFINES += VER_FREE
 } else {
-    RESOURCES += res_neutral.qrc \
-    res_fw.qrc
+    RESOURCES += res_neutral.qrc
     DEFINES += VER_NEUTRAL
 }
 
@@ -301,15 +297,19 @@ macx-clang:contains(QMAKE_HOST.arch, arm.*): {
 macx {
     ICON        =  macos/appIcon.icns
     QMAKE_INFO_PLIST = macos/Info.plist
-    DISTFILES += macos/Info.plist
+    DISTFILES += macos/Info.plist    
+    QMAKE_CFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
+    QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO
+    QMAKE_OBJECTIVE_CFLAGS_RELEASE = $$QMAKE_OBJECTIVE_CFLAGS_RELEASE_WITH_DEBUGINFO
+    QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO
 }
 
 ios {
     QMAKE_INFO_PLIST = ios/Info.plist
     HEADERS += ios/src/setIosParameters.h
     SOURCES += ios/src/setIosParameters.mm
-    DISTFILES += ios/Info.plist
-
+    DISTFILES += ios/Info.plist \
+                 ios/*.storyboard
     QMAKE_ASSET_CATALOGS = $$PWD/ios/Images.xcassets
     QMAKE_ASSET_CATALOGS_APP_ICON = "AppIcon"
 
@@ -317,7 +317,7 @@ ios {
     QMAKE_BUNDLE_DATA += ios_artwork
     app_launch_images.files = $$files($$PWD/ios/LaunchImage*.png)
     QMAKE_BUNDLE_DATA += app_launch_images
-    app_launch_screen.files = $$files($$PWD/ios/MyLaunchScreen.xib)
+    app_launch_screen.files = $$files($$PWD/ios/MyLaunchScreen.storyboard)
     QMAKE_BUNDLE_DATA += app_launch_screen
 
     #QMAKE_IOS_DEPLOYMENT_TARGET = 11.0

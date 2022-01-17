@@ -31,12 +31,12 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: Utility.getAppHexColor("darkAccent")
+        color: {color = Utility.getAppHexColor("darkAccent")}
         radius: 5
 
         Text {
             anchors.centerIn: parent
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             id: name
             text: sepName
             font.bold: true

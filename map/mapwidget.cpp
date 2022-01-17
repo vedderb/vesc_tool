@@ -1297,7 +1297,7 @@ int MapWidget::drawInfoPoints(QPainter &painter, const QList<LocPoint> &pts,
                 pt_txt.setY(p.y());
                 pt_txt = drawTrans.map(pt_txt);
                 painter.setPen(Qt::black);
-                painter.setFont(QFont("monospace"));
+                painter.setFont(QFont("DejaVu Sans Mono"));
                 rect_txt.setCoords(pt_txt.x(), pt_txt.y() - 20,
                                    pt_txt.x() + 500, pt_txt.y() + 500);
                 painter.drawText(rect_txt, Qt::AlignTop | Qt::AlignLeft, ip.getInfo());
@@ -1672,7 +1672,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
 
     // Set font
     font.setPointSize(10);
-    font.setFamily("Monospace");
+    font.setFamily("DejaVu Sans Mono");
     painter.setFont(font);
 
     // Grid parameters

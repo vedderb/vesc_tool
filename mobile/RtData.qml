@@ -28,6 +28,7 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: rtData
+    property alias updateData: commandsUpdate.enabled
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property bool isHorizontal: rtData.width > rtData.height
@@ -49,10 +50,15 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             columns: isHorizontal ? 4 : 2
-
+            Layout.leftMargin: 5
+            Layout.rightMargin: 5
+            Layout.topMargin: 5
+            Layout.bottomMargin: 5
             CustomGauge {
                 id: currentGauge
                 Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 maximumValue: 100
                 minimumValue: -100
                 labelStep: maximumValue > 60 ? 20 : 10
@@ -66,6 +72,8 @@ Item {
             CustomGauge {
                 id: dutyGauge
                 Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 maximumValue: 100
                 minimumValue: -100
                 labelStep: 20
@@ -79,10 +87,12 @@ Item {
             CustomGauge {
                 id: rpmGauge
                 Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 maximumValue: 100
                 minimumValue: -100
                 labelStep: 20
-                value: -10
+                value: 0
                 unitText: "x1000"
                 typeText: "ERPM"
                 Layout.preferredWidth: gaugeSize
@@ -92,11 +102,13 @@ Item {
             CustomGauge {
                 id: powerGauge
                 Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 maximumValue: 10000
                 minimumValue: -10000
                 tickmarkScale: 0.001
                 tickmarkSuffix: "k"
-                labelStep: 1000
+                labelStep: 2000
                 value: 0
                 unitText: "W"
                 typeText: "Power"
@@ -110,26 +122,43 @@ Item {
             color: Utility.getAppHexColor("darkBackground")
 
             Rectangle {
-                anchors.bottom: valText.top
+                anchors.bottom: parent.top
                 width: parent.width
                 height: 2
                 color: Utility.getAppHexColor("lightAccent")
             }
 
             Layout.fillWidth: true
-            Layout.preferredHeight: valMetrics.height * 10 + 20
+            Layout.preferredHeight: isHorizontal ? valMetrics.height * 5 + 20 : valMetrics.height * 10 + 20
             Layout.alignment: Qt.AlignBottom
-
-            Text {
-                id: valText
-                color: Utility.getAppHexColor("lightText")
-                text: VescIf.getConnectedPortName()
-                font.family: "DejaVu Sans Mono"
-                verticalAlignment: Text.AlignVCenter
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.topMargin: 5
-            }
+                Text {
+                    id: valText
+                    anchors.top: parent.top
+                    anchors.topMargin: 10
+                    anchors.leftMargin: 10
+                    anchors.left: parent.left
+                    width: isHorizontal ? parent.width/2 : parent.width
+                    color: Utility.getAppHexColor("lightText")
+                    text: VescIf.getConnectedPortName()
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    font.family: "DejaVu Sans Mono"
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Text {
+                    id: valText2
+                    anchors.topMargin:  isHorizontal ? 10 : -10
+                    anchors.leftMargin: 10
+                    anchors.top: isHorizontal ? parent.top : valText.bottom
+                    width: isHorizontal ? parent.width/2 : parent.width
+                    anchors.left: isHorizontal ? valText.right : parent.left
+                    color: Utility.getAppHexColor("lightText")
+                    text: ""
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    font.family: "DejaVu Sans Mono"
+                    verticalAlignment: Text.AlignVCenter
+                }
 
             TextMetrics {
                 id: valMetrics
@@ -143,12 +172,19 @@ Item {
         target: mMcConf
 
         onUpdated: {
-            currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5
-            currentGauge.minimumValue = -currentGauge.maximumValue
+            var currentMaxRound = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5
+
+            if (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7)) {
+                currentGauge.maximumValue = currentMaxRound
+                currentGauge.minimumValue = -currentMaxRound
+            }
+
+            currentGauge.labelStep = Math.ceil(currentMaxRound / 20) * 5
         }
     }
 
     Connections {
+        id: commandsUpdate
         target: mCommands
 
         onValuesReceived: {
@@ -159,7 +195,7 @@ Item {
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var rpmMaxRound = (Math.ceil(rpmMax / 5000.0) * 5000.0) / 1000
 
-            if (Math.abs(rpmGauge.maximumValue - rpmMaxRound) > 6) {
+            if (rpmMaxRound > rpmGauge.maximumValue || rpmMaxRound < (rpmGauge.maximumValue * 0.6)) {
                 rpmGauge.maximumValue = rpmMaxRound
                 rpmGauge.minimumValue = -rpmMaxRound
             }
@@ -171,7 +207,7 @@ Item {
                                     mMcConf.getParamDouble("l_watt_max"))
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
-            if (Math.abs(powerGauge.maximumValue - powerMaxRound) > 1.2) {
+            if (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6)) {
                 powerGauge.maximumValue = powerMaxRound
                 powerGauge.minimumValue = -powerMaxRound
             }
@@ -183,7 +219,9 @@ Item {
                     "I Battery  : " + parseFloat(values.current_in).toFixed(2) + " A\n" +
                     "Temp MOS   : " + parseFloat(values.temp_mos).toFixed(2) + " \u00B0C\n" +
                     "Temp Motor : " + parseFloat(values.temp_motor).toFixed(2) + " \u00B0C\n" +
-                    "Ah Draw    : " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + " mAh\n" +
+                    "Ah Draw    : " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + " mAh\n"
+
+            valText2.text =
                     "Ah Charge  : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1) + " mAh\n" +
                     "Wh Draw    : " + parseFloat(values.watt_hours).toFixed(2) + " Wh\n" +
                     "Wh Charge  : " + parseFloat(values.watt_hours_charged).toFixed(2) + " Wh\n" +

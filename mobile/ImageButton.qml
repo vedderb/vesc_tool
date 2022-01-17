@@ -24,8 +24,8 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: rootItem
-    property var imageSrc: ""
-    property var buttonText: ""
+    property string imageSrc: ""
+    property string buttonText: ""
     signal clicked()
 
     Button {
@@ -40,9 +40,18 @@ Item {
         background: Rectangle {
             anchors.fill: parent
             radius: 10
-            color: control.pressed ? Utility.getAppHexColor("darkAccent") :Utility.getAppHexColor("normalBackground")
-            border.color: Utility.getAppHexColor("disabledText")
+            property color hoveredColor: {hoveredColor = Utility.getAppHexColor("lightBackground")}
+            property color pressedColor: {pressedColor = Utility.getAppHexColor("darkAccent")}
+            property color normalColor: {normalColor = Utility.getAppHexColor("normalBackground")}
+            color: control.pressed ? pressedColor: control.hovered ? hoveredColor : normalColor
+            border.color: {border.color = Utility.getAppHexColor("disabledText")}
             border.width: control.activeFocus ? 2 : 1
+            Behavior on color {
+                ColorAnimation {
+                    duration: 200;
+                    easing.type: Easing.InOutSine
+                }
+            }
 
             RowLayout {
                 anchors.fill: parent

@@ -29,10 +29,13 @@ import "qrc:/mobile"
 
 Item {
     id: container
-    width: 100
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
+    width: 100   
 
+    // Full screen iPhone X workaround:
+    property int notchLeft: 0
+    property int notchRight: 0
+    property int notchBot: 0
+    property int notchTop: 0
 
     function setupMotors() {
         if (!VescIf.isPortConnected()) {
@@ -124,7 +127,7 @@ Item {
 
             background: Rectangle {
                 opacity: 1
-                color: Utility.getAppHexColor("lightBackground")
+                color: {color = Utility.getAppHexColor("lightBackground")}
             }
 
             property int buttonWidth: Math.max(120,
@@ -188,9 +191,37 @@ Item {
             clip: true
 
             Page {
-                RtDataSetup {
+                PageIndicator {
+                    count: rtSwipeView.count
+                    currentIndex: rtSwipeView.currentIndex
+                    anchors.left: parent.left
+                    width:25
+                    anchors.verticalCenter: parent.verticalCenter
+                    rotation: 90
+                    z:2
+                }
+
+                SwipeView {
+                    id: rtSwipeView
+                    enabled: true
+                    clip: true
+                    currentIndex: 0
                     anchors.fill: parent
-                    dialogParent: container
+                    orientation: Qt.Vertical
+
+                    Page {
+                        RtDataSetup {
+                            anchors.fill: parent
+                            dialogParent: container
+                        }
+                    }
+
+                    Page {
+                        StatPage {
+                            anchors.fill: parent
+                            anchors.margins: 20
+                        }
+                    }
                 }
             }
 
@@ -310,7 +341,7 @@ Item {
         y: parent.y + parent.height / 2 - height / 2
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -343,7 +374,7 @@ Item {
         y: parent.y + parent.height / 2 - height / 2
 
         Text {
-            color: Utility.getAppHexColor("lightText")
+            color: {color = Utility.getAppHexColor("lightText")}
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap

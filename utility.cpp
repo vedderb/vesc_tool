@@ -31,6 +31,7 @@
 #include <QNetworkReply>
 #include <QMessageBox>
 #include <QFile>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QtGlobal>
 #include <QNetworkInterface>
@@ -425,13 +426,15 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                                "Motor current      : %2 A\n"
                                "Motor R            : %3 mΩ\n"
                                "Motor L            : %4 µH\n"
-                               "Motor Flux Linkage : %5 mWb\n"
-                               "Temp Comp          : %6\n"
-                               "Sensors            : %7").
+                               "Motor Lq-Ld        : %5 µH\n"
+                               "Motor Flux Linkage : %6 mWb\n"
+                               "Temp Comp          : %7\n"
+                               "Sensors            : %8").
                         arg(ap->getParamInt("controller_id")).
                         arg(p->getParamDouble("l_current_max"), 0, 'f', 2).
                         arg(p->getParamDouble("foc_motor_r") * 1e3, 0, 'f', 2).
                         arg(p->getParamDouble("foc_motor_l") * 1e6, 0, 'f', 2).
+                        arg(p->getParamDouble("foc_motor_ld_lq_diff") * 1e6, 0, 'f', 2).
                         arg(p->getParamDouble("foc_motor_flux_linkage") * 1e3, 0, 'f', 2).
                         arg(p->getParamBool("foc_temp_comp") ? "True" : "False").
                         arg(sensors);
@@ -512,12 +515,13 @@ QVector<double> Utility::measureRLBlocking(VescInterface *vesc)
 
     vesc->commands()->measureRL();
 
-    auto conn = connect(vesc->commands(), &Commands::motorRLReceived, [&res](double r, double l) {
+    auto conn = connect(vesc->commands(), &Commands::motorRLReceived, [&res](double r, double l, double ld_lq_diff) {
         res.append(r);
         res.append(l);
+        res.append(ld_lq_diff);
     });
 
-    waitSignal(vesc->commands(), SIGNAL(motorRLReceived(double, double)), 8000);
+    waitSignal(vesc->commands(), SIGNAL(motorRLReceived(double, double, double)), 8000);
     disconnect(conn);
 
     return res;
@@ -1493,6 +1497,18 @@ void Utility::stopGnssForegroundService()
 #endif
 }
 
+bool Utility::isBleScanEnabled()
+{
+#ifdef Q_OS_ANDROID
+    return QAndroidJniObject::callStaticMethod<jboolean>("com/vedder/vesc/Utils",
+                                                         "checkLocationEnabled",
+                                                         "(Landroid/content/Context;)Z",
+                                                         QtAndroid::androidActivity().object());
+#else
+    return true;
+#endif
+}
+
 void Utility::llhToXyz(double lat, double lon, double height, double *x, double *y, double *z)
 {
     double sinp = sin(lat * M_PI / 180.0);
@@ -2024,6 +2040,70 @@ void Utility::setPlotColors(QCustomPlot* plot)
     plot->legend->setBrush(Utility::getAppQColor("normalBackground"));
     plot->legend->setTextColor(Utility::getAppQColor("lightText"));
     plot->legend->setBorderPen(QPen(Utility::getAppQColor("darkBackground")));
+}
+
+void Utility::plotSavePdf(QCustomPlot *plot, int width, int height, QString title)
+{
+    QString fileName = QFileDialog::getSaveFileName(plot,
+                                                    tr("Save PDF"), "",
+                                                    tr("PDF Files (*.pdf)"));
+
+    if (!fileName.isEmpty()) {
+        if (!fileName.toLower().endsWith(".pdf")) {
+            fileName.append(".pdf");
+        }
+
+        if (!title.isEmpty()) {
+            auto element = new QCPTextElement(plot,
+                                              title,
+                                              QFont("sans", 12, QFont::Bold));
+            element->setTextColor(Utility::getAppQColor("lightText"));
+
+            plot->plotLayout()->insertRow(0);
+            plot->plotLayout()->addElement(0, 0, element);
+            plot->replot();
+        }
+
+        plot->savePdf(fileName, width, height);
+
+        if (!title.isEmpty()) {
+            delete plot->plotLayout()->element(0, 0);
+            plot->plotLayout()->simplify();
+            plot->replot();
+        }
+    }
+}
+
+void Utility::plotSavePng(QCustomPlot *plot, int width, int height, QString title)
+{
+    QString fileName = QFileDialog::getSaveFileName(plot,
+                                                    tr("Save Image"), "",
+                                                    tr("PNG Files (*.png)"));
+
+    if (!fileName.isEmpty()) {
+        if (!fileName.toLower().endsWith(".png")) {
+            fileName.append(".png");
+        }
+
+        if (!title.isEmpty()) {
+            auto element = new QCPTextElement(plot,
+                                              title,
+                                              QFont("sans", 12, QFont::Bold));
+            element->setTextColor(Utility::getAppQColor("lightText"));
+
+            plot->plotLayout()->insertRow(0);
+            plot->plotLayout()->addElement(0, 0, element);
+            plot->replot();
+        }
+
+        plot->savePng(fileName, width, height);
+
+        if (!title.isEmpty()) {
+            delete plot->plotLayout()->element(0, 0);
+            plot->plotLayout()->simplify();
+            plot->replot();
+        }
+    }
 }
 
 void Utility::setDarkMode(bool isDarkSetting)

@@ -20,7 +20,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
-
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.bleuart 1.0
 import Vedder.vesc.commands 1.0
@@ -28,14 +27,23 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: rootItem
-
+    property int animationDuration: 500
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
-    property int notchTop: 0
-    property int animationSpeed: 500
+    property bool opened: true
+
+    onOpenedChanged: {
+        if(opened){
+            animationDuration = 500
+            y = 0
+        } else {
+            y = Qt.binding(function() {return parent.height})
+        }
+    }
+
     Behavior on y {
         NumberAnimation {
-            duration: animationSpeed;
+            duration: animationDuration
             easing.type: Easing.InOutSine
         }
     }
@@ -45,14 +53,29 @@ Item {
         anchors.fill: parent
     }
 
+    // Prevents events from passing to components behind
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.AllButtons
+        onWheel: {wheel.accepted=true}
+        hoverEnabled: true
+    }
+
     Component.onCompleted: {
         mBle.startScan()
         scanDotTimer.running = true
+
+        if (!Utility.isBleScanEnabled()) {
+            bleEn.open()
+        }
     }
 
     onYChanged: {
         if (y > 1) {
             enableDialog()
+        }
+        if(!opened & y == height){
+            animationDuration = 0
         }
     }
 
@@ -60,6 +83,9 @@ Item {
         id: column
         anchors.fill: parent
         anchors.margins: 10
+        anchors.leftMargin: notchLeft
+        anchors.rightMargin: notchRight
+
         Rectangle{
             Layout.preferredHeight: notchTop
             Layout.fillWidth: true
@@ -68,16 +94,15 @@ Item {
 
         Image {
             id: image
-            Layout.preferredWidth: Math.min(column.width, column.height) * 0.8
+            Layout.preferredWidth: Math.min(column.width, column.height*0.8) * 0.8
             Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
             Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
             Layout.bottomMargin: 0
             source: "qrc" + Utility.getThemePath() + "/logo.png"
-
             DragHandler {
                 id: handler
-                target:rootItem
+                target: rootItem
                 margin: 0
                 xAxis.enabled: false
                 yAxis.maximum: rootItem.height
@@ -85,13 +110,15 @@ Item {
 
                 onActiveChanged: {
                     if (handler.active) {
-                        animationSpeed = 3
+                        animationDuration = 3
                     } else {
-                        animationSpeed = 500
-                        if (rootItem.y > rootItem.height / 4) {
-                            rootItem.y = rootItem.height
-                        } else {
-                            rootItem.y = 0
+                        animationDuration = 500
+                        if(opened) {
+                            if (rootItem.y > (rootItem.height / 4)) {
+                                rootItem.opened = false
+                            } else {
+                                rootItem.y = 0
+                            }
                         }
                     }
                 }
@@ -100,14 +127,12 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-
             Button {
                 text: qsTr("Hide")
                 Layout.preferredWidth: 120
                 flat: true
-
                 onClicked: {
-                    rootItem.y = rootItem.height
+                    rootItem.opened = false
                 }
             }
 
@@ -164,44 +189,18 @@ Item {
         }
 
         ListView {
-            // transitions for insertion/deletation of elements
-            add: Transition {
-                NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 200 }
-                NumberAnimation { property: "scale"; easing.type: Easing.OutExpo; from: 0; to: 1.0; duration: 300 }
-            }
-
-            addDisplaced: Transition {
-                NumberAnimation { properties: "y"; duration: 300; easing.type: Easing.InOutBack }
-            }
-
-            remove: Transition {
-                NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 100 }
-                NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 200 }
-            }
-
-            removeDisplaced: Transition {
-                NumberAnimation { properties: "x,y"; duration: 300; easing.type: Easing.InExpo }
-            }
-
             id: bleList
             Layout.fillWidth: true
             Layout.fillHeight: true
             focus: true
             clip: true
             spacing: 5
+            z:2
 
             Component {
                 id: bleDelegate
 
                 Rectangle {
-                    //Component.onCompleted: showAnim.start();
-                    //transform: Rotation { id:rt; origin.x: 0; origin.y: height; axis { x: 0.3; y: 1; z: 0 } angle: 0}//     <--- I like this one more!
-                    //SequentialAnimation {
-                    //    id: showAnim
-                    //    running: false
-                    //    RotationAnimation { target: rt; from: 180; to: 0; duration: 800; easing.type: Easing.OutExpo; property: "angle" }
-                    //}
-
                     width: bleList.width
                     height: 120
                     color: Utility.getAppHexColor("normalBackground")
@@ -260,6 +259,7 @@ Item {
                                 checked: preferred
                                 onToggled: {
                                     VescIf.storeBlePreferred(bleAddr, checked)
+                                    bleModel.clear()
                                     mBle.emitScanDone()
                                 }
                             }
@@ -335,8 +335,6 @@ Item {
                 scanButton.enabled = true
                 scanButton.text = qsTr("Scan")
             }
-
-            //bleModel.clear()
 
             for (var addr in devs) {
                 var name = devs[addr]
@@ -416,17 +414,16 @@ Item {
         title: "Connecting..."
         closePolicy: Popup.NoAutoClose
         modal: true
-        focus: true        
+        focus: true
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
-        x: 10
+        width: parent.width - 20 - notchLeft - notchRight
+        x: parent.width/2 - width/2
         y: parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
-
         ProgressBar {
             anchors.fill: parent
             indeterminate: visible
@@ -446,10 +443,10 @@ Item {
             color: "#AA000000"
         }
 
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         height: 200
         closePolicy: Popup.CloseOnEscape
-        x: 10
+        x: parent.width/2 - width/2
         y: Math.max(parent.height / 4 - height / 2, 20)
         parent: ApplicationWindow.overlay
 
@@ -473,6 +470,7 @@ Item {
         onAccepted: {
             VescIf.storeBleName(addr, stringInput.text)
             VescIf.storeSettings()
+            bleModel.clear()
             mBle.emitScanDone()
         }
     }
@@ -488,7 +486,9 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Preferred BLE Devices"
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay      
+        x: parent.width/2 - width/2
+        width: parent.width - 20 - notchLeft - notchRight
+        parent: ApplicationWindow.overlay
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -504,6 +504,7 @@ Item {
 
         onAccepted: {
             VescIf.storeBlePreferred(bleAddr, true)
+            bleModel.clear()
             mBle.emitScanDone()
             disableDialog()
             VescIf.connectBle(bleAddr)
@@ -512,6 +513,34 @@ Item {
         onRejected: {
             disableDialog()
             VescIf.connectBle(bleAddr)
+        }
+    }
+
+    Dialog {
+        id: bleEn
+        standardButtons: Dialog.Ok
+        modal: true
+        focus: true
+        rightMargin: 10
+        leftMargin: 10
+        closePolicy: Popup.CloseOnEscape
+        y: 10 + parent.height / 2 - height / 2
+        x: parent.width/2 - width/2
+        width: parent.width - 20 - notchLeft - notchRight
+        parent: ApplicationWindow.overlay
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        title: "BLE scan"
+
+        Text {
+            color: Utility.getAppHexColor("lightText")
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text: "BLE scan does not seem to be possible. Make sure that the " +
+                  "location service is enabled on your device."
         }
     }
 }

@@ -22,18 +22,26 @@
 #include "utility.h"
 #include <QApplication>
 
+
+
 Vesc3dItem::Vesc3dItem(QQuickItem *parent) : QQuickPaintedItem(parent)
 {
     mVesc3d.setBgColor(Utility::getAppQColor("normalBackground").redF(),
                        Utility::getAppQColor("normalBackground").greenF(),
                        Utility::getAppQColor("normalBackground").blueF(), 1.0);
+    setRenderTarget(QQuickPaintedItem::FramebufferObject);
+    setAntialiasing(true);
+    setOpaquePainting(true);
 }
 
 void Vesc3dItem::setRotation(double roll, double pitch, double yaw)
 {
-    mVesc3d.setRollPitchYaw(roll * 180.0 / M_PI, pitch * 180.0 / M_PI, yaw * 180.0 / M_PI);
-    updateImage();
-    update();
+    if(abs(roll - mRoll) > 0.005 || abs(pitch - mPitch) > 0.005 ||  abs(yaw - mYaw) > 0.005) {
+        mVesc3d.setRollPitchYaw(roll * 180.0 / M_PI, pitch * 180.0 / M_PI, yaw * 180.0 / M_PI);
+        updateImage();
+        update();
+        mRoll = roll; mPitch = pitch; mYaw = yaw;
+    }
 }
 
 void Vesc3dItem::setRotationQuat(double q0, double q1, double q2, double q3)
@@ -53,18 +61,11 @@ void Vesc3dItem::paint(QPainter *painter)
 
 void Vesc3dItem::updateImage()
 {
-    if(qApp->applicationState() == Qt::ApplicationState::ApplicationActive)
-    {
+    if (qApp->applicationState() == Qt::ApplicationState::ApplicationActive) {
         double scale = 1.0;
-
-#ifdef Q_OS_IOS
-        scale = 1.5;
-#endif
 
         if (mVesc3d.size() != size().toSize()) {
             mVesc3d.resize(size().toSize() * scale);
-            mLastCornerImg = mVesc3d.grabFramebuffer();
-            // The render seems to be needed after a resize
             mVesc3d.render(&mLastCornerImg, QPoint(), QRegion(), nullptr);
         }
 

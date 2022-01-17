@@ -134,8 +134,8 @@ void DetectFoc::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(motorRLReceived(double,double)),
-                this, SLOT(motorRLReceived(double,double)));
+        connect(mVesc->commands(), SIGNAL(motorRLReceived(double,double,double)),
+                this, SLOT(motorRLReceived(double,double,double)));
         connect(mVesc->commands(), SIGNAL(motorLinkageReceived(double)),
                 this, SLOT(motorLinkageReceived(double)));
         connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
@@ -145,7 +145,7 @@ void DetectFoc::setVesc(VescInterface *vesc)
     }
 }
 
-void DetectFoc::motorRLReceived(double r, double l)
+void DetectFoc::motorRLReceived(double r, double l, double ld_lq_diff)
 {
     if (!mRunning) {
         return;
@@ -162,6 +162,7 @@ void DetectFoc::motorRLReceived(double r, double l)
         mVesc->emitStatusMessage(tr("FOC Detection Result Received"), true);
         ui->resistanceBox->setValue(r * 1e3);
         ui->inductanceBox->setValue(l);
+        ui->inductanceDiffBox->setValue(ld_lq_diff);
         ui->kpBox->setValue(0.0);
         ui->kiBox->setValue(0.0);
         on_calcKpKiButton_clicked();
@@ -224,6 +225,7 @@ void DetectFoc::on_applyAllButton_clicked()
     if (mVesc) {
         double r = ui->resistanceBox->value() / 1e3;
         double l = ui->inductanceBox->value();
+        double ld_lq_diff = ui->inductanceDiffBox->value();
         double lambda = ui->lambdaBox->value() / 1e3;
 
         if (r < 1e-10) {
@@ -243,15 +245,23 @@ void DetectFoc::on_applyAllButton_clicked()
         if (lambda < 1e-10) {
             QMessageBox::critical(this,
                                   tr("Apply Error"),
-                                  tr("\u03BB is 0. Please measure it first."));
+                                  tr(u8"\u03BB is 0. Please measure it first."));
             return;
+        }
+
+        if (ld_lq_diff > (l / 4.0)) {
+            QMessageBox::information(this,
+                                  tr("Salient Motor"),
+                                  tr("This motor has some saliency and could benefit from the MTPA-algorithm. You "
+                                     "can activate it from the FOC->Advanced page. Be careful when testing!"));
         }
 
         mVesc->mcConfig()->updateParamDouble("foc_motor_r", r);
         mVesc->mcConfig()->updateParamDouble("foc_motor_l", l / 1e6);
+        mVesc->mcConfig()->updateParamDouble("foc_motor_ld_lq_diff", ld_lq_diff / 1e6);
         mVesc->mcConfig()->updateParamDouble("foc_motor_flux_linkage", lambda);
 
-        mVesc->emitStatusMessage(tr("R, L and \u03BB applied"), true);
+        mVesc->emitStatusMessage(tr(u8"R, L and \u03BB applied"), true);
 
         if (mTempMotorLast > -10.0) {
             mVesc->mcConfig()->updateParamDouble("foc_temp_comp_base_temp", mTempMotorLast);
@@ -287,6 +297,7 @@ void DetectFoc::updateColors()
 {
     bool r_ok = ui->resistanceBox->value() > 1e-10;
     bool l_ok = ui->inductanceBox->value() > 1e-10;
+    bool l_diff_ok = ui->inductanceDiffBox->value() > 1e-10;
     bool lambda_ok = ui->lambdaBox->value() > 1e-10;
     bool gain_ok = ui->obsGainBox->value() > 1e-10;
     bool kp_ok = ui->kpBox->value() > 1e-10;
@@ -302,6 +313,8 @@ void DetectFoc::updateColors()
                                      arg(r_ok ? style_green : style_red));
     ui->inductanceBox->setStyleSheet(QString("#inductanceBox {%1}").
                                      arg(l_ok ? style_green : style_red));
+    ui->inductanceDiffBox->setStyleSheet(QString("#inductanceDiffBox {%1}").
+                                     arg(l_diff_ok ? style_green : style_red));
     ui->lambdaBox->setStyleSheet(QString("#lambdaBox {%1}").
                                  arg(lambda_ok ? style_green : style_red));
     ui->obsGainBox->setStyleSheet(QString("#obsGainBox {%1}").
@@ -359,7 +372,7 @@ void DetectFoc::on_calcGainButton_clicked()
     if (lambda < 1e-10) {
         QMessageBox::critical(this,
                               tr("Calculate Error"),
-                              tr("\u03BB is 0. Please measure it first."));
+                              tr(u8"\u03BB is 0. Please measure it first."));
         return;
     }
 

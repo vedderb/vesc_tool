@@ -76,9 +76,9 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: Utility.getAppHexColor("lightBackground")
+        color: {color = Utility.getAppHexColor("lightBackground")}
         radius: 5
-        border.color:  Utility.getAppHexColor("disabledText")
+        border.color: {border.color = Utility.getAppHexColor("disabledText")}
         border.width: 2
 
         ColumnLayout {
@@ -89,7 +89,7 @@ Item {
 
             Text {
                 id: nameText
-                color: Utility.getAppHexColor("lightText")
+                color: {color = Utility.getAppHexColor("lightText")}
                 text: paramName
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true

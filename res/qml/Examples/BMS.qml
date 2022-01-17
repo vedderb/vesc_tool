@@ -29,9 +29,6 @@ Item {
     property Commands mCommands: VescIf.commands()
     property var mVal
     property bool mValSet: false
-
-    Material.theme: Utility.isDarkMode() ? "Dark" : "Light"
-    Material.accent: Utility.getAppHexColor("lightAccent")
     
     anchors.fill: parent
     anchors.margins: 10

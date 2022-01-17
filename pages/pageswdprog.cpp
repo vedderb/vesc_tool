@@ -539,6 +539,12 @@ void PageSwdProg::bmConnRes(int res)
                  0, ":/res/bootloaders/generic.bin");
         addSwdFw("UXV SR", ":/res/firmwares/UXV_SR/VESC_default.bin",
                  0, ":/res/bootloaders/generic.bin");
+        addSwdFw("VESC 100/500", "://res/firmwares/100_500/VESC_default.bin",
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+        addSwdFw("STORMCORE 60Dxs", ":/res/firmwares/STORMCORE_60Dxs/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("STORMCORE 100DX", ":/res/firmwares/STORMCORE_100Dx/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
         break;
 
     case 2:
@@ -576,6 +582,8 @@ void PageSwdProg::bmConnRes(int res)
                  "://res/other_fw/nrf52840_vesc_ble_rx26_tx25_led27.bin");
         addSwdFw("Wand Remote",
                  "://res/other_fw/nrf52840_stick_remote.bin");
+        addSwdFw("Stormcore Builtin - RX: 31 TX: 30 LED: 5",
+                 "://res/other_fw/nrf52840_stormcore_ble_rx31_tx30_led5.bin");
         break;
 
     case 10:

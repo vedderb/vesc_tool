@@ -28,7 +28,6 @@ import Vedder.vesc.utility 1.0
 
 Item {
     implicitHeight: grid.implicitHeight
-
     property var dialogParent: ApplicationWindow.overlay
 
     GridLayout {

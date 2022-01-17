@@ -26,7 +26,7 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
-Item {
+Item {   
     function openDialog() {
         dialog.open()
         loadUuids()
@@ -47,11 +47,11 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 20
-        height: parent.height - 60
+        width: parent.width - 20 - notchLeft - notchRight
+        height: parent.height - 60 - notchBot - notchTop
         closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: 50
+        x: (parent.width - width)/2
+        y: 50 + notchTop
         parent: ApplicationWindow.overlay
         padding: 10
 
@@ -259,10 +259,10 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
         title: "Pair connected VESC"
-        x: 10
+        x: (parent.width - width)/2
         y: 10 + Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
 
@@ -300,10 +300,10 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
-        width: parent.width - 20
+        width: parent.width - 20 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
         title: "Unpair connected VESC"
-        x: 10
+        x: (parent.width - width)/2
         y: 10 + parent.height / 2 - height / 2
         parent: ApplicationWindow.overlay
 
@@ -334,11 +334,11 @@ Item {
         focus: true
         title: "Add UUID"
 
-        width: parent.width - 20
+        width: parent.width - 20  - notchLeft - notchRight
         height: 200
         closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: parent.height / 2 - height / 2
+        x: (parent.width - width)/2
+        y: (parent.height - height)/2
         parent: ApplicationWindow.overlay
 
         Overlay.modal: Rectangle {

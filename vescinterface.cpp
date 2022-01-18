@@ -31,6 +31,7 @@
 #include "lzokay/lzokay.hpp"
 #include "vescinterface.h"
 #include "utility.h"
+#include "heatshrink/heatshrinkif.h"
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
@@ -1377,11 +1378,30 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     int nonCompChunks = 0;
     int skipChunks = 0;
 
+    HeatshrinkIf hs;
+    bool useHeatshrink = false;
+    if (szTot > 393208) {
+        useHeatshrink = true;
+        qDebug() << "Firmware is big, using heatshrink compression library";
+        int szOld = szTot;
+        newFirmware = hs.encode(newFirmware);
+        szTot = newFirmware.size();
+        qDebug() << "New size:" << szTot << "(" << 100.0 * (double)szTot / (double)szOld << "%)";
+        supportsLzo = false;
+    }
+
     if (!isBootloader) {
         quint16 crc = Packet::crc16((const unsigned char*)newFirmware.constData(),
                                     uint32_t(newFirmware.size()));
         VByteArray sizeCrc;
-        sizeCrc.vbAppendInt32(szTot);
+        if (useHeatshrink) {
+            uint32_t szShift = 0xCC;
+            szShift <<= 24;
+            szShift |= szTot;
+            sizeCrc.vbAppendUint32(szShift);
+        } else {
+            sizeCrc.vbAppendUint32(szTot);
+        }
         sizeCrc.vbAppendUint16(crc);
         newFirmware.prepend(sizeCrc);
     }

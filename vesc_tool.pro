@@ -245,6 +245,7 @@ include(widgets/widgets.pri)
 include(mobile/mobile.pri)
 include(map/map.pri)
 include(lzokay/lzokay.pri)
+include(heatshrink/heatshrink.pri)
 include(QCodeEditor/qcodeeditor.pri)
 
 RESOURCES += res.qrc \

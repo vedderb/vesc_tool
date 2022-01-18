@@ -1378,12 +1378,12 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     int nonCompChunks = 0;
     int skipChunks = 0;
 
-    HeatshrinkIf hs;
     bool useHeatshrink = false;
     if (szTot > 393208) {
         useHeatshrink = true;
         qDebug() << "Firmware is big, using heatshrink compression library";
         int szOld = szTot;
+        HeatshrinkIf hs;
         newFirmware = hs.encode(newFirmware);
         szTot = newFirmware.size();
         qDebug() << "New size:" << szTot << "(" << 100.0 * (double)szTot / (double)szOld << "%)";

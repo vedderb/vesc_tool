@@ -8,8 +8,6 @@ HeatshrinkIf::HeatshrinkIf()
 {
     hse = new heatshrink_encoder;
     hsd = new heatshrink_decoder;
-
-    test("/home/benjamin/Nextcloud/Dokument/ARM/STM_Eclipse/BLDC_4_ChibiOS/build/BLDC_4_ChibiOS.bin");
 }
 
 HeatshrinkIf::~HeatshrinkIf()

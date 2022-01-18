@@ -1388,6 +1388,13 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         szTot = newFirmware.size();
         qDebug() << "New size:" << szTot << "(" << 100.0 * (double)szTot / (double)szOld << "%)";
         supportsLzo = false;
+
+        if (szTot > 393208) {
+            emitMessageDialog(tr("Firmware too big"),
+                              tr("The firmware you are trying to upload is too large for the "
+                                 "bootloader even after compression."), false);
+            return false;
+        }
     }
 
     if (!isBootloader) {

@@ -166,12 +166,16 @@ private:
     bool mKeyRight;
     bool mMcConfRead;
     bool mAppConfRead;
+    bool shouldUpdateDisplayBars;
     QMap<QString, int> mPageNameIdList;
 
     QTimer mPollRtTimer;
     QTimer mPollAppTimer;
     QTimer mPollImuTimer;
     QTimer mPollBmsTimer;
+    QTimer mRepaintDisplayBarTimer;
+
+    MC_VALUES mMcValues;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;

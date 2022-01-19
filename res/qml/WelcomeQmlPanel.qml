@@ -37,6 +37,8 @@ Item {
     property int notchBot: 0
     property int notchTop: 0
 
+    property bool shouldTelemetryBeActive: true
+
     function setupMotors() {
         if (!VescIf.isPortConnected()) {
             VescIf.emitMessageDialog("Setup motors FOC",
@@ -213,6 +215,7 @@ Item {
                         RtDataSetup {
                             anchors.fill: parent
                             dialogParent: container
+                            updateData: shouldTelemetryBeActive
                         }
                     }
 
@@ -220,6 +223,7 @@ Item {
                         StatPage {
                             anchors.fill: parent
                             anchors.margins: 20
+                            updateData: shouldTelemetryBeActive
                         }
                     }
                 }

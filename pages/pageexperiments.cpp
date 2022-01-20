@@ -597,7 +597,7 @@ void PageExperiments::plotSamples(bool exportFormat)
         ui->plot->rescaleAxes();
     }
 
-    ui->plot->replot();
+    ui->plot->replotWhenVisible();
 }
 
 void PageExperiments::victronGetCurrent()
@@ -625,7 +625,7 @@ void PageExperiments::victronGetVoltage()
 void PageExperiments::on_rescaleButton_clicked()
 {
     ui->plot->rescaleAxes();
-    ui->plot->replot();
+    ui->plot->replotWhenVisible();
 }
 
 void PageExperiments::on_zoomHButton_toggled(bool checked)

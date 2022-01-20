@@ -197,8 +197,8 @@ void PageSampledData::timerSlot()
             ui->filterResponsePlot->rescaleAxes();
         }
 
-        ui->filterPlot->replot();
-        ui->filterResponsePlot->replot();
+        ui->filterPlot->replotWhenVisible();
+        ui->filterResponsePlot->replotWhenVisible();
 
         mDoFilterReplot = false;
     }
@@ -480,8 +480,8 @@ void PageSampledData::timerSlot()
                 ui->voltagePlot->rescaleAxes();
             }
 
-            ui->currentPlot->replot();
-            ui->voltagePlot->replot();
+            ui->currentPlot->replotWhenVisible();
+            ui->voltagePlot->replotWhenVisible();
 
         }
 
@@ -625,16 +625,16 @@ void PageSampledData::on_zoomVButton_toggled(bool checked)
 void PageSampledData::on_rescaleButton_clicked()
 {
     ui->currentPlot->rescaleAxes();
-    ui->currentPlot->replot();
+    ui->currentPlot->replotWhenVisible();
 
     ui->voltagePlot->rescaleAxes();
-    ui->voltagePlot->replot();
+    ui->voltagePlot->replotWhenVisible();
 
     ui->filterPlot->rescaleAxes();
-    ui->filterPlot->replot();
+    ui->filterPlot->replotWhenVisible();
 
     ui->filterResponsePlot->rescaleAxes();
-    ui->filterResponsePlot->replot();
+    ui->filterResponsePlot->replotWhenVisible();
 }
 
 void PageSampledData::clearBuffers()
@@ -673,7 +673,7 @@ void PageSampledData::on_filterLogScaleBox_toggled(bool checked)
     }
 
     ui->filterResponsePlot->rescaleAxes();
-    ui->filterResponsePlot->replot();
+    ui->filterResponsePlot->replotWhenVisible();
 }
 
 

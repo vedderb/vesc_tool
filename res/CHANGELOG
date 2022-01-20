@@ -1,3 +1,7 @@
+== 4.00 <dev> ==
+* Added support for compressed firmware upload.
+* Reduce CPU usage by only plotting RT data when the plot is visible.
+
 == 3.01 ==
 * Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.
 * Fixed configuration backup and restore over CAN-bus.

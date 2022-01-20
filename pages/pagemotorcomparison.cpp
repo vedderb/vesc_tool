@@ -75,7 +75,7 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     connect(ui->rescaleButton, &QPushButton::clicked, [this]() {
         on_testRunButton_clicked();
         ui->plot->rescaleAxes();
-        ui->plot->replot();
+        ui->plot->replotWhenVisible();
     });
 
     connect(ui->m1ConfLocalButton, &QRadioButton::toggled, [this]() {
@@ -399,7 +399,7 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
     x[1] = posx; y[1] = yMax;
     mVerticalLine->setData(x, y);
     mVerticalLine->setVisible(true);
-    ui->plot->replot();
+    ui->plot->replotWhenVisible();
     mVerticalLinePosLast = posx;
     mVerticalLineYLast.first = yMin;
     mVerticalLineYLast.second = yMax;
@@ -672,7 +672,7 @@ void PageMotorComparison::on_testRunButton_clicked()
             ui->plot->rescaleAxes();
         }
 
-        ui->plot->replot();
+        ui->plot->replotWhenVisible();
     };
 
     auto plotTorqueSweep = [this, updateData, updateGraphs](QTableWidget *table,

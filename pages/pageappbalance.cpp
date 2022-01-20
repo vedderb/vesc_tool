@@ -167,7 +167,7 @@ void PageAppBalance::timerSlot()
 
         ui->balancePlot->rescaleAxes();
 
-        ui->balancePlot->replot();
+        ui->balancePlot->replotWhenVisible();
 
         updateTextOutput();
     }

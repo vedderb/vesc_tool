@@ -3450,6 +3450,8 @@ p, li { white-space: pre-wrap; }
             <enumNames>KTY83/122</enumNames>
             <enumNames>NTC 100K at 25°C</enumNames>
             <enumNames>KTY84/130</enumNames>
+            <enumNames>NTC Custom</enumNames>
+            <enumNames>PTC Custom</enumNames>
         </m_motor_temp_sens_type>
         <m_ptc_motor_coeff>
             <longName>Coefficient for PTC Motor Thermistor</longName>
@@ -3473,6 +3475,50 @@ p, li { white-space: pre-wrap; }
             <suffix> %/K</suffix>
             <vTx>9</vTx>
         </m_ptc_motor_coeff>
+        <m_ntcx_ptcx_res>
+            <longName>Custom NTC/PTC Resistance</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Resistance of custom NTC/PTC resistor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_NTCX_PTCX_RES</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>0.001</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>200000</maxDouble>
+            <minDouble>100</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>10000</valDouble>
+            <vTxDoubleScale>0.1</vTxDoubleScale>
+            <suffix> kΩ</suffix>
+            <vTx>7</vTx>
+        </m_ntcx_ptcx_res>
+        <m_ntcx_ptcx_temp_base>
+            <longName>Custom NTC/PTC Base Temperature</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Base temperature of custom NTC/PTC resistor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_NTCX_PTCX_BASE_TEMP</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>500</maxDouble>
+            <minDouble>-274</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>25</valDouble>
+            <vTxDoubleScale>10</vTxDoubleScale>
+            <suffix> °C</suffix>
+            <vTx>7</vTx>
+        </m_ntcx_ptcx_temp_base>
         <m_hall_extra_samples>
             <longName>Hall Sensor Extra Samples</longName>
             <type>2</type>
@@ -4106,6 +4152,8 @@ p, li { white-space: pre-wrap; }
         <ser>m_out_aux_mode</ser>
         <ser>m_motor_temp_sens_type</ser>
         <ser>m_ptc_motor_coeff</ser>
+        <ser>m_ntcx_ptcx_res</ser>
+        <ser>m_ntcx_ptcx_temp_base</ser>
         <ser>m_hall_extra_samples</ser>
         <ser>si_motor_poles</ser>
         <ser>si_gear_ratio</ser>
@@ -4210,6 +4258,8 @@ p, li { white-space: pre-wrap; }
                     <param>m_motor_temp_sens_type</param>
                     <param>m_ntc_motor_beta</param>
                     <param>m_ptc_motor_coeff</param>
+                    <param>m_ntcx_ptcx_res</param>
+                    <param>m_ntcx_ptcx_temp_base</param>
                     <param>l_duty_start</param>
                     <param>m_hall_extra_samples</param>
                 </subgroupParams>

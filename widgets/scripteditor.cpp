@@ -18,7 +18,7 @@
     */
 
 #include "scripteditor.h"
-#include "ui_qmleditor.h"
+#include "ui_scripteditor.h"
 
 #include <QmlHighlighter>
 #include <LispHighlighter>

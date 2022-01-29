@@ -8,5 +8,6 @@
         <file>res/Lisp/Examples/ppm_read.lisp</file>
         <file>res/Lisp/Examples/print_bms_data.lisp</file>
         <file>res/Lisp/Examples/speed_test.lisp</file>
+        <file>res/Lisp/Examples/loop.lisp</file>
     </qresource>
 </RCC>

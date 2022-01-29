@@ -39,7 +39,10 @@ QCodeEditor::QCodeEditor(QWidget* widget) :
     m_autoIndentation(true),
     m_autoParentheses(true),
     m_replaceTab(true),
-    m_tabReplace(QString(4, ' '))
+    m_tabReplace(QString(4, ' ')),
+    m_commentStr("//"),
+    m_indentStartStr("{"),
+    m_indentEndStr("}")
 {
 
     initFont();
@@ -515,10 +518,10 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                         auto line2 = line;
                         line2.replace(" ", "");
                         line2.replace("\t", "");
-                        if (line2.startsWith("//")) {
-                            line.replace(line.indexOf("/"), 2, "");
+                        if (line2.startsWith(m_commentStr)) {
+                            line.replace(line.indexOf(m_commentStr.at(0)), m_commentStr.size(), "");
                         } else {
-                            line.prepend("//");
+                            line.prepend(m_commentStr);
                         }
 
                         tc.insertText(line);
@@ -573,7 +576,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         }
 
         // Auto-indent selected line or block
-        if (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier) {
+        if (!m_indentStartStr.isEmpty() && e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier) {
             auto txtOld = toPlainText();
             int indentNow = 0;
             bool isComment = false;
@@ -615,7 +618,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                 }
 
                 for (auto c: line) {
-                    if (c == '}') {
+                    if (c == m_indentEndStr) {
                         indentNow--;
                     }
 
@@ -647,7 +650,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                 }
 
                 for (auto c: line) {
-                    if (c == '{') {
+                    if (c == m_indentStartStr) {
                         indentNow++;
                     }
                 }
@@ -1014,4 +1017,20 @@ QString QCodeEditor::getCompletionWordNow(int *linePosStart, int *linePosEnd)
     }
 
     return res;
+}
+
+void QCodeEditor::setIndentStrs(const QString &start, const QString &end)
+{
+    m_indentStartStr = start;
+    m_indentEndStr = end;
+}
+
+QString QCodeEditor::getCommentStr() const
+{
+    return m_commentStr;
+}
+
+void QCodeEditor::setCommentStr(const QString &commentStr)
+{
+    m_commentStr = commentStr;
 }

@@ -7,5 +7,6 @@
         <file>languages/python.xml</file>
         <file>languages/qml.xml</file>
         <file>default_style.xml</file>
+        <file>languages/lisp.xml</file>
     </qresource>
 </RCC>

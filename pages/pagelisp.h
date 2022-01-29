@@ -1,5 +1,5 @@
 /*
-    Copyright 2021 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2022 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -17,79 +17,59 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-#ifndef PAGESCRIPTING_H
-#define PAGESCRIPTING_H
+#ifndef PAGELISP_H
+#define PAGELISP_H
 
 #include <QWidget>
-#include <QDebug>
-
 #include "vescinterface.h"
-#include "mobile/qmlui.h"
 #include "widgets/scripteditor.h"
-#include "utility.h"
 
 namespace Ui {
-class PageScripting;
+class PageLisp;
 }
 
-class PageScripting : public QWidget
+class PageLisp : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit PageScripting(QWidget *parent = nullptr);
-    ~PageScripting();
+    explicit PageLisp(QWidget *parent = nullptr);
+    ~PageLisp();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
     void reloadParams();
 
-signals:
-    void reloadQml(QString str);
-
-public slots:
-    void debugMsgRx(QtMsgType type, const QString msg);
-
 private slots:
-    void on_runButton_clicked();
-    void on_stopButton_clicked();
-    void on_runWindowButton_clicked();
-    void on_fullscreenButton_clicked();
     void on_openRecentButton_clicked();
-    void on_recentList_doubleClicked();
     void on_removeSelectedButton_clicked();
     void on_clearRecentButton_clicked();
+    void on_recentList_doubleClicked();
     void on_openExampleButton_clicked();
     void on_exampleList_doubleClicked();
-    void on_helpButton_clicked();
-    void on_exportCArrayHwButton_clicked();
-    void on_exportCArrayAppButton_clicked();
-    void on_openQmluiHwButton_clicked();
-    void on_openQmluiAppButton_clicked();
+    void on_runButton_clicked();
+    void on_stopButton_clicked();
     void on_uploadButton_clicked();
-    void on_eraseOnlyButton_clicked();
-    void on_calcSizeButton_clicked();
+    void on_readExistingButton_clicked();
+    void on_eraseButton_clicked();
 
 private:
-    Ui::PageScripting *ui;
+    Ui::PageLisp *ui;
     VescInterface *mVesc;
-    QmlUi mQmlUi;
     QStringList mRecentFiles;
     QString mDirNow;
-    Utility mUtil;
+    QTimer mPollTimer;
 
     void updateRecentList();
     void makeEditorConnections(ScriptEditor *editor);
     void createEditorTab(QString fileName, QString content);
     void removeEditor(ScriptEditor *editor);
-    void setEditorDirty(ScriptEditor *editor);
-    void setEditorClean(ScriptEditor *editor);
-    QString qmlToRun(bool importDir = true);
-    bool exportCArray(QString name);
-    bool eraseQml();
+    void setEditorDirty(ScriptEditor * editor);
+    void setEditorClean(ScriptEditor * editor);
     void openExample();
     void openRecentList();
+    bool eraseCode();
 
 };
 
-#endif // PAGESCRIPTING_H
+#endif // PAGELISP_H

@@ -937,6 +937,14 @@ typedef enum {
     COMM_GET_EXT_HUM_TMP,
     COMM_GET_STATS,
     COMM_RESET_STATS,
+
+    // Lisp
+    COMM_LISP_READ_CODE,
+    COMM_LISP_WRITE_CODE,
+    COMM_LISP_ERASE_CODE,
+    COMM_LISP_SET_RUNNING,
+    COMM_LISP_GET_STATS,
+    COMM_LISP_PRINT
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -1075,5 +1083,30 @@ public:
 };
 
 Q_DECLARE_METATYPE(BALANCE_VALUES)
+
+struct LISP_STATS {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(double cpu_use MEMBER cpu_use)
+    Q_PROPERTY(double heap_use MEMBER heap_use)
+    Q_PROPERTY(double mem_use MEMBER mem_use)
+    Q_PROPERTY(double stack_use MEMBER stack_use)
+
+    LISP_STATS() {
+        cpu_use = 0.0;
+        heap_use = 0.0;
+        mem_use = 0.0;
+        stack_use = 0.0;
+    }
+
+    double cpu_use;
+    double heap_use;
+    double mem_use;
+    double stack_use;
+    QVector<QPair<QString, double>> number_bindings;
+};
+
+Q_DECLARE_METATYPE(LISP_STATS)
 
 #endif // DATATYPES_H

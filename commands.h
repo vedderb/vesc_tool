@@ -131,6 +131,12 @@ signals:
     void writeQmluiResReceived(bool ok, quint32 offset);
     void ioBoardValRx(IO_BOARD_VALUES val);
     void statsRx(STAT_VALUES val, unsigned int mask);
+    void lispReadCodeRx(int lenQml, int ofsQml, QByteArray data);
+    void lispEraseCodeRx(bool ok);
+    void lispWriteCodeRx(bool ok, quint32 offset);
+    void lispPrintReceived(QString str);
+    void lispStatsRx(LISP_STATS stats);
+    void lispRunningResRx(bool ok);
 
 public slots:
     void processPacket(QByteArray data);
@@ -234,6 +240,12 @@ public slots:
 
     void getStats(unsigned int mask);
     void resetStats(bool sendAck);
+
+    void lispReadCode(int len, int offset);
+    void lispWriteCode(QByteArray data, quint32 offset);
+    void lispEraseCode();
+    void lispSetRunning(bool running);
+    void lispGetStats();
 
 private slots:
     void timerSlot();

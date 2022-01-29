@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <section name="Keyword">
+        <name>define</name>
+        <name>lambda</name>
+        <name>car</name>
+        <name>cons</name>
+        <name>cdr</name>
+        <name>let</name>
+        <name>progn</name>
+        <name>if</name>
+        <name>match</name>
+        <name>_</name>
+    </section>
+    <section name="PrimitiveType">
+        <name>nil</name>
+        <name>list</name>
+    </section>
+    <section name="Type">
+        <name>print</name>
+        <name>yield</name>
+    </section>
+</root>

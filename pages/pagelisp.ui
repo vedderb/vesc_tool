@@ -1,33 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PageScripting</class>
- <widget class="QWidget" name="PageScripting">
+ <class>PageLisp</class>
+ <widget class="QWidget" name="PageLisp">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1437</width>
-    <height>765</height>
+    <width>1569</width>
+    <height>907</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_10">
    <item>
     <widget class="QSplitter" name="splitter_2">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <property name="handleWidth">
-      <number>8</number>
-     </property>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="handleWidth">
-       <number>8</number>
       </property>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -40,6 +34,51 @@
            <number>12</number>
           </property>
           <item>
+           <widget class="QPushButton" name="eraseButton">
+            <property name="text">
+             <string>Erase</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="uploadButton">
+            <property name="text">
+             <string>Upload</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="readExistingButton">
+            <property name="toolTip">
+             <string>Read lisp code from connected VESC</string>
+            </property>
+            <property name="text">
+             <string>Read Existing</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Upload-96.png</normaloff>:/res/icons/Upload-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="runButton">
             <property name="text">
              <string>Run</string>
@@ -47,34 +86,6 @@
             <property name="icon">
              <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="runWindowButton">
-            <property name="text">
-             <string>Run in Window</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="fullscreenButton">
-            <property name="text">
-             <string>Toggle Fullscreen</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/size_off.png</normaloff>:/res/icons/size_off.png</iconset>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -144,13 +155,99 @@
         </item>
        </layout>
       </widget>
-      <widget class="QQuickWidget" name="qmlWidget">
-       <property name="autoFillBackground">
-        <bool>true</bool>
-       </property>
-       <property name="resizeMode">
-        <enum>QQuickWidget::SizeRootObjectToView</enum>
-       </property>
+      <widget class="QWidget" name="">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="pollBox">
+          <property name="text">
+           <string>Poll Status</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="1">
+           <widget class="QProgressBar" name="cpuBar">
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Stack</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>CPU</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Heap</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QProgressBar" name="stackBar">
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QProgressBar" name="heapBar">
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QProgressBar" name="memBar">
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Mem</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="bindingTable">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Binding</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Value</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
      <widget class="QTabWidget" name="tabWidget">
@@ -319,208 +416,11 @@
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
-        <string>Tools</string>
+        <string>Plot</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_7">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QGroupBox" name="groupBox">
-            <property name="title">
-             <string>Export C Array</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_5">
-             <property name="spacing">
-              <number>2</number>
-             </property>
-             <item>
-              <widget class="QPushButton" name="exportCArrayHwButton">
-               <property name="text">
-                <string>Export Array HW</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="exportCArrayAppButton">
-               <property name="text">
-                <string>Export Array App</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="calcSizeButton">
-               <property name="toolTip">
-                <string>Calculate compressed QML size</string>
-               </property>
-               <property name="text">
-                <string>Calculate Size</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Calculator-96.png</normaloff>:/res/icons/Calculator-96.png</iconset>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox_2">
-            <property name="title">
-             <string>Connected VESC</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_8">
-             <property name="spacing">
-              <number>2</number>
-             </property>
-             <item>
-              <widget class="QPushButton" name="openQmluiHwButton">
-               <property name="text">
-                <string>Open Qmlui HW</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="openQmluiAppButton">
-               <property name="text">
-                <string>Open Qmlui App</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_5">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>405</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="title">
-             <string>QML Upload</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_9">
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_6">
-               <property name="spacing">
-                <number>2</number>
-               </property>
-               <item>
-                <widget class="QPushButton" name="uploadButton">
-                 <property name="text">
-                  <string>Erase &amp;&amp; Upload</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../res.qrc">
-                   <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="eraseOnlyButton">
-                 <property name="text">
-                  <string>Erase Only</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../res.qrc">
-                   <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="uploadFullscreenBox">
-                 <property name="toolTip">
-                  <string>Run uploaded UI in fullscreen mode.</string>
-                 </property>
-                 <property name="text">
-                  <string>Fullscreen</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="horizontalSpacer_2">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QPushButton" name="clearUploadTextButton">
-                 <property name="toolTip">
-                  <string>Clear text below</string>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../res.qrc">
-                   <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QPlainTextEdit" name="uploadTextEdit">
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QCustomPlot" name="bindingPlot" native="true"/>
         </item>
        </layout>
       </widget>
@@ -531,11 +431,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QQuickWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">QtQuickWidgets/QQuickWidget</header>
-  </customwidget>
-  <customwidget>
    <class>VTextBrowser</class>
    <extends>QTextEdit</extends>
    <header>widgets/vtextbrowser.h</header>
@@ -544,6 +439,12 @@
    <class>ScriptEditor</class>
    <extends>QWidget</extends>
    <header>widgets/scripteditor.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>widgets/qcustomplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -558,28 +459,12 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1415</x>
-     <y>148</y>
+     <x>1524</x>
+     <y>374</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1128</x>
-     <y>744</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>clearUploadTextButton</sender>
-   <signal>clicked()</signal>
-   <receiver>uploadTextEdit</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1385</x>
-     <y>168</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1386</x>
-     <y>236</y>
+     <x>1456</x>
+     <y>379</y>
     </hint>
    </hints>
   </connection>

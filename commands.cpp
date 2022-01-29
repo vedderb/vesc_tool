@@ -952,6 +952,44 @@ void Commands::processPacket(QByteArray data)
         emit statsRx(values, mask);
     } break;
 
+    case COMM_LISP_READ_CODE: {
+        int qmlSize = vb.vbPopFrontInt32();
+        int offset = vb.vbPopFrontInt32();
+        emit lispReadCodeRx(qmlSize, offset, vb);
+    } break;
+
+    case COMM_LISP_ERASE_CODE:
+        emit lispEraseCodeRx(vb.at(0));
+        break;
+
+    case COMM_LISP_WRITE_CODE: {
+        bool ok = vb.vbPopFrontInt8();
+        quint32 offset = vb.vbPopFrontUint32();
+        emit lispWriteCodeRx(ok, offset);
+    } break;
+
+    case COMM_LISP_PRINT:
+        emit lispPrintReceived(QString::fromLatin1(vb));
+        break;
+
+    case COMM_LISP_GET_STATS: {
+        LISP_STATS stats;
+        stats.cpu_use = vb.vbPopFrontDouble16(1e2);
+        stats.heap_use = vb.vbPopFrontDouble16(1e2);
+        stats.mem_use = vb.vbPopFrontDouble16(1e2);
+        stats.stack_use = vb.vbPopFrontDouble16(1e2);
+        while (vb.size() > 0) {
+            auto name = vb.vbPopFrontString();
+            auto num = vb.vbPopFrontDouble32Auto();
+            stats.number_bindings.append(qMakePair(name, num));
+        }
+        emit lispStatsRx(stats);
+    } break;
+
+    case COMM_LISP_SET_RUNNING:
+        emit lispRunningResRx(vb.at(0));
+        break;
+
     default:
         break;
     }
@@ -1960,6 +1998,46 @@ void Commands::resetStats(bool sendAck)
     VByteArray vb;
     vb.vbAppendInt8(COMM_RESET_STATS);
     vb.vbAppendInt8(sendAck);
+    emitData(vb);
+}
+
+void Commands::lispReadCode(int len, int offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_READ_CODE);
+    vb.vbAppendInt32(len);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::lispWriteCode(QByteArray data, quint32 offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_WRITE_CODE);
+    vb.vbAppendUint32(offset);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::lispEraseCode()
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_ERASE_CODE);
+    emitData(vb);
+}
+
+void Commands::lispSetRunning(bool running)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_SET_RUNNING);
+    vb.vbAppendInt8(running);
+    emitData(vb);
+}
+
+void Commands::lispGetStats()
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_GET_STATS);
     emitData(vb);
 }
 

@@ -1,4 +1,5 @@
 HEADERS += \
+    $$PWD/include/internal/LispHighlighter.hpp \
     $$PWD/include/internal/QCodeEditor.hpp \
     $$PWD/include/internal/QCXXHighlighter.hpp \
     $$PWD/include/internal/QFramedTextAttribute.hpp \
@@ -9,6 +10,7 @@ HEADERS += \
     $$PWD/include/internal/QJSONHighlighter.hpp \
     $$PWD/include/internal/QLanguage.hpp \
     $$PWD/include/internal/QLineNumberArea.hpp \
+    $$PWD/include/internal/QLispCompleter.hpp \
     $$PWD/include/internal/QLuaCompleter.hpp \
     $$PWD/include/internal/QLuaHighlighter.hpp \
     $$PWD/include/internal/QPythonCompleter.hpp \
@@ -20,6 +22,7 @@ HEADERS += \
     $$PWD/include/internal/QVescCompleter.hpp
 
 SOURCES += \
+    $$PWD/src/internal/LispHighlighter.cpp \
     $$PWD/src/internal/QCodeEditor.cpp \
     $$PWD/src/internal/QCXXHighlighter.cpp \
     $$PWD/src/internal/QFramedTextAttribute.cpp \
@@ -28,6 +31,7 @@ SOURCES += \
     $$PWD/src/internal/QJSONHighlighter.cpp \
     $$PWD/src/internal/QLanguage.cpp \
     $$PWD/src/internal/QLineNumberArea.cpp \
+    $$PWD/src/internal/QLispCompleter.cpp \
     $$PWD/src/internal/QLuaCompleter.cpp \
     $$PWD/src/internal/QLuaHighlighter.cpp \
     $$PWD/src/internal/QPythonCompleter.cpp \

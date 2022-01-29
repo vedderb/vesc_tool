@@ -10,7 +10,7 @@ VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 1
+VT_IS_TEST_VERSION = 2
 
 VT_ANDROID_VERSION_ARMV7 = 98
 VT_ANDROID_VERSION_ARM64 = 99
@@ -251,6 +251,7 @@ include(QCodeEditor/qcodeeditor.pri)
 RESOURCES += res.qrc \
     res_fw_bms.qrc \
     res_fw.qrc \
+    res_lisp.qrc \
     res_qml.qrc
 RESOURCES += res_config.qrc
 

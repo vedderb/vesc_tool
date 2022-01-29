@@ -51,6 +51,11 @@ public:
     void searchPreviousResult();
     void searchSetCaseSensitive(bool isCaseSensitive);
 
+    QString getCommentStr() const;
+    void setCommentStr(const QString &commentStr);
+
+    void setIndentStrs(const QString &start, const QString &end);
+
 signals:
     void saveTriggered();
     void runEmbeddedTriggered();
@@ -210,5 +215,9 @@ private:
     bool m_autoParentheses;
     bool m_replaceTab;
     QString m_tabReplace;
+    QString m_commentStr;
+    QString m_indentStartStr;
+    QString m_indentEndStr;
+
 };
 

@@ -52,6 +52,7 @@ private slots:
     void on_uploadButton_clicked();
     void on_readExistingButton_clicked();
     void on_eraseButton_clicked();
+    void on_rescaleButton_clicked();
 
 private:
     Ui::PageLisp *ui;
@@ -59,6 +60,7 @@ private:
     QStringList mRecentFiles;
     QString mDirNow;
     QTimer mPollTimer;
+    QMap<QString, QVector<QPair<qint64, double> > > mBindingData;
 
     void updateRecentList();
     void makeEditorConnections(ScriptEditor *editor);

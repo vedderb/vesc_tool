@@ -17,6 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
+#include <QDateTime>
 #include "pagelisp.h"
 #include "ui_pagelisp.h"
 #include "utility.h"
@@ -47,6 +48,22 @@ PageLisp::PageLisp(QWidget *parent) :
     ui->uploadButton->setIcon(QIcon(theme +"icons/Download-96.png"));
     ui->readExistingButton->setIcon(QIcon(theme +"icons/Upload-96.png"));
     ui->eraseButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->rescaleButton->setIcon(QPixmap(theme + "icons/expand_off.png"));
+
+    QIcon mycon = QIcon(theme + "icons/expand_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    ui->zoomHButton->setIcon(mycon);
+
+    mycon = QIcon(theme + "icons/expand_v_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    ui->zoomVButton->setIcon(mycon);
+
+    mycon = QIcon(theme + "icons/size_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    ui->autoscaleButton->setIcon(mycon);
 
     plusButton->setFlat(true);
     plusButton->setText("New Tab");
@@ -129,7 +146,7 @@ PageLisp::PageLisp(QWidget *parent) :
     ui->splitter->setSizes(QList<int>({1000, 600}));
     ui->splitter_2->setSizes(QList<int>({1000, 600}));
 
-    mPollTimer.start(100);
+    mPollTimer.start(1000 / ui->pollRateBox->value());
     connect(&mPollTimer, &QTimer::timeout, [this]() {
         if (ui->pollBox->isChecked()) {
             if (mVesc) {
@@ -137,6 +154,32 @@ PageLisp::PageLisp(QWidget *parent) :
             }
         }
     });
+
+    connect(ui->pollRateBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int val) {
+        mPollTimer.setInterval(1000 / val);
+    });
+
+    auto updateZoom = [this]() {
+        Qt::Orientations plotOrientations = Qt::Orientations(
+                    ((ui->zoomHButton->isChecked() ? Qt::Horizontal : 0) |
+                     (ui->zoomVButton->isChecked() ? Qt::Vertical : 0)));
+
+        ui->bindingPlot->axisRect()->setRangeZoom(plotOrientations);
+    };
+
+    connect(ui->zoomHButton, &QPushButton::clicked, updateZoom);
+    connect(ui->zoomVButton, &QPushButton::clicked, updateZoom);
+    updateZoom();
+
+    QFont legendFont = font();
+    legendFont.setPointSize(9);
+    ui->bindingPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    ui->bindingPlot->legend->setVisible(true);
+    ui->bindingPlot->legend->setFont(legendFont);
+    ui->bindingPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
+    ui->bindingPlot->xAxis->setLabel("Age (s)");
+    ui->bindingPlot->yAxis->setLabel("Value");
+    ui->bindingPlot->xAxis->setRangeReversed(true);
 }
 
 PageLisp::~PageLisp()
@@ -197,12 +240,67 @@ void PageLisp::setVesc(VescInterface *vesc)
 
         ui->bindingTable->setColumnCount(2);
         ui->bindingTable->setRowCount(stats.number_bindings.size());
+
+        QStringList selectedBindings;
+        qint64 maxAgeMs = 5000;
+        auto timeNow = QDateTime::currentMSecsSinceEpoch();
+
         int ind = 0;
         for (auto b: stats.number_bindings) {
             ui->bindingTable->setItem(ind, 0, new QTableWidgetItem(b.first));
-            ui->bindingTable->setItem(ind, 1, new QTableWidgetItem(QString::number(b.second, 'f')));
+            auto data = new QTableWidgetItem(QString::number(b.second, 'f'));
+            data->setData(Qt::UserRole, b.second);
+            ui->bindingTable->setItem(ind, 1, data);
+
+            if (ui->bindingTable->item(ind, 1)->isSelected()) {
+                selectedBindings.append(b.first);
+                if (!mBindingData.contains(b.first)) {
+                    mBindingData.insert(b.first, QVector<QPair<qint64, double>>());
+                }
+
+                mBindingData[b.first].append(qMakePair(timeNow, b.second));
+
+                // Remove old data points
+                while (!mBindingData[b.first].isEmpty() && mBindingData[b.first].at(0).first < (timeNow - maxAgeMs)) {
+                    mBindingData[b.first].removeFirst();
+                }
+            }
+
             ind++;
         }
+
+        // Remove bindings not selected
+        for (auto it = mBindingData.begin(); it != mBindingData.end();) {
+            if (!selectedBindings.contains(it.key())) {
+                it = mBindingData.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        // Add graphs
+        ui->bindingPlot->clearGraphs();
+        int graphInd = 0;
+        for (auto it = mBindingData.begin(); it != mBindingData.end();++it) {
+            auto name = it.key();
+            QVector<double> xAxis, yAxis;
+            for (auto p: it.value()) {
+                xAxis.append(double(timeNow - p.first) / 1000.0);
+                yAxis.append(p.second);
+            }
+
+            ui->bindingPlot->addGraph();
+            ui->bindingPlot->graph()->setPen(QPen(Utility::getAppQColor(QString("plot_graph%1").arg(graphInd + 1))));
+            ui->bindingPlot->graph()->setName(name);
+            ui->bindingPlot->graph()->setData(xAxis, yAxis);
+            graphInd++;
+        }
+
+        if (ui->autoscaleButton->isChecked()) {
+            ui->bindingPlot->rescaleAxes();
+        }
+
+        ui->bindingPlot->replotWhenVisible();
     });
 }
 
@@ -594,10 +692,19 @@ void PageLisp::on_uploadButton_clicked()
         offset += sz;
         data.remove(0, sz);
     }
+
+    if (ok && ui->autoRunBox->isChecked()) {
+        on_runButton_clicked();
+    }
 }
 
 void PageLisp::on_readExistingButton_clicked()
 {
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog(tr("Read code"), tr("Not Connected"), false);
+        return;
+    }
+
     QByteArray lispData;
     int lenLispLast = 0;
     auto conn = connect(mVesc->commands(), &Commands::lispReadCodeRx,
@@ -657,4 +764,10 @@ void PageLisp::on_readExistingButton_clicked()
 void PageLisp::on_eraseButton_clicked()
 {
     eraseCode();
+}
+
+void PageLisp::on_rescaleButton_clicked()
+{
+    ui->bindingPlot->rescaleAxes();
+    ui->bindingPlot->replotWhenVisible();
 }

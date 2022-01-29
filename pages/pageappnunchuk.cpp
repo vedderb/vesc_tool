@@ -107,7 +107,8 @@ void PageAppNunchuk::paramChangedDouble(QObject *src, QString name, double newPa
             y.append(val);
         }
         ui->throttlePlot->graph()->setData(x, y);
-        ui->throttlePlot->rescaleAxes();
+
+        ui->throttlePlot->rescaleAxesWhenVisible();
         ui->throttlePlot->replotWhenVisible();
     }
 }

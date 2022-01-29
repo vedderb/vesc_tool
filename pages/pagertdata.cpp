@@ -318,7 +318,6 @@ void PageRtData::timerSlot()
         ui->tempPlot->graph(graphIndex)->setName("Temperature Motor");
         ui->tempPlot->graph(graphIndex)->setData(xAxis, mTempMotorVec);
         ui->tempPlot->graph(graphIndex)->setVisible(ui->tempShowMotorBox->isChecked());
-        graphIndex++;
 
         // RPM plot
         graphIndex = 0;
@@ -331,11 +330,13 @@ void PageRtData::timerSlot()
         ui->focPlot->graph(graphIndex++)->setData(xAxis, mVdVec);
         ui->focPlot->graph(graphIndex++)->setData(xAxis, mVqVec);
 
+        // Check if we should rescale the graphs
         if (ui->autoscaleButton->isChecked()) {
-            ui->currentPlot->rescaleAxes();
-            ui->tempPlot->rescaleAxes();
-            ui->rpmPlot->rescaleAxes();
-            ui->focPlot->rescaleAxes();
+            // Only rescale if visible
+            ui->currentPlot->rescaleAxesWhenVisible();
+            ui->tempPlot->rescaleAxesWhenVisible();
+            ui->rpmPlot->rescaleAxesWhenVisible();
+            ui->focPlot->rescaleAxesWhenVisible();
         }
 
         ui->currentPlot->replotWhenVisible();
@@ -356,7 +357,7 @@ void PageRtData::timerSlot()
         ui->posPlot->graph(0)->setData(xAxis, mPositionVec);
 
         if (ui->autoscaleButton->isChecked()) {
-            ui->posPlot->rescaleAxes();
+            ui->posPlot->rescaleAxesWhenVisible();
         }
 
         ui->posPlot->replotWhenVisible();
@@ -396,10 +397,11 @@ void PageRtData::timerSlot()
         ui->experimentPlot->legend->setVisible(mExperimentPlots.size() > 1);
 
         if (ui->experimentAutoScaleButton->isChecked()) {
-            ui->experimentPlot->rescaleAxes();
+            ui->experimentPlot->rescaleAxesWhenVisible();
         }
 
         ui->experimentPlot->replotWhenVisible();
+
         mExperimentReplot = false;
     }
 }
@@ -540,11 +542,11 @@ void PageRtData::on_zoomVButton_toggled(bool checked)
 
 void PageRtData::on_rescaleButton_clicked()
 {
-    ui->currentPlot->rescaleAxes();
-    ui->tempPlot->rescaleAxes();
-    ui->rpmPlot->rescaleAxes();
-    ui->focPlot->rescaleAxes();
-    ui->posPlot->rescaleAxes();
+    ui->currentPlot->rescaleAxesWhenVisible();
+    ui->tempPlot->rescaleAxesWhenVisible();
+    ui->rpmPlot->rescaleAxesWhenVisible();
+    ui->focPlot->rescaleAxesWhenVisible();
+    ui->posPlot->rescaleAxesWhenVisible();
 
     ui->currentPlot->replotWhenVisible();
     ui->tempPlot->replotWhenVisible();

@@ -165,8 +165,7 @@ void PageAppBalance::timerSlot()
         }
         ui->balancePlot->graph(graphIndex++)->setData(xAxis, mAppDebug2);
 
-        ui->balancePlot->rescaleAxes();
-
+        ui->balancePlot->rescaleAxesWhenVisible();
         ui->balancePlot->replotWhenVisible();
 
         updateTextOutput();

@@ -186,9 +186,9 @@ void PageAppImu::timerSlot()
         ui->gyroPlot->graph(graphIndex++)->setData(xAxis, mGyroYVec);
         ui->gyroPlot->graph(graphIndex++)->setData(xAxis, mGyroZVec);
 
-        ui->rpyPlot->rescaleAxes();
-        ui->accelPlot->rescaleAxes();
-        ui->gyroPlot->rescaleAxes();
+        ui->rpyPlot->rescaleAxesWhenVisible();
+        ui->accelPlot->rescaleAxesWhenVisible();
+        ui->gyroPlot->rescaleAxesWhenVisible();
 
         ui->rpyPlot->replotWhenVisible();
         ui->accelPlot->replotWhenVisible();

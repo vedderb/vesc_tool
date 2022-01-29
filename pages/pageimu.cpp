@@ -201,10 +201,10 @@ void PageImu::timerSlot()
         ui->magPlot->graph(graphIndex++)->setData(xAxis, mMagYVec);
         ui->magPlot->graph(graphIndex++)->setData(xAxis, mMagZVec);
 
-        ui->rpyPlot->rescaleAxes();
-        ui->accelPlot->rescaleAxes();
-        ui->gyroPlot->rescaleAxes();
-        ui->magPlot->rescaleAxes();
+        ui->rpyPlot->rescaleAxesWhenVisible();
+        ui->accelPlot->rescaleAxesWhenVisible();
+        ui->gyroPlot->rescaleAxesWhenVisible();
+        ui->magPlot->rescaleAxesWhenVisible();
 
         ui->rpyPlot->replotWhenVisible();
         ui->accelPlot->replotWhenVisible();

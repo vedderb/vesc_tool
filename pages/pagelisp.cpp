@@ -31,9 +31,6 @@ PageLisp::PageLisp(QWidget *parent) :
     Utility::setPlotColors(ui->bindingPlot);
 
     ui->mainEdit->setModeLisp();
-    ui->mainEdit->codeEditor()->setCommentStr(";");
-    ui->mainEdit->codeEditor()->setIndentStrs("", "");
-
     makeEditorConnections(ui->mainEdit);
 
     QPushButton *plusButton = new QPushButton();
@@ -254,8 +251,6 @@ void PageLisp::createEditorTab(QString fileName, QString content)
 {
     ScriptEditor *editor = new ScriptEditor();
     editor->setModeLisp();
-    editor->codeEditor()->setCommentStr(";");
-    editor->codeEditor()->setIndentStrs("", "");
     int tabIndex = ui->fileTabs->addTab(editor, "");
     ui->fileTabs->setCurrentIndex(tabIndex);
 

@@ -41,18 +41,18 @@ ScriptEditor::ScriptEditor(QWidget *parent) :
     ui->saveButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
     ui->saveAsButton->setIcon(QPixmap(theme + "icons/Save as-96.png"));
     ui->searchWidget->setVisible(false);
-    ui->qmlEdit->setTabReplaceSize(4);
+    ui->codeEdit->setTabReplaceSize(4);
 
-    connect(ui->qmlEdit, &QCodeEditor::saveTriggered, [this]() {
+    connect(ui->codeEdit, &QCodeEditor::saveTriggered, [this]() {
         on_saveButton_clicked();
     });
-    connect(ui->qmlEdit, &QCodeEditor::searchTriggered, [this]() {
+    connect(ui->codeEdit, &QCodeEditor::searchTriggered, [this]() {
         ui->searchWidget->setVisible(true);
-        auto selected = ui->qmlEdit->textCursor().selectedText();
+        auto selected = ui->codeEdit->textCursor().selectedText();
         if (!selected.isEmpty()) {
             ui->searchEdit->setText(selected);
         }
-        ui->qmlEdit->searchForString(ui->searchEdit->text());
+        ui->codeEdit->searchForString(ui->searchEdit->text());
         ui->searchEdit->setFocus();
     });
 }
@@ -64,7 +64,7 @@ ScriptEditor::~ScriptEditor()
 
 QCodeEditor *ScriptEditor::codeEditor()
 {
-    return ui->qmlEdit;
+    return ui->codeEdit;
 }
 
 QString ScriptEditor::fileNow()
@@ -80,15 +80,19 @@ void ScriptEditor::setFileNow(QString fileName)
 
 void ScriptEditor::setModeQml()
 {
-    ui->qmlEdit->setHighlighter(new QmlHighlighter);
-    ui->qmlEdit->setCompleter(new QVescCompleter);
+    ui->codeEdit->setHighlighter(new QmlHighlighter);
+    ui->codeEdit->setCompleter(new QVescCompleter);
     mIsModeLisp = false;
 }
 
 void ScriptEditor::setModeLisp()
 {
-    ui->qmlEdit->setHighlighter(new LispHighlighter);
-    ui->qmlEdit->setCompleter(new QLispCompleter);
+    ui->codeEdit->setHighlighter(new LispHighlighter);
+    ui->codeEdit->setCompleter(new QLispCompleter);
+    ui->codeEdit->setCommentStr(";");
+    ui->codeEdit->setIndentStrs("", "");
+    ui->codeEdit->setAutoParentheses(false);
+    ui->codeEdit->setAutoIndentation(false);
     mIsModeLisp = true;
 }
 
@@ -115,7 +119,7 @@ void ScriptEditor::on_openFileButton_clicked()
             return;
         }
 
-        ui->qmlEdit->setPlainText(file.readAll());
+        ui->codeEdit->setPlainText(file.readAll());
         ui->fileNowLabel->setText(fileName);
         emit fileNameChanged(fileName);
 
@@ -143,7 +147,7 @@ void ScriptEditor::on_saveButton_clicked()
         return;
     }
 
-    file.write(ui->qmlEdit->toPlainText().toUtf8());
+    file.write(ui->codeEdit->toPlainText().toUtf8());
     file.close();
 
     emit fileSaved(fileName);
@@ -169,7 +173,7 @@ void ScriptEditor::on_saveAsButton_clicked()
             return;
         }
 
-        file.write(ui->qmlEdit->toPlainText().toUtf8());
+        file.write(ui->codeEdit->toPlainText().toUtf8());
         file.close();
 
         ui->fileNowLabel->setText(fileName);
@@ -181,46 +185,46 @@ void ScriptEditor::on_saveAsButton_clicked()
 
 void ScriptEditor::on_searchEdit_textChanged(const QString &arg1)
 {
-    ui->qmlEdit->searchForString(arg1);
+    ui->codeEdit->searchForString(arg1);
 }
 
 void ScriptEditor::on_searchPrevButton_clicked()
 {
-    ui->qmlEdit->searchPreviousResult();
-    ui->qmlEdit->setFocus();
+    ui->codeEdit->searchPreviousResult();
+    ui->codeEdit->setFocus();
 }
 
 void ScriptEditor::on_searchNextButton_clicked()
 {
-    ui->qmlEdit->searchNextResult();
-    ui->qmlEdit->setFocus();
+    ui->codeEdit->searchNextResult();
+    ui->codeEdit->setFocus();
 }
 
 void ScriptEditor::on_replaceThisButton_clicked()
 {
-    if (ui->qmlEdit->textCursor().selectedText() == ui->searchEdit->text()) {
-        ui->qmlEdit->textCursor().insertText(ui->replaceEdit->text());
-        ui->qmlEdit->searchNextResult();
+    if (ui->codeEdit->textCursor().selectedText() == ui->searchEdit->text()) {
+        ui->codeEdit->textCursor().insertText(ui->replaceEdit->text());
+        ui->codeEdit->searchNextResult();
     }
 }
 
 void ScriptEditor::on_replaceAllButton_clicked()
 {
-    ui->qmlEdit->searchNextResult();
-    while (!ui->qmlEdit->textCursor().selectedText().isEmpty()) {
-        ui->qmlEdit->textCursor().insertText(ui->replaceEdit->text());
-        ui->qmlEdit->searchNextResult();
+    ui->codeEdit->searchNextResult();
+    while (!ui->codeEdit->textCursor().selectedText().isEmpty()) {
+        ui->codeEdit->textCursor().insertText(ui->replaceEdit->text());
+        ui->codeEdit->searchNextResult();
     }
 }
 
 void ScriptEditor::on_searchHideButton_clicked()
 {
     ui->searchWidget->setVisible(false);
-    ui->qmlEdit->searchForString("");
-    ui->qmlEdit->setFocus();
+    ui->codeEdit->searchForString("");
+    ui->codeEdit->setFocus();
 }
 
 void ScriptEditor::on_searchCaseSensitiveBox_toggled(bool checked)
 {
-    ui->qmlEdit->searchSetCaseSensitive(checked);
+    ui->codeEdit->searchSetCaseSensitive(checked);
 }

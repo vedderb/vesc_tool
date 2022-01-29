@@ -978,6 +978,7 @@ void Commands::processPacket(QByteArray data)
         stats.heap_use = vb.vbPopFrontDouble16(1e2);
         stats.mem_use = vb.vbPopFrontDouble16(1e2);
         stats.stack_use = vb.vbPopFrontDouble16(1e2);
+        stats.done_ctx_r = vb.vbPopFrontString();
         while (vb.size() > 0) {
             auto name = vb.vbPopFrontString();
             auto num = vb.vbPopFrontDouble32Auto();

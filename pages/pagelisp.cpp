@@ -233,10 +233,12 @@ void PageLisp::setVesc(VescInterface *vesc)
     });
 
     connect(mVesc->commands(), &Commands::lispStatsRx, [this](LISP_STATS stats) {
-        ui->cpuBar->setValue(stats.cpu_use);
+        ui->cpuBar->setValue(stats.cpu_use * 10);
+        ui->cpuBar->setFormat(QString("%1%").arg(stats.cpu_use, 0, 'f', 1));
         ui->heapBar->setValue(stats.heap_use);
         ui->memBar->setValue(stats.mem_use);
         ui->stackBar->setValue(stats.stack_use);
+        ui->doneCtxRLabel->setText(stats.done_ctx_r);
 
         ui->bindingTable->setColumnCount(2);
         ui->bindingTable->setRowCount(stats.number_bindings.size());

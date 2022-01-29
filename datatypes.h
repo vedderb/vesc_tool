@@ -1092,6 +1092,7 @@ public:
     Q_PROPERTY(double heap_use MEMBER heap_use)
     Q_PROPERTY(double mem_use MEMBER mem_use)
     Q_PROPERTY(double stack_use MEMBER stack_use)
+    Q_PROPERTY(QString done_ctx_r MEMBER done_ctx_r)
 
     LISP_STATS() {
         cpu_use = 0.0;
@@ -1104,6 +1105,7 @@ public:
     double heap_use;
     double mem_use;
     double stack_use;
+    QString done_ctx_r;
     QVector<QPair<QString, double>> number_bindings;
 };
 

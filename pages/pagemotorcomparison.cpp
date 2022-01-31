@@ -301,8 +301,6 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     addDataItemBoth("wh/mi", false);
     addDataItemBoth("KV (BLDC)", false);
     addDataItemBoth("KV Noload (BLDC)", false);
-
-
 }
 
 PageMotorComparison::~PageMotorComparison()
@@ -344,7 +342,7 @@ void PageMotorComparison::settingChanged()
 {
     ui->testTorqueBox->setEnabled(ui->testModeTorqueButton->isChecked() || ui->testModeRpmButton->isChecked());
     ui->testPowerBox->setEnabled(ui->testModeRpmPowerButton->isChecked() || ui->testModeExpButton->isChecked());
-    ui->testRpmStartBox->setEnabled(ui->testModeRpmPowerButton->isChecked());
+    ui->testRpmStartBox->setEnabled(ui->testModeRpmPowerButton->isChecked() || ui->testModeExpButton->isChecked());
     ui->testExpBox->setEnabled(ui->testModeExpButton->isChecked());
     ui->testExpBaseTorqueBox->setEnabled(ui->testModeExpButton->isChecked());
 
@@ -459,13 +457,14 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         md.update(mM2Config, posx, torque, getParamsUi(2));
         updateTable(md, ui->m2PlotTable);
     } else {
+        double rpm_start = ui->testRpmStartBox->value();
         double rps = posx * 2.0 * M_PI / 60.0;
         double prop_exp = ui->testExpBox->value();
         double baseTorque = ui->testExpBaseTorqueBox->value();
         double topRpm = ui->testRpmBox->value();
         double power = ui->testPowerBox->value();
-        double p_max_const = power / pow(topRpm, prop_exp);
-        double torque = (p_max_const * pow(posx, prop_exp)) / rps;
+        double p_max_const = power / pow(topRpm - rpm_start, prop_exp);
+        double torque = (p_max_const * pow(posx > rpm_start ? (posx - rpm_start) : 0.0, prop_exp)) / rps;
         torque += baseTorque;
 
         MotorData md;
@@ -768,7 +767,8 @@ void PageMotorComparison::on_testRunButton_clicked()
         double power = ui->testPowerBox->value();
         double prop_exp = ui->testExpBox->value();
         double baseTorque = ui->testExpBaseTorqueBox->value();
-        double p_max_const = power / pow(rpm, prop_exp);
+        double rpm_start = ui->testRpmStartBox->value();
+        double p_max_const = power / pow(rpm - rpm_start, prop_exp);
 
         QVector<double> xAxis;
         QVector<QVector<double> > yAxes;
@@ -776,7 +776,7 @@ void PageMotorComparison::on_testRunButton_clicked()
 
         for (double r = rpm / 1000.0;r < rpm;r += (rpm / 1000.0)) {
             double rps = r * 2.0 * M_PI / 60.0;
-            double power = p_max_const * pow(r, prop_exp);
+            double power = p_max_const * pow(r > rpm_start ? (r - rpm_start) : 0.0, prop_exp);
             double torque = power / rps;
             torque += baseTorque;
 

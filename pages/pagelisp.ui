@@ -35,6 +35,9 @@
           </property>
           <item>
            <widget class="QPushButton" name="eraseButton">
+            <property name="toolTip">
+             <string>Erase lisp application from VESC. This will also prevent it from starting on next boot (as expected).</string>
+            </property>
             <property name="text">
              <string>Erase</string>
             </property>
@@ -140,7 +143,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">

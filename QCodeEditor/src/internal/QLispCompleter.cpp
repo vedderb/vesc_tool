@@ -54,8 +54,8 @@ QLispCompleter::QLispCompleter(QObject *parent) :
     addItem("set");
     {
         level++;
-        addItem("duty(dty)");
-        addItem("current(i)");
+        addItem("duty dty");
+        addItem("current i)");
         level--;
     }
 

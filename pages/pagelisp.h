@@ -53,6 +53,7 @@ private slots:
     void on_readExistingButton_clicked();
     void on_eraseButton_clicked();
     void on_rescaleButton_clicked();
+    void on_helpButton_clicked();
 
 private:
     Ui::PageLisp *ui;

@@ -21,6 +21,7 @@
 #include "pagelisp.h"
 #include "ui_pagelisp.h"
 #include "utility.h"
+#include "widgets/helpdialog.h"
 
 PageLisp::PageLisp(QWidget *parent) :
     QWidget(parent),
@@ -344,6 +345,12 @@ void PageLisp::makeEditorConnections(ScriptEditor *editor)
         }
 
         setEditorClean(editor);
+    });
+    connect(editor->codeEditor(), &QCodeEditor::runEmbeddedTriggered, [this]() {
+        on_uploadButton_clicked();
+    });
+    connect(editor->codeEditor(), &QCodeEditor::stopTriggered, [this]() {
+        on_stopButton_clicked();
     });
 }
 
@@ -772,4 +779,22 @@ void PageLisp::on_rescaleButton_clicked()
 {
     ui->bindingPlot->rescaleAxes();
     ui->bindingPlot->replotWhenVisible();
+}
+
+void PageLisp::on_helpButton_clicked()
+{
+    QString html = "<b>VESC Lisp Editor</b>. For documentation, go to<br>"
+                   "https://github.com/vedderb/bldc/blob/master/lispBM/README.md<br><br>"
+                   "<b>Keyboard Commands</b><br>"
+                   "Ctrl + '+'   : Increase font size<br>"
+                   "Ctrl + '-'   : Decrease font size<br>"
+                   "Ctrl + space : Show auto-complete suggestions<br>"
+                   "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
+                   "Ctrl + 'f'   : Open search (and replace) bar<br>"
+                   "Ctrl + 'e'   : Upload (and run if set) application<br>"
+                   "Ctrl + 'q'   : Stop application<br>"
+                   "Ctrl + 'd'   : Clear console<br>"
+                   "Ctrl + 's'   : Save file<br>";
+
+    HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html.replace(" ","&nbsp;"));
 }

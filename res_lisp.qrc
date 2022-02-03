@@ -9,5 +9,6 @@
         <file>res/Lisp/Examples/print_bms_data.lisp</file>
         <file>res/Lisp/Examples/speed_test.lisp</file>
         <file>res/Lisp/Examples/loop.lisp</file>
+        <file>res/Lisp/Examples/can_js.lisp</file>
     </qresource>
 </RCC>

@@ -505,7 +505,7 @@ QStringList VescInterface::getSupportedFirmwares()
     QStringList fws;
 
     for (int i = 0;i < fwPairs.size();i++) {
-        fws.append(QString("%1.%2").arg(fwPairs.at(i).first).arg(fwPairs.at(i).second));
+        fws.append(QString("%1.%2").arg(fwPairs.at(i).first).arg(fwPairs.at(i).second, 2, 10, QLatin1Char('0')));
     }
     return fws;
 }

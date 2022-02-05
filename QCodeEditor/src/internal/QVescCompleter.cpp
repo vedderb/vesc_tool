@@ -94,6 +94,8 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("emitPlotSetGraph(graph)");
         addItem("getStats(mask)");
         addItem("getImuData(mask)");
+        addItem("setBleName(name)");
+        addItem("setBlePin(pin)");
         level--;
     };
 

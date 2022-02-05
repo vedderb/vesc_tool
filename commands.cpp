@@ -146,6 +146,12 @@ void Commands::processPacket(QByteArray data)
             params.qmlAppFullscreen = qmlApp == 2;
         }
 
+        if (vb.size() >= 1) {
+            auto nrfFlags = vb.vbPopFrontUint8();
+            params.nrfNameSupported = nrfFlags & 1;
+            params.nrfPinSupported = nrfFlags & 2;
+        }
+
         emit fwVersionReceived(params);
     } break;
 
@@ -2039,6 +2045,22 @@ void Commands::lispGetStats()
 {
     VByteArray vb;
     vb.vbAppendUint8(COMM_LISP_GET_STATS);
+    emitData(vb);
+}
+
+void Commands::setBleName(QString name)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_SET_BLE_NAME);
+    vb.vbAppendString(name);
+    emitData(vb);
+}
+
+void Commands::setBlePin(QString pin)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_SET_BLE_PIN);
+    vb.vbAppendString(pin);
     emitData(vb);
 }
 

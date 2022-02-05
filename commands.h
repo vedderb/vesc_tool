@@ -247,6 +247,9 @@ public slots:
     void lispSetRunning(bool running);
     void lispGetStats();
 
+    void setBleName(QString name);
+    void setBlePin(QString pin);
+
 private slots:
     void timerSlot();
 

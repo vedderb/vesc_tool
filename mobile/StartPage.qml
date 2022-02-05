@@ -267,11 +267,16 @@ Item {
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
-                        buttonText: "Pair\nBLE"
+                        buttonText: "Setup\nBluetooth\nModule"
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/bluetooth.png"
 
                         onClicked: {
-                            pairDialog.openDialog()
+                            if (VescIf.getLastFwRxParams().nrfNameSupported &&
+                                    VescIf.getLastFwRxParams().nrfPinSupported) {
+                                bleSetupDialog.openDialog()
+                            } else {
+                                pairDialog.openDialog()
+                            }
                         }
                     }
 
@@ -325,7 +330,9 @@ Item {
         id: pairDialog
     }
 
-
+    BleSetupDialog {
+        id: bleSetupDialog
+    }
 
     Connections {
         target: mCommands

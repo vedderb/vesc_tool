@@ -574,6 +574,8 @@ struct FW_RX_PARAMS {
     Q_PROPERTY(bool qmlHwFullscreen MEMBER qmlHwFullscreen)
     Q_PROPERTY(bool hasQmlApp MEMBER hasQmlApp)
     Q_PROPERTY(bool qmlAppFullscreen MEMBER qmlAppFullscreen)
+    Q_PROPERTY(bool nrfNameSupported MEMBER nrfNameSupported)
+    Q_PROPERTY(bool nrfPinSupported MEMBER nrfPinSupported)
 
 public:
     FW_RX_PARAMS() {
@@ -588,6 +590,8 @@ public:
         qmlHwFullscreen = false;
         hasQmlApp = false;
         qmlAppFullscreen = false;
+        nrfNameSupported = false;
+        nrfPinSupported = false;
     }
 
     Q_INVOKABLE QString hwTypeStr() {
@@ -622,6 +626,8 @@ public:
     bool qmlHwFullscreen;
     bool hasQmlApp;
     bool qmlAppFullscreen;
+    bool nrfNameSupported;
+    bool nrfPinSupported;
 
 };
 

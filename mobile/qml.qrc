@@ -55,5 +55,6 @@
         <file>MultiSettings.qml</file>
         <file>CanScreen.qml</file>
         <file>StatPage.qml</file>
+        <file>BleSetupDialog.qml</file>
     </qresource>
 </RCC>

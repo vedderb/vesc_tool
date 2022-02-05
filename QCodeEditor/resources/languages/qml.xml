@@ -116,5 +116,7 @@
         <name>ApplicationWindow</name>
         <name>ProgressBar</name>
         <name>Gamepad</name>
+        <name>TextArea</name>
+        <name>TextInput</name>
     </section>
 </root>

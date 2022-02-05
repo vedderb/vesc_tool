@@ -184,6 +184,11 @@ void PageFirmware::fwRxChanged(bool rx, bool limited)
         fwStr += params.hasPhaseFilters ? "Yes" : "No";
     }
 
+    fwStr += "\nNRF Name: ";
+    fwStr += (params.nrfNameSupported ? "Yes" : "No");
+    fwStr += ", Pin: ";
+    fwStr += (params.nrfPinSupported ? "Yes" : "No");
+
     ui->currentLabel->setText(fwStr);
     updateHwList(params);
     updateBlList(params);

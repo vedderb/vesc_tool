@@ -97,6 +97,7 @@ Item {
                     TextInput {
                         id: pinInput
                         color: Utility.getAppHexColor("lightText")
+                        inputMethodHints: Qt.ImhDigitsOnly
                         anchors.fill: parent
                         anchors.margins: 7
                         font.pointSize: 12

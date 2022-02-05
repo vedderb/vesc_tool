@@ -26,6 +26,7 @@
 #include <QLowEnergyController>
 #include <QLowEnergyService>
 #include <QVariantMap>
+#include <QTimer>
 
 class BleUart : public QObject
 {
@@ -81,6 +82,7 @@ private:
     QString mTxUuid;
     bool mScanFinished;
     bool mInitDone;
+    QTimer mConnectTimetoutTimer;
 
     void init();
 

@@ -98,6 +98,7 @@ void BleUart::startConnect(QString addr)
             this, SLOT(connectionUpdated(QLowEnergyConnectionParameters)));
 
     mControl->connectToDevice();
+    mConnectTimetoutTimer.start(10000);
 }
 
 void BleUart::disconnectBle()
@@ -127,6 +128,7 @@ bool BleUart::isConnecting()
 
 void BleUart::emitScanDone()
 {
+    mConnectTimetoutTimer.stop();
     emit scanDone(mDevs, mScanFinished);
 }
 
@@ -184,6 +186,7 @@ void BleUart::addDevice(const QBluetoothDeviceInfo &dev)
             mDevs.insert(addr, dev.name());
         }
 
+        mConnectTimetoutTimer.stop();
         emit scanDone(mDevs, false);
     }
 }
@@ -192,6 +195,7 @@ void BleUart::scanFinished()
 {
     qDebug() << "BLE scan finished";
     mScanFinished = true;
+    mConnectTimetoutTimer.stop();
     emit scanDone(mDevs, true);
 }
 
@@ -208,6 +212,7 @@ void BleUart::deviceScanError(QBluetoothDeviceDiscoveryAgent::Error e)
                 "location service are activated.";
 #endif
 
+    mConnectTimetoutTimer.stop();
     emit bleError(errorStr);
 }
 
@@ -248,6 +253,7 @@ void BleUart::controllerError(QLowEnergyController::Error e)
 {
     qWarning() << "BLE error:" << e;
     disconnectBle();
+    mConnectTimetoutTimer.stop();
     emit bleError(tr("BLE error: ") + Utility::QEnumToQString(e));
 }
 
@@ -317,6 +323,7 @@ void BleUart::confirmedDescriptorWrite(const QLowEnergyDescriptor &d, const QByt
         disconnectBle();
     } else {
         mConnectDone = true;
+        mConnectTimetoutTimer.stop();
         emit connected();
     }
 }
@@ -357,4 +364,11 @@ void BleUart::init()
     connect(mDeviceDiscoveryAgent, SIGNAL(finished()), this, SLOT(scanFinished()));
 
     mInitDone = true;
+
+    mConnectTimetoutTimer.setSingleShot(true);
+    connect(&mConnectTimetoutTimer, &QTimer::timeout, [this]() {
+        disconnectBle();
+        qDebug() << "BLE connect timeout";
+        emit bleError(tr("BLE connect timed out."));
+    });
 }

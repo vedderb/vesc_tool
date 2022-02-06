@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/Lisp/Examples/aux.lisp</file>
         <file>res/Lisp/Examples/can_pos_follow.lisp</file>
         <file>res/Lisp/Examples/control_servo_from_duty.lisp</file>
         <file>res/Lisp/Examples/control_servo_from_encoder.lisp</file>
@@ -10,5 +9,6 @@
         <file>res/Lisp/Examples/speed_test.lisp</file>
         <file>res/Lisp/Examples/loop.lisp</file>
         <file>res/Lisp/Examples/can_js.lisp</file>
+        <file>res/Lisp/Examples/aux_out.lisp</file>
     </qresource>
 </RCC>

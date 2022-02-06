@@ -118,5 +118,6 @@
         <name>Gamepad</name>
         <name>TextArea</name>
         <name>TextInput</name>
+        <name>RtDataSetup</name>
     </section>
 </root>

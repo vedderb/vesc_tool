@@ -96,6 +96,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("getImuData(mask)");
         addItem("setBleName(name)");
         addItem("setBlePin(pin)");
+        addItem("sendCustomAppData(data)");
         level--;
     };
 

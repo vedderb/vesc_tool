@@ -10,5 +10,8 @@
         <file>res/Lisp/Examples/loop.lisp</file>
         <file>res/Lisp/Examples/can_js.lisp</file>
         <file>res/Lisp/Examples/aux_out.lisp</file>
+        <file>res/Lisp/Examples/raw_current.lisp</file>
+        <file>res/Lisp/Examples/raw_voltage.lisp</file>
+        <file>res/Lisp/Examples/raw_voltage_mod.lisp</file>
     </qresource>
 </RCC>

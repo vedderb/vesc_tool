@@ -67,6 +67,24 @@ Item {
             }
         }
         
+        RowLayout {
+            Layout.fillWidth: true
+            
+            CheckBox {
+                id: posBox
+                Layout.fillWidth: true
+                text: "PosControl"
+                checked: true
+            }
+            
+            CheckBox {
+                id: yawBox
+                Layout.fillWidth: true
+                text: "YawControl"
+                checked: true
+            }
+        }
+        
         Rectangle {
             Layout.fillHeight: true
             Layout.fillWidth: true
@@ -113,12 +131,14 @@ Item {
                 mx = -mx
             }
             
-            var buffer = new ArrayBuffer(4);
+            var buffer = new ArrayBuffer(6);
             var dv = new DataView(buffer);
             dv.setUint8(0, (btnFwd.pressed ? step : 0) + 2 * step * (my > 0 ? my : 0))
             dv.setUint8(1, (btnRev.pressed ? step : 0) + 2 * step * (my < 0 ? -my : 0))
             dv.setUint8(2, (btnLeft.pressed ? step : 0) + 2 * step * (mx < 0 ? -mx : 0))
             dv.setUint8(3, (btnRight.pressed ? step : 0) + 2 * step * (mx > 0 ? mx : 0))
+            dv.setUint8(4, posBox.checked ? 1 : 0)
+            dv.setUint8(5, yawBox.checked ? 1 : 0)
             mCommands.sendCustomAppData(buffer)
         }
     }

@@ -1,12 +1,51 @@
 ; Balance robot controller written in lisp
 
+(define pos-x (lambda ()
+    (progn
+        (select-motor 1)
+        (define m1-p (get-dist))
+        (select-motor 2)
+        (define m2-p (get-dist))
+        (* 0.5 (+ m1-p m2-p))
+)))
+
+(define pitch-set 0)
+(define yaw-set (* (ix 2 (get-imu-rpy)) 57.29577951308232))
+(define pos-set (pos-x))
+
+(define was-running 0)
+(define t-last (systime))
+(define pos-last (pos-x))
+
+(define kp 0.014)
+(define kd 0.0016)
+
+(define p-kp 50.0)
+(define p-kd -33.0)
+
+(define y-kp 0.003)
+(define y-kd 0.0003)
+
+(define enable-pos 1)
+(define enable-yaw 1)
+
 ; This is received from the QML-program which acts as a remote control for the robot
 (define proc-data (lambda (data)
     (progn
-        (define pos-set (+ pos-set (* (ix 0 data) 0.002)))
-        (define pos-set (- pos-set (* (ix 1 data) 0.002)))
-        (define yaw-set (- yaw-set (* (ix 2 data) 0.5)))
-        (define yaw-set (+ yaw-set (* (ix 3 data) 0.5)))
+        (define enable-pos (ix 4 data))
+        (define enable-yaw (ix 5 data))
+        
+        (if (= enable-pos 1)
+            (progn
+                (define pos-set (+ pos-set (* (ix 0 data) 0.002)))
+                (define pos-set (- pos-set (* (ix 1 data) 0.002)))
+        ) nil)
+        
+        (if (= enable-yaw 1)
+            (progn
+                (define yaw-set (- yaw-set (* (ix 2 data) 0.5)))
+                (define yaw-set (+ yaw-set (* (ix 3 data) 0.5)))
+        ) nil)
         
         (if (> yaw-set 360) (define yaw-set (- yaw-set 360)) nil)
         (if (< yaw-set 0) (define yaw-set (+ yaw-set 360)) nil)
@@ -33,15 +72,6 @@
         (timeout-reset)
 )))
 
-(define pos-x (lambda ()
-    (progn
-        (select-motor 1)
-        (define m1-p (get-dist))
-        (select-motor 2)
-        (define m2-p (get-dist))
-        (* 0.5 (+ m1-p m2-p))
-)))
-
 (define speed-x (lambda ()
     (progn
         (select-motor 1)
@@ -50,23 +80,6 @@
         (define m2-s (get-speed))
         (* 0.5 (+ m1-s m2-s))
 )))
-
-(define pitch-set 0)
-(define yaw-set (* (ix 2 (get-imu-rpy)) 57.29577951308232))
-(define pos-set (pos-x))
-
-(define was-running 0)
-(define t-last (systime))
-(define pos-last (pos-x))
-
-(define kp 0.016)
-(define kd 0.0018)
-
-(define p-kp 50.0)
-(define p-kd -33.0)
-
-(define y-kp 0.003)
-(define y-kd 0.0003)
 
 (define f (lambda ()
     (progn
@@ -85,9 +98,8 @@
             (progn
                 (define was-running 1)
                 
-                ; Uncomment these to run the pitch controller by itself
-;                (define pos-set pos)
-;                (define yaw-set yaw)
+                (if (= enable-pos 0) (define pos-set pos) nil)
+                (if (= enable-yaw 0) (define yaw-set yaw) nil)
                 
                 (define pos-err (- pos-set pos))
                 (define pitch-set (+ (* pos-err p-kp) (* speed p-kd)))

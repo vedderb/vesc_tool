@@ -23,5 +23,6 @@
         <file>res/qml/Examples/PositionControl.qml</file>
         <file>res/qml/Examples/GaugeTest.qml</file>
         <file>res/qml/Examples/RpmSlider.qml</file>
+        <file>res/qml/Examples/BalanceUi.qml</file>
     </qresource>
 </RCC>

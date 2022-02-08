@@ -13,5 +13,6 @@
         <file>res/Lisp/Examples/raw_current.lisp</file>
         <file>res/Lisp/Examples/raw_voltage.lisp</file>
         <file>res/Lisp/Examples/raw_voltage_mod.lisp</file>
+        <file>res/Lisp/Examples/balance.lisp</file>
     </qresource>
 </RCC>

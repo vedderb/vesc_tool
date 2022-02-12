@@ -42,8 +42,16 @@ public:
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
 
+signals:
+    void reloadQml(QString str);
+
 private slots:
     void on_testRunButton_clicked();
+    void on_qmlChooseButton_clicked();
+    void on_qmlRunButton_clicked();
+    void on_qmlStopButton_clicked();
+
+    void qmlTestChanged();
 
 private:
     struct TestParams {
@@ -64,12 +72,41 @@ private:
         double tempInc;
     };
 
+    struct QmlParams {
+        QmlParams() {
+            rpmM1 = 0.0;
+            torqueM1 = 0.0;
+            extraM1 = 0.0;
+            extraM1_2 = 0.0;
+
+            rpmM2 = 0.0;
+            torqueM2 = 0.0;
+            extraM2 = 0.0;
+            extraM2_2 = 0.0;
+        }
+
+        double rpmM1;
+        double torqueM1;
+        double extraM1;
+        double extraM1_2;
+
+        double rpmM2;
+        double torqueM2;
+        double extraM2;
+        double extraM2_2;
+    };
+
     Ui::PageMotorComparison *ui;
     VescInterface *mVesc;
     void settingChanged();
     bool reloadConfigs();
     void updateDataAndPlot(double posx, double yMin, double yMax);
     TestParams getParamsUi(int motor);
+    QmlParams getQmlParam(double progress);
+    QString getQmlXName();
+    double getQmlXMin();
+    double getQmlXMax();
+    void setQmlProgressSelected(double progress);
 
     ConfigParams mM1Config;
     ConfigParams mM2Config;
@@ -79,6 +116,13 @@ private:
     double mVerticalLinePosLast;
     QPair<double, double> mVerticalLineYLast;
     bool mRunDone;
+    Utility mUtil;
+
+    bool mQmlXNameOk;
+    bool mQmlXMinOk;
+    bool mQmlXMaxOk;
+    bool mQmlProgressOk;
+    bool mQmlReadNamesDone;
 
     struct MotorData {
         MotorData() {
@@ -107,6 +151,9 @@ private:
             wh_mi = 0.0;
             kv_bldc = 0.0;
             kv_bldc_noload = 0.0;
+
+            extraVal = 0.0;
+            extraVal2 = 0.0;
         }
 
         void update(ConfigParams &config, double rpm, double torque, TestParams params) {
@@ -213,6 +260,9 @@ private:
         double wh_mi;
         double kv_bldc;
         double kv_bldc_noload;
+
+        double extraVal;
+        double extraVal2;
     };
 };
 

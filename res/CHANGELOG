@@ -7,6 +7,7 @@
  - Real-time binding, CPU and memory monitors.
  - Console for printing
  - Examples
+* Added custom load code support to motor comparison tool.
 
 == 3.01 ==
 * Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.

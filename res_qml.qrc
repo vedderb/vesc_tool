@@ -24,5 +24,6 @@
         <file>res/qml/Examples/GaugeTest.qml</file>
         <file>res/qml/Examples/RpmSlider.qml</file>
         <file>res/qml/Examples/BalanceUi.qml</file>
+        <file>res/qml/Examples/MotorComparisonModel.qml</file>
     </qresource>
 </RCC>

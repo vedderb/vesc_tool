@@ -119,5 +119,7 @@
         <name>TextArea</name>
         <name>TextInput</name>
         <name>RtDataSetup</name>
+        <name>ComboBox</name>
+        <name>ListModel</name>
     </section>
 </root>

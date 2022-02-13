@@ -58,7 +58,7 @@
         (event-handler)
 )))
 
-(event-register-handler (spawn '(event-handler)))
+(event-register-handler (spawn event-handler))
 (event-enable "event-data-rx")
 
 (define abs (lambda (x) (if (> x 0) x (- x))))

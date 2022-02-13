@@ -137,6 +137,7 @@ public:
     Q_INVOKABLE bool openRtLogFile(QString outDirectory);
     Q_INVOKABLE void closeRtLogFile();
     Q_INVOKABLE bool isRtLogOpen();
+    Q_INVOKABLE QString rtLogFilePath();
     Q_INVOKABLE QVector<LOG_DATA> getRtLogData();
     Q_INVOKABLE bool loadRtLogFile(QString file);
     Q_INVOKABLE LOG_DATA getRtLogSample(double progress);

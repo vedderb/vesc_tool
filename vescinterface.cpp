@@ -1692,6 +1692,12 @@ bool VescInterface::isRtLogOpen()
     return mRtLogFile.isOpen();
 }
 
+QString VescInterface::rtLogFilePath()
+{
+    QFileInfo fi(mRtLogFile);
+    return fi.canonicalFilePath();
+}
+
 QVector<LOG_DATA> VescInterface::getRtLogData()
 {
     return mRtLogData;

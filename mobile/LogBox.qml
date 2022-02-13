@@ -120,7 +120,14 @@ Item {
                         VescIf.emitStatusMessage("Logging Started", true)
                         Utility.startGnssForegroundService()
                         VescIf.setWakeLock(true)
-                    }else{
+
+                        VescIf.emitMessageDialog("Logging Started",
+                                                 "Motor data together with your location is now being logged to:\n\n" +
+                                                 VescIf.rtLogFilePath() + "\n\n" +
+                                                 "You can connect your device to a computer and transfer the file to it for " +
+                                                 "analysis in the desktop version of VESC Tool (under Data Analysis->Log Analysis).",
+                                                 true, false)
+                    } else {
                         VescIf.emitStatusMessage("Logging Failed", false)
                     }
                 } else {

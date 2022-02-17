@@ -1,13 +1,10 @@
 ; Balance robot controller written in lisp
 
 (define pos-x (lambda ()
-    (progn
-        (select-motor 1)
-        (define m1-p (get-dist))
-        (select-motor 2)
-        (define m2-p (get-dist))
-        (* 0.5 (+ m1-p m2-p))
-)))
+    (* 0.5 (+
+        (progn (select-motor 1) (get-dist))
+        (progn (select-motor 2) (get-dist))
+))))
 
 (define pitch-set 0)
 (define yaw-set (* (ix 2 (get-imu-rpy)) 57.29577951308232))
@@ -73,13 +70,10 @@
 )))
 
 (define speed-x (lambda ()
-    (progn
-        (select-motor 1)
-        (define m1-s (get-speed))
-        (select-motor 2)
-        (define m2-s (get-speed))
-        (* 0.5 (+ m1-s m2-s))
-)))
+    (* 0.5 (+
+        (progn (select-motor 1) (get-speed))
+        (progn (select-motor 2) (get-speed))
+))))
 
 (define f (lambda ()
     (progn

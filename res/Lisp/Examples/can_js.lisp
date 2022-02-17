@@ -88,7 +88,7 @@
 )))
 
 ; Spawn the event handler thread and pass the ID it returns to C
-(event-register-handler (spawn '(event-handler)))
+(event-register-handler (spawn event-handler))
 
 ; Enable the CAN event for extended ID (EID) frames
 (event-enable "event-can-eid")

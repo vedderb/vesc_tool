@@ -288,6 +288,20 @@ bool Utility::requestFilePermission()
 #endif
 }
 
+bool Utility::hasLocationPermission()
+{
+#ifdef Q_OS_ANDROID
+    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.ACCESS_FINE_LOCATION");
+    if (r == QtAndroid::PermissionResult::Denied) {
+        return false;
+    } else {
+        return true;
+    }
+#else
+    return true;
+#endif
+}
+
 void Utility::keepScreenOn(bool on)
 {
 #ifdef Q_OS_IOS

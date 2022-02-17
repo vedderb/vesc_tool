@@ -115,6 +115,14 @@ Item {
             Layout.columnSpan: 3
 
             onClicked: {
+                if (checked && !VescIf.isPortConnected()) {
+                    VescIf.emitMessageDialog("Log Data",
+                                             "You must be connected to the VESC in order to log data.",
+                                             false, false)
+                    checked = false
+                    return
+                }
+
                 if (checked) {
                     if (VescIf.openRtLogFile(rtLogFileText.text)) {
                         VescIf.emitStatusMessage("Logging Started", true)

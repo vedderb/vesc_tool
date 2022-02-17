@@ -179,8 +179,6 @@ Item {
                 }
             }
 
-
-
             GroupBox {
                 id: toolsBox
                 title: qsTr("Tools")
@@ -324,8 +322,6 @@ Item {
     PairingDialog {
         id: pairDialog
     }
-
-
 
     Connections {
         target: mCommands
@@ -499,6 +495,4 @@ Item {
             indeterminate: visible
         }
     }
-
-
 }

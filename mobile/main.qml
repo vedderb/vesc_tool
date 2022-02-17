@@ -232,7 +232,15 @@ ApplicationWindow {
                                     mInfoConf.getDescription("gpl_text"),
                                     true, true)
                     }
+                }
+            }
 
+            Button {
+                Layout.fillWidth: true
+                text: "Privacy Policy"
+                flat: true
+                onClicked: {
+                    Qt.openUrlExternally("https://vesc-project.com/privacy_policies")
                 }
             }
         }

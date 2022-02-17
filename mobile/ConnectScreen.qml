@@ -61,13 +61,19 @@ Item {
         hoverEnabled: true
     }
 
-    Component.onCompleted: {
-        mBle.startScan()
-        scanDotTimer.running = true
-
-        if (!Utility.isBleScanEnabled()) {
-            bleEn.open()
+    function startBleScan() {
+        if (Utility.hasLocationPermission()) {
+            scanButton.enabled = false
+            scanDotTimer.running = true
+            bleModel.clear()
+            mBle.startScan()
+        } else {
+            bleScanStart.open()
         }
+    }
+
+    Component.onCompleted: {
+        startBleScan()
     }
 
     onYChanged: {
@@ -149,15 +155,12 @@ Item {
             Button {
                 id: scanButton
                 text: qsTr("Scan")
-                enabled: false
+                enabled: true
                 flat: true
                 Layout.preferredWidth: 120
 
                 onClicked: {
-                    scanButton.enabled = false
-                    scanDotTimer.running = true
-                    bleModel.clear()
-                    mBle.startScan()
+                    startBleScan()
                 }
             }
 
@@ -541,6 +544,60 @@ Item {
             wrapMode: Text.WordWrap
             text: "BLE scan does not seem to be possible. Make sure that the " +
                   "location service is enabled on your device."
+        }
+    }
+
+    Dialog {
+        id: bleScanStart
+        standardButtons: Dialog.Ok | Dialog.No
+        modal: true
+        focus: true
+        rightMargin: 10
+        leftMargin: 10
+        closePolicy: Popup.CloseOnEscape
+        y: 10 + parent.height / 2 - height / 2
+        x: parent.width/2 - width/2
+        width: parent.width - 20 - notchLeft - notchRight
+        parent: ApplicationWindow.overlay
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        onAccepted: {
+            scanButton.enabled = false
+            scanDotTimer.running = true
+            bleModel.clear()
+            mBle.startScan()
+
+            if (!Utility.isBleScanEnabled()) {
+                bleEn.open()
+            }
+        }
+
+        onRejected: {
+            VescIf.emitMessageDialog(
+                        "Location Permission",
+                        "VESC Tool cannot scan for bluetoot devices or log data with location information without the " +
+                        "the location permission. Please accept the request in order to use these features.",
+                        false, false)
+        }
+
+        title: "BLE scan"
+
+        Text {
+            color: Utility.getAppHexColor("lightText")
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text:
+                "VESC Tool needs to access the location of your device to scan for " +
+                "Bluetooth devices as well as for recording your location when doing " +
+                "realtime data logging.\n\n" +
+
+                "In order to keep logging when VESC Tool is in the background and/or when the " +
+                "screen is off, the permission to log data in the background is also required. " +
+                "Otherwise the logs will only get location information together with the motor " +
+                "data when the screen is on and VESC Tool is in the foreground."
         }
     }
 }

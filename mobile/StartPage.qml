@@ -179,8 +179,6 @@ Item {
                 }
             }
 
-
-
             GroupBox {
                 id: toolsBox
                 title: qsTr("Tools")
@@ -506,6 +504,4 @@ Item {
             indeterminate: visible
         }
     }
-
-
 }

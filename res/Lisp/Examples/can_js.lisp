@@ -25,25 +25,30 @@
             ; why they don't use just 7 bits for that.
             
             (define x-axis (* 0.001
-                (* (if (= (bits-dec-int (ix 0 data) 2 1) 0) 1.0 -1.0)
-                (+ (bits-dec-int (ix 0 data) 6 2) (* 4 (ix 1 data))
+                (* (if (= (bits-dec-int (bufget-u8 data 0) 2 1) 0) 1.0 -1.0)
+                (+ (bits-dec-int (bufget-u8 data 0) 6 2) (* 4 (ix 1 data))
             ))))
             
             (define y-axis (* 0.001
-                (* (if (= (bits-dec-int (ix 2 data) 2 1) 0) 1.0 -1.0)
-                (+ (bits-dec-int (ix 2 data) 6 2) (* 4 (ix 3 data))
+                (* (if (= (bits-dec-int (bufget-u8 data 2) 2 1) 0) 1.0 -1.0)
+                (+ (bits-dec-int (bufget-u8 data 2) 6 2) (* 4 (bufget-u8 3 data))
             ))))
                         
             ; Decode the buttons that are currently pressed
             (define btn-lst (list
-                (bits-dec-int (ix 5 data) 6 2)
-                (bits-dec-int (ix 5 data) 4 2)
-                (bits-dec-int (ix 5 data) 2 2)
-                (bits-dec-int (ix 5 data) 0 2)
-                (bits-dec-int (ix 6 data) 6 2)
-                (bits-dec-int (ix 6 data) 4 2)
-                (bits-dec-int (ix 6 data) 2 2)
+                (bits-dec-int (bufget-u8 data 5) 6 2)
+                (bits-dec-int (bufget-u8 data 5) 4 2)
+                (bits-dec-int (bufget-u8 data 5) 2 2)
+                (bits-dec-int (bufget-u8 data 5) 0 2)
+                (bits-dec-int (bufget-u8 data 6) 6 2)
+                (bits-dec-int (bufget-u8 data 6) 4 2)
+                (bits-dec-int (bufget-u8 data 6) 2 2)
             ))
+            
+            ; Save memory by freeing data when done. This can be omitted as GC
+            ; will free it in the next run, but doing it prevents the memory
+            ; usage from increasing more than needed.
+            (free data)
             
 ;            (set-duty y-axis)
 ;            (timeout-reset)
@@ -88,7 +93,7 @@
 )))
 
 ; Spawn the event handler thread and pass the ID it returns to C
-(event-register-handler (spawn event-handler))
+(event-register-handler (spawn 50 event-handler))
 
 ; Enable the CAN event for extended ID (EID) frames
 (event-enable "event-can-eid")

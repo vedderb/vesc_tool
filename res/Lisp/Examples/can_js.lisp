@@ -26,12 +26,12 @@
             
             (define x-axis (* 0.001
                 (* (if (= (bits-dec-int (bufget-u8 data 0) 2 1) 0) 1.0 -1.0)
-                (+ (bits-dec-int (bufget-u8 data 0) 6 2) (* 4 (ix 1 data))
+                (+ (bits-dec-int (bufget-u8 data 0) 6 2) (* 4 (bufget-u8 data 1))
             ))))
             
             (define y-axis (* 0.001
                 (* (if (= (bits-dec-int (bufget-u8 data 2) 2 1) 0) 1.0 -1.0)
-                (+ (bits-dec-int (bufget-u8 data 2) 6 2) (* 4 (bufget-u8 3 data))
+                (+ (bits-dec-int (bufget-u8 data 2) 6 2) (* 4 (bufget-u8 data 3))
             ))))
                         
             ; Decode the buttons that are currently pressed

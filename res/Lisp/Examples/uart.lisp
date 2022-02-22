@@ -2,7 +2,7 @@
 
 ; As uart-read returns right away when there is nothing to read we create
 ; wrappers that try to read bytes until the desired amount of bytes is
-; received. They use yield to give other threads a change to run.
+; received. They use yield to give other threads a chance to run.
 
 ; Read n bytes into buffer at ofs.
 (define read-bytes (lambda (buffer n ofs)
@@ -11,13 +11,13 @@
             (rd (uart-read buffer n ofs))
         )
         (if (num-eq rd n)
-            (bufset-u8 buffer 0 (+ ofs rd)) ; Newline at the end
+            (bufset-u8 buffer 0 (+ ofs rd)) ; Null-termination
             (progn (yield 4000) (read-bytes buffer (- n rd) (+ ofs rd)))
         )
     )
 ))
 
-; Read at most n bytes into buffer at ofs. Stop reading and return at characted end.
+; Read at most n bytes into buffer at ofs. Stop reading and return at character end.
 (define read-until (lambda (buffer n ofs end)
     (let
         (

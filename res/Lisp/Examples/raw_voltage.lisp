@@ -1,13 +1,13 @@
 (define rate 500) ; Update rate in hz
 (define filter-const 0.2)
 
-(define filter (lambda (val sample)
+(defun filter (val sample)
     (- val (* filter-const (- val sample)))
-))
+)
 
 (define va-f 0)
 
-(define f (lambda ()
+(defun f ()
     (progn
         (define use-raw 0) ; Set to 1 to use ADC bits and not convert to voltage
     
@@ -24,6 +24,6 @@
 
         (yield (/ 1000000 rate))
         (f)
-)))
+))
 
 (f)

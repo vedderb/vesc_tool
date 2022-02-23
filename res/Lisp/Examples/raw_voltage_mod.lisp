@@ -1,6 +1,6 @@
 (define rate 200) ; Update rate in hz
 
-(define f (lambda ()
+(defun f ()
     (progn
         (define va (raw-adc-voltage 1 1))
         (define vb (raw-adc-voltage 1 2))
@@ -21,5 +21,5 @@
 
         (yield (/ 1000000 rate))
         (f)
-)))
+))
 (f)

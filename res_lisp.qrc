@@ -15,5 +15,6 @@
         <file>res/Lisp/Examples/raw_voltage_mod.lisp</file>
         <file>res/Lisp/Examples/balance.lisp</file>
         <file>res/Lisp/Examples/uart.lisp</file>
+        <file>res/Lisp/Examples/threads.lisp</file>
     </qresource>
 </RCC>

@@ -2,6 +2,8 @@
 <root>
     <section name="Keyword">
         <name>define</name>
+        <name>defun</name>
+        <name>macro</name>
         <name>lambda</name>
         <name>car</name>
         <name>cons</name>
@@ -19,5 +21,9 @@
     <section name="Type">
         <name>print</name>
         <name>yield</name>
+        <name>map</name>
+        <name>foldl</name>
+        <name>foldr</name>
+        <name>list</name>
     </section>
 </root>

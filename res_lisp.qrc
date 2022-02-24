@@ -16,5 +16,6 @@
         <file>res/Lisp/Examples/balance.lisp</file>
         <file>res/Lisp/Examples/uart.lisp</file>
         <file>res/Lisp/Examples/threads.lisp</file>
+        <file>res/Lisp/Examples/i2c_mpu9250.lisp</file>
     </qresource>
 </RCC>

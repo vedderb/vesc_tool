@@ -3442,7 +3442,7 @@ p, li { white-space: pre-wrap; }
             <cDefine>APPCONF_IMU_SAMPLE_RATE_HZ</cDefine>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxInt>1000</maxInt>
+            <maxInt>10000</maxInt>
             <minInt>1</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>10</stepInt>

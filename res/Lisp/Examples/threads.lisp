@@ -1,6 +1,12 @@
+(define cnt01 0) (define cnt02 0) (define cnt03 0) (define cnt04 0) (define cnt05 0)
+(define cnt06 0) (define cnt07 0) (define cnt08 0) (define cnt09 0) (define cnt10 0)
+(define cnt11 0) (define cnt12 0) (define cnt13 0) (define cnt14 0) (define cnt15 0)
+(define cnt16 0) (define cnt17 0) (define cnt18 0) (define cnt19 0) (define cnt20 0)
+(define cnt21 0) (define cnt22 0) (define cnt23 0) (define cnt24 0) (define cnt25 0)
+
 (defun counter (var rate start)
     (progn
-        (setvar var start)
+        (set! var start)
         (yield (/ 1000000 rate))
         (counter var rate (+ start 1))
 ))

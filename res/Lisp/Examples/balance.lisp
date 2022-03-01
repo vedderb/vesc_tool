@@ -28,7 +28,6 @@
 
 (define #pitch-set 0)
 (define #was-running 0)
-(define #t-last (systime))
 
 (define #kp 0.014)
 (define #kd 0.0016)
@@ -74,6 +73,7 @@
 (event-register-handler (spawn event-handler))
 (event-enable "event-data-rx")
 
+(define #t-last (systime))
 (define #it-rate 0)
 (define #it-rate-filter 0)
 (defun #filter (val sample)

@@ -17,5 +17,6 @@
         <file>res/Lisp/Examples/uart.lisp</file>
         <file>res/Lisp/Examples/threads.lisp</file>
         <file>res/Lisp/Examples/i2c_mpu9250.lisp</file>
+        <file>res/Lisp/Examples/threads_create_many.lisp</file>
     </qresource>
 </RCC>

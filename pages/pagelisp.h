@@ -54,6 +54,8 @@ private slots:
     void on_eraseButton_clicked();
     void on_rescaleButton_clicked();
     void on_helpButton_clicked();
+    void on_replEdit_returnPressed();
+    void on_replHelpButton_clicked();
 
 private:
     Ui::PageLisp *ui;

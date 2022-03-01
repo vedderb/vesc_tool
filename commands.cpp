@@ -2048,6 +2048,14 @@ void Commands::lispGetStats()
     emitData(vb);
 }
 
+void Commands::lispSendReplCmd(QString str)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_REPL_CMD);
+    vb.vbAppendString(str);
+    emitData(vb);
+}
+
 void Commands::setBleName(QString name)
 {
     VByteArray vb;

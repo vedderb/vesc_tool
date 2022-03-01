@@ -246,6 +246,7 @@ public slots:
     void lispEraseCode();
     void lispSetRunning(bool running);
     void lispGetStats();
+    void lispSendReplCmd(QString str);
 
     void setBleName(QString name);
     void setBlePin(QString pin);

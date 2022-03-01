@@ -317,15 +317,56 @@
        <attribute name="title">
         <string>Console</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
-         <widget class="VTextBrowser" name="debugEdit">
-          <property name="font">
-           <font>
-            <family>DejaVu Sans Mono</family>
-           </font>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <property name="spacing">
+           <number>3</number>
           </property>
-         </widget>
+          <item>
+           <widget class="VTextBrowser" name="debugEdit">
+            <property name="font">
+             <font>
+              <family>DejaVu Sans Mono</family>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Repl</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="HistoryLineEdit" name="replEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="replHelpButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Print available commands</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/+theme_light/icons/Help-96.png</normaloff>:/res/+theme_light/icons/Help-96.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -679,6 +720,11 @@
    <extends>QWidget</extends>
    <header>widgets/qcustomplot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>HistoryLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>widgets/historylineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -49,7 +49,7 @@ PageLisp::PageLisp(QWidget *parent) :
     ui->uploadButton->setIcon(QIcon(theme +"icons/Download-96.png"));
     ui->readExistingButton->setIcon(QIcon(theme +"icons/Upload-96.png"));
     ui->eraseButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
-    ui->rescaleButton->setIcon(QPixmap(theme + "icons/expand_off.png"));
+    ui->replHelpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
 
     QIcon mycon = QIcon(theme + "icons/expand_off.png");
     mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
@@ -797,4 +797,15 @@ void PageLisp::on_helpButton_clicked()
                    "Ctrl + 's'   : Save file<br>";
 
     HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html.replace(" ","&nbsp;"));
+}
+
+void PageLisp::on_replEdit_returnPressed()
+{
+    mVesc->commands()->lispSendReplCmd(ui->replEdit->text());
+    ui->replEdit->clear();
+}
+
+void PageLisp::on_replHelpButton_clicked()
+{
+    mVesc->commands()->lispSendReplCmd(":help");
 }

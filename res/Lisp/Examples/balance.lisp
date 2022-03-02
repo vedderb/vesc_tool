@@ -23,7 +23,7 @@
         (progn (select-motor 2) (get-speed))
 )))
 
-(define #yaw-set (* (ix 2 (get-imu-rpy)) 57.29577951308232))
+(define #yaw-set (* (ix (get-imu-rpy) 2) 57.29577951308232))
 (define #pos-set (#pos-x))
 
 (define #pitch-set 0)
@@ -82,10 +82,10 @@
 
 (defun main ()
     (progn
-        (define #pitch (* (ix 1 (get-imu-rpy)) 57.29577951308232))
-        (define #yaw (* (ix 2 (get-imu-rpy)) 57.29577951308232))
-        (define #pitch-rate (ix 1 (get-imu-gyro)))
-        (define #yaw-rate (ix 2 (get-imu-gyro)))
+        (define #pitch (* (ix (get-imu-rpy) 1) 57.29577951308232))
+        (define #yaw (* (ix (get-imu-rpy) 2) 57.29577951308232))
+        (define #pitch-rate (ix (get-imu-gyro) 1))
+        (define #yaw-rate (ix (get-imu-gyro) 2))
         (define #pos (+ (#pos-x) (* #pitch 0.00122))) ; Includes pitch compensation
         (define #speed (#speed-x))
 

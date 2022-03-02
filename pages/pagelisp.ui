@@ -335,16 +335,6 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Repl</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="HistoryLineEdit" name="replEdit"/>
-            </item>
-            <item>
              <widget class="QPushButton" name="replHelpButton">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -363,6 +353,16 @@
                 <normaloff>:/res/+theme_light/icons/Help-96.png</normaloff>:/res/+theme_light/icons/Help-96.png</iconset>
               </property>
              </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Repl</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="HistoryLineEdit" name="replEdit"/>
             </item>
            </layout>
           </item>

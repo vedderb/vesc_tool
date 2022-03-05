@@ -2,14 +2,21 @@
 
 set -e
 
-FWPATH="../../ARM/STM_Eclipse/BLDC_4_ChibiOS/build_all"
+FWPATH="../../ARM/STM_Eclipse/BLDC_4_ChibiOS/"
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
+rm -rf $FWPATH/package/*
+
 cd $FWPATH
-./rebuild_all
+make all_fw_clean
+time make all_fw -j24
+python3 package_firmware.py
+make all_fw_clean
+
 cd $DIR
 rm -r res/firmwares/*
-cp -r $FWPATH/* res/firmwares/
-find res/firmwares -maxdepth 1 -type f -exec rm {} \;
-cp $FWPATH/../CHANGELOG res/firmwares
+cp -r $FWPATH/package/* res/firmwares/
+cp $FWPATH/CHANGELOG res/firmwares
+
+rm -r $FWPATH/package/*
 

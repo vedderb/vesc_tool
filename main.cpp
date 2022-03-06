@@ -439,6 +439,8 @@ int main(int argc, char *argv[])
             darkPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("midAccent"));
             darkPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
             darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Link, QColor(150,150,255));
+            darkPalette.setColor(QPalette::LinkVisited, QColor(220,150,255));
             qApp->setPalette(darkPalette);
         } else {
             QPalette lightPalette = qApp->style()->standardPalette();

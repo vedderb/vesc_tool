@@ -783,8 +783,14 @@ void PageLisp::on_rescaleButton_clicked()
 
 void PageLisp::on_helpButton_clicked()
 {
-    QString html = "<b>VESC Lisp Editor</b>. For documentation, go to<br>"
-                   "https://github.com/vedderb/bldc/blob/master/lispBM/README.md<br><br>"
+    QString html = "<b>VESC Lisp Editor</b><br><br>"
+                   ""
+                   "For documentation, go to<br>"
+                   "<a href=\"https://github.com/vedderb/bldc/blob/master/lispBM/README.md\">https://github.com/vedderb/bldc/blob/master/lispBM/README.md</a><br><br>"
+                   ""
+                   "You can also join the unofficial VESC Discord server and ask questions "
+                   "in the lisp-scripting chat at<br>"
+                   "<a href=\"https://discord.gg/JgvV5NwYts\">https://discord.gg/JgvV5NwYts</a><br><br>"
                    "<b>Keyboard Commands</b><br>"
                    "Ctrl + '+'   : Increase font size<br>"
                    "Ctrl + '-'   : Decrease font size<br>"
@@ -796,7 +802,7 @@ void PageLisp::on_helpButton_clicked()
                    "Ctrl + 'd'   : Clear console<br>"
                    "Ctrl + 's'   : Save file<br>";
 
-    HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html.replace(" ","&nbsp;"));
+    HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html);
 }
 
 void PageLisp::on_replEdit_returnPressed()

@@ -16,7 +16,7 @@
 
 ; Handler for EID CAN-frames
 (define proc-eid (lambda (id data)
-    (if (num-eq id 0x18ff03f1)
+    (if (= id 0x18ff03f1)
         (progn
             (define can-cnt (+ can-cnt 1))
             

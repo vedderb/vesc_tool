@@ -47,13 +47,13 @@
         (define #enable-pos (bufget-u8 data 4))
         (define #enable-yaw (bufget-u8 data 5))
         
-        (if (num-eq #enable-pos 1)
+        (if (= #enable-pos 1)
             (progn
                 (define #pos-set (+ #pos-set (* (bufget-u8 data 0) 0.002)))
                 (define #pos-set (- #pos-set (* (bufget-u8 data 1) 0.002)))
         ) nil)
         
-        (if (num-eq #enable-yaw 1)
+        (if (= #enable-yaw 1)
             (progn
                 (define #yaw-set (- #yaw-set (* (bufget-u8 data 2) 0.5)))
                 (define #yaw-set (+ #yaw-set (* (bufget-u8 data 3) 0.5)))
@@ -94,12 +94,12 @@
         (define #t-last (systime))
         (define #it-rate-filter (#filter #it-rate-filter #it-rate))
                 
-        (if (< (#abs #pitch) (if (num-eq #was-running 1) 45 10))
+        (if (< (#abs #pitch) (if (= #was-running 1) 45 10))
             (progn
                 (define #was-running 1)
                 
-                (if (num-eq #enable-pos 0) (define #pos-set #pos) nil)
-                (if (num-eq #enable-yaw 0) (define #yaw-set #yaw) nil)
+                (if (= #enable-pos 0) (define #pos-set #pos) nil)
+                (if (= #enable-yaw 0) (define #yaw-set #yaw) nil)
                 
                 (define #pos-err (- #pos-set #pos))
                 (define #pitch-set (+ (* #pos-err #p-kp) (* #speed #p-kd)))

@@ -60,7 +60,7 @@
 ; handlers for them when the events arrive.
 (define event-handler (lambda ()
     (progn
-        (recv ((signal-can-eid (? id) . (? data)) (proc-eid id data))
+        (recv ((event-can-eid (? id) . (? data)) (proc-eid id data))
               (_ nil))
         (event-handler) ; Call self again to make this a loop
 )))
@@ -96,7 +96,7 @@
 (event-register-handler (spawn 50 event-handler))
 
 ; Enable the CAN event for extended ID (EID) frames
-(event-enable "event-can-eid")
+(event-enable 'event-can-eid)
 
 ; Start the button-blink-function from this thread
 (btn-fun)

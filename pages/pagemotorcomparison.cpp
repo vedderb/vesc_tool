@@ -207,6 +207,8 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
             [this](bool checked) { (void)checked; settingChanged(); });
     connect(ui->testNegativeBox, &QCheckBox::toggled,
             [this](bool checked) { (void)checked; settingChanged(); });
+    connect(ui->scatterPlotBox, &QCheckBox::toggled,
+            [this](bool checked) { (void)checked; settingChanged(); });
 
     connect(ui->testRpmBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
@@ -219,6 +221,8 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     connect(ui->testExpBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
     connect(ui->testExpBaseTorqueBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double value) { (void)value; settingChanged(); });
+    connect(ui->pointsBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
 
     connect(ui->m1GearingBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
@@ -700,6 +704,8 @@ void PageMotorComparison::on_testRunButton_clicked()
         }
     };
 
+    double plotPoints = ui->pointsBox->value();
+
     auto updateGraphs = [this](
             QVector<double> &xAxis,
             QVector<QVector<double> > &yAxes,
@@ -757,6 +763,9 @@ void PageMotorComparison::on_testRunButton_clicked()
 
             ui->plot->addGraph();
             ui->plot->graph(graphNow)->setPen(pen);
+            if (ui->scatterPlotBox->isChecked()) {
+                ui->plot->graph(graphNow)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
+            }
             ui->plot->graph(graphNow)->setName(names.at(i));
             ui->plot->graph(graphNow)->setData(xAxis, yAxes.at(i));
         }
@@ -768,7 +777,7 @@ void PageMotorComparison::on_testRunButton_clicked()
         ui->plot->replotWhenVisible();
     };
 
-    auto plotTorqueSweep = [this, updateData, updateGraphs](QTableWidget *table,
+    auto plotTorqueSweep = [this, updateData, updateGraphs, plotPoints](QTableWidget *table,
             ConfigParams &config, TestParams param) {
         double torque = fabs(ui->testTorqueBox->value());
         double rpm = ui->testRpmBox->value();
@@ -779,10 +788,10 @@ void PageMotorComparison::on_testRunButton_clicked()
 
         double torque_start = -torque;
         if (!ui->testNegativeBox->isChecked()) {
-            torque_start = torque / 1000.0;
+            torque_start = torque / plotPoints;
         }
 
-        for (double t = torque_start;t < torque;t += (torque / 1000.0)) {
+        for (double t = torque_start;t < torque;t += (torque / plotPoints)) {
             MotorData md;
             md.update(config, rpm, t, param);
             xAxis.append(t);
@@ -798,7 +807,7 @@ void PageMotorComparison::on_testRunButton_clicked()
         updateGraphs(xAxis, yAxes, names);
     };
 
-    auto plotRpmSweep = [this, updateData, updateGraphs](QTableWidget *table,
+    auto plotRpmSweep = [this, updateData, updateGraphs, plotPoints](QTableWidget *table,
             ConfigParams &config, TestParams param) {
         double torque = ui->testTorqueBox->value();
         double rpm = ui->testRpmBox->value();
@@ -809,10 +818,10 @@ void PageMotorComparison::on_testRunButton_clicked()
 
         double rpm_start = -rpm;
         if (!ui->testNegativeBox->isChecked()) {
-            rpm_start = rpm / 1000.0;
+            rpm_start = rpm / plotPoints;
         }
 
-        for (double r = rpm_start;r < rpm;r += (rpm / 1000.0)) {
+        for (double r = rpm_start;r < rpm;r += (rpm / plotPoints)) {
             MotorData md;
             md.update(config, r, torque, param);
             xAxis.append(r);
@@ -827,7 +836,7 @@ void PageMotorComparison::on_testRunButton_clicked()
         updateGraphs(xAxis, yAxes, names);
     };
 
-    auto plotPowerSweep = [this, updateData, updateGraphs](QTableWidget *table,
+    auto plotPowerSweep = [this, updateData, updateGraphs, plotPoints](QTableWidget *table,
             ConfigParams &config, TestParams param) {
         double rpm = ui->testRpmBox->value();
         double rpm_start = ui->testRpmStartBox->value();
@@ -837,7 +846,7 @@ void PageMotorComparison::on_testRunButton_clicked()
         QVector<QVector<double> > yAxes;
         QVector<QString> names;
 
-        for (double r = rpm_start;r < rpm;r += (rpm / 1000.0)) {
+        for (double r = rpm_start;r < rpm;r += (rpm / plotPoints)) {
             double rps = r * 2.0 * M_PI / 60.0;
             double torque = power / rps;
 
@@ -855,7 +864,7 @@ void PageMotorComparison::on_testRunButton_clicked()
         updateGraphs(xAxis, yAxes, names);
     };
 
-    auto plotPropSweep = [this, updateData, updateGraphs](QTableWidget *table,
+    auto plotPropSweep = [this, updateData, updateGraphs, plotPoints](QTableWidget *table,
             ConfigParams &config, TestParams param) {
         double rpm = ui->testRpmBox->value();
         double power = ui->testPowerBox->value();
@@ -868,7 +877,7 @@ void PageMotorComparison::on_testRunButton_clicked()
         QVector<QVector<double> > yAxes;
         QVector<QString> names;
 
-        for (double r = rpm / 1000.0;r < rpm;r += (rpm / 1000.0)) {
+        for (double r = rpm / plotPoints;r < rpm;r += (rpm / plotPoints)) {
             double rps = r * 2.0 * M_PI / 60.0;
             double power = p_max_const * pow(r > rpm_start ? (r - rpm_start) : 0.0, prop_exp);
             double torque = power / rps;
@@ -888,7 +897,7 @@ void PageMotorComparison::on_testRunButton_clicked()
         updateGraphs(xAxis, yAxes, names);
     };
 
-    auto plotQmlSweep = [this, updateData, updateGraphs](QTableWidget *table,
+    auto plotQmlSweep = [this, updateData, updateGraphs, plotPoints](QTableWidget *table,
             ConfigParams &config, TestParams param, int motor) {
 
         QVector<double> xAxis;
@@ -897,7 +906,7 @@ void PageMotorComparison::on_testRunButton_clicked()
         double min = getQmlXMin();
         double max = getQmlXMax();
 
-        for (double p = min; p < max; p += (max - min) / 1000.0) {
+        for (double p = min; p < max; p += (max - min) / plotPoints) {
             auto rpmTorque = getQmlParam(p);
 
             MotorData md;

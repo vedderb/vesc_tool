@@ -121,5 +121,6 @@
         <name>RtDataSetup</name>
         <name>ComboBox</name>
         <name>ListModel</name>
+        <name>RadioButton</name>
     </section>
 </root>

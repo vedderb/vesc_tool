@@ -50,6 +50,7 @@ public:
     Q_INVOKABLE bool isParamEnum(const QString &name);
     Q_INVOKABLE bool isParamQString(const QString &name);
     Q_INVOKABLE bool isParamBool(const QString &name);
+    Q_INVOKABLE bool isParamBitfield(const QString &name);
 
     Q_INVOKABLE double getParamDouble(const QString &name);
     Q_INVOKABLE int getParamInt(const QString &name);

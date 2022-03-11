@@ -627,7 +627,8 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 
     if (res) {
         int canId = ap->getParamInt("controller_id");
-        int canStatus = ap->getParamEnum("send_can_status");
+        int canStatus = ap->getParamEnum("can_status_msgs_r1");
+        int canStatus2 = ap->getParamEnum("can_status_msgs_r2");
         vesc->commands()->getAppConfDefault();
         res = waitSignal(ap, SIGNAL(updated()), 4000);
 
@@ -637,7 +638,8 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 
         if (res) {
             ap->updateParamInt("controller_id", canId);
-            ap->updateParamEnum("send_can_status", canStatus);
+            ap->updateParamEnum("can_status_msgs_r1", canStatus);
+            ap->updateParamEnum("can_status_msgs_r2", canStatus2);
             vesc->commands()->setAppConf();
             res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
@@ -679,7 +681,8 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             int canId = ap->getParamInt("controller_id");
-            int canStatus = ap->getParamEnum("send_can_status");
+            int canStatus = ap->getParamEnum("can_status_msgs_r1");
+            int canStatus2 = ap->getParamEnum("can_status_msgs_r2");
             vesc->commands()->getAppConfDefault();
             res = waitSignal(ap, SIGNAL(updated()), 4000);
 
@@ -689,7 +692,8 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             ap->updateParamInt("controller_id", canId);
-            ap->updateParamEnum("send_can_status", canStatus);
+            ap->updateParamEnum("can_status_msgs_r1", canStatus);
+            ap->updateParamEnum("can_status_msgs_r2", canStatus2);
             vesc->commands()->setAppConf();
             res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
@@ -1814,6 +1818,7 @@ void Utility::serialFunc(ConfigParams *params, QTextStream &s) {
             switch (p->type) {
             case CFG_T_BOOL:
             case CFG_T_ENUM:
+            case CFG_T_BITFIELD:
                 s << "\t" << "buffer[ind++] = conf->" << name << ";\n";
                 break;
 
@@ -1898,6 +1903,7 @@ void Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
             switch (p->type) {
             case CFG_T_BOOL:
             case CFG_T_ENUM:
+            case CFG_T_BITFIELD:
                 s << "\tconf->" << name << " = buffer[ind++];\n";
                 break;
 

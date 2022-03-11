@@ -45,6 +45,9 @@ Item {
             } else if (conf.isParamQString(name)) {
                 var component5 = Qt.createComponent("ParamEditString.qml");
                 return component5.createObject(parent, {"params": conf, "paramName": name});
+            } else if (conf.isParamBitfield(name)) {
+                var component6 = Qt.createComponent("ParamEditBitfield.qml");
+                return component6.createObject(parent, {"params": conf, "paramName": name});
             }
         } else {
             console.log("Parameter " + name + " not found.")

@@ -40,7 +40,8 @@ typedef enum {
     CFG_T_INT,
     CFG_T_QSTRING,
     CFG_T_ENUM,
-    CFG_T_BOOL
+    CFG_T_BOOL,
+    CFG_T_BITFIELD
 } CFG_T;
 
 typedef enum {

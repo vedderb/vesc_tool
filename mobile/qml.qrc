@@ -56,5 +56,6 @@
         <file>CanScreen.qml</file>
         <file>StatPage.qml</file>
         <file>BleSetupDialog.qml</file>
+        <file>ParamEditBitfield.qml</file>
     </qresource>
 </RCC>

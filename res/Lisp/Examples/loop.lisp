@@ -1,10 +1,8 @@
-(define rate 50) ; Update rate in hz
-
 (defun f ()
     (progn
         ; Put your code here
 
-        (yield (/ 1000000 rate))
+        (sleep 0.02) ; 50 Hz
         (f)
 ))
 

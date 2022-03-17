@@ -24,6 +24,7 @@
 #include "mobile/logwriter.h"
 #include "mobile/logreader.h"
 #include "tcpserversimple.h"
+#include "pages/pagemotorcomparison.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -192,6 +193,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<FW_RX_PARAMS>();
     qRegisterMetaType<PSW_STATUS>();
     qRegisterMetaType<IO_BOARD_VALUES>();
+    qRegisterMetaType<MotorData>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD

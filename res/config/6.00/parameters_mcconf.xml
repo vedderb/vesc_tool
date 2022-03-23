@@ -1291,6 +1291,9 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;VSS&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vedder Sensorless Start. Use HFI just after starting the motor to resolve the initial position and set the observer state to that position. This can help the observer track the motor correctly from 0 speed. As this also is based on saturation it can help start some motors with low saliency.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Silent HFI&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;A different approach to HFI that is completely silent if the zero vector frequency is high enough (maximum around 32 kHz). It is also more stable under high load when configured properly. This implementation relies on a good inductance measurement (in addition to some difference in Lq and Ld), so if it does not work well you can try adjusting the inductance 1-5 % up and down. &lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NOTE:&lt;/span&gt; HFI and VSS only work when the FOC switching frequency is at or below 30 KHz. &lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_SENSOR_MODE</cDefine>
@@ -1300,6 +1303,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>Hall Sensors</enumNames>
             <enumNames>HFI</enumNames>
             <enumNames>VSS</enumNames>
+            <enumNames>Silent HFI</enumNames>
         </foc_sensor_mode>
         <foc_pll_kp>
             <longName>Speed Tracker Kp</longName>
@@ -2145,9 +2149,9 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;HFI voltage during operation, at maximum current. Increasing the voltage at higher currents helps with tracking. A higher voltage makes HFI noisier and wastes more power, which is why this option allows increasing it at high motor currents when it is needed.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The HFI voltage is mapped between voltage_run and voltage_max, relative to the motor current.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;HFI voltage during operation, at maximum current. Increasing the voltage at higher currents helps with tracking. A higher voltage makes HFI noisier and wastes more power, which is why this option allows increasing it at high motor currents when it is needed.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The HFI voltage is mapped between voltage_run and voltage_max, relative to the motor current.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_HFI_VOLTAGE_MAX</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -2156,11 +2160,55 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>10</valDouble>
+            <valDouble>5</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>9</vTx>
         </foc_hfi_voltage_max>
+        <foc_hfi_gain>
+            <longName>HFI Gain</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Correction gain for the silent HFI mode. Higher values are better at handling sudden changes in speed, but also make the position tracking noisier.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_HFI_GAIN</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1.5</maxDouble>
+            <minDouble>0.01</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.4</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>7</vTx>
+        </foc_hfi_gain>
+        <foc_hfi_hyst>
+            <longName>HFI Current Hysteresis</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Current hysteresis for the silent HFI mode. This sets above which current magnitude the injected voltage vector changes phase. Always setting the phase opposite of the set current is best for tracking, but every phase change causes a small click that can be heard. This hysteresis reduces how often the phase is changed around 0 current at the cost of some performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_HFI_HYST</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>500</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>2</valDouble>
+            <vTxDoubleScale>100</vTxDoubleScale>
+            <suffix> A</suffix>
+            <vTx>7</vTx>
+        </foc_hfi_hyst>
         <foc_sl_erpm_hfi>
             <longName>Sensorless ERPM HFI</longName>
             <type>1</type>
@@ -2602,6 +2650,27 @@ p, li { white-space: pre-wrap; }
             <suffix> ms</suffix>
             <vTx>7</vTx>
         </foc_fw_ramp_time>
+        <foc_speed_soure>
+            <longName>Speed Tracker Position Source</longName>
+            <type>4</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Position source for the speed trackers.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Corrected Position&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use the derived motor control position from sensors, HFI and observer.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Observer&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use the observer position. This is usually less noisy than hall sensors or hfi, but it can drift slowly at 0 speed.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_SPEED_SOURCE</cDefine>
+            <valInt>1</valInt>
+            <enumNames>Corrected Position</enumNames>
+            <enumNames>Observer</enumNames>
+        </foc_speed_soure>
         <gpd_buffer_notify_left>
             <longName>Buffer Notification Length</longName>
             <type>2</type>
@@ -4091,6 +4160,8 @@ p, li { white-space: pre-wrap; }
         <ser>foc_hfi_voltage_start</ser>
         <ser>foc_hfi_voltage_run</ser>
         <ser>foc_hfi_voltage_max</ser>
+        <ser>foc_hfi_gain</ser>
+        <ser>foc_hfi_hyst</ser>
         <ser>foc_sl_erpm_hfi</ser>
         <ser>foc_hfi_start_samples</ser>
         <ser>foc_hfi_obs_ovr_sec</ser>
@@ -4112,6 +4183,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_fw_duty_start</ser>
         <ser>foc_fw_ramp_time</ser>
         <ser>foc_fw_q_current_factor</ser>
+        <ser>foc_speed_soure</ser>
         <ser>gpd_buffer_notify_left</ser>
         <ser>gpd_buffer_interpol</ser>
         <ser>gpd_current_filter_const</ser>
@@ -4393,6 +4465,8 @@ p, li { white-space: pre-wrap; }
                     <param>foc_hfi_voltage_start</param>
                     <param>foc_hfi_voltage_run</param>
                     <param>foc_hfi_voltage_max</param>
+                    <param>foc_hfi_gain</param>
+                    <param>foc_hfi_hyst</param>
                     <param>foc_sl_erpm_hfi</param>
                     <param>foc_hfi_start_samples</param>
                     <param>foc_hfi_obs_ovr_sec</param>
@@ -4460,6 +4534,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_d_gain_scale_max_mod</param>
                     <param>foc_mtpa_mode</param>
                     <param>foc_observer_offset</param>
+                    <param>foc_speed_soure</param>
                 </subgroupParams>
             </subgroup>
         </group>
@@ -4492,6 +4567,7 @@ p, li { white-space: pre-wrap; }
                     <param>s_pid_min_erpm</param>
                     <param>s_pid_allow_braking</param>
                     <param>s_pid_ramp_erpms_s</param>
+                    <param>foc_speed_soure</param>
                     <param>::sep::Position Controller</param>
                     <param>p_pid_kp</param>
                     <param>p_pid_ki</param>

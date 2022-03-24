@@ -175,3 +175,22 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
 
     return fwRes;
 }
+
+bool FwHelper::uploadFirmwareSingleShotTimer(QString filename, VescInterface *vesc,
+                              bool isBootloader, bool checkName, bool fwdCan, QString BLfilename)
+{
+    bool res;
+    QTimer::singleShot(10, [this, &res, filename, vesc, isBootloader, checkName, fwdCan, BLfilename]() {
+        qDebug() << filename;
+        if(BLfilename.isEmpty()) {
+            res = uploadFirmware(filename, vesc, isBootloader, checkName, fwdCan);
+        } else {
+            res = uploadFirmware(BLfilename, vesc, true, checkName, fwdCan);
+            if(res) {
+                res = uploadFirmware(filename, vesc, isBootloader, checkName, fwdCan);
+            }
+        }
+        emit fwUploadRes(res, isBootloader);
+    });
+    return true;
+}

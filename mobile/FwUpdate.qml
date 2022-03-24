@@ -452,24 +452,17 @@ Item {
 
         onAccepted: {
             var okUploadFw = false
-
             if (swipeView.currentIndex == 0) {
                 if (mCommands.getLimitedSupportsEraseBootloader() && blItems.count > 0) {
-                    fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
+                    fwHelper.uploadFirmwareSingleShotTimer(fwItems.get(fwBox.currentIndex).value, VescIf, false, false,
+                                                           fwdCan, blItems.get(blBox.currentIndex).value)
+                } else {
+                    okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan, "")
                 }
-                okUploadFw = fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan)
             } else if (swipeView.currentIndex == 1) {
-                okUploadFw = fwHelper.uploadFirmware(customFwText.text, VescIf, false, true, fwdCan)
+                okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(customFwText.text, VescIf, false, true, fwdCan,"")
             } else if (swipeView.currentIndex == 2) {
-                fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
-            }
-
-            if (okUploadFw) {
-                VescIf.emitMessageDialog("Warning",
-                                         "The firmware upload is done. You must wait at least " +
-                                         "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your " +
-                                         "VESC will become bricked. If that happens you need a SWD programmer to recover it.",
-                                         true, false)
+                fwHelper.uploadFirmwareSingleShotTimer(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan,"")
             }
         }
     }
@@ -641,6 +634,25 @@ Item {
             uploadProgress.value = progress
             uploadButton.enabled = !isOngoing
             cancelButton.enabled = isOngoing
+        }
+    }
+    Connections {
+        target: fwHelper
+
+        onFwUploadRes: {
+            if (res) {
+                if(isBootloader) {
+                        VescIf.emitMessageDialog("Bootloader Finished",
+                                                 "Bootloader upload is done.",
+                                                 true, false)
+                } else {
+                        VescIf.emitMessageDialog("Warning",
+                                                 "The firmware upload is done. You must wait at least " +
+                                                 "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your " +
+                                                 "VESC will become bricked. If that happens you need a SWD programmer to recover it.",
+                                                 true, false)
+                }
+            }
         }
     }
 

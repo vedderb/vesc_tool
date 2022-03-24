@@ -1389,7 +1389,7 @@ p, li { white-space: pre-wrap; }
             <editorScale>1e+06</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>10</maxDouble>
-            <minDouble>0</minDouble>
+            <minDouble>-10</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
             <valDouble>0</valDouble>

@@ -21,9 +21,29 @@
     <section name="Type">
         <name>print</name>
         <name>yield</name>
+        <name>sleep</name>
         <name>map</name>
         <name>foldl</name>
         <name>foldr</name>
         <name>list</name>
+        <name>iota</name>
+        <name>range</name>
+        <name>reverse</name>
+        <name>length</name>
+        <name>apply</name>
+        <name>zipwith</name>
+        <name>filter</name>
+        <name>sort</name>
+        <name>sin</name>
+        <name>cos</name>
+        <name>tan</name>
+        <name>asin</name>
+        <name>acos</name>
+        <name>atan</name>
+        <name>atan2</name>
+        <name>pow</name>
+        <name>sqrt</name>
+        <name>log</name>
+        <name>log10</name>
     </section>
 </root>

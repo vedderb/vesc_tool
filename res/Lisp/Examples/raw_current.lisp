@@ -9,7 +9,7 @@
 (define i2-f 0)
 (define i3-f 0)
 
-(define f (lambda ()
+(loopwhile t
     (progn
         ; Unfiltered
         (define i1 (raw-adc-current 1 1))
@@ -28,7 +28,4 @@
         (define i3-adc (raw-adc-current 1 3 1))
 
         (yield (/ 1000000 rate))
-        (f)
-)))
-
-(f)
+))

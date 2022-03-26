@@ -13,12 +13,16 @@
         <name>if</name>
         <name>match</name>
         <name>_</name>
+        <name>loopfor</name>
+        <name>loopwhile</name>
+        <name>looprange</name>
     </section>
     <section name="PrimitiveType">
         <name>nil</name>
         <name>list</name>
     </section>
     <section name="Type">
+        <name>spawn</name>
         <name>print</name>
         <name>yield</name>
         <name>sleep</name>

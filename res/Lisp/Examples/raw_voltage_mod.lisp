@@ -1,6 +1,6 @@
 (define rate 200) ; Update rate in hz
 
-(defun f ()
+(loopwhile t
     (progn
         (define va (raw-adc-voltage 1 1))
         (define vb (raw-adc-voltage 1 2))
@@ -19,7 +19,5 @@
         (define vb-calc (* (/ (get-vin) 1.5) (/ (+ (- (raw-mod-alpha)) (+ (* sqrt-3 (raw-mod-beta))) ) 2)))
         (define vc-calc (* (/ (get-vin) 1.5) (/ (+ (- (raw-mod-alpha)) (- (* sqrt-3 (raw-mod-beta))) ) 2)))
 
-        (yield (/ 1000000 rate))
-        (f)
+        (sleep (/ 1.0 rate))
 ))
-(f)

@@ -1,9 +1,5 @@
-(defun f ()
+(loopwhile t
     (progn
-        ; Put your code here
-
-        (sleep 0.02) ; 50 Hz
-        (f)
+        (print "Hello World")
+        (sleep 1.5)
 ))
-
-(f)

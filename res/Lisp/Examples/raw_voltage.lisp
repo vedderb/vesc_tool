@@ -7,7 +7,7 @@
 
 (define va-f 0)
 
-(defun f ()
+(loopwhile t
     (progn
         (define use-raw 0) ; Set to 1 to use ADC bits and not convert to voltage
     
@@ -22,8 +22,5 @@
         
         (define va-f (filter va-f va-z))
 
-        (yield (/ 1000000 rate))
-        (f)
+        (sleep (/ 1.0 rate))
 ))
-
-(f)

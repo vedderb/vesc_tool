@@ -3,7 +3,6 @@
         <file>res/Lisp/Examples/can_pos_follow.lisp</file>
         <file>res/Lisp/Examples/control_servo_from_duty.lisp</file>
         <file>res/Lisp/Examples/control_servo_from_encoder.lisp</file>
-        <file>res/Lisp/Examples/duty.lisp</file>
         <file>res/Lisp/Examples/ppm_read.lisp</file>
         <file>res/Lisp/Examples/print_bms_data.lisp</file>
         <file>res/Lisp/Examples/speed_test.lisp</file>
@@ -21,5 +20,8 @@
         <file>res/Lisp/Examples/list_with_lists.lisp</file>
         <file>res/Lisp/Examples/gc_time_test.lisp</file>
         <file>res/Lisp/Examples/remote.lisp</file>
+        <file>res/Lisp/Examples/duty_ramp_functional.lisp</file>
+        <file>res/Lisp/Examples/duty_ramp_imperative.lisp</file>
+        <file>res/Lisp/Examples/loop_tests.lisp</file>
     </qresource>
 </RCC>

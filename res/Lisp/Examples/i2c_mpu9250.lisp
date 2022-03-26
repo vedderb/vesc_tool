@@ -21,7 +21,7 @@
 ; Receive buffer for accel and gyro
 (define rx-buf (array-create type-byte 14))
 
-(defun main ()
+(loopwhile t
     (progn
         (i2c-tx-rx mpu-addr (list reg-accel-xout-h) rx-buf)
     
@@ -33,7 +33,5 @@
         (define gyro-y (/ (* (bufget-i16 rx-buf 10) 2000.0) 32768.0))
         (define gyro-z (/ (* (bufget-i16 rx-buf 12) 2000.0) 32768.0))
     
-        (yield 10000)
-        (main)
+        (sleep 0.01)
 ))
-(main)

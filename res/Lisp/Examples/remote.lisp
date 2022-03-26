@@ -1,4 +1,4 @@
-(defun main () 
+(loopwhile t
     (progn
         (define state (get-remote-state))
         (define mote-y (ix state 0))
@@ -8,7 +8,4 @@
         (define mote-rev (ix state 4))
         
         (sleep 0.02)
-        (main)
 ))
-
-(main)

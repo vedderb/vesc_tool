@@ -12,7 +12,7 @@
 (define add rampstep)
 (define duty 0)
 
-(loopwhile 1
+(loopwhile t
     (progn
         (set-duty duty)
         (sleep (/ 1.0 rate))

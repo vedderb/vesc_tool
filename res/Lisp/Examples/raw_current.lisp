@@ -27,5 +27,5 @@
         (define i2-adc (raw-adc-current 1 2 1))
         (define i3-adc (raw-adc-current 1 3 1))
 
-        (yield (/ 1000000 rate))
+        (sleep (/ 1.0 rate))
 ))

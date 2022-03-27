@@ -58,12 +58,11 @@
 
 ; This function waits for events from the C code and calls the
 ; handlers for them when the events arrive.
-(define event-handler (lambda ()
-    (progn
+(defun event-handler ()
+    (loopwhile t
         (recv ((event-can-eid (? id) . (? data)) (proc-eid id data))
               (_ nil))
-        (event-handler) ; Call self again to make this a loop
-)))
+))
 
 ; Set LEDs in button.
 ; 0: off, 1: on, 2: slow blink, 3: med blink, 4: fast blink
@@ -77,9 +76,15 @@
         (can-send-eid id-send msg)
 )))
 
+; Spawn the event handler thread and pass the ID it returns to C
+(event-register-handler (spawn 150 event-handler))
+
+; Enable the CAN event for extended ID (EID) frames
+(event-enable 'event-can-eid)
+
 (define btn-now 1)
 
-(define btn-fun (lambda ()
+(loopwhile t
     (progn 
         (set-btn-leds btn-now 1 4 1)
         (yield 1500000)
@@ -88,15 +93,4 @@
         (define btn-now (+ btn-now 1))
         (if (= btn-now 6) (define btn-now 7)) ; Index 6 is missing, so skip it
         (if (> btn-now 7) (define btn-now 1))
-        
-        (btn-fun) ; Call self again to make this a loop
-)))
-
-; Spawn the event handler thread and pass the ID it returns to C
-(event-register-handler (spawn 50 event-handler))
-
-; Enable the CAN event for extended ID (EID) frames
-(event-enable 'event-can-eid)
-
-; Start the button-blink-function from this thread
-(btn-fun)
+))

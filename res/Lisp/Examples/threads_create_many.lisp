@@ -12,13 +12,10 @@
             (downcounter rate (- start 1))
 )))
 
-(defun main ()
+(loopwhile t
     (progn
         (spawn 20 downcounter 500 15)
         (define threads-now (+ threads-now 1))
         (define spawncnt (+ spawncnt 1))
-        (yield 3000)
-        (main)
+        (sleep 0.003)
 ))
-
-(main)

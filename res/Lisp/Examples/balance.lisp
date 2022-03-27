@@ -23,7 +23,7 @@
         (progn (select-motor 2) (get-speed))
 )))
 
-(define #yaw-set (* (ix (get-imu-rpy) 2) 57.29577951308232))
+(define #yaw-set (rad2deg (ix (get-imu-rpy) 2)))
 (define #pos-set (#pos-x))
 
 (define #pitch-set 0)
@@ -80,17 +80,20 @@
     (- val (* 0.01 (- val sample)))
 )
 
-(defun main ()
+; Sleep after boot to wait for IMU to settle
+(if (< (secs-since 0) 5) (sleep 5) nil)
+
+(loopwhile t
     (progn
-        (define #pitch (* (ix (get-imu-rpy) 1) 57.29577951308232))
-        (define #yaw (* (ix (get-imu-rpy) 2) 57.29577951308232))
+        (define #pitch (rad2deg (ix (get-imu-rpy) 1)))
+        (define #yaw (rad2deg (ix (get-imu-rpy) 2)))
         (define #pitch-rate (ix (get-imu-gyro) 1))
         (define #yaw-rate (ix (get-imu-gyro) 2))
         (define #pos (+ (#pos-x) (* #pitch 0.00122))) ; Includes pitch compensation
         (define #speed (#speed-x))
 
         ; Loop rate measurement
-        (define #it-rate (/ 1 (secs-since #t-last)))
+        (define #it-rate (/ 1.0 (secs-since #t-last)))
         (define #t-last (systime))
         (define #it-rate-filter (#filter #it-rate-filter #it-rate))
                 
@@ -123,8 +126,4 @@
         )
         
         (yield 1) ; Run as fast as possible
-        (main)
 ))
-
-(if (< (systime) 50000) (yield 5000000) nil) ; Sleep after boot to wait for IMU to settle
-(main)

@@ -1,9 +1,6 @@
-(let ((f (lambda ()
-   (progn
-     (define ppm (get-ppm)) ; So that lisp_stats shows the value
-     (set-duty ppm)
-     (timeout-reset)
-     (yield 20000)
-     (f)))))
-(f))
-
+(loopwhile 1
+    (progn
+        (define ppm (get-ppm)) ; This will make ppm show up in the variable table
+        (set-duty ppm)
+        (yield 20000)
+))

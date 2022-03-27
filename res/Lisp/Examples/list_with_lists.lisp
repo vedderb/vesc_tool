@@ -14,13 +14,11 @@
             ))
 ))
 
-(defun print-fw (index)
+(map (lambda (index)
     (let ( (dir (car (ix pkg index)))
            (fws (cdr (ix pkg index))) )
         (progn
-            (print (list "Dir:" dir))
-            (map (lambda (x) (print (list "  Target:" (car x) " File:" (cdr x)))) fws)
+            (print (str-merge "Dir: " dir))
+            (map (lambda (x) (print (str-merge "  Target: " (car x) " File: " (cdr x)))) fws)
             (print " ")
-)))
-
-(map print-fw (iota (- (length pkg) 1)))
+))) (iota (length pkg)))

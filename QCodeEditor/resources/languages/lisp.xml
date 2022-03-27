@@ -23,6 +23,7 @@
     </section>
     <section name="Type">
         <name>spawn</name>
+        <name>recv</name>
         <name>print</name>
         <name>yield</name>
         <name>sleep</name>

@@ -5,6 +5,7 @@
         <name>defun</name>
         <name>macro</name>
         <name>lambda</name>
+        <name>eval</name>
         <name>car</name>
         <name>cons</name>
         <name>cdr</name>
@@ -17,6 +18,12 @@
         <name>loopwhile</name>
         <name>looprange</name>
         <name>loopforeach</name>
+        <name>first</name>
+        <name>rest</name>
+        <name>fn</name>
+        <name>def</name>
+        <name>second</name>
+        <name>third</name>
     </section>
     <section name="PrimitiveType">
         <name>nil</name>
@@ -27,6 +34,7 @@
         <name>recv</name>
         <name>print</name>
         <name>yield</name>
+        <name>ix</name>
         <name>sleep</name>
         <name>map</name>
         <name>foldl</name>

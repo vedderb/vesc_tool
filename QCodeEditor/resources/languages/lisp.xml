@@ -16,6 +16,7 @@
         <name>loopfor</name>
         <name>loopwhile</name>
         <name>looprange</name>
+        <name>loopforeach</name>
     </section>
     <section name="PrimitiveType">
         <name>nil</name>

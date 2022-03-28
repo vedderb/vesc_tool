@@ -49,3 +49,8 @@
         (sleep 0.5)
 ))
 
+(print "\n== ForEach ==")
+
+(loopforeach i '("AB" "C" "dE" "f")
+    (print i)
+)

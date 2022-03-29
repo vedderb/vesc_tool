@@ -724,8 +724,17 @@ Item {
 
         onAccepted: {
             disableDialog()
-            Utility.restoreConfAll(VescIf, true, true, true)
-            enableDialog()
+            workaroundTimerLoadDefaultDialog.start()
+        }
+        Timer {
+            id: workaroundTimerLoadDefaultDialog
+            interval: 0
+            repeat: false
+            running: false
+            onTriggered: {
+                Utility.restoreConfAll(VescIf, true, true, true)
+                enableDialog()
+            }
         }
     }
 
@@ -765,13 +774,21 @@ Item {
             // have damaged their battery by forgetting to set this number properly and overdischarge
             // their battery.
             disableDialog()
-            var val = Utility.getMcValuesBlocking(VescIf)
-            enableDialog()
-
-            if (val.v_in > 39.0 && val.v_in < 51.0) {
-                mMcConf.updateParamInt("si_battery_cells", 12)
-            } else {
-                mMcConf.updateParamInt("si_battery_cells", 3)
+            workaroundTimerStartWarningDialog.start()
+        }
+        Timer {
+            id: workaroundTimerStartWarningDialog
+            interval: 0
+            repeat: false
+            running: false
+            onTriggered: {
+                var val = Utility.getMcValuesBlocking(VescIf)
+                enableDialog()
+                if (val.v_in > 39.0 && val.v_in < 51.0) {
+                    mMcConf.updateParamInt("si_battery_cells", 12)
+                } else {
+                    mMcConf.updateParamInt("si_battery_cells", 3)
+                }
             }
         }
     }
@@ -852,68 +869,76 @@ Item {
 
             mMcConf.updateParamDouble("si_gear_ratio", directDriveBox.checked ?
                                           1 : (wheelPulleyBox.value / motorPulleyBox.value), null)
-
             mCommands.setMcconf(false)
-            Utility.waitSignal(mCommands, "2ackReceived(QString)", 4000)
+            workaroundTimerDetectDialog.start()
+        }
+        Timer {
+            id: workaroundTimerDetectDialog
+            interval: 0
+            repeat: false
+            running: false
 
-            if (detectCanBox.checked) {
-                canDevs = Utility.scanCanVescOnly(VescIf)
-            } else {
-                canDevs: []
-            }
+            onTriggered: {
+                Utility.waitSignal(mCommands, "2ackReceived(QString)", 4000)
 
-            if (!Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0)) {
+                if (detectCanBox.checked) {
+                    detectDialog.canDevs = Utility.scanCanVescOnly(VescIf)
+                } else {
+                    detectDialog.canDevs = []
+                }
+
+                if (!Utility.setBatteryCutCan(VescIf, detectDialog.canDevs, 6.0, 6.0)) {
+                    enableDialog()
+                    return
+                }
+
+                var res  = Utility.detectAllFoc(VescIf, detectCanBox.checked,
+                                                maxPowerLossBox.realValue,
+                                                currentInMinBox.realValue,
+                                                currentInMaxBox.realValue,
+                                                openloopErpmBox.realValue,
+                                                sensorlessBox.realValue)
+
+                var resDetect = false
+                if (res.startsWith("Success!")) {
+                    resDetect = true
+
+                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, detectDialog.canDevs)
+
+                    var updateAllParams = ["l_duty_start"]
+
+                    // Temperature compensation means that the motor can be tracked at lower
+                    // speed across a broader temperature range. Therefore openloop_erpm
+                    // can be decreased.
+                    if (mMcConf.getParamBool("foc_temp_comp")) {
+                        var openloopErpm = mMcConf.getParamDouble("foc_openloop_rpm")
+                        mMcConf.updateParamDouble("foc_openloop_rpm", openloopErpm / 2.0, null)
+                        updateAllParams.push("foc_openloop_rpm")
+                    }
+
+                    // Set sensor mode to HFI start if the motor is sensorless, the firmware supports it
+                    // and the motor and application suggest it.
+                    if (mMcConf.getParamEnumNames("foc_sensor_mode").length >= 5 &&
+                            mMcConf.getParamEnum("foc_sensor_mode") === 0 &&
+                            usageList.currentItem.modelData.hfi_start &&
+                            motorList.currentItem.modelData.hfi_start) {
+                        mMcConf.updateParamEnum("foc_sensor_mode", 4, null)
+                        updateAllParams.push("foc_sensor_mode")
+                    }
+
+                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, detectDialog.canDevs, updateAllParams)
+                }
                 enableDialog()
-                return
-            }
 
-            var res  = Utility.detectAllFoc(VescIf, detectCanBox.checked,
-                                            maxPowerLossBox.realValue,
-                                            currentInMinBox.realValue,
-                                            currentInMaxBox.realValue,
-                                            openloopErpmBox.realValue,
-                                            sensorlessBox.realValue)
-
-            var resDetect = false
-            if (res.startsWith("Success!")) {
-                resDetect = true
-
-                Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs)
-
-                var updateAllParams = ["l_duty_start"]
-
-                // Temperature compensation means that the motor can be tracked at lower
-                // speed across a broader temperature range. Therefore openloop_erpm
-                // can be decreased.
-                if (mMcConf.getParamBool("foc_temp_comp")) {
-                    var openloopErpm = mMcConf.getParamDouble("foc_openloop_rpm")
-                    mMcConf.updateParamDouble("foc_openloop_rpm", openloopErpm / 2.0, null)
-                    updateAllParams.push("foc_openloop_rpm")
+                if (resDetect) {
+                    stackLayout.currentIndex++
+                    updateButtonText()
                 }
 
-                // Set sensor mode to HFI start if the motor is sensorless, the firmware supports it
-                // and the motor and application suggest it.
-                if (mMcConf.getParamEnumNames("foc_sensor_mode").length >= 5 &&
-                        mMcConf.getParamEnum("foc_sensor_mode") === 0 &&
-                        usageList.currentItem.modelData.hfi_start &&
-                        motorList.currentItem.modelData.hfi_start) {
-                    mMcConf.updateParamEnum("foc_sensor_mode", 4, null)
-                    updateAllParams.push("foc_sensor_mode")
-                }
-
-                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, updateAllParams)
+                resultDialog.title = "Detection Result"
+                resultLabel.text = res
+                resultDialog.open()
             }
-
-            enableDialog()
-
-            if (resDetect) {
-                stackLayout.currentIndex++
-                updateButtonText()
-            }
-
-            resultDialog.title = "Detection Result"
-            resultLabel.text = res
-            resultDialog.open()
         }
     }
 

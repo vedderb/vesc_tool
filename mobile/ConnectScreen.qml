@@ -286,7 +286,8 @@ Item {
                                             preferredDialog.open()
                                         } else {
                                             disableDialog()
-                                            VescIf.connectBle(bleAddr)
+                                            preferredDialog.bleAddr = bleAddr
+                                            workaroundTimerConnectPref.start()
                                         }
                                     }
                                 }
@@ -510,12 +511,21 @@ Item {
             bleModel.clear()
             mBle.emitScanDone()
             disableDialog()
-            VescIf.connectBle(bleAddr)
+            workaroundTimerConnectPref.start()
         }
 
         onRejected: {
             disableDialog()
-            VescIf.connectBle(bleAddr)
+            workaroundTimerConnectPref.start()
+        }
+        Timer {
+            id: workaroundTimerConnectPref
+            interval: 0
+            repeat: false
+            running: false
+            onTriggered: {
+                VescIf.connectBle(preferredDialog.bleAddr)
+            }
         }
     }
 

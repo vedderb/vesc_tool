@@ -443,8 +443,17 @@ Item {
 
         onAccepted: {
             progDialog.open()
-            VescIf.confStoreBackup(true, "")
-            progDialog.close()
+            workaroundTimerBackup.start()
+        }
+        Timer {
+            id: workaroundTimerBackup
+            interval: 0
+            repeat: false
+            running: false
+            onTriggered: {
+                VescIf.confStoreBackup(true, "")
+                progDialog.close()
+            }
         }
     }
 
@@ -478,8 +487,17 @@ Item {
 
         onAccepted: {
             progDialog.open()
-            VescIf.confRestoreBackup(true)
-            progDialog.close()
+            workaroundTimerRestore.start()
+        }
+        Timer {
+            id: workaroundTimerRestore
+            interval: 0
+            repeat: false
+            running: false
+            onTriggered: {
+                VescIf.confRestoreBackup(true)
+                progDialog.close()
+            }
         }
     }
 

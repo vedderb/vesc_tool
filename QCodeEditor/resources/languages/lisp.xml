@@ -18,6 +18,7 @@
         <name>loopwhile</name>
         <name>looprange</name>
         <name>loopforeach</name>
+        <name>break</name>
         <name>first</name>
         <name>rest</name>
         <name>fn</name>

@@ -23,5 +23,6 @@
         <file>res/Lisp/Examples/duty_ramp_functional.lisp</file>
         <file>res/Lisp/Examples/duty_ramp_imperative.lisp</file>
         <file>res/Lisp/Examples/loop_tests.lisp</file>
+        <file>res/Lisp/Examples/raw_hall.lisp</file>
     </qresource>
 </RCC>

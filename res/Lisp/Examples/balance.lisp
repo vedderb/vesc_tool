@@ -65,7 +65,7 @@
 
 (defun event-handler ()
     (progn
-        (recv ((signal-data-rx . (? data)) (proc-data data))
+        (recv ((event-data-rx . (? data)) (proc-data data))
               (_ nil))
         (event-handler)
 ))

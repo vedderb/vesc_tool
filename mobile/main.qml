@@ -36,6 +36,7 @@ ApplicationWindow {
     property ConfigParams mAppConf: VescIf.appConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
     property bool connected: false
+    property bool fwReadCorrectly: false
 
     visible: true
     width: 500
@@ -841,6 +842,26 @@ ApplicationWindow {
         }
     }
 
+    Timer {
+        id: bleDisconnectTimer
+        interval: 1000
+        running: false
+        repeat: true
+        property int trysLeft: 0
+
+        onTriggered: {
+            if(trysLeft < 1 || fwReadCorrectly) {
+                bleDisconnectTimer.stop()
+                connScreen.opened = VescIf.isPortConnected() ? false : true
+                return
+            }
+            if(VescIf.getLastBleAddr().length > 0) {
+                VescIf.connectBle(VescIf.getLastBleAddr())
+            }
+            trysLeft = trysLeft - 1
+        }
+    }
+
     Dialog {
         id: vescDialog
         standardButtons: Dialog.Ok
@@ -961,6 +982,7 @@ ApplicationWindow {
                 confTimer.mcConfRx = false
                 confTimer.appConfRx = false
                 connected = false
+                fwReadCorrectly = false
             } else {
                 connected = true
             }
@@ -968,8 +990,14 @@ ApplicationWindow {
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
+            if(!bleDisconnectTimer.running) {
+                connScreen.opened = VescIf.isPortConnected() ? false : true
+            }
+        }
 
-            connScreen.opened = VescIf.isPortConnected() ? false : true
+        onUnintentionalBleDisconnect: {
+            bleDisconnectTimer.trysLeft = 5
+            bleDisconnectTimer.start()
         }
 
         onStatusMessage: {
@@ -998,6 +1026,8 @@ ApplicationWindow {
                     mCommands.getMcconf()
                     mCommands.getAppConf()
                 }
+                fwReadCorrectly = true
+                bleDisconnectTimer.stop()
             }
 
             updateHwUi()

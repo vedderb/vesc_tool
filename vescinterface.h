@@ -242,6 +242,7 @@ signals:
     void autoConnectFinished();
     void profilesUpdated();
     void pairingListUpdated();
+    void unintentionalBleDisconnect();
     void CANbusNewNode(int node);
     void CANbusInterfaceListUpdated();
     void useImperialUnitsChanged(bool useImperialUnits);
@@ -273,6 +274,7 @@ private slots:
 
 #ifdef HAS_BLUETOOTH
     void bleDataRx(QByteArray data);
+    void bleUnintentionalDisconnect();
 #endif
 
     void timerSlot();

@@ -646,6 +646,7 @@ Item {
                                                  "Bootloader upload is done.",
                                                  true, false)
                 } else {
+                        VescIf.disconnectPort()
                         VescIf.emitMessageDialog("Warning",
                                                  "The firmware upload is done. You must wait at least " +
                                                  "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your " +

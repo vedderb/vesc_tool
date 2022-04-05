@@ -193,6 +193,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         setLastConnectionType(CONN_BLE);
         mSettings.setValue("ble_addr", mLastBleAddr);
     });
+    connect(mBleUart, SIGNAL(unintentionalDisconnect()), this, SLOT(bleUnintentionalDisconnect()));
 #endif
 
     mTcpServer = new TcpServerSimple(this);
@@ -2899,6 +2900,11 @@ void VescInterface::udpInputError(QAbstractSocket::SocketError socketError)
 void VescInterface::bleDataRx(QByteArray data)
 {
     mPacket->processData(data);
+}
+
+void VescInterface::bleUnintentionalDisconnect()
+{
+   emit unintentionalBleDisconnect();
 }
 #endif
 

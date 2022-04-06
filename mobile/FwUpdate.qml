@@ -20,6 +20,7 @@
 import QtQuick 2.11
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.3
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -250,8 +251,10 @@ Item {
 
                             onClicked: {
                                 if (Utility.requestFilePermission()) {
-                                    filePicker.enabled = true
-                                    filePicker.visible = true
+                                    fileDialog.close()
+                                    fileDialog.open()
+                                    //filePicker.enabled = true
+                                    //filePicker.visible = true
                                 } else {
                                     VescIf.emitMessageDialog(
                                                 "File Permissions",
@@ -280,6 +283,26 @@ Item {
                             customFwText.text = currentFolder() + "/" + fileName
                             visible = false
                             enabled = false
+                        }
+                    }
+                    FileDialog {
+                        id: fileDialog
+                        title: "Please choose a file"
+                        nameFilters: ["Firmware File (*.bin)"]
+                        selectedNameFilter : "Firmware File (*.bin)"
+                        onAccepted: {
+                            var substring = ".bin";
+                            if(fileDialog.fileUrl.toString().indexOf(substring) !== -1) {
+                                customFwText.text = fileDialog.fileUrl
+                        } else {
+
+                        }
+                            console.log("You chose: " + fileDialog.fileUrls)
+                            fileDialog.close()
+                        }
+                        onRejected: {
+                            console.log("Canceled")
+                            fileDialog.close()
                         }
                     }
                 }
@@ -430,10 +453,8 @@ Item {
         id: uploadDialog
         property bool fwdCan: false
         standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
         width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
+        modality: Qt.WindowModal
 
         Overlay.modal: Rectangle {
             color: "#AA000000"

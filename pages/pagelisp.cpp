@@ -18,6 +18,8 @@
     */
 
 #include <QDateTime>
+#include <QMessageBox>
+#include <QProgressDialog>
 #include "pagelisp.h"
 #include "ui_pagelisp.h"
 #include "utility.h"

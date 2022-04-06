@@ -47,6 +47,7 @@ signals:
     void scanDone(QVariantMap devs, bool done);
     void bleError(QString info);
     void connected();
+    void unintentionalDisconnect();
 
 public slots:
     void writeData(QByteArray data);
@@ -63,6 +64,7 @@ private slots:
     void deviceDisconnected();
 
     void serviceStateChanged(QLowEnergyService::ServiceState s);
+    void serviceError(QLowEnergyService::ServiceError e);
     void updateData(const QLowEnergyCharacteristic &c, const QByteArray &value);
     void confirmedDescriptorWrite(const QLowEnergyDescriptor &d, const QByteArray &value);
 
@@ -82,7 +84,7 @@ private:
     QString mTxUuid;
     bool mScanFinished;
     bool mInitDone;
-    QTimer mConnectTimetoutTimer;
+    QTimer mConnectTimeoutTimer;
 
     void init();
 

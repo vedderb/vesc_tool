@@ -1766,6 +1766,30 @@ p, li { white-space: pre-wrap; }
             <suffix> A</suffix>
             <vTx>7</vTx>
         </foc_sl_openloop_boost_q>
+        <foc_sl_openloop_max_q>
+            <longName>Openloop Current Max</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Limit the current during the openloop sequence to this value. Setting the boost current higher than this value means that the openloop current is a constant value (this one).&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;A negative value means that this limit is disabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_SL_OPENLOOP_MAX_Q</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>300</maxDouble>
+            <minDouble>-1</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>-1</valDouble>
+            <vTxDoubleScale>100</vTxDoubleScale>
+            <suffix> A</suffix>
+            <vTx>7</vTx>
+        </foc_sl_openloop_max_q>
         <foc_hall_table__0>
             <longName>Hall Table [0]</longName>
             <type>2</type>
@@ -4176,6 +4200,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_sl_openloop_time_ramp</ser>
         <ser>foc_sl_openloop_time</ser>
         <ser>foc_sl_openloop_boost_q</ser>
+        <ser>foc_sl_openloop_max_q</ser>
         <ser>foc_hall_table__0</ser>
         <ser>foc_hall_table__1</ser>
         <ser>foc_hall_table__2</ser>
@@ -4461,6 +4486,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_sl_openloop_time_ramp</param>
                     <param>foc_sl_openloop_time</param>
                     <param>foc_sl_openloop_boost_q</param>
+                    <param>foc_sl_openloop_max_q</param>
                     <param>foc_sat_comp</param>
                     <param>foc_temp_comp</param>
                     <param>foc_temp_comp_base_temp</param>

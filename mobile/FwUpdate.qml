@@ -20,7 +20,7 @@
 import QtQuick 2.11
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3
+import QtQuick.Dialogs 1.3 as Dl
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -285,7 +285,7 @@ Item {
                             enabled = false
                         }
                     }
-                    FileDialog {
+                    Dl.FileDialog {
                         id: fileDialog
                         title: "Please choose a file"
                         nameFilters: ["Firmware File (*.bin)"]
@@ -454,7 +454,9 @@ Item {
         property bool fwdCan: false
         standardButtons: Dialog.Ok | Dialog.Cancel
         width: parent.width - 20
-        modality: Qt.WindowModal
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape
 
         Overlay.modal: Rectangle {
             color: "#AA000000"

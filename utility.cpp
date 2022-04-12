@@ -627,8 +627,8 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 
     if (res) {
         int canId = ap->getParamInt("controller_id");
-        int canStatus = ap->getParamEnum("can_status_msgs_r1");
-        int canStatus2 = ap->getParamEnum("can_status_msgs_r2");
+        int canStatus = ap->getParamInt("can_status_msgs_r1");
+        int canStatus2 = ap->getParamInt("can_status_msgs_r2");
         vesc->commands()->getAppConfDefault();
         res = waitSignal(ap, SIGNAL(updated()), 4000);
 
@@ -638,8 +638,8 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 
         if (res) {
             ap->updateParamInt("controller_id", canId);
-            ap->updateParamEnum("can_status_msgs_r1", canStatus);
-            ap->updateParamEnum("can_status_msgs_r2", canStatus2);
+            ap->updateParamInt("can_status_msgs_r1", canStatus);
+            ap->updateParamInt("can_status_msgs_r2", canStatus2);
             vesc->commands()->setAppConf();
             res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
@@ -681,8 +681,8 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             int canId = ap->getParamInt("controller_id");
-            int canStatus = ap->getParamEnum("can_status_msgs_r1");
-            int canStatus2 = ap->getParamEnum("can_status_msgs_r2");
+            int canStatus = ap->getParamInt("can_status_msgs_r1");
+            int canStatus2 = ap->getParamInt("can_status_msgs_r2");
             vesc->commands()->getAppConfDefault();
             res = waitSignal(ap, SIGNAL(updated()), 4000);
 
@@ -692,8 +692,8 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             ap->updateParamInt("controller_id", canId);
-            ap->updateParamEnum("can_status_msgs_r1", canStatus);
-            ap->updateParamEnum("can_status_msgs_r2", canStatus2);
+            ap->updateParamInt("can_status_msgs_r1", canStatus);
+            ap->updateParamInt("can_status_msgs_r2", canStatus2);
             vesc->commands()->setAppConf();
             res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 

@@ -14,19 +14,11 @@
             )
 ))
 
-; Pad string s to length n with character ch, functional style
+; Pad string s to length n with character ch
 (defun pad-str (s n ch)
     (if (>= (str-len s) n)
         s
-        (pad-str2 (str-merge s ch) n ch)
-))
-
-; Same as above, imperative style
-(defun pad-str2 (s n ch)
-    (progn
-        (loopwhile (< (str-len s) n)
-            (set! 's (str-merge s ch)))
-        s
+        (pad-str (str-merge s ch) n ch)
 ))
 
 (loopforeach hw pkg

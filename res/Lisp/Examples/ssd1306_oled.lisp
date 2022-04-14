@@ -138,10 +138,12 @@
 ))))
 
 (defun putc (x row c) 
-    (looprange i 0 5
-        (bufset-u8 pixbuf
-            (+ x 1 i (* row 128))
-            (bufget-u8 font (+ i (* 5 (- c 32))))
+    (let (
+        (y (* row 128))
+        (co (* 5 (- c 32)))
+    )(progn
+        (bufset-u32 pixbuf (+ x 2 y) (bufget-u32 font co))
+        (bufset-u8 pixbuf (+ x 6 y) (bufget-u8 font (+ 4 co)))
 )))
 
 (defun putstr (x row str)
@@ -150,17 +152,15 @@
 ))
 
 ; Draw static things
-(putstr 0 0 "V In :")
 (line 0 11 127 11)
-(putstr 0 2 "T Fet:")
 
 (def fps 0)
 
 (loopwhile t
     (progn
         (def t-start (systime))
-        (putstr 42 0 (str-from-n (get-vin)      "%.1f "))
-        (putstr 42 2 (str-from-n (get-temp-fet) "%.1f "))
+        (putstr 0 0 (str-from-n (get-vin)      "V In : %.1f "))
+        (putstr 0 2 (str-from-n (get-temp-fet) "T Fet: %.1f "))
         (putstr 0 7 (str-from-n fps "FPS %.1f "))
         (circle 90 50 (to-i (- (get-vin) 10))) ; Circle that changes size based in v_in
         (i2c-tx-rx #SSD-ADDRESS pixbuf)

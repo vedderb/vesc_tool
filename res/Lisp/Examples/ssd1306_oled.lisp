@@ -142,8 +142,8 @@
         (y (* row 128))
         (co (* 5 (- c 32)))
     )(progn
-        (bufset-u32 pixbuf (+ x 2 y) (bufget-u32 font co))
-        (bufset-u8 pixbuf (+ x 6 y) (bufget-u8 font (+ 4 co)))
+        (bufset-u32 pixbuf (+ x 1 y) (bufget-u32 font co))
+        (bufset-u8 pixbuf (+ x 5 y) (bufget-u8 font (+ 4 co)))
 )))
 
 (defun putstr (x row str)

@@ -25,5 +25,6 @@
         <file>res/Lisp/Examples/loop_tests.lisp</file>
         <file>res/Lisp/Examples/raw_hall.lisp</file>
         <file>res/Lisp/Examples/print.lisp</file>
+        <file>res/Lisp/Examples/ssd1306_oled.lisp</file>
     </qresource>
 </RCC>

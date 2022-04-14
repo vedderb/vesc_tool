@@ -60,5 +60,7 @@
         <name>sqrt</name>
         <name>log</name>
         <name>log10</name>
+        <name>shl</name>
+        <name>shr</name>
     </section>
 </root>

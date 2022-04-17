@@ -3596,6 +3596,18 @@ p, li { white-space: pre-wrap; }
             <suffix> Hz</suffix>
             <vTx>3</vTx>
         </imu_conf.sample_rate_hz>
+        <imu_conf.use_magnetometer>
+            <longName>Use magnetometer</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use magnetometer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_IMU_USE_MAGNETOMETER</cDefine>
+            <valInt>1</valInt>
+        </imu_conf.use_magnetometer>
         <imu_conf.accel_confidence_decay>
             <longName>Accelerometer Confidence Decay</longName>
             <type>1</type>
@@ -4048,6 +4060,7 @@ p, li { white-space: pre-wrap; }
         <ser>imu_conf.type</ser>
         <ser>imu_conf.mode</ser>
         <ser>imu_conf.sample_rate_hz</ser>
+        <ser>imu_conf.use_magnetometer</ser>
         <ser>imu_conf.accel_confidence_decay</ser>
         <ser>imu_conf.mahony_kp</ser>
         <ser>imu_conf.mahony_ki</ser>
@@ -4356,6 +4369,7 @@ p, li { white-space: pre-wrap; }
                 <subgroupName>General</subgroupName>
                 <subgroupParams>
                     <param>imu_conf.type</param>
+                    <param>imu_conf.use_magnetometer</param>
                     <param>imu_conf.sample_rate_hz</param>
                     <param>::sep::Filters</param>
                     <param>imu_conf.mode</param>

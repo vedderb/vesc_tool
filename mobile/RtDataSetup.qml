@@ -721,7 +721,11 @@ Item {
             efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow
             efficiencyGauge.value = efficiency_lpf
             efficiencyGauge.unitText = useImperial ? "WH/MI" : "WH/KM"
-            consumValLabel.text = parseFloat(wh_km_total / impFact).toFixed(1)
+            if( (wh_km_total / impFact) < 999.0) {
+                consumValLabel.text = parseFloat(wh_km_total / impFact).toFixed(1)
+            } else {
+                consumValLabel.text = "∞"
+            }
 
             odometerValue = values.odometer
             batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) + "%"

@@ -661,13 +661,14 @@ Item {
 
         onValuesSetupReceived: {
             var currentMaxRound = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
+            var currentMinRound = Math.floor(mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
 
             if (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7)) {
                 currentGauge.maximumValue = currentMaxRound
-                currentGauge.minimumValue = -currentMaxRound
+                currentGauge.minimumValue = currentMinRound
             }
 
-            currentGauge.labelStep = Math.ceil(currentMaxRound / 20) * 5
+            currentGauge.labelStep = Math.ceil((currentMaxRound - currentMinRound) / 40) * 5
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
             batteryGauge.value = values.battery_level * 100.0

@@ -1,6 +1,6 @@
 (defun counter (var rate start)
     (progn
-        (set! var start)
+        (setvar var start)
         (yield (/ 1000000 rate))
         (counter var rate (+ start 1))
 ))

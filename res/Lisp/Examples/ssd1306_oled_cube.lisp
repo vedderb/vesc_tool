@@ -75,42 +75,6 @@
     (bufset-bit pixbuf (+ 8 (* x 8) (mod y 8) (* (/ y 8) 1024)) 1)
 )
 
-(defun circle (x0 y0 r)
-    (let (
-        (f (- 1 r))
-        (ddF-x 1)
-        (ddF-y (* -2 r))
-        (x 0)
-        (y r)
-    )
-    (progn
-        (pix-set x0 (+ y0 r))
-        (pix-set x0 (- y0 r))
-        (pix-set (+ x0 r) y0)
-        (pix-set (- x0 r) y0)
-
-        (loopwhile (< x y)
-            (progn
-                (if (>= f 0)
-                    (progn
-                        (setvar 'y (- y 1))
-                        (setvar 'ddF-y (+ ddF-y 2))
-                        (setvar 'f (+ f ddF-y))
-                ))
-                (setvar 'x (+ x 1))
-                (setvar 'ddF-x (+ ddF-x 2))
-                (setvar 'f (+ f ddF-x))
-                
-                (pix-set (+ x0 x) (+ y0 y))
-                (pix-set (- x0 x) (+ y0 y))
-                (pix-set (+ x0 x) (- y0 y))
-                (pix-set (- x0 x) (- y0 y))
-                (pix-set (+ x0 y) (+ y0 x))
-                (pix-set (- x0 y) (+ y0 x))
-                (pix-set (+ x0 y) (- y0 x))
-                (pix-set (- x0 y) (- y0 x))
-)))))
-
 (defun line (x0 y0 x1 y1)
     (let (
         (dx (abs (- x1 x0)))
@@ -135,17 +99,49 @@
                     (setvar 'y0 (+ y0 sy))))
 ))))
 
+; Nodes and edges of a 3d cube
+(def nodes '((-1 -1 -1) (-1 -1 1) (-1 1 -1) (-1 1 1) (1 -1 -1) (1 -1 1) (1 1 -1) (1 1 1)))
+(def edges '((0  1) (1 3) (3 2) (2 0) (4 5) (5 7) (7 6) (6 4) (0 4) (1 5) (2 6) (3 7)))
+
+(defun draw-edges ()
+    (let (
+        (scale 17.0)
+        (ofs-x (/ 85 scale))
+        (ofs-y (/ 34 scale)))
+        (loopforeach e edges
+            (apply line (map (fn (x) (to-i (* x scale))) (list
+                (+ ofs-x (ix (ix nodes (ix e 0)) 0)) (+ ofs-y (ix (ix nodes (ix e 0)) 1))
+                (+ ofs-x (ix (ix nodes (ix e 1)) 0)) (+ ofs-y (ix (ix nodes (ix e 1)) 1))
+))))))
+
+(defun rotate (ax ay) (let (
+    (sx (sin ax))
+    (cx (cos ax))
+    (sy (sin ay))
+    (cy (cos ay)))
+    (loopforeach n nodes
+        (let (
+            (x (ix n 0))
+            (y (ix n 1))
+            (z (ix n 2)))
+            (progn
+                (setix n 0 (- (* x cx) (* z sx)))
+                (setix n 2 (+ (* z cx) (* x sx)))
+                (setvar 'z (ix n 2))
+                (setix n 1 (- (* y cy) (* z sy)))
+                (setix n 2 (+ (* z cy) (* y sy)))
+)))))
+
 (def fps 0)
 
 (loopwhile t
     (progn
         (def t-start (systime))
-        (putstr 0 0 (str-from-n (get-vin)      "V In : %.1f "))
-        (putstr 0 2 (str-from-n (get-temp-fet) "T Fet: %.1f "))
-        (putstr 0 6 (str-from-n fps "FPS %.1f "))
-        (circle 90 50 (to-i (- (get-vin) 10))) ; Circle that changes size based in v_in
+        (draw-edges)
+        (rotate 0.1 0.05)
+        (putstr 0 7 (str-from-n fps "FPS %.1f "))
         (i2c-tx-rx #SSD-ADDRESS pixbuf)
         (bufclear pixbuf 0 1)
-        (def fps (/ 1 (secs-since t-start))) ; Calculate framerate excluding sleep
-        (sleep 0.1)
+        (def fps (/ 1 (secs-since t-start)))
+        (sleep 0.01)
 ))

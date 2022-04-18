@@ -6,9 +6,6 @@
         <name>macro</name>
         <name>lambda</name>
         <name>eval</name>
-        <name>car</name>
-        <name>cons</name>
-        <name>cdr</name>
         <name>let</name>
         <name>progn</name>
         <name>if</name>
@@ -19,12 +16,8 @@
         <name>looprange</name>
         <name>loopforeach</name>
         <name>break</name>
-        <name>first</name>
-        <name>rest</name>
         <name>fn</name>
         <name>def</name>
-        <name>second</name>
-        <name>third</name>
     </section>
     <section name="PrimitiveType">
         <name>nil</name>
@@ -62,5 +55,16 @@
         <name>log10</name>
         <name>shl</name>
         <name>shr</name>
+        <name>first</name>
+        <name>rest</name>
+        <name>car</name>
+        <name>cons</name>
+        <name>cdr</name>
+        <name>second</name>
+        <name>third</name>
+        <name>setcar</name>
+        <name>setcdr</name>
+        <name>setvar</name>
+        <name>setix</name>
     </section>
 </root>

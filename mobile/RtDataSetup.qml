@@ -742,6 +742,10 @@ Item {
             motTempGauge.labelStep = Math.ceil(motTempGauge.maximumValue/ 50) * 5
             motTempGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_end") / 5) * 5
             motTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_start") / 5) * 5
+
+            if(values.fault_str !== "FAULT_CODE_NONE") {
+                VescIf.emitStatusMessage(values.fault_str, false)
+            }
         }
     }
 }

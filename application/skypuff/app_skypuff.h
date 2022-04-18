@@ -31,8 +31,8 @@ typedef enum
 {
 	SK_COMM_SETTINGS_V1,		  // Receive settings on get_conf
 	SK_COMM_SETTINGS_LORA,		  // Propagate new LoRa settings between remote control units
-	SK_COMM_ALIVE_POWER_STATS,	  // Get alive timeout from UI and send back power stats
-	SK_COMM_ALIVE_TEMP_STATS,	  // Get alive timeout from UI and send back power and temp stats
+    SK_COMM_POWER_STATS,	      // Send power stats
+    SK_COMM_TEMP_STATS,	          // Send power and temp stats
 	SK_COMM_FAULT,				  // Send Fault code to UI
 	SK_COMM_STATE,				  // Send/receive new state
 	SK_COMM_PULLING_TOO_HIGH,	  // Messages to UI
@@ -148,10 +148,10 @@ inline const char *sk_command_str(const skypuff_custom_app_data_command c)
 		return "SK_COMM_SETTINGS_V1";
 	case SK_COMM_SETTINGS_LORA:
 		return "SK_COMM_SETTINGS_LORA";
-	case SK_COMM_ALIVE_POWER_STATS:
-		return "SK_COMM_ALIVE_POWER_STATS";
-	case SK_COMM_ALIVE_TEMP_STATS:
-		return "SK_COMM_ALIVE_TEMP_STATS";
+    case SK_COMM_POWER_STATS:
+        return "SK_COMM_POWER_STATS";
+    case SK_COMM_TEMP_STATS:
+        return "SK_COMM_TEMP_STATS";
 	case SK_COMM_FAULT:
 		return "SK_COMM_FAULT";
 	case SK_COMM_STATE:

@@ -25,7 +25,6 @@
 #include "qmlable_skypuff_types.h"
 
 const int aliveTimerDelay = 300; // milliseconds
-const int aliveTimeout = 1400;   // 4 alives per fail (1.4s)
 const int commandTimeout = 1390;
 const int aliveAvgN = 10; // number last alive responses to average
 const int aliveStepsForTemps = 4; // Get temps every N steps
@@ -153,7 +152,7 @@ protected:
 
     // Alive responce stats to monitor channel quality
     QElapsedTimer aliveResponseDelay;
-    QContiguousCache<int> aliveResponseTimes;
+    QContiguousCache<int> statsResponseTimes;
     int sumResponceTime;
     int minResponceTime;
     int maxResponceTime;
@@ -197,7 +196,7 @@ protected:
     // Connection stats
     int getMinResponseMillis() const {return minResponceTime == INT_MAX ? 0 : minResponceTime;}
     int getMaxResponseMillis() const {return maxResponceTime == INT_MIN ? 0 : maxResponceTime;}
-    float getAvgResponseMillis() const {return sumResponceTime == 0 ? 0 : (float)sumResponceTime / (float)aliveResponseTimes.count();}
+    float getAvgResponseMillis() const {return sumResponceTime == 0 ? 0 : (float)sumResponceTime / (float)statsResponseTimes.count();}
 
     QString getState() {return state_str(state);}
     QString getStateText() {return stateText;}
@@ -225,8 +224,8 @@ protected:
 
     // Protocol
     void sendGetConf();
-    void sendAlive();
-    void processAlive(VByteArray &vb, bool temps);
+    void requestStats();
+    void processStats(VByteArray &vb, bool temps);
     void processFault(VByteArray &vb);
     void processState(VByteArray &vb);
     void processPullingTooHigh(VByteArray &vb);
@@ -240,7 +239,7 @@ protected:
     void processForceIsSet(VByteArray &vb);
     void processSettingsV1(VByteArray &vb);
     void processMsg(VByteArray &vb);
-    void updateAliveResponseStats(const int millis);
+    void updateStatsResponse(const int millis);
 };
 
 #endif // SKYPUFF_H

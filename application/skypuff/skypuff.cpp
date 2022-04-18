@@ -40,7 +40,7 @@ Skypuff::Skypuff(VescInterface *v) : QObject(),
     setState(DISCONNECTED);
     clearStats();
 
-    aliveResponseTimes.setCapacity(aliveAvgN);
+    statsResponseTimes.setCapacity(aliveAvgN);
 }
 
 void Skypuff::logVescDialog(const QString & title, const QString & text)
@@ -153,7 +153,7 @@ void Skypuff::portConnectedChanged()
 void Skypuff::clearStats()
 {
     // Alive ping stats
-    aliveResponseTimes.clear();
+    statsResponseTimes.clear();
     sumResponceTime = 0;
     minResponceTime = INT_MAX;
     maxResponceTime = INT_MIN;
@@ -197,7 +197,7 @@ void Skypuff::timerEvent(QTimerEvent *event)
         vesc->disconnectPort();
     }
     else if(event->timerId() == this->aliveTimerId) {
-        sendAlive();
+        requestStats();
     }
     else
         qFatal("Skypuff::timerEvent(): unknown timer id %d", event->timerId());
@@ -217,12 +217,11 @@ void Skypuff::sendGetConf()
     getConfTimeoutTimerId = startTimer(commandTimeout, Qt::PreciseTimer);
 }
 
-void Skypuff::sendAlive()
+void Skypuff::requestStats()
 {
     VByteArray vb;
 
-    vb.vbAppendUint8((aliveStep % aliveStepsForTemps) ? SK_COMM_ALIVE_POWER_STATS : SK_COMM_ALIVE_TEMP_STATS);
-    vb.vbAppendUint16(aliveTimeout);
+    vb.vbAppendUint8((aliveStep % aliveStepsForTemps) ? SK_COMM_POWER_STATS : SK_COMM_TEMP_STATS);
     aliveStep++;
 
     vesc->commands()->sendCustomAppData(vb);
@@ -289,11 +288,11 @@ void Skypuff::customAppDataReceived(QByteArray data)
     skypuff_custom_app_data_command command = (skypuff_custom_app_data_command)vb.vbPopFrontUint8();
 
     switch(command) {
-    case SK_COMM_ALIVE_POWER_STATS:
-        processAlive(vb, false);
+    case SK_COMM_POWER_STATS:
+        processStats(vb, false);
         break;
-    case SK_COMM_ALIVE_TEMP_STATS:
-        processAlive(vb, true);
+    case SK_COMM_TEMP_STATS:
+        processStats(vb, true);
         break;
     case SK_COMM_STATE:
         processState(vb);
@@ -338,15 +337,15 @@ void Skypuff::customAppDataReceived(QByteArray data)
 
 }
 
-void Skypuff::updateAliveResponseStats(const int millis)
+void Skypuff::updateStatsResponse(const int millis)
 {
     sumResponceTime += millis;
 
     // Get old value if buffer is full
-    if(aliveResponseTimes.count() == aliveAvgN)
-        sumResponceTime -= aliveResponseTimes.takeFirst();
+    if(statsResponseTimes.count() == aliveAvgN)
+        sumResponceTime -= statsResponseTimes.takeFirst();
 
-    aliveResponseTimes.append(millis);
+    statsResponseTimes.append(millis);
 
     emit avgResponseMillisChanged(getAvgResponseMillis());
 
@@ -533,23 +532,23 @@ void Skypuff::processState(VByteArray &vb)
     }
 }
 
-void Skypuff::processAlive(VByteArray &vb, bool isTempsPacket)
+void Skypuff::processStats(VByteArray &vb, bool isTempsPacket)
 {
     // alive could be set from UI, timer is not necessary but possible
     if(aliveTimeoutTimerId) {
-        updateAliveResponseStats(aliveResponseDelay.elapsed());
+        updateStatsResponse(aliveResponseDelay.elapsed());
         killTimer(aliveTimeoutTimerId);
         aliveTimeoutTimerId = 0;
     }
     else {
-        qWarning() << "alive stats received, but timeout timer is not set";
+        qWarning() << "stats received, but timeout timer is not set";
     }
 
     // Enough data?
-    const int alive_power_packet_length = 4 * 2  + 2 * 2;
-    if(vb.length() < alive_power_packet_length) {
-        vesc->emitMessageDialog(tr("Can't deserialize alive power command packet"),
-                                tr("Received %1 bytes, expected %2 bytes!").arg(vb.length()).arg(alive_power_packet_length),
+    const int stats_power_packet_length = 4 * 2  + 2 * 2;
+    if(vb.length() < stats_power_packet_length) {
+        vesc->emitMessageDialog(tr("Can't deserialize stats power command packet"),
+                                tr("Received %1 bytes, expected %2 bytes!").arg(vb.length()).arg(stats_power_packet_length),
                                 true);
         vesc->disconnectPort();
     }
@@ -564,10 +563,10 @@ void Skypuff::processAlive(VByteArray &vb, bool isTempsPacket)
     setPower(newMotorAmps, newBatteryAmps);
 
     if(isTempsPacket) {
-        const int alive_temp_packet_length = 2 * 3;
-        if(vb.length() < alive_temp_packet_length) {
+        const int stats_temp_packet_length = 2 * 3;
+        if(vb.length() < stats_temp_packet_length) {
             vesc->emitMessageDialog(tr("Can't deserialize alive temp command packet"),
-                                    tr("Received %1 bytes, expected %2 bytes!").arg(vb.length()).arg(alive_temp_packet_length),
+                                    tr("Received %1 bytes, expected %2 bytes!").arg(vb.length()).arg(stats_temp_packet_length),
                                     true);
             vesc->disconnectPort();
         }

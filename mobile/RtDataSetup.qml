@@ -736,7 +736,7 @@ Item {
 
             escTempGauge.value = values.temp_mos
             escTempGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_end") / 5) * 5
-            motTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
+            escTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
             escTempGauge.labelStep = Math.ceil(escTempGauge.maximumValue/ 50) * 5
             motTempGauge.value = values.temp_motor
             motTempGauge.labelStep = Math.ceil(motTempGauge.maximumValue/ 50) * 5

@@ -66,5 +66,8 @@
         <name>setcdr</name>
         <name>setvar</name>
         <name>setix</name>
+        <name>bufcpy</name>
+        <name>bufclear</name>
+        <name>systime</name>
     </section>
 </root>

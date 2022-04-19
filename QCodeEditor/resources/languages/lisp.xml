@@ -69,5 +69,7 @@
         <name>bufcpy</name>
         <name>bufclear</name>
         <name>systime</name>
+        <name>and</name>
+        <name>or</name>
     </section>
 </root>

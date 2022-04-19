@@ -57,7 +57,7 @@
     (0xAF) ; Disaply on
 ))
 
-(i2c-start)
+(i2c-start 'rate-700k)
 
 (loopforeach c cmds-init
     (i2c-tx-rx #SSD-ADDRESS `(0x00 ,@c))

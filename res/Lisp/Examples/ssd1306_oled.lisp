@@ -25,9 +25,8 @@
 0x00 0x00 0x77 0x00 0x00  0x00 0x41 0x36 0x08 0x00  0x02 0x01 0x02 0x04 0x02])
 
 (defun putc (x row c) 
-    (progn
-        (bufcpy pixbuf (+ x 1 (* row 128)) font (* 5 (- c 32)) 5)
-))
+    (bufcpy pixbuf (+ x 1 (* row 128)) font (* 5 (- c 32)) 5)
+)
 
 (defun putstr (x row str)
     (looprange i 0 (str-len str)

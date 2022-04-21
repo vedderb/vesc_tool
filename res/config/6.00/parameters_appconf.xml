@@ -1991,8 +1991,22 @@ p, li { white-space: pre-wrap; }
             <cDefine>APPCONF_NRF_SEND_CRC_ACK</cDefine>
             <valInt>1</valInt>
         </app_nrf_conf.send_crc_ack>
+        <app_balance_conf.pid_mode>
+            <longName>PID Mode</longName>
+            <type>4</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;PID loop mode, Angle or Cascadeing Angle Rate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_PID_MODE</cDefine>
+            <valInt>0</valInt>
+            <enumNames>BALANCE_PID_MODE_ANGLE</enumNames>
+            <enumNames>BALANCE_PID_MODE_ANGLE_RATE_CASCADE</enumNames>
+        </app_balance_conf.pid_mode>
         <app_balance_conf.kp>
-            <longName>P</longName>
+            <longName>Angle P</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2014,7 +2028,7 @@ p, li { white-space: pre-wrap; }
             <vTx>9</vTx>
         </app_balance_conf.kp>
         <app_balance_conf.ki>
-            <longName>I</longName>
+            <longName>Angle I</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2036,7 +2050,7 @@ p, li { white-space: pre-wrap; }
             <vTx>9</vTx>
         </app_balance_conf.ki>
         <app_balance_conf.kd>
-            <longName>D</longName>
+            <longName>Angle D</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2057,6 +2071,72 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </app_balance_conf.kd>
+        <app_balance_conf.kp2>
+            <longName>Rate P</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;P value for the PID balance loop.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_KP2</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1e+06</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.kp2>
+        <app_balance_conf.ki2>
+            <longName>Rate I</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;I value for the PID balance loop.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_KI2</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1e+06</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.ki2>
+        <app_balance_conf.kd2>
+            <longName>Rate D</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;D value for the PID balance loop.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_KD2</cDefine>
+            <editorDecimalsDouble>4</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1e+06</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_balance_conf.kd2>
         <app_balance_conf.hertz>
             <longName>Loop Hertz</longName>
             <type>2</type>
@@ -4024,9 +4104,13 @@ p, li { white-space: pre-wrap; }
         <ser>app_nrf_conf.address__1</ser>
         <ser>app_nrf_conf.address__2</ser>
         <ser>app_nrf_conf.send_crc_ack</ser>
+        <ser>app_balance_conf.pid_mode</ser>
         <ser>app_balance_conf.kp</ser>
         <ser>app_balance_conf.ki</ser>
         <ser>app_balance_conf.kd</ser>
+        <ser>app_balance_conf.kp2</ser>
+        <ser>app_balance_conf.ki2</ser>
+        <ser>app_balance_conf.kd2</ser>
         <ser>app_balance_conf.hertz</ser>
         <ser>app_balance_conf.loop_time_filter</ser>
         <ser>app_balance_conf.fault_pitch</ser>
@@ -4294,9 +4378,13 @@ p, li { white-space: pre-wrap; }
                 <subgroupName>Tune</subgroupName>
                 <subgroupParams>
                     <param>::sep::PID</param>
+                    <param>app_balance_conf.pid_mode</param>
                     <param>app_balance_conf.kp</param>
                     <param>app_balance_conf.ki</param>
                     <param>app_balance_conf.kd</param>
+                    <param>app_balance_conf.kp2</param>
+                    <param>app_balance_conf.ki2</param>
+                    <param>app_balance_conf.kd2</param>
                     <param>::sep::Main Loop</param>
                     <param>app_balance_conf.hertz</param>
                     <param>app_balance_conf.loop_time_filter</param>

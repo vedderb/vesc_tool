@@ -32,7 +32,7 @@ import Vedder.vesc.configparams 1.0
 
 Item {
     id: rtData
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: ApplicationWindow.overlay // not used internally, kept for backwards compatibility
     anchors.fill: parent
     property alias updateData: commandsUpdate.enabled
 
@@ -175,9 +175,9 @@ Item {
                             color: "#AA000000"
                         }
 
-                        x: 10
-                        y: Math.max((parent.height - height) / 2, 10)
-                        parent: dialogParent
+                        x: Math.round((parent.width - width) / 2)
+                        y: Math.round((parent.height - height) / 2)
+                        parent: rtData
                         standardButtons: Dialog.Ok | Dialog.Cancel
 
                         onOpened: {

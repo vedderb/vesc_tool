@@ -145,6 +145,21 @@ Item {
 
                             Component.onCompleted: {
                                 updateHw(VescIf.getLastFwRxParams())
+                                var params = VescIf.getLastFwRxParams()
+
+                                updateHw(params)
+                                updateBl(params)
+
+                                var testFwStr = "";
+
+                                if (params.isTestFw > 0) {
+                                    testFwStr = " BETA " +  params.isTestFw
+                                }
+
+                                versionText.text =
+                                        "FW   : " + params.major + "." + params.minor + testFwStr + "\n" +
+                                        "HW   : " + params.hw + "\n" +
+                                        "UUID : " + Utility.uuid2Str(params.uuid, false)
                             }
 
                             onCurrentIndexChanged: {

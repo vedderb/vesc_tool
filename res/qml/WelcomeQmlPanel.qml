@@ -234,7 +234,6 @@ Item {
                     Page {
                         RtDataSetup {
                             anchors.fill: parent
-                            dialogParent: container
                         }
                     }
 

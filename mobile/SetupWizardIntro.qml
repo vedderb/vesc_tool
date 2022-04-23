@@ -18,12 +18,13 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     property ConfigParams mInfoConf: VescIf.infoConfig()
@@ -43,15 +44,19 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 10
-        height: parent.height - 10
+        width: parent.width - 10 - notchLeft - notchRight
+        height: parent.height - 10 - notchBot - notchTop
         closePolicy: Popup.NoAutoClose
-        x: 5
-        y: 5
+        x: 5 + (notchLeft + notchRight)/2
+        y: 5 + notchTop
         parent: ApplicationWindow.overlay
         bottomMargin: 0
         rightMargin: 0
         padding: 10
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         StackLayout {
             id: stackLayout
@@ -60,7 +65,7 @@ Item {
             Item {
                 Text {
                     id: introText
-                    color: "#ffffff"
+                    color: Utility.getAppHexColor("lightText")
                     linkColor: "lightblue"
                     verticalAlignment: Text.AlignVCenter
                     anchors.fill: parent
@@ -80,11 +85,11 @@ Item {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                         clip: true
-                        contentWidth: parent.width - 20
+                        contentWidth: availableWidth
 
                         Text {
                             id: usageText
-                            color: "#ffffff"
+                            color: Utility.getAppHexColor("lightText")
                             linkColor: "lightblue"
                             verticalAlignment: Text.AlignVCenter
                             width: parent.parent.width - 20
@@ -120,7 +125,7 @@ Item {
 
                         Text {
                             id: warrantyText
-                            color: "#ffffff"
+                            color: Utility.getAppHexColor("lightText")
                             linkColor: "lightblue"
                             verticalAlignment: Text.AlignVCenter
                             width: parent.parent.width - 20
@@ -147,7 +152,7 @@ Item {
             Item {
                 Text {
                     id: conclusionText
-                    color: "#ffffff"
+                    color: Utility.getAppHexColor("lightText")
                     linkColor: "lightblue"
                     verticalAlignment: Text.AlignVCenter
                     anchors.fill: parent
@@ -161,7 +166,7 @@ Item {
         }
 
         header: Rectangle {
-            color: "#dbdbdb"
+            color: Utility.getAppHexColor("lightText")
             height: tabBar.height
 
             TabBar {
@@ -174,7 +179,7 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: "#4f4f4f"
+                    color: Utility.getAppHexColor("lightBackground")
                 }
 
                 property int buttons: 3
@@ -245,10 +250,14 @@ Item {
         standardButtons: Dialog.Ok | Dialog.Close
         modal: true
         focus: true
-        width: parent.width - 20
-        height: Math.min(implicitHeight, parent.height - 40)
+        width: parent.width - 20 - notchLeft - notchRight
+        height: Math.min(implicitHeight, parent.height - 40 - notchTop - notchBot)
         closePolicy: Popup.CloseOnEscape
         parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
@@ -260,7 +269,7 @@ Item {
 
             Text {
                 id: resultLabel
-                color: "#ffffff"
+                color: Utility.getAppHexColor("lightText")
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
                 wrapMode: Text.WordWrap

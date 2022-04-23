@@ -20,6 +20,8 @@
 #include "detectallfocdialog.h"
 #include "ui_detectallfocdialog.h"
 #include "utility.h"
+#include "helpdialog.h"
+#include "utility.h"
 
 #include <QMessageBox>
 
@@ -29,13 +31,26 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QString theme = Utility::getThemePath();
+    ui->tabWidget->setTabIcon(0, QPixmap(theme + "icons/Wizard-96.png"));
+    ui->tabWidget->setTabIcon(1, QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->nextMotorButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->prevBattButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->nextBattButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->prevSetupButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->prevDirButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->runButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->runNoCanButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->runAdvancedButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->finishButton->setIcon(QPixmap(theme + "icons/Circled Ok-96.png"));
+
+
     mVesc = vesc;
     mRejectOk = true;
     mPulleyMotorOld = 1;
     mPulleyWheelOld = 1;
 
     ui->dirSetup->setVesc(mVesc);
-
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
@@ -43,55 +58,55 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
     QListWidgetItem *item = new QListWidgetItem;
     item->setText(tr("Mini Outrunner (~75 g)"));
     item->setIcon(QIcon("://res/images/motors/outrunner_mini.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(10, 1400, 4000, 14)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(20, 1400, 4000, 14)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Small Outrunner (~200 g)"));
     item->setIcon(QIcon("://res/images/motors/outrunner_small.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(25, 1400, 4000, 14)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(50, 1400, 4000, 14)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Medium Outrunner (~750 g)"));
     item->setIcon(QIcon("://res/images/motors/6374.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(60, 700, 4000, 14)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(120, 700, 4000, 14)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Large Outrunner (~2000 g)"));
-    item->setIcon(QIcon("://res/icons/motor.png"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 700, 4000, 14)));
+    item->setIcon(QIcon(theme +"icons/motor.png"));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(400, 700, 4000, 14)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Small Inrunner (~200 g)"));
     item->setIcon(QIcon("://res/images/motors/inrunner_small.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(25, 1400, 4000, 2)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(50, 1400, 4000, 2)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Medium Inrunner (~750 g)"));
     item->setIcon(QIcon("://res/images/motors/inrunner_medium.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(70, 1400, 4000, 4)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(140, 1400, 4000, 4)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("Large Inrunner (~2000 g)"));
-    item->setIcon(QIcon("://res/icons/motor.png"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(200, 1000, 4000, 4)));
+    item->setIcon(QIcon(theme +"icons/motor.png"));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(400, 1000, 4000, 4)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("E-Bike DD hub motor (~6 kg)"));
     item->setIcon(QIcon("://res/images/motors/ebike_dd_1kw.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(75, 300, 2000, 46)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(150, 300, 2000, 46)));
     ui->motorList->addItem(item);
 
     item = new QListWidgetItem;
     item->setText(tr("EDF Inrunner Small (~200 g)"));
     item->setIcon(QIcon("://res/images/motors/edf_small.jpg"));
-    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(55, 1400, 4000, 6)));
+    item->setData(Qt::UserRole, QVariant::fromValue(MotorData(110, 1400, 4000, 6)));
     ui->motorList->addItem(item);
 
     ui->motorList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -153,76 +168,7 @@ void DetectAllFocDialog::updateGearRatio()
 
 void DetectAllFocDialog::on_runButton_clicked()
 {
-    if (!mVesc->isPortConnected()) {
-        mVesc->emitMessageDialog("Error",
-                                 "The VESC is not connected. Please connect and try again.",
-                                 false, false);
-        return;
-    }
-
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::warning(this,
-                                 tr("Warning"),
-                                 tr("<font color=\"red\">Warning: </font>"
-                                    "This is going to spin up all motors connected on "
-                                    "the CAN-bus. Make sure that nothing is in the way."),
-                                 QMessageBox::Ok | QMessageBox::Cancel);
-
-    if (reply != QMessageBox::Ok) {
-        return;
-    }
-
-    mRejectOk = false;
-    ui->tabWidget->setEnabled(false);
-    ui->runButton->setEnabled(false);
-    ui->closeButton->setEnabled(false);
-
-    ui->progressBar->setRange(0, 0);
-
-    mVesc->commands()->setMcconf(false);
-    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
-    auto canDevs = mVesc->scanCan();
-
-    if (!Utility::setBatteryCutCan(mVesc, canDevs, 6.0, 6.0)) {
-        ui->tabWidget->setEnabled(true);
-        ui->runButton->setEnabled(true);
-        ui->closeButton->setEnabled(true);
-        mRejectOk = true;
-        ui->progressBar->setRange(0, 100);
-        ui->progressBar->setValue(0);
-        return;
-    }
-
-    QString res = Utility::detectAllFoc(mVesc, true,
-                                        ui->maxPowerLossBox->value(),
-                                        ui->currentInMinBox->value(),
-                                        ui->currentInMaxBox->value(),
-                                        ui->openloopErpmBox->value(),
-                                        ui->sensorlessErpmBox->value());
-
-    if (res.startsWith("Success!")) {
-        Utility::setBatteryCutCanFromCurrentConfig(mVesc, canDevs);
-    }
-
-    ui->progressBar->setRange(0, 100);
-    ui->progressBar->setValue(100);
-
-    ui->tabWidget->setEnabled(true);
-    ui->runButton->setEnabled(true);
-    ui->closeButton->setEnabled(true);
-    mRejectOk = true;
-
-    QMessageBox *msg = new QMessageBox(QMessageBox::Information,
-                                       "FOC Detection Result", res,
-                                       QMessageBox::Ok, this);
-    QFont font = QFont("DejaVu Sans Mono");
-    msg->setFont(font);
-    msg->exec();
-
-    if (res.startsWith("Success!")) {
-        ui->simpleSetupBox->setCurrentIndex(3);
-        ui->dirSetup->scanVescs();
-    }
+    runDetect(true);
 }
 
 void DetectAllFocDialog::on_closeButton_clicked()
@@ -289,4 +235,92 @@ void DetectAllFocDialog::on_motorList_currentRowChanged(int currentRow)
 void DetectAllFocDialog::on_prevDirButton_clicked()
 {
     ui->simpleSetupBox->setCurrentIndex(2);
+}
+
+void DetectAllFocDialog::on_runNoCanButton_clicked()
+{
+    runDetect(false);
+}
+
+void DetectAllFocDialog::runDetect(bool can)
+{
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog("Error",
+                                 "The VESC is not connected. Please connect and try again.",
+                                 false, false);
+        return;
+    }
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this,
+                                 tr("Warning"),
+                                 tr("<font color=\"red\">Warning: </font>"
+                                    "This is going to spin up all motors connected on "
+                                    "the CAN-bus. Make sure that nothing is in the way."),
+                                 QMessageBox::Ok | QMessageBox::Cancel);
+
+    if (reply != QMessageBox::Ok) {
+        return;
+    }
+
+    mRejectOk = false;
+    ui->tabWidget->setEnabled(false);
+    ui->runButton->setEnabled(false);
+    ui->runNoCanButton->setEnabled(false);
+    ui->closeButton->setEnabled(false);
+
+    ui->progressBar->setRange(0, 0);
+
+    mVesc->commands()->setMcconf(false);
+    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    QVector<int> canDevs;
+    if (can) {
+        canDevs = Utility::scanCanVescOnly(mVesc);
+    }
+
+    if (mVesc->commands()->getLimitedCompatibilityCommands().contains(COMM_SET_BATTERY_CUT)) {
+        mVesc->commands()->setBatteryCut(
+                    mVesc->mcConfig()->getParamDouble("l_battery_cut_start"),
+                    mVesc->mcConfig()->getParamDouble("l_battery_cut_end"),
+                    true, true);
+        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    } else {
+        if (!Utility::setBatteryCutCan(mVesc, canDevs, 6.0, 6.0)) {
+            ui->tabWidget->setEnabled(true);
+            ui->runButton->setEnabled(true);
+            ui->runNoCanButton->setEnabled(true);
+            ui->closeButton->setEnabled(true);
+            mRejectOk = true;
+            ui->progressBar->setRange(0, 100);
+            ui->progressBar->setValue(0);
+            return;
+        }
+    }
+
+    QString res = Utility::detectAllFoc(mVesc, can,
+                                        ui->maxPowerLossBox->value(),
+                                        ui->currentInMinBox->value(),
+                                        ui->currentInMaxBox->value(),
+                                        ui->openloopErpmBox->value(),
+                                        ui->sensorlessErpmBox->value());
+
+    if (res.startsWith("Success!")) {
+        Utility::setBatteryCutCanFromCurrentConfig(mVesc, canDevs);
+    }
+
+    ui->progressBar->setRange(0, 100);
+    ui->progressBar->setValue(100);
+
+    ui->tabWidget->setEnabled(true);
+    ui->runButton->setEnabled(true);
+    ui->runNoCanButton->setEnabled(true);
+    ui->closeButton->setEnabled(true);
+    mRejectOk = true;
+
+    HelpDialog::showHelpMonospace(this, "FOC Detection Result", res);
+
+    if (res.startsWith("Success!")) {
+        ui->simpleSetupBox->setCurrentIndex(3);
+        ui->dirSetup->scanVescs(can);
+    }
 }

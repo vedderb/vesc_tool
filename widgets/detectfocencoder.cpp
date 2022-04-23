@@ -21,12 +21,19 @@
 #include "ui_detectfocencoder.h"
 #include "helpdialog.h"
 #include <QMessageBox>
+#include "utility.h"
 
 DetectFocEncoder::DetectFocEncoder(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DetectFocEncoder)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->startButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
 }

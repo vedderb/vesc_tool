@@ -21,12 +21,18 @@
 #include "ui_helpdialog.h"
 #include <QDebug>
 #include <QMessageBox>
+#include "utility.h"
 
 HelpDialog::HelpDialog(QString title, QString text, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::HelpDialog)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    this->setWindowIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->label->setPixmap(QPixmap(theme + "icons/About-96.png"));
+
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowTitle(title);
     ui->textEdit->setText(text);
@@ -61,6 +67,14 @@ void HelpDialog::showHelp(QWidget *parent, ConfigParams *params, QString name, b
 void HelpDialog::showHelp(QWidget *parent, QString title, QString text)
 {
     HelpDialog *h = new HelpDialog(title, text, parent);
+    h->exec();
+}
+
+void HelpDialog::showHelpMonospace(QWidget *parent, QString title, QString text)
+{
+    HelpDialog *h = new HelpDialog(title, text, parent);
+    QFont font = QFont("DejaVu Sans Mono");
+    h->setFont(font);
     h->exec();
 }
 

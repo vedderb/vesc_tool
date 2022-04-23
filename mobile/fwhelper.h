@@ -29,13 +29,17 @@ class FwHelper : public QObject
     Q_OBJECT
 public:
     explicit FwHelper(QObject *parent = nullptr);
-    Q_INVOKABLE QVariantMap getHardwares(QString hw = "");
+    Q_INVOKABLE QVariantMap getHardwares(FW_RX_PARAMS params, QString hw = "");
     Q_INVOKABLE QVariantMap getFirmwares(QString hw);
-    Q_INVOKABLE QVariantMap getBootloaders(QString hw);
+    Q_INVOKABLE QVariantMap getBootloaders(FW_RX_PARAMS params, QString hw);
     Q_INVOKABLE bool uploadFirmware(QString filename, VescInterface *vesc,
                                     bool isBootloader, bool isIncluded, bool fwdCan);
+    Q_INVOKABLE bool uploadFirmwareSingleShotTimer(QString filename, VescInterface *vesc,
+                                                 bool isBootloader, bool isIncluded, bool fwdCan, QString BLfilename);
 
 signals:
+
+    void fwUploadRes(bool res, bool isBootloader);
 
 public slots:
 };

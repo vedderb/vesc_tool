@@ -10,6 +10,11 @@
     <height>720</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Roboto</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>VESC Parameter Editor</string>
   </property>
@@ -225,6 +230,11 @@
                   <item>
                    <property name="text">
                     <string>Bool</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Bitfield</string>
                    </property>
                   </item>
                  </widget>
@@ -854,6 +864,88 @@
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                 </layout>
+                </widget>
+                <widget class="QWidget" name="page_7">
+                 <layout class="QVBoxLayout" name="verticalLayout_16">
+                  <item>
+                   <widget class="QSpinBox" name="bitfieldValBox">
+                    <property name="prefix">
+                     <string>Value: </string>
+                    </property>
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QListWidget" name="bitfieldWidget">
+                    <item>
+                     <property name="text">
+                      <string>Bit 0</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 1</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 2</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 3</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 4</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 5</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 6</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 7</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -1498,7 +1590,7 @@
      <x>0</x>
      <y>0</y>
      <width>1267</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1507,6 +1599,8 @@
     </property>
     <addaction name="actionLoad_XML"/>
     <addaction name="actionSave_XML_as"/>
+    <addaction name="actionSave_Configuration_C_Header_as"/>
+    <addaction name="actionSave_Configuration_C_Header_ifdef_wrapped_as"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -1519,6 +1613,10 @@
      <string>Tools</string>
     </property>
     <addaction name="actionCalculatePacketSize"/>
+    <addaction name="actionCalculateCompressedCArraySize"/>
+    <addaction name="actionExportConfigurationParser"/>
+    <addaction name="actionExportCompressedCArray"/>
+    <addaction name="actionSave_XML_and_export_config_parser_and_compressed_C_array"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1561,18 +1659,75 @@
     <string>Calculate Packet Size</string>
    </property>
   </action>
+  <action name="actionExportConfigurationParser">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Configuration Parser</string>
+   </property>
+  </action>
+  <action name="actionSave_Configuration_C_Header_as">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Configuration C Header as...</string>
+   </property>
+  </action>
+  <action name="actionSave_Configuration_C_Header_ifdef_wrapped_as">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Configuration C Header (ifdef wrapped) as...</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Configuration C Header (ifdef wrapped) as</string>
+   </property>
+  </action>
+  <action name="actionExportCompressedCArray">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Compressed C Array</string>
+   </property>
+  </action>
+  <action name="actionCalculateCompressedCArraySize">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Calculator-96.png</normaloff>:/res/icons/Calculator-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Calculate Compressed C Array Size</string>
+   </property>
+  </action>
+  <action name="actionSave_XML_and_export_config_parser_and_compressed_C_array">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save XML and export config, parser and compressed C array</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ParamTable</class>
+   <extends>QTableWidget</extends>
+   <header>widgets/paramtable.h</header>
+  </customwidget>
   <customwidget>
    <class>MRichTextEdit</class>
    <extends>QWidget</extends>
    <header>widgets/mrichtextedit.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ParamTable</class>
-   <extends>QTableWidget</extends>
-   <header>widgets/paramtable.h</header>
   </customwidget>
  </customwidgets>
  <resources>
@@ -1586,12 +1741,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>588</x>
-     <y>203</y>
+     <x>945</x>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel">
-     <x>587</x>
-     <y>226</y>
+     <x>889</x>
+     <y>469</y>
     </hint>
    </hints>
   </connection>

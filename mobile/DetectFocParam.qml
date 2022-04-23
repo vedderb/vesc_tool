@@ -18,12 +18,13 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     property real res: 0.0
@@ -90,7 +91,7 @@ Item {
             return;
         }
 
-        gain = (0.00001 / res) / (lambda * lambda)
+        gain = 1.0e-3 / (lambda * lambda)
 
         updateDisplay()
     }
@@ -119,6 +120,10 @@ Item {
         width: parent.width - 20
         height: column.height - 40
         closePolicy: Popup.CloseOnEscape
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
@@ -287,7 +292,7 @@ Item {
 
     Dialog {
         id: detectRlDialog
-        standardButtons: Dialog.Ok
+        standardButtons: Dialog.Ok | Dialog.Cancel
         modal: true
         focus: true
         width: parent.width - 20
@@ -298,9 +303,13 @@ Item {
         y: Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
             id: detectRlLabel
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
@@ -328,10 +337,14 @@ Item {
         y: Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         Text {
             anchors.fill: parent
             id: detectLambdaLabel
-            color: "#ffffff"
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.WordWrap
             text:
@@ -341,7 +354,8 @@ Item {
         }
 
         onAccepted: {
-            mCommands.measureLinkageOpenloop(currentBox.realValue, erpmBox.realValue, dutyBox.realValue, res)
+            mCommands.measureLinkageOpenloop(currentBox.realValue, erpmBox.realValue,
+                                             dutyBox.realValue, res, ind)
         }
     }
 

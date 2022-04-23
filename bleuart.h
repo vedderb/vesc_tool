@@ -26,6 +26,7 @@
 #include <QLowEnergyController>
 #include <QLowEnergyService>
 #include <QVariantMap>
+#include <QTimer>
 
 class BleUart : public QObject
 {
@@ -39,12 +40,14 @@ public:
     Q_INVOKABLE void disconnectBle();
     Q_INVOKABLE bool isConnected();
     Q_INVOKABLE bool isConnecting();
+    Q_INVOKABLE void emitScanDone();
 
 signals:
     void dataRx(QByteArray data);
     void scanDone(QVariantMap devs, bool done);
     void bleError(QString info);
     void connected();
+    void unintentionalDisconnect();
 
 public slots:
     void writeData(QByteArray data);
@@ -61,6 +64,7 @@ private slots:
     void deviceDisconnected();
 
     void serviceStateChanged(QLowEnergyService::ServiceState s);
+    void serviceError(QLowEnergyService::ServiceError e);
     void updateData(const QLowEnergyCharacteristic &c, const QByteArray &value);
     void confirmedDescriptorWrite(const QLowEnergyDescriptor &d, const QByteArray &value);
 
@@ -78,6 +82,11 @@ private:
     QString mServiceUuid;
     QString mRxUuid;
     QString mTxUuid;
+    bool mScanFinished;
+    bool mInitDone;
+    QTimer mConnectTimeoutTimer;
+
+    void init();
 
 };
 

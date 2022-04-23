@@ -24,7 +24,6 @@ import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
-
 Item {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mAppConf: VescIf.appConfig()
@@ -46,6 +45,9 @@ Item {
             } else if (conf.isParamQString(name)) {
                 var component5 = Qt.createComponent("ParamEditString.qml");
                 return component5.createObject(parent, {"params": conf, "paramName": name});
+            } else if (conf.isParamBitfield(name)) {
+                var component6 = Qt.createComponent("ParamEditBitfield.qml");
+                return component6.createObject(parent, {"params": conf, "paramName": name});
             }
         } else {
             console.log("Parameter " + name + " not found.")

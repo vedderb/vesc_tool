@@ -30,8 +30,10 @@ PageAppNunchuk::PageAppNunchuk(QWidget *parent) :
     mVesc = nullptr;
     ui->display->setDual(true);
 
+    Utility::setPlotColors(ui->throttlePlot);
     ui->throttlePlot->addGraph();
     ui->throttlePlot->graph()->setName("Throttle Curve");
+    ui->throttlePlot->graph()->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->throttlePlot->xAxis->setLabel("Throttle Value");
     ui->throttlePlot->yAxis->setLabel("Output Value");
     ui->throttlePlot->legend->setVisible(true);
@@ -53,6 +55,7 @@ void PageAppNunchuk::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
+        ui->nrfPair->setVesc(mVesc);
         reloadParams();
 
         connect(mVesc->commands(), SIGNAL(decodedChukReceived(double)),
@@ -105,7 +108,7 @@ void PageAppNunchuk::paramChangedDouble(QObject *src, QString name, double newPa
         }
         ui->throttlePlot->graph()->setData(x, y);
         ui->throttlePlot->rescaleAxes();
-        ui->throttlePlot->replot();
+        ui->throttlePlot->replotWhenVisible();
     }
 }
 

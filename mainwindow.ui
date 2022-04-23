@@ -7,28 +7,60 @@
     <x>0</x>
     <y>0</y>
     <width>1054</width>
-    <height>642</height>
+    <height>652</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Roboto</family>
+   </font>
   </property>
   <property name="windowTitle">
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_silver.qrc">
+   <iconset>
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="spacing">
+     <number>4</number>
+    </property>
     <property name="leftMargin">
      <number>6</number>
     </property>
+    <property name="topMargin">
+     <number>6</number>
+    </property>
+    <property name="rightMargin">
+     <number>6</number>
+    </property>
     <property name="bottomMargin">
-     <number>2</number>
+     <number>6</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>4</number>
+      </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>12</number>
+        </property>
+        <property name="leftMargin">
+         <number>12</number>
+        </property>
+        <property name="topMargin">
+         <number>12</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>12</number>
+        </property>
         <item>
          <widget class="QLabel" name="pageLabel">
           <property name="enabled">
@@ -44,7 +76,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_silver.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_free.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -52,24 +84,120 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="pageList">
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>0</height>
-           </size>
+         <widget class="QSplitter" name="leftSplitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="handleWidth">
+           <number>6</number>
+          </property>
+          <property name="childrenCollapsible">
+           <bool>true</bool>
+          </property>
+          <widget class="QListWidget" name="pageList">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>220</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>220</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Roboto</family>
+            </font>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="resizeMode">
+            <enum>QListView::Adjust</enum>
+           </property>
+           <property name="viewMode">
+            <enum>QListView::ListMode</enum>
+           </property>
+          </widget>
+          <widget class="QWidget" name="layoutWidget">
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="font">
+               <font>
+                <family>Roboto</family>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>CAN-Devices</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="canList">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>Roboto</family>
+               </font>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="scanCanButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="maximumSize">
            <size>
-            <width>220</width>
+            <width>200</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
+          <property name="text">
+           <string>Scan CAN</string>
           </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
+          <property name="icon">
+           <iconset resource="res.qrc">
+            <normaloff>:/res/icons/Refresh-96.png</normaloff>:/res/icons/Refresh-96.png</iconset>
           </property>
          </widget>
         </item>
@@ -77,6 +205,11 @@
       </item>
       <item>
        <widget class="QStackedWidget" name="pageWidget">
+        <property name="font">
+         <font>
+          <family>Roboto</family>
+         </font>
+        </property>
         <property name="currentIndex">
          <number>-1</number>
         </property>
@@ -89,8 +222,8 @@
       <property name="spacing">
        <number>2</number>
       </property>
-      <item row="1" column="8">
-       <widget class="DisplayBar" name="dispCurrent" native="true">
+      <item row="0" column="8">
+       <widget class="DisplayBar" name="dispDuty" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -105,18 +238,114 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="8">
-       <widget class="DisplayBar" name="dispDuty" native="true">
+      <item row="0" column="4">
+       <widget class="QDoubleSpinBox" name="brakeCurrentBox">
+        <property name="font">
+         <font>
+          <family>DejaVu Sans Mono</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Brake current</string>
+        </property>
+        <property name="prefix">
+         <string>IB </string>
+        </property>
+        <property name="suffix">
+         <string> A</string>
+        </property>
+        <property name="minimum">
+         <double>-500.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>500.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.500000000000000</double>
+        </property>
+        <property name="value">
+         <double>3.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="currentButton">
+        <property name="toolTip">
+         <string>Current</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QPushButton" name="brakeCurrentButton">
+        <property name="toolTip">
+         <string>Brake current</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QPushButton" name="handbrakeButton">
+        <property name="toolTip">
+         <string>Handbrake current</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="speedButton">
+        <property name="toolTip">
+         <string>Speed</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7" rowspan="2">
+       <widget class="QPushButton" name="stopButton">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="minimumSize">
+        <property name="toolTip">
+         <string>Switch off</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Stop Sign-96.png</normaloff>:/res/icons/Stop Sign-96.png</iconset>
+        </property>
+        <property name="iconSize">
          <size>
-          <width>150</width>
-          <height>0</height>
+          <width>40</width>
+          <height>40</height>
          </size>
         </property>
        </widget>
@@ -156,80 +385,19 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
-       <widget class="QDoubleSpinBox" name="handbrakeBox">
-        <property name="font">
-         <font>
-          <family>Monospace</family>
-         </font>
+      <item row="1" column="8">
+       <widget class="DisplayBar" name="dispCurrent" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="toolTip">
-         <string>Handbrake current</string>
-        </property>
-        <property name="prefix">
-         <string>HB </string>
-        </property>
-        <property name="suffix">
-         <string> A</string>
-        </property>
-        <property name="minimum">
-         <double>-500.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>500.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.500000000000000</double>
-        </property>
-        <property name="value">
-         <double>3.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="5">
-       <widget class="QPushButton" name="handbrakeButton">
-        <property name="toolTip">
-         <string>Handbrake current</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QDoubleSpinBox" name="currentBox">
-        <property name="font">
-         <font>
-          <family>Monospace</family>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Current</string>
-        </property>
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-        <property name="prefix">
-         <string>I </string>
-        </property>
-        <property name="suffix">
-         <string> A</string>
-        </property>
-        <property name="minimum">
-         <double>-500.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>500.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.500000000000000</double>
-        </property>
-        <property name="value">
-         <double>3.000000000000000</double>
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -237,7 +405,7 @@
        <widget class="QDoubleSpinBox" name="speedBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -266,133 +434,18 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="dutyButton">
-        <property name="toolTip">
-         <string>Duty cycle</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-        </property>
-        <property name="flat">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QDoubleSpinBox" name="posBox">
+      <item row="1" column="4">
+       <widget class="QDoubleSpinBox" name="handbrakeBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
-         <string>Position</string>
+         <string>Handbrake current</string>
         </property>
         <property name="prefix">
-         <string>P </string>
-        </property>
-        <property name="suffix">
-         <string> °</string>
-        </property>
-        <property name="maximum">
-         <double>360.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="value">
-         <double>0.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="posButton">
-        <property name="toolTip">
-         <string>Position</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="7" rowspan="2">
-       <widget class="QPushButton" name="stopButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Switch off</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Stop Sign-96.png</normaloff>:/res/icons/Stop Sign-96.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>40</width>
-          <height>40</height>
-         </size>
-        </property>
-        <property name="shortcut">
-         <string>Esc</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QPushButton" name="speedButton">
-        <property name="toolTip">
-         <string>Speed</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="currentButton">
-        <property name="toolTip">
-         <string>Current</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QDoubleSpinBox" name="brakeCurrentBox">
-        <property name="font">
-         <font>
-          <family>Monospace</family>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Brake current</string>
-        </property>
-        <property name="prefix">
-         <string>IB </string>
+         <string>HB </string>
         </property>
         <property name="suffix">
          <string> A</string>
@@ -411,25 +464,11 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="5">
-       <widget class="QPushButton" name="brakeCurrentButton">
-        <property name="toolTip">
-         <string>Brake current</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QDoubleSpinBox" name="dutyBox">
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>DejaVu Sans Mono</family>
          </font>
         </property>
         <property name="toolTip">
@@ -458,109 +497,105 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="posButton">
+        <property name="toolTip">
+         <string>Position</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="dutyButton">
+        <property name="toolTip">
+         <string>Duty cycle</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="res.qrc">
+          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QDoubleSpinBox" name="posBox">
+        <property name="font">
+         <font>
+          <family>DejaVu Sans Mono</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Position</string>
+        </property>
+        <property name="prefix">
+         <string>P </string>
+        </property>
+        <property name="suffix">
+         <string> °</string>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QDoubleSpinBox" name="currentBox">
+        <property name="font">
+         <font>
+          <family>DejaVu Sans Mono</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Current</string>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="prefix">
+         <string>I </string>
+        </property>
+        <property name="suffix">
+         <string> A</string>
+        </property>
+        <property name="minimum">
+         <double>-500.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>500.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.500000000000000</double>
+        </property>
+        <property name="value">
+         <double>3.000000000000000</double>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1054</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionSaveMotorConfXml"/>
-    <addaction name="actionLoadMotorConfXml"/>
-    <addaction name="separator"/>
-    <addaction name="actionSaveAppconfXml"/>
-    <addaction name="actionLoadAppconfXml"/>
-    <addaction name="separator"/>
-    <addaction name="actionSaveMotorConfigurationHeader"/>
-    <addaction name="actionSaveMotorConfigurationHeaderWrap"/>
-    <addaction name="separator"/>
-    <addaction name="actionSaveAppConfigurationHeader"/>
-    <addaction name="actionSaveAppConfigurationHeaderWrap"/>
-    <addaction name="separator"/>
-    <addaction name="actionExit"/>
-   </widget>
-   <widget class="QMenu" name="menuHelp">
-    <property name="title">
-     <string>Help</string>
-    </property>
-    <addaction name="actionVESCProjectForums"/>
-    <addaction name="separator"/>
-    <addaction name="actionVESCToolChangelog"/>
-    <addaction name="actionFirmwareChangelog"/>
-    <addaction name="separator"/>
-    <addaction name="actionAbout"/>
-    <addaction name="actionLibrariesUsed"/>
-    <addaction name="actionAboutQt"/>
-    <addaction name="separator"/>
-    <addaction name="actionSafetyInformation"/>
-    <addaction name="actionWarrantyStatement"/>
-    <addaction name="actionLicense"/>
-   </widget>
-   <widget class="QMenu" name="menuTools">
-    <property name="title">
-     <string>Developer</string>
-    </property>
-    <addaction name="actionParameterEditorMcconf"/>
-    <addaction name="actionParameterEditorAppconf"/>
-    <addaction name="actionParameterEditorInfo"/>
-    <addaction name="actionParameterEditorFW"/>
-    <addaction name="actionExportConfigurationParser"/>
-   </widget>
-   <widget class="QMenu" name="menuTerminal">
-    <property name="title">
-     <string>Terminal</string>
-    </property>
-    <addaction name="actionTerminalShowHelp"/>
-    <addaction name="actionTerminalPrintFaults"/>
-    <addaction name="actionTerminalPrintThreads"/>
-    <addaction name="separator"/>
-    <addaction name="actionTerminalDRV8301ResetLatchedFaults"/>
-    <addaction name="separator"/>
-    <addaction name="actionTerminalClear"/>
-   </widget>
-   <widget class="QMenu" name="menuCommands">
-    <property name="title">
-     <string>Commands</string>
-    </property>
-    <addaction name="actionReboot"/>
-   </widget>
-   <widget class="QMenu" name="menuWizards">
-    <property name="title">
-     <string>Wizards</string>
-    </property>
-    <addaction name="actionAutoSetupFOC"/>
-    <addaction name="actionAppSetupWizard"/>
-    <addaction name="actionMotorSetupWizard"/>
-   </widget>
-   <widget class="QMenu" name="menuTools_2">
-    <property name="title">
-     <string>ConfBackup</string>
-    </property>
-    <addaction name="actionBackupConfiguration"/>
-    <addaction name="actionBackupConfigurationsCAN"/>
-    <addaction name="actionRestoreConfiguration"/>
-    <addaction name="actionRestoreConfigurationsCAN"/>
-    <addaction name="actionClearConfigurationBackups"/>
-   </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuTools_2"/>
-   <addaction name="menuWizards"/>
-   <addaction name="menuCommands"/>
-   <addaction name="menuTerminal"/>
-   <addaction name="menuTools"/>
-   <addaction name="menuHelp"/>
-  </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="toolTip">
+    <string/>
+   </property>
    <property name="movable">
     <bool>false</bool>
    </property>
@@ -594,13 +629,124 @@
    <addaction name="actionWriteAppconf"/>
    <addaction name="separator"/>
    <addaction name="actionKeyboardControl"/>
+   <addaction name="actionGamepadControl"/>
    <addaction name="actionRtData"/>
    <addaction name="actionRtDataApp"/>
    <addaction name="actionIMU"/>
+   <addaction name="actionrtDataBms"/>
    <addaction name="actionSendAlive"/>
    <addaction name="actionCanFwd"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1054</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSaveMotorConfXml"/>
+    <addaction name="actionLoadMotorConfXml"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveAppconfXml"/>
+    <addaction name="actionLoadAppconfXml"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveMotorConfigurationHeader"/>
+    <addaction name="actionSaveMotorConfigurationHeaderWrap"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveAppConfigurationHeader"/>
+    <addaction name="actionSaveAppConfigurationHeaderWrap"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionVESCProjectForums"/>
+    <addaction name="separator"/>
+    <addaction name="actionVESCToolChangelog"/>
+    <addaction name="actionFirmwareChangelog"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout"/>
+    <addaction name="actionLibrariesUsed"/>
+    <addaction name="actionAboutQt"/>
+    <addaction name="separator"/>
+    <addaction name="actionSafetyInformation"/>
+    <addaction name="actionWarrantyStatement"/>
+    <addaction name="actionLicense"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Developer</string>
+    </property>
+    <addaction name="actionParameterEditorMcconf"/>
+    <addaction name="actionParameterEditorAppconf"/>
+    <addaction name="actionParameterEditorInfo"/>
+    <addaction name="actionParameterEditorFW"/>
+    <addaction name="actionParameterEditorCustomConf0"/>
+    <addaction name="actionExportConfigurationParser"/>
+   </widget>
+   <widget class="QMenu" name="menuTerminal">
+    <property name="title">
+     <string>Terminal</string>
+    </property>
+    <addaction name="actionTerminalShowHelp"/>
+    <addaction name="actionTerminalPrintFaults"/>
+    <addaction name="actionTerminalPrintThreads"/>
+    <addaction name="separator"/>
+    <addaction name="actionTerminalDRVResetLatchedFaults"/>
+    <addaction name="separator"/>
+    <addaction name="actionTerminalClear"/>
+    <addaction name="separator"/>
+    <addaction name="actionReboot"/>
+   </widget>
+   <widget class="QMenu" name="menuCommands">
+    <property name="font">
+     <font>
+      <family>Roboto</family>
+     </font>
+    </property>
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionPreferences"/>
+   </widget>
+   <widget class="QMenu" name="menuWizards">
+    <property name="title">
+     <string>Wizards</string>
+    </property>
+    <addaction name="actionAutoSetupFOC"/>
+    <addaction name="actionSetupMotorsFOCQuick"/>
+    <addaction name="actionAppSetupWizard"/>
+    <addaction name="actionMotorSetupWizard"/>
+   </widget>
+   <widget class="QMenu" name="menuTools_2">
+    <property name="title">
+     <string>ConfBackup</string>
+    </property>
+    <addaction name="actionBackupConfiguration"/>
+    <addaction name="actionBackupConfigurationsCAN"/>
+    <addaction name="actionRestoreConfiguration"/>
+    <addaction name="actionRestoreConfigurationsCAN"/>
+    <addaction name="actionClearConfigurationBackups"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuCommands"/>
+   <addaction name="menuTools_2"/>
+   <addaction name="menuWizards"/>
+   <addaction name="menuTerminal"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
+  </widget>
   <action name="actionReadMcconf">
    <property name="icon">
     <iconset resource="res.qrc">
@@ -811,21 +957,21 @@
     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Enable keyboard control.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Key functions:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-weight:600;&quot;&gt;Up and Down Arrow Keys&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Current control using the current value in the lower&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;left corner.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-weight:600;&quot;&gt;Right and Left Arrow Keys&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Duty cycle control. Slowly ramps up and down the cuty&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;cycle. When e.g. starting with right and then also holding&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;left, the duty cycle is ramped higher.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-weight:600;&quot;&gt;Page Down&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;Brake with the current set in the lower left corner.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Enable keyboard control.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Key functions:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Up and Down Arrow Keys&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Current control using the current value in the lower&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;left corner.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Right and Left Arrow Keys&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Duty cycle control. Slowly ramps up and down the cuty&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;cycle. When e.g. starting with right and then also holding&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;left, the duty cycle is ramped higher.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Page Down&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Brake with the current set in the lower left corner.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
   <action name="actionParameterEditorMcconf">
@@ -976,6 +1122,9 @@ p, li { white-space: pre-wrap; }
    <property name="toolTip">
     <string>Start the Motor Setup Wizard</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionAppSetupWizard">
    <property name="icon">
@@ -987,6 +1136,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="toolTip">
     <string>Start the App Setup Wizard</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionAboutQt">
@@ -1040,13 +1192,13 @@ p, li { white-space: pre-wrap; }
     <string>VESC Tool Changelog</string>
    </property>
   </action>
-  <action name="actionTerminalDRV8301ResetLatchedFaults">
+  <action name="actionTerminalDRVResetLatchedFaults">
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/res/icons/Bug-96.png</normaloff>:/res/icons/Bug-96.png</iconset>
    </property>
    <property name="text">
-    <string>DRV8301 Reset Latched Faults</string>
+    <string>DRV Reset Latched Faults</string>
    </property>
   </action>
   <action name="actionVESCProjectForums">
@@ -1083,6 +1235,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Setup Motors FOC</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionExportConfigurationParser">
@@ -1182,6 +1337,71 @@ p, li { white-space: pre-wrap; }
     <string>Restore Configurations (Including CAN)</string>
    </property>
   </action>
+  <action name="actionrtDataBms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/bms_off.png</normaloff>
+     <normalon>:/res/icons/bms_on.png</normalon>:/res/icons/bms_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>rtDataBms</string>
+   </property>
+   <property name="toolTip">
+    <string>Stream BMS realtime data</string>
+   </property>
+  </action>
+  <action name="actionGamepadControl">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Controller-96.png</normaloff>
+     <normalon>:/res/icons/Controller-96_on.png</normalon>:/res/icons/Controller-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Gamepad Control</string>
+   </property>
+   <property name="toolTip">
+    <string>Use Gamepad Control</string>
+   </property>
+  </action>
+  <action name="actionParameterEditorCustomConf0">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Parameter Editor Custom Conf 0</string>
+   </property>
+  </action>
+  <action name="actionSetupMotorsFOCQuick">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Setup Motors FOC (old)</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/res/icons/Settings-96.png</normaloff>:/res/icons/Settings-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>false</bool>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1193,7 +1413,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res_silver.qrc"/>
+  <include location="res_free.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

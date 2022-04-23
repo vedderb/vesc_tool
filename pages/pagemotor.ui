@@ -91,6 +91,16 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_8">
+      <attribute name="title">
+       <string>BMS</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="ParamTable" name="bmsTab"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
        <string>Advanced</string>

@@ -1,23 +1,23 @@
 buildscript {
     repositories {
+        google()
         jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:3.2.0'
     }
 }
 
-allprojects {
-    repositories {
-        jcenter()
-    }
+repositories {
+    google()
+    jcenter()
 }
 
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
 }
 
 android {

@@ -19,6 +19,7 @@
 
 #include "commands.h"
 #include <QDebug>
+#include <QEventLoop>
 
 Commands::Commands(QObject *parent) : QObject(parent)
 {
@@ -27,6 +28,7 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mIsLimitedMode = false;
     mLimitedSupportsFwdAllCan = false;
     mLimitedSupportsEraseBootloader = false;
+    mMaxPowerLossBug = false;
     mCheckNextMcConfig = false;
 
     mTimer = new QTimer(this);
@@ -48,6 +50,8 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mTimeoutDecChuk = 0;
     mTimeoutDecBalance = 0;
     mTimeoutPingCan = 0;
+    mTimeoutCustomConf = 0;
+    mTimeoutBmsVal = 0;
 
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
 }
@@ -100,37 +104,71 @@ void Commands::processPacket(QByteArray data)
     switch (id) {
     case COMM_FW_VERSION: {
         mTimeoutFwVer = 0;
-        int fw_major = -1;
-        int fw_minor = -1;
-        QString hw;
-        QByteArray uuid;
-        bool isPaired = false;
+        FW_RX_PARAMS params;
 
         if (vb.size() >= 2) {
-            fw_major = vb.vbPopFrontInt8();
-            fw_minor = vb.vbPopFrontInt8();
-            hw = vb.vbPopFrontString();
+            params.major = vb.vbPopFrontInt8();
+            params.minor = vb.vbPopFrontInt8();
+            params.hw = vb.vbPopFrontString();
         }
 
         if (vb.size() >= 12) {
-            uuid.append(vb.left(12));
+            params.uuid.append(vb.left(12));
             vb.remove(0, 12);
         }
 
         if (vb.size() >= 1) {
-            isPaired = vb.vbPopFrontInt8();
+            params.isPaired = vb.vbPopFrontInt8();
         }
 
-        emit fwVersionReceived(fw_major, fw_minor, hw, uuid, isPaired);
+        if (vb.size() >= 1) {
+            params.isTestFw = vb.vbPopFrontInt8();
+        }
+
+        if (vb.size() >= 1) {
+            params.hwType = HW_TYPE(vb.vbPopFrontInt8());
+        }
+
+        if (vb.size() >= 1) {
+            params.customConfigNum = vb.vbPopFrontInt8();
+        }
+
+        if (vb.size() >= 1) {
+            params.hasPhaseFilters = vb.vbPopFrontInt8();
+        }
+
+        if (vb.size() >= 2) {
+            auto qmlHw = vb.vbPopFrontInt8();
+            auto qmlApp = vb.vbPopFrontInt8();
+            params.hasQmlHw = qmlHw > 0;
+            params.qmlHwFullscreen = qmlHw == 2;
+            params.hasQmlApp = qmlApp > 0;
+            params.qmlAppFullscreen = qmlApp == 2;
+        }
+
+        if (vb.size() >= 1) {
+            auto nrfFlags = vb.vbPopFrontUint8();
+            params.nrfNameSupported = nrfFlags & 1;
+            params.nrfPinSupported = nrfFlags & 2;
+        }
+
+        emit fwVersionReceived(params);
     } break;
 
     case COMM_ERASE_NEW_APP:
         emit eraseNewAppResReceived(vb.at(0));
         break;
 
-    case COMM_WRITE_NEW_APP_DATA:
-        emit writeNewAppDataResReceived(vb.at(0));
-        break;
+    case COMM_WRITE_NEW_APP_DATA: {
+        bool ok = vb.vbPopFrontInt8();
+        bool hasOffset = false;
+        quint32 offset = 0;
+        if (vb.size() >= 4) {
+            hasOffset = true;
+            offset = vb.vbPopFrontUint32();
+        }
+        emit writeNewAppDataResReceived(ok, hasOffset, offset);
+    } break;
 
     case COMM_ERASE_BOOTLOADER:
         emit eraseBootloaderResReceived(vb.at(0));
@@ -229,6 +267,14 @@ void Commands::processPacket(QByteArray data)
             }
         }
 
+        if (vb.size() >= 1) {
+            if (mask & (uint32_t(1) << 21)) {
+                quint8 status = vb.vbPopFrontUint8();
+                values.has_timeout = status & 1;
+                values.kill_sw_active = (status >> 1) & 1;
+            }
+        }
+
         emit valuesReceived(values, mask);
     } break;
 
@@ -295,7 +341,11 @@ void Commands::processPacket(QByteArray data)
     case COMM_DETECT_MOTOR_R_L: {
         double r = vb.vbPopFrontDouble32(1e6);
         double l = vb.vbPopFrontDouble32(1e3);
-        emit motorRLReceived(r, l);
+        double ld_lq_diff = 0.0;
+        if (vb.size() >= 4) {
+            ld_lq_diff = vb.vbPopFrontDouble32(1e3);
+        }
+        emit motorRLReceived(r, l, ld_lq_diff);
     } break;
 
     case COMM_DETECT_MOTOR_FLUX_LINKAGE: {
@@ -345,15 +395,16 @@ void Commands::processPacket(QByteArray data)
         BALANCE_VALUES values;
 
         values.pid_output = vb.vbPopFrontDouble32(1e6);
-        values.m_angle = vb.vbPopFrontDouble32(1e6);
-        values.c_angle = vb.vbPopFrontDouble32(1e6);
+        values.pitch_angle = vb.vbPopFrontDouble32(1e6);
+        values.roll_angle = vb.vbPopFrontDouble32(1e6);
         values.diff_time = vb.vbPopFrontUint32();
         values.motor_current = vb.vbPopFrontDouble32(1e6);
-        values.motor_position = vb.vbPopFrontDouble32(1e6);
+        values.debug1 = vb.vbPopFrontDouble32(1e6);
         values.state = vb.vbPopFrontUint16();
         values.switch_value = vb.vbPopFrontUint16();
         values.adc1 = vb.vbPopFrontDouble32(1e6);
         values.adc2 = vb.vbPopFrontDouble32(1e6);
+        values.debug2 = vb.vbPopFrontDouble32(1e6);
         emit decodedBalanceReceived(values);
     } break;
 
@@ -367,6 +418,10 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_CUSTOM_APP_DATA:
         emit customAppDataReceived(vb);
+        break;
+
+    case COMM_CUSTOM_HW_DATA:
+        emit customHwDataReceived(vb);
         break;
 
     case COMM_NRF_START_PAIRING:
@@ -451,6 +506,12 @@ void Commands::processPacket(QByteArray data)
         }
         if (mask & (uint32_t(1) << 19)) {
             values.battery_wh = vb.vbPopFrontDouble32(1e3);
+        }
+        if (mask & (uint32_t(1) << 20)) {
+            values.odometer = vb.vbPopFrontUint32();
+        }
+        if (mask & (uint32_t(1) << 21)) {
+            values.uptime_ms = vb.vbPopFrontUint32();
         }
 
         emit valuesSetupReceived(values, mask);
@@ -540,8 +601,21 @@ void Commands::processPacket(QByteArray data)
         if (mask & (uint32_t(1) << 15)) {
             values.q3 = vb.vbPopFrontDouble32Auto();
         }
+        if (vb.size() >= 1) {
+            if (mask & (uint32_t(1) << 16)) {
+                values.vesc_id = vb.vbPopFrontUint8();
+            }
+        }
 
         emit valuesImuReceived(values, mask);
+    } break;
+
+    case COMM_GET_IMU_CALIBRATION: {
+        QVector<double> cal;
+        for (int i = 0;i < 9;i++) {
+            cal.append(vb.vbPopFrontDouble32(1e6));
+        }
+        emit imuCalibrationReceived(cal);
     } break;
 
     case COMM_BM_CONNECT:
@@ -604,6 +678,325 @@ void Commands::processPacket(QByteArray data)
         emit canFrameRx(vb, id, isExtended);
     } break;
 
+    case COMM_SET_BATTERY_CUT:
+        emit ackReceived("COMM_SET_BATTERY_CUT Write OK");
+        break;
+
+    case COMM_BMS_GET_VALUES: {
+        mTimeoutBmsVal = 0;
+        BMS_VALUES val;
+        val.v_tot = vb.vbPopFrontDouble32(1e6);
+        val.v_charge = vb.vbPopFrontDouble32(1e6);
+        val.i_in = vb.vbPopFrontDouble32(1e6);
+        val.i_in_ic = vb.vbPopFrontDouble32(1e6);
+        val.ah_cnt = vb.vbPopFrontDouble32(1e3);
+        val.wh_cnt = vb.vbPopFrontDouble32(1e3);
+
+        int cells = vb.vbPopFrontUint8();
+        for (int i = 0;i < cells;i++) {
+            val.v_cells.append(vb.vbPopFrontDouble16(1e3));
+        }
+        for (int i = 0;i < cells;i++) {
+            val.is_balancing.append(vb.vbPopFrontUint8());
+        }
+
+        int sensors = vb.vbPopFrontUint8();
+        for (int i = 0;i < sensors;i++) {
+            val.temps.append(vb.vbPopFrontDouble16(1e2));
+        }
+
+        val.temp_ic = vb.vbPopFrontDouble16(1e2);
+        val.temp_hum_sensor = vb.vbPopFrontDouble16(1e2);
+        val.humidity = vb.vbPopFrontDouble16(1e2);
+
+        val.temp_cells_highest = vb.vbPopFrontDouble16(1e2);
+
+        if (vb.size() >= 2) {
+            val.soc = vb.vbPopFrontDouble16(1e3);
+        }
+
+        if (vb.size() >= 2) {
+            val.soh = vb.vbPopFrontDouble16(1e3);
+        }
+
+        if (vb.size() >= 1) {
+            val.can_id = vb.vbPopFrontUint8();
+        }
+
+        if (vb.size() >= 16) {
+            val.ah_cnt_chg_total = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt_chg_total = vb.vbPopFrontDouble32Auto();
+            val.ah_cnt_dis_total = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt_dis_total = vb.vbPopFrontDouble32Auto();
+        }
+
+        val.updateTimeStamp();
+
+        emit bmsValuesRx(val);
+    } break;
+
+    case COMM_SET_CUSTOM_CONFIG:
+        emit ackReceived("COMM_SET_CUSTOM_CONFIG Write OK");
+        break;
+
+    case COMM_GET_CUSTOM_CONFIG:
+    case COMM_GET_CUSTOM_CONFIG_DEFAULT: {
+        mTimeoutCustomConf = 0;
+        int confInd = vb.vbPopFrontInt8();
+        emit customConfigRx(confInd, vb);
+    } break;
+
+    case COMM_GET_CUSTOM_CONFIG_XML: {
+        int confInd = vb.vbPopFrontInt8();
+        int confSize = vb.vbPopFrontInt32();
+        int offset = vb.vbPopFrontInt32();
+        emit customConfigChunkRx(confInd, confSize, offset, vb);
+    } break;
+
+    case COMM_PSW_GET_STATUS: {
+        PSW_STATUS stat;
+        stat.id = vb.vbPopFrontInt16();
+        stat.psws_num = vb.vbPopFrontInt16();
+        stat.age_seconds = vb.vbPopFrontDouble32Auto();
+        stat.v_in = vb.vbPopFrontDouble32Auto();
+        stat.v_out = vb.vbPopFrontDouble32Auto();
+        stat.temp = vb.vbPopFrontDouble32Auto();
+        stat.is_out_on = vb.vbPopFrontInt8();
+        stat.is_pch_on = vb.vbPopFrontInt8();
+        stat.is_dsc_on = vb.vbPopFrontInt8();
+        emit pswStatusRx(stat);
+    } break;
+
+    case COMM_BMS_FWD_CAN_RX: {
+        int id = vb.vbPopFrontUint8();
+        CAN_PACKET_ID cmd = CAN_PACKET_ID(vb.vbPopFrontUint8());
+        BMS_VALUES &val = mBmsValues[id];
+
+        switch (cmd) {
+        case CAN_PACKET_BMS_SOC_SOH_TEMP_STAT: {
+            vb.vbPopFrontDouble16(1e3); // V_CELL_MIN
+            vb.vbPopFrontDouble16(1e3); // V_CELL_MAX
+            val.can_id = id;
+            val.soc = double(vb.vbPopFrontUint8()) / 255.0;
+            val.soh = double(vb.vbPopFrontUint8()) / 255.0;
+            val.temp_cells_highest = double(vb.vbPopFrontUint8());
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_V_TOT: {
+            val.can_id = id;
+            val.v_tot = vb.vbPopFrontDouble32Auto();
+            val.v_charge = vb.vbPopFrontDouble32Auto();
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_I: {
+            val.can_id = id;
+            val.i_in = vb.vbPopFrontDouble32Auto();
+            val.i_in_ic = vb.vbPopFrontDouble32Auto();
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_AH_WH: {
+            val.can_id = id;
+            val.ah_cnt = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt = vb.vbPopFrontDouble32Auto();
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_V_CELL: {
+            val.can_id = id;
+
+            int ofs = vb.vbPopFrontUint8();
+            val.v_cells.resize(vb.vbPopFrontUint8());
+
+            while (vb.size() > 1) {
+                val.v_cells[ofs++] = vb.vbPopFrontDouble16(1e3);
+            }
+
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_BAL: {
+            val.can_id = id;
+
+            uint64_t bal_state_0 = vb.vbPopFrontUint32();
+            int cell_num = (bal_state_0 >> 24) & 0xFF;
+            bal_state_0 &= 0x00FFFFFF;
+            uint64_t bal_state_1 = vb.vbPopFrontUint32();
+            uint64_t bal_state = bal_state_0 << 32 | bal_state_1;
+            int32_t ind = 0;
+
+            val.is_balancing.resize(cell_num);
+            while (ind < cell_num) {
+                val.is_balancing[ind] = (bal_state >> ind) & 1;
+                ind++;
+            }
+
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_TEMPS: {
+            val.can_id = id;
+
+            unsigned int ofs = vb.vbPopFrontUint8();
+            val.temps.resize(vb.vbPopFrontUint8());
+
+            while (vb.size() > 1) {
+                val.temps[ofs++] = vb.vbPopFrontDouble16(1e2);
+            }
+
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_HUM: {
+            val.can_id = id;
+            val.temp_hum_sensor = vb.vbPopFrontDouble16(1e2);
+            val.humidity = vb.vbPopFrontDouble16(1e2);
+            val.temp_ic = vb.vbPopFrontDouble16(1e2);
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_AH_WH_CHG_TOTAL: {
+            val.can_id = id;
+            val.ah_cnt_chg_total = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt_chg_total = vb.vbPopFrontDouble32Auto();
+            val.updateTimeStamp();
+        } break;
+
+        case CAN_PACKET_BMS_AH_WH_DIS_TOTAL: {
+            val.can_id = id;
+            val.ah_cnt_dis_total = vb.vbPopFrontDouble32Auto();
+            val.wh_cnt_dis_total = vb.vbPopFrontDouble32Auto();
+            val.updateTimeStamp();
+        } break;
+
+        default:
+            break;
+        }
+    } break;
+
+    case COMM_GET_QML_UI_HW: {
+        int qmlSize = vb.vbPopFrontInt32();
+        int offset = vb.vbPopFrontInt32();
+        emit qmluiHwRx(qmlSize, offset, vb);
+    } break;
+
+    case COMM_GET_QML_UI_APP: {
+        int qmlSize = vb.vbPopFrontInt32();
+        int offset = vb.vbPopFrontInt32();
+        emit qmluiAppRx(qmlSize, offset, vb);
+    } break;
+
+    case COMM_QMLUI_ERASE:
+        emit eraseQmluiResReceived(vb.at(0));
+        break;
+
+    case COMM_QMLUI_WRITE: {
+        bool ok = vb.vbPopFrontInt8();
+        quint32 offset = vb.vbPopFrontUint32();
+        emit writeQmluiResReceived(ok, offset);
+    } break;
+
+    case COMM_IO_BOARD_GET_ALL: {
+        IO_BOARD_VALUES val;
+        val.id = vb.vbPopFrontInt16();
+
+        while (vb.size() > 0) {
+            int type = vb.vbPopFrontInt8();
+            switch (type) {
+            case 1: {
+                val.adc_1_4_age = vb.vbPopFrontDouble32Auto();
+                val.adc_1_4.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_1_4.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_1_4.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_1_4.append(vb.vbPopFrontDouble16(1e2));
+            } break;
+
+            case 2: {
+                val.adc_5_8_age = vb.vbPopFrontDouble32Auto();
+                val.adc_5_8.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_5_8.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_5_8.append(vb.vbPopFrontDouble16(1e2));
+                val.adc_5_8.append(vb.vbPopFrontDouble16(1e2));
+            } break;
+
+            case 3: {
+                val.digital_age = vb.vbPopFrontDouble32Auto();
+                uint64_t hi = vb.vbPopFrontUint32();
+                uint64_t lo = vb.vbPopFrontUint32();
+                uint64_t combined = (hi << 32) | lo;
+
+                for (int i = 0;i < 64;i++) {
+                    val.digital.append((combined >> i) & 1);
+                }
+            } break;
+
+            default:
+                break;
+            }
+        }
+
+        emit ioBoardValRx(val);
+    } break;
+
+    case COMM_GET_STATS: {
+        mTimeoutStats = 0;
+        STAT_VALUES values;
+        uint32_t mask = vb.vbPopFrontUint32();
+        if (mask & ((uint32_t)1 << 0)) { values.speed_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 1)) { values.speed_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 2)) { values.power_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 3)) { values.power_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 4)) { values.current_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 5)) { values.current_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 6)) { values.temp_mos_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 7)) { values.temp_mos_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 8)) { values.temp_motor_avg = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 9)) { values.temp_motor_max = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 10)) { values.count_time = vb.vbPopFrontDouble32Auto(); }
+        emit statsRx(values, mask);
+    } break;
+
+    case COMM_LISP_READ_CODE: {
+        int qmlSize = vb.vbPopFrontInt32();
+        int offset = vb.vbPopFrontInt32();
+        emit lispReadCodeRx(qmlSize, offset, vb);
+    } break;
+
+    case COMM_LISP_ERASE_CODE:
+        emit lispEraseCodeRx(vb.at(0));
+        break;
+
+    case COMM_LISP_WRITE_CODE: {
+        bool ok = vb.vbPopFrontInt8();
+        quint32 offset = vb.vbPopFrontUint32();
+        emit lispWriteCodeRx(ok, offset);
+    } break;
+
+    case COMM_LISP_PRINT:
+        emit lispPrintReceived(QString::fromLatin1(vb));
+        break;
+
+    case COMM_LISP_GET_STATS: {
+        LISP_STATS stats;
+        stats.cpu_use = vb.vbPopFrontDouble16(1e2);
+        stats.heap_use = vb.vbPopFrontDouble16(1e2);
+        stats.mem_use = vb.vbPopFrontDouble16(1e2);
+        stats.stack_use = vb.vbPopFrontDouble16(1e2);
+        stats.done_ctx_r = vb.vbPopFrontString();
+        while (vb.size() > 0) {
+            auto name = vb.vbPopFrontString();
+            auto num = vb.vbPopFrontDouble32Auto();
+            stats.number_bindings.append(qMakePair(name, num));
+        }
+        emit lispStatsRx(stats);
+    } break;
+
+    case COMM_LISP_SET_RUNNING:
+        emit lispRunningResRx(vb.at(0));
+        break;
+
     default:
         break;
     }
@@ -622,28 +1015,49 @@ void Commands::getFwVersion()
     emitData(vb);
 }
 
-void Commands::eraseNewApp(bool fwdCan, quint32 fwSize)
+void Commands::eraseNewApp(bool fwdCan, quint32 fwSize, HW_TYPE hwType, QString hwName)
 {
     VByteArray vb;
-    vb.vbAppendInt8(fwdCan ? COMM_ERASE_NEW_APP_ALL_CAN :
-                             COMM_ERASE_NEW_APP);
+    if (!hwName.isEmpty() && hwType != HW_TYPE_VESC && fwdCan) {
+        vb.vbAppendInt8(COMM_ERASE_NEW_APP_ALL_CAN_HW);
+        vb.vbAppendUint8(hwType);
+        vb.vbAppendString(hwName);
+    } else {
+        vb.vbAppendInt8(fwdCan ? COMM_ERASE_NEW_APP_ALL_CAN :
+                                 COMM_ERASE_NEW_APP);
+    }
+
     vb.vbAppendUint32(fwSize);
     emitData(vb);
 }
 
-void Commands::eraseBootloader(bool fwdCan)
+void Commands::eraseBootloader(bool fwdCan, HW_TYPE hwType, QString hwName)
 {
     VByteArray vb;
-    vb.vbAppendInt8(fwdCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
-                             COMM_ERASE_BOOTLOADER);
+    if (!hwName.isEmpty() && hwType != HW_TYPE_VESC && fwdCan) {
+        vb.vbAppendInt8(COMM_ERASE_BOOTLOADER_ALL_CAN_HW);
+        vb.vbAppendUint8(hwType);
+        vb.vbAppendString(hwName);
+    } else {
+        vb.vbAppendInt8(fwdCan ? COMM_ERASE_BOOTLOADER_ALL_CAN :
+                                 COMM_ERASE_BOOTLOADER);
+    }
+
     emitData(vb);
 }
 
-void Commands::writeNewAppData(QByteArray data, quint32 offset, bool fwdCan)
+void Commands::writeNewAppData(QByteArray data, quint32 offset, bool fwdCan, HW_TYPE hwType, QString hwName)
 {
     VByteArray vb;
-    vb.vbAppendInt8(fwdCan ? COMM_WRITE_NEW_APP_DATA_ALL_CAN :
-                             COMM_WRITE_NEW_APP_DATA);
+    if (!hwName.isEmpty() && hwType != HW_TYPE_VESC && fwdCan) {
+        vb.vbAppendInt8(COMM_WRITE_NEW_APP_DATA_ALL_CAN_HW);
+        vb.vbAppendUint8(hwType);
+        vb.vbAppendString(hwName);
+    } else {
+        vb.vbAppendInt8(fwdCan ? COMM_WRITE_NEW_APP_DATA_ALL_CAN :
+                                 COMM_WRITE_NEW_APP_DATA);
+    }
+
     vb.vbAppendUint32(offset);
     vb.append(data);
     emitData(vb);
@@ -660,11 +1074,17 @@ void Commands::writeNewAppDataLzo(QByteArray data, quint32 offset, quint16 decom
     emitData(vb);
 }
 
-void Commands::jumpToBootloader(bool fwdCan)
+void Commands::jumpToBootloader(bool fwdCan, HW_TYPE hwType, QString hwName)
 {
     VByteArray vb;
-    vb.vbAppendInt8(fwdCan ? COMM_JUMP_TO_BOOTLOADER_ALL_CAN :
-                             COMM_JUMP_TO_BOOTLOADER);
+    if (!hwName.isEmpty() && hwType != HW_TYPE_VESC && fwdCan) {
+        vb.vbAppendInt8(COMM_JUMP_TO_BOOTLOADER_ALL_CAN_HW);
+        vb.vbAppendUint8(hwType);
+        vb.vbAppendString(hwName);
+    } else {
+        vb.vbAppendInt8(fwdCan ? COMM_JUMP_TO_BOOTLOADER_ALL_CAN :
+                                 COMM_JUMP_TO_BOOTLOADER);
+    }
     emitData(vb);
 }
 
@@ -679,6 +1099,49 @@ void Commands::getValues()
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_VALUES);
     emitData(vb);
+}
+
+void Commands::setOdometer(unsigned odometer_meters)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_SET_ODOMETER);
+    vb.vbAppendUint32(odometer_meters);
+    emitData(vb);
+}
+
+int Commands::bmsGetCanDevNum()
+{
+    return mBmsValues.size();
+}
+
+BMS_VALUES Commands::bmsGetCanValues(int can_id)
+{
+    return mBmsValues.value(can_id);
+}
+
+bool Commands::bmsHasCanValues(int can_id)
+{
+    return mBmsValues.contains(can_id);
+}
+
+void Commands::emitPlotInit(QString xLabel, QString yLabel)
+{
+    emit plotInitReceived(xLabel, yLabel);
+}
+
+void Commands::emitPlotData(double x, double y)
+{
+    emit plotDataReceived(x, y);
+}
+
+void Commands::emitPlotAddGraph(QString name)
+{
+    emit plotAddGraphReceived(name);
+}
+
+void Commands::emitPlotSetGraph(int graph)
+{
+    emit plotSetGraphReceived(graph);
 }
 
 void Commands::sendTerminalCmd(QString cmd)
@@ -753,13 +1216,14 @@ void Commands::setDetect(disp_pos_mode mode)
     emitData(vb);
 }
 
-void Commands::samplePrint(debug_sampling_mode mode, int sample_len, int dec)
+void Commands::samplePrint(debug_sampling_mode mode, int sample_len, int dec, bool raw)
 {
     VByteArray vb;
     vb.vbAppendInt8(COMM_SAMPLE_PRINT);
     vb.vbAppendInt8(mode);
     vb.vbAppendUint16(sample_len);
     vb.vbAppendUint8(dec);
+    vb.vbAppendInt8(raw);
     emitData(vb);
 }
 
@@ -974,6 +1438,14 @@ void Commands::sendCustomAppData(unsigned char *data, unsigned int len)
     sendCustomAppData(ba);
 }
 
+void Commands::sendCustomHwData(QByteArray data)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_CUSTOM_HW_DATA);
+    vb.append(data);
+    emitData(vb);
+}
+
 void Commands::setChukData(chuck_data &data)
 {
     VByteArray vb;
@@ -1159,7 +1631,8 @@ void Commands::getValuesSetupSelective(unsigned int mask)
     emitData(vb);
 }
 
-void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty, double resistance)
+void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty,
+                                      double resistance, double inductance)
 {
     VByteArray vb;
     vb.vbAppendInt8(COMM_DETECT_MOTOR_FLUX_LINKAGE_OPENLOOP);
@@ -1167,12 +1640,17 @@ void Commands::measureLinkageOpenloop(double current, double erpm_per_sec, doubl
     vb.vbAppendDouble32(erpm_per_sec, 1e3);
     vb.vbAppendDouble32(low_duty, 1e3);
     vb.vbAppendDouble32(resistance, 1e6);
+    vb.vbAppendDouble32(inductance, 1e8);
     emitData(vb);
 }
 
 void Commands::detectAllFoc(bool detect_can, double max_power_loss, double min_current_in,
                             double max_current_in, double openloop_rpm, double sl_erpm)
 {
+    if (mMaxPowerLossBug) {
+        max_power_loss /= 2.0;
+    }
+
     VByteArray vb;
     vb.vbAppendInt8(COMM_DETECT_APPLY_ALL_FOC);
     vb.vbAppendInt8(detect_can);
@@ -1230,6 +1708,14 @@ void Commands::getImuData(unsigned int mask)
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_IMU_DATA);
     vb.vbAppendUint16(mask);
+    emitData(vb);
+}
+
+void Commands::getImuCalibration(double yaw)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_IMU_CALIBRATION);
+    vb.vbAppendDouble32(yaw, 1e3);
     emitData(vb);
 }
 
@@ -1321,6 +1807,271 @@ void Commands::forwardCanFrame(QByteArray data, quint32 id, bool isExtended)
     emitData(vb);
 }
 
+void Commands::setBatteryCut(double start, double end, bool store, bool fwdCan)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_SET_BATTERY_CUT);
+    vb.vbAppendDouble32(start, 1e3);
+    vb.vbAppendDouble32(end, 1e3);
+    vb.vbAppendInt8(store);
+    vb.vbAppendInt8(fwdCan);
+    emitData(vb);
+}
+
+void Commands::bmsGetValues()
+{
+    if (mTimeoutBmsVal > 0) {
+        return;
+    }
+
+    mTimeoutBmsVal = mTimeoutCount;
+
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_GET_VALUES);
+    emitData(vb);
+}
+
+void Commands::bmsSetChargeAllowed(bool allowed)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_SET_CHARGE_ALLOWED);
+    vb.vbAppendUint8(allowed);
+    emitData(vb);
+}
+
+void Commands::bmsSetBalanceOverride(uint8_t cell, uint8_t override)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_SET_BALANCE_OVERRIDE);
+    vb.vbAppendUint8(cell);
+    vb.vbAppendUint8(override);
+    emitData(vb);
+}
+
+void Commands::bmsResetCounters(bool ah, bool wh)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_RESET_COUNTERS);
+    vb.vbAppendUint8(ah);
+    vb.vbAppendUint8(wh);
+    emitData(vb);
+}
+
+void Commands::bmsForceBalance(bool bal_en)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_FORCE_BALANCE);
+    vb.vbAppendUint8(bal_en);
+    emitData(vb);
+}
+
+void Commands::bmsZeroCurrentOffset()
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_BMS_ZERO_CURRENT_OFFSET);
+    emitData(vb);
+}
+
+void Commands::customConfigGetChunk(int confInd, int len, int offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_GET_CUSTOM_CONFIG_XML);
+    vb.vbAppendInt8(int8_t(confInd));
+    vb.vbAppendInt32(len);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::customConfigGet(int confInd, bool isDefault)
+{
+    if (mTimeoutCustomConf > 0) {
+        return;
+    }
+
+    mTimeoutCustomConf = mTimeoutCount;
+
+    VByteArray vb;
+    vb.vbAppendUint8(isDefault ? COMM_GET_CUSTOM_CONFIG_DEFAULT : COMM_GET_CUSTOM_CONFIG);
+    vb.vbAppendInt8(int8_t(confInd));
+    emitData(vb);
+}
+
+void Commands::customConfigSet(int confInd, QByteArray confData)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_SET_CUSTOM_CONFIG);
+    vb.vbAppendInt8(int8_t(confInd));
+    vb.append(confData);
+    emitData(vb);
+}
+
+void Commands::pswGetStatus(bool by_id, int id_ind)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_PSW_GET_STATUS);
+    vb.vbAppendInt8(by_id);
+    vb.vbAppendInt16(id_ind);
+    emitData(vb);
+}
+
+void Commands::pswSwitch(int id, bool is_on, bool plot)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_PSW_SWITCH);
+    vb.vbAppendInt16(id);
+    vb.vbAppendInt8(is_on);
+    vb.vbAppendInt8(plot);
+    emitData(vb);
+}
+
+void Commands::qmlUiHwGet(int len, int offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_GET_QML_UI_HW);
+    vb.vbAppendInt32(len);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::qmlUiAppGet(int len, int offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_GET_QML_UI_APP);
+    vb.vbAppendInt32(len);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::qmlUiErase()
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_QMLUI_ERASE);
+    emitData(vb);
+}
+
+void Commands::qmlUiWrite(QByteArray data, quint32 offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_QMLUI_WRITE);
+    vb.vbAppendUint32(offset);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::ioBoardGetAll(int id)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_IO_BOARD_GET_ALL);
+    vb.vbAppendInt16(id);
+    emitData(vb);
+}
+
+void Commands::ioBoardSetPwm(int id, int channel, double duty)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_IO_BOARD_SET_PWM);
+    vb.vbAppendInt16(id);
+    vb.vbAppendInt16(channel);
+    vb.vbAppendDouble32Auto(duty);
+    emitData(vb);
+}
+
+void Commands::ioBoardSetDigital(int id, int channel, bool on)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_IO_BOARD_SET_DIGITAL);
+    vb.vbAppendInt16(id);
+    vb.vbAppendInt16(channel);
+    vb.vbAppendInt8(on);
+    emitData(vb);
+}
+
+void Commands::getStats(unsigned int mask)
+{
+    if (mTimeoutStats > 0) {
+        return;
+    }
+
+    mTimeoutStats = mTimeoutCount;
+
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_STATS);
+    vb.vbAppendUint16(mask);
+    emitData(vb);
+}
+
+void Commands::resetStats(bool sendAck)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_RESET_STATS);
+    vb.vbAppendInt8(sendAck);
+    emitData(vb);
+}
+
+void Commands::lispReadCode(int len, int offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_READ_CODE);
+    vb.vbAppendInt32(len);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::lispWriteCode(QByteArray data, quint32 offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_WRITE_CODE);
+    vb.vbAppendUint32(offset);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::lispEraseCode()
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_ERASE_CODE);
+    emitData(vb);
+}
+
+void Commands::lispSetRunning(bool running)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_SET_RUNNING);
+    vb.vbAppendInt8(running);
+    emitData(vb);
+}
+
+void Commands::lispGetStats()
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_GET_STATS);
+    emitData(vb);
+}
+
+void Commands::lispSendReplCmd(QString str)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_REPL_CMD);
+    vb.vbAppendString(str);
+    emitData(vb);
+}
+
+void Commands::setBleName(QString name)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_SET_BLE_NAME);
+    vb.vbAppendString(name);
+    emitData(vb);
+}
+
+void Commands::setBlePin(QString pin)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_SET_BLE_PIN);
+    vb.vbAppendString(pin);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;
@@ -1338,14 +2089,16 @@ void Commands::timerSlot()
     if (mTimeoutDecAdc > 0) mTimeoutDecAdc--;
     if (mTimeoutDecChuk > 0) mTimeoutDecChuk--;
     if (mTimeoutDecBalance > 0) mTimeoutDecBalance--;
-
     if (mTimeoutPingCan > 0) {
         mTimeoutPingCan--;
-
         if (mTimeoutPingCan == 0) {
             emit pingCanRx(QVector<int>(), true);
+            qWarning() << "CAN ping timed out";
         }
     }
+    if (mTimeoutCustomConf > 0) mTimeoutCustomConf--;
+    if (mTimeoutBmsVal > 0) mTimeoutBmsVal--;
+    if (mTimeoutStats > 0) mTimeoutStats--;
 }
 
 void Commands::emitData(QByteArray data)
@@ -1373,6 +2126,16 @@ void Commands::emitData(QByteArray data)
     }
 
     emit dataToSend(data);
+}
+
+bool Commands::getMaxPowerLossBug() const
+{
+    return mMaxPowerLossBug;
+}
+
+void Commands::setMaxPowerLossBug(bool maxPowerLossBug)
+{
+    mMaxPowerLossBug = maxPowerLossBug;
 }
 
 bool Commands::getLimitedSupportsFwdAllCan() const
@@ -1427,11 +2190,65 @@ QString Commands::faultToStr(mc_fault_code fault)
     case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2";
     case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: return "FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3";
     case FAULT_CODE_UNBALANCED_CURRENTS: return "FAULT_CODE_UNBALANCED_CURRENTS";
+    case FAULT_CODE_BRK: return "FAULT_CODE_BRK";
     case FAULT_CODE_RESOLVER_LOT: return "FAULT_CODE_RESOLVER_LOT";
     case FAULT_CODE_RESOLVER_DOS: return "FAULT_CODE_RESOLVER_DOS";
-    case FAULT_CODE_RESOLVER_LOS: return "FAULT_CODE_RESOLVER_LOS";
-    default: return "Unknown fault";
+    case FAULT_CODE_RESOLVER_LOS: return "FAULT_CODE_RESOLVER_LOS";        
+    case FAULT_CODE_FLASH_CORRUPTION_APP_CFG: return "FAULT_CODE_FLASH_CORRUPTION_APP_CFG";
+    case FAULT_CODE_FLASH_CORRUPTION_MC_CFG: return "FAULT_CODE_FLASH_CORRUPTION_MC_CFG";
+    case FAULT_CODE_ENCODER_NO_MAGNET: return "FAULT_CODE_ENCODER_NO_MAGNET";
+    case FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: return "FAULT_CODE_ENCODER_MAGNET_TOO_STRONG";
+    case FAULT_CODE_PHASE_FILTER: return "FAULT_CODE_PHASE_FILTER";
     }
+
+    return "Unknown fault";
+}
+
+QByteArray Commands::bmReadMemWait(uint32_t addr, quint16 size, int timeoutMs)
+{
+    bmReadMem(addr, size);
+
+    int res = -10;
+    QByteArray resData;
+
+    QEventLoop loop;
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    timeoutTimer.start(timeoutMs);
+    auto conn = connect(this, &Commands::bmReadMemRes, [&res,&resData,&loop]
+                        (int rdRes, QByteArray data) {
+        res = rdRes;
+        resData = data;
+        loop.quit();
+    });
+
+    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    loop.exec();
+
+    disconnect(conn);
+    return resData;
+}
+
+int Commands::bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs)
+{
+    bmWriteFlash(addr, data);
+
+    int res = -10;
+
+    QEventLoop loop;
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    timeoutTimer.start(timeoutMs);
+    auto conn = connect(this, &Commands::bmWriteFlashRes, [&res,&loop](int wrRes) {
+        res = wrRes;
+        loop.quit();
+    });
+
+    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    loop.exec();
+
+    disconnect(conn);
+    return res;
 }
 
 void Commands::setAppConfig(ConfigParams *appConfig)
@@ -1508,4 +2325,11 @@ void Commands::emitEmptySetupValues()
     values.battery_wh = 0.0;
 
     emit valuesSetupReceived(values, 0xFFFFFFFF);
+}
+
+void Commands::emitEmptyStats()
+{
+    STAT_VALUES stat;
+
+    emit statsRx(stat, 0xFFFFFFFF);
 }

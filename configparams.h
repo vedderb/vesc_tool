@@ -50,6 +50,7 @@ public:
     Q_INVOKABLE bool isParamEnum(const QString &name);
     Q_INVOKABLE bool isParamQString(const QString &name);
     Q_INVOKABLE bool isParamBool(const QString &name);
+    Q_INVOKABLE bool isParamBitfield(const QString &name);
 
     Q_INVOKABLE double getParamDouble(const QString &name);
     Q_INVOKABLE int getParamInt(const QString &name);
@@ -100,6 +101,8 @@ public:
     bool setParamsXML(QXmlStreamReader &stream);
     bool saveParamsXml(QString fileName);
     bool loadParamsXml(QString fileName);
+    QByteArray getCompressedParamsXml();
+    bool loadCompressedParamsXml(QByteArray data);
 
     bool saveCDefines(const QString &fileName, bool wrapIfdef = false);
 
@@ -135,6 +138,11 @@ public:
     // Operators
     ConfigParams& operator=(const ConfigParams &other);
 
+    int getConfigVersion() const;
+
+    bool getStoreConfigVersion() const;
+    void setStoreConfigVersion(bool storeConfigVersion);
+
 signals:
     void paramChangedDouble(QObject *src, QString name, double newParam);
     void paramChangedInt(QObject *src, QString name, int newParam);
@@ -152,6 +160,7 @@ public slots:
     void updateParamEnum(QString name, int param, QObject *src = nullptr);
     void updateParamString(QString name, QString param, QObject *src = nullptr);
     void updateParamBool(QString name, bool param, QObject *src = nullptr);
+    void updateParamFromOther(QString name, const ConfigParam &other, QObject *src);
     void requestUpdate();
     void requestUpdateDefault();
     void updateDone();
@@ -164,6 +173,8 @@ private:
     QStringList mSerializeOrder;
     QString mXmlStatus;
     QList<QPair<QString, QList<QPair<QString, QStringList>>>> mParamGrouping;
+    int mConfigVersion;
+    bool mStoreConfigVersion;
 
     bool almostEqual(float A, float B, float eps);
 

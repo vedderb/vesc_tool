@@ -24,6 +24,7 @@
 #include "widgets/parameditstring.h"
 #include "widgets/parameditenum.h"
 #include "widgets/parameditbool.h"
+#include "widgets/parameditbitfield.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
@@ -36,6 +37,8 @@ ConfigParams::ConfigParams(QObject *parent) : QObject(parent)
     mUpdateOnlyName.clear();
     mXmlStatus = tr("OK");
     mUpdatesEnabled = true;
+    mConfigVersion = -1;
+    mStoreConfigVersion = true;
 }
 
 void ConfigParams::addParam(const QString &name, ConfigParam param)
@@ -174,6 +177,15 @@ bool ConfigParams::isParamBool(const QString &name)
     }
 }
 
+bool ConfigParams::isParamBitfield(const QString &name)
+{
+    if (mParams.contains(name) && mParams[name].type == CFG_T_BITFIELD) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 double ConfigParams::getParamDouble(const QString &name)
 {
     double retVal = 0.0;
@@ -200,7 +212,7 @@ int ConfigParams::getParamInt(const QString &name)
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
 
-        if (p.type == CFG_T_INT) {
+        if (p.type == CFG_T_INT || p.type == CFG_T_BITFIELD) {
             retVal = p.valInt;
         } else {
             qWarning() << name << "wrong type";
@@ -435,7 +447,7 @@ QStringList ConfigParams::getParamEnumNames(const QString &name)
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
 
-        if (p.type == CFG_T_ENUM) {
+        if (p.type == CFG_T_ENUM || p.type == CFG_T_BITFIELD) {
             retVal = p.enumNames;
         } else {
             qWarning() << name << "wrong type";
@@ -573,6 +585,13 @@ QWidget *ConfigParams::getEditor(const QString &name, QWidget *parent)
             retVal = edit;
         } break;
 
+        case CFG_T_BITFIELD: {
+            ParamEditBitfield *edit = new ParamEditBitfield(parent);
+            edit->setName(name);
+            edit->setConfig(this);
+            retVal = edit;
+        } break;
+
         default:
             qWarning() << "no editor for" << name << "could be created";
             break;
@@ -631,6 +650,7 @@ void ConfigParams::getParamSerial(VByteArray &vb, const QString &name)
 
         case CFG_T_ENUM:
         case CFG_T_BOOL:
+        case CFG_T_BITFIELD:
             vb.vbAppendInt8(p.valInt);
             break;
         }
@@ -669,10 +689,11 @@ void ConfigParams::setParamSerial(VByteArray &vb, const QString &name, QObject *
             }
         } break;
 
-        case CFG_T_INT: {
+        case CFG_T_INT:
+        case CFG_T_BITFIELD: {
             int val = 0;
 
-            if (p.vTx == VESC_TX_UINT8) {
+            if (p.vTx == VESC_TX_UINT8 || p.type == CFG_T_BITFIELD) {
                 val = vb.vbPopFrontUint8();
             } else if (p.vTx == VESC_TX_INT8) {
                 val = vb.vbPopFrontInt8();
@@ -750,7 +771,7 @@ void ConfigParams::updateParamInt(QString name, int param, QObject *src)
 
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
-        if (p.type == CFG_T_INT) {
+        if (p.type == CFG_T_INT || p.type == CFG_T_BITFIELD) {
             if (p.valInt != param) {
                 p.valInt = param;
                 emit paramChangedInt(src, name, param);
@@ -826,6 +847,35 @@ void ConfigParams::updateParamBool(QString name, bool param, QObject *src)
     }
 }
 
+void ConfigParams::updateParamFromOther(QString name, const ConfigParam &other, QObject *src)
+{
+    switch (other.type) {
+    case CFG_T_DOUBLE: {
+        updateParamDouble(name, other.valDouble, src);
+    } break;
+
+    case CFG_T_INT:
+    case CFG_T_BITFIELD: {
+        updateParamInt(name, other.valInt, src);
+    } break;
+
+    case CFG_T_ENUM: {
+        updateParamEnum(name, other.valInt, src);
+    } break;
+
+    case CFG_T_QSTRING: {
+        updateParamString(name, other.valString, src);
+    } break;
+
+    case CFG_T_BOOL: {
+        updateParamBool(name, other.valInt, src);
+    } break;
+
+    default:
+        break;
+    }
+}
+
 void ConfigParams::requestUpdate()
 {
     emit updateRequested();
@@ -841,6 +891,21 @@ void ConfigParams::updateDone()
     // Accept all names from now on again.
     mUpdateOnlyName.clear();
     emit updated();
+}
+
+bool ConfigParams::getStoreConfigVersion() const
+{
+    return mStoreConfigVersion;
+}
+
+void ConfigParams::setStoreConfigVersion(bool storeConfigVersion)
+{
+    mStoreConfigVersion = storeConfigVersion;
+}
+
+int ConfigParams::getConfigVersion() const
+{
+    return mConfigVersion;
 }
 
 // http://realtimecollisiondetection.net/blog/?p=89
@@ -886,6 +951,8 @@ bool ConfigParams::deSerialize(VByteArray &vb)
         setParamSerial(vb, mSerializeOrder.at(i));
     }
 
+    mConfigVersion = VT_CONFIG_VERSION;
+
     return true;
 }
 
@@ -893,6 +960,10 @@ void ConfigParams::getXML(QXmlStreamWriter &stream, QString configName)
 {
     stream.writeStartDocument();
     stream.writeStartElement(configName);
+
+    if (mStoreConfigVersion) {
+        stream.writeTextElement("ConfigVersion", QString::number(VT_CONFIG_VERSION));
+    }
 
     for (QString s: mParamList) {
         const ConfigParam p = mParams[s];
@@ -902,6 +973,7 @@ void ConfigParams::getXML(QXmlStreamWriter &stream, QString configName)
         case CFG_T_BOOL:
         case CFG_T_ENUM:
         case CFG_T_INT:
+        case CFG_T_BITFIELD:
             stream.writeTextElement(name, QString::number(p.valInt));
             break;
 
@@ -933,10 +1005,14 @@ bool ConfigParams::setXML(QXmlStreamReader &stream, QString configName)
     }
 
     if (nameFound) {
+        mConfigVersion = -1;
+
         while (stream.readNextStartElement()) {
             QString name = stream.name().toString();
 
-            if (mParams.contains(name)) {
+            if (name == "ConfigVersion") {
+                mConfigVersion = stream.readElementText().toInt();
+            } else if (mParams.contains(name)) {
                 ConfigParam &p = mParams[name];
                 QString text = stream.readElementText();
                 int valInt = text.toInt();
@@ -958,6 +1034,7 @@ bool ConfigParams::setXML(QXmlStreamReader &stream, QString configName)
                     break;
 
                 case CFG_T_INT:
+                case CFG_T_BITFIELD:
                     if (valInt != p.valInt) {
                         p.valInt = valInt;
                         emit paramChangedInt(nullptr, name, valInt);
@@ -1145,6 +1222,7 @@ void ConfigParams::getParamsXML(QXmlStreamWriter &stream)
             break;
 
         case CFG_T_ENUM:
+        case CFG_T_BITFIELD:
             stream.writeTextElement("valInt", QString::number(p->valInt));
             for (int j = 0;j < p->enumNames.size();j++) {
                 stream.writeTextElement("enumNames", p->enumNames.at(j));
@@ -1382,6 +1460,24 @@ bool ConfigParams::loadParamsXml(QString fileName)
     return res;
 }
 
+QByteArray ConfigParams::getCompressedParamsXml()
+{
+    QByteArray res;
+    QXmlStreamWriter stream(&res);
+    stream.setCodec("UTF-8");
+    stream.setAutoFormatting(true);
+    getParamsXML(stream);
+    return qCompress(res, 9);
+}
+
+bool ConfigParams::loadCompressedParamsXml(QByteArray data)
+{
+    QByteArray uncompressed = qUncompress(data);
+    QXmlStreamReader stream(uncompressed);
+    bool res = setParamsXML(stream);
+    return res;
+}
+
 bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
 {
     QFile file(fileName);
@@ -1416,6 +1512,7 @@ bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
                 case CFG_T_BOOL:
                 case CFG_T_ENUM:
                 case CFG_T_INT:
+                case CFG_T_BITFIELD:
                     out << "#define " + p.cDefine + " " + QString::number(p.valInt) + "\n";
                     break;
 
@@ -1476,16 +1573,23 @@ QStringList ConfigParams::checkDifference(ConfigParams *config)
                 case CFG_T_BOOL:
                 case CFG_T_ENUM:
                 case CFG_T_INT:
+                case CFG_T_BITFIELD:
                     if (thisParam->valInt != otherParam->valInt) {
                         res.append(p);
                     }
                     break;
 
-                case CFG_T_DOUBLE:
-                    if (!almostEqual(thisParam->valDouble, otherParam->valDouble, 0.0001)) {
+                case CFG_T_DOUBLE: {
+                    float eps = 0.0001;
+
+                    if (thisParam->vTx == VESC_TX_DOUBLE16) {
+                        eps = 0.01;
+                    }
+
+                    if (!almostEqual(thisParam->valDouble, otherParam->valDouble, eps)) {
                         res.append(p);
                     }
-                    break;
+                } break;
 
                 case CFG_T_QSTRING:
                     if (thisParam->valString != otherParam->valString) {

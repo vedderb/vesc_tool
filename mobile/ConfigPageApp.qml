@@ -18,14 +18,16 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
+    id: appPageItem
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
 
@@ -39,6 +41,10 @@ Item {
         standardButtons: Dialog.Close
         modal: true
         focus: true
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
@@ -58,6 +64,10 @@ Item {
         modal: true
         focus: true
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         x: 10
@@ -76,6 +86,10 @@ Item {
         modal: true
         focus: true
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
         x: 10
@@ -83,6 +97,28 @@ Item {
         parent: ApplicationWindow.overlay
 
         NrfPair {
+            anchors.fill: parent
+        }
+    }
+
+    Dialog {
+        id: detectImu
+        title: "IMU Calibration"
+        standardButtons: Dialog.Close
+        modal: true
+        focus: true
+
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        x: 10
+        y: (parent.height - height) / 2
+        parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        DetectIMU {
             anchors.fill: parent
         }
     }
@@ -144,7 +180,7 @@ Item {
                     tabBox.model = subgroups
                     tabBox.visible = subgroups.length > 1
 
-                    if (tabTextOld === tabBox.currentText) {
+                    if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
                         updateEditors()
                     }
                 }
@@ -204,7 +240,12 @@ Item {
 
                 Menu {
                     id: menu
-                    width: 500
+                    bottomPadding: notchBot
+                    leftPadding: notchLeft
+                    rightPadding: notchRight
+                    parent: appPageItem
+                    y: parent.height - implicitHeight
+                    width: parent.width
 
                     MenuItem {
                         text: "Read Default Settings"
@@ -228,6 +269,12 @@ Item {
                         text: "Pair NRF..."
                         onTriggered: {
                             nrfPair.open()
+                        }
+                    }
+                    MenuItem {
+                        text: "Calibrate IMU..."
+                        onTriggered: {
+                            detectImu.open()
                         }
                     }
                 }

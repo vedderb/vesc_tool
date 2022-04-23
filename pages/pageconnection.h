@@ -54,7 +54,9 @@ private slots:
     void on_CANbusDisconnectButton_clicked();
     void on_CANbusConnectButton_clicked();
     void on_tcpDisconnectButton_clicked();
+    void on_udpDisconnectButton_clicked();
     void on_tcpConnectButton_clicked();
+    void on_udpConnectButton_clicked();
     void on_helpButton_clicked();
     void on_canFwdButton_toggled(bool checked);
     void on_autoConnectButton_clicked();
@@ -71,7 +73,8 @@ private slots:
     void on_clearPairedButton_clicked();
     void on_addUuidButton_clicked();
     void on_unpairButton_clicked();
-    void on_tcpServerEnableBox_toggled(bool arg1);
+    void on_tcpServerEnableBox_toggled(bool isEnabled);
+    void on_udpServerEnableBox_toggled(bool isEnabled);
 
 private:
     Ui::PageConnection *ui;

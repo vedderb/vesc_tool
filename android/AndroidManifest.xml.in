@@ -1,6 +1,6 @@
 <?xml version='"1.0"'?>
 <manifest package='"vedder.vesctool"' xmlns:android='"http://schemas.android.com/apk/res/android"' android:versionName='"$$VT_VERSION"' android:versionCode='"$${VT_ANDROID_VERSION}"' android:installLocation='"auto"'>
-    <application android:hardwareAccelerated='"true"' android:name='"org.qtproject.qt5.android.bindings.QtApplication"' android:label='"VESC Tool"' android:icon='"@drawable/icon"'>
+    <application android:hardwareAccelerated='"true"' android:name='"org.qtproject.qt5.android.bindings.QtApplication"' android:label='"VESC Tool"' android:icon='"@drawable/icon"' android:requestLegacyExternalStorage='"true"'>
         <activity android:configChanges='"orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation"' android:name='"org.qtproject.qt5.android.bindings.QtActivity"' android:label='"VESC Tool"' android:screenOrientation='"unspecified"' android:launchMode='"singleTop"'>
             <intent-filter>
                 <action android:name='"android.intent.action.MAIN"'/>
@@ -57,6 +57,9 @@
                 -->
             <meta-data android:name='"android.app.extract_android_style"' android:value='"full"'/>
             <!-- extract android style -->
+            <meta-data android:name='"android.app.splash_screen_drawable"' android:resource='"@drawable/splashscreen"'/>
+            <meta-data android:name='"android.app.splash_screen_drawable_portrait"' android:resource='"@drawable/splashscreen_port"'/>
+            <meta-data android:name='"android.app.splash_screen_drawable_landscape"' android:resource='"@drawable/splashscreen_land"'/>
     </activity>
     
     <service
@@ -68,7 +71,7 @@
 
     </application>
 
-    <uses-sdk android:minSdkVersion='"23"' android:targetSdkVersion='"28"'/>
+    <uses-sdk android:minSdkVersion='"23"' android:targetSdkVersion='"30"'/>
     <supports-screens android:largeScreens='"true"' android:normalScreens='"true"' android:anyDensity='"true"' android:smallScreens='"true"'/>
 
     <!-- The following comment will be replaced upon deployment with default permissions based on the dependencies of the application.

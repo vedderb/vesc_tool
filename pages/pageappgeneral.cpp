@@ -55,3 +55,15 @@ void PageAppGeneral::reloadParams()
         ui->appTab->addParamSubgroup(mVesc->appConfig(), "general", "general");
     }
 }
+
+void PageAppGeneral::on_servoSlider_valueChanged(int position)
+{
+    if (mVesc) {
+        mVesc->commands()->setServoPos(double(position) / 1000.0);
+    }
+}
+
+void PageAppGeneral::on_servoCenterButton_clicked()
+{
+    ui->servoSlider->setValue(500);
+}

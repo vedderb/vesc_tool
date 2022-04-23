@@ -35,6 +35,7 @@ class Vesc3DView : public QOpenGLWidget, protected QOpenGLFunctions
 public:
     explicit Vesc3DView(QWidget *parent = nullptr);
     ~Vesc3DView();
+    void setBgColor(double r, double g, double b, double a);
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;

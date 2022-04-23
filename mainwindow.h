@@ -25,8 +25,12 @@
 #include <QTimer>
 #include <QProcess>
 #include <QSettings>
+#include <QMap>
 #include "vescinterface.h"
 #include "widgets/pagelistitem.h"
+#include "widgets/canlistitem.h"
+#include "mobile/qmlui.h"
+#include "preferences.h"
 
 #include "pages/pagewelcome.h"
 #include "pages/pageconnection.h"
@@ -51,7 +55,7 @@
 #include "pages/pageappnunchuk.h"
 #include "pages/pageappnrf.h"
 #include "pages/pageappbalance.h"
-#include "pages/pagesettings.h"
+#include "pages/pageapppas.h"
 #include "pages/pagegpd.h"
 #include "pages/pageexperiments.h"
 #include "pages/pageimu.h"
@@ -59,6 +63,11 @@
 #include "pages/pageappimu.h"
 #include "pages/pageloganalysis.h"
 #include "pages/pagecananalyzer.h"
+#include "pages/pagebms.h"
+#include "pages/pagecustomconfig.h"
+#include "pages/pagescripting.h"
+#include "pages/pagemotorcomparison.h"
+#include "pages/pagelisp.h"
 
 namespace Ui {
 class MainWindow;
@@ -74,6 +83,7 @@ public:
     bool eventFilter(QObject *object, QEvent *e);
 
 private slots:
+    void timerSlotDebugMsg();
     void timerSlot();
     void showStatusInfo(QString info, bool isGood);
     void showMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -81,6 +91,7 @@ private slots:
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void paramChangedDouble(QObject *src, QString name, double newParam);
     void mcConfigCheckResult(QStringList paramsNotSet);
+    void pingCanRx(QVector<int> devs, bool isTimeout);
 
     void on_actionReconnect_triggered();
     void on_actionDisconnect_triggered();
@@ -110,6 +121,8 @@ private slots:
     void on_actionParameterEditorMcconf_triggered();
     void on_actionParameterEditorAppconf_triggered();
     void on_actionParameterEditorInfo_triggered();
+    void on_actionParameterEditorFW_triggered();
+    void on_actionParameterEditorCustomConf0_triggered();
     void on_actionSaveMotorConfigurationHeader_triggered();
     void on_actionSaveAppConfigurationHeader_triggered();
     void on_actionSaveMotorConfigurationHeaderWrap_triggered();
@@ -118,7 +131,7 @@ private slots:
     void on_actionTerminalShowHelp_triggered();
     void on_actionTerminalClear_triggered();
     void on_actionTerminalPrintThreads_triggered();
-    void on_actionTerminalDRV8301ResetLatchedFaults_triggered();
+    void on_actionTerminalDRVResetLatchedFaults_triggered();
     void on_actionCanFwd_toggled(bool arg1);
     void on_actionSafetyInformation_triggered();
     void on_actionWarrantyStatement_triggered();
@@ -132,9 +145,12 @@ private slots:
     void on_actionBackupConfiguration_triggered();
     void on_actionRestoreConfiguration_triggered();
     void on_actionClearConfigurationBackups_triggered();
-    void on_actionParameterEditorFW_triggered();
     void on_actionBackupConfigurationsCAN_triggered();
     void on_actionRestoreConfigurationsCAN_triggered();
+    void on_scanCanButton_clicked();
+    void on_canList_currentRowChanged(int currentRow);
+    void on_actionGamepadControl_triggered(bool checked);   
+    void on_actionPreferences_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -142,6 +158,7 @@ private:
     QSettings mSettings;
     QString mVersion;
     VescInterface *mVesc;
+    QTimer *mDebugTimer;
     QTimer *mTimer;
     QLabel *mStatusLabel;
     int mStatusInfoTime;
@@ -149,6 +166,12 @@ private:
     bool mKeyRight;
     bool mMcConfRead;
     bool mAppConfRead;
+    QMap<QString, int> mPageNameIdList;
+
+    QTimer mPollRtTimer;
+    QTimer mPollAppTimer;
+    QTimer mPollImuTimer;
+    QTimer mPollBmsTimer;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;
@@ -156,7 +179,6 @@ private:
     PageRtData *mPageRtData;
     PageSampledData *mPageSampledData;
     PageImu *mPageImu;
-    PageTerminal *mPageTerminal;
     PageFirmware *mPageFirmware;
     PageDebugPrint *mPageDebugPrint;
     PageMotorSettings *mPageMotorSettings;
@@ -168,6 +190,7 @@ private:
     PageControllers *mPageControllers;
     PageMotorInfo *mPageMotorInfo;
     PageExperiments *mPageExperiments;
+    PageMotorComparison *mPageMotorComparison;
     PageAppSettings *mPageAppSettings;
     PageAppGeneral *mPageAppGeneral;
     PageAppPpm *mPageAppPpm;
@@ -176,11 +199,20 @@ private:
     PageAppNunchuk *mPageAppNunchuk;
     PageAppNrf *mPageAppNrf;
     PageAppBalance *mPageAppBalance;
-    PageSettings *mPageSettings;
+    PageCanAnalyzer *mPageCanAnalyzer;
+    PageTerminal *mPageTerminal;
+    PageAppPas *mPageAppPas;
     PageSwdProg *mPageSwdProg;
     PageAppImu *mPageAppImu;
     PageLogAnalysis *mPageLogAnalysis;
-    PageCanAnalyzer *mPageCanAnalyzer;
+    PageBms *mPageBms;
+    PageCustomConfig *mPageCustomConfig0;
+    PageCustomConfig *mPageCustomConfig1;
+    PageCustomConfig *mPageCustomConfig2;
+    PageScripting *mPageScripting;
+    PageLisp *mPageLisp;
+    QTabWidget *mPageVESCDev;
+    Preferences *mPreferences;
 
     void addPageItem(QString name,
                      QString icon = "",
@@ -191,9 +223,10 @@ private:
     void showPage(const QString &name);
     void reloadPages();
     void checkUdev();
+#ifdef Q_OS_LINUX
     bool waitProcess(QProcess &process, bool block = true, int timeoutMs = 300000);
     QString runCmd(QString cmd, QStringList args);
-
+#endif
 };
 
 #endif // MAINWINDOW_H

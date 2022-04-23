@@ -20,12 +20,19 @@
 #include "batterycalculator.h"
 #include "ui_batterycalculator.h"
 #include "widgets/helpdialog.h"
+#include "utility.h"
 
 BatteryCalculator::BatteryCalculator(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::BatteryCalculator)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->batteryCalcButton->setIcon(QPixmap(theme + "icons/apply.png"));
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
     on_batteryCellBox_valueChanged(ui->batteryCellBox->value());

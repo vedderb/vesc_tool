@@ -37,7 +37,7 @@ public:
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
-    void scanVescs();
+    void scanVescs(bool scanCan = true);
 
 private slots:
     void on_refreshButton_clicked();

@@ -31,7 +31,6 @@ PageConnection::PageConnection(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-
     mVesc = nullptr;
     mTimer = new QTimer(this);
 
@@ -39,6 +38,38 @@ PageConnection::PageConnection(QWidget *parent) :
             this, SLOT(timerSlot()));
 
     mTimer->start(20);
+
+    QString theme = Utility::getThemePath();
+    ui->CANbusScanButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->canRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->CANbusConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->CANbusDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->tcpConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->tcpDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->udpConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->udpDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->serialRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->serialConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->serialDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->bleConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->bleDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->bleScanButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->CANbusScanButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->addConnectedButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->addUuidButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->unpairButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+    ui->deletePairedButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->clearPairedButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->canDefaultButton->setIcon(QPixmap(theme + "icons/Bug-96.png"));
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->autoConnectButton->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->bleSetNameButton->setIcon(QPixmap(theme + "icons/Ok-96.png"));
+    ui->pairConnectedButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+
+    QIcon mycon = QIcon(theme + "icons/can_off.png");
+    mycon.addPixmap(QPixmap(theme + "icons/can_off.png"), QIcon::Normal, QIcon::Off);
+    mycon.addPixmap(QPixmap(theme + "icons/can_on.png"), QIcon::Normal, QIcon::On);
+    ui->canFwdButton->setIcon(mycon);
 }
 
 PageConnection::~PageConnection()
@@ -57,6 +88,9 @@ void PageConnection::setVesc(VescInterface *vesc)
 
     ui->tcpServerEdit->setText(mVesc->getLastTcpServer());
     ui->tcpPortBox->setValue(mVesc->getLastTcpPort());
+
+    ui->udpServerEdit->setText(mVesc->getLastUdpServer());
+    ui->udpPortBox->setValue(mVesc->getLastUdpPort());
 
 #ifdef HAS_BLUETOOTH
     connect(mVesc->bleDevice(), SIGNAL(scanDone(QVariantMap,bool)),
@@ -135,26 +169,50 @@ void PageConnection::timerSlot()
         }
     }
 
-    QString ipTxt = "Server IPs\n";
-    QString clientTxt = "Connected Clients\n";
+    QString tcpIpTxt = "Server IPs\n";
+    QString tcpClientTxt = "Connected Clients\n";
     if (mVesc->tcpServerIsRunning()) {
         for (auto adr: Utility::getNetworkAddresses()) {
-            ipTxt += adr.toString() + "\n";
+            tcpIpTxt += adr.toString() + "\n";
         }
 
         if (mVesc->tcpServerIsClientConnected()) {
-            clientTxt += mVesc->tcpServerClientIp();
+            tcpClientTxt += mVesc->tcpServerClientIp();
         }
-    } else {
+    }
+    else {
         ui->tcpServerPortBox->setEnabled(true);
     }
 
-    if (ui->tcpServerAddressesEdit->toPlainText() != ipTxt) {
-        ui->tcpServerAddressesEdit->setPlainText(ipTxt);
+    if (ui->tcpServerAddressesEdit->toPlainText() != tcpIpTxt) {
+        ui->tcpServerAddressesEdit->setPlainText(tcpIpTxt);
     }
 
-    if (ui->tcpServerClientsEdit->toPlainText() != clientTxt) {
-        ui->tcpServerClientsEdit->setPlainText(clientTxt);
+    if (ui->tcpServerClientsEdit->toPlainText() != tcpClientTxt) {
+        ui->tcpServerClientsEdit->setPlainText(tcpClientTxt);
+    }
+
+    QString udpIpTxt = "Server IPs\n";
+    QString udpClientTxt = "Connected Clients\n";
+    if(mVesc->udpServerIsRunning()) {
+        for (auto adr: Utility::getNetworkAddresses()) {
+            udpIpTxt += adr.toString() + "\n";
+        }
+
+        if (mVesc->udpServerIsClientConnected()) {
+            udpClientTxt += mVesc->udpServerClientIp();
+        }
+    }
+    else {
+        ui->udpServerPortBox->setEnabled(true);
+    }
+
+    if (ui->udpServerAddressesEdit->toPlainText() != udpIpTxt) {
+        ui->udpServerAddressesEdit->setPlainText(udpIpTxt);
+    }
+
+    if (ui->udpServerClientsEdit->toPlainText() != udpClientTxt) {
+        ui->udpServerClientsEdit->setPlainText(udpClientTxt);
     }
 }
 
@@ -236,7 +294,7 @@ void PageConnection::pairingListUpdated()
     for (QString uuid: mVesc->getPairedUuids()) {
         QListWidgetItem *item = new QListWidgetItem;
         item->setText("UUID: " + uuid);
-        item->setIcon(QIcon("://res/icon.png"));
+        item->setIcon(QIcon("://res/icon.svg"));
         item->setData(Qt::UserRole, uuid);
         ui->pairedListWidget->addItem(item);
     }
@@ -309,12 +367,28 @@ void PageConnection::on_tcpDisconnectButton_clicked()
     }
 }
 
+void PageConnection::on_udpDisconnectButton_clicked()
+{
+    if (mVesc) {
+        mVesc->disconnectPort();
+    }
+}
+
 void PageConnection::on_tcpConnectButton_clicked()
 {
     if (mVesc) {
         QString tcpServer = ui->tcpServerEdit->text();
         int tcpPort = ui->tcpPortBox->value();
         mVesc->connectTcp(tcpServer, tcpPort);
+    }
+}
+
+void PageConnection::on_udpConnectButton_clicked()
+{
+    if (mVesc) {
+        QString udpServer = ui->udpServerEdit->text();
+        int udpPort = ui->udpPortBox->value();
+        mVesc->connectUdp(udpServer, udpPort);
     }
 }
 
@@ -557,14 +631,28 @@ void PageConnection::on_unpairButton_clicked()
     }
 }
 
-void PageConnection::on_tcpServerEnableBox_toggled(bool arg1)
+void PageConnection::on_tcpServerEnableBox_toggled(bool isEnabled)
 {
     if (mVesc) {
-        if (arg1) {
+        if (isEnabled)
+        {
             mVesc->tcpServerStart(ui->tcpServerPortBox->value());
             ui->tcpServerPortBox->setEnabled(false);
         } else {
             mVesc->tcpServerStop();
+        }
+    }
+}
+
+void PageConnection::on_udpServerEnableBox_toggled(bool isEnabled)
+{
+    if (mVesc) {
+        if (isEnabled)
+        {
+            mVesc->udpServerStart(ui->udpServerPortBox->value());
+            ui->udpServerPortBox->setEnabled(false);
+        } else {
+           mVesc->udpServerStop();
         }
     }
 }

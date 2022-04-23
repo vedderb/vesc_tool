@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -19,17 +19,24 @@
 
 #include "fwhelper.h"
 #include <QDirIterator>
+#include "hexfile.h"
 
 FwHelper::FwHelper(QObject *parent) : QObject(parent)
 {
 
 }
 
-QVariantMap FwHelper::getHardwares(QString hw)
+QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
 {
     QVariantMap hws;
 
-    QDirIterator it("://res/firmwares");
+    QString fwDir = "://res/firmwares";
+
+    if (params.hwType == HW_TYPE_VESC_BMS) {
+        fwDir = "://res/firmwares_bms";
+    }
+
+    QDirIterator it(fwDir);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         QStringList names = fi.fileName().split("_o_");
@@ -60,11 +67,17 @@ QVariantMap FwHelper::getFirmwares(QString hw)
     return fws;
 }
 
-QVariantMap FwHelper::getBootloaders(QString hw)
+QVariantMap FwHelper::getBootloaders(FW_RX_PARAMS params, QString hw)
 {
     QVariantMap bls;
 
-    QDirIterator it("://res/bootloaders");
+    QString blDir = "://res/bootloaders";
+
+    if (params.hwType == HW_TYPE_VESC_BMS) {
+        blDir = "://res/bootloaders_bms";
+    }
+
+    QDirIterator it(blDir);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         QStringList names = fi.fileName().replace(".bin", "").split("_o_");
@@ -80,7 +93,7 @@ QVariantMap FwHelper::getBootloaders(QString hw)
     }
 
     if (bls.isEmpty()) {
-        QFileInfo generic("://res/bootloaders/generic.bin");
+        QFileInfo generic(blDir + "/generic.bin");
         if (generic.exists()) {
             bls.insert("generic", generic.absoluteFilePath());
         }
@@ -101,8 +114,8 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
     QFileInfo fileInfo(filename);
 
     if (checkName) {
-        if (!(fileInfo.fileName().startsWith("BLDC_4") || fileInfo.fileName().startsWith("VESC"))
-                || !fileInfo.fileName().endsWith(".bin")) {
+        if (!fileInfo.fileName().toLower().endsWith(".bin") &&
+                !fileInfo.fileName().toLower().endsWith(".hex")) {
             vesc->emitMessageDialog(
                         tr("Upload Error"),
                         tr("The selected file name seems to be invalid."),
@@ -119,15 +132,65 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
         return false;
     }
 
-    if (file.size() > 400000) {
+    if (file.size() > 700000) {
         vesc->emitMessageDialog(tr("Upload Error"),
                                 tr("The selected file is too large to be a firmware."),
                                 false);
         return false;
     }
 
-    QByteArray data = file.readAll();
-    vesc->fwUpload(data, isBootloader, fwdCan);
+    bool fwRes = false;
 
+    if (file.fileName().toLower().endsWith(".hex")) {
+        QMap<quint32, QByteArray> fwData;
+        fwRes = HexFile::parseFile(file.fileName(), fwData);
+
+        if (fwRes) {
+            QMapIterator<quint32, QByteArray> i(fwData);
+
+            QByteArray data;
+            bool startSet = false;
+            unsigned int startOffset = 0;
+
+            while (i.hasNext()) {
+                i.next();
+                if (!startSet) {
+                    startSet = true;
+                    startOffset = i.key();
+                }
+
+                while ((quint32(data.size()) + startOffset) < i.key()) {
+                    data.append(char(0xFF));
+                }
+
+                data.append(i.value());
+            }
+
+            fwRes = vesc->fwUpload(data, isBootloader, fwdCan);
+        }
+    } else {
+        QByteArray data = file.readAll();
+        fwRes = vesc->fwUpload(data, isBootloader, fwdCan);
+    }
+
+    return fwRes;
+}
+
+bool FwHelper::uploadFirmwareSingleShotTimer(QString filename, VescInterface *vesc,
+                              bool isBootloader, bool checkName, bool fwdCan, QString BLfilename)
+{
+    bool res;
+    QTimer::singleShot(10, [this, &res, filename, vesc, isBootloader, checkName, fwdCan, BLfilename]() {
+        qDebug() << filename;
+        if(BLfilename.isEmpty()) {
+            res = uploadFirmware(filename, vesc, isBootloader, checkName, fwdCan);
+        } else {
+            res = uploadFirmware(BLfilename, vesc, true, checkName, fwdCan);
+            if(res) {
+                res = uploadFirmware(filename, vesc, isBootloader, checkName, fwdCan);
+            }
+        }
+        emit fwUploadRes(res, isBootloader);
+    });
     return true;
 }

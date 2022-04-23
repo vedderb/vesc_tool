@@ -109,15 +109,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ParamTable</class>
+   <extends>QTableWidget</extends>
+   <header>widgets/paramtable.h</header>
+  </customwidget>
+  <customwidget>
    <class>MRichTextEdit</class>
    <extends>QWidget</extends>
    <header>widgets/mrichtextedit.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ParamTable</class>
-   <extends>QTableWidget</extends>
-   <header>widgets/paramtable.h</header>
   </customwidget>
  </customwidgets>
  <resources>

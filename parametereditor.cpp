@@ -25,6 +25,7 @@
 #include <QInputDialog>
 #include <QDebug>
 #include <cmath>
+#include "utility.h"
 
 ParameterEditor::ParameterEditor(QWidget *parent) :
     QMainWindow(parent),
@@ -32,6 +33,52 @@ ParameterEditor::ParameterEditor(QWidget *parent) :
 {
     ui->setupUi(this);
     setEditorValues("new_parameter", ConfigParam());
+
+    QString theme = Utility::getThemePath();
+    windowIcon().addPixmap(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
+    ui->paramRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->paramDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->paramUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->paramOpenButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->enumRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->enumMoveDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->enumMoveUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->enumAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->paramResetButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->paramSaveButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->serRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->serDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->serUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->serAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+
+    ui->groupRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->groupDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->groupUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->groupAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->groupEditButton->setIcon(QPixmap(theme + "icons/icons8-edit-96.png"));
+
+    ui->subgroupRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->subgroupDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->subgroupUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->subgroupAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->subgroupEditButton->setIcon(QPixmap(theme + "icons/icons8-edit-96.png"));
+
+    ui->groupParamRemoveButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->groupParamDownButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
+    ui->groupParamUpButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
+    ui->groupParamAddButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
+    ui->groupParamEditButton->setIcon(QPixmap(theme + "icons/icons8-edit-96.png"));
+
+    ui->actionCalculatePacketSize->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->actionCalculateCompressedCArraySize->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->actionSave_XML_as->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionExportCompressedCArray->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSave_Configuration_C_Header_as->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSave_Configuration_C_Header_ifdef_wrapped_as->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionSave_XML_and_export_config_parser_and_compressed_C_array->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionLoad_XML->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->actionExportConfigurationParser->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->actionDeleteAll->setIcon(QPixmap(theme + "icons/Delete-96.png"));
 
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
@@ -488,6 +535,13 @@ void ParameterEditor::setEditorValues(QString name, ConfigParam p)
 
     // Bool
     ui->boolBox->setCurrentIndex(p.valInt > 0 ? 1 : 0);
+
+    // Bitfield
+    for (int i = 0;i < p.enumNames.size();i++) {
+        if (ui->bitfieldWidget->count() > i) {
+            ui->bitfieldWidget->item(i)->setText(p.enumNames.at(i));
+        }
+    }
 }
 
 QString ParameterEditor::getEditorValues(ConfigParam *p)
@@ -541,6 +595,14 @@ QString ParameterEditor::getEditorValues(ConfigParam *p)
 
         case CFG_T_BOOL:
             p->valInt = ui->boolBox->currentIndex();
+            break;
+
+        case CFG_T_BITFIELD:
+            p->enumNames.clear();
+            for (int i = 0;i < ui->bitfieldWidget->count();i++) {
+                p->enumNames.append(ui->bitfieldWidget->item(i)->text());
+            }
+            p->valInt = ui->bitfieldValBox->value();
             break;
 
         default:
@@ -622,6 +684,38 @@ void ParameterEditor::updateGroupParamList()
         if (index >= 0 && index < ui->groupParamList->count()) {
             ui->groupParamList->setCurrentRow(index);
         }
+    }
+}
+
+void ParameterEditor::saveParamFileDialog(bool wrapIfdef)
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the configuration header file"),
+                                        ".",
+                                        tr("h files (*.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    if (path.contains(" ")) {
+        QMessageBox::warning(this, tr("Save header"),
+                          tr("Spaces are not allowed in the filename."));
+        return;
+    }
+
+    if (!path.toLower().endsWith(".h")) {
+        path += ".h";
+    }
+
+    bool res = mParams.saveCDefines(path, wrapIfdef);
+
+    if (res) {
+        showStatusInfo("Saved C header", true);
+    } else {
+        QMessageBox::warning(this, tr("Save header"),
+                          tr("Could not save header"));
     }
 }
 
@@ -873,4 +967,127 @@ void ParameterEditor::on_groupParamEditButton_clicked()
             updateGroupParamList();
         }
     }
+}
+
+void ParameterEditor::on_actionExportConfigurationParser_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the parser C source and header file"),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    QString name = "device_config";
+
+    if (mParams.hasParam("config_name") && mParams.getParam("config_name")->type == CFG_T_QSTRING) {
+        name = mParams.getParamQString("config_name");
+    } else {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Config Name",
+                                             "Name:", QLineEdit::Normal,
+                                             name, &ok);
+
+        if (ok && text.size() > 0) {
+            name = text;
+        }
+    }
+
+    Utility::createParamParserC(&mParams, name, path);
+}
+
+void ParameterEditor::on_actionSave_Configuration_C_Header_as_triggered()
+{
+    saveParamFileDialog(false);
+}
+
+void ParameterEditor::on_actionSave_Configuration_C_Header_ifdef_wrapped_as_triggered()
+{
+    saveParamFileDialog(true);
+}
+
+void ParameterEditor::on_actionExportCompressedCArray_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the config C source and header file"),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    QString name = "device_config";
+
+    if (mParams.hasParam("config_name") && mParams.getParam("config_name")->type == CFG_T_QSTRING) {
+        name = mParams.getParamQString("config_name");
+    } else {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Config Name",
+                                             "Name:", QLineEdit::Normal,
+                                             name, &ok);
+
+        if (ok && text.size() > 0) {
+            name = text;
+        }
+    }
+
+    Utility::createCompressedConfigC(&mParams, name, path);
+}
+
+void ParameterEditor::on_actionCalculateCompressedCArraySize_triggered()
+{
+    QByteArray compressed = mParams.getCompressedParamsXml();
+    QMessageBox::information(this,
+                             tr("Compressed XML Size"),
+                             tr("%1 Bytes").arg(compressed.size()));
+}
+
+void ParameterEditor::on_actionSave_XML_and_export_config_parser_and_compressed_C_array_triggered()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose the XML file or one of the C files. All files will be created with default "
+                                           "names and/or overwritten if they already exist in the directory."),
+                                        ".",
+                                        tr("C Source/Header files (*.c *.h)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    QString nameConfig = "device_config";
+    if (mParams.hasParam("config_name") && mParams.getParam("config_name")->type == CFG_T_QSTRING) {
+        nameConfig = mParams.getParamQString("config_name");
+    } else {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Config Name",
+                                             "Name:", QLineEdit::Normal,
+                                             nameConfig, &ok);
+
+        if (ok && text.size() > 0) {
+            nameConfig = text;
+        }
+    }
+
+    QFileInfo fi(path);
+    path.chop(fi.fileName().length());
+    QString pathXml = path + "settings.xml";
+    QString pathDefines = path + "conf_default.h";
+    QString pathParser = path + "confparser.c";
+    QString pathCompressed = path + "confxml.c";
+
+    qDebug() << pathXml;
+    qDebug() << pathDefines;
+    qDebug() << pathParser;
+    qDebug() << pathCompressed;
+
+    Utility::createCompressedConfigC(&mParams, nameConfig, pathCompressed);
+    Utility::createParamParserC(&mParams, nameConfig, pathParser);
+    mParams.saveCDefines(pathDefines, true);
+    mParams.saveParamsXml(pathXml);
 }

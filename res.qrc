@@ -1,122 +1,15 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/icons/Horizontal Settings Mixer-96.png</file>
-        <file>res/icons/Data Backup-96.png</file>
-        <file>res/icons/Download-96.png</file>
-        <file>res/icons/Help-96.png</file>
-        <file>res/icons_textedit/Add Image-96.png</file>
-        <file>res/icons_textedit/Bold-96.png</file>
-        <file>res/icons_textedit/Bulleted List-96.png</file>
-        <file>res/icons_textedit/Copy-96.png</file>
-        <file>res/icons_textedit/Cut-96.png</file>
-        <file>res/icons_textedit/Fill Color-96.png</file>
-        <file>res/icons_textedit/Indent-96.png</file>
-        <file>res/icons_textedit/Italic-96.png</file>
-        <file>res/icons_textedit/Link-96.png</file>
-        <file>res/icons_textedit/Menu 2-96.png</file>
-        <file>res/icons_textedit/Numbered List-96.png</file>
-        <file>res/icons_textedit/Outdent-96.png</file>
-        <file>res/icons_textedit/Paste-96.png</file>
-        <file>res/icons_textedit/Redo-96.png</file>
-        <file>res/icons_textedit/Strikethrough-96.png</file>
-        <file>res/icons_textedit/Text Color-96.png</file>
-        <file>res/icons_textedit/Undo-96.png</file>
-        <file>res/icons/Upload-96.png</file>
-        <file>res/icons/Toggle Off-96_2.png</file>
-        <file>res/icons/Toggle On-96_2.png</file>
-        <file>res/icons/Open Folder-96.png</file>
-        <file>res/icons/Save-96.png</file>
-        <file>res/icons/Save as-96.png</file>
-        <file>res/icons/Connected-96.png</file>
-        <file>res/icons/Refresh-96.png</file>
-        <file>res/icons/Restart-96.png</file>
-        <file>res/icons/Disconnected-96.png</file>
-        <file>res/icons/Anchor-96.png</file>
-        <file>res/icons/Circled Play-96.png</file>
-        <file>res/icons/Stop Sign-96.png</file>
-        <file>res/icons/Stop-96.png</file>
-        <file>res/icons/can_off.png</file>
-        <file>res/icons/can_on.png</file>
-        <file>res/icons/Brake Warning-96.png</file>
-        <file>res/icons/Line Chart-96.png</file>
-        <file>res/icons/rt_off.png</file>
-        <file>res/icons/rt_on.png</file>
-        <file>res/icons/Shutdown-96.png</file>
-        <file>res/icons/About-96.png</file>
-        <file>res/icons/keys_off.png</file>
-        <file>res/icons/keys_on.png</file>
-        <file>res/icons/app_default.png</file>
-        <file>res/icons/app_down.png</file>
-        <file>res/icons/app_up.png</file>
-        <file>res/icons/motor_default.png</file>
-        <file>res/icons/motor_down.png</file>
-        <file>res/icons/motor_up.png</file>
-        <file>res/icons/motor.png</file>
-        <file>res/icons/appconf.png</file>
-        <file>res/icons/mcconf.png</file>
-        <file>res/icons/3ph_sine.png</file>
-        <file>res/icons/Delete-96.png</file>
-        <file>res/icons/Console-96.png</file>
-        <file>res/icons/Bug-96.png</file>
-        <file>res/icons/Process-96.png</file>
-        <file>res/icons/bldc.png</file>
-        <file>res/icons/Controller-96.png</file>
-        <file>res/icons/Down-96.png</file>
-        <file>res/icons/Plus Math-96.png</file>
-        <file>res/icons/Up-96.png</file>
-        <file>res/icons/Ok-96.png</file>
-        <file>res/icons/Car Battery-96.png</file>
-        <file>res/icons/lambda.png</file>
-        <file>res/icons/rl.png</file>
-        <file>res/icons/Calculator-96.png</file>
-        <file>res/icons/Speed-96.png</file>
-        <file>res/icons/rt_app_off.png</file>
-        <file>res/icons/rt_app_on.png</file>
-        <file>res/icons/Outgoing Data-96.png</file>
-        <file>res/icons/Potentiometer-96.png</file>
-        <file>res/icons/Rs 232 Male-96.png</file>
-        <file>res/icons/Wii-96.png</file>
-        <file>res/icons/Online-96.png</file>
-        <file>res/icons/Send File-96.png</file>
-        <file>res/icons/Cancel-96.png</file>
-        <file>res/icons/Electronics-96.png</file>
-        <file>res/icons/alive_off.png</file>
-        <file>res/icons/alive_on.png</file>
-        <file>res/icons/expand_off.png</file>
-        <file>res/icons/expand_on.png</file>
-        <file>res/icons/size_off.png</file>
-        <file>res/icons/size_on.png</file>
-        <file>res/icons/expand_v_off.png</file>
-        <file>res/icons/expand_v_on.png</file>
-        <file>res/icons/Home-96.png</file>
-        <file>res/icons/Wizard-96.png</file>
         <file>res/bg.png</file>
-        <file>res/logo_wizard.png</file>
-        <file>res/icons/apply.png</file>
-        <file>res/icons/arrow_down.png</file>
-        <file>res/icons/arrow_l.png</file>
-        <file>res/icons/arrow_r.png</file>
-        <file>res/icons/arrow_up.png</file>
         <file>res/images/rc_rx.jpg</file>
         <file>res/images/ebike_throttle.jpg</file>
         <file>res/images/nunchuk.jpg</file>
         <file>res/images/vedder_nunchuk.jpg</file>
         <file>res/firmwares/CHANGELOG</file>
-        <file>res/icons_textedit/Align Center-96.png</file>
-        <file>res/icons_textedit/Align Justify-96.png</file>
-        <file>res/icons_textedit/Align Left-96.png</file>
-        <file>res/icons_textedit/Align Right-96.png</file>
-        <file>res/logo_intro_wizard.png</file>
         <file>res/CHANGELOG</file>
-        <file>res/icons/sampl_trigger_start.png</file>
-        <file>res/icons/sample_trigger_fault_nosend.png</file>
-        <file>res/icons/sample_trigger_fault.png</file>
-        <file>res/icons/sample_trigger_start_nosend.png</file>
         <file>res/images/multi_master.png</file>
         <file>res/images/multi_single.png</file>
         <file>res/images/multi_slave.png</file>
-        <file>res/icons/User Group Man Man-96.png</file>
-        <file>res/icons/Settings-96.png</file>
         <file>res/bootloaders/40_o_47_o_48_o_410_o_411_o_412_o_DAS_RS.bin</file>
         <file>res/fonts/DejaVuSans.ttf</file>
         <file>res/fonts/DejaVuSans-Oblique.ttf</file>
@@ -126,10 +19,7 @@
         <file>res/fonts/DejaVuSansMono.ttf</file>
         <file>res/fonts/DejaVuSans-BoldOblique.ttf</file>
         <file>res/fonts/DejaVuSans-Bold.ttf</file>
-        <file>res/icons/ic_folder_open_black_48dp.png</file>
-        <file>res/icons/ic_insert_drive_file_black_48dp.png</file>
         <file>res/bootloaders/generic.bin</file>
-        <file>res/logo_white.png</file>
         <file>res/images/motors/6374.jpg</file>
         <file>res/images/motors/ebike_dd_1kw.jpg</file>
         <file>res/images/motors/edf_small.jpg</file>
@@ -137,9 +27,6 @@
         <file>res/images/motors/inrunner_small.jpg</file>
         <file>res/images/motors/outrunner_mini.jpg</file>
         <file>res/images/motors/outrunner_small.jpg</file>
-        <file>res/icons/Gyroscope-96.png</file>
-        <file>res/icons/imu_off.png</file>
-        <file>res/icons/imu_on.png</file>
         <file>res/images/v6plus_top.png</file>
         <file>res/other_fw/nrf51_remote_mt_32k_32m.bin</file>
         <file>res/other_fw/nrf51_vesc_ble_16k_16m_rx1_tx2_led3.bin</file>
@@ -152,13 +39,288 @@
         <file>res/other_fw/nrf52832_vesc_ble_rx7_tx6_led8.bin</file>
         <file>res/other_fw/nrf52840_vesc_ble_rx26_tx25_led27.bin</file>
         <file>res/other_fw/nrf52840_stick_remote.bin</file>
-        <file>res/icons/Polyline-96.png</file>
-        <file>res/icons/Waypoint Map-96.png</file>
-        <file>res/icons/EUC-96.png</file>
         <file>res/images/slider1.png</file>
+        <file>res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin</file>
+        <file>res/fonts/Roboto/Roboto-Black.ttf</file>
+        <file>res/fonts/Roboto/Roboto-BlackItalic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Bold.ttf</file>
+        <file>res/fonts/Roboto/Roboto-BoldItalic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Italic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Light.ttf</file>
+        <file>res/fonts/Roboto/Roboto-LightItalic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Medium.ttf</file>
+        <file>res/fonts/Roboto/Roboto-MediumItalic.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Regular.ttf</file>
+        <file>res/fonts/Roboto/Roboto-Thin.ttf</file>
+        <file>res/fonts/Roboto/Roboto-ThinItalic.ttf</file>
+        <file>res/images/12s7p_pcb.png</file>
+        <file>res/images/esk8.jpg</file>
+        <file>res/images/propeller.jpg</file>
+        <file>res/+theme_light/logo_vertical.png</file>
+        <file>res/icons/bluetooth.png</file>
+        <file>res/icons/minimize.png</file>
+        <file>res/icons/icons8-battery-100.png</file>
+        <file>res/icons/fullscreen.png</file>
+        <file>res/icons/exit.png</file>
+        <file>res/icons/bms_on.png</file>
+        <file>res/icons/bms_off.png</file>
+        <file>res/icons/Controller-96_on.png</file>
+        <file>res/icons/size_on.png</file>
+        <file>res/icons/size_off.png</file>
+        <file>res/icons/sample_trigger_start_nosend.png</file>
+        <file>res/icons/sample_trigger_fault_nosend.png</file>
+        <file>res/icons/sample_trigger_fault.png</file>
+        <file>res/icons/sampl_trigger_start.png</file>
+        <file>res/icons/rt_on.png</file>
+        <file>res/icons/rt_off.png</file>
+        <file>res/icons/rt_app_on.png</file>
+        <file>res/icons/rt_app_off.png</file>
+        <file>res/icons/rl.png</file>
+        <file>res/icons/motor_up.png</file>
+        <file>res/icons/motor_down.png</file>
+        <file>res/icons/motor_default.png</file>
+        <file>res/icons/motor.png</file>
+        <file>res/icons/mcconf.png</file>
+        <file>res/icons/lambda.png</file>
+        <file>res/icons/keys_on.png</file>
+        <file>res/icons/keys_off.png</file>
+        <file>res/icons/imu_on.png</file>
+        <file>res/icons/imu_off.png</file>
         <file>res/icons/icons8-target-96.png</file>
         <file>res/icons/icons8-fantasy-96.png</file>
         <file>res/icons/icons8-edit-96.png</file>
-        <file>res/bootloaders/60_o_75_300_o_HD_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250.bin</file>
+        <file>res/icons/ic_insert_drive_file_black_48dp.png</file>
+        <file>res/icons/ic_folder_open_black_48dp.png</file>
+        <file>res/icons/expand_v_on.png</file>
+        <file>res/icons/expand_v_off.png</file>
+        <file>res/icons/expand_on.png</file>
+        <file>res/icons/expand_off.png</file>
+        <file>res/icons/collapse_on.png</file>
+        <file>res/icons/collapse_off.png</file>
+        <file>res/icons/can_on.png</file>
+        <file>res/icons/can_off.png</file>
+        <file>res/icons/bldc.png</file>
+        <file>res/icons/arrow_up.png</file>
+        <file>res/icons/arrow_r.png</file>
+        <file>res/icons/arrow_l.png</file>
+        <file>res/icons/arrow_down.png</file>
+        <file>res/icons/apply.png</file>
+        <file>res/icons/appconf.png</file>
+        <file>res/icons/app_up.png</file>
+        <file>res/icons/app_down.png</file>
+        <file>res/icons/app_default.png</file>
+        <file>res/icons/alive_on.png</file>
+        <file>res/icons/alive_off.png</file>
+        <file>res/icons/Wizard-96.png</file>
+        <file>res/icons/Wii-96.png</file>
+        <file>res/icons/Waypoint Map-96.png</file>
+        <file>res/icons/User Group Man Man-96.png</file>
+        <file>res/icons/Upload-96.png</file>
+        <file>res/icons/Up-96.png</file>
+        <file>res/icons/Toggle On-96_2.png</file>
+        <file>res/icons/Toggle Off-96_2.png</file>
+        <file>res/icons/Stop-96.png</file>
+        <file>res/icons/Speed-96.png</file>
+        <file>res/icons/Shutdown-96.png</file>
+        <file>res/icons/Settings-96.png</file>
+        <file>res/icons/Send File-96.png</file>
+        <file>res/icons/Save-96.png</file>
+        <file>res/icons/Save as-96.png</file>
+        <file>res/icons/Rs 232 Male-96.png</file>
+        <file>res/icons/Restart-96.png</file>
+        <file>res/icons/Refresh-96.png</file>
+        <file>res/icons/Process-96.png</file>
+        <file>res/icons/Potentiometer-96.png</file>
+        <file>res/icons/Polyline-96.png</file>
+        <file>res/icons/Plus Math-96.png</file>
+        <file>res/icons/Outgoing Data-96.png</file>
+        <file>res/icons/Open Folder-96.png</file>
+        <file>res/icons/Online-96.png</file>
+        <file>res/icons/Ok-96.png</file>
+        <file>res/icons/Line Chart-96.png</file>
+        <file>res/icons/Horizontal Settings Mixer-96.png</file>
+        <file>res/icons/Home-96.png</file>
+        <file>res/icons/Help-96.png</file>
+        <file>res/icons/Gyroscope-96.png</file>
+        <file>res/icons/Electronics-96.png</file>
+        <file>res/icons/EUC-96.png</file>
+        <file>res/icons/Download-96.png</file>
+        <file>res/icons/Down-96.png</file>
+        <file>res/icons/Disconnected-96.png</file>
+        <file>res/icons/Delete-96.png</file>
+        <file>res/icons/Data Backup-96.png</file>
+        <file>res/icons/Controller-96.png</file>
+        <file>res/icons/Console-96.png</file>
+        <file>res/icons/Connected-96.png</file>
+        <file>res/icons/Circled Play-96.png</file>
+        <file>res/icons/Car Battery-96.png</file>
+        <file>res/icons/Cancel-96.png</file>
+        <file>res/icons/Calculator-96.png</file>
+        <file>res/icons/Bug-96.png</file>
+        <file>res/icons/Brake Warning-96.png</file>
+        <file>res/icons/Anchor-96.png</file>
+        <file>res/icons/About-96.png</file>
+        <file>res/icons/3ph_sine.png</file>
+        <file>res/icons/Stop Sign-96.png</file>
+        <file>res/icons_textedit/Undo-96.png</file>
+        <file>res/icons_textedit/Text Color-96.png</file>
+        <file>res/icons_textedit/Strikethrough-96.png</file>
+        <file>res/icons_textedit/Redo-96.png</file>
+        <file>res/icons_textedit/Paste-96.png</file>
+        <file>res/icons_textedit/Outdent-96.png</file>
+        <file>res/icons_textedit/Numbered List-96.png</file>
+        <file>res/icons_textedit/Menu 2-96.png</file>
+        <file>res/icons_textedit/Link-96.png</file>
+        <file>res/icons_textedit/Italic-96.png</file>
+        <file>res/icons_textedit/Indent-96.png</file>
+        <file>res/icons_textedit/Fill Color-96.png</file>
+        <file>res/icons_textedit/Cut-96.png</file>
+        <file>res/icons_textedit/Copy-96.png</file>
+        <file>res/icons_textedit/Bulleted List-96.png</file>
+        <file>res/icons_textedit/Bold-96.png</file>
+        <file>res/icons_textedit/Align Right-96.png</file>
+        <file>res/icons_textedit/Align Left-96.png</file>
+        <file>res/icons_textedit/Align Justify-96.png</file>
+        <file>res/icons_textedit/Align Center-96.png</file>
+        <file>res/icons_textedit/Add Image-96.png</file>
+        <file>res/logo_vertical.png</file>
+        <file>res/+theme_light/icons/Wizard-96.png</file>
+        <file>res/+theme_light/icons/Wii-96.png</file>
+        <file>res/+theme_light/icons/Waypoint Map-96.png</file>
+        <file>res/+theme_light/icons/User Group Man Man-96.png</file>
+        <file>res/+theme_light/icons/Upload-96.png</file>
+        <file>res/+theme_light/icons/Up-96.png</file>
+        <file>res/+theme_light/icons/Toggle On-96_2.png</file>
+        <file>res/+theme_light/icons/Toggle Off-96_2.png</file>
+        <file>res/+theme_light/icons/Stop-96.png</file>
+        <file>res/+theme_light/icons/Stop Sign-96.png</file>
+        <file>res/+theme_light/icons/Speed-96.png</file>
+        <file>res/+theme_light/icons/size_on.png</file>
+        <file>res/+theme_light/icons/size_off.png</file>
+        <file>res/+theme_light/icons/Shutdown-96.png</file>
+        <file>res/+theme_light/icons/Settings-96.png</file>
+        <file>res/+theme_light/icons/Send File-96.png</file>
+        <file>res/+theme_light/icons/Save-96.png</file>
+        <file>res/+theme_light/icons/Save as-96.png</file>
+        <file>res/+theme_light/icons/sample_trigger_start_nosend.png</file>
+        <file>res/+theme_light/icons/sample_trigger_fault.png</file>
+        <file>res/+theme_light/icons/sample_trigger_fault_nosend.png</file>
+        <file>res/+theme_light/icons/sampl_trigger_start.png</file>
+        <file>res/+theme_light/icons/rt_on.png</file>
+        <file>res/+theme_light/icons/rt_off.png</file>
+        <file>res/+theme_light/icons/rt_app_on.png</file>
+        <file>res/+theme_light/icons/rt_app_off.png</file>
+        <file>res/+theme_light/icons/Rs 232 Male-96.png</file>
+        <file>res/+theme_light/icons/rl.png</file>
+        <file>res/+theme_light/icons/Restart-96.png</file>
+        <file>res/+theme_light/icons/Refresh-96.png</file>
+        <file>res/+theme_light/icons/Process-96.png</file>
+        <file>res/+theme_light/icons/Potentiometer-96.png</file>
+        <file>res/+theme_light/icons/Polyline-96.png</file>
+        <file>res/+theme_light/icons/Plus Math-96.png</file>
+        <file>res/+theme_light/icons/Outgoing Data-96.png</file>
+        <file>res/+theme_light/icons/Open Folder-96.png</file>
+        <file>res/+theme_light/icons/Online-96.png</file>
+        <file>res/+theme_light/icons/Ok-96.png</file>
+        <file>res/+theme_light/icons/motor.png</file>
+        <file>res/+theme_light/icons/motor_up.png</file>
+        <file>res/+theme_light/icons/motor_down.png</file>
+        <file>res/+theme_light/icons/motor_default.png</file>
+        <file>res/+theme_light/icons/mcconf.png</file>
+        <file>res/+theme_light/icons/Line Chart-96.png</file>
+        <file>res/+theme_light/icons/lambda.png</file>
+        <file>res/+theme_light/icons/keys_on.png</file>
+        <file>res/+theme_light/icons/keys_off.png</file>
+        <file>res/+theme_light/icons/imu_on.png</file>
+        <file>res/+theme_light/icons/imu_off.png</file>
+        <file>res/+theme_light/icons/icons8-target-96.png</file>
+        <file>res/+theme_light/icons/icons8-fantasy-96.png</file>
+        <file>res/+theme_light/icons/icons8-edit-96.png</file>
+        <file>res/+theme_light/icons/icons8-battery-100.png</file>
+        <file>res/+theme_light/icons/ic_insert_drive_file_black_48dp.png</file>
+        <file>res/+theme_light/icons/ic_folder_open_black_48dp.png</file>
+        <file>res/+theme_light/icons/Horizontal Settings Mixer-96.png</file>
+        <file>res/+theme_light/icons/Home-96.png</file>
+        <file>res/+theme_light/icons/Help-96.png</file>
+        <file>res/+theme_light/icons/Gyroscope-96.png</file>
+        <file>res/+theme_light/icons/expand_v_on.png</file>
+        <file>res/+theme_light/icons/expand_v_off.png</file>
+        <file>res/+theme_light/icons/expand_on.png</file>
+        <file>res/+theme_light/icons/expand_off.png</file>
+        <file>res/+theme_light/icons/EUC-96.png</file>
+        <file>res/+theme_light/icons/Electronics-96.png</file>
+        <file>res/+theme_light/icons/Download-96.png</file>
+        <file>res/+theme_light/icons/Down-96.png</file>
+        <file>res/+theme_light/icons/Disconnected-96.png</file>
+        <file>res/+theme_light/icons/Delete-96.png</file>
+        <file>res/+theme_light/icons/Data Backup-96.png</file>
+        <file>res/+theme_light/icons/Controller-96.png</file>
+        <file>res/+theme_light/icons/Controller-96_on.png</file>
+        <file>res/+theme_light/icons/Console-96.png</file>
+        <file>res/+theme_light/icons/Connected-96.png</file>
+        <file>res/+theme_light/icons/collapse_on.png</file>
+        <file>res/+theme_light/icons/collapse_off.png</file>
+        <file>res/+theme_light/icons/Circled Play-96.png</file>
+        <file>res/+theme_light/icons/Car Battery-96.png</file>
+        <file>res/+theme_light/icons/Cancel-96.png</file>
+        <file>res/+theme_light/icons/can_on.png</file>
+        <file>res/+theme_light/icons/can_off.png</file>
+        <file>res/+theme_light/icons/Calculator-96.png</file>
+        <file>res/+theme_light/icons/Bug-96.png</file>
+        <file>res/+theme_light/icons/Brake Warning-96.png</file>
+        <file>res/+theme_light/icons/bms_on.png</file>
+        <file>res/+theme_light/icons/bms_off.png</file>
+        <file>res/+theme_light/icons/bldc.png</file>
+        <file>res/+theme_light/icons/arrow_up.png</file>
+        <file>res/+theme_light/icons/arrow_r.png</file>
+        <file>res/+theme_light/icons/arrow_l.png</file>
+        <file>res/+theme_light/icons/arrow_down.png</file>
+        <file>res/+theme_light/icons/apply.png</file>
+        <file>res/+theme_light/icons/appconf.png</file>
+        <file>res/+theme_light/icons/app_up.png</file>
+        <file>res/+theme_light/icons/app_down.png</file>
+        <file>res/+theme_light/icons/app_default.png</file>
+        <file>res/+theme_light/icons/Anchor-96.png</file>
+        <file>res/+theme_light/icons/alive_on.png</file>
+        <file>res/+theme_light/icons/alive_off.png</file>
+        <file>res/+theme_light/icons/About-96.png</file>
+        <file>res/+theme_light/icons/3ph_sine.png</file>
+        <file>res/+theme_light/icons_textedit/Undo-96.png</file>
+        <file>res/+theme_light/icons_textedit/Text Color-96.png</file>
+        <file>res/+theme_light/icons_textedit/Strikethrough-96.png</file>
+        <file>res/+theme_light/icons_textedit/Redo-96.png</file>
+        <file>res/+theme_light/icons_textedit/Paste-96.png</file>
+        <file>res/+theme_light/icons_textedit/Outdent-96.png</file>
+        <file>res/+theme_light/icons_textedit/Numbered List-96.png</file>
+        <file>res/+theme_light/icons_textedit/Menu 2-96.png</file>
+        <file>res/+theme_light/icons_textedit/Link-96.png</file>
+        <file>res/+theme_light/icons_textedit/Italic-96.png</file>
+        <file>res/+theme_light/icons_textedit/Indent-96.png</file>
+        <file>res/+theme_light/icons_textedit/Fill Color-96.png</file>
+        <file>res/+theme_light/icons_textedit/Cut-96.png</file>
+        <file>res/+theme_light/icons_textedit/Copy-96.png</file>
+        <file>res/+theme_light/icons_textedit/Bulleted List-96.png</file>
+        <file>res/+theme_light/icons_textedit/Bold-96.png</file>
+        <file>res/+theme_light/icons_textedit/Align Right-96.png</file>
+        <file>res/+theme_light/icons_textedit/Align Left-96.png</file>
+        <file>res/+theme_light/icons_textedit/Align Justify-96.png</file>
+        <file>res/+theme_light/icons_textedit/Align Center-96.png</file>
+        <file>res/+theme_light/icons_textedit/Add Image-96.png</file>
+        <file>res/+theme_light/icons/bluetooth.png</file>
+        <file>res/other_fw/vesc_power_switch_120.bin</file>
+        <file>res/+theme_light/icons/v_icon-256.png</file>
+        <file>res/+theme_light/icons/v_icon-96.png</file>
+        <file>res/icons/v_icon-96.png</file>
+        <file>res/icons/v_icon-256.png</file>
+        <file>res/+theme_light/icons/vesc-96.png</file>
+        <file>res/icons/vesc-96.png</file>
+        <file>res/icons/stormcore-96.png</file>
+        <file>res/+theme_light/icons/stormcore-96.png</file>
+        <file>res/+theme_light/icons/motor_side.png</file>
+        <file>res/icons/motor_side.png</file>
+        <file>res/other_fw/nrf52840_stormcore_ble_rx31_tx30_led5.bin</file>
+        <file>res/fonts/Exan-Regular.ttf</file>
+        <file>res/fonts/Roboto/RobotoMono-VariableFont_wght.ttf</file>
+        <file>res/other_fw/nrf52840_wand_mag.bin</file>
     </qresource>
 </RCC>

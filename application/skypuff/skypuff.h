@@ -227,7 +227,6 @@ protected:
     void requestStats();
     void processStats(VByteArray &vb, bool temps);
     void processFault(VByteArray &vb);
-    void processState(VByteArray &vb);
     void processPullingTooHigh(VByteArray &vb);
     void processOutOfLimits(VByteArray &vb);
     void processUnwindedToOpposite(VByteArray &vb);

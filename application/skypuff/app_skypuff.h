@@ -34,7 +34,6 @@ typedef enum
     SK_COMM_POWER_STATS,	      // Send power stats
     SK_COMM_TEMP_STATS,	          // Send power and temp stats
 	SK_COMM_FAULT,				  // Send Fault code to UI
-	SK_COMM_STATE,				  // Send/receive new state
 	SK_COMM_PULLING_TOO_HIGH,	  // Messages to UI
 	SK_COMM_OUT_OF_LIMITS,		  // Will contain entire error message without zero byte
 	SK_COMM_UNWINDED_TO_OPPOSITE, // Many one byte acknowledgments
@@ -154,8 +153,6 @@ inline const char *sk_command_str(const skypuff_custom_app_data_command c)
         return "SK_COMM_TEMP_STATS";
 	case SK_COMM_FAULT:
 		return "SK_COMM_FAULT";
-	case SK_COMM_STATE:
-		return "SK_COMM_STATE";
 	case SK_COMM_PULLING_TOO_HIGH:
 		return "SK_COMM_PULLING_TOO_HIGH";
 	case SK_COMM_OUT_OF_LIMITS:

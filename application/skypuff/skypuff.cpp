@@ -294,9 +294,6 @@ void Skypuff::customAppDataReceived(QByteArray data)
     case SK_COMM_TEMP_STATS:
         processStats(vb, true);
         break;
-    case SK_COMM_STATE:
-        processState(vb);
-        break;
     case SK_COMM_PULLING_TOO_HIGH:
         processPullingTooHigh(vb);
         break;
@@ -510,28 +507,6 @@ void Skypuff::processSettingsApplied(VByteArray &vb)
     vesc->emitMessageDialog(tr("Settings are set"), tr("Have a nice puffs"), true);
 }
 
-void Skypuff::processState(VByteArray &vb)
-{
-    // Enough data?
-    const int fault_packet_length = 1;
-    if(vb.length() < fault_packet_length) {
-        vesc->emitMessageDialog(tr("Can't deserialize state command packet"),
-                                tr("Received %1 bytes, expected %2 bytes!").arg(vb.length()).arg(fault_packet_length),
-                                true);
-        vesc->disconnectPort();
-    }
-
-    setState((skypuff_state)vb.vbPopFrontUint8());
-
-    if(vb.length()) {
-        vesc->emitMessageDialog(tr("Extra bytes received with state command packet"),
-                                tr("Received %1 extra bytes!").arg(vb.length()),
-                                true);
-        vesc->disconnectPort();
-        return;
-    }
-}
-
 void Skypuff::processStats(VByteArray &vb, bool isTempsPacket)
 {
     // alive could be set from UI, timer is not necessary but possible
@@ -545,13 +520,15 @@ void Skypuff::processStats(VByteArray &vb, bool isTempsPacket)
     }
 
     // Enough data?
-    const int stats_power_packet_length = 4 * 2  + 2 * 2;
+    const int stats_power_packet_length = 1 + 4 * 2  + 2 * 2;
     if(vb.length() < stats_power_packet_length) {
         vesc->emitMessageDialog(tr("Can't deserialize stats power command packet"),
                                 tr("Received %1 bytes, expected %2 bytes!").arg(vb.length()).arg(stats_power_packet_length),
                                 true);
         vesc->disconnectPort();
     }
+
+    setState((skypuff_state)vb.vbPopFrontUint8());
 
     int newTac = vb.vbPopFrontInt32();
     float newErpm = vb.vbPopFrontInt16() * 4;

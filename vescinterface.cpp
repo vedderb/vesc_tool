@@ -257,8 +257,11 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
         mSettings.endArray();
     }
+    
+    QLocale systemLocale;
+    bool useImperialByDefault = systemLocale.measurementSystem() == QLocale::ImperialSystem;
 
-    mUseImperialUnits = mSettings.value("useImperialUnits", false).toBool();
+    mUseImperialUnits = mSettings.value("useImperialUnits", useImperialByDefault).toBool();
     mKeepScreenOn = mSettings.value("keepScreenOn", true).toBool();
     mUseWakeLock = mSettings.value("useWakeLock", false).toBool();
     mLoadQmlUiOnConnect = mSettings.value("loadQmlUiOnConnect", true).toBool();

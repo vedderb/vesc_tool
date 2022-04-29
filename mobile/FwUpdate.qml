@@ -32,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
     property bool isHorizontal: width > height
+    property bool showUploadAllButton: true
     anchors.fill: parent
 
     FwHelper {
@@ -431,6 +432,7 @@ Item {
                         id: uploadAllButton
                         text: qsTr("Upload All")
                         Layout.fillWidth: true
+                        visible: showUploadAllButton
 
                         onClicked: {
                             uploadFw(true)

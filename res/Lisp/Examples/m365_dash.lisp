@@ -29,7 +29,6 @@
 (define light 0)
 (setvar 'light light-default)
 (define c-out 0)
-(define battery 100)
 
 (defun inp (buffer) ;Frame 0x65
     (progn
@@ -37,7 +36,7 @@
     (setvar 'brake (/(-(bufget-u8 uart-buf 5) cal-brk-lo) cal-brk-hi))
     (if (> brake 0.01)
         (set-brake-rel brake)
-       ; (set-current-rel throttle)
+        (set-current-rel throttle)
     )
 ))
 

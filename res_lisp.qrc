@@ -28,5 +28,7 @@
         <file>res/Lisp/Examples/ssd1306_oled.lisp</file>
         <file>res/Lisp/Examples/ssd1306_oled_cube.lisp</file>
         <file>res/Lisp/Examples/ssd1306_oled_largefont.lisp</file>
+        <file>res/Lisp/Examples/ssd1306_oled_rt_data.lisp</file>
+        <file>res/Lisp/Examples/m365_dash.lisp</file>
     </qresource>
 </RCC>

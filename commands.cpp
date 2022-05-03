@@ -152,6 +152,10 @@ void Commands::processPacket(QByteArray data)
             params.nrfPinSupported = nrfFlags & 2;
         }
 
+        if (vb.size() >= 1) {
+            params.fwName = vb.vbPopFrontString();
+        }
+
         emit fwVersionReceived(params);
     } break;
 

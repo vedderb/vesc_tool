@@ -566,6 +566,7 @@ struct FW_RX_PARAMS {
 
     Q_PROPERTY(int major MEMBER major)
     Q_PROPERTY(int minor MEMBER minor)
+    Q_PROPERTY(QString fwName MEMBER fwName)
     Q_PROPERTY(QString hw MEMBER hw)
     Q_PROPERTY(QByteArray uuid MEMBER uuid)
     Q_PROPERTY(bool isPaired MEMBER isPaired)
@@ -617,6 +618,7 @@ public:
 
     int major;
     int minor;
+    QString fwName;
     QString hw;
     QByteArray uuid;
     bool isPaired;

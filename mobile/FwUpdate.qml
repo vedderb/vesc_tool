@@ -152,13 +152,19 @@ Item {
                                 updateBl(params)
 
                                 var testFwStr = "";
+                                var fwNameStr = "";
 
                                 if (params.isTestFw > 0) {
                                     testFwStr = " BETA " +  params.isTestFw
                                 }
 
+ 
+                                if (params.fwName !== "") {
+                                    fwNameStr = " (" + params.fwName + ")"
+                                }
+                                    
                                 versionText.text =
-                                        "FW   : " + params.major + "." + params.minor + testFwStr + "\n" +
+                                        "FW   : v" + params.major + "." + params.minor + fwNameStr + testFwStr + "\n" +
                                         "HW   : " + params.hw + "\n" +
                                         "UUID : " + Utility.uuid2Str(params.uuid, false)
                             }
@@ -711,13 +717,18 @@ Item {
             updateBl(params)
 
             var testFwStr = "";
+            var fwNameStr = "";
 
             if (params.isTestFw > 0) {
                 testFwStr = " BETA " +  params.isTestFw
             }
 
+            if (params.fwName !== "") {
+                fwNameStr = " (" + params.fwName + ")"
+            }
+
             versionText.text =
-                    "FW   : " + params.major + "." + params.minor + testFwStr + "\n" +
+                    "FW   : v" + params.major + "." + params.minor + fwNameStr + testFwStr + "\n" +
                     "HW   : " + params.hw + "\n" +
                     "UUID : " + Utility.uuid2Str(params.uuid, false)
         }

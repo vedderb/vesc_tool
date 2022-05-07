@@ -576,7 +576,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         }
 
         // Auto-indent selected line or block
-        if (!m_indentStartStr.isEmpty() && e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier) {
+        if (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier) {
             auto txtOld = toPlainText();
             int indentNow = 0;
             bool isComment = false;
@@ -586,6 +586,11 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                 lineNum++;
 
                 bool indent = true;
+
+                if (m_indentStartStr.isEmpty()) {
+                    indent = false;
+                }
+
                 bool removeTrailing = true;
 
                 if (lineNum < lineStart || lineNum > lineEnd) {

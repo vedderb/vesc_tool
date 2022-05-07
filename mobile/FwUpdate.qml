@@ -32,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
     property bool isHorizontal: width > height
+    property bool showUploadAllButton: true
     anchors.fill: parent
 
     FwHelper {
@@ -145,6 +146,27 @@ Item {
 
                             Component.onCompleted: {
                                 updateHw(VescIf.getLastFwRxParams())
+                                var params = VescIf.getLastFwRxParams()
+
+                                updateHw(params)
+                                updateBl(params)
+
+                                var testFwStr = "";
+                                var fwNameStr = "";
+
+                                if (params.isTestFw > 0) {
+                                    testFwStr = " BETA " +  params.isTestFw
+                                }
+
+ 
+                                if (params.fwName !== "") {
+                                    fwNameStr = " (" + params.fwName + ")"
+                                }
+                                    
+                                versionText.text =
+                                        "FW   : v" + params.major + "." + params.minor + fwNameStr + testFwStr + "\n" +
+                                        "HW   : " + params.hw + "\n" +
+                                        "UUID : " + Utility.uuid2Str(params.uuid, false)
                             }
 
                             onCurrentIndexChanged: {
@@ -416,6 +438,7 @@ Item {
                         id: uploadAllButton
                         text: qsTr("Upload All")
                         Layout.fillWidth: true
+                        visible: showUploadAllButton
 
                         onClicked: {
                             uploadFw(true)
@@ -694,13 +717,18 @@ Item {
             updateBl(params)
 
             var testFwStr = "";
+            var fwNameStr = "";
 
             if (params.isTestFw > 0) {
                 testFwStr = " BETA " +  params.isTestFw
             }
 
+            if (params.fwName !== "") {
+                fwNameStr = " (" + params.fwName + ")"
+            }
+
             versionText.text =
-                    "FW   : " + params.major + "." + params.minor + testFwStr + "\n" +
+                    "FW   : v" + params.major + "." + params.minor + fwNameStr + testFwStr + "\n" +
                     "HW   : " + params.hw + "\n" +
                     "UUID : " + Utility.uuid2Str(params.uuid, false)
         }

@@ -71,5 +71,6 @@
         <name>systime</name>
         <name>and</name>
         <name>or</name>
+        <name>eq</name>
     </section>
 </root>

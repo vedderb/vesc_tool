@@ -108,10 +108,13 @@
         (ofs-x (/ 85 scale))
         (ofs-y (/ 34 scale)))
         (loopforeach e edges
-            (apply line (map (fn (x) (to-i (* x scale))) (list
-                (+ ofs-x (ix (ix nodes (ix e 0)) 0)) (+ ofs-y (ix (ix nodes (ix e 0)) 1))
-                (+ ofs-x (ix (ix nodes (ix e 1)) 0)) (+ ofs-y (ix (ix nodes (ix e 1)) 1))
-))))))
+            (let (
+                (na (ix nodes (ix e 0)))
+                (nb (ix nodes (ix e 1))))
+                (apply line (map (fn (x) (to-i (* x scale))) (list
+                    (+ ofs-x (ix na 0)) (+ ofs-y (ix na 1))
+                    (+ ofs-x (ix nb 0)) (+ ofs-y (ix nb 1))
+)))))))
 
 (defun rotate (ax ay) (let (
     (sx (sin ax))

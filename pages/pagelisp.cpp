@@ -805,6 +805,7 @@ void PageLisp::on_helpButton_clicked()
                    "Ctrl + '-'   : Decrease font size<br>"
                    "Ctrl + space : Show auto-complete suggestions<br>"
                    "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
+                   "Ctrl + 'i'   : Remove trailing whitespaces from selected lines<br>"
                    "Ctrl + 'f'   : Open search (and replace) bar<br>"
                    "Ctrl + 'e'   : Upload (and run if set) application<br>"
                    "Ctrl + 'q'   : Stop application<br>"

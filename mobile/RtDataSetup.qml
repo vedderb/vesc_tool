@@ -655,6 +655,8 @@ Item {
         id: commandsUpdate
         target: mCommands
 
+        property string lastFault: ""
+
         onValuesImuReceived: {
             inclineCanvas.incline = Math.tan(values.pitch) * 100
         }
@@ -748,9 +750,11 @@ Item {
             motTempGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_end") / 5) * 5
             motTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_start") / 5) * 5
 
-            if(values.fault_str !== "FAULT_CODE_NONE") {
+            if (lastFault !== values.fault_str && values.fault_str !== "FAULT_CODE_NONE") {
                 VescIf.emitStatusMessage(values.fault_str, false)
             }
+
+            lastFault = values.fault_str
         }
     }
 }

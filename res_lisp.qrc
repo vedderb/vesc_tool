@@ -31,5 +31,6 @@
         <file>res/Lisp/Examples/ssd1306_oled_rt_data.lisp</file>
         <file>res/Lisp/Examples/m365_dash.lisp</file>
         <file>res/Lisp/Examples/ssd1306_oled_cube_native.lisp</file>
+        <file>res/Lisp/Examples/ws2812_native.lisp</file>
     </qresource>
 </RCC>

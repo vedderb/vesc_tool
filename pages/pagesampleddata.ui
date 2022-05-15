@@ -316,7 +316,7 @@
                <string>Use Hamming window</string>
               </property>
               <property name="text">
-               <string>Hammnig</string>
+               <string>Hamming</string>
               </property>
               <property name="checked">
                <bool>true</bool>

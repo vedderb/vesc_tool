@@ -3,15 +3,18 @@
 
 ;****User parameters****
 ;Calibrate throttle min max
-(define cal-thr-lo 32.0)
+(define cal-thr-lo 41.0)
 (define cal-thr-hi 178.0)
 
 ;Calibrate brake min max
-(define cal-brk-lo 32.0)
+(define cal-brk-lo 40.0)
 (define cal-brk-hi 178.0)
 
 (define light-default 0)
 (define show-faults 1)
+(define show-batt-in-idle 1)
+
+(define min-speed 1)
 
 ;****Code section****
 (uart-start 115200 'half-duplex)
@@ -26,18 +29,23 @@
 (define throttle 0)
 (define brake 0)
 (define buttonold 0)
-(define light 0)
+(define light 1)
 (setvar 'light light-default)
 (define c-out 0)
+(define battery 100)
+(define code 0)
 
 (defun inp (buffer) ;Frame 0x65
     (progn
     (setvar 'throttle (/(-(bufget-u8 uart-buf 4) cal-thr-lo) cal-thr-hi))
     (setvar 'brake (/(-(bufget-u8 uart-buf 5) cal-brk-lo) cal-brk-hi))
-    (if (> brake 0.01)
-        (set-brake-rel brake)
+    (set-current-rel 0)
+    (if (> (* (get-speed) 3.6) min-speed)
         (set-current-rel throttle)
-    )
+        (set-current-rel 0))
+    
+    (if (> brake 0.02)
+        (set-brake-rel brake))
 ))
 
 (defun outp (buffer) ;Frame 0x64
@@ -66,26 +74,42 @@
                                 (setvar 'crc (+ crc (bufget-u8 uart-buf i))))
                             (if (=(+(shl(bufget-u8 uart-buf (+ len 2))8) (bufget-u8 uart-buf (+ len 1))) (bitwise-xor crc 0xFFFF))
                                 (progn
-                                    (if(= (bufget-u8 uart-buf 1) 0x65)
-                                        (inp uart-buf))
-                                    (if(= (bufget-u8 uart-buf 1) 0x64)
-                                        (outp uart-buf))
+                                    (setvar 'code (bufget-u8 uart-buf 1))
+                                    
+                                    (if(= code 0x65)
+                                        (inp uart-buf)
                                     )
-))))))))
+
+                                    ; on my setup I am not receiving any 0x64. Still looking into this issue.
+                                    (if(= code 0x64)
+                                        (outp uart-buf)
+                                    )
+                                )
+                            )
+                         )
+                     )
+)))))
 
 (spawn 150 read-thd) ; Run UART in its own thread
 
 (loopwhile t
     (progn
         (if (> buttonold (gpio-read 'pin-rx))
+            ; sometimes the light will turn on and off when motor is accelerating. might be issue with my vesc firmware.
             (setvar 'light (bitwise-xor light 1))
         )
         (setvar 'buttonold (gpio-read 'pin-rx))
         (bufset-u8 tx-frame 7 (*(get-batt) 100))
         (bufset-u8 tx-frame 8 light)
-        (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
+        (if (= show-batt-in-idle 1)
+            (if (> (* (get-speed) 3.6) 1)
+                (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
+                (bufset-u8 tx-frame 10 (*(get-batt) 100)))
+            (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
+        )
+        
         (if (= show-faults 1)
             (bufset-u8 tx-frame 11 (get-fault))
         )
         (sleep 0.1)
-))
+))-

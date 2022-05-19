@@ -39,7 +39,6 @@
     (progn
     (setvar 'throttle (/(-(bufget-u8 uart-buf 4) cal-thr-lo) cal-thr-hi))
     (setvar 'brake (/(-(bufget-u8 uart-buf 5) cal-brk-lo) cal-brk-hi))
-    (set-current-rel 0)
     (if (> (* (get-speed) 3.6) min-speed)
         (set-current-rel throttle)
         (set-current-rel 0))

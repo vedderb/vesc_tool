@@ -2585,6 +2585,18 @@ p, li { white-space: pre-wrap; }
             <cDefine>MCCONF_FOC_PHASE_FILTER_ENABLE</cDefine>
             <valInt>1</valInt>
         </foc_phase_filter_enable>
+        <foc_phase_filter_disable_fault>
+            <longName>Disable Phase Filter Fault Code</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Disable the phase filter fault code. This can be useful if the phase filter fault seems to trigger for no reason on some difficult motors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_PHASE_FILTER_DISABLE_FAULT</cDefine>
+            <valInt>0</valInt>
+        </foc_phase_filter_disable_fault>
         <foc_phase_filter_max_erpm>
             <longName>Maximum ERPM for phase filters</longName>
             <type>1</type>
@@ -4087,9 +4099,9 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The battery state of charge (SOC) below which battery current is not allowed anymore.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the lowest value will be ued.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The battery state of charge (SOC) below which battery current is not allowed anymore.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the lowest value will be ued.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_BMS_SOC_LIMIT_END</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -4252,6 +4264,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_offsets_voltage_undriven__1</ser>
         <ser>foc_offsets_voltage_undriven__2</ser>
         <ser>foc_phase_filter_enable</ser>
+        <ser>foc_phase_filter_disable_fault</ser>
         <ser>foc_phase_filter_max_erpm</ser>
         <ser>foc_mtpa_mode</ser>
         <ser>foc_fw_current_max</ser>
@@ -4563,6 +4576,7 @@ p, li { white-space: pre-wrap; }
                 <subgroupParams>
                     <param>foc_phase_filter_enable</param>
                     <param>foc_phase_filter_max_erpm</param>
+                    <param>foc_phase_filter_disable_fault</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

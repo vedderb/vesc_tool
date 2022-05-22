@@ -112,6 +112,8 @@ typedef enum {
     DISP_POS_MODE_ENCODER_OBSERVER_ERROR
 } disp_pos_mode;
 
+Q_DECLARE_METATYPE(disp_pos_mode)
+
 // ADC control types. Remember to add new types here when adding them to the firmware.
 typedef enum {
     ADC_CTRL_TYPE_NONE = 0,

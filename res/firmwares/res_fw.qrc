@@ -55,7 +55,8 @@
         <file>STORMCORE_100S/VESC_default.bin</file>
         <file>STORMCORE_100S/VESC_default_no_hw_limits.bin</file>
         <file>Little_FOCer/VESC_default.bin</file>
-        <file>Little_FOCer/VESC_default_no_hw_limits.bin</file>
+        <file>Little_FOCer_V3/VESC_default.bin</file>
+        <file>Little_FOCer_V3_1/VESC_default.bin</file>
         <file>UXV_SR/VESC_default.bin</file>
         <file>GESC/VESC_default.bin</file>
         <file>Warrior6/VESC_default.bin</file>

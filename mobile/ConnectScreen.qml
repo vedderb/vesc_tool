@@ -24,6 +24,7 @@ import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.bleuart 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.utility 1.0
+import Vedder.vesc.udpserversimple 1.0
 
 Item {
     id: rootItem
@@ -66,6 +67,7 @@ Item {
             scanButton.enabled = false
             scanDotTimer.running = true
             bleModel.clear()
+            vescsUdp = []
             mBle.startScan()
         } else {
             bleScanStart.open()
@@ -92,7 +94,7 @@ Item {
         anchors.leftMargin: notchLeft
         anchors.rightMargin: notchRight
 
-        Rectangle{
+        Rectangle {
             Layout.preferredHeight: notchTop
             Layout.fillWidth: true
             opacity: 0
@@ -231,7 +233,7 @@ Item {
                                     Layout.preferredWidth: 40
                                     Layout.preferredHeight: 40
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: "qrc" + Utility.getThemePath() + (isSerial ? "icons/Connected-96.png" : "icons/bluetooth.png")
+                                    source: "qrc" + Utility.getThemePath() + ((isSerial == 0) ? "icons/Connected-96.png" : "icons/bluetooth.png")
                                 }
 
                                 Text {
@@ -246,7 +248,7 @@ Item {
                         }
 
                         ColumnLayout {
-                            visible: !isSerial
+                            visible: isSerial == 0
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
@@ -275,11 +277,14 @@ Item {
                             Button {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
-                                text: isSerial ? "Autoconnect" : "Connect"
+                                Layout.preferredWidth: 130
+                                text: (isSerial == 0) ? "Autoconnect" : "Connect"
 
                                 onClicked: {
-                                    if (isSerial) {
+                                    if (isSerial == 0) {
                                         VescIf.autoconnect()
+                                    } else if (isSerial == 2) {
+                                        VescIf.connectTcp(bleAddr, 65102)
                                     } else {
                                         if (!VescIf.getBlePreferred(bleAddr)) {
                                             preferredDialog.bleAddr = bleAddr
@@ -296,8 +301,9 @@ Item {
                             Button {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
+                                Layout.preferredWidth: 130
                                 text: "Set Name"
-                                visible: !isSerial
+                                visible: isSerial == 0
 
                                 onClicked: {
                                     bleNameDialog.addr = bleAddr
@@ -327,6 +333,36 @@ Item {
                     }
                 }
 
+            }
+        }
+    }
+
+    property var vescsUdp: []
+
+    UdpServerSimple {
+        Component.onCompleted: {
+            startServerBroadcast(65109)
+        }
+
+        onDataRx: {
+            var tokens = Utility.arr2str(data).split("::")
+            if (tokens.length === 3) {
+                var found = false
+                for (var i = 0; i < vescsUdp.length;i++) {
+                    if (vescsUdp[i].ip === tokens[1]) {
+                        found = true
+                        break
+                    }
+                }
+
+                if (!found) {
+                    vescsUdp[vescsUdp.length] = {
+                        "name" : tokens[0],
+                        "ip" : tokens[1],
+                        "port" : tokens[2]
+                    }
+                    mBle.emitScanDone()
+                }
             }
         }
     }
@@ -371,29 +407,48 @@ Item {
                                             "setName": setNameShort,
                                             "preferred": preferred,
                                             "bleAddr": addr,
-                                            "isSerial": false})
+                                            "isSerial": 0})
                     } else {
                         bleModel.append({"name": setName,
                                             "setName": setNameShort,
                                             "preferred": preferred,
                                             "bleAddr": addr,
-                                            "isSerial": false})
+                                            "isSerial": 0})
                     }
 
                 }
             }
+
+            for (var k = 0; k < vescsUdp.length;k++) {
+                addToList  = true
+                for (j = 0; j < bleModel.count; j++) {
+                    if (bleModel.get(j).bleAddr === (vescsUdp[k].ip)) {
+                        addToList  = false
+                    }
+                }
+
+                if (addToList) {
+                    bleModel.insert(0, {"name": "TCP\n" + vescsUdp[k].ip,
+                                        "setName": "",
+                                        "preferred": true,
+                                        "bleAddr": vescsUdp[k].ip,
+                                        "isSerial": 2})
+                }
+            }
+
             addToList = true
-            for(j=0; j < bleModel.count; j++) {
+            for(j = 0; j < bleModel.count; j++) {
                 if(bleModel.get(j).name === ("Serial Port")){
                     addToList  = false
                 }
             }
+
             if (Utility.hasSerialport() && addToList) {
                 bleModel.insert(0, {"name": "Serial Port",
                                     "setName": "",
                                     "preferred": true,
                                     "bleAddr": "",
-                                    "isSerial": true})
+                                    "isSerial": 1})
             }
         }
 
@@ -577,6 +632,7 @@ Item {
             scanButton.enabled = false
             scanDotTimer.running = true
             bleModel.clear()
+            vescsUdp = []
             mBle.startScan()
 
             if (!Utility.isBleScanEnabled()) {

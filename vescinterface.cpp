@@ -2273,12 +2273,6 @@ bool VescInterface::connectSerial(QString port, int baudrate)
         mSerialPort->setParity(QSerialPort::NoParity);
         mSerialPort->setStopBits(QSerialPort::OneStop);
         mSerialPort->setFlowControl(QSerialPort::NoFlowControl);
-
-        // For nrf
-        mSerialPort->setRequestToSend(true);
-        mSerialPort->setDataTerminalReady(true);
-        QThread::msleep(5);
-        mSerialPort->setDataTerminalReady(false);
     }
 
     mLastSerialPort = port;

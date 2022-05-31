@@ -23,6 +23,7 @@
 #include <QWidget>
 #include <QTimer>
 #include "vescinterface.h"
+#include "udpserversimple.h"
 
 namespace Ui {
 class PageConnection;
@@ -75,11 +76,14 @@ private slots:
     void on_unpairButton_clicked();
     void on_tcpServerEnableBox_toggled(bool isEnabled);
     void on_udpServerEnableBox_toggled(bool isEnabled);
+    void on_tcpDetectConnectButton_clicked();
+    void on_tcpDetectDisconnectButton_clicked();
 
 private:
     Ui::PageConnection *ui;
     VescInterface *mVesc;
     QTimer *mTimer;
+    UdpServerSimple *mUdpListen;
 
 };
 

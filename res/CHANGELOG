@@ -9,6 +9,7 @@
  - Examples
 * Added custom load code support to motor comparison tool.
 * Added support for bitfield parameters.
+* Added VESC UDP broadcast listener.
 
 == 3.01 ==
 * Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.

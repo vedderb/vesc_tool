@@ -10,7 +10,7 @@ VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 5
+VT_IS_TEST_VERSION = 6
 
 VT_ANDROID_VERSION_ARMV7 = 108
 VT_ANDROID_VERSION_ARM64 = 109

@@ -281,7 +281,7 @@ Item {
                                 text: "Connect"
 
                                 onClicked: {
-                                    if (isSerial == 0) {
+                                    if (isSerial == 1) {
                                         VescIf.autoconnect()
                                     } else if (isSerial == 2) {
                                         VescIf.connectTcp(bleAddr, 65102)

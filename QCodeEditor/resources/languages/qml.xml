@@ -107,6 +107,7 @@
         <name>MenuItem</name>
         <name>Repeater</name>
         <name>TcpServerSimple</name>
+        <name>UdpServerSimple</name>
         <name>LogWriter</name>
         <name>LogReader</name>
         <name>ImageButton</name>

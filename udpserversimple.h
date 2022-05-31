@@ -29,16 +29,17 @@ class UdpServerSimple : public QObject
     Q_OBJECT
 public:
     explicit UdpServerSimple(QObject *parent = nullptr);
-    bool startServer(int port, QHostAddress addr = QHostAddress::Any);
-    void stopServer();
-    bool sendData(const QByteArray &data);
+    Q_INVOKABLE bool startServer(int port, QHostAddress addr = QHostAddress::Any);
+    Q_INVOKABLE bool startServerBroadcast(int port);
+    Q_INVOKABLE void stopServer();
+    Q_INVOKABLE bool sendData(const QByteArray &data);
     QString errorString();
     Packet *packet();
     bool usePacket() const;
     void setUsePacket(bool usePacket);
-    bool isClientConnected();
-    QString getConnectedClientIp();
-    bool isServerRunning();
+    Q_INVOKABLE bool isClientConnected();
+    Q_INVOKABLE QString getConnectedClientIp();
+    Q_INVOKABLE bool isServerRunning();
 
 signals:
     void dataRx(const QByteArray &data);

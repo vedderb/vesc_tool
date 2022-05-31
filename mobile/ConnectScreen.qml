@@ -277,8 +277,8 @@ Item {
                             Button {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
-                                Layout.preferredWidth: 130
-                                text: (isSerial == 0) ? "Autoconnect" : "Connect"
+                                Layout.preferredWidth: nameButton.width
+                                text: "Connect"
 
                                 onClicked: {
                                     if (isSerial == 0) {
@@ -299,9 +299,9 @@ Item {
                             }
 
                             Button {
+                                id: nameButton
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
-                                Layout.preferredWidth: 130
                                 text: "Set Name"
                                 visible: isSerial == 0
 

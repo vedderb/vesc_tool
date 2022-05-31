@@ -257,7 +257,7 @@ QString Utility::uuid2Str(QByteArray uuid, bool space)
 {
     QString strUuid;
     for (int i = 0;i < uuid.size();i++) {
-        QString str = QString::number(uuid.at(i), 16).
+        QString str = QString::number((uint8_t)uuid.at(i), 16).
                 rightJustified(2, '0').toUpper();
         strUuid.append(((i > 0 && space) ? " " : "") + str);
     }

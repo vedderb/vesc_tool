@@ -35,10 +35,26 @@
 (define battery 100)
 (define code 0)
 
+(define presstime (systime))
+(define presses 0)
+
+(define off 0)
+(define locked 0)
+(define speedmode 1)
+
 (defun inp (buffer) ;Frame 0x65
     (progn
     (setvar 'throttle (/(-(bufget-u8 uart-buf 4) cal-thr-lo) cal-thr-hi))
     (setvar 'brake (/(-(bufget-u8 uart-buf 5) cal-brk-lo) cal-brk-hi))
+    
+    ; todo: figure out how to calculate and set max rpm 
+    (if (= speedmode 1) ; is drive?
+        (print "drive")
+        (if (= speedmode 2) ; is eco?
+            (print "eco")
+            (if (= speedmode 4) ; is sport?
+                (print "sport"))))
+    
     (if (> (* (get-speed) 3.6) min-speed)
         (set-current-rel throttle)
         (set-current-rel 0))
@@ -78,11 +94,9 @@
                                     (if(= code 0x65)
                                         (inp uart-buf)
                                     )
-
-                                    ; on my setup I am not receiving any 0x64. Still looking into this issue.
-                                    (if(= code 0x64)
+                                    ;(if(= code 0x64)
                                         (outp uart-buf)
-                                    )
+                                    ;)
                                 )
                             )
                          )
@@ -94,12 +108,63 @@
 (loopwhile t
     (progn
         (if (> buttonold (gpio-read 'pin-rx))
-            ; sometimes the light will turn on and off when motor is accelerating. might be issue with my vesc firmware.
-            (setvar 'light (bitwise-xor light 1))
+            (progn
+                (setvar 'presses (+ presses 1))
+                (setvar 'presstime (systime))
+            )
+            (if (> (- (systime) presstime) 4000) ;; double press
+                (progn
+                    (print presses)
+                    (if (= presses 1)
+                        (setvar 'light (bitwise-xor light 1))
+                    )
+                    
+                    (if (>= presses 2) ; double press
+                        (progn
+                            ;; seems not to be working hmm
+                            ;; (case speedmode
+                            ;; (1 (setvar 'speedmode 4))
+                            ;; (2 (setvar 'speedmode 1))
+                            ;; (4 (setvar 'speedmode 2)))
+                            
+                            (if (= speedmode 1) ;; is drive?
+                                (setvar 'speedmode 4) ;; to sport
+                                (if (= speedmode 2) ;; is eco?
+                                    (setvar 'speedmode 1) ;; to drive
+                                    (if (= speedmode 4) ;; is sport?
+                                        (setvar 'speedmode 2)))) ;; to eco
+                            
+                        )
+                    )
+                
+                    (setvar 'presses 0)
+                )
+            )
         )
         (setvar 'buttonold (gpio-read 'pin-rx))
+        
+        (if (= (gpio-read 'pin-rx) 0)
+            (if (> (- (systime) presstime) 10000) ; long press
+                (progn 
+                    (setvar 'off (bitwise-xor off 1))
+                    (setvar 'presstime (systime))
+                )
+            )
+        )
+    
+        (if (= off 1)
+            (bufset-u8 tx-frame 6 16) ; turn off display
+            (if (= locked 1)
+                (bufset-u8 tx-frame 6 32)
+                (bufset-u8 tx-frame 6 speedmode)
+            )
+        )
+        
         (bufset-u8 tx-frame 7 (*(get-batt) 100))
-        (bufset-u8 tx-frame 8 light)
+        (if (= off 0)
+            (bufset-u8 tx-frame 8 light)
+            (bufset-u8 tx-frame 8 0)
+        )
         (if (= show-batt-in-idle 1)
             (if (> (* (get-speed) 3.6) 1)
                 (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
@@ -108,7 +173,7 @@
         )
         
         (if (= show-faults 1)
-            (bufset-u8 tx-frame 11 (get-fault))
+        (bufset-u8 tx-frame 11 (get-fault))
         )
         (sleep 0.1)
 ))-

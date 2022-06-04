@@ -168,20 +168,27 @@
                 )
             )
         )
-    
+
+        ; mode field (1=drive, 2=eco, 4=sport, 8=charge, 16=off, 32=lock)
         (if (= off 1)
             (bufset-u8 tx-frame 6 16) ; turn off display
             (if (= lock 1)
-                (bufset-u8 tx-frame 6 32)
+                (bufset-u8 tx-frame 6 32) ; lock display
                 (bufset-u8 tx-frame 6 speedmode)
             )
         )
         
+        ; batt field
         (bufset-u8 tx-frame 7 (*(get-batt) 100))
+        ; light field
         (if (= off 0)
             (bufset-u8 tx-frame 8 light)
             (bufset-u8 tx-frame 8 0)
         )
+
+        ; todo: add beeping on lock when pushing scooter
+
+        ; speed field
         (if (= show-batt-in-idle 1)
             (if (> (* (get-speed) 3.6) 1)
                 (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
@@ -190,7 +197,7 @@
         )
         
         (if (= show-faults 1)
-        (bufset-u8 tx-frame 11 (get-fault))
+            (bufset-u8 tx-frame 11 (get-fault))
         )
         (sleep 0.1)
 ))-

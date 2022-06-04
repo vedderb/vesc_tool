@@ -38,7 +38,7 @@
 (define presses 0)
 
 (define off 0)
-(define locked 0)
+(define lock 0)
 (define speedmode 1)
 
 (defun inp (buffer) ;Frame 0x65
@@ -54,7 +54,7 @@
             (if (= speedmode 4) ; is sport?
                 (print "sport"))))
     
-    (if (= (+ off locked) 0)
+    (if (= (+ off lock) 0)
         (progn
             (if (> (* (get-speed) 3.6) min-speed)
                 (set-current-rel throttle)
@@ -65,7 +65,7 @@
         )
         (progn
             (set-current-rel 0)
-            (if (= locked 1)
+            (if (= lock 1)
                 (if (> (* (get-speed) 3.6) min-speed)
                     (set-brake-rel 1)
                     (set-brake-rel 0)
@@ -143,7 +143,7 @@
                             ;; (4 (setvar 'speedmode 2)))
                             
                             (if (> brake 0.02)
-                                (setvar 'locked (bitwise-xor locked 1))
+                                (setvar 'lock (bitwise-xor lock 1))
                                 (if (= speedmode 1) ; is drive?
                                     (setvar 'speedmode 4) ; to sport
                                     (if (= speedmode 2) ; is eco?
@@ -171,7 +171,7 @@
     
         (if (= off 1)
             (bufset-u8 tx-frame 6 16) ; turn off display
-            (if (= locked 1)
+            (if (= lock 1)
                 (bufset-u8 tx-frame 6 32)
                 (bufset-u8 tx-frame 6 speedmode)
             )

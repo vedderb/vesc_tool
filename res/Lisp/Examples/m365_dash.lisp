@@ -29,10 +29,9 @@
 (define throttle 0)
 (define brake 0)
 (define buttonold 0)
-(define light 1)
+(define light 0)
 (setvar 'light light-default)
 (define c-out 0)
-(define battery 100)
 (define code 0)
 
 (define presstime (systime))

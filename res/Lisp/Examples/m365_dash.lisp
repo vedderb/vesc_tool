@@ -55,12 +55,28 @@
             (if (= speedmode 4) ; is sport?
                 (print "sport"))))
     
-    (if (> (* (get-speed) 3.6) min-speed)
-        (set-current-rel throttle)
-        (set-current-rel 0))
+    (if (= (+ off locked) 0)
+        (progn
+            (if (> (* (get-speed) 3.6) min-speed)
+                (set-current-rel throttle)
+                (set-current-rel 0))
+                
+            (if (> brake 0.02)
+                (set-brake-rel brake))
+        )
+        (progn
+            (set-current-rel 0)
+            (if (= locked 1)
+                (if (> (* (get-speed) 3.6) min-speed)
+                    (set-brake-rel 1)
+                    (set-brake-rel 0)
+                )
+                (set-brake-rel 0)
+            )
+        )
+    )
     
-    (if (> brake 0.02)
-        (set-brake-rel brake))
+    
 ))
 
 (defun outp (buffer) ;Frame 0x64
@@ -127,13 +143,15 @@
                             ;; (2 (setvar 'speedmode 1))
                             ;; (4 (setvar 'speedmode 2)))
                             
-                            (if (= speedmode 1) ;; is drive?
-                                (setvar 'speedmode 4) ;; to sport
-                                (if (= speedmode 2) ;; is eco?
-                                    (setvar 'speedmode 1) ;; to drive
-                                    (if (= speedmode 4) ;; is sport?
-                                        (setvar 'speedmode 2)))) ;; to eco
-                            
+                            (if (> brake 0.02)
+                                (setvar 'locked (bitwise-xor locked 1))
+                                (if (= speedmode 1) ; is drive?
+                                    (setvar 'speedmode 4) ; to sport
+                                    (if (= speedmode 2) ; is eco?
+                                        (setvar 'speedmode 1) ; to drive
+                                        (if (= speedmode 4) ; is sport?
+                                            (setvar 'speedmode 2)))) ; to eco
+                            )
                         )
                     )
                 

@@ -2,6 +2,8 @@
 
 set -e
 
+touch build/test_all/"Build Date $(date '+%Y-%m-%d')"
+
 # Linux
 export PATH=/opt/Qt/5.12-static/bin:$PATH
 rm -rf build/lin/*

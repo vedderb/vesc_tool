@@ -20,6 +20,7 @@
 import QtQuick 2.11
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.3 as Dl
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -31,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
     property bool isHorizontal: width > height
+    property bool showUploadAllButton: true
     anchors.fill: parent
 
     FwHelper {
@@ -144,6 +146,27 @@ Item {
 
                             Component.onCompleted: {
                                 updateHw(VescIf.getLastFwRxParams())
+                                var params = VescIf.getLastFwRxParams()
+
+                                updateHw(params)
+                                updateBl(params)
+
+                                var testFwStr = "";
+                                var fwNameStr = "";
+
+                                if (params.isTestFw > 0) {
+                                    testFwStr = " BETA " +  params.isTestFw
+                                }
+
+ 
+                                if (params.fwName !== "") {
+                                    fwNameStr = " (" + params.fwName + ")"
+                                }
+                                    
+                                versionText.text =
+                                        "FW   : v" + params.major + "." + params.minor + fwNameStr + testFwStr + "\n" +
+                                        "HW   : " + params.hw + "\n" +
+                                        "UUID : " + Utility.uuid2Str(params.uuid, false)
                             }
 
                             onCurrentIndexChanged: {
@@ -250,8 +273,10 @@ Item {
 
                             onClicked: {
                                 if (Utility.requestFilePermission()) {
-                                    filePicker.enabled = true
-                                    filePicker.visible = true
+                                    fileDialog.close()
+                                    fileDialog.open()
+                                    //filePicker.enabled = true
+                                    //filePicker.visible = true
                                 } else {
                                     VescIf.emitMessageDialog(
                                                 "File Permissions",
@@ -280,6 +305,26 @@ Item {
                             customFwText.text = currentFolder() + "/" + fileName
                             visible = false
                             enabled = false
+                        }
+                    }
+                    Dl.FileDialog {
+                        id: fileDialog
+                        title: "Please choose a file"
+                        nameFilters: ["Firmware File (*.bin)"]
+                        selectedNameFilter : "Firmware File (*.bin)"
+                        onAccepted: {
+                            var substring = ".bin";
+                            if(fileDialog.fileUrl.toString().indexOf(substring) !== -1) {
+                                customFwText.text = fileDialog.fileUrl
+                        } else {
+
+                        }
+                            console.log("You chose: " + fileDialog.fileUrls)
+                            fileDialog.close()
+                        }
+                        onRejected: {
+                            console.log("Canceled")
+                            fileDialog.close()
                         }
                     }
                 }
@@ -393,6 +438,7 @@ Item {
                         id: uploadAllButton
                         text: qsTr("Upload All")
                         Layout.fillWidth: true
+                        visible: showUploadAllButton
 
                         onClicked: {
                             uploadFw(true)
@@ -430,9 +476,9 @@ Item {
         id: uploadDialog
         property bool fwdCan: false
         standardButtons: Dialog.Ok | Dialog.Cancel
+        width: parent.width - 20
         modal: true
         focus: true
-        width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
 
         Overlay.modal: Rectangle {
@@ -452,24 +498,17 @@ Item {
 
         onAccepted: {
             var okUploadFw = false
-
             if (swipeView.currentIndex == 0) {
                 if (mCommands.getLimitedSupportsEraseBootloader() && blItems.count > 0) {
-                    fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
+                    fwHelper.uploadFirmwareSingleShotTimer(fwItems.get(fwBox.currentIndex).value, VescIf, false, false,
+                                                           fwdCan, blItems.get(blBox.currentIndex).value)
+                } else {
+                    okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan, "")
                 }
-                okUploadFw = fwHelper.uploadFirmware(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan)
             } else if (swipeView.currentIndex == 1) {
-                okUploadFw = fwHelper.uploadFirmware(customFwText.text, VescIf, false, true, fwdCan)
+                okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(customFwText.text, VescIf, false, true, fwdCan,"")
             } else if (swipeView.currentIndex == 2) {
-                fwHelper.uploadFirmware(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan)
-            }
-
-            if (okUploadFw) {
-                VescIf.emitMessageDialog("Warning",
-                                         "The firmware upload is done. You must wait at least " +
-                                         "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your " +
-                                         "VESC will become bricked. If that happens you need a SWD programmer to recover it.",
-                                         true, false)
+                fwHelper.uploadFirmwareSingleShotTimer(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan,"")
             }
         }
     }
@@ -643,6 +682,26 @@ Item {
             cancelButton.enabled = isOngoing
         }
     }
+    Connections {
+        target: fwHelper
+
+        onFwUploadRes: {
+            if (res) {
+                if(isBootloader) {
+                        VescIf.emitMessageDialog("Bootloader Finished",
+                                                 "Bootloader upload is done.",
+                                                 true, false)
+                } else {
+                        VescIf.disconnectPort()
+                        VescIf.emitMessageDialog("Warning",
+                                                 "The firmware upload is done. You must wait at least " +
+                                                 "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your " +
+                                                 "VESC will become bricked. If that happens you need a SWD programmer to recover it.",
+                                                 true, false)
+                }
+            }
+        }
+    }
 
     Connections {
         target: VescIf
@@ -658,13 +717,18 @@ Item {
             updateBl(params)
 
             var testFwStr = "";
+            var fwNameStr = "";
 
             if (params.isTestFw > 0) {
                 testFwStr = " BETA " +  params.isTestFw
             }
 
+            if (params.fwName !== "") {
+                fwNameStr = " (" + params.fwName + ")"
+            }
+
             versionText.text =
-                    "FW   : " + params.major + "." + params.minor + testFwStr + "\n" +
+                    "FW   : v" + params.major + "." + params.minor + fwNameStr + testFwStr + "\n" +
                     "HW   : " + params.hw + "\n" +
                     "UUID : " + Utility.uuid2Str(params.uuid, false)
         }

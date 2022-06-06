@@ -70,6 +70,35 @@ PageConnection::PageConnection(QWidget *parent) :
     mycon.addPixmap(QPixmap(theme + "icons/can_off.png"), QIcon::Normal, QIcon::Off);
     mycon.addPixmap(QPixmap(theme + "icons/can_on.png"), QIcon::Normal, QIcon::On);
     ui->canFwdButton->setIcon(mycon);
+
+    mUdpListen = new UdpServerSimple(this);
+    mUdpListen->startServerBroadcast(65109);
+
+    connect(mUdpListen, &UdpServerSimple::dataRx, [this](const QByteArray &data) {
+        QString str(data);
+        auto tokens = str.split("::");
+        if (tokens.size() == 3) {
+            auto name = tokens.at(0);
+            auto ip = tokens.at(1);
+            auto port = tokens.at(2);
+            tokens.append(QString::number(QTime::currentTime().msecsSinceStartOfDay()));
+
+            bool found = false;
+            for (int i = 0;i < ui->tcpDetectBox->count();i++) {
+                auto d = ui->tcpDetectBox->itemData(i).toStringList();
+                if (d.at(1) == ip) {
+                    ui->tcpDetectBox->setItemData(i, tokens);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                QString itemName = name + " - " + ip + ":" + port;
+                ui->tcpDetectBox->addItem(itemName, tokens);
+            }
+        }
+    });
 }
 
 PageConnection::~PageConnection()
@@ -145,6 +174,14 @@ void PageConnection::setVesc(VescInterface *vesc)
 
 void PageConnection::timerSlot()
 {
+    for (int i = 0;i < ui->tcpDetectBox->count();i++) {
+        auto d = ui->tcpDetectBox->itemData(i).toStringList();
+        if ((QTime::currentTime().msecsSinceStartOfDay() - d.at(3).toInt()) > 3000) {
+            ui->tcpDetectBox->removeItem(i);
+            break;
+        }
+    }
+
     if (mVesc) {
         QString str = mVesc->getConnectedPortName();
         if (str != ui->statusLabel->text()) {
@@ -647,12 +684,26 @@ void PageConnection::on_tcpServerEnableBox_toggled(bool isEnabled)
 void PageConnection::on_udpServerEnableBox_toggled(bool isEnabled)
 {
     if (mVesc) {
-        if (isEnabled)
-        {
+        if (isEnabled) {
             mVesc->udpServerStart(ui->udpServerPortBox->value());
             ui->udpServerPortBox->setEnabled(false);
         } else {
            mVesc->udpServerStop();
         }
+    }
+}
+
+void PageConnection::on_tcpDetectConnectButton_clicked()
+{
+    if (mVesc && ui->tcpDetectBox->count() > 0) {
+        auto d = ui->tcpDetectBox->currentData().toStringList();
+        mVesc->connectTcp(d.at(1), d.at(2).toInt());
+    }
+}
+
+void PageConnection::on_tcpDetectDisconnectButton_clicked()
+{
+    if (mVesc) {
+        mVesc->disconnectPort();
     }
 }

@@ -232,6 +232,11 @@
                     <string>Bool</string>
                    </property>
                   </item>
+                  <item>
+                   <property name="text">
+                    <string>Bitfield</string>
+                   </property>
+                  </item>
                  </widget>
                 </item>
                 <item row="0" column="0">
@@ -859,6 +864,88 @@
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                 </layout>
+                </widget>
+                <widget class="QWidget" name="page_7">
+                 <layout class="QVBoxLayout" name="verticalLayout_16">
+                  <item>
+                   <widget class="QSpinBox" name="bitfieldValBox">
+                    <property name="prefix">
+                     <string>Value: </string>
+                    </property>
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QListWidget" name="bitfieldWidget">
+                    <item>
+                     <property name="text">
+                      <string>Bit 0</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 1</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 2</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 3</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 4</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 5</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 6</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bit 7</string>
+                     </property>
+                     <property name="flags">
+                      <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+                     </property>
+                    </item>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -1654,12 +1741,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>588</x>
-     <y>203</y>
+     <x>945</x>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel">
-     <x>587</x>
-     <y>226</y>
+     <x>889</x>
+     <y>469</y>
     </hint>
    </hints>
   </connection>

@@ -19,7 +19,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_platinum.qrc">
+   <iconset>
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -76,7 +76,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="res_platinum.qrc">:/res/logo.png</pixmap>
+           <pixmap resource="res_free.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -931,9 +931,6 @@
    <property name="text">
     <string>Exit</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+Q</string>
-   </property>
   </action>
   <action name="actionAbout">
    <property name="icon">
@@ -1416,8 +1413,8 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="res_free.qrc"/>
   <include location="res.qrc"/>
-  <include location="res_platinum.qrc"/>
  </resources>
  <connections/>
 </ui>

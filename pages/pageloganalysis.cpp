@@ -773,7 +773,7 @@ void PageLogAnalysis::updateGraphs()
         mVerticalLine->setVisible(true);
     }
 
-    ui->plot->replot();
+    ui->plot->replotWhenVisible();
 }
 
 void PageLogAnalysis::updateStats()
@@ -910,7 +910,7 @@ void PageLogAnalysis::updateDataAndPlot(double time)
     x[1] = time; y[1] = ui->plot->yAxis->range().upper;
     mVerticalLine->setData(x, y);
     mVerticalLine->setVisible(true);
-    ui->plot->replot();
+    ui->plot->replotWhenVisible();
 
     LOG_DATA d = getLogSample(int(time * 1000));
     mVerticalLineMsLast = d.valTime;

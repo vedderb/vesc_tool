@@ -24,6 +24,7 @@
 #include "mobile/logwriter.h"
 #include "mobile/logreader.h"
 #include "tcpserversimple.h"
+#include "pages/pagemotorcomparison.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -182,6 +183,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");
     qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
     qmlRegisterType<TcpServerSimple>("Vedder.vesc.tcpserversimple", 1, 0, "TcpServerSimple");
+    qmlRegisterType<UdpServerSimple>("Vedder.vesc.udpserversimple", 1, 0, "UdpServerSimple");
     qmlRegisterType<Vesc3dItem>("Vedder.vesc.vesc3ditem", 1, 0, "Vesc3dItem");
     qmlRegisterType<LogWriter>("Vedder.vesc.logwriter", 1, 0, "LogWriter");
     qmlRegisterType<LogReader>("Vedder.vesc.logreader", 1, 0, "LogReader");
@@ -192,6 +194,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<FW_RX_PARAMS>();
     qRegisterMetaType<PSW_STATUS>();
     qRegisterMetaType<IO_BOARD_VALUES>();
+    qRegisterMetaType<MotorData>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD
@@ -439,6 +442,8 @@ int main(int argc, char *argv[])
             darkPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("midAccent"));
             darkPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
             darkPalette.setColor(QPalette::Disabled,QPalette::HighlightedText,Utility::getAppQColor("disabledText"));
+            darkPalette.setColor(QPalette::Link, QColor(150,150,255));
+            darkPalette.setColor(QPalette::LinkVisited, QColor(220,150,255));
             qApp->setPalette(darkPalette);
         } else {
             QPalette lightPalette = qApp->style()->standardPalette();

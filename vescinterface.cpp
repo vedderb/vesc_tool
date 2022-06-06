@@ -31,6 +31,7 @@
 #include "lzokay/lzokay.hpp"
 #include "vescinterface.h"
 #include "utility.h"
+#include "heatshrink/heatshrinkif.h"
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPortInfo>
@@ -192,6 +193,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         setLastConnectionType(CONN_BLE);
         mSettings.setValue("ble_addr", mLastBleAddr);
     });
+    connect(mBleUart, SIGNAL(unintentionalDisconnect()), this, SLOT(bleUnintentionalDisconnect()));
 #endif
 
     mTcpServer = new TcpServerSimple(this);
@@ -255,8 +257,11 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
         mSettings.endArray();
     }
+    
+    QLocale systemLocale;
+    bool useImperialByDefault = systemLocale.measurementSystem() == QLocale::ImperialSystem;
 
-    mUseImperialUnits = mSettings.value("useImperialUnits", false).toBool();
+    mUseImperialUnits = mSettings.value("useImperialUnits", useImperialByDefault).toBool();
     mKeepScreenOn = mSettings.value("keepScreenOn", true).toBool();
     mUseWakeLock = mSettings.value("useWakeLock", false).toBool();
     mLoadQmlUiOnConnect = mSettings.value("loadQmlUiOnConnect", true).toBool();
@@ -504,7 +509,7 @@ QStringList VescInterface::getSupportedFirmwares()
     QStringList fws;
 
     for (int i = 0;i < fwPairs.size();i++) {
-        fws.append(QString("%1.%2").arg(fwPairs.at(i).first).arg(fwPairs.at(i).second));
+        fws.append(QString("%1.%2").arg(fwPairs.at(i).first).arg(fwPairs.at(i).second, 2, 10, QLatin1Char('0')));
     }
     return fws;
 }
@@ -1377,11 +1382,37 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     int nonCompChunks = 0;
     int skipChunks = 0;
 
+    bool useHeatshrink = false;
+    if (szTot > 393208) {
+        useHeatshrink = true;
+        qDebug() << "Firmware is big, using heatshrink compression library";
+        int szOld = szTot;
+        HeatshrinkIf hs;
+        newFirmware = hs.encode(newFirmware);
+        szTot = newFirmware.size();
+        qDebug() << "New size:" << szTot << "(" << 100.0 * (double)szTot / (double)szOld << "%)";
+        supportsLzo = false;
+
+        if (szTot > 393208) {
+            emitMessageDialog(tr("Firmware too big"),
+                              tr("The firmware you are trying to upload is too large for the "
+                                 "bootloader even after compression."), false);
+            return false;
+        }
+    }
+
     if (!isBootloader) {
         quint16 crc = Packet::crc16((const unsigned char*)newFirmware.constData(),
                                     uint32_t(newFirmware.size()));
         VByteArray sizeCrc;
-        sizeCrc.vbAppendInt32(szTot);
+        if (useHeatshrink) {
+            uint32_t szShift = 0xCC;
+            szShift <<= 24;
+            szShift |= szTot;
+            sizeCrc.vbAppendUint32(szShift);
+        } else {
+            sizeCrc.vbAppendUint32(szTot);
+        }
         sizeCrc.vbAppendUint16(crc);
         newFirmware.prepend(sizeCrc);
     }
@@ -1663,6 +1694,12 @@ void VescInterface::closeRtLogFile()
 bool VescInterface::isRtLogOpen()
 {
     return mRtLogFile.isOpen();
+}
+
+QString VescInterface::rtLogFilePath()
+{
+    QFileInfo fi(mRtLogFile);
+    return fi.canonicalFilePath();
 }
 
 QVector<LOG_DATA> VescInterface::getRtLogData()
@@ -2236,12 +2273,6 @@ bool VescInterface::connectSerial(QString port, int baudrate)
         mSerialPort->setParity(QSerialPort::NoParity);
         mSerialPort->setStopBits(QSerialPort::OneStop);
         mSerialPort->setFlowControl(QSerialPort::NoFlowControl);
-
-        // For nrf
-        mSerialPort->setRequestToSend(true);
-        mSerialPort->setDataTerminalReady(true);
-        QThread::msleep(5);
-        mSerialPort->setDataTerminalReady(false);
     }
 
     mLastSerialPort = port;
@@ -2866,6 +2897,11 @@ void VescInterface::udpInputError(QAbstractSocket::SocketError socketError)
 void VescInterface::bleDataRx(QByteArray data)
 {
     mPacket->processData(data);
+}
+
+void VescInterface::bleUnintentionalDisconnect()
+{
+   emit unintentionalBleDisconnect();
 }
 #endif
 

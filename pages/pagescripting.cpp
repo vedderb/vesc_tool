@@ -41,6 +41,7 @@ PageScripting::PageScripting(QWidget *parent) :
     ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
     ui->qmlWidget->setClearColor(Utility::getAppQColor("normalBackground"));
 
+    ui->mainEdit->setModeQml();
     makeEditorConnections(ui->mainEdit);
 
     QPushButton *plusButton = new QPushButton();
@@ -72,7 +73,7 @@ PageScripting::PageScripting(QWidget *parent) :
         createEditorTab("", "");
     });
 
-    connect(ui->mainEdit, &QmlEditor::fileNameChanged, [this](QString fileName) {
+    connect(ui->mainEdit, &ScriptEditor::fileNameChanged, [this](QString fileName) {
         QFileInfo f(fileName);
         QString txt = "main";
 
@@ -137,7 +138,7 @@ PageScripting::PageScripting(QWidget *parent) :
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(0, QTabBar::RightSide, closeButton);
 
-    QmlEditor *mainQmlEditor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
+    ScriptEditor *mainQmlEditor = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(0));
     connect(closeButton, &QPushButton::clicked, [this, mainQmlEditor]() {
         // Clear main tab
         removeEditor(mainQmlEditor);
@@ -164,7 +165,7 @@ PageScripting::~PageScripting()
         set.remove("pagescripting/recentopenfiles");
         set.beginWriteArray("pagescripting/recentopenfiles");
         for (int i = 0;i < ui->fileTabs->count();i++) {
-            auto e = qobject_cast<QmlEditor*>(ui->fileTabs->widget(i));
+            auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(i));
             set.setArrayIndex(i);
             set.setValue("path", e->fileNow());
         }
@@ -357,7 +358,7 @@ void PageScripting::updateRecentList()
     }
 }
 
-void PageScripting::makeEditorConnections(QmlEditor *editor)
+void PageScripting::makeEditorConnections(ScriptEditor *editor)
 {
     connect(editor->codeEditor(), &QCodeEditor::textChanged, [editor, this]() {
        setEditorDirty(editor);
@@ -374,13 +375,13 @@ void PageScripting::makeEditorConnections(QmlEditor *editor)
     connect(editor->codeEditor(), &QCodeEditor::clearConsoleTriggered, [this]() {
         ui->debugEdit->clear();
     });
-    connect(editor, &QmlEditor::fileOpened, [this](QString fileName) {
+    connect(editor, &ScriptEditor::fileOpened, [this](QString fileName) {
         if (!mRecentFiles.contains(fileName)) {
             mRecentFiles.append(fileName);
             updateRecentList();
         }
     });
-    connect(editor, &QmlEditor::fileSaved, [editor, this](QString fileName) {
+    connect(editor, &ScriptEditor::fileSaved, [editor, this](QString fileName) {
         if (mVesc) {
             mVesc->emitStatusMessage("Saved " + fileName, true);
         }
@@ -396,13 +397,14 @@ void PageScripting::makeEditorConnections(QmlEditor *editor)
 
 void PageScripting::createEditorTab(QString fileName, QString content)
 {
-    QmlEditor *editor = new QmlEditor();
+    ScriptEditor *editor = new ScriptEditor();
+    editor->setModeQml();
     int tabIndex = ui->fileTabs->addTab(editor, "");
     ui->fileTabs->setCurrentIndex(tabIndex);
 
     makeEditorConnections(editor);
 
-    connect(editor, &QmlEditor::fileNameChanged, [this, editor](QString fileName) {
+    connect(editor, &ScriptEditor::fileNameChanged, [this, editor](QString fileName) {
         QFileInfo f(fileName);
         QString txt = "Unnamed";
 
@@ -437,12 +439,12 @@ void PageScripting::createEditorTab(QString fileName, QString content)
  * @brief PageScripting::removeEditor Removes the editor (unless it is the 0th, in which case it simply clears it)
  * @param qmlEditor
  */
-void PageScripting::removeEditor(QmlEditor *qmlEditor)
+void PageScripting::removeEditor(ScriptEditor *editor)
 {
    bool shouldCloseTab = false;
 
    // Check if tab is dirty
-   if (qmlEditor->isDirty == true) {
+   if (editor->isDirty == true) {
        // Ask user for confirmation
        QMessageBox::StandardButton answer = QMessageBox::question(
             this,
@@ -464,17 +466,16 @@ void PageScripting::removeEditor(QmlEditor *qmlEditor)
    // Only close if appropriate
    if (shouldCloseTab) {
        // Get index for this tab
-       int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+       int tabIdx = ui->fileTabs->indexOf(editor);
 
        // Special handling of tabIdx == 0
        if (tabIdx == 0) {
-            qmlEditor->codeEditor()->clear();
-            qmlEditor->setFileNow("");
+            editor->codeEditor()->clear();
+            editor->setFileNow("");
        } else {
            ui->fileTabs->removeTab(tabIdx);
        }
    }
-
 }
 
 
@@ -482,15 +483,15 @@ void PageScripting::removeEditor(QmlEditor *qmlEditor)
  * @brief PageScripting::setEditorDirtySet the editor as dirty, i.e. having text modifications
  * @param qmlEditor
  */
-void PageScripting::setEditorDirty(QmlEditor *qmlEditor)
+void PageScripting::setEditorDirty(ScriptEditor *editor)
 {
     // Check if the editor is not already dirty
-    if (qmlEditor->isDirty == false) {
+    if (editor->isDirty == false) {
         // Set editor as dirty
-        qmlEditor->isDirty = true;
+        editor->isDirty = true;
 
         // Get editor index
-        int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+        int tabIdx = ui->fileTabs->indexOf(editor);
 
         // Append a `*` to signify a dirty editor
         QString tabText = ui->fileTabs->tabText(tabIdx);
@@ -503,15 +504,15 @@ void PageScripting::setEditorDirty(QmlEditor *qmlEditor)
  * @brief PageScripting::setEditorClean Set the editor as clean, i.e. having no text modifications
  * @param qmlEditor
  */
-void PageScripting::setEditorClean(QmlEditor *qmlEditor)
+void PageScripting::setEditorClean(ScriptEditor *editor)
 {
     // Check if the editor is not already clean
-    if (qmlEditor->isDirty == true) {
+    if (editor->isDirty == true) {
         // Set editor as clean
-        qmlEditor->isDirty = false;
+        editor->isDirty = false;
 
         // Get editor index
-        int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+        int tabIdx = ui->fileTabs->indexOf(editor);
 
         // Get the tab's label
         QString tabText = ui->fileTabs->tabText(tabIdx);
@@ -547,7 +548,7 @@ bool PageScripting::exportCArray(QString name)
     QString filename;
     QString dir = ".";
 
-    auto editor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
+    auto editor = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(0));
     QFileInfo fileNow = QFileInfo(editor->fileNow());
     if (fileNow.exists()) {
         dir = fileNow.path();

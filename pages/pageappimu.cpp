@@ -189,9 +189,9 @@ void PageAppImu::timerSlot()
         ui->accelPlot->rescaleAxes();
         ui->gyroPlot->rescaleAxes();
 
-        ui->rpyPlot->replot();
-        ui->accelPlot->replot();
-        ui->gyroPlot->replot();
+        ui->rpyPlot->replotWhenVisible();
+        ui->accelPlot->replotWhenVisible();
+        ui->gyroPlot->replotWhenVisible();
     }
 }
 

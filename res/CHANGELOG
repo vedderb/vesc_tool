@@ -1,3 +1,16 @@
+== 4.00 <dev> ==
+* Added support for compressed firmware upload.
+* Reduce CPU usage by only plotting RT data when the plot is visible.
+* Lisp scripting editor and integration.
+ - Autocompletion.
+ - Syntax highlighting.
+ - Real-time binding, CPU and memory monitors.
+ - Console for printing
+ - Examples
+* Added custom load code support to motor comparison tool.
+* Added support for bitfield parameters.
+* Added VESC UDP broadcast listener.
+
 == 3.01 ==
 * Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.
 * Fixed configuration backup and restore over CAN-bus.

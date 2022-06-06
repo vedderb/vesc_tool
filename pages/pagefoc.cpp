@@ -61,6 +61,7 @@ void PageFoc::reloadParams()
         ui->hallTab->clearParams();
         ui->encoderTab->clearParams();
         ui->hfiTab->clearParams();
+        ui->vssTab->clearParams();
         ui->filterTab->clearParams();
         ui->offsetTab->clearParams();
         ui->fwTab->clearParams();

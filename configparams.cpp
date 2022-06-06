@@ -24,6 +24,7 @@
 #include "widgets/parameditstring.h"
 #include "widgets/parameditenum.h"
 #include "widgets/parameditbool.h"
+#include "widgets/parameditbitfield.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
@@ -176,6 +177,15 @@ bool ConfigParams::isParamBool(const QString &name)
     }
 }
 
+bool ConfigParams::isParamBitfield(const QString &name)
+{
+    if (mParams.contains(name) && mParams[name].type == CFG_T_BITFIELD) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 double ConfigParams::getParamDouble(const QString &name)
 {
     double retVal = 0.0;
@@ -202,7 +212,7 @@ int ConfigParams::getParamInt(const QString &name)
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
 
-        if (p.type == CFG_T_INT) {
+        if (p.type == CFG_T_INT || p.type == CFG_T_BITFIELD) {
             retVal = p.valInt;
         } else {
             qWarning() << name << "wrong type";
@@ -437,7 +447,7 @@ QStringList ConfigParams::getParamEnumNames(const QString &name)
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
 
-        if (p.type == CFG_T_ENUM) {
+        if (p.type == CFG_T_ENUM || p.type == CFG_T_BITFIELD) {
             retVal = p.enumNames;
         } else {
             qWarning() << name << "wrong type";
@@ -575,6 +585,13 @@ QWidget *ConfigParams::getEditor(const QString &name, QWidget *parent)
             retVal = edit;
         } break;
 
+        case CFG_T_BITFIELD: {
+            ParamEditBitfield *edit = new ParamEditBitfield(parent);
+            edit->setName(name);
+            edit->setConfig(this);
+            retVal = edit;
+        } break;
+
         default:
             qWarning() << "no editor for" << name << "could be created";
             break;
@@ -633,6 +650,7 @@ void ConfigParams::getParamSerial(VByteArray &vb, const QString &name)
 
         case CFG_T_ENUM:
         case CFG_T_BOOL:
+        case CFG_T_BITFIELD:
             vb.vbAppendInt8(p.valInt);
             break;
         }
@@ -671,10 +689,11 @@ void ConfigParams::setParamSerial(VByteArray &vb, const QString &name, QObject *
             }
         } break;
 
-        case CFG_T_INT: {
+        case CFG_T_INT:
+        case CFG_T_BITFIELD: {
             int val = 0;
 
-            if (p.vTx == VESC_TX_UINT8) {
+            if (p.vTx == VESC_TX_UINT8 || p.type == CFG_T_BITFIELD) {
                 val = vb.vbPopFrontUint8();
             } else if (p.vTx == VESC_TX_INT8) {
                 val = vb.vbPopFrontInt8();
@@ -752,7 +771,7 @@ void ConfigParams::updateParamInt(QString name, int param, QObject *src)
 
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
-        if (p.type == CFG_T_INT) {
+        if (p.type == CFG_T_INT || p.type == CFG_T_BITFIELD) {
             if (p.valInt != param) {
                 p.valInt = param;
                 emit paramChangedInt(src, name, param);
@@ -835,7 +854,8 @@ void ConfigParams::updateParamFromOther(QString name, const ConfigParam &other, 
         updateParamDouble(name, other.valDouble, src);
     } break;
 
-    case CFG_T_INT: {
+    case CFG_T_INT:
+    case CFG_T_BITFIELD: {
         updateParamInt(name, other.valInt, src);
     } break;
 
@@ -953,6 +973,7 @@ void ConfigParams::getXML(QXmlStreamWriter &stream, QString configName)
         case CFG_T_BOOL:
         case CFG_T_ENUM:
         case CFG_T_INT:
+        case CFG_T_BITFIELD:
             stream.writeTextElement(name, QString::number(p.valInt));
             break;
 
@@ -1013,6 +1034,7 @@ bool ConfigParams::setXML(QXmlStreamReader &stream, QString configName)
                     break;
 
                 case CFG_T_INT:
+                case CFG_T_BITFIELD:
                     if (valInt != p.valInt) {
                         p.valInt = valInt;
                         emit paramChangedInt(nullptr, name, valInt);
@@ -1200,6 +1222,7 @@ void ConfigParams::getParamsXML(QXmlStreamWriter &stream)
             break;
 
         case CFG_T_ENUM:
+        case CFG_T_BITFIELD:
             stream.writeTextElement("valInt", QString::number(p->valInt));
             for (int j = 0;j < p->enumNames.size();j++) {
                 stream.writeTextElement("enumNames", p->enumNames.at(j));
@@ -1489,6 +1512,7 @@ bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
                 case CFG_T_BOOL:
                 case CFG_T_ENUM:
                 case CFG_T_INT:
+                case CFG_T_BITFIELD:
                     out << "#define " + p.cDefine + " " + QString::number(p.valInt) + "\n";
                     break;
 
@@ -1549,6 +1573,7 @@ QStringList ConfigParams::checkDifference(ConfigParams *config)
                 case CFG_T_BOOL:
                 case CFG_T_ENUM:
                 case CFG_T_INT:
+                case CFG_T_BITFIELD:
                     if (thisParam->valInt != otherParam->valInt) {
                         res.append(p);
                     }

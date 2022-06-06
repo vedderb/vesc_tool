@@ -83,7 +83,7 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
     }
 
     ui->plotCells->xAxis->setTicker(textTicker);
-    ui->plotCells->replot();
+    ui->plotCells->replotWhenVisible();
 
     // Temps
 
@@ -113,7 +113,7 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
     }
 
     ui->plotTemp->xAxis->setTicker(textTicker2);
-    ui->plotTemp->replot();
+    ui->plotTemp->replotWhenVisible();
 
     // Value table
     ui->valTable->item(0, 0)->setText(QString("%1 V").arg(val.v_tot, 0, 'f', 2));

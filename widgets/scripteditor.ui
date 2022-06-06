@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QmlEditor</class>
- <widget class="QWidget" name="QmlEditor">
+ <class>ScriptEditor</class>
+ <widget class="QWidget" name="ScriptEditor">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -30,7 +30,7 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="QCodeEditor" name="qmlEdit">
+    <widget class="QCodeEditor" name="codeEdit">
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>
@@ -107,7 +107,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../res.qrc">
           <normaloff>:/res/icons/Cancel-96.png</normaloff>:/res/icons/Cancel-96.png</iconset>
         </property>
         <property name="flat">
@@ -142,7 +142,7 @@
         <string>Open</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
        </property>
        <property name="flat">
@@ -156,7 +156,7 @@
         <string>Save</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
        </property>
        <property name="flat">
@@ -170,7 +170,7 @@
         <string>Save As</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
        </property>
        <property name="flat">
@@ -189,6 +189,8 @@
    <header>QCodeEditor</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

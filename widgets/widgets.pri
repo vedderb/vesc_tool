@@ -1,4 +1,5 @@
 FORMS += \
+    $$PWD/parameditbitfield.ui \
     $$PWD/parameditbool.ui \
     $$PWD/parameditdouble.ui \
     $$PWD/parameditenum.ui \
@@ -18,11 +19,12 @@ FORMS += \
     $$PWD/paramdialog.ui \
     $$PWD/detectallfocdialog.ui \
     $$PWD/dirsetup.ui \
-    $$PWD/qmleditor.ui
+    $$PWD/scripteditor.ui
 
 HEADERS += \
     $$PWD/batttempplot.h \
     $$PWD/canlistitem.h \
+    $$PWD/parameditbitfield.h \
     $$PWD/parameditbool.h \
     $$PWD/parameditdouble.h \
     $$PWD/parameditenum.h \
@@ -43,9 +45,9 @@ HEADERS += \
     $$PWD/detectimu.h \
     $$PWD/ppmmap.h \
     $$PWD/adcmap.h \
-    $$PWD/qmleditor.h \
     $$PWD/rtdatatext.h \
     $$PWD/nrfpair.h \
+    $$PWD/scripteditor.h \
     $$PWD/vtextbrowser.h \
     $$PWD/imagewidget.h \
     $$PWD/parameditstring.h \
@@ -60,6 +62,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/batttempplot.cpp \
     $$PWD/canlistitem.cpp \
+    $$PWD/parameditbitfield.cpp \
     $$PWD/parameditbool.cpp \
     $$PWD/parameditdouble.cpp \
     $$PWD/parameditenum.cpp \
@@ -80,9 +83,9 @@ SOURCES += \
     $$PWD/detectimu.cpp \
     $$PWD/ppmmap.cpp \
     $$PWD/adcmap.cpp \
-    $$PWD/qmleditor.cpp \
     $$PWD/rtdatatext.cpp \
     $$PWD/nrfpair.cpp \
+    $$PWD/scripteditor.cpp \
     $$PWD/vtextbrowser.cpp \
     $$PWD/imagewidget.cpp \
     $$PWD/parameditstring.cpp \

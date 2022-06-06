@@ -206,10 +206,10 @@ void PageImu::timerSlot()
         ui->gyroPlot->rescaleAxes();
         ui->magPlot->rescaleAxes();
 
-        ui->rpyPlot->replot();
-        ui->accelPlot->replot();
-        ui->gyroPlot->replot();
-        ui->magPlot->replot();
+        ui->rpyPlot->replotWhenVisible();
+        ui->accelPlot->replotWhenVisible();
+        ui->gyroPlot->replotWhenVisible();
+        ui->magPlot->replotWhenVisible();
     }
 }
 

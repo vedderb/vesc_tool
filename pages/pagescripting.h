@@ -25,7 +25,7 @@
 
 #include "vescinterface.h"
 #include "mobile/qmlui.h"
-#include "widgets/qmleditor.h"
+#include "widgets/scripteditor.h"
 #include "utility.h"
 
 namespace Ui {
@@ -79,11 +79,11 @@ private:
     Utility mUtil;
 
     void updateRecentList();
-    void makeEditorConnections(QmlEditor *editor);
+    void makeEditorConnections(ScriptEditor *editor);
     void createEditorTab(QString fileName, QString content);
-    void removeEditor(QmlEditor *qmlEditor);
-    void setEditorDirty(QmlEditor * qmlEditor);
-    void setEditorClean(QmlEditor * qmlEditor);
+    void removeEditor(ScriptEditor *editor);
+    void setEditorDirty(ScriptEditor *editor);
+    void setEditorClean(ScriptEditor *editor);
     QString qmlToRun(bool importDir = true);
     bool exportCArray(QString name);
     bool eraseQml();

@@ -25,6 +25,11 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDirIterator>
+#include <QNetworkAccessManager>
+#include <QUrl>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
 
 PageFirmware::PageFirmware(QWidget *parent) :
     QWidget(parent),
@@ -45,6 +50,7 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->uploadButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
     ui->uploadAllButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
     ui->readVersionButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
+    ui->dlArchiveButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
 
     updateHwList(FW_RX_PARAMS());
     updateBlList(FW_RX_PARAMS());
@@ -57,12 +63,18 @@ PageFirmware::PageFirmware(QWidget *parent) :
     connect(ui->showNonDefaultBox, SIGNAL(toggled(bool)),
             this, SLOT(updateFwList()));
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    connect(ui->archVersionList, SIGNAL(currentRowChanged(int)),
+            this, SLOT(updateArchFwList()));
+    connect(ui->showNonDefaultArchBox, SIGNAL(toggled(bool)),
+            this, SLOT(updateArchFwList()));
 
     QSettings set;
     ui->fwEdit->setText(set.value("pagefirmware/lastcustomfile", "").toString());
     ui->fw2Edit->setText(set.value("pagefirmware/lastcustomfile2", "").toString());
     ui->fw3Edit->setText(set.value("pagefirmware/lastcustomfile3", "").toString());
     ui->fw4Edit->setText(set.value("pagefirmware/lastcustomfile4", "").toString());
+
+    reloadArchive();
 }
 
 PageFirmware::~PageFirmware()
@@ -159,7 +171,11 @@ void PageFirmware::fwRxChanged(bool rx, bool limited)
     }
 
     if (params.major >= 0) {
-        fwStr = QString("Fw: %1.%2").arg(params.major).arg(params.minor);
+        fwStr = QString("Fw: v%1.%2").arg(params.major).arg(params.minor, 2, 10, QLatin1Char('0'));
+        if (!params.fwName.isEmpty()) {
+            fwStr += " (" + params.fwName + ")";
+        }
+
         if (!params.hw.isEmpty()) {
             fwStr += ", Hw: " + params.hw;
         }
@@ -184,9 +200,15 @@ void PageFirmware::fwRxChanged(bool rx, bool limited)
         fwStr += params.hasPhaseFilters ? "Yes" : "No";
     }
 
+    fwStr += "\nNRF Name: ";
+    fwStr += (params.nrfNameSupported ? "Yes" : "No");
+    fwStr += ", Pin: ";
+    fwStr += (params.nrfPinSupported ? "Yes" : "No");
+
     ui->currentLabel->setText(fwStr);
     updateHwList(params);
     updateBlList(params);
+    updateArchFwList();
     update();
 }
 
@@ -248,6 +270,49 @@ void PageFirmware::updateFwList()
 
     if (ui->fwList->count() > 0) {
         ui->fwList->setCurrentRow(0);
+    }
+}
+
+void PageFirmware::updateArchFwList()
+{
+    ui->archFwList->clear();
+    QListWidgetItem *item = ui->archVersionList->currentItem();
+    if (item != nullptr) {
+        QString hw = item->data(Qt::UserRole).toString();
+
+        QDirIterator it(hw);
+        while (it.hasNext()) {
+            QFileInfo fi(it.next());
+
+            QDirIterator it2(fi.absoluteFilePath());
+            while (it2.hasNext()) {
+                QFileInfo fi2(it2.next());
+
+                QStringList names = fi.fileName().split("_o_");
+                auto params = mVesc->getLastFwRxParams();
+
+                if (!mVesc->isPortConnected() || params.hw.isEmpty() ||
+                        names.contains(params.hw, Qt::CaseInsensitive)) {
+
+                    if (ui->showNonDefaultArchBox->isChecked() ||
+                            fi2.fileName().toLower() == "vesc_default.bin") {
+                        QString name = names.at(0);
+                        for(int i = 1;i < names.size();i++) {
+                            name += " & " + names.at(i);
+                        }
+
+                        QListWidgetItem *item = new QListWidgetItem;
+                        item->setText("HW " + name + ": " + fi2.fileName());
+                        item->setData(Qt::UserRole, fi2.absoluteFilePath());
+                        ui->archFwList->insertItem(ui->archFwList->count(), item);
+                    }
+                }
+            }
+        }
+    }
+
+    if (ui->archFwList->count() > 0) {
+        ui->archFwList->setCurrentRow(0);
     }
 }
 
@@ -376,8 +441,13 @@ void PageFirmware::uploadFw(bool allOverCan)
 
         QFile file, fileBl;
 
-        if (ui->fwTabWidget->currentIndex() == 0) {
+        if (ui->fwTabWidget->currentIndex() == 0 || ui->fwTabWidget->currentIndex() == 3) {
             QListWidgetItem *item = ui->fwList->currentItem();
+
+            if (ui->fwTabWidget->currentIndex() == 3) {
+                item = ui->archFwList->currentItem();
+            }
+
             if (item) {
                 file.setFileName(item->data(Qt::UserRole).toString());
 
@@ -462,7 +532,7 @@ void PageFirmware::uploadFw(bool allOverCan)
             }
         }
 
-        if (file.size() > 400000 && !(file.fileName().toLower().endsWith(".hex"))) {
+        if (file.size() > 700000 && !(file.fileName().toLower().endsWith(".hex"))) {
             QMessageBox::critical(this,
                                   tr("Upload Error"),
                                   tr("The selected file is too large to be a firmware."));
@@ -471,7 +541,7 @@ void PageFirmware::uploadFw(bool allOverCan)
 
         QMessageBox::StandardButton reply;
 
-        if (ui->fwTabWidget->currentIndex() == 0 && ui->hwList->count() == 1) {
+        if ((ui->fwTabWidget->currentIndex() == 0 && ui->hwList->count() == 1) || ui->fwTabWidget->currentIndex() == 3) {
             reply = QMessageBox::warning(this,
                                          tr("Warning"),
                                          tr("Uploading new firmware will clear all settings on your VESC "
@@ -559,4 +629,70 @@ void PageFirmware::uploadFw(bool allOverCan)
             }
         }
     }
+}
+
+void PageFirmware::reloadArchive()
+{
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+            "/res_fw.rcc";
+    QFile file(path);
+    if (file.exists()) {
+        QResource::unregisterResource(path);
+        QResource::registerResource(path);
+
+        QString fwDir = "://fw_archive";
+
+        ui->archVersionList->clear();
+
+        QDirIterator it(fwDir);
+        while (it.hasNext()) {
+            QFileInfo fi(it.next());
+            QListWidgetItem *item = new QListWidgetItem;
+
+            item->setText(fi.fileName());
+            item->setData(Qt::UserRole, fi.absoluteFilePath());
+            ui->archVersionList->insertItem(ui->archVersionList->count(), item);
+        }
+    }
+}
+
+void PageFirmware::on_dlArchiveButton_clicked()
+{
+    ui->dlArchiveButton->setEnabled(false);
+
+    ui->displayDl->setText("Preparing download...");
+
+    QString version = QString::number(VT_VERSION);
+    QUrl url("http://home.vedder.se/vesc_fw_archive/res_fw.rcc");
+    QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    QNetworkReply *reply = manager.get(request);
+
+    connect(reply, &QNetworkReply::downloadProgress, [this](qint64 bytesReceived, qint64 bytesTotal) {
+        ui->displayDl->setText("Downloading...");
+        ui->displayDl->setValue(100.0 * (double)bytesReceived / (double)bytesTotal);
+    });
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() == QNetworkReply::NoError) {
+        ui->displayDl->setText("Download Finished");
+        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+                "/res_fw.rcc";
+        QFile file(path);
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(reply->readAll());
+            file.close();
+            reloadArchive();
+        }
+    } else {
+        ui->displayDl->setText("Download Failed");
+    }
+
+    reply->abort();
+    reply->deleteLater();
+
+    ui->dlArchiveButton->setEnabled(true);
 }

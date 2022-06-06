@@ -11,4 +11,5 @@ rm /storage/mnt_webserver/web/ubercart_downloads/vesc_tool_*
 mv build/lin/vesc_tool_* /storage/mnt_webserver/web/ubercart_downloads/
 mv build/win/vesc_tool_* /storage/mnt_webserver/web/ubercart_downloads/
 mv build/android/vesc_tool_* /storage/mnt_webserver/web/ubercart_downloads/
+cp build/macos/vesc_tool_* /storage/mnt_webserver/web/ubercart_downloads/
 

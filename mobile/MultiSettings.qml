@@ -46,12 +46,20 @@ Item {
                                      "CAN-forwarding must be disabled for multi setup to work.", false, false)
             return
         }
+        workaroundTimerOpenDialog.start()
+    }
+    Timer {
+        id: workaroundTimerOpenDialog
+        interval: 0
+        repeat: false
+        running: false
+        onTriggered: {
+            dialog.open()
 
-        dialog.open()
-
-        disableDialog("Scanning CAN-bus...")
-        canDevs = Utility.scanCanVescOnly(VescIf)
-        enableDialog()
+            disableDialog("Scanning CAN-bus...")
+            canDevs = Utility.scanCanVescOnly(VescIf)
+            enableDialog()
+        }
     }
 
     Dialog {
@@ -180,8 +188,17 @@ Item {
 
                                 onClicked: {
                                     disableDialog("Writing Parameters...")
-                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListGeneral.getParamNames())
-                                    enableDialog()
+                                    workaroundTimerWriteGeneralAll.start()
+                                }
+                                Timer {
+                                    id: workaroundTimerWriteGeneralAll
+                                    interval: 0
+                                    repeat: false
+                                    running: false
+                                    onTriggered: {
+                                        Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListGeneral.getParamNames())
+                                        enableDialog()
+                                    }
                                 }
                             }
                             Button {
@@ -218,11 +235,19 @@ Item {
                             Button {
                                 Layout.fillWidth: true
                                 text: "Write Limits to All VESCs"
-
                                 onClicked: {
                                     disableDialog("Writing Parameters...")
-                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListLimits.getParamNames())
-                                    enableDialog()
+                                    workaroundTimerWriteLimitsAll.start()
+                                }
+                                Timer {
+                                    id: workaroundTimerWriteLimitsAll
+                                    interval: 0
+                                    repeat: false
+                                    running: false
+                                    onTriggered: {
+                                        Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListLimits.getParamNames())
+                                        enableDialog()
+                                    }
                                 }
                             }
                             Button {
@@ -295,8 +320,17 @@ Item {
 
                                 onClicked: {
                                     disableDialog("Writing Parameters...")
-                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListFoc.getParamNames())
-                                    enableDialog()
+                                    workaroundTimerWriteFOCAll.start()
+                                }
+                                Timer {
+                                    id: workaroundTimerWriteFOCAll
+                                    interval: 0
+                                    repeat: false
+                                    running: false
+                                    onTriggered: {
+                                        Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListFoc.getParamNames())
+                                        enableDialog()
+                                    }
                                 }
                             }
                             Button {
@@ -336,8 +370,17 @@ Item {
 
                                 onClicked: {
                                     disableDialog("Writing Parameters...")
-                                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListBms.getParamNames())
-                                    enableDialog()
+                                    workaroundTimerWriteBMSAll.start()
+                                }
+                                Timer {
+                                    id: workaroundTimerWriteBMSAll
+                                    interval: 0
+                                    repeat: false
+                                    running: false
+                                    onTriggered: {
+                                        Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, paramListBms.getParamNames())
+                                        enableDialog()
+                                    }
                                 }
                             }
                             Button {

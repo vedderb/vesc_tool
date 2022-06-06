@@ -40,7 +40,8 @@ typedef enum {
     CFG_T_INT,
     CFG_T_QSTRING,
     CFG_T_ENUM,
-    CFG_T_BOOL
+    CFG_T_BOOL,
+    CFG_T_BITFIELD
 } CFG_T;
 
 typedef enum {
@@ -97,7 +98,8 @@ typedef enum {
     FAULT_CODE_FLASH_CORRUPTION_APP_CFG,
     FAULT_CODE_FLASH_CORRUPTION_MC_CFG,
     FAULT_CODE_ENCODER_NO_MAGNET,
-    FAULT_CODE_ENCODER_MAGNET_TOO_STRONG
+    FAULT_CODE_ENCODER_MAGNET_TOO_STRONG,
+    FAULT_CODE_PHASE_FILTER
 } mc_fault_code;
 
 typedef enum {
@@ -109,6 +111,8 @@ typedef enum {
     DISP_POS_MODE_PID_POS_ERROR,
     DISP_POS_MODE_ENCODER_OBSERVER_ERROR
 } disp_pos_mode;
+
+Q_DECLARE_METATYPE(disp_pos_mode)
 
 // ADC control types. Remember to add new types here when adding them to the firmware.
 typedef enum {
@@ -564,6 +568,7 @@ struct FW_RX_PARAMS {
 
     Q_PROPERTY(int major MEMBER major)
     Q_PROPERTY(int minor MEMBER minor)
+    Q_PROPERTY(QString fwName MEMBER fwName)
     Q_PROPERTY(QString hw MEMBER hw)
     Q_PROPERTY(QByteArray uuid MEMBER uuid)
     Q_PROPERTY(bool isPaired MEMBER isPaired)
@@ -574,6 +579,8 @@ struct FW_RX_PARAMS {
     Q_PROPERTY(bool qmlHwFullscreen MEMBER qmlHwFullscreen)
     Q_PROPERTY(bool hasQmlApp MEMBER hasQmlApp)
     Q_PROPERTY(bool qmlAppFullscreen MEMBER qmlAppFullscreen)
+    Q_PROPERTY(bool nrfNameSupported MEMBER nrfNameSupported)
+    Q_PROPERTY(bool nrfPinSupported MEMBER nrfPinSupported)
 
 public:
     FW_RX_PARAMS() {
@@ -588,6 +595,8 @@ public:
         qmlHwFullscreen = false;
         hasQmlApp = false;
         qmlAppFullscreen = false;
+        nrfNameSupported = false;
+        nrfPinSupported = false;
     }
 
     Q_INVOKABLE QString hwTypeStr() {
@@ -611,6 +620,7 @@ public:
 
     int major;
     int minor;
+    QString fwName;
     QString hw;
     QByteArray uuid;
     bool isPaired;
@@ -622,6 +632,8 @@ public:
     bool qmlHwFullscreen;
     bool hasQmlApp;
     bool qmlAppFullscreen;
+    bool nrfNameSupported;
+    bool nrfPinSupported;
 
 };
 
@@ -937,6 +949,19 @@ typedef enum {
     COMM_GET_EXT_HUM_TMP,
     COMM_GET_STATS,
     COMM_RESET_STATS,
+
+    // Lisp
+    COMM_LISP_READ_CODE,
+    COMM_LISP_WRITE_CODE,
+    COMM_LISP_ERASE_CODE,
+    COMM_LISP_SET_RUNNING,
+    COMM_LISP_GET_STATS,
+    COMM_LISP_PRINT,
+
+    COMM_BMS_SET_BATT_TYPE,
+    COMM_BMS_GET_BATT_TYPE,
+
+    COMM_LISP_REPL_CMD,
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -1075,5 +1100,32 @@ public:
 };
 
 Q_DECLARE_METATYPE(BALANCE_VALUES)
+
+struct LISP_STATS {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(double cpu_use MEMBER cpu_use)
+    Q_PROPERTY(double heap_use MEMBER heap_use)
+    Q_PROPERTY(double mem_use MEMBER mem_use)
+    Q_PROPERTY(double stack_use MEMBER stack_use)
+    Q_PROPERTY(QString done_ctx_r MEMBER done_ctx_r)
+
+    LISP_STATS() {
+        cpu_use = 0.0;
+        heap_use = 0.0;
+        mem_use = 0.0;
+        stack_use = 0.0;
+    }
+
+    double cpu_use;
+    double heap_use;
+    double mem_use;
+    double stack_use;
+    QString done_ctx_r;
+    QVector<QPair<QString, double>> number_bindings;
+};
+
+Q_DECLARE_METATYPE(LISP_STATS)
 
 #endif // DATATYPES_H

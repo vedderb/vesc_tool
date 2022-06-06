@@ -257,7 +257,7 @@ QString Utility::uuid2Str(QByteArray uuid, bool space)
 {
     QString strUuid;
     for (int i = 0;i < uuid.size();i++) {
-        QString str = QString::number(uuid.at(i), 16).
+        QString str = QString::number((uint8_t)uuid.at(i), 16).
                 rightJustified(2, '0').toUpper();
         strUuid.append(((i > 0 && space) ? " " : "") + str);
     }
@@ -283,6 +283,20 @@ bool Utility::requestFilePermission()
 #else
     return true;
 #endif
+#else
+    return true;
+#endif
+}
+
+bool Utility::hasLocationPermission()
+{
+#ifdef Q_OS_ANDROID
+    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.ACCESS_FINE_LOCATION");
+    if (r == QtAndroid::PermissionResult::Denied) {
+        return false;
+    } else {
+        return true;
+    }
 #else
     return true;
 #endif
@@ -613,7 +627,17 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 
     if (res) {
         int canId = ap->getParamInt("controller_id");
-        int canStatus = ap->getParamEnum("send_can_status");
+
+        int canStatus;
+        int canStatus2;
+        bool has_bitfield_params = ap->hasParam("can_status_msgs_r1");
+        if (has_bitfield_params) {
+            canStatus = ap->getParamInt("can_status_msgs_r1");
+            canStatus2 = ap->getParamInt("can_status_msgs_r2");
+        } else {
+            canStatus = ap->getParamEnum("send_can_status");
+        }
+
         vesc->commands()->getAppConfDefault();
         res = waitSignal(ap, SIGNAL(updated()), 4000);
 
@@ -623,7 +647,13 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
 
         if (res) {
             ap->updateParamInt("controller_id", canId);
-            ap->updateParamEnum("send_can_status", canStatus);
+            if (has_bitfield_params) {
+                ap->updateParamInt("can_status_msgs_r1", canStatus);
+                ap->updateParamInt("can_status_msgs_r2", canStatus2);
+            } else {
+                ap->updateParamEnum("send_can_status", canStatus);
+            }
+
             vesc->commands()->setAppConf();
             res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
@@ -665,7 +695,17 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             int canId = ap->getParamInt("controller_id");
-            int canStatus = ap->getParamEnum("send_can_status");
+
+            int canStatus;
+            int canStatus2;
+            bool has_bitfield_params = ap->hasParam("can_status_msgs_r1");
+            if (has_bitfield_params) {
+                canStatus = ap->getParamInt("can_status_msgs_r1");
+                canStatus2 = ap->getParamInt("can_status_msgs_r2");
+            } else {
+                canStatus = ap->getParamEnum("send_can_status");
+            }
+
             vesc->commands()->getAppConfDefault();
             res = waitSignal(ap, SIGNAL(updated()), 4000);
 
@@ -675,7 +715,14 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             ap->updateParamInt("controller_id", canId);
-            ap->updateParamEnum("send_can_status", canStatus);
+
+            if (has_bitfield_params) {
+                ap->updateParamInt("can_status_msgs_r1", canStatus);
+                ap->updateParamInt("can_status_msgs_r2", canStatus2);
+            } else {
+                ap->updateParamEnum("send_can_status", canStatus);
+            }
+
             vesc->commands()->setAppConf();
             res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
@@ -1800,6 +1847,7 @@ void Utility::serialFunc(ConfigParams *params, QTextStream &s) {
             switch (p->type) {
             case CFG_T_BOOL:
             case CFG_T_ENUM:
+            case CFG_T_BITFIELD:
                 s << "\t" << "buffer[ind++] = conf->" << name << ";\n";
                 break;
 
@@ -1884,6 +1932,7 @@ void Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
             switch (p->type) {
             case CFG_T_BOOL:
             case CFG_T_ENUM:
+            case CFG_T_BITFIELD:
                 s << "\tconf->" << name << " = buffer[ind++];\n";
                 break;
 

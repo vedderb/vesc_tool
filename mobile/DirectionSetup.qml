@@ -38,7 +38,16 @@ Item {
 
     function scanCan() {
         disableDialog()
-        setCanDevs(Utility.scanCanVescOnly(VescIf))
+        workaroundTimerCanScan.start()
+    }
+    Timer {
+        id: workaroundTimerCanScan
+        interval: 0
+        repeat: false
+        running: false
+        onTriggered: {
+            setCanDevs(Utility.scanCanVescOnly(VescIf))
+        }
     }
 
     function setCanDevs(canDevs) {
@@ -142,13 +151,23 @@ Item {
                             }
 
                             Switch {
+                                id: invertSwitch
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                                 enabled: true
                                 checked: isInv
                                 onToggled: {
                                     disableDialog()
-                                    Utility.setInvertDirection(VescIf, isCan ? canId : -1, checked)
-                                    enableDialog()
+                                    workaroundTimerInvertSwitch.start()
+                                }
+                                Timer {
+                                    id: workaroundTimerInvertSwitch
+                                    interval: 0
+                                    repeat: false
+                                    running: false
+                                    onTriggered: {
+                                        Utility.setInvertDirection(VescIf, isCan ? canId : -1, invertSwitch.checked)
+                                        enableDialog()
+                                    }
                                 }
                             }
                         }
@@ -165,8 +184,17 @@ Item {
 
                                 onClicked: {
                                     disableDialog()
-                                    Utility.testDirection(VescIf, isCan ? canId : -1, 0.1, 2000)
-                                    enableDialog()
+                                    workaroundTimerFWD.start()
+                                }
+                                Timer {
+                                    id: workaroundTimerFWD
+                                    interval: 0
+                                    repeat: false
+                                    running: false
+                                    onTriggered: {
+                                        Utility.testDirection(VescIf, isCan ? canId : -1, 0.1, 2000)
+                                        enableDialog()
+                                    }
                                 }
                             }
 
@@ -178,8 +206,17 @@ Item {
 
                                 onClicked: {
                                     disableDialog()
-                                    Utility.testDirection(VescIf, isCan ? canId : -1, -0.1, 2000)
-                                    enableDialog()
+                                    workaroundTimerBWD.start()
+                                }
+                                Timer {
+                                    id: workaroundTimerBWD
+                                    interval: 0
+                                    repeat: false
+                                    running: false
+                                    onTriggered: {
+                                        Utility.testDirection(VescIf, isCan ? canId : -1, -0.1, 2000)
+                                        enableDialog()
+                                    }
                                 }
                             }
                         }

@@ -47,6 +47,7 @@ private slots:
     void fwRxChanged(bool rx, bool limited);
     void updateHwList(FW_RX_PARAMS params);
     void updateFwList();
+    void updateArchFwList();
     void updateBlList(FW_RX_PARAMS params);
 
     void on_chooseButton_clicked();
@@ -58,6 +59,7 @@ private slots:
     void on_cancelButton_clicked();
     void on_changelogButton_clicked();
     void on_uploadAllButton_clicked();
+    void on_dlArchiveButton_clicked();
 
 private:
     Ui::PageFirmware *ui;
@@ -65,6 +67,7 @@ private:
     QTimer *mTimer;
 
     void uploadFw(bool allOverCan);
+    void reloadArchive();
 
 };
 

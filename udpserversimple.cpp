@@ -35,11 +35,18 @@ UdpServerSimple::UdpServerSimple(QObject *parent) : QObject(parent)
 
 bool UdpServerSimple::startServer(int port, QHostAddress addr)
 {
+    mUdpSocket->close();
     if (!mUdpSocket->bind(addr,  port)) {
         return false;
     }
 
     return true;
+}
+
+bool UdpServerSimple::startServerBroadcast(int port)
+{
+    mUdpSocket->close();
+    return mUdpSocket->bind(QHostAddress::Any, port, QUdpSocket::ShareAddress);
 }
 
 void UdpServerSimple::stopServer()

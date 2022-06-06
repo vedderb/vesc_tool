@@ -338,10 +338,10 @@ void PageRtData::timerSlot()
             ui->focPlot->rescaleAxes();
         }
 
-        ui->currentPlot->replot();
-        ui->tempPlot->replot();
-        ui->rpmPlot->replot();
-        ui->focPlot->replot();
+        ui->currentPlot->replotWhenVisible();
+        ui->tempPlot->replotWhenVisible();
+        ui->rpmPlot->replotWhenVisible();
+        ui->focPlot->replotWhenVisible();
 
         mUpdateValPlot = false;
     }
@@ -359,7 +359,7 @@ void PageRtData::timerSlot()
             ui->posPlot->rescaleAxes();
         }
 
-        ui->posPlot->replot();
+        ui->posPlot->replotWhenVisible();
 
         mUpdatePosPlot = false;
     }
@@ -399,7 +399,7 @@ void PageRtData::timerSlot()
             ui->experimentPlot->rescaleAxes();
         }
 
-        ui->experimentPlot->replot();
+        ui->experimentPlot->replotWhenVisible();
         mExperimentReplot = false;
     }
 }
@@ -546,11 +546,11 @@ void PageRtData::on_rescaleButton_clicked()
     ui->focPlot->rescaleAxes();
     ui->posPlot->rescaleAxes();
 
-    ui->currentPlot->replot();
-    ui->tempPlot->replot();
-    ui->rpmPlot->replot();
-    ui->focPlot->replot();
-    ui->posPlot->replot();
+    ui->currentPlot->replotWhenVisible();
+    ui->tempPlot->replotWhenVisible();
+    ui->rpmPlot->replotWhenVisible();
+    ui->focPlot->replotWhenVisible();
+    ui->posPlot->replotWhenVisible();
 }
 
 void PageRtData::on_posInductanceButton_clicked()

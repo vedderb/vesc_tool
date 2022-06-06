@@ -43,6 +43,7 @@ PageWelcome::PageWelcome(QWidget *parent) :
     ui->nrfPairButton->setIcon(QIcon(theme + "icons/icons8-fantasy-96.png"));
     ui->multiSettingButton->setIcon(QIcon(theme + "icons/Settings-96.png"));
     ui->invertDirButton->setIcon(QIcon(theme + "icons/Process-96.png"));
+    ui->setupBluetoothButton->setIcon(QIcon(theme + "icons/bluetooth.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
@@ -123,4 +124,9 @@ void PageWelcome::on_autoConnectButton_clicked()
 void PageWelcome::on_nrfPairButton_clicked()
 {
     QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "nrfQuickPair");
+}
+
+void PageWelcome::on_setupBluetoothButton_clicked()
+{
+    QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "openBleSetup");
 }

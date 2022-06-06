@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <section name="Keyword">
+        <name>define</name>
+        <name>defun</name>
+        <name>macro</name>
+        <name>lambda</name>
+        <name>eval</name>
+        <name>let</name>
+        <name>progn</name>
+        <name>if</name>
+        <name>match</name>
+        <name>_</name>
+        <name>loopfor</name>
+        <name>loopwhile</name>
+        <name>looprange</name>
+        <name>loopforeach</name>
+        <name>break</name>
+        <name>fn</name>
+        <name>def</name>
+    </section>
+    <section name="PrimitiveType">
+        <name>nil</name>
+        <name>list</name>
+    </section>
+    <section name="Type">
+        <name>spawn</name>
+        <name>recv</name>
+        <name>print</name>
+        <name>yield</name>
+        <name>ix</name>
+        <name>sleep</name>
+        <name>map</name>
+        <name>foldl</name>
+        <name>foldr</name>
+        <name>list</name>
+        <name>iota</name>
+        <name>range</name>
+        <name>reverse</name>
+        <name>length</name>
+        <name>apply</name>
+        <name>zipwith</name>
+        <name>filter</name>
+        <name>sort</name>
+        <name>sin</name>
+        <name>cos</name>
+        <name>tan</name>
+        <name>asin</name>
+        <name>acos</name>
+        <name>atan</name>
+        <name>atan2</name>
+        <name>pow</name>
+        <name>sqrt</name>
+        <name>log</name>
+        <name>log10</name>
+        <name>shl</name>
+        <name>shr</name>
+        <name>first</name>
+        <name>rest</name>
+        <name>car</name>
+        <name>cons</name>
+        <name>cdr</name>
+        <name>second</name>
+        <name>third</name>
+        <name>setcar</name>
+        <name>setcdr</name>
+        <name>setvar</name>
+        <name>setix</name>
+        <name>bufcpy</name>
+        <name>bufclear</name>
+        <name>systime</name>
+        <name>and</name>
+        <name>or</name>
+        <name>eq</name>
+    </section>
+</root>

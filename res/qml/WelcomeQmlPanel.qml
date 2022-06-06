@@ -74,6 +74,23 @@ Item {
         multiSettings.openDialog()
     }
 
+    function openBleSetup() {
+        if (!VescIf.isPortConnected()) {
+            VescIf.emitMessageDialog("BLE Setup",
+                                     "You are not connected to the VESC.", false, false)
+        } else {
+            if (VescIf.getLastFwRxParams().nrfNameSupported &&
+                    VescIf.getLastFwRxParams().nrfPinSupported) {
+                bleSetupDialog.openDialog()
+            } else {
+                VescIf.emitMessageDialog("BLE Setup",
+                                         "The BLE module does not support setup. You can try " +
+                                         "updating the firmware on it from the SWD programmer page.",
+                                         false, false)
+            }
+        }
+    }
+
     SetupWizardFoc {
         id: focWizard
         dialogParent: container
@@ -81,6 +98,11 @@ Item {
 
     MultiSettings {
         id: multiSettings
+        dialogParent: container
+    }
+
+    BleSetupDialog {
+        id: bleSetupDialog
         dialogParent: container
     }
 

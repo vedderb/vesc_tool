@@ -535,6 +535,13 @@ void ParameterEditor::setEditorValues(QString name, ConfigParam p)
 
     // Bool
     ui->boolBox->setCurrentIndex(p.valInt > 0 ? 1 : 0);
+
+    // Bitfield
+    for (int i = 0;i < p.enumNames.size();i++) {
+        if (ui->bitfieldWidget->count() > i) {
+            ui->bitfieldWidget->item(i)->setText(p.enumNames.at(i));
+        }
+    }
 }
 
 QString ParameterEditor::getEditorValues(ConfigParam *p)
@@ -588,6 +595,14 @@ QString ParameterEditor::getEditorValues(ConfigParam *p)
 
         case CFG_T_BOOL:
             p->valInt = ui->boolBox->currentIndex();
+            break;
+
+        case CFG_T_BITFIELD:
+            p->enumNames.clear();
+            for (int i = 0;i < ui->bitfieldWidget->count();i++) {
+                p->enumNames.append(ui->bitfieldWidget->item(i)->text());
+            }
+            p->valInt = ui->bitfieldValBox->value();
             break;
 
         default:

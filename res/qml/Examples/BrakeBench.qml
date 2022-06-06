@@ -13,6 +13,35 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool isRunning: false
     
+    function driveStart() {
+        mCommands.setRpm(rpmBox.realValue)
+        isRunning = true
+    }
+    
+    function driveStop() {
+        // Disable brake first so that we don't feed anything back to the supply
+        VescIf.canTmpOverride(true, canBox.realValue)
+        mCommands.setCurrentBrake(0)
+        VescIf.canTmpOverrideEnd()
+        
+        mCommands.setCurrent(0)
+        
+        isRunning = false
+    }
+    
+    function brakeOn() {
+        VescIf.canTmpOverride(true, canBox.realValue)
+        mCommands.setCurrentBrake(currentBox.realValue)
+        VescIf.canTmpOverrideEnd()
+        isRunning = true
+    }
+    
+    function brakeOff() {
+        VescIf.canTmpOverride(true, canBox.realValue)
+        mCommands.setCurrentBrake(0)
+        VescIf.canTmpOverrideEnd()
+    }
+    
     ColumnLayout {
         anchors.fill: parent
         
@@ -42,8 +71,7 @@ Item {
                         text: "Start"
                         
                         onClicked: {
-                            mCommands.setRpm(rpmBox.realValue)
-                            isRunning = true
+                            driveStart()
                         }
                     }
                     
@@ -52,14 +80,7 @@ Item {
                         text: "Stop"
                         
                         onClicked: {
-                            // Disable brake first so that we don't feed anything back to the supply
-                            VescIf.canTmpOverride(true, canBox.realValue)
-                            mCommands.setCurrentBrake(0)
-                            VescIf.canTmpOverrideEnd()
-                            
-                            mCommands.setCurrent(0)
-                            
-                            isRunning = false
+                            driveStop()
                         }
                     }
                 }
@@ -104,10 +125,7 @@ Item {
                         text: "Brake ON"
                         
                         onClicked: {
-                            VescIf.canTmpOverride(true, canBox.realValue)
-                            mCommands.setCurrentBrake(currentBox.realValue)
-                            VescIf.canTmpOverrideEnd()
-                            isRunning = true
+                            brakeOn()
                         }
                     }
                     
@@ -116,12 +134,19 @@ Item {
                         text: "Brake Off"
                         
                         onClicked: {
-                            VescIf.canTmpOverride(true, canBox.realValue)
-                            mCommands.setCurrentBrake(0)
-                            VescIf.canTmpOverrideEnd()
+                            brakeOff()
                         }
                     }
                 }
+            }
+        }
+        
+        Button {
+            Layout.fillWidth: true
+            text: "Run Test"
+            
+            onClicked: {
+                testTimer.start()
             }
         }
         
@@ -131,6 +156,52 @@ Item {
             Layout.fillWidth: true
             color: "white"
             font.family: "DejaVu Sans Mono"
+        }
+    }
+    
+    Timer {
+        id: testTimer
+        property var state: 0
+        interval: 100
+        repeat: false
+        running: false
+        
+        onTriggered: {
+            if (state == 0) {
+                driveStart()
+                
+                interval = 2000
+                state++
+                start()
+            } else if (state == 1) {
+                mCommands.setDetect(6)
+                
+                interval = 1000
+                state++
+                start()
+            } else if (state == 2) {
+                brakeOn()
+                
+                interval = 1000
+                state++
+                start()
+            } else if (state == 3) {
+                mCommands.setDetect(3)
+                
+                interval = 200
+                state++
+                start()
+            } else if (state == 4) {
+                driveStop()
+                mCommands.setDetect(0)
+                
+                interval = 1000
+                state++
+                start()
+            } else {
+                interval = 100
+                state = 0
+            }
         }
     }
     

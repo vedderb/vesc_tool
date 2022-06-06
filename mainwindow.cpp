@@ -422,6 +422,7 @@ MainWindow::MainWindow(QWidget *parent) :
         mPageFirmware->reloadParams();
         mPageCanAnalyzer->reloadParams();
         mPageScripting->reloadParams();
+        mPageLisp->reloadParams();
 
         updateMotortype();
         updateAppToUse();
@@ -1505,7 +1506,12 @@ void MainWindow::reloadPages()
     mPageScripting = new PageScripting(this);
     mPageScripting->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageScripting);
-    mPageVESCDev->addTab(mPageScripting, QIcon(theme + "icons_textedit/Outdent-96.png"), tr("Scripting"));
+    mPageVESCDev->addTab(mPageScripting, QIcon(theme + "icons_textedit/Outdent-96.png"), tr("QML"));
+
+    mPageLisp = new PageLisp(this);
+    mPageLisp->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageLisp);
+    mPageVESCDev->addTab(mPageLisp, QIcon(theme + "icons_textedit/Outdent-96.png"), tr("Lisp"));
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);

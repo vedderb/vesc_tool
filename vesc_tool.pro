@@ -5,16 +5,16 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 3.01
+VT_VERSION = 4.00
 VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 0
+VT_IS_TEST_VERSION = 6
 
-VT_ANDROID_VERSION_ARMV7 = 98
-VT_ANDROID_VERSION_ARM64 = 99
-VT_ANDROID_VERSION_X86 = 100
+VT_ANDROID_VERSION_ARMV7 = 108
+VT_ANDROID_VERSION_ARM64 = 109
+VT_ANDROID_VERSION_X86 = 110
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -246,11 +246,13 @@ include(widgets/widgets.pri)
 include(mobile/mobile.pri)
 include(map/map.pri)
 include(lzokay/lzokay.pri)
+include(heatshrink/heatshrink.pri)
 include(QCodeEditor/qcodeeditor.pri)
 
 RESOURCES += res.qrc \
     res_fw_bms.qrc \
-    res_fw.qrc \
+    res/firmwares/res_fw.qrc \
+    res_lisp.qrc \
     res_qml.qrc
 RESOURCES += res_config.qrc
 

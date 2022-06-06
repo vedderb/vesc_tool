@@ -21,7 +21,6 @@
 #include "ui_pageappimu.h"
 #include "utility.h"
 #include <QDateTime>
-#include <QQuickItem>
 #include <cmath>
 
 PageAppImu::PageAppImu(QWidget *parent) :

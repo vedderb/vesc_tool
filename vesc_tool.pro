@@ -35,7 +35,7 @@ ios: {
 }
 
 !win32-msvc*: { !android: {
-    QMAKE_CXXFLAGS += -Wno-deprecated-copy
+    QMAKE_CXXFLAGS += -Wno-deprecated
 }}
 
 # Build mobile GUI
@@ -68,11 +68,12 @@ ios: {
 # Positioning
 DEFINES += HAS_POS
 
+# Serial port available
+DEFINES += HAS_SERIALPORT
+
 !ios: {
     QT       += printsupport
 !android: {
-    # Serial port available
-    DEFINES += HAS_SERIALPORT
     DEFINES += HAS_GAMEPAD
 }
 }

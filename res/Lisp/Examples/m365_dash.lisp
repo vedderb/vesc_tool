@@ -1,6 +1,8 @@
 ;m365 dashboard free for all by Netzpfuscher
 ;red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)
 
+;(app-adc-detach 3 1) ;Detach ADC1/2 and cc/rev button from APP
+
 ;****User parameters****
 ;Calibrate throttle min max
 (define cal-thr-lo 41.0)
@@ -41,25 +43,32 @@
 (define lock 0)
 (define speedmode 1)
 
+(define feedback 0)
+
 (defun inp (buffer) ;Frame 0x65
     (progn
     (setvar 'throttle (/(-(bufget-u8 uart-buf 4) cal-thr-lo) cal-thr-hi))
     (setvar 'brake (/(-(bufget-u8 uart-buf 5) cal-brk-lo) cal-brk-hi))
     
+    ;(setvar 'throttle (/(bufget-u8 uart-buf 4) 255.0))
+    ;(setvar 'brake (/(bufget-u8 uart-buf 5) 255.0))
+    ;(app-adc-override 0 throttle)
+    ;(app-adc-override 1 brake)
+    
     ; todo: figure out how to calculate and set max rpm 
-    (if (= speedmode 1) ; is drive?
-        (print "drive")
-        (if (= speedmode 2) ; is eco?
-            (print "eco")
-            (if (= speedmode 4) ; is sport?
-                (print "sport"))))
+    ;(if (= speedmode 1) ; is drive?
+    ;    (print "drive")
+    ;    (if (= speedmode 2) ; is eco?
+    ;        (print "eco")
+    ;        (if (= speedmode 4) ; is sport?
+    ;            (print "sport"))))
     
     (if (= (+ off lock) 0)
         (progn
             (if (> (* (get-speed) 3.6) min-speed)
                 (set-current-rel throttle)
                 (set-current-rel 0))
-                
+            
             (if (> brake 0.02)
                 (set-brake-rel brake))
         )
@@ -122,53 +131,63 @@
 
 (loopwhile t
     (progn
-        (if (> buttonold (gpio-read 'pin-rx))
-            (progn
-                (setvar 'presses (+ presses 1))
-                (setvar 'presstime (systime))
-            )
-            (if (> (- (systime) presstime) 4000) ;; double press
-                (progn
-                    (print presses)
-                    (if (= presses 1)
-                        (setvar 'light (bitwise-xor light 1))
+        ;(if (<= (* (get-speed) 3.6) min-speed)
+        ;    (progn
+                (if (> buttonold (gpio-read 'pin-rx))
+                    (progn
+                        (setvar 'presses (+ presses 1))
+                        (setvar 'presstime (systime))
                     )
-                    
-                    (if (>= presses 2) ; double press
-                        (progn
-                            ;; seems not to be working hmm
-                            ;; (case speedmode
-                            ;; (1 (setvar 'speedmode 4))
-                            ;; (2 (setvar 'speedmode 1))
-                            ;; (4 (setvar 'speedmode 2)))
+                    (if (> (- (systime) presstime) 2500) ;
+                        (if (= (gpio-read 'pin-rx) 0) ; check if button is still pressed
+                            (if (> (- (systime) presstime) 6000) ; instead check for long press
+                                (progn
+                                    (if (= lock 0) ; it is locked? do not turn off
+                                        (progn
+                                            (setvar 'off 1) ; turn off
+                                            (setvar 'feedback 1) ; beep feedback
+                                        )
+                                    )
+                                    (setvar 'presstime (systime)) ; reset press time again
+                                    (setvar 'presses 0)
+                                )
+                            )
+                            (progn ; else if button not pressed
+                                (if (= presses 1)
+                                    (if (= off 1) ; is it off? turn on scooter again
+                                        (progn
+                                            (setvar 'off 0) ; turn off
+                                            (setvar 'feedback 1) ; beep feedback
+                                        )
+                                        (setvar 'light (bitwise-xor light 1)) ; toggle light
+                                    )
+                                )
                             
-                            (if (> brake 0.02)
-                                (setvar 'lock (bitwise-xor lock 1))
-                                (if (= speedmode 1) ; is drive?
-                                    (setvar 'speedmode 4) ; to sport
-                                    (if (= speedmode 2) ; is eco?
-                                        (setvar 'speedmode 1) ; to drive
-                                        (if (= speedmode 4) ; is sport?
-                                            (setvar 'speedmode 2)))) ; to eco
+                                (if (>= presses 2) ; double press
+                                    (progn
+                                        (if (> brake 0.02)
+                                            (setvar 'lock (bitwise-xor lock 1))
+                                            (if (= speedmode 1) ; is drive?
+                                                (setvar 'speedmode 4) ; to sport
+                                                (if (= speedmode 2) ; is eco?
+                                                    (setvar 'speedmode 1) ; to drive
+                                                    (if (= speedmode 4) ; is sport?
+                                                        (setvar 'speedmode 2)))) ; to eco
+                                        )
+                                    )
+                                )
+                        
+                                (setvar 'presses 0)
                             )
                         )
                     )
-                
-                    (setvar 'presses 0)
                 )
-            )
-        )
-        (setvar 'buttonold (gpio-read 'pin-rx))
-        
-        (if (= (gpio-read 'pin-rx) 0)
-            (if (> (- (systime) presstime) 10000) ; long press
-                (progn 
-                    (setvar 'off (bitwise-xor off 1))
-                    (setvar 'presstime (systime))
-                )
-            )
-        )
+                (setvar 'buttonold (gpio-read 'pin-rx))
 
+                
+        ;    )
+        ;)
+        
         ; mode field (1=drive, 2=eco, 4=sport, 8=charge, 16=off, 32=lock)
         (if (= off 1)
             (bufset-u8 tx-frame 6 16) ; turn off display
@@ -185,8 +204,20 @@
             (bufset-u8 tx-frame 8 light)
             (bufset-u8 tx-frame 8 0)
         )
-
-        ; todo: add beeping on lock when pushing scooter
+        
+        ; beep field
+        (if (= lock 1)
+            (if (> (* (get-speed) 3.6) min-speed)
+                (bufset-u8 tx-frame 9 1) ; beep lock
+                (bufset-u8 tx-frame 9 0))
+            (if (> feedback 0)
+                (progn
+                    (bufset-u8 tx-frame 9 1)
+                    (setvar 'feedback (- feedback 1))
+                )
+                (bufset-u8 tx-frame 9 0)
+            )
+        )
 
         ; speed field
         (if (= show-batt-in-idle 1)
@@ -199,5 +230,5 @@
         (if (= show-faults 1)
             (bufset-u8 tx-frame 11 (get-fault))
         )
-        (sleep 0.1)
-))-
+        (sleep 0.01)
+))

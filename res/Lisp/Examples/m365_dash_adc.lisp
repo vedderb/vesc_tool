@@ -1,15 +1,9 @@
 ; M365 dashboard compability lisp script by Netzpfuscher
 ; Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with R470 Resistor
 
+(app-adc-detach 3 1) ; Detach ADC1/2 and cc/rev button from APP
+
 ; **** User parameters ****
-;Calibrate throttle min max
-(define cal-thr-lo 41.0)
-(define cal-thr-hi 178.0)
-
-;Calibrate brake min max
-(define cal-brk-lo 40.0)
-(define cal-brk-hi 178.0)
-
 (define light-default 0)
 (define show-faults 1)
 (define show-batt-in-idle 1)
@@ -61,27 +55,20 @@
 
 (defun inp(buffer) ; Frame 0x65
     (progn
-        (setvar 'throttle (/(-(bufget-u8 uart-buf 4) cal-thr-lo) cal-thr-hi))
-        (setvar 'brake (/(-(bufget-u8 uart-buf 5) cal-brk-lo) cal-brk-hi))
+        (setvar 'throttle (/(bufget-u8 uart-buf 4) 255.0))
+        (setvar 'brake (/(bufget-u8 uart-buf 5) 255.0))
 
         (if (= (+ off lock) 0)
             (progn
-                (if (> (* (get-speed) 3.6) min-speed)
-                    (set-current-rel throttle)
-                    (set-current-rel 0))
-                
-                (if (> brake 0.02)
-                    (set-brake-rel brake))
+                (app-adc-override 0 throttle)
+                (if (= lock 1)
+                    (app-adc-override 1 1)
+                    (app-adc-override 1 brake)
+                )
             )
             (progn
-                (set-current-rel 0)
-                (if (= lock 1)
-                    (if (> (* (get-speed) 3.6) min-speed)
-                        (set-brake-rel 1)
-                        (set-brake-rel 0)
-                    )
-                    (set-brake-rel 0)
-                )
+                (app-adc-override 0 0)
+                (app-adc-override 1 0)
             )
         )
     )
@@ -220,7 +207,7 @@
                             
                             (if (>= presses 2) ; double press
                                 (progn
-                                    (if (> brake 0.02)
+                                    (if (> brake 0.4)
                                         (setvar 'lock (bitwise-xor lock 1))
                                         (progn
                                             (if (= speedmode 1) ; is drive?

@@ -188,6 +188,7 @@
     (progn
         ; If you do not have any R470 resistors or it still occours to press buttons randomly, try uncommenting this:
         ;(if (<= (* (get-speed) 3.6) min-speed)
+        ;(progn
             (if (> buttonold (gpio-read 'pin-rx))
                 (progn
                     (setvar 'presses (+ presses 1))
@@ -256,7 +257,7 @@
             )
 
             (setvar 'buttonold (gpio-read 'pin-rx))
-        ;)
+        ;))
         (sleep 0.01)
     )
 )

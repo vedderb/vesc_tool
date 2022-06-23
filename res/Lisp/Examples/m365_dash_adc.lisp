@@ -47,7 +47,7 @@
 (define speedmode 4)
 
 (conf-set 'max-speed (/ speed-sport 3.6))
-(conf-set 'l-watt-max (/ watt-sport 3.6))
+(conf-set 'l-watt-max watt-sport)
 
 ; Sound feedback
 
@@ -214,19 +214,19 @@
                                             (if (= speedmode 1) ; is drive?
                                                 (progn 
                                                     (conf-set 'max-speed (/ speed-sport 3.6))
-                                                    (conf-set 'l-watt-max (/ watt-sport 3.6))
+                                                    (conf-set 'l-watt-max watt-sport)
                                                     (setvar 'speedmode 4) ; to sport
                                                 )
                                                 (if (= speedmode 2) ; is eco?
                                                     (progn
                                                         (conf-set 'max-speed (/ speed-drive 3.6))
-                                                        (conf-set 'l-watt-max (/ watt-drive 3.6))
+                                                        (conf-set 'l-watt-max watt-drive)
                                                         (setvar 'speedmode 1) ; to drive
                                                     )
                                                     (if (= speedmode 4) ; is sport?
                                                         (progn
                                                             (conf-set 'max-speed (/ speed-eco 3.6))
-                                                            (conf-set 'l-watt-max (/ watt-eco 3.6))
+                                                            (conf-set 'l-watt-max watt-eco)
                                                             (setvar 'speedmode 2) ; to eco
                                                         )
                                                     )

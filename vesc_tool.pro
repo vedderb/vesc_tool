@@ -10,7 +10,7 @@ VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 6
+VT_IS_TEST_VERSION = 7
 
 VT_ANDROID_VERSION_ARMV7 = 108
 VT_ANDROID_VERSION_ARM64 = 109
@@ -247,12 +247,14 @@ include(map/map.pri)
 include(lzokay/lzokay.pri)
 include(heatshrink/heatshrink.pri)
 include(QCodeEditor/qcodeeditor.pri)
+include(esp32/esp32.pri)
 
 RESOURCES += res.qrc \
     res_fw_bms.qrc \
     res/firmwares/res_fw.qrc \
     res_lisp.qrc \
-    res_qml.qrc
+    res_qml.qrc \
+    res/firmwares_esp/res_fw_esp.qrc
 RESOURCES += res_config.qrc
 
 build_original {

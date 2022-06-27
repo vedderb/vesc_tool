@@ -2305,12 +2305,17 @@ QList<VSerialInfo_t> VescInterface::listSerialPorts()
         info.systemPath = port.systemLocation();
         int index = res.size();
 
-        if(port.manufacturer().startsWith("STMicroelectronics")) {
+        if (port.manufacturer().startsWith("STMicroelectronics")) {
             info.name.insert(0, "VESC - ");
             info.isVesc = true;
             index = 0;
         } else {
             info.isVesc = false;
+        }
+
+        if (port.productIdentifier() == 0x1001) {
+            info.name.insert(0, "ESP32 - ");
+            index = 0;
         }
 
         res.insert(index, info);

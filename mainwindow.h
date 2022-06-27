@@ -68,6 +68,7 @@
 #include "pages/pagescripting.h"
 #include "pages/pagemotorcomparison.h"
 #include "pages/pagelisp.h"
+#include "pages/pageespprog.h"
 
 namespace Ui {
 class MainWindow;
@@ -211,6 +212,7 @@ private:
     PageCustomConfig *mPageCustomConfig2;
     PageScripting *mPageScripting;
     PageLisp *mPageLisp;
+    PageEspProg *mPageEspProg;
     QTabWidget *mPageVESCDev;
     Preferences *mPreferences;
 

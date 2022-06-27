@@ -1531,6 +1531,11 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageSwdProg);
     addPageItem(tr("SWD Programmer"),  theme + "icons/Electronics-96.png", "", true);
 
+    mPageEspProg = new PageEspProg(this);
+    mPageEspProg->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageEspProg);
+    addPageItem(tr("ESP Programmer"),  theme + "icons/Electronics-96.png", "", true);
+
     /*
      * Page IDs
      *

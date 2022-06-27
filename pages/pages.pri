@@ -5,6 +5,7 @@ FORMS += \
     $$PWD/pagecananalyzer.ui \
     $$PWD/pageconnection.ui \
     $$PWD/pagecustomconfig.ui \
+    $$PWD/pageespprog.ui \
     $$PWD/pagelisp.ui \
     $$PWD/pagemotor.ui \
     $$PWD/pagedebugprint.ui \
@@ -44,6 +45,7 @@ HEADERS += \
     $$PWD/pagecananalyzer.h \
     $$PWD/pageconnection.h \
     $$PWD/pagecustomconfig.h \
+    $$PWD/pageespprog.h \
     $$PWD/pagelisp.h \
     $$PWD/pagemotor.h \
     $$PWD/pagedebugprint.h \
@@ -83,6 +85,7 @@ SOURCES += \
     $$PWD/pagecananalyzer.cpp \
     $$PWD/pageconnection.cpp \
     $$PWD/pagecustomconfig.cpp \
+    $$PWD/pageespprog.cpp \
     $$PWD/pagelisp.cpp \
     $$PWD/pagemotor.cpp \
     $$PWD/pagedebugprint.cpp \

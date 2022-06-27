@@ -118,6 +118,8 @@ public:
         return QString(QMetaEnum::fromType<QEnum>().valueToKey(value));
     }
 
+    Q_INVOKABLE static QString arr2str(QByteArray a) {return QString(a);}
+
     Q_INVOKABLE static bool hasSerialport() {
 #ifdef HAS_SERIALPORT
         return true;

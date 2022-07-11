@@ -34,7 +34,7 @@ public:
                    double step = 1.0, int decimals = 2);
     void setDoubleTx(VESC_TX_T tx, double scale);
     void setEnum(int val, QStringList names);
-    void setString(QString val);
+    void setString(QString val, int maxLen);
     void setBool(bool val);
 
     CFG_T type;
@@ -52,6 +52,7 @@ public:
     int maxInt;
     int minInt;
     int stepInt;
+    int maxLen;
     VESC_TX_T vTx;
     double vTxDoubleScale;
     QString suffix;

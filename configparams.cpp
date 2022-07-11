@@ -440,6 +440,25 @@ int ConfigParams::getParamStepInt(const QString &name)
     return retVal;
 }
 
+int ConfigParams::getParamMaxLen(const QString &name)
+{
+    int retVal = 0;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_QSTRING) {
+            retVal = p.maxLen;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
 QStringList ConfigParams::getParamEnumNames(const QString &name)
 {
     QStringList retVal;
@@ -645,7 +664,7 @@ void ConfigParams::getParamSerial(VByteArray &vb, const QString &name)
             break;
 
         case CFG_T_QSTRING:
-            qWarning() << name << ": QString not supported.";
+            vb.vbAppendString(p.valString);
             break;
 
         case CFG_T_ENUM:
@@ -717,9 +736,16 @@ void ConfigParams::setParamSerial(VByteArray &vb, const QString &name, QObject *
             }
         } break;
 
-        case CFG_T_QSTRING:
-            qWarning() << name << ": QString not supported.";
-            break;
+        case CFG_T_QSTRING: {
+            QString val = vb.vbPopFrontString();
+
+            if (mUpdatesEnabled && (mUpdateOnlyName.isEmpty() || mUpdateOnlyName == name)) {
+                if (p.valString != val) {
+                    p.valString = val;
+                    emit paramChangedQString(src, name, val);
+                }
+            }
+        } break;
 
         case CFG_T_ENUM:
         case CFG_T_BOOL: {
@@ -1219,6 +1245,7 @@ void ConfigParams::getParamsXML(QXmlStreamWriter &stream)
 
         case CFG_T_QSTRING:
             stream.writeTextElement("valString", p->valString);
+            stream.writeTextElement("maxLen", QString::number(p->maxLen));
             break;
 
         case CFG_T_ENUM:
@@ -1322,6 +1349,8 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
                             p.stepDouble = stream.readElementText().toDouble();
                         } else if (name == "stepInt") {
                             p.stepInt = stream.readElementText().toInt();
+                        } else if (name == "maxLen") {
+                            p.maxLen = stream.readElementText().toInt();
                         } else if (name == "suffix") {
                             p.suffix = stream.readElementText();
                         } else if (name == "type") {
@@ -1521,7 +1550,7 @@ bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
                     break;
 
                 case CFG_T_QSTRING:
-                    out << "#define " + p.cDefine + " " + p.valString + "\n";
+                    out << "#define " + p.cDefine + " \"" + p.valString + "\"\n";
                     break;
 
                 default:

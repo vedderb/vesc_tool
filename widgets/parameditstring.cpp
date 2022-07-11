@@ -44,6 +44,9 @@ void ParamEditString::setConfig(ConfigParams *config)
 
     if (param) {
         ui->valueEdit->setText(param->valString);
+        if (param->maxLen > 0) {
+            ui->valueEdit->setMaxLength(param->maxLen);
+        }
     }
 
     connect(mConfig, SIGNAL(paramChangedQString(QObject*,QString,QString)),

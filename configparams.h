@@ -67,6 +67,7 @@ public:
     Q_INVOKABLE int getParamMaxInt(const QString &name);
     Q_INVOKABLE int getParamMinInt(const QString &name);
     Q_INVOKABLE int getParamStepInt(const QString &name);
+    Q_INVOKABLE int getParamMaxLen(const QString &name);
     Q_INVOKABLE QStringList getParamEnumNames(const QString &name);
     Q_INVOKABLE double getParamEditorScale(const QString &name);
     Q_INVOKABLE QString getParamSuffix(const QString &name);

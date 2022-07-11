@@ -34,9 +34,14 @@ Item {
     property real maxVal: 1.0
 
     Component.onCompleted: {
-        if (params !== null) {
+        if (params != null) {
             nameText.text = params.getLongName(paramName)
             stringInput.text = params.getParamQString(paramName)
+
+            var maxLen = params.getParamMaxLen()
+            if (maxLen > 0) {
+                stringInput.maximumLength = maxLen
+            }
 
             if (params.getParamTransmittable(paramName)) {
                 nowButton.visible = true

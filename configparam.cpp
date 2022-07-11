@@ -41,6 +41,7 @@ void ConfigParam::reset()
     maxInt = 99;
     minInt = 0;
     stepInt = 1;
+    maxLen = 0;
     vTx = VESC_TX_UNDEFINED;
     vTxDoubleScale = 1.0;
     suffix = "";
@@ -82,10 +83,11 @@ void ConfigParam::setEnum(int val, QStringList names)
     enumNames = names;
 }
 
-void ConfigParam::setString(QString val)
+void ConfigParam::setString(QString val, int maxStrLen)
 {
     type = CFG_T_QSTRING;
     valString = val;
+    maxLen = maxStrLen;
 }
 
 void ConfigParam::setBool(bool val)

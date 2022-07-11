@@ -363,7 +363,7 @@ void PageFirmware::updateBlList(FW_RX_PARAMS params)
 void PageFirmware::on_chooseButton_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
-                                                    tr("Choose Firmware File"), ".",
+                                                    tr("Choose Firmware File"), ui->fwEdit->text(),
                                                     tr("Firmware files (*.bin *.hex)"));
     if (!filename.isNull()) {
         ui->fwEdit->setText(filename);
@@ -373,7 +373,7 @@ void PageFirmware::on_chooseButton_clicked()
 void PageFirmware::on_choose2Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
-                                                    tr("Choose Firmware File"), ".",
+                                                    tr("Choose Firmware File"), ui->fw2Edit->text(),
                                                     tr("Firmware files (*.bin *.hex)"));
     if (!filename.isNull()) {
         ui->fw2Edit->setText(filename);
@@ -383,7 +383,7 @@ void PageFirmware::on_choose2Button_clicked()
 void PageFirmware::on_choose3Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
-                                                    tr("Choose Firmware File"), ".",
+                                                    tr("Choose Firmware File"), ui->fw3Edit->text(),
                                                     tr("Firmware files (*.bin *.hex)"));
     if (!filename.isNull()) {
         ui->fw3Edit->setText(filename);
@@ -393,7 +393,7 @@ void PageFirmware::on_choose3Button_clicked()
 void PageFirmware::on_choose4Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
-                                                    tr("Choose Firmware File"), ".",
+                                                    tr("Choose Firmware File"), ui->fw4Edit->text(),
                                                     tr("Firmware files (*.bin *.hex)"));
     if (!filename.isNull()) {
         ui->fw4Edit->setText(filename);

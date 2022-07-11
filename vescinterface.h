@@ -224,6 +224,7 @@ public:
 
     Q_INVOKABLE int customConfigNum();
     Q_INVOKABLE bool customConfigsLoaded();
+    Q_INVOKABLE bool customConfigRxDone();
     ConfigParams *customConfig(int configNum);
 
     Q_INVOKABLE bool qmlHwLoaded();
@@ -311,6 +312,7 @@ private:
     ConfigParams *mFwConfig;
     QVector<ConfigParams*> mCustomConfigs;
     bool mCustomConfigsLoaded;
+    bool mCustomConfigRxDone;
 
     bool mQmlHwLoaded;
     QString mQmlHw;

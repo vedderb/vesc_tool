@@ -52,6 +52,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mInfoConfig = new ConfigParams(this);
     mFwConfig = new ConfigParams(this);
     mCustomConfigsLoaded = false;
+    mCustomConfigRxDone = false;
     mQmlHwLoaded = false;
     mQmlAppLoaded = false;
     mPacket = new Packet(this);
@@ -3571,6 +3572,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         mCustomConfigsLoaded = readConfigsOk;
     }
 
+    mCustomConfigRxDone = true;
     emit customConfigLoadDone();
 
     // Read qmlui
@@ -4011,6 +4013,11 @@ bool VescInterface::customConfigsLoaded()
     return mCustomConfigsLoaded;
 }
 
+bool VescInterface::customConfigRxDone()
+{
+    return mCustomConfigRxDone;
+}
+
 ConfigParams *VescInterface::customConfig(int configNum)
 {
     if (customConfigsLoaded() && configNum < mCustomConfigs.size()) {
@@ -4050,6 +4057,7 @@ void VescInterface::updateFwRx(bool fwRx)
 
     if (!mFwVersionReceived) {
         mCustomConfigsLoaded = false;
+        mCustomConfigRxDone = false;
         mQmlHwLoaded = false;
         mQmlAppLoaded = false;
     }

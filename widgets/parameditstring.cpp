@@ -27,8 +27,11 @@ ParamEditString::ParamEditString(QWidget *parent) :
     ui(new Ui::ParamEditString)
 {
     ui->setupUi(this);
+
     QString theme = Utility::getThemePath();
     ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->readButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
+    ui->readDefaultButton->setIcon(QPixmap(theme + "icons/Data Backup-96.png"));
 }
 
 ParamEditString::~ParamEditString()
@@ -43,6 +46,8 @@ void ParamEditString::setConfig(ConfigParams *config)
     ConfigParam *param = mConfig->getParam(mName);
 
     if (param) {
+        ui->readButton->setVisible(param->transmittable);
+        ui->readDefaultButton->setVisible(param->transmittable);
         ui->valueEdit->setText(param->valString);
         if (param->maxLen > 0) {
             ui->valueEdit->setMaxLength(param->maxLen);
@@ -84,5 +89,21 @@ void ParamEditString::on_valueEdit_textChanged(const QString &arg1)
             mConfig->setUpdateOnly("");
         }
         mConfig->updateParamString(mName, arg1, this);
+    }
+}
+
+void ParamEditString::on_readButton_clicked()
+{
+    if (mConfig) {
+        mConfig->setUpdateOnly(mName);
+        mConfig->requestUpdate();
+    }
+}
+
+void ParamEditString::on_readDefaultButton_clicked()
+{
+    if (mConfig) {
+        mConfig->setUpdateOnly(mName);
+        mConfig->requestUpdateDefault();
     }
 }

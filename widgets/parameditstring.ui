@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>258</width>
-    <height>32</height>
+    <width>367</width>
+    <height>25</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,6 +31,46 @@
    </property>
    <item>
     <widget class="QLineEdit" name="valueEdit"/>
+   </item>
+   <item>
+    <widget class="QPushButton" name="readButton">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Read current setting</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../res.qrc">
+       <normaloff>:/res/icons/Upload-96.png</normaloff>:/res/icons/Upload-96.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="readDefaultButton">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Read default setting</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../res.qrc">
+       <normaloff>:/res/icons/Data Backup-96.png</normaloff>:/res/icons/Data Backup-96.png</iconset>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QPushButton" name="helpButton">

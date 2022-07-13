@@ -71,8 +71,10 @@
         <name>systime</name>
         <name>and</name>
         <name>or</name>
+        <name>not</name>
         <name>eq</name>
         <name>assoc</name>
         <name>cossa</name>
+        <name>setassoc</name>
     </section>
 </root>

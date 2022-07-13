@@ -72,5 +72,7 @@
         <name>and</name>
         <name>or</name>
         <name>eq</name>
+        <name>assoc</name>
+        <name>cossa</name>
     </section>
 </root>

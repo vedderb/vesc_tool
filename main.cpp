@@ -195,6 +195,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<PSW_STATUS>();
     qRegisterMetaType<IO_BOARD_VALUES>();
     qRegisterMetaType<MotorData>();
+    qRegisterMetaType<ENCODER_DETECT_RES>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD

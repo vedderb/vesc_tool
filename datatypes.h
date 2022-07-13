@@ -1128,4 +1128,28 @@ public:
 
 Q_DECLARE_METATYPE(LISP_STATS)
 
+struct ENCODER_DETECT_RES {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(double offset MEMBER offset)
+    Q_PROPERTY(double ratio MEMBER ratio)
+    Q_PROPERTY(bool inverted MEMBER inverted)
+    Q_PROPERTY(bool detect_rx MEMBER detect_rx)
+
+    ENCODER_DETECT_RES() {
+        offset = 0.0;
+        ratio = 0.0;
+        inverted = false;
+        detect_rx = false;
+    }
+
+    double offset;
+    double ratio;
+    bool inverted;
+    bool detect_rx;
+};
+
+Q_DECLARE_METATYPE(ENCODER_DETECT_RES)
+
 #endif // DATATYPES_H

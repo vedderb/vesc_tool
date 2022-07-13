@@ -561,7 +561,6 @@ double Utility::measureLinkageOpenloopBlocking(VescInterface *vesc, double curre
 QVector<int> Utility::measureHallFocBlocking(VescInterface *vesc, double current)
 {
     QVector<int> resDetect;
-
     vesc->commands()->measureHallFoc(current);
 
     auto conn = connect(vesc->commands(), &Commands::focHallTableReceived,
@@ -576,6 +575,22 @@ QVector<int> Utility::measureHallFocBlocking(VescInterface *vesc, double current
     if (!rx) {
         resDetect.append(-10);
     }
+
+    return resDetect;
+}
+
+ENCODER_DETECT_RES Utility::measureEncoderBlocking(VescInterface *vesc, double current)
+{
+    ENCODER_DETECT_RES resDetect;
+    vesc->commands()->measureEncoder(current);
+
+    auto conn = connect(vesc->commands(), &Commands::encoderParamReceived,
+                        [&resDetect](ENCODER_DETECT_RES res) {
+            resDetect = res;
+    });
+
+    waitSignal(vesc->commands(), SIGNAL(encoderParamReceived(ENCODER_DETECT_RES)), 50000);
+    disconnect(conn);
 
     return resDetect;
 }

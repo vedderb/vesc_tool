@@ -86,20 +86,20 @@ void DetectFocEncoder::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(encoderParamReceived(double,double,bool)),
-                this, SLOT(encoderParamReceived(double,double,bool)));
+        connect(mVesc->commands(), SIGNAL(encoderParamReceived(ENCODER_DETECT_RES)),
+                this, SLOT(encoderParamReceived(ENCODER_DETECT_RES)));
     }
 }
 
-void DetectFocEncoder::encoderParamReceived(double offset, double ratio, bool inverted)
+void DetectFocEncoder::encoderParamReceived(ENCODER_DETECT_RES res)
 {
-    if (offset > 1000.0) {
+    if (res.offset > 1000.0) {
         mVesc->emitStatusMessage(tr("Encoder not enabled in firmware"), false);
         QMessageBox::critical(this, "Error", "Encoder support is not enabled. Enable it in the general settings.");
     } else {
         mVesc->emitStatusMessage(tr("Encoder Result Received"), true);
-        ui->offsetBox->setValue(offset);
-        ui->ratioBox->setValue(ratio);
-        ui->invertedBox->setCurrentIndex(inverted ? 1 : 0);
+        ui->offsetBox->setValue(res.offset);
+        ui->ratioBox->setValue(res.ratio);
+        ui->invertedBox->setCurrentIndex(res.inverted ? 1 : 0);
     }
 }

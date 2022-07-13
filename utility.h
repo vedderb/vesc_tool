@@ -27,6 +27,7 @@
 #include <QtGui/qpa/qplatformwindow.h>
 #include "vescinterface.h"
 #include "widgets/qcustomplot.h"
+#include "datatypes.h"
 
 #define FE_WGS84        (1.0/298.257223563) // earth flattening (WGS84)
 #define RE_WGS84        6378137.0           // earth semimajor axis (WGS84) (m)
@@ -62,6 +63,7 @@ public:
     Q_INVOKABLE static double measureLinkageOpenloopBlocking(VescInterface *vesc, double current, double erpm_per_sec, double low_duty,
                                                              double resistance, double inductance);
     Q_INVOKABLE static QVector<int> measureHallFocBlocking(VescInterface *vesc, double current);
+    Q_INVOKABLE static ENCODER_DETECT_RES measureEncoderBlocking(VescInterface *vesc, double current);
     Q_INVOKABLE static bool waitMotorStop(VescInterface *vesc, double erpmTres, int timeoutMs);
     Q_INVOKABLE static bool resetInputCan(VescInterface *vesc, QVector<int> canIds);
     Q_INVOKABLE static bool setBatteryCutCan(VescInterface *vesc, QVector<int> canIds, double cutStart, double cutEnd);

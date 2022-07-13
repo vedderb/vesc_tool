@@ -260,6 +260,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("measureHallFocBlocking(VescIf, current)");
         addItem("getMcValuesBlocking(VescIf)");
         addItem("waitMotorStop(VescIf, erpmTres, timeoutMs)");
+        addItem("measureEncoderBlocking(VescIf, current)");
         level--;
     }
 

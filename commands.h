@@ -95,7 +95,7 @@ signals:
     void decodedBalanceReceived(BALANCE_VALUES values);
     void motorRLReceived(double r, double l, double ld_lq_diff);
     void motorLinkageReceived(double flux_linkage);
-    void encoderParamReceived(double offset, double ratio, bool inverted);
+    void encoderParamReceived(ENCODER_DETECT_RES res);
     void customAppDataReceived(QByteArray data);
     void customHwDataReceived(QByteArray data);
     void focHallTableReceived(QVector<int> hall_table, int res);

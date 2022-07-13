@@ -357,10 +357,12 @@ void Commands::processPacket(QByteArray data)
     } break;
 
     case COMM_DETECT_ENCODER: {
-        double offset = vb.vbPopFrontDouble32(1e6);
-        double ratio = vb.vbPopFrontDouble32(1e6);
-        bool inverted = vb.vbPopFrontInt8();
-        emit encoderParamReceived(offset, ratio, inverted);
+        ENCODER_DETECT_RES res;
+        res.offset = vb.vbPopFrontDouble32(1e6);
+        res.ratio = vb.vbPopFrontDouble32(1e6);
+        res.inverted = vb.vbPopFrontInt8();
+        res.detect_rx = true;
+        emit encoderParamReceived(res);
     } break;
 
     case COMM_DETECT_HALL_FOC: {

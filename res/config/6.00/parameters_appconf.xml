@@ -2407,6 +2407,18 @@ p, li { white-space: pre-wrap; }
             <suffix> ERPM</suffix>
             <vTx>3</vTx>
         </app_balance_conf.fault_adc_half_erpm>
+        <app_balance_conf.fault_is_dual_switch>
+            <longName>Treat both sensors as one</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Treat both sensors as a single one, i.e. startup only requires one of the sensors, and heel lifts aren't possible (for advanced riders only!).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BALANCE_FAULT_IS_DUAL_SWITCH</cDefine>
+            <valInt>0</valInt>
+        </app_balance_conf.fault_is_dual_switch>
         <app_balance_conf.tiltback_duty_angle>
             <longName>Angle</longName>
             <type>1</type>
@@ -4124,6 +4136,7 @@ p, li { white-space: pre-wrap; }
         <ser>app_balance_conf.fault_delay_switch_half</ser>
         <ser>app_balance_conf.fault_delay_switch_full</ser>
         <ser>app_balance_conf.fault_adc_half_erpm</ser>
+        <ser>app_balance_conf.fault_is_dual_switch</ser>
         <ser>app_balance_conf.tiltback_duty_angle</ser>
         <ser>app_balance_conf.tiltback_duty_speed</ser>
         <ser>app_balance_conf.tiltback_duty</ser>
@@ -4476,6 +4489,7 @@ p, li { white-space: pre-wrap; }
                     <param>app_balance_conf.fault_delay_switch_half</param>
                     <param>app_balance_conf.fault_delay_switch_full</param>
                     <param>app_balance_conf.fault_adc_half_erpm</param>
+                    <param>app_balance_conf.fault_is_dual_switch</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

@@ -62,7 +62,8 @@ public:
         Sensor_EncoderAs,
         Sensor_Resolver_AD2S1205,
         Sensor_Encoder_SinCos,
-        Sensor_EncoderBiSS
+        Sensor_EncoderBiSS,
+        Sensor_EncoderAs5x47u
     };
 
     SetupWizardMotor(VescInterface *vesc, QWidget *parent = 0);

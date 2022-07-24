@@ -3482,6 +3482,9 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;AS5047 Encoder&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;An AS5047 magnetic encoder connected over SPI. This one provides absolute positions from start, but tends to have a bit of nonlinearity.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;AS5X47U Encoder&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;An AS5147U or AS5247U magnetic encoder connected over SPI. It is similar to the AS5047 but with additional safety features making it capable of automotive safety levels. It must be connected to SPI in the COMM port. To use this encoder, you have to make sure that no app uses UART, I2C, ADC2, or ADC3.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;SIN/COS Encoder&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;A Sin/Cos encoder is a position feedback device similar to a quadrature encoder, except instead of outputting digital pulses, it outputs analog voltages with sinusoidal shapes offset by 90°. Provides absolute positions from the start, but its sensitive to EMI and requires special filtering,  transient protections and shielded wiring.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
@@ -3504,6 +3507,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>TS5700N8501 Encoder</enumNames>
             <enumNames>TS5700N8501 Encoder (Multiturn)</enumNames>
             <enumNames>MT6816 Encoder (SPI)</enumNames>
+            <enumNames>AS5X47U Encoder (SPI)</enumNames>
         </m_sensor_port_mode>
         <m_invert_direction>
             <longName>Invert Motor Direction</longName>
@@ -3997,6 +4001,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>Hall Sensors</enumNames>
             <enumNames>ABI Encoder</enumNames>
             <enumNames>AS5047 Encoder</enumNames>
+            <enumNames>AS5X47U Encoder</enumNames>
             <enumNames>Other Sensor</enumNames>
         </motor_sensor_type>
         <motor_description>

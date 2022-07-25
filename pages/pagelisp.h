@@ -23,6 +23,7 @@
 #include <QWidget>
 #include "vescinterface.h"
 #include "widgets/scripteditor.h"
+#include "codeloader.h"
 
 namespace Ui {
 class PageLisp;
@@ -64,6 +65,7 @@ private:
     QString mDirNow;
     QTimer mPollTimer;
     QMap<QString, QVector<QPair<qint64, double> > > mBindingData;
+    CodeLoader mLoader;
 
     void updateRecentList();
     void makeEditorConnections(ScriptEditor *editor);

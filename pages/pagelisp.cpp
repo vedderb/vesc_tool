@@ -221,6 +221,7 @@ VescInterface *PageLisp::vesc() const
 void PageLisp::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
+    mLoader.setVesc(vesc);
 
     connect(mVesc->commands(), &Commands::lispPrintReceived, [this](QString str) {
         ui->debugEdit->moveCursor(QTextCursor::End);
@@ -531,57 +532,12 @@ void PageLisp::openRecentList()
 
 bool PageLisp::eraseCode()
 {
-    if (!mVesc) {
-        return false;
-    }
-
-    if (!mVesc->isPortConnected()) {
-        mVesc->emitMessageDialog(tr("Erase old code"), tr("Not Connected"), false);
-        return false;
-    }
-
     QProgressDialog dialog("Erasing old script...", QString(), 0, 0, this);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
-
-    auto waitEraseRes = [this]() {
-        int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(6000);
-        auto conn = connect(mVesc->commands(), &Commands::lispEraseCodeRx,
-                            [&res,&loop](bool erRes) {
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
-        return res;
-    };
-
-    mVesc->commands()->lispEraseCode();
-
-    int erRes = waitEraseRes();
-    if (erRes != 1) {
-        QString msg = tr("Unknown failure");
-
-        if (erRes == -10) {
-            msg = tr("Erase timed out");
-        } else if (erRes == -1) {
-            msg = tr("Erasing Lisp Code failed");
-        }
-
-        dialog.close();
-        mVesc->emitMessageDialog(tr("Erase Lisp"), msg, false);
-        return false;
-    }
-
-    return true;
+    auto res = mLoader.lispErase();
+    dialog.close();
+    return res;
 }
 
 void PageLisp::on_openRecentButton_clicked()
@@ -646,9 +602,6 @@ void PageLisp::on_uploadButton_clicked()
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
 
-    VByteArray vb;
-    vb.vbAppendUint16(0);
-
     auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(ui->fileTabs->currentIndex()));
 
     QString codeStr = "";
@@ -668,160 +621,7 @@ void PageLisp::on_uploadButton_clicked()
         }
     }
 
-    vb.append(codeStr);
-
-    if (vb.at(vb.size() - 1) != '\0') {
-        vb.append('\0');
-    }
-
-    // Create and append data table
-    {
-        QList<QPair<QString, QByteArray> > files;
-        auto lines = codeStr.split("\n");
-        int line_num = 0;
-
-        for (auto line: lines) {
-            line_num++;
-
-            while (line.startsWith(" ")) {
-                line.remove(0, 1);
-            }
-
-            while (line.startsWith("( ")) {
-                line.remove(1, 1);
-            }
-
-            if (line.startsWith("(import ", Qt::CaseInsensitive)) {
-                int start = line.indexOf("\"");
-                int end = line.lastIndexOf("\"");
-
-                if (start > 0 && end > start) {
-                    auto path = line.mid(start + 1, end - start - 1);
-                    auto tag = line.mid(end + 1).replace(" ", "").replace(")", "").replace("'", "");
-                    if (tag.indexOf(";") >= 0) {
-                        tag = tag.mid(0, tag.indexOf(";"));
-                    }
-
-                    if (tag.isEmpty()) {
-                        mVesc->emitMessageDialog(tr("Upload Code"),
-                                                 tr("Invalid import tag. Line: %1").arg(line_num),
-                                                 false);
-                        return;
-                    }
-
-                    QFileInfo fi(editorPath + "/" + path);
-                    if (!fi.exists()) {
-                        fi = QFileInfo(path);
-                    }
-
-                    if (fi.exists()) {
-                        QFile f(fi.absoluteFilePath());
-                        if (f.open(QIODevice::ReadOnly)) {
-                            auto fileData = f.readAll();
-
-                            // Pad with 0 in case it is a text file
-                            fileData.append('\0');
-
-                            files.append(qMakePair(tag, fileData));
-                        } else {
-                            mVesc->emitMessageDialog(tr("Upload Code"),
-                                                     tr("Imported file cannot be opened. Line: %1").arg(line_num),
-                                                     false);
-                            return;
-                        }
-                    } else {
-                        mVesc->emitMessageDialog(tr("Upload Code"),
-                                                 tr("Imported file not found: %1 Line: %2").arg(fi.absoluteFilePath()).arg(line_num),
-                                                 false);
-                        return;
-                    }
-                } else {
-                    mVesc->emitMessageDialog(tr("Upload Code"),
-                                             tr("Invalid import on line %1").arg(line_num),
-                                             false);
-                    return;
-                }
-            }
-        }
-
-        int file_table_size = 0;
-        for (auto f: files) {
-            file_table_size += f.first.length() + 9;
-        }
-
-        vb.vbAppendInt16(files.size());
-
-        int file_offset = vb.size() + file_table_size - 2;
-
-        for (auto f: files) {
-            // Align on 4 bytes in case this is loaded as code
-            while (file_offset % 4 != 0) {
-                file_offset++;
-            }
-
-            vb.vbAppendString(f.first);
-            vb.vbAppendInt32(file_offset);
-            vb.vbAppendInt32(f.second.size());
-            file_offset += f.second.size();
-        }
-
-        for (auto f: files) {
-            while ((vb.size() - 2) % 4 != 0) {
-                vb.append('\0');
-            }
-            vb.append(f.second);
-        }
-    }
-
-    quint16 crc = Packet::crc16((const unsigned char*)vb.constData(), uint32_t(vb.size()));
-    VByteArray data;
-    data.vbAppendUint32(vb.size() - 2);
-    data.vbAppendUint16(crc);
-    data.append(vb);
-
-    if (data.size() > (1024 * 120)) {
-        ui->uploadButton->setEnabled(true);
-        mVesc->emitMessageDialog(tr("Upload Code"), tr("Not enough space"), false);
-        return;
-    }
-
-    auto waitWriteRes = [this]() {
-        int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1000);
-        auto conn = connect(mVesc->commands(), &Commands::lispWriteCodeRx,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
-        return res;
-    };
-
-    quint32 offset = 0;
-    bool ok = true;
-    while (data.size() > 0) {
-        const int chunkSize = 384;
-        int sz = data.size() > chunkSize ? chunkSize : data.size();
-
-        mVesc->commands()->lispWriteCode(data.mid(0, sz), offset);
-        if (!waitWriteRes()) {
-            mVesc->emitMessageDialog(tr("Upload Code"), tr("Write failed"), false);
-            ok = false;
-            break;
-        }
-
-        offset += sz;
-        data.remove(0, sz);
-    }
+    bool ok = mLoader.lispUpload(codeStr, editorPath);
 
     if (ok && ui->autoRunBox->isChecked()) {
         on_runButton_clicked();
@@ -830,115 +630,16 @@ void PageLisp::on_uploadButton_clicked()
 
 void PageLisp::on_readExistingButton_clicked()
 {
-    if (!mVesc->isPortConnected()) {
-        mVesc->emitMessageDialog(tr("Read code"), tr("Not Connected"), false);
-        return;
-    }
+    auto code = mLoader.lispRead(this);
 
-    QByteArray lispData;
-    int lenLispLast = 0;
-    auto conn = connect(mVesc->commands(), &Commands::lispReadCodeRx,
-                        [&](int lenLisp, int ofsLisp, QByteArray data) {
-        if (lispData.size() <= ofsLisp) {
-            lispData.append(data);
-        }
-        lenLispLast = lenLisp;
-    });
-
-    auto getLispChunk = [&](int size, int offset, int tries, int timeout) {
-        bool res = false;
-
-        for (int j = 0;j < tries;j++) {
-            mVesc->commands()->lispReadCode(size, offset);
-            res = Utility::waitSignal(mVesc->commands(), SIGNAL(lispReadCodeRx(int,int,QByteArray)), timeout);
-            if (res) {
-                break;
-            }
-        }
-        return res;
-    };
-
-    QProgressDialog dialog(tr("Reading Lisp..."), QString(), 0, 0, this);
-    dialog.setWindowModality(Qt::WindowModal);
-    dialog.show();
-
-    if (getLispChunk(10, 0, 5, 1500)) {
-        while (lispData.size() < lenLispLast) {
-            int dataLeft = lenLispLast - lispData.size();
-            if (!getLispChunk(dataLeft > 400 ? 400 : dataLeft, lispData.size(), 5, 1500)) {
-                break;
-            }
-        }
-
-        if (lispData.size() == lenLispLast) {
-            int end = lispData.indexOf(QByteArray("\0", 1));
-            if (end > 0) {
-                VByteArray vb = lispData.mid(end + 1);
-                QList<QPair<QString, QByteArray> > imports;
-
-                if (vb.size() > 3) {
-                    auto num_imports = vb.vbPopFrontInt16();
-                    if (num_imports > 0 && num_imports < 500) {
-                        for (int i = 0;i < num_imports;i++) {
-                            auto name = vb.vbPopFrontString();
-                            auto offset = vb.vbPopFrontInt32();
-                            auto len = vb.vbPopFrontInt32() - 1; // Remove 1 as the files are padded with one 0
-                            imports.append(qMakePair(name, lispData.mid(offset, len)));
-                        }
-
-                        QMessageBox::StandardButton reply =
-                                QMessageBox::warning(this,
-                                                     tr("Imports"),
-                                                     tr("%1 imports found. Do you want to save them as files?").arg(num_imports),
-                                                     QMessageBox::Yes | QMessageBox::Cancel);
-
-                        QString lastDir = "";
-                        if (reply == QMessageBox::Yes) {
-                            for (auto i: imports) {
-                                QString fileName = QFileDialog::getSaveFileName(this,
-                                                                                tr("Save Import %1").arg(i.first),
-                                                                                lastDir + "/" + i.first + ".bin");
-
-                                if (!fileName.isEmpty()) {
-                                    QFile file(fileName);
-                                    if (!file.open(QIODevice::WriteOnly)) {
-                                        QMessageBox::critical(this, tr("Save Import"),
-                                                              "Could not open\n" + fileName + "\nfor writing");
-                                        return;
-                                    }
-
-                                    QFileInfo fi(file);
-                                    lastDir = fi.canonicalPath();
-
-                                    file.write(i.second);
-                                    file.close();
-                                }
-                            }
-                        }
-                    }
-                }
-
-                lispData = lispData.left(end);
-            }
-
-            if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
-                ui->mainEdit->codeEditor()->setPlainText(lispData);
-                ui->fileTabs->setTabText(ui->fileTabs->indexOf(ui->mainEdit), "From VESC");
-            } else {
-                createEditorTab("From VESC", lispData);
-            }
+    if (!code.isEmpty()) {
+        if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
+            ui->mainEdit->codeEditor()->setPlainText(code);
+            ui->fileTabs->setTabText(ui->fileTabs->indexOf(ui->mainEdit), "From VESC");
         } else {
-            mVesc->emitMessageDialog(tr("Get Lisp"),
-                                     tr("Could not read Lisp code"),
-                                     false);
+            createEditorTab("From VESC", code);
         }
-    } else {
-        mVesc->emitMessageDialog(tr("Get Lisp"),
-                                 tr("Could not read Lisp code"),
-                                 false);
     }
-
-    disconnect(conn);
 }
 
 void PageLisp::on_eraseButton_clicked()

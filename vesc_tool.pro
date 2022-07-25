@@ -10,7 +10,7 @@ VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 7
+VT_IS_TEST_VERSION = 8
 
 VT_ANDROID_VERSION_ARMV7 = 108
 VT_ANDROID_VERSION_ARM64 = 109
@@ -194,6 +194,7 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
+    codeloader.cpp \
     mainwindow.cpp \
     packet.cpp \
     preferences.cpp \
@@ -213,6 +214,7 @@ SOURCES += main.cpp\
     hexfile.cpp
 
 HEADERS  += mainwindow.h \
+    codeloader.h \
     packet.h \
     preferences.h \
     udpserversimple.h \

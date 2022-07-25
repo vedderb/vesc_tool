@@ -183,6 +183,7 @@ VescInterface *PageScripting::vesc() const
 void PageScripting::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
+    mLoader.setVesc(vesc);
 
     ui->qmlWidget->engine()->rootContext()->setContextProperty("VescIf", mVesc);
     ui->qmlWidget->engine()->rootContext()->setContextProperty("QmlUi", this);
@@ -645,46 +646,16 @@ bool PageScripting::eraseQml()
         return false;
     }
 
-    auto waitEraseRes = [this]() {
-        int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(6000);
-        auto conn = connect(mVesc->commands(), &Commands::eraseQmluiResReceived,
-                            [&res,&loop](bool erRes) {
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
-        return res;
-    };
-
-    mVesc->commands()->qmlUiErase();
-
     ui->uploadTextEdit->appendPlainText("Erasing QMLUI...");
+    bool res = mLoader.qmlErase();
 
-    int erRes = waitEraseRes();
-    if (erRes != 1) {
-        QString msg = "Unknown failure";
-
-        if (erRes == -10) {
-            msg = "Erase timed out";
-        } else if (erRes == -1) {
-            msg = "Erasing QMLUI failed";
-        }
-
-        ui->uploadTextEdit->appendPlainText(msg);
-        return false;
+    if (res) {
+        ui->uploadTextEdit->appendPlainText("Erase OK!");
+    } else {
+        ui->uploadTextEdit->appendPlainText("Erasing QMLUI failed");
     }
 
-    ui->uploadTextEdit->appendPlainText("Erase OK!");
-    return true;
+    return res;
 }
 
 void PageScripting::on_helpButton_clicked()
@@ -756,65 +727,13 @@ void PageScripting::on_uploadButton_clicked()
         return;
     }
 
-    auto waitWriteRes = [this]() {
-        int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1000);
-        auto conn = connect(mVesc->commands(), &Commands::writeQmluiResReceived,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
-        return res;
-    };
-
-    VByteArray vb;
-    vb.vbAppendUint16(ui->uploadFullscreenBox->isChecked() ? 2 : 1);
-    vb.append(qCompress(qmlToRun(false).toUtf8(), 9));
-    quint16 crc = Packet::crc16((const unsigned char*)vb.constData(),
-                                uint32_t(vb.size()));
-    VByteArray data;
-    data.vbAppendUint32(vb.size() - 2);
-    data.vbAppendUint16(crc);
-    data.append(vb);
-
-    if (data.size() > (1024 * 120)) {
-        ui->uploadTextEdit->appendPlainText("Not enough space");
-        ui->uploadButton->setEnabled(true);
-        ui->eraseOnlyButton->setEnabled(true);
-        return;
-    }
-
     ui->uploadTextEdit->appendPlainText("Writing data...");
+    bool res = mLoader.qmlUpload(qmlToRun(false), ui->uploadFullscreenBox->isChecked());
 
-    quint32 offset = 0;
-    bool ok = true;
-    while (data.size() > 0) {
-        const int chunkSize = 384;
-        int sz = data.size() > chunkSize ? chunkSize : data.size();
-
-        mVesc->commands()->qmlUiWrite(data.mid(0, sz), offset);
-        if (!waitWriteRes()) {
-            ui->uploadTextEdit->appendPlainText("Write failed");
-            ok = false;
-            break;
-        }
-
-        offset += sz;
-        data.remove(0, sz);
-    }
-
-    if (ok) {
+    if (res) {
         ui->uploadTextEdit->appendPlainText("Write OK!");
+    } else {
+        ui->uploadTextEdit->appendPlainText("Write failed");
     }
 
     ui->uploadButton->setEnabled(true);

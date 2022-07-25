@@ -27,6 +27,7 @@
 #include "mobile/qmlui.h"
 #include "widgets/scripteditor.h"
 #include "utility.h"
+#include "codeloader.h"
 
 namespace Ui {
 class PageScripting;
@@ -77,6 +78,7 @@ private:
     QStringList mRecentFiles;
     QString mDirNow;
     Utility mUtil;
+    CodeLoader mLoader;
 
     void updateRecentList();
     void makeEditorConnections(ScriptEditor *editor);

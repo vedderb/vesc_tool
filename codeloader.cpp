@@ -1,0 +1,478 @@
+/*
+    Copyright 2022 Benjamin Vedder	benjamin@vedder.se
+
+    This file is part of VESC Tool.
+
+    VESC Tool is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    VESC Tool is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    */
+
+#include "codeloader.h"
+#include "utility.h"
+#include <QEventLoop>
+#include <QFileDialog>
+#include <QMessageBox>
+
+CodeLoader::CodeLoader(QObject *parent) : QObject(parent)
+{
+    mVesc = nullptr;
+}
+
+VescInterface *CodeLoader::vesc() const
+{
+    return mVesc;
+}
+
+void CodeLoader::setVesc(VescInterface *vesc)
+{
+    mVesc = vesc;
+}
+
+bool CodeLoader::lispErase()
+{
+    if (!mVesc) {
+        return false;
+    }
+
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog(tr("Erase old code"), tr("Not Connected"), false);
+        return false;
+    }
+
+    auto waitEraseRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(6000);
+        auto conn = connect(mVesc->commands(), &Commands::lispEraseCodeRx,
+                            [&res,&loop](bool erRes) {
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    mVesc->commands()->lispEraseCode();
+
+    int erRes = waitEraseRes();
+    if (erRes != 1) {
+        QString msg = tr("Unknown failure");
+
+        if (erRes == -10) {
+            msg = tr("Erase timed out");
+        } else if (erRes == -1) {
+            msg = tr("Erasing Lisp Code failed");
+        }
+
+        mVesc->emitMessageDialog(tr("Erase Lisp"), msg, false);
+        return false;
+    }
+
+    return true;
+}
+
+QByteArray CodeLoader::lispAppendImports(QString codeStr, QString editorPath)
+{
+    VByteArray vb;
+    vb.vbAppendUint16(0);
+    vb.append(codeStr);
+
+    if (vb.at(vb.size() - 1) != '\0') {
+        vb.append('\0');
+    }
+
+    // Create and append data table
+    {
+        QList<QPair<QString, QByteArray> > files;
+        auto lines = codeStr.split("\n");
+        int line_num = 0;
+
+        for (auto line: lines) {
+            line_num++;
+
+            while (line.startsWith(" ")) {
+                line.remove(0, 1);
+            }
+
+            while (line.startsWith("( ")) {
+                line.remove(1, 1);
+            }
+
+            if (line.startsWith("(import ", Qt::CaseInsensitive)) {
+                int start = line.indexOf("\"");
+                int end = line.lastIndexOf("\"");
+
+                if (start > 0 && end > start) {
+                    auto path = line.mid(start + 1, end - start - 1);
+                    auto tag = line.mid(end + 1).replace(" ", "").replace(")", "").replace("'", "");
+                    if (tag.indexOf(";") >= 0) {
+                        tag = tag.mid(0, tag.indexOf(";"));
+                    }
+
+                    if (tag.isEmpty()) {
+                        mVesc->emitMessageDialog(tr("Upload Code"),
+                                                 tr("Invalid import tag. Line: %1").arg(line_num),
+                                                 false);
+                        return QByteArray();
+                    }
+
+                    QFileInfo fi(editorPath + "/" + path);
+                    if (!fi.exists()) {
+                        fi = QFileInfo(path);
+                    }
+
+                    if (fi.exists()) {
+                        QFile f(fi.absoluteFilePath());
+                        if (f.open(QIODevice::ReadOnly)) {
+                            auto fileData = f.readAll();
+
+                            // Pad with 0 in case it is a text file
+                            fileData.append('\0');
+
+                            files.append(qMakePair(tag, fileData));
+                        } else {
+                            mVesc->emitMessageDialog(tr("Upload Code"),
+                                                     tr("Imported file cannot be opened. Line: %1").arg(line_num),
+                                                     false);
+                            return QByteArray();
+                        }
+                    } else {
+                        mVesc->emitMessageDialog(tr("Upload Code"),
+                                                 tr("Imported file not found: %1 Line: %2").arg(fi.absoluteFilePath()).arg(line_num),
+                                                 false);
+                        return QByteArray();
+                    }
+                } else {
+                    mVesc->emitMessageDialog(tr("Upload Code"),
+                                             tr("Invalid import on line %1").arg(line_num),
+                                             false);
+                    return QByteArray();
+                }
+            }
+        }
+
+        int file_table_size = 0;
+        for (auto f: files) {
+            file_table_size += f.first.length() + 9;
+        }
+
+        vb.vbAppendInt16(files.size());
+
+        int file_offset = vb.size() + file_table_size - 2;
+
+        for (auto f: files) {
+            // Align on 4 bytes in case this is loaded as code
+            while (file_offset % 4 != 0) {
+                file_offset++;
+            }
+
+            vb.vbAppendString(f.first);
+            vb.vbAppendInt32(file_offset);
+            vb.vbAppendInt32(f.second.size());
+            file_offset += f.second.size();
+        }
+
+        for (auto f: files) {
+            while ((vb.size() - 2) % 4 != 0) {
+                vb.append('\0');
+            }
+            vb.append(f.second);
+        }
+    }
+
+    return std::move(vb);
+}
+
+bool CodeLoader::lispUpload(VByteArray vb)
+{
+    quint16 crc = Packet::crc16((const unsigned char*)vb.constData(), uint32_t(vb.size()));
+    VByteArray data;
+    data.vbAppendUint32(vb.size() - 2);
+    data.vbAppendUint16(crc);
+    data.append(vb);
+
+    if (data.size() > (1024 * 120)) {
+        mVesc->emitMessageDialog(tr("Upload Code"), tr("Not enough space"), false);
+        return false;
+    }
+
+    auto waitWriteRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1000);
+        auto conn = connect(mVesc->commands(), &Commands::lispWriteCodeRx,
+                            [&res,&loop](bool erRes, quint32 offset) {
+            (void)offset;
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    quint32 offset = 0;
+    bool ok = true;
+    while (data.size() > 0) {
+        const int chunkSize = 384;
+        int sz = data.size() > chunkSize ? chunkSize : data.size();
+
+        mVesc->commands()->lispWriteCode(data.mid(0, sz), offset);
+        if (!waitWriteRes()) {
+            mVesc->emitMessageDialog(tr("Upload Code"), tr("Write failed"), false);
+            ok = false;
+            break;
+        }
+
+        offset += sz;
+        data.remove(0, sz);
+    }
+
+    return ok;
+}
+
+bool CodeLoader::lispUpload(QString codeStr, QString editorPath)
+{
+    VByteArray vb = lispAppendImports(codeStr, editorPath);
+
+    if (vb.isEmpty()) {
+        return false;
+    }
+
+    return lispUpload(vb);
+}
+
+QByteArray CodeLoader::lispRead(QWidget *parent)
+{
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog(tr("Read code"), tr("Not Connected"), false);
+        return QByteArray();
+    }
+
+    QByteArray lispData;
+    int lenLispLast = 0;
+    auto conn = connect(mVesc->commands(), &Commands::lispReadCodeRx,
+                        [&](int lenLisp, int ofsLisp, QByteArray data) {
+        if (lispData.size() <= ofsLisp) {
+            lispData.append(data);
+        }
+        lenLispLast = lenLisp;
+    });
+
+    auto getLispChunk = [&](int size, int offset, int tries, int timeout) {
+        bool res = false;
+
+        for (int j = 0;j < tries;j++) {
+            mVesc->commands()->lispReadCode(size, offset);
+            res = Utility::waitSignal(mVesc->commands(), SIGNAL(lispReadCodeRx(int,int,QByteArray)), timeout);
+            if (res) {
+                break;
+            }
+        }
+        return res;
+    };
+
+    if (getLispChunk(10, 0, 5, 1500)) {
+        while (lispData.size() < lenLispLast) {
+            int dataLeft = lenLispLast - lispData.size();
+            if (!getLispChunk(dataLeft > 400 ? 400 : dataLeft, lispData.size(), 5, 1500)) {
+                break;
+            }
+        }
+
+        if (lispData.size() == lenLispLast) {
+            int end = lispData.indexOf(QByteArray("\0", 1));
+            if (end > 0) {
+                VByteArray vb = lispData.mid(end + 1);
+                QList<QPair<QString, QByteArray> > imports;
+
+                if (vb.size() > 3) {
+                    auto num_imports = vb.vbPopFrontInt16();
+                    if (num_imports > 0 && num_imports < 500) {
+                        for (int i = 0;i < num_imports;i++) {
+                            auto name = vb.vbPopFrontString();
+                            auto offset = vb.vbPopFrontInt32();
+                            auto len = vb.vbPopFrontInt32() - 1; // Remove 1 as the files are padded with one 0
+                            imports.append(qMakePair(name, lispData.mid(offset, len)));
+                        }
+
+                        auto reply = QMessageBox::warning(parent,
+                                                          tr("Imports"),
+                                                          tr("%1 imports found. Do you want to save them as files?").arg(num_imports),
+                                                          QMessageBox::Yes | QMessageBox::No);
+
+                        QString lastDir = "";
+                        if (reply == QMessageBox::Yes) {
+                            for (auto i: imports) {
+                                QString fileName = QFileDialog::getSaveFileName(parent,
+                                                                                tr("Save Import %1").arg(i.first),
+                                                                                lastDir + "/" + i.first + ".bin");
+
+                                if (!fileName.isEmpty()) {
+                                    QFile file(fileName);
+                                    if (!file.open(QIODevice::WriteOnly)) {
+                                        QMessageBox::critical(parent, tr("Save Import"),
+                                                              "Could not open\n" + fileName + "\nfor writing");
+                                        return QByteArray();
+                                    }
+
+                                    QFileInfo fi(file);
+                                    lastDir = fi.canonicalPath();
+
+                                    file.write(i.second);
+                                    file.close();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                lispData = lispData.left(end);
+            }
+
+            return lispData;
+        }
+    }
+
+    mVesc->emitMessageDialog(tr("Get Lisp"),
+                             tr("Could not read Lisp code"),
+                             false);
+
+    disconnect(conn);
+
+    return QByteArray();
+}
+
+bool CodeLoader::qmlErase()
+{
+    if (!mVesc) {
+        return false;
+    }
+
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog(tr("Erase Qml"), tr("Not Connected"), false);
+        return false;
+    }
+
+    auto waitEraseRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(6000);
+        auto conn = connect(mVesc->commands(), &Commands::eraseQmluiResReceived,
+                            [&res,&loop](bool erRes) {
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    mVesc->commands()->qmlUiErase();
+
+    int erRes = waitEraseRes();
+    if (erRes != 1) {
+        QString msg = "Unknown failure";
+
+        if (erRes == -10) {
+            msg = "Erase timed out";
+        } else if (erRes == -1) {
+            msg = "Erasing QMLUI failed";
+        }
+
+        mVesc->emitMessageDialog(tr("Erase Qml"), msg, false);
+        return false;
+    }
+
+    return true;
+}
+
+bool CodeLoader::qmlUpload(QString script, bool isFullscreen)
+{
+    script.prepend("import \"qrc:/mobile\";");
+    script.prepend("import Vedder.vesc.vescinterface 1.0;");
+
+    auto waitWriteRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1000);
+        auto conn = connect(mVesc->commands(), &Commands::writeQmluiResReceived,
+                            [&res,&loop](bool erRes, quint32 offset) {
+            (void)offset;
+            res = erRes ? 1 : -1;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    VByteArray vb;
+    vb.vbAppendUint16(isFullscreen ? 2 : 1);
+    vb.append(qCompress(script.toUtf8(), 9));
+    quint16 crc = Packet::crc16((const unsigned char*)vb.constData(),
+                                uint32_t(vb.size()));
+    VByteArray data;
+    data.vbAppendUint32(vb.size() - 2);
+    data.vbAppendUint16(crc);
+    data.append(vb);
+
+    if (data.size() > (1024 * 120)) {
+        mVesc->emitMessageDialog(tr("Upload Qml"), tr("Not enough space"), false);
+        return false;
+    }
+
+    quint32 offset = 0;
+    bool ok = true;
+    while (data.size() > 0) {
+        const int chunkSize = 384;
+        int sz = data.size() > chunkSize ? chunkSize : data.size();
+
+        mVesc->commands()->qmlUiWrite(data.mid(0, sz), offset);
+        if (!waitWriteRes()) {
+            mVesc->emitMessageDialog(tr("Upload Qml"), tr("Qml write failed"), false);
+            ok = false;
+            break;
+        }
+
+        offset += sz;
+        data.remove(0, sz);
+    }
+
+    return ok;
+}

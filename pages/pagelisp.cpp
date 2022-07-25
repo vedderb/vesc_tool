@@ -642,6 +642,149 @@ void PageLisp::on_uploadButton_clicked()
         return;
     }
 
+    QProgressDialog dialog(tr("Uploading..."), QString(), 0, 0, this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.show();
+
+    VByteArray vb;
+    vb.vbAppendUint16(0);
+
+    auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(ui->fileTabs->currentIndex()));
+
+    QString codeStr = "";
+    QString editorPath = QDir::currentPath();
+
+    if (e != nullptr) {
+        codeStr = e->codeEditor()->toPlainText();
+        QFileInfo fi(e->fileNow());
+        if (fi.exists()) {
+            editorPath = fi.canonicalPath();
+        }
+    } else {
+        ui->mainEdit->codeEditor()->toPlainText();
+        QFileInfo fi(ui->mainEdit->fileNow());
+        if (fi.exists()) {
+            editorPath = fi.canonicalPath();
+        }
+    }
+
+    vb.append(codeStr);
+
+    if (vb.at(vb.size() - 1) != '\0') {
+        vb.append('\0');
+    }
+
+    // Create and append data table
+    {
+        QList<QPair<QString, QByteArray> > files;
+        auto lines = codeStr.split("\n");
+        int line_num = 0;
+
+        for (auto line: lines) {
+            line_num++;
+
+            while (line.startsWith(" ")) {
+                line.remove(0, 1);
+            }
+
+            while (line.startsWith("( ")) {
+                line.remove(1, 1);
+            }
+
+            if (line.startsWith("(import ", Qt::CaseInsensitive)) {
+                int start = line.indexOf("\"");
+                int end = line.lastIndexOf("\"");
+
+                if (start > 0 && end > start) {
+                    auto path = line.mid(start + 1, end - start - 1);
+                    auto tag = line.mid(end + 1).replace(" ", "").replace(")", "").replace("'", "");
+                    if (tag.indexOf(";") >= 0) {
+                        tag = tag.mid(0, tag.indexOf(";"));
+                    }
+
+                    if (tag.isEmpty()) {
+                        mVesc->emitMessageDialog(tr("Upload Code"),
+                                                 tr("Invalid import tag. Line: %1").arg(line_num),
+                                                 false);
+                        return;
+                    }
+
+                    QFileInfo fi(editorPath + "/" + path);
+                    if (!fi.exists()) {
+                        fi = QFileInfo(path);
+                    }
+
+                    if (fi.exists()) {
+                        QFile f(fi.absoluteFilePath());
+                        if (f.open(QIODevice::ReadOnly)) {
+                            auto fileData = f.readAll();
+
+                            // Pad with 0 in case it is a text file
+                            fileData.append('\0');
+
+                            files.append(qMakePair(tag, fileData));
+                        } else {
+                            mVesc->emitMessageDialog(tr("Upload Code"),
+                                                     tr("Imported file cannot be opened. Line: %1").arg(line_num),
+                                                     false);
+                            return;
+                        }
+                    } else {
+                        mVesc->emitMessageDialog(tr("Upload Code"),
+                                                 tr("Imported file not found: %1 Line: %2").arg(fi.absoluteFilePath()).arg(line_num),
+                                                 false);
+                        return;
+                    }
+                } else {
+                    mVesc->emitMessageDialog(tr("Upload Code"),
+                                             tr("Invalid import on line %1").arg(line_num),
+                                             false);
+                    return;
+                }
+            }
+        }
+
+        int file_table_size = 0;
+        for (auto f: files) {
+            file_table_size += f.first.length() + 9;
+        }
+
+        vb.vbAppendInt16(files.size());
+
+        int file_offset = vb.size() + file_table_size - 2;
+
+        for (auto f: files) {
+            // Align on 4 bytes in case this is loaded as code
+            while (file_offset % 4 != 0) {
+                file_offset++;
+            }
+
+            vb.vbAppendString(f.first);
+            vb.vbAppendInt32(file_offset);
+            vb.vbAppendInt32(f.second.size());
+            file_offset += f.second.size();
+        }
+
+        for (auto f: files) {
+            while ((vb.size() - 2) % 4 != 0) {
+                vb.append('\0');
+            }
+            vb.append(f.second);
+        }
+    }
+
+    quint16 crc = Packet::crc16((const unsigned char*)vb.constData(), uint32_t(vb.size()));
+    VByteArray data;
+    data.vbAppendUint32(vb.size() - 2);
+    data.vbAppendUint16(crc);
+    data.append(vb);
+
+    if (data.size() > (1024 * 120)) {
+        ui->uploadButton->setEnabled(true);
+        mVesc->emitMessageDialog(tr("Upload Code"), tr("Not enough space"), false);
+        return;
+    }
+
     auto waitWriteRes = [this]() {
         int res = -10;
 
@@ -662,37 +805,6 @@ void PageLisp::on_uploadButton_clicked()
         disconnect(conn);
         return res;
     };
-
-    QProgressDialog dialog(tr("Uploading..."), QString(), 0, 0, this);
-    dialog.setWindowModality(Qt::WindowModal);
-    dialog.show();
-
-    VByteArray vb;
-    vb.vbAppendUint16(0);
-
-    auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(ui->fileTabs->currentIndex()));
-
-    if (e != nullptr) {
-        vb.append(e->codeEditor()->toPlainText());
-    } else {
-        vb.append(ui->mainEdit->codeEditor()->toPlainText());
-    }
-
-    if (vb.at(vb.size() - 1) != '\0') {
-        vb.append('\0');
-    }
-
-    quint16 crc = Packet::crc16((const unsigned char*)vb.constData(), uint32_t(vb.size()));
-    VByteArray data;
-    data.vbAppendUint32(vb.size() - 2);
-    data.vbAppendUint16(crc);
-    data.append(vb);
-
-    if (data.size() > (1024 * 120)) {
-        ui->uploadButton->setEnabled(true);
-        mVesc->emitMessageDialog(tr("Upload Code"), tr("Not enough space"), false);
-        return;
-    }
 
     quint32 offset = 0;
     bool ok = true;
@@ -759,6 +871,56 @@ void PageLisp::on_readExistingButton_clicked()
         }
 
         if (lispData.size() == lenLispLast) {
+            int end = lispData.indexOf(QByteArray("\0", 1));
+            if (end > 0) {
+                VByteArray vb = lispData.mid(end + 1);
+                QList<QPair<QString, QByteArray> > imports;
+
+                if (vb.size() > 3) {
+                    auto num_imports = vb.vbPopFrontInt16();
+                    if (num_imports > 0 && num_imports < 500) {
+                        for (int i = 0;i < num_imports;i++) {
+                            auto name = vb.vbPopFrontString();
+                            auto offset = vb.vbPopFrontInt32();
+                            auto len = vb.vbPopFrontInt32() - 1; // Remove 1 as the files are padded with one 0
+                            imports.append(qMakePair(name, lispData.mid(offset, len)));
+                        }
+
+                        QMessageBox::StandardButton reply =
+                                QMessageBox::warning(this,
+                                                     tr("Imports"),
+                                                     tr("%1 imports found. Do you want to save them as files?").arg(num_imports),
+                                                     QMessageBox::Yes | QMessageBox::Cancel);
+
+                        QString lastDir = "";
+                        if (reply == QMessageBox::Yes) {
+                            for (auto i: imports) {
+                                QString fileName = QFileDialog::getSaveFileName(this,
+                                                                                tr("Save Import %1").arg(i.first),
+                                                                                lastDir + "/" + i.first + ".bin");
+
+                                if (!fileName.isEmpty()) {
+                                    QFile file(fileName);
+                                    if (!file.open(QIODevice::WriteOnly)) {
+                                        QMessageBox::critical(this, tr("Save Import"),
+                                                              "Could not open\n" + fileName + "\nfor writing");
+                                        return;
+                                    }
+
+                                    QFileInfo fi(file);
+                                    lastDir = fi.canonicalPath();
+
+                                    file.write(i.second);
+                                    file.close();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                lispData = lispData.left(end);
+            }
+
             if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
                 ui->mainEdit->codeEditor()->setPlainText(lispData);
                 ui->fileTabs->setTabText(ui->fileTabs->indexOf(ui->mainEdit), "From VESC");

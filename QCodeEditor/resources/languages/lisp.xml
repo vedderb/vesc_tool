@@ -18,6 +18,7 @@
         <name>break</name>
         <name>fn</name>
         <name>def</name>
+        <name>import</name>
     </section>
     <section name="PrimitiveType">
         <name>nil</name>

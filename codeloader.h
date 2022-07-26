@@ -24,6 +24,19 @@
 #include <QDir>
 #include "vescinterface.h"
 
+struct VescPackage {
+
+public:
+    VescPackage () {
+        qmlIsFullscreen = false;
+    }
+
+    QString description;
+    QByteArray lispData;
+    QString qmlFile;
+    bool qmlIsFullscreen;
+};
+
 class CodeLoader : public QObject
 {
     Q_OBJECT
@@ -34,13 +47,19 @@ public:
     void setVesc(VescInterface *vesc);
 
     bool lispErase();
-    QByteArray lispAppendImports(QString codeStr, QString editorPath = QDir::currentPath());
+    QByteArray lispPackImports(QString codeStr, QString editorPath = QDir::currentPath());
+    QPair<QString, QList<QPair<QString, QByteArray> > > lispUnpackImports(QByteArray data);
     bool lispUpload(VByteArray vb);
     bool lispUpload(QString codeStr, QString editorPath = QDir::currentPath());
-    QByteArray lispRead(QWidget *parent = nullptr);
+    QString lispRead(QWidget *parent = nullptr);
 
     bool qmlErase();
     bool qmlUpload(QString script, bool isFullscreen);
+
+    QByteArray packVescPackage(VescPackage pkg);
+    VescPackage unpackVescPackage(QByteArray data);
+    bool installVescPackage(VescPackage pkg);
+    bool installVescPackage(QByteArray data);
 
 signals:
 

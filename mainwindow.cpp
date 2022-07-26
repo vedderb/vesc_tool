@@ -420,6 +420,7 @@ MainWindow::MainWindow(QWidget *parent) :
         mPageAppPas->reloadParams();
         mPageAppImu->reloadParams();
         mPageFirmware->reloadParams();
+        mPagePackage->reloadParams();
         mPageCanAnalyzer->reloadParams();
         mPageScripting->reloadParams();
         mPageLisp->reloadParams();
@@ -1297,6 +1298,11 @@ void MainWindow::reloadPages()
     mPageFirmware->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageFirmware);
     addPageItem(tr("Firmware"),  theme + "icons/Electronics-96.png", "", true);
+
+    mPagePackage = new PageVescPackage(this);
+    mPagePackage->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPagePackage);
+    addPageItem(tr("VESC Packages"),  theme + "icons/v_icon-96.png", "", true);
 
     mPageMotorSettings = new PageMotorSettings(this);
     mPageMotorSettings->setVesc(mVesc);

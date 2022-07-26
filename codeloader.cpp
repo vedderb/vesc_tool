@@ -88,7 +88,7 @@ bool CodeLoader::lispErase()
     return true;
 }
 
-QByteArray CodeLoader::lispAppendImports(QString codeStr, QString editorPath)
+QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
 {
     VByteArray vb;
     vb.vbAppendUint16(0);
@@ -127,7 +127,7 @@ QByteArray CodeLoader::lispAppendImports(QString codeStr, QString editorPath)
                     }
 
                     if (tag.isEmpty()) {
-                        mVesc->emitMessageDialog(tr("Upload Code"),
+                        mVesc->emitMessageDialog(tr("Append Imports"),
                                                  tr("Invalid import tag. Line: %1").arg(line_num),
                                                  false);
                         return QByteArray();
@@ -148,19 +148,19 @@ QByteArray CodeLoader::lispAppendImports(QString codeStr, QString editorPath)
 
                             files.append(qMakePair(tag, fileData));
                         } else {
-                            mVesc->emitMessageDialog(tr("Upload Code"),
+                            mVesc->emitMessageDialog(tr("Append Imports"),
                                                      tr("Imported file cannot be opened. Line: %1").arg(line_num),
                                                      false);
                             return QByteArray();
                         }
                     } else {
-                        mVesc->emitMessageDialog(tr("Upload Code"),
+                        mVesc->emitMessageDialog(tr("Append Imports"),
                                                  tr("Imported file not found: %1 Line: %2").arg(fi.absoluteFilePath()).arg(line_num),
                                                  false);
                         return QByteArray();
                     }
                 } else {
-                    mVesc->emitMessageDialog(tr("Upload Code"),
+                    mVesc->emitMessageDialog(tr("Append Imports"),
                                              tr("Invalid import on line %1").arg(line_num),
                                              false);
                     return QByteArray();
@@ -198,6 +198,32 @@ QByteArray CodeLoader::lispAppendImports(QString codeStr, QString editorPath)
     }
 
     return std::move(vb);
+}
+
+QPair<QString, QList<QPair<QString, QByteArray> > > CodeLoader::lispUnpackImports(QByteArray data)
+{
+    QList<QPair<QString, QByteArray> > imports;
+    int end = data.indexOf(QByteArray("\0", 1));
+
+    if (end > 0) {
+        VByteArray vb = data.mid(end + 1);
+
+        if (vb.size() > 3) {
+            auto num_imports = vb.vbPopFrontInt16();
+            if (num_imports > 0 && num_imports < 500) {
+                for (int i = 0;i < num_imports;i++) {
+                    auto name = vb.vbPopFrontString();
+                    auto offset = vb.vbPopFrontInt32();
+                    auto len = vb.vbPopFrontInt32() - 1; // Remove 1 as the files are padded with one 0
+                    imports.append(qMakePair(name, data.mid(offset, len)));
+                }
+            }
+        }
+
+        data = data.left(end);
+    }
+
+    return qMakePair(QString::fromLocal8Bit(data), imports);
 }
 
 bool CodeLoader::lispUpload(VByteArray vb)
@@ -256,7 +282,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
 
 bool CodeLoader::lispUpload(QString codeStr, QString editorPath)
 {
-    VByteArray vb = lispAppendImports(codeStr, editorPath);
+    VByteArray vb = lispPackImports(codeStr, editorPath);
 
     if (vb.isEmpty()) {
         return false;
@@ -265,11 +291,11 @@ bool CodeLoader::lispUpload(QString codeStr, QString editorPath)
     return lispUpload(vb);
 }
 
-QByteArray CodeLoader::lispRead(QWidget *parent)
+QString CodeLoader::lispRead(QWidget *parent)
 {
     if (!mVesc->isPortConnected()) {
         mVesc->emitMessageDialog(tr("Read code"), tr("Not Connected"), false);
-        return QByteArray();
+        return "";
     }
 
     QByteArray lispData;
@@ -295,6 +321,8 @@ QByteArray CodeLoader::lispRead(QWidget *parent)
         return res;
     };
 
+    QString res = "";
+
     if (getLispChunk(10, 0, 5, 1500)) {
         while (lispData.size() < lenLispLast) {
             int dataLeft = lenLispLast - lispData.size();
@@ -304,56 +332,43 @@ QByteArray CodeLoader::lispRead(QWidget *parent)
         }
 
         if (lispData.size() == lenLispLast) {
-            int end = lispData.indexOf(QByteArray("\0", 1));
-            if (end > 0) {
-                VByteArray vb = lispData.mid(end + 1);
-                QList<QPair<QString, QByteArray> > imports;
+            auto unpacked = lispUnpackImports(lispData);
 
-                if (vb.size() > 3) {
-                    auto num_imports = vb.vbPopFrontInt16();
-                    if (num_imports > 0 && num_imports < 500) {
-                        for (int i = 0;i < num_imports;i++) {
-                            auto name = vb.vbPopFrontString();
-                            auto offset = vb.vbPopFrontInt32();
-                            auto len = vb.vbPopFrontInt32() - 1; // Remove 1 as the files are padded with one 0
-                            imports.append(qMakePair(name, lispData.mid(offset, len)));
-                        }
+            res = unpacked.first;
+            auto num_imports = unpacked.second.length();
 
-                        auto reply = QMessageBox::warning(parent,
-                                                          tr("Imports"),
-                                                          tr("%1 imports found. Do you want to save them as files?").arg(num_imports),
-                                                          QMessageBox::Yes | QMessageBox::No);
+            if (num_imports > 0) {
+                auto reply = QMessageBox::warning(parent,
+                                                  tr("Imports"),
+                                                  tr("%1 imports found. Do you want to save them as files?").arg(num_imports),
+                                                  QMessageBox::Yes | QMessageBox::No);
 
-                        QString lastDir = "";
-                        if (reply == QMessageBox::Yes) {
-                            for (auto i: imports) {
-                                QString fileName = QFileDialog::getSaveFileName(parent,
-                                                                                tr("Save Import %1").arg(i.first),
-                                                                                lastDir + "/" + i.first + ".bin");
+                QString lastDir = "";
+                if (reply == QMessageBox::Yes) {
+                    for (auto i: unpacked.second) {
+                        QString fileName = QFileDialog::getSaveFileName(parent,
+                                                                        tr("Save Import %1").arg(i.first),
+                                                                        lastDir + "/" + i.first + ".bin");
 
-                                if (!fileName.isEmpty()) {
-                                    QFile file(fileName);
-                                    if (!file.open(QIODevice::WriteOnly)) {
-                                        QMessageBox::critical(parent, tr("Save Import"),
-                                                              "Could not open\n" + fileName + "\nfor writing");
-                                        return QByteArray();
-                                    }
-
-                                    QFileInfo fi(file);
-                                    lastDir = fi.canonicalPath();
-
-                                    file.write(i.second);
-                                    file.close();
-                                }
+                        if (!fileName.isEmpty()) {
+                            QFile file(fileName);
+                            if (!file.open(QIODevice::WriteOnly)) {
+                                QMessageBox::critical(parent, tr("Save Import"),
+                                                      "Could not open\n" + fileName + "\nfor writing");
+                                return QByteArray();
                             }
+
+                            QFileInfo fi(file);
+                            lastDir = fi.canonicalPath();
+
+                            file.write(i.second);
+                            file.close();
                         }
                     }
                 }
-
-                lispData = lispData.left(end);
             }
 
-            return lispData;
+            return res;
         }
     }
 
@@ -363,7 +378,7 @@ QByteArray CodeLoader::lispRead(QWidget *parent)
 
     disconnect(conn);
 
-    return QByteArray();
+    return "";
 }
 
 bool CodeLoader::qmlErase()
@@ -475,4 +490,109 @@ bool CodeLoader::qmlUpload(QString script, bool isFullscreen)
     }
 
     return ok;
+}
+
+QByteArray CodeLoader::packVescPackage(VescPackage pkg)
+{
+    VByteArray data;
+
+    data.vbAppendString("VESC Packet");
+
+    if (!pkg.description.isEmpty()) {
+        auto dataRaw = pkg.description.toUtf8();
+        data.vbAppendString("description");
+        data.vbAppendInt32(dataRaw.size());
+        data.append(dataRaw);
+    }
+
+    if (!pkg.lispData.isEmpty()) {
+        data.vbAppendString("lispData");
+        data.vbAppendInt32(pkg.lispData.size());
+        data.append(pkg.lispData);
+    }
+
+    if (!pkg.qmlFile.isEmpty()) {
+        auto dataRaw = pkg.qmlFile.toUtf8();
+        data.vbAppendString("qmlFile");
+        data.vbAppendInt32(dataRaw.size());
+        data.append(dataRaw);
+    }
+
+    data.vbAppendString("qmlIsFullscreen");
+    data.vbAppendInt8(pkg.qmlIsFullscreen);
+
+    return qCompress(data, 9);
+}
+
+VescPackage CodeLoader::unpackVescPackage(QByteArray data)
+{
+    VescPackage pkg;
+    VByteArray vb(qUncompress(data));
+
+    if (vb.vbPopFrontString() != "VESC Packet") {
+        qWarning() << "Invalid VESC Packet";
+        return pkg;
+    }
+
+    while (!vb.isEmpty()) {
+        QString name = vb.vbPopFrontString();
+
+        if (name.isEmpty()) {
+            qWarning() << "Empty name";
+            break;
+        }
+
+        if (name == "description") {
+            auto len = vb.vbPopFrontInt32();
+            auto dataRaw = vb.left(len);
+            vb.remove(0, len);
+            pkg.description = QString::fromUtf8(dataRaw);
+        } else if (name == "lispData") {
+            auto len = vb.vbPopFrontInt32();
+            auto dataRaw = vb.left(len);
+            vb.remove(0, len);
+            pkg.lispData = dataRaw;
+        } else if (name == "qmlFile") {
+            auto len = vb.vbPopFrontInt32();
+            auto dataRaw = vb.left(len);
+            vb.remove(0, len);
+            pkg.qmlFile = QString::fromUtf8(dataRaw);
+        } else if (name == "qmlIsFullscreen") {
+            pkg.qmlIsFullscreen = vb.vbPopFrontInt8();
+        }
+    }
+
+    return pkg;
+}
+
+bool CodeLoader::installVescPackage(VescPackage pkg)
+{
+    bool res = true;
+
+    if (res && !pkg.qmlFile.isEmpty()) {
+        res = qmlErase();
+    }
+
+    if (res && !pkg.qmlFile.isEmpty()) {
+        res = qmlUpload(pkg.qmlFile, pkg.qmlIsFullscreen);
+    }
+
+    if (res && !pkg.lispData.isEmpty()) {
+        res = lispErase();
+    }
+
+    if (res && !pkg.lispData.isEmpty()) {
+        res = lispUpload(VByteArray(pkg.lispData));
+    }
+
+    if (res && !pkg.lispData.isEmpty()) {
+        mVesc->commands()->lispSetRunning(1);
+    }
+
+    return res;
+}
+
+bool CodeLoader::installVescPackage(QByteArray data)
+{
+    return installVescPackage(unpackVescPackage(data));
 }

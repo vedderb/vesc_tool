@@ -25,6 +25,7 @@ FORMS += \
     $$PWD/pagefirmware.ui \
     $$PWD/pagertdata.ui \
     $$PWD/pagesampleddata.ui \
+    $$PWD/pagevescpackage.ui \
     $$PWD/pagewelcome.ui \
     $$PWD/pagemotorsettings.ui \
     $$PWD/pageappsettings.ui \
@@ -65,6 +66,7 @@ HEADERS += \
     $$PWD/pagefirmware.h \
     $$PWD/pagertdata.h \
     $$PWD/pagesampleddata.h \
+    $$PWD/pagevescpackage.h \
     $$PWD/pagewelcome.h \
     $$PWD/pagemotorsettings.h \
     $$PWD/pageappsettings.h \
@@ -105,6 +107,7 @@ SOURCES += \
     $$PWD/pagefirmware.cpp \
     $$PWD/pagertdata.cpp \
     $$PWD/pagesampleddata.cpp \
+    $$PWD/pagevescpackage.cpp \
     $$PWD/pagewelcome.cpp \
     $$PWD/pagemotorsettings.cpp \
     $$PWD/pageappsettings.cpp \

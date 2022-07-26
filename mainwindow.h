@@ -69,6 +69,7 @@
 #include "pages/pagemotorcomparison.h"
 #include "pages/pagelisp.h"
 #include "pages/pageespprog.h"
+#include "pages/pagevescpackage.h"
 
 namespace Ui {
 class MainWindow;
@@ -181,6 +182,7 @@ private:
     PageSampledData *mPageSampledData;
     PageImu *mPageImu;
     PageFirmware *mPageFirmware;
+    PageVescPackage *mPagePackage;
     PageDebugPrint *mPageDebugPrint;
     PageMotorSettings *mPageMotorSettings;
     PageMotor *mPageMotor;

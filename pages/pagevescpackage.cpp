@@ -45,6 +45,8 @@ PageVescPackage::PageVescPackage(QWidget *parent) :
     ui->qmlEdit->setText(set.value("pagevescpackage/lastqml", "").toString());
     ui->outputEdit->setText(set.value("pagevescpackage/lastoutput", "").toString());
 
+    ui->descriptionEdit->document()->setHtml("Package Description");
+
     on_loadRefreshButton_clicked();
     on_outputRefreshButton_clicked();
 }
@@ -171,6 +173,7 @@ void PageVescPackage::on_saveButton_clicked()
         f.close();
     }
 
+    pkg.name = ui->nameEdit->text();
     pkg.description = ui->descriptionEdit->document()->toHtml();
 
     file.write(mLoader.packVescPackage(pkg));
@@ -227,4 +230,5 @@ void PageVescPackage::on_outputRefreshButton_clicked()
 
     auto pkg = mLoader.unpackVescPackage(f.readAll());
     ui->descriptionEdit->document()->setHtml(pkg.description);
+    ui->nameEdit->setText(pkg.name);
 }

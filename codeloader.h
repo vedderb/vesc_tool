@@ -28,9 +28,11 @@ struct VescPackage {
 
 public:
     VescPackage () {
+        name = "VESC Package Name";
         qmlIsFullscreen = false;
     }
 
+    QString name;
     QString description;
     QByteArray lispData;
     QString qmlFile;

@@ -498,6 +498,13 @@ QByteArray CodeLoader::packVescPackage(VescPackage pkg)
 
     data.vbAppendString("VESC Packet");
 
+    if (!pkg.name.isEmpty()) {
+        auto dataRaw = pkg.name.toUtf8();
+        data.vbAppendString("name");
+        data.vbAppendInt32(dataRaw.size());
+        data.append(dataRaw);
+    }
+
     if (!pkg.description.isEmpty()) {
         auto dataRaw = pkg.description.toUtf8();
         data.vbAppendString("description");
@@ -542,7 +549,12 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
             break;
         }
 
-        if (name == "description") {
+        if (name == "name") {
+            auto len = vb.vbPopFrontInt32();
+            auto dataRaw = vb.left(len);
+            vb.remove(0, len);
+            pkg.name = QString::fromUtf8(dataRaw);
+        } else if (name == "description") {
             auto len = vb.vbPopFrontInt32();
             auto dataRaw = vb.left(len);
             vb.remove(0, len);

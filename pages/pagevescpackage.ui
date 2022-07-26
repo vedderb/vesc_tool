@@ -214,6 +214,20 @@
         </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Package Name</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="nameEdit"/>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="MRichTextEdit" name="descriptionEdit" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">

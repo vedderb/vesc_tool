@@ -526,6 +526,7 @@ QByteArray CodeLoader::packVescPackage(VescPackage pkg)
     }
 
     data.vbAppendString("qmlIsFullscreen");
+    data.vbAppendInt32(1);
     data.vbAppendInt8(pkg.qmlIsFullscreen);
 
     return qCompress(data, 9);
@@ -570,7 +571,12 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
             vb.remove(0, len);
             pkg.qmlFile = QString::fromUtf8(dataRaw);
         } else if (name == "qmlIsFullscreen") {
+            vb.vbPopFrontInt32(); // Discard length
             pkg.qmlIsFullscreen = vb.vbPopFrontInt8();
+        } else {
+            // Unknown identifier, skip
+            auto len = vb.vbPopFrontInt32();
+            vb.remove(0, len);
         }
     }
 

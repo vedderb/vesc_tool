@@ -107,13 +107,13 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event)
 void ScriptEditor::on_openFileButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open QML File"), "",
+                                                    tr("Open %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"), "",
                                                     mIsModeLisp ? tr("Lisp files (*.lisp)") : tr("QML files (*.qml)"));
 
     if (!fileName.isEmpty()) {
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Open QML File",
+            QMessageBox::critical(this, tr("Open %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"),
                                   "Could not open\n" + fileName + "\nfor reading");
             return;
         }
@@ -141,7 +141,7 @@ void ScriptEditor::on_saveButton_clicked()
 
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this, "Save QML File",
+        QMessageBox::critical(this, tr("Save %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"),
                               "Could not open\n" + fileName + "\nfor writing");
         return;
     }
@@ -155,7 +155,7 @@ void ScriptEditor::on_saveButton_clicked()
 void ScriptEditor::on_saveAsButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save QML"), "",
+                                                    tr("Save %1").arg(mIsModeLisp ? "Lisp" : "Qml"), "",
                                                     mIsModeLisp ? tr("Lisp files (*.lisp)") : tr("QML files (*.qml)"));
 
     QString ending = mIsModeLisp ? ".lisp" : ".qml";
@@ -167,7 +167,7 @@ void ScriptEditor::on_saveAsButton_clicked()
 
         QFile file(fileName);
         if (!file.open(QIODevice::WriteOnly)) {
-            QMessageBox::critical(this, "Save QML File",
+            QMessageBox::critical(this, tr("Save %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"),
                                   "Could not open\n" + fileName + "\nfor writing");
             return;
         }

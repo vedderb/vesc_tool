@@ -98,10 +98,15 @@ ParameterEditor::ParameterEditor(QWidget *parent) :
         (void)row;
         updateGroupParamList();
     });
+
+    QSettings set;
+    mLastXmlPath = (set.value("parametereditor/lastxmlpath", ".").toString());
 }
 
 ParameterEditor::~ParameterEditor()
 {
+    QSettings set;
+    set.setValue("parametereditor/lastxmlpath", mLastXmlPath);
     delete ui;
 }
 
@@ -397,7 +402,7 @@ void ParameterEditor::on_actionLoad_XML_triggered()
     QString path;
     path = QFileDialog::getOpenFileName(this,
                                         tr("Choose parameter file to load"),
-                                        ".",
+                                        mLastXmlPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -413,6 +418,7 @@ void ParameterEditor::on_actionLoad_XML_triggered()
                                     "%1").arg(mParams.xmlStatus()));
     } else {
         showStatusInfo(tr("Configuration Loaded"), true);
+        mLastXmlPath = path;
     }
 
     updateUi();
@@ -423,7 +429,7 @@ void ParameterEditor::on_actionSave_XML_as_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the parameter XML file"),
-                                        ".",
+                                        mLastXmlPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -443,6 +449,7 @@ void ParameterEditor::on_actionSave_XML_as_triggered()
                                     "%1").arg(mParams.xmlStatus()));
     } else {
         showStatusInfo(tr("Configuration Saved"), true);
+        mLastXmlPath = path;
     }
 }
 
@@ -1089,8 +1096,8 @@ void ParameterEditor::on_actionSave_XML_and_export_config_parser_and_compressed_
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose the XML file or one of the C files. All files will be created with default "
                                            "names and/or overwritten if they already exist in the directory."),
-                                        ".",
-                                        tr("C Source/Header files (*.c *.h)"));
+                                        mLastXmlPath,
+                                        tr("C Source/Header files (*.c *.h *.xml)"));
 
     if (path.isNull()) {
         return;

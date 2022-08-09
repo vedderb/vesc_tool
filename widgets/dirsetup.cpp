@@ -51,7 +51,7 @@ void DirSetup::setVesc(VescInterface *vesc)
     mVesc = vesc;
 }
 
-void DirSetup::scanVescs()
+void DirSetup::scanVescs(bool scanCan)
 {
     if (mVesc) {
         auto *wOld = ui->vescArea->widget();
@@ -74,7 +74,8 @@ void DirSetup::scanVescs()
             auto *l = new QHBoxLayout;
 
             auto *imageLabel = new QLabel;
-            imageLabel->setPixmap(QPixmap(dev >= 0 ? "://res/icons/can_off.png" : "://res/icons/Connected-96.png"));
+            QString theme = Utility::getThemePath();
+            imageLabel->setPixmap(QPixmap(dev >= 0 ? theme +"icons/can_off.png" : theme +"icons/Connected-96.png"));
             imageLabel->setMaximumSize(50, 50);
             imageLabel->setScaledContents(true);
             l->addWidget(imageLabel);
@@ -135,9 +136,11 @@ void DirSetup::scanVescs()
         l->setSpacing(4);
         l->addWidget(addViewer(QString("Local VESC"), -1));
 
-        auto canDevs = Utility::scanCanVescOnly(mVesc);
-        for (auto d: canDevs) {
-            l->addWidget(addViewer(QString("CAN VESC\nID: %1").arg(d), d));
+        if (scanCan) {
+            auto canDevs = Utility::scanCanVescOnly(mVesc);
+            for (auto d: canDevs) {
+                l->addWidget(addViewer(QString("CAN VESC\nID: %1").arg(d), d));
+            }
         }
 
         l->addStretch();

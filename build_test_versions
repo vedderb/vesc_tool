@@ -6,7 +6,7 @@ set -e
 export PATH=/opt/Qt/5.12-static/bin:$PATH
 rm -rf build/lin/*
 
-qmake -config release "CONFIG += release_lin build_original vt_test_version"
+qmake -config release "CONFIG += release_lin build_original"
 make clean
 make -j8
 rm -rf build/lin/obj
@@ -46,8 +46,8 @@ qmake -config release "CONFIG += release_android build_mobile vt_test_version"
 make clean
 make -j8
 make install INSTALL_ROOT=build/android/build
-androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-libvesc_tool.so-deployment-settings.json --android-platform android-28
-mv build/android/build/build/outputs/apk/build-debug.apk build/test_all/vesc_tool_test_android.apk
+androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-libvesc_tool.so-deployment-settings.json --android-platform android-29
+mv build/android/build/build/outputs/apk/debug/build-debug.apk build/test_all/vesc_tool_test_android.apk
 rm -rf build/android/build
 rm -rf build/android/obj
 rm -f build/android/libvesc_tool.so

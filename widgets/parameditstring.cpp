@@ -20,12 +20,15 @@
 #include "parameditstring.h"
 #include "ui_parameditstring.h"
 #include "helpdialog.h"
+#include "utility.h"
 
 ParamEditString::ParamEditString(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ParamEditString)
 {
     ui->setupUi(this);
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
 }
 
 ParamEditString::~ParamEditString()

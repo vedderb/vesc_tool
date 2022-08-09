@@ -27,14 +27,16 @@ PageAppPpm::PageAppPpm(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
 
     ui->throttlePlot->addGraph();
     ui->throttlePlot->graph()->setName("Throttle Curve");
+    ui->throttlePlot->graph()->setPen(QPen(Utility::getAppQColor("plot_graph1")));
     ui->throttlePlot->xAxis->setLabel("Throttle Value");
     ui->throttlePlot->yAxis->setLabel("Output Value");
     ui->throttlePlot->legend->setVisible(true);
     ui->throttlePlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
+    Utility::setPlotColors(ui->throttlePlot);
 }
 
 PageAppPpm::~PageAppPpm()
@@ -107,6 +109,6 @@ void PageAppPpm::paramChangedEnum(QObject *src, QString name, int newParam)
     (void)newParam;
 
     if (name == "app_ppm_conf.throttle_exp_mode") {
-        paramChangedDouble(0, "app_ppm_conf.throttle_exp", 0.0);
+        paramChangedDouble(nullptr, "app_ppm_conf.throttle_exp", 0.0);
     }
 }

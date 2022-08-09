@@ -18,14 +18,17 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    property bool mLastDarkMode: false
+
     function openDialog() {
+        mLastDarkMode = Utility.isDarkMode()
         dialog.open()
     }
 
@@ -36,6 +39,10 @@ Item {
         focus: true
         title: "VESC Tool Settings"
 
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
         width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
 
@@ -43,41 +50,77 @@ Item {
         y: Math.max((parent.height - height) / 2, 10)
         parent: ApplicationWindow.overlay
 
-        ColumnLayout {
+        ScrollView {
             anchors.fill: parent
 
-            CheckBox {
-                id: imperialBox
-                Layout.fillWidth: true
-                text: "Use Imperial Units"
-                checked: VescIf.useImperialUnits()
-            }
+            ColumnLayout {
+                anchors.fill: parent
 
-            CheckBox {
-                id: screenOnBox
-                Layout.fillWidth: true
-                text: "Keep Screen On"
-                checked: VescIf.keepScreenOn()
-            }
+                CheckBox {
+                    id: imperialBox
+                    Layout.fillWidth: true
+                    text: "Use Imperial Units"
+                    checked: VescIf.useImperialUnits()
+                }
 
-            CheckBox {
-                id: wakeLockBox
-                Layout.fillWidth: true
-                text: "Use Wake Lock (experimental)"
-                checked: VescIf.useWakeLock()
-            }
+                CheckBox {
+                    id: negativeSpeedBox
+                    Layout.fillWidth: true
+                    text: "Use Negative Speed"
+                    checked: VescIf.speedGaugeUseNegativeValues()
+                }
 
-            Item {
-                // Spacer
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+                CheckBox {
+                    id: screenOnBox
+                    Layout.fillWidth: true
+                    text: "Keep Screen On"
+                    checked: VescIf.keepScreenOn()
+                    visible: Qt.platform.os !== "ios"
+                    enabled: Qt.platform.os !== "ios"
+                }
+
+                CheckBox {
+                    id: screenRotBox
+                    Layout.fillWidth: true
+                    text: "Allow Screen Rotation"
+                    checked: VescIf.getAllowScreenRotation()
+                    visible: Qt.platform.os !== "ios"
+                    enabled: Qt.platform.os !== "ios"
+                }
+
+                CheckBox {
+                    id: qmlUiBox
+                    Layout.fillWidth: true
+                    text: "Load QML UI on Connect"
+                    checked: VescIf.getLoadQmlUiOnConnect()
+                }
+
+                CheckBox {
+                    id: darkModeBox
+                    Layout.fillWidth: true
+                    text: "Use Dark Mode"
+                    checked: Utility.isDarkMode()
+                    onCheckedChanged: {
+                        Utility.setDarkMode(checked)
+                    }
+                }
             }
+        }
+
+        onOpened: {
+            imperialBox.checked = VescIf.useImperialUnits()
+            negativeSpeedBox.checked = VescIf.speedGaugeUseNegativeValues()
+            screenOnBox.checked = VescIf.keepScreenOn()
+            screenRotBox.checked = VescIf.getAllowScreenRotation()
+            qmlUiBox.checked = VescIf.getLoadQmlUiOnConnect()
         }
 
         onClosed: {
             VescIf.setUseImperialUnits(imperialBox.checked)
+            VescIf.setSpeedGaugeUseNegativeValues(negativeSpeedBox.checked)
             VescIf.setKeepScreenOn(screenOnBox.checked)
-            VescIf.setUseWakeLock(wakeLockBox.checked)
+            VescIf.setAllowScreenRotation(screenRotBox.checked)
+            VescIf.setLoadQmlUiOnConnect(qmlUiBox.checked)
             VescIf.storeSettings()
 
             Utility.keepScreenOn(VescIf.keepScreenOn())
@@ -85,6 +128,45 @@ Item {
             if (VescIf.useWakeLock()) {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
+
+            if (Utility.isDarkMode() !== mLastDarkMode) {
+                darkChangedDialog.open()
+            }
+
+            VescIf.commands().emitEmptySetupValues()
+        }
+    }
+
+    Dialog {
+        id: darkChangedDialog
+        standardButtons: Dialog.Yes | Dialog.No
+        modal: true
+        focus: true
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        title: "Theme Changed"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        x: 10
+        y: Math.max((parent.height - height) / 2, 10)
+        parent: ApplicationWindow.overlay
+
+        Text {
+            id: detectRlLabel
+            color: Utility.getAppHexColor("lightText")
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text:
+                "The theme has been changed. This requires restarting VESC Tool to take effect. " +
+                "Do you want to close VESC Tool now?"
+        }
+
+        onAccepted: {
+            Qt.quit()
         }
     }
 }

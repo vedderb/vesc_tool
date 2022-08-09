@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -26,21 +26,27 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    id: bmsPageItem
     property Commands mCommands: VescIf.commands()
     property var mVal
     property bool mValSet: false
+    property bool isHorizontal: width > height
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
-        spacing: 0
-
+        columns: isHorizontal ? 2 : 1
+        rows: isHorizontal ? 1 : 2
         RowLayout {
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.column: isHorizontal ? 1 : 0
+            Layout.row: 0
+            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
+            Layout.preferredHeight: parent.height*2/3
             spacing: 0
 
             Rectangle {
-                color: "#4f4f4f"
+                color: Utility.getAppHexColor("lightestBackground")
                 width: 16
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
@@ -89,11 +95,11 @@ Item {
                                 ctx.lineTo(xOfsLeft + lineStep * i, heightBars)
                             }
 
-                            ctx.strokeStyle = "#81D4FA"
+                            ctx.strokeStyle = Utility.getAppHexColor("lightAccent")
                             ctx.lineWidth = 1.2
                             ctx.stroke()
 
-                            ctx.fillStyle = "white"
+                            ctx.fillStyle = Utility.getAppHexColor("lightAccent")
                             ctx.textBaseline = "top"
 
                             ctx.textAlign = "start";
@@ -111,8 +117,8 @@ Item {
                             var vCells = mVal.v_cells
                             var isBal = mVal.is_balancing
 
-//                            var vCells = [3.1, 2.7, 3.3, 3.4, 3.5, 3.4, 3.3, 4.4, 4.1, 4.2]
-//                            var isBal = [false, false, false, false, true, true, false, false, false, true]
+                            //                            var vCells = [3.1, 2.7, 3.3, 3.4, 3.5, 3.4, 3.3, 4.4, 4.1, 4.2]
+                            //                            var isBal = [false, false, false, false, true, true, false, false, false, true]
 
                             var cellNum = vCells.length
                             var cellHeight = (heightBars / cellNum) * 0.6
@@ -122,7 +128,7 @@ Item {
                             ctx.textBaseline = "middle"
 
                             for (i = 0;i < cellNum;i++) {
-                                ctx.fillStyle = "white"
+                                ctx.fillStyle = Utility.getAppHexColor("lightAccent")
 
                                 var cellW = ((vCells[i] - 3.0) / 1.2) * cellWidth
                                 if (cellW > cellWidth) {
@@ -140,7 +146,7 @@ Item {
                                              xOfsLeft + cellWidth + valMetrics.width / 2, txtY)
 
                                 if (isBal[i]) {
-                                    ctx.fillStyle = "#FF6347"
+                                    ctx.fillStyle = Utility.getAppHexColor("orange")
                                 } else {
                                     ctx.fillStyle = Qt.rgba(0, 0.9, 0, 1)
                                 }
@@ -176,7 +182,7 @@ Item {
                             var cellWidth = width - xOfsLeft - xOfsRight
 
                             for (var i = 0;i < tempNum;i++) {
-                                ctx.fillStyle = "white"
+                                ctx.fillStyle = Utility.getAppHexColor("lightAccent")
                                 ctx.textAlign = "start";
                                 ctx.textBaseline = "middle";
                                 ctx.font = '%1pt %2'.arg(valText.font.pointSize).arg(valText.font.family)
@@ -210,99 +216,114 @@ Item {
             }
         }
 
-        Rectangle {
-            id: textRect
-            color: "#272727"
-
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
+            Layout.column:0
+            Layout.row: isHorizontal ? 0 : 1
+            Layout.preferredHeight: valMetrics.height * 12 + 20 + menuButton.implicitHeight
+            spacing: 0
             Rectangle {
-                anchors.bottom: valText.top
-                width: parent.width
-                height: 2
-                color: "#81D4FA"
-            }
+                id: textRect
+                color: Utility.getAppHexColor("darkBackground")
 
-            Layout.fillWidth: true
-            Layout.preferredHeight: valMetrics.height * 10 + 20
-            Layout.alignment: Qt.AlignBottom
+                Rectangle {
+                    anchors.top: textRect.top
+                    width: parent.width
+                    height: 2
+                    color: Utility.getAppHexColor("lightAccent")
+                }
 
-            Text {
-                id: valText
-                color: "white"
-                text: "No Data"
-                font.family: "DejaVu Sans Mono"
-                verticalAlignment: Text.AlignVCenter
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.topMargin: 5
-            }
-
-            TextMetrics {
-                id: valMetrics
-                font: valText.font
-                text: "A"
-            }
-        }
-
-        RowLayout {
-            Layout.leftMargin: 10
-            Layout.rightMargin: 10
-            Layout.fillWidth: true
-
-            Item {
                 Layout.fillWidth: true
-                Layout.preferredWidth: 150
+                Layout.preferredHeight: valMetrics.height * 12 + 20
+                Layout.alignment: Qt.AlignBottom
+
+                Text {
+                    id: valText
+                    color: Utility.getAppHexColor("lightText")
+                    text: "No Data"
+                    font.family: "DejaVu Sans Mono"
+                    verticalAlignment: Text.AlignVCenter
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.topMargin: 5
+                }
+
+                TextMetrics {
+                    id: valMetrics
+                    font: valText.font
+                    text: "A"
+                }
             }
 
-            Button {
-                Layout.preferredWidth: 50
+            RowLayout {
+                Layout.leftMargin: 10 + notchLeft
+                Layout.rightMargin: 10 + notchRight
                 Layout.fillWidth: true
-                text: "..."
-                onClicked: menu.open()
 
-                Menu {
-                    id: menu
-                    width: 500
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 150
+                }
 
-                    MenuItem {
-                        text: "Balance On"
-                        onTriggered: {
-                            mCommands.bmsForceBalance(true)
+                Button {
+                    id: menuButton
+                    Layout.preferredWidth: 50
+                    Layout.fillWidth: true
+                    text: "..."
+                    onClicked: menu.open()
+
+                    Menu {
+                        id: menu
+                        bottomPadding: notchBot
+                        leftPadding: notchLeft
+                        rightPadding: notchRight
+                        parent: bmsPageItem
+                        y: parent.height - implicitHeight
+                        width: parent.width
+
+                        MenuItem {
+                            text: "Balance On"
+                            onTriggered: {
+                                mCommands.bmsForceBalance(true)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Balance Off"
-                        onTriggered: {
-                            mCommands.bmsForceBalance(false)
+                        MenuItem {
+                            text: "Balance Off"
+                            onTriggered: {
+                                mCommands.bmsForceBalance(false)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Reset Ah Counter"
-                        onTriggered: {
-                            mCommands.bmsResetCounters(true, false)
+                        MenuItem {
+                            text: "Reset Ah Counter"
+                            onTriggered: {
+                                mCommands.bmsResetCounters(true, false)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Reset Wh Counter"
-                        onTriggered: {
-                            mCommands.bmsResetCounters(false, true)
+                        MenuItem {
+                            text: "Reset Wh Counter"
+                            onTriggered: {
+                                mCommands.bmsResetCounters(false, true)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Allow Charging"
-                        onTriggered: {
-                            mCommands.bmsSetChargeAllowed(true)
+                        MenuItem {
+                            text: "Allow Charging"
+                            onTriggered: {
+                                mCommands.bmsSetChargeAllowed(true)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Disable Charging"
-                        onTriggered: {
-                            mCommands.bmsSetChargeAllowed(false)
+                        MenuItem {
+                            text: "Disable Charging"
+                            onTriggered: {
+                                mCommands.bmsSetChargeAllowed(false)
+                            }
                         }
-                    }
-                    MenuItem {
-                        text: "Zero Current Offset"
-                        onTriggered: {
-                            mCommands.bmsZeroCurrentOffset()
+                        MenuItem {
+                            text: "Zero Current Offset"
+                            onTriggered: {
+                                mCommands.bmsZeroCurrentOffset()
+                            }
                         }
                     }
                 }
@@ -325,9 +346,11 @@ Item {
                     "Wh Cnt     : " + parseFloat(val.wh_cnt).toFixed(2) + " Wh\n" +
                     "Power      : " + parseFloat(val.v_tot * val.i_in_ic).toFixed(2) + " W\n" +
                     "Humidity   : " + parseFloat(val.humidity).toFixed(1) + " %\n" +
-                    "Temp Max   : " + parseFloat(val.temp_cells_highest).toFixed(1) + " %\n" +
+                    "Temp Hum   : " + parseFloat(val.temp_hum_sensor).toFixed(1) + " \u00B0C\n" +
+                    "Temp Max   : " + parseFloat(val.temp_cells_highest).toFixed(1) + " \u00B0C\n" +
                     "SoC        : " + parseFloat(val.soc * 100).toFixed(1) + " %\n" +
-                    "SoH        : " + parseFloat(val.soh * 100).toFixed(1) + " %"
+                    "SoH        : " + parseFloat(val.soh * 100).toFixed(1) + " %\n" +
+                    "Ah Chg Tot : " + parseFloat(val.ah_cnt_chg_total).toFixed(3) + " Ah"
 
             cellCanvas.requestPaint()
             tempCanvas.requestPaint()

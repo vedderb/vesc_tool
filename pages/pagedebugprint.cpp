@@ -21,16 +21,12 @@
 #include "ui_pagedebugprint.h"
 #include <QDateTime>
 
-// Static member initialization
-PageDebugPrint *PageDebugPrint::currentMsgHandler = nullptr;
-
 PageDebugPrint::PageDebugPrint(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageDebugPrint)
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    currentMsgHandler = this;
 }
 
 PageDebugPrint::~PageDebugPrint()

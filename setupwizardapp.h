@@ -25,6 +25,7 @@
 #include <QListWidget>
 #include <QTimer>
 #include <QPushButton>
+#include <QFileSelector>
 
 #include "vescinterface.h"
 #include "widgets/paramtable.h"

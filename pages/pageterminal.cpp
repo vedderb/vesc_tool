@@ -19,12 +19,19 @@
 
 #include "pageterminal.h"
 #include "ui_pageterminal.h"
+#include "utility.h"
 
 PageTerminal::PageTerminal(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageTerminal)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->sendButton->setIcon(QPixmap(theme + "icons/Send File-96.png"));
+    ui->clearButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
 }

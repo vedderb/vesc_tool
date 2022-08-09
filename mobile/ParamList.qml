@@ -20,40 +20,77 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import QtQuick.Window 2.0
 
 Item {
     implicitHeight: scrollCol.implicitHeight
     property var editorsVisible: []
+    property var paramNames: []
+    property var paramNamesAll: []
+    property bool isHorizontal: Screen.width > Screen.height & parent.width > Screen.width/2
+
+    onIsHorizontalChanged: {
+        updateEditors()
+    }
+
+    function updateEditors() {
+        for (var i = 0;i < paramNamesAll.length;i++) {
+            if (paramNamesAll[i].startsWith("::sep::")) {
+                editorsVisible[i].Layout.columnSpan = isHorizontal ? 2 : 1
+            }
+        }
+    }
 
     function clear() {
         for (var i = 0;i < editorsVisible.length;i++) {
             editorsVisible[i].destroy();
         }
         editorsVisible = []
+        paramNames = []
+        paramNamesAll = []
     }
 
     function addEditorMc(param) {
-        editorsVisible.push(editors.createEditorMc(scrollCol, param))
+        var e = editors.createEditorMc(scrollCol, param)
+        e.Layout.preferredWidth = 500
+        e.Layout.fillsWidth = true
+        editorsVisible.push(e)
+        paramNames.push(param)
+        paramNamesAll.push(param)
     }
 
     function addEditorApp(param) {
-        editorsVisible.push(editors.createEditorApp(scrollCol, param))
+        var e = editors.createEditorApp(scrollCol, param)
+        e.Layout.preferredWidth = 500
+        e.Layout.fillsWidth = true
+        editorsVisible.push(e)
+        paramNames.push(param)
+        paramNamesAll.push(param)
     }
 
     function addSpacer() {
-        editorsVisible.push(editors.createSpacer(scrollCol))
+        var e = editors.createSpacer(scrollCol)
+        editorsVisible.push(e)
     }
 
     function addSeparator(text) {
-        editorsVisible.push(editors.createSeparator(scrollCol, text))
+        var e = editors.createSeparator(scrollCol, text)
+        e.Layout.columnSpan = isHorizontal ? 2 : 1
+        editorsVisible.push(e)
+        paramNamesAll.push("::sep::" + text)
+    }
+
+    function getParamNames() {
+        return paramNames
     }
 
     ParamEditors {
         id: editors
     }
 
-    ColumnLayout {
+    GridLayout {
         id: scrollCol
+        columns: isHorizontal ? 2 : 1
         anchors.fill: parent
     }
 }

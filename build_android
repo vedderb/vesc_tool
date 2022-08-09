@@ -26,7 +26,7 @@ make clean
 make -j8
 make install INSTALL_ROOT=build/android/build
 androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-libvesc_tool.so-deployment-settings.json --android-platform android-29
-mv build/android/build/build/outputs/apk/build-debug.apk build/android/vesc_tool_mobile.apk
+mv build/android/build/build/outputs/apk/debug/build-debug.apk build/android/vesc_tool_mobile.apk
 rm -rf build/android/build
 rm -rf build/android/obj
 rm -f build/android/libvesc_tool.so
@@ -37,7 +37,7 @@ make clean
 make -j8
 make install INSTALL_ROOT=build/android/build
 androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-libvesc_tool.so-deployment-settings.json --android-platform android-29
-mv build/android/build/build/outputs/apk/build-debug.apk build/android/vesc_tool_full.apk
+mv build/android/build/build/outputs/apk/debug/build-debug.apk build/android/vesc_tool_full.apk
 rm -rf build/android/build
 rm -rf build/android/obj
 rm -f build/android/libvesc_tool.so

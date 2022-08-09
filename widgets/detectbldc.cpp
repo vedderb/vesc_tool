@@ -22,12 +22,18 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "helpdialog.h"
+#include "utility.h"
 
 DetectBldc::DetectBldc(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DetectBldc)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
     mResultReceived = false;
@@ -137,28 +143,28 @@ void DetectBldc::bldcDetectReceived(bldc_detect param)
 
         QString hall_str;
         if (param.hall_res == 0) {
-            hall_str.sprintf("Detected hall sensor table:\n"
+            hall_str = QString::asprintf("Detected hall sensor table:\n"
                              "%i, %i, %i, %i, %i, %i, %i, %i\n",
                              param.hall_table.at(0), param.hall_table.at(1),
                              param.hall_table.at(2), param.hall_table.at(3),
                              param.hall_table.at(4), param.hall_table.at(5),
                              param.hall_table.at(6), param.hall_table.at(7));
         } else if (param.hall_res == -1) {
-            hall_str.sprintf("Hall sensor detection failed:\n"
+            hall_str = QString::asprintf("Hall sensor detection failed:\n"
                              "%i, %i, %i, %i, %i, %i, %i, %i\n",
                              param.hall_table.at(0), param.hall_table.at(1),
                              param.hall_table.at(2), param.hall_table.at(3),
                              param.hall_table.at(4), param.hall_table.at(5),
                              param.hall_table.at(6), param.hall_table.at(7));
         } else if (param.hall_res == -2) {
-            hall_str.sprintf("WS2811 enabled. Hall sensors cannot be used.\n");
+            hall_str = "WS2811 enabled. Hall sensors cannot be used.\n";
         } else if (param.hall_res == -3) {
-            hall_str.sprintf("Encoder enabled. Hall sensors cannot be used.\n");
+            hall_str = "Encoder enabled. Hall sensors cannot be used.\n";
         } else {
-            hall_str.sprintf("Unknown hall error: %d\n", param.hall_res);
+            hall_str = QString("Unknown hall error: %1\n").arg(param.hall_res);
         }
 
-        ui->resultBrowser->setText(QString().sprintf("Detection results:\n"
+        ui->resultBrowser->setText(QString().asprintf("Detection results:\n"
                                                      "Integrator limit: %.2f\n"
                                                      "BEMF Coupling: %.2f\n"
                                                      "%s",

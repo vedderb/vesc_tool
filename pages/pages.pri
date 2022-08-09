@@ -17,6 +17,8 @@ FORMS += \
     $$PWD/pageappuart.ui \
     $$PWD/pageappnunchuk.ui \
     $$PWD/pageappnrf.ui \
+    $$PWD/pagemotorcomparison.ui \
+    $$PWD/pagescripting.ui \
     $$PWD/pageterminal.ui \
     $$PWD/pagefirmware.ui \
     $$PWD/pagertdata.ui \
@@ -27,7 +29,6 @@ FORMS += \
     $$PWD/pagedataanalysis.ui \
     $$PWD/pagemotorinfo.ui \
     $$PWD/pagesetupcalculators.ui \
-    $$PWD/pagesettings.ui \
     $$PWD/pagegpd.ui \
     $$PWD/pageexperiments.ui \
     $$PWD/pageimu.ui \
@@ -54,6 +55,8 @@ HEADERS += \
     $$PWD/pageappuart.h \
     $$PWD/pageappnunchuk.h \
     $$PWD/pageappnrf.h \
+    $$PWD/pagemotorcomparison.h \
+    $$PWD/pagescripting.h \
     $$PWD/pageterminal.h \
     $$PWD/pagefirmware.h \
     $$PWD/pagertdata.h \
@@ -64,7 +67,6 @@ HEADERS += \
     $$PWD/pagedataanalysis.h \
     $$PWD/pagemotorinfo.h \
     $$PWD/pagesetupcalculators.h \
-    $$PWD/pagesettings.h \
     $$PWD/pagegpd.h \
     $$PWD/pageexperiments.h \
     $$PWD/pageimu.h \
@@ -91,6 +93,8 @@ SOURCES += \
     $$PWD/pageappuart.cpp \
     $$PWD/pageappnunchuk.cpp \
     $$PWD/pageappnrf.cpp \
+    $$PWD/pagemotorcomparison.cpp \
+    $$PWD/pagescripting.cpp \
     $$PWD/pageterminal.cpp \
     $$PWD/pagefirmware.cpp \
     $$PWD/pagertdata.cpp \
@@ -101,7 +105,6 @@ SOURCES += \
     $$PWD/pagedataanalysis.cpp \
     $$PWD/pagemotorinfo.cpp \
     $$PWD/pagesetupcalculators.cpp \
-    $$PWD/pagesettings.cpp \
     $$PWD/pagegpd.cpp \
     $$PWD/pageexperiments.cpp \
     $$PWD/pageimu.cpp \

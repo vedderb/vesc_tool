@@ -29,7 +29,9 @@ import QtQuick.Controls 2.1
 import Qt.labs.folderlistmodel 2.1
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.0
+import Qt.labs.platform 1.0
 
+import Vedder.vesc.utility 1.0
 Item {
     id:picker
     signal dirSelected(string fileName)
@@ -43,7 +45,7 @@ Item {
     property bool showDotAndDotDot: false
     property bool showHidden: true
     property bool showDirsFirst: true
-    property string folder: "file:///sdcard"
+    property string folder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
     property string nameFilters: ""
 
     function currentFolder() {
@@ -80,7 +82,7 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         height: toolbarHeight
-        color: "#3c3c3c"
+        color: Utility.getAppHexColor("lightBackground")
         Button {
             id: button
             text: ".."
@@ -98,7 +100,7 @@ Item {
         }
         Text {
             id: filePath
-            color: "white"
+            color: Utility.getAppHexColor("lightText")
             text: folderListModel.folder.toString().replace("file:///", "►").replace("/", "►").replace("/", "►").replace("/", "►").replace("/", "►")
             renderType: Text.NativeRendering
             elide: Text.ElideMiddle
@@ -128,6 +130,8 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
+        spacing: 0
+
         OldControls.TableView {
             id: view
             Layout.fillHeight: true
@@ -136,7 +140,7 @@ Item {
             headerDelegate:headerDelegate
             rowDelegate: Rectangle {
                 height: rowHeight
-                color: "#6f6f6f"
+                color: Utility.getAppHexColor("disabledText")
             }
 
             OldControls.TableViewColumn {
@@ -151,7 +155,7 @@ Item {
                 Item {
                     height: rowHeight
                     Rectangle {
-                        color: "#6f6f6f"
+                        color: Utility.getAppHexColor("disabledText")
                         anchors.fill: parent
                         MouseArea {
                             anchors.fill: parent
@@ -161,7 +165,7 @@ Item {
                         }
                         Text {
                             id: fileNameText
-                            color: "white"
+                            color: Utility.getAppHexColor("lightText")
                             height: width
                             anchors.left: image.right
                             anchors.top: parent.top
@@ -177,8 +181,8 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: textmargin
                             anchors.verticalCenter: parent.verticalCenter
-                            source: isFolder(fileNameText.text) ? "qrc:/res/icons/ic_folder_open_black_48dp.png" :
-                                                                  "qrc:/res/icons/ic_insert_drive_file_black_48dp.png"
+                            source: isFolder(fileNameText.text) ? "qrc" + Utility.getThemePath() + "icons/ic_folder_open_black_48dp.png" :
+                                                                  "qrc" + Utility.getThemePath() + "icons/ic_insert_drive_file_black_48dp.png"
                         }
                     }
                 }
@@ -187,44 +191,51 @@ Item {
                 id: headerDelegate
                 Rectangle {
                     height: rowHeight
-                    color: "#535353"
+                    color: Utility.getAppHexColor("lightestBackground")
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.horizontalCenter: parent.horizontalCenter
                         height: headerTextSize
                         font.bold: true
                         elide: Text.ElideMiddle
-                        color: "white"
+                        color: Utility.getAppHexColor("lightText")
                         text: styleData.value !== undefined ? styleData.value : ""
                     }
                 }
             }
         }
-
-        RowLayout {
+        Rectangle {
+            id: buttonBackground
             Layout.fillWidth: true
-            Layout.leftMargin: 10
-            Layout.rightMargin: 10
-            Layout.bottomMargin: 5
+            height: toolbarHeight
+            color: Utility.getAppHexColor("lightBackground")
 
-            Button {
+            RowLayout {
+                anchors.fill: parent
                 Layout.fillWidth: true
-                text: "Cancel"
+                Layout.leftMargin: 10
+                Layout.rightMargin: 10
+                Layout.bottomMargin: 5
 
-                onClicked: {
-                    picker.enabled = false
-                    picker.visible = false
+                Button {
+                    Layout.fillWidth: true
+                    text: "Cancel"
+
+                    onClicked: {
+                        picker.enabled = false
+                        picker.visible = false
+                    }
                 }
-            }
 
-            Button {
-                Layout.fillWidth: true
-                text: "Ok"
+                Button {
+                    Layout.fillWidth: true
+                    text: "Ok"
 
-                onClicked: {
-                    dirSelected(folderListModel.folder)
-                    picker.enabled = false
-                    picker.visible = false
+                    onClicked: {
+                        dirSelected(folderListModel.folder)
+                        picker.enabled = false
+                        picker.visible = false
+                    }
                 }
             }
         }

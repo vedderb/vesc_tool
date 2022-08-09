@@ -18,6 +18,7 @@
     */
 
 #include "displaypercentage.h"
+#include "utility.h"
 #include <QPainter>
 #include <QPaintEvent>
 #include <QFont>
@@ -68,12 +69,12 @@ void DisplayPercentage::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    QColor c_bg = Qt::black;
-    QColor c_hl = Qt::darkGreen;
-    QColor c_vl = Qt::darkRed;
-    QColor c_neg = Qt::red;
-    QColor c_pos = Qt::green;
-    QColor c_text = Qt::white;
+    QColor c_bg = Utility::getAppQColor("black");
+    QColor c_hl = Utility::getAppQColor("darkAccent");
+    QColor c_vl = Utility::getAppQColor("red");
+    QColor c_neg = Utility::getAppQColor("red");
+    QColor c_pos = Utility::getAppQColor("lightAccent");
+    QColor c_text = Utility::getAppQColor("white");
 
     if (!isEnabled()) {
         int c = 80;
@@ -113,7 +114,7 @@ void DisplayPercentage::paintEvent(QPaintEvent *event)
 
     // Text
     pen.setColor(c_text);
-    font.setFamily("Monospace");
+    font.setFamily("DejaVu Sans Mono");
     font.setBold(true);
     font.setPixelSize(2 * h / 3 - 2);
     painter.setPen(pen);

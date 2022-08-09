@@ -86,7 +86,7 @@ Scene3D {
                     },
 
                     PhongMaterial {
-                        diffuse: "darkgray"
+                        diffuse: Utility.getAppHexColor("normalText")
                         ambient: "dimgray"
                     }
                 ]

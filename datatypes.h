@@ -24,6 +24,8 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+#include <QDateTime>
+#include <QTime>
 #include <stdint.h>
 
 typedef struct {
@@ -88,12 +90,14 @@ typedef enum {
     FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2,
     FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3,
     FAULT_CODE_UNBALANCED_CURRENTS,
+    FAULT_CODE_BRK,
     FAULT_CODE_RESOLVER_LOT,
     FAULT_CODE_RESOLVER_DOS,
     FAULT_CODE_RESOLVER_LOS,
     FAULT_CODE_FLASH_CORRUPTION_APP_CFG,
     FAULT_CODE_FLASH_CORRUPTION_MC_CFG,
-    FAULT_CODE_ENCODER_NO_MAGNET
+    FAULT_CODE_ENCODER_NO_MAGNET,
+    FAULT_CODE_ENCODER_MAGNET_TOO_STRONG
 } mc_fault_code;
 
 typedef enum {
@@ -152,6 +156,8 @@ struct MC_VALUES {
     Q_PROPERTY(QString fault_str MEMBER fault_str)
     Q_PROPERTY(double vd MEMBER vd)
     Q_PROPERTY(double vq MEMBER vq)
+    Q_PROPERTY(bool has_timeout MEMBER has_timeout)
+    Q_PROPERTY(bool kill_sw_active MEMBER kill_sw_active)
 
 public:
     MC_VALUES() {
@@ -178,6 +184,8 @@ public:
         vesc_id = 0;
         vd = 0.0;
         vq = 0.0;
+        has_timeout = false;
+        kill_sw_active = false;
     }
 
     bool operator==(const MC_VALUES &other) const {
@@ -214,6 +222,8 @@ public:
     QString fault_str;
     double vd;
     double vq;
+    bool has_timeout;
+    bool kill_sw_active;
 };
 
 Q_DECLARE_METATYPE(MC_VALUES)
@@ -243,6 +253,7 @@ struct SETUP_VALUES {
     Q_PROPERTY(double battery_wh MEMBER battery_wh)
     Q_PROPERTY(QString fault_str MEMBER fault_str)
     Q_PROPERTY(unsigned odometer MEMBER odometer)
+    Q_PROPERTY(unsigned uptime_ms MEMBER uptime_ms)
 
 public:
     SETUP_VALUES() {
@@ -267,6 +278,7 @@ public:
         num_vescs = 0;
         battery_wh = 0.0;
         odometer = 0;
+        uptime_ms = 0;
     }
 
     bool operator==(const SETUP_VALUES &other) const {
@@ -277,6 +289,12 @@ public:
 
     bool operator!=(SETUP_VALUES const &other) const {
         return !(*this == other);
+    }
+
+    Q_INVOKABLE QString uptimeString() {
+        QTime t(0, 0);
+        t = t.addMSecs(uptime_ms);
+        return t.toString("hh:mm:ss");
     }
 
     double temp_mos;
@@ -301,6 +319,7 @@ public:
     double battery_wh;
     QString fault_str;
     unsigned odometer;
+    unsigned uptime_ms;
 };
 
 Q_DECLARE_METATYPE(SETUP_VALUES)
@@ -329,6 +348,8 @@ struct IMU_VALUES {
     Q_PROPERTY(double q2 MEMBER q2)
     Q_PROPERTY(double q3 MEMBER q3)
 
+    Q_PROPERTY(int vesc_id MEMBER vesc_id)
+
 public:
     IMU_VALUES() {
         roll = 0; pitch = 0; yaw = 0;
@@ -336,6 +357,7 @@ public:
         gyroX = 0; gyroY = 0; gyroZ = 0;
         magX = 0; magY = 0; magZ = 0;
         q0 = 1; q1 = 0; q2 = 0; q3 = 0;
+        vesc_id = 0;
     }
 
     bool operator==(const IMU_VALUES &other) const {
@@ -368,9 +390,82 @@ public:
     double q1;
     double q2;
     double q3;
+
+    int vesc_id;
 };
 
 Q_DECLARE_METATYPE(IMU_VALUES)
+
+struct STAT_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(double speed_avg MEMBER speed_avg)
+    Q_PROPERTY(double speed_max MEMBER speed_max)
+    Q_PROPERTY(double power_avg MEMBER power_avg)
+    Q_PROPERTY(double power_max MEMBER power_max)
+    Q_PROPERTY(double temp_motor_avg MEMBER temp_motor_avg)
+    Q_PROPERTY(double temp_motor_max MEMBER temp_motor_max)
+    Q_PROPERTY(double temp_mos_avg MEMBER temp_mos_avg)
+    Q_PROPERTY(double temp_mos_max MEMBER temp_mos_max)
+    Q_PROPERTY(double current_avg MEMBER current_avg)
+    Q_PROPERTY(double current_max MEMBER current_max)
+    Q_PROPERTY(double count_time MEMBER count_time)
+
+public:
+    STAT_VALUES() {
+        speed_avg = 0.0;
+        speed_max = 0.0;
+        power_avg = 0.0;
+        power_max = 0.0;
+        temp_motor_avg = 0.0;
+        temp_motor_max = 0.0;
+        temp_mos_avg = 0.0;
+        temp_mos_max = 0.0;
+        current_avg = 0.0;
+        current_max = 0.0;
+        count_time = 0.0;
+    }
+
+    bool operator==(const STAT_VALUES &other) const {
+        (void)other;
+        // compare members
+        return true;
+    }
+
+    bool operator!=(STAT_VALUES const &other) const {
+        return !(*this == other);
+    }
+
+    Q_INVOKABLE double distance() { // Meters
+        return speed_avg * count_time;
+    }
+
+    Q_INVOKABLE double energy() { // Wh
+        return power_avg * count_time / 60.0 / 60.0;
+    }
+
+    Q_INVOKABLE double ah() {
+        return current_avg * count_time / 60.0 / 60.0;
+    }
+
+    Q_INVOKABLE double efficiency() { // Wh / km
+        return energy() / (distance() / 1000.0);
+    }
+
+    double speed_avg;
+    double speed_max;
+    double power_avg;
+    double power_max;
+    double temp_motor_avg;
+    double temp_motor_max;
+    double temp_mos_avg;
+    double temp_mos_max;
+    double current_avg;
+    double current_max;
+    double count_time;
+};
+
+Q_DECLARE_METATYPE(STAT_VALUES)
 
 struct LOG_DATA {
     Q_GADGET
@@ -475,6 +570,10 @@ struct FW_RX_PARAMS {
     Q_PROPERTY(int isTestFw MEMBER isTestFw)
     Q_PROPERTY(HW_TYPE hwType MEMBER hwType)
     Q_PROPERTY(int customConfigNum MEMBER customConfigNum)
+    Q_PROPERTY(bool hasQmlHw MEMBER hasQmlHw)
+    Q_PROPERTY(bool qmlHwFullscreen MEMBER qmlHwFullscreen)
+    Q_PROPERTY(bool hasQmlApp MEMBER hasQmlApp)
+    Q_PROPERTY(bool qmlAppFullscreen MEMBER qmlAppFullscreen)
 
 public:
     FW_RX_PARAMS() {
@@ -484,6 +583,11 @@ public:
         isTestFw = false;
         hwType = HW_TYPE_VESC;
         customConfigNum = 0;
+        hasPhaseFilters = false;
+        hasQmlHw = false;
+        qmlHwFullscreen = false;
+        hasQmlApp = false;
+        qmlAppFullscreen = false;
     }
 
     Q_INVOKABLE QString hwTypeStr() {
@@ -513,6 +617,12 @@ public:
     int isTestFw;
     HW_TYPE hwType;
     int customConfigNum;
+    bool hasPhaseFilters;
+    bool hasQmlHw;
+    bool qmlHwFullscreen;
+    bool hasQmlApp;
+    bool qmlAppFullscreen;
+
 };
 
 Q_DECLARE_METATYPE(FW_RX_PARAMS)
@@ -535,6 +645,11 @@ struct BMS_VALUES {
     Q_PROPERTY(double temp_cells_highest MEMBER temp_cells_highest)
     Q_PROPERTY(double soc MEMBER soc)
     Q_PROPERTY(double soh MEMBER soh)
+    Q_PROPERTY(int can_id MEMBER can_id)
+    Q_PROPERTY(double ah_cnt_chg_total MEMBER ah_cnt_chg_total)
+    Q_PROPERTY(double wh_cnt_chg_total MEMBER wh_cnt_chg_total)
+    Q_PROPERTY(double ah_cnt_dis_total MEMBER ah_cnt_dis_total)
+    Q_PROPERTY(double wh_cnt_dis_total MEMBER wh_cnt_dis_total)
 
 public:
     BMS_VALUES() {
@@ -549,6 +664,27 @@ public:
         temp_cells_highest = 0.0;
         soc = 0.0;
         soh = 0.0;
+        can_id = -1;
+        ah_cnt_chg_total = 0.0;
+        wh_cnt_chg_total = 0.0;
+        ah_cnt_dis_total = 0.0;
+        wh_cnt_dis_total = 0.0;
+        updateTime = -1;
+    }
+
+    Q_INVOKABLE double age() {
+        double res = -1.0;
+
+        if (updateTime > 0) {
+            auto ms = QDateTime::currentDateTime().toMSecsSinceEpoch() - updateTime;
+            res = double(ms) / 1000.0;
+        }
+
+        return res;
+    }
+
+    Q_INVOKABLE void updateTimeStamp() {
+        updateTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
     }
 
     double v_tot;
@@ -566,10 +702,85 @@ public:
     double temp_cells_highest;
     double soc;
     double soh;
-
+    int can_id;
+    double ah_cnt_chg_total;
+    double wh_cnt_chg_total;
+    double ah_cnt_dis_total;
+    double wh_cnt_dis_total;
+    qint64 updateTime;
 };
 
 Q_DECLARE_METATYPE(BMS_VALUES)
+
+struct PSW_STATUS {
+    Q_GADGET
+
+    Q_PROPERTY(int id MEMBER id)
+    Q_PROPERTY(int psws_num MEMBER psws_num)
+    Q_PROPERTY(double age_seconds MEMBER age_seconds)
+    Q_PROPERTY(double v_in MEMBER v_in)
+    Q_PROPERTY(double v_out MEMBER v_out)
+    Q_PROPERTY(double temp MEMBER temp)
+    Q_PROPERTY(bool is_out_on MEMBER is_out_on)
+    Q_PROPERTY(bool is_pch_on MEMBER is_pch_on)
+    Q_PROPERTY(bool is_dsc_on MEMBER is_dsc_on)
+
+public:
+    PSW_STATUS() {
+        id = -1;
+        psws_num = 0;
+        age_seconds = -1.0;
+        v_in = 0.0;
+        v_out = 0.0;
+        temp = 0.0;
+        is_out_on = false;
+        is_pch_on = false;
+        is_dsc_on = false;
+    }
+
+    int id;
+    int psws_num;
+    double age_seconds;
+    double v_in;
+    double v_out;
+    double temp;
+    bool is_out_on;
+    bool is_pch_on;
+    bool is_dsc_on;
+
+};
+
+Q_DECLARE_METATYPE(PSW_STATUS)
+
+struct IO_BOARD_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(int id MEMBER id)
+    Q_PROPERTY(QVector<qreal> adc_1_4 MEMBER adc_1_4)
+    Q_PROPERTY(QVector<qreal> adc_5_8 MEMBER adc_5_8)
+    Q_PROPERTY(QVector<bool> digital MEMBER digital)
+    Q_PROPERTY(double adc_1_4_age MEMBER adc_1_4_age)
+    Q_PROPERTY(double adc_5_8_age MEMBER adc_5_8_age)
+    Q_PROPERTY(double digital_age MEMBER digital_age)
+
+public:
+    IO_BOARD_VALUES() {
+        id = -1;
+        adc_1_4_age = -1.0;
+        adc_5_8_age = -1.0;
+        digital_age = -1.0;
+    }
+
+    int id;
+    QVector<qreal> adc_1_4;
+    QVector<qreal> adc_5_8;
+    QVector<bool> digital;
+    double adc_1_4_age;
+    double adc_5_8_age;
+    double digital_age;
+};
+
+Q_DECLARE_METATYPE(IO_BOARD_VALUES)
 
 typedef enum {
     DEBUG_SAMPLING_OFF = 0,
@@ -701,6 +912,31 @@ typedef enum {
     COMM_ERASE_BOOTLOADER_ALL_CAN_HW,
 
     COMM_SET_ODOMETER,
+
+    // Power switch commands
+    COMM_PSW_GET_STATUS,
+    COMM_PSW_SWITCH,
+
+    COMM_BMS_FWD_CAN_RX,
+    COMM_BMS_HW_DATA,
+    COMM_GET_BATTERY_CUT,
+    COMM_BM_HALT_REQ,
+    COMM_GET_QML_UI_HW,
+    COMM_GET_QML_UI_APP,
+    COMM_CUSTOM_HW_DATA,
+    COMM_QMLUI_ERASE,
+    COMM_QMLUI_WRITE,
+
+    // IO Board
+    COMM_IO_BOARD_GET_ALL,
+    COMM_IO_BOARD_SET_PWM,
+    COMM_IO_BOARD_SET_DIGITAL,
+
+    COMM_BM_MEM_WRITE,
+    COMM_BMS_BLNC_SELFTEST,
+    COMM_GET_EXT_HUM_TMP,
+    COMM_GET_STATS,
+    COMM_RESET_STATS,
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -736,7 +972,30 @@ typedef enum {
     CAN_PACKET_POLL_TS5700N8501_STATUS,
     CAN_PACKET_CONF_BATTERY_CUT,
     CAN_PACKET_CONF_STORE_BATTERY_CUT,
-    CAN_PACKET_SHUTDOWN
+    CAN_PACKET_SHUTDOWN,
+    CAN_PACKET_IO_BOARD_ADC_1_TO_4,
+    CAN_PACKET_IO_BOARD_ADC_5_TO_8,
+    CAN_PACKET_IO_BOARD_ADC_9_TO_12,
+    CAN_PACKET_IO_BOARD_DIGITAL_IN,
+    CAN_PACKET_IO_BOARD_SET_OUTPUT_DIGITAL,
+    CAN_PACKET_IO_BOARD_SET_OUTPUT_PWM,
+    CAN_PACKET_BMS_V_TOT,
+    CAN_PACKET_BMS_I,
+    CAN_PACKET_BMS_AH_WH,
+    CAN_PACKET_BMS_V_CELL,
+    CAN_PACKET_BMS_BAL,
+    CAN_PACKET_BMS_TEMPS,
+    CAN_PACKET_BMS_HUM,
+    CAN_PACKET_BMS_SOC_SOH_TEMP_STAT,
+    CAN_PACKET_PSW_STAT,
+    CAN_PACKET_PSW_SWITCH,
+    CAN_PACKET_BMS_HW_DATA_1,
+    CAN_PACKET_BMS_HW_DATA_2,
+    CAN_PACKET_BMS_HW_DATA_3,
+    CAN_PACKET_BMS_HW_DATA_4,
+    CAN_PACKET_BMS_HW_DATA_5,
+    CAN_PACKET_BMS_AH_WH_CHG_TOTAL,
+    CAN_PACKET_BMS_AH_WH_DIS_TOTAL,
 } CAN_PACKET_ID;
 
 typedef struct {
@@ -780,11 +1039,12 @@ struct BALANCE_VALUES {
     Q_PROPERTY(double roll_angle MEMBER roll_angle)
     Q_PROPERTY(int diff_time MEMBER diff_time)
     Q_PROPERTY(double motor_current MEMBER motor_current)
-    Q_PROPERTY(double motor_position MEMBER motor_position)
     Q_PROPERTY(int state MEMBER state)
     Q_PROPERTY(int switch_value MEMBER switch_value)
     Q_PROPERTY(double adc1 MEMBER adc1)
     Q_PROPERTY(double adc2 MEMBER adc2)
+    Q_PROPERTY(double debug1 MEMBER debug1)
+    Q_PROPERTY(double debug2 MEMBER debug2)
 
 public:
     BALANCE_VALUES() {
@@ -793,11 +1053,12 @@ public:
         roll_angle = 0;
         diff_time = 0;
         motor_current = 0;
-        motor_position = 0;
         state = 0;
         switch_value = 0;
         adc1 = 0;
         adc2 = 0;
+        debug1 = 0;
+        debug2 = 0;
     }
 
     double pid_output;
@@ -805,11 +1066,12 @@ public:
     double roll_angle;
     int diff_time;
     double motor_current;
-    double motor_position;
     int state;
     int switch_value;
     double adc1;
     double adc2;
+    double debug1;
+    double debug2;
 };
 
 Q_DECLARE_METATYPE(BALANCE_VALUES)

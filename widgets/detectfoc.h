@@ -41,7 +41,7 @@ public:
     bool lastOkValuesApplied() const;
 
 private slots:
-    void motorRLReceived(double r, double l);
+    void motorRLReceived(double r, double l, double ld_lq_diff);
     void motorLinkageReceived(double flux_linkage);
     void paramChangedDouble(QObject *src, QString name, double newParam);
 
@@ -60,6 +60,7 @@ private:
     bool mAllValuesOk;
     bool mLastOkValuesApplied;
     bool mRunning;
+    double mTempMotorLast;
 
     void updateColors();
 

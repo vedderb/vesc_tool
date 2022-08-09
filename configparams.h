@@ -137,6 +137,11 @@ public:
     // Operators
     ConfigParams& operator=(const ConfigParams &other);
 
+    int getConfigVersion() const;
+
+    bool getStoreConfigVersion() const;
+    void setStoreConfigVersion(bool storeConfigVersion);
+
 signals:
     void paramChangedDouble(QObject *src, QString name, double newParam);
     void paramChangedInt(QObject *src, QString name, int newParam);
@@ -154,6 +159,7 @@ public slots:
     void updateParamEnum(QString name, int param, QObject *src = nullptr);
     void updateParamString(QString name, QString param, QObject *src = nullptr);
     void updateParamBool(QString name, bool param, QObject *src = nullptr);
+    void updateParamFromOther(QString name, const ConfigParam &other, QObject *src);
     void requestUpdate();
     void requestUpdateDefault();
     void updateDone();
@@ -166,6 +172,8 @@ private:
     QStringList mSerializeOrder;
     QString mXmlStatus;
     QList<QPair<QString, QList<QPair<QString, QStringList>>>> mParamGrouping;
+    int mConfigVersion;
+    bool mStoreConfigVersion;
 
     bool almostEqual(float A, float B, float eps);
 

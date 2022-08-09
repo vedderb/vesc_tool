@@ -21,12 +21,18 @@
 #include "ui_nrfpair.h"
 #include "helpdialog.h"
 #include <QMessageBox>
+#include "utility.h"
 
 NrfPair::NrfPair(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::NrfPair)
 {
     ui->setupUi(this);
+
+    QString theme = Utility::getThemePath();
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->startButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
     mPairCnt = 0.0;

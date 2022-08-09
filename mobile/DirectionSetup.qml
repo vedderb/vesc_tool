@@ -18,7 +18,7 @@
     */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -27,6 +27,8 @@ import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    property var dialogParent: ApplicationWindow.overlay
+
     // TODO: This is not pretty...
     implicitHeight: text.implicitHeight +
                     canIdList.contentHeight + 10
@@ -35,15 +37,16 @@ Item {
     property Commands mCommands: VescIf.commands()
 
     function scanCan() {
-        canIdModel.clear()
-
         disableDialog()
+        setCanDevs(Utility.scanCanVescOnly(VescIf))
+    }
+
+    function setCanDevs(canDevs) {
+        canIdModel.clear()
         canIdModel.append({"name": "This VESC",
                               "canId": mAppConf.getParamInt("controller_id"),
                               "isCan": false,
                               "isInv": Utility.getInvertDirection(VescIf, -1)})
-
-        var canDevs = Utility.scanCanVescOnly(VescIf)
 
         for (var i = 0;i < canDevs.length;i++) {
             canIdModel.append({"name": "VESC on CAN-bus",
@@ -57,11 +60,13 @@ Item {
     ColumnLayout {
         id: column
         anchors.fill: parent
+        anchors.leftMargin: notchLeft
+        anchors.rightMargin: notchRight
 
         Text {
             id: text
             Layout.fillWidth: true
-            color: "white"
+            color: {color = Utility.getAppHexColor("lightText")}
             text: qsTr("Select which VESCs have inverted motor direction. Press the FWD or REV button to try.")
             font.bold: true
             horizontalAlignment: Text.AlignHCenter
@@ -88,38 +93,42 @@ Item {
 
                     width: canIdList.width
                     height: 130
-                    color: "#30000000"
+                    color: Utility.getAppHexColor("darkBackground")
                     radius: 5
 
                     RowLayout {
                         anchors.fill: parent
                         spacing: 10
 
-                        ColumnLayout {
+                        Rectangle {
                             Layout.leftMargin: 5
+                            Layout.fillWidth: true
 
-                            Rectangle {
-                                anchors.fill: parent
-                                color: "#33a8d9ff"
-                                radius: height / 2
-                            }
+                            color: Utility.getAppHexColor("lightAccent")
+                            height: column.height
+                            radius: height / 2
 
-                            Image {
-                                id: image
-                                fillMode: Image.PreserveAspectFit
-                                Layout.preferredWidth: 60
-                                Layout.preferredHeight: 60
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                source: isCan ? "qrc:/res/icons/can_off.png" : "qrc:/res/icons/Connected-96.png"
-                            }
+                            ColumnLayout {
+                                id: column
+                                anchors.centerIn: parent
 
-                            Text {
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                text: name + "\nID: " + canId
-                                horizontalAlignment: Text.AlignHCenter
-                                color: "white"
-                                wrapMode: Text.WordWrap
+                                Image {
+                                    id: image
+                                    fillMode: Image.PreserveAspectFit
+                                    Layout.preferredWidth: 60
+                                    Layout.preferredHeight: 60
+                                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                                    source: isCan ? "qrc" + Utility.getThemePath() + "icons/can_off.png" : "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                                    text: name + "\nID: " + canId
+                                    horizontalAlignment: Text.AlignHCenter
+                                    color: Utility.getAppHexColor("lightText")
+                                    wrapMode: Text.WordWrap
+                                }
                             }
                         }
 
@@ -127,7 +136,7 @@ Item {
                             Text {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.rightMargin: 5
-                                color: "white"
+                                color: Utility.getAppHexColor("lightText")
                                 text: "Inverted"
                                 horizontalAlignment: Text.AlignHCenter
                             }
@@ -198,12 +207,15 @@ Item {
         title: "Communicating..."
         closePolicy: Popup.NoAutoClose
         modal: true
-        focus: true
+        focus: true        
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
 
         width: parent.width - 20
         x: 10
         y: parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         ProgressBar {
             anchors.fill: parent

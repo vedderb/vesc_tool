@@ -25,6 +25,7 @@
 #include "pageswdprog.h"
 #include "ui_pageswdprog.h"
 #include "utility.h"
+#include "hexfile.h"
 
 PageSwdProg::PageSwdProg(QWidget *parent) :
     QWidget(parent),
@@ -33,6 +34,22 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
+
+    QString theme = Utility::getThemePath();
+    ui->chooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->choose2Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->choose3Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->choose4Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->uicrReadButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
+    ui->uicrWriteButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
+    ui->uicrEraseButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->connectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->connectNrf5xButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->disconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->resetButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+    ui->eraseFlashButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->uploadButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
+    ui->cancelButton->setIcon(QPixmap(theme + "icons/Cancel-96.png"));
 
     mTimer = new QTimer(this);
     mTimer->start(500);
@@ -70,9 +87,10 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
         le->setFont(font);
         ui->uicrTable->setCellWidget(ui->uicrTable->rowCount() - 1, 2, le);
 
+        QString theme = Utility::getThemePath();
         QPushButton *readButton = new QPushButton;
         readButton->setText("Read");
-        readButton->setIcon(QIcon("://res/icons/Upload-96.png"));
+        readButton->setIcon(QIcon(theme +"icons/Upload-96.png"));
         ui->uicrTable->setCellWidget(ui->uicrTable->rowCount() - 1, 3, readButton);
 
         connect(readButton, &QAbstractButton::clicked, [this, offset, le]() {
@@ -101,7 +119,7 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
 
         QPushButton *writeButton = new QPushButton;
         writeButton->setText("Write");
-        writeButton->setIcon(QIcon("://res/icons/Download-96.png"));
+        writeButton->setIcon(QIcon(theme +"icons/Download-96.png"));
         ui->uicrTable->setCellWidget(ui->uicrTable->rowCount() - 1, 4, writeButton);
 
         connect(writeButton, &QAbstractButton::clicked, [this, offset, le, name]() {
@@ -167,7 +185,9 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
     addDataItem("PSELRESET[0]", "0x200", "0xFFFFFFFF");
     addDataItem("PSELRESET[1]", "0x204", "0xFFFFFFFF");
     addDataItem("APPROTECT", "0x208", "0xFFFFFFFF");
-    addDataItem("NRFPINS", "0x20C", "0xFFFFFFFF");
+    addDataItem("NFCPINS", "0x20C", "0xFFFFFFFF");
+    addDataItem("DEBUGCTRL", "0x210", "0xFFFFFFFF");
+    addDataItem("REGOUT0", "0x304", "0xFFFFFFFF");
 }
 
 PageSwdProg::~PageSwdProg()
@@ -184,7 +204,7 @@ void PageSwdProg::on_chooseButton_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
 
     if (filename.isNull()) {
         return;
@@ -197,7 +217,7 @@ void PageSwdProg::on_choose2Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File 2"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
 
     if (filename.isNull()) {
         return;
@@ -210,7 +230,7 @@ void PageSwdProg::on_choose3Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File 3"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
 
     if (filename.isNull()) {
         return;
@@ -223,7 +243,7 @@ void PageSwdProg::on_choose4Button_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Firmware File 4"), ".",
-                                                    tr("Binary files (*.bin)"));
+                                                    tr("Firmware files (*.bin *.hex)"));
 
     if (filename.isNull()) {
         return;
@@ -253,6 +273,25 @@ void PageSwdProg::on_uploadButton_clicked()
             return;
         }
 
+        auto uploadHex = [this](QString name) {
+            QMap<quint32, QByteArray> fwData;
+            bool fwRes = HexFile::parseFile(name, fwData);
+
+            if (fwRes) {
+                QMapIterator<quint32, QByteArray> i(fwData);
+
+                while (i.hasNext()) {
+                    i.next();
+                    QByteArray data = i.value();
+                    fwRes = mVesc->swdUploadFw(data, i.key(),
+                                               ui->verifyBox->isChecked());
+                    if (!fwRes) {
+                        break;
+                    }
+                }
+            }
+        };
+
         if (ui->tabWidget->currentIndex() == 0) {
             auto current = ui->fwList->currentItem();
 
@@ -278,7 +317,16 @@ void PageSwdProg::on_uploadButton_clicked()
                     return;
                 }
 
-                mVesc->swdUploadFw(file.readAll(), mFlashOffset + fw.addr, ui->verifyBox->isChecked());
+                bool isHex = false;
+                if (file.fileName().toLower().endsWith(".hex")) {
+                    isHex = true;
+                }
+
+                if (isHex) {
+                    uploadHex(file.fileName());
+                } else {
+                    mVesc->swdUploadFw(file.readAll(), mFlashOffset + fw.addr, ui->verifyBox->isChecked());
+                }
 
                 if (!fw.bootloaderPath.isEmpty()) {
                     QFile file2(fw.bootloaderPath);
@@ -296,7 +344,16 @@ void PageSwdProg::on_uploadButton_clicked()
                         return;
                     }
 
-                    mVesc->swdUploadFw(file2.readAll(), mFlashOffset + fw.bootloaderAddr, ui->verifyBox->isChecked());
+                    isHex = false;
+                    if (file2.fileName().toLower().endsWith(".hex")) {
+                        isHex = true;
+                    }
+
+                    if (isHex) {
+                        uploadHex(file2.fileName());
+                    } else {
+                        mVesc->swdUploadFw(file2.readAll(), mFlashOffset + fw.bootloaderAddr, ui->verifyBox->isChecked());
+                    }
                 }
             } else {
                 QMessageBox::critical(this,
@@ -331,7 +388,13 @@ void PageSwdProg::on_uploadButton_clicked()
                                       tr("Could not open file. Make sure that the path is valid."));
                 return;
             }
-            if (file.size() > (1024 * 1024 * 5)) {
+
+            bool isHex = false;
+            if (file.fileName().toLower().endsWith(".hex")) {
+                isHex = true;
+            }
+
+            if (!isHex && file.size() > (1024 * 1024 * 5)) {
                 QMessageBox::critical(this,
                                       tr("Upload Error"),
                                       tr("The selected file is too large to be a firmware."));
@@ -340,7 +403,12 @@ void PageSwdProg::on_uploadButton_clicked()
             if (!mVesc->swdEraseFlash()) {
                 return;
             }
-            mVesc->swdUploadFw(file.readAll(), mFlashOffset, ui->verifyBox->isChecked());
+
+            if (isHex) {
+                uploadHex(file.fileName());
+            } else {
+                mVesc->swdUploadFw(file.readAll(), mFlashOffset, ui->verifyBox->isChecked());
+            }
         }
 
         mVesc->swdReboot();
@@ -469,6 +537,16 @@ void PageSwdProg::bmConnRes(int res)
                  0, ":/res/bootloaders/generic.bin");
         addSwdFw("STORMCORE 100S", ":/res/firmwares/STORMCORE_100S/VESC_default.bin",
                  0, ":/res/bootloaders/generic.bin");
+        addSwdFw("UXV SR", ":/res/firmwares/UXV_SR/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("VESC 100/500", "://res/firmwares/100_500/VESC_default.bin",
+                 0, "://res/bootloaders/60_o_75_300_o_HD60_o_UAVC_OMEGA_o_75_300_R2_o_60_MK3_o_100_250_o_75_300_R3_o_60_MK4_o_60_MK5_o_HD75.bin");
+        addSwdFw("STORMCORE 60Dxs", ":/res/firmwares/STORMCORE_60Dxs/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("STORMCORE 100DX", ":/res/firmwares/STORMCORE_100Dx/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
+        addSwdFw("VESC 60v2 Alva", ":/res/firmwares/60v2_alva/VESC_default.bin",
+                 0, ":/res/bootloaders/generic.bin");
         break;
 
     case 2:
@@ -506,6 +584,8 @@ void PageSwdProg::bmConnRes(int res)
                  "://res/other_fw/nrf52840_vesc_ble_rx26_tx25_led27.bin");
         addSwdFw("Wand Remote",
                  "://res/other_fw/nrf52840_stick_remote.bin");
+        addSwdFw("Stormcore Builtin - RX: 31 TX: 30 LED: 5",
+                 "://res/other_fw/nrf52840_stormcore_ble_rx31_tx30_led5.bin");
         break;
 
     case 10:
@@ -514,6 +594,9 @@ void PageSwdProg::bmConnRes(int res)
                  "://res/bootloaders_bms/generic.bin", 0x3E000);
         addSwdFw("Trampa 18s Light BMS",
                  "://res/firmwares_bms/18s_light/vesc_default.bin", 0,
+                 "://res/bootloaders_bms/generic.bin", 0x3E000);
+        addSwdFw("Power Switch 120V",
+                 "://res/other_fw/vesc_power_switch_120.bin", 0,
                  "://res/bootloaders_bms/generic.bin", 0x3E000);
         break;
 
@@ -624,7 +707,7 @@ void PageSwdProg::on_uicrWriteButton_clicked()
         }
 
         VByteArray vb;
-        for (int i = 0;i < ui->uicrTable->rowCount();i++) {
+        for (int i = 0;i < (ui->uicrTable->rowCount() - 1);i++) {
             if (QLineEdit *le = qobject_cast<QLineEdit*>(ui->uicrTable->cellWidget(i, 2))) {
                 QString txt = le->text();
                 int base = 10;

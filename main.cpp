@@ -335,30 +335,29 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    QApplication a(argc, argv);
+    QCoreApplication *app;
+
+#ifdef USE_MOBILE
+    QApplication *a = new QApplication(argc, argv);
+    app = a;
 
     addFonts();
 
-    // Style
-    a.setStyleSheet("");
-    a.setStyle(QStyleFactory::create("Fusion"));
-
-#ifdef USE_MOBILE
-    QmlUi q;
-    q.startQmlUi();
+    QmlUi *qml = new QmlUi;
+    qml->startQmlUi();
 
     // As background running is allowed, make sure to not update the GUI when
     // running in the background.
-    QObject::connect(&a, &QApplication::applicationStateChanged, [&q](Qt::ApplicationState state) {
+    QObject::connect(a, &QApplication::applicationStateChanged, [&qml](Qt::ApplicationState state) {
         if(state == Qt::ApplicationHidden) {
-            q.setVisible(false);
+            qml->setVisible(false);
         } else {
-            q.setVisible(true);
+            qml->setVisible(true);
         }
     });
 #else
     VescInterface *vesc = nullptr;
-    MainWindow *w = nullptr;
+    BoardSetupWindow *w = nullptr;
     QmlUi *qmlUi = nullptr;
     QString qmlStr;
 
@@ -536,7 +535,8 @@ int main(int argc, char *argv[])
             qmlUi = new QmlUi;
             qmlUi->startQmlUi();
         } else {
-            w = new MainWindow;
+            w = new BoardSetupWindow;
+            //w = new MainWindow;
             w->show();
         }
     }

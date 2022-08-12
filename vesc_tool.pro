@@ -195,6 +195,7 @@ build_mobile {
 
 SOURCES += main.cpp\
     mainwindow.cpp \
+    boardsetupwindow.cpp \
     packet.cpp \
     preferences.cpp \
     udpserversimple.cpp \
@@ -213,6 +214,7 @@ SOURCES += main.cpp\
     hexfile.cpp
 
 HEADERS  += mainwindow.h \
+    boardsetupwindow.h \
     packet.h \
     preferences.h \
     udpserversimple.h \
@@ -232,6 +234,7 @@ HEADERS  += mainwindow.h \
     hexfile.h
 
 FORMS    += mainwindow.ui \
+    boardsetupwindow.ui \
     parametereditor.ui \
     preferences.ui
 

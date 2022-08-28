@@ -1099,11 +1099,11 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>3.4</maxDouble>
+            <maxDouble>3.6</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>3.4</valDouble>
+            <valDouble>3.6</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>

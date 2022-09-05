@@ -155,7 +155,7 @@ void ScriptEditor::on_saveButton_clicked()
 void ScriptEditor::on_saveAsButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save %1").arg(mIsModeLisp ? "Lisp" : "Qml"), "",
+                                                    tr("Save %1").arg(mIsModeLisp ? "Lisp" : "Qml"), ui->fileNowLabel->text(),
                                                     mIsModeLisp ? tr("Lisp files (*.lisp)") : tr("QML files (*.qml)"));
 
     QString ending = mIsModeLisp ? ".lisp" : ".qml";

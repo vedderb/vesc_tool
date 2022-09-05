@@ -123,5 +123,6 @@
         <name>ComboBox</name>
         <name>ListModel</name>
         <name>RadioButton</name>
+        <name>FwHelper</name>
     </section>
 </root>

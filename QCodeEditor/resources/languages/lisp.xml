@@ -19,6 +19,7 @@
         <name>fn</name>
         <name>def</name>
         <name>import</name>
+        <name>atomic</name>
     </section>
     <section name="PrimitiveType">
         <name>nil</name>

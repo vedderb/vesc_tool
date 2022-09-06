@@ -261,6 +261,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("getMcValuesBlocking(VescIf)");
         addItem("waitMotorStop(VescIf, erpmTres, timeoutMs)");
         addItem("measureEncoderBlocking(VescIf, current)");
+        addItem("sleepWithEventLoop(timeMs)");
         level--;
     }
 

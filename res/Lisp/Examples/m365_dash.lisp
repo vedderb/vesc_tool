@@ -220,7 +220,7 @@
 
 (loopwhile t
     (progn
-        ; If you do not have any R470 resistors or it still occours to press buttons randomly, try uncommenting this:
+        ; Random button presses can occour (while braking as ex.), that's why I decided to disable button interaction while driving by default.
         (if (<= (* (get-speed) 3.6) min-speed)
         (progn
             (if (> buttonold (gpio-read 'pin-rx))
@@ -255,7 +255,7 @@
                             
                             (if (>= presses 2) ; double press
                                 (progn
-                                    (if (> brake 0.02)
+                                    (if (> (/(- brake-in cal-brk-lo) cal-brk-hi) brk-deadzone)
                                         (setvar 'lock (bitwise-xor lock 1))
                                         (progn
                                             (if (= speedmode 1) ; is drive?

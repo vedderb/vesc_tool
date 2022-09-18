@@ -124,5 +124,6 @@
         <name>ListModel</name>
         <name>RadioButton</name>
         <name>FwHelper</name>
+        <name>ParamList</name>
     </section>
 </root>

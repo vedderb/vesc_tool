@@ -57,6 +57,7 @@ private slots:
     void on_helpButton_clicked();
     void on_replEdit_returnPressed();
     void on_replHelpButton_clicked();
+    void on_streamButton_clicked();
 
 private:
     Ui::PageLisp *ui;

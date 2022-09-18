@@ -225,7 +225,7 @@ public:
     Q_INVOKABLE int customConfigNum();
     Q_INVOKABLE bool customConfigsLoaded();
     Q_INVOKABLE bool customConfigRxDone();
-    ConfigParams *customConfig(int configNum);
+    Q_INVOKABLE ConfigParams *customConfig(int configNum);
 
     Q_INVOKABLE bool qmlHwLoaded();
     Q_INVOKABLE bool qmlAppLoaded();

@@ -53,6 +53,7 @@ public:
     QPair<QString, QList<QPair<QString, QByteArray> > > lispUnpackImports(QByteArray data);
     bool lispUpload(VByteArray vb);
     bool lispUpload(QString codeStr, QString editorPath = QDir::currentPath());
+    bool lispStream(VByteArray vb, qint8 mode);
     QString lispRead(QWidget *parent = nullptr);
 
     bool qmlErase();

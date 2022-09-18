@@ -52,6 +52,7 @@ PageLisp::PageLisp(QWidget *parent) :
     ui->readExistingButton->setIcon(QIcon(theme +"icons/Upload-96.png"));
     ui->eraseButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
     ui->replHelpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->streamButton->setIcon(QIcon(theme +"icons/Download-96.png"));
 
     QIcon mycon = QIcon(theme + "icons/expand_off.png");
     mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
@@ -687,4 +688,23 @@ void PageLisp::on_replEdit_returnPressed()
 void PageLisp::on_replHelpButton_clicked()
 {
     mVesc->commands()->lispSendReplCmd(":help");
+}
+
+void PageLisp::on_streamButton_clicked()
+{
+    QProgressDialog dialog(tr("Streaming..."), QString(), 0, 0, this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.show();
+
+    auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(ui->fileTabs->currentIndex()));
+
+    QString codeStr = "";
+
+    if (e != nullptr) {
+        codeStr = e->codeEditor()->toPlainText();
+    } else {
+        ui->mainEdit->codeEditor()->toPlainText();
+    }
+
+    mLoader.lispStream(codeStr.toLocal8Bit(), ui->streamModeBox->currentIndex());
 }

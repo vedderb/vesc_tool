@@ -267,7 +267,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
         int sz = data.size() > chunkSize ? chunkSize : data.size();
 
         mVesc->commands()->lispWriteCode(data.mid(0, sz), offset);
-        if (!waitWriteRes()) {
+        if (waitWriteRes() < 0) {
             mVesc->emitMessageDialog(tr("Upload Code"), tr("Write failed"), false);
             ok = false;
             break;
@@ -289,6 +289,51 @@ bool CodeLoader::lispUpload(QString codeStr, QString editorPath)
     }
 
     return lispUpload(vb);
+}
+
+bool CodeLoader::lispStream(VByteArray vb, qint8 mode)
+{
+    auto waitWriteRes = [this]() {
+        int res = -10;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(4000);
+        auto conn = connect(mVesc->commands(), &Commands::lispStreamCodeRx,
+                            [&res,&loop](qint32 offset, qint16 result) {
+            (void)offset;
+            res = result;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return res;
+    };
+
+    qint32 offset = 0;
+    qint32 size_tot = vb.size();
+    bool ok = true;
+    while (vb.size() > 0) {
+        const int chunkSize = 384;
+        int sz = vb.size() > chunkSize ? chunkSize : vb.size();
+
+        mVesc->commands()->lispStreamCode(vb.mid(0, sz), offset, size_tot, mode);
+        auto writeRes = waitWriteRes();
+        if (writeRes != 0) {
+            mVesc->emitMessageDialog(tr("Stream Code"), tr("Stream failed. Result: %1").arg(writeRes), false);
+            ok = false;
+            break;
+        }
+
+        offset += sz;
+        vb.remove(0, sz);
+    }
+
+    return ok;
 }
 
 QString CodeLoader::lispRead(QWidget *parent)

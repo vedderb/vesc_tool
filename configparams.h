@@ -87,8 +87,8 @@ public:
     void setSerializeOrder(const QStringList &serializeOrder);
     void clearSerializeOrder();
 
-    void serialize(VByteArray &vb);
-    bool deSerialize(VByteArray &vb);
+    Q_INVOKABLE void serialize(VByteArray &vb);
+    Q_INVOKABLE bool deSerialize(VByteArray &vb);
 
     void getXML(QXmlStreamWriter &stream, QString configName);
     bool setXML(QXmlStreamReader &stream, QString configName);

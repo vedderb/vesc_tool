@@ -1908,12 +1908,12 @@ void Commands::customConfigGet(int confInd, bool isDefault)
     emitData(vb);
 }
 
-void Commands::customConfigSet(int confInd, QByteArray confData)
+void Commands::customConfigSet(int confInd, ConfigParams *conf)
 {
     VByteArray vb;
     vb.vbAppendUint8(COMM_SET_CUSTOM_CONFIG);
     vb.vbAppendInt8(int8_t(confInd));
-    vb.append(confData);
+    conf->serialize(vb);
     emitData(vb);
 }
 

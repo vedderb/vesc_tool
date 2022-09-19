@@ -97,6 +97,8 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("setBleName(name)");
         addItem("setBlePin(pin)");
         addItem("sendCustomAppData(data)");
+        addItem("customConfigGet(confInd, isDefault)");
+        addItem("customConfigSet(confInd, config)");
         level--;
     };
 
@@ -134,6 +136,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("canTmpOverrideEnd()");
         addItem("emitMessageDialog(title, text, isGood, isRichText)");
         addItem("emitStatusMessage(msg, isGood)");
+        addItem("customConfig(confInd)");
         level--;
     }
 

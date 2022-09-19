@@ -117,9 +117,7 @@ void PageCustomConfig::on_writeButton_clicked()
     if (mVesc) {
         ConfigParams *params = mVesc->customConfig(mConfNum);
         if (params) {
-            VByteArray data;
-            params->serialize(data);
-            mVesc->commands()->customConfigSet(mConfNum, data);
+            mVesc->commands()->customConfigSet(mConfNum, params);
         }
     }
 }

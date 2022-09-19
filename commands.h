@@ -225,7 +225,7 @@ public slots:
 
     void customConfigGetChunk(int confInd, int len, int offset);
     void customConfigGet(int confInd, bool isDefault);
-    void customConfigSet(int confInd, QByteArray confData);
+    void customConfigSet(int confInd, ConfigParams *conf);
 
     void pswGetStatus(bool by_id, int id_ind);
     void pswSwitch(int id, bool is_on, bool plot);

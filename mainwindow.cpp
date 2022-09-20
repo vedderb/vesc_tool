@@ -1482,13 +1482,13 @@ void MainWindow::reloadPages()
     mPageSampledData = new PageSampledData(this);
     mPageSampledData->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSampledData);
-    addPageItem(tr("Sampled Data"),  theme + "icons/Gyroscope-96.png", "", false, true);
+    addPageItem(tr("Sampled Data"),  theme + "icons/Line Chart-96.png", "", false, true);
     mPageNameIdList.insert("data_sampled", ui->pageList->count() - 1);
 
     mPageImu = new PageImu(this);
     mPageImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageImu);
-    addPageItem(tr("IMU Data"),  theme + "icons/Line Chart-96.png", "", false, true);
+    addPageItem(tr("IMU Data"),  theme + "icons/Gyroscope-96.png", "", false, true);
     mPageNameIdList.insert("data_imu", ui->pageList->count() - 1);
 
     mPageBms = new PageBms(this);

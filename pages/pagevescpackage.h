@@ -49,11 +49,17 @@ private slots:
     void on_loadRefreshButton_clicked();
     void on_writeButton_clicked();
     void on_outputRefreshButton_clicked();
+    void on_dlArchiveButton_clicked();
+    void on_uninstallButton_clicked();
+    void on_installButton_clicked();
+    void on_storeList_currentRowChanged(int currentRow);
 
 private:
     Ui::PageVescPackage *ui;
     VescInterface *mVesc;
     CodeLoader mLoader;
+
+    void reloadArchive();
 
 };
 

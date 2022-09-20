@@ -59,6 +59,20 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="saveXmlButton">
+       <property name="text">
+        <string>Save XML</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="loadXmlButton">
+       <property name="text">
+        <string>Load XML</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>

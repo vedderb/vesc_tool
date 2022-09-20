@@ -46,6 +46,8 @@ private slots:
     void on_readButton_clicked();
     void on_readDefaultButton_clicked();
     void on_writeButton_clicked();
+    void on_saveXmlButton_clicked();
+    void on_loadXmlButton_clicked();
 
 private:
     Ui::PageCustomConfig *ui;

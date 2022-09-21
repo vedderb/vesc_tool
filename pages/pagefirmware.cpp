@@ -659,10 +659,8 @@ void PageFirmware::reloadArchive()
 void PageFirmware::on_dlArchiveButton_clicked()
 {
     ui->dlArchiveButton->setEnabled(false);
-
     ui->displayDl->setText("Preparing download...");
 
-    QString version = QString::number(VT_VERSION);
     QUrl url("http://home.vedder.se/vesc_fw_archive/res_fw.rcc");
     QNetworkAccessManager manager;
     QNetworkRequest request(url);

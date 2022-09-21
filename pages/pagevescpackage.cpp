@@ -251,10 +251,8 @@ void PageVescPackage::on_outputRefreshButton_clicked()
 void PageVescPackage::on_dlArchiveButton_clicked()
 {
     ui->dlArchiveButton->setEnabled(false);
-
     ui->displayDl->setText("Preparing download...");
 
-    QString version = QString::number(VT_VERSION);
     QUrl url("http://home.vedder.se/vesc_pkg/vesc_pkg_all.rcc");
     QNetworkAccessManager manager;
     QNetworkRequest request(url);

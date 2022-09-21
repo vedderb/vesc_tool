@@ -91,7 +91,7 @@ bool CodeLoader::lispErase()
 QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
 {
     VByteArray vb;
-    vb.vbAppendUint16(0);
+    vb.vbAppendUint16(0); // Flags: 0
     vb.append(codeStr);
 
     if (vb.at(vb.size() - 1) != '\0') {
@@ -128,9 +128,32 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
 
                     if (tag.isEmpty()) {
                         mVesc->emitMessageDialog(tr("Append Imports"),
-                                                 tr("Invalid import tag. Line: %1").arg(line_num),
+                                                 tr("Line: %1: Invalid import tag.").arg(line_num),
                                                  false);
                         return QByteArray();
+                    }
+
+                    auto pkgErrorMsg = "If you are importing from a package in the git repository you might "
+                                       "need to update the package archive. That can be done from the the "
+                                       "VESC Packages page.";
+
+                    bool isPkgImport = false;
+                    QString pkgImportName;
+                    if (path.startsWith("pkg::")) {
+                        path.remove(0, 5);
+
+                        auto atInd = path.indexOf("@");
+                        if (atInd > 0) {
+                            pkgImportName = path.mid(0, atInd);
+                            path.remove(0, atInd + 1);
+                        } else {
+                            mVesc->emitMessageDialog(tr("Append Imports"),
+                                                     tr("Line: %1: Invalid import tag.").arg(line_num),
+                                                     false);
+                            return QByteArray();
+                        }
+
+                        isPkgImport = true;
                     }
 
                     QFileInfo fi(editorPath + "/" + path);
@@ -143,25 +166,48 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                         if (f.open(QIODevice::ReadOnly)) {
                             auto fileData = f.readAll();
 
-                            // Pad with 0 in case it is a text file
-                            fileData.append('\0');
+                            if (isPkgImport) {
+                                auto pkg = unpackVescPackage(fileData);
+                                auto imports = lispUnpackImports(pkg.lispData);
+                                bool found = false;
+                                for (auto i: imports.second) {
+                                    qDebug() << i.first;
+                                    if (i.first == pkgImportName) {
+                                        auto fileData = i.second;
+                                        fileData.append('\0'); // Pad with 0 in case it is a text file
+                                        files.append(qMakePair(tag, fileData));
+                                        found = true;
+                                        break;
+                                    }
+                                }
 
-                            files.append(qMakePair(tag, fileData));
+                                if (!found) {
+                                    mVesc->emitMessageDialog(tr("Append Imports"),
+                                                             tr("Tag %1 not found in package %2. %3").
+                                                             arg(pkgImportName).arg(path).arg(pkgErrorMsg),
+                                                             false);
+                                    return QByteArray();
+                                }
+                            } else {
+                                fileData.append('\0'); // Pad with 0 in case it is a text file
+                                files.append(qMakePair(tag, fileData));
+                            }
                         } else {
                             mVesc->emitMessageDialog(tr("Append Imports"),
-                                                     tr("Imported file cannot be opened. Line: %1").arg(line_num),
+                                                     tr("Line: %1: Imported file cannot be opened.").arg(line_num),
                                                      false);
                             return QByteArray();
                         }
                     } else {
                         mVesc->emitMessageDialog(tr("Append Imports"),
-                                                 tr("Imported file not found: %1 Line: %2").arg(fi.absoluteFilePath()).arg(line_num),
+                                                 tr("Line: %1: Imported file not found: %2. %3").
+                                                 arg(line_num).arg(fi.absoluteFilePath()).arg(pkgErrorMsg),
                                                  false);
                         return QByteArray();
                     }
                 } else {
                     mVesc->emitMessageDialog(tr("Append Imports"),
-                                             tr("Invalid import on line %1").arg(line_num),
+                                             tr("Line %1: Invalid import.").arg(line_num),
                                              false);
                     return QByteArray();
                 }
@@ -202,6 +248,13 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
 
 QPair<QString, QList<QPair<QString, QByteArray> > > CodeLoader::lispUnpackImports(QByteArray data)
 {
+    // In case the import starts with a flag it is removed here. Note: The flag is a
+    // bit confusing and there is a slightly more consistent way of handling it, but
+    // I left it as is to not break compatibility.
+    if (data.size() > 2 && data[0] == '\0' && data[1] == '\0') {
+        data.remove(0, 2);
+    }
+
     QList<QPair<QString, QByteArray> > imports;
     int end = data.indexOf(QByteArray("\0", 1));
 

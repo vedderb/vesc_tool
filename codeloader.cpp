@@ -171,7 +171,6 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                                 auto imports = lispUnpackImports(pkg.lispData);
                                 bool found = false;
                                 for (auto i: imports.second) {
-                                    qDebug() << i.first;
                                     if (i.first == pkgImportName) {
                                         auto fileData = i.second;
                                         fileData.append('\0'); // Pad with 0 in case it is a text file

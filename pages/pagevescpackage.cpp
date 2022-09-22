@@ -322,11 +322,8 @@ void PageVescPackage::on_installButton_clicked()
         return;
     }
 
-    QListWidgetItem *item = ui->storeList->currentItem();
-    if (item != nullptr) {
-        QString path = item->data(Qt::UserRole).toString();
-
-        QFile f(path);
+    if (!mCurrentPath.isEmpty()) {
+        QFile f(mCurrentPath);
         if (!f.open(QIODevice::ReadOnly)) {
             mVesc->emitMessageDialog(tr("Install Package"),
                                      tr("Could not open package file for reading."),
@@ -362,7 +359,8 @@ void PageVescPackage::reloadArchive()
 
         QString pkgDir = "://vesc_packages";
 
-        ui->storeList->clear();
+        ui->applicationList->clear();
+        ui->libraryList->clear();
 
         QDirIterator it(pkgDir);
         while (it.hasNext()) {
@@ -384,24 +382,49 @@ void PageVescPackage::reloadArchive()
 
                     item->setText(name);
                     item->setData(Qt::UserRole, fi2.absoluteFilePath());
-                    ui->storeList->insertItem(ui->storeList->count(), item);
+
+                    if (fi2.absoluteFilePath().startsWith("://vesc_packages/lib_")) {
+                        ui->libraryList->insertItem(ui->libraryList->count(), item);
+                    } else {
+                        ui->applicationList->insertItem(ui->applicationList->count(), item);
+                    }
                 }
             }
         }
     }
 }
 
-void PageVescPackage::on_storeList_currentRowChanged(int currentRow)
+void PageVescPackage::packageSelected(QString path)
 {
-    (void)currentRow;
-    QListWidgetItem *item = ui->storeList->currentItem();
-    if (item != nullptr) {
-        QString path = item->data(Qt::UserRole).toString();
-
-        QFile f(path);
-        if (f.open(QIODevice::ReadOnly)) {
-            auto pkg = mLoader.unpackVescPackage(f.readAll());
-            ui->storeBrowser->document()->setHtml(pkg.description);
+    mCurrentPath = path;
+    QFile f(path);
+    if (f.open(QIODevice::ReadOnly)) {
+        auto pkg = mLoader.unpackVescPackage(f.readAll());
+        ui->storeBrowser->document()->setHtml(pkg.description);
+        ui->installButton->setEnabled(!path.startsWith("://vesc_packages/lib_"));
+        if (ui->installButton->isEnabled()) {
+            ui->installButton->setToolTip("");
+        } else {
+            ui->installButton->setToolTip("This is a library, so it is not supposed to be installed. You can use "
+                                          "it from your own LispBM-scripts without installing it.");
         }
+    }
+}
+
+void PageVescPackage::on_applicationList_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
+{
+    (void)previous;
+    if (current != nullptr) {
+        packageSelected(current->data(Qt::UserRole).toString());
+        ui->libraryList->setCurrentItem(nullptr);
+    }
+}
+
+void PageVescPackage::on_libraryList_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
+{
+    (void)previous;
+    if (current != nullptr) {
+        packageSelected(current->data(Qt::UserRole).toString());
+        ui->applicationList->setCurrentItem(nullptr);
     }
 }

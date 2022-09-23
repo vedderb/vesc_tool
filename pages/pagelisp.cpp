@@ -353,6 +353,9 @@ void PageLisp::makeEditorConnections(ScriptEditor *editor)
     connect(editor->codeEditor(), &QCodeEditor::runEmbeddedTriggered, [this]() {
         on_uploadButton_clicked();
     });
+    connect(editor->codeEditor(), &QCodeEditor::runWindowTriggered, [this]() {
+        on_streamButton_clicked();
+    });
     connect(editor->codeEditor(), &QCodeEditor::stopTriggered, [this]() {
         on_stopButton_clicked();
     });
@@ -672,6 +675,7 @@ void PageLisp::on_helpButton_clicked()
                    "Ctrl + 'i'   : Remove trailing whitespaces from selected lines<br>"
                    "Ctrl + 'f'   : Open search (and replace) bar<br>"
                    "Ctrl + 'e'   : Upload (and run if set) application<br>"
+                   "Ctrl + 'w'   : Stream application<br>"
                    "Ctrl + 'q'   : Stop application<br>"
                    "Ctrl + 'd'   : Clear console<br>"
                    "Ctrl + 's'   : Save file<br>";

@@ -175,16 +175,28 @@ void PageAppImu::timerSlot()
         ui->rpyPlot->graph(graphIndex++)->setData(xAxis, mRollVec);
         ui->rpyPlot->graph(graphIndex++)->setData(xAxis, mPitchVec);
         ui->rpyPlot->graph(graphIndex++)->setData(xAxis, mYawVec);
+        ui->rpyPlot->xAxis->setLabel(QString("Seconds (s) \n Roll: %1 Pitch: %2 Yaw: %3")
+                    .arg(mRollVec.last(), 8, 'f', 3, QLatin1Char(' '))
+                    .arg(mPitchVec.last(), 8, 'f', 3, QLatin1Char(' '))
+                    .arg(mYawVec.last(), 8, 'f', 3, QLatin1Char(' ')));
 
         graphIndex = 0;
         ui->accelPlot->graph(graphIndex++)->setData(xAxis, mAccXVec);
         ui->accelPlot->graph(graphIndex++)->setData(xAxis, mAccYVec);
         ui->accelPlot->graph(graphIndex++)->setData(xAxis, mAccZVec);
+        ui->accelPlot->xAxis->setLabel(QString("Seconds (s) \n X: %1 Y: %2 Z: %3")
+                    .arg(mAccXVec.last(), 8, 'f', 3, QLatin1Char(' '))
+                    .arg(mAccYVec.last(), 8, 'f', 3, QLatin1Char(' '))
+                    .arg(mAccZVec.last(), 8, 'f', 3, QLatin1Char(' ')));
 
         graphIndex = 0;
         ui->gyroPlot->graph(graphIndex++)->setData(xAxis, mGyroXVec);
         ui->gyroPlot->graph(graphIndex++)->setData(xAxis, mGyroYVec);
         ui->gyroPlot->graph(graphIndex++)->setData(xAxis, mGyroZVec);
+        ui->gyroPlot->xAxis->setLabel(QString("Seconds (s) \n X: %1 Y: %2 Z: %3")
+                    .arg(mGyroXVec.last(), 8, 'f', 3, QLatin1Char(' '))
+                    .arg(mGyroYVec.last(), 8, 'f', 3, QLatin1Char(' '))
+                    .arg(mGyroZVec.last(), 8, 'f', 3, QLatin1Char(' ')));
 
         ui->rpyPlot->rescaleAxes();
         ui->accelPlot->rescaleAxes();

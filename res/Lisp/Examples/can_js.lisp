@@ -5,7 +5,7 @@
 (define my-id 2)
 
 ; ID to send data to the joysick
-(define id-send (bits-enc-int (bits-enc-int 0x18EF0000 8 js-sa 8) 0 my-id 8))
+(define id-send (bits-enc-int (bits-enc-int 0x18EF0000u32 8 js-sa 8) 0 my-id 8))
 
 ; Received X- and Y-axis values from the joystick
 (define x-axis 0)
@@ -16,7 +16,7 @@
 
 ; Handler for EID CAN-frames
 (define proc-eid (lambda (id data)
-    (if (= id 0x18ff03f1)
+    (if (= id 0x18ff03f1u32)
         (progn
             (define can-cnt (+ can-cnt 1))
             

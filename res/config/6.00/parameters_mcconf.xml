@@ -3694,6 +3694,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>KTY84/130</enumNames>
             <enumNames>NTC Custom</enumNames>
             <enumNames>PTC Custom</enumNames>
+            <enumNames>PT1000</enumNames>
         </m_motor_temp_sens_type>
         <m_ptc_motor_coeff>
             <longName>Coefficient for PTC Motor Thermistor</longName>

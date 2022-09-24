@@ -154,6 +154,9 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                         }
 
                         isPkgImport = true;
+                    } else if (path.startsWith("pkg@")) {
+                        path.remove(0, 4);
+                        isPkgImport = true;
                     }
 
                     QFileInfo fi(editorPath + "/" + path);
@@ -169,23 +172,30 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                             if (isPkgImport) {
                                 auto pkg = unpackVescPackage(fileData);
                                 auto imports = lispUnpackImports(pkg.lispData);
-                                bool found = false;
-                                for (auto i: imports.second) {
-                                    if (i.first == pkgImportName) {
-                                        auto fileData = i.second;
-                                        fileData.append('\0'); // Pad with 0 in case it is a text file
-                                        files.append(qMakePair(tag, fileData));
-                                        found = true;
-                                        break;
-                                    }
-                                }
 
-                                if (!found) {
-                                    mVesc->emitMessageDialog(tr("Append Imports"),
-                                                             tr("Tag %1 not found in package %2. %3").
-                                                             arg(pkgImportName).arg(path).arg(pkgErrorMsg),
-                                                             false);
-                                    return QByteArray();
+                                if (pkgImportName.isEmpty()) {
+                                    auto importData = imports.first.toLocal8Bit();
+                                    importData.append('\0'); // Pad with 0 in case it is a text file
+                                    files.append(qMakePair(tag, importData));
+                                } else {
+                                    bool found = false;
+                                    for (auto i: imports.second) {
+                                        if (i.first == pkgImportName) {
+                                            auto importData = i.second;
+                                            importData.append('\0'); // Pad with 0 in case it is a text file
+                                            files.append(qMakePair(tag, importData));
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!found) {
+                                        mVesc->emitMessageDialog(tr("Append Imports"),
+                                                                 tr("Tag %1 not found in package %2. %3").
+                                                                 arg(pkgImportName).arg(path).arg(pkgErrorMsg),
+                                                                 false);
+                                        return QByteArray();
+                                    }
                                 }
                             } else {
                                 fileData.append('\0'); // Pad with 0 in case it is a text file
@@ -345,6 +355,11 @@ bool CodeLoader::lispUpload(QString codeStr, QString editorPath)
 
 bool CodeLoader::lispStream(VByteArray vb, qint8 mode)
 {
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog(tr("Stream code"), tr("Not Connected"), false);
+        return false;
+    }
+
     auto waitWriteRes = [this]() {
         int res = -10;
 

@@ -32,5 +32,6 @@
         <file>res/Lisp/Examples/m365_dash.lisp</file>
         <file>res/Lisp/Examples/ssd1306_oled_cube_native.lisp</file>
         <file>res/Lisp/Examples/ws2812_native.lisp</file>
+        <file>res/Lisp/Examples/plot_vesc_tool.lisp</file>
     </qresource>
 </RCC>

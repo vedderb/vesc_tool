@@ -71,6 +71,15 @@ void ParamEditBitfield::setConfig(ConfigParams *config)
         if (param->enumNames.size() > 5) ui->b5Box->setText(param->enumNames.at(5));
         if (param->enumNames.size() > 6) ui->b6Box->setText(param->enumNames.at(6));
         if (param->enumNames.size() > 7) ui->b7Box->setText(param->enumNames.at(7));
+
+        ui->b0Box->setVisible(ui->b0Box->text().toLower() != "unused");
+        ui->b1Box->setVisible(ui->b1Box->text().toLower() != "unused");
+        ui->b2Box->setVisible(ui->b2Box->text().toLower() != "unused");
+        ui->b3Box->setVisible(ui->b3Box->text().toLower() != "unused");
+        ui->b4Box->setVisible(ui->b4Box->text().toLower() != "unused");
+        ui->b5Box->setVisible(ui->b5Box->text().toLower() != "unused");
+        ui->b6Box->setVisible(ui->b6Box->text().toLower() != "unused");
+        ui->b7Box->setVisible(ui->b7Box->text().toLower() != "unused");
     }
 
     connect(mConfig, SIGNAL(paramChangedInt(QObject*,QString,int)),

@@ -20,6 +20,7 @@
 #include "pagecustomconfig.h"
 #include "ui_pagecustomconfig.h"
 #include "widgets/paramtable.h"
+#include "utility.h"
 
 PageCustomConfig::PageCustomConfig(QWidget *parent) :
     QWidget(parent),
@@ -28,6 +29,13 @@ PageCustomConfig::PageCustomConfig(QWidget *parent) :
     ui->setupUi(this);
     mVesc = nullptr;
     mConfNum = 0;
+
+    QString theme = Utility::getThemePath();
+    ui->readButton->setIcon(QPixmap(theme + "/icons/Upload-96.png"));
+    ui->readDefaultButton->setIcon(QPixmap(theme + "/icons/Upload-96.png"));
+    ui->writeButton->setIcon(QPixmap(theme + "/icons/Download-96.png"));
+    ui->saveXmlButton->setIcon(QPixmap(theme + "/icons/Save as-96.png"));
+    ui->loadXmlButton->setIcon(QPixmap(theme + "/icons/Open Folder-96.png"));
 }
 
 PageCustomConfig::~PageCustomConfig()
@@ -117,9 +125,59 @@ void PageCustomConfig::on_writeButton_clicked()
     if (mVesc) {
         ConfigParams *params = mVesc->customConfig(mConfNum);
         if (params) {
-            VByteArray data;
-            params->serialize(data);
-            mVesc->commands()->customConfigSet(mConfNum, data);
+            mVesc->commands()->customConfigSet(mConfNum, params);
         }
+    }
+}
+
+void PageCustomConfig::on_saveXmlButton_clicked()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the motor configuration XML file"),
+                                        ".",
+                                        tr("Xml files (*.xml)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    if (!path.toLower().endsWith(".xml")) {
+        path += ".xml";
+    }
+
+    bool res = mVesc->customConfig(mConfNum)->saveXml(path, "CustomConfiguration");
+
+    if (res) {
+        mVesc->emitStatusMessage("Saved custom configuration", true);
+    } else {
+        mVesc->emitMessageDialog(tr("Save custom configuration"),
+                                 tr("Could not save custom configuration:<BR>"
+                                    "%1").arg(mVesc->mcConfig()->xmlStatus()),
+                                 false, false);
+    }
+}
+
+void PageCustomConfig::on_loadXmlButton_clicked()
+{
+    QString path;
+    path = QFileDialog::getOpenFileName(this,
+                                        tr("Choose custom configuration file to load"),
+                                        ".",
+                                        tr("Xml files (*.xml)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    bool res = mVesc->customConfig(mConfNum)->loadXml(path, "CustomConfiguration");
+
+    if (res) {
+        mVesc->emitStatusMessage("Loaded custom configuration", true);
+    } else {
+        mVesc->emitMessageDialog(tr("Load custom configuration"),
+                                 tr("Could not load custom configuration:<BR>"
+                                    "%1").arg(mVesc->mcConfig()->xmlStatus()),
+                                 false, false);
     }
 }

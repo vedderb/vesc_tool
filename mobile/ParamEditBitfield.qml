@@ -51,6 +51,31 @@ Item {
                 if (i === 7) b7Box.text = names[i]
             }
 
+            b0Box.visible = b0Box.text.toLowerCase() != "unused"
+            b1Box.visible = b1Box.text.toLowerCase() != "unused"
+            b2Box.visible = b2Box.text.toLowerCase() != "unused"
+            b3Box.visible = b3Box.text.toLowerCase() != "unused"
+            b4Box.visible = b4Box.text.toLowerCase() != "unused"
+            b5Box.visible = b5Box.text.toLowerCase() != "unused"
+            b6Box.visible = b6Box.text.toLowerCase() != "unused"
+            b7Box.visible = b7Box.text.toLowerCase() != "unused"
+
+            var visibleCount = 0
+            if (b0Box.text.toLowerCase() != "unused") visibleCount++
+            if (b1Box.text.toLowerCase() != "unused") visibleCount++
+            if (b2Box.text.toLowerCase() != "unused") visibleCount++
+            if (b3Box.text.toLowerCase() != "unused") visibleCount++
+            if (b4Box.text.toLowerCase() != "unused") visibleCount++
+            if (b5Box.text.toLowerCase() != "unused") visibleCount++
+            if (b6Box.text.toLowerCase() != "unused") visibleCount++
+            if (b7Box.text.toLowerCase() != "unused") visibleCount++
+
+            visibleCount = Math.ceil(visibleCount / 2.0) - 1.0
+            if (visibleCount < 0.0) visibleCount = 0.0
+
+            height = 120 + visibleCount * 40
+            Layout.preferredHeight = height
+
             if (params.getParamTransmittable(paramName)) {
                 nowButton.visible = true
                 defaultButton.visible = true

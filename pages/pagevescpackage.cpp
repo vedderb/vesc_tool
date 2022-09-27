@@ -20,6 +20,14 @@
 #include "pagevescpackage.h"
 #include "ui_pagevescpackage.h"
 #include "utility.h"
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QDirIterator>
+#include <QNetworkAccessManager>
+#include <QUrl>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
 
 PageVescPackage::PageVescPackage(QWidget *parent) :
     QWidget(parent),
@@ -38,6 +46,9 @@ PageVescPackage::PageVescPackage(QWidget *parent) :
     ui->loadRefreshButton->setIcon(QIcon(theme +"icons/Refresh-96.png"));
     ui->outputRefreshButton->setIcon(QIcon(theme +"icons/Refresh-96.png"));
     ui->saveButton->setIcon(QIcon(theme +"icons/Save-96.png"));
+    ui->dlArchiveButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->installButton->setIcon(QIcon(theme +"icons/Download-96.png"));
+    ui->uninstallButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
 
     QSettings set;
     ui->loadEdit->setText(set.value("pagevescpackage/lastpkgload", "").toString());
@@ -49,6 +60,10 @@ PageVescPackage::PageVescPackage(QWidget *parent) :
 
     on_loadRefreshButton_clicked();
     on_outputRefreshButton_clicked();
+
+    ui->splitter->setSizes(QList<int>({500, 1000}));
+
+    reloadArchive();
 }
 
 PageVescPackage::~PageVescPackage()
@@ -231,4 +246,185 @@ void PageVescPackage::on_outputRefreshButton_clicked()
     auto pkg = mLoader.unpackVescPackage(f.readAll());
     ui->descriptionEdit->document()->setHtml(pkg.description);
     ui->nameEdit->setText(pkg.name);
+}
+
+void PageVescPackage::on_dlArchiveButton_clicked()
+{
+    ui->dlArchiveButton->setEnabled(false);
+    ui->displayDl->setText("Preparing download...");
+
+    QUrl url("http://home.vedder.se/vesc_pkg/vesc_pkg_all.rcc");
+    QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    QNetworkReply *reply = manager.get(request);
+
+    connect(reply, &QNetworkReply::downloadProgress, [this](qint64 bytesReceived, qint64 bytesTotal) {
+        ui->displayDl->setText("Downloading...");
+        ui->displayDl->setValue(100.0 * (double)bytesReceived / (double)bytesTotal);
+    });
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() == QNetworkReply::NoError) {
+        ui->displayDl->setText("Download Finished");
+        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+                "/vesc_pkg_all.rcc";
+        QFile file(path);
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(reply->readAll());
+            file.close();
+            reloadArchive();
+        }
+    } else {
+        ui->displayDl->setText("Download Failed");
+    }
+
+    reply->abort();
+    reply->deleteLater();
+
+    ui->dlArchiveButton->setEnabled(true);
+}
+
+void PageVescPackage::on_uninstallButton_clicked()
+{
+    if (!mVesc) {
+        return;
+    }
+
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog(tr("Uninstall Package"), tr("Not Connected"), false);
+        return;
+    }
+
+    QProgressDialog dialog(tr("Erasing..."), QString(), 0, 0, this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.show();
+
+    mLoader.qmlErase();
+    mLoader.lispErase();
+
+    mVesc->emitMessageDialog(tr("Uninstall Package"),
+                             tr("Uninstallation Done! Please disconnect and reconnect to "
+                                "revert possible VESC Tool GUI updates."),
+                             true);
+}
+
+void PageVescPackage::on_installButton_clicked()
+{
+    if (!mVesc) {
+        return;
+    }
+
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog(tr("Install Package"), tr("Not Connected"), false);
+        return;
+    }
+
+    if (!mCurrentPath.isEmpty()) {
+        QFile f(mCurrentPath);
+        if (!f.open(QIODevice::ReadOnly)) {
+            mVesc->emitMessageDialog(tr("Install Package"),
+                                     tr("Could not open package file for reading."),
+                                     false, false);
+            return;
+        }
+
+        QProgressDialog dialog(tr("Writing..."), QString(), 0, 0, this);
+        dialog.setWindowModality(Qt::WindowModal);
+        dialog.show();
+
+        mLoader.installVescPackage(f.readAll());
+
+        mVesc->emitMessageDialog(tr("Install Package"),
+                                 tr("Install Done! Please disconnect and reconnect to "
+                                    "apply possible VESC Tool GUI updates from this package."),
+                                 true);
+    } else {
+        mVesc->emitMessageDialog(tr("Install Package"),
+                                 tr("No package selected."),
+                                 false, false);
+    }
+}
+
+void PageVescPackage::reloadArchive()
+{
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+            "/vesc_pkg_all.rcc";
+    QFile file(path);
+    if (file.exists()) {
+        QResource::unregisterResource(path);
+        QResource::registerResource(path);
+
+        QString pkgDir = "://vesc_packages";
+
+        ui->applicationList->clear();
+        ui->libraryList->clear();
+
+        QDirIterator it(pkgDir);
+        while (it.hasNext()) {
+            QFileInfo fi(it.next());
+
+            QDirIterator it2(fi.absoluteFilePath());
+            while (it2.hasNext()) {
+                QFileInfo fi2(it2.next());
+
+                if (fi2.absoluteFilePath().toLower().endsWith(".vescpkg")) {
+                    QListWidgetItem *item = new QListWidgetItem;
+                    QString name = fi2.fileName();
+
+                    QFile f(fi2.absoluteFilePath());
+                    if (f.open(QIODevice::ReadOnly)) {
+                        auto pkg = mLoader.unpackVescPackage(f.readAll());
+                        name = pkg.name;
+                    }
+
+                    item->setText(name);
+                    item->setData(Qt::UserRole, fi2.absoluteFilePath());
+
+                    if (fi2.absoluteFilePath().startsWith("://vesc_packages/lib_")) {
+                        ui->libraryList->insertItem(ui->libraryList->count(), item);
+                    } else {
+                        ui->applicationList->insertItem(ui->applicationList->count(), item);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void PageVescPackage::packageSelected(QString path)
+{
+    mCurrentPath = path;
+    QFile f(path);
+    if (f.open(QIODevice::ReadOnly)) {
+        auto pkg = mLoader.unpackVescPackage(f.readAll());
+        ui->storeBrowser->document()->setHtml(pkg.description);
+        ui->installButton->setEnabled(!path.startsWith("://vesc_packages/lib_"));
+        if (ui->installButton->isEnabled()) {
+            ui->installButton->setToolTip("");
+        } else {
+            ui->installButton->setToolTip("This is a library, so it is not supposed to be installed. You can use "
+                                          "it from your own LispBM-scripts without installing it.");
+        }
+    }
+}
+
+void PageVescPackage::on_applicationList_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
+{
+    (void)previous;
+    if (current != nullptr) {
+        packageSelected(current->data(Qt::UserRole).toString());
+        ui->libraryList->setCurrentItem(nullptr);
+    }
+}
+
+void PageVescPackage::on_libraryList_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
+{
+    (void)previous;
+    if (current != nullptr) {
+        packageSelected(current->data(Qt::UserRole).toString());
+        ui->applicationList->setCurrentItem(nullptr);
+    }
 }

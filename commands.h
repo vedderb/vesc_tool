@@ -137,6 +137,7 @@ signals:
     void lispPrintReceived(QString str);
     void lispStatsRx(LISP_STATS stats);
     void lispRunningResRx(bool ok);
+    void lispStreamCodeRx(quint32 offset, qint16 res);
 
 public slots:
     void processPacket(QByteArray data);
@@ -224,7 +225,7 @@ public slots:
 
     void customConfigGetChunk(int confInd, int len, int offset);
     void customConfigGet(int confInd, bool isDefault);
-    void customConfigSet(int confInd, QByteArray confData);
+    void customConfigSet(int confInd, ConfigParams *conf);
 
     void pswGetStatus(bool by_id, int id_ind);
     void pswSwitch(int id, bool is_on, bool plot);
@@ -243,6 +244,7 @@ public slots:
 
     void lispReadCode(int len, int offset);
     void lispWriteCode(QByteArray data, quint32 offset);
+    void lispStreamCode(QByteArray data, quint32 offset, quint32 totLen, qint8 mode);
     void lispEraseCode();
     void lispSetRunning(bool running);
     void lispGetStats();

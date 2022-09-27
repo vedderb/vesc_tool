@@ -1,9 +1,10 @@
-
 <RCC>
-   <qresource prefix="/res/firmwares_esp/">
+    <qresource prefix="/res/firmwares_esp">
         <file>ESP32-C3/Devkit Blink/app.bin</file>
         <file>ESP32-C3/Devkit Blink/bootloader.bin</file>
         <file>ESP32-C3/Devkit Blink/partition-table.bin</file>
-   </qresource>
+        <file>ESP32-C3/VESC Express/bootloader.bin</file>
+        <file>ESP32-C3/VESC Express/partition-table.bin</file>
+        <file>ESP32-C3/VESC Express/app.bin</file>
+    </qresource>
 </RCC>
-

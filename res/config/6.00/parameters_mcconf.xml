@@ -3694,6 +3694,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>KTY84/130</enumNames>
             <enumNames>NTC Custom</enumNames>
             <enumNames>PTC Custom</enumNames>
+            <enumNames>PT1000</enumNames>
         </m_motor_temp_sens_type>
         <m_ptc_motor_coeff>
             <longName>Coefficient for PTC Motor Thermistor</longName>
@@ -3951,6 +3952,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The motor brand, e.g. Turnigy.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine></cDefine>
             <valString>Unnamed</valString>
+            <maxLen>0</maxLen>
         </motor_brand>
         <motor_model>
             <longName>Motor Model</longName>
@@ -3963,6 +3965,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The motor model, e.g. 6374 168KV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine></cDefine>
             <valString>Not Specified</valString>
+            <maxLen>0</maxLen>
         </motor_model>
         <motor_weight>
             <longName>Motor Weight</longName>
@@ -4015,6 +4018,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;This is an editor where a description can be stored for your motor configuration. Images can also be inserted. Notice that this information is not written to the VESC, so it has to be stored in an XML file.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine></cDefine>
             <valString>A motor description can be edited here.</valString>
+            <maxLen>0</maxLen>
         </motor_description>
         <motor_quality_bearings>
             <longName>Bearing Quality</longName>
@@ -4087,6 +4091,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;A text summary of the motor quality.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine></cDefine>
             <valString>Some comments about the motor quality. Images can be added as well.</valString>
+            <maxLen>0</maxLen>
         </motor_quality_description>
         <bms.type>
             <longName>BMS Type</longName>
@@ -4108,6 +4113,33 @@ p, li { white-space: pre-wrap; }
             <enumNames>None</enumNames>
             <enumNames>VESC BMS</enumNames>
         </bms.type>
+        <bms.limit_mode>
+            <longName>BMS Limit Mode</longName>
+            <type>6</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Choose how to limit the motor current based on data from the BMS.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Overtemp&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Decrease the input and regen current as the battery gets to hot.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SOC&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Decrease the input current as the state of charge (SOC) gets too low.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_BMS_LIMIT_MODE</cDefine>
+            <valInt>3</valInt>
+            <enumNames>Overtemp</enumNames>
+            <enumNames>SOC</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+        </bms.limit_mode>
         <bms.t_limit_start>
             <longName>Temperature Limit Start</longName>
             <type>1</type>
@@ -4415,6 +4447,7 @@ p, li { white-space: pre-wrap; }
         <ser>si_battery_ah</ser>
         <ser>si_motor_nl_current</ser>
         <ser>bms.type</ser>
+        <ser>bms.limit_mode</ser>
         <ser>bms.t_limit_start</ser>
         <ser>bms.t_limit_end</ser>
         <ser>bms.soc_limit_start</ser>
@@ -4490,6 +4523,7 @@ p, li { white-space: pre-wrap; }
                 <subgroupName>BMS</subgroupName>
                 <subgroupParams>
                     <param>bms.type</param>
+                    <param>bms.limit_mode</param>
                     <param>bms.t_limit_start</param>
                     <param>bms.t_limit_end</param>
                     <param>bms.soc_limit_start</param>

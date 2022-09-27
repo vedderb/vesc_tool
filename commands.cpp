@@ -1003,6 +1003,12 @@ void Commands::processPacket(QByteArray data)
         emit lispRunningResRx(vb.at(0));
         break;
 
+    case COMM_LISP_STREAM_CODE: {
+        quint32 offset = vb.vbPopFrontInt32();
+        quint32 res = vb.vbPopFrontInt16();
+        emit lispStreamCodeRx(offset, res);
+    } break;
+
     default:
         break;
     }
@@ -1902,12 +1908,12 @@ void Commands::customConfigGet(int confInd, bool isDefault)
     emitData(vb);
 }
 
-void Commands::customConfigSet(int confInd, QByteArray confData)
+void Commands::customConfigSet(int confInd, ConfigParams *conf)
 {
     VByteArray vb;
     vb.vbAppendUint8(COMM_SET_CUSTOM_CONFIG);
     vb.vbAppendInt8(int8_t(confInd));
-    vb.append(confData);
+    conf->serialize(vb);
     emitData(vb);
 }
 
@@ -2028,6 +2034,17 @@ void Commands::lispWriteCode(QByteArray data, quint32 offset)
     VByteArray vb;
     vb.vbAppendUint8(COMM_LISP_WRITE_CODE);
     vb.vbAppendUint32(offset);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::lispStreamCode(QByteArray data, quint32 offset, quint32 totLen, qint8 mode)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_STREAM_CODE);
+    vb.vbAppendInt32(offset);
+    vb.vbAppendInt32(totLen);
+    vb.vbAppendInt8(mode);
     vb.append(data);
     emitData(vb);
 }

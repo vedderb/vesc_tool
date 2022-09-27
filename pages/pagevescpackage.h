@@ -21,6 +21,7 @@
 #define PAGEVESCPACKAGE_H
 
 #include <QWidget>
+#include <QListWidgetItem>
 #include "vescinterface.h"
 #include "codeloader.h"
 
@@ -49,11 +50,20 @@ private slots:
     void on_loadRefreshButton_clicked();
     void on_writeButton_clicked();
     void on_outputRefreshButton_clicked();
+    void on_dlArchiveButton_clicked();
+    void on_uninstallButton_clicked();
+    void on_installButton_clicked();
+    void on_applicationList_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+    void on_libraryList_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
 
 private:
     Ui::PageVescPackage *ui;
     VescInterface *mVesc;
     CodeLoader mLoader;
+    QString mCurrentPath;
+
+    void reloadArchive();
+    void packageSelected(QString path);
 
 };
 

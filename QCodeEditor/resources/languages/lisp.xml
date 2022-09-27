@@ -20,6 +20,7 @@
         <name>def</name>
         <name>import</name>
         <name>atomic</name>
+        <name>undefine</name>
     </section>
     <section name="PrimitiveType">
         <name>nil</name>

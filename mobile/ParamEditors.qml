@@ -29,6 +29,11 @@ Item {
     property ConfigParams mAppConf: VescIf.appConfig()
 
     function createEditor(parent, name, conf) {
+        if (conf === null) {
+            console.log("Config is null, cannot create editor")
+            return null
+        }
+
         if (conf.hasParam(name)) {
             if (conf.isParamDouble(name)) {
                 var component = Qt.createComponent("ParamEditDouble.qml");
@@ -62,6 +67,10 @@ Item {
 
     function createEditorApp(parent, name) {
         return createEditor(parent, name, mAppConf)
+    }
+
+    function createEditorCustom(parent, name, customInd) {
+        return createEditor(parent, name, VescIf.customConfig(customInd))
     }
 
     function createSeparator(parent, text) {

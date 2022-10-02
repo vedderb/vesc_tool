@@ -53,8 +53,6 @@ void PageCustomConfig::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(customConfigRx(int,QByteArray)),
-                this, SLOT(customConfigRx(int,QByteArray)));
         connect(mVesc, SIGNAL(customConfigLoadDone()),
                 this, SLOT(customConfigLoadDone()));
     }
@@ -63,23 +61,6 @@ void PageCustomConfig::setVesc(VescInterface *vesc)
 void PageCustomConfig::setConfNum(int num)
 {
     mConfNum = num;
-}
-
-void PageCustomConfig::customConfigRx(int confInd, QByteArray data)
-{
-    if (confInd == mConfNum) {
-        ConfigParams *params = mVesc->customConfig(mConfNum);
-        if (params) {
-            auto vb = VByteArray(data);
-            if (params->deSerialize(vb)) {
-                mVesc->emitStatusMessage(tr("Custom config %1 updated").arg(mConfNum), true);
-            } else {
-                mVesc->emitMessageDialog(tr("Custom Configuration"),
-                                         tr("Could not deserialize custom config %1").arg(mConfNum),
-                                         false, false);
-            }
-        }
-    }
 }
 
 void PageCustomConfig::customConfigLoadDone()

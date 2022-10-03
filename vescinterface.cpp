@@ -3678,6 +3678,10 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     if (params.hasQmlApp || params.hasQmlHw) {
         emit qmlLoadDone();
     }
+
+    for (int i = 0;i < mCustomConfigs.size();i++) {
+        commands()->customConfigGet(i, false);
+    }
 }
 
 void VescInterface::appconfUpdated()

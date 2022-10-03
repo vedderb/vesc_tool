@@ -82,8 +82,6 @@ void PageCustomConfig::customConfigLoadDone()
             t->clearParams();
             t->addParamSubgroup(p, "General", tabNames.at(i));
         }
-
-        on_readButton_clicked();
     }
 }
 

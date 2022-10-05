@@ -57,5 +57,6 @@
         <file>StatPage.qml</file>
         <file>BleSetupDialog.qml</file>
         <file>ParamEditBitfield.qml</file>
+        <file>ConfigPageCustom.qml</file>
     </qresource>
 </RCC>

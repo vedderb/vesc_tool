@@ -577,6 +577,29 @@ ApplicationWindow {
         }
     }
 
+    TabButton {
+        id: confCustomButton
+        visible: confCustomPage.visible
+        text: "ConfCustom"
+        width: tabBar.buttonWidth
+    }
+
+    Page {
+        id: confCustomPage
+        visible: false
+
+        Loader {
+            id: confCustomLoader
+            anchors.fill: parent
+            asynchronous: true
+            sourceComponent: ConfigPageCustom {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+            }
+        }
+    }
+
     Page {
         id: rtDataBalance
         visible: false
@@ -963,6 +986,20 @@ ApplicationWindow {
         }
     }
 
+    function updateConfCustom () {
+        if (VescIf.isPortConnected() && VescIf.customConfig(0) !== null) {
+            swipeView.insertItem(5, confCustomPage)
+            tabBar.insertItem(5, confCustomButton)
+            confCustomPage.visible = true
+            confCustomLoader.item.reloadConfig()
+            confCustomButton.text = VescIf.customConfig(0).getLongName("hw_name")
+        } else {
+            confCustomPage.visible = false
+            confCustomPage.parent = null
+            confCustomButton.parent = null
+        }
+    }
+
     function indexOffset() {
         var res = 0
         if (uiHwButton.visible) {
@@ -1019,7 +1056,7 @@ ApplicationWindow {
                 if (limited && !VescIf.getFwSupportsConfiguration()) {
                     confPageMotor.enabled = false
                     confPageApp.enabled = false
-                    swipeView.setCurrentIndex(4 + indexOffset())
+                    swipeView.setCurrentIndex(4 + indexOffset() + (confCustomPage.visible ? 1 : 0))
                 } else {
                     confPageMotor.enabled = true
                     confPageApp.enabled = true
@@ -1028,6 +1065,8 @@ ApplicationWindow {
                 }
                 fwReadCorrectly = true
                 bleDisconnectTimer.stop()
+            } else {
+                updateConfCustom()
             }
 
             updateHwUi()
@@ -1036,6 +1075,10 @@ ApplicationWindow {
 
         onQmlLoadDone: {
             qmlLoadDialog.open()
+        }
+
+        onCustomConfigLoadDone: {
+            updateConfCustom()
         }
     }
 

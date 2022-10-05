@@ -964,6 +964,8 @@ typedef enum {
 
     COMM_LISP_REPL_CMD,
     COMM_LISP_STREAM_CODE,
+    // TcpHub
+    COMM_TCP_HUB_CONNECT,
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -1153,5 +1155,11 @@ public:
 };
 
 Q_DECLARE_METATYPE(ENCODER_DETECT_RES)
+
+typedef enum {
+    TCP_HUB_VESC_TOOL_CONNECTING = 0,
+    TCP_HUB_VESC_CONNECTING,
+} TCP_CONNECTION_FLAG;
+
 
 #endif // DATATYPES_H

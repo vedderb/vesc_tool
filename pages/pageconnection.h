@@ -79,6 +79,10 @@ private slots:
     void on_tcpDetectConnectButton_clicked();
     void on_tcpDetectDisconnectButton_clicked();
 
+    void on_tcpHubConnectButton_clicked();
+
+    void on_tcpHubDisconnectButton_clicked();
+
 private:
     Ui::PageConnection *ui;
     VescInterface *mVesc;

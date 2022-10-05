@@ -32,6 +32,8 @@
 #include <QDesktopWidget>
 #include <QFontDatabase>
 
+#include <tcphub.h>
+
 #ifdef Q_OS_IOS
 #include "ios/src/setIosParameters.h"
 #endif
@@ -71,6 +73,7 @@ static void showHelp()
     qDebug() << "--qmlRotation [deg] : Rotate screen by deg degrees";
     qDebug() << "--retryConn : Keep trying to reconnect to the VESC when the connection fails";
     qDebug() << "--useMobileUi : Start the mobile UI instead of the full desktop UI";
+    qDebug() << "--tcpHub [port] : Start a TCP hub for remote access to connected VESCs";
 
 }
 
@@ -225,6 +228,8 @@ int main(int argc, char *argv[])
     bool qmlOtherScreen = false;
     bool useMobileUi = false;
     double qmlRot = 0.0;
+    bool isTcpHub = false;
+    TcpHub tcpHub;
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -312,6 +317,14 @@ int main(int argc, char *argv[])
                 i++;
                 qCritical() << "No rotation specified";
                 return 1;
+            }
+        }
+        if (str == "--tcpHub") {
+            if ((i + 1) < args.size()) {
+                i++;
+                tcpPort = args.at(i).toInt();
+                isTcpHub = true;
+                found = true;
             }
         }
 
@@ -407,7 +420,21 @@ int main(int argc, char *argv[])
                 qWarning() << msg;
             }
         });
-    } else {
+    } else if (isTcpHub) {
+        qputenv("QT_QPA_PLATFORM", "offscreen");
+        app = new QCoreApplication(argc, argv);
+        vesc = new VescInterface;
+        vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+        Utility::configLoadLatest(vesc);
+
+        if (tcpHub.start(tcpPort)) {
+            qDebug() << "TcpHub started";
+        } else {
+            qCritical() << "Could not start TcpHub on port" << tcpPort;
+            qApp->quit();
+        }
+    }
+    else {
         QApplication *a = new QApplication(argc, argv);
         app = a;
 

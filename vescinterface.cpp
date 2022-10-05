@@ -155,6 +155,16 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
 
+    // TCPHub
+    mTcpHubSocket = new QTcpSocket(this);
+    mTcpHubConnected = false;
+    connect(mTcpHubSocket, SIGNAL(connected()), this, SLOT(tcpHubConnected()));
+    connect(mTcpHubSocket, SIGNAL(disconnected()), this, SLOT(tcpHubDisconnected()));
+    connect(mTcpHubSocket, SIGNAL(readyRead()), this, SLOT(tcpHubReadyRead()));
+    mHubPacket = new Packet(this);
+    connect(mHubPacket, SIGNAL(packetReceived(QByteArray&)), this, SLOT(tcpHubPacketReceived(QByteArray&)));
+    connect(mHubPacket, SIGNAL(dataToSend(QByteArray&)), this, SLOT(tcpHubSendData(QByteArray&)));
+
     // UDP
     mUdpSocket = new QUdpSocket(this);
     mUdpConnected = false;
@@ -2453,6 +2463,34 @@ void VescInterface::connectTcp(QString server, int port)
     mTcpSocket->connectToHost(host, port);
 }
 
+void VescInterface::connectTcpHub(QString server, int port) {
+
+    mLastTcpHubServer = server;
+    mLastTcpHubPort = port;
+
+    QHostAddress host;
+    host.setAddress(server);
+
+    if (host.isNull()) {
+        QList<QHostAddress> addresses = QHostInfo::fromName(server).addresses();
+
+        if (!addresses.isEmpty()) {
+            host.setAddress(addresses.first().toString());
+        }
+    }
+    mTcpHubSocket->abort();
+    mTcpHubSocket->connectToHost(host,port);
+}
+
+void VescInterface::disconnectTcpHub()
+{
+    if (mTcpHubConnected) {
+        mTcpHubSocket->flush();
+        mTcpHubSocket->close();
+        mTcpHubConnected = false;
+    }
+}
+
 void VescInterface::connectUdp(QString server, int port)
 {
     QHostAddress host;
@@ -2886,6 +2924,43 @@ void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
     emit statusMessage(tr("TCP Error") + errorStr, false);
     mTcpSocket->close();
     updateFwRx(false);
+}
+
+void VescInterface::tcpHubConnected()
+{
+    mTcpHubSocket->setSocketOption(QAbstractSocket::LowDelayOption, true);
+    mTcpHubConnected = true;
+
+    qDebug() << "Connected to a TCP VESC HUB";
+
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_TCP_HUB_CONNECT);
+    vb.vbAppendUint8(TCP_HUB_VESC_TOOL_CONNECTING);
+    mHubPacket->sendPacket(vb);
+
+}
+
+void VescInterface::tcpHubDisconnected()
+{
+    mTcpHubConnected = false;
+    qDebug() << "Lost connection to Hub";
+}
+
+void VescInterface::tcpHubReadyRead()
+{
+    while (mTcpHubSocket->bytesAvailable() > 0) {
+        mHubPacket->processData(mTcpHubSocket->readAll());
+    }
+}
+
+void VescInterface::tcpHubPacketReceived(QByteArray &packet)
+{
+    qDebug() << "received data packet from HUB";
+}
+
+void VescInterface::tcpHubSendData(QByteArray &data)
+{
+    mTcpHubSocket->write(data);
 }
 
 void VescInterface::udpInputError(QAbstractSocket::SocketError socketError)

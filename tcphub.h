@@ -2,8 +2,15 @@
 #define TCPHUB_H
 
 #include <QObject>
-
-
+#include <QMap>
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QTimer>
+#include <QThread>
+#include "packet.h"
+#include <tcpconnectedvesc.h>
+#include <tcpconnectedtool.h>
+#include <tcphubrouter.h>
 
 /*
  *  - VESC connects to Server (HUB) and gets registered.
@@ -24,8 +31,28 @@ class TcpHub : public QObject
     Q_OBJECT
 public:
     explicit TcpHub(QObject *parent = nullptr);
+    void addVesc(QString id, TcpConnectedVesc* vesc);
+    void addTool(QString id, TcpConnectedTool* tool);
 
+    bool start(int port, QHostAddress addr = QHostAddress::Any);
 signals:
+
+public slots:
+    void newTcpHubConnection();
+    void routerDisconnected(QString addr);
+    void newVescConnection(QTcpSocket *socket);
+    void newVescToolConnection(QTcpSocket *socket);
+    void periodicTask();
+private:
+    //QThread *mThread = nullptr;
+    //QTimer *mPeriodic = nullptr;
+
+    // Not entirely happy with a QString key. But QHostAddress is not possible.
+    QMap<QString, TcpConnectedVesc*> mTcpConnectedVescs;
+    QMap<QString, TcpConnectedTool*> mTcpConnectedTools;
+    QMap<QString, TcpHubRouter*> mTcpHubRouters;
+    QTcpServer *mTcpHubServer;
+
 
 };
 

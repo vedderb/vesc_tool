@@ -456,6 +456,9 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
     });
 
+    connect(mCommands, SIGNAL(customConfigRx(int,QByteArray)),
+            this, SLOT(customConfigRx(int,QByteArray)));
+
 #if VT_IS_TEST_VERSION
     QTimer::singleShot(1000, [this]() {
         emitMessageDialog("VESC Tool Test Version",
@@ -3675,6 +3678,10 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     if (params.hasQmlApp || params.hasQmlHw) {
         emit qmlLoadDone();
     }
+
+    for (int i = 0;i < mCustomConfigs.size();i++) {
+        commands()->customConfigGet(i, false);
+    }
 }
 
 void VescInterface::appconfUpdated()
@@ -3707,6 +3714,21 @@ void VescInterface::mcconfUpdated()
 void VescInterface::ackReceived(QString ackType)
 {
     emit statusMessage(ackType, true);
+}
+
+void VescInterface::customConfigRx(int confId, QByteArray data)
+{
+    ConfigParams *params = customConfig(confId);
+    if (params) {
+        auto vb = VByteArray(data);
+        if (params->deSerialize(vb)) {
+            emitStatusMessage(tr("Custom config %1 updated").arg(confId), true);
+        } else {
+            emitMessageDialog(tr("Custom Configuration"),
+                              tr("Could not deserialize custom config %1").arg(confId),
+                              false, false);
+        }
+    }
 }
 
 bool VescInterface::getFwSupportsConfiguration() const

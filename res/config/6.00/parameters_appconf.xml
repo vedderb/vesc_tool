@@ -1226,30 +1226,42 @@ p, li { white-space: pre-wrap; }
             <enumNames>Regular</enumNames>
             <enumNames>No Fault</enumNames>
         </app_adc_conf.safe_start>
-        <app_adc_conf.cc_button_inverted>
-            <longName>Invert Cruise Control Button</longName>
-            <type>5</type>
+        <app_adc_conf.buttons>
+            <longName>Button Inputs</longName>
+            <type>6</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Invert the cruise control button. For supporting both normally-closed and normally-open buttons.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_ADC_CC_BUTTON_INVERTED</cDefine>
-            <valInt>1</valInt>
-        </app_adc_conf.cc_button_inverted>
-        <app_adc_conf.rev_button_inverted>
-            <longName>Invert Reverse Button</longName>
-            <type>5</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Invert the reverse button. For supporting both normally-closed and normally-open buttons.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>APPCONF_ADC_REV_BUTTON_INVERTED</cDefine>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;A cruise control and a reverse button can be used with the ADC app. The reverse button is only used on the control modes that have button in their name, but cruise control can be used on all control modes when enabled. The buttons can be connected as follows:&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Comm TX: Cruise Control&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Comm RX: Reverse&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If the UART app is active the PPM-input is used for the button instead. That means you only have one button, which will be the reverse button for the button-modes (not cruise control available) or cruise control for non-button control modes.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;By default the button inputs have a pull-up resistor and are active low.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Enable Cruise Control&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Enable cruise control button input.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Invert CC Button&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Invert the polarity of the cruise control button.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Invert Reverse Button&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Invert the polarity of the reverse button.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_ADC_BUTTONS</cDefine>
             <valInt>0</valInt>
-        </app_adc_conf.rev_button_inverted>
+            <enumNames>Enable Cruise Control</enumNames>
+            <enumNames>Invert CC Button</enumNames>
+            <enumNames>Invert Reverse Button</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+        </app_adc_conf.buttons>
         <app_adc_conf.voltage_inverted>
             <longName>Invert ADC1 Voltage</longName>
             <type>5</type>
@@ -3702,6 +3714,32 @@ p, li { white-space: pre-wrap; }
             <enumNames>IMU_FILTER_MEDIUM</enumNames>
             <enumNames>IMU_FILTER_HIGH</enumNames>
         </imu_conf.filter>
+        <imu_conf.accel_lowpass_filter>
+            <longName>Accel lowpass filter</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Accelerometer lowpass filter&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Biquad lowpass filter applied to all 3 axes. This is run on the ESC and will be applied regardless of IMU model.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Setting the filter to 0Hz will disable it.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_IMU_ACCEL_LOWPASS_FILTER</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1000</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.5</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix> Hz</suffix>
+            <vTx>9</vTx>
+        </imu_conf.accel_lowpass_filter>
         <imu_conf.sample_rate_hz>
             <longName>Sample Rate</longName>
             <type>2</type>
@@ -4071,8 +4109,7 @@ p, li { white-space: pre-wrap; }
         <ser>app_adc_conf.voltage2_end</ser>
         <ser>app_adc_conf.use_filter</ser>
         <ser>app_adc_conf.safe_start</ser>
-        <ser>app_adc_conf.cc_button_inverted</ser>
-        <ser>app_adc_conf.rev_button_inverted</ser>
+        <ser>app_adc_conf.buttons</ser>
         <ser>app_adc_conf.voltage_inverted</ser>
         <ser>app_adc_conf.voltage2_inverted</ser>
         <ser>app_adc_conf.throttle_exp</ser>
@@ -4191,6 +4228,7 @@ p, li { white-space: pre-wrap; }
         <ser>imu_conf.type</ser>
         <ser>imu_conf.mode</ser>
         <ser>imu_conf.filter</ser>
+        <ser>imu_conf.accel_lowpass_filter</ser>
         <ser>imu_conf.sample_rate_hz</ser>
         <ser>imu_conf.use_magnetometer</ser>
         <ser>imu_conf.accel_confidence_decay</ser>
@@ -4283,11 +4321,10 @@ p, li { white-space: pre-wrap; }
                     <param>app_adc_conf.ctrl_type</param>
                     <param>app_adc_conf.use_filter</param>
                     <param>app_adc_conf.safe_start</param>
-                    <param>app_adc_conf.cc_button_inverted</param>
-                    <param>app_adc_conf.rev_button_inverted</param>
                     <param>app_adc_conf.update_rate_hz</param>
                     <param>app_adc_conf.ramp_time_pos</param>
                     <param>app_adc_conf.ramp_time_neg</param>
+                    <param>app_adc_conf.buttons</param>
                     <param>::sep::Multiple VESCs over CAN-bus</param>
                     <param>app_adc_conf.multi_esc</param>
                     <param>app_adc_conf.tc</param>
@@ -4509,6 +4546,7 @@ p, li { white-space: pre-wrap; }
                     <param>imu_conf.use_magnetometer</param>
                     <param>imu_conf.sample_rate_hz</param>
                     <param>imu_conf.filter</param>
+                    <param>imu_conf.accel_lowpass_filter</param>
                     <param>::sep::AHRS</param>
                     <param>imu_conf.mode</param>
                     <param>imu_conf.accel_confidence_decay</param>

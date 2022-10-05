@@ -702,7 +702,8 @@ void MainWindow::timerSlot()
     }
 
     // Scan can bus on connect
-    if (mVesc->isPortConnected() && ui->canList->count() == 0 && ui->scanCanButton->isEnabled() && mVesc->fwRx() && mVesc->customConfigRxDone()) {
+    if (mVesc->isPortConnected() && ui->canList->count() == 0 &&
+            ui->scanCanButton->isEnabled() && mVesc->fwRx() && mVesc->customConfigRxDone()) {
         on_scanCanButton_clicked();
     }
 

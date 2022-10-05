@@ -40,7 +40,6 @@ public:
     void setConfNum(int num);
 
 private slots:
-    void customConfigRx(int confId, QByteArray data);
     void customConfigLoadDone();
 
     void on_readButton_clicked();

@@ -6,10 +6,8 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QTimer>
-#include <QThread>
 #include "packet.h"
-#include <tcpconnectedvesc.h>
-#include <vescinterface.h>
+#include "vescinterface.h"
 
 /*
  *  - VESC connects to Server (HUB) and gets registered.
@@ -24,6 +22,23 @@
  *  - If VESC_TOOL drops, reconnect if made avaialable again
  *  - If the VESC drops, kill connection.
  */
+
+class TcpConnectedVesc : public QObject
+{
+    Q_OBJECT
+
+private:
+
+
+public:
+    explicit TcpConnectedVesc(QObject *parent = nullptr);
+    Packet *mPacket;
+    QTcpSocket *mTcpSocket;
+
+signals:
+    void connectionChanged(bool state, QHostAddress addr);
+public slots:
+};
 
 class TcpHub : public QObject
 {
@@ -40,11 +55,10 @@ signals:
 
 public slots:
     void newTcpHubConnection();
-    void newVescConnection(QTcpSocket *socket);
+    void periodic();
 
 private:
-    //QThread *mThread = nullptr;
-    //QTimer *mPeriodic = nullptr;
+    QTimer *mPeriodic;
 
     // Not entirely happy with a QString key. But QHostAddress is not possible.
     QMap<QString, TcpConnectedVesc*> mTcpConnectedVescs;

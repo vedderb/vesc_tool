@@ -198,7 +198,6 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     packet.cpp \
     preferences.cpp \
-    tcpconnectedvesc.cpp \
     tcphub.cpp \
     udpserversimple.cpp \
     vbytearray.cpp \
@@ -219,7 +218,6 @@ HEADERS  += mainwindow.h \
     codeloader.h \
     packet.h \
     preferences.h \
-    tcpconnectedvesc.h \
     tcphub.h \
     udpserversimple.h \
     vbytearray.h \

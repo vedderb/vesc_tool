@@ -233,12 +233,6 @@ public:
     Q_INVOKABLE QString qmlApp();
 
     Q_INVOKABLE void connectTcpHub(QString server, int port, QString id, QString pass);
-    Q_INVOKABLE void disconnectTcpHub();
-    QString getTcpHubVescID() const;
-    void setTcpHubVescID(const QString &tcpHubVescID);
-
-    QString getTcpHubVescPass() const;
-    void setTcpHubVescPass(const QString &tcpHubVescPass);
 
 signals:
     void statusMessage(const QString &msg, bool isGood);
@@ -277,11 +271,6 @@ private slots:
     void tcpInputDisconnected();
     void tcpInputDataAvailable();
     void tcpInputError(QAbstractSocket::SocketError socketError);
-    void tcpHubConnected();
-    void tcpHubDisconnected();
-    void tcpHubReadyRead();
-    void tcpHubPacketReceived(QByteArray &packet);
-    void tcpHubSendData(QByteArray &data);
 
     void udpInputError(QAbstractSocket::SocketError socketError);
     void udpInputDataAvailable();
@@ -380,12 +369,6 @@ private:
     bool mTcpConnected;
     QString mLastTcpServer;
     int mLastTcpPort;
-
-    QTcpSocket *mTcpHubSocket;
-    bool mTcpHubConnected;
-    QString mLastTcpHubServer;
-    int mLastTcpHubPort;
-    Packet *mHubPacket; // Packet IF for interfacing with hub as client
 
     QUdpSocket *mUdpSocket;
     bool mUdpConnected;

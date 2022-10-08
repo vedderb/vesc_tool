@@ -720,6 +720,6 @@ void PageConnection::on_tcpHubConnectButton_clicked()
 void PageConnection::on_tcpHubDisconnectButton_clicked()
 {
     if (mVesc) {
-        mVesc->disconnectTcpHub();
+        mVesc->disconnectPort();
     }
 }

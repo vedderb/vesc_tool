@@ -155,16 +155,6 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
 
-    // TCPHub
-    mTcpHubSocket = new QTcpSocket(this);
-    mTcpHubConnected = false;
-    connect(mTcpHubSocket, SIGNAL(connected()), this, SLOT(tcpHubConnected()));
-    connect(mTcpHubSocket, SIGNAL(disconnected()), this, SLOT(tcpHubDisconnected()));
-    connect(mTcpHubSocket, SIGNAL(readyRead()), this, SLOT(tcpHubReadyRead()));
-    mHubPacket = new Packet(this);
-    connect(mHubPacket, SIGNAL(packetReceived(QByteArray&)), this, SLOT(tcpHubPacketReceived(QByteArray&)));
-    connect(mHubPacket, SIGNAL(dataToSend(QByteArray&)), this, SLOT(tcpHubSendData(QByteArray&)));
-
     // UDP
     mUdpSocket = new QUdpSocket(this);
     mUdpConnected = false;
@@ -2468,8 +2458,8 @@ void VescInterface::connectTcp(QString server, int port)
 
 void VescInterface::connectTcpHub(QString server, int port, QString id, QString pass) {
 
-    mLastTcpHubServer = server;
-    mLastTcpHubPort = port;
+    mLastTcpServer = server;
+    mLastTcpPort = port;
 
     QHostAddress host;
     host.setAddress(server);
@@ -2481,19 +2471,10 @@ void VescInterface::connectTcpHub(QString server, int port, QString id, QString 
             host.setAddress(addresses.first().toString());
         }
     }
-    mTcpHubSocket->abort();
-    mTcpHubSocket->connectToHost(host,port);
+    mTcpSocket->abort();
+    mTcpSocket->connectToHost(host,port);
     mTcpHubVescID = id;
     mTcpHubVescPass = pass;
-}
-
-void VescInterface::disconnectTcpHub()
-{
-    if (mTcpHubConnected) {
-        mTcpHubSocket->flush();
-        mTcpHubSocket->close();
-        mTcpHubConnected = false;
-    }
 }
 
 void VescInterface::connectUdp(QString server, int port)
@@ -2929,37 +2910,6 @@ void VescInterface::tcpInputError(QAbstractSocket::SocketError socketError)
     emit statusMessage(tr("TCP Error") + errorStr, false);
     mTcpSocket->close();
     updateFwRx(false);
-}
-
-void VescInterface::tcpHubConnected()
-{
-    mTcpHubSocket->setSocketOption(QAbstractSocket::LowDelayOption, true);
-    mTcpHubConnected = true;
-
-    qDebug() << "Connected to a TCP VESC HUB";
-}
-
-void VescInterface::tcpHubDisconnected()
-{
-    mTcpHubConnected = false;
-    qDebug() << "Lost connection to Hub";
-}
-
-void VescInterface::tcpHubReadyRead()
-{
-    while (mTcpHubSocket->bytesAvailable() > 0) {
-        mHubPacket->processData(mTcpHubSocket->readAll());
-    }
-}
-
-void VescInterface::tcpHubPacketReceived(QByteArray &packet)
-{
-    qDebug() << "received data packet from HUB";
-}
-
-void VescInterface::tcpHubSendData(QByteArray &data)
-{
-    mTcpHubSocket->write(data);
 }
 
 void VescInterface::udpInputError(QAbstractSocket::SocketError socketError)
@@ -4160,24 +4110,4 @@ void VescInterface::setLastConnectionType(conn_t type)
 {
     mLastConnType = type;
     mSettings.setValue("connection_type", type);
-}
-
-QString VescInterface::getTcpHubVescPass() const
-{
-    return mTcpHubVescPass;
-}
-
-void VescInterface::setTcpHubVescPass(const QString &tcpHubVescPass)
-{
-    mTcpHubVescPass = tcpHubVescPass;
-}
-
-QString VescInterface::getTcpHubVescID() const
-{
-    return mTcpHubVescID;
-}
-
-void VescInterface::setTcpHubVescID(const QString &tcpHubVescID)
-{
-    mTcpHubVescID = tcpHubVescID;
 }

@@ -32,7 +32,7 @@
 #include <QDesktopWidget>
 #include <QFontDatabase>
 
-#include <tcphub.h>
+#include "tcphub.h"
 
 #ifdef Q_OS_IOS
 #include "ios/src/setIosParameters.h"
@@ -229,7 +229,6 @@ int main(int argc, char *argv[])
     bool useMobileUi = false;
     double qmlRot = 0.0;
     bool isTcpHub = false;
-    TcpHub tcpHub;
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -373,6 +372,7 @@ int main(int argc, char *argv[])
     });
 #else
     VescInterface *vesc = nullptr;
+    TcpHub *tcpHub = nullptr;
     MainWindow *w = nullptr;
     QmlUi *qmlUi = nullptr;
     QString qmlStr;
@@ -426,8 +426,9 @@ int main(int argc, char *argv[])
         vesc = new VescInterface;
         vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
         Utility::configLoadLatest(vesc);
-        tcpHub.setVescIF(vesc);
-        if (tcpHub.start(tcpPort)) {
+        tcpHub = new TcpHub;
+        tcpHub->setVescIF(vesc);
+        if (tcpHub->start(tcpPort)) {
             qDebug() << "TcpHub started";
         } else {
             qCritical() << "Could not start TcpHub on port" << tcpPort;
@@ -583,6 +584,10 @@ int main(int argc, char *argv[])
 #else
     if (vesc) {
         delete vesc;
+    }
+
+    if (tcpHub) {
+        delete tcpHub;
     }
 
     if (w) {

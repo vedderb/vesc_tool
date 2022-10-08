@@ -65,6 +65,8 @@ PageConnection::PageConnection(QWidget *parent) :
     ui->autoConnectButton->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
     ui->bleSetNameButton->setIcon(QPixmap(theme + "icons/Ok-96.png"));
     ui->pairConnectedButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->tcpHubConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->tcpHubDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
 
     QIcon mycon = QIcon(theme + "icons/can_off.png");
     mycon.addPixmap(QPixmap(theme + "icons/can_off.png"), QIcon::Normal, QIcon::Off);
@@ -120,6 +122,11 @@ void PageConnection::setVesc(VescInterface *vesc)
 
     ui->udpServerEdit->setText(mVesc->getLastUdpServer());
     ui->udpPortBox->setValue(mVesc->getLastUdpPort());
+
+    ui->tcpHubServerEdit->setText(mVesc->getLastTcpServer());
+    ui->tcpHubPortBox->setValue(mVesc->getLastTcpPort());
+    ui->tcpHubVescIdLineEdit->setText(mVesc->getLastTcpHubVescID());
+    ui->tcpHubVescPasswordLineEdit->setText(mVesc->getLastTcpHubVescPass());
 
 #ifdef HAS_BLUETOOTH
     connect(mVesc->bleDevice(), SIGNAL(scanDone(QVariantMap,bool)),
@@ -713,7 +720,9 @@ void PageConnection::on_tcpHubConnectButton_clicked()
     if (mVesc) {
         QString tcpServer = ui->tcpHubServerEdit->text();
         int tcpPort = ui->tcpHubPortBox->value();
-        mVesc->connectTcpHub(tcpServer, tcpPort, ui->tcpHubVescIDlineEdit->text(),ui->tcpHubVescPasswordlineEdit->text());
+        mVesc->connectTcpHub(tcpServer, tcpPort,
+                             ui->tcpHubVescIdLineEdit->text().replace(" ", "").replace(":", "").toUpper(),
+                             ui->tcpHubVescPasswordLineEdit->text());
     }
 }
 

@@ -81,6 +81,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastConnType = static_cast<conn_t>(mSettings.value("connection_type", CONN_NONE).toInt());
     mLastTcpServer = mSettings.value("tcp_server", "127.0.0.1").toString();
     mLastTcpPort = mSettings.value("tcp_port", 65102).toInt();
+    mLastTcpHubVescID = mSettings.value("tcp_hub_vesc_id", "").toString();
+    mLastTcpHubVescPass = mSettings.value("tcp_hub_vesc_pass", "").toString();
     mLastUdpServer = QHostAddress(mSettings.value("udp_server", "127.0.0.1").toString());
     mLastUdpPort = mSettings.value("udp_port", 65102).toInt();
 
@@ -2099,7 +2101,7 @@ bool VescInterface::reconnectLastPort()
         return false;
 #endif
     } else if (mLastConnType == CONN_TCP) {
-        connectTcp(mLastTcpServer, mLastTcpPort);
+        connectTcpHub(mLastTcpServer, mLastTcpPort, mLastTcpHubVescID, mLastTcpHubVescPass);
         return true;
     } else if (mLastConnType == CONN_UDP) {
         connectUdp(mLastUdpServer.toString(), mLastUdpPort);
@@ -2437,8 +2439,15 @@ void VescInterface::setCANbusReceiverID(int node_ID)
 
 void VescInterface::connectTcp(QString server, int port)
 {
+    connectTcpHub(server, port, "", "");
+}
+
+void VescInterface::connectTcpHub(QString server, int port, QString id, QString pass)
+{
     mLastTcpServer = server;
     mLastTcpPort = port;
+    mLastTcpHubVescID = id;
+    mLastTcpHubVescPass = pass;
 
     QHostAddress host;
     host.setAddress(server);
@@ -2453,28 +2462,7 @@ void VescInterface::connectTcp(QString server, int port)
     }
 
     mTcpSocket->abort();
-    mTcpSocket->connectToHost(host, port);
-}
-
-void VescInterface::connectTcpHub(QString server, int port, QString id, QString pass) {
-
-    mLastTcpServer = server;
-    mLastTcpPort = port;
-
-    QHostAddress host;
-    host.setAddress(server);
-
-    if (host.isNull()) {
-        QList<QHostAddress> addresses = QHostInfo::fromName(server).addresses();
-
-        if (!addresses.isEmpty()) {
-            host.setAddress(addresses.first().toString());
-        }
-    }
-    mTcpSocket->abort();
     mTcpSocket->connectToHost(host,port);
-    mTcpHubVescID = id;
-    mTcpHubVescPass = pass;
 }
 
 void VescInterface::connectUdp(QString server, int port)
@@ -2873,8 +2861,15 @@ void VescInterface::tcpInputConnected()
 {
     mTcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, true);
 
+    if (!mLastTcpHubVescID.isEmpty()) {
+        QString login = QString("VESCTOOL:%1:%2\n").arg(mLastTcpHubVescID).arg(mLastTcpHubVescPass);
+        mTcpSocket->write(login.toLocal8Bit());
+    }
+
     mSettings.setValue("tcp_server", mLastTcpServer);
     mSettings.setValue("tcp_port", mLastTcpPort);
+    mSettings.setValue("tcp_hub_vesc_id", mLastTcpHubVescID);
+    mSettings.setValue("tcp_hub_vesc_pass", mLastTcpHubVescPass);
     setLastConnectionType(CONN_TCP);
 
     mTcpConnected = true;
@@ -3750,6 +3745,16 @@ void VescInterface::customConfigRx(int confId, QByteArray data)
                               false, false);
         }
     }
+}
+
+QString VescInterface::getLastTcpHubVescPass() const
+{
+    return mLastTcpHubVescPass;
+}
+
+QString VescInterface::getLastTcpHubVescID() const
+{
+    return mLastTcpHubVescID;
 }
 
 bool VescInterface::getFwSupportsConfiguration() const

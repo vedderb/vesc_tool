@@ -232,8 +232,14 @@ public:
     Q_INVOKABLE QString qmlHw();
     Q_INVOKABLE QString qmlApp();
 
-    void connectTcpHub(QString server, int port);
-    void disconnectTcpHub();
+    Q_INVOKABLE void connectTcpHub(QString server, int port, QString id, QString pass);
+    Q_INVOKABLE void disconnectTcpHub();
+    QString getTcpHubVescID() const;
+    void setTcpHubVescID(const QString &tcpHubVescID);
+
+    QString getTcpHubVescPass() const;
+    void setTcpHubVescPass(const QString &tcpHubVescPass);
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -434,6 +440,10 @@ private:
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);
+
+    // TCP HUB Connection related
+    QString mTcpHubVescID;
+    QString mTcpHubVescPass;
 
 };
 

@@ -6,11 +6,6 @@ TcpHub::TcpHub(QObject *parent)
 {
     mTcpHubServer = new QTcpServer(this);
     connect(mTcpHubServer, SIGNAL(newConnection()), this, SLOT(newTcpHubConnection()));
-
-    //mPeriodic = new QTimer(this);
-    //mPeriodic->setInterval(2000);
-    //connect(mPeriodic, SIGNAL(timeout), this, SLOT(periodicTask()));
-    //mPeriodic->start();
 }
 
 void TcpHub::addVesc(QString id, TcpConnectedVesc *vesc)
@@ -34,6 +29,12 @@ void TcpHub::newTcpHubConnection()
     QHostAddress addr = socket->peerAddress();
 
     qDebug() << "new connection to hub: " << addr.toString();
+
+    socket->write("VESC_TOOL\n");
+    socket->write(mVescIF->getTcpHubVescID().toLocal8Bit());
+    socket->write(":");
+    socket->write(mVescIF->getTcpHubVescPass().toLocal8Bit());
+    socket->write("\n");
 }
 
 void TcpHub::newVescConnection(QTcpSocket *socket)
@@ -50,5 +51,15 @@ void TcpHub::newVescConnection(QTcpSocket *socket)
         vesc->setTcpSocket(socket);
         mTcpConnectedVescs.insert(addr,vesc);
     }
+}
+
+VescInterface *TcpHub::vescIF() const
+{
+    return mVescIF;
+}
+
+void TcpHub::setVescIF(VescInterface *vescIF)
+{
+    mVescIF = vescIF;
 }
 

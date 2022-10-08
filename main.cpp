@@ -426,7 +426,7 @@ int main(int argc, char *argv[])
         vesc = new VescInterface;
         vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
         Utility::configLoadLatest(vesc);
-
+        tcpHub.setVescIF(vesc);
         if (tcpHub.start(tcpPort)) {
             qDebug() << "TcpHub started";
         } else {

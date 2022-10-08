@@ -9,6 +9,7 @@
 #include <QThread>
 #include "packet.h"
 #include <tcpconnectedvesc.h>
+#include <vescinterface.h>
 
 /*
  *  - VESC connects to Server (HUB) and gets registered.
@@ -32,6 +33,9 @@ public:
     void addVesc(QString id, TcpConnectedVesc* vesc);
 
     bool start(int port, QHostAddress addr = QHostAddress::Any);
+    VescInterface *vescIF() const;
+    void setVescIF(VescInterface *vescIF);
+
 signals:
 
 public slots:
@@ -45,8 +49,7 @@ private:
     // Not entirely happy with a QString key. But QHostAddress is not possible.
     QMap<QString, TcpConnectedVesc*> mTcpConnectedVescs;
     QTcpServer *mTcpHubServer;
-
-
+    VescInterface *mVescIF;
 };
 
 #endif // TCPHUB_H

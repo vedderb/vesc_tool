@@ -2466,7 +2466,7 @@ void VescInterface::connectTcp(QString server, int port)
     mTcpSocket->connectToHost(host, port);
 }
 
-void VescInterface::connectTcpHub(QString server, int port) {
+void VescInterface::connectTcpHub(QString server, int port, QString id, QString pass) {
 
     mLastTcpHubServer = server;
     mLastTcpHubPort = port;
@@ -2483,6 +2483,8 @@ void VescInterface::connectTcpHub(QString server, int port) {
     }
     mTcpHubSocket->abort();
     mTcpHubSocket->connectToHost(host,port);
+    mTcpHubVescID = id;
+    mTcpHubVescPass = pass;
 }
 
 void VescInterface::disconnectTcpHub()
@@ -2935,12 +2937,6 @@ void VescInterface::tcpHubConnected()
     mTcpHubConnected = true;
 
     qDebug() << "Connected to a TCP VESC HUB";
-
-    VByteArray vb;
-    vb.vbAppendUint8(COMM_TCP_HUB_CONNECT);
-    vb.vbAppendUint8(TCP_HUB_VESC_TOOL_CONNECTING);
-    mHubPacket->sendPacket(vb);
-
 }
 
 void VescInterface::tcpHubDisconnected()
@@ -4164,4 +4160,24 @@ void VescInterface::setLastConnectionType(conn_t type)
 {
     mLastConnType = type;
     mSettings.setValue("connection_type", type);
+}
+
+QString VescInterface::getTcpHubVescPass() const
+{
+    return mTcpHubVescPass;
+}
+
+void VescInterface::setTcpHubVescPass(const QString &tcpHubVescPass)
+{
+    mTcpHubVescPass = tcpHubVescPass;
+}
+
+QString VescInterface::getTcpHubVescID() const
+{
+    return mTcpHubVescID;
+}
+
+void VescInterface::setTcpHubVescID(const QString &tcpHubVescID)
+{
+    mTcpHubVescID = tcpHubVescID;
 }

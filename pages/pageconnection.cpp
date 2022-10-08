@@ -713,7 +713,7 @@ void PageConnection::on_tcpHubConnectButton_clicked()
     if (mVesc) {
         QString tcpServer = ui->tcpHubServerEdit->text();
         int tcpPort = ui->tcpHubPortBox->value();
-        mVesc->connectTcpHub(tcpServer, tcpPort);
+        mVesc->connectTcpHub(tcpServer, tcpPort, ui->tcpHubVescIDlineEdit->text(),ui->tcpHubVescPasswordlineEdit->text());
     }
 }
 

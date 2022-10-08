@@ -964,8 +964,6 @@ typedef enum {
 
     COMM_LISP_REPL_CMD,
     COMM_LISP_STREAM_CODE,
-    // TcpHub
-    COMM_TCP_HUB_CONNECT,
 } COMM_PACKET_ID;
 
 // CAN commands

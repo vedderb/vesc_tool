@@ -7,7 +7,6 @@
 #include <QTcpSocket>
 #include <QTimer>
 #include "packet.h"
-#include "vescinterface.h"
 
 /*
  *  - VESC connects to Server (HUB) and gets registered.
@@ -27,9 +26,6 @@ class TcpConnectedVesc : public QObject
 {
     Q_OBJECT
 
-private:
-
-
 public:
     explicit TcpConnectedVesc(QObject *parent = nullptr);
     Packet *mPacket;
@@ -45,11 +41,7 @@ class TcpHub : public QObject
     Q_OBJECT
 public:
     explicit TcpHub(QObject *parent = nullptr);
-    void addVesc(QString id, TcpConnectedVesc* vesc);
-
     bool start(int port, QHostAddress addr = QHostAddress::Any);
-    VescInterface *vescIF() const;
-    void setVescIF(VescInterface *vescIF);
 
 signals:
 
@@ -63,7 +55,6 @@ private:
     // Not entirely happy with a QString key. But QHostAddress is not possible.
     QMap<QString, TcpConnectedVesc*> mTcpConnectedVescs;
     QTcpServer *mTcpHubServer;
-    VescInterface *mVescIF;
 };
 
 #endif // TCPHUB_H

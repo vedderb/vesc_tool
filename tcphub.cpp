@@ -12,11 +12,6 @@ TcpHub::TcpHub(QObject *parent)
     mPeriodic->start(1000);
 }
 
-void TcpHub::addVesc(QString id, TcpConnectedVesc *vesc)
-{
-    mTcpConnectedVescs.insert(id, vesc);
-}
-
 bool TcpHub::start(int port, QHostAddress addr)
 {
     if (!mTcpHubServer->listen(addr,  port)) {
@@ -38,15 +33,5 @@ void TcpHub::newTcpHubConnection()
 void TcpHub::periodic()
 {
     qDebug("periodic");
-}
-
-VescInterface *TcpHub::vescIF() const
-{
-    return mVescIF;
-}
-
-void TcpHub::setVescIF(VescInterface *vescIF)
-{
-    mVescIF = vescIF;
 }
 

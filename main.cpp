@@ -423,11 +423,7 @@ int main(int argc, char *argv[])
     } else if (isTcpHub) {
         qputenv("QT_QPA_PLATFORM", "offscreen");
         app = new QCoreApplication(argc, argv);
-        vesc = new VescInterface;
-        vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
-        Utility::configLoadLatest(vesc);
         tcpHub = new TcpHub;
-        tcpHub->setVescIF(vesc);
         if (tcpHub->start(tcpPort)) {
             qDebug() << "TcpHub started";
         } else {

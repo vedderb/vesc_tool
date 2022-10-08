@@ -2673,6 +2673,24 @@ QString VescInterface::tcpServerClientIp()
     return mTcpServer->getConnectedClientIp();
 }
 
+bool VescInterface::tcpServerConnectToHub(QString server, int port, QString id, QString pass)
+{
+    bool res = mTcpServer->connectToHub(server, port, id, pass);
+
+    mLastTcpServer = server;
+    mLastTcpPort = port;
+    mLastTcpHubVescID = id;
+    mLastTcpHubVescPass = pass;
+
+    if (!res) {
+        emitMessageDialog("Connecto to Hub",
+                          "Could not connect to hub",
+                          false, false);
+    }
+
+    return res;
+}
+
 bool VescInterface::udpServerStart(int port)
 {
     bool res = mUdpServer->startServer(port);

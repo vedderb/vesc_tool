@@ -901,7 +901,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_5">
          <property name="title">
-          <string>TCP Hub</string>
+          <string>Login Details</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <property name="leftMargin">
@@ -922,6 +922,16 @@
           <property name="verticalSpacing">
            <number>2</number>
           </property>
+          <item row="1" column="3" colspan="3">
+           <widget class="QRadioButton" name="hubClientButton">
+            <property name="text">
+             <string>Client</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_9">
             <property name="text">
@@ -929,7 +939,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
+          <item row="0" column="5">
            <widget class="QPushButton" name="tcpHubConnectButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -949,10 +959,14 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="tcpHubVescIdLineEdit"/>
+          <item row="2" column="3" colspan="3">
+           <widget class="QRadioButton" name="hubServerButton">
+            <property name="text">
+             <string>Server</string>
+            </property>
+           </widget>
           </item>
-          <item row="0" column="3">
+          <item row="0" column="4">
            <widget class="QPushButton" name="tcpHubDisconnectButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -972,7 +986,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="0" column="3">
            <widget class="QSpinBox" name="tcpHubPortBox">
             <property name="prefix">
              <string>Port: </string>
@@ -999,9 +1013,6 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="tcpHubVescPasswordLineEdit"/>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_10">
             <property name="text">
@@ -1009,21 +1020,41 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="2">
+           <widget class="QPushButton" name="hubDefaultButton">
+            <property name="toolTip">
+             <string>Restore default</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="QLineEdit" name="tcpHubVescIdLineEdit"/>
+          </item>
+          <item row="2" column="1" colspan="2">
+           <widget class="QLineEdit" name="tcpHubVescPasswordLineEdit"/>
+          </item>
          </layout>
         </widget>
        </item>
        <item>
-        <widget class="QPlainTextEdit" name="tcpHubplainTextEdit">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <property name="readOnly">
-          <bool>true</bool>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
          </property>
-        </widget>
+        </spacer>
        </item>
       </layout>
      </widget>

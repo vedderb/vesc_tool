@@ -158,7 +158,6 @@ public:
     Q_INVOKABLE bool speedGaugeUseNegativeValues();
     Q_INVOKABLE void setSpeedGaugeUseNegativeValues(bool useNegativeValues);
 
-
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
     Q_INVOKABLE void storeBleName(QString address, QString name);
@@ -199,6 +198,7 @@ public:
     Q_INVOKABLE bool tcpServerIsRunning();
     Q_INVOKABLE bool tcpServerIsClientConnected();
     Q_INVOKABLE QString tcpServerClientIp();
+    Q_INVOKABLE bool tcpServerConnectToHub(QString server, int port, QString id, QString pass);
 
     Q_INVOKABLE bool udpServerStart(int port);
     Q_INVOKABLE void udpServerStop();

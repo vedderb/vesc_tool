@@ -67,6 +67,7 @@ PageConnection::PageConnection(QWidget *parent) :
     ui->pairConnectedButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
     ui->tcpHubConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
     ui->tcpHubDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
+    ui->hubDefaultButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
 
     QIcon mycon = QIcon(theme + "icons/can_off.png");
     mycon.addPixmap(QPixmap(theme + "icons/can_off.png"), QIcon::Normal, QIcon::Off);
@@ -720,15 +721,29 @@ void PageConnection::on_tcpHubConnectButton_clicked()
     if (mVesc) {
         QString tcpServer = ui->tcpHubServerEdit->text();
         int tcpPort = ui->tcpHubPortBox->value();
-        mVesc->connectTcpHub(tcpServer, tcpPort,
-                             ui->tcpHubVescIdLineEdit->text().replace(" ", "").replace(":", "").toUpper(),
-                             ui->tcpHubVescPasswordLineEdit->text());
+        QString uuid = ui->tcpHubVescIdLineEdit->text().replace(" ", "").replace(":", "").toUpper();
+        QString pass = ui->tcpHubVescPasswordLineEdit->text();
+
+        if (ui->hubClientButton->isChecked()) {
+            mVesc->connectTcpHub(tcpServer, tcpPort, uuid, pass);
+        } else {
+            mVesc->tcpServerConnectToHub(tcpServer, tcpPort, uuid, pass);
+        }
     }
 }
 
 void PageConnection::on_tcpHubDisconnectButton_clicked()
 {
     if (mVesc) {
-        mVesc->disconnectPort();
+        if (ui->hubClientButton->isChecked()) {
+            mVesc->disconnectPort();
+        } else {
+            mVesc->tcpServerStop();
+        }
     }
+}
+
+void PageConnection::on_hubDefaultButton_clicked()
+{
+    ui->tcpHubServerEdit->setText("veschub.vedder.se");
 }

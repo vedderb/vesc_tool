@@ -90,6 +90,13 @@ void TcpHub::newTcpHubConnection()
         auto uuid = tokens.at(1).toUpper().replace(" ", "");
         auto pass = tokens.at(2);
 
+        if (uuid.length() < 3) {
+            qWarning() << "Too short UUID";
+            socket->close();
+            socket->deleteLater();
+            return;
+        }
+
         if (type == "VESC") {
             if (mConnectedVescs.contains(uuid)) {
                 delete mConnectedVescs[uuid];
@@ -99,8 +106,16 @@ void TcpHub::newTcpHubConnection()
             TcpConnectedVesc *v = new TcpConnectedVesc;
             v->vescSocket = socket;
             v->pass = pass;
-
             mConnectedVescs.insert(uuid, v);
+
+            connect(v->vescSocket, &QTcpSocket::disconnected, [v, uuid, this]() {
+                qDebug() << tr("VESC with UUID %1 disconnected").arg(uuid);
+                mConnectedVescs.remove(uuid);
+                QTimer::singleShot(0, [v]() {
+                    delete v;
+                });
+            });
+
             qDebug() << tr("VESC with UUID %1 connected").arg(uuid);
             return;
         } else if (type == "VESCTOOL") {
@@ -108,7 +123,7 @@ void TcpHub::newTcpHubConnection()
                 TcpConnectedVesc *v = mConnectedVescs[uuid];
                 if (v->pass == pass) {
                     if (v->vescToolSocket != nullptr) {
-                        v->vescSocket->close();
+                        v->vescToolSocket->close();
                         v->vescToolSocket->deleteLater();
                     }
                     v->vescToolSocket = socket;
@@ -125,14 +140,15 @@ void TcpHub::newTcpHubConnection()
                         }
                     });
 
-                    connect(v->vescSocket, &QTcpSocket::disconnected, [v, uuid, this]() {
-                        delete v;
-                        mConnectedVescs.remove(uuid);
+                    connect(v->vescToolSocket, &QTcpSocket::disconnected, [uuid]() {
+                        qDebug() << "VESC Tool disconnected from" << uuid;
                     });
+
+                    qDebug() << "VESC Tool connected to" << uuid;
 
                     return;
                 } else {
-                    qWarning() << "Invalid password";
+                    qWarning() << "Invalid password" << pass << v->pass;
                 }
             } else {
                 qWarning() << tr("No VESC with UUID %1 found").arg(uuid);

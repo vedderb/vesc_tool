@@ -198,6 +198,7 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     packet.cpp \
     preferences.cpp \
+    tcphub.cpp \
     udpserversimple.cpp \
     vbytearray.cpp \
     commands.cpp \
@@ -217,6 +218,7 @@ HEADERS  += mainwindow.h \
     codeloader.h \
     packet.h \
     preferences.h \
+    tcphub.h \
     udpserversimple.h \
     vbytearray.h \
     commands.h \

@@ -707,3 +707,19 @@ void PageConnection::on_tcpDetectDisconnectButton_clicked()
         mVesc->disconnectPort();
     }
 }
+
+void PageConnection::on_tcpHubConnectButton_clicked()
+{
+    if (mVesc) {
+        QString tcpServer = ui->tcpHubServerEdit->text();
+        int tcpPort = ui->tcpHubPortBox->value();
+        mVesc->connectTcpHub(tcpServer, tcpPort, ui->tcpHubVescIDlineEdit->text(),ui->tcpHubVescPasswordlineEdit->text());
+    }
+}
+
+void PageConnection::on_tcpHubDisconnectButton_clicked()
+{
+    if (mVesc) {
+        mVesc->disconnectPort();
+    }
+}

@@ -232,6 +232,8 @@ public:
     Q_INVOKABLE QString qmlHw();
     Q_INVOKABLE QString qmlApp();
 
+    Q_INVOKABLE void connectTcpHub(QString server, int port, QString id, QString pass);
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -421,6 +423,10 @@ private:
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);
+
+    // TCP HUB Connection related
+    QString mTcpHubVescID;
+    QString mTcpHubVescPass;
 
 };
 

@@ -32,6 +32,8 @@
 #include <QDesktopWidget>
 #include <QFontDatabase>
 
+#include "tcphub.h"
+
 #ifdef Q_OS_IOS
 #include "ios/src/setIosParameters.h"
 #endif
@@ -71,6 +73,7 @@ static void showHelp()
     qDebug() << "--qmlRotation [deg] : Rotate screen by deg degrees";
     qDebug() << "--retryConn : Keep trying to reconnect to the VESC when the connection fails";
     qDebug() << "--useMobileUi : Start the mobile UI instead of the full desktop UI";
+    qDebug() << "--tcpHub [port] : Start a TCP hub for remote access to connected VESCs";
 
 }
 
@@ -225,6 +228,7 @@ int main(int argc, char *argv[])
     bool qmlOtherScreen = false;
     bool useMobileUi = false;
     double qmlRot = 0.0;
+    bool isTcpHub = false;
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -314,6 +318,14 @@ int main(int argc, char *argv[])
                 return 1;
             }
         }
+        if (str == "--tcpHub") {
+            if ((i + 1) < args.size()) {
+                i++;
+                tcpPort = args.at(i).toInt();
+                isTcpHub = true;
+                found = true;
+            }
+        }
 
         if (!found) {
             if (dash) {
@@ -360,6 +372,7 @@ int main(int argc, char *argv[])
     });
 #else
     VescInterface *vesc = nullptr;
+    TcpHub *tcpHub = nullptr;
     MainWindow *w = nullptr;
     QmlUi *qmlUi = nullptr;
     QString qmlStr;
@@ -407,7 +420,18 @@ int main(int argc, char *argv[])
                 qWarning() << msg;
             }
         });
-    } else {
+    } else if (isTcpHub) {
+        qputenv("QT_QPA_PLATFORM", "offscreen");
+        app = new QCoreApplication(argc, argv);
+        tcpHub = new TcpHub;
+        if (tcpHub->start(tcpPort)) {
+            qDebug() << "TcpHub started";
+        } else {
+            qCritical() << "Could not start TcpHub on port" << tcpPort;
+            qApp->quit();
+        }
+    }
+    else {
         QApplication *a = new QApplication(argc, argv);
         app = a;
 
@@ -556,6 +580,10 @@ int main(int argc, char *argv[])
 #else
     if (vesc) {
         delete vesc;
+    }
+
+    if (tcpHub) {
+        delete tcpHub;
     }
 
     if (w) {

@@ -2456,6 +2456,27 @@ void VescInterface::connectTcp(QString server, int port)
     mTcpSocket->connectToHost(host, port);
 }
 
+void VescInterface::connectTcpHub(QString server, int port, QString id, QString pass) {
+
+    mLastTcpServer = server;
+    mLastTcpPort = port;
+
+    QHostAddress host;
+    host.setAddress(server);
+
+    if (host.isNull()) {
+        QList<QHostAddress> addresses = QHostInfo::fromName(server).addresses();
+
+        if (!addresses.isEmpty()) {
+            host.setAddress(addresses.first().toString());
+        }
+    }
+    mTcpSocket->abort();
+    mTcpSocket->connectToHost(host,port);
+    mTcpHubVescID = id;
+    mTcpHubVescPass = pass;
+}
+
 void VescInterface::connectUdp(QString server, int port)
 {
     QHostAddress host;

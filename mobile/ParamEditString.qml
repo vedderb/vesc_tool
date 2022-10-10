@@ -29,7 +29,7 @@ Item {
     id: editor
     property string paramName: ""
     property ConfigParams params: null
-    height: column.implicitHeight + 2 * column.anchors.margins
+    height: 140
     Layout.fillWidth: true
     property real maxVal: 1.0
 
@@ -38,7 +38,7 @@ Item {
             nameText.text = params.getLongName(paramName)
             stringInput.text = params.getParamQString(paramName)
 
-            var maxLen = params.getParamMaxLen()
+            var maxLen = params.getParamMaxLen(paramName)
             if (maxLen > 0) {
                 stringInput.maximumLength = maxLen
             }

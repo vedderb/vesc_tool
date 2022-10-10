@@ -517,6 +517,7 @@ Item {
         var hws = fwHelper.getHardwares(params, params.hw)
 
         hwItems.clear()
+        fwItems.clear()
 
         for (var name in hws) {
             if (name.indexOf("412") !== -1) {

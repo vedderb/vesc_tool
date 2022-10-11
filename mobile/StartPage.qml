@@ -306,10 +306,19 @@ Item {
 
             GroupBox {
                 title: qsTr("Wireless Bridge to Computer (TCP)")
-                Layout.bottomMargin: isHorizontal ? 0 : 10
                 Layout.fillWidth: true
 
                 TcpBox {
+                    anchors.fill: parent
+                }
+            }
+
+            GroupBox {
+                title: qsTr("TCP Hub (Internet Bridge)")
+                Layout.bottomMargin: isHorizontal ? 0 : 10
+                Layout.fillWidth: true
+
+                TcpHubBox {
                     anchors.fill: parent
                 }
             }

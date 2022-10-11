@@ -1573,6 +1573,26 @@ bool Utility::isBleScanEnabled()
 #endif
 }
 
+QString Utility::strCrc32(QString str)
+{
+    uint32_t crc = 0xFFFFFFFF;
+    auto data = str.toLocal8Bit();
+
+    for (auto b: data) {
+        uint32_t byte = quint8(b);
+        crc = crc ^ byte;
+
+        for (int j = 7;j >= 0;j--) {
+            uint32_t mask = -(crc & 1);
+            crc = (crc >> 1) ^ (0x82F63B78 & mask);
+        }
+    }
+
+    crc = ~crc;
+
+    return QString::number(crc);
+}
+
 void Utility::llhToXyz(double lat, double lon, double height, double *x, double *y, double *z)
 {
     double sinp = sin(lat * M_PI / 180.0);

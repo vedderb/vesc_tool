@@ -12,6 +12,7 @@
 * Added VESC UDP broadcast listener.
 * Added VESC package creation and loading support.
 * Added VESC package store. See https://github.com/vedderb/vesc_pkg
+* Added TCP bridge.
 
 == 3.01 ==
 * Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.

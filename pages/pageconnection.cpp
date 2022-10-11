@@ -124,8 +124,8 @@ void PageConnection::setVesc(VescInterface *vesc)
     ui->udpServerEdit->setText(mVesc->getLastUdpServer());
     ui->udpPortBox->setValue(mVesc->getLastUdpPort());
 
-    ui->tcpHubServerEdit->setText(mVesc->getLastTcpServer());
-    ui->tcpHubPortBox->setValue(mVesc->getLastTcpPort());
+    ui->tcpHubServerEdit->setText(mVesc->getLastTcpHubServer());
+    ui->tcpHubPortBox->setValue(mVesc->getLastTcpHubPort());
     ui->tcpHubVescIdLineEdit->setText(mVesc->getLastTcpHubVescID());
     ui->tcpHubVescPasswordLineEdit->setText(mVesc->getLastTcpHubVescPass());
 
@@ -746,4 +746,5 @@ void PageConnection::on_tcpHubDisconnectButton_clicked()
 void PageConnection::on_hubDefaultButton_clicked()
 {
     ui->tcpHubServerEdit->setText("veschub.vedder.se");
+    ui->tcpHubPortBox->setValue(65101);
 }

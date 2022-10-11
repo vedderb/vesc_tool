@@ -81,6 +81,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastConnType = static_cast<conn_t>(mSettings.value("connection_type", CONN_NONE).toInt());
     mLastTcpServer = mSettings.value("tcp_server", "127.0.0.1").toString();
     mLastTcpPort = mSettings.value("tcp_port", 65102).toInt();
+    mLastTcpHubServer = mSettings.value("tcp_hub_server", "veschub.vedder.se").toString();
+    mLastTcpHubPort = mSettings.value("tcp_hub_port", 65101).toInt();
     mLastTcpHubVescID = mSettings.value("tcp_hub_vesc_id", "").toString();
     mLastTcpHubVescPass = mSettings.value("tcp_hub_vesc_pass", "").toString();
     mLastUdpServer = QHostAddress(mSettings.value("udp_server", "127.0.0.1").toString());
@@ -2101,7 +2103,10 @@ bool VescInterface::reconnectLastPort()
         return false;
 #endif
     } else if (mLastConnType == CONN_TCP) {
-        connectTcpHub(mLastTcpServer, mLastTcpPort, mLastTcpHubVescID, mLastTcpHubVescPass);
+        connectTcp(mLastTcpServer, mLastTcpPort);
+        return true;
+    } else if (mLastConnType == CONN_TCP_HUB) {
+        connectTcpHub(mLastTcpHubServer, mLastTcpHubPort, mLastTcpHubVescID, mLastTcpHubVescPass);
         return true;
     } else if (mLastConnType == CONN_UDP) {
         connectUdp(mLastUdpServer.toString(), mLastUdpPort);
@@ -2439,13 +2444,29 @@ void VescInterface::setCANbusReceiverID(int node_ID)
 
 void VescInterface::connectTcp(QString server, int port)
 {
-    connectTcpHub(server, port, "", "");
+    mLastTcpServer = server;
+    mLastTcpPort = port;
+
+    QHostAddress host;
+    host.setAddress(server);
+
+    // Try DNS lookup
+    if (host.isNull()) {
+        QList<QHostAddress> addresses = QHostInfo::fromName(server).addresses();
+
+        if (!addresses.isEmpty()) {
+            host.setAddress(addresses.first().toString());
+        }
+    }
+
+    mTcpSocket->abort();
+    mTcpSocket->connectToHost(host,port);
 }
 
 void VescInterface::connectTcpHub(QString server, int port, QString id, QString pass)
 {
-    mLastTcpServer = server;
-    mLastTcpPort = port;
+    mLastTcpHubServer = server;
+    mLastTcpHubPort = port;
     mLastTcpHubVescID = id;
     mLastTcpHubVescPass = pass;
 
@@ -2677,12 +2698,12 @@ bool VescInterface::tcpServerConnectToHub(QString server, int port, QString id, 
 {
     bool res = mTcpServer->connectToHub(server, port, id, pass);
 
-    mLastTcpServer = server;
-    mLastTcpPort = port;
-    mLastTcpHubVescID = id;
-    mLastTcpHubVescPass = pass;
-
-    if (!res) {
+    if (res) {
+        mLastTcpHubServer = server;
+        mLastTcpHubPort = port;
+        mLastTcpHubVescID = id;
+        mLastTcpHubVescPass = pass;
+    } else {
         emitMessageDialog("Connecto to Hub",
                           "Could not connect to hub",
                           false, false);
@@ -2882,13 +2903,17 @@ void VescInterface::tcpInputConnected()
     if (!mLastTcpHubVescID.isEmpty()) {
         QString login = QString("VESCTOOL:%1:%2\n").arg(mLastTcpHubVescID).arg(mLastTcpHubVescPass);
         mTcpSocket->write(login.toLocal8Bit());
-    }
 
-    mSettings.setValue("tcp_server", mLastTcpServer);
-    mSettings.setValue("tcp_port", mLastTcpPort);
-    mSettings.setValue("tcp_hub_vesc_id", mLastTcpHubVescID);
-    mSettings.setValue("tcp_hub_vesc_pass", mLastTcpHubVescPass);
-    setLastConnectionType(CONN_TCP);
+        mSettings.setValue("tcp_hub_server", mLastTcpHubServer);
+        mSettings.setValue("tcp_hub_port", mLastTcpHubPort);
+        mSettings.setValue("tcp_hub_vesc_id", mLastTcpHubVescID);
+        mSettings.setValue("tcp_hub_vesc_pass", mLastTcpHubVescPass);
+        setLastConnectionType(CONN_TCP_HUB);
+    } else {
+        mSettings.setValue("tcp_server", mLastTcpServer);
+        mSettings.setValue("tcp_port", mLastTcpPort);
+        setLastConnectionType(CONN_TCP);
+    }
 
     mTcpConnected = true;
     updateFwRx(false);
@@ -3763,6 +3788,16 @@ void VescInterface::customConfigRx(int confId, QByteArray data)
                               false, false);
         }
     }
+}
+
+int VescInterface::getLastTcpHubPort() const
+{
+    return mLastTcpHubPort;
+}
+
+QString VescInterface::getLastTcpHubServer() const
+{
+    return mLastTcpHubServer;
 }
 
 QString VescInterface::getLastTcpHubVescPass() const

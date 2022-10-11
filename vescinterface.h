@@ -235,6 +235,8 @@ public:
     Q_INVOKABLE void connectTcpHub(QString server, int port, QString id, QString pass);
     Q_INVOKABLE QString getLastTcpHubVescID() const;
     Q_INVOKABLE QString getLastTcpHubVescPass() const;
+    Q_INVOKABLE QString getLastTcpHubServer() const;
+    Q_INVOKABLE int getLastTcpHubPort() const;
 
 signals:
     void statusMessage(const QString &msg, bool isGood);
@@ -300,6 +302,7 @@ private:
         CONN_TCP,
         CONN_BLE,
         CONN_UDP,
+        CONN_TCP_HUB,
     } conn_t;
 
     QSettings mSettings;
@@ -371,6 +374,8 @@ private:
     bool mTcpConnected;
     QString mLastTcpServer;
     int mLastTcpPort;
+    QString mLastTcpHubServer;
+    int mLastTcpHubPort;
     QString mLastTcpHubVescID;
     QString mLastTcpHubVescPass;
 

@@ -99,8 +99,7 @@ void TcpHub::newTcpHubConnection()
 
         if (type == "VESC") {
             if (mConnectedVescs.contains(uuid)) {
-                delete mConnectedVescs[uuid];
-                mConnectedVescs.remove(uuid);
+                mConnectedVescs[uuid]->vescSocket->close();
             }
 
             TcpConnectedVesc *v = new TcpConnectedVesc;

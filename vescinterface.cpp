@@ -2446,6 +2446,8 @@ void VescInterface::connectTcp(QString server, int port)
 {
     mLastTcpServer = server;
     mLastTcpPort = port;
+    mLastTcpHubVescID = "";
+    mLastTcpHubVescPass = "";
 
     QHostAddress host;
     host.setAddress(server);

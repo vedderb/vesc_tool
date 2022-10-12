@@ -2207,6 +2207,43 @@ void Utility::plotSavePng(QCustomPlot *plot, int width, int height, QString titl
     }
 }
 
+QString Utility::waitForLine(QTcpSocket *socket, int timeoutMs)
+{
+    QEventLoop loop;
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    timeoutTimer.start(timeoutMs);
+    auto conn = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+
+    QByteArray rxLine;
+    auto conn2 = connect(socket, &QTcpSocket::readyRead, [&rxLine,socket,&loop]() {
+        while (socket->bytesAvailable() > 0) {
+            QByteArray rxb = socket->read(1);
+            if (rxb.size() == 1) {
+                if (rxb[0] != '\n') {
+                    rxLine.append(rxb[0]);
+                } else {
+                    loop.quit();
+                }
+            } else {
+                break;
+            }
+        }
+    });
+
+    loop.exec();
+
+    disconnect(conn);
+    disconnect(conn2);
+
+    auto res = QString::fromLocal8Bit(rxLine);
+    if (!timeoutTimer.isActive()) {
+        res = "";
+    }
+
+    return res;
+}
+
 void Utility::setDarkMode(bool isDarkSetting)
 {
     isDark = isDarkSetting;

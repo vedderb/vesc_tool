@@ -71,7 +71,8 @@ public:
     explicit TcpHub(QObject *parent = nullptr);
     ~TcpHub();
 
-    bool start(int port, QHostAddress addr = QHostAddress::Any);
+    Q_INVOKABLE bool start(int port, QHostAddress addr = QHostAddress::Any);
+    Q_INVOKABLE static bool ping(QString server, int port, QString uuid);
 
 signals:
 

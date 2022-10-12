@@ -190,6 +190,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Vesc3dItem>("Vedder.vesc.vesc3ditem", 1, 0, "Vesc3dItem");
     qmlRegisterType<LogWriter>("Vedder.vesc.logwriter", 1, 0, "LogWriter");
     qmlRegisterType<LogReader>("Vedder.vesc.logreader", 1, 0, "LogReader");
+    qmlRegisterType<TcpHub>("Vedder.vesc.tcphub", 1, 0, "TcpHub");
 
     qRegisterMetaType<MCCONF_TEMP>();
     qRegisterMetaType<MC_VALUES>();

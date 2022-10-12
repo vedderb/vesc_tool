@@ -125,5 +125,6 @@
         <name>RadioButton</name>
         <name>FwHelper</name>
         <name>ParamList</name>
+        <name>TcpHub</name>
     </section>
 </root>

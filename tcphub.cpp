@@ -19,9 +19,11 @@
     */
 
 #include "tcphub.h"
+#include "utility.h"
 #include <QDateTime>
 #include <QEventLoop>
 #include <QtDebug>
+#include <QHostInfo>
 
 TcpHub::TcpHub(QObject *parent)
     : QObject{parent}
@@ -44,46 +46,48 @@ bool TcpHub::start(int port, QHostAddress addr)
     return mTcpHubServer->listen(addr,  port);
 }
 
+bool TcpHub::ping(QString server, int port, QString uuid)
+{
+    QHostAddress host;
+    host.setAddress(server);
+
+    // Try DNS lookup
+    if (host.isNull()) {
+        QList<QHostAddress> addresses = QHostInfo::fromName(server).addresses();
+
+        if (!addresses.isEmpty()) {
+            host.setAddress(addresses.first().toString());
+        }
+    }
+
+    QTcpSocket socket;
+    socket.connectToHost(host, port);
+    if (!Utility::waitSignal(&socket, SIGNAL(connected()), 1000)) {
+        return false;
+    }
+
+    socket.write(QString("PING:%1:0\n").arg(uuid).toLocal8Bit());
+    socket.flush();
+
+    auto res = Utility::waitForLine(&socket, 1000);
+
+    return res == "PONG";
+}
+
 void TcpHub::newTcpHubConnection()
 {
     QTcpSocket *socket = mTcpHubServer->nextPendingConnection();
     socket->setSocketOption(QAbstractSocket::LowDelayOption, true);
 
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(5000);
-    auto conn = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    QString connStr = Utility::waitForLine(socket, 5000);
 
-    QByteArray rxLine;
-    auto conn2 = connect(socket, &QTcpSocket::readyRead, [&rxLine,socket,&loop]() {
-        while (socket->bytesAvailable() > 0) {
-            QByteArray rxb = socket->read(1);
-            if (rxb.size() == 1) {
-                if (rxb[0] != '\n') {
-                    rxLine.append(rxb[0]);
-                } else {
-                    loop.quit();
-                }
-            } else {
-                break;
-            }
-        }
-    });
-
-    loop.exec();
-
-    disconnect(conn);
-    disconnect(conn2);
-
-    if (!timeoutTimer.isActive()) {
+    if (connStr.isEmpty()) {
         socket->close();
         socket->deleteLater();
         qWarning() << "Waiting for connect string timed out";
         return;
     }
 
-    QString connStr(rxLine);
     auto tokens = connStr.split(":");
     if (tokens.size() == 3) {
         auto type = tokens.at(0).toUpper().replace(" ", "");
@@ -151,6 +155,11 @@ void TcpHub::newTcpHubConnection()
                 }
             } else {
                 qWarning() << tr("No VESC with UUID %1 found").arg(uuid);
+            }
+        } else if (type == "PING") {
+            if (mConnectedVescs.contains(uuid)) {
+                socket->write("PONG\n");
+                socket->flush();
             }
         } else {
             qWarning() << "Invalid connect string";

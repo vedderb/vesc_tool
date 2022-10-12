@@ -131,6 +131,8 @@ public:
 #endif
     };
 
+    static QString waitForLine(QTcpSocket *socket, int timeoutMs);
+
 signals:
 
 public slots:

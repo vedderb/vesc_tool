@@ -274,6 +274,18 @@ Item {
                             Layout.rightMargin: 10
                             spacing: -5
 
+                            Timer {
+                                id: workaroundTimerConnect
+                                property var bleAddr: ""
+                                interval: 0
+                                repeat: false
+                                running: false
+                                onTriggered: {
+                                    VescIf.connectBle(workaroundTimerConnect.bleAddr)
+                                }
+                            }
+
+
                             Button {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
@@ -286,14 +298,9 @@ Item {
                                     } else if (isSerial == 2) {
                                         VescIf.connectTcp(bleAddr, 65102)
                                     } else {
-                                        if (!VescIf.getBlePreferred(bleAddr)) {
-                                            preferredDialog.bleAddr = bleAddr
-                                            preferredDialog.open()
-                                        } else {
-                                            disableDialog()
-                                            preferredDialog.bleAddr = bleAddr
-                                            workaroundTimerConnectPref.start()
-                                        }
+                                        disableDialog()
+                                        workaroundTimerConnect.bleAddr = bleAddr
+                                        workaroundTimerConnect.start()
                                     }
                                 }
                             }
@@ -531,56 +538,6 @@ Item {
             VescIf.storeSettings()
             bleModel.clear()
             mBle.emitScanDone()
-        }
-    }
-
-    Dialog {
-        id: preferredDialog
-        property var bleAddr: ""
-        standardButtons: Dialog.Yes | Dialog.No
-        modal: true
-        focus: true
-        rightMargin: 10
-        leftMargin: 10
-        closePolicy: Popup.CloseOnEscape
-        title: "Preferred BLE Devices"
-        y: 10 + parent.height / 2 - height / 2
-        x: parent.width/2 - width/2
-        width: parent.width - 20 - notchLeft - notchRight
-        parent: ApplicationWindow.overlay
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        Text {
-            color: Utility.getAppHexColor("lightText")
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text: "Do you want to make this a preferred device? That will make it show " +
-                  "up a bit faster in BLE scans and it will be shown at the top of the device list."
-        }
-
-        onAccepted: {
-            VescIf.storeBlePreferred(bleAddr, true)
-            bleModel.clear()
-            mBle.emitScanDone()
-            disableDialog()
-            workaroundTimerConnectPref.start()
-        }
-
-        onRejected: {
-            disableDialog()
-            workaroundTimerConnectPref.start()
-        }
-        Timer {
-            id: workaroundTimerConnectPref
-            interval: 0
-            repeat: false
-            running: false
-            onTriggered: {
-                VescIf.connectBle(preferredDialog.bleAddr)
-            }
         }
     }
 

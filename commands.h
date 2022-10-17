@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2022 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -23,6 +23,8 @@
 #include <QObject>
 #include <QTimer>
 #include <QMap>
+#include <QVariant>
+#include <QVariantList>
 #include "vbytearray.h"
 #include "datatypes.h"
 #include "packet.h"
@@ -74,6 +76,16 @@ public:
 
     Q_INVOKABLE bool getMaxPowerLossBug() const;
     void setMaxPowerLossBug(bool maxPowerLossBug);
+
+    Q_INVOKABLE QVariantList fileBlockList(QString path);
+    Q_INVOKABLE QByteArray fileBlockRead(QString path);
+    Q_INVOKABLE bool fileBlockWrite(QString path, QByteArray data);
+    Q_INVOKABLE bool fileBlockMkdir(QString path);
+    Q_INVOKABLE bool fileBlockRemove(QString path);
+    Q_INVOKABLE void fileBlockCancel();
+
+    Q_INVOKABLE double getFilePercentage() const;
+    Q_INVOKABLE double getFileSpeed() const;
 
 signals:
     void dataToSend(QByteArray &data);
@@ -138,6 +150,13 @@ signals:
     void lispStatsRx(LISP_STATS stats);
     void lispRunningResRx(bool ok);
     void lispStreamCodeRx(quint32 offset, qint16 res);
+
+    void fileListRx(bool hasMore, QList<FILE_LIST_ENTRY> files);
+    void fileReadRx(qint32 offset, qint32 size, QByteArray data);
+    void fileWriteRx(qint32 offset, bool ok);
+    void fileMkdirRx(bool ok);
+    void fileRemoveRx(bool ok);
+    void fileProgress(int32_t prog, int32_t tot, double percentage, double bytesPerSec);
 
 public slots:
     void processPacket(QByteArray data);
@@ -253,6 +272,12 @@ public slots:
     void setBleName(QString name);
     void setBlePin(QString pin);
 
+    void fileList(QString path, QString from);
+    void fileRead(QString path, qint32 offset);
+    void fileWrite(QString path, qint32 offset, qint32 size, QByteArray data);
+    void fileMkdir(QString path);
+    void fileRemove(QString path);
+
 private slots:
     void timerSlot();
 
@@ -289,6 +314,10 @@ private:
     int mTimeoutCustomConf;
     int mTimeoutBmsVal;
     int mTimeoutStats;
+
+    double mFilePercentage;
+    double mFileSpeed;
+    bool mFileShouldCancel;
 
 };
 

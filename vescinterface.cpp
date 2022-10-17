@@ -1722,104 +1722,9 @@ bool VescInterface::loadRtLogFile(QString file)
     QFile inFile(file);
 
     if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&inFile);
-        int lineNum = 0;
-
-        mRtLogData.clear();
-        while (!in.atEnd()) {
-            QStringList tokens = in.readLine().split(";");
-
-            if (tokens.size() == 1) {
-                tokens = tokens.at(0).split(",");
-            }
-
-            if (tokens.size() < 22) {
-                continue;
-            }
-
-            if (lineNum > 0) {
-                LOG_DATA d;
-                d.valTime = tokens.at(0).toInt();
-                d.values.v_in = tokens.at(1).toDouble();
-                d.values.temp_mos = tokens.at(2).toDouble();
-                d.values.temp_mos_1 = tokens.at(3).toDouble();
-                d.values.temp_mos_2 = tokens.at(4).toDouble();
-                d.values.temp_mos_3 = tokens.at(5).toDouble();
-                d.values.temp_motor = tokens.at(6).toDouble();
-                d.values.current_motor = tokens.at(7).toDouble();
-                d.values.current_in = tokens.at(8).toDouble();
-                d.values.id = tokens.at(9).toDouble();
-                d.values.iq = tokens.at(10).toDouble();
-                d.values.rpm = tokens.at(11).toDouble();
-                d.values.duty_now = tokens.at(12).toDouble();
-                d.values.amp_hours = tokens.at(13).toDouble();
-                d.values.amp_hours_charged = tokens.at(14).toDouble();
-                d.values.watt_hours = tokens.at(15).toDouble();
-                d.values.watt_hours_charged = tokens.at(16).toDouble();
-                d.values.tachometer = tokens.at(17).toInt();
-                d.values.tachometer_abs = tokens.at(18).toInt();
-                d.values.position = tokens.at(19).toDouble();
-                d.values.fault_code = mc_fault_code(tokens.at(20).toInt());
-                d.values.vesc_id = tokens.at(21).toInt();
-
-                // Possibly populate setup values too, but these values would
-                // not correspond to setupValTime.
-//                d.setupValues.v_in = d.values.v_in;
-//                d.setupValues.duty_now = d.values.duty_now;
-//                d.setupValues.temp_mos = d.values.temp_mos;
-//                d.setupValues.temp_motor = d.values.temp_motor;
-//                d.setupValues.fault_code = d.values.fault_code;
-//                d.setupValues.vesc_id = d.values.vesc_id;
-
-                if (tokens.size() >= 55) {
-                    d.values.vd = tokens.at(22).toDouble();
-                    d.values.vq = tokens.at(23).toDouble();
-
-                    d.setupValTime = tokens.at(24).toInt();
-                    d.setupValues.amp_hours = tokens.at(25).toDouble();
-                    d.setupValues.amp_hours_charged = tokens.at(26).toDouble();
-                    d.setupValues.watt_hours = tokens.at(27).toDouble();
-                    d.setupValues.watt_hours_charged = tokens.at(28).toDouble();
-                    d.setupValues.battery_level = tokens.at(29).toDouble();
-                    d.setupValues.battery_wh = tokens.at(30).toDouble();
-                    d.setupValues.current_in = tokens.at(31).toDouble();
-                    d.setupValues.current_motor = tokens.at(32).toDouble();
-                    d.setupValues.speed = tokens.at(33).toDouble();
-                    d.setupValues.tachometer = tokens.at(34).toDouble();
-                    d.setupValues.tachometer_abs = tokens.at(35).toDouble();
-                    d.setupValues.num_vescs = tokens.at(36).toInt();
-
-                    d.imuValTime = tokens.at(37).toInt();
-                    d.imuValues.roll = tokens.at(38).toDouble();
-                    d.imuValues.pitch = tokens.at(39).toDouble();
-                    d.imuValues.yaw = tokens.at(40).toDouble();
-                    d.imuValues.accX = tokens.at(41).toDouble();
-                    d.imuValues.accY = tokens.at(42).toDouble();
-                    d.imuValues.accZ = tokens.at(43).toDouble();
-                    d.imuValues.gyroX = tokens.at(44).toDouble();
-                    d.imuValues.gyroY = tokens.at(45).toDouble();
-                    d.imuValues.gyroZ = tokens.at(46).toDouble();
-
-                    d.posTime = tokens.at(47).toInt();
-                    d.lat = tokens.at(48).toDouble();
-                    d.lon = tokens.at(49).toDouble();
-                    d.alt = tokens.at(50).toDouble();
-                    d.gVel = tokens.at(51).toDouble();
-                    d.vVel = tokens.at(52).toDouble();
-                    d.hAcc = tokens.at(53).toDouble();
-                    d.vAcc = tokens.at(54).toDouble();
-                }
-
-                mRtLogData.append(d);
-            }
-
-            lineNum++;
-        }
-
+        auto data = inFile.readAll();
         inFile.close();
-        res = true;
-
-        emitStatusMessage(QString("Loaded %1 log entries").arg(lineNum - 1), true);
+        return loadRtLogFile(data);
     } else {
         emitMessageDialog("Read Log File",
                           "Could not open\n" +
@@ -1827,6 +1732,102 @@ bool VescInterface::loadRtLogFile(QString file)
                           "\nfor reading.",
                           false, false);
     }
+
+    return res;
+}
+
+bool VescInterface::loadRtLogFile(QByteArray data)
+{
+    bool res = false;
+
+    QTextStream in(&data);
+    int lineNum = 0;
+
+    mRtLogData.clear();
+    while (!in.atEnd()) {
+        QStringList tokens = in.readLine().split(";");
+
+        if (tokens.size() == 1) {
+            tokens = tokens.at(0).split(",");
+        }
+
+        if (tokens.size() < 22) {
+            continue;
+        }
+
+        if (lineNum > 0) {
+            LOG_DATA d;
+            d.valTime = tokens.at(0).toInt();
+            d.values.v_in = tokens.at(1).toDouble();
+            d.values.temp_mos = tokens.at(2).toDouble();
+            d.values.temp_mos_1 = tokens.at(3).toDouble();
+            d.values.temp_mos_2 = tokens.at(4).toDouble();
+            d.values.temp_mos_3 = tokens.at(5).toDouble();
+            d.values.temp_motor = tokens.at(6).toDouble();
+            d.values.current_motor = tokens.at(7).toDouble();
+            d.values.current_in = tokens.at(8).toDouble();
+            d.values.id = tokens.at(9).toDouble();
+            d.values.iq = tokens.at(10).toDouble();
+            d.values.rpm = tokens.at(11).toDouble();
+            d.values.duty_now = tokens.at(12).toDouble();
+            d.values.amp_hours = tokens.at(13).toDouble();
+            d.values.amp_hours_charged = tokens.at(14).toDouble();
+            d.values.watt_hours = tokens.at(15).toDouble();
+            d.values.watt_hours_charged = tokens.at(16).toDouble();
+            d.values.tachometer = tokens.at(17).toInt();
+            d.values.tachometer_abs = tokens.at(18).toInt();
+            d.values.position = tokens.at(19).toDouble();
+            d.values.fault_code = mc_fault_code(tokens.at(20).toInt());
+            d.values.vesc_id = tokens.at(21).toInt();
+
+            if (tokens.size() >= 55) {
+                d.values.vd = tokens.at(22).toDouble();
+                d.values.vq = tokens.at(23).toDouble();
+
+                d.setupValTime = tokens.at(24).toInt();
+                d.setupValues.amp_hours = tokens.at(25).toDouble();
+                d.setupValues.amp_hours_charged = tokens.at(26).toDouble();
+                d.setupValues.watt_hours = tokens.at(27).toDouble();
+                d.setupValues.watt_hours_charged = tokens.at(28).toDouble();
+                d.setupValues.battery_level = tokens.at(29).toDouble();
+                d.setupValues.battery_wh = tokens.at(30).toDouble();
+                d.setupValues.current_in = tokens.at(31).toDouble();
+                d.setupValues.current_motor = tokens.at(32).toDouble();
+                d.setupValues.speed = tokens.at(33).toDouble();
+                d.setupValues.tachometer = tokens.at(34).toDouble();
+                d.setupValues.tachometer_abs = tokens.at(35).toDouble();
+                d.setupValues.num_vescs = tokens.at(36).toInt();
+
+                d.imuValTime = tokens.at(37).toInt();
+                d.imuValues.roll = tokens.at(38).toDouble();
+                d.imuValues.pitch = tokens.at(39).toDouble();
+                d.imuValues.yaw = tokens.at(40).toDouble();
+                d.imuValues.accX = tokens.at(41).toDouble();
+                d.imuValues.accY = tokens.at(42).toDouble();
+                d.imuValues.accZ = tokens.at(43).toDouble();
+                d.imuValues.gyroX = tokens.at(44).toDouble();
+                d.imuValues.gyroY = tokens.at(45).toDouble();
+                d.imuValues.gyroZ = tokens.at(46).toDouble();
+
+                d.posTime = tokens.at(47).toInt();
+                d.lat = tokens.at(48).toDouble();
+                d.lon = tokens.at(49).toDouble();
+                d.alt = tokens.at(50).toDouble();
+                d.gVel = tokens.at(51).toDouble();
+                d.vVel = tokens.at(52).toDouble();
+                d.hAcc = tokens.at(53).toDouble();
+                d.vAcc = tokens.at(54).toDouble();
+            }
+
+            mRtLogData.append(d);
+        }
+
+        lineNum++;
+    }
+
+    res = true;
+
+    emitStatusMessage(QString("Loaded %1 log entries").arg(lineNum - 1), true);
 
     return res;
 }

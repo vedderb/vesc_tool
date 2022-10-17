@@ -285,7 +285,6 @@ Item {
                                 }
                             }
 
-
                             Button {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55

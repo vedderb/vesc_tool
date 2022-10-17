@@ -56,6 +56,11 @@ private slots:
     void on_logListOpenButton_clicked();
     void on_logListRefreshButton_clicked();
     void on_logTable_cellDoubleClicked(int row, int column);
+    void on_vescLogListRefreshButton_clicked();
+    void on_vescLogListOpenButton_clicked();
+    void on_vescUpButton_clicked();
+    void on_vescLogCancelButton_clicked();
+    void on_vescLogTable_cellDoubleClicked(int row, int column);
 
 private:
     Ui::PageLogAnalysis *ui;
@@ -68,6 +73,7 @@ private:
     QVector<LOG_DATA> mLogDataTruncated;
     QTimer *mPlayTimer;
     double mPlayPosNow;
+    QString mVescLastPath;
 
     void truncateDataAndPlot(bool zoomGraph = true);
     void updateGraphs();

@@ -964,6 +964,12 @@ typedef enum {
 
     COMM_LISP_REPL_CMD,
     COMM_LISP_STREAM_CODE,
+
+    COMM_FILE_LIST,
+    COMM_FILE_READ,
+    COMM_FILE_WRITE,
+    COMM_FILE_MKDIR,
+    COMM_FILE_REMOVE,
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -1153,5 +1159,25 @@ public:
 };
 
 Q_DECLARE_METATYPE(ENCODER_DETECT_RES)
+
+struct FILE_LIST_ENTRY {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(bool isDir MEMBER isDir)
+    Q_PROPERTY(qint32 size MEMBER size)
+
+    FILE_LIST_ENTRY() {
+        isDir = false;
+        size = false;
+    }
+
+    QString name;
+    bool isDir;
+    qint32 size;
+};
+
+Q_DECLARE_METATYPE(FILE_LIST_ENTRY)
 
 #endif // DATATYPES_H

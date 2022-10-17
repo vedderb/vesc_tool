@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2022 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -52,6 +52,9 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mTimeoutPingCan = 0;
     mTimeoutCustomConf = 0;
     mTimeoutBmsVal = 0;
+
+    mFilePercentage = 0.0;
+    mFileSpeed = 0.0;
 
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
 }
@@ -1007,6 +1010,41 @@ void Commands::processPacket(QByteArray data)
         quint32 offset = vb.vbPopFrontInt32();
         quint32 res = vb.vbPopFrontInt16();
         emit lispStreamCodeRx(offset, res);
+    } break;
+
+    case COMM_FILE_LIST: {
+        auto hasMore = vb.vbPopFrontInt8();
+        QList<FILE_LIST_ENTRY> files;
+        while (vb.size() > 0) {
+            FILE_LIST_ENTRY f;
+            f.isDir = vb.vbPopFrontInt8();
+            f.size = vb.vbPopFrontInt32();
+            f.name = vb.vbPopFrontString();
+            files.append(f);
+        }
+        emit fileListRx(hasMore, files);
+    } break;
+
+    case COMM_FILE_READ: {
+        auto offset = vb.vbPopFrontInt32();
+        auto size = vb.vbPopFrontInt32();
+        emit fileReadRx(offset, size, vb);
+    } break;
+
+    case COMM_FILE_WRITE: {
+        auto offset = vb.vbPopFrontInt32();
+        auto ok = vb.vbPopFrontInt8();
+        emit fileWriteRx(offset, ok);
+    } break;
+
+    case COMM_FILE_MKDIR: {
+        auto ok = vb.vbPopFrontInt8();
+        emit fileMkdirRx(ok);
+    } break;
+
+    case COMM_FILE_REMOVE: {
+        auto ok = vb.vbPopFrontInt8();
+        emit fileRemoveRx(ok);
     } break;
 
     default:
@@ -2095,6 +2133,51 @@ void Commands::setBlePin(QString pin)
     emitData(vb);
 }
 
+void Commands::fileList(QString path, QString from)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_LIST);
+    vb.vbAppendString(path);
+    vb.vbAppendString(from);
+    emitData(vb);
+}
+
+void Commands::fileRead(QString path, qint32 offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_READ);
+    vb.vbAppendString(path);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::fileWrite(QString path, qint32 offset, qint32 size, QByteArray data)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_WRITE);
+    vb.vbAppendString(path);
+    vb.vbAppendInt32(offset);
+    vb.vbAppendInt32(size);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::fileMkdir(QString path)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_MKDIR);
+    vb.vbAppendString(path);
+    emitData(vb);
+}
+
+void Commands::fileRemove(QString path)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_REMOVE);
+    vb.vbAppendString(path);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;
@@ -2151,6 +2234,16 @@ void Commands::emitData(QByteArray data)
     emit dataToSend(data);
 }
 
+double Commands::getFileSpeed() const
+{
+    return mFileSpeed;
+}
+
+double Commands::getFilePercentage() const
+{
+    return mFilePercentage;
+}
+
 bool Commands::getMaxPowerLossBug() const
 {
     return mMaxPowerLossBug;
@@ -2159,6 +2252,294 @@ bool Commands::getMaxPowerLossBug() const
 void Commands::setMaxPowerLossBug(bool maxPowerLossBug)
 {
     mMaxPowerLossBug = maxPowerLossBug;
+}
+
+QVariantList Commands::fileBlockList(QString path)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this](QList<FILE_LIST_ENTRY> &filesNow) {
+        bool res = false;
+        bool more = false;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileListRx,
+                            [&res,&loop,&filesNow,&more](bool hasMore, QList<FILE_LIST_ENTRY> files) {
+            filesNow.append(files);
+            res = true;
+            more = hasMore;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return qMakePair(res, more);
+    };
+
+    auto waitResRetry = [waitRes,path,this](QList<FILE_LIST_ENTRY> &filesNow) {
+        QString from = "";
+        if (!filesNow.isEmpty()) {
+            from = filesNow.last().name;
+        }
+        fileList(path, from);
+        auto res = waitRes(filesNow);
+        int retries = 3;
+        while (!res.first && retries > 0) {
+            fileList(path, from);
+            res = waitRes(filesNow);
+            retries--;
+        }
+        return res;
+    };
+
+    QList<FILE_LIST_ENTRY> files;
+    auto res = waitResRetry(files);
+
+    while (res.second) {
+        res = waitResRetry(files);
+
+        if (mFileShouldCancel) {
+            break;
+        }
+    }
+
+    if (!res.first) {
+        qWarning() << "Could not list files";
+    }
+
+    QVariantList retVal;
+    for (auto f: files) {
+        retVal.append(QVariant::fromValue(f));
+    }
+
+    return retVal;
+}
+
+QByteArray Commands::fileBlockRead(QString path)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this](QByteArray &dataNow, qint32 offsetNow) {
+        qint32 sizeRet = -1.0;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileReadRx,
+                            [&sizeRet,&loop,&dataNow,&offsetNow]
+                            (qint32 offset, qint32 size, QByteArray data) {
+            if (offset == offsetNow) {
+                sizeRet = size;
+                dataNow.append(data);
+            } else {
+                qWarning() << "Wrong offset";
+            }
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return sizeRet;
+    };
+
+    auto waitResRetry = [waitRes,path,this](QByteArray &dataNow, qint32 offsetNow) {
+        fileRead(path, offsetNow);
+        auto res = waitRes(dataNow, offsetNow);
+        int retries = 3;
+        while (res < 0 && retries > 0) {
+            fileRead(path, offsetNow);
+            res = waitRes(dataNow, offsetNow);
+            retries--;
+        }
+        return res;
+    };
+
+    QTime t;
+    t.start();
+
+    QByteArray data;
+    auto res = waitResRetry(data, 0);
+
+    while (res >= 0 && data.size() < res) {
+        mFilePercentage = (double(data.size()) / double(res)) * 100.0;
+        mFileSpeed = (double(data.size()) / double(t.elapsed())) * 1000.0;
+        emit fileProgress(data.size(), res, mFilePercentage, mFileSpeed);
+        res = waitResRetry(data, data.size());
+
+        if (mFileShouldCancel) {
+            return QByteArray();
+            break;
+        }
+    }
+
+    if (res < 0) {
+        qWarning() << "Could not read file";
+        return QByteArray();
+    }
+
+    return data;
+}
+
+bool Commands::fileBlockWrite(QString path, QByteArray data)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this]() {
+        bool res = false;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileWriteRx,
+                            [&res,&loop]
+                            (qint32 offset, bool ok) {
+            (void)offset;
+            res = ok;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        return res;
+    };
+
+    auto waitResRetry = [waitRes,path,this](qint32 offsetNow, qint32 size, QByteArray dataNow) {
+        fileWrite(path, offsetNow, size, dataNow);
+        auto res = waitRes();
+        int retries = 3;
+        while (!res && retries > 0) {
+            fileWrite(path, offsetNow, size, dataNow);
+            res = waitRes();
+            retries--;
+        }
+        return res;
+    };
+
+    const int chunkSize = 384;
+    qint32 size = data.size();
+    int sz = data.size() > chunkSize ? chunkSize : data.size();
+
+    QTime t;
+    t.start();
+
+    qint32 offset = 0;
+    auto res = waitResRetry(offset, size, data.mid(0, sz));
+    offset += sz;
+    data.remove(0, sz);
+
+    while (res && data.size() > 0) {
+        mFilePercentage = (double(size - data.size()) / double(size)) * 100.0;
+        mFileSpeed = (double(size - data.size()) / double(t.elapsed())) * 1000.0;
+        emit fileProgress(size - data.size(), size, mFilePercentage, mFileSpeed);
+
+        sz = data.size() > chunkSize ? chunkSize : data.size();
+        res = waitResRetry(offset, size, data.mid(0, sz));
+        offset += sz;
+        data.remove(0, sz);
+
+        if (mFileShouldCancel) {
+            return false;
+        }
+    }
+
+    return res;
+}
+
+bool Commands::fileBlockMkdir(QString path)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this]() {
+        bool res = false;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileMkdirRx,
+                            [&res,&loop](bool ok) {
+            res = ok;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        return res;
+    };
+
+    auto waitResRetry = [waitRes,path,this]() {
+        fileMkdir(path);
+        auto res = waitRes();
+        int retries = 3;
+        while (!res && retries > 0) {
+            fileMkdir(path);
+            res = waitRes();
+            retries--;
+        }
+        return res;
+    };
+
+    return waitResRetry();
+}
+
+bool Commands::fileBlockRemove(QString path)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this]() {
+        bool res = false;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileRemoveRx,
+                            [&res,&loop](bool ok) {
+            res = ok;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        return res;
+    };
+
+    auto waitResRetry = [waitRes,path,this]() {
+        fileRemove(path);
+        auto res = waitRes();
+        int retries = 3;
+        while (!res && retries > 0) {
+            fileRemove(path);
+            res = waitRes();
+            retries--;
+        }
+        return res;
+    };
+
+    return waitResRetry();
+}
+
+void Commands::fileBlockCancel()
+{
+    mFileShouldCancel = true;
+    mFilePercentage = 0.0;
+    mFileSpeed = 0;
+    emit fileProgress(0, 0, mFilePercentage, mFileSpeed);
 }
 
 bool Commands::getLimitedSupportsFwdAllCan() const

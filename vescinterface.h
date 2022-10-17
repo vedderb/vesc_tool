@@ -140,6 +140,7 @@ public:
     Q_INVOKABLE QString rtLogFilePath();
     Q_INVOKABLE QVector<LOG_DATA> getRtLogData();
     Q_INVOKABLE bool loadRtLogFile(QString file);
+    Q_INVOKABLE bool loadRtLogFile(QByteArray data);
     Q_INVOKABLE LOG_DATA getRtLogSample(double progress);
     Q_INVOKABLE LOG_DATA getRtLogSampleAtValTimeFromStart(int time);
 

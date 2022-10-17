@@ -43,6 +43,9 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->savePlotPngButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
     ui->saveMapPdfButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
     ui->saveMapPngButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
+    ui->vescLogListRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->vescLogListOpenButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->vescUpButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
 
     updateTileServers();
 
@@ -65,6 +68,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->dataTable->setColumnWidth(1, 120);
     ui->statTable->setColumnWidth(0, 140);
     ui->logTable->setColumnWidth(0, 250);
+    ui->vescLogTable->setColumnWidth(0, 250);
 
     m3dView = new Vesc3DView(this);
     m3dView->setMinimumWidth(200);
@@ -282,6 +286,16 @@ VescInterface *PageLogAnalysis::vesc() const
 void PageLogAnalysis::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
+
+    if (mVesc) {
+        connect(mVesc->commands(), &Commands::fileProgress, [this]
+                (int32_t prog, int32_t tot, double percentage, double bytesPerSec) {
+            (void)prog;
+            (void)tot;
+            ui->vescDisplay->setValue(percentage);
+            ui->vescDisplay->setText(tr("Speed: %1 KB/s").arg(bytesPerSec / 1024, 0, 'f', 2));
+        });
+    }
 }
 
 void PageLogAnalysis::on_openCsvButton_clicked()
@@ -1211,4 +1225,107 @@ void PageLogAnalysis::on_logTable_cellDoubleClicked(int row, int column)
 {
     (void)row; (void)column;
     on_logListOpenButton_clicked();
+}
+
+void PageLogAnalysis::on_vescLogListRefreshButton_clicked()
+{
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog("Refresh", "Not conected", false, false);
+        mVescLastPath = "";
+        return;
+    }
+
+    ui->vescLogTable->setRowCount(0);
+
+    ui->vescLogTab->setEnabled(false);
+    auto res = mVesc->commands()->fileBlockList(mVescLastPath);
+    ui->vescLogTab->setEnabled(true);
+
+    for (auto f: res) {
+        FILE_LIST_ENTRY fe;
+        if (f.canConvert<FILE_LIST_ENTRY>()) {
+            fe = f.value<FILE_LIST_ENTRY>();
+        }
+
+        if (!fe.isDir && !fe.name.toLower().endsWith(".csv")) {
+            continue;
+        }
+
+        QTableWidgetItem *itName = new QTableWidgetItem(fe.name);
+        itName->setData(Qt::UserRole, QVariant::fromValue(fe));
+        ui->vescLogTable->setRowCount(ui->vescLogTable->rowCount() + 1);
+        ui->vescLogTable->setItem(ui->vescLogTable->rowCount() - 1, 0, itName);
+
+        if (fe.isDir) {
+            ui->vescLogTable->setItem(ui->vescLogTable->rowCount() - 1, 1,
+                                      new QTableWidgetItem("Dir"));
+        } else {
+            ui->vescLogTable->setItem(ui->vescLogTable->rowCount() - 1, 1,
+                                      new QTableWidgetItem(QString("%1 MB").
+                                                           arg(double(fe.size)
+                                                               / 1024.0 / 1024.0,
+                                                               0, 'f', 2)));
+        }
+    }
+}
+
+void PageLogAnalysis::on_vescLogListOpenButton_clicked()
+{
+    if (!ui->vescLogListOpenButton->isEnabled()) {
+        return;
+    }
+
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog("Open", "Not conected", false, false);
+        mVescLastPath = "";
+        return;
+    }
+
+    auto item = ui->vescLogTable->currentItem();
+    if (item != nullptr) {
+        FILE_LIST_ENTRY fe;
+        if (item->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
+            fe = item->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
+        }
+
+        if (fe.isDir) {
+            mVescLastPath += "/" + fe.name;
+            mVescLastPath.replace("//", "/");
+            on_vescLogListRefreshButton_clicked();
+        } else {
+            ui->vescLogListOpenButton->setEnabled(false);
+            auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
+            ui->vescLogListOpenButton->setEnabled(true);
+            if (!data.isEmpty()) {
+                if (mVesc->loadRtLogFile(data)) {
+                    on_openCurrentButton_clicked();
+                }
+            }
+        }
+    }
+}
+
+void PageLogAnalysis::on_vescUpButton_clicked()
+{
+    if (!mVesc->isPortConnected()) {
+        mVesc->emitMessageDialog("Up", "Not conected", false, false);
+        mVescLastPath = "";
+        return;
+    }
+
+    if (mVescLastPath.lastIndexOf("/") >= 0) {
+        mVescLastPath = mVescLastPath.mid(0, mVescLastPath.lastIndexOf("/"));
+        on_vescLogListRefreshButton_clicked();
+    }
+}
+
+void PageLogAnalysis::on_vescLogCancelButton_clicked()
+{
+    mVesc->commands()->fileBlockCancel();
+}
+
+void PageLogAnalysis::on_vescLogTable_cellDoubleClicked(int row, int column)
+{
+    (void)row; (void)column;
+    on_vescLogListOpenButton_clicked();
 }

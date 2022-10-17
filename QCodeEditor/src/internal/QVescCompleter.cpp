@@ -99,6 +99,11 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("sendCustomAppData(data)");
         addItem("customConfigGet(confInd, isDefault)");
         addItem("customConfigSet(confInd, config)");
+        addItem("fileBlockList(path)");
+        addItem("fileBlockRead(path)");
+        addItem("fileBlockWrite(path, data)");
+        addItem("fileBlockMkdir(path)");
+        addItem("fileBlockRemove(path)");
         level--;
     };
 

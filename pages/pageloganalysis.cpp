@@ -1281,11 +1281,12 @@ void PageLogAnalysis::on_vescLogListOpenButton_clicked()
         return;
     }
 
-    auto item = ui->vescLogTable->currentItem();
-    if (item != nullptr) {
+    auto items = ui->vescLogTable->selectedItems();
+
+    if (items.size() > 0) {
         FILE_LIST_ENTRY fe;
-        if (item->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
-            fe = item->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
+        if (items.first()->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
+            fe = items.first()->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
         }
 
         if (fe.isDir) {

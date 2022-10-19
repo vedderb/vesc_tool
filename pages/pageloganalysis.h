@@ -42,6 +42,8 @@ public:
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
 
+    void loadVescLog(QVector<LOG_DATA> log);
+
 private slots:
     void on_openCsvButton_clicked();
     void on_openCurrentButton_clicked();
@@ -69,18 +71,78 @@ private:
     int mVerticalLineMsLast;
     Vesc3DView *m3dView;
     QCheckBox *mUseYawBox;
-    QVector<LOG_DATA> mLogData;
-    QVector<LOG_DATA> mLogDataTruncated;
     QTimer *mPlayTimer;
     double mPlayPosNow;
     QString mVescLastPath;
+
+    QVector<QVector<LOG_ENTRY*> > mLog;
+    QVector<QVector<LOG_ENTRY*> > mLogTruncated;
+
+    int mInd_t_day;
+    int mInd_t_day_pos;
+    int mInd_gnss_h_acc;
+    int mInd_gnss_lat;
+    int mInd_gnss_lon;
+    int mInd_gnss_alt;
+    int mInd_trip_vesc;
+    int mInd_trip_vesc_abs;
+    int mInd_trip_gnss;
+    int mInd_cnt_wh;
+    int mInd_cnt_wh_chg;
+    int mInd_cnt_ah;
+    int mInd_cnt_ah_chg;
+    int mInd_roll;
+    int mInd_pitch;
+    int mInd_yaw;
+
+    void resetInds() {
+        mInd_t_day = -1;
+        mInd_t_day_pos = -1;
+        mInd_gnss_h_acc = -1;
+        mInd_gnss_lat = -1;
+        mInd_gnss_lon = -1;
+        mInd_gnss_alt = -1;
+        mInd_trip_vesc = -1;
+        mInd_trip_vesc_abs = -1;
+        mInd_trip_gnss = -1;
+        mInd_cnt_wh = -1;
+        mInd_cnt_wh_chg = -1;
+        mInd_cnt_ah = -1;
+        mInd_cnt_ah_chg = -1;
+        mInd_roll = -1;
+        mInd_pitch = -1;
+        mInd_yaw = -1;
+    }
+
+    void updateInds() {
+        if (!mLog.isEmpty()) {
+            for (int i = 0;i < mLog.first().size();i++) {
+                auto e = mLog.first().at(i);
+                if (e->key == "t_day") mInd_t_day = i;
+                else if (e->key == "t_day_pos") mInd_t_day_pos = i;
+                else if (e->key == "gnss_h_acc") mInd_gnss_h_acc = i;
+                else if (e->key == "gnss_lat") mInd_gnss_lat = i;
+                else if (e->key == "gnss_lon") mInd_gnss_lon = i;
+                else if (e->key == "gnss_alt") mInd_gnss_alt = i;
+                else if (e->key == "trip_vesc") mInd_trip_vesc = i;
+                else if (e->key == "trip_vesc_abs") mInd_trip_vesc_abs = i;
+                else if (e->key == "trip_gnss") mInd_trip_gnss = i;
+                else if (e->key == "cnt_wh") mInd_cnt_wh = i;
+                else if (e->key == "cnt_wh_chg") mInd_cnt_wh_chg = i;
+                else if (e->key == "cnt_ah") mInd_cnt_ah = i;
+                else if (e->key == "cnt_ah_chg") mInd_cnt_ah_chg = i;
+                else if (e->key == "roll") mInd_roll = i;
+                else if (e->key == "pitch") mInd_pitch = i;
+                else if (e->key == "yaw") mInd_yaw = i;
+            }
+        }
+    }
 
     void truncateDataAndPlot(bool zoomGraph = true);
     void updateGraphs();
     void updateStats();
     void updateDataAndPlot(double time);
-    LOG_DATA getLogSample(int timeMs);
-    double getDistGnssSample(int timeMs);
+    QVector<LOG_ENTRY *> getLogSample(int timeMs);
     void updateTileServers();
     void logListRefresh();
 

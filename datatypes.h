@@ -26,6 +26,7 @@
 #include <QVector>
 #include <QDateTime>
 #include <QTime>
+#include <QMap>
 #include <stdint.h>
 
 typedef struct {
@@ -519,6 +520,71 @@ public:
 };
 
 Q_DECLARE_METATYPE(LOG_DATA)
+
+struct LOG_ENTRY {
+    Q_GADGET
+
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString unit MEMBER unit)
+    Q_PROPERTY(int precision MEMBER precision)
+    Q_PROPERTY(double value MEMBER value)
+    Q_PROPERTY(QString valueString MEMBER valueString)
+    Q_PROPERTY(bool isTimeStamp MEMBER isTimeStamp)
+    Q_PROPERTY(bool isRelativeToFirst MEMBER isRelativeToFirst)
+    Q_PROPERTY(bool hasScale MEMBER hasScale)
+    Q_PROPERTY(double scaleStep MEMBER scaleStep)
+    Q_PROPERTY(double scaleMax MEMBER scaleMax)
+
+public:
+    LOG_ENTRY() {
+        value = 0.0;
+        precision = 2;
+        isRelativeToFirst = false;
+        isTimeStamp = false;
+        hasScale = true;
+        scaleStep = 0.1;
+        scaleMax = 99.99;
+    }
+
+    LOG_ENTRY(QString key,
+              QString name,
+              QString unit,
+              double value,
+              int precision = 2,
+              QString valueString = "",
+              bool isRelativeToFirst = false,
+              bool isTimeStamp = false,
+              bool hasScale = true,
+              double scaleStep = 0.1,
+              double scaleMax = 99.99) {
+        this->key = key;
+        this->name = name;
+        this->unit = unit;
+        this->value = value;
+        this->precision = precision;
+        this->valueString = valueString;
+        this->isRelativeToFirst = isRelativeToFirst;
+        this->isTimeStamp = isTimeStamp;
+        this->hasScale = hasScale;
+        this->scaleStep = scaleStep;
+        this->scaleMax = scaleMax;
+    }
+
+    QString key;
+    QString name;
+    QString unit;
+    double value;
+    int precision;
+    QString valueString;
+    bool isRelativeToFirst;
+    bool isTimeStamp;
+    bool hasScale;
+    double scaleStep;
+    double scaleMax;
+
+};
+
+Q_DECLARE_METATYPE(LOG_ENTRY)
 
 struct MCCONF_TEMP {
     Q_GADGET

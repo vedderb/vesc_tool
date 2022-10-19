@@ -32,6 +32,8 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->setupUi(this);
     mVesc = nullptr;
 
+    resetInds();
+
     QString theme = Utility::getThemePath();
     ui->centerButton->setIcon(QPixmap(theme + "icons/icons8-target-96.png"));
     ui->playButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
@@ -84,19 +86,21 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     mPlayTimer->start(100);
 
     connect(mPlayTimer, &QTimer::timeout, [this]() {
-        if (ui->playButton->isChecked()) {
+        if (ui->playButton->isChecked() && !mLogTruncated.isEmpty()) {
             mPlayPosNow += double(mPlayTimer->interval()) / 1000.0;
 
-            int timeMs = mLogDataTruncated.last().valTime - mLogDataTruncated.first().valTime;
-            if (timeMs < 0) { // Handle midnight
-                timeMs += 60 * 60 * 24 * 1000;
-            }
+            if (mInd_t_day >= 0) {
+                double time = (mLogTruncated.last()[mInd_t_day]->value - mLogTruncated.first()[mInd_t_day]->value);
+                if (time < 0.0) { // Handle midnight
+                    time += 60.0 * 60.0 * 24.0;
+                }
 
-            if (mLogDataTruncated.size() > 0 &&
-                    mPlayPosNow <= double(timeMs) / 1000.0) {
-                updateDataAndPlot(mPlayPosNow);
-            } else {
-                ui->playButton->setChecked(false);
+                if (mLogTruncated.size() > 0 &&
+                        mPlayPosNow <= time) {
+                    updateDataAndPlot(mPlayPosNow);
+                } else {
+                    ui->playButton->setChecked(false);
+                }
             }
         }
     });
@@ -108,81 +112,6 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->plot->legend->setFont(legendFont);
     ui->plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignRight|Qt::AlignBottom);
     ui->plot->xAxis->setLabel("Seconds (s)");
-
-    auto addDataItem = [this](QString name, bool hasScale = true,
-            double scale = 1.0, double scaleStep = 0.1) {
-        ui->dataTable->setRowCount(ui->dataTable->rowCount() + 1);
-        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 0, new QTableWidgetItem(name));
-        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 1, new QTableWidgetItem(""));
-        if (hasScale) {
-            QDoubleSpinBox *sb = new QDoubleSpinBox;
-            sb->setSingleStep(scaleStep);
-            sb->setValue(scale);
-            // Prevent mouse wheel focus to avoid changing the selection
-            sb->setFocusPolicy(Qt::StrongFocus);
-            ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, 2, sb);
-            connect(sb, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-                    [this](double value) {
-                (void)value;
-                updateGraphs();
-            });
-        } else {
-            ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 2, new QTableWidgetItem("Not Plottable"));
-        }
-    };
-
-    addDataItem("Speed VESC");      // 0
-    addDataItem("Speed GNSS");      // 1
-    addDataItem("Time of Day", false);     // 2
-    addDataItem("Time of trip", false);    // 3
-    addDataItem("Trip VESC");       // 4
-    addDataItem("Trip ABS VESC");   // 5
-    addDataItem("Trip GNSS");       // 6
-    addDataItem("Current Motors");  // 7
-    addDataItem("Current Battery"); // 8
-    addDataItem("Power");           // 9
-    addDataItem("ERPM");            // 10
-    addDataItem("Duty Cycle");      // 11
-    addDataItem("Fault Code");      // 12
-    addDataItem("Input Voltage");   // 13
-    addDataItem("Battery Level");   // 14
-    addDataItem("Temp MOSFET");     // 15
-    addDataItem("Temp Motor");      // 16
-    addDataItem("Ah Used");         // 17
-    addDataItem("Ah Charged");      // 18
-    addDataItem("Wh Used");         // 19
-    addDataItem("Wh Charged");      // 20
-    addDataItem("id");              // 21
-    addDataItem("iq");              // 22
-    addDataItem("vd");              // 23
-    addDataItem("vq");              // 24
-    addDataItem("Temp MOSFET 1");   // 25
-    addDataItem("Temp MOSFET 2");   // 26
-    addDataItem("Temp MOSFET 3");   // 27
-    addDataItem("Motor Pos");       // 28
-    addDataItem("Altitude GNSS");   // 29
-    addDataItem("Roll");            // 30
-    addDataItem("Pitch");           // 31
-    addDataItem("Yaw");             // 32
-    addDataItem("Accel X");         // 33
-    addDataItem("Accel Y");         // 34
-    addDataItem("Accel Z");         // 35
-    addDataItem("Gyro X");          // 36
-    addDataItem("Gyro Y");          // 37
-    addDataItem("Gyro Z");          // 38
-    addDataItem("GNSS Accuracy");   // 39
-    addDataItem("V1 Current");      // 40
-    addDataItem("V1 Current In");   // 41
-    addDataItem("V1 Power");        // 42
-    addDataItem("V1 Ah Used");      // 43
-    addDataItem("V1 Ah Charged");   // 44
-    addDataItem("V1 Wh Used");      // 45
-    addDataItem("V1 Wh Charged");   // 46
-    addDataItem("Latitude");        // 47
-    addDataItem("Longitude");       // 48
-    addDataItem("V. Speed GNSS");   // 49
-    addDataItem("GNSS V. Acc.");    // 50
-    addDataItem("VESC num");        // 51
 
     mVerticalLine = new QCPCurve(ui->plot->xAxis, ui->plot->yAxis);
     mVerticalLine->removeFromLegend();
@@ -205,7 +134,9 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     };
 
     connect(ui->map, &MapWidget::infoPointClicked, [this](LocPoint info) {
-        updateDataAndPlot(double(info.getInfo().toInt() - mLogDataTruncated.first().valTime) / 1000.0);
+        if (mInd_t_day >= 0 && !mLogTruncated.isEmpty()) {
+            updateDataAndPlot(info.getInfo().toDouble() - mLogTruncated.first()[mInd_t_day]->value);
+        }
     });
 
     connect(ui->plot, &QCustomPlot::mousePress, [updateMouse](QMouseEvent *event) {
@@ -298,6 +229,168 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
     }
 }
 
+void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
+{
+    resetInds();
+
+    for (auto e: mLog) {
+        for (auto e2: e) {
+            delete e2;
+        }
+    }
+
+    mLog.clear();
+    mLogTruncated.clear();
+
+    double i_llh[3];
+    for (auto d: log) {
+        if (d.posTime >= 0 && (!ui->filterOutlierBox->isChecked() ||
+                               d.hAcc < ui->filterhAccBox->value())) {
+            i_llh[0] = d.lat;
+            i_llh[1] = d.lon;
+            i_llh[2] = d.alt;
+            ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
+            break;
+        }
+    }
+
+    LOG_DATA prevSampleGnss;
+    bool prevSampleGnssSet = false;
+    double metersGnss = 0.0;
+
+    for (auto d: log) {
+        if (d.posTime >= 0 &&
+                (!ui->filterOutlierBox->isChecked() ||
+                 d.hAcc < ui->filterhAccBox->value())) {
+            if (prevSampleGnssSet) {
+                double i_llh[3];
+                double llh[3];
+                double xyz[3];
+                ui->map->getEnuRef(i_llh);
+
+                llh[0] = d.lat;
+                llh[1] = d.lon;
+                llh[2] = d.alt;
+                Utility::llhToEnu(i_llh, llh, xyz);
+
+                LocPoint p, p2;
+                p.setXY(xyz[0], xyz[1]);
+                p.setRadius(10);
+
+                llh[0] = prevSampleGnss.lat;
+                llh[1] = prevSampleGnss.lon;
+                llh[2] = prevSampleGnss.alt;
+                Utility::llhToEnu(i_llh, llh, xyz);
+
+                p2.setXY(xyz[0], xyz[1]);
+                p2.setRadius(10);
+
+                metersGnss += p.getDistanceTo(p2);
+            }
+
+            prevSampleGnssSet = true;
+            prevSampleGnss = d;
+        }
+
+        // Todo: There is a lot of duplication here, which leads to high memory usage for large logs. A log with
+        // 30000 samples (10 MB file size) takes around 500 MB RAM to load.
+        QVector<LOG_ENTRY*> e;
+        e.append(new LOG_ENTRY("kmh_vesc", "Speed VESC", "km/h", d.setupValues.speed * 3.6));
+        e.append(new LOG_ENTRY("kmh_gnss", "Speed GNSS", "km/h", d.gVel * 3.6));
+        e.append(new LOG_ENTRY("t_day", "Time", "s", double(d.valTime) / 1000.0, 0, "", false, true, false));
+        e.append(new LOG_ENTRY("t_day_pos", "Time GNSS", "", double(d.posTime) / 1000.0, 0, "", false, true, false));
+        e.append(new LOG_ENTRY("t_trip", "Time of trip", "", double(d.valTime) / 1000.0, 0, "", true, true, false));
+        e.append(new LOG_ENTRY("trip_vesc", "Trip VESC", "m", d.setupValues.tachometer, 3, "", true));
+        e.append(new LOG_ENTRY("trip_vesc_abs", "Trip VESC ABS", "m", d.setupValues.tachometer, 3, "", true));
+        e.append(new LOG_ENTRY("trip_gnss", "Trip GNSS", "m", metersGnss, 3, "", false));
+        e.append(new LOG_ENTRY("setup_curr_motor", "Current Motors", "A", d.setupValues.current_motor));
+        e.append(new LOG_ENTRY("setup_curr_battery", "Current Battery", "A", d.setupValues.current_in));
+        e.append(new LOG_ENTRY("setup_power", "Power", "W", d.setupValues.current_in * d.values.v_in, 0));
+        e.append(new LOG_ENTRY("erpm", "ERPM", "1/1000", d.values.rpm / 1000, 0));
+        e.append(new LOG_ENTRY("duty", "Duty", "%", d.values.duty_now * 100, 1));
+        e.append(new LOG_ENTRY("fault", "Fault Code", "", d.values.fault_code,
+                           0, Commands::faultToStr(mc_fault_code(d.values.fault_code)).mid(11)));
+        e.append(new LOG_ENTRY("v_in", "Input Voltage", "V", d.values.v_in));
+        e.append(new LOG_ENTRY("soc", "Battery Level", "%", d.setupValues.battery_level * 100.0, 1));
+        e.append(new LOG_ENTRY("t_mosfet", "Temp MOSFET", "°C", d.values.temp_mos, 1));
+        e.append(new LOG_ENTRY("t_motor", "Temp Motor", "°C", d.values.temp_motor, 1));
+        e.append(new LOG_ENTRY("cnt_ah", "Ah Used", "Ah", d.setupValues.amp_hours, 3));
+        e.append(new LOG_ENTRY("cnt_ah_chg", "Ah Charged", "Ah", d.setupValues.amp_hours_charged, 3));
+        e.append(new LOG_ENTRY("cnt_wh", "Wh Used", "Wh", d.setupValues.watt_hours, 3));
+        e.append(new LOG_ENTRY("cnt_wh_chg", "Wh Charged", "Wh", d.setupValues.watt_hours_charged, 3));
+        e.append(new LOG_ENTRY("id", "id", "A", d.values.id));
+        e.append(new LOG_ENTRY("iq", "iq", "A", d.values.iq));
+        e.append(new LOG_ENTRY("vd", "vd", "V", d.values.vd));
+        e.append(new LOG_ENTRY("vq", "vq", "V", d.values.vq));
+        e.append(new LOG_ENTRY("t_mosfet_1", "Temp MOSFET 1", "°C", d.values.temp_mos_1, 1));
+        e.append(new LOG_ENTRY("t_mosfet_2", "Temp MOSFET 2", "°C", d.values.temp_mos_2, 1));
+        e.append(new LOG_ENTRY("t_mosfet_3", "Temp MOSFET 3", "°C", d.values.temp_mos_3, 1));
+        e.append(new LOG_ENTRY("position", "Motor Pos", "°", d.values.position, 1));
+        e.append(new LOG_ENTRY("roll", "Roll", "°", d.imuValues.roll, 1));
+        e.append(new LOG_ENTRY("pitch", "Pitch", "°", d.imuValues.pitch, 1));
+        e.append(new LOG_ENTRY("yaw", "Yaw", "°", d.imuValues.yaw, 1));
+        e.append(new LOG_ENTRY("acc_x", "Accel X", "G", d.imuValues.accX));
+        e.append(new LOG_ENTRY("acc_y", "Accel Y", "G", d.imuValues.accY));
+        e.append(new LOG_ENTRY("acc_z", "Accel Z", "G", d.imuValues.accZ));
+        e.append(new LOG_ENTRY("gyro_x", "Gyro X", "°/s", d.imuValues.gyroX, 1));
+        e.append(new LOG_ENTRY("gyro_y", "Gyro Y", "°/s", d.imuValues.gyroY, 1));
+        e.append(new LOG_ENTRY("gyro_z", "Gyro Z", "°/s", d.imuValues.gyroZ, 1));
+        e.append(new LOG_ENTRY("v1_curr_motor", "V1 Current", "A", d.values.current_motor));
+        e.append(new LOG_ENTRY("v1_curr_battery", "V1 Current Battery", "A", d.values.current_in));
+        e.append(new LOG_ENTRY("v1_cnt_ah", "V1 Ah Used", "Ah", d.values.amp_hours, 3));
+        e.append(new LOG_ENTRY("v1_cnt_ah_chg", "V1 Ah Charged", "Ah", d.values.amp_hours_charged, 3));
+        e.append(new LOG_ENTRY("v1_cnt_wh", "V1 Wh Used", "Wh", d.values.watt_hours, 3));
+        e.append(new LOG_ENTRY("v1_cnt_wh_chg", "V1 Wh Charged", "Wh", d.values.watt_hours_charged, 3));
+        e.append(new LOG_ENTRY("gnss_lat", "Latitude", "°", d.lat, 6));
+        e.append(new LOG_ENTRY("gnss_lon", "Longitude", "°", d.lon, 6));
+        e.append(new LOG_ENTRY("gnss_alt", "Altitude", "m", d.alt));
+        e.append(new LOG_ENTRY("gnss_v_vel", "V. Speed GNSS", "km/h", d.vVel * 3.6));
+        e.append(new LOG_ENTRY("gnss_h_acc", "H. Accuracy GNSS", "m", d.hAcc));
+        e.append(new LOG_ENTRY("gnss_v_acc", "V. Accuracy GNSS", "m", d.vAcc));
+        e.append(new LOG_ENTRY("num_vesc", "VESC num", "", d.setupValues.num_vescs, 0));
+
+        mLog.append(e);
+    }
+
+    updateInds();
+
+    ui->dataTable->setRowCount(0);
+
+    if (mLog.size() == 0) {
+        return;
+    }
+
+    auto addDataItem = [this](QString name, bool hasScale = true,
+            double scaleStep = 0.1, double scaleMax = 99.99) {
+        ui->dataTable->setRowCount(ui->dataTable->rowCount() + 1);
+        auto item1 = new QTableWidgetItem(name);
+        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 0, item1);
+        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 1, new QTableWidgetItem(""));
+        if (hasScale) {
+            QDoubleSpinBox *sb = new QDoubleSpinBox;
+            sb->setSingleStep(scaleStep);
+            sb->setValue(1.0);
+            sb->setMaximum(scaleMax);
+            // Prevent mouse wheel focus to avoid changing the selection
+            sb->setFocusPolicy(Qt::StrongFocus);
+            ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, 2, sb);
+            connect(sb, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                    [this](double value) {
+                (void)value;
+                updateGraphs();
+            });
+        } else {
+            ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 2, new QTableWidgetItem("Not Plottable"));
+        }
+    };
+
+    for (auto e: mLog.first()) {
+        addDataItem(e->name, e->hasScale, e->scaleStep, e->scaleMax);
+    }
+
+    truncateDataAndPlot();
+}
+
 void PageLogAnalysis::on_openCsvButton_clicked()
 {
     if (mVesc) {
@@ -322,21 +415,7 @@ void PageLogAnalysis::on_openCsvButton_clicked()
 void PageLogAnalysis::on_openCurrentButton_clicked()
 {
     if (mVesc) {
-        mLogData = mVesc->getRtLogData();
-
-        double i_llh[3];
-        for (auto d: mLogData) {
-            if (d.posTime >= 0 && (!ui->filterOutlierBox->isChecked() ||
-                                   d.hAcc < ui->filterhAccBox->value())) {
-                i_llh[0] = d.lat;
-                i_llh[1] = d.lon;
-                i_llh[2] = d.alt;
-                ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
-                break;
-            }
-        }
-
-        truncateDataAndPlot();
+        loadVescLog(mVesc->getRtLogData());
     }
 }
 
@@ -372,36 +451,58 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
     int posTimeLast = -1;
 
     ui->map->getEnuRef(i_llh);
-    mLogDataTruncated.clear();
+    mLogTruncated.clear();
 
-    for (auto d: mLogData) {
+    for (const auto &d: mLog) {
         ind++;
-        double prop = double(ind) / double(mLogData.size());
+        double prop = double(ind) / double(mLog.size());
         if (prop < start || prop > end) {
             continue;
         }
 
-        mLogDataTruncated.append(d);
+        mLogTruncated.append(d);
+        bool skip = false;
 
-        if (d.posTime >= 0 &&
-                (!ui->filterOutlierBox->isChecked() ||
-                 d.hAcc < ui->filterhAccBox->value()) &&
-                posTimeLast != d.posTime) {
+        if (mInd_t_day_pos >= 0 && mInd_gnss_h_acc >= 0) {
+            int postime = int(d[mInd_t_day_pos]->value * 1000.0);
+            double h_acc = d[mInd_gnss_h_acc]->value;
+
+            skip = true;
+            if (postime >= 0 &&
+                    (!ui->filterOutlierBox->isChecked() ||
+                     h_acc < ui->filterhAccBox->value()) &&
+                    posTimeLast != postime) {
+                skip = false;
+                posTimeLast = postime;
+            }
+        }
+
+        if (mInd_gnss_lat < 0 || mInd_gnss_lon < 0) {
+            skip = true;
+        }
+
+        if (!skip) {
             double llh[3];
             double xyz[3];
 
-            llh[0] = d.lat;
-            llh[1] = d.lon;
-            llh[2] = d.alt;
+            llh[0] = d[mInd_gnss_lat]->value;
+            llh[1] = d[mInd_gnss_lon]->value;
+            if (mInd_gnss_alt >= 0) {
+                llh[2] = d[mInd_gnss_alt]->value;
+            } else {
+                llh[2] = 0.0;
+            }
             Utility::llhToEnu(i_llh, llh, xyz);
 
             LocPoint p;
             p.setXY(xyz[0], xyz[1]);
             p.setRadius(5);
-            p.setInfo(QString("%1").arg(d.valTime));
+
+            if (mInd_t_day >= 0) {
+                p.setInfo(QString("%1").arg(d[mInd_t_day]->value));
+            }
 
             ui->map->addInfoPoint(p, false);
-            posTimeLast = d.posTime;
         }
     }
 
@@ -422,68 +523,28 @@ void PageLogAnalysis::updateGraphs()
     QVector<QVector<double> > yAxes;
     QVector<QString> names;
 
-    int startTime = -1;
-    LOG_DATA prevSampleGnss;
-    bool prevSampleGnssSet = false;
-    double metersGnss = 0.0;
-    LOG_DATA firstData;
-
-    if (mLogDataTruncated.size() > 0) {
-        firstData = mLogDataTruncated.first();
-    }
-
+    double startTime = -1.0;
     double verticalTime = -1.0;
     LocPoint p, p2;
 
-    for (LOG_DATA d: mLogDataTruncated) {
-        if (startTime < 0) {
-            startTime = d.valTime;
-        }
+    int timeMs = 0;
+    for (const auto &d: mLogTruncated) {
+        if (mInd_t_day >= 0) {
+            if (startTime < 0) {
+                startTime = d[mInd_t_day]->value;
+            }
 
-        int timeMs = d.valTime - startTime;
-        if (timeMs < 0) { // Handle midnight
-            timeMs += 60 * 60 * 24 * 1000;
-        }
-
-        if (mVerticalLineMsLast == d.valTime) {
-            verticalTime = double(timeMs) / 1000.0;
+            timeMs = int((d[mInd_t_day]->value - startTime) * 1000.0);
+            if (timeMs < 0) { // Handle midnight
+                timeMs += 60 * 60 * 24 * 1000;
+            }
+        } else {
+            timeMs += 1000.0;
         }
 
         xAxis.append(double(timeMs) / 1000.0);
-
-        if (d.posTime >= 0 &&
-                (!ui->filterOutlierBox->isChecked() ||
-                 d.hAcc < ui->filterhAccBox->value())) {
-            if (prevSampleGnssSet) {
-                double i_llh[3];
-                double llh[3];
-                double xyz[3];
-                ui->map->getEnuRef(i_llh);
-
-                llh[0] = d.lat;
-                llh[1] = d.lon;
-                llh[2] = d.alt;
-                Utility::llhToEnu(i_llh, llh, xyz);
-
-                p.setXY(xyz[0], xyz[1]);
-                p.setRadius(10);
-
-                llh[0] = prevSampleGnss.lat;
-                llh[1] = prevSampleGnss.lon;
-                llh[2] = prevSampleGnss.alt;
-                Utility::llhToEnu(i_llh, llh, xyz);
-
-                p2.setXY(xyz[0], xyz[1]);
-                p2.setRadius(10);
-
-                metersGnss += p.getDistanceTo(p2);
-            }
-
-            prevSampleGnssSet = true;
-            prevSampleGnss = d;
-        }
-
         int rowInd = 0;
+
         for (int r = 0;r < rows.size();r++) {
             int row = rows.at(r).row();
             double rowScale = 1.0;
@@ -491,257 +552,14 @@ void PageLogAnalysis::updateGraphs()
                     (ui->dataTable->cellWidget(row, 2))) {
                 rowScale = sb->value();
             }
-            if (row == 0) {
+
+            auto entry = d[row];
+
+            if (entry->hasScale) {
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.setupValues.speed * 3.6 * rowScale);
-                names.append(QString("Speed VESC (km/h * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 1) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.gVel * 3.6 * rowScale);
-                names.append(QString("Speed GNSS (km/h * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 4) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append((d.setupValues.tachometer -
-                                      firstData.setupValues.tachometer) * rowScale);
-                names.append(QString("Trip VESC (m * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 5) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append((d.setupValues.tachometer_abs -
-                                      firstData.setupValues.tachometer_abs) * rowScale);
-                names.append(QString("Trip ABS VESC (m * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 6) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(metersGnss * rowScale);
-                names.append(QString("Trip GNSS (m * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 7) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.setupValues.current_motor * rowScale);
-                names.append(QString("Current Motor (A * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 8) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.setupValues.current_in * rowScale);
-                names.append(QString("Current Battery (A * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 9) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.setupValues.current_in * d.values.v_in * rowScale);
-                names.append(QString("Power (W * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 10) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.rpm / 1000 * rowScale);
-                names.append(QString("ERPM (1/1000 * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 11) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.duty_now * 100.0 * rowScale);
-                names.append(QString("Duty (% * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 12) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(double(d.values.fault_code) * rowScale);
-                names.append(QString("Fault Code (* %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 13) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.v_in * rowScale);
-                names.append(QString("Input Voltage (V * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 14) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.setupValues.battery_level * 100.0 * rowScale);
-                names.append(QString("Input Voltage (% * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 15) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.temp_mos * rowScale);
-                names.append(QString("Temp MOSFET (°C * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 16) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.temp_motor * rowScale);
-                names.append(QString("Temp Motor (°C * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 17) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.setupValues.amp_hours * rowScale);
-                names.append(QString("Ah Used (Ah * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 18) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.setupValues.amp_hours_charged * rowScale);
-                names.append(QString("Ah Charged (Ah * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 19) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.setupValues.watt_hours * rowScale);
-                names.append(QString("Wh Used (Wh * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 20) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.setupValues.watt_hours_charged * rowScale);
-                names.append(QString("Wh Charged (Wh * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 21) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.id * rowScale);
-                names.append(QString("id (A * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 22) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.iq * rowScale);
-                names.append(QString("iq (A * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 23) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.vd * rowScale);
-                names.append(QString("vd (V * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 24) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.vq * rowScale);
-                names.append(QString("vq (A * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 25) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.temp_mos_1 * rowScale);
-                names.append(QString("Temp MOSFET 1 (°C * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 26) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.temp_mos_2 * rowScale);
-                names.append(QString("Temp MOSFET 2 (°C * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 27) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.temp_mos_3 * rowScale);
-                names.append(QString("Temp MOSFET 3 (°C * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 28) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.position * rowScale);
-                names.append(QString("Motor Pos (° * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 29) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.alt * rowScale);
-                names.append(QString("Altitude GNSS (m * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 30) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.imuValues.roll * 180.0 / M_PI * rowScale);
-                names.append(QString("Roll (° * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 31) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.imuValues.pitch * 180.0 / M_PI * rowScale);
-                names.append(QString("Pitch (° * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 32) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.imuValues.yaw * 180.0 / M_PI * rowScale);
-                names.append(QString("Yaw (° * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 33) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.imuValues.accX * rowScale);
-                names.append(QString("Accel X (G * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 34) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.imuValues.accY * rowScale);
-                names.append(QString("Accel Y (G * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 35) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.imuValues.accZ * rowScale);
-                names.append(QString("Accel Z (G * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 36) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.imuValues.gyroX * rowScale);
-                names.append(QString("Gyro X (°/s * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 37) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.imuValues.gyroY * rowScale);
-                names.append(QString("Gyro Y (°/s * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 38) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.imuValues.gyroZ * rowScale);
-                names.append(QString("Gyro Z (°/s * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 39) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.hAcc * rowScale);
-                names.append(QString("GNSS Accuracy (m * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 40) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.current_motor * rowScale);
-                names.append(QString("V1 Current (A * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 41) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.current_in * rowScale);
-                names.append(QString("V1 Current In (A * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 42) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.current_in * d.values.v_in * rowScale);
-                names.append(QString("Power (W * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 43) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.amp_hours * rowScale);
-                names.append(QString("V1 Ah Used (Ah * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 44) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.amp_hours_charged * rowScale);
-                names.append(QString("V1 Ah Charged (Ah * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 45) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.watt_hours * rowScale);
-                names.append(QString("V1 Wh Used (Wh * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 46) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.values.watt_hours_charged * rowScale);
-                names.append(QString("V1 Wh Charged (Wh * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 47) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.lat * rowScale);
-                names.append(QString("Latitude (° * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 48) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.lon * rowScale);
-                names.append(QString("Longitude (° * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 49) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.vVel * 3.6 * rowScale);
-                names.append(QString("V. Speed GNSS (km/h * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 50) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(d.vAcc * rowScale);
-                names.append(QString("GNSS V. Accuracy (m * %1)").arg(rowScale));
-                rowInd++;
-            } else if (row == 51) {
-                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(double(d.setupValues.num_vescs) * rowScale);
-                names.append(QString("VESC num (* %1)").arg(rowScale));
+                yAxes[rowInd].append(entry->value * rowScale);
+                names.append(QString("%1 (%2 * %3)").arg(entry->name).
+                             arg(entry->unit).arg(rowScale));
                 rowInd++;
             }
         }
@@ -792,12 +610,27 @@ void PageLogAnalysis::updateGraphs()
 
 void PageLogAnalysis::updateStats()
 {
-    bool startSampleSet = false;
-    LOG_DATA startSample;
-    LOG_DATA endSample;
+    if (mLogTruncated.size() < 2) {
+            return;
+    }
 
-    int samples = 0;
+    auto startSample = mLogTruncated.first();
+    auto endSample = mLogTruncated.last();
+
+    int samples = mLogTruncated.size();
     int timeTotMs = 0;
+
+    if (samples < 2) {
+        return;
+    }
+
+    if (mInd_t_day >= 0) {
+        timeTotMs = (endSample[mInd_t_day]->value - startSample[mInd_t_day]->value) * 1000.0;
+        if (timeTotMs < 0) { // Handle midnight
+            timeTotMs += 60 * 60 * 24 * 1000;
+        }
+    }
+
     double meters = 0.0;
     double metersAbs = 0.0;
     double metersGnss = 0.0;
@@ -805,69 +638,36 @@ void PageLogAnalysis::updateStats()
     double whCharge = 0.0;
     double ah = 0.0;
     double ahCharge = 0.0;
-    LOG_DATA prevSampleGnss;
-    bool prevSampleGnssSet = false;
 
-    for (LOG_DATA d: mLogDataTruncated) {
-        if (!startSampleSet) {
-            startSample = d;
-            startSampleSet = true;
-        }
-
-        samples++;
-
-        if (d.posTime >= 0 &&
-                (!ui->filterOutlierBox->isChecked() ||
-                 d.hAcc < ui->filterhAccBox->value())) {
-            if (prevSampleGnssSet) {
-                double i_llh[3];
-                double llh[3];
-                double xyz[3];
-                ui->map->getEnuRef(i_llh);
-
-                llh[0] = d.lat;
-                llh[1] = d.lon;
-                llh[2] = d.alt;
-                Utility::llhToEnu(i_llh, llh, xyz);
-
-                LocPoint p;
-                p.setXY(xyz[0], xyz[1]);
-                p.setRadius(10);
-
-                llh[0] = prevSampleGnss.lat;
-                llh[1] = prevSampleGnss.lon;
-                llh[2] = prevSampleGnss.alt;
-                Utility::llhToEnu(i_llh, llh, xyz);
-
-                LocPoint p2;
-                p2.setXY(xyz[0], xyz[1]);
-                p2.setRadius(10);
-
-                metersGnss += p.getDistanceTo(p2);
-            }
-
-            prevSampleGnssSet = true;
-            prevSampleGnss = d;
-        }
-
-        endSample = d;
+    if (mInd_trip_vesc >= 0) {
+        meters = endSample[mInd_trip_vesc]->value - startSample[mInd_trip_vesc]->value;
     }
 
-    timeTotMs = endSample.valTime - startSample.valTime;
-    if (timeTotMs < 0) { // Handle midnight
-        timeTotMs += 60 * 60 * 24 * 1000;
+    if (mInd_trip_vesc_abs >= 0) {
+        metersAbs = endSample[mInd_trip_vesc_abs]->value - startSample[mInd_trip_vesc_abs]->value;
     }
 
-    meters = endSample.setupValues.tachometer - startSample.setupValues.tachometer;
-    metersAbs = endSample.setupValues.tachometer_abs - startSample.setupValues.tachometer_abs;
-    wh = endSample.setupValues.watt_hours - startSample.setupValues.watt_hours;
-    whCharge = endSample.setupValues.watt_hours_charged - startSample.setupValues.watt_hours_charged;
-    ah = endSample.setupValues.amp_hours - startSample.setupValues.amp_hours;
-    ahCharge = endSample.setupValues.amp_hours_charged - startSample.setupValues.amp_hours_charged;
-
-    while (ui->statTable->rowCount() > 0) {
-        ui->statTable->removeRow(0);
+    if (mInd_trip_gnss >= 0) {
+        metersGnss = endSample[mInd_trip_gnss]->value - startSample[mInd_trip_gnss]->value;
     }
+
+    if (mInd_cnt_wh >= 0) {
+        wh = endSample[mInd_cnt_wh]->value - startSample[mInd_cnt_wh]->value;
+    }
+
+    if (mInd_cnt_wh_chg >= 0) {
+        whCharge = endSample[mInd_cnt_wh_chg]->value - startSample[mInd_cnt_wh_chg]->value;
+    }
+
+    if (mInd_cnt_ah >= 0) {
+        ah = endSample[mInd_cnt_ah]->value - startSample[mInd_cnt_ah]->value;
+    }
+
+    if (mInd_cnt_ah_chg >= 0) {
+        ahCharge = endSample[mInd_cnt_ah_chg]->value - startSample[mInd_cnt_ah_chg]->value;
+    }
+
+    ui->statTable->setRowCount(0);
     auto addStatItem = [this](QString name) {
         ui->statTable->setRowCount(ui->statTable->rowCount() + 1);
         ui->statTable->setItem(ui->statTable->rowCount() - 1, 0, new QTableWidgetItem(name));
@@ -910,6 +710,10 @@ void PageLogAnalysis::updateStats()
 
 void PageLogAnalysis::updateDataAndPlot(double time)
 {
+    if (mLogTruncated.isEmpty()) {
+        return;
+    }
+
     mPlayPosNow = time;
 
     double upper = ui->plot->xAxis->range().upper;
@@ -926,81 +730,72 @@ void PageLogAnalysis::updateDataAndPlot(double time)
     mVerticalLine->setVisible(true);
     ui->plot->replotWhenVisible();
 
-    LOG_DATA d = getLogSample(int(time * 1000));
-    mVerticalLineMsLast = d.valTime;
+    auto sample = getLogSample(int(time * 1000));
+    auto first = mLogTruncated.first();
 
-    int timeTotMs = d.valTime - getLogSample(0).valTime;
-    if (timeTotMs < 0) { // Handle midnight
-        timeTotMs += 60 * 60 * 24 * 1000;
+    if (mInd_t_day >= 0) {
+        mVerticalLineMsLast = int(sample[mInd_t_day]->value * 1000.0);
     }
 
-    ui->dataTable->item(0, 1)->setText(QString::number(d.setupValues.speed * 3.6, 'f', 2) + " km/h");
-    ui->dataTable->item(1, 1)->setText(QString::number(d.gVel * 3.6, 'f', 2) + " km/h");
-    QTime t(0, 0, 0, 0);
-    t = t.addMSecs(d.valTime);
-    ui->dataTable->item(2, 1)->setText(t.toString("hh:mm:ss.zzz"));
-    QTime t2(0, 0, 0, 0);
-    t2 = t2.addMSecs(timeTotMs);
-    ui->dataTable->item(3, 1)->setText(t2.toString("hh:mm:ss.zzz"));
-    ui->dataTable->item(4, 1)->setText(QString::number(d.setupValues.tachometer - getLogSample(0).setupValues.tachometer, 'f', 2) + "m");
-    ui->dataTable->item(5, 1)->setText(QString::number(d.setupValues.tachometer_abs - getLogSample(0).setupValues.tachometer_abs, 'f', 2) + "m");
-    ui->dataTable->item(6, 1)->setText(QString::number(getDistGnssSample(int(time * 1000)), 'f', 2) + "m");
-    ui->dataTable->item(7, 1)->setText(QString::number(d.setupValues.current_motor, 'f', 2) + " A");
-    ui->dataTable->item(8, 1)->setText(QString::number(d.setupValues.current_in, 'f', 2) + " A");
-    ui->dataTable->item(9, 1)->setText(QString::number(d.setupValues.current_in * d.values.v_in, 'f', 2) + " w");
-    ui->dataTable->item(10, 1)->setText(QString::number(d.values.rpm / 1000.0, 'f', 2) + " k");
-    ui->dataTable->item(11, 1)->setText(QString::number(d.values.duty_now * 100.0, 'f', 2) + " %");
-    ui->dataTable->item(12, 1)->setText(Commands::faultToStr(mc_fault_code(d.values.fault_code)).mid(11));
-    ui->dataTable->item(13, 1)->setText(QString::number(d.values.v_in, 'f', 2) + " V");
-    ui->dataTable->item(14, 1)->setText(QString::number(d.setupValues.battery_level * 100.0, 'f', 2) + " %");
-    ui->dataTable->item(15, 1)->setText(QString::number(d.values.temp_mos, 'f', 2) + " °C");
-    ui->dataTable->item(16, 1)->setText(QString::number(d.values.temp_motor, 'f', 2) + " °C");
-    ui->dataTable->item(17, 1)->setText(QString::number(d.setupValues.amp_hours, 'f', 2) + " Ah");
-    ui->dataTable->item(18, 1)->setText(QString::number(d.setupValues.amp_hours_charged, 'f', 2) + " Ah");
-    ui->dataTable->item(19, 1)->setText(QString::number(d.setupValues.watt_hours, 'f', 2) + " Wh");
-    ui->dataTable->item(20, 1)->setText(QString::number(d.setupValues.watt_hours_charged, 'f', 2) + " Wh");
-    ui->dataTable->item(21, 1)->setText(QString::number(d.values.id, 'f', 2) + " A");
-    ui->dataTable->item(22, 1)->setText(QString::number(d.values.iq, 'f', 2) + " A");
-    ui->dataTable->item(23, 1)->setText(QString::number(d.values.vd, 'f', 2) + " V");
-    ui->dataTable->item(24, 1)->setText(QString::number(d.values.vq, 'f', 2) + " V");
-    ui->dataTable->item(25, 1)->setText(QString::number(d.values.temp_mos_1, 'f', 2) + " °C");
-    ui->dataTable->item(26, 1)->setText(QString::number(d.values.temp_mos_2, 'f', 2) + " °C");
-    ui->dataTable->item(27, 1)->setText(QString::number(d.values.temp_mos_3, 'f', 2) + " °C");
-    ui->dataTable->item(28, 1)->setText(QString::number(d.values.position, 'f', 2) + " °");
-    ui->dataTable->item(29, 1)->setText(QString::number(d.alt, 'f', 2) + " m");
-    ui->dataTable->item(30, 1)->setText(QString::number(d.imuValues.roll * 180.0 / M_PI, 'f', 2) + " °");
-    ui->dataTable->item(31, 1)->setText(QString::number(d.imuValues.pitch * 180.0 / M_PI, 'f', 2) + " °");
-    ui->dataTable->item(32, 1)->setText(QString::number(d.imuValues.yaw * 180.0 / M_PI, 'f', 2) + " °");
-    ui->dataTable->item(33, 1)->setText(QString::number(d.imuValues.accX, 'f', 2) + " G");
-    ui->dataTable->item(34, 1)->setText(QString::number(d.imuValues.accY, 'f', 2) + " G");
-    ui->dataTable->item(35, 1)->setText(QString::number(d.imuValues.accZ, 'f', 2) + " G");
-    ui->dataTable->item(36, 1)->setText(QString::number(d.imuValues.gyroX, 'f', 2) + " °/s");
-    ui->dataTable->item(37, 1)->setText(QString::number(d.imuValues.gyroY, 'f', 2) + " °/s");
-    ui->dataTable->item(38, 1)->setText(QString::number(d.imuValues.gyroZ, 'f', 2) + " °/s");
-    ui->dataTable->item(39, 1)->setText(QString::number(d.hAcc, 'f', 2) + " m");
-    ui->dataTable->item(40, 1)->setText(QString::number(d.values.current_motor, 'f', 2) + " A");
-    ui->dataTable->item(41, 1)->setText(QString::number(d.values.current_in, 'f', 2) + " A");
-    ui->dataTable->item(42, 1)->setText(QString::number(d.values.current_in * d.values.v_in, 'f', 2) + " w");
-    ui->dataTable->item(43, 1)->setText(QString::number(d.values.amp_hours, 'f', 2) + " Ah");
-    ui->dataTable->item(44, 1)->setText(QString::number(d.values.amp_hours_charged, 'f', 2) + " Ah");
-    ui->dataTable->item(45, 1)->setText(QString::number(d.values.watt_hours, 'f', 2) + " Wh");
-    ui->dataTable->item(46, 1)->setText(QString::number(d.values.watt_hours_charged, 'f', 2) + " Wh");
-    ui->dataTable->item(47, 1)->setText(QString::number(d.lat, 'f', 7) + " °");
-    ui->dataTable->item(48, 1)->setText(QString::number(d.lon, 'f', 7) + " °");
-    ui->dataTable->item(49, 1)->setText(QString::number(d.vVel * 3.6, 'f', 2) + " km/h");
-    ui->dataTable->item(50, 1)->setText(QString::number(d.vAcc, 'f', 2) + " m");
-    ui->dataTable->item(51, 1)->setText(QString::number(d.setupValues.num_vescs));
+    int ind = 0;
+    for (int i = 0;i < sample.size();i++) {
+        const auto &e = sample.at(i);
 
-    if (d.posTime >= 0 &&
-            (!ui->filterOutlierBox->isChecked() ||
-             d.hAcc < ui->filterhAccBox->value())) {
+        auto value = e->value;
+        if (e->isRelativeToFirst) {
+            value -= first[i]->value;
+
+            if (e->isTimeStamp && value < 0) {
+                value += 60 * 60 * 24;
+            }
+        }
+
+        if (e->valueString.isEmpty()) {
+            if (e->isTimeStamp) {
+                QTime t(0, 0, 0, 0);
+                t = t.addMSecs(value * 1000);
+                ui->dataTable->item(ind, 1)->setText(t.toString("hh:mm:ss.zzz"));
+            } else {
+                ui->dataTable->item(ind, 1)->setText(
+                            QString::number(value, 'f', e->precision) + " " + e->unit);
+            }
+        } else {
+            ui->dataTable->item(ind, 1)->setText(e->valueString);
+        }
+
+        ind++;
+    }
+
+    bool skip = false;
+    if (mInd_t_day_pos >= 0 && mInd_gnss_h_acc >= 0) {
+        int postime = int(sample[mInd_t_day_pos]->value * 1000.0);
+        double h_acc = sample[mInd_gnss_h_acc]->value;
+
+        skip = true;
+        if (postime >= 0 &&
+                (!ui->filterOutlierBox->isChecked() ||
+                 h_acc < ui->filterhAccBox->value())) {
+            skip = false;
+        }
+    }
+
+    if (mInd_gnss_lat < 0 || mInd_gnss_lon < 0) {
+        skip = true;
+    }
+
+    if (!skip) {
         double i_llh[3];
         double llh[3];
         double xyz[3];
+
         ui->map->getEnuRef(i_llh);
-        llh[0] = d.lat;
-        llh[1] = d.lon;
-        llh[2] = d.alt;
+        llh[0] = sample[mInd_gnss_lat]->value;
+        llh[1] = sample[mInd_gnss_lon]->value;
+        if (mInd_gnss_alt >= 0) {
+            llh[2] = sample[mInd_gnss_alt]->value;
+        } else {
+            llh[2] = 0.0;
+        }
         Utility::llhToEnu(i_llh, llh, xyz);
 
         LocPoint p;
@@ -1016,99 +811,37 @@ void PageLogAnalysis::updateDataAndPlot(double time)
         }
     }
 
-    m3dView->setRollPitchYaw(d.imuValues.roll * 180.0 / M_PI, d.imuValues.pitch * 180.0 / M_PI,
-                             mUseYawBox->isChecked() ? d.imuValues.yaw * 180.0 / M_PI : 0.0);
+    if (mInd_roll >= 0 && mInd_pitch >= 0 && mInd_yaw >= 0) {
+        m3dView->setRollPitchYaw(sample[mInd_roll]->value * 180.0 / M_PI, sample[mInd_pitch]->value * 180.0 / M_PI,
+                                 mUseYawBox->isChecked() ? sample[mInd_yaw]->value * 180.0 / M_PI : 0.0);
+    }
 }
 
-LOG_DATA PageLogAnalysis::getLogSample(int timeMs)
+QVector<LOG_ENTRY*> PageLogAnalysis::getLogSample(int timeMs)
 {
-    LOG_DATA d;
+    QVector<LOG_ENTRY*> d;
 
-    if (mLogDataTruncated.size() > 0) {
-        d = mLogDataTruncated.first();
-        int startTime = d.valTime;
+    if (!mLogTruncated.isEmpty()) {
+        d = mLogTruncated.first();
 
-        for (LOG_DATA dn: mLogDataTruncated) {
-            int timeMsNow = dn.valTime - startTime;
-            if (timeMsNow < 0) { // Handle midnight
-                timeMsNow += 60 * 60 * 24 * 1000;
-            }
+        if (mInd_t_day >= 0) {
+            int startTime = int(d[mInd_t_day]->value * 1000.0);
 
-            if (timeMsNow >= timeMs) {
-                d = dn;
-                break;
+            for (auto dn: mLogTruncated) {
+                int timeMsNow = (dn[mInd_t_day]->value * 1000) - startTime;
+                if (timeMsNow < 0) { // Handle midnight
+                    timeMsNow += 60 * 60 * 24 * 1000;
+                }
+
+                if (timeMsNow >= timeMs) {
+                    d = dn;
+                    break;
+                }
             }
         }
     }
 
     return d;
-}
-
-double PageLogAnalysis::getDistGnssSample(int timeMs)
-{
-    if (mLogDataTruncated.size() < 2) {
-        return 0.0;
-    }
-
-    double metersGnss = 0.0;
-    LOG_DATA prevSample;
-    bool prevSampleSet = false;
-
-    for (LOG_DATA d: mLogDataTruncated) {
-        int timeMsNow = d.valTime - mLogDataTruncated.first().valTime;
-        if (timeMsNow < 0) { // Handle midnight
-            timeMsNow += 60 * 60 * 24 * 1000;
-        }
-
-        if (d.posTime < 0) {
-            if (timeMsNow >= timeMs) {
-                break;
-            }
-            continue;
-        }
-
-        if (!prevSampleSet) {
-            prevSampleSet = true;
-            prevSample = d;
-            if (timeMsNow >= timeMs) {
-                break;
-            }
-            continue;
-        }
-
-        double i_llh[3];
-        double llh[3];
-        double xyz[3];
-        ui->map->getEnuRef(i_llh);
-
-        llh[0] = d.lat;
-        llh[1] = d.lon;
-        llh[2] = d.alt;
-        Utility::llhToEnu(i_llh, llh, xyz);
-
-        LocPoint p;
-        p.setXY(xyz[0], xyz[1]);
-        p.setRadius(10);
-
-        llh[0] = prevSample.lat;
-        llh[1] = prevSample.lon;
-        llh[2] = prevSample.alt;
-        Utility::llhToEnu(i_llh, llh, xyz);
-
-        LocPoint p2;
-        p2.setXY(xyz[0], xyz[1]);
-        p2.setRadius(10);
-
-        metersGnss += p.getDistanceTo(p2);
-
-        prevSample = d;
-
-        if (timeMsNow >= timeMs) {
-            break;
-        }
-    }
-
-    return metersGnss;
 }
 
 void PageLogAnalysis::updateTileServers()

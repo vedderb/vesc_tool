@@ -622,18 +622,27 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                     }
                 }
 
+                int indentLine = 0;
                 for (auto c: line) {
-                    if (c == m_indentEndStr) {
-                        indentNow--;
-                    }
-
-                    if (indentNow < 0) {
-                        indentNow = 0;
+                    if (c == m_indentStartStr) {
+                        indentNow++;
+                        indentLine++;
                     }
                 }
 
+                for (auto c: line) {
+                    if (c == m_indentEndStr) {
+                        indentNow--;
+                        indentLine--;
+                    }
+                }
+
+                if (indentLine < 0) {
+                    indentLine = 0;
+                }
+
                 if (indent) {
-                    for (int i = 0;i < indentNow;i++) {
+                    for (int i = 0;i < (indentNow - indentLine);i++) {
                         line.prepend(m_tabReplace);
                     }
                 }
@@ -651,12 +660,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                             break;
                         }
                         tc.setPosition(posStart++);
-                    }
-                }
-
-                for (auto c: line) {
-                    if (c == m_indentStartStr) {
-                        indentNow++;
                     }
                 }
             }

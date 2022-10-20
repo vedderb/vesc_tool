@@ -547,22 +547,22 @@ void PageLogAnalysis::updateGraphs()
     double verticalTime = -1.0;
     LocPoint p, p2;
 
-    int timeMs = 0;
+    double time = 0;
     for (const auto &d: mLogTruncated) {
         if (mInd_t_day >= 0) {
             if (startTime < 0) {
                 startTime = d[mInd_t_day];
             }
 
-            timeMs = int((d[mInd_t_day] - startTime) * 1000.0);
-            if (timeMs < 0) { // Handle midnight
-                timeMs += 60 * 60 * 24 * 1000;
+            time = d[mInd_t_day] - startTime;
+            if (time < 0) { // Handle midnight
+                time += 60 * 60 * 24;
             }
         } else {
-            timeMs += 1000.0;
+            time++;;
         }
 
-        xAxis.append(double(timeMs) / 1000.0);
+        xAxis.append(time);
         int rowInd = 0;
 
         for (int r = 0;r < rows.size();r++) {

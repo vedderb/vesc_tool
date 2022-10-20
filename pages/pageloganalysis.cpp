@@ -90,7 +90,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
             mPlayPosNow += double(mPlayTimer->interval()) / 1000.0;
 
             if (mInd_t_day >= 0) {
-                double time = (mLogTruncated.last()[mInd_t_day]->value - mLogTruncated.first()[mInd_t_day]->value);
+                double time = (mLogTruncated.last()[mInd_t_day] - mLogTruncated.first()[mInd_t_day]);
                 if (time < 0.0) { // Handle midnight
                     time += 60.0 * 60.0 * 24.0;
                 }
@@ -116,7 +116,6 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     mVerticalLine = new QCPCurve(ui->plot->xAxis, ui->plot->yAxis);
     mVerticalLine->removeFromLegend();
     mVerticalLine->setPen(QPen(Utility::getAppQColor("normalText")));
-    mVerticalLineMsLast = -1;
 
     auto updateMouse = [this](QMouseEvent *event) {
         if (event->modifiers() == Qt::ShiftModifier) {
@@ -135,7 +134,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     connect(ui->map, &MapWidget::infoPointClicked, [this](LocPoint info) {
         if (mInd_t_day >= 0 && !mLogTruncated.isEmpty()) {
-            updateDataAndPlot(info.getInfo().toDouble() - mLogTruncated.first()[mInd_t_day]->value);
+            updateDataAndPlot(info.getInfo().toDouble() - mLogTruncated.first()[mInd_t_day]);
         }
     });
 
@@ -232,12 +231,6 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
 void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
 {
     resetInds();
-
-    for (auto e: mLog) {
-        for (auto e2: e) {
-            delete e2;
-        }
-    }
 
     mLog.clear();
     mLogTruncated.clear();
@@ -346,59 +339,59 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
             prevSampleGnss = d;
         }
 
-        QVector<LOG_ENTRY*> e;
-        e.append(new LOG_ENTRY(d.setupValues.speed * 3.6));
-        e.append(new LOG_ENTRY(d.gVel * 3.6));
-        e.append(new LOG_ENTRY(double(d.valTime) / 1000.0));
-        e.append(new LOG_ENTRY(double(d.posTime) / 1000.0));
-        e.append(new LOG_ENTRY(double(d.valTime) / 1000.0));
-        e.append(new LOG_ENTRY(d.setupValues.tachometer));
-        e.append(new LOG_ENTRY(d.setupValues.tachometer));
-        e.append(new LOG_ENTRY(metersGnss));
-        e.append(new LOG_ENTRY(d.setupValues.current_motor));
-        e.append(new LOG_ENTRY(d.setupValues.current_in));
-        e.append(new LOG_ENTRY(d.setupValues.current_in * d.values.v_in));
-        e.append(new LOG_ENTRY(d.values.rpm / 1000, 0));
-        e.append(new LOG_ENTRY(d.values.duty_now * 100));
-        e.append(new LOG_ENTRY(d.values.fault_code, Commands::faultToStr(mc_fault_code(d.values.fault_code)).mid(11)));
-        e.append(new LOG_ENTRY(d.values.v_in));
-        e.append(new LOG_ENTRY(d.setupValues.battery_level * 100.0));
-        e.append(new LOG_ENTRY(d.values.temp_mos));
-        e.append(new LOG_ENTRY(d.values.temp_motor));
-        e.append(new LOG_ENTRY(d.setupValues.amp_hours));
-        e.append(new LOG_ENTRY(d.setupValues.amp_hours_charged));
-        e.append(new LOG_ENTRY(d.setupValues.watt_hours));
-        e.append(new LOG_ENTRY(d.setupValues.watt_hours_charged));
-        e.append(new LOG_ENTRY(d.values.id));
-        e.append(new LOG_ENTRY(d.values.iq));
-        e.append(new LOG_ENTRY(d.values.vd));
-        e.append(new LOG_ENTRY(d.values.vq));
-        e.append(new LOG_ENTRY(d.values.temp_mos_1));
-        e.append(new LOG_ENTRY(d.values.temp_mos_2));
-        e.append(new LOG_ENTRY(d.values.temp_mos_3));
-        e.append(new LOG_ENTRY(d.values.position));
-        e.append(new LOG_ENTRY(d.imuValues.roll));
-        e.append(new LOG_ENTRY(d.imuValues.pitch));
-        e.append(new LOG_ENTRY(d.imuValues.yaw));
-        e.append(new LOG_ENTRY(d.imuValues.accX));
-        e.append(new LOG_ENTRY(d.imuValues.accY));
-        e.append(new LOG_ENTRY(d.imuValues.accZ));
-        e.append(new LOG_ENTRY(d.imuValues.gyroX));
-        e.append(new LOG_ENTRY(d.imuValues.gyroY));
-        e.append(new LOG_ENTRY(d.imuValues.gyroZ));
-        e.append(new LOG_ENTRY(d.values.current_motor));
-        e.append(new LOG_ENTRY(d.values.current_in));
-        e.append(new LOG_ENTRY(d.values.amp_hours));
-        e.append(new LOG_ENTRY(d.values.amp_hours_charged));
-        e.append(new LOG_ENTRY(d.values.watt_hours));
-        e.append(new LOG_ENTRY(d.values.watt_hours_charged));
-        e.append(new LOG_ENTRY(d.lat));
-        e.append(new LOG_ENTRY(d.lon));
-        e.append(new LOG_ENTRY(d.alt));
-        e.append(new LOG_ENTRY(d.vVel * 3.6));
-        e.append(new LOG_ENTRY(d.hAcc));
-        e.append(new LOG_ENTRY(d.vAcc));
-        e.append(new LOG_ENTRY(d.setupValues.num_vescs));
+        QVector<double> e;
+        e.append(d.setupValues.speed * 3.6);
+        e.append(d.gVel * 3.6);
+        e.append(double(d.valTime) / 1000.0);
+        e.append(double(d.posTime) / 1000.0);
+        e.append(double(d.valTime) / 1000.0);
+        e.append(d.setupValues.tachometer);
+        e.append(d.setupValues.tachometer);
+        e.append(metersGnss);
+        e.append(d.setupValues.current_motor);
+        e.append(d.setupValues.current_in);
+        e.append(d.setupValues.current_in * d.values.v_in);
+        e.append(d.values.rpm / 1000);
+        e.append(d.values.duty_now * 100);
+        e.append(d.values.fault_code);
+        e.append(d.values.v_in);
+        e.append(d.setupValues.battery_level * 100.0);
+        e.append(d.values.temp_mos);
+        e.append(d.values.temp_motor);
+        e.append(d.setupValues.amp_hours);
+        e.append(d.setupValues.amp_hours_charged);
+        e.append(d.setupValues.watt_hours);
+        e.append(d.setupValues.watt_hours_charged);
+        e.append(d.values.id);
+        e.append(d.values.iq);
+        e.append(d.values.vd);
+        e.append(d.values.vq);
+        e.append(d.values.temp_mos_1);
+        e.append(d.values.temp_mos_2);
+        e.append(d.values.temp_mos_3);
+        e.append(d.values.position);
+        e.append(d.imuValues.roll);
+        e.append(d.imuValues.pitch);
+        e.append(d.imuValues.yaw);
+        e.append(d.imuValues.accX);
+        e.append(d.imuValues.accY);
+        e.append(d.imuValues.accZ);
+        e.append(d.imuValues.gyroX);
+        e.append(d.imuValues.gyroY);
+        e.append(d.imuValues.gyroZ);
+        e.append(d.values.current_motor);
+        e.append(d.values.current_in);
+        e.append(d.values.amp_hours);
+        e.append(d.values.amp_hours_charged);
+        e.append(d.values.watt_hours);
+        e.append(d.values.watt_hours_charged);
+        e.append(d.lat);
+        e.append(d.lon);
+        e.append(d.alt);
+        e.append(d.vVel * 3.6);
+        e.append(d.hAcc);
+        e.append(d.vAcc);
+        e.append(d.setupValues.num_vescs);
 
         mLog.append(e);
     }
@@ -410,30 +403,6 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
     if (mLog.size() == 0) {
         return;
     }
-
-    auto addDataItem = [this](QString name, bool hasScale = true,
-            double scaleStep = 0.1, double scaleMax = 99.99) {
-        ui->dataTable->setRowCount(ui->dataTable->rowCount() + 1);
-        auto item1 = new QTableWidgetItem(name);
-        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 0, item1);
-        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 1, new QTableWidgetItem(""));
-        if (hasScale) {
-            QDoubleSpinBox *sb = new QDoubleSpinBox;
-            sb->setSingleStep(scaleStep);
-            sb->setValue(1.0);
-            sb->setMaximum(scaleMax);
-            // Prevent mouse wheel focus to avoid changing the selection
-            sb->setFocusPolicy(Qt::StrongFocus);
-            ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, 2, sb);
-            connect(sb, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-                    [this](double value) {
-                (void)value;
-                updateGraphs();
-            });
-        } else {
-            ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 2, new QTableWidgetItem("Not Plottable"));
-        }
-    };
 
     for (auto e: mLogHeader) {
         addDataItem(e.name, e.hasScale, e.scaleStep, e.scaleMax);
@@ -515,8 +484,8 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
         bool skip = false;
 
         if (mInd_t_day_pos >= 0 && mInd_gnss_h_acc >= 0) {
-            int postime = int(d[mInd_t_day_pos]->value * 1000.0);
-            double h_acc = d[mInd_gnss_h_acc]->value;
+            int postime = int(d[mInd_t_day_pos] * 1000.0);
+            double h_acc = d[mInd_gnss_h_acc];
 
             skip = true;
             if (postime >= 0 &&
@@ -536,10 +505,10 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
             double llh[3];
             double xyz[3];
 
-            llh[0] = d[mInd_gnss_lat]->value;
-            llh[1] = d[mInd_gnss_lon]->value;
+            llh[0] = d[mInd_gnss_lat];
+            llh[1] = d[mInd_gnss_lon];
             if (mInd_gnss_alt >= 0) {
-                llh[2] = d[mInd_gnss_alt]->value;
+                llh[2] = d[mInd_gnss_alt];
             } else {
                 llh[2] = 0.0;
             }
@@ -550,7 +519,7 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
             p.setRadius(5);
 
             if (mInd_t_day >= 0) {
-                p.setInfo(QString("%1").arg(d[mInd_t_day]->value));
+                p.setInfo(QString("%1").arg(d[mInd_t_day]));
             }
 
             ui->map->addInfoPoint(p, false);
@@ -582,10 +551,10 @@ void PageLogAnalysis::updateGraphs()
     for (const auto &d: mLogTruncated) {
         if (mInd_t_day >= 0) {
             if (startTime < 0) {
-                startTime = d[mInd_t_day]->value;
+                startTime = d[mInd_t_day];
             }
 
-            timeMs = int((d[mInd_t_day]->value - startTime) * 1000.0);
+            timeMs = int((d[mInd_t_day] - startTime) * 1000.0);
             if (timeMs < 0) { // Handle midnight
                 timeMs += 60 * 60 * 24 * 1000;
             }
@@ -609,7 +578,7 @@ void PageLogAnalysis::updateGraphs()
 
             if (header.hasScale) {
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
-                yAxes[rowInd].append(entry->value * rowScale);
+                yAxes[rowInd].append(entry * rowScale);
                 names.append(QString("%1 (%2 * %3)").arg(header.name).
                              arg(header.unit).arg(rowScale));
                 rowInd++;
@@ -677,7 +646,7 @@ void PageLogAnalysis::updateStats()
     }
 
     if (mInd_t_day >= 0) {
-        timeTotMs = (endSample[mInd_t_day]->value - startSample[mInd_t_day]->value) * 1000.0;
+        timeTotMs = (endSample[mInd_t_day] - startSample[mInd_t_day]) * 1000.0;
         if (timeTotMs < 0) { // Handle midnight
             timeTotMs += 60 * 60 * 24 * 1000;
         }
@@ -692,31 +661,31 @@ void PageLogAnalysis::updateStats()
     double ahCharge = 0.0;
 
     if (mInd_trip_vesc >= 0) {
-        meters = endSample[mInd_trip_vesc]->value - startSample[mInd_trip_vesc]->value;
+        meters = endSample[mInd_trip_vesc] - startSample[mInd_trip_vesc];
     }
 
     if (mInd_trip_vesc_abs >= 0) {
-        metersAbs = endSample[mInd_trip_vesc_abs]->value - startSample[mInd_trip_vesc_abs]->value;
+        metersAbs = endSample[mInd_trip_vesc_abs] - startSample[mInd_trip_vesc_abs];
     }
 
     if (mInd_trip_gnss >= 0) {
-        metersGnss = endSample[mInd_trip_gnss]->value - startSample[mInd_trip_gnss]->value;
+        metersGnss = endSample[mInd_trip_gnss] - startSample[mInd_trip_gnss];
     }
 
     if (mInd_cnt_wh >= 0) {
-        wh = endSample[mInd_cnt_wh]->value - startSample[mInd_cnt_wh]->value;
+        wh = endSample[mInd_cnt_wh] - startSample[mInd_cnt_wh];
     }
 
     if (mInd_cnt_wh_chg >= 0) {
-        whCharge = endSample[mInd_cnt_wh_chg]->value - startSample[mInd_cnt_wh_chg]->value;
+        whCharge = endSample[mInd_cnt_wh_chg] - startSample[mInd_cnt_wh_chg];
     }
 
     if (mInd_cnt_ah >= 0) {
-        ah = endSample[mInd_cnt_ah]->value - startSample[mInd_cnt_ah]->value;
+        ah = endSample[mInd_cnt_ah] - startSample[mInd_cnt_ah];
     }
 
     if (mInd_cnt_ah_chg >= 0) {
-        ahCharge = endSample[mInd_cnt_ah_chg]->value - startSample[mInd_cnt_ah_chg]->value;
+        ahCharge = endSample[mInd_cnt_ah_chg] - startSample[mInd_cnt_ah_chg];
     }
 
     ui->statTable->setRowCount(0);
@@ -782,28 +751,23 @@ void PageLogAnalysis::updateDataAndPlot(double time)
     mVerticalLine->setVisible(true);
     ui->plot->replotWhenVisible();
 
-    auto sample = getLogSample(int(time * 1000));
+    auto sample = getLogSample(time);
     auto first = mLogTruncated.first();
-
-    if (mInd_t_day >= 0) {
-        mVerticalLineMsLast = int(sample[mInd_t_day]->value * 1000.0);
-    }
 
     int ind = 0;
     for (int i = 0;i < sample.size();i++) {
-        const auto &e = sample.at(i);
+        auto value = sample.at(i);
         const auto &header = mLogHeader[i];
 
-        auto value = e->value;
         if (header.isRelativeToFirst) {
-            value -= first[i]->value;
+            value -= first[i];
 
             if (header.isTimeStamp && value < 0) {
                 value += 60 * 60 * 24;
             }
         }
 
-        if (e->valueString.isEmpty()) {
+        if (ind != mInd_fault) {
             if (header.isTimeStamp) {
                 QTime t(0, 0, 0, 0);
                 t = t.addMSecs(value * 1000);
@@ -813,7 +777,7 @@ void PageLogAnalysis::updateDataAndPlot(double time)
                             QString::number(value, 'f', header.precision) + " " + header.unit);
             }
         } else {
-            ui->dataTable->item(ind, 1)->setText(e->valueString);
+            ui->dataTable->item(ind, 1)->setText(Commands::faultToStr(mc_fault_code(round(value))).mid(11));
         }
 
         ind++;
@@ -821,8 +785,8 @@ void PageLogAnalysis::updateDataAndPlot(double time)
 
     bool skip = false;
     if (mInd_t_day_pos >= 0 && mInd_gnss_h_acc >= 0) {
-        int postime = int(sample[mInd_t_day_pos]->value * 1000.0);
-        double h_acc = sample[mInd_gnss_h_acc]->value;
+        int postime = int(sample[mInd_t_day_pos] * 1000.0);
+        double h_acc = sample[mInd_gnss_h_acc];
 
         skip = true;
         if (postime >= 0 &&
@@ -842,10 +806,10 @@ void PageLogAnalysis::updateDataAndPlot(double time)
         double xyz[3];
 
         ui->map->getEnuRef(i_llh);
-        llh[0] = sample[mInd_gnss_lat]->value;
-        llh[1] = sample[mInd_gnss_lon]->value;
+        llh[0] = sample[mInd_gnss_lat];
+        llh[1] = sample[mInd_gnss_lon];
         if (mInd_gnss_alt >= 0) {
-            llh[2] = sample[mInd_gnss_alt]->value;
+            llh[2] = sample[mInd_gnss_alt];
         } else {
             llh[2] = 0.0;
         }
@@ -865,28 +829,28 @@ void PageLogAnalysis::updateDataAndPlot(double time)
     }
 
     if (mInd_roll >= 0 && mInd_pitch >= 0 && mInd_yaw >= 0) {
-        m3dView->setRollPitchYaw(sample[mInd_roll]->value * 180.0 / M_PI, sample[mInd_pitch]->value * 180.0 / M_PI,
-                                 mUseYawBox->isChecked() ? sample[mInd_yaw]->value * 180.0 / M_PI : 0.0);
+        m3dView->setRollPitchYaw(sample[mInd_roll] * 180.0 / M_PI, sample[mInd_pitch] * 180.0 / M_PI,
+                                 mUseYawBox->isChecked() ? sample[mInd_yaw] * 180.0 / M_PI : 0.0);
     }
 }
 
-QVector<LOG_ENTRY*> PageLogAnalysis::getLogSample(int timeMs)
+QVector<double> PageLogAnalysis::getLogSample(double time)
 {
-    QVector<LOG_ENTRY*> d;
+    QVector<double> d;
 
     if (!mLogTruncated.isEmpty()) {
         d = mLogTruncated.first();
 
         if (mInd_t_day >= 0) {
-            int startTime = int(d[mInd_t_day]->value * 1000.0);
+            int startTime = d[mInd_t_day];
 
             for (auto dn: mLogTruncated) {
-                int timeMsNow = (dn[mInd_t_day]->value * 1000) - startTime;
-                if (timeMsNow < 0) { // Handle midnight
-                    timeMsNow += 60 * 60 * 24 * 1000;
+                int timeNow = dn[mInd_t_day] - startTime;
+                if (timeNow < 0) { // Handle midnight
+                    timeNow += 60 * 60 * 24;
                 }
 
-                if (timeMsNow >= timeMs) {
+                if (timeNow >= time) {
                     d = dn;
                     break;
                 }
@@ -935,6 +899,30 @@ void PageLogAnalysis::logListRefresh()
                 }
             }
         }
+    }
+}
+
+void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep, double scaleMax)
+{
+    ui->dataTable->setRowCount(ui->dataTable->rowCount() + 1);
+    auto item1 = new QTableWidgetItem(name);
+    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 0, item1);
+    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 1, new QTableWidgetItem(""));
+    if (hasScale) {
+        QDoubleSpinBox *sb = new QDoubleSpinBox;
+        sb->setSingleStep(scaleStep);
+        sb->setValue(1.0);
+        sb->setMaximum(scaleMax);
+        // Prevent mouse wheel focus to avoid changing the selection
+        sb->setFocusPolicy(Qt::StrongFocus);
+        ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, 2, sb);
+        connect(sb, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                [this](double value) {
+            (void)value;
+            updateGraphs();
+        });
+    } else {
+        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 2, new QTableWidgetItem("Not Plottable"));
     }
 }
 

@@ -577,22 +577,6 @@ public:
 
 Q_DECLARE_METATYPE(LOG_HEADER)
 
-// Lightweight log entry
-struct LOG_ENTRY {
-public:
-    LOG_ENTRY() {
-        value = 0.0;
-    }
-
-    LOG_ENTRY(double value, QString valueString = "") {
-        this->value = value;
-        this->valueString = valueString;
-    }
-
-    double value;
-    QString valueString;
-};
-
 struct MCCONF_TEMP {
     Q_GADGET
 

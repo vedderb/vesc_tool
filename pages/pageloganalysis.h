@@ -68,7 +68,6 @@ private:
     Ui::PageLogAnalysis *ui;
     VescInterface *mVesc;
     QCPCurve *mVerticalLine;
-    int mVerticalLineMsLast;
     Vesc3DView *m3dView;
     QCheckBox *mUseYawBox;
     QTimer *mPlayTimer;
@@ -76,9 +75,12 @@ private:
     QString mVescLastPath;
 
     QVector<LOG_HEADER> mLogHeader;
-    QVector<QVector<LOG_ENTRY*> > mLog;
-    QVector<QVector<LOG_ENTRY*> > mLogTruncated;
+    QVector<QVector<double> > mLog;
+    QVector<QVector<double> > mLogTruncated;
 
+    // Lightweight pre-calculated offsets in the log. These
+    // need to be looked up a lot and finding them in the
+    // header each time slows down the responsiveness.
     int mInd_t_day;
     int mInd_t_day_pos;
     int mInd_gnss_h_acc;
@@ -95,6 +97,7 @@ private:
     int mInd_roll;
     int mInd_pitch;
     int mInd_yaw;
+    int mInd_fault;
 
     void resetInds() {
         mInd_t_day = -1;
@@ -113,6 +116,7 @@ private:
         mInd_roll = -1;
         mInd_pitch = -1;
         mInd_yaw = -1;
+        mInd_fault = -1;
     }
 
     void updateInds() {
@@ -135,6 +139,7 @@ private:
                 else if (e.key == "roll") mInd_roll = i;
                 else if (e.key == "pitch") mInd_pitch = i;
                 else if (e.key == "yaw") mInd_yaw = i;
+                else if (e.key == "fault") mInd_fault = i;
             }
         }
     }
@@ -143,9 +148,11 @@ private:
     void updateGraphs();
     void updateStats();
     void updateDataAndPlot(double time);
-    QVector<LOG_ENTRY *> getLogSample(int timeMs);
+    QVector<double> getLogSample(double time);
     void updateTileServers();
     void logListRefresh();
+    void addDataItem(QString name, bool hasScale = true,
+                     double scaleStep = 0.1, double scaleMax = 99.99);
 
 };
 

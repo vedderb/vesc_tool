@@ -241,6 +241,60 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
 
     mLog.clear();
     mLogTruncated.clear();
+    mLogHeader.clear();
+
+    mLogHeader.append(LOG_HEADER("kmh_vesc", "Speed VESC", "km/h"));
+    mLogHeader.append(LOG_HEADER("kmh_gnss", "Speed GNSS", "km/h"));
+    mLogHeader.append(LOG_HEADER("t_day", "Time", "s", 0, "", false, true, false));
+    mLogHeader.append(LOG_HEADER("t_day_pos", "Time GNSS", "", 0, "", false, true, false));
+    mLogHeader.append(LOG_HEADER("t_trip", "Time of trip", "", 0, "", true, true, false));
+    mLogHeader.append(LOG_HEADER("trip_vesc", "Trip VESC", "m", 3, "", true));
+    mLogHeader.append(LOG_HEADER("trip_vesc_abs", "Trip VESC ABS", "m", 3, "", true));
+    mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, "", false));
+    mLogHeader.append(LOG_HEADER("setup_curr_motor", "Current Motors", "A"));
+    mLogHeader.append(LOG_HEADER("setup_curr_battery", "Current Battery", "A"));
+    mLogHeader.append(LOG_HEADER("setup_power", "Power", "W", 0));
+    mLogHeader.append(LOG_HEADER("erpm", "ERPM", "1/1000", 0));
+    mLogHeader.append(LOG_HEADER("duty", "Duty", "%", 1));
+    mLogHeader.append(LOG_HEADER("fault", "Fault Code", "", 0));
+    mLogHeader.append(LOG_HEADER("v_in", "Input Voltage", "V"));
+    mLogHeader.append(LOG_HEADER("soc", "Battery Level", "%", 1));
+    mLogHeader.append(LOG_HEADER("t_mosfet", "Temp MOSFET", "°C", 1));
+    mLogHeader.append(LOG_HEADER("t_motor", "Temp Motor", "°C", 1));
+    mLogHeader.append(LOG_HEADER("cnt_ah", "Ah Used", "Ah", 3));
+    mLogHeader.append(LOG_HEADER("cnt_ah_chg", "Ah Charged", "Ah", 3));
+    mLogHeader.append(LOG_HEADER("cnt_wh", "Wh Used", "Wh", 3));
+    mLogHeader.append(LOG_HEADER("cnt_wh_chg", "Wh Charged", "Wh", 3));
+    mLogHeader.append(LOG_HEADER("id", "id", "A"));
+    mLogHeader.append(LOG_HEADER("iq", "iq", "A"));
+    mLogHeader.append(LOG_HEADER("vd", "vd", "V"));
+    mLogHeader.append(LOG_HEADER("vq", "vq", "V"));
+    mLogHeader.append(LOG_HEADER("t_mosfet_1", "Temp MOSFET 1", "°C", 1));
+    mLogHeader.append(LOG_HEADER("t_mosfet_2", "Temp MOSFET 2", "°C", 1));
+    mLogHeader.append(LOG_HEADER("t_mosfet_3", "Temp MOSFET 3", "°C", 1));
+    mLogHeader.append(LOG_HEADER("position", "Motor Pos", "°", 1));
+    mLogHeader.append(LOG_HEADER("roll", "Roll", "°", 1));
+    mLogHeader.append(LOG_HEADER("pitch", "Pitch", "°", 1));
+    mLogHeader.append(LOG_HEADER("yaw", "Yaw", "°", 1));
+    mLogHeader.append(LOG_HEADER("acc_x", "Accel X", "G"));
+    mLogHeader.append(LOG_HEADER("acc_y", "Accel Y", "G"));
+    mLogHeader.append(LOG_HEADER("acc_z", "Accel Z", "G"));
+    mLogHeader.append(LOG_HEADER("gyro_x", "Gyro X", "°/s", 1));
+    mLogHeader.append(LOG_HEADER("gyro_y", "Gyro Y", "°/s", 1));
+    mLogHeader.append(LOG_HEADER("gyro_z", "Gyro Z", "°/s", 1));
+    mLogHeader.append(LOG_HEADER("v1_curr_motor", "V1 Current", "A"));
+    mLogHeader.append(LOG_HEADER("v1_curr_battery", "V1 Current Battery", "A"));
+    mLogHeader.append(LOG_HEADER("v1_cnt_ah", "V1 Ah Used", "Ah", 3));
+    mLogHeader.append(LOG_HEADER("v1_cnt_ah_chg", "V1 Ah Charged", "Ah", 3));
+    mLogHeader.append(LOG_HEADER("v1_cnt_wh", "V1 Wh Used", "Wh", 3));
+    mLogHeader.append(LOG_HEADER("v1_cnt_wh_chg", "V1 Wh Charged", "Wh", 3));
+    mLogHeader.append(LOG_HEADER("gnss_lat", "Latitude", "°", 6));
+    mLogHeader.append(LOG_HEADER("gnss_lon", "Longitude", "°", 6));
+    mLogHeader.append(LOG_HEADER("gnss_alt", "Altitude", "m"));
+    mLogHeader.append(LOG_HEADER("gnss_v_vel", "V. Speed GNSS", "km/h"));
+    mLogHeader.append(LOG_HEADER("gnss_h_acc", "H. Accuracy GNSS", "m"));
+    mLogHeader.append(LOG_HEADER("gnss_v_acc", "V. Accuracy GNSS", "m"));
+    mLogHeader.append(LOG_HEADER("num_vesc", "VESC num", "", 0));
 
     double i_llh[3];
     for (auto d: log) {
@@ -292,62 +346,59 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
             prevSampleGnss = d;
         }
 
-        // Todo: There is a lot of duplication here, which leads to high memory usage for large logs. A log with
-        // 30000 samples (10 MB file size) takes around 500 MB RAM to load.
         QVector<LOG_ENTRY*> e;
-        e.append(new LOG_ENTRY("kmh_vesc", "Speed VESC", "km/h", d.setupValues.speed * 3.6));
-        e.append(new LOG_ENTRY("kmh_gnss", "Speed GNSS", "km/h", d.gVel * 3.6));
-        e.append(new LOG_ENTRY("t_day", "Time", "s", double(d.valTime) / 1000.0, 0, "", false, true, false));
-        e.append(new LOG_ENTRY("t_day_pos", "Time GNSS", "", double(d.posTime) / 1000.0, 0, "", false, true, false));
-        e.append(new LOG_ENTRY("t_trip", "Time of trip", "", double(d.valTime) / 1000.0, 0, "", true, true, false));
-        e.append(new LOG_ENTRY("trip_vesc", "Trip VESC", "m", d.setupValues.tachometer, 3, "", true));
-        e.append(new LOG_ENTRY("trip_vesc_abs", "Trip VESC ABS", "m", d.setupValues.tachometer, 3, "", true));
-        e.append(new LOG_ENTRY("trip_gnss", "Trip GNSS", "m", metersGnss, 3, "", false));
-        e.append(new LOG_ENTRY("setup_curr_motor", "Current Motors", "A", d.setupValues.current_motor));
-        e.append(new LOG_ENTRY("setup_curr_battery", "Current Battery", "A", d.setupValues.current_in));
-        e.append(new LOG_ENTRY("setup_power", "Power", "W", d.setupValues.current_in * d.values.v_in, 0));
-        e.append(new LOG_ENTRY("erpm", "ERPM", "1/1000", d.values.rpm / 1000, 0));
-        e.append(new LOG_ENTRY("duty", "Duty", "%", d.values.duty_now * 100, 1));
-        e.append(new LOG_ENTRY("fault", "Fault Code", "", d.values.fault_code,
-                           0, Commands::faultToStr(mc_fault_code(d.values.fault_code)).mid(11)));
-        e.append(new LOG_ENTRY("v_in", "Input Voltage", "V", d.values.v_in));
-        e.append(new LOG_ENTRY("soc", "Battery Level", "%", d.setupValues.battery_level * 100.0, 1));
-        e.append(new LOG_ENTRY("t_mosfet", "Temp MOSFET", "°C", d.values.temp_mos, 1));
-        e.append(new LOG_ENTRY("t_motor", "Temp Motor", "°C", d.values.temp_motor, 1));
-        e.append(new LOG_ENTRY("cnt_ah", "Ah Used", "Ah", d.setupValues.amp_hours, 3));
-        e.append(new LOG_ENTRY("cnt_ah_chg", "Ah Charged", "Ah", d.setupValues.amp_hours_charged, 3));
-        e.append(new LOG_ENTRY("cnt_wh", "Wh Used", "Wh", d.setupValues.watt_hours, 3));
-        e.append(new LOG_ENTRY("cnt_wh_chg", "Wh Charged", "Wh", d.setupValues.watt_hours_charged, 3));
-        e.append(new LOG_ENTRY("id", "id", "A", d.values.id));
-        e.append(new LOG_ENTRY("iq", "iq", "A", d.values.iq));
-        e.append(new LOG_ENTRY("vd", "vd", "V", d.values.vd));
-        e.append(new LOG_ENTRY("vq", "vq", "V", d.values.vq));
-        e.append(new LOG_ENTRY("t_mosfet_1", "Temp MOSFET 1", "°C", d.values.temp_mos_1, 1));
-        e.append(new LOG_ENTRY("t_mosfet_2", "Temp MOSFET 2", "°C", d.values.temp_mos_2, 1));
-        e.append(new LOG_ENTRY("t_mosfet_3", "Temp MOSFET 3", "°C", d.values.temp_mos_3, 1));
-        e.append(new LOG_ENTRY("position", "Motor Pos", "°", d.values.position, 1));
-        e.append(new LOG_ENTRY("roll", "Roll", "°", d.imuValues.roll, 1));
-        e.append(new LOG_ENTRY("pitch", "Pitch", "°", d.imuValues.pitch, 1));
-        e.append(new LOG_ENTRY("yaw", "Yaw", "°", d.imuValues.yaw, 1));
-        e.append(new LOG_ENTRY("acc_x", "Accel X", "G", d.imuValues.accX));
-        e.append(new LOG_ENTRY("acc_y", "Accel Y", "G", d.imuValues.accY));
-        e.append(new LOG_ENTRY("acc_z", "Accel Z", "G", d.imuValues.accZ));
-        e.append(new LOG_ENTRY("gyro_x", "Gyro X", "°/s", d.imuValues.gyroX, 1));
-        e.append(new LOG_ENTRY("gyro_y", "Gyro Y", "°/s", d.imuValues.gyroY, 1));
-        e.append(new LOG_ENTRY("gyro_z", "Gyro Z", "°/s", d.imuValues.gyroZ, 1));
-        e.append(new LOG_ENTRY("v1_curr_motor", "V1 Current", "A", d.values.current_motor));
-        e.append(new LOG_ENTRY("v1_curr_battery", "V1 Current Battery", "A", d.values.current_in));
-        e.append(new LOG_ENTRY("v1_cnt_ah", "V1 Ah Used", "Ah", d.values.amp_hours, 3));
-        e.append(new LOG_ENTRY("v1_cnt_ah_chg", "V1 Ah Charged", "Ah", d.values.amp_hours_charged, 3));
-        e.append(new LOG_ENTRY("v1_cnt_wh", "V1 Wh Used", "Wh", d.values.watt_hours, 3));
-        e.append(new LOG_ENTRY("v1_cnt_wh_chg", "V1 Wh Charged", "Wh", d.values.watt_hours_charged, 3));
-        e.append(new LOG_ENTRY("gnss_lat", "Latitude", "°", d.lat, 6));
-        e.append(new LOG_ENTRY("gnss_lon", "Longitude", "°", d.lon, 6));
-        e.append(new LOG_ENTRY("gnss_alt", "Altitude", "m", d.alt));
-        e.append(new LOG_ENTRY("gnss_v_vel", "V. Speed GNSS", "km/h", d.vVel * 3.6));
-        e.append(new LOG_ENTRY("gnss_h_acc", "H. Accuracy GNSS", "m", d.hAcc));
-        e.append(new LOG_ENTRY("gnss_v_acc", "V. Accuracy GNSS", "m", d.vAcc));
-        e.append(new LOG_ENTRY("num_vesc", "VESC num", "", d.setupValues.num_vescs, 0));
+        e.append(new LOG_ENTRY(d.setupValues.speed * 3.6));
+        e.append(new LOG_ENTRY(d.gVel * 3.6));
+        e.append(new LOG_ENTRY(double(d.valTime) / 1000.0));
+        e.append(new LOG_ENTRY(double(d.posTime) / 1000.0));
+        e.append(new LOG_ENTRY(double(d.valTime) / 1000.0));
+        e.append(new LOG_ENTRY(d.setupValues.tachometer));
+        e.append(new LOG_ENTRY(d.setupValues.tachometer));
+        e.append(new LOG_ENTRY(metersGnss));
+        e.append(new LOG_ENTRY(d.setupValues.current_motor));
+        e.append(new LOG_ENTRY(d.setupValues.current_in));
+        e.append(new LOG_ENTRY(d.setupValues.current_in * d.values.v_in));
+        e.append(new LOG_ENTRY(d.values.rpm / 1000, 0));
+        e.append(new LOG_ENTRY(d.values.duty_now * 100));
+        e.append(new LOG_ENTRY(d.values.fault_code, Commands::faultToStr(mc_fault_code(d.values.fault_code)).mid(11)));
+        e.append(new LOG_ENTRY(d.values.v_in));
+        e.append(new LOG_ENTRY(d.setupValues.battery_level * 100.0));
+        e.append(new LOG_ENTRY(d.values.temp_mos));
+        e.append(new LOG_ENTRY(d.values.temp_motor));
+        e.append(new LOG_ENTRY(d.setupValues.amp_hours));
+        e.append(new LOG_ENTRY(d.setupValues.amp_hours_charged));
+        e.append(new LOG_ENTRY(d.setupValues.watt_hours));
+        e.append(new LOG_ENTRY(d.setupValues.watt_hours_charged));
+        e.append(new LOG_ENTRY(d.values.id));
+        e.append(new LOG_ENTRY(d.values.iq));
+        e.append(new LOG_ENTRY(d.values.vd));
+        e.append(new LOG_ENTRY(d.values.vq));
+        e.append(new LOG_ENTRY(d.values.temp_mos_1));
+        e.append(new LOG_ENTRY(d.values.temp_mos_2));
+        e.append(new LOG_ENTRY(d.values.temp_mos_3));
+        e.append(new LOG_ENTRY(d.values.position));
+        e.append(new LOG_ENTRY(d.imuValues.roll));
+        e.append(new LOG_ENTRY(d.imuValues.pitch));
+        e.append(new LOG_ENTRY(d.imuValues.yaw));
+        e.append(new LOG_ENTRY(d.imuValues.accX));
+        e.append(new LOG_ENTRY(d.imuValues.accY));
+        e.append(new LOG_ENTRY(d.imuValues.accZ));
+        e.append(new LOG_ENTRY(d.imuValues.gyroX));
+        e.append(new LOG_ENTRY(d.imuValues.gyroY));
+        e.append(new LOG_ENTRY(d.imuValues.gyroZ));
+        e.append(new LOG_ENTRY(d.values.current_motor));
+        e.append(new LOG_ENTRY(d.values.current_in));
+        e.append(new LOG_ENTRY(d.values.amp_hours));
+        e.append(new LOG_ENTRY(d.values.amp_hours_charged));
+        e.append(new LOG_ENTRY(d.values.watt_hours));
+        e.append(new LOG_ENTRY(d.values.watt_hours_charged));
+        e.append(new LOG_ENTRY(d.lat));
+        e.append(new LOG_ENTRY(d.lon));
+        e.append(new LOG_ENTRY(d.alt));
+        e.append(new LOG_ENTRY(d.vVel * 3.6));
+        e.append(new LOG_ENTRY(d.hAcc));
+        e.append(new LOG_ENTRY(d.vAcc));
+        e.append(new LOG_ENTRY(d.setupValues.num_vescs));
 
         mLog.append(e);
     }
@@ -384,8 +435,8 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
         }
     };
 
-    for (auto e: mLog.first()) {
-        addDataItem(e->name, e->hasScale, e->scaleStep, e->scaleMax);
+    for (auto e: mLogHeader) {
+        addDataItem(e.name, e.hasScale, e.scaleStep, e.scaleMax);
     }
 
     truncateDataAndPlot();
@@ -554,12 +605,13 @@ void PageLogAnalysis::updateGraphs()
             }
 
             auto entry = d[row];
+            const auto &header = mLogHeader[row];
 
-            if (entry->hasScale) {
+            if (header.hasScale) {
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(entry->value * rowScale);
-                names.append(QString("%1 (%2 * %3)").arg(entry->name).
-                             arg(entry->unit).arg(rowScale));
+                names.append(QString("%1 (%2 * %3)").arg(header.name).
+                             arg(header.unit).arg(rowScale));
                 rowInd++;
             }
         }
@@ -740,24 +792,25 @@ void PageLogAnalysis::updateDataAndPlot(double time)
     int ind = 0;
     for (int i = 0;i < sample.size();i++) {
         const auto &e = sample.at(i);
+        const auto &header = mLogHeader[i];
 
         auto value = e->value;
-        if (e->isRelativeToFirst) {
+        if (header.isRelativeToFirst) {
             value -= first[i]->value;
 
-            if (e->isTimeStamp && value < 0) {
+            if (header.isTimeStamp && value < 0) {
                 value += 60 * 60 * 24;
             }
         }
 
         if (e->valueString.isEmpty()) {
-            if (e->isTimeStamp) {
+            if (header.isTimeStamp) {
                 QTime t(0, 0, 0, 0);
                 t = t.addMSecs(value * 1000);
                 ui->dataTable->item(ind, 1)->setText(t.toString("hh:mm:ss.zzz"));
             } else {
                 ui->dataTable->item(ind, 1)->setText(
-                            QString::number(value, 'f', e->precision) + " " + e->unit);
+                            QString::number(value, 'f', header.precision) + " " + header.unit);
             }
         } else {
             ui->dataTable->item(ind, 1)->setText(e->valueString);

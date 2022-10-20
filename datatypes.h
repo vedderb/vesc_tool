@@ -521,14 +521,12 @@ public:
 
 Q_DECLARE_METATYPE(LOG_DATA)
 
-struct LOG_ENTRY {
+struct LOG_HEADER {
     Q_GADGET
 
     Q_PROPERTY(QString name MEMBER name)
     Q_PROPERTY(QString unit MEMBER unit)
     Q_PROPERTY(int precision MEMBER precision)
-    Q_PROPERTY(double value MEMBER value)
-    Q_PROPERTY(QString valueString MEMBER valueString)
     Q_PROPERTY(bool isTimeStamp MEMBER isTimeStamp)
     Q_PROPERTY(bool isRelativeToFirst MEMBER isRelativeToFirst)
     Q_PROPERTY(bool hasScale MEMBER hasScale)
@@ -536,8 +534,7 @@ struct LOG_ENTRY {
     Q_PROPERTY(double scaleMax MEMBER scaleMax)
 
 public:
-    LOG_ENTRY() {
-        value = 0.0;
+    LOG_HEADER() {
         precision = 2;
         isRelativeToFirst = false;
         isTimeStamp = false;
@@ -546,12 +543,10 @@ public:
         scaleMax = 99.99;
     }
 
-    LOG_ENTRY(QString key,
+    LOG_HEADER(QString key,
               QString name,
               QString unit,
-              double value,
               int precision = 2,
-              QString valueString = "",
               bool isRelativeToFirst = false,
               bool isTimeStamp = false,
               bool hasScale = true,
@@ -560,9 +555,7 @@ public:
         this->key = key;
         this->name = name;
         this->unit = unit;
-        this->value = value;
         this->precision = precision;
-        this->valueString = valueString;
         this->isRelativeToFirst = isRelativeToFirst;
         this->isTimeStamp = isTimeStamp;
         this->hasScale = hasScale;
@@ -573,9 +566,7 @@ public:
     QString key;
     QString name;
     QString unit;
-    double value;
     int precision;
-    QString valueString;
     bool isRelativeToFirst;
     bool isTimeStamp;
     bool hasScale;
@@ -584,7 +575,23 @@ public:
 
 };
 
-Q_DECLARE_METATYPE(LOG_ENTRY)
+Q_DECLARE_METATYPE(LOG_HEADER)
+
+// Lightweight log entry
+struct LOG_ENTRY {
+public:
+    LOG_ENTRY() {
+        value = 0.0;
+    }
+
+    LOG_ENTRY(double value, QString valueString = "") {
+        this->value = value;
+        this->valueString = valueString;
+    }
+
+    double value;
+    QString valueString;
+};
 
 struct MCCONF_TEMP {
     Q_GADGET

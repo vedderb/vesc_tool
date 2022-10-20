@@ -238,16 +238,16 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
 
     mLogHeader.append(LOG_HEADER("kmh_vesc", "Speed VESC", "km/h"));
     mLogHeader.append(LOG_HEADER("kmh_gnss", "Speed GNSS", "km/h"));
-    mLogHeader.append(LOG_HEADER("t_day", "Time", "s", 0, "", false, true, false));
-    mLogHeader.append(LOG_HEADER("t_day_pos", "Time GNSS", "", 0, "", false, true, false));
-    mLogHeader.append(LOG_HEADER("t_trip", "Time of trip", "", 0, "", true, true, false));
-    mLogHeader.append(LOG_HEADER("trip_vesc", "Trip VESC", "m", 3, "", true));
-    mLogHeader.append(LOG_HEADER("trip_vesc_abs", "Trip VESC ABS", "m", 3, "", true));
-    mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, "", false));
+    mLogHeader.append(LOG_HEADER("t_day", "Time", "s", 0, false, true));
+    mLogHeader.append(LOG_HEADER("t_day_pos", "Time GNSS", "s", 0, false, true));
+    mLogHeader.append(LOG_HEADER("t_trip", "Time of trip", "s", 0, true, true));
+    mLogHeader.append(LOG_HEADER("trip_vesc", "Trip VESC", "m", 3, true));
+    mLogHeader.append(LOG_HEADER("trip_vesc_abs", "Trip VESC ABS", "m", 3, true));
+    mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, true));
     mLogHeader.append(LOG_HEADER("setup_curr_motor", "Current Motors", "A"));
     mLogHeader.append(LOG_HEADER("setup_curr_battery", "Current Battery", "A"));
     mLogHeader.append(LOG_HEADER("setup_power", "Power", "W", 0));
-    mLogHeader.append(LOG_HEADER("erpm", "ERPM", "1/1000", 0));
+    mLogHeader.append(LOG_HEADER("erpm", "ERPM", "", 0));
     mLogHeader.append(LOG_HEADER("duty", "Duty", "%", 1));
     mLogHeader.append(LOG_HEADER("fault", "Fault Code", "", 0));
     mLogHeader.append(LOG_HEADER("v_in", "Input Voltage", "V"));
@@ -351,7 +351,7 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
         e.append(d.setupValues.current_motor);
         e.append(d.setupValues.current_in);
         e.append(d.setupValues.current_in * d.values.v_in);
-        e.append(d.values.rpm / 1000);
+        e.append(d.values.rpm);
         e.append(d.values.duty_now * 100);
         e.append(d.values.fault_code);
         e.append(d.values.v_in);
@@ -405,7 +405,7 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
     }
 
     for (auto e: mLogHeader) {
-        addDataItem(e.name, e.hasScale, e.scaleStep, e.scaleMax);
+        addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
     }
 
     truncateDataAndPlot();
@@ -576,7 +576,7 @@ void PageLogAnalysis::updateGraphs()
             auto entry = d[row];
             const auto &header = mLogHeader[row];
 
-            if (header.hasScale) {
+            if (!header.isTimeStamp) {
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(entry * rowScale);
                 names.append(QString("%1 (%2 * %3)").arg(header.name).
@@ -845,7 +845,7 @@ QVector<double> PageLogAnalysis::getLogSample(double time)
             int startTime = d[mInd_t_day];
 
             for (auto dn: mLogTruncated) {
-                int timeNow = dn[mInd_t_day] - startTime;
+                double timeNow = dn[mInd_t_day] - startTime;
                 if (timeNow < 0) { // Handle midnight
                     timeNow += 60 * 60 * 24;
                 }

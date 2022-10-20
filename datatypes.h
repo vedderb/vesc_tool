@@ -529,7 +529,6 @@ struct LOG_HEADER {
     Q_PROPERTY(int precision MEMBER precision)
     Q_PROPERTY(bool isTimeStamp MEMBER isTimeStamp)
     Q_PROPERTY(bool isRelativeToFirst MEMBER isRelativeToFirst)
-    Q_PROPERTY(bool hasScale MEMBER hasScale)
     Q_PROPERTY(double scaleStep MEMBER scaleStep)
     Q_PROPERTY(double scaleMax MEMBER scaleMax)
 
@@ -538,7 +537,6 @@ public:
         precision = 2;
         isRelativeToFirst = false;
         isTimeStamp = false;
-        hasScale = true;
         scaleStep = 0.1;
         scaleMax = 99.99;
     }
@@ -549,7 +547,6 @@ public:
               int precision = 2,
               bool isRelativeToFirst = false,
               bool isTimeStamp = false,
-              bool hasScale = true,
               double scaleStep = 0.1,
               double scaleMax = 99.99) {
         this->key = key;
@@ -558,7 +555,6 @@ public:
         this->precision = precision;
         this->isRelativeToFirst = isRelativeToFirst;
         this->isTimeStamp = isTimeStamp;
-        this->hasScale = hasScale;
         this->scaleStep = scaleStep;
         this->scaleMax = scaleMax;
     }
@@ -569,7 +565,6 @@ public:
     int precision;
     bool isRelativeToFirst;
     bool isTimeStamp;
-    bool hasScale;
     double scaleStep;
     double scaleMax;
 

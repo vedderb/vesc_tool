@@ -153,6 +153,7 @@ private:
     void logListRefresh();
     void addDataItem(QString name, bool hasScale = true,
                      double scaleStep = 0.1, double scaleMax = 99.99);
+    void openLog(QByteArray data);
 
 };
 

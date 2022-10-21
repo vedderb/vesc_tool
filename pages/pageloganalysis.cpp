@@ -103,6 +103,15 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
                 }
             }
         }
+
+        if (mVesc) {
+            if (!mVesc->isPortConnected()) {
+                mVescLastPath.clear();
+                if (ui->vescLogTable->rowCount() > 0) {
+                    ui->vescLogTable->setRowCount(0);
+                }
+            }
+        }
     });
 
     QFont legendFont = font();
@@ -926,6 +935,161 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
     }
 }
 
+void PageLogAnalysis::openLog(QByteArray data)
+{
+    QTextStream in(&data);
+    auto tokensLine1 = in.readLine().split(";");
+    if (tokensLine1.size() < 1) {
+        mVesc->emitStatusMessage("Invalid log file", false);
+        return;
+    }
+    auto entry1 = tokensLine1.first().split(":");
+    if (entry1.size() == 1) {
+        if (mVesc->loadRtLogFile(data)) {
+            on_openCurrentButton_clicked();
+        }
+    } else {
+        resetInds();
+
+        mLog.clear();
+        mLogTruncated.clear();
+        mLogHeader.clear();
+
+        QVector<double> entryLastData;
+
+        for (auto t: tokensLine1) {
+            auto token = t.split(":");
+            LOG_HEADER h;
+            for (int i = 0;i < t.size();i++) {
+                switch (i) {
+                case 0: h.key = token.at(i);
+                case 1: h.name = token.at(i);
+                case 2: h.unit = token.at(i);
+                case 3: h.precision = token.at(i).toDouble();
+                case 4: h.isRelativeToFirst = token.at(i).toInt();
+                case 5: h.isTimeStamp = token.at(i).toInt();
+                default: break;
+                }
+            }
+            mLogHeader.append(h);
+            entryLastData.append(0.0);
+        }
+
+        while (!in.atEnd()) {
+            QStringList tokens = in.readLine().split(";");
+            QVector<double> entry;
+            for (int i = 0;i < tokens.size();i++) {
+                if (!tokens.at(i).isEmpty()) {
+                    entryLastData[i] = tokens.at(i).toDouble();
+                }
+                entry.append(entryLastData.at(i));
+            }
+            mLog.append(entry);
+        }
+
+        updateInds();
+
+        // Create sample array if t_day is missing
+        if (mInd_t_day < 0) {
+            mLogHeader.append(LOG_HEADER("t_day", "Sample", "", 0));
+
+            for (int i = 0;i < mLog.size();i++) {
+                mLog[i].append(i);
+            }
+        }
+
+        updateInds();
+
+        if (mInd_gnss_lat >= 0 && mInd_gnss_lon >= 0 &&
+                mInd_gnss_alt >= 0 && mInd_gnss_h_acc >= 0) {
+
+            // Initialize map enu ref
+            double i_llh[3] = {57.71495867, 12.89134921, 220.0};
+            for (auto d: mLog) {
+                double lat = d.at(mInd_gnss_lat);
+                double lon = d.at(mInd_gnss_lon);
+                double alt = d.at(mInd_gnss_alt);
+                double hacc = d.at(mInd_gnss_h_acc);
+
+                if (hacc > 0 && (!ui->filterOutlierBox->isChecked() ||
+                                 hacc < ui->filterhAccBox->value())) {
+                    i_llh[0] = lat;
+                    i_llh[1] = lon;
+                    i_llh[2] = alt;
+                    ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
+                    break;
+                }
+            }
+
+            // Create GNSS trip counter if it is missing
+            if (mInd_trip_vesc < 0) {
+                mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, true));
+
+                double prevSampleGnss[3];
+                bool prevSampleGnssSet = false;
+                double metersGnss = 0.0;
+
+                for (int i = 0;i < mLog.size();i++) {
+                    double lat = mLog.at(i).at(mInd_gnss_lat);
+                    double lon = mLog.at(i).at(mInd_gnss_lon);
+                    double alt = mLog.at(i).at(mInd_gnss_alt);
+                    double hacc = mLog.at(i).at(mInd_gnss_h_acc);
+
+                    if (hacc > 0 && (!ui->filterOutlierBox->isChecked() ||
+                                     hacc < ui->filterhAccBox->value())) {
+                        if (prevSampleGnssSet) {
+                            double i_llh[3];
+                            double llh[3];
+                            double xyz[3];
+                            ui->map->getEnuRef(i_llh);
+
+                            llh[0] = lat;
+                            llh[1] = lon;
+                            llh[2] = alt;
+                            Utility::llhToEnu(i_llh, llh, xyz);
+
+                            LocPoint p, p2;
+                            p.setXY(xyz[0], xyz[1]);
+                            p.setRadius(10);
+
+                            llh[0] = prevSampleGnss[0];
+                            llh[1] = prevSampleGnss[1];
+                            llh[2] = prevSampleGnss[2];
+                            Utility::llhToEnu(i_llh, llh, xyz);
+
+                            p2.setXY(xyz[0], xyz[1]);
+                            p2.setRadius(10);
+
+                            metersGnss += p.getDistanceTo(p2);
+                        }
+
+                        prevSampleGnssSet = true;
+                        prevSampleGnss[0] = lat;
+                        prevSampleGnss[1] = lon;
+                        prevSampleGnss[2] = alt;
+                    }
+
+                    mLog[i].append(metersGnss);
+                }
+            }
+        }
+
+        updateInds();
+
+        ui->dataTable->setRowCount(0);
+
+        if (mLog.size() == 0) {
+            return;
+        }
+
+        for (auto e: mLogHeader) {
+            addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
+        }
+
+        truncateDataAndPlot();
+    }
+}
+
 void PageLogAnalysis::on_saveMapPdfButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -982,8 +1146,10 @@ void PageLogAnalysis::on_logListOpenButton_clicked()
     if (items.size() > 0) {
         QString fileName = items.
                 first()->data(Qt::UserRole).toString();
-        if (mVesc->loadRtLogFile(fileName)) {
-            on_openCurrentButton_clicked();
+
+        QFile inFile(fileName);
+        if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            openLog(inFile.readAll());
         }
     } else {
         mVesc->emitMessageDialog("Open Log", "No Log Selected", false);
@@ -1072,9 +1238,7 @@ void PageLogAnalysis::on_vescLogListOpenButton_clicked()
             auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
             ui->vescLogListOpenButton->setEnabled(true);
             if (!data.isEmpty()) {
-                if (mVesc->loadRtLogFile(data)) {
-                    on_openCurrentButton_clicked();
-                }
+                openLog(data);
             }
         }
     }

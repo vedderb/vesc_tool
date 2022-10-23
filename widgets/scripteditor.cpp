@@ -107,7 +107,7 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event)
 void ScriptEditor::on_openFileButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"), "",
+                                                    tr("Open %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"), ui->fileNowLabel->text(),
                                                     mIsModeLisp ? tr("Lisp files (*.lisp)") : tr("QML files (*.qml)"));
 
     if (!fileName.isEmpty()) {

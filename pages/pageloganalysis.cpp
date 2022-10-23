@@ -48,6 +48,8 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->vescLogListRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
     ui->vescLogListOpenButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
     ui->vescUpButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
+    ui->vescSaveAsButton->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->vescLogDeleteButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
 
     updateTileServers();
 
@@ -210,6 +212,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     });
 
     on_gridBox_toggled(ui->gridBox->isChecked());
+    logListRefresh();
 }
 
 PageLogAnalysis::~PageLogAnalysis()
@@ -427,16 +430,15 @@ void PageLogAnalysis::on_openCsvButton_clicked()
                                                         tr("Load CSV File"), "",
                                                         tr("CSV files (*.csv)"));
 
-        if (!fileName.isEmpty()) {            
+        if (!fileName.isEmpty()) {
             QSettings set;
             set.setValue("pageloganalysis/lastdir",
                          QFileInfo(fileName).absolutePath());
 
-            if (mVesc->loadRtLogFile(fileName)) {
-                on_openCurrentButton_clicked();
+            QFile inFile(fileName);
+            if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                openLog(inFile.readAll());
             }
-
-            logListRefresh();
         }
     }
 }
@@ -497,7 +499,7 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
             double h_acc = d[mInd_gnss_h_acc];
 
             skip = true;
-            if (postime >= 0 &&
+            if (h_acc > 0.0 &&
                     (!ui->filterOutlierBox->isChecked() ||
                      h_acc < ui->filterhAccBox->value()) &&
                     posTimeLast != postime) {
@@ -798,7 +800,7 @@ void PageLogAnalysis::updateDataAndPlot(double time)
         double h_acc = sample[mInd_gnss_h_acc];
 
         skip = true;
-        if (postime >= 0 &&
+        if (h_acc > 0.0 &&
                 (!ui->filterOutlierBox->isChecked() ||
                  h_acc < ui->filterhAccBox->value())) {
             skip = false;
@@ -887,25 +889,23 @@ void PageLogAnalysis::updateTileServers()
 
 void PageLogAnalysis::logListRefresh()
 {
-    if (ui->tabWidget->currentIndex() == 3) {
-        ui->logTable->setRowCount(0);
-        QSettings set;
-        if (set.contains("pageloganalysis/lastdir")) {
-            QString dirPath = set.value("pageloganalysis/lastdir").toString();
-            QDir dir(dirPath);
-            if (dir.exists()) {
-                for (QFileInfo f: dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
-                                              QDir::Files, QDir::Name)) {
-                    QTableWidgetItem *itName = new QTableWidgetItem(f.fileName());
-                    itName->setData(Qt::UserRole, f.absoluteFilePath());
-                    ui->logTable->setRowCount(ui->logTable->rowCount() + 1);
-                    ui->logTable->setItem(ui->logTable->rowCount() - 1, 0, itName);
-                    ui->logTable->setItem(ui->logTable->rowCount() - 1, 1,
-                                          new QTableWidgetItem(QString("%1 MB").
-                                                               arg(double(f.size())
-                                                                   / 1024.0 / 1024.0,
-                                                                   0, 'f', 2)));
-                }
+    ui->logTable->setRowCount(0);
+    QSettings set;
+    if (set.contains("pageloganalysis/lastdir")) {
+        QString dirPath = set.value("pageloganalysis/lastdir").toString();
+        QDir dir(dirPath);
+        if (dir.exists()) {
+            for (QFileInfo f: dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
+                                                QDir::Files, QDir::Name)) {
+                QTableWidgetItem *itName = new QTableWidgetItem(f.fileName());
+                itName->setData(Qt::UserRole, f.absoluteFilePath());
+                ui->logTable->setRowCount(ui->logTable->rowCount() + 1);
+                ui->logTable->setItem(ui->logTable->rowCount() - 1, 0, itName);
+                ui->logTable->setItem(ui->logTable->rowCount() - 1, 1,
+                                      new QTableWidgetItem(QString("%1 MB").
+                                                           arg(double(f.size())
+                                                               / 1024.0 / 1024.0,
+                                                               0, 'f', 2)));
             }
         }
     }
@@ -984,6 +984,9 @@ void PageLogAnalysis::openLog(QByteArray data)
                 }
                 entry.append(entryLastData.at(i));
             }
+            while (entry.size() < entryLastData.size()) {
+                entry.append(entryLastData[entry.size()]);
+            }
             mLog.append(entry);
         }
 
@@ -1011,7 +1014,7 @@ void PageLogAnalysis::openLog(QByteArray data)
                 double alt = d.at(mInd_gnss_alt);
                 double hacc = d.at(mInd_gnss_h_acc);
 
-                if (hacc > 0 && (!ui->filterOutlierBox->isChecked() ||
+                if (hacc > 0.0 && (!ui->filterOutlierBox->isChecked() ||
                                  hacc < ui->filterhAccBox->value())) {
                     i_llh[0] = lat;
                     i_llh[1] = lon;
@@ -1198,7 +1201,7 @@ void PageLogAnalysis::on_vescLogListRefreshButton_clicked()
 
         if (fe.isDir) {
             ui->vescLogTable->setItem(ui->vescLogTable->rowCount() - 1, 1,
-                                      new QTableWidgetItem("Dir"));
+                                      new QTableWidgetItem(QString("Dir, %1 files").arg(fe.size)));
         } else {
             ui->vescLogTable->setItem(ui->vescLogTable->rowCount() - 1, 1,
                                       new QTableWidgetItem(QString("%1 MB").
@@ -1235,8 +1238,10 @@ void PageLogAnalysis::on_vescLogListOpenButton_clicked()
             on_vescLogListRefreshButton_clicked();
         } else {
             ui->vescLogListOpenButton->setEnabled(false);
+            ui->vescSaveAsButton->setEnabled(false);
             auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
             ui->vescLogListOpenButton->setEnabled(true);
+            ui->vescSaveAsButton->setEnabled(true);
             if (!data.isEmpty()) {
                 openLog(data);
             }
@@ -1267,4 +1272,81 @@ void PageLogAnalysis::on_vescLogTable_cellDoubleClicked(int row, int column)
 {
     (void)row; (void)column;
     on_vescLogListOpenButton_clicked();
+}
+
+void PageLogAnalysis::on_vescSaveAsButton_clicked()
+{
+    auto items = ui->vescLogTable->selectedItems();
+
+    if (items.size() <= 0) {
+        mVesc->emitMessageDialog("Save File", "No file selected", false);
+        return;
+    }
+
+    FILE_LIST_ENTRY fe;
+    if (items.first()->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
+        fe = items.first()->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
+    }
+
+    if (fe.isDir) {
+        mVesc->emitMessageDialog("Save File", "Cannot save directory, only files", false);
+    } else {
+        QString fileName = QFileDialog::getSaveFileName(this,
+                                                        tr("Save Log File"), "",
+                                                        tr("CSV files (*.csv)"));
+
+        if (!fileName.isEmpty()) {
+            if (!fileName.toLower().endsWith(".csv")) {
+                fileName += ".csv";
+            }
+
+            QFile file(fileName);
+
+            if (!file.open(QIODevice::WriteOnly)) {
+                mVesc->emitMessageDialog("Save File", "Cannot open destination", false);
+                return;
+            }
+
+            ui->vescLogListOpenButton->setEnabled(false);
+            ui->vescSaveAsButton->setEnabled(false);
+            auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
+            ui->vescLogListOpenButton->setEnabled(true);
+            ui->vescSaveAsButton->setEnabled(true);
+
+            file.write(data);
+            file.close();
+        }
+    }
+}
+
+void PageLogAnalysis::on_vescLogDeleteButton_clicked()
+{
+    auto items = ui->vescLogTable->selectedItems();
+
+    if (items.size() <= 0) {
+        mVesc->emitMessageDialog("Delete File", "No file selected", false);
+        return;
+    }
+
+    FILE_LIST_ENTRY fe;
+    if (items.first()->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
+        fe = items.first()->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
+    }
+
+    if (fe.isDir) {
+        mVesc->emitMessageDialog("Delete File", "Cannot delete directory, only files", false);
+    } else {
+        int ret = QMessageBox::warning(this,
+                                       tr("Delete File"),
+                                       tr("This is going to delete %1 permanently. Are you sure?").arg(fe.name),
+                                       QMessageBox::Yes | QMessageBox::Cancel);
+
+        if (ret == QMessageBox::Yes) {
+            bool ok = mVesc->commands()->fileBlockRemove(mVescLastPath + "/" + fe.name);
+            if (ok) {
+                on_vescLogListRefreshButton_clicked();
+                mVesc->emitStatusMessage("File deleted", true);
+            }
+        }
+    }
 }

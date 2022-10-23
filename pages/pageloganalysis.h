@@ -63,6 +63,8 @@ private slots:
     void on_vescUpButton_clicked();
     void on_vescLogCancelButton_clicked();
     void on_vescLogTable_cellDoubleClicked(int row, int column);
+    void on_vescSaveAsButton_clicked();
+    void on_vescLogDeleteButton_clicked();
 
 private:
     Ui::PageLogAnalysis *ui;

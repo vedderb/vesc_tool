@@ -92,6 +92,7 @@ void ScriptEditor::setModeLisp()
     ui->codeEdit->setCommentStr(";");
     ui->codeEdit->setIndentStrs("(", ")");
     ui->codeEdit->setAutoParentheses(false);
+    ui->codeEdit->setSeparateMinus(false);
     mIsModeLisp = true;
 }
 

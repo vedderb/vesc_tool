@@ -30,6 +30,7 @@ protected:
 
 private:
     QVector<QHighlightRule> m_highlightRules;
+    QVector<QHighlightRule> m_highlightRulesLang;
     QRegularExpression m_keyRegex;
 
 };

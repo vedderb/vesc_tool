@@ -10,6 +10,7 @@
 LispHighlighter::LispHighlighter(QTextDocument* document) :
     QStyleSyntaxHighlighter(document),
     m_highlightRules(),
+    m_highlightRulesLang(),
     m_keyRegex(R"(("[^\r\n:]+?")\s*:)")
 {
     Q_INIT_RESOURCE(qcodeeditor_resources);
@@ -33,8 +34,8 @@ LispHighlighter::LispHighlighter(QTextDocument* document) :
         auto names = language.names(key);
         for (auto&& name : names)
         {
-            m_highlightRules.append({
-                QRegularExpression(QString(R"(\b%1\b)").arg(name)),
+            m_highlightRulesLang.append({
+                QRegularExpression(QString(R"(\b%1\b)").arg(name.replace("-", "_"))),
                 key
             });
         }
@@ -59,15 +60,26 @@ LispHighlighter::LispHighlighter(QTextDocument* document) :
     });
 }
 
-
 void LispHighlighter::highlightBlock(const QString& text)
 {
-    for (auto&& rule : m_highlightRules)
-    {
+    for (auto&& rule : m_highlightRulesLang) {
+        auto matchIterator = rule.pattern.globalMatch(QString(text).replace("-", "_").replace("#", "_"));
+
+        while (matchIterator.hasNext()) {
+            auto match = matchIterator.next();
+
+            setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                syntaxStyle()->getFormat(rule.formatName)
+            );
+        }
+    }
+
+    for (auto&& rule : m_highlightRules) {
         auto matchIterator = rule.pattern.globalMatch(text);
 
-        while (matchIterator.hasNext())
-        {
+        while (matchIterator.hasNext()) {
             auto match = matchIterator.next();
 
             setFormat(
@@ -81,8 +93,7 @@ void LispHighlighter::highlightBlock(const QString& text)
     // Special treatment for key regex
     auto matchIterator = m_keyRegex.globalMatch(text);
 
-    while (matchIterator.hasNext())
-    {
+    while (matchIterator.hasNext()) {
         auto match = matchIterator.next();
 
         setFormat(

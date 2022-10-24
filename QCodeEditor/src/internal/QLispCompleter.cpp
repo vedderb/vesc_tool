@@ -51,14 +51,6 @@ QLispCompleter::QLispCompleter(QObject *parent) :
         }
     };
 
-    addItem("set");
-    {
-        level++;
-        addItem("duty dty");
-        addItem("current i)");
-        level--;
-    }
-
     Q_INIT_RESOURCE(qcodeeditor_resources);
     QFile fl(":/languages/lisp.xml");
 
@@ -83,19 +75,4 @@ QLispCompleter::QLispCompleter(QObject *parent) :
     setModelSorting(QCompleter::UnsortedModel);
     setCaseSensitivity(Qt::CaseInsensitive);
     setWrapAround(true);
-}
-
-QStringList QLispCompleter::splitPath(const QString &path) const
-{
-    return path.split("-");
-}
-
-QString QLispCompleter::pathFromIndex(const QModelIndex &index) const
-{
-    QStringList dataList;
-    for (QModelIndex i = index; i.isValid(); i = i.parent()) {
-        dataList.prepend(model()->data(i, completionRole()).toString());
-    }
-
-    return dataList.join("-");
 }

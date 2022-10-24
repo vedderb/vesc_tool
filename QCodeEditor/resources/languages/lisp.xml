@@ -32,19 +32,121 @@
         <name>print</name>
         <name>yield</name>
         <name>ix</name>
-        <name>sleep</name>
-        <name>map</name>
-        <name>foldl</name>
-        <name>foldr</name>
         <name>list</name>
-        <name>iota</name>
         <name>range</name>
-        <name>reverse</name>
         <name>length</name>
-        <name>apply</name>
-        <name>zipwith</name>
-        <name>filter</name>
-        <name>sort</name>
+        <name>shl</name>
+        <name>shr</name>
+        <name>first</name>
+        <name>rest</name>
+        <name>car</name>
+        <name>cons</name>
+        <name>cdr</name>
+        <name>setcar</name>
+        <name>setcdr</name>
+        <name>setvar</name>
+        <name>setix</name>
+        <name>systime</name>
+        <name>and</name>
+        <name>or</name>
+        <name>not</name>
+        <name>eq</name>
+        <name>assoc</name>
+        <name>cossa</name>
+        <name>setassoc</name>
+
+        <name>timeout-reset</name>
+        <name>get-ppm</name>
+        <name>get-ppm-age</name>
+        <name>get-encoder</name>
+        <name>set-servo</name>
+        <name>get-vin</name>
+        <name>select-motor</name>
+        <name>get-selected-motor</name>
+        <name>get-bms-val</name>
+        <name>get-adc</name>
+        <name>get-adc-decoded</name>
+        <name>secs-since</name>
+        <name>set-aux</name>
+        <name>event-register-handler</name>
+        <name>event-enable</name>
+        <name>get-imu-rpy</name>
+        <name>get-imu-quat</name>
+        <name>get-imu-acc</name>
+        <name>get-imu-gyro</name>
+        <name>get-imu-mag</name>
+        <name>get-imu-acc-derot</name>
+        <name>get-imu-gyro-derot</name>
+        <name>send-data</name>
+        <name>get-remote-state</name>
+        <name>eeprom-store-f</name>
+        <name>eeprom-read-f</name>
+        <name>eeprom-store-i</name>
+        <name>eeprom-read-i</name>
+        <name>sysinfo</name>
+        <name>import</name>
+
+        <name>app-adc-detach</name>
+        <name>app-adc-override</name>
+        <name>app-ppm-detach</name>
+        <name>app-ppm-override</name>
+        <name>set-remote-state</name>
+        <name>app-disable-output</name>
+
+        <name>set-current</name>
+        <name>set-current-rel</name>
+        <name>set-duty</name>
+        <name>set-brake</name>
+        <name>set-brake-rel</name>
+        <name>set-handbrake</name>
+        <name>set-handbrake-rel</name>
+        <name>set-rpm</name>
+        <name>set-pos</name>
+        <name>foc-openloop</name>
+        <name>foc-beep</name>
+
+        <name>get-current</name>
+        <name>get-current-dir</name>
+        <name>get-current-in</name>
+        <name>get-id</name>
+        <name>get-iq</name>
+        <name>get-vd</name>
+        <name>get-vq</name>
+        <name>get-duty</name>
+        <name>get-rpm</name>
+        <name>get-temp-fet</name>
+        <name>get-temp-mot</name>
+        <name>get-speed</name>
+        <name>get-dist</name>
+        <name>get-dist-abs</name>
+        <name>get-batt</name>
+        <name>get-fault</name>
+
+        <name>canset-current</name>
+        <name>canset-current-rel</name>
+        <name>canset-duty</name>
+        <name>canset-brake</name>
+        <name>canset-brake-rel</name>
+        <name>canset-rpm</name>
+        <name>canset-pos</name>
+
+        <name>canget-current</name>
+        <name>canget-current-dir</name>
+        <name>canget-current-in</name>
+        <name>canget-duty</name>
+        <name>canget-rpm</name>
+        <name>canget-temp-fet</name>
+        <name>canget-temp-motor</name>
+        <name>canget-speed</name>
+        <name>canget-dist</name>
+        <name>canget-ppm</name>
+        <name>canget-adc</name>
+
+        <name>can-list-devs</name>
+        <name>can-scan</name>
+        <name>can-send-sid</name>
+        <name>can-send-eid</name>
+
         <name>sin</name>
         <name>cos</name>
         <name>tan</name>
@@ -56,28 +158,114 @@
         <name>sqrt</name>
         <name>log</name>
         <name>log10</name>
-        <name>shl</name>
-        <name>shr</name>
-        <name>first</name>
-        <name>rest</name>
-        <name>car</name>
-        <name>cons</name>
-        <name>cdr</name>
+        <name>deg2rad</name>
+        <name>rad2deg</name>
+        <name>vec3-rot</name>
+        <name>throttle-curve</name>
+
+        <name>bits-enc-int</name>
+        <name>bits-dec-int</name>
+
+        <name>raw-adc-current</name>
+        <name>raw-adc-voltage</name>
+        <name>raw-mod-alpha</name>
+        <name>raw-mod-beta</name>
+        <name>raw-mod-alpha-measured</name>
+        <name>raw-mod-beta-measured</name>
+        <name>raw-hall</name>
+
+        <name>uart-start</name>
+        <name>uart-write</name>
+        <name>uart-read</name>
+
+        <name>i2c-start</name>
+        <name>i2c-tx-rx</name>
+        <name>i2c-restore</name>
+
+        <name>gpio-configure</name>
+        <name>gpio-write</name>
+        <name>gpio-read</name>
+
+        <name>str-from-n</name>
+        <name>str-merge</name>
+        <name>str-to-i</name>
+        <name>str-to-f</name>
+        <name>str-part</name>
+        <name>str-split</name>
+        <name>str-replace</name>
+        <name>str-to-lower</name>
+        <name>str-to-upper</name>
+        <name>str-cmp</name>
+
+        <name>conf-set</name>
+        <name>conf-get</name>
+        <name>conf-store</name>
+        <name>conf-detect-foc</name>
+        <name>conf-set-pid-offset</name>
+        <name>conf-measure-res</name>
+
+        <name>free</name>
+        <name>bufset-i8</name>
+        <name>bufset-i16</name>
+        <name>bufset-i24</name>
+        <name>bufset-i32</name>
+        <name>bufset-u8</name>
+        <name>bufset-u16</name>
+        <name>bufset-u24</name>
+        <name>bufset-u32</name>
+        <name>bufset-f32</name>
+        <name>bufget-i8</name>
+        <name>bufget-i16</name>
+        <name>bufget-i32</name>
+        <name>bufget-u8</name>
+        <name>bufget-u16</name>
+        <name>bufget-u24</name>
+        <name>bufget-u32</name>
+        <name>bufget-f32</name>
+        <name>buflen</name>
+        <name>bufclear</name>
+        <name>bufcpy</name>
+        <name>bufset-bit</name>
+
+        <name>load-native-lib</name>
+        <name>unload-native-lib</name>
+
+        <name>uavcan-last-rawcmd</name>
+        <name>uavcan-last-rpmcmd</name>
+
+        <name>lbm-set-quota</name>
+
+        <name>plot-init</name>
+        <name>plot-add-graph</name>
+        <name>plot-set-graph</name>
+        <name>plot-send-points</name>
+
+        <name>ioboard-get-adc</name>
+        <name>ioboard-get-digital</name>
+        <name>ioboard-set-digital</name>
+        <name>ioboard-set-pwm</name>
+
+        <name>log-config-field</name>
+        <name>log-start</name>
+        <name>log-stop</name>
+        <name>log-send-f32</name>
+
+        <name>uart-read-bytes</name>
+        <name>uart-read-until</name>
+        <name>map</name>
+        <name>foldl</name>
+        <name>foldr</name>
+        <name>reverse</name>
+        <name>apply</name>
+        <name>zipwith</name>
+        <name>sleep</name>
+        <name>filter</name>
+        <name>str-len</name>
+        <name>sort</name>
+        <name>str-cmp-asc</name>
+        <name>str-cmp-dsc</name>
         <name>second</name>
         <name>third</name>
-        <name>setcar</name>
-        <name>setcdr</name>
-        <name>setvar</name>
-        <name>setix</name>
-        <name>bufcpy</name>
-        <name>bufclear</name>
-        <name>systime</name>
-        <name>and</name>
-        <name>or</name>
-        <name>not</name>
-        <name>eq</name>
-        <name>assoc</name>
-        <name>cossa</name>
-        <name>setassoc</name>
+        <name>abs</name>
     </section>
 </root>

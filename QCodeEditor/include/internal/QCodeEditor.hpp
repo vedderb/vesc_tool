@@ -56,6 +56,9 @@ public:
 
     void setIndentStrs(const QString &start, const QString &end);
 
+    bool getSeparateMinus() const;
+    void setSeparateMinus(bool separateMinus);
+
 signals:
     void saveTriggered();
     void runEmbeddedTriggered();
@@ -218,6 +221,7 @@ private:
     QString m_commentStr;
     QString m_indentStartStr;
     QString m_indentEndStr;
+    bool m_separateMinus;
 
 };
 

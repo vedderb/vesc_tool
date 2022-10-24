@@ -10,7 +10,6 @@
         <name>progn</name>
         <name>if</name>
         <name>match</name>
-        <name>_</name>
         <name>loopfor</name>
         <name>loopwhile</name>
         <name>looprange</name>
@@ -54,6 +53,7 @@
         <name>assoc</name>
         <name>cossa</name>
         <name>setassoc</name>
+        <name>type-of</name>
 
         <name>timeout-reset</name>
         <name>get-ppm</name>

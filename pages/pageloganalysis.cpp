@@ -795,8 +795,7 @@ void PageLogAnalysis::updateDataAndPlot(double time)
     }
 
     bool skip = false;
-    if (mInd_t_day_pos >= 0 && mInd_gnss_h_acc >= 0) {
-        int postime = int(sample[mInd_t_day_pos] * 1000.0);
+    if (mInd_gnss_h_acc >= 0) {
         double h_acc = sample[mInd_gnss_h_acc];
 
         skip = true;

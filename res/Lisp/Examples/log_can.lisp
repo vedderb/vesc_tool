@@ -18,13 +18,11 @@
 ; All entries except value-function are optional and
 ; default values will be used if they are left out.
 (def loglist '(
-        ("v_in" "V" "Input Voltage"   2  (get-vin))
-        ("roll"                       4 (ix (get-imu-rpy) 0))
+        ("v_in" "V" "Input Voltage"     (get-vin))
+        ("roll"                         (ix (get-imu-rpy) 0))
         ("pitch"                        (ix (get-imu-rpy) 1))
         ("yaw"                          (ix (get-imu-rpy) 2))
         ("kmh_vesc" "km/h" "Speed VESC" (* (get-speed) 3.6))
-        ((+ 15 4))
-        ((+ 2 1))
 ))
 
 ; The code below runs the logging and can be left as is

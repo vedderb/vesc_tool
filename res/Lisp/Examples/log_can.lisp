@@ -13,71 +13,53 @@
 
 ; List with log fields and values. Format:
 ;
-; (key optName optUnit optPrecision value-function)
+; (optKey optName optUnit optPrecision optIsRel optIsTime value-function)
 ;
-; optName, optUnit and optPrecision are optional and
+; All entries except value-function are optional and
 ; default values will be used if they are left out.
 (def loglist '(
-        ("v_in" "Input Voltage" "V"     (get-vin))
-        ("roll"                         (ix (get-imu-rpy) 0))
+        ("v_in" "V" "Input Voltage"   2  (get-vin))
+        ("roll"                       4 (ix (get-imu-rpy) 0))
         ("pitch"                        (ix (get-imu-rpy) 1))
         ("yaw"                          (ix (get-imu-rpy) 2))
-        ("kmh_vesc" "Speed VESC" "km/h" (* (get-speed) 3.6))
+        ("kmh_vesc" "km/h" "Speed VESC" (* (get-speed) 3.6))
+        ((+ 15 4))
+        ((+ 2 1))
 ))
 
 ; The code below runs the logging and can be left as is
 
-(looprange i 0 (length loglist)
+(looprange row 0 (length loglist)
     (let (
-            (field (ix loglist i))
-            (p (ix field -2))
-            (has-prec (eq (type-of p) type-i))
-            (prec (if has-prec p 2))
+            (field (ix loglist row))
+            (get-field
+                (fn (type default)
+                    (let ((f (first field)))
+                        (if (eq (type-of f) type)
+                            (progn
+                                (setvar 'field (rest field))
+                                f
+                            )
+                            default
+            ))))
+            (key       (get-field type-array (str-from-n row "Field %d")))
+            (unit      (get-field type-array ""))
+            (name      (get-field type-array key))
+            (precision (get-field type-i 2))
+            (is-rel    (get-field type-symbol false))
+            (is-time   (get-field type-symbol false))
         )
-        (match (if has-prec (- (length field) 1) (length field))
-            (2
-                (log-config-field
-                    esp-can-id ; CAN id
-                    i ; Field
-                    (ix field 0) ; Key
-                    (ix field 0) ; Name
-                    "" ; Unit
-                    prec ; Precision
-                    false ; Is relative
-                    false ; Is timestamp
-                )
-            )
-            
-            (3
-                (log-config-field
-                    esp-can-id ; CAN id
-                    i ; Field
-                    (ix field 0) ; Key
-                    (ix field 0) ; Name
-                    (ix field 1) ; Unit
-                    prec ; Precision
-                    false ; Is relative
-                    false ; Is timestamp
-                )
-            )
-            
-            (4
-                (log-config-field
-                    esp-can-id ; CAN id
-                    i ; Field
-                    (ix field 0) ; Key
-                    (ix field 1) ; Name
-                    (ix field 2) ; Unit
-                    prec ; Precision
-                    false ; Is relative
-                    false ; Is timestamp
-                )
-            )
-            
-            (_ (print (str-from-n i "Row %d is invalid")))
+        (log-config-field
+            esp-can-id ; CAN id
+            row ; Field
+            key ; Key
+            name ; Name
+            unit ; Unit
+            precision ; Precision
+            is-rel ; Is relative
+            is-time ; Is timestamp
         )
-    )
-)
+))
 
 (log-start
     esp-can-id ; CAN id

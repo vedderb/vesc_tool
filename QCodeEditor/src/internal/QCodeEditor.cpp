@@ -996,7 +996,7 @@ int QCodeEditor::getIndentationSpaces()
 
 QString QCodeEditor::getCompletionWordNow(int *linePosStart, int *linePosEnd)
 {
-    QString lineStartChars = " \t[{\"!";
+    QString lineStartChars = " \t[{\"!'";
     QString lineEndChars = " \t)]}\"!";
     auto posStart = textCursor().positionInBlock() - 1;
     auto posEnd = posStart;

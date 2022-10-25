@@ -73,6 +73,10 @@
 <name>rate-400k</name>
 <name>rate-700k</name>
 <name>half-duplex</name>
+<name>event-can-sid</name>
+<name>event-can-eid</name>
+<name>event-data-rx</name>
+<name>event-shutdown</name>
 </section>
 
 <section name="Type">

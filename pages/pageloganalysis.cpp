@@ -232,10 +232,12 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
     if (mVesc) {
         connect(mVesc->commands(), &Commands::fileProgress, [this]
                 (int32_t prog, int32_t tot, double percentage, double bytesPerSec) {
-            (void)prog;
-            (void)tot;
+            QTime t(0, 0, 0, 0);;
+            t = t.addSecs((tot - prog) / bytesPerSec);
             ui->vescDisplay->setValue(percentage);
-            ui->vescDisplay->setText(tr("Speed: %1 KB/s").arg(bytesPerSec / 1024, 0, 'f', 2));
+            ui->vescDisplay->setText(tr("%1 KB/s, %2").
+                                     arg(bytesPerSec / 1024, 0, 'f', 2).
+                                     arg(t.toString("hh:mm:ss")));
         });
     }
 }

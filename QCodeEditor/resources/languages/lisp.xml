@@ -47,6 +47,34 @@
 <name>false</name>
 </section>
 
+<section name="Global">
+<name>little-endian</name>
+<name>big-endian</name>
+<name>pin-mode-out</name>
+<name>pin-mode-od</name>
+<name>pin-mode-od-pu</name>
+<name>pin-mode-od-pd</name>
+<name>pin-mode-in</name>
+<name>pin-mode-in-pu</name>
+<name>pin-mode-in-pd</name>
+<name>pin-mode-analog</name>
+<name>pin-rx</name>
+<name>pin-tx</name>
+<name>pin-swdio</name>
+<name>pin-swclk</name>
+<name>pin-hall1</name>
+<name>pin-hall2</name>
+<name>pin-hall3</name>
+<name>pin-adc1</name>
+<name>pin-adc2</name>
+<name>pin-ppm</name>
+<name>rate-100k</name>
+<name>rate-200k</name>
+<name>rate-400k</name>
+<name>rate-700k</name>
+<name>half-duplex</name>
+</section>
+
 <section name="Type">
 <name>to-byte</name>
 <name>to-i</name>

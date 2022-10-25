@@ -6,7 +6,7 @@
 
 ; Log GNSS. Setting this to 1 will enable GNSS-logging. Note that the log won't be started
 ; until a valid position is available if GNSS-logging is enabled.
-(def log-gnss 0)
+(def log-gnss false)
 
 ; Close log if voltage goes below this value
 (def vin-min 9.0)
@@ -43,8 +43,8 @@
                     (ix field 0) ; Name
                     "" ; Unit
                     prec ; Precision
-                    0 ; Is relative
-                    0 ; Is timestamp
+                    false ; Is relative
+                    false ; Is timestamp
                 )
             )
             
@@ -56,8 +56,8 @@
                     (ix field 0) ; Name
                     (ix field 1) ; Unit
                     prec ; Precision
-                    0 ; Is relative
-                    0 ; Is timestamp
+                    false ; Is relative
+                    false ; Is timestamp
                 )
             )
             
@@ -69,8 +69,8 @@
                     (ix field 1) ; Name
                     (ix field 2) ; Unit
                     prec ; Precision
-                    0 ; Is relative
-                    0 ; Is timestamp
+                    false ; Is relative
+                    false ; Is timestamp
                 )
             )
             
@@ -83,9 +83,8 @@
     esp-can-id ; CAN id
     (length loglist) ; Field num
     rate-hz ; Rate Hz
-    1 ; Append time
+    true ; Append time
     log-gnss ; Append gnss
-    log-gnss ; Append gnss time
 )
 
 ; Close the log on the shutdown event

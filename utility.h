@@ -89,6 +89,7 @@ public:
     Q_INVOKABLE static void stopGnssForegroundService();
     Q_INVOKABLE static bool isBleScanEnabled();
     Q_INVOKABLE static QString strCrc32(QString str);
+    Q_INVOKABLE static QString readInternalImuType(VescInterface *vesc);
 
     static void llhToXyz(double lat, double lon, double height, double *x, double *y, double *z);
     static void xyzToLlh(double x, double y, double z, double *lat, double *lon, double *height);

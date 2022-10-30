@@ -270,6 +270,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("waitMotorStop(VescIf, erpmTres, timeoutMs)");
         addItem("measureEncoderBlocking(VescIf, current)");
         addItem("sleepWithEventLoop(timeMs)");
+        addItem("readInternalImuType(VescIf)");
         level--;
     }
 

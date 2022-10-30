@@ -192,9 +192,9 @@ Item {
                                 }
 
                                 if (VescIf.customConfig(confInd).saveXml(path, "CustomConfiguration")) {
-                                    VescIf.emitStatusMessage("Appconf Saved", true)
+                                    VescIf.emitStatusMessage("Custom Config Saved", true)
                                 } else {
-                                    VescIf.emitStatusMessage("Appconf Save Failed", false)
+                                    VescIf.emitStatusMessage("Save Failed", false)
                                 }
 
                                 close()
@@ -231,9 +231,9 @@ Item {
                                 var path = fileUrl.toString()
                                 if (path.toLowerCase().endsWith(".xml")) {
                                     if (VescIf.customConfig(confInd).loadXml(path, "CustomConfiguration")) {
-                                        VescIf.emitStatusMessage("Appconf Loaded", true)
+                                        VescIf.emitStatusMessage("Custom Config Loaded", true)
                                     } else {
-                                        VescIf.emitStatusMessage("Appconf Load Failed", false)
+                                        VescIf.emitStatusMessage("Load Failed", false)
                                     }
                                 } else {
                                     VescIf.emitStatusMessage("Invalid File", false)

@@ -184,6 +184,7 @@ public slots:
     void getAppConf();
     void getAppConfDefault();
     void setAppConf();
+    void setAppConfNoStore();
     void detectMotorParam(double current, double min_rpm, double low_duty);
     void reboot();
     void sendAlive();

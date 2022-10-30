@@ -69,6 +69,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("getAppConf()");
         addItem("getAppConfDefault()");
         addItem("setAppConf()");
+        addItem("setAppConfNoStore()");
         addItem("getMcconf()");
         addItem("getMcconfDefault()");
         addItem("setMcconf(check)");

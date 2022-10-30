@@ -25,6 +25,7 @@
 #include "mobile/logreader.h"
 #include "tcpserversimple.h"
 #include "pages/pagemotorcomparison.h"
+#include "codeloader.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -191,6 +192,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<LogWriter>("Vedder.vesc.logwriter", 1, 0, "LogWriter");
     qmlRegisterType<LogReader>("Vedder.vesc.logreader", 1, 0, "LogReader");
     qmlRegisterType<TcpHub>("Vedder.vesc.tcphub", 1, 0, "TcpHub");
+    qmlRegisterType<CodeLoader>("Vedder.vesc.codeloader", 1, 0, "CodeLoader");
 
     qRegisterMetaType<MCCONF_TEMP>();
     qRegisterMetaType<MC_VALUES>();
@@ -201,6 +203,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<MotorData>();
     qRegisterMetaType<ENCODER_DETECT_RES>();
     qRegisterMetaType<FILE_LIST_ENTRY>();
+    qRegisterMetaType<VescPackage>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD

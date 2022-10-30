@@ -1232,4 +1232,37 @@ public:
 
 Q_DECLARE_METATYPE(FILE_LIST_ENTRY)
 
+struct VescPackage {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString description MEMBER description)
+    Q_PROPERTY(QByteArray lispData MEMBER lispData)
+    Q_PROPERTY(QString qmlFile MEMBER qmlFile)
+    Q_PROPERTY(bool qmlIsFullscreen MEMBER qmlIsFullscreen)
+    Q_PROPERTY(bool isLibrary MEMBER isLibrary)
+    Q_PROPERTY(bool loadOk MEMBER loadOk)
+    Q_PROPERTY(QByteArray compressedData MEMBER compressedData)
+
+    VescPackage () {
+        name = "VESC Package Name";
+        qmlIsFullscreen = false;
+        isLibrary = false;
+        loadOk = false;
+    }
+
+    QByteArray compressedData;
+    QString name;
+    QString description;
+    QByteArray lispData;
+    QString qmlFile;
+    bool qmlIsFullscreen;
+    bool isLibrary;
+    bool loadOk;
+
+};
+
+Q_DECLARE_METATYPE(VescPackage)
+
 #endif // DATATYPES_H

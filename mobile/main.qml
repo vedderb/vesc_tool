@@ -495,6 +495,20 @@ ApplicationWindow {
                 }
             }
         }
+
+        Page {
+            Loader {
+                anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: Packages {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    anchors.topMargin: 10
+                }
+            }
+        }
     }
 
     header: Rectangle {
@@ -529,7 +543,7 @@ ApplicationWindow {
                 Repeater {
                     id: rep
                     model: ["Start", "RT Data", "Profiles", "BMS", "Firmware", "Motor Cfg",
-                        "App Cfg", "Terminal"]
+                        "App Cfg", "Terminal", "Packages"]
 
                     TabButton {
                         text: modelData

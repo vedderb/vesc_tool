@@ -1303,7 +1303,7 @@ void MainWindow::reloadPages()
     mPagePackage = new PageVescPackage(this);
     mPagePackage->setVesc(mVesc);
     ui->pageWidget->addWidget(mPagePackage);
-    addPageItem(tr("VESC Packages"),  theme + "icons/v_icon-96.png", "", true);
+    addPageItem(tr("VESC Packages"),  theme + "icons/Package-96.png", "", true);
 
     mPageMotorSettings = new PageMotorSettings(this);
     mPageMotorSettings->setVesc(mVesc);

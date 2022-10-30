@@ -59,5 +59,6 @@
         <file>ParamEditBitfield.qml</file>
         <file>ConfigPageCustom.qml</file>
         <file>TcpHubBox.qml</file>
+        <file>Packages.qml</file>
     </qresource>
 </RCC>

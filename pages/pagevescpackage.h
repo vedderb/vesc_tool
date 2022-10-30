@@ -60,10 +60,10 @@ private:
     Ui::PageVescPackage *ui;
     VescInterface *mVesc;
     CodeLoader mLoader;
-    QString mCurrentPath;
+    VescPackage mCurrentPkg;
 
     void reloadArchive();
-    void packageSelected(QString path);
+    void packageSelected(VescPackage pkg);
 
 };
 

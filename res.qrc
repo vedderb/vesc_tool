@@ -322,5 +322,7 @@
         <file>res/fonts/Exan-Regular.ttf</file>
         <file>res/fonts/Roboto/RobotoMono-VariableFont_wght.ttf</file>
         <file>res/other_fw/nrf52840_wand_mag.bin</file>
+        <file>res/icons/Package-96.png</file>
+        <file>res/+theme_light/icons/Package-96.png</file>
     </qresource>
 </RCC>

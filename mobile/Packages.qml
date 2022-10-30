@@ -188,23 +188,48 @@ Item {
             delegate: canIdDelegate
         }
 
-        Button {
-            text: "Uninstall All"
+        RowLayout {
             Layout.fillWidth: true
-            onClicked: {
-                disableDialog()
-                workaroundTimerUninstall.start()
+
+            Button {
+                text: "Update Archive"
+                Layout.fillWidth: true
+                onClicked: {
+                    disableDialog()
+                    workaroundTimerArchive.start()
+                }
+
+                Timer {
+                    id: workaroundTimerArchive
+                    interval: 0
+                    repeat: false
+                    running: false
+                    onTriggered: {
+                        mLoader.downloadPackageArchive()
+                        reloadArchive()
+                        enableDialog()
+                    }
+                }
             }
 
-            Timer {
-                id: workaroundTimerUninstall
-                interval: 0
-                repeat: false
-                running: false
-                onTriggered: {
-                    mLoader.lispErase()
-                    mLoader.qmlErase()
-                    enableDialog()
+            Button {
+                text: "Uninstall All"
+                Layout.fillWidth: true
+                onClicked: {
+                    disableDialog()
+                    workaroundTimerUninstall.start()
+                }
+
+                Timer {
+                    id: workaroundTimerUninstall
+                    interval: 0
+                    repeat: false
+                    running: false
+                    onTriggered: {
+                        mLoader.lispErase()
+                        mLoader.qmlErase()
+                        enableDialog()
+                    }
                 }
             }
         }

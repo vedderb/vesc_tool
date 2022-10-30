@@ -20,10 +20,12 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.3 as Dl
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     id: confPageMotorItem
@@ -237,6 +239,90 @@ Item {
                         onTriggered: {
                             directionSetupDialog.open()
                             directionSetup.scanCan()
+                        }
+                    }
+                    MenuItem {
+                        text: "Save XML"
+                        onTriggered: {
+                            if (Utility.requestFilePermission()) {
+                                fileDialogSave.close()
+                                fileDialogSave.open()
+                            } else {
+                                VescIf.emitMessageDialog(
+                                            "File Permissions",
+                                            "Unable to request file system permission.",
+                                            false, false)
+                            }
+                        }
+
+                        Dl.FileDialog {
+                            id: fileDialogSave
+                            title: "Please choose a file"
+                            nameFilters: ["XML File (*.xml)"]
+                            selectedNameFilter: "XML File (*.xml)"
+                            selectExisting: false
+                            selectMultiple: false
+                            onAccepted: {
+                                var path = fileUrl.toString()
+                                if (!path.toLowerCase().endsWith(".xml")) {
+                                    path += ".xml"
+                                }
+
+                                if (VescIf.mcConfig().saveXml(path, "MCConfiguration")) {
+                                    VescIf.emitStatusMessage("Mcconf Saved", true)
+                                } else {
+                                    VescIf.emitStatusMessage("Mcconf Save Failed", false)
+                                }
+
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                            onRejected: {
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                        }
+                    }
+                    MenuItem {
+                        text: "Load XML"
+                        onTriggered: {
+                            if (Utility.requestFilePermission()) {
+                                fileDialogLoad.close()
+                                fileDialogLoad.open()
+                            } else {
+                                VescIf.emitMessageDialog(
+                                            "File Permissions",
+                                            "Unable to request file system permission.",
+                                            false, false)
+                            }
+                        }
+
+                        Dl.FileDialog {
+                            id: fileDialogLoad
+                            title: "Please choose a file"
+                            nameFilters: ["XML File (*.xml)"]
+                            selectedNameFilter: "XML File (*.xml)"
+                            selectExisting: true
+                            selectMultiple: false
+                            onAccepted: {
+                                var path = fileUrl.toString()
+                                if (path.toLowerCase().endsWith(".xml")) {
+                                    if (VescIf.mcConfig().loadXml(path, "MCConfiguration")) {
+                                        VescIf.emitStatusMessage("Mcconf Loaded", true)
+                                    } else {
+                                        VescIf.emitStatusMessage("Mcconf Load Failed", false)
+                                    }
+                                } else {
+                                    VescIf.emitStatusMessage("Invalid File", false)
+                                }
+
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                            onRejected: {
+                                close()
+                                parent.forceActiveFocus()
+                            }
                         }
                     }
                 }

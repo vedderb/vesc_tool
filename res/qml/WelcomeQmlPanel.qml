@@ -74,6 +74,10 @@ Item {
         multiSettings.openDialog()
     }
 
+    function openWizardIMU() {
+        imuWizard.openDialog()
+    }
+
     function openBleSetup() {
         if (!VescIf.isPortConnected()) {
             VescIf.emitMessageDialog("BLE Setup",
@@ -93,6 +97,11 @@ Item {
 
     SetupWizardFoc {
         id: focWizard
+        dialogParent: container
+    }
+
+    SetupWizardIMU {
+        id: imuWizard
         dialogParent: container
     }
 

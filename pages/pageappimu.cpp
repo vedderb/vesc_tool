@@ -143,7 +143,6 @@ void PageAppImu::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->detectIMU->setVesc(mVesc);
         reloadParams();
 
         connect(mVesc->commands(), SIGNAL(valuesImuReceived(IMU_VALUES,uint)),

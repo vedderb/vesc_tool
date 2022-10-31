@@ -130,3 +130,9 @@ void PageWelcome::on_setupBluetoothButton_clicked()
 {
     QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "openBleSetup");
 }
+
+void PageWelcome::on_wizardIMUButton_clicked()
+{
+    QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "openWizardIMU");
+}
+

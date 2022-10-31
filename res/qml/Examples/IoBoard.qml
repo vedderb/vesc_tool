@@ -81,7 +81,7 @@ Item {
     Connections {
         target: mCommands
         
-        onIoBoardValRx: {
+        function onIoBoardValRx(val) {
             // Members of val
 //            val.id
 //            val.adc_1_4[ch]

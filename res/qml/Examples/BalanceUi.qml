@@ -146,7 +146,7 @@ Item {
     Connections {
         target: mCommands
         
-        onCustomAppDataReceived: {
+        function onCustomAppDataReceived(data) {
             
         }
     }

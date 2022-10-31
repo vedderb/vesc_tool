@@ -650,7 +650,7 @@ Item {
     Connections {
         target: VescIf
 
-        onFwUploadStatus: {
+        function onFwUploadStatus(status, progress, isOngoing) {
             if (isOngoing) {
                 uploadText.text = status + " (" + parseFloat(progress * 100.0).toFixed(2) + " %)"
             } else {
@@ -662,10 +662,11 @@ Item {
             cancelButton.enabled = isOngoing
         }
     }
+
     Connections {
         target: fwHelper
 
-        onFwUploadRes: {
+        function onFwUploadRes(res, isBootloader) {
             if (res) {
                 if(isBootloader) {
                         VescIf.emitMessageDialog("Bootloader Finished",
@@ -686,7 +687,7 @@ Item {
     Connections {
         target: VescIf
 
-        onFwRxChanged: {
+        function onFwRxChanged(rx, limited) {
             if (!rx) {
                 return;
             }

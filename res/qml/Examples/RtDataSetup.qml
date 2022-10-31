@@ -347,12 +347,12 @@ Item {
     Connections {
         target: mCommands
         
-        onValuesImuReceived: {
+        function onValuesImuReceived(values, mask) {
             inclineCanvas.incline = Math.tan(values.pitch) * 100
             inclineCanvas.requestPaint()
         }
 
-        onValuesSetupReceived: {
+        function onValuesSetupReceived(values, mask) {
             currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
             currentGauge.minimumValue = -currentGauge.maximumValue
             currentGauge.labelStep = Math.ceil(currentGauge.maximumValue / 20) * 5

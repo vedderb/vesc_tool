@@ -344,12 +344,12 @@ Item {
     Connections {
         target: VescIf
 
-        onFwRxChanged: {
+        function onFwRxChanged(rx, limited) {
             updateHwUi()
             updateAppUi()
         }
 
-        onQmlLoadDone: {
+        function onQmlLoadDone() {
             qmlLoadDialog.open()
         }
     }

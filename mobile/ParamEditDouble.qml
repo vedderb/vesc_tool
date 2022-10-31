@@ -35,7 +35,7 @@ Item {
     property bool createReady: false
 
     Component.onCompleted: {
-        if (params !== null) {
+        if (params != null) {
             if (Math.abs(params.getParamMaxDouble(paramName)) > params.getParamMinDouble(paramName)) {
                 maxVal = Math.abs(params.getParamMaxDouble(paramName))
             } else {
@@ -191,8 +191,8 @@ Item {
     Connections {
         target: params
 
-        onParamChangedDouble: {
-            if (src !== editor && name == paramName) {
+        function onParamChangedDouble(src, name, newParam) {
+            if (src !== editor && name === paramName) {
                 valueBox.realValue = newParam * params.getParamEditorScale(paramName)
                 percentageBox.value = Math.round((100.0 * newParam) / maxVal)
             }

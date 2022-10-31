@@ -33,7 +33,7 @@ Item {
     Connections {
         target: mCommands
         
-        onValuesReceived: { // values, mask
+        function onValuesReceived(values, mask) {
             // Members of values
 //            values.v_in
 //            values.temp_mos

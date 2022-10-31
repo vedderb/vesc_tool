@@ -35,7 +35,7 @@ Item {
     property bool createReady: false
 
     Component.onCompleted: {
-        if (params !== null) {
+        if (params != null) {
             nameText.text = params.getLongName(paramName)
             setBits(params.getParamInt(paramName))
 
@@ -209,8 +209,8 @@ Item {
     Connections {
         target: params
 
-        onParamChangedInt: {
-            if (src !== editor && name == paramName) {
+        function onParamChangedInt(src, name, newParam) {
+            if (src !== editor && name === paramName) {
                 setBits(newParam)
             }
         }

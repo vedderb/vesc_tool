@@ -250,7 +250,7 @@ Item {
     Connections {
         target: VescIf
 
-        onCustomConfigLoadDone: {
+        function onCustomConfigLoadDone() {
             updateEditors()
         }
     }

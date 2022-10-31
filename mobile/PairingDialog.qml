@@ -372,7 +372,7 @@ Item {
     Connections {
         target: VescIf
 
-        onPairingListUpdated: {
+        function onPairingListUpdated() {
             loadUuids()
         }
     }

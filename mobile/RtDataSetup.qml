@@ -657,11 +657,11 @@ Item {
 
         property string lastFault: ""
 
-        onValuesImuReceived: {
+        function onValuesImuReceived(values, mask) {
             inclineCanvas.incline = Math.tan(values.pitch) * 100
         }
 
-        onValuesSetupReceived: {
+        function onValuesSetupReceived(values, mask) {
             var currentMaxRound = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
             var currentMinRound = Math.floor(mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
 

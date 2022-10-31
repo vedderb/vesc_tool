@@ -220,7 +220,7 @@ Item {
     Connections {
         target: mMcConf
 
-        onParamChangedDouble: {
+        function onParamChangedDouble(src, name, newParam) {
             checkActive()
         }
     }
@@ -228,7 +228,7 @@ Item {
     Connections {
         target: VescIf
 
-        onUseImperialUnitsChanged: {
+        function onUseImperialUnitsChanged(useImperialUnits) {
             setFromMcConfTemp(VescIf.getProfile(index))
         }
     }

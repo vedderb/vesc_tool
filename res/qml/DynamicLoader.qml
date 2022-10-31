@@ -66,7 +66,7 @@ Item {
     Connections {
         target: QmlUi
 
-        onReloadQml: {
+        function onReloadQml(str) {
             Qt.createQmlObject(str, container, "myCode");
         }
     }

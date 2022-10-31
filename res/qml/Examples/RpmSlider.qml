@@ -108,7 +108,7 @@ Item {
         Connections {
             target: mCommands
 
-            onValuesReceived: {
+            function onValuesReceived(values, mask) {
                 rpmGauge.value = Math.abs(values.rpm) / 5
                 voltageGauge.value = Math.abs(values.v_in * values.duty_now)
             }

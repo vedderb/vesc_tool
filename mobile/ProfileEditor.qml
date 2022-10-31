@@ -130,7 +130,7 @@ Item {
     Connections {
         target: VescIf
 
-        onUseImperialUnitsChanged: {
+        function onUseImperialUnitsChanged(useImperialUnits) {
             updateSpeedBoxes()
         }
     }

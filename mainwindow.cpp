@@ -484,9 +484,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&mPollRtTimer, &QTimer::timeout, [this]() {
         if (ui->actionRtData->isChecked()) {
+            mVesc->commands()->getStats(0xFFFFFFFF);
             mVesc->commands()->getValues();
             mVesc->commands()->getValuesSetup();
-            mVesc->commands()->getStats(0xFFFFFFFF);
             mPollRtTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
         }
     });

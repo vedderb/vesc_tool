@@ -91,7 +91,7 @@ Item {
                     focus: true
 
                     onTextChanged: {
-                        if (params !== null) {
+                        if (params != null) {
                             if (params.getUpdateOnly() !== paramName) {
                                 params.setUpdateOnly("")
                             }
@@ -147,8 +147,8 @@ Item {
     Connections {
         target: params
 
-        onParamChangedQString: {
-            if (src !== editor && name == paramName) {
+        function onParamChangedQString(src, name, newParam) {
+            if (src !== editor && name === paramName) {
                 stringInput.text = newParam
             }
         }

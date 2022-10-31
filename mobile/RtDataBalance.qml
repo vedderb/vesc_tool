@@ -194,7 +194,7 @@ Item {
     Connections {
         target: mCommands
 
-        onDecodedBalanceReceived: {
+        function onDecodedBalanceReceived(values) {
             pitchGauge.value = values.pitch_angle
             rollGauge.value = values.roll_angle
 

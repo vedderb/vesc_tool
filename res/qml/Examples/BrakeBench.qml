@@ -239,10 +239,10 @@ Item {
         
         property var valOther: []
         
-        onValuesReceived: { // values, mask
+        function onValuesReceived(values, mask) {
             var friction = 10.0
                     
-            if (values.vesc_id == canBox.realValue) {
+            if (values.vesc_id === canBox.realValue) {
                 valOther = values
             } else {
                 var powerDrive = values.v_in * values.current_in

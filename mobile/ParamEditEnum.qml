@@ -35,7 +35,7 @@ Item {
     property bool createReady: false
 
     Component.onCompleted: {
-        if (params !== null) {
+        if (params != null) {
             nameText.text = params.getLongName(paramName)
             enumBox.model = params.getParamEnumNames(paramName)
             enumBox.currentIndex = params.getParamEnum(paramName)
@@ -88,7 +88,7 @@ Item {
                 }
 
                 onCurrentIndexChanged: {
-                    if (params !== null && createReady) {
+                    if (params != null && createReady) {
                         if (params.getUpdateOnly() !== paramName) {
                             params.setUpdateOnly("")
                         }
@@ -143,8 +143,8 @@ Item {
     Connections {
         target: params
 
-        onParamChangedEnum: {
-            if (src !== editor && name == paramName) {
+        function onParamChangedEnum(src, name, newParam) {
+            if (src !== editor && name === paramName) {
                 enumBox.currentIndex = newParam
             }
         }

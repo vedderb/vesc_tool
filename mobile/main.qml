@@ -1027,7 +1027,7 @@ ApplicationWindow {
 
     Connections {
         target: VescIf
-        onPortConnectedChanged: {
+        function onPortConnectedChanged() {
             connectedText.text = VescIf.getConnectedPortName()
             if (!VescIf.isPortConnected()) {
                 confTimer.mcConfRx = false
@@ -1046,18 +1046,18 @@ ApplicationWindow {
             }
         }
 
-        onUnintentionalBleDisconnect: {
+        function onUnintentionalBleDisconnect() {
             bleDisconnectTimer.trysLeft = 5
             bleDisconnectTimer.start()
         }
 
-        onStatusMessage: {
+        function onStatusMessage(msg, isGood) {
             connectedText.text = msg
             connectedRect.color = isGood ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("red")
             statusTimer.restart()
         }
 
-        onMessageDialog: {
+        function onMessageDialog(title, msg, isGood, richText) {
             vescDialog.title = title
             vescDialogLabel.text = (richText ? "<style>a:link { color: lightblue; }</style>" : "") + msg
             vescDialogLabel.textFormat = richText ? Text.RichText : Text.AutoText
@@ -1065,7 +1065,7 @@ ApplicationWindow {
             vescDialog.open()
         }
 
-        onFwRxChanged: {
+        function onFwRxChanged(rx, limited) {
             if (rx) {
                 if (limited && !VescIf.getFwSupportsConfiguration()) {
                     confPageMotor.enabled = false
@@ -1087,11 +1087,11 @@ ApplicationWindow {
             updateAppUi()
         }
 
-        onQmlLoadDone: {
+        function onQmlLoadDone() {
             qmlLoadDialog.open()
         }
 
-        onCustomConfigLoadDone: {
+        function onCustomConfigLoadDone() {
             updateConfCustom()
         }
     }
@@ -1099,7 +1099,7 @@ ApplicationWindow {
     Connections {
         target: mMcConf
 
-        onUpdated: {
+        function onUpdated() {
             confTimer.mcConfRx = true
         }
     }
@@ -1107,14 +1107,14 @@ ApplicationWindow {
     Connections {
         target: mAppConf
 
-        onUpdated: {
+        function onUpdated() {
             confTimer.appConfRx = true
         }
     }
 
     Connections {
         target: mCommands
-        onValuesImuReceived: {
+        function onValuesImuReceived(values, mask) {
             if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
                 vesc3dLoader.item.setRotation(values.roll, values.pitch,
                                               useYawBox.checked ? values.yaw : 0)
@@ -1122,7 +1122,7 @@ ApplicationWindow {
             }
         }
 
-        onDeserializeConfigFailed: {
+        function onDeserializeConfigFailed(isMc, isApp) {
             if (isMc) {
                 confTimer.mcConfRx = true
             }

@@ -160,7 +160,7 @@ Item {
     Connections {
         target: mCommands
 
-        onDecodedAdcReceived: {
+        function onDecodedAdcReceived(value, voltage, value2, voltage2) {
             valueNow = value
             vNow = voltage
             valueNow2 = value2

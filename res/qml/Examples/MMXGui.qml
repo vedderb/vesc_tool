@@ -220,7 +220,7 @@ Item {
     Connections {
         target: mCommands
         
-        onValuesReceived: {
+        function onValuesReceived(values, mask) {
             bpmNowGauge.value = erpm_to_bpm(Math.abs(values.rpm))
         }
     }

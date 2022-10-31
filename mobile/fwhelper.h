@@ -38,7 +38,6 @@ public:
                                                  bool isBootloader, bool isIncluded, bool fwdCan, QString BLfilename);
 
 signals:
-
     void fwUploadRes(bool res, bool isBootloader);
 
 public slots:

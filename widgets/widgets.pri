@@ -11,7 +11,6 @@ FORMS += \
     $$PWD/detectfoc.ui \
     $$PWD/detectfocencoder.ui \
     $$PWD/detectfochall.ui \
-    $$PWD/detectimu.ui \
     $$PWD/ppmmap.ui \
     $$PWD/adcmap.ui \
     $$PWD/nrfpair.ui \
@@ -42,7 +41,6 @@ HEADERS += \
     $$PWD/detectfoc.h \
     $$PWD/detectfocencoder.h \
     $$PWD/detectfochall.h \
-    $$PWD/detectimu.h \
     $$PWD/ppmmap.h \
     $$PWD/adcmap.h \
     $$PWD/rtdatatext.h \
@@ -80,7 +78,6 @@ SOURCES += \
     $$PWD/detectfoc.cpp \
     $$PWD/detectfocencoder.cpp \
     $$PWD/detectfochall.cpp \
-    $$PWD/detectimu.cpp \
     $$PWD/ppmmap.cpp \
     $$PWD/adcmap.cpp \
     $$PWD/rtdatatext.cpp \

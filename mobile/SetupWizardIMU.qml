@@ -7,11 +7,11 @@ import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 //import QtGraphicalEffects 1.0
 //import QtQuick.Controls.Material 2.2
-//
-//import Vedder.vesc.vescinterface 1.0
+
+import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
-//import Vedder.vesc.utility 1.0
+import Vedder.vesc.utility 1.0
 //import Vedder.vesc.datatypes 1.0
 
 Item {
@@ -74,14 +74,14 @@ Item {
         target: mCommands
 
         //        IMU_VALUES() {
-            //            roll = 0; pitch = 0; yaw = 0;
-            //            accX = 0; accY = 0; accZ = 0;
-            //            gyroX = 0; gyroY = 0; gyroZ = 0;
-            //            magX = 0; magY = 0; magZ = 0;
-            //            q0 = 1; q1 = 0; q2 = 0; q3 = 0;
-            //            vesc_id = 0;
+        //            roll = 0; pitch = 0; yaw = 0;
+        //            accX = 0; accY = 0; accZ = 0;
+        //            gyroX = 0; gyroY = 0; gyroZ = 0;
+        //            magX = 0; magY = 0; magZ = 0;
+        //            q0 = 1; q1 = 0; q2 = 0; q3 = 0;
+        //            vesc_id = 0;
         //        }
-        onValuesImuReceived: {
+        function onValuesImuReceived(values) {
 
             // Update values
             filteredIMUValues.roll = values.roll
@@ -162,6 +162,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         font.bold: true
                         font.underline: true
+                        font.pointSize: 20
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
@@ -237,6 +238,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         font.bold: true
                         font.underline: true
+                        font.pointSize: 20
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
@@ -280,6 +282,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         font.bold: true
                         font.underline: true
+                        font.pointSize: 20
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
@@ -352,6 +355,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         font.bold: true
                         font.underline: true
+                        font.pointSize: 20
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
@@ -411,7 +415,7 @@ Item {
                 }// Column Layout
             }// Item (Accel Y Calibration)
 
-            Item{// Accel Z Calibration #3
+            Item{// Accel Z Calibration #4
                 width: parent.width
                 height: parent.height
 
@@ -424,6 +428,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         font.bold: true
                         font.underline: true
+                        font.pointSize: 20
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
@@ -496,6 +501,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         font.bold: true
                         font.underline: true
+                        font.pointSize: 20
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
@@ -535,7 +541,7 @@ Item {
                 }// Column Layout
             }// Item (roll Calibration)
 
-            Item{// pitch Callibration
+            Item{// pitch Callibration #6
                 width: parent.width
                 height: parent.height
 
@@ -548,6 +554,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         font.bold: true
                         font.underline: true
+                        font.pointSize: 20
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
@@ -586,7 +593,7 @@ Item {
                 }// Column Layout
             }// Item (pitch Calibration)
 
-            Item{// yaw Callibration
+            Item{// yaw Callibration #7
                 width: parent.width
                 height: parent.height
 
@@ -599,6 +606,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         font.bold: true
                         font.underline: true
+                        font.pointSize: 20
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width

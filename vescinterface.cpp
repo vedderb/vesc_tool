@@ -404,8 +404,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             os << mLastImuValues.gyroZ << ";";
 
             os << msPos << ";";
-            os << fixed << qSetRealNumberPrecision(8) << lat << ";";
-            os << fixed << qSetRealNumberPrecision(8) << lon << ";";
+            os << Qt::fixed << qSetRealNumberPrecision(8) << lat << ";";
+            os << Qt::fixed << qSetRealNumberPrecision(8) << lon << ";";
             os << alt << ";";
             os << gVel << ";";
             os << vVel << ";";
@@ -677,7 +677,7 @@ void VescInterface::deleteProfile(int index)
 void VescInterface::moveProfileUp(int index)
 {
     if (index > 0 && index < mProfiles.size()) {
-        mProfiles.swap(index, index - 1);
+        mProfiles.swapItemsAt(index, index - 1);
         emit profilesUpdated();
     }
 }
@@ -685,7 +685,7 @@ void VescInterface::moveProfileUp(int index)
 void VescInterface::moveProfileDown(int index)
 {
     if (index >= 0 && index < (mProfiles.size() - 1)) {
-        mProfiles.swap(index, index + 1);
+        mProfiles.swapItemsAt(index, index + 1);
         emit profilesUpdated();
     }
 }

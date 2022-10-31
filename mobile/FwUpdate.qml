@@ -294,13 +294,10 @@ Item {
                     Dl.FileDialog {
                         id: fileDialog
                         title: "Choose a firmware file"
-                        nameFilters: ["Firmware File (*.bin)"]
-                        selectedNameFilter: "Firmware File (*.bin)"
+                        nameFilters: ["*"]
+                        selectedNameFilter: "*"
                         onAccepted: {
-                            if (fileUrl.toString().toLowerCase().indexOf(".bin") !== -1) {
-                                customFwText.text = fileUrl
-                            }
-
+                            customFwText.text = fileUrl
                             close()
                             parent.forceActiveFocus()
                         }

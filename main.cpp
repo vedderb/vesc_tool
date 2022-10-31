@@ -486,7 +486,7 @@ int main(int argc, char *argv[])
         // from the mobile UI. In the mobile UI these are provided as singletons, whereas
         // in the desktop GUI they are provided as context properties.
         qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
-        qmlRegisterType<VescInterface>("Vedder.vesc.utility", 1, 0, "Utility2");
+        qmlRegisterType<Utility>("Vedder.vesc.utility", 1, 0, "Utility2");
 
         if (!loadQml.isEmpty() || loadQmlVesc) {
             vesc = new VescInterface;

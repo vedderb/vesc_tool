@@ -97,7 +97,7 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
 {
     VByteArray vb;
     vb.vbAppendUint16(0); // Flags: 0
-    vb.append(codeStr);
+    vb.append(codeStr.toLocal8Bit());
 
     if (vb.at(vb.size() - 1) != '\0') {
         vb.append('\0');

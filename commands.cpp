@@ -18,6 +18,7 @@
     */
 
 #include "commands.h"
+#include "qelapsedtimer.h"
 #include <QDebug>
 #include <QEventLoop>
 
@@ -2376,7 +2377,7 @@ QByteArray Commands::fileBlockRead(QString path)
         return res;
     };
 
-    QTime t;
+    QElapsedTimer t;
     t.start();
 
     QByteArray data;
@@ -2444,7 +2445,7 @@ bool Commands::fileBlockWrite(QString path, QByteArray data)
     qint32 size = data.size();
     int sz = data.size() > chunkSize ? chunkSize : data.size();
 
-    QTime t;
+    QElapsedTimer t;
     t.start();
 
     qint32 offset = 0;

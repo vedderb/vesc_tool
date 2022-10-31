@@ -181,8 +181,7 @@ Item {
                         Dl.FileDialog {
                             id: fileDialogSave
                             title: "Please choose a file"
-                            nameFilters: ["XML File (*.xml)"]
-                            selectedNameFilter: "XML File (*.xml)"
+                            nameFilters: ["*"]
                             selectExisting: false
                             selectMultiple: false
                             onAccepted: {
@@ -223,20 +222,15 @@ Item {
                         Dl.FileDialog {
                             id: fileDialogLoad
                             title: "Please choose a file"
-                            nameFilters: ["XML File (*.xml)"]
-                            selectedNameFilter: "XML File (*.xml)"
+                            nameFilters: ["*"]
                             selectExisting: true
                             selectMultiple: false
                             onAccepted: {
                                 var path = fileUrl.toString()
-                                if (path.toLowerCase().endsWith(".xml")) {
-                                    if (VescIf.customConfig(confInd).loadXml(path, "CustomConfiguration")) {
-                                        VescIf.emitStatusMessage("Custom Config Loaded", true)
-                                    } else {
-                                        VescIf.emitStatusMessage("Load Failed", false)
-                                    }
+                                if (VescIf.customConfig(confInd).loadXml(path, "CustomConfiguration")) {
+                                    VescIf.emitStatusMessage("Custom Config Loaded", true)
                                 } else {
-                                    VescIf.emitStatusMessage("Invalid File", false)
+                                    VescIf.emitStatusMessage("Load Failed", false)
                                 }
 
                                 close()

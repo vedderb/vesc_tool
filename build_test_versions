@@ -5,7 +5,7 @@ set -e
 touch build/test_all/"Build Date $(date '+%Y-%m-%d')"
 
 # Linux
-export PATH=/opt/Qt/5.12-static/bin:$PATH
+export PATH=/opt/Qt/5.15-static/bin:$PATH
 rm -rf build/lin/*
 
 qmake -config release "CONFIG += release_lin build_original"
@@ -25,32 +25,29 @@ rm -rf build/win/obj
 mv build/win/vesc_tool*.exe build/test_all/vesc_tool_test_windows.exe
 
 # Android
-export ANDROID_HOME=~/Android/Latest
+export ANDROID_HOME=~/Android/Latest/Sdk
 export ANDROID_NDK_HOST=linux-x86_64
 export ANDROID_NDK_PLATFORM=android-23
 export ANDROID_NDK_TOOLCHAIN_VERSION=4.9
-export ANDROID_API_VERSION=android-23
-export ANDROID_NDK_ROOT=$ANDROID_HOME/Ndk
-export ANDROID_SDK_ROOT=$ANDROID_HOME/Sdk
+export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/23.1.7779620
+export ANDROID_SDK_ROOT=$ANDROID_HOME
 
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 export PATH=$PATH:$ANDROID_HOME/Sdk/tools:/usr/bin:$JAVA_HOME/bin
 
 rm -rf build/android/*
 
-# armv7
-export PATH=/opt/Qt3/5.12.7/android_armv7/bin/:$PATH
-export ANDROID_NDK_TOOLCHAIN_PREFIX=arm-linux-androideabi
-export ANDROID_NDK_TOOLS_PREFIX=arm-linux-androideabi
+export PATH=/opt/Qt5/5.15.2/android/bin/:$PATH
 
 # Mobile
-qmake -config release "CONFIG += release_android build_mobile vt_test_version"
+qmake -config release "CONFIG += release_android build_mobile vt_test_version" ANDROID_ABIS="armeabi-v7a" -spec android-clang
+#qmake -config release "CONFIG += release_android build_mobile vt_test_version" ANDROID_ABIS="arm64-v8a" -spec android-clang
 make clean
 make -j8
 make install INSTALL_ROOT=build/android/build
-androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-libvesc_tool.so-deployment-settings.json --android-platform android-29
+androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-vesc_tool-deployment-settings.json --android-platform android-31
 mv build/android/build/build/outputs/apk/debug/build-debug.apk build/test_all/vesc_tool_test_android.apk
 rm -rf build/android/build
 rm -rf build/android/obj
-rm -f build/android/libvesc_tool.so
+rm -f build/android/libvesc_tool*
 

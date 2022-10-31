@@ -74,11 +74,40 @@ Item {
                     logFilePicker.folder = rtLogFileText.text
                     logFilePicker.enabled = true
                     logFilePicker.visible = true
+//                    folderDialog.close()
+//                    folderDialog.open()
                 } else {
                     VescIf.emitMessageDialog(
                                 "File Permissions",
                                 "Unable to request file system permission.",
                                 false, false)
+                }
+            }
+
+            FolderDialog {
+                id: folderDialog
+                title: "Please choose a folder"
+                onAccepted: {
+                    rtLogFileText.text = folderDialog.folder
+                    close()
+                    parent.forceActiveFocus()
+                }
+                onRejected: {
+                    close()
+                    parent.forceActiveFocus()
+                }
+            }
+
+            DirectoryPicker {
+                id: logFilePicker
+                anchors.fill: parent
+                showDotAndDotDot: true
+                visible: false
+                enabled: false
+                parent: dialogParent
+
+                onDirSelected: {
+                    rtLogFileText.text = fileName
                 }
             }
         }
@@ -166,19 +195,6 @@ Item {
                     rtLogEnBox.checked = VescIf.isRtLogOpen()
                 }
             }
-        }
-    }
-
-    DirectoryPicker {
-        id: logFilePicker
-        anchors.fill: parent
-        showDotAndDotDot: true
-        visible: false
-        enabled: false
-        parent: dialogParent
-
-        onDirSelected: {
-            rtLogFileText.text = fileName
         }
     }
 }

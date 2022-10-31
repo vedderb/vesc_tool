@@ -166,7 +166,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
             ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
 
             double upper = ui->plot->xAxis->range().upper;
-            double progress = ui->plot->xAxis->pixelToCoord(event->x()) / upper;
+            double progress = ui->plot->xAxis->pixelToCoord(event->position().x()) / upper;
             double diff = event->angleDelta().y();
             double d1 = diff * progress;
             double d2 = diff * (1.0 - progress);

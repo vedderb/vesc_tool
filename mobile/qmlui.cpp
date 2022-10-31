@@ -18,7 +18,6 @@
     */
 
 #include "qmlui.h"
-#include "fwhelper.h"
 
 #include <QQuickStyle>
 #include <QApplication>

@@ -258,16 +258,11 @@ Item {
                         Dl.FileDialog {
                             id: fileDialogSave
                             title: "Please choose a file"
-                            nameFilters: ["XML File (*.xml)"]
-                            selectedNameFilter: "XML File (*.xml)"
+                            nameFilters: ["*"]
                             selectExisting: false
                             selectMultiple: false
                             onAccepted: {
                                 var path = fileUrl.toString()
-                                if (!path.toLowerCase().endsWith(".xml")) {
-                                    path += ".xml"
-                                }
-
                                 if (VescIf.mcConfig().saveXml(path, "MCConfiguration")) {
                                     VescIf.emitStatusMessage("Mcconf Saved", true)
                                 } else {
@@ -300,20 +295,15 @@ Item {
                         Dl.FileDialog {
                             id: fileDialogLoad
                             title: "Please choose a file"
-                            nameFilters: ["XML File (*.xml)"]
-                            selectedNameFilter: "XML File (*.xml)"
+                            nameFilters: ["*"]
                             selectExisting: true
                             selectMultiple: false
                             onAccepted: {
                                 var path = fileUrl.toString()
-                                if (path.toLowerCase().endsWith(".xml")) {
-                                    if (VescIf.mcConfig().loadXml(path, "MCConfiguration")) {
-                                        VescIf.emitStatusMessage("Mcconf Loaded", true)
-                                    } else {
-                                        VescIf.emitStatusMessage("Mcconf Load Failed", false)
-                                    }
+                                if (VescIf.mcConfig().loadXml(path, "MCConfiguration")) {
+                                    VescIf.emitStatusMessage("Mcconf Loaded", true)
                                 } else {
-                                    VescIf.emitStatusMessage("Invalid File", false)
+                                    VescIf.emitStatusMessage("Mcconf Load Failed", false)
                                 }
 
                                 close()

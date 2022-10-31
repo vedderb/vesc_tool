@@ -969,8 +969,10 @@ bool MapWidget::event(QEvent *event)
                            QPointF(0, 0),
                            QPoint(0, 0),
                            QPoint(0, 120),
-                           0, Qt::Vertical, nullptr,
-                           ke->modifiers());
+                           Qt::MouseButtons(),
+                           ke->modifiers(),
+                           Qt::NoScrollPhase,
+                           false);
             wheelEvent(&we);
             return true;
         } else if (ke->key() == Qt::Key_Down) {
@@ -978,8 +980,10 @@ bool MapWidget::event(QEvent *event)
                            QPointF(0, 0),
                            QPoint(0, 0),
                            QPoint(0, -120),
-                           0, Qt::Vertical, nullptr,
-                           ke->modifiers());
+                           Qt::MouseButtons(),
+                           ke->modifiers(),
+                           Qt::NoScrollPhase,
+                           false);
             wheelEvent(&we);
             return true;
         }

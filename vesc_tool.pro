@@ -339,3 +339,8 @@ ios {
     QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1,2
 }
 CONFIG -= warn_on
+
+contains(ANDROID_TARGET_ARCH,) {
+    ANDROID_ABIS = \
+        armeabi-v7a
+}

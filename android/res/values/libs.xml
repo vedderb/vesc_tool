@@ -21,5 +21,7 @@
     <array name="bundled_in_assets">
         <!-- %%INSERT_BUNDLED_IN_ASSETS%% -->
     </array>
-
+    <array name="load_local_libs">
+        <!-- %%INSERT_LOCAL_LIBS%% -->
+    </array>
 </resources>

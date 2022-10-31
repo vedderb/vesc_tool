@@ -12,7 +12,6 @@ import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
-//import Vedder.vesc.datatypes 1.0
 
 Item {
     id: topItem
@@ -81,7 +80,7 @@ Item {
         //            q0 = 1; q1 = 0; q2 = 0; q3 = 0;
         //            vesc_id = 0;
         //        }
-        function onValuesImuReceived(values) {
+        onValuesImuReceived: {
 
             // Update values
             filteredIMUValues.roll = values.roll

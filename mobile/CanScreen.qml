@@ -293,7 +293,7 @@ Item {
                     name = "BMS (" + params.hw + ")"
                 } else {
                     devicePath = theme + "icons/Electronics-96.png"
-                    name = "BMS (" + params.hw + ")"
+                    name = "Device (" + params.hw + ")"
                 }
                 name = name.replace("_", " ")
 
@@ -312,7 +312,7 @@ Item {
                         name = "BMS (" + params.hw + ")";
                     } else {
                         devicePath = theme + "icons/Electronics-96.png"
-                        name = params.hw;
+                        name = "Device (" + params.hw + ")"
                     }
                     name = name.replace("_", " ")
                     canModel.append({"name": name,

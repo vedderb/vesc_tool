@@ -275,8 +275,6 @@ Item {
                                 if (Utility.requestFilePermission()) {
                                     fileDialog.close()
                                     fileDialog.open()
-                                    //filePicker.enabled = true
-                                    //filePicker.visible = true
                                 } else {
                                     VescIf.emitMessageDialog(
                                                 "File Permissions",
@@ -293,38 +291,22 @@ Item {
                         }
                     }
 
-                    FilePicker {
-                        id: filePicker
-                        anchors.fill: parent
-                        showDotAndDotDot: true
-                        nameFilters: "*.bin"
-                        visible: false
-                        enabled: false
-
-                        onFileSelected: {
-                            customFwText.text = currentFolder() + "/" + fileName
-                            visible = false
-                            enabled = false
-                        }
-                    }
                     Dl.FileDialog {
                         id: fileDialog
-                        title: "Please choose a file"
+                        title: "Choose a firmware file"
                         nameFilters: ["Firmware File (*.bin)"]
-                        selectedNameFilter : "Firmware File (*.bin)"
+                        selectedNameFilter: "Firmware File (*.bin)"
                         onAccepted: {
-                            var substring = ".bin";
-                            if(fileDialog.fileUrl.toString().indexOf(substring) !== -1) {
-                                customFwText.text = fileDialog.fileUrl
-                        } else {
+                            if (fileUrl.toString().toLowerCase().indexOf(".bin") !== -1) {
+                                customFwText.text = fileUrl
+                            }
 
-                        }
-                            console.log("You chose: " + fileDialog.fileUrls)
-                            fileDialog.close()
+                            close()
+                            parent.forceActiveFocus()
                         }
                         onRejected: {
-                            console.log("Canceled")
-                            fileDialog.close()
+                            close()
+                            parent.forceActiveFocus()
                         }
                     }
                 }

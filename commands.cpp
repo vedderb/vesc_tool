@@ -425,6 +425,10 @@ void Commands::processPacket(QByteArray data)
         emit ackReceived("APPCONF Write OK");
         break;
 
+    case COMM_SET_APPCONF_NO_STORE:
+        emit ackReceived("APPCONF_NO_STORE Write OK");
+        break;
+
     case COMM_CUSTOM_APP_DATA:
         emit customAppDataReceived(vb);
         break;
@@ -1351,6 +1355,16 @@ void Commands::setAppConf()
     if (mAppConfig) {
         VByteArray vb;
         vb.vbAppendInt8(COMM_SET_APPCONF);
+        mAppConfig->serialize(vb);
+        emitData(vb);
+    }
+}
+
+void Commands::setAppConfNoStore()
+{
+    if (mAppConfig) {
+        VByteArray vb;
+        vb.vbAppendInt8(COMM_SET_APPCONF_NO_STORE);
         mAppConfig->serialize(vb);
         emitData(vb);
     }

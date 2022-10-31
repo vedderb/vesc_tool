@@ -92,8 +92,8 @@ public:
 
     void getXML(QXmlStreamWriter &stream, QString configName);
     bool setXML(QXmlStreamReader &stream, QString configName);
-    bool saveXml(QString fileName, QString configName);
-    bool loadXml(QString fileName, QString configName);
+    Q_INVOKABLE bool saveXml(QString fileName, QString configName);
+    Q_INVOKABLE bool loadXml(QString fileName, QString configName);
     QString xmlStatus();
     QString saveCompressed(QString configName);
     bool loadCompressed(QString data, QString configName);

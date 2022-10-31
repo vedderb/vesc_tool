@@ -69,6 +69,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("getAppConf()");
         addItem("getAppConfDefault()");
         addItem("setAppConf()");
+        addItem("setAppConfNoStore()");
         addItem("getMcconf()");
         addItem("getMcconfDefault()");
         addItem("setMcconf(check)");
@@ -270,6 +271,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("waitMotorStop(VescIf, erpmTres, timeoutMs)");
         addItem("measureEncoderBlocking(VescIf, current)");
         addItem("sleepWithEventLoop(timeMs)");
+        addItem("readInternalImuType(VescIf)");
         level--;
     }
 

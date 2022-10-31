@@ -68,6 +68,7 @@ private slots:
     void on_experimentSavePdfButton_clicked();
     void on_experimentClearDataButton_clicked();
     void on_logRtButton_toggled(bool checked);
+    void on_experimentSaveCsvButton_clicked();
 
 private:
     Ui::PageRtData *ui;

@@ -1108,6 +1108,10 @@ bool ConfigParams::setXML(QXmlStreamReader &stream, QString configName)
 
 bool ConfigParams::saveXml(QString fileName, QString configName)
 {
+    if (fileName.startsWith("file:/")) {
+        fileName.remove(0, 6);
+    }
+
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly)) {
         mXmlStatus = tr("Could not open %1 for writing").arg(fileName);
@@ -1130,6 +1134,10 @@ bool ConfigParams::saveXml(QString fileName, QString configName)
 
 bool ConfigParams::loadXml(QString fileName, QString configName)
 {
+    if (fileName.startsWith("file:/")) {
+        fileName.remove(0, 6);
+    }
+
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
         mXmlStatus = tr("Could not open %1 for reading").arg(fileName);

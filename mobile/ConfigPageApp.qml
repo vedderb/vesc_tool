@@ -20,6 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.3 as Dl
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -275,6 +276,90 @@ Item {
                         text: "Calibrate IMU..."
                         onTriggered: {
                             detectImu.open()
+                        }
+                    }
+                    MenuItem {
+                        text: "Save XML"
+                        onTriggered: {
+                            if (Utility.requestFilePermission()) {
+                                fileDialogSave.close()
+                                fileDialogSave.open()
+                            } else {
+                                VescIf.emitMessageDialog(
+                                            "File Permissions",
+                                            "Unable to request file system permission.",
+                                            false, false)
+                            }
+                        }
+
+                        Dl.FileDialog {
+                            id: fileDialogSave
+                            title: "Please choose a file"
+                            nameFilters: ["XML File (*.xml)"]
+                            selectedNameFilter: "XML File (*.xml)"
+                            selectExisting: false
+                            selectMultiple: false
+                            onAccepted: {
+                                var path = fileUrl.toString()
+                                if (!path.toLowerCase().endsWith(".xml")) {
+                                    path += ".xml"
+                                }
+
+                                if (VescIf.appConfig().saveXml(path, "APPConfiguration")) {
+                                    VescIf.emitStatusMessage("Appconf Saved", true)
+                                } else {
+                                    VescIf.emitStatusMessage("Appconf Save Failed", false)
+                                }
+
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                            onRejected: {
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                        }
+                    }
+                    MenuItem {
+                        text: "Load XML"
+                        onTriggered: {
+                            if (Utility.requestFilePermission()) {
+                                fileDialogLoad.close()
+                                fileDialogLoad.open()
+                            } else {
+                                VescIf.emitMessageDialog(
+                                            "File Permissions",
+                                            "Unable to request file system permission.",
+                                            false, false)
+                            }
+                        }
+
+                        Dl.FileDialog {
+                            id: fileDialogLoad
+                            title: "Please choose a file"
+                            nameFilters: ["XML File (*.xml)"]
+                            selectedNameFilter: "XML File (*.xml)"
+                            selectExisting: true
+                            selectMultiple: false
+                            onAccepted: {
+                                var path = fileUrl.toString()
+                                if (path.toLowerCase().endsWith(".xml")) {
+                                    if (VescIf.appConfig().loadXml(path, "APPConfiguration")) {
+                                        VescIf.emitStatusMessage("Appconf Loaded", true)
+                                    } else {
+                                        VescIf.emitStatusMessage("Appconf Load Failed", false)
+                                    }
+                                } else {
+                                    VescIf.emitStatusMessage("Invalid File", false)
+                                }
+
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                            onRejected: {
+                                close()
+                                parent.forceActiveFocus()
+                            }
                         }
                     }
                 }

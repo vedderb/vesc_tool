@@ -619,6 +619,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="experimentSaveCsvButton">
+             <property name="text">
+              <string>CSV</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="experimentSavePngButton">
              <property name="text">
               <string>PNG</string>

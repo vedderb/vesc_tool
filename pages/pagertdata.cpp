@@ -809,3 +809,49 @@ void PageRtData::on_logRtButton_toggled(bool checked)
         mVesc->closeRtLogFile();
     }
 }
+
+void PageRtData::on_experimentSaveCsvButton_clicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this,
+                                                    tr("Save Plot"), "",
+                                                    tr("Csv files (*.csv)"));
+
+    if (filename.isEmpty()) {
+        return;
+    }
+
+    if (!filename.toLower().endsWith(".csv")) {
+        filename.append(".csv");
+    }
+
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Save Plot",
+                              "Could not open\n" + filename + "\nfor writing");
+        return;
+    }
+
+    QTextStream os(&file);
+
+    int maxLen = 0;
+    for (EXPERIMENT_PLOT p: mExperimentPlots) {
+        os << p.label << " x;" << p.label << " y;";
+        if (p.xData.length() > maxLen) {
+            maxLen = p.xData.length();
+        }
+    }
+    os << "\n";
+
+    for (int i = 0;i < maxLen;i++) {
+        for (EXPERIMENT_PLOT p: mExperimentPlots) {
+            if (p.xData.length() > i) {
+                os << p.xData.at(i) << ";" << p.yData.at(i) << ";";
+            } else {
+                os << ";;";
+            }
+        }
+        os << "\n";
+    }
+
+    file.close();
+}

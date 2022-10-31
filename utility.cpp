@@ -1593,6 +1593,21 @@ QString Utility::strCrc32(QString str)
     return QString::number(crc);
 }
 
+QString Utility::readInternalImuType(VescInterface *vesc)
+{
+    QString res = "Timeout";
+    auto conn = connect(vesc->commands(), &Commands::printReceived, [&](QString str) {
+            res = str;
+    });
+
+    vesc->commands()->sendTerminalCmdSync("imu_type_internal");
+    waitSignal(vesc->commands(), SIGNAL(printReceived(QString)), 2000);
+
+    disconnect(conn);
+
+    return res;
+}
+
 void Utility::llhToXyz(double lat, double lon, double height, double *x, double *y, double *z)
 {
     double sinp = sin(lat * M_PI / 180.0);

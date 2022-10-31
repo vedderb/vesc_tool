@@ -23,21 +23,7 @@
 #include <QObject>
 #include <QDir>
 #include "vescinterface.h"
-
-struct VescPackage {
-
-public:
-    VescPackage () {
-        name = "VESC Package Name";
-        qmlIsFullscreen = false;
-    }
-
-    QString name;
-    QString description;
-    QByteArray lispData;
-    QString qmlFile;
-    bool qmlIsFullscreen;
-};
+#include "datatypes.h"
 
 class CodeLoader : public QObject
 {
@@ -46,9 +32,9 @@ public:
     explicit CodeLoader(QObject *parent = nullptr);
 
     VescInterface *vesc() const;
-    void setVesc(VescInterface *vesc);
+    Q_INVOKABLE void setVesc(VescInterface *vesc);
 
-    bool lispErase();
+    Q_INVOKABLE bool lispErase();
     QByteArray lispPackImports(QString codeStr, QString editorPath = QDir::currentPath());
     QPair<QString, QList<QPair<QString, QByteArray> > > lispUnpackImports(QByteArray data);
     bool lispUpload(VByteArray vb);
@@ -56,15 +42,19 @@ public:
     bool lispStream(VByteArray vb, qint8 mode);
     QString lispRead(QWidget *parent = nullptr);
 
-    bool qmlErase();
+    Q_INVOKABLE bool qmlErase();
     bool qmlUpload(QString script, bool isFullscreen);
 
     QByteArray packVescPackage(VescPackage pkg);
     VescPackage unpackVescPackage(QByteArray data);
     bool installVescPackage(VescPackage pkg);
-    bool installVescPackage(QByteArray data);
+    Q_INVOKABLE bool installVescPackage(QByteArray data);
+
+    Q_INVOKABLE QVariantList reloadPackageArchive();
+    Q_INVOKABLE bool downloadPackageArchive();
 
 signals:
+    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
 
 private:
     VescInterface *mVesc;

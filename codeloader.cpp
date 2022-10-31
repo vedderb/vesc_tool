@@ -22,6 +22,11 @@
 #include <QEventLoop>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QUrl>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
 
 CodeLoader::CodeLoader(QObject *parent) : QObject(parent)
 {
@@ -654,6 +659,8 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
         return pkg;
     }
 
+    pkg.compressedData = data;
+
     while (!vb.isEmpty()) {
         QString name = vb.vbPopFrontString();
 
@@ -667,6 +674,7 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
             auto dataRaw = vb.left(len);
             vb.remove(0, len);
             pkg.name = QString::fromUtf8(dataRaw);
+            pkg.loadOk = true;
         } else if (name == "description") {
             auto len = vb.vbPopFrontInt32();
             auto dataRaw = vb.left(len);
@@ -725,4 +733,74 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
 bool CodeLoader::installVescPackage(QByteArray data)
 {
     return installVescPackage(unpackVescPackage(data));
+}
+
+
+QVariantList CodeLoader::reloadPackageArchive()
+{
+    QVariantList res;
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/vesc_pkg_all.rcc";
+    QFile file(path);
+    if (file.exists()) {
+        QResource::unregisterResource(path);
+        QResource::registerResource(path);
+
+        QString pkgDir = "://vesc_packages";
+
+        QDirIterator it(pkgDir);
+        while (it.hasNext()) {
+            QFileInfo fi(it.next());
+
+            QDirIterator it2(fi.absoluteFilePath());
+            while (it2.hasNext()) {
+                QFileInfo fi2(it2.next());
+
+                if (fi2.absoluteFilePath().toLower().endsWith(".vescpkg")) {
+                    QString name = fi2.fileName();
+                    QFile f(fi2.absoluteFilePath());
+                    if (f.open(QIODevice::ReadOnly)) {
+                        auto pkg = unpackVescPackage(f.readAll());
+                        name = pkg.name;
+                        pkg.isLibrary = fi2.absoluteFilePath().startsWith("://vesc_packages/lib_");
+                        res.append(QVariant::fromValue(pkg));
+                    }
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+bool CodeLoader::downloadPackageArchive()
+{
+    bool res = false;
+
+    QUrl url("http://home.vedder.se/vesc_pkg/vesc_pkg_all.rcc");
+    QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    QNetworkReply *reply = manager.get(request);
+
+    connect(reply, &QNetworkReply::downloadProgress, [this](qint64 bytesReceived, qint64 bytesTotal) {
+        emit downloadProgress(bytesReceived, bytesTotal);
+    });
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() == QNetworkReply::NoError) {
+        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/vesc_pkg_all.rcc";
+        QFile file(path);
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(reply->readAll());
+            file.close();
+            res = true;
+        }
+    }
+
+    reply->abort();
+    reply->deleteLater();
+
+    return res;
 }

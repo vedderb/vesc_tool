@@ -15,6 +15,7 @@
 <name>let</name>
 <name>progn</name>
 <name>if</name>
+<name>cond</name>
 <name>match</name>
 <name>loopfor</name>
 <name>loopwhile</name>

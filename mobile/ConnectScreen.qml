@@ -350,8 +350,10 @@ Item {
             var tokens = Utility.arr2str(data).split("::")
             if (tokens.length === 3) {
                 var found = false
+
                 for (var i = 0; i < vescsUdp.length;i++) {
                     if (vescsUdp[i].ip === tokens[1]) {
+                        vescsUdp[i].updateTime = new Date().getTime()
                         found = true
                         break
                     }
@@ -361,10 +363,37 @@ Item {
                     vescsUdp[vescsUdp.length] = {
                         "name" : tokens[0],
                         "ip" : tokens[1],
-                        "port" : tokens[2]
+                        "port" : tokens[2],
+                        "updateTime" : new Date().getTime()
                     }
                     mBle.emitScanDone()
                 }
+            }
+        }
+    }
+
+    Timer {
+        running: true
+        repeat: true
+        interval: 500
+
+        onTriggered: {
+            var removed = false
+            for (var i = 0; i < vescsUdp.length;i++) {
+                var age = new Date().getTime() - vescsUdp[i].updateTime
+                if (age > 3000) {
+                    vescsUdp.splice(i, 1)
+                    removed = true
+                    i--;
+                    if (i < 0) {
+                        break
+                    }
+                }
+            }
+
+            if (removed) {
+                bleModel.clear()
+                mBle.emitScanDone()
             }
         }
     }
@@ -397,6 +426,7 @@ Item {
                 }
                 var addToList = true
                 var j = 0
+                var k = 0
                 for(j=0; j < bleModel.count; j++) {
                     if(bleModel.get(j).bleAddr === addr){
                         addToList  = false
@@ -421,11 +451,12 @@ Item {
                 }
             }
 
-            for (var k = 0; k < vescsUdp.length;k++) {
+            for (k = 0; k < vescsUdp.length;k++) {
                 addToList  = true
                 for (j = 0; j < bleModel.count; j++) {
                     if (bleModel.get(j).bleAddr === (vescsUdp[k].ip)) {
                         addToList  = false
+                        break
                     }
                 }
 

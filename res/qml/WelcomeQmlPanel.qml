@@ -288,6 +288,10 @@ Item {
             width: parent.width
             opened: true
 
+            Component.onCompleted: {
+                VescIf.bleDevice().emitScanDone()
+            }
+
             onYChanged: {
                 parent.color.a = Math.min(1, Math.max(1 - y / height, 0))
 

@@ -386,7 +386,12 @@ Item {
         }
 
         function onQmlLoadDone() {
-            qmlLoadDialog.open()
+            if (VescIf.askQmlLoad()) {
+                qmlLoadDialog.open()
+            } else {
+                updateHwUi()
+                updateAppUi()
+            }
         }
     }
 
@@ -440,19 +445,31 @@ Item {
         parent: container
         y: parent.y + parent.height / 2 - height / 2
 
-        Text {
-            color: {color = Utility.getAppHexColor("lightText")}
-            verticalAlignment: Text.AlignVCenter
+        ColumnLayout {
             anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "The hardware you are connecting to contains code that will alter the " +
-                "user interface of VESC Tool. This code has not been verified by the " +
-                "authors of VESC Tool and could contain bugs and security problems. \n\n" +
-                "Do you want to load this custom user interface?"
+
+            Text {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: Utility.getAppHexColor("lightText")
+                verticalAlignment: Text.AlignVCenter
+                wrapMode: Text.WordWrap
+                text:
+                    "The hardware you are connecting to contains code that will alter the " +
+                    "user interface of VESC Tool. This code has not been verified by the " +
+                    "authors of VESC Tool and could contain bugs and security problems. \n\n" +
+                    "Do you want to load this custom user interface?"
+            }
+
+            CheckBox {
+                Layout.fillWidth: true
+                id: qmlDoNotAskAgainBox
+                text: "Load without asking"
+            }
         }
 
         onAccepted: {
+            VescIf.setAskQmlLoad(!qmlDoNotAskAgainBox.checked)
             updateHwUi()
             updateAppUi()
         }

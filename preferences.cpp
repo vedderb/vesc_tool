@@ -165,9 +165,6 @@ VescInterface *Preferences::vesc() const
 void Preferences::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
-    if (mVesc) {
-        ui->loadQmlUiConnectBox->setChecked(mVesc->getLoadQmlUiOnConnect());
-    }
 }
 
 void Preferences::setUseGamepadControl(bool useControl)
@@ -216,6 +213,15 @@ void Preferences::closeEvent(QCloseEvent *event)
     }
 
     saveSettingsChanged();
+    event->accept();
+}
+
+void Preferences::showEvent(QShowEvent *event)
+{
+    if (mVesc) {
+        ui->loadQmlUiConnectBox->setChecked(mVesc->getLoadQmlUiOnConnect());
+        ui->qmlUiAskBox->setChecked(mVesc->askQmlLoad());
+    }
     event->accept();
 }
 
@@ -356,6 +362,13 @@ void Preferences::on_loadQmlUiConnectBox_toggled(bool checked)
 {
     if (mVesc) {
         mVesc->setLoadQmlUiOnConnect(checked);
+    }
+}
+
+void Preferences::on_qmlUiAskBox_toggled(bool checked)
+{
+    if (mVesc) {
+        mVesc->setAskQmlLoad(checked);
     }
 }
 

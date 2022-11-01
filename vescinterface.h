@@ -158,6 +158,8 @@ public:
     Q_INVOKABLE void setAllowScreenRotation(bool allowScreenRotation);
     Q_INVOKABLE bool speedGaugeUseNegativeValues();
     Q_INVOKABLE void setSpeedGaugeUseNegativeValues(bool useNegativeValues);
+    Q_INVOKABLE bool askQmlLoad() const;
+    Q_INVOKABLE void setAskQmlLoad(bool newAskQmlLoad);
 
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
@@ -431,6 +433,7 @@ private:
     bool mLoadQmlUiOnConnect;
     bool mAllowScreenRotation;
     bool mSpeedGaugeUseNegativeValues;
+    bool mAskQmlLoad;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

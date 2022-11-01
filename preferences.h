@@ -63,6 +63,7 @@ public:
 
 protected:
     void closeEvent(QCloseEvent *event);
+    void showEvent(QShowEvent *event);
 
 private slots:
     void timerSlot();
@@ -72,6 +73,7 @@ private slots:
     void on_jsConnectButton_clicked();
     void on_jsResetConfigButton_clicked();
     void on_loadQmlUiConnectBox_toggled(bool checked);
+    void on_qmlUiAskBox_toggled(bool checked);
     void on_pathRtLogChooseButton_clicked();
     void on_pathScriptInputChooseButton_clicked();
     void on_pathRtLogEdit_textChanged(const QString &arg1);

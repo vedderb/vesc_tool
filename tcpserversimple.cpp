@@ -29,6 +29,7 @@ TcpServerSimple::TcpServerSimple(QObject *parent) : QObject(parent)
     mPacket = new Packet(this);
     mTcpSocket = nullptr;
     mUsePacket = false;
+    mLastPort = -1;
 
     connect(mTcpServer, SIGNAL(newConnection()), this, SLOT(newTcpConnection()));
     connect(mPacket, SIGNAL(dataToSend(QByteArray&)),
@@ -37,6 +38,7 @@ TcpServerSimple::TcpServerSimple(QObject *parent) : QObject(parent)
 
 bool TcpServerSimple::startServer(int port, QHostAddress addr)
 {
+    mLastPort = port;
     return mTcpServer->listen(addr,  port);
 }
 
@@ -175,6 +177,11 @@ void TcpServerSimple::tcpInputError(QAbstractSocket::SocketError socketError)
 void TcpServerSimple::dataToSend(QByteArray &data)
 {
     sendData(data);
+}
+
+int TcpServerSimple::lastPort() const
+{
+    return mLastPort;
 }
 
 bool TcpServerSimple::usePacket() const

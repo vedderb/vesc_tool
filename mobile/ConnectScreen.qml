@@ -74,10 +74,6 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        startBleScan()
-    }
-
     onYChanged: {
         if (y > 1) {
             enableDialog()
@@ -156,7 +152,7 @@ Item {
 
             Button {
                 id: scanButton
-                text: qsTr("Scan")
+                text: qsTr("Scan BLE")
                 enabled: true
                 flat: true
                 Layout.preferredWidth: 120
@@ -233,7 +229,7 @@ Item {
                                     Layout.preferredWidth: 40
                                     Layout.preferredHeight: 40
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: "qrc" + Utility.getThemePath() + ((isSerial == 0) ? "icons/Connected-96.png" : "icons/bluetooth.png")
+                                    source: "qrc" + Utility.getThemePath() + ((isSerial === 0) ? "icons/Connected-96.png" : "icons/bluetooth.png")
                                 }
 
                                 Text {
@@ -248,7 +244,7 @@ Item {
                         }
 
                         ColumnLayout {
-                            visible: isSerial == 0
+                            visible: isSerial === 0
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
@@ -276,7 +272,7 @@ Item {
 
                             Timer {
                                 id: workaroundTimerConnect
-                                property var bleAddr: ""
+                                property string bleAddr: ""
                                 interval: 0
                                 repeat: false
                                 running: false
@@ -292,9 +288,9 @@ Item {
                                 text: "Connect"
 
                                 onClicked: {
-                                    if (isSerial == 1) {
+                                    if (isSerial === 1) {
                                         VescIf.autoconnect()
-                                    } else if (isSerial == 2) {
+                                    } else if (isSerial === 2) {
                                         VescIf.connectTcp(bleAddr, 65102)
                                     } else {
                                         disableDialog()
@@ -309,7 +305,7 @@ Item {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
                                 text: "Set Name"
-                                visible: isSerial == 0
+                                visible: isSerial === 0
 
                                 onClicked: {
                                     bleNameDialog.addr = bleAddr
@@ -379,7 +375,7 @@ Item {
             if (done) {
                 scanDotTimer.running = false
                 scanButton.enabled = true
-                scanButton.text = qsTr("Scan")
+                scanButton.text = qsTr("Scan BLE")
             }
 
             for (var addr in devs) {
@@ -434,7 +430,7 @@ Item {
                 }
 
                 if (addToList) {
-                    bleModel.insert(0, {"name": "TCP\n" + vescsUdp[k].ip,
+                    bleModel.insert(0, {"name": vescsUdp[k].name + " (TCP)\n" + vescsUdp[k].ip,
                                         "setName": "",
                                         "preferred": true,
                                         "bleAddr": vescsUdp[k].ip,
@@ -488,7 +484,7 @@ Item {
         width: parent.width - 20 - notchLeft - notchRight
         x: parent.width/2 - width/2
         y: parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: rootItem.parent
         ProgressBar {
             anchors.fill: parent
             indeterminate: visible
@@ -496,7 +492,7 @@ Item {
     }
 
     Dialog {
-        property var addr: ""
+        property string addr: ""
 
         id: bleNameDialog
         standardButtons: Dialog.Ok | Dialog.Cancel
@@ -513,7 +509,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: parent.width/2 - width/2
         y: Math.max(parent.height / 4 - height / 2, 20)
-        parent: ApplicationWindow.overlay
+        parent: rootItem.parent
 
         Rectangle {
             anchors.fill: parent
@@ -551,7 +547,7 @@ Item {
         y: 10 + parent.height / 2 - height / 2
         x: parent.width/2 - width/2
         width: parent.width - 20 - notchLeft - notchRight
-        parent: ApplicationWindow.overlay
+        parent: rootItem.parent
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -579,7 +575,7 @@ Item {
         y: 10 + parent.height / 2 - height / 2
         x: parent.width/2 - width/2
         width: parent.width - 20 - notchLeft - notchRight
-        parent: ApplicationWindow.overlay
+        parent: rootItem.parent
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }

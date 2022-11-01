@@ -314,6 +314,7 @@ private:
     QStringList mPairedUuids;
     TcpServerSimple *mTcpServer;
     UdpServerSimple *mUdpServer;
+    QTimer *mTimerBroadcast;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;

@@ -41,6 +41,7 @@ public:
     Q_INVOKABLE bool isClientConnected();
     Q_INVOKABLE QString getConnectedClientIp();
     Q_INVOKABLE bool isServerRunning();
+    int lastPort() const;
 
 signals:
     void dataRx(const QByteArray &data);
@@ -58,6 +59,7 @@ private:
     QTcpSocket *mTcpSocket;
     Packet *mPacket;
     bool mUsePacket;
+    int mLastPort;
 
 };
 

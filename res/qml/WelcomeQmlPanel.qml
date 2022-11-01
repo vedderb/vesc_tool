@@ -275,6 +275,42 @@ Item {
         }
     }
 
+    Rectangle {
+        parent: container
+        anchors.fill: parent
+        color: "black"
+
+        ConnectScreen {
+            id: connScreen
+            x: 0
+            y: 0
+            height: parent.height
+            width: parent.width
+            opened: true
+
+            onYChanged: {
+                parent.color.a = Math.min(1, Math.max(1 - y / height, 0))
+
+                if (opened) {
+                    drawer.interactive = false
+                    canDrawerLoader.item.interactive = false
+                    drawer.close()
+                    canDrawerLoader.item.close()
+                } else {
+                    drawer.interactive = true
+                    canDrawerLoader.item.interactive = true
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: VescIf
+        function onPortConnectedChanged() {
+            connScreen.opened = VescIf.isPortConnected() ? false : true
+        }
+    }
+
     property var hwUiObj: 0
 
     function updateHwUi () {

@@ -171,7 +171,7 @@ void TcpServerSimple::tcpInputError(QAbstractSocket::SocketError socketError)
 {
     (void)socketError;
     mTcpSocket->abort();
-//    qDebug() << socketError;
+    qDebug() << socketError;
 }
 
 void TcpServerSimple::dataToSend(QByteArray &data)

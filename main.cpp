@@ -204,6 +204,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<ENCODER_DETECT_RES>();
     qRegisterMetaType<FILE_LIST_ENTRY>();
     qRegisterMetaType<VescPackage>();
+    qRegisterMetaType<TCP_HUB_DEVICE>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD

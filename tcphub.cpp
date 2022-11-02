@@ -60,6 +60,10 @@ bool TcpHub::ping(QString server, int port, QString uuid)
         }
     }
 
+    if (host.isNull()) {
+        return false;
+    }
+
     QTcpSocket socket;
     socket.connectToHost(host, port);
     if (!Utility::waitSignal(&socket, SIGNAL(connected()), 1000)) {
@@ -77,7 +81,9 @@ bool TcpHub::ping(QString server, int port, QString uuid)
 void TcpHub::newTcpHubConnection()
 {
     QTcpSocket *socket = mTcpHubServer->nextPendingConnection();
+
     socket->setSocketOption(QAbstractSocket::LowDelayOption, true);
+    socket->setSocketOption(QAbstractSocket::KeepAliveOption, true);
 
     QString connStr = Utility::waitForLine(socket, 5000);
 
@@ -159,6 +165,9 @@ void TcpHub::newTcpHubConnection()
         } else if (type == "PING") {
             if (mConnectedVescs.contains(uuid)) {
                 socket->write("PONG\n");
+                socket->flush();
+            } else {
+                socket->write("NULL\n");
                 socket->flush();
             }
         } else {

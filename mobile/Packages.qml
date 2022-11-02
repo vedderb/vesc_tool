@@ -29,11 +29,6 @@ import Vedder.vesc.codeloader 1.0
 
 Item {
     property var dialogParent: ApplicationWindow.overlay
-
-    // TODO: This is not pretty...
-    implicitHeight: text.implicitHeight +
-                    canIdList.contentHeight + 10
-
     property ConfigParams mAppConf: VescIf.appConfig()
     property Commands mCommands: VescIf.commands()
 

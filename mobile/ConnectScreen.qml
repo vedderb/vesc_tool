@@ -32,6 +32,8 @@ Item {
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
     property bool opened: true
+    property bool pingTcpHub: false
+    property bool scanning: false
 
     onOpenedChanged: {
         if(opened){
@@ -64,7 +66,7 @@ Item {
 
     function startBleScan() {
         if (Utility.hasLocationPermission()) {
-            scanButton.enabled = false
+            scanning = true
             scanDotTimer.running = true
             bleModel.clear()
             vescsUdp = []
@@ -152,13 +154,73 @@ Item {
 
             Button {
                 id: scanButton
-                text: qsTr("Scan BLE")
+                text: qsTr("Scan...")
                 enabled: true
                 flat: true
                 Layout.preferredWidth: 120
 
                 onClicked: {
-                    startBleScan()
+                    scanMenu.open()
+                }
+
+                Menu {
+                    id: scanMenu
+
+                    MenuItem {
+                        text: "Scan BLE"
+                        enabled: !scanning
+                        onTriggered: {
+                            startBleScan()
+                        }
+                    }
+
+                    MenuItem {
+                        text: "Ping TCP hub"
+                        onTriggered: {
+                            bleModel.clear()
+                            pingTcpHub = true
+                            mBle.emitScanDone()
+                        }
+                    }
+
+                    MenuItem {
+                        text: "Clear TCP hub devs"
+                        onTriggered: {
+                            tcpHubClearDialog.open()
+                        }
+
+                        Dialog {
+                            id: tcpHubClearDialog
+                            standardButtons: Dialog.Ok | Dialog.Cancel
+                            modal: true
+                            focus: true
+                            rightMargin: 10
+                            leftMargin: 10
+                            closePolicy: Popup.CloseOnEscape
+                            y: 10 + parent.height / 2 - height / 2
+                            x: parent.width/2 - width/2
+                            width: parent.width - 20 - notchLeft - notchRight
+                            parent: rootItem.parent
+                            Overlay.modal: Rectangle {
+                                color: "#AA000000"
+                            }
+
+                            onAccepted: {
+                                VescIf.clearTcpHubDevs()
+                            }
+
+                            title: "Clear TCP Hub Devices"
+
+                            Text {
+                                color: Utility.getAppHexColor("lightText")
+                                verticalAlignment: Text.AlignVCenter
+                                anchors.fill: parent
+                                wrapMode: Text.WordWrap
+                                text:
+                                    "This is going to clear all previous TCP hub connections. Continue?"
+                            }
+                        }
+                    }
                 }
             }
 
@@ -284,7 +346,14 @@ Item {
                             Button {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
-                                Layout.preferredWidth: nameButton.width
+                                Layout.preferredWidth: {
+                                    if (isSerial === 0) {
+                                        nameButton.width
+                                    } else if (isSerial === 3) {
+                                        passButton.width
+                                    }
+                                }
+
                                 text: "Connect"
 
                                 onClicked: {
@@ -292,11 +361,26 @@ Item {
                                         VescIf.autoconnect()
                                     } else if (isSerial === 2) {
                                         VescIf.connectTcp(bleAddr, 65102)
+                                    } else if (isSerial === 3) {
+                                        VescIf.connectTcpHubUuid(hubUuid)
                                     } else {
                                         disableDialog()
                                         workaroundTimerConnect.bleAddr = bleAddr
                                         workaroundTimerConnect.start()
                                     }
+                                }
+                            }
+
+                            Button {
+                                id: passButton
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                                Layout.preferredHeight: 55
+                                text: "Update Password"
+                                visible: isSerial === 3
+
+                                onClicked: {
+                                    hubPassDialog.uuid = hubUuid
+                                    hubPassDialog.open()
                                 }
                             }
 
@@ -324,7 +408,7 @@ Item {
             footer: BusyIndicator {
                 Layout.alignment: Qt.AlignCenter
                 Layout.fillHeight: true
-                running: !scanButton.enabled
+                running: scanning
                 width: parent.width
                 height: BusyIndicator.implicitHeight*1.5
 
@@ -403,8 +487,8 @@ Item {
         function onScanDone(devs, done) {
             if (done) {
                 scanDotTimer.running = false
-                scanButton.enabled = true
-                scanButton.text = qsTr("Scan BLE")
+                scanning = false
+                scanButton.text = qsTr("Scan...")
             }
 
             for (var addr in devs) {
@@ -439,12 +523,14 @@ Item {
                                             "setName": setNameShort,
                                             "preferred": preferred,
                                             "bleAddr": addr,
+                                            "hubUuid": "",
                                             "isSerial": 0})
                     } else {
                         bleModel.append({"name": setName,
                                             "setName": setNameShort,
                                             "preferred": preferred,
                                             "bleAddr": addr,
+                                            "hubUuid": "",
                                             "isSerial": 0})
                     }
 
@@ -465,6 +551,7 @@ Item {
                                         "setName": "",
                                         "preferred": true,
                                         "bleAddr": vescsUdp[k].ip,
+                                        "hubUuid": "",
                                         "isSerial": 2})
                 }
             }
@@ -481,7 +568,26 @@ Item {
                                     "setName": "",
                                     "preferred": true,
                                     "bleAddr": "",
+                                    "hubUuid": "",
                                     "isSerial": 1})
+            }
+
+            if (pingTcpHub) {
+                disableDialog()
+                var hubDevs = VescIf.getTcpHubDevs()
+                for (j = 0; j < hubDevs.length; j++) {
+                    if (hubDevs[j].ping()) {
+                        bleModel.insert(0, {"name": hubDevs[j].id + " (TCP Hub)\n" + hubDevs[j].server,
+                                            "setName": "",
+                                            "preferred": true,
+                                            "bleAddr": "",
+                                            "hubUuid": hubDevs[j].uuid(),
+                                            "isSerial": 3})
+                    }
+                }
+
+                pingTcpHub = false
+                enableDialog()
             }
         }
 
@@ -568,6 +674,48 @@ Item {
     }
 
     Dialog {
+        property string uuid: ""
+
+        id: hubPassDialog
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        modal: true
+        focus: true
+        title: "Set TCP Hub Password"
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        width: parent.width - 20 - notchLeft - notchRight
+        height: 200
+        closePolicy: Popup.CloseOnEscape
+        x: parent.width/2 - width/2
+        y: Math.max(parent.height / 4 - height / 2, 20)
+        parent: rootItem.parent
+
+        Rectangle {
+            anchors.fill: parent
+            height: hubPassInput.implicitHeight + 14
+            border.width: 2
+            border.color: Utility.getAppHexColor("lightestBackground")
+            color: Utility.getAppHexColor("normalBackground")
+            radius: 3
+            TextInput {
+                id: hubPassInput
+                color: Utility.getAppHexColor("lightText")
+                anchors.fill: parent
+                anchors.margins: 7
+                font.pointSize: 12
+                focus: true
+            }
+        }
+
+        onAccepted: {
+            VescIf.updateTcpHubPassword(uuid, hubPassInput.text)
+        }
+    }
+
+    Dialog {
         id: bleEn
         standardButtons: Dialog.Ok
         modal: true
@@ -612,7 +760,7 @@ Item {
         }
 
         onAccepted: {
-            scanButton.enabled = false
+            scanning = true
             scanDotTimer.running = true
             bleModel.clear()
             vescsUdp = []

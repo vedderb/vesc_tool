@@ -27,7 +27,8 @@
 #include <QDateTime>
 #include <QTime>
 #include <QMap>
-#include <stdint.h>
+#include <cstdint>
+#include "tcphub.h"
 
 typedef struct {
     QString name;
@@ -1271,5 +1272,34 @@ public:
 };
 
 Q_DECLARE_METATYPE(VescPackage)
+
+struct TCP_HUB_DEVICE {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(QString server MEMBER server)
+    Q_PROPERTY(int port MEMBER port)
+    Q_PROPERTY(QString id MEMBER id)
+    Q_PROPERTY(QString password MEMBER password)
+
+    TCP_HUB_DEVICE() {
+        port = 65101;
+    }
+
+    Q_INVOKABLE bool ping() {
+        return TcpHub::ping(server, port, id);
+    }
+
+    Q_INVOKABLE QString uuid() {
+        return QString("%1:%2:%3").arg(server).arg(port).arg(id);
+    }
+
+    QString server;
+    int port;
+    QString id;
+    QString password;
+};
+
+Q_DECLARE_METATYPE(TCP_HUB_DEVICE)
 
 #endif // DATATYPES_H

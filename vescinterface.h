@@ -185,6 +185,7 @@ public:
     Q_INVOKABLE void scanCANbus();
 
     Q_INVOKABLE void connectTcp(QString server, int port);
+    Q_INVOKABLE void connectTcpHub(QString server, int port, QString id, QString pass);
     Q_INVOKABLE void connectUdp(QString server, int port);
     Q_INVOKABLE void connectBle(QString address);
     Q_INVOKABLE bool isAutoconnectOngoing() const;
@@ -235,11 +236,14 @@ public:
     Q_INVOKABLE QString qmlHw();
     Q_INVOKABLE QString qmlApp();
 
-    Q_INVOKABLE void connectTcpHub(QString server, int port, QString id, QString pass);
     Q_INVOKABLE QString getLastTcpHubVescID() const;
     Q_INVOKABLE QString getLastTcpHubVescPass() const;
     Q_INVOKABLE QString getLastTcpHubServer() const;
     Q_INVOKABLE int getLastTcpHubPort() const;
+    Q_INVOKABLE QVariantList getTcpHubDevs();
+    Q_INVOKABLE void clearTcpHubDevs();
+    Q_INVOKABLE bool updateTcpHubPassword(QString uuid, QString newPass);
+    Q_INVOKABLE bool connectTcpHubUuid(QString uuid);
 
 signals:
     void statusMessage(const QString &msg, bool isGood);
@@ -317,6 +321,7 @@ private:
     TcpServerSimple *mTcpServer;
     UdpServerSimple *mUdpServer;
     QTimer *mTimerBroadcast;
+    QVariantList mTcpHubDevs;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;

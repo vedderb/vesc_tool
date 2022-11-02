@@ -253,6 +253,20 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     }
 
     {
+        int size = mSettings.beginReadArray("tcpHubDevices");
+        for (int i = 0; i < size; ++i) {
+            mSettings.setArrayIndex(i);
+            TCP_HUB_DEVICE dev;
+            dev.server = mSettings.value("server").toString();
+            dev.port = mSettings.value("port").toInt();
+            dev.id = mSettings.value("id").toString();
+            dev.password = mSettings.value("pw").toString();
+            mTcpHubDevs.append(QVariant::fromValue(dev));
+        }
+        mSettings.endArray();
+    }
+
+    {
         int size = mSettings.beginReadArray("pairedUuids");
         for (int i = 0; i < size; ++i) {
             mSettings.setArrayIndex(i);
@@ -616,7 +630,7 @@ void VescInterface::storeSettings()
     mSettings.remove("profiles");
     mSettings.beginWriteArray("profiles");
     for (int i = 0; i < mProfiles.size(); ++i) {
-        MCCONF_TEMP cfg = mProfiles.value(i).value<MCCONF_TEMP>();
+        auto cfg = mProfiles.value(i).value<MCCONF_TEMP>();
         mSettings.setArrayIndex(i);
         mSettings.setValue("current_min_scale", cfg.current_min_scale);
         mSettings.setValue("current_max_scale", cfg.current_max_scale);
@@ -627,6 +641,18 @@ void VescInterface::storeSettings()
         mSettings.setValue("watt_min", cfg.watt_min);
         mSettings.setValue("watt_max", cfg.watt_max);
         mSettings.setValue("name", cfg.name);
+    }
+    mSettings.endArray();
+
+    mSettings.remove("tcpHubDevices");
+    mSettings.beginWriteArray("tcpHubDevices");
+    for (int i = 0; i < mTcpHubDevs.size(); ++i) {
+        auto dev = mTcpHubDevs.value(i).value<TCP_HUB_DEVICE>();
+        mSettings.setArrayIndex(i);
+        mSettings.setValue("server", dev.server);
+        mSettings.setValue("port", dev.port);
+        mSettings.setValue("id", dev.id);
+        mSettings.setValue("pw", dev.password);
     }
     mSettings.endArray();
 
@@ -2938,6 +2964,26 @@ void VescInterface::tcpInputConnected()
         mSettings.setValue("tcp_hub_vesc_id", mLastTcpHubVescID);
         mSettings.setValue("tcp_hub_vesc_pass", mLastTcpHubVescPass);
         setLastConnectionType(CONN_TCP_HUB);
+
+        TCP_HUB_DEVICE devNow;
+        devNow.server = mLastTcpHubServer;
+        devNow.port = mLastTcpHubPort;
+        devNow.id = mLastTcpHubVescID;
+        devNow.password = mLastTcpHubVescPass;
+
+        bool found = false;
+        for (const auto &i: qAsConst(mTcpHubDevs)) {
+            auto dev = i.value<TCP_HUB_DEVICE>();
+            if (dev.uuid() == devNow.uuid()) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            mTcpHubDevs.append(QVariant::fromValue(devNow));
+            storeSettings();
+        }
     } else {
         mSettings.setValue("tcp_server", mLastTcpServer);
         mSettings.setValue("tcp_port", mLastTcpPort);
@@ -3822,6 +3868,43 @@ void VescInterface::customConfigRx(int confId, QByteArray data)
 int VescInterface::getLastTcpHubPort() const
 {
     return mLastTcpHubPort;
+}
+
+QVariantList VescInterface::getTcpHubDevs()
+{
+    return mTcpHubDevs;
+}
+
+void VescInterface::clearTcpHubDevs()
+{
+    mTcpHubDevs.clear();
+}
+
+bool VescInterface::updateTcpHubPassword(QString uuid, QString newPass)
+{
+    for (int i = 0;i < mTcpHubDevs.size();i++) {
+        auto dev = mTcpHubDevs.at(i).value<TCP_HUB_DEVICE>();
+        if (dev.uuid() == uuid) {
+            dev.password = newPass;
+            mTcpHubDevs[i] = QVariant::fromValue(dev);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool VescInterface::connectTcpHubUuid(QString uuid)
+{
+    for (const auto &i: qAsConst(mTcpHubDevs)) {
+        auto dev = i.value<TCP_HUB_DEVICE>();
+        if (dev.uuid() == uuid) {
+            connectTcpHub(dev.server, dev.port, dev.id, dev.password);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 QString VescInterface::getLastTcpHubServer() const

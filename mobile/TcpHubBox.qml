@@ -42,7 +42,7 @@ Item {
 
         CheckBox {
             id: enableBox
-            text: "Connect Hub"
+            text: "Connect as Server"
             Layout.fillWidth: true
             Layout.columnSpan: 2
 
@@ -170,7 +170,7 @@ Item {
 
         Button {
             Layout.topMargin: 5
-            Layout.columnSpan: 2
+            Layout.columnSpan: 1
             Layout.fillWidth: true
             text: "Reset Defaults"
             enabled: !enableBox.checked
@@ -179,6 +179,18 @@ Item {
                 serverText.text = "veschub.vedder.se"
                 portBox.value = 65101
                 idText.text = Utility.strCrc32(VescIf.getConnectedUuid())
+            }
+        }
+
+        Button {
+            Layout.topMargin: 5
+            Layout.columnSpan: 1
+            Layout.fillWidth: true
+            text: "Connect as Client"
+            enabled: !enableBox.checked
+
+            onClicked: {
+                VescIf.connectTcpHub(serverText.text, portBox.value, idText.text, passText.text)
             }
         }
 

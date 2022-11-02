@@ -25,6 +25,8 @@
 <name>import</name>
 <name>atomic</name>
 <name>call-cc</name>
+<name>quote</name>
+<name>closure</name>
 </section>
 
 <section name="Label">

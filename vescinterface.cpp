@@ -2976,6 +2976,7 @@ void VescInterface::tcpInputConnected()
             auto dev = i.value<TCP_HUB_DEVICE>();
             if (dev.uuid() == devNow.uuid()) {
                 found = true;
+                updateTcpHubPassword(dev.uuid(), mLastTcpHubVescPass);
                 break;
             }
         }

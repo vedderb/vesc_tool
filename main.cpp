@@ -75,7 +75,7 @@ static void showHelp()
     qDebug() << "--retryConn : Keep trying to reconnect to the VESC when the connection fails";
     qDebug() << "--useMobileUi : Start the mobile UI instead of the full desktop UI";
     qDebug() << "--tcpHub [port] : Start a TCP hub for remote access to connected VESCs";
-
+    qDebug() << "--buildPkg [pkgPath:lispPath:qmlPath:isFullscreen:optMd:optName] : Build VESC Package";
 }
 
 #ifdef Q_OS_LINUX
@@ -235,6 +235,7 @@ int main(int argc, char *argv[])
     bool useMobileUi = false;
     double qmlRot = 0.0;
     bool isTcpHub = false;
+    QStringList pkgArgs;
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -332,6 +333,13 @@ int main(int argc, char *argv[])
                 found = true;
             }
         }
+        if (str == "--buildPkg") {
+            if ((i + 1) < args.size()) {
+                i++;
+                pkgArgs = args.at(i).split(":");
+                found = true;
+            }
+        }
 
         if (!found) {
             if (dash) {
@@ -343,6 +351,98 @@ int main(int argc, char *argv[])
             showHelp();
             return 1;
         }
+    }
+
+    if (!pkgArgs.isEmpty()) {
+        if (pkgArgs.size() < 4) {
+            qWarning() << "Invalid arguments";
+            return 1;
+        }
+
+        CodeLoader loader;
+        QString pkgPath = pkgArgs.at(0);
+        QString lispPath = pkgArgs.at(1);
+        QString qmlPath = pkgArgs.at(2);
+        bool isFullscreen = pkgArgs.at(3).toInt();
+
+        QString mdPath;
+        QString name;
+
+        VescPackage pkg;
+
+        if (pkgArgs.size() >= 6) {
+            mdPath = pkgArgs.at(4);
+            name = pkgArgs.at(5);
+
+            QFile f(mdPath);
+            if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                qWarning() << "Could not open markdown file for reading.";
+                return 1;
+            }
+
+            qputenv("QT_QPA_PLATFORM", "offscreen");
+            QApplication a(argc, argv);
+            addFonts();
+
+            QTextDocument d;
+            d.setMarkdown(QString::fromUtf8(f.readAll()));
+
+            f.close();
+
+            pkg.name = name;
+            pkg.description = d.toHtml();
+        } else {
+            QFile f(pkgPath);
+            if (!f.open(QIODevice::ReadOnly)) {
+                qWarning() << QString("Could not open %1 for reading.").arg(pkgPath);
+                return 1;
+            }
+
+            pkg = loader.unpackVescPackage(f.readAll());
+            f.close();
+
+            qDebug() << "Opened package" << pkg.name;
+        }
+
+        QFile file(pkgPath);
+        if (!file.open(QIODevice::WriteOnly)) {
+            qWarning() << QString("Could not open %1 for writing.").arg(pkgPath);
+            return 1;
+        }
+
+        if (!lispPath.isEmpty()) {
+            QFile f(lispPath);
+            if (!f.open(QIODevice::ReadOnly)) {
+                qWarning() << "Could not open lisp file for reading.";
+                return 1;
+            }
+
+            QFileInfo fi(f);
+            pkg.lispData = loader.lispPackImports(f.readAll(), fi.canonicalPath());
+            f.close();
+
+            qDebug() << "Read lisp script done";
+        }
+
+        if (!qmlPath.isEmpty()) {
+            QFile f(qmlPath);
+            if (!f.open(QIODevice::ReadOnly)) {
+                qWarning() << "Could not open qml file for reading.";
+                return 1;
+            }
+
+            pkg.qmlFile = f.readAll();
+            pkg.qmlIsFullscreen =isFullscreen;
+            f.close();
+
+            qDebug() << "Read qml script done";
+        }
+
+        file.write(loader.packVescPackage(pkg));
+        file.close();
+
+        qDebug() << "Package Saved!";
+        return 0;
     }
 
     double scale = set.value("app_scale_factor", 1.0).toDouble();
@@ -436,8 +536,7 @@ int main(int argc, char *argv[])
             qCritical() << "Could not start TcpHub on port" << tcpPort;
             qApp->quit();
         }
-    }
-    else {
+    } else {
         QApplication *a = new QApplication(argc, argv);
         app = a;
 

@@ -103,6 +103,18 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
         vb.append('\0');
     }
 
+    auto dbg = [this](QString title, QString msg, bool isGood) {
+        if (mVesc) {
+            mVesc->emitMessageDialog(title, msg, isGood);
+        } else {
+            if (isGood) {
+                qDebug() << title << ":" << msg;
+            } else {
+                qWarning() << title << ":" << msg;
+            }
+        }
+    };
+
     // Create and append data table
     {
         QList<QPair<QString, QByteArray> > files;
@@ -132,9 +144,9 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                     }
 
                     if (tag.isEmpty()) {
-                        mVesc->emitMessageDialog(tr("Append Imports"),
-                                                 tr("Line: %1: Invalid import tag.").arg(line_num),
-                                                 false);
+                        dbg(tr("Append Imports"),
+                            tr("Line: %1: Invalid import tag.").arg(line_num),
+                            false);
                         return QByteArray();
                     }
 
@@ -152,9 +164,9 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                             pkgImportName = path.mid(0, atInd);
                             path.remove(0, atInd + 1);
                         } else {
-                            mVesc->emitMessageDialog(tr("Append Imports"),
-                                                     tr("Line: %1: Invalid import tag.").arg(line_num),
-                                                     false);
+                            dbg(tr("Append Imports"),
+                                tr("Line: %1: Invalid import tag.").arg(line_num),
+                                false);
                             return QByteArray();
                         }
 
@@ -207,22 +219,22 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                                 files.append(qMakePair(tag, fileData));
                             }
                         } else {
-                            mVesc->emitMessageDialog(tr("Append Imports"),
-                                                     tr("Line: %1: Imported file cannot be opened.").arg(line_num),
-                                                     false);
+                            dbg(tr("Append Imports"),
+                                tr("Line: %1: Imported file cannot be opened.").arg(line_num),
+                                false);
                             return QByteArray();
                         }
                     } else {
-                        mVesc->emitMessageDialog(tr("Append Imports"),
-                                                 tr("Line: %1: Imported file not found: %2. %3").
-                                                 arg(line_num).arg(fi.absoluteFilePath()).arg(pkgErrorMsg),
-                                                 false);
+                        dbg(tr("Append Imports"),
+                            tr("Line: %1: Imported file not found: %2. %3").
+                            arg(line_num).arg(fi.absoluteFilePath()).arg(pkgErrorMsg),
+                            false);
                         return QByteArray();
                     }
                 } else {
-                    mVesc->emitMessageDialog(tr("Append Imports"),
-                                             tr("Line %1: Invalid import.").arg(line_num),
-                                             false);
+                    dbg(tr("Append Imports"),
+                        tr("Line %1: Invalid import.").arg(line_num),
+                        false);
                     return QByteArray();
                 }
             }

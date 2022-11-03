@@ -48,6 +48,8 @@
 
 #ifdef HAS_BLUETOOTH
 #include "bleuart.h"
+#else
+#include "bleuartdummy.h"
 #endif
 
 #ifdef HAS_POS
@@ -168,6 +170,10 @@ public:
     Q_INVOKABLE QString getLastBleAddr() const;
     Q_INVOKABLE void storeBlePreferred(QString address, bool preferred);
     Q_INVOKABLE bool getBlePreferred(QString address);
+    Q_INVOKABLE bool hasBluetooth() {return true;}
+#else
+    Q_INVOKABLE BleUartDummy* bleDevice() {return mBleUart;}
+    Q_INVOKABLE bool hasBluetooth() {return false;}
 #endif
 
     // Connection
@@ -396,6 +402,8 @@ private:
 #ifdef HAS_BLUETOOTH
     BleUart *mBleUart;
     QString mLastBleAddr;
+#else
+    BleUartDummy *mBleUart;
 #endif
 
 #ifdef HAS_POS

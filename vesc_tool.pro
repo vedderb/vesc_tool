@@ -194,6 +194,7 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
+    bleuartdummy.cpp \
     codeloader.cpp \
     mainwindow.cpp \
     packet.cpp \
@@ -215,6 +216,7 @@ SOURCES += main.cpp\
     hexfile.cpp
 
 HEADERS  += mainwindow.h \
+    bleuartdummy.h \
     codeloader.h \
     packet.h \
     preferences.h \

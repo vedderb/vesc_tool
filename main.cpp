@@ -34,6 +34,7 @@
 #include <QFontDatabase>
 
 #include "tcphub.h"
+#include "bleuartdummy.h"
 
 #ifdef Q_OS_IOS
 #include "ios/src/setIosParameters.h"
@@ -182,6 +183,8 @@ int main(int argc, char *argv[])
 
 #ifdef HAS_BLUETOOTH
     qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
+#else
+    qmlRegisterType<BleUartDummy>("Vedder.vesc.bleuart", 1, 0, "BleUart");
 #endif
     qmlRegisterType<Commands>("Vedder.vesc.commands", 1, 0, "Commands");
     qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");

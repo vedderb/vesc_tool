@@ -199,6 +199,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         mSettings.setValue("ble_addr", mLastBleAddr);
     });
     connect(mBleUart, SIGNAL(unintentionalDisconnect()), this, SLOT(bleUnintentionalDisconnect()));
+#else
+    mBleUart = new BleUartDummy(this);
 #endif
 
     mTcpServer = new TcpServerSimple(this);

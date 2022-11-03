@@ -339,14 +339,27 @@ bool CodeLoader::lispUpload(VByteArray vb)
         return res;
     };
 
+    auto writeChunk = [this, waitWriteRes](QByteArray data, quint32 offset) {
+        int tries = 5;
+        int res = -10;
+        while (tries > 0) {
+            mVesc->commands()->lispWriteCode(data, offset);
+            if ((res = waitWriteRes()) >= 0) {
+                return res;
+            }
+            tries--;
+        }
+
+        return res;
+    };
+
     quint32 offset = 0;
     bool ok = true;
     while (data.size() > 0) {
         const int chunkSize = 384;
         int sz = data.size() > chunkSize ? chunkSize : data.size();
 
-        mVesc->commands()->lispWriteCode(data.mid(0, sz), offset);
-        if (waitWriteRes() < 0) {
+        if (writeChunk(data.mid(0, sz), offset) < 0) {
             mVesc->emitMessageDialog(tr("Upload Code"), tr("Write failed"), false);
             ok = false;
             break;
@@ -586,6 +599,20 @@ bool CodeLoader::qmlUpload(QString script, bool isFullscreen)
         return res;
     };
 
+    auto writeChunk = [this, waitWriteRes](QByteArray data, quint32 offset) {
+        int tries = 5;
+        int res = -10;
+        while (tries > 0) {
+            mVesc->commands()->qmlUiWrite(data, offset);
+            if ((res = waitWriteRes()) >= 0) {
+                return res;
+            }
+            tries--;
+        }
+
+        return res;
+    };
+
     VByteArray vb;
     vb.vbAppendUint16(isFullscreen ? 2 : 1);
     vb.append(qCompress(script.toUtf8(), 9));
@@ -607,8 +634,7 @@ bool CodeLoader::qmlUpload(QString script, bool isFullscreen)
         const int chunkSize = 384;
         int sz = data.size() > chunkSize ? chunkSize : data.size();
 
-        mVesc->commands()->qmlUiWrite(data.mid(0, sz), offset);
-        if (!waitWriteRes()) {
+        if (writeChunk(data.mid(0, sz), offset) < 0) {
             mVesc->emitMessageDialog(tr("Upload Qml"), tr("Qml write failed"), false);
             ok = false;
             break;

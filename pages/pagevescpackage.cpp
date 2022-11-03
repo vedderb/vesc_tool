@@ -264,6 +264,8 @@ void PageVescPackage::on_dlArchiveButton_clicked()
     }
 
     ui->dlArchiveButton->setEnabled(true);
+
+    reloadArchive();
 }
 
 void PageVescPackage::on_uninstallButton_clicked()
@@ -322,6 +324,9 @@ void PageVescPackage::on_installButton_clicked()
 void PageVescPackage::reloadArchive()
 {
     auto pList = mLoader.reloadPackageArchive();
+
+    ui->applicationList->clear();
+    ui->libraryList->clear();
 
     for (auto p: pList) {
         auto pVal = p.value<VescPackage>();

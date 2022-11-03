@@ -35,6 +35,7 @@ PageWelcome::PageWelcome(QWidget *parent) :
     ui(new Ui::PageWelcome)
 {
     ui->setupUi(this);
+    mUtil = new Utility(this);
 
     QString theme = Utility::getThemePath();
     ui->autoConnectButton->setIcon(QIcon(theme + "icons/Connected-96.png"));
@@ -111,7 +112,7 @@ void PageWelcome::setVesc(VescInterface *vesc)
 
     ui->qmlWidget->engine()->rootContext()->setContextProperty("VescIf", mVesc);
     ui->qmlWidget->engine()->rootContext()->setContextProperty("QmlUi", this);
-    ui->qmlWidget->engine()->rootContext()->setContextProperty("Utility", &mUtil);
+    ui->qmlWidget->engine()->rootContext()->setContextProperty("Utility", mUtil);
 
     ui->qmlWidget->setSource(QUrl(QLatin1String("qrc:/res/qml/WelcomeQmlPanel.qml")));
 }

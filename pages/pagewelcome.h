@@ -56,7 +56,7 @@ private:
     Ui::PageWelcome *ui;
     VescInterface *mVesc;
     QmlUi mQmlUi;
-    Utility mUtil;
+    Utility *mUtil;
 
 };
 

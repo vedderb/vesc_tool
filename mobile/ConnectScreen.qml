@@ -351,6 +351,8 @@ Item {
                                         nameButton.width
                                     } else if (isSerial === 3) {
                                         passButton.width
+                                    } else {
+                                        nameButton.width
                                     }
                                 }
 

@@ -181,9 +181,13 @@ void BleUart::addDevice(const QBluetoothDeviceInfo &dev)
             set.endArray();
         }
 
+#if defined(Q_OS_WIN)
+        mDevs.insert(addr, dev.name());
+#else
         if(preferred || dev.serviceUuids().contains(QBluetoothUuid(QUuid("6e400001-b5a3-f393-e0a9-e50e24dcca9e")))) {
             mDevs.insert(addr, dev.name());
         }
+#endif
 
         mConnectTimeoutTimer.stop();
         emit scanDone(mDevs, false);

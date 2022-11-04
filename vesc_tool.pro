@@ -57,9 +57,7 @@ ios: {
 # sudo service bluetooth restart
 
 # Bluetooth available
-!win32: {
-    DEFINES += HAS_BLUETOOTH
-}
+DEFINES += HAS_BLUETOOTH
 
 # CAN bus available
 # Adding serialbus to Qt seems to break the serial port on static builds. TODO: Figure out why.

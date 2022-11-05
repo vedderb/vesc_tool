@@ -28,6 +28,7 @@
         <name>if</name>
         <name>implements</name>
         <name>in</name>
+        <name>of</name>
         <name>instanceof</name>
         <name>int</name>
         <name>interface</name>

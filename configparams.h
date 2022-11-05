@@ -32,18 +32,18 @@ class ConfigParams : public QObject
     Q_OBJECT
 public:
     explicit ConfigParams(QObject *parent = nullptr);
-    void addParam(const QString &name, ConfigParam param);
-    void deleteParam(const QString &name);
+    Q_INVOKABLE void addParam(const QString &name, ConfigParam param);
+    Q_INVOKABLE void deleteParam(const QString &name);
     Q_INVOKABLE void setUpdateOnly(const QString &name);
     Q_INVOKABLE QString getUpdateOnly();
     Q_INVOKABLE bool getUpdatesEnabled() const;
     Q_INVOKABLE void setUpdatesEnabled(bool updatesEnabled);
-    void clearParams();
-    void clearAll();
+    Q_INVOKABLE void clearParams();
+    Q_INVOKABLE void clearAll();
 
     Q_INVOKABLE bool hasParam(const QString &name);
     ConfigParam *getParam(const QString &name);
-    ConfigParam getParamCopy(const QString &name) const;
+    Q_INVOKABLE ConfigParam getParamCopy(const QString &name) const;
 
     Q_INVOKABLE bool isParamDouble(const QString &name);
     Q_INVOKABLE bool isParamInt(const QString &name);
@@ -75,7 +75,7 @@ public:
     Q_INVOKABLE bool getParamShowDisplay(const QString &name);
     Q_INVOKABLE bool getParamTransmittable(const QString &name);
 
-    QStringList getParamOrder() const;
+    Q_INVOKABLE QStringList getParamOrder() const;
     void setParamOrder(const QStringList &order);
 
     QWidget *getEditor(const QString &name, QWidget *parent = nullptr);

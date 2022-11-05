@@ -26,6 +26,7 @@
 #include "tcpserversimple.h"
 #include "pages/pagemotorcomparison.h"
 #include "codeloader.h"
+#include "configparam.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -34,7 +35,10 @@
 #include <QFontDatabase>
 
 #include "tcphub.h"
+
+#ifndef HAS_BLUETOOTH
 #include "bleuartdummy.h"
+#endif
 
 #ifdef Q_OS_IOS
 #include "ios/src/setIosParameters.h"
@@ -208,6 +212,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<FILE_LIST_ENTRY>();
     qRegisterMetaType<VescPackage>();
     qRegisterMetaType<TCP_HUB_DEVICE>();
+    qRegisterMetaType<ConfigParam>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD

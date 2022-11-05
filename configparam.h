@@ -21,10 +21,19 @@
 #define CONFIGPARAM_H
 
 #include <QImage>
+#include <QObject>
 #include "datatypes.h"
 
-class ConfigParam
-{
+class ConfigParam {
+    Q_GADGET
+
+    Q_PROPERTY(QString longName MEMBER longName)
+    Q_PROPERTY(QString description MEMBER description)
+    Q_PROPERTY(QString cDefine MEMBER cDefine)
+    Q_PROPERTY(double valDouble MEMBER valDouble)
+    Q_PROPERTY(int valInt MEMBER valInt)
+    Q_PROPERTY(QString valString MEMBER valString)
+
 public:
     ConfigParam();
 
@@ -60,7 +69,8 @@ public:
     bool editAsPercentage;
     bool showDisplay;
     bool transmittable;
-
 };
+
+Q_DECLARE_METATYPE(ConfigParam)
 
 #endif // CONFIGPARAM_H

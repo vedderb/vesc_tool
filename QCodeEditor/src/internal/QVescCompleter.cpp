@@ -110,6 +110,8 @@ QVescCompleter::QVescCompleter(QObject *parent) :
 
     auto addConfigCmds = [&]() {
         level++;
+        addItem("addParam(name, param)");
+        addItem("getParamCopy(name)");
         addItem("getParamDouble(paramName)");
         addItem("getParamInt(paramName)");
         addItem("getParamEnum(paramName)");

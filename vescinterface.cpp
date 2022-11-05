@@ -287,6 +287,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             cfg.vesc_uuid = uuid;
             cfg.mcconf_xml_compressed = mSettings.value("mcconf").toString();
             cfg.appconf_xml_compressed = mSettings.value("appconf").toString();
+            cfg.customconf_xml_compressed = mSettings.value("customconf").toString();
             cfg.name = mSettings.value("name", QString("")).toString();
             mConfigurationBackups.insert(uuid, cfg);
         }
@@ -676,6 +677,7 @@ void VescInterface::storeSettings()
             mSettings.setValue("uuid", i.key());
             mSettings.setValue("mcconf", i.value().mcconf_xml_compressed);
             mSettings.setValue("appconf", i.value().appconf_xml_compressed);
+            mSettings.setValue("customconf", i.value().customconf_xml_compressed);
             mSettings.setValue("name", i.value().name);
             ind++;
         }
@@ -3859,6 +3861,7 @@ void VescInterface::customConfigRx(int confId, QByteArray data)
     if (params) {
         auto vb = VByteArray(data);
         if (params->deSerialize(vb)) {
+            params->updateDone();
             emitStatusMessage(tr("Custom config %1 updated").arg(confId), true);
         } else {
             emitMessageDialog(tr("Custom Configuration"),
@@ -3954,11 +3957,19 @@ bool VescInterface::confStoreBackup(bool can, QString name)
 
         ConfigParams *pMc = mcConfig();
         ConfigParams *pApp = appConfig();
+        ConfigParams *pCustom = customConfig(0);
 
         commands()->getMcconf();
         bool rxMc = Utility::waitSignal(pMc, SIGNAL(updated()), 1500);
         commands()->getAppConf();
         bool rxApp = Utility::waitSignal(pApp, SIGNAL(updated()), 1500);
+
+        bool rxCustom = false;
+        if (pCustom != nullptr) {
+            commands()->customConfigGet(0, false);
+            rxCustom = Utility::waitSignal(pCustom, SIGNAL(updated()), 1500);
+            qDebug() << rxCustom;
+        }
 
         if (rxMc && rxApp) {
             CONFIG_BACKUP cfg;
@@ -3966,6 +3977,11 @@ bool VescInterface::confStoreBackup(bool can, QString name)
             cfg.vesc_uuid = uuid;
             cfg.mcconf_xml_compressed = pMc->saveCompressed("mcconf");
             cfg.appconf_xml_compressed = pApp->saveCompressed("appconf");
+
+            if (rxCustom) {
+                cfg.customconf_xml_compressed = pCustom->saveCompressed("customconf");
+            }
+
             mConfigurationBackups.insert(uuid, cfg);
             return true;
         } else {
@@ -4050,26 +4066,42 @@ bool VescInterface::confRestoreBackup(bool can)
 
         ConfigParams *pMc = mcConfig();
         ConfigParams *pApp = appConfig();
+        ConfigParams *pCustom = customConfig(0);
 
         commands()->getMcconf();
         bool rxMc = Utility::waitSignal(pMc, SIGNAL(updated()), 2000);
         commands()->getAppConf();
         bool rxApp = Utility::waitSignal(pApp, SIGNAL(updated()), 2000);
 
+        bool rxCustom = false;
+        if (pCustom != nullptr) {
+            commands()->customConfigGet(0, false);
+            rxCustom = Utility::waitSignal(pCustom, SIGNAL(updated()), 2000);
+        }
+
         if (rxMc && rxApp) {
             if (mConfigurationBackups.contains(uuid)) {
                 pMc->loadCompressed(mConfigurationBackups[uuid].mcconf_xml_compressed, "mcconf");
                 pApp->loadCompressed(mConfigurationBackups[uuid].appconf_xml_compressed, "appconf");
 
+                if (rxCustom) {
+                    pCustom->loadCompressed(mConfigurationBackups[uuid].customconf_xml_compressed, "customconf");
+                }
+
                 // Try a few times, as BLE seems to drop the response sometimes.
-                bool txMc = false, txApp = false;
+                bool txMc = false, txApp = false, txCustom = true;;
                 for (int i = 0;i < 2;i++) {
                     commands()->setMcconf(false);
                     txMc = Utility::waitSignal(commands(), SIGNAL(ackReceived(QString)), 2000);
                     commands()->setAppConf();
                     txApp = Utility::waitSignal(commands(), SIGNAL(ackReceived(QString)), 2000);
 
-                    if (txApp && txMc) {
+                    if (rxCustom) {
+                        commands()->customConfigSet(0, pCustom);
+                        txCustom = Utility::waitSignal(commands(), SIGNAL(ackReceived(QString)), 2000);
+                    }
+
+                    if (txApp && txMc && txCustom) {
                         break;
                     }
                 }
@@ -4084,6 +4116,11 @@ bool VescInterface::confRestoreBackup(bool can)
                 if (!txApp) {
                     emitMessageDialog("Restore Configuration",
                                       "No response when writing app configuration to " + uuid + ".", false, false);
+                }
+
+                if (!txCustom) {
+                    emitMessageDialog("Restore Configuration",
+                                      "No response when writing" + pCustom->getParam("hw_name")->longName + "configuration to " + uuid + ".", false, false);
                 }
 
                 return txMc && txApp;

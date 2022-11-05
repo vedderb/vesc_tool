@@ -1,4 +1,4 @@
-== 4.00 <dev> ==
+== 6.00 <dev> ==
 * Added support for compressed firmware upload.
 * Reduce CPU usage by only plotting RT data when the plot is visible.
 * Lisp scripting editor and integration.
@@ -13,6 +13,11 @@
 * Added VESC package creation and loading support.
 * Added VESC package store. See https://github.com/vedderb/vesc_pkg
 * Added TCP bridge.
+* Custom config backup and restore.
+* Connect screen on welcome page.
+* Attempt at BLE-support on windows.
+* Save and load support of configs on mobile.
+* Custom config pages on mobile.
 
 == 3.01 ==
 * Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.

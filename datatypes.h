@@ -607,12 +607,14 @@ struct CONFIG_BACKUP {
     Q_PROPERTY(QString vesc_uuid MEMBER vesc_uuid)
     Q_PROPERTY(QString mcconf_xml_compressed MEMBER mcconf_xml_compressed)
     Q_PROPERTY(QString appconf_xml_compressed MEMBER appconf_xml_compressed)
+    Q_PROPERTY(QString customconf_xml_compressed MEMBER customconf_xml_compressed)
 
 public:
     QString name;
     QString vesc_uuid;
     QString mcconf_xml_compressed;
     QString appconf_xml_compressed;
+    QString customconf_xml_compressed;
 };
 
 Q_DECLARE_METATYPE(CONFIG_BACKUP)

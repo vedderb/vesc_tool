@@ -26,5 +26,7 @@
         <file>res/qml/Examples/BalanceUi.qml</file>
         <file>res/qml/Examples/MotorComparisonModel.qml</file>
         <file>res/qml/Examples/UdpServer.qml</file>
+        <file>res/qml/Examples/ConfigParams.qml</file>
+        <file>res/qml/Examples/TcpHub.qml</file>
     </qresource>
 </RCC>

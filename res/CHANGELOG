@@ -18,6 +18,7 @@
 * Attempt at BLE-support on windows.
 * Save and load support of configs on mobile.
 * Custom config pages on mobile.
+* Wizard and multisettings improvements when connected over CAN.
 
 == 3.01 ==
 * Fixed simultaneous CAN FW upload when other devices (such as BMS) are on the CAN-bus.

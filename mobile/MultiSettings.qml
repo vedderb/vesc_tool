@@ -41,11 +41,6 @@ Item {
             return
         }
 
-        if (mCommands.getSendCan()) {
-            VescIf.emitMessageDialog("Multi Setup",
-                                     "CAN-forwarding must be disabled for multi setup to work.", false, false)
-            return
-        }
         workaroundTimerOpenDialog.start()
     }
     Timer {
@@ -58,6 +53,13 @@ Item {
 
             disableDialog("Scanning CAN-bus...")
             canDevs = Utility.scanCanVescOnly(VescIf)
+
+            if (!Utility.isConnectedToHwVesc(VescIf)) {
+                if (canDevs.length > 0) {
+                    mCommands.setSendCan(true, canDevs[0])
+                }
+            }
+
             enableDialog()
         }
     }

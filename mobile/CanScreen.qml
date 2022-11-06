@@ -116,7 +116,7 @@ Item {
                         anchors.fill: parent
                         onClicked: {
                             canList.currentIndex = index
-                            if(index == 0){
+                            if(index === 0){
                                 mCommands.setSendCan(false,0)
                             }else{
                                 mCommands.setSendCan(true,ID)
@@ -188,6 +188,10 @@ Item {
                 scanButton.enabled = false
                 canModel.clear()
                 scanDialog.open()
+                if (mCommands.getSendCan()) {
+                    mCommands.setSendCan(false, -1)
+                    Utility.sleepWithEventLoop(1500)
+                }
                 mCommands.pingCan()
             }
         }
@@ -276,7 +280,7 @@ Item {
             scanButton.text = qsTr("Scan")
             if (VescIf.isPortConnected()) {
                 canModel.clear()
-                mCommands.setSendCan(0,0);
+                mCommands.setSendCan(0,0)
                 var params = Utility.getFwVersionBlocking(VescIf)
                 var name = params.hw
                 var theme ="qrc"  + Utility.getThemePath()

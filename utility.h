@@ -80,6 +80,7 @@ public:
     static uint32_t crc32c(uint8_t *data, uint32_t len);
     static bool getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params);
     static bool getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId);
+    Q_INVOKABLE static bool isConnectedToHwVesc(VescInterface *vesc);
     Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlocking(VescInterface *vesc);
     Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlockingCan(VescInterface *vesc, int canId);
     Q_INVOKABLE static MC_VALUES getMcValuesBlocking(VescInterface *vesc);

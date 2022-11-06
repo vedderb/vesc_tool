@@ -28,8 +28,7 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     : QWizard(parent)
 {
     mVesc = vesc;
-    mCanLastFwd = mVesc->commands()->getSendCan();
-    mCanLastId = mVesc->commands()->getCanSendId();
+    mVesc->commands()->setSendCan(false);
 
     setPage(Page_Intro, new AppIntroPage(vesc));
     setPage(Page_Connection, new AppConnectionPage(vesc));
@@ -52,7 +51,6 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     resize(800, 450);
 
     setWindowTitle(tr("App Setup Wizard"));
-
 
     mSideLabel = new AspectImgLabel(Qt::Vertical);
     mSideLabel->setPixmap(QPixmap(theme +"logo_vertical.png"));
@@ -77,7 +75,6 @@ void SetupWizardApp::idChanged(int id)
 
 void SetupWizardApp::ended()
 {
-    mVesc->commands()->setSendCan(mCanLastFwd, mCanLastId);
     mVesc->commands()->getAppConf();
 }
 
@@ -241,16 +238,33 @@ void AppMultiPage::initializePage()
 {
     mCanFwdList->clear();
 
-    QListWidgetItem *item = new QListWidgetItem;
-    item->setText(tr("This VESC (ID: %1)").
-                  arg(mVesc->appConfig()->getParamInt("controller_id")));
+    FW_RX_PARAMS params;
+    Utility::getFwVersionBlocking(mVesc, &params);
+
     QString theme = Utility::getThemePath();
-    item->setIcon(QIcon(theme +"icons/Connected-96.png"));
-    item->setData(Qt::UserRole, -1);
-    mCanFwdList->addItem(item);
+
+    if (params.hwType == HW_TYPE_VESC) {
+        QListWidgetItem *item = new QListWidgetItem;
+        item->setText(tr("This VESC (ID: %1)").
+                      arg(mVesc->appConfig()->getParamInt("controller_id")));
+        item->setIcon(QIcon(theme +"icons/Connected-96.png"));
+        item->setData(Qt::UserRole, -1);
+        mCanFwdList->addItem(item);
+    }
+
+    bool canLastFwd = mVesc->commands()->getSendCan();
+    int canLastId = mVesc->commands()->getCanSendId();
+    mVesc->ignoreCanChange(true);
 
     for (int dev: mVesc->getCanDevsLast()) {
-        item = new QListWidgetItem;
+        mVesc->commands()->setSendCan(true, dev);
+        FW_RX_PARAMS params;
+        Utility::getFwVersionBlocking(mVesc, &params);
+        if (params.hwType != HW_TYPE_VESC) {
+            continue;
+        }
+
+        QListWidgetItem *item = new QListWidgetItem;
         item->setText(tr("VESC with ID: %1").arg(dev));
         item->setIcon(QIcon(theme +"icons/can_off.png"));
         item->setData(Qt::UserRole, dev);
@@ -258,6 +272,9 @@ void AppMultiPage::initializePage()
     }
 
     mCanFwdList->setCurrentItem(nullptr);
+
+    mVesc->commands()->setSendCan(canLastFwd, canLastId);
+    mVesc->ignoreCanChange(false);
 }
 
 int AppMultiPage::nextId() const

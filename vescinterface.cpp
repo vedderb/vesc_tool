@@ -2634,6 +2634,8 @@ QVector<int> VescInterface::scanCan()
         return canDevs;
     }
 
+    canTmpOverride(false, 0);
+
     QEventLoop loop;
 
     bool timeout;
@@ -2656,6 +2658,8 @@ QVector<int> VescInterface::scanCan()
     } else {
         canDevs.clear();
     }
+
+    canTmpOverrideEnd();
 
     return canDevs;
 }

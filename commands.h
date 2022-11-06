@@ -25,9 +25,7 @@
 #include <QMap>
 #include <QVariant>
 #include <QVariantList>
-#include "vbytearray.h"
 #include "datatypes.h"
-#include "packet.h"
 #include "configparams.h"
 
 class Commands : public QObject

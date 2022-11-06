@@ -34,6 +34,7 @@ Item {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
     property var dialogParent: ApplicationWindow.overlay
+    property var canDevs: []
 
     signal dialogClosed()
 
@@ -51,6 +52,16 @@ Item {
         repeat: false
 
         onTriggered: {
+            disableDialog()
+            canDevs = Utility.scanCanVescOnly(VescIf)
+            enableDialog()
+
+            if (!Utility.isConnectedToHwVesc(VescIf)) {
+                if (canDevs.length > 0) {
+                    mCommands.setSendCan(true, canDevs[0])
+                }
+            }
+
             updateUsageListParams()
             loadDefaultDialog.open()
         }
@@ -838,7 +849,7 @@ Item {
         title: "Detect FOC Parameters"
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
-        property var canDevs: []
+
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -881,13 +892,7 @@ Item {
             onTriggered: {
                 Utility.waitSignal(mCommands, "2ackReceived(QString)", 4000)
 
-                if (detectCanBox.checked) {
-                    detectDialog.canDevs = Utility.scanCanVescOnly(VescIf)
-                } else {
-                    detectDialog.canDevs = []
-                }
-
-                if (!Utility.setBatteryCutCan(VescIf, detectDialog.canDevs, 6.0, 6.0)) {
+                if (!Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0)) {
                     enableDialog()
                     return
                 }
@@ -903,7 +908,7 @@ Item {
                 if (res.startsWith("Success!")) {
                     resDetect = true
 
-                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, detectDialog.canDevs)
+                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs)
 
                     var updateAllParams = ["l_duty_start"]
 
@@ -926,7 +931,7 @@ Item {
                         updateAllParams.push("foc_sensor_mode")
                     }
 
-                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, detectDialog.canDevs, updateAllParams)
+                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, updateAllParams)
                 }
                 enableDialog()
 
@@ -987,7 +992,7 @@ Item {
         running: false
 
         onTriggered: {
-            dirSetup.setCanDevs(detectDialog.canDevs)
+            dirSetup.setCanDevs(canDevs)
         }
     }
 

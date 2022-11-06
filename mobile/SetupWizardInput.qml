@@ -464,8 +464,8 @@ Item {
                         }
 
                         if (stackLayout.currentIndex == 2) {
-                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 0, 0)
-                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 0, 0)
+                            mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 0, null)
+                            mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 0, null)
                             mCommands.setAppConf()
                         }
                     }

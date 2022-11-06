@@ -33,7 +33,6 @@
 #include "widgets/helpdialog.h"
 #include "utility.h"
 #include "widgets/paramdialog.h"
-#include "widgets/detectallfocdialog.h"
 
 namespace {
 void stepTowards(double &value, double goal, double step) {
@@ -733,8 +732,11 @@ void MainWindow::timerSlot()
         if (mVesc->commands()->getSendCan()) {
             int id_set = mVesc->commands()->getCanSendId();
             for (int i = 1; i <  ui->canList->count(); i++) {
-                int id_ui = ui->canList->item(i)->text().split(" ").last().toInt();
-                if (id_ui == id_set) {
+                int id = 0;
+                auto current = ui->canList->itemWidget(ui->canList->item(i));
+                bool ok = QMetaObject::invokeMethod(current, "getID", Q_RETURN_ARG(int, id));
+
+                if (ok && id == id_set) {
                     ui->canList->setCurrentRow(i);
                     break;
                 }

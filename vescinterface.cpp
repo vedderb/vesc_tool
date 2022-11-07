@@ -1437,7 +1437,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     int skipChunks = 0;
 
     bool useHeatshrink = false;
-    if (szTot > 393208) {
+    if (szTot > 393208 && szTot < 700000) { // If fw is much larger it is probably for the esp32
         useHeatshrink = true;
         qDebug() << "Firmware is big, using heatshrink compression library";
         int szOld = szTot;

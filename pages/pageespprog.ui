@@ -264,13 +264,30 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="cancelButton">
+          <property name="text">
+           <string>Cancel</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="flashButton">
           <property name="text">
-           <string>Flash</string>
+           <string>Flash using USB</string>
           </property>
           <property name="icon">
            <iconset resource="../res.qrc">
             <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="flashBlButton">
+          <property name="toolTip">
+           <string>Flash using the bootloader. Requires that the vesc-firmware alredy is present.</string>
+          </property>
+          <property name="text">
+           <string>Flash using Bootloader</string>
           </property>
          </widget>
         </item>

@@ -34,6 +34,7 @@ PageEspProg::PageEspProg(QWidget *parent) :
     ui->partChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
     ui->appChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
     ui->flashButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
+    ui->flashBlButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
     ui->serialConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
     ui->serialDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
     ui->serialRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
@@ -60,6 +61,8 @@ PageEspProg::PageEspProg(QWidget *parent) :
     connect(&mEspFlash, &Esp32Flash::stateUpdate, [this](QString msg) {
         ui->progWidget->setText(msg);
     });
+
+    listAllFw();
 }
 
 PageEspProg::~PageEspProg()
@@ -79,16 +82,30 @@ VescInterface *PageEspProg::vesc() const
 void PageEspProg::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
+
+    connect(mVesc, &VescInterface::fwUploadStatus, [this]
+            (QString status, double progress, bool isOngoing) {
+        (void)isOngoing;
+        ui->progWidget->setValue(progress * 100.0);
+        ui->progWidget->setText(status);
+    });
+
     on_serialRefreshButton_clicked();
 }
 
 void PageEspProg::timerSlot()
 {
-    ui->serialConnectButton->setEnabled(ui->flashButton->isEnabled() && !mEspFlash.isEspConnected());
-    ui->serialDisconnectButton->setEnabled(ui->flashButton->isEnabled() && mEspFlash.isEspConnected());
+    bool vescConn = false;
+    if (mVesc) {
+        vescConn = mVesc->isPortConnected();
+    }
 
-    if (ui->fwList->count() > 0 && !mEspFlash.isEspConnected()) {
-        ui->fwList->clear();
+    ui->serialConnectButton->setEnabled(!mEspFlash.isEspConnected());
+    ui->serialDisconnectButton->setEnabled(mEspFlash.isEspConnected());
+    ui->flashBlButton->setEnabled(!mEspFlash.isEspConnected() && vescConn);
+
+    if (!mEspFlash.isEspConnected() && ui->flashButton->isEnabled()) {
+        ui->flashButton->setEnabled(false);
     }
 }
 
@@ -107,6 +124,7 @@ void PageEspProg::on_serialRefreshButton_clicked()
 void PageEspProg::on_serialDisconnectButton_clicked()
 {
     mEspFlash.disconnectEsp();
+    listAllFw();
 }
 
 void PageEspProg::on_serialConnectButton_clicked()
@@ -114,6 +132,8 @@ void PageEspProg::on_serialConnectButton_clicked()
     if (mEspFlash.connectEsp(ui->serialPortBox->currentData().toString())) {
         switch (mEspFlash.getTarget()) {
         case ESP32C3_CHIP: {
+            ui->fwList->clear();
+
             QDir dir("://res/firmwares_esp/ESP32-C3");
             dir.setSorting(QDir::Name);
             for (auto fi: dir.entryInfoList()) {
@@ -125,6 +145,7 @@ void PageEspProg::on_serialConnectButton_clicked()
                     addFwToList(fi.fileName(), fi.canonicalFilePath());
                 }
             }
+            ui->flashButton->setEnabled(true);
         } break;
 
         default:
@@ -264,3 +285,61 @@ void PageEspProg::addFwToList(QString name, QString path)
     item->setData(Qt::UserRole, QVariant::fromValue(path));
     ui->fwList->insertItem(ui->fwList->count(), item);
 }
+
+void PageEspProg::on_flashBlButton_clicked()
+{
+    QString appPath;
+
+    if (ui->tabWidget->currentIndex() == 0) {
+        auto item = ui->fwList->currentItem();
+        if (item != nullptr) {
+            QString path = item->data(Qt::UserRole).toString();
+            appPath = path + "/app.bin";
+        } else {
+            mVesc->emitMessageDialog("Flash Firmware",
+                                     "No Firmware Selected",
+                                     false, false);
+            return;
+        }
+    } else {
+        appPath = ui->appEdit->text();
+    }
+
+    ui->flashButton->setEnabled(false);
+
+    QFile fApp(appPath);
+    if (!fApp.open(QIODevice::ReadOnly)) {
+        qWarning() << "Could not open application";
+        ui->flashButton->setEnabled(true);
+        return;
+    }
+
+    auto fwData = fApp.readAll();
+    fApp.close();
+
+    mVesc->fwUpload(fwData, false, false, false);
+
+    ui->flashButton->setEnabled(true);
+}
+
+void PageEspProg::on_cancelButton_clicked()
+{
+    mVesc->fwUploadCancel();
+}
+
+void PageEspProg::listAllFw()
+{
+    ui->fwList->clear();
+    QDir dir("://res/firmwares_esp/ESP32-C3");
+    dir.setSorting(QDir::Name);
+    for (auto fi: dir.entryInfoList()) {
+        QFileInfo fiApp(fi.absoluteFilePath() + "/app.bin");
+        QFileInfo fiBl(fi.absoluteFilePath() + "/bootloader.bin");
+        QFileInfo fiPart(fi.absoluteFilePath() + "/partition-table.bin");
+
+        if (fiApp.exists() && fiBl.exists() && fiPart.exists()) {
+            addFwToList(fi.fileName(), fi.canonicalFilePath());
+        }
+    }
+}
+

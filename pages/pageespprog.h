@@ -49,6 +49,8 @@ private slots:
     void on_blChooseButton_clicked();
     void on_partChooseButton_clicked();
     void on_appChooseButton_clicked();
+    void on_flashBlButton_clicked();
+    void on_cancelButton_clicked();
 
 private:
     QTimer *mTimer;
@@ -56,8 +58,8 @@ private:
     VescInterface *mVesc;
     Esp32Flash mEspFlash;
 
+    void listAllFw();
     void addFwToList(QString name, QString path);
-
 };
 
 #endif // PAGEESPPROG_H

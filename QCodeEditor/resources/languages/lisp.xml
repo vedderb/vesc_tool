@@ -132,6 +132,7 @@
 <name>or</name>
 <name>not</name>
 <name>eq</name>
+<name>not-eq</name>
 <name>acons</name>
 <name>assoc</name>
 <name>cossa</name>

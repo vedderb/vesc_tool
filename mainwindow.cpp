@@ -1043,7 +1043,7 @@ void MainWindow::on_actionSaveMotorConfXml_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the motor configuration XML file"),
-                                        ".",
+                                        "./vesc_mcconf",
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1095,7 +1095,7 @@ void MainWindow::on_actionSaveAppconfXml_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the app configuration XML file"),
-                                        ".",
+                                        "./vesc_appconf",
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1227,7 +1227,7 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the configuration header file"),
-                                        ".",
+                                        QString("./%1_default").arg(conf.toLower()),
                                         tr("h files (*.h)"));
 
     if (path.isNull()) {

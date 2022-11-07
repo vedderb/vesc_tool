@@ -531,6 +531,8 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
+    LastParamParserCPath = (mSettings.value("mainwindow/LastParamParserCPath", "./confgenerator").toString());
+
     updateMotortype();
     updateAppToUse();
 
@@ -545,6 +547,7 @@ MainWindow::~MainWindow()
     mSettings.setValue("introVersion", VT_INTRO_VERSION);
     mSettings.setValue("mainwindow/position", pos());
     mSettings.setValue("mainwindow/maximized", isMaximized());
+    mSettings.setValue("mainwindow/LastParamParserCPath", LastParamParserCPath);
 
     if (!isMaximized()) {
         mSettings.setValue("mainwindow/size", size());
@@ -1897,7 +1900,7 @@ void MainWindow::on_actionExportConfigurationParser_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the parser C source and header file"),
-                                        ".",
+                                        LastParamParserCPath,
                                         tr("C Source/Header files (*.c *.h)"));
 
     if (path.isNull()) {
@@ -1905,6 +1908,7 @@ void MainWindow::on_actionExportConfigurationParser_triggered()
     }
 
     Utility::createParamParserC(mVesc, path);
+    LastParamParserCPath = path;
 }
 
 void MainWindow::on_actionBackupConfiguration_triggered()

@@ -530,6 +530,10 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
+    mLastParamParserCPath = (mSettings.value("mainwindow/mLastParamParserCPath", "./confgenerator").toString());
+    mLastMCConfigXMLPath  = (mSettings.value("mainwindow/mLastMCConfigXMLPath", "./vesc_mcconf").toString());
+    mLastAppConfigXMLPath = (mSettings.value("mainwindow/mLastAppConfigXMLPath", "./vesc_appconf").toString());
+
     updateMotortype();
     updateAppToUse();
 
@@ -544,6 +548,9 @@ MainWindow::~MainWindow()
     mSettings.setValue("introVersion", VT_INTRO_VERSION);
     mSettings.setValue("mainwindow/position", pos());
     mSettings.setValue("mainwindow/maximized", isMaximized());
+    mSettings.setValue("mainwindow/mLastParamParserCPath", mLastParamParserCPath);
+    mSettings.setValue("mainwindow/mLastMCConfigXMLPath", mLastMCConfigXMLPath);
+    mSettings.setValue("mainwindow/mLastAppConfigXMLPath", mLastAppConfigXMLPath);
 
     if (!isMaximized()) {
         mSettings.setValue("mainwindow/size", size());
@@ -1042,7 +1049,7 @@ void MainWindow::on_actionSaveMotorConfXml_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the motor configuration XML file"),
-                                        ".",
+                                        mLastMCConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1057,6 +1064,7 @@ void MainWindow::on_actionSaveMotorConfXml_triggered()
 
     if (res) {
         showStatusInfo("Saved motor configuration", true);
+        mLastMCConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Save motor configuration"),
                           tr("Could not save motor configuration:<BR>"
@@ -1070,7 +1078,7 @@ void MainWindow::on_actionLoadMotorConfXml_triggered()
     QString path;
     path = QFileDialog::getOpenFileName(this,
                                         tr("Choose motor configuration file to load"),
-                                        ".",
+                                        mLastMCConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1081,6 +1089,7 @@ void MainWindow::on_actionLoadMotorConfXml_triggered()
 
     if (res) {
         showStatusInfo("Loaded motor configuration", true);
+        mLastMCConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Load motor configuration"),
                           tr("Could not load motor configuration:<BR>"
@@ -1094,7 +1103,7 @@ void MainWindow::on_actionSaveAppconfXml_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the app configuration XML file"),
-                                        ".",
+                                        mLastAppConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1109,6 +1118,7 @@ void MainWindow::on_actionSaveAppconfXml_triggered()
 
     if (res) {
         showStatusInfo("Saved app configuration", true);
+        mLastAppConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Save app configuration"),
                           tr("Could not save app configuration:<BR>"
@@ -1122,7 +1132,7 @@ void MainWindow::on_actionLoadAppconfXml_triggered()
     QString path;
     path = QFileDialog::getOpenFileName(this,
                                         tr("Choose app configuration file to load"),
-                                        ".",
+                                        mLastAppConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1133,6 +1143,7 @@ void MainWindow::on_actionLoadAppconfXml_triggered()
 
     if (res) {
         showStatusInfo("Loaded app configuration", true);
+        mLastAppConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Load app configuration"),
                           tr("Could not load app configuration:<BR>"
@@ -1226,7 +1237,7 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the configuration header file"),
-                                        ".",
+                                        QString("./%1_default").arg(conf.toLower()),
                                         tr("h files (*.h)"));
 
     if (path.isNull()) {
@@ -1899,7 +1910,7 @@ void MainWindow::on_actionExportConfigurationParser_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the parser C source and header file"),
-                                        ".",
+                                        mLastParamParserCPath,
                                         tr("C Source/Header files (*.c *.h)"));
 
     if (path.isNull()) {
@@ -1907,6 +1918,7 @@ void MainWindow::on_actionExportConfigurationParser_triggered()
     }
 
     Utility::createParamParserC(mVesc, path);
+    mLastParamParserCPath = path;
 }
 
 void MainWindow::on_actionBackupConfiguration_triggered()

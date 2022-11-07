@@ -169,6 +169,9 @@ private:
     bool mMcConfRead;
     bool mAppConfRead;
     QMap<QString, int> mPageNameIdList;
+    QString mLastParamParserCPath;
+    QString mLastMCConfigXMLPath;
+    QString mLastAppConfigXMLPath;
 
     QTimer mPollRtTimer;
     QTimer mPollAppTimer;

@@ -532,6 +532,8 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     LastParamParserCPath = (mSettings.value("mainwindow/LastParamParserCPath", "./confgenerator").toString());
+    LastMCConfigXMLPath  = (mSettings.value("mainwindow/LastMCConfigXMLPath", "./vesc_mcconf").toString());
+    LastAppConfigXMLPath = (mSettings.value("mainwindow/LastAppConfigXMLPath", "./vesc_appconf").toString());
 
     updateMotortype();
     updateAppToUse();
@@ -548,6 +550,8 @@ MainWindow::~MainWindow()
     mSettings.setValue("mainwindow/position", pos());
     mSettings.setValue("mainwindow/maximized", isMaximized());
     mSettings.setValue("mainwindow/LastParamParserCPath", LastParamParserCPath);
+    mSettings.setValue("mainwindow/LastMCConfigXMLPath", LastMCConfigXMLPath);
+    mSettings.setValue("mainwindow/LastAppConfigXMLPath", LastAppConfigXMLPath);
 
     if (!isMaximized()) {
         mSettings.setValue("mainwindow/size", size());
@@ -1043,7 +1047,7 @@ void MainWindow::on_actionSaveMotorConfXml_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the motor configuration XML file"),
-                                        "./vesc_mcconf",
+                                        LastMCConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1058,6 +1062,7 @@ void MainWindow::on_actionSaveMotorConfXml_triggered()
 
     if (res) {
         showStatusInfo("Saved motor configuration", true);
+        LastMCConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Save motor configuration"),
                           tr("Could not save motor configuration:<BR>"
@@ -1071,7 +1076,7 @@ void MainWindow::on_actionLoadMotorConfXml_triggered()
     QString path;
     path = QFileDialog::getOpenFileName(this,
                                         tr("Choose motor configuration file to load"),
-                                        ".",
+                                        LastMCConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1082,6 +1087,7 @@ void MainWindow::on_actionLoadMotorConfXml_triggered()
 
     if (res) {
         showStatusInfo("Loaded motor configuration", true);
+        LastMCConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Load motor configuration"),
                           tr("Could not load motor configuration:<BR>"
@@ -1095,7 +1101,7 @@ void MainWindow::on_actionSaveAppconfXml_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the app configuration XML file"),
-                                        "./vesc_appconf",
+                                        LastAppConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1110,6 +1116,7 @@ void MainWindow::on_actionSaveAppconfXml_triggered()
 
     if (res) {
         showStatusInfo("Saved app configuration", true);
+        LastAppConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Save app configuration"),
                           tr("Could not save app configuration:<BR>"
@@ -1123,7 +1130,7 @@ void MainWindow::on_actionLoadAppconfXml_triggered()
     QString path;
     path = QFileDialog::getOpenFileName(this,
                                         tr("Choose app configuration file to load"),
-                                        ".",
+                                        LastAppConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1134,6 +1141,7 @@ void MainWindow::on_actionLoadAppconfXml_triggered()
 
     if (res) {
         showStatusInfo("Loaded app configuration", true);
+        LastAppConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Load app configuration"),
                           tr("Could not load app configuration:<BR>"

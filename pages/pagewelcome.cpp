@@ -29,6 +29,8 @@
 #include <QSettings>
 #include <QmlHighlighter>
 #include <QQuickItem>
+#include <QQmlProperty>
+
 
 PageWelcome::PageWelcome(QWidget *parent) :
     QWidget(parent),
@@ -115,7 +117,38 @@ void PageWelcome::setVesc(VescInterface *vesc)
     ui->qmlWidget->engine()->rootContext()->setContextProperty("Utility", mUtil);
 
     ui->qmlWidget->setSource(QUrl(QLatin1String("qrc:/res/qml/WelcomeQmlPanel.qml")));
+
+    // Install an event filter to monitor for when this QML widget becomes hidden
+    ui->qmlWidget->installEventFilter(this);
 }
+
+
+bool PageWelcome::eventFilter(QObject *obj, QEvent *event)
+{
+   switch(event->type()) {
+   case QEvent::Show: {
+      // Set the telemetry to active when this page is visible
+      bool ret = QQmlProperty::write(ui->qmlWidget->rootObject(), "shouldTelemetryBeActive", true);
+      if (ret == false) {
+         qDebug() << "[QML][Error] shouldTelemetryBeActive was not successfully written. Perhaps that variable no longer exists in the QML component file?";
+      }
+   } break;
+   case QEvent::Hide: {
+      // Set the telemetry to inactive when this page is not visible
+      bool ret = QQmlProperty::write(ui->qmlWidget->rootObject(), "shouldTelemetryBeActive", false);
+
+      if (ret == false) {
+         qDebug() << "[QML][Error] shouldTelemetryBeActive was not successfully written. Perhaps that variable no longer exists in the QML component file?";
+      }
+   } break;
+   default: {
+   } break;
+   }
+
+   return QObject::eventFilter(obj, event);
+}
+
+
 
 void PageWelcome::on_autoConnectButton_clicked()
 {

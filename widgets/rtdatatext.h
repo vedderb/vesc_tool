@@ -21,6 +21,7 @@
 #define RTDATATEXT_H
 
 #include <QWidget>
+#include <QTimer>
 #include "datatypes.h"
 
 class RtDataText : public QWidget
@@ -45,6 +46,9 @@ private:
     int mBoxH;
     int mBoxW;
     int mTxtOfs;
+    bool shouldUpdate_flag;
+
+    QTimer *mTimer;
 
 };
 

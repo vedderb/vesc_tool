@@ -594,7 +594,7 @@ void PageExperiments::plotSamples(bool exportFormat)
     }
 
     if (ui->autoscaleButton->isChecked()) {
-        ui->plot->rescaleAxes();
+        ui->plot->rescaleAxesWhenVisible();
     }
 
     ui->plot->replotWhenVisible();

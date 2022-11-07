@@ -58,6 +58,9 @@ private:
     QmlUi mQmlUi;
     Utility *mUtil;
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
+
 };
 
 #endif // PAGEWELCOME_H

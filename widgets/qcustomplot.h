@@ -3910,6 +3910,14 @@ public:
   QCPAxis *xAxis, *yAxis, *xAxis2, *yAxis2;
   QCPLegend *legend;
 
+  void rescaleAxesWhenVisible() {
+      if (isVisible()) {
+          rescaleAxes();
+      } else {
+          doRescaleOnShow = true;
+      }
+  }
+
   void replotWhenVisible() {
       if (isVisible()) {
           replot(rpQueuedReplot);
@@ -3940,11 +3948,18 @@ signals:
   void afterReplot();
   
 protected:
+  bool doRescaleOnShow;
   bool doReplotOnShow;
 
   virtual void showEvent(QShowEvent *event) override
   {
       (void)event;
+
+     // Catch up on any queued events
+      if (doRescaleOnShow) {
+          rescaleAxes();
+          doRescaleOnShow = false;
+      }
       if (doReplotOnShow) {
           replot(rpQueuedReplot);
           doReplotOnShow = false;

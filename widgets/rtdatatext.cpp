@@ -29,6 +29,7 @@ RtDataText::RtDataText(QWidget *parent) : QWidget(parent)
     mBoxH = 10;
     mBoxW = 10;
     mTxtOfs = 2;
+    shouldUpdate_flag = false;
 
     mValues.amp_hours = 0;
     mValues.amp_hours_charged = 0;
@@ -47,13 +48,27 @@ RtDataText::RtDataText(QWidget *parent) : QWidget(parent)
     mValues.v_in = 0;
     mValues.watt_hours = 0;
     mValues.watt_hours_charged = 0;
+
+    // Create a timer to control the text repaint rate
+    mTimer = new QTimer(this);
+    mTimer->setInterval(1000.0/30);  // Set refresh rate to 30Hz
+    mTimer->start();
+
+    QObject::connect(mTimer, &QTimer::timeout, [&]() {
+       // Check if data should be repainted
+       if (shouldUpdate_flag == true){
+          // Trigger the repaint
+          update();
+          shouldUpdate_flag = false;
+       }
+    });
 }
 
 void RtDataText::setValues(const MC_VALUES &values)
 {
     mValues = values;
     mValues.fault_str.remove(0, 11);
-    update();
+    shouldUpdate_flag = true;
 }
 
 QSize RtDataText::sizeHint() const

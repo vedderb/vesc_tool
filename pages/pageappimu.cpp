@@ -197,9 +197,9 @@ void PageAppImu::timerSlot()
                     .arg(mGyroYVec.last(), 8, 'f', 3, QLatin1Char(' '))
                     .arg(mGyroZVec.last(), 8, 'f', 3, QLatin1Char(' ')));
 
-        ui->rpyPlot->rescaleAxes();
-        ui->accelPlot->rescaleAxes();
-        ui->gyroPlot->rescaleAxes();
+        ui->rpyPlot->rescaleAxesWhenVisible();
+        ui->accelPlot->rescaleAxesWhenVisible();
+        ui->gyroPlot->rescaleAxesWhenVisible();
 
         ui->rpyPlot->replotWhenVisible();
         ui->accelPlot->replotWhenVisible();

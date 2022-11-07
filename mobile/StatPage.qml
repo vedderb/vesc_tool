@@ -28,6 +28,7 @@ import Vedder.vesc.utility 1.0
 Item {
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
+    property alias updateData: commandsUpdate.enabled
 
     Component.onCompleted: {
         mCommands.emitEmptyStats()
@@ -87,6 +88,7 @@ Item {
     }
 
     Connections {
+        id: commandsUpdate
         target: mCommands
 
         function onValuesSetupReceived(values, mask) {

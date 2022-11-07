@@ -218,6 +218,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mKeyLeft = false;
     mKeyRight = false;
 
+    shouldUpdateDisplayBars = false;
+
     connect(mDebugTimer, SIGNAL(timeout()),
             this, SLOT(timerSlotDebugMsg()));
     connect(mTimer, SIGNAL(timeout()),
@@ -481,6 +483,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mPollImuTimer.start(int(1000.0 / mSettings.value("poll_rate_imu_data", 50).toDouble()));
     mPollBmsTimer.start(int(1000.0 / mSettings.value("poll_rate_bms_data", 10).toDouble()));
 
+    mRepaintDisplayBarTimer.start(1000.0/30); // Set the refresh rate to 30Hz
+
     connect(&mPollRtTimer, &QTimer::timeout, [this]() {
         if (ui->actionRtData->isChecked()) {
             mVesc->commands()->getStats(0xFFFFFFFF);
@@ -511,6 +515,15 @@ MainWindow::MainWindow(QWidget *parent) :
         if (ui->actionrtDataBms->isChecked()) {
             mVesc->commands()->bmsGetValues();
             mPollBmsTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_bms_data", 10).toDouble()));
+        }
+    });
+
+    connect(&mRepaintDisplayBarTimer, &QTimer::timeout, [this]() {
+        if (shouldUpdateDisplayBars) {
+           ui->dispCurrent->setVal(mMcValues.current_motor);
+           ui->dispDuty->setVal(mMcValues.duty_now * 100.0);
+
+           shouldUpdateDisplayBars = false;
         }
     });
 
@@ -962,8 +975,8 @@ void MainWindow::serialPortNotWritable(const QString &port)
 void MainWindow::valuesReceived(MC_VALUES values, unsigned int mask)
 {
     (void)mask;
-    ui->dispCurrent->setVal(values.current_motor);
-    ui->dispDuty->setVal(values.duty_now * 100.0);
+    mMcValues = values;
+    shouldUpdateDisplayBars = true;
 }
 
 void MainWindow::paramChangedDouble(QObject *src, QString name, double newParam)

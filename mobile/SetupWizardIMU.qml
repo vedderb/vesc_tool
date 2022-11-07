@@ -24,6 +24,8 @@ Item {
     property var dialogParent: ApplicationWindow.overlay
 
     property bool workingIMU: false
+    property int imuType: 0
+    property string imuString: "Unknown"
     property var filteredIMUValues: {
         'roll': 0.0,
         'pitch': 0.0,
@@ -34,6 +36,8 @@ Item {
         'gyroX': 0.0,
         'gyroY': 0.0,
         'gyroZ': 0.0,
+        'gyroXNoise': 0.0,
+        'gyroXPrevious': 0.0,
     }
     property var maxAccelValues: {
         'x': -10.0, 'y': -10.0, 'z': -10.0
@@ -49,6 +53,7 @@ Item {
         'orientationRoll': 5,
         'orientationPitch': 6,
         'orientationYaw': 7,
+        'configurator': 8
     }
 
     function openDialog() {
@@ -67,6 +72,17 @@ Item {
         onTriggered: {
             mCommands.getImuData(0x1FF)
         }
+    }
+
+    Timer {
+        id: delayTimer
+        repeat: false
+
+    }
+    function delay(delayTime, cb) {
+        delayTimer.interval = delayTime
+        delayTimer.triggered.connect(cb)
+        delayTimer.start()
     }
 
     Connections {
@@ -113,8 +129,13 @@ Item {
                 calculatedYawOffset = pi
             }
 
-            // Only detect a working IMU once, and leave value at true forever (This can be fooled, idk').
-            if(workingIMU == false && values.accZ !== 0 && values.accZ !== filteredIMUValues.accZ){
+            // Detect working IMU based on noise levels of the gyro X axis
+            var noise = Math.abs(values.gyroX - filteredIMUValues.gyroXPrevious)
+            filteredIMUValues.gyroXPrevious = values.gyroX
+            filteredIMUValues.gyroXNoise = (filteredIMUValues.gyroXNoise * .9) + (noise * .1)
+            if(filteredIMUValues.gyroXNoise < 0.01){
+                workingIMU = false
+            } else {
                 workingIMU = true
             }
         }
@@ -184,6 +205,20 @@ Item {
                         font.pointSize: 10
                         Layout.preferredWidth: parent.width
                         text: "Choose a task:"
+                    }
+                    Button {
+                        id: configuratorButton
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 500
+                        text: "IMU Configurator"
+                        flat: false
+
+                        onClicked: {
+                            configuratorRadioDefault.checked = true
+                            configuratorRadioDefault.onClicked()
+                            updateIMUType()
+                            stackLayout.currentIndex = pages.configurator
+                        }
                     }
                     Button {
                         id: gyroCalibrationButton
@@ -295,7 +330,7 @@ Item {
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "To find the accelerometer offsets, " +
-                        "the IMU must be must be rotated to the max value for all 3 axes. " +
+                        "the IMU must be rotated to the max value for all 3 axes. " +
                         "Avoid sharp movements & bumping the IMU to keep the reading stable. " +
                         "If you've overshot the reading, hit the 'Clear Max' button to reset the reading. " +
                         "\n\nAfter finding a stable max X value, hit 'SAVE' to continue.\n"
@@ -368,7 +403,7 @@ Item {
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "To find the accelerometer offsets, " +
-                        "the IMU must be must be rotated to the max value for all 3 axes. " +
+                        "the IMU must be rotated to the max value for all 3 axes. " +
                         "Avoid sharp movements & bumping the IMU to keep the reading stable. " +
                         "If you've overshot the reading, hit the 'Clear Max' button to reset the reading. " +
                         "\n\nAfter finding a stable max Y value, hit 'SAVE' to continue.\n"
@@ -441,7 +476,7 @@ Item {
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "To find the accelerometer offsets, " +
-                        "the IMU must be must be rotated to the max value for all 3 axes. " +
+                        "the IMU must be rotated to the max value for all 3 axes. " +
                         "Avoid sharp movements & bumping the IMU to keep the reading stable. " +
                         "If you've overshot the reading, hit the 'Clear Max' button to reset the reading. " +
                         "\n\nAfter finding a stable max Z value, hit 'SAVE' to continue.\n"
@@ -644,6 +679,220 @@ Item {
                 }// Column Layout
             }// Item (yaw Calibration)
 
+            Item{// configurator #8
+                width: parent.width
+                height: parent.height
+
+                ColumnLayout {
+                    width: parent.width
+                    height: parent.height
+                    Text {
+                        id: configuratorText1
+                        color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
+                        font.bold: true
+                        font.underline: true
+                        font.pointSize: 20
+                        wrapMode: Text.Wrap
+                        horizontalAlignment: Text.AlignHCenter
+                        Layout.preferredWidth: parent.width
+                        text: "IMU Configurator"
+                    }// Text
+                    Text {
+                        id: configuratorText2
+                        color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
+                        wrapMode: Text.Wrap
+                        font.pointSize: 10
+                        Layout.preferredWidth: parent.width
+                        text: "First make sure you have an IMU, if IMU is not detected press \"Search for IMU\". " +
+                        "IMU Type of \"Off\" means IMU is not connected (properly). " +
+                        "If IMU Detected is true but then becomes \"false\" after searching, the configured app has a conflicting comm port use."
+                    }// Text
+                    Text {
+                        id: configuratorText3
+                        color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
+                        wrapMode: Text.Wrap
+                        Layout.preferredWidth: parent.width
+                        text: "IMU Detected: " + (workingIMU ? "true" : "false") + "\n" +
+                        "IMU Type: " + imuString
+                    }// Text
+                    Button {
+                        id: searchIMUButton
+                        Layout.fillWidth: true
+                        text: "Search for IMU"
+                        flat: true
+
+                        onClicked: {
+                            searchIMUButton.enabled = false
+                            searchIMUButton.text = "Searching...."
+
+                            var previousApp = mAppConf.getParamEnum("app_to_use")
+                            mAppConf.updateParamEnum("app_to_use", 0)
+                            mAppConf.updateParamEnum("imu_conf.type", 1)
+                            mCommands.setAppConfNoStore()
+                            updateIMUType()
+                            delay(2000, function(){
+                                delayTimer.stop()
+                                if(!workingIMU){
+                                    mAppConf.updateParamEnum("imu_conf.type", 2)
+                                    mCommands.setAppConfNoStore()
+                                    updateIMUType()
+                                    delay(2000, function(){
+                                        delayTimer.stop()
+                                        if(!workingIMU){
+                                            mAppConf.updateParamEnum("imu_conf.type", 3)
+                                            mCommands.setAppConfNoStore()
+                                            updateIMUType()
+                                            delay(2000, function(){
+                                                delayTimer.stop()
+                                                if(!workingIMU){
+                                                    mAppConf.updateParamEnum("imu_conf.type", 4)
+                                                    mCommands.setAppConfNoStore()
+                                                    updateIMUType()
+                                                    delay(2000, function(){
+                                                        delayTimer.stop()
+                                                        if(!workingIMU){
+                                                            mAppConf.updateParamEnum("imu_conf.type", 5)
+                                                            mCommands.setAppConfNoStore()
+                                                            updateIMUType()
+                                                            delay(2000, function(){
+                                                                delayTimer.stop()
+                                                                if(!workingIMU){
+                                                                    mAppConf.updateParamEnum("imu_conf.type", 0)
+                                                                }
+                                                                searchIMUButton.enabled = true
+                                                                searchIMUButton.text = "Search for IMU"
+                                                                mAppConf.updateParamEnum("app_to_use", previousApp)
+                                                                mCommands.setAppConfNoStore()
+                                                                updateIMUType()
+                                                            })
+                                                        }else{
+                                                            searchIMUButton.enabled = true
+                                                            searchIMUButton.text = "Search for IMU"
+                                                            mAppConf.updateParamEnum("app_to_use", previousApp)
+                                                            mCommands.setAppConfNoStore()
+                                                        }
+                                                    })
+                                                }else{
+                                                    searchIMUButton.enabled = true
+                                                    searchIMUButton.text = "Search for IMU"
+                                                    mAppConf.updateParamEnum("app_to_use", previousApp)
+                                                    mCommands.setAppConfNoStore()
+                                                }
+                                            })
+                                        }else{
+                                            searchIMUButton.enabled = true
+                                            searchIMUButton.text = "Search for IMU"
+                                            mAppConf.updateParamEnum("app_to_use", previousApp)
+                                            mCommands.setAppConfNoStore()
+                                        }
+                                    })
+                                }else{
+                                    searchIMUButton.enabled = true
+                                    searchIMUButton.text = "Search for IMU"
+                                    mAppConf.updateParamEnum("app_to_use", previousApp)
+                                    mCommands.setAppConfNoStore()
+                                }
+                            })
+                        }
+                    }// Button
+                    Text {
+                        id: configuratorText4
+                        color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
+                        wrapMode: Text.Wrap
+                        font.pointSize: 10
+                        Layout.preferredWidth: parent.width
+                        text:
+                            "Next, select the intended IMU use:"
+                    }// Text
+                    GridLayout {
+                        columns: 2
+                        RadioButton {
+                            id: configuratorRadioDefault
+                            text: "Default"
+                            onClicked: {
+                                mAppConf.updateParamInt("imu_conf.sample_rate_hz", 200)
+                                mAppConf.updateParamEnum("imu_conf.mode", 0)
+                                mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
+                                mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.03)
+                                mAppConf.updateParamDouble("imu_conf.accel_offsets__2", 0.0)
+                                configuratorText5.text = configuratorText5.getText()
+                            }
+                        }
+                        RadioButton {
+                            id: configuratorRadioLogs
+                            text: "Logs"
+                            onClicked: {
+                                mAppConf.updateParamInt("imu_conf.sample_rate_hz", 200)
+                                mAppConf.updateParamEnum("imu_conf.mode", 1)
+                                mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
+                                mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.03)
+                                mAppConf.updateParamDouble("imu_conf.accel_offsets__2", 0.0)
+                                configuratorText5.text = configuratorText5.getText()
+                            }
+                        }
+                        RadioButton {
+                            id: configuratorRadioBUni
+                            text: "Balance Unicycle"
+                            onClicked: {
+                                if(imuType == 4){
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 800)
+                                }else if(imuType == 5){
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 833)
+                                }else{
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 1000)
+                                }
+                                mAppConf.updateParamEnum("imu_conf.mode", 1)
+                                mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
+                                mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.02)
+                                mAppConf.updateParamDouble("imu_conf.accel_offsets__2", 0.0)
+                                configuratorText5.text = configuratorText5.getText()
+                            }
+                        }
+                        RadioButton {
+                            id: configuratorRadioBSkate
+                            text: "Balance Skateboard"
+                            onClicked: {
+                                if(imuType == 4){
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 400)
+                                }else if(imuType == 5){
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 416)
+                                }else{
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 1000)
+                                }
+                                mAppConf.updateParamEnum("imu_conf.mode", 1)
+                                mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 0.02)
+                                mAppConf.updateParamDouble("imu_conf.mahony_kp", 2.0)
+                                mAppConf.updateParamDouble("imu_conf.accel_offsets__2", 1.0)
+                                configuratorText5.text = configuratorText5.getText()
+                            }
+                        }
+                    }
+                    Text {
+                        function getText(){
+                            return "Frequency: " + mAppConf.getParamInt("imu_conf.sample_rate_hz") + "\n" +
+                                "AHRS: " + getAHRS() + "\n" +
+                                "Acc Decay: " + mAppConf.getParamDouble("imu_conf.accel_confidence_decay").toFixed(3) + "\n" +
+                                "Mahony kp: " + mAppConf.getParamDouble("imu_conf.mahony_kp").toFixed(3) + "\n" +
+                                "Accel Z Offset: " + mAppConf.getParamDouble("imu_conf.accel_offsets__2").toFixed(1)
+                        }
+
+                        id: configuratorText5
+                        color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
+                        wrapMode: Text.Wrap
+                        Layout.preferredWidth: parent.width
+                        text: getText()
+                    }// Text
+
+
+
+                }// Column Layout
+            }// Item (configurator)
+
         }
 
 //        header: Rectangle {
@@ -667,6 +916,10 @@ Item {
                     if (stackLayout.currentIndex === pages.menu) {
                         dialog.close()
                         openTimer.stop()
+                    } else if(stackLayout.currentIndex === pages.configurator){
+                        mCommands.getAppConf()
+                        mCommands.setAppConf()
+                        stackLayout.currentIndex = pages.menu
                     } else {
                         stackLayout.currentIndex = pages.menu
                     }
@@ -771,6 +1024,9 @@ Item {
                         )
                         applyRotationToCalibrationConfig(0, 0, yaw)
 
+                        mCommands.setAppConf()
+                        stackLayout.currentIndex = pages.menu
+                    }else if(stackLayout.currentIndex === pages.configurator){
                         mCommands.setAppConf()
                         stackLayout.currentIndex = pages.menu
                     }else{
@@ -903,6 +1159,46 @@ Item {
         var rotatedYaw   = filteredIMUValues.roll * m31 + filteredIMUValues.pitch * m32 + filteredIMUValues.yaw * m33;
 
         return rotatedPitch
+    }
+
+    function updateIMUType(){
+        imuType = mAppConf.getParamEnum("imu_conf.type")
+        if(imuType === 0){ //off
+            imuString = "Off"
+        }else if(imuType === 1){ //internal
+            var internalTypeString = Utility.readInternalImuType(VescIf)
+            imuString = "Internal " + internalTypeString
+            if(internalTypeString === "MPU6050"){
+                imuType = 2
+            }else if(internalTypeString === "ICM20948"){
+                imuType = 3
+            }else if(internalTypeString === "BMI160"){
+                imuType = 4
+            }else if(internalTypeString === "LSM6DS2"){
+                imuType = 5
+            }
+        }else if(imuType === 2){ //MPU6050
+            imuString = "MPU6050"
+        }else if(imuType === 3){ //ICM20948
+            imuString = "ICM20948"
+        }else if(imuType === 4){ //BMI160
+            imuString = "BMI160"
+        }else if(imuType === 5){ //LSM6DS2(tr-c?)
+            imuString = "LSM6DS3"
+        }
+    }
+
+    function getAHRS(){
+        imuType = mAppConf.getParamEnum("imu_conf.mode")
+        if(imuType === 0){
+            return "Madgwick"
+        }else if(imuType === 1){
+            return "Mahony"
+        }else if(imuType === 2){
+            return "Madgwick Fusion"
+        }else if(imuType === 3){
+            return "Unknown"
+        }
     }
 
 }//Item

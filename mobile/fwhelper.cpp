@@ -51,6 +51,11 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
         }
     }
 
+    // Manually added entries. TODO: Come up with a system for them
+    if (params.hw == "VESC Express T") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VESC Express");
+    }
+
     return hws;
 }
 
@@ -61,7 +66,10 @@ QVariantMap FwHelper::getFirmwares(QString hw)
     QDirIterator it(hw);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
-        fws.insert(fi.fileName(), fi.absoluteFilePath());
+        if (fi.fileName().toLower() == "vesc_default.bin" ||
+                fi.fileName().toLower() == "app.bin") {
+            fws.insert(fi.fileName(), fi.absoluteFilePath());
+        }
     }
 
     return fws;
@@ -71,10 +79,13 @@ QVariantMap FwHelper::getBootloaders(FW_RX_PARAMS params, QString hw)
 {
     QVariantMap bls;
 
-    QString blDir = "://res/bootloaders";
-
-    if (params.hwType == HW_TYPE_VESC_BMS) {
+    QString blDir;
+    if (params.hwType == HW_TYPE_VESC) {
+        blDir = "://res/bootloaders";
+    } else if (params.hwType == HW_TYPE_VESC_BMS) {
         blDir = "://res/bootloaders_bms";
+    } else {
+        return bls;
     }
 
     QDirIterator it(blDir);
@@ -132,7 +143,7 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
         return false;
     }
 
-    if (file.size() > 700000) {
+    if (file.size() > 1500000) {
         vesc->emitMessageDialog(tr("Upload Error"),
                                 tr("The selected file is too large to be a firmware."),
                                 false);

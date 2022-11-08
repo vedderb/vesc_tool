@@ -241,6 +241,19 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         }
     }
 
+    // Manually added entries. TODO: Come up with a system for them
+    QString extraPath;
+    if (params.hw == "VESC Express T") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VESC Express";
+    }
+
+    if (!extraPath.isEmpty()) {
+        QListWidgetItem *item = new QListWidgetItem;
+        item->setText(params.hw);
+        item->setData(Qt::UserRole, extraPath);
+        ui->hwList->insertItem(ui->hwList->count(), item);
+    }
+
     if (ui->hwList->count() > 0) {
         ui->hwList->setCurrentRow(0);
     }
@@ -259,7 +272,8 @@ void PageFirmware::updateFwList()
         while (it.hasNext()) {
             QFileInfo fi(it.next());
             if (ui->showNonDefaultBox->isChecked() ||
-                    fi.fileName().toLower() == "vesc_default.bin") {
+                    fi.fileName().toLower() == "vesc_default.bin" ||
+                    fi.fileName().toLower() == "app.bin") {
                 QListWidgetItem *item = new QListWidgetItem;
                 item->setText(fi.fileName());
                 item->setData(Qt::UserRole, fi.absoluteFilePath());
@@ -320,10 +334,13 @@ void PageFirmware::updateBlList(FW_RX_PARAMS params)
 {
     ui->blList->clear();
 
-    QString blDir = "://res/bootloaders";
-
-    if (params.hwType != HW_TYPE_VESC) {
+    QString blDir;
+    if (params.hwType == HW_TYPE_VESC) {
+        blDir = "://res/bootloaders";
+    } else if (params.hwType == HW_TYPE_VESC_BMS) {
         blDir = "://res/bootloaders_bms";
+    } else {
+        return;
     }
 
     QDirIterator it(blDir);
@@ -532,7 +549,7 @@ void PageFirmware::uploadFw(bool allOverCan)
             }
         }
 
-        if (file.size() > 700000 && !(file.fileName().toLower().endsWith(".hex"))) {
+        if (file.size() > 1500000 && !(file.fileName().toLower().endsWith(".hex"))) {
             QMessageBox::critical(this,
                                   tr("Upload Error"),
                                   tr("The selected file is too large to be a firmware."));

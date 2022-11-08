@@ -105,6 +105,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("fileBlockWrite(path, data)");
         addItem("fileBlockMkdir(path)");
         addItem("fileBlockRemove(path)");
+        addItem("getGnss(mask)");
         level--;
     };
 

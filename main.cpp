@@ -213,6 +213,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<VescPackage>();
     qRegisterMetaType<TCP_HUB_DEVICE>();
     qRegisterMetaType<ConfigParam>();
+    qRegisterMetaType<GNSS_DATA>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD

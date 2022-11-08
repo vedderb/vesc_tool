@@ -1032,6 +1032,7 @@ typedef enum {
     COMM_LOG_DATA_F32,
 
     COMM_SET_APPCONF_NO_STORE,
+    COMM_GET_GNSS,
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -1091,6 +1092,15 @@ typedef enum {
     CAN_PACKET_BMS_HW_DATA_5,
     CAN_PACKET_BMS_AH_WH_CHG_TOTAL,
     CAN_PACKET_BMS_AH_WH_DIS_TOTAL,
+    CAN_PACKET_UPDATE_PID_POS_OFFSET,
+    CAN_PACKET_POLL_ROTOR_POS,
+    CAN_PACKET_NOTIFY_BOOT,
+    CAN_PACKET_STATUS_6,
+    CAN_PACKET_GNSS_TIME,
+    CAN_PACKET_GNSS_LAT,
+    CAN_PACKET_GNSS_LON,
+    CAN_PACKET_GNSS_ALT_SPEED_HDOP,
+    CAN_PACKET_MAKE_ENUM_32_BITS = 0xFFFFFFFF,
 } CAN_PACKET_ID;
 
 typedef struct {
@@ -1303,5 +1313,47 @@ public:
 };
 
 Q_DECLARE_METATYPE(TCP_HUB_DEVICE)
+
+struct GNSS_DATA {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(double lat MEMBER lat)
+    Q_PROPERTY(double lon MEMBER lon)
+    Q_PROPERTY(double height MEMBER height)
+    Q_PROPERTY(double speed MEMBER speed)
+    Q_PROPERTY(double hdop MEMBER hdop)
+    Q_PROPERTY(qint32 ms_today MEMBER ms_today)
+    Q_PROPERTY(int yy MEMBER yy)
+    Q_PROPERTY(int mo MEMBER mo)
+    Q_PROPERTY(int dd MEMBER dd)
+    Q_PROPERTY(double age_s MEMBER age_s)
+
+    GNSS_DATA() {
+        lat = 0.0;
+        lon = 0.0;
+        height = 0.0;
+        speed = 0.0;
+        hdop = 0.0;
+        ms_today = 0;
+        yy = 0;
+        mo = 0;
+        dd = 0;
+        age_s = 0.0;
+    }
+
+    double lat;
+    double lon;
+    double height;
+    double speed;
+    double hdop;
+    qint32 ms_today;
+    int yy;
+    int mo;
+    int dd;
+    double age_s;
+};
+
+Q_DECLARE_METATYPE(GNSS_DATA)
 
 #endif // DATATYPES_H

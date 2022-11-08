@@ -62,6 +62,8 @@ PageEspProg::PageEspProg(QWidget *parent) :
         ui->progWidget->setText(msg);
     });
 
+    mVescUploadOngoing = false;
+
     listAllFw();
 }
 
@@ -85,7 +87,7 @@ void PageEspProg::setVesc(VescInterface *vesc)
 
     connect(mVesc, &VescInterface::fwUploadStatus, [this]
             (QString status, double progress, bool isOngoing) {
-        (void)isOngoing;
+        mVescUploadOngoing = isOngoing;
         ui->progWidget->setValue(progress * 100.0);
         ui->progWidget->setText(status);
     });
@@ -102,7 +104,7 @@ void PageEspProg::timerSlot()
 
     ui->serialConnectButton->setEnabled(!mEspFlash.isEspConnected());
     ui->serialDisconnectButton->setEnabled(mEspFlash.isEspConnected());
-    ui->flashBlButton->setEnabled(!mEspFlash.isEspConnected() && vescConn);
+    ui->flashBlButton->setEnabled(!mEspFlash.isEspConnected() && vescConn && !mVescUploadOngoing);
 
     if (!mEspFlash.isEspConnected() && ui->flashButton->isEnabled()) {
         ui->flashButton->setEnabled(false);

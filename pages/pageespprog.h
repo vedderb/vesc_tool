@@ -57,6 +57,7 @@ private:
     Ui::PageEspProg *ui;
     VescInterface *mVesc;
     Esp32Flash mEspFlash;
+    bool mVescUploadOngoing;
 
     void listAllFw();
     void addFwToList(QString name, QString path);

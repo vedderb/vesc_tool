@@ -1052,6 +1052,23 @@ void Commands::processPacket(QByteArray data)
         emit fileRemoveRx(ok);
     } break;
 
+    case COMM_GET_GNSS: {
+        mTimeoutStats = 0;
+        GNSS_DATA values;
+        uint32_t mask = vb.vbPopFrontUint32();
+        if (mask & ((uint32_t)1 << 0)) { values.lat = vb.vbPopFrontDouble64(1e16); }
+        if (mask & ((uint32_t)1 << 1)) { values.lon = vb.vbPopFrontDouble64(1e16); }
+        if (mask & ((uint32_t)1 << 2)) { values.height = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 3)) { values.speed = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 4)) { values.hdop = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 5)) { values.ms_today = vb.vbPopFrontInt32(); }
+        if (mask & ((uint32_t)1 << 6)) { values.yy = vb.vbPopFrontInt16(); }
+        if (mask & ((uint32_t)1 << 7)) { values.mo = vb.vbPopFrontInt8(); }
+        if (mask & ((uint32_t)1 << 8)) { values.dd = vb.vbPopFrontInt8(); }
+        if (mask & ((uint32_t)1 << 9)) { values.age_s = vb.vbPopFrontDouble32Auto(); }
+        emit gnssRx(values, mask);
+    } break;
+
     default:
         break;
     }
@@ -2070,6 +2087,14 @@ void Commands::resetStats(bool sendAck)
     VByteArray vb;
     vb.vbAppendInt8(COMM_RESET_STATS);
     vb.vbAppendInt8(sendAck);
+    emitData(vb);
+}
+
+void Commands::getGnss(unsigned int mask)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_GNSS);
+    vb.vbAppendUint16(mask);
     emitData(vb);
 }
 

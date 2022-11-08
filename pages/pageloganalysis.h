@@ -73,8 +73,10 @@ private:
     Vesc3DView *m3dView;
     QCheckBox *mUseYawBox;
     QTimer *mPlayTimer;
+    QTimer *mGnssTimer;
     double mPlayPosNow;
     QString mVescLastPath;
+    qint32 mGnssMsTodayLast;
 
     QVector<LOG_HEADER> mLogHeader;
     QVector<QVector<double> > mLog;

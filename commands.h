@@ -141,6 +141,7 @@ signals:
     void writeQmluiResReceived(bool ok, quint32 offset);
     void ioBoardValRx(IO_BOARD_VALUES val);
     void statsRx(STAT_VALUES val, unsigned int mask);
+    void gnssRx(GNSS_DATA val, unsigned int mask);
     void lispReadCodeRx(int lenQml, int ofsQml, QByteArray data);
     void lispEraseCodeRx(bool ok);
     void lispWriteCodeRx(bool ok, quint32 offset);
@@ -259,6 +260,8 @@ public slots:
 
     void getStats(unsigned int mask);
     void resetStats(bool sendAck);
+
+    void getGnss(unsigned int mask);
 
     void lispReadCode(int len, int offset);
     void lispWriteCode(QByteArray data, quint32 offset);

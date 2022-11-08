@@ -116,6 +116,16 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
         }
     });
 
+    mGnssTimer = new QTimer(this);
+    mGnssTimer->start(100);
+    mGnssMsTodayLast = 0;
+
+    connect(mGnssTimer, &QTimer::timeout, [this]() {
+        if (mVesc && ui->pollGnssBox->isChecked()) {
+            mVesc->commands()->getGnss(0xFFFF);
+        }
+    });
+
     QFont legendFont = font();
     legendFont.setPointSize(9);
 
@@ -198,6 +208,13 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
         truncateDataAndPlot(ui->autoZoomBox->isChecked());
     });
 
+    connect(ui->pollGnssBox, &QCheckBox::toggled, [this]() {
+        if (ui->pollGnssBox->isChecked()) {
+            ui->map->setInfoTraceNow(2);
+            ui->map->clearInfoTrace();
+        }
+    });
+
     connect(ui->filterhAccBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double newVal) {
         (void)newVal;
@@ -238,6 +255,49 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
             ui->vescDisplay->setText(tr("%1 KB/s, %2").
                                      arg(bytesPerSec / 1024, 0, 'f', 2).
                                      arg(t.toString("hh:mm:ss")));
+        });
+
+        connect(mVesc->commands(), &Commands::gnssRx, [this](GNSS_DATA val) {
+            if (val.ms_today != mGnssMsTodayLast) {
+                mGnssMsTodayLast = val.ms_today;
+
+                if (ui->filterOutlierBox->isChecked() &&
+                        (val.hdop * 5.0) > ui->filterhAccBox->value()) {
+                    return;
+                }
+
+                double llh[3];
+                double i_llh[3];
+                double xyz[3];
+
+                ui->map->getEnuRef(i_llh);
+                llh[0] = val.lat;
+                llh[1] = val.lon;
+                llh[2] = val.height;
+
+                Utility::llhToEnu(i_llh, llh, xyz);
+
+                LocPoint p;
+                p.setXY(xyz[0], xyz[1]);
+                p.setRadius(10);
+                ui->map->setInfoTraceNow(2);
+
+                LocPoint p2;
+                p2.setXY(0, 0);
+                p2.setInfo(tr("Hdop %d").arg(val.hdop));
+
+                if (p2.getDistanceTo(p) > 10000) {
+                    ui->map->setEnuRef(llh[0], llh[1], llh[2]);
+                    p.setXY(0, 0);
+                    ui->map->clearAllInfoTraces();
+                }
+
+                ui->map->addInfoPoint(p);
+
+                if (ui->followBox->isChecked()) {
+                    ui->map->moveView(xyz[0], xyz[1]);
+                }
+            }
         });
     }
 }

@@ -67,6 +67,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="pollGnssBox">
+           <property name="toolTip">
+            <string>Poll realtime GNSS-data from the connected device.</string>
+           </property>
+           <property name="text">
+            <string>Poll GNSS</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="QRadioButton" name="tilesOsmButton">
@@ -758,6 +768,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>DisplayPercentage</class>
+   <extends>QWidget</extends>
+   <header>widgets/displaypercentage.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
    <header>widgets/qcustomplot.h</header>
@@ -773,12 +789,6 @@
    <class>SuperSlider</class>
    <extends>QSlider</extends>
    <header>widgets/superslider.h</header>
-  </customwidget>
-  <customwidget>
-   <class>DisplayPercentage</class>
-   <extends>QWidget</extends>
-   <header>widgets/displaypercentage.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

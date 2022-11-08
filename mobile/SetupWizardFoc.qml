@@ -771,7 +771,8 @@ Item {
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
-            text: "Warning: Choosing a significantly too large motor for detection is likely to destroy the motor " +
+            text: "Warning: This selection determines the recommended max current for your motor based on heat dissipation. " +
+                  "Selecting a motor here that is significantly larger than your motor is likely to destroy your motor " +
                   "during detection. It is important to choose a motor size similar to the motor you are using. " +
                   "Are you sure that your motor selection is within range?"
         }
@@ -798,7 +799,10 @@ Item {
                 if (val.v_in > 39.0 && val.v_in < 51.0) {
                     mMcConf.updateParamInt("si_battery_cells", 12)
                 } else {
-                    mMcConf.updateParamInt("si_battery_cells", 3)
+                    // Roughly work out by dividing by 4.2 (most common max voltage) and ceil
+                    // This will give the minimum cell count
+                    var cells = Math.ceil(val.v_in / 4.2)
+                    mMcConf.updateParamInt("si_battery_cells", cells)
                 }
             }
         }
@@ -826,10 +830,11 @@ Item {
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
-            text: "Warning: You have not specified battery current limits, which essentially only limits " +
-                  "the current if the voltage drops too much. This is fine in most cases, but check with " +
-                  "your battery and BMS specification to be safe. Keep in mind that you have to divide the " +
-                  "battery current settings by the number of VESCs."
+            text: "Warning: You have not specified battery current limits (advanced box). This means that " +
+                  "the battery current will only be limited if, the battery voltage drops so much from the " +
+                  "internal resistance of the battery that it falls below the battery cutoff voltage. " +
+                  "This is fine in most cases, but check with your battery and BMS specification to be safe. " +
+                  "Keep in mind that you have to divide the battery current settings by the number of VESCs."
         }
 
         onAccepted: {
@@ -864,7 +869,7 @@ Item {
                 color: {color = Utility.getAppHexColor("lightText")}
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap
-                text: "This is going to spin up all motors. Make " +
+                text: "WARNING: This is going to spin up all motors. Make " +
                       "sure that nothing is in the way."
             }
 

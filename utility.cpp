@@ -500,10 +500,40 @@ QString Utility::detectAllFoc(VescInterface *vesc,
         } else {
             QString reason;
             switch (resDetect) {
-            case -1: reason = "Sensor detection failed"; break;
+            case -1: reason = "Peristent fault, check realtime data page"; break;
             case -10: reason = "Flux linkage detection failed"; break;
             case -50: reason = "CAN detection timeout"; break;
             case -51: reason = "CAN detection failed"; break;
+            case -100 + FAULT_CODE_NONE: reason = "No fault, detection failed for an unknown reason"; break;
+            case -100 + FAULT_CODE_OVER_VOLTAGE: reason = "Over voltage fault, check voltage is below set limit"; break;
+            case -100 + FAULT_CODE_UNDER_VOLTAGE: reason = "Under voltage fault, check voltage is above set limit. If using a power supply make sure the current limit is high enough."; break;
+            case -100 + FAULT_CODE_DRV: reason = "DRV fault, hardware fault occured. Check there are no shorts"; break;
+            case -100 + FAULT_CODE_ABS_OVER_CURRENT: reason = "Overcurrent fault, Check there are no shorts and ABS Overcurrent limit is sensible"; break;
+            case -100 + FAULT_CODE_OVER_TEMP_FET: reason = "Mosfet Overtemperature fault, Mosfets overheated, check for shorts. Cool down device"; break;
+            case -100 + FAULT_CODE_OVER_TEMP_MOTOR: reason = "Motor Overtemperature fault, Motor overheaded, is the current limit OK?"; break;
+            case -100 + FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: reason = "Gate Driver over voltage, check for hardware failure"; break;
+            case -100 + FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: reason = "Gate Driver under voltage, check for hardware failure"; break;
+            case -100 + FAULT_CODE_MCU_UNDER_VOLTAGE: reason = "MCU under voltage, check for hardware failure, shorts on outputs"; break;
+            case -100 + FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: reason = "Boot from watchdog reset, software locked up check for firmware corruption"; break;
+            case -100 + FAULT_CODE_ENCODER_SPI: reason = "Encoder SPI fault, check encoder connections"; break;
+            case -100 + FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE: reason = "Encoder SINCOS below min amplitude, check encoder connections and magnet alignment / distance"; break;
+            case -100 + FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE: reason = "Encoder SINCOS above max amplitude, check encoder connections and magnet alignment / distance"; break;
+            case -100 + FAULT_CODE_FLASH_CORRUPTION: reason = "Flash corruption, reflash firmware immediately!"; break;
+            case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1: reason = "High offset on current sensor 1, check for hardware failure"; break;
+            case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: reason = "High offset on current sensor 2, check for hardware failure"; break;
+            case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: reason = "High offset on current sensor 3, check for hardware failure"; break;
+            case -100 + FAULT_CODE_UNBALANCED_CURRENTS: reason = "Unbalanced currents, check for hardware failure"; break;
+            case -100 + FAULT_CODE_BRK: reason = "BRK, hardware protection triggered, check for shorts or possible hardware failure"; break;
+            case -100 + FAULT_CODE_RESOLVER_LOT: reason = "?"; break;
+            case -100 + FAULT_CODE_RESOLVER_DOS: reason = "?"; break;
+            case -100 + FAULT_CODE_RESOLVER_LOS: reason = "?"; break;
+            case -100 + FAULT_CODE_FLASH_CORRUPTION_APP_CFG: reason = "Flash corruption, App config corrupt, rewrite app config to restore"; break;
+            case -100 + FAULT_CODE_FLASH_CORRUPTION_MC_CFG: reason = "Flash corruption, Motor config corrupt, rewrite motor config to restore"; break;
+            case -100 + FAULT_CODE_ENCODER_NO_MAGNET: reason = "Encoder no magnet, magnet is too weak or too far from the encoder"; break;
+            case -100 + FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: reason = "Magnet too strong, magnet is too strong or too close to the encoder"; break;
+            case -100 + FAULT_CODE_PHASE_FILTER: reason = "Phase filter fault, ?"; break;
+            case -100 + FAULT_CODE_ENCODER_FAULT: reason = "Encoder fault, check encoder connections and alignment"; break;
+
             default: reason = QString::number(resDetect); break;
             }
 

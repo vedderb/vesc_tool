@@ -34,5 +34,6 @@
         <file>res/Lisp/Examples/ws2812_native.lisp</file>
         <file>res/Lisp/Examples/plot_vesc_tool.lisp</file>
         <file>res/Lisp/Examples/log_can.lisp</file>
+        <file>res/Lisp/Examples/crc16.lisp</file>
     </qresource>
 </RCC>

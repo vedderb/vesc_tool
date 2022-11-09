@@ -330,8 +330,15 @@
 <name>sort</name>
 <name>str-cmp-asc</name>
 <name>str-cmp-dsc</name>
+<name>to-str</name>
 <name>second</name>
 <name>third</name>
 <name>abs</name>
+<name>gnss-lat-lon</name>
+<name>gnss-height</name>
+<name>gnss-speed</name>
+<name>gnss-hdop</name>
+<name>gnss-date-time</name>
+<name>gnss-age</name>
 </section>
 </root>

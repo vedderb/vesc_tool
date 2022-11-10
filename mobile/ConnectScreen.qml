@@ -167,6 +167,15 @@ Item {
                     id: scanMenu
 
                     MenuItem {
+                        text: "Scan Serial"
+                        visible: Utility.hasSerialport()
+                        onTriggered: {
+                            bleModel.clear()
+                            mBle.emitScanDone()
+                        }
+                    }
+
+                    MenuItem {
                         text: "Scan BLE"
                         enabled: !scanning
                         onTriggered: {
@@ -291,7 +300,7 @@ Item {
                                     Layout.preferredWidth: 40
                                     Layout.preferredHeight: 40
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: "qrc" + Utility.getThemePath() + ((isSerial === 0) ? "icons/Connected-96.png" : "icons/bluetooth.png")
+                                    source: "qrc" + Utility.getThemePath() + ((isSerial === 0) ? "icons/bluetooth.png" : "icons/Connected-96.png")
                                 }
 
                                 Text {
@@ -360,7 +369,11 @@ Item {
 
                                 onClicked: {
                                     if (isSerial === 1) {
-                                        VescIf.autoconnect()
+                                        if (bleAddr === "") {
+                                            VescIf.autoconnect()
+                                        } else {
+                                            VescIf.connectSerial(bleAddr, 115200)
+                                        }
                                     } else if (isSerial === 2) {
                                         VescIf.connectTcp(bleAddr, 65102)
                                     } else if (isSerial === 3) {
@@ -558,20 +571,64 @@ Item {
                 }
             }
 
-            addToList = true
-            for(j = 0; j < bleModel.count; j++) {
-                if(bleModel.get(j).name === ("Serial Port")){
-                    addToList  = false
-                }
-            }
+            if (Utility.hasSerialport()) {
+                var ports = VescIf.listSerialPorts()
+                for (j = 0; j < ports.length; j++) {
+                    if (ports[j].isEsp) {
+                        var nameNow = "Serial ESP32\n" + ports[j].systemPath
+                        addToList = true
+                        for(j = 0; j < bleModel.count; j++) {
+                            if(bleModel.get(j).name === nameNow){
+                                addToList  = false
+                            }
+                        }
 
-            if (Utility.hasSerialport() && addToList) {
-                bleModel.insert(0, {"name": "Serial Port",
-                                    "setName": "",
-                                    "preferred": true,
-                                    "bleAddr": "",
-                                    "hubUuid": "",
-                                    "isSerial": 1})
+                        if (addToList) {
+                            bleModel.insert(0, {"name": nameNow,
+                                                "setName": "",
+                                                "preferred": true,
+                                                "bleAddr": ports[j].systemPath,
+                                                "hubUuid": "",
+                                                "isSerial": 1})
+                        }
+                    }
+
+                    if (ports[j].isVesc) {
+                        nameNow = "Serial STM32\n" + ports[j].systemPath
+                        addToList = true
+                        for(j = 0; j < bleModel.count; j++) {
+                            if(bleModel.get(j).name === nameNow){
+                                addToList  = false
+                            }
+                        }
+
+                        if (addToList) {
+                            bleModel.insert(0, {"name": nameNow,
+                                                "setName": "",
+                                                "preferred": true,
+                                                "bleAddr": ports[j].systemPath,
+                                                "hubUuid": "",
+                                                "isSerial": 1})
+                        }
+                    }
+                }
+
+                nameNow = "Serial (AutoConnect)"
+                addToList = true
+                for(j = 0; j < bleModel.count; j++) {
+                    if(bleModel.get(j).name === nameNow){
+                        addToList  = false
+                    }
+                }
+
+                if (addToList) {
+                    bleModel.insert(0, {"name": nameNow,
+                                        "setName": "",
+                                        "preferred": true,
+                                        "bleAddr": "",
+                                        "hubUuid": "",
+                                        "isSerial": 1})
+                }
             }
 
             if (pingTcpHub) {

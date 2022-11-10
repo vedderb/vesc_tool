@@ -115,8 +115,9 @@ void PageEspProg::on_serialRefreshButton_clicked()
 {
     if (mVesc) {
         ui->serialPortBox->clear();
-        QList<VSerialInfo_t> ports = mVesc->listSerialPorts();
-        foreach(const VSerialInfo_t &port, ports) {
+        auto ports = mVesc->listSerialPorts();
+        foreach(auto &info, ports) {
+            auto port = info.value<VSerialInfo_t>();
             ui->serialPortBox->addItem(port.name, port.systemPath);
         }
         ui->serialPortBox->setCurrentIndex(0);

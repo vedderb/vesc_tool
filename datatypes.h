@@ -30,11 +30,27 @@
 #include <cstdint>
 #include "tcphub.h"
 
-typedef struct {
+struct VSerialInfo_t {
+    Q_GADGET
+
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString systemPath MEMBER systemPath)
+    Q_PROPERTY(bool isVesc MEMBER isVesc)
+    Q_PROPERTY(bool isEsp MEMBER isEsp)
+
+public:
+    VSerialInfo_t() {
+        isVesc = false;
+        isEsp = false;
+    }
+
     QString name;
     QString systemPath;
     bool isVesc;
-} VSerialInfo_t;
+    bool isEsp;
+};
+
+Q_DECLARE_METATYPE(VSerialInfo_t)
 
 typedef enum {
     CFG_T_UNDEFINED = 0,

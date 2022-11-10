@@ -2181,9 +2181,9 @@ bool VescInterface::reconnectLastPort()
 #endif
     } else {
 #ifdef HAS_SERIALPORT
-        QList<VSerialInfo_t> ports = listSerialPorts();
+        auto ports = listSerialPorts();
         if (!ports.isEmpty()) {
-            return connectSerial(ports.first().systemPath);
+            return connectSerial(ports.first().value<VSerialInfo_t>().systemPath);
         } else  {
             emit messageDialog(tr("Reconnect"), tr("No ports found"), false, false);
             return false;
@@ -2203,7 +2203,7 @@ bool VescInterface::autoconnect()
     bool res = false;
 
 #ifdef HAS_SERIALPORT
-    QList<VSerialInfo_t> ports = listSerialPorts();
+    auto ports = listSerialPorts();
     mAutoconnectOngoing = true;
     mAutoconnectProgress = 0.0;
 
@@ -2212,7 +2212,7 @@ bool VescInterface::autoconnect()
                this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     for (int i = 0;i < ports.size();i++) {
-        VSerialInfo_t serial = ports[i];
+        VSerialInfo_t serial = ports[i].value<VSerialInfo_t>();
 
         if (!connectSerial(serial.systemPath)) {
             continue;
@@ -2304,8 +2304,8 @@ bool VescInterface::connectSerial(QString port, int baudrate)
 {
 #ifdef HAS_SERIALPORT
     bool found = false;
-    for (VSerialInfo_t ser: listSerialPorts()) {
-        if (ser.systemPath == port) {
+    for (auto ser: listSerialPorts()) {
+        if (ser.value<VSerialInfo_t>().systemPath == port) {
             found = true;
             break;
         }
@@ -2360,9 +2360,9 @@ bool VescInterface::connectSerial(QString port, int baudrate)
 #endif
 }
 
-QList<VSerialInfo_t> VescInterface::listSerialPorts()
+QVariantList VescInterface::listSerialPorts()
 {
-    QList<VSerialInfo_t> res;
+    QVariantList res;
 
 #ifdef HAS_SERIALPORT
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
@@ -2383,10 +2383,11 @@ QList<VSerialInfo_t> VescInterface::listSerialPorts()
 
         if (port.productIdentifier() == 0x1001) {
             info.name.insert(0, "ESP32 - ");
+            info.isEsp = true;
             index = 0;
         }
 
-        res.insert(index, info);
+        res.insert(index, QVariant::fromValue(info));
     }
 #endif
 

@@ -201,6 +201,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<TcpHub>("Vedder.vesc.tcphub", 1, 0, "TcpHub");
     qmlRegisterType<CodeLoader>("Vedder.vesc.codeloader", 1, 0, "CodeLoader");
 
+    qRegisterMetaType<VSerialInfo_t>();
     qRegisterMetaType<MCCONF_TEMP>();
     qRegisterMetaType<MC_VALUES>();
     qRegisterMetaType<BMS_VALUES>();

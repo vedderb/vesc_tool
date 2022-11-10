@@ -182,8 +182,11 @@ public:
     Q_INVOKABLE bool reconnectLastPort();
     Q_INVOKABLE bool autoconnect();
     Q_INVOKABLE QString getConnectedPortName();
-    bool connectSerial(QString port, int baudrate = 115200);
-    QList<VSerialInfo_t> listSerialPorts();
+    Q_INVOKABLE bool connectSerial(QString port, int baudrate);
+    bool connectSerial(QString port) {
+        return connectSerial(port, 115200);
+    }
+    Q_INVOKABLE QVariantList listSerialPorts();
     QList<QString> listCANbusInterfaces();
     Q_INVOKABLE bool connectCANbus(QString backend, QString ifName, int bitrate);
     Q_INVOKABLE bool isCANbusConnected();

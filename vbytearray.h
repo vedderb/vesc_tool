@@ -41,6 +41,7 @@ public:
     void vbAppendDouble32(double number, double scale);
     void vbAppendDouble16(double number, double scale);
     void vbAppendDouble32Auto(double number);
+    void vbAppendDouble64Auto(double number);
     void vbAppendString(QString str);
 
     qint64 vbPopFrontInt64();
@@ -55,6 +56,7 @@ public:
     double vbPopFrontDouble32(double scale);
     double vbPopFrontDouble16(double scale);
     double vbPopFrontDouble32Auto();
+    double vbPopFrontDouble64Auto();
     QString vbPopFrontString();
 
 };

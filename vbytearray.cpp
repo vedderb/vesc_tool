@@ -152,6 +152,14 @@ void VByteArray::vbAppendDouble32Auto(double number)
     vbAppendUint32(res);
 }
 
+void VByteArray::vbAppendDouble64Auto(double number)
+{
+    float n = number;
+    float err = float(number - double(n));
+    vbAppendDouble32Auto(n);
+    vbAppendDouble32Auto(err);
+}
+
 void VByteArray::vbAppendString(QString str)
 {
     append(str.toLocal8Bit());
@@ -310,6 +318,13 @@ double VByteArray::vbPopFrontDouble32Auto()
     }
 
     return ldexpf(f, e);
+}
+
+double VByteArray::vbPopFrontDouble64Auto()
+{
+    double n = vbPopFrontDouble32Auto();
+    double err = vbPopFrontDouble32Auto();
+    return n + err;
 }
 
 QString VByteArray::vbPopFrontString()

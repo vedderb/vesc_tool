@@ -318,6 +318,7 @@
 <name>log-start</name>
 <name>log-stop</name>
 <name>log-send-f32</name>
+<name>log-send-f64</name>
 <name>uart-read-bytes</name>
 <name>uart-read-until</name>
 <name>map</name>

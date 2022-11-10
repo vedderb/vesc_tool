@@ -152,6 +152,7 @@
 <name>select-motor</name>
 <name>get-selected-motor</name>
 <name>get-bms-val</name>
+<name>set-bms-val</name>
 <name>get-adc</name>
 <name>get-adc-decoded</name>
 <name>secs-since</name>

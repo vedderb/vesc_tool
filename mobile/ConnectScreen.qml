@@ -168,7 +168,7 @@ Item {
 
                     MenuItem {
                         text: "Scan Serial"
-                        visible: Utility.hasSerialport()
+                        enabled: Utility.hasSerialport()
                         onTriggered: {
                             bleModel.clear()
                             mBle.emitScanDone()

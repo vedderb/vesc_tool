@@ -239,11 +239,11 @@ void PageEspProg::on_flashButton_clicked()
 
     ui->progWidget->setText("Flashing firmware...");
     ui->progWidget->setValue(0.0);
-    mEspFlash.flashFirmware(fApp.readAll(), 0x10000);
+    mEspFlash.flashFirmware(fApp.readAll(), ui->appOffsetBox->value());
 
     ui->progWidget->setText("Flashing partition table...");
     ui->progWidget->setValue(0.0);
-    mEspFlash.flashFirmware(fPart.readAll(), 0x8000);
+    mEspFlash.flashFirmware(fPart.readAll(), ui->partOffsetBox->value());
 
     ui->flashButton->setEnabled(true);
 }

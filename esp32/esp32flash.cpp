@@ -157,7 +157,7 @@ bool Esp32Flash::flashFirmware(QByteArray data, size_t address)
         emit flashProgress(double(written) / double(binary_size));
     };
 
-    emit stateUpdate("Finished programming");
+    emit stateUpdate("Done, verifying flash...");
 
     err = esp_loader_flash_verify();
     if (err != ESP_LOADER_SUCCESS) {

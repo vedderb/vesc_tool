@@ -9,8 +9,8 @@ rm -rf $FWPATH/package/*
 
 cd $FWPATH
 make all_fw_clean
-make all_fw -j12
-sleep 10
+make all_fw -j24
+sleep 1
 python3 package_firmware.py
 make all_fw_clean
 

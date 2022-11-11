@@ -1069,6 +1069,49 @@ void Commands::processPacket(QByteArray data)
         emit gnssRx(values, mask);
     } break;
 
+    case COMM_LOG_START: {
+        int fieldNum = vb.vbPopFrontInt16();
+        double rateHz = vb.vbPopFrontDouble32Auto();
+        bool appendTime = vb.vbPopFrontInt8();
+        bool appendGnss = vb.vbPopFrontInt8();
+        bool appendGnssTime = vb.vbPopFrontInt8();
+        emit logStart(fieldNum, rateHz, appendTime, appendGnss, appendGnssTime);
+    } break;
+
+    case COMM_LOG_STOP: {
+        emit logStop();
+    } break;
+
+    case COMM_LOG_CONFIG_FIELD: {
+        LOG_HEADER h;
+        h.fieldInd = vb.vbPopFrontInt16();
+        h.key = vb.vbPopFrontString();
+        h.name = vb.vbPopFrontString();
+        h.unit = vb.vbPopFrontString();
+        h.precision = vb.vbPopFrontInt8();
+        h.isRelativeToFirst = vb.vbPopFrontInt8();
+        h.isTimeStamp = vb.vbPopFrontInt8();
+        emit logConfigField(h);
+    } break;
+
+    case COMM_LOG_DATA_F32: {
+        int fieldStart = vb.vbPopFrontInt16();
+        QVector<double> samples;
+        while (vb.size() >= 4) {
+            samples.append(vb.vbPopFrontDouble32Auto());
+        }
+        emit logSamples(fieldStart, samples);
+    } break;
+
+    case COMM_LOG_DATA_F64: {
+        int fieldStart = vb.vbPopFrontInt16();
+        QVector<double> samples;
+        while (vb.size() >= 8) {
+            samples.append(vb.vbPopFrontDouble64Auto());
+        }
+        emit logSamples(fieldStart, samples);
+    } break;
+
     default:
         break;
     }

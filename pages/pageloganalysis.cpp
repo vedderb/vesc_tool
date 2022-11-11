@@ -50,6 +50,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->vescUpButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
     ui->vescSaveAsButton->setIcon(QPixmap(theme + "icons/Save as-96.png"));
     ui->vescLogDeleteButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->saveCsvButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
 
     updateTileServers();
 
@@ -119,6 +120,8 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     mGnssTimer = new QTimer(this);
     mGnssTimer->start(100);
     mGnssMsTodayLast = 0;
+
+    mLogRtTimer = new QTimer(this);
 
     connect(mGnssTimer, &QTimer::timeout, [this]() {
         if (mVesc && ui->pollGnssBox->isChecked()) {
@@ -230,10 +233,17 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     on_gridBox_toggled(ui->gridBox->isChecked());
     logListRefresh();
+
+    QSettings set;
+    mLastSaveCsvPath = set.value("pageloganalysis/lastSaveCsvPath", true).toString();
 }
 
 PageLogAnalysis::~PageLogAnalysis()
 {
+    QSettings set;
+    set.setValue("pageloganalysis/lastSaveCsvPath", mLastSaveCsvPath);
+    set.sync();
+
     delete ui;
 }
 
@@ -247,6 +257,76 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
+        auto updatePlots = [this]() {
+            resetInds();
+
+            mLogHeader = mLogRtHeader;
+            mLog = mLogRt;
+
+            updateInds();
+            generateMissingEntries();
+
+            auto sel = ui->dataTable->selectionModel()->selectedIndexes();
+            ui->dataTable->setRowCount(0);
+
+            if (mLog.size() == 0) {
+                return;
+            }
+
+            for (auto e: mLogHeader) {
+                addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
+            }
+
+            foreach (QModelIndex ind, sel) {
+                ui->dataTable->selectRow(ind.row());
+            }
+
+            truncateDataAndPlot(ui->autoZoomBox->isChecked());
+
+            if (mInd_t_day >= 0 && !mLog.isEmpty()) {
+                updateDataAndPlot(mLog.last().at(mInd_t_day));
+            }
+        };
+
+        connect(mVesc->commands(), &Commands::logStart, [this]
+                (int fieldNum, double rateHz, bool appendTime, bool appendGnss, bool appendGnssTime) {
+            (void)appendTime; (void)appendGnss; (void)appendGnssTime;
+            mLogRtHeader.resize(fieldNum);
+            mLogRtSamplesNow.resize(fieldNum);
+            mLogRtTimer->start(1000.0 / rateHz);
+            mLogRt.clear();
+        });
+
+        connect(mVesc->commands(), &Commands::logStop, [this, updatePlots] () {
+           mLogRtTimer->stop();
+           updatePlots();
+        });
+
+        connect(mVesc->commands(), &Commands::logConfigField, [this](LOG_HEADER h) {
+            if (mLogRtHeader.size() <= h.fieldInd) {
+                mLogRtHeader.resize(h.fieldInd + 1);
+            }
+
+            mLogRtHeader[h.fieldInd] = h;
+        });
+
+        connect(mVesc->commands(), &Commands::logSamples, [this](int fieldStart, QVector<double> samples) {
+            for (int i = 0;i < samples.size();i++) {
+                int ind = i + fieldStart;
+                if (mLogRtSamplesNow.size() > ind) {
+                    mLogRtSamplesNow[ind] = samples.at(i);
+                }
+            }
+        });
+
+        connect(mLogRtTimer, &QTimer::timeout, [this, updatePlots]() {
+            mLogRt.append(mLogRtSamplesNow);
+
+            if (ui->updateRtBox->isChecked()) {
+                updatePlots();
+            }
+        });
+
         connect(mVesc->commands(), &Commands::fileProgress, [this]
                 (int32_t prog, int32_t tot, double percentage, double bytesPerSec) {
             QTime t(0, 0, 0, 0);;
@@ -284,7 +364,7 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
 
                 LocPoint p2;
                 p2.setXY(0, 0);
-                p2.setInfo(tr("Hdop %d").arg(val.hdop));
+                p2.setInfo(tr("Hdop %1").arg(val.hdop));
 
                 if (p2.getDistanceTo(p) > 10000) {
                     ui->map->setEnuRef(llh[0], llh[1], llh[2]);
@@ -1053,92 +1133,7 @@ void PageLogAnalysis::openLog(QByteArray data)
 
         updateInds();
 
-        // Create sample array if t_day is missing
-        if (mInd_t_day < 0) {
-            mLogHeader.append(LOG_HEADER("t_day", "Sample", "", 0));
-
-            for (int i = 0;i < mLog.size();i++) {
-                mLog[i].append(i);
-            }
-        }
-
-        updateInds();
-
-        if (mInd_gnss_lat >= 0 && mInd_gnss_lon >= 0 &&
-                mInd_gnss_alt >= 0 && mInd_gnss_h_acc >= 0) {
-
-            // Initialize map enu ref
-            double i_llh[3] = {57.71495867, 12.89134921, 220.0};
-            for (auto d: mLog) {
-                double lat = d.at(mInd_gnss_lat);
-                double lon = d.at(mInd_gnss_lon);
-                double alt = d.at(mInd_gnss_alt);
-                double hacc = d.at(mInd_gnss_h_acc);
-
-                if (hacc > 0.0 && (!ui->filterOutlierBox->isChecked() ||
-                                 hacc < ui->filterhAccBox->value())) {
-                    i_llh[0] = lat;
-                    i_llh[1] = lon;
-                    i_llh[2] = alt;
-                    ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
-                    break;
-                }
-            }
-
-            // Create GNSS trip counter if it is missing
-            if (mInd_trip_vesc < 0) {
-                mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, true));
-
-                double prevSampleGnss[3];
-                bool prevSampleGnssSet = false;
-                double metersGnss = 0.0;
-
-                for (int i = 0;i < mLog.size();i++) {
-                    double lat = mLog.at(i).at(mInd_gnss_lat);
-                    double lon = mLog.at(i).at(mInd_gnss_lon);
-                    double alt = mLog.at(i).at(mInd_gnss_alt);
-                    double hacc = mLog.at(i).at(mInd_gnss_h_acc);
-
-                    if (hacc > 0 && (!ui->filterOutlierBox->isChecked() ||
-                                     hacc < ui->filterhAccBox->value())) {
-                        if (prevSampleGnssSet) {
-                            double i_llh[3];
-                            double llh[3];
-                            double xyz[3];
-                            ui->map->getEnuRef(i_llh);
-
-                            llh[0] = lat;
-                            llh[1] = lon;
-                            llh[2] = alt;
-                            Utility::llhToEnu(i_llh, llh, xyz);
-
-                            LocPoint p, p2;
-                            p.setXY(xyz[0], xyz[1]);
-                            p.setRadius(10);
-
-                            llh[0] = prevSampleGnss[0];
-                            llh[1] = prevSampleGnss[1];
-                            llh[2] = prevSampleGnss[2];
-                            Utility::llhToEnu(i_llh, llh, xyz);
-
-                            p2.setXY(xyz[0], xyz[1]);
-                            p2.setRadius(10);
-
-                            metersGnss += p.getDistanceTo(p2);
-                        }
-
-                        prevSampleGnssSet = true;
-                        prevSampleGnss[0] = lat;
-                        prevSampleGnss[1] = lon;
-                        prevSampleGnss[2] = alt;
-                    }
-
-                    mLog[i].append(metersGnss);
-                }
-            }
-        }
-
-        updateInds();
+        generateMissingEntries();
 
         ui->dataTable->setRowCount(0);
 
@@ -1152,6 +1147,109 @@ void PageLogAnalysis::openLog(QByteArray data)
 
         truncateDataAndPlot();
     }
+}
+
+void PageLogAnalysis::generateMissingEntries()
+{
+    // Create sample array if t_day is missing
+    if (mInd_t_day < 0) {
+        mLogHeader.append(LOG_HEADER("t_day", "Sample", "", 0));
+
+        for (int i = 0;i < mLog.size();i++) {
+            mLog[i].append(i);
+        }
+    }
+
+    updateInds();
+
+    if (mInd_gnss_lat >= 0 && mInd_gnss_lon >= 0) {
+
+        // Initialize map enu ref
+        double i_llh[3] = {57.71495867, 12.89134921, 220.0};
+        for (auto d: mLog) {
+            double lat = d.at(mInd_gnss_lat);
+            double lon = d.at(mInd_gnss_lon);
+            double alt = 0;
+            if (mInd_gnss_alt >= 0) {
+                alt = d.at(mInd_gnss_alt);
+            }
+
+            double hacc = 0.0;
+            if (mInd_gnss_h_acc >= 0) {
+                hacc = d.at(mInd_gnss_h_acc);
+            }
+
+            if (hacc > 0.0 && (!ui->filterOutlierBox->isChecked() ||
+                             hacc < ui->filterhAccBox->value())) {
+                i_llh[0] = lat;
+                i_llh[1] = lon;
+                i_llh[2] = alt;
+                ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
+                break;
+            }
+        }
+
+        // Create GNSS trip counter if it is missing
+        if (mInd_trip_vesc < 0) {
+            mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, true));
+
+            double prevSampleGnss[3];
+            bool prevSampleGnssSet = false;
+            double metersGnss = 0.0;
+
+            for (int i = 0;i < mLog.size();i++) {
+                double lat = mLog.at(i).at(mInd_gnss_lat);
+                double lon = mLog.at(i).at(mInd_gnss_lon);
+                double alt = 0;
+                if (mInd_gnss_alt >= 0) {
+                    alt = mLog.at(i).at(mInd_gnss_alt);
+                }
+
+                double hacc = 0.0;
+                if (mInd_gnss_h_acc >= 0) {
+                    hacc = mLog.at(i).at(mInd_gnss_h_acc);
+                }
+
+                if (hacc > 0 && (!ui->filterOutlierBox->isChecked() ||
+                                 hacc < ui->filterhAccBox->value())) {
+                    if (prevSampleGnssSet) {
+                        double i_llh[3];
+                        double llh[3];
+                        double xyz[3];
+                        ui->map->getEnuRef(i_llh);
+
+                        llh[0] = lat;
+                        llh[1] = lon;
+                        llh[2] = alt;
+                        Utility::llhToEnu(i_llh, llh, xyz);
+
+                        LocPoint p, p2;
+                        p.setXY(xyz[0], xyz[1]);
+                        p.setRadius(10);
+
+                        llh[0] = prevSampleGnss[0];
+                        llh[1] = prevSampleGnss[1];
+                        llh[2] = prevSampleGnss[2];
+                        Utility::llhToEnu(i_llh, llh, xyz);
+
+                        p2.setXY(xyz[0], xyz[1]);
+                        p2.setRadius(10);
+
+                        metersGnss += p.getDistanceTo(p2);
+                    }
+
+                    prevSampleGnssSet = true;
+                    prevSampleGnss[0] = lat;
+                    prevSampleGnss[1] = lon;
+                    prevSampleGnss[2] = alt;
+                }
+
+                mLog[i].append(metersGnss);
+            }
+        }
+    }
+
+    updateInds();
 }
 
 void PageLogAnalysis::on_saveMapPdfButton_clicked()
@@ -1409,5 +1507,60 @@ void PageLogAnalysis::on_vescLogDeleteButton_clicked()
                 mVesc->emitStatusMessage("File deleted", true);
             }
         }
+    }
+}
+
+void PageLogAnalysis::on_saveCsvButton_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save Log File"), mLastSaveCsvPath,
+                                                    tr("CSV files (*.csv)"));
+
+    if (!fileName.isEmpty()) {
+        if (!fileName.toLower().endsWith(".csv")) {
+            fileName += ".csv";
+        }
+
+        QFile file(fileName);
+
+        if (!file.open(QIODevice::WriteOnly)) {
+            mVesc->emitMessageDialog("Save File", "Cannot open destination", false);
+            return;
+        }
+
+        mLastSaveCsvPath = fileName;
+
+        QTextStream os(&file);
+
+        for (int i = 0;i < mLogHeader.size();i++) {
+            auto h = mLogHeader.at(i);
+            os << h.key << ":"
+               << h.name << ":"
+               << h.unit << ":"
+               << h.precision << ":"
+               << h.isRelativeToFirst << ":"
+               << h.isTimeStamp;
+
+            if (i < (mLogHeader.size() - 1)) {
+                os << ";";
+            }
+        }
+
+        os << "\n";
+
+        for (int i = 0;i < mLog.size();i++) {
+            for (int j = 0;j < mLog.at(i).size();j++) {
+                os << Qt::fixed
+                   << qSetRealNumberPrecision(mLogHeader.at(j).precision)
+                   << mLog.at(i).at(j);
+
+                if (j < (mLog.at(i).size() - 1)) {
+                    os << ";";
+                }
+            }
+            os << "\n";
+        }
+
+        file.close();
     }
 }

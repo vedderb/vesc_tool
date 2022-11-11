@@ -65,6 +65,7 @@ private slots:
     void on_vescLogTable_cellDoubleClicked(int row, int column);
     void on_vescSaveAsButton_clicked();
     void on_vescLogDeleteButton_clicked();
+    void on_saveCsvButton_clicked();
 
 private:
     Ui::PageLogAnalysis *ui;
@@ -77,10 +78,16 @@ private:
     double mPlayPosNow;
     QString mVescLastPath;
     qint32 mGnssMsTodayLast;
+    QString mLastSaveCsvPath;
 
     QVector<LOG_HEADER> mLogHeader;
     QVector<QVector<double> > mLog;
     QVector<QVector<double> > mLogTruncated;
+
+    QVector<LOG_HEADER> mLogRtHeader;
+    QVector<QVector<double> > mLogRt;
+    QVector<double> mLogRtSamplesNow;
+    QTimer *mLogRtTimer;
 
     // Lightweight pre-calculated offsets in the log. These
     // need to be looked up a lot and finding them in the
@@ -158,6 +165,7 @@ private:
     void addDataItem(QString name, bool hasScale = true,
                      double scaleStep = 0.1, double scaleMax = 99.99);
     void openLog(QByteArray data);
+    void generateMissingEntries();
 
 };
 

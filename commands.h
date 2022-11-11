@@ -157,6 +157,11 @@ signals:
     void fileRemoveRx(bool ok);
     void fileProgress(int32_t prog, int32_t tot, double percentage, double bytesPerSec);
 
+    void logStart(int fieldNum, double rateHz, bool appendTime, bool appendGnss, bool appendGnssTime);
+    void logStop();
+    void logConfigField(LOG_HEADER header);
+    void logSamples(int fieldStart, QVector<double> samples);
+
 public slots:
     void processPacket(QByteArray data);
 

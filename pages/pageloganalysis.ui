@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1325</width>
-    <height>783</height>
+    <width>1301</width>
+    <height>716</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -73,6 +73,19 @@
            </property>
            <property name="text">
             <string>Poll GNSS</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="updateRtBox">
+           <property name="toolTip">
+            <string>Update plots while receiving data</string>
+           </property>
+           <property name="text">
+            <string>Update RT</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -307,17 +320,6 @@
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_4">
-               <item>
-                <widget class="QPushButton" name="openCsvButton">
-                 <property name="text">
-                  <string>Open CSV...</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../res.qrc">
-                   <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-                 </property>
-                </widget>
-               </item>
                <item>
                 <spacer name="horizontalSpacer_2">
                  <property name="orientation">
@@ -646,8 +648,25 @@
      </property>
      <item>
       <widget class="QPushButton" name="openCurrentButton">
+       <property name="toolTip">
+        <string>Open log from RT data page</string>
+       </property>
        <property name="text">
-        <string>Open Current</string>
+        <string>RtPage</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../res.qrc">
+         <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="openCsvButton">
+       <property name="toolTip">
+        <string>Open CSV file...</string>
+       </property>
+       <property name="text">
+        <string>CSV</string>
        </property>
        <property name="icon">
         <iconset resource="../res.qrc">
@@ -759,6 +778,16 @@
        <property name="icon">
         <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Waypoint Map-96.png</normaloff>:/res/icons/Waypoint Map-96.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="saveCsvButton">
+       <property name="toolTip">
+        <string>Save all data as CSV-file...</string>
+       </property>
+       <property name="text">
+        <string>CSV</string>
        </property>
       </widget>
      </item>

@@ -88,6 +88,7 @@ private:
     QVector<QVector<double> > mLogRt;
     QVector<double> mLogRtSamplesNow;
     QTimer *mLogRtTimer;
+    bool mLogRtAppendTime;
 
     // Lightweight pre-calculated offsets in the log. These
     // need to be looked up a lot and finding them in the

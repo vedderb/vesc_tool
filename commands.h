@@ -159,7 +159,7 @@ signals:
 
     void logStart(int fieldNum, double rateHz, bool appendTime, bool appendGnss, bool appendGnssTime);
     void logStop();
-    void logConfigField(LOG_HEADER header);
+    void logConfigField(int fieldInd, LOG_HEADER header);
     void logSamples(int fieldStart, QVector<double> samples);
 
 public slots:

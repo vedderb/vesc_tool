@@ -1084,14 +1084,14 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_LOG_CONFIG_FIELD: {
         LOG_HEADER h;
-        h.fieldInd = vb.vbPopFrontInt16();
+        int fieldInd = vb.vbPopFrontInt16();
         h.key = vb.vbPopFrontString();
         h.name = vb.vbPopFrontString();
         h.unit = vb.vbPopFrontString();
         h.precision = vb.vbPopFrontInt8();
         h.isRelativeToFirst = vb.vbPopFrontInt8();
         h.isTimeStamp = vb.vbPopFrontInt8();
-        emit logConfigField(h);
+        emit logConfigField(fieldInd, h);
     } break;
 
     case COMM_LOG_DATA_F32: {

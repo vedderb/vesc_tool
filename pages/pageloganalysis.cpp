@@ -121,6 +121,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     mGnssTimer->start(100);
     mGnssMsTodayLast = 0;
 
+    mLogRtAppendTime = false;
     mLogRtTimer = new QTimer(this);
 
     connect(mGnssTimer, &QTimer::timeout, [this]() {
@@ -290,8 +291,30 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
 
         connect(mVesc->commands(), &Commands::logStart, [this]
                 (int fieldNum, double rateHz, bool appendTime, bool appendGnss, bool appendGnssTime) {
-            (void)appendTime; (void)appendGnss; (void)appendGnssTime;
+            (void)appendGnss; (void)appendGnssTime;
+
+            mLogRtAppendTime = appendTime;
+
+            if (mLogRtAppendTime) {
+                fieldNum++;
+            }
+
             mLogRtHeader.resize(fieldNum);
+
+            if (mLogRtAppendTime) {
+                LOG_HEADER h;
+                h.key = "t_day";
+                h.name = "Time";
+                h.unit = "s";
+                h.isTimeStamp = true;
+
+                for (int i = (mLogRtHeader.size() - 1);i > 0;i--) {
+                    mLogRtHeader[i] = mLogRtHeader[i - 1];
+                }
+
+                mLogRtHeader[0] = h;
+            }
+
             mLogRtSamplesNow.resize(fieldNum);
             mLogRtTimer->start(1000.0 / rateHz);
             mLogRt.clear();
@@ -302,15 +325,23 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
            updatePlots();
         });
 
-        connect(mVesc->commands(), &Commands::logConfigField, [this](LOG_HEADER h) {
-            if (mLogRtHeader.size() <= h.fieldInd) {
-                mLogRtHeader.resize(h.fieldInd + 1);
+        connect(mVesc->commands(), &Commands::logConfigField, [this](int fieldInd, LOG_HEADER h) {
+            if (mLogRtAppendTime) {
+                fieldInd++;
             }
 
-            mLogRtHeader[h.fieldInd] = h;
+            if (mLogRtHeader.size() <= fieldInd) {
+                mLogRtHeader.resize(fieldInd + 1);
+            }
+
+            mLogRtHeader[fieldInd] = h;
         });
 
         connect(mVesc->commands(), &Commands::logSamples, [this](int fieldStart, QVector<double> samples) {
+            if (mLogRtAppendTime) {
+                fieldStart++;
+            }
+
             for (int i = 0;i < samples.size();i++) {
                 int ind = i + fieldStart;
                 if (mLogRtSamplesNow.size() > ind) {
@@ -320,6 +351,10 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
         });
 
         connect(mLogRtTimer, &QTimer::timeout, [this, updatePlots]() {
+            if (mLogRtAppendTime) {
+                mLogRtSamplesNow[0] = (double(QTime::currentTime().msecsSinceStartOfDay()) / 1000.0);
+            }
+
             mLogRt.append(mLogRtSamplesNow);
 
             if (ui->updateRtBox->isChecked()) {

@@ -549,7 +549,6 @@ struct LOG_HEADER {
     Q_PROPERTY(bool isRelativeToFirst MEMBER isRelativeToFirst)
     Q_PROPERTY(double scaleStep MEMBER scaleStep)
     Q_PROPERTY(double scaleMax MEMBER scaleMax)
-    Q_PROPERTY(int fieldInd MEMBER fieldInd)
 
 public:
     LOG_HEADER() {
@@ -558,7 +557,6 @@ public:
         isTimeStamp = false;
         scaleStep = 0.1;
         scaleMax = 99.99;
-        fieldInd = -1;
     }
 
     LOG_HEADER(QString key,
@@ -587,7 +585,6 @@ public:
     bool isTimeStamp;
     double scaleStep;
     double scaleMax;
-    int fieldInd;
 
 };
 

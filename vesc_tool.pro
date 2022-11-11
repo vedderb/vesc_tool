@@ -79,6 +79,10 @@ win32: {
     DEFINES += _USE_MATH_DEFINES
 }
 
+unix: {
+    QTPLUGIN += composeplatforminputcontextplugin
+}
+
 # Options
 #CONFIG += build_original
 #CONFIG += build_platinum

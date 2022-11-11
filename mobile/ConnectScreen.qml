@@ -577,8 +577,8 @@ Item {
                     if (ports[j].isEsp) {
                         var nameNow = "Serial ESP32\n" + ports[j].systemPath
                         addToList = true
-                        for(j = 0; j < bleModel.count; j++) {
-                            if(bleModel.get(j).name === nameNow){
+                        for (k = 0; k < bleModel.count; k++) {
+                            if(bleModel.get(k).name === nameNow){
                                 addToList  = false
                             }
                         }
@@ -596,8 +596,8 @@ Item {
                     if (ports[j].isVesc) {
                         nameNow = "Serial STM32\n" + ports[j].systemPath
                         addToList = true
-                        for(j = 0; j < bleModel.count; j++) {
-                            if(bleModel.get(j).name === nameNow){
+                        for (k = 0; k < bleModel.count; k++) {
+                            if(bleModel.get(k).name === nameNow){
                                 addToList  = false
                             }
                         }
@@ -615,7 +615,7 @@ Item {
 
                 nameNow = "Serial (AutoConnect)"
                 addToList = true
-                for(j = 0; j < bleModel.count; j++) {
+                for (j = 0; j < bleModel.count; j++) {
                     if(bleModel.get(j).name === nameNow){
                         addToList  = false
                     }

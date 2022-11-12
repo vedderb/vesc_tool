@@ -36,6 +36,7 @@ Item {
         cntBar.value = 1
         startButton.enabled = false
         pairOngoing = true
+        afterPairTimer.stop()
     }
 
     property real pairCnt: 0.0
@@ -115,7 +116,7 @@ Item {
                 cntBar.value = pairCnt / timeBox.realValue
             } else {
                 if (hideAfterPair && visible) {
-                    afterPairTimer.start()
+                    afterPairTimer.restart()
                 }
             }
         }
@@ -137,7 +138,7 @@ Item {
                 VescIf.emitMessageDialog(
                             "VESC Remote Pairing",
                             "No response received. This most likely means that the " +
-                            "hardware you are using us not capable of VESC Remote pairing " +
+                            "hardware you are using is not capable of VESC Remote pairing " +
                             "or that something is not plugged in properly.",
                             true, false)
             }

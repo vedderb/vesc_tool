@@ -115,8 +115,8 @@ Item {
 
                 cntBar.value = pairCnt / timeBox.realValue
             } else {
-                if (hideAfterPair && visible) {
-                    afterPairTimer.restart()
+                if (visible) {
+                    afterPairTimer.start()
                 }
             }
         }

@@ -135,8 +135,10 @@ Item {
                 }
 
                 VescIf.emitMessageDialog(
-                            "NRF Pairing",
-                            "No response received",
+                            "VESC Remote Pairing",
+                            "No response received. This most likely means that the " +
+                            "hardware you are using us not capable of VESC Remote pairing " +
+                            "or that something is not plugged in properly.",
                             true, false)
             }
         }
@@ -156,9 +158,9 @@ Item {
                 pairCnt = 0.0
                 cntBar.value = 0
                 pairOngoing = false
-                VescIf.emitStatusMessage("Pairing NRF Sucessful", true)
+                VescIf.emitStatusMessage("Pairing Sucessful", true)
                 VescIf.emitMessageDialog(
-                            "NRF Pairing",
+                            "VESC Remote Pairing",
                             "Pairing was successful.",
                             true, false)
                 break;
@@ -170,11 +172,11 @@ Item {
                 pairOngoing = false
                 VescIf.emitStatusMessage("Pairing NRF Timed Out", false)
                 VescIf.emitMessageDialog(
-                            "NRF Pairing",
-                            "Pairing timed out. Make sure to put your device (e.g. NRF nunchuk) " +
+                            "VESC Remote Pairing",
+                            "Pairing timed out. Make sure to put your device (e.g. VESC Wand) " +
                             "in pairing mode before the time runs out." +
                             "<br><br>" +
-                            "To put the NRF nunchuk in " +
+                            "To put a VESC-compatible Remote in " +
                             "pairing mode, just switch it on using any of the buttons. Then it " +
                             "will enter pairing mode if it was switched off previously.",
                             false, false)

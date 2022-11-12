@@ -1527,20 +1527,26 @@ void PageLogAnalysis::on_vescLogDeleteButton_clicked()
         fe = items.first()->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
     }
 
+    int ret = QMessageBox::Cancel;
     if (fe.isDir) {
-        mVesc->emitMessageDialog("Delete File", "Cannot delete directory, only files", false);
+        ret = QMessageBox::warning(this,
+                                   tr("Delete Directory"),
+                                   tr("This is going to delete %1 and its content permanently. Are you sure?").arg(fe.name),
+                                   QMessageBox::Yes | QMessageBox::Cancel);
     } else {
-        int ret = QMessageBox::warning(this,
-                                       tr("Delete File"),
-                                       tr("This is going to delete %1 permanently. Are you sure?").arg(fe.name),
-                                       QMessageBox::Yes | QMessageBox::Cancel);
+        ret = QMessageBox::warning(this,
+                                   tr("Delete File"),
+                                   tr("This is going to delete %1 permanently. Are you sure?").arg(fe.name),
+                                   QMessageBox::Yes | QMessageBox::Cancel);
+    }
 
-        if (ret == QMessageBox::Yes) {
-            bool ok = mVesc->commands()->fileBlockRemove(mVescLastPath + "/" + fe.name);
-            if (ok) {
-                on_vescLogListRefreshButton_clicked();
-                mVesc->emitStatusMessage("File deleted", true);
-            }
+    if (ret == QMessageBox::Yes) {
+        ui->vescLogTab->setEnabled(false);
+        bool ok = mVesc->commands()->fileBlockRemove(mVescLastPath + "/" + fe.name);
+        ui->vescLogTab->setEnabled(true);
+        if (ok) {
+            on_vescLogListRefreshButton_clicked();
+            mVesc->emitStatusMessage("File deleted", true);
         }
     }
 }

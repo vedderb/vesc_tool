@@ -98,9 +98,9 @@ Item {
 
                     ImageButton {
                         id: nrfPairButton
-
+                        visible: !nrfPair.visible
                         Layout.fillWidth: true
-                         Layout.fillHeight: true
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 80
 
@@ -366,16 +366,6 @@ Item {
     }
 
     Connections {
-        target: mCommands
-
-        function onNrfPairingRes(res) {
-            if (res !== 0) {
-                nrfPairButton.visible = true
-            }
-        }
-    }
-
-    Connections {
         target: VescIf
         function onPortConnectedChanged() {
             if (VescIf.isPortConnected()) {
@@ -441,7 +431,6 @@ Item {
 
         onAccepted: {
             nrfPair.visible = true
-            nrfPairButton.visible = false
             nrfPair.startPairing()
         }
     }

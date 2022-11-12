@@ -28,9 +28,14 @@ import Vedder.vesc.configparams 1.0
 Item {
     implicitHeight: column.implicitHeight
     property bool hideAfterPair: false
+    property bool pairOngoing: false
 
     function startPairing() {
         mCommands.pairNrf(timeBox.realValue * 1000.0)
+        pairCnt = timeBox.realValue
+        cntBar.value = 1
+        startButton.enabled = false
+        pairOngoing = true
     }
 
     property real pairCnt: 0.0
@@ -108,6 +113,31 @@ Item {
                 }
 
                 cntBar.value = pairCnt / timeBox.realValue
+            } else {
+                if (hideAfterPair && visible) {
+                    afterPairTimer.start()
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: afterPairTimer
+        interval: 2000
+        running: false
+        repeat: false
+
+        onTriggered: {
+            if (pairOngoing) {
+                pairOngoing = false
+                if (hideAfterPair) {
+                    visible = false
+                }
+
+                VescIf.emitMessageDialog(
+                            "NRF Pairing",
+                            "No response received",
+                            true, false)
             }
         }
     }
@@ -121,16 +151,11 @@ Item {
             }
 
             switch (res) {
-            case 0:
-                pairCnt = timeBox.realValue
-                cntBar.value = 1
-                startButton.enabled = false
-                break;
-
             case 1:
                 startButton.enabled = true
                 pairCnt = 0.0
                 cntBar.value = 0
+                pairOngoing = false
                 VescIf.emitStatusMessage("Pairing NRF Sucessful", true)
                 VescIf.emitMessageDialog(
                             "NRF Pairing",
@@ -142,6 +167,7 @@ Item {
                 startButton.enabled = true
                 pairCnt = 0.0
                 cntBar.value = 0
+                pairOngoing = false
                 VescIf.emitStatusMessage("Pairing NRF Timed Out", false)
                 VescIf.emitMessageDialog(
                             "NRF Pairing",
@@ -152,7 +178,6 @@ Item {
                             "pairing mode, just switch it on using any of the buttons. Then it " +
                             "will enter pairing mode if it was switched off previously.",
                             false, false)
-//                VescIf.emitMessageDialog("Test", "test23", false, false)
                 break;
 
             default:

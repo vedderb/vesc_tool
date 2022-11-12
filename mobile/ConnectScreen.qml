@@ -167,15 +167,6 @@ Item {
                     id: scanMenu
 
                     MenuItem {
-                        text: "Scan Serial"
-                        enabled: Utility.hasSerialport()
-                        onTriggered: {
-                            bleModel.clear()
-                            mBle.emitScanDone()
-                        }
-                    }
-
-                    MenuItem {
                         text: "Scan BLE"
                         enabled: !scanning
                         onTriggered: {
@@ -494,6 +485,11 @@ Item {
                 bleModel.clear()
                 mBle.emitScanDone()
             }
+
+            // Re-scan serial regularly
+            if (Utility.hasSerialport()) {
+                mBle.emitScanDone()
+            }
         }
     }
 
@@ -597,7 +593,7 @@ Item {
                         nameNow = "Serial STM32\n" + ports[j].systemPath
                         addToList = true
                         for (k = 0; k < bleModel.count; k++) {
-                            if(bleModel.get(k).name === nameNow){
+                            if (bleModel.get(k).name === nameNow){
                                 addToList  = false
                             }
                         }
@@ -613,21 +609,26 @@ Item {
                     }
                 }
 
-                nameNow = "Serial (AutoConnect)"
-                addToList = true
-                for (j = 0; j < bleModel.count; j++) {
-                    if(bleModel.get(j).name === nameNow){
-                        addToList  = false
-                    }
-                }
+                // Remove ports that no longer are there
+                var removed = true
+                while (removed) {
+                    removed = false
 
-                if (addToList) {
-                    bleModel.insert(0, {"name": nameNow,
-                                        "setName": "",
-                                        "preferred": true,
-                                        "bleAddr": "",
-                                        "hubUuid": "",
-                                        "isSerial": 1})
+                    for (k = 0; k < bleModel.count; k++) {
+                        var found = false
+                        for (j = 0; j < ports.length; j++) {
+                            if (ports[j].systemPath === bleModel.get(k).bleAddr) {
+                                found = true
+                                break
+                            }
+                        }
+
+                        if (bleModel.get(k).isSerial === 1 && !found) {
+                            bleModel.remove(k)
+                            removed = true
+                            break
+                        }
+                    }
                 }
             }
 

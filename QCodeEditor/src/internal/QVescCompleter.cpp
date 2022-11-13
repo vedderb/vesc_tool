@@ -261,6 +261,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("bottomMargin: ");
         addItem("preferredWidth: ");
         addItem("preferredHeight: ");
+        addItem("columnSpan: ");
         level--;
     }
 

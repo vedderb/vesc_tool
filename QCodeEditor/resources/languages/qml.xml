@@ -100,6 +100,7 @@
         <name>SwipeView</name>
         <name>Page</name>
         <name>CheckBox</name>
+        <name>SpinBox</name>
         <name>DoubleSpinBox</name>
         <name>Slider</name>
         <name>PageIndicator</name>

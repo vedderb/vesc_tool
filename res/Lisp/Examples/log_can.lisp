@@ -92,8 +92,8 @@
     (progn
         (log-send-f32 esp-can-id 0
             (map
-                (fn (x) (eval (ix (ix loglist x) -1)))
-                (range (length loglist))
+                (fn (x) (eval (ix x -1)))
+                loglist
             )
         )
         (sleep (/ 1.0 rate-hz))

@@ -186,25 +186,27 @@ Item {
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
-                        text: "IMU Calibration wizard"
+                        text: "IMU Wizard"
                     }// Text
                     Text {
                         id: welcomeText2
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
-                        font.pointSize: 10
+                        font.pointSize: 12
                         Layout.preferredWidth: parent.width
-                        text: (workingIMU) ? "Valid IMU detected." : "Unable to read from IMU, please check your IMU Settings."
+                        text: "Welcome to the IMU Wizard. This tool is split into tasks which help simplify IMU config and calibration. " +
+                              "They are intented to be ran sequentially, but can be run as one offs and in any order."
                     }
                     Text {
                         id: welcomeText3
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
-                        font.pointSize: 10
+                        font.pointSize: 12
                         Layout.preferredWidth: parent.width
-                        text: "Choose a task:"
+                        visible: !workingIMU
+                        text: "We have detected that your IMU is <font color=\"#FF0000\">not working</font>. The IMU Configurator can help set it up."
                     }
                     Button {
                         id: configuratorButton
@@ -283,7 +285,7 @@ Item {
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
-                        font.pointSize: 10
+                        font.pointSize: 12
                         Layout.preferredWidth: parent.width
                         text: "To find the gyroscope offsets, " +
                         "the IMU must be left in a stable position without any vibration. " +
@@ -326,7 +328,7 @@ Item {
                         id: accelXText2
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
-                        font.pointSize: 10
+                        font.pointSize: 12
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "To find the accelerometer offsets, " +
@@ -399,7 +401,7 @@ Item {
                         id: accelYText2
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
-                        font.pointSize: 10
+                        font.pointSize: 12
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "To find the accelerometer offsets, " +
@@ -472,7 +474,7 @@ Item {
                         id: accelZText2
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
-                        font.pointSize: 10
+                        font.pointSize: 12
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "To find the accelerometer offsets, " +
@@ -546,7 +548,7 @@ Item {
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
-                        font.pointSize: 10
+                        font.pointSize: 12
                         Layout.preferredWidth: parent.width
                         text: "To calibrate the roll angle, " +
                         "place the IMU on a flat stable surface, " +
@@ -599,7 +601,7 @@ Item {
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
-                        font.pointSize: 10
+                        font.pointSize: 12
                         Layout.preferredWidth: parent.width
                         text: "To calibrate the pitch angle, " +
                         "place the IMU on a flat stable surface, " +
@@ -651,11 +653,11 @@ Item {
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
-                        font.pointSize: 10
+                        font.pointSize: 12
                         Layout.preferredWidth: parent.width
                         text: "To calculate the yaw orientation, " +
                         "place the IMU on a stable surface, " +
-                        "with roll angle leveled out, and the pitch angle raised to roughly 45 degrees.\n\n" +
+                        "with roll angle leveled out, and the <b>pitch angle raised to roughly <font color=\"#FF0000\">45 degrees</font></b>.<br><br>" +
                         "Wait for the offset to stabilize then hit 'SAVE'."
                     }// Text
                     Text {
@@ -696,33 +698,32 @@ Item {
                         wrapMode: Text.Wrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
-                        text: "IMU Configurator"
+                        text: "IMU Detector"
                     }// Text
                     Text {
                         id: configuratorText2
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
-                        font.pointSize: 10
                         Layout.preferredWidth: parent.width
-                        text: "First make sure you have an IMU, if IMU is not detected press \"Search for IMU\". " +
-                        "IMU Type of \"Off\" means IMU is not connected (properly). " +
-                        "If IMU Detected is true but then becomes \"false\" after searching, the configured app has a conflicting comm port use."
+                        text: "IMU Detected: " + (workingIMU ? "<font color=\"#00FF00\">True</font>" : "<font color=\"#FF0000\">False</font>") + "<br>" +
+                        "IMU Type: " + imuString
                     }// Text
                     Text {
                         id: configuratorText3
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
+                        font.pointSize: 10
                         Layout.preferredWidth: parent.width
-                        text: "IMU Detected: " + (workingIMU ? "true" : "false") + "\n" +
-                        "IMU Type: " + imuString
+                        text: "After searching, IMU Type of \"Off\" indicates your IMU is not connected (properly). " +
+                        "If IMU Detected is \"true\" but changes to \"false\" after searching, the configured app has a conflicting comm port use."
                     }// Text
                     Button {
                         id: searchIMUButton
                         Layout.fillWidth: true
                         text: "Search for IMU"
-                        flat: true
+                        flat: false
 
                         onClicked: {
                             searchIMUButton.enabled = false
@@ -798,15 +799,21 @@ Item {
                             })
                         }
                     }// Button
+                    ToolSeparator {
+                        Layout.preferredWidth: parent.width
+                        orientation: Qt.Horizontal
+                    }
                     Text {
                         id: configuratorText4
                         color: Utility.getAppHexColor("lightText")
                         font.family: "DejaVu Sans Mono"
+                        font.bold: true
+                        font.underline: true
+                        font.pointSize: 20
                         wrapMode: Text.Wrap
-                        font.pointSize: 10
+                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
-                        text:
-                            "Next, select the intended IMU use:"
+                        text: "IMU Profile Selector"
                     }// Text
                     GridLayout {
                         columns: 2
@@ -1174,7 +1181,7 @@ Item {
                 imuType = 3
             }else if(internalTypeString === "BMI160"){
                 imuType = 4
-            }else if(internalTypeString === "LSM6DS2"){
+            }else if(internalTypeString === "LSM6DS3"){
                 imuType = 5
             }
         }else if(imuType === 2){ //MPU6050
@@ -1189,14 +1196,14 @@ Item {
     }
 
     function getAHRS(){
-        imuType = mAppConf.getParamEnum("imu_conf.mode")
-        if(imuType === 0){
+        var imuMode = mAppConf.getParamEnum("imu_conf.mode")
+        if(imuMode === 0){
             return "Madgwick"
-        }else if(imuType === 1){
+        }else if(imuMode === 1){
             return "Mahony"
-        }else if(imuType === 2){
+        }else if(imuMode === 2){
             return "Madgwick Fusion"
-        }else if(imuType === 3){
+        }else if(imuMode === 3){
             return "Unknown"
         }
     }

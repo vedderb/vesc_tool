@@ -209,6 +209,10 @@
 <name>get-dist-abs</name>
 <name>get-batt</name>
 <name>get-fault</name>
+<name>get-ah</name>
+<name>get-wh</name>
+<name>get-ah-chg</name>
+<name>get-wh-chg</name>
 <name>canset-current</name>
 <name>canset-current-rel</name>
 <name>canset-duty</name>

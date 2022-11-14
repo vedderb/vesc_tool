@@ -95,6 +95,7 @@
 <name>spawn</name>
 <name>spawn-trap</name>
 <name>wait</name>
+<name>self</name>
 <name>exit-ok</name>
 <name>exit-error</name>
 <name>recv</name>

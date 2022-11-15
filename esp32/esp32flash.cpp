@@ -330,8 +330,16 @@ void loader_port_enter_bootloader(void)
 
     auto port = QSerialPortInfo(sPort->portName());
 
-    if (port.productIdentifier() == 0x1001) {
+    bool isBuiltin = false;
+    if (port.hasProductIdentifier()) {
+        isBuiltin = port.productIdentifier() == 0x1001;
+    } else {
+        isBuiltin = port.manufacturer().startsWith("Espressif", Qt::CaseInsensitive);
+    }
+
+    if (isBuiltin) {
         // The built in USB requires a different sequence
+        qDebug() << "Using builtin USB-serial";
         setRts(false);
         setDtr(false);
         Utility::sleepWithEventLoop(100);
@@ -345,6 +353,7 @@ void loader_port_enter_bootloader(void)
         setDtr(false);
         setRts(false);
     } else {
+        qDebug() << "Using external USB-serial";
         setDtr(false);
         setRts(true);
         Utility::sleepWithEventLoop(100);

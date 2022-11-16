@@ -35,5 +35,6 @@
         <file>res/Lisp/Examples/plot_vesc_tool.lisp</file>
         <file>res/Lisp/Examples/log_can.lisp</file>
         <file>res/Lisp/Examples/crc16.lisp</file>
+        <file>res/Lisp/Examples/encoder_sincos_cal.lisp</file>
     </qresource>
 </RCC>

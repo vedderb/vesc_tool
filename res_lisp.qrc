@@ -36,5 +36,6 @@
         <file>res/Lisp/Examples/log_can.lisp</file>
         <file>res/Lisp/Examples/crc16.lisp</file>
         <file>res/Lisp/Examples/encoder_sincos_cal.lisp</file>
+        <file>res/Lisp/Examples/test_extensions.lisp</file>
     </qresource>
 </RCC>

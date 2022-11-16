@@ -182,6 +182,7 @@
 <name>app-ppm-override</name>
 <name>set-remote-state</name>
 <name>app-disable-output</name>
+<name>app-pas-get-rpm</name>
 <name>set-current</name>
 <name>set-current-rel</name>
 <name>set-duty</name>
@@ -213,6 +214,13 @@
 <name>get-wh</name>
 <name>get-ah-chg</name>
 <name>get-wh-chg</name>
+<name>setup-ah</name>
+<name>setup-wh</name>
+<name>setup-ah-chg</name>
+<name>setup-wh-chg</name>
+<name>setup-current</name>
+<name>setup-current-in</name>
+<name>setup-num-vescs</name>
 <name>canset-current</name>
 <name>canset-current-rel</name>
 <name>canset-duty</name>

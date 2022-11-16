@@ -347,6 +347,7 @@
 <name>str-cmp-asc</name>
 <name>str-cmp-dsc</name>
 <name>to-str</name>
+<name>to-str-delim</name>
 <name>second</name>
 <name>third</name>
 <name>abs</name>

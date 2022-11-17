@@ -220,6 +220,18 @@
         ((gnss-hdop)                                 is-float)
         ((gnss-date-time)                            is-list)
         ((gnss-age)                                  is-float)
+        ((stats 'stat-speed-avg)                     is-float)
+        ((stats 'stat-speed-max)                     is-float)
+        ((stats 'stat-power-avg)                     is-float)
+        ((stats 'stat-power-max)                     is-float)
+        ((stats 'stat-current-avg)                   is-float)
+        ((stats 'stat-current-max)                   is-float)
+        ((stats 'stat-temp-mosfet-avg)               is-float)
+        ((stats 'stat-temp-mosfet-max)               is-float)
+        ((stats 'stat-temp-motor-avg)                is-float)
+        ((stats 'stat-temp-motor-max)                is-float)
+        ((stats 'stat-count-time)                    is-float)
+        ((stats-reset)                               is-true)
 ))
 
 (def test-res (loopforeach i test-cmds

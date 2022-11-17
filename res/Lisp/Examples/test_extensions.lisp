@@ -232,6 +232,7 @@
         ((stats 'stat-temp-motor-max)                is-float)
         ((stats 'stat-count-time)                    is-float)
         ((stats-reset)                               is-true)
+        ((override-temp-motor 0.2)                   is-true)
 ))
 
 (def test-res (loopforeach i test-cmds

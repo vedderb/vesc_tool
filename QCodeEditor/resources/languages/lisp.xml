@@ -80,6 +80,17 @@
 <name>event-can-eid</name>
 <name>event-data-rx</name>
 <name>event-shutdown</name>
+<name>stat-speed-avg</name>
+<name>stat-speed-max</name>
+<name>stat-power-avg</name>
+<name>stat-power-max</name>
+<name>stat-current-avg</name>
+<name>stat-current-max</name>
+<name>stat-temp-mosfet-avg</name>
+<name>stat-temp-mosfet-max</name>
+<name>stat-temp-motor-avg</name>
+<name>stat-temp-motor-max</name>
+<name>stat-count-time</name>
 </section>
 
 <section name="Type">
@@ -175,6 +186,8 @@
 <name>eeprom-store-i</name>
 <name>eeprom-read-i</name>
 <name>sysinfo</name>
+<name>stats</name>
+<name>stats-reset</name>
 <name>import</name>
 <name>app-adc-detach</name>
 <name>app-adc-override</name>

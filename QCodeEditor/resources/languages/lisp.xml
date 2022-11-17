@@ -167,6 +167,7 @@
 <name>set-bms-val</name>
 <name>send-bms-can</name>
 <name>get-adc</name>
+<name>override-temp-motor</name>
 <name>get-adc-decoded</name>
 <name>secs-since</name>
 <name>set-aux</name>

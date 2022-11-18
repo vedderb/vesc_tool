@@ -68,6 +68,8 @@ PageConnection::PageConnection(QWidget *parent) :
     ui->tcpHubConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
     ui->tcpHubDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
     ui->hubDefaultButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+    ui->tcpDetectConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
+    ui->tcpDetectDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
 
     QIcon mycon = QIcon(theme + "icons/can_off.png");
     mycon.addPixmap(QPixmap(theme + "icons/can_off.png"), QIcon::Normal, QIcon::Off);

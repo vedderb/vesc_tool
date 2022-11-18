@@ -529,20 +529,20 @@ Item {
         if (!VescIf.isPortConnected()) {
             VescIf.emitMessageDialog(
                         "Connection Error",
-                        "The VESC is not connected. Please open a connection.",
+                        "Not connected to device. Please connect first.",
                         false)
             return
         }
 
-        var msg = "You are about to upload new firmware to the connected VESC"
-        var msgBl = "You are about to upload a bootloader to the connected VESC"
+        var msg = "You are about to upload new firmware to the connected device"
+        var msgBl = "You are about to upload a bootloader to the connected device"
 
         var msgEnd = "."
         if (fwdCan) {
-            msgEnd = ", as well as all VESCs found on the CAN-bus. \n\n" +
+            msgEnd = ", as well as all decices found on the CAN-bus. \n\n" +
                     "WARNING: The upload all function should ONLY be used if all " +
-                    "VESCs on the CAN-bus have the same hardware version. If that " +
-                    "is not the case, you must upload firmware to the VESCs individually."
+                    "decices on the CAN-bus have the same hardware version. If that " +
+                    "is not the case, you must upload firmware to the decices individually."
         }
 
         msg += msgEnd
@@ -567,13 +567,13 @@ Item {
 
                 if (VescIf.getFwSupportsConfiguration()) {
                     msg += "\n\n" +
-                            "Uploading new firmware will clear all settings on your VESC. You can make " +
+                            "Uploading new firmware will clear all settings on . You can make " +
                             "a backup of the settings from the connection page and restore them after the " +
                             "update if you'd like (if you haven't done the backup already). " +
                             "Do you want to continue with the update, or cancel and do the backup first?"
                 } else {
                     msg += "\n\n" +
-                            "Uploading new firmware will clear all settings on your VESC " +
+                            "Uploading new firmware will clear all settings on your device " +
                             "and you have to do the configuration again. Do you want to " +
                             "continue?"
                 }
@@ -585,7 +585,7 @@ Item {
                 uploadDialogLabel.text =
                         msg + "\n\n" +
                         "Uploading firmware for the wrong hardware version " +
-                        "WILL damage the VESC for sure. Are you sure that you have " +
+                        "WILL damage the hardware. Are you sure that you have " +
                         "chosen the correct hardware version?"
                 uploadDialog.open()
             }
@@ -595,7 +595,7 @@ Item {
                 uploadDialogLabel.text =
                         msg + "\n\n" +
                         "Uploading firmware for the wrong hardware version " +
-                        "WILL damage the VESC for sure. Are you sure that you have " +
+                        "WILL damage the hardware. Are you sure that you have " +
                         "chosen the correct hardware version?"
                 uploadDialog.open()
             } else {
@@ -618,7 +618,7 @@ Item {
 
             var msgBl2 = ""
             if (!mCommands.getLimitedSupportsEraseBootloader()) {
-                msgBl2 = "If the VESC already has a bootloader this will destroy " +
+                msgBl2 = "If the device already has a bootloader this will destroy " +
                         "the bootloader and firmware updates cannot be done anymore. "
             }
 

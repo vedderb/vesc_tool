@@ -452,7 +452,7 @@ void PageFirmware::uploadFw(bool allOverCan)
         if (!mVesc->isPortConnected()) {
             QMessageBox::critical(this,
                                   tr("Connection Error"),
-                                  tr("The VESC is not connected. Please connect it."));
+                                  tr("Not connected to device. Please connect first."));
             return;
         }
 
@@ -561,7 +561,7 @@ void PageFirmware::uploadFw(bool allOverCan)
         if ((ui->fwTabWidget->currentIndex() == 0 && ui->hwList->count() == 1) || ui->fwTabWidget->currentIndex() == 3) {
             reply = QMessageBox::warning(this,
                                          tr("Warning"),
-                                         tr("Uploading new firmware will clear all settings on your VESC "
+                                         tr("Uploading new firmware will clear all settings in the VESC firmware "
                                             "and you have to do the configuration again. Do you want to "
                                             "continue?"),
                                          QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
@@ -569,21 +569,21 @@ void PageFirmware::uploadFw(bool allOverCan)
             reply = QMessageBox::warning(this,
                                          tr("Warning"),
                                          tr("Uploading firmware for the wrong hardware version "
-                                            "WILL damage the VESC for sure. Are you sure that you have "
+                                            "WILL damage the hardware. Are you sure that you have "
                                             "chosen the correct hardware version?"),
                                          QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         } else if (ui->fwTabWidget->currentIndex() == 2) {
             if (mVesc->commands()->getLimitedSupportsEraseBootloader()) {
                 reply = QMessageBox::warning(this,
                                              tr("Warning"),
-                                             tr("This will attempt to upload a bootloader to the connected VESC. "
+                                             tr("This will attempt to upload a bootloader to the connected device. "
                                                 "Do you want to continue?"),
                                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
             } else {
                 reply = QMessageBox::warning(this,
                                              tr("Warning"),
-                                             tr("This will attempt to upload a bootloader to the connected VESC. "
-                                                "If the connected VESC already has a bootloader this will destroy "
+                                             tr("This will attempt to upload a bootloader to the connected device. "
+                                                "If the connected device already has a bootloader this will destroy "
                                                 "the bootloader and firmware updates cannot be done anymore. Do "
                                                 "you want to continue?"),
                                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
@@ -636,12 +636,21 @@ void PageFirmware::uploadFw(bool allOverCan)
             }
 
             if (!file.fileName().isEmpty()) {
+                QString blMsg = tr("");
+
+                // No bootloader was uploaded prior to the firmware
+                if (fileBl.fileName().isEmpty()) {
+                    blMsg = tr("\n\n"
+                               "NOTE: If the old firmware is loaded again after the reboot a bootloader is probably missing. You "
+                               "can try uploading one from the bootloader tab if that is the case.");
+                }
+
                 if (uploadFw(&file, false, allOverCan)) {
                     QMessageBox::warning(this,
                                          tr("Warning"),
                                          tr("The firmware upload is done. The device should reboot automatically within 10 seconds. Do "
                                             "NOT remove power before the reboot is done as that can brick the CPU and requires a programmer "
-                                            "to fix."));
+                                            "to fix.") + blMsg);
                 }
             }
         }

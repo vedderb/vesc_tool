@@ -411,6 +411,18 @@ p, li { white-space: pre-wrap; }
             <cDefine>APPCONF_SERVO_OUT_ENABLE</cDefine>
             <valInt>0</valInt>
         </servo_out_enable>
+        <buzzer_enable>
+            <longName>Enable External Buzzer</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Enable buzzer driven via servo/PPM-port.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_BUZZER_ENABLE</cDefine>
+            <valInt>0</valInt>
+        </buzzer_enable>
         <kill_sw_mode>
             <longName>Kill Switch Mode</longName>
             <type>4</type>
@@ -4160,6 +4172,7 @@ p, li { white-space: pre-wrap; }
         <ser>uavcan_raw_rpm_max</ser>
         <ser>uavcan_status_current_mode</ser>
         <ser>servo_out_enable</ser>
+        <ser>buzzer_enable</ser>
         <ser>kill_sw_mode</ser>
         <ser>app_to_use</ser>
         <ser>app_ppm_conf.ctrl_type</ser>
@@ -4351,6 +4364,7 @@ p, li { white-space: pre-wrap; }
                     <param>uavcan_raw_rpm_max</param>
                     <param>uavcan_status_current_mode</param>
                     <param>servo_out_enable</param>
+                    <param>buzzer_enable</param>
                     <param>kill_sw_mode</param>
                     <param>::sep::CAN Messages Rate 1</param>
                     <param>can_status_rate_1</param>

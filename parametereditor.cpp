@@ -753,6 +753,12 @@ void ParameterEditor::on_actionCalculatePacketSize_triggered()
     // Fill all strings to get maximum possible size
     for (auto name: mParams.getSerializeOrder()) {
         auto p = mParams.getParam(name);
+
+        if (p == nullptr) {
+            qWarning() << "Parameter" << name << "not found.";
+            continue;
+        }
+
         if (p->type == CFG_T_QSTRING) {
             oldStrings[name] = mParams.getParamQString(name);
 
@@ -774,6 +780,12 @@ void ParameterEditor::on_actionCalculatePacketSize_triggered()
     // Restore
     for (auto name: mParams.getSerializeOrder()) {
         auto p = mParams.getParam(name);
+
+        if (p == nullptr) {
+            qWarning() << "Parameter" << name << "not found.";
+            continue;
+        }
+
         if (p->type == CFG_T_QSTRING) {
             mParams.updateParamString(name, oldStrings[name]);
         }

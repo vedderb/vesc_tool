@@ -138,7 +138,7 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
 
                 if (start > 0 && end > start) {
                     auto path = line.mid(start + 1, end - start - 1);
-                    auto tag = line.mid(end + 1).replace(" ", "").replace(")", "").replace("'", "");
+                    auto tag = line.mid(end + 1).replace("\r", "").replace(" ", "").replace(")", "").replace("'", "");
                     if (tag.indexOf(";") >= 0) {
                         tag = tag.mid(0, tag.indexOf(";"));
                     }

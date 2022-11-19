@@ -1156,116 +1156,6 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </foc_encoder_ratio>
-        <foc_encoder_sin_amp>
-            <longName>Sine Amplitude</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Amplitude of the sine-input in volts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_ENCODER_SIN_AMP</cDefine>
-            <editorDecimalsDouble>3</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>2</maxDouble>
-            <minDouble>0.01</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>1</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> V</suffix>
-            <vTx>7</vTx>
-        </foc_encoder_sin_amp>
-        <foc_encoder_cos_amp>
-            <longName>Cosine Amplitude</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Amplitude of the cosine-input in volts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_ENCODER_COS_AMP</cDefine>
-            <editorDecimalsDouble>3</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>2</maxDouble>
-            <minDouble>0.01</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>1</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> V</suffix>
-            <vTx>7</vTx>
-        </foc_encoder_cos_amp>
-        <foc_encoder_sin_offset>
-            <longName>Sine Offset</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sine offset in volts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_ENCODER_SIN_OFFSET</cDefine>
-            <editorDecimalsDouble>3</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>3.3</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>1.65</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> V</suffix>
-            <vTx>7</vTx>
-        </foc_encoder_sin_offset>
-        <foc_encoder_cos_offset>
-            <longName>Cosine Offset</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Cosine offset in volts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_ENCODER_COS_OFFSET</cDefine>
-            <editorDecimalsDouble>3</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>3.3</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>1.65</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix> V</suffix>
-            <vTx>7</vTx>
-        </foc_encoder_cos_offset>
-        <foc_encoder_sincos_filter_constant>
-            <longName>Sin/Cos Filter Constant</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sin/Cos Encoder low pass filter constant. Will affect the ratio between lag and noise on the encoder position feedback. Range 0 to 1, where 0 has the lowest noise and most phase lag, and 1 has no lag and unfiltered noise.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_ENCODER_SINCOS_FILTER</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>0.5</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix></suffix>
-            <vTx>7</vTx>
-        </foc_encoder_sincos_filter_constant>
         <foc_sensor_mode>
             <longName>Sensor Mode</longName>
             <type>4</type>
@@ -3463,6 +3353,116 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>5</vTx>
         </m_encoder_counts>
+        <m_encoder_sin_amp>
+            <longName>Sine Amplitude</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Amplitude of the sine-input in volts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_ENCODER_SIN_AMP</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>2</maxDouble>
+            <minDouble>0.01</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>1</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </m_encoder_sin_amp>
+        <m_encoder_cos_amp>
+            <longName>Cosine Amplitude</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Amplitude of the cosine-input in volts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_ENCODER_COS_AMP</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>2</maxDouble>
+            <minDouble>0.01</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>1</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </m_encoder_cos_amp>
+        <m_encoder_sin_offset>
+            <longName>Sine Offset</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sine offset in volts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_ENCODER_SIN_OFFSET</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>3.3</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>1.65</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </m_encoder_sin_offset>
+        <m_encoder_cos_offset>
+            <longName>Cosine Offset</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Cosine offset in volts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_ENCODER_COS_OFFSET</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>3.3</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>1.65</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </m_encoder_cos_offset>
+        <m_encoder_sincos_filter_constant>
+            <longName>Sin/Cos Filter Constant</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sin/Cos Encoder low pass filter constant. Will affect the ratio between lag and noise on the encoder position feedback. Range 0 to 1, where 0 has the lowest noise and most phase lag, and 1 has no lag and unfiltered noise.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_ENCODER_SINCOS_FILTER</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.5</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>7</vTx>
+        </m_encoder_sincos_filter_constant>
         <m_sensor_port_mode>
             <longName>Sensor Port Mode</longName>
             <type>4</type>
@@ -3506,7 +3506,11 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;TLE5102 Encoder&lt;/span&gt; &lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;A magnetic encoder using the bidirectional SSC protocol. Provides absolute position from start and error protected communication. Currently both “SSC SW” and “SSC HW” use software bitbanging. “SSC SW” uses the hall connector pins which must not have filters. “SSC HW” uses the 7-8 pin adc/uart connector. Recommend 5v sensor power.&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Wires must be shielded and/or run together or you will get communication errors.&lt;br /&gt;&lt;br /&gt;“SSC SW” Connections: H1 = SCK, H2 = DATA , H3 = CS &lt;br /&gt;“SSC HW” Connections: ADC1 = SCK, TX = DATA , NSS = CS &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Wires must be shielded and/or run together or you will get communication errors.&lt;br /&gt;&lt;br /&gt;“SSC SW” Connections: H1 = SCK, H2 = DATA , H3 = CS &lt;br /&gt;“SSC HW” Connections: ADC1 = SCK, TX = DATA , NSS = CS&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Custom Encoder&lt;/span&gt; &lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This means that a native library is loaded that handles reading of the encoder and provides the decoded angle.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_M_SENSOR_PORT_MODE</cDefine>
             <valInt>0</valInt>
             <enumNames>Hall Sensors</enumNames>
@@ -3521,6 +3525,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>BISSC Encoder (SPI)</enumNames>
             <enumNames>TLE5012 Encoder (SSC SW)</enumNames>
             <enumNames>TLE5012 Encoder (SSC HW)</enumNames>
+            <enumNames>Custom Encoder</enumNames>
         </m_sensor_port_mode>
         <m_invert_direction>
             <longName>Invert Motor Direction</longName>
@@ -4334,11 +4339,6 @@ p, li { white-space: pre-wrap; }
         <ser>foc_encoder_inverted</ser>
         <ser>foc_encoder_offset</ser>
         <ser>foc_encoder_ratio</ser>
-        <ser>foc_encoder_sin_amp</ser>
-        <ser>foc_encoder_cos_amp</ser>
-        <ser>foc_encoder_sin_offset</ser>
-        <ser>foc_encoder_cos_offset</ser>
-        <ser>foc_encoder_sincos_filter_constant</ser>
         <ser>foc_sensor_mode</ser>
         <ser>foc_pll_kp</ser>
         <ser>foc_pll_ki</ser>
@@ -4439,6 +4439,11 @@ p, li { white-space: pre-wrap; }
         <ser>m_duty_ramp_step</ser>
         <ser>m_current_backoff_gain</ser>
         <ser>m_encoder_counts</ser>
+        <ser>m_encoder_sin_amp</ser>
+        <ser>m_encoder_cos_amp</ser>
+        <ser>m_encoder_sin_offset</ser>
+        <ser>m_encoder_cos_offset</ser>
+        <ser>m_encoder_sincos_filter_constant</ser>
         <ser>m_sensor_port_mode</ser>
         <ser>m_invert_direction</ser>
         <ser>m_drv8301_oc_mode</ser>
@@ -4477,7 +4482,13 @@ p, li { white-space: pre-wrap; }
                     <param>motor_type</param>
                     <param>m_invert_direction</param>
                     <param>m_sensor_port_mode</param>
+                    <param>::sep::Encoder</param>
                     <param>m_encoder_counts</param>
+                    <param>m_encoder_sin_amp</param>
+                    <param>m_encoder_cos_amp</param>
+                    <param>m_encoder_sin_offset</param>
+                    <param>m_encoder_cos_offset</param>
+                    <param>m_encoder_sincos_filter_constant</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>
@@ -4523,6 +4534,12 @@ p, li { white-space: pre-wrap; }
             <subgroup>
                 <subgroupName>Temperature</subgroupName>
                 <subgroupParams>
+                    <param>::sep::Motor Temperature Sensor Type</param>
+                    <param>m_motor_temp_sens_type</param>
+                    <param>m_ntc_motor_beta</param>
+                    <param>m_ptc_motor_coeff</param>
+                    <param>m_ntcx_ptcx_res</param>
+                    <param>m_ntcx_ptcx_temp_base</param>
                     <param>::sep::General</param>
                     <param>l_temp_accel_dec</param>
                     <param>::sep::MOSFET</param>
@@ -4555,11 +4572,6 @@ p, li { white-space: pre-wrap; }
                     <param>cc_min_current</param>
                     <param>m_fault_stop_time_ms</param>
                     <param>m_out_aux_mode</param>
-                    <param>m_motor_temp_sens_type</param>
-                    <param>m_ntc_motor_beta</param>
-                    <param>m_ptc_motor_coeff</param>
-                    <param>m_ntcx_ptcx_res</param>
-                    <param>m_ntcx_ptcx_temp_base</param>
                     <param>l_duty_start</param>
                     <param>m_hall_extra_samples</param>
                 </subgroupParams>
@@ -4684,11 +4696,6 @@ p, li { white-space: pre-wrap; }
                     <param>foc_encoder_offset</param>
                     <param>foc_encoder_ratio</param>
                     <param>foc_encoder_inverted</param>
-                    <param>foc_encoder_sin_amp</param>
-                    <param>foc_encoder_cos_amp</param>
-                    <param>foc_encoder_sin_offset</param>
-                    <param>foc_encoder_cos_offset</param>
-                    <param>foc_encoder_sincos_filter_constant</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

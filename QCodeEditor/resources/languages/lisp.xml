@@ -159,6 +159,7 @@
 <name>get-ppm</name>
 <name>get-ppm-age</name>
 <name>get-encoder</name>
+<name>get-encoder-error-rate</name>
 <name>set-servo</name>
 <name>get-vin</name>
 <name>select-motor</name>

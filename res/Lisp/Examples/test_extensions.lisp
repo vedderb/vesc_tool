@@ -14,6 +14,7 @@
         ((get-ppm)                                   is-float)
         ((get-ppm-age)                               is-float)
         ((get-encoder)                               is-float)
+        ((get-encoder-error-rate)                    is-float)
         ((set-servo 0)                               is-true)
         ((get-vin)                                   is-float)
         ((select-motor 1)                            is-true)

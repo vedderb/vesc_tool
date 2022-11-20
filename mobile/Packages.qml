@@ -160,6 +160,10 @@ Item {
                                     onTriggered: {
                                         mLoader.installVescPackage(pkg.compressedData)
                                         enableDialog()
+                                        VescIf.emitMessageDialog("Install Package",
+                                                                 "Install Done! Please disconnect and reconnect to " +
+                                                                 "apply possible VESC Tool GUI updates from this package.",
+                                                                 true, false)
                                     }
                                 }
                             }
@@ -224,6 +228,10 @@ Item {
                         mLoader.lispErase()
                         mLoader.qmlErase()
                         enableDialog()
+                        VescIf.emitMessageDialog("Uninstall Package",
+                                                 "Uninstallation Done! Please disconnect and reconnect to " +
+                                                 "revert possible VESC Tool GUI updates.",
+                                                 true, false)
                     }
                 }
             }

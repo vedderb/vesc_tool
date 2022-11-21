@@ -1388,8 +1388,10 @@ void PageLogAnalysis::on_vescLogListRefreshButton_clicked()
             continue;
         }
 
+        QString theme = Utility::getThemePath();
         QTableWidgetItem *itName = new QTableWidgetItem(fe.name);
         itName->setData(Qt::UserRole, QVariant::fromValue(fe));
+        itName->setIcon(fe.isDir ? QPixmap(theme + "icons/Open Folder-96.png") : QPixmap(theme + "icons/Line Chart-96.png"));
         ui->vescLogTable->setRowCount(ui->vescLogTable->rowCount() + 1);
         ui->vescLogTable->setItem(ui->vescLogTable->rowCount() - 1, 0, itName);
 

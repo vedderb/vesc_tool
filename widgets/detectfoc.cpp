@@ -249,13 +249,6 @@ void DetectFoc::on_applyAllButton_clicked()
             return;
         }
 
-        if (ld_lq_diff > (l / 4.0)) {
-            QMessageBox::information(this,
-                                  tr("Salient Motor"),
-                                  tr("This motor has some saliency and could benefit from the MTPA-algorithm. You "
-                                     "can activate it from the FOC->Advanced page. Be careful when testing!"));
-        }
-
         mVesc->mcConfig()->updateParamDouble("foc_motor_r", r);
         mVesc->mcConfig()->updateParamDouble("foc_motor_l", l / 1e6);
         mVesc->mcConfig()->updateParamDouble("foc_motor_ld_lq_diff", ld_lq_diff / 1e6);

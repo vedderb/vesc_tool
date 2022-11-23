@@ -45,6 +45,7 @@ PageWelcome::PageWelcome(QWidget *parent) :
     ui->multiSettingButton->setIcon(QIcon(theme + "icons/Settings-96.png"));
     ui->invertDirButton->setIcon(QIcon(theme + "icons/Process-96.png"));
     ui->setupBluetoothButton->setIcon(QIcon(theme + "icons/bluetooth.png"));
+    ui->wizardIMUButton->setIcon(QIcon(theme + "icons/imu_off.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;

@@ -485,7 +485,7 @@ Item {
                     okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan, "")
                 }
             } else if (swipeView.currentIndex == 1) {
-                okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(customFwText.text, VescIf, false, true, fwdCan,"")
+                okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(customFwText.text, VescIf, false, Qt.platform.os != "android", fwdCan,"")
             } else if (swipeView.currentIndex == 2) {
                 fwHelper.uploadFirmwareSingleShotTimer(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan,"")
             }

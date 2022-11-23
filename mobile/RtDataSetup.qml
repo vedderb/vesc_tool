@@ -683,6 +683,11 @@ Item {
             var speedFact = ((mMcConf.getParamInt("si_motor_poles") / 2.0) * 60.0 *
                              mMcConf.getParamDouble("si_gear_ratio")) /
                     (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
+
+            if (speedFact < 1e-3) {
+                speedFact = 1e-3
+            }
+
             var speedMax = 3.6 * rpmMax / speedFact
             var impFact = useImperial ? 0.621371192 : 1.0
             var speedMaxRound = Math.ceil((speedMax * impFact) / 10.0) * 10.0
@@ -693,6 +698,13 @@ Item {
 
             if (speedMaxRound > speedGauge.maximumValue || speedMaxRound < (speedGauge.maximumValue * 0.6) ||
                     useNegativeSpeedValues !== speedGauge.minimumValue < 0) {
+                var labelStep = Math.ceil(speedMaxRound / 100) * 10
+
+                if ((speedMaxRound / labelStep) > 30) {
+                    labelStep = speedMaxRound / 30
+                }
+
+                speedGauge.labelStep = labelStep
                 speedGauge.maximumValue = speedMaxRound
                 speedGauge.minimumValue = useNegativeSpeedValues ? -speedMaxRound : 0
             }

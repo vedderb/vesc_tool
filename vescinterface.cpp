@@ -2380,7 +2380,8 @@ QVariantList VescInterface::listSerialPorts()
         info.systemPath = port.systemLocation();
         int index = res.size();
 
-        if (port.manufacturer().startsWith("STMicroelectronics")) {
+        //qDebug() << port.portName()  << ":  " << port.manufacturer() << "  " << port.productIdentifier();
+        if (port.manufacturer().startsWith("STMicroelectronics") || port.productIdentifier() == 22336) {
             info.name.insert(0, "VESC - ");
             info.isVesc = true;
             index = 0;

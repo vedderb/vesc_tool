@@ -3801,6 +3801,26 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>1</vTx>
         </m_hall_extra_samples>
+        <m_batt_filter_const>
+            <longName>Battery Filter Constant</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Battery Level Filtering. The higher this number is the more the battery level is filtered. Too little filtering will make the battery level affected by the power draw and too much filtering will prevent the battery level to keep up with changes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_BATT_FILTER_CONST</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>99</maxInt>
+            <minInt>0</minInt>
+            <showDisplay>1</showDisplay>
+            <stepInt>1</stepInt>
+            <valInt>1</valInt>
+            <suffix></suffix>
+            <vTx>1</vTx>
+        </m_batt_filter_const>
         <si_motor_poles>
             <longName>Motor Poles</longName>
             <type>2</type>
@@ -4458,6 +4478,7 @@ p, li { white-space: pre-wrap; }
         <ser>m_ntcx_ptcx_res</ser>
         <ser>m_ntcx_ptcx_temp_base</ser>
         <ser>m_hall_extra_samples</ser>
+        <ser>m_batt_filter_const</ser>
         <ser>si_motor_poles</ser>
         <ser>si_gear_ratio</ser>
         <ser>si_wheel_diameter</ser>
@@ -4514,6 +4535,7 @@ p, li { white-space: pre-wrap; }
                 <subgroupParams>
                     <param>l_battery_cut_start</param>
                     <param>l_battery_cut_end</param>
+                    <param>m_batt_filter_const</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

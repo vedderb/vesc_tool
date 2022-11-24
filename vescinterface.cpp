@@ -3664,7 +3664,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         for (int i = 0;i < params.customConfigNum;i++) {
             QByteArray configData;
             int confIndLast = 0;
-            int lenConfLast = 0;
+            int lenConfLast = -1;
             auto conn = connect(mCommands, &Commands::customConfigChunkRx,
                     [&](int confInd, int lenConf, int ofsConf, QByteArray data) {
                 if (configData.size() <= ofsConf) {
@@ -3733,7 +3733,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     // Read qmlui
     if (mLoadQmlUiOnConnect && params.hasQmlHw) {
         QByteArray qmlData;
-        int lenQmlLast = 0;
+        int lenQmlLast = -1;
         auto conn = connect(mCommands, &Commands::qmluiHwRx,
                             [&](int lenQml, int ofsQml, QByteArray data) {
             if (qmlData.size() <= ofsQml) {
@@ -3781,7 +3781,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
     if (mLoadQmlUiOnConnect && params.hasQmlApp) {
         QByteArray qmlData;
-        int lenQmlLast = 0;
+        int lenQmlLast = -1;
         auto conn = connect(mCommands, &Commands::qmluiAppRx,
                             [&](int lenQml, int ofsQml, QByteArray data) {
             if (qmlData.size() <= ofsQml) {

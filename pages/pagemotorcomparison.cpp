@@ -476,8 +476,8 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
         table->item(ind++, 1)->setText(QString::number(md.vq, 'f', 1) + " V");
         table->item(ind++, 1)->setText(QString::number(md.vd, 'f', 1) + " V");
         table->item(ind++, 1)->setText(QString::number(md.vbus_min, 'f', 1) + " V");
-        table->item(ind++, 1)->setText(QString::number(md.torque_out, 'f', 1) + " Nm");
-        table->item(ind++, 1)->setText(QString::number(md.torque_motor_shaft, 'f', 1) + " Nm");
+        table->item(ind++, 1)->setText(QString::number(md.torque_out, 'f', 3) + " Nm");
+        table->item(ind++, 1)->setText(QString::number(md.torque_motor_shaft, 'f', 3) + " Nm");
         table->item(ind++, 1)->setText(QString::number(md.rpm_out, 'f', 1));
         table->item(ind++, 1)->setText(QString::number(md.rpm_motor_shaft, 'f', 1));
         table->item(ind++, 1)->setText(QString::number(md.extraVal, 'f', 1));

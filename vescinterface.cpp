@@ -2209,6 +2209,7 @@ bool VescInterface::lastPortAvailable()
 {
     bool res = false;
 
+#ifdef HAS_SERIALPORT
     if (mLastConnType == CONN_SERIAL) {
         auto ports = listSerialPorts();
         foreach (auto port, ports) {
@@ -2219,6 +2220,7 @@ bool VescInterface::lastPortAvailable()
             }
         }
     }
+#endif
 
     return res;
 }

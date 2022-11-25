@@ -2205,6 +2205,24 @@ bool VescInterface::reconnectLastPort()
     }
 }
 
+bool VescInterface::lastPortAvailable()
+{
+    bool res = false;
+
+    if (mLastConnType == CONN_SERIAL) {
+        auto ports = listSerialPorts();
+        foreach (auto port, ports) {
+            auto p = port.value<VSerialInfo_t>();
+            if (p.systemPath == mLastSerialPort) {
+                res = true;
+                break;
+            }
+        }
+    }
+
+    return res;
+}
+
 bool VescInterface::autoconnect()
 {
     bool res = false;

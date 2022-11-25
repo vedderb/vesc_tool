@@ -514,6 +514,20 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
 
+    mPortTimer.start(1000);
+    connect(&mPortTimer, &QTimer::timeout, [this]() {
+        QString theme = Utility::getThemePath();
+
+        if (!mVesc->isPortConnected() && mVesc->lastPortAvailable()) {
+            ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-hl-96.png"));
+        } else {
+            ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-96.png"));
+        }
+
+        ui->actionReconnect->setEnabled(!mVesc->isPortConnected());
+        ui->actionDisconnect->setEnabled(mVesc->isPortConnected());
+    });
+
     // Restore size and position
     if (mSettings.contains("mainwindow/size")) {
         resize(mSettings.value("mainwindow/size").toSize());

@@ -177,6 +177,7 @@ private:
     QTimer mPollAppTimer;
     QTimer mPollImuTimer;
     QTimer mPollBmsTimer;
+    QTimer mPortTimer;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;

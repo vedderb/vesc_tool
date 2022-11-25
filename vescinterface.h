@@ -180,6 +180,7 @@ public:
     Q_INVOKABLE bool isPortConnected();
     Q_INVOKABLE void disconnectPort();
     Q_INVOKABLE bool reconnectLastPort();
+    Q_INVOKABLE bool lastPortAvailable();
     Q_INVOKABLE bool autoconnect();
     Q_INVOKABLE QString getConnectedPortName();
     Q_INVOKABLE bool connectSerial(QString port, int baudrate);

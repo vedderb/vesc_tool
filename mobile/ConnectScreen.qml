@@ -633,6 +633,7 @@ Item {
             }
 
             if (pingTcpHub) {
+                pingTcpHub = false
                 disableDialog()
                 var hubDevs = VescIf.getTcpHubDevs()
                 for (j = 0; j < hubDevs.length; j++) {
@@ -646,7 +647,6 @@ Item {
                     }
                 }
 
-                pingTcpHub = false
                 enableDialog()
             }
         }

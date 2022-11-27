@@ -28,5 +28,6 @@
         <file>res/qml/Examples/UdpServer.qml</file>
         <file>res/qml/Examples/ConfigParams.qml</file>
         <file>res/qml/Examples/TcpHub.qml</file>
+        <file>res/qml/Examples/ParamTableAndPlot.qml</file>
     </qresource>
 </RCC>

@@ -28,6 +28,7 @@ Item {
 //            mCommands.ioBoardGetAll(255)
 //            mCommands.getStats(0xFFFFFFFF)
 //            mCommands.getGnss(0xFFFF)
+//            mCommands.getImuData(0xFFFFFFFF)
         }
     }
     
@@ -152,6 +153,26 @@ Item {
 //            val.mo
 //            val.dd
 //            val.age_s
+        }
+        
+        function onValuesImuReceived(val, mask) {
+//            val.roll
+//            val.pitch
+//            val.yaw
+//            val.accX
+//            val.accY
+//            val.accZ
+//            val.gyroX
+//            val.gyroY
+//            val.gyroZ
+//            val.magX
+//            val.magY
+//            val.magZ
+//            val.q0
+//            val.q1
+//            val.q2
+//            val.q3
+//            val.vesc_id
         }
     }
 }

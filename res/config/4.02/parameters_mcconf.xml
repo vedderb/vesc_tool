@@ -2734,7 +2734,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>3000</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>40000</valDouble>
+            <valDouble>25000</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix> kHz</suffix>
             <vTx>9</vTx>

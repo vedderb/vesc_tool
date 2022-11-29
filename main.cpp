@@ -18,6 +18,7 @@
     */
 
 #include "mainwindow.h"
+#include "boardsetupwindow.h"
 #include "mobile/qmlui.h"
 #include "mobile/fwhelper.h"
 #include "mobile/vesc3ditem.h"
@@ -243,6 +244,7 @@ int main(int argc, char *argv[])
     bool loadQmlVesc = false;
     bool qmlOtherScreen = false;
     bool useMobileUi = false;
+    bool useBoardSetupWindow = false;
     double qmlRot = 0.0;
     bool isTcpHub = false;
     QStringList pkgArgs;
@@ -317,6 +319,11 @@ int main(int argc, char *argv[])
 
         if (str == "--useMobileUi") {
             useMobileUi = true;
+            found = true;
+        }
+
+        if (str == "--useBoardSetupWindow") {
+            useBoardSetupWindow = true;
             found = true;
         }
 
@@ -490,6 +497,7 @@ int main(int argc, char *argv[])
     VescInterface *vesc = nullptr;
     TcpHub *tcpHub = nullptr;
     MainWindow *w = nullptr;
+    BoardSetupWindow *bw = nullptr;
     QmlUi *qmlUi = nullptr;
     QString qmlStr;
 
@@ -678,6 +686,9 @@ int main(int argc, char *argv[])
         } else if (useMobileUi) {
             qmlUi = new QmlUi;
             qmlUi->startQmlUi();
+        } else if(useBoardSetupWindow){
+            bw = new BoardSetupWindow;
+            bw->show();
         } else {
             w = new MainWindow;
             w->show();

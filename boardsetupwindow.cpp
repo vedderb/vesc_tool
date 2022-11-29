@@ -41,10 +41,6 @@ BoardSetupWindow::BoardSetupWindow(QWidget *parent) :
             this, SLOT(showStatusInfo(QString,bool)));
     connect(mVesc, SIGNAL(messageDialog(QString,QString,bool,bool)),
             this, SLOT(showMessageDialog(QString,QString,bool,bool)));
-    connect(mVesc, SIGNAL(serialPortNotWritable(QString)),
-            this, SLOT(serialPortNotWritable(QString)));
-    connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
-            this, SLOT(paramChangedDouble(QObject*,QString,double)));
     connect(mVesc->commands(), SIGNAL(pingCanRx(QVector<int>,bool)),
             this, SLOT(pingCanRx(QVector<int>,bool)));
     connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
@@ -638,12 +634,26 @@ bool BoardSetupWindow::tryMotorDirection(){
     QString directionStatus;
     directionStatus = tr("Spin each motor in the forward direction to continue.\n");
     mVesc->ignoreCanChange(true);
+    QVector<int> CAN_IDs_VESC;
+    FW_RX_PARAMS params;
     for(int i = -1; i < CAN_IDs.size(); i++){
         if(i<0){
             mVesc->commands()->setSendCan(false);
         }else{
             mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
         }
+        bool res = Utility::getFwVersionBlocking(mVesc, &params);
+        if(i > 0 &&res && params.hwType == HW_TYPE_VESC){
+            CAN_IDs_VESC.append(CAN_IDs.at(i));
+        }
+    }
+    for(int i = -1; i < CAN_IDs_VESC.size(); i++){
+        if(i<0){
+            mVesc->commands()->setSendCan(false);
+        }else{
+            mVesc->commands()->setSendCan(true, CAN_IDs_VESC.at(i));
+        }
+
         mVesc->commands()->getValues();
         if(!Utility::waitSignal(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 2000)){
             ui->motorDirectionLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
@@ -665,12 +675,12 @@ bool BoardSetupWindow::tryMotorDirection(){
     while(!allHaveTurned){
         directionStatus = tr("Spin each motor in the forward direction to continue.\n");
         bool turned = true;
-        for(int i = -1; i < CAN_IDs.size(); i++){
+        for(int i = -1; i < CAN_IDs_VESC.size(); i++){
 
             if(i<0){
                 mVesc->commands()->setSendCan(false);
             }else{
-                mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+                mVesc->commands()->setSendCan(true, CAN_IDs_VESC.at(i));
             }
             Utility::sleepWithEventLoop(10);
             mVesc->commands()->getValues();
@@ -709,11 +719,11 @@ bool BoardSetupWindow::tryMotorDirection(){
     double motor_current_max = mMcConfig_Target->getParamDouble("l_current_max");
     double motor_current_in_min = mMcConfig_Target->getParamDouble("l_in_current_min");
     double motor_current_in_max = mMcConfig_Target->getParamDouble("l_in_current_max");
-    for(int i = -1; i < CAN_IDs.size(); i++){
+    for(int i = -1; i < CAN_IDs_VESC.size(); i++){
         if(i<0){
             mVesc->commands()->setSendCan(false);
         }else{
-            mVesc->commands()->setSendCan(true, CAN_IDs.at(i));
+            mVesc->commands()->setSendCan(true, CAN_IDs_VESC.at(i));
         }
         Utility::sleepWithEventLoop(100);
         mVesc->commands()->getMcconf();
@@ -966,13 +976,13 @@ void BoardSetupWindow::on_serialRefreshButton_clicked()
 {
     if (mVesc) {
         ui->serialPortBox->clear();
-        QList<VSerialInfo_t> ports = mVesc->listSerialPorts();
-        foreach(const VSerialInfo_t &port, ports) {
+        auto ports = mVesc->listSerialPorts();
+        foreach(auto &info, ports) {
+            auto port = info.value<VSerialInfo_t>();
             ui->serialPortBox->addItem(port.name, port.systemPath);
         }
         ui->serialPortBox->setCurrentIndex(0);
     }
-
 }
 
 void BoardSetupWindow::on_bootloaderCheckBox_stateChanged(){

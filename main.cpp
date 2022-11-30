@@ -82,6 +82,7 @@ static void showHelp()
     qDebug() << "--useMobileUi : Start the mobile UI instead of the full desktop UI";
     qDebug() << "--tcpHub [port] : Start a TCP hub for remote access to connected VESCs";
     qDebug() << "--buildPkg [pkgPath:lispPath:qmlPath:isFullscreen:optMd:optName] : Build VESC Package";
+    qDebug() << "--useBoardSetupWindow : Start board setup window instead of main UI¨";
 }
 
 #ifdef Q_OS_LINUX
@@ -686,7 +687,7 @@ int main(int argc, char *argv[])
         } else if (useMobileUi) {
             qmlUi = new QmlUi;
             qmlUi->startQmlUi();
-        } else if(useBoardSetupWindow){
+        } else if (useBoardSetupWindow){
             bw = new BoardSetupWindow;
             bw->show();
         } else {

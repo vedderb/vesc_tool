@@ -476,7 +476,6 @@ QString Utility::detectAllFoc(VescInterface *vesc,
 
             for (int id: canDevs) {
                 vesc->commands()->setSendCan(true, id);
-
                 if (!checkFwCompatibility(vesc)) {
                     vesc->emitMessageDialog("FW Versions",
                                             "All VESCs must have the latest firmware to perform this operation.",

@@ -212,7 +212,7 @@ Item {
             }
 
             Button {
-                text: "Uninstall All"
+                text: "Uninstall Current"
                 Layout.fillWidth: true
                 onClicked: {
                     disableDialog()

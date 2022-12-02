@@ -214,7 +214,7 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The maximum electrical RPM.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_RPM_MAX</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
@@ -3480,9 +3480,9 @@ p, li { white-space: pre-wrap; }
             <minDouble>-45</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.0</valDouble>
+            <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
-            <suffix></suffix>
+            <suffix> °</suffix>
             <vTx>7</vTx>
         </m_encoder_sincos_phase_correction>
         <m_sensor_port_mode>
@@ -4525,14 +4525,21 @@ p, li { white-space: pre-wrap; }
                 <subgroupParams>
                     <param>motor_type</param>
                     <param>m_invert_direction</param>
+                </subgroupParams>
+            </subgroup>
+            <subgroup>
+                <subgroupName>Sensors</subgroupName>
+                <subgroupParams>
                     <param>m_sensor_port_mode</param>
-                    <param>::sep::Encoder</param>
+                    <param>::sep::ABI Encoder</param>
                     <param>m_encoder_counts</param>
+                    <param>::sep::Sin/Cos Encoder</param>
                     <param>m_encoder_sin_amp</param>
                     <param>m_encoder_cos_amp</param>
                     <param>m_encoder_sin_offset</param>
                     <param>m_encoder_cos_offset</param>
                     <param>m_encoder_sincos_filter_constant</param>
+                    <param>m_encoder_sincos_phase_correction</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>
@@ -4619,7 +4626,6 @@ p, li { white-space: pre-wrap; }
                     <param>m_out_aux_mode</param>
                     <param>l_duty_start</param>
                     <param>m_hall_extra_samples</param>
-                    <param>m_encoder_sincos_phase_correction</param>
                 </subgroupParams>
             </subgroup>
         </group>

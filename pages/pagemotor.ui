@@ -38,6 +38,16 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_9">
+      <attribute name="title">
+       <string>Sensors</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_10">
+       <item>
+        <widget class="ParamTable" name="sensorsTab"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
        <string>Current</string>

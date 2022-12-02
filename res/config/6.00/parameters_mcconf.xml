@@ -3471,7 +3471,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sin/Cos Encoder low pass filter constant. Will affect the ratio between lag and noise on the encoder position feedback. Range 0 to 1, where 0 has the lowest noise and most phase lag, and 1 has no lag and unfiltered noise.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sin/Cos Phase error compensation in deg. Some sin/cos encoders do not output perfect 90° phase between sin and cos signals. This parameter allows for compensating a phase error between sin and cos signals.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_M_ENCODER_SINCOS_PHASE</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -4533,7 +4533,6 @@ p, li { white-space: pre-wrap; }
                     <param>m_encoder_sin_offset</param>
                     <param>m_encoder_cos_offset</param>
                     <param>m_encoder_sincos_filter_constant</param>
-                    <param>m_encoder_sincos_phase_correction</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>
@@ -4620,6 +4619,7 @@ p, li { white-space: pre-wrap; }
                     <param>m_out_aux_mode</param>
                     <param>l_duty_start</param>
                     <param>m_hall_extra_samples</param>
+                    <param>m_encoder_sincos_phase_correction</param>
                 </subgroupParams>
             </subgroup>
         </group>

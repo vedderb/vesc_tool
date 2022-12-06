@@ -116,7 +116,10 @@
            <item>
             <widget class="QPushButton" name="installButton">
              <property name="text">
-              <string>Install</string>
+              <string>Install to VESC</string>
+             </property>
+             <property name="toolTip">
+              <string>Uninstall current package and install the selected package to the connected VESC</string>
              </property>
             </widget>
            </item>
@@ -189,11 +192,14 @@
           <item>
            <widget class="QPushButton" name="writeButton">
             <property name="text">
-             <string>Write to VESC</string>
+             <string>Install to VESC</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
+            </property>
+            <property name="toolTip">
+             <string>Uninstall current package and install the selected package to the connected VESC</string>
             </property>
            </widget>
           </item>

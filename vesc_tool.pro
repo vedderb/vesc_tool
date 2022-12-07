@@ -63,7 +63,7 @@ ios: {
 
 # CAN bus available
 # Adding serialbus to Qt seems to break the serial port on static builds. TODO: Figure out why.
-#DEFINES += HAS_CANBUS
+DEFINES += HAS_CANBUS
 
 # Positioning
 DEFINES += HAS_POS

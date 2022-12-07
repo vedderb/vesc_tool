@@ -22,6 +22,7 @@
 #include "utility.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QProgressDialog>
 #include <QDirIterator>
 
 PageVescPackage::PageVescPackage(QWidget *parent) :

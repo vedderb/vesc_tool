@@ -22,6 +22,7 @@
 #include "ui_pageloganalysis.h"
 #include "utility.h"
 #include <QFileDialog>
+#include <QMessageBox>
 #include <cmath>
 #include <QStandardPaths>
 

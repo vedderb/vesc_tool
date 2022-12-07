@@ -81,7 +81,9 @@ win32: {
 
 # https://stackoverflow.com/questions/61444320/what-are-the-configure-options-for-qt-that-enable-dead-keys-usage
 unix: {
+!ios: {
     QTPLUGIN += composeplatforminputcontextplugin
+}
 }
 
 # Options

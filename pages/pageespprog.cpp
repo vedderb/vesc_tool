@@ -20,6 +20,7 @@
 #include "pageespprog.h"
 #include "ui_pageespprog.h"
 #include "utility.h"
+#include <QFileDialog>
 
 PageEspProg::PageEspProg(QWidget *parent) :
     QWidget(parent),

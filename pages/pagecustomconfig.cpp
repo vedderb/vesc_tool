@@ -21,6 +21,7 @@
 #include "ui_pagecustomconfig.h"
 #include "widgets/paramtable.h"
 #include "utility.h"
+#include <QFileDialog>
 
 PageCustomConfig::PageCustomConfig(QWidget *parent) :
     QWidget(parent),

@@ -660,11 +660,28 @@ Item {
     function disableDialog() {
         commDialog.open()
         column.enabled = false
+        disableTimeoutTimer.stop()
+        disableTimeoutTimer.start()
     }
 
     function enableDialog() {
         commDialog.close()
         column.enabled = true
+        disableTimeoutTimer.stop()
+    }
+
+    Timer {
+        id: disableTimeoutTimer
+        running: false
+        repeat: false
+        interval: 15000
+
+        onTriggered: {
+            enableDialog()
+            VescIf.emitMessageDialog("Connect",
+                                     "Connection timed out",
+                                     false, false)
+        }
     }
 
     Dialog {

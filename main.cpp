@@ -18,6 +18,7 @@
     */
 
 #include "mainwindow.h"
+#include "boardsetupwindow.h"
 #include "mobile/qmlui.h"
 #include "mobile/fwhelper.h"
 #include "mobile/vesc3ditem.h"
@@ -81,6 +82,8 @@ static void showHelp()
     qDebug() << "--useMobileUi : Start the mobile UI instead of the full desktop UI";
     qDebug() << "--tcpHub [port] : Start a TCP hub for remote access to connected VESCs";
     qDebug() << "--buildPkg [pkgPath:lispPath:qmlPath:isFullscreen:optMd:optName] : Build VESC Package";
+    qDebug() << "--useBoardSetupWindow : Start board setup window instead of the main UI";
+    qDebug() << "--xmlConfToCode [xml-file] : Generate C code from XML configuration file (the files are saved in the same directory as the XML)";
 }
 
 #ifdef Q_OS_LINUX
@@ -243,9 +246,11 @@ int main(int argc, char *argv[])
     bool loadQmlVesc = false;
     bool qmlOtherScreen = false;
     bool useMobileUi = false;
+    bool useBoardSetupWindow = false;
     double qmlRot = 0.0;
     bool isTcpHub = false;
     QStringList pkgArgs;
+    QString xmlCodePath = "";
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -320,6 +325,11 @@ int main(int argc, char *argv[])
             found = true;
         }
 
+        if (str == "--useBoardSetupWindow") {
+            useBoardSetupWindow = true;
+            found = true;
+        }
+
         if (str.startsWith("-qmljsdebugger")) {
             found = true;
         }
@@ -351,6 +361,18 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (str == "--xmlConfToCode") {
+            if ((i + 1) < args.size()) {
+                i++;
+                xmlCodePath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path to xml file";
+                return 1;
+            }
+        }
+
         if (!found) {
             if (dash) {
                 qCritical() << "At least one of the flags is invalid:" << str;
@@ -361,6 +383,32 @@ int main(int argc, char *argv[])
             showHelp();
             return 1;
         }
+    }
+
+    if (!xmlCodePath.isEmpty()) {
+        ConfigParams conf;
+        if (!conf.loadParamsXml(xmlCodePath)) {
+            qCritical() << "Could not parse XML-file" << xmlCodePath;
+            return 1;
+        }
+
+        QString nameConfig = "device_config";
+        if (conf.hasParam("config_name") && conf.getParam("config_name")->type == CFG_T_QSTRING) {
+            nameConfig = conf.getParamQString("config_name");
+        }
+
+        QFileInfo fi(xmlCodePath);
+        xmlCodePath.chop(fi.fileName().length());
+        QString pathDefines = xmlCodePath + "conf_default.h";
+        QString pathParser = xmlCodePath + "confparser.c";
+        QString pathCompressed = xmlCodePath + "confxml.c";
+
+        Utility::createCompressedConfigC(&conf, nameConfig, pathCompressed);
+        Utility::createParamParserC(&conf, nameConfig, pathParser);
+        conf.saveCDefines(pathDefines, true);
+
+        qDebug() << "Done!";
+        return 0;
     }
 
     if (!pkgArgs.isEmpty()) {
@@ -490,6 +538,7 @@ int main(int argc, char *argv[])
     VescInterface *vesc = nullptr;
     TcpHub *tcpHub = nullptr;
     MainWindow *w = nullptr;
+    BoardSetupWindow *bw = nullptr;
     QmlUi *qmlUi = nullptr;
     QString qmlStr;
 
@@ -678,6 +727,9 @@ int main(int argc, char *argv[])
         } else if (useMobileUi) {
             qmlUi = new QmlUi;
             qmlUi->startQmlUi();
+        } else if (useBoardSetupWindow){
+            bw = new BoardSetupWindow;
+            bw->show();
         } else {
             w = new MainWindow;
             w->show();

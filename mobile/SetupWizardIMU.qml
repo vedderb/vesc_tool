@@ -825,7 +825,7 @@ Item {
                                 mAppConf.updateParamEnum("imu_conf.mode", 0)
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.03)
-                                mAppConf.updateParamDouble("imu_conf.accel_offsets__2", 0.0)
+                                mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -837,7 +837,7 @@ Item {
                                 mAppConf.updateParamEnum("imu_conf.mode", 1)
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.03)
-                                mAppConf.updateParamDouble("imu_conf.accel_offsets__2", 0.0)
+                                mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -855,7 +855,7 @@ Item {
                                 mAppConf.updateParamEnum("imu_conf.mode", 1)
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.02)
-                                mAppConf.updateParamDouble("imu_conf.accel_offsets__2", 0.0)
+                                mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -873,7 +873,7 @@ Item {
                                 mAppConf.updateParamEnum("imu_conf.mode", 1)
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 0.02)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 2.0)
-                                mAppConf.updateParamDouble("imu_conf.accel_offsets__2", 1.0)
+                                mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 1.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -884,7 +884,7 @@ Item {
                                 "AHRS: " + getAHRS() + "\n" +
                                 "Acc Decay: " + mAppConf.getParamDouble("imu_conf.accel_confidence_decay").toFixed(3) + "\n" +
                                 "Mahony kp: " + mAppConf.getParamDouble("imu_conf.mahony_kp").toFixed(3) + "\n" +
-                                "Accel Z Offset: " + mAppConf.getParamDouble("imu_conf.accel_offsets__2").toFixed(1)
+                                "Accel Z Filter: " + mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z").toFixed(1)
                         }
 
                         id: configuratorText5

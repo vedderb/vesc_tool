@@ -774,7 +774,7 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Paired VESCs</string>
+          <string>VESC Devices</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>

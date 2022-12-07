@@ -83,7 +83,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Maximum motor current.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Maximum motor current.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_CURRENT_MAX</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -214,7 +214,7 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The maximum electrical RPM.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_RPM_MAX</cDefine>
             <editorDecimalsDouble>2</editorDecimalsDouble>
@@ -2306,7 +2306,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Override HFI position with observer position for this amount of time after dropping below the HFI ERPM threshold. This can prevent oscillating between the two at a transition. Settings this value too high can make HFI catch the motor 180 electrical degrees off, as the observer position might degrade too much.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Override HFI position with observer position for this amount of time after dropping below the HFI ERPM threshold. This can prevent oscillating between the two at a transition. Setting this value too high can make HFI catch the motor 180 electrical degrees off, as the observer position might degrade too much.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_HFI_OBS_OVR_SEC</cDefine>
             <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1000</editorScale>
@@ -3463,6 +3463,28 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>7</vTx>
         </m_encoder_sincos_filter_constant>
+        <m_encoder_sincos_phase_correction>
+            <longName>Sin/Cos Phase Correction</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sin/Cos Phase error compensation in deg. Some sin/cos encoders do not output perfect 90° phase between sin and cos signals. This parameter allows for compensating a phase error between sin and cos signals.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_M_ENCODER_SINCOS_PHASE</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>45</maxDouble>
+            <minDouble>-45</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> °</suffix>
+            <vTx>7</vTx>
+        </m_encoder_sincos_phase_correction>
         <m_sensor_port_mode>
             <longName>Sensor Port Mode</longName>
             <type>4</type>
@@ -4464,6 +4486,7 @@ p, li { white-space: pre-wrap; }
         <ser>m_encoder_sin_offset</ser>
         <ser>m_encoder_cos_offset</ser>
         <ser>m_encoder_sincos_filter_constant</ser>
+        <ser>m_encoder_sincos_phase_correction</ser>
         <ser>m_sensor_port_mode</ser>
         <ser>m_invert_direction</ser>
         <ser>m_drv8301_oc_mode</ser>
@@ -4502,14 +4525,21 @@ p, li { white-space: pre-wrap; }
                 <subgroupParams>
                     <param>motor_type</param>
                     <param>m_invert_direction</param>
+                </subgroupParams>
+            </subgroup>
+            <subgroup>
+                <subgroupName>Sensors</subgroupName>
+                <subgroupParams>
                     <param>m_sensor_port_mode</param>
-                    <param>::sep::Encoder</param>
+                    <param>::sep::ABI Encoder</param>
                     <param>m_encoder_counts</param>
+                    <param>::sep::Sin/Cos Encoder</param>
                     <param>m_encoder_sin_amp</param>
                     <param>m_encoder_cos_amp</param>
                     <param>m_encoder_sin_offset</param>
                     <param>m_encoder_cos_offset</param>
                     <param>m_encoder_sincos_filter_constant</param>
+                    <param>m_encoder_sincos_phase_correction</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>
@@ -4595,7 +4625,6 @@ p, li { white-space: pre-wrap; }
                     <param>m_fault_stop_time_ms</param>
                     <param>m_out_aux_mode</param>
                     <param>l_duty_start</param>
-                    <param>m_hall_extra_samples</param>
                 </subgroupParams>
             </subgroup>
         </group>

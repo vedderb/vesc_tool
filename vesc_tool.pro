@@ -202,6 +202,7 @@ SOURCES += main.cpp\
     bleuartdummy.cpp \
     codeloader.cpp \
     mainwindow.cpp \
+    boardsetupwindow.cpp \
     packet.cpp \
     preferences.cpp \
     tcphub.cpp \
@@ -223,6 +224,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     bleuartdummy.h \
     codeloader.h \
+    boardsetupwindow.h \
     packet.h \
     preferences.h \
     tcphub.h \
@@ -243,6 +245,7 @@ HEADERS  += mainwindow.h \
     hexfile.h
 
 FORMS    += mainwindow.ui \
+    boardsetupwindow.ui \
     parametereditor.ui \
     preferences.ui
 
@@ -311,7 +314,7 @@ macx-clang:contains(QMAKE_HOST.arch, arm.*): {
 macx {
     ICON        =  macos/appIcon.icns
     QMAKE_INFO_PLIST = macos/Info.plist
-    DISTFILES += macos/Info.plist    
+    DISTFILES += macos/Info.plist
     QMAKE_CFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
     QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO
     QMAKE_OBJECTIVE_CFLAGS_RELEASE = $$QMAKE_OBJECTIVE_CFLAGS_RELEASE_WITH_DEBUGINFO

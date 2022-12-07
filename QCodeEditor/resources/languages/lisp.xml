@@ -197,6 +197,7 @@
 <name>app-ppm-override</name>
 <name>set-remote-state</name>
 <name>app-disable-output</name>
+<name>app-is-output-disabled</name>
 <name>app-pas-get-rpm</name>
 <name>set-current</name>
 <name>set-current-rel</name>

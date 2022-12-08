@@ -3,5 +3,7 @@
         <file>res/firmwares_bms/12s7p/vesc_default.bin</file>
         <file>res/bootloaders_bms/generic.bin</file>
         <file>res/firmwares_bms/18s_light/vesc_default.bin</file>
+        <file>res/firmwares_bms/18s_light_lmp/vesc_default.bin</file>
+        <file>res/firmwares_bms/18s_light_mk2/vesc_default.bin</file>
     </qresource>
 </RCC>

@@ -370,6 +370,9 @@ void BleUart::init()
         return;
     }
 
+    Utility::requestBleScanPermission();
+    Utility::requestBleConnectPermission();
+
     mDeviceDiscoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
 
     connect(mDeviceDiscoveryAgent, SIGNAL(deviceDiscovered(const QBluetoothDeviceInfo&)),

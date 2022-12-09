@@ -272,8 +272,52 @@ bool Utility::requestFilePermission()
     // https://codereview.qt-project.org/#/c/199162/
     QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
     if(r == QtAndroid::PermissionResult::Denied) {
-        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE", 5000);
+        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE", 10000);
         r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+        if(r == QtAndroid::PermissionResult::Denied) {
+            return false;
+        }
+    }
+
+    return true;
+#else
+    return true;
+#endif
+#else
+    return true;
+#endif
+}
+
+bool Utility::requestBleScanPermission()
+{
+#ifdef Q_OS_ANDROID
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.BLUETOOTH_SCAN");
+    if(r == QtAndroid::PermissionResult::Denied) {
+        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.BLUETOOTH_SCAN", 10000);
+        r = QtAndroid::checkPermission("android.permission.BLUETOOTH_SCAN");
+        if(r == QtAndroid::PermissionResult::Denied) {
+            return false;
+        }
+    }
+
+    return true;
+#else
+    return true;
+#endif
+#else
+    return true;
+#endif
+}
+
+bool Utility::requestBleConnectPermission()
+{
+#ifdef Q_OS_ANDROID
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.BLUETOOTH_CONNECT");
+    if(r == QtAndroid::PermissionResult::Denied) {
+        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.BLUETOOTH_CONNECT", 10000);
+        r = QtAndroid::checkPermission("android.permission.BLUETOOTH_CONNECT");
         if(r == QtAndroid::PermissionResult::Denied) {
             return false;
         }

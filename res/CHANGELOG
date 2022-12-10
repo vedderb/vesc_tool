@@ -1,4 +1,4 @@
-== 6.00 <dev> ==
+== 6.00 ==
 * Added support for compressed firmware upload.
 * Reduce CPU usage by only plotting RT data when the plot is visible.
 * Lisp scripting editor and integration.

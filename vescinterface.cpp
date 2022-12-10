@@ -4034,13 +4034,17 @@ bool VescInterface::confStoreBackup(bool can, QString name)
         commands()->setSendCan(false);
     }
 
-    res = storeConf();
+    FW_RX_PARAMS fwp;
+    Utility::getFwVersionBlocking(this, &fwp);
+
+    if (fwp.hwType == HW_TYPE_VESC) {
+        res = storeConf();
+    }
 
     if (res && can) {
         for (int d: scanCan()) {
             commands()->setSendCan(true, d);
 
-            FW_RX_PARAMS fwp;
             Utility::getFwVersionBlocking(this, &fwp);
 
             if (fwp.hwType == HW_TYPE_VESC) {
@@ -4178,13 +4182,17 @@ bool VescInterface::confRestoreBackup(bool can)
         commands()->setSendCan(false);
     }
 
-    res = restoreConf();
+    FW_RX_PARAMS fwp;
+    Utility::getFwVersionBlocking(this, &fwp);
+
+    if (fwp.hwType == HW_TYPE_VESC) {
+        res = restoreConf();
+    }
 
     if (res && can) {
         for (int d: scanCan()) {
             commands()->setSendCan(true, d);
 
-            FW_RX_PARAMS fwp;
             Utility::getFwVersionBlocking(this, &fwp);
 
             if (fwp.hwType == HW_TYPE_VESC) {

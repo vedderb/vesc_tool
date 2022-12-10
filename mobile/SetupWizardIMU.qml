@@ -59,7 +59,6 @@ Item {
     function openDialog() {
         dialog.open()
         openTimer.start()
-        tabBar.currentIndex = 0
     }
 
     Timer {
@@ -167,7 +166,6 @@ Item {
             height: parent.height
             id: stackLayout
             currentIndex: 0
-        onCurrentIndexChanged: {tabBar.currentIndex = currentIndex}
 
             Item{// Welcome Screen #0
                 width: parent.width

@@ -3546,6 +3546,39 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_QMLUI_WRITE));
     }
 
+    if (fw_connected >= qMakePair(6, 00)) {
+        compCommands.append(int(COMM_IO_BOARD_GET_ALL));
+        compCommands.append(int(COMM_IO_BOARD_SET_PWM));
+        compCommands.append(int(COMM_IO_BOARD_SET_DIGITAL));
+        compCommands.append(int(COMM_BM_MEM_WRITE));
+        compCommands.append(int(COMM_BMS_BLNC_SELFTEST));
+        compCommands.append(int(COMM_GET_EXT_HUM_TMP));
+        compCommands.append(int(COMM_GET_STATS));
+        compCommands.append(int(COMM_RESET_STATS));
+        compCommands.append(int(COMM_LISP_READ_CODE));
+        compCommands.append(int(COMM_LISP_WRITE_CODE));
+        compCommands.append(int(COMM_LISP_ERASE_CODE));
+        compCommands.append(int(COMM_LISP_SET_RUNNING));
+        compCommands.append(int(COMM_LISP_GET_STATS));
+        compCommands.append(int(COMM_LISP_PRINT));
+        compCommands.append(int(COMM_BMS_SET_BATT_TYPE));
+        compCommands.append(int(COMM_BMS_GET_BATT_TYPE));
+        compCommands.append(int(COMM_LISP_REPL_CMD));
+        compCommands.append(int(COMM_LISP_STREAM_CODE));
+        compCommands.append(int(COMM_FILE_LIST));
+        compCommands.append(int(COMM_FILE_READ));
+        compCommands.append(int(COMM_FILE_WRITE));
+        compCommands.append(int(COMM_FILE_MKDIR));
+        compCommands.append(int(COMM_FILE_REMOVE));
+        compCommands.append(int(COMM_LOG_START));
+        compCommands.append(int(COMM_LOG_STOP));
+        compCommands.append(int(COMM_LOG_CONFIG_FIELD));
+        compCommands.append(int(COMM_LOG_DATA_F32));
+        compCommands.append(int(COMM_SET_APPCONF_NO_STORE));
+        compCommands.append(int(COMM_GET_GNSS));
+        compCommands.append(int(COMM_LOG_DATA_F64));
+    }
+
     if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {
         compCommands.append(int(COMM_SET_MCCONF));
         compCommands.append(int(COMM_GET_MCCONF));

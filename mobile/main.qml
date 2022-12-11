@@ -542,8 +542,8 @@ ApplicationWindow {
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "Profiles", "BMS", "Firmware", "Motor Cfg",
-                        "App Cfg", "Terminal", "Packages"]
+                    model: ["Start", "RT Data", "Profiles", "BMS", "Motor Cfg",
+                        "App Cfg", "Terminal", "Packages", "Firmware"]
 
                     TabButton {
                         text: modelData

@@ -692,27 +692,33 @@ void PageFirmware::on_dlArchiveButton_clicked()
     QNetworkRequest request(url);
     QNetworkReply *reply = manager.get(request);
 
-    connect(reply, &QNetworkReply::downloadProgress, [this](qint64 bytesReceived, qint64 bytesTotal) {
-        ui->displayDl->setText("Downloading...");
-        ui->displayDl->setValue(100.0 * (double)bytesReceived / (double)bytesTotal);
-    });
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw.rcc";
+    QFile file(path);
+    QResource::unregisterResource(path);
+    if (file.open(QIODevice::WriteOnly)) {
+        auto conn = connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this]
+                            (qint64 bytesReceived, qint64 bytesTotal) {
+            ui->displayDl->setText("Downloading...");
+            ui->displayDl->setValue(100.0 * (double)bytesReceived / (double)bytesTotal);
+            file.write(reply->read(reply->size()));
+        });
 
-    QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
+        QEventLoop loop;
+        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
 
-    if (reply->error() == QNetworkReply::NoError) {
-        ui->displayDl->setText("Download Finished");
-        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-                "/res_fw.rcc";
-        QFile file(path);
-        if (file.open(QIODevice::WriteOnly)) {
+        if (reply->error() == QNetworkReply::NoError) {
             file.write(reply->readAll());
-            file.close();
-            reloadArchive();
+            ui->displayDl->setText("Download Done");
+        } else {
+            ui->displayDl->setText("Download Failed");
         }
+
+        file.close();
+        reloadArchive();
     } else {
-        ui->displayDl->setText("Download Failed");
+        ui->displayDl->setText("Could not open local file");
     }
 
     reply->abort();

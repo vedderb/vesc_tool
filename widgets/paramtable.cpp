@@ -88,13 +88,17 @@ void ParamTable::addRowSeparator(QString text)
 
 void ParamTable::addParamSubgroup(ConfigParams *params, QString groupName, QString subgroupName)
 {
-    for (auto p: params->getParamsFromSubgroup(groupName, subgroupName)) {
+    setUpdatesEnabled(false);
+    foreach (auto p, params->getParamsFromSubgroup(groupName, subgroupName)) {
         if (p.startsWith("::sep::")) {
             addRowSeparator(p.mid(7));
         } else {
             addParamRow(params, p);
         }
     }
+    QTimer::singleShot(0, [this]() {
+        setUpdatesEnabled(true);
+    });
 }
 
 void ParamTable::clearParams()

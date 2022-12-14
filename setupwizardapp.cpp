@@ -100,7 +100,7 @@ AppIntroPage::AppIntroPage(VescInterface *vesc, QWidget *parent)
 int AppIntroPage::nextId() const
 {
     if (mVesc->isPortConnected()) {
-        if (mVesc->commands()->isLimitedMode() || !mResetInputOk) {
+        if (mVesc->commands()->isLimitedMode() && !mVesc->commands()->getLimitedCompatibilityCommands().contains(int(COMM_GET_APPCONF)) || !mResetInputOk) {
             return SetupWizardApp::Page_Firmware;
         } else {
             if (mVesc->getCanDevsLast().size() == 0) {
@@ -174,8 +174,7 @@ AppConnectionPage::AppConnectionPage(VescInterface *vesc, QWidget *parent)
 
 int AppConnectionPage::nextId() const
 {
-    if (mVesc->commands()->isLimitedMode() &&
-            !mVesc->commands()->getLimitedCompatibilityCommands().contains(int(COMM_GET_APPCONF))) {
+    if (mVesc->commands()->isLimitedMode()) {
         return SetupWizardApp::Page_Firmware;
     } else {
         return SetupWizardApp::Page_Multi;

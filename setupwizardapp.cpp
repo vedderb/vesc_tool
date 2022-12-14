@@ -174,7 +174,8 @@ AppConnectionPage::AppConnectionPage(VescInterface *vesc, QWidget *parent)
 
 int AppConnectionPage::nextId() const
 {
-    if (mVesc->commands()->isLimitedMode()) {
+    if (mVesc->commands()->isLimitedMode() &&
+            !mVesc->commands()->getLimitedCompatibilityCommands().contains(int(COMM_GET_APPCONF))) {
         return SetupWizardApp::Page_Firmware;
     } else {
         return SetupWizardApp::Page_Multi;

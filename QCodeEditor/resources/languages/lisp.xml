@@ -271,6 +271,9 @@
 <name>sqrt</name>
 <name>log</name>
 <name>log10</name>
+<name>floor</name>
+<name>ceil</name>
+<name>round</name>
 <name>deg2rad</name>
 <name>rad2deg</name>
 <name>vec3-rot</name>

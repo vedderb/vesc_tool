@@ -217,19 +217,11 @@ void PageVescPackage::on_writeButton_clicked()
         return;
     }
 
-    QFile f(ui->loadEdit->text());
-    if (!f.open(QIODevice::ReadOnly)) {
-        mVesc->emitMessageDialog(tr("Write Package"),
-                                 tr("Could not open package file for reading."),
-                                 false, false);
-        return;
-    }
-
     QProgressDialog dialog(tr("Writing..."), QString(), 0, 0, this);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
 
-    mLoader.installVescPackage(f.readAll());
+    mLoader.installVescPackageFromPath(ui->loadEdit->text());
 }
 
 void PageVescPackage::on_outputRefreshButton_clicked()

@@ -37,7 +37,7 @@ Item {
     function openDialog() {
         if (!VescIf.isPortConnected()) {
             VescIf.emitMessageDialog("Multi Setup",
-                                     "You are not connected to the VESC. Please connect first.", false, false)
+                                     "You are not connected. Please connect first.", false, false)
             return
         }
 
@@ -186,7 +186,7 @@ Item {
                         RowLayout {
                             Button {
                                 Layout.fillWidth: true
-                                text: "Write General to All VESCs"
+                                text: "Write General to All"
 
                                 onClicked: {
                                     disableDialog("Writing Parameters...")
@@ -236,7 +236,7 @@ Item {
                         RowLayout {
                             Button {
                                 Layout.fillWidth: true
-                                text: "Write Limits to All VESCs"
+                                text: "Write Limits to All"
                                 onClicked: {
                                     disableDialog("Writing Parameters...")
                                     workaroundTimerWriteLimitsAll.start()
@@ -318,7 +318,7 @@ Item {
                         RowLayout {
                             Button {
                                 Layout.fillWidth: true
-                                text: "Write FOC to All VESCs"
+                                text: "Write FOC to All"
 
                                 onClicked: {
                                     disableDialog("Writing Parameters...")
@@ -368,7 +368,7 @@ Item {
                         RowLayout {
                             Button {
                                 Layout.fillWidth: true
-                                text: "Write BMS to All VESCs"
+                                text: "Write BMS to All"
 
                                 onClicked: {
                                     disableDialog("Writing Parameters...")

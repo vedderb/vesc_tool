@@ -41,6 +41,9 @@ ios: {
 # Build mobile GUI
 #CONFIG += build_mobile
 
+# Exclude built-in firmwares
+#CONFIG += exclude_fw
+
 ios: {
     CONFIG    += build_mobile
     DEFINES   += QT_NO_PRINTER
@@ -264,12 +267,15 @@ include(QCodeEditor/qcodeeditor.pri)
 include(esp32/esp32.pri)
 
 RESOURCES += res.qrc \
-    res_fw_bms.qrc \
-    res/firmwares/res_fw.qrc \
     res_lisp.qrc \
-    res_qml.qrc \
-    res/firmwares_esp/res_fw_esp.qrc
+    res_qml.qrc
 RESOURCES += res_config.qrc
+
+!exclude_fw {
+    RESOURCES += res_fw_bms.qrc
+    RESOURCES += res/firmwares/res_fw.qrc
+    RESOURCES += res/firmwares_esp/res_fw_esp.qrc
+}
 
 build_original {
     RESOURCES += res_original.qrc

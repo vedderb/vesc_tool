@@ -217,6 +217,9 @@
 <name>get-iq</name>
 <name>get-vd</name>
 <name>get-vq</name>
+<name>get-est-lambda</name>
+<name>get-est-res</name>
+<name>get-est-ind</name>
 <name>get-duty</name>
 <name>get-rpm</name>
 <name>get-temp-fet</name>

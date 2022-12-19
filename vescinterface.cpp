@@ -3544,9 +3544,6 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_CUSTOM_HW_DATA));
         compCommands.append(int(COMM_QMLUI_ERASE));
         compCommands.append(int(COMM_QMLUI_WRITE));
-    }
-
-    if (fw_connected >= qMakePair(6, 00)) {
         compCommands.append(int(COMM_IO_BOARD_GET_ALL));
         compCommands.append(int(COMM_IO_BOARD_SET_PWM));
         compCommands.append(int(COMM_IO_BOARD_SET_DIGITAL));
@@ -3554,6 +3551,9 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_BMS_BLNC_SELFTEST));
         compCommands.append(int(COMM_GET_EXT_HUM_TMP));
         compCommands.append(int(COMM_GET_STATS));
+    }
+
+    if (fw_connected >= qMakePair(6, 00)) {
         compCommands.append(int(COMM_RESET_STATS));
         compCommands.append(int(COMM_LISP_READ_CODE));
         compCommands.append(int(COMM_LISP_WRITE_CODE));

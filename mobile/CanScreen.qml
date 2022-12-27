@@ -37,6 +37,12 @@ Item {
         scanButton.enabled = VescIf.isPortConnected()
     }
 
+    function scanIfEmpty() {
+        if (canList.count == 0 && VescIf.isPortConnected()) {
+            scanButton.clicked()
+        }
+    }
+
     Timer {
         repeat: true
         interval: 1000

@@ -125,7 +125,14 @@ ApplicationWindow {
             }
 
             CanScreen {
+                id: canScreen
                 anchors.fill: parent
+            }
+
+            onVisibleChanged: {
+                if (visible) {
+                    canScreen.scanIfEmpty()
+                }
             }
         }
     }

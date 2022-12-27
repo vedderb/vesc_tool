@@ -10,6 +10,7 @@
 * Old firmware download RAM usage fix.
 * Config backup/restore improvements.
 * Automatically reload UI after installing and uninstalling packages.
+* Automatically scan mobile CAN-list if empty.
 
 == 6.00 ==
 * Added support for compressed firmware upload.

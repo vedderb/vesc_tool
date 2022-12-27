@@ -1,3 +1,15 @@
+== 6.02 ==
+* Improved experiment plot.
+* Updated PPM and ADC mapping widgets.
+* Better compatibility with old firmwares.
+* LispBM
+    - More examples
+    - Rearranged UI
+    - Added experiment plot
+* Mobile custom package install support.
+* Old firmware download RAM usage fix.
+* Config backup/restore improvements.
+
 == 6.00 ==
 * Added support for compressed firmware upload.
 * Reduce CPU usage by only plotting RT data when the plot is visible.

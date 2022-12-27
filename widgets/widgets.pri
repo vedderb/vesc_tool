@@ -1,4 +1,5 @@
 FORMS += \
+    $$PWD/experimentplot.ui \
     $$PWD/parameditbitfield.ui \
     $$PWD/parameditbool.ui \
     $$PWD/parameditdouble.ui \
@@ -23,6 +24,7 @@ FORMS += \
 HEADERS += \
     $$PWD/batttempplot.h \
     $$PWD/canlistitem.h \
+    $$PWD/experimentplot.h \
     $$PWD/parameditbitfield.h \
     $$PWD/parameditbool.h \
     $$PWD/parameditdouble.h \
@@ -60,6 +62,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/batttempplot.cpp \
     $$PWD/canlistitem.cpp \
+    $$PWD/experimentplot.cpp \
     $$PWD/parameditbitfield.cpp \
     $$PWD/parameditbool.cpp \
     $$PWD/parameditdouble.cpp \

@@ -193,7 +193,7 @@ PageLisp::~PageLisp()
         set.remove("pagelisp/recentfiles");
         set.beginWriteArray("pagelisp/recentfiles");
         int ind = 0;
-        for (auto f: mRecentFiles) {
+        foreach (auto f, mRecentFiles) {
             set.setArrayIndex(ind);
             set.setValue("path", f);
             ind++;
@@ -223,6 +223,7 @@ void PageLisp::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
     mLoader.setVesc(vesc);
+    ui->experimentPlot->setVesc(vesc);
 
     connect(mVesc->commands(), &Commands::lispPrintReceived, [this](QString str) {
         ui->debugEdit->moveCursor(QTextCursor::End);
@@ -243,7 +244,6 @@ void PageLisp::setVesc(VescInterface *vesc)
         ui->heapBar->setValue(stats.heap_use);
         ui->memBar->setValue(stats.mem_use);
         ui->stackBar->setValue(stats.stack_use);
-        ui->doneCtxRLabel->setText(stats.done_ctx_r);
 
         ui->bindingTable->setColumnCount(2);
         ui->bindingTable->setRowCount(stats.number_bindings.size());

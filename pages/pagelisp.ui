@@ -147,7 +147,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget2">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -203,17 +203,17 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="3" column="1">
-           <widget class="QProgressBar" name="stackBar">
+          <item row="2" column="1">
+           <widget class="QProgressBar" name="memBar">
             <property name="value">
              <number>0</number>
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>CPU</string>
+             <string>Stack</string>
             </property>
            </widget>
           </item>
@@ -224,15 +224,29 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
-           <widget class="QLabel" name="doneCtxRLabel">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_3">
             <property name="text">
-             <string/>
+             <string>Heap</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>CPU</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
            <widget class="QProgressBar" name="heapBar">
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QProgressBar" name="stackBar">
             <property name="value">
              <number>0</number>
             </property>
@@ -248,34 +262,6 @@
             </property>
             <property name="format">
              <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Stack</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Result</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QProgressBar" name="memBar">
-            <property name="value">
-             <number>0</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Heap</string>
             </property>
            </widget>
           </item>
@@ -371,7 +357,7 @@
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabPosition">
-       <enum>QTabWidget::West</enum>
+       <enum>QTabWidget::North</enum>
       </property>
       <property name="tabShape">
        <enum>QTabWidget::Triangular</enum>
@@ -381,7 +367,7 @@
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Console</string>
+        <string>Console/REPL</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
@@ -417,13 +403,6 @@
               <property name="icon">
                <iconset resource="../res.qrc">
                 <normaloff>:/res/+theme_light/icons/Help-96.png</normaloff>:/res/+theme_light/icons/Help-96.png</iconset>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Repl</string>
               </property>
              </widget>
             </item>
@@ -576,7 +555,7 @@
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
-        <string>Plot</string>
+        <string>Binding Plot</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
@@ -764,12 +743,34 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_5">
+       <attribute name="title">
+        <string>Experiment Plot</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <widget class="ExperimentPlot" name="experimentPlot" native="true"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>widgets/qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ExperimentPlot</class>
+   <extends>QWidget</extends>
+   <header>widgets/experimentplot.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>VTextBrowser</class>
    <extends>QTextEdit</extends>
@@ -779,12 +780,6 @@
    <class>ScriptEditor</class>
    <extends>QWidget</extends>
    <header>widgets/scripteditor.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QCustomPlot</class>
-   <extends>QWidget</extends>
-   <header>widgets/qcustomplot.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

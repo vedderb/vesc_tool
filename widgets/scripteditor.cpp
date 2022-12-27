@@ -135,8 +135,7 @@ void ScriptEditor::on_saveButton_clicked()
 
     QFileInfo fi(fileName);
     if (!fi.exists()) {
-        QMessageBox::critical(this, "Save File",
-                              "Current file path not valid. Use save as instead.");
+        on_saveAsButton_clicked();
         return;
     }
 

@@ -229,10 +229,11 @@ Item {
                     onTriggered: {
                         mLoader.lispErase()
                         mLoader.qmlErase()
+                        Utility.sleepWithEventLoop(500)
+                        VescIf.reloadFirmware()
                         enableDialog()
                         VescIf.emitMessageDialog("Uninstall Package",
-                                                 "Uninstallation Done! Please disconnect and reconnect to " +
-                                                 "revert possible VESC Tool GUI updates.",
+                                                 "Uninstallation Done!",
                                                  true, false)
                     }
                 }
@@ -298,13 +299,12 @@ Item {
                                 if (mLoader.installVescPackageFromPath(pkgPath)) {
                                     enableDialog()
                                     VescIf.emitMessageDialog("Install Package",
-                                                             "Install Done! Please disconnect and reconnect to " +
-                                                             "apply possible VESC Tool GUI updates from this package.",
+                                                             "Installation Done!",
                                                              true, false)
                                 } else {
                                     enableDialog()
                                     VescIf.emitMessageDialog("Install Package",
-                                                             "Install failed",
+                                                             "Installation failed",
                                                              false, false)
                                 }
                             }

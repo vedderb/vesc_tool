@@ -279,9 +279,11 @@ void PageVescPackage::on_uninstallButton_clicked()
     mLoader.qmlErase();
     mLoader.lispErase();
 
+    Utility::sleepWithEventLoop(500);
+    mVesc->reloadFirmware();
+
     mVesc->emitMessageDialog(tr("Uninstall Package"),
-                             tr("Uninstallation Done! Please disconnect and reconnect to "
-                                "revert possible VESC Tool GUI updates."),
+                             tr("Uninstallation Done!"),
                              true);
 }
 
@@ -304,8 +306,7 @@ void PageVescPackage::on_installButton_clicked()
         mLoader.installVescPackage(mCurrentPkg);
 
         mVesc->emitMessageDialog(tr("Install Package"),
-                                 tr("Install Done! Please disconnect and reconnect to "
-                                    "apply possible VESC Tool GUI updates from this package."),
+                                 tr("Installation Done!"),
                                  true);
     } else {
         mVesc->emitMessageDialog(tr("Install Package"),

@@ -255,6 +255,11 @@ public:
     Q_INVOKABLE bool updateTcpHubPassword(QString uuid, QString newPass);
     Q_INVOKABLE bool connectTcpHubUuid(QString uuid);
 
+    // Force reloading of firmware version, custom UIs and custom configs
+    Q_INVOKABLE void reloadFirmware() {
+        updateFwRx(false);
+    }
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);

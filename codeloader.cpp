@@ -768,6 +768,9 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
         mVesc->commands()->lispSetRunning(1);
     }
 
+    Utility::sleepWithEventLoop(500);
+    mVesc->reloadFirmware();
+
     return res;
 }
 

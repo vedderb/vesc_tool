@@ -9,6 +9,7 @@
 * Mobile custom package install support.
 * Old firmware download RAM usage fix.
 * Config backup/restore improvements.
+* Automatically reload UI after installing and uninstalling packages.
 
 == 6.00 ==
 * Added support for compressed firmware upload.

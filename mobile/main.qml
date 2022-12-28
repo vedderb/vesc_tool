@@ -971,8 +971,6 @@ ApplicationWindow {
             swipeView.insertItem(1, uiHwPage)
             tabBar.insertItem(1, uiHwButton)
             uiHwPage.visible = true
-            swipeView.setCurrentIndex(0)
-            swipeView.setCurrentIndex(1)
         } else {
             uiHwPage.visible = false
             uiHwPage.parent = null
@@ -1003,8 +1001,6 @@ ApplicationWindow {
             swipeView.insertItem(1, uiAppPage)
             tabBar.insertItem(1, uiAppButton)
             uiAppPage.visible = true
-            swipeView.setCurrentIndex(0)
-            swipeView.setCurrentIndex(1)
         } else {
             uiAppPage.visible = false
             uiAppPage.parent = null

@@ -27,7 +27,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>194</width>
+        <width>188</width>
         <height>579</height>
        </rect>
       </property>
@@ -511,7 +511,7 @@
              <string>Export Scale</string>
             </property>
             <property name="prefix">
-             <string>S: </string>
+             <string>Scale: </string>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>

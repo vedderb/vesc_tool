@@ -5,8 +5,8 @@
         <file>res/images/ebike_throttle.jpg</file>
         <file>res/images/nunchuk.jpg</file>
         <file>res/images/vedder_nunchuk.jpg</file>
-        <file>res/firmwares/CHANGELOG</file>
-        <file>res/CHANGELOG</file>
+        <file>res/firmwares/CHANGELOG.md</file>
+        <file>res/CHANGELOG.md</file>
         <file>res/images/multi_master.png</file>
         <file>res/images/multi_single.png</file>
         <file>res/images/multi_slave.png</file>

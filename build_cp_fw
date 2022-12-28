@@ -17,7 +17,7 @@ make all_fw_clean
 cd $DIR
 rm -r res/firmwares/*
 cp -r $FWPATH/package/* res/firmwares/
-cp $FWPATH/CHANGELOG res/firmwares
+cp $FWPATH/CHANGELOG.md res/firmwares
 
 rm -r $FWPATH/package/*
 

@@ -1070,9 +1070,14 @@ ApplicationWindow {
         }
 
         function onMessageDialog(title, msg, isGood, richText) {
+            if (!richText && msg.trim().startsWith("#")) {
+                vescDialogLabel.textFormat = Text.MarkdownText
+            } else {
+                vescDialogLabel.textFormat = richText ? Text.RichText : Text.AutoText
+            }
+
             vescDialog.title = title
             vescDialogLabel.text = (richText ? "<style>a:link { color: lightblue; }</style>" : "") + msg
-            vescDialogLabel.textFormat = richText ? Text.RichText : Text.AutoText
             vescDialogScroll.ScrollBar.vertical.position = 0
             vescDialog.open()
         }

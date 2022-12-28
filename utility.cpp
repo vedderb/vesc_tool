@@ -206,7 +206,7 @@ void Utility::checkVersion(VescInterface *vesc)
 
 QString Utility::fwChangeLog()
 {
-    QFile cl("://res/firmwares/CHANGELOG");
+    QFile cl("://res/firmwares/CHANGELOG.md");
     if (cl.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return QString::fromUtf8(cl.readAll());
     } else {
@@ -216,7 +216,7 @@ QString Utility::fwChangeLog()
 
 QString Utility::vescToolChangeLog()
 {
-    QFile cl("://res/CHANGELOG");
+    QFile cl("://res/CHANGELOG.md");
     if (cl.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return QString::fromUtf8(cl.readAll());
     } else {

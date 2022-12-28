@@ -38,5 +38,6 @@
         <file>res/Lisp/Examples/encoder_sincos_cal.lisp</file>
         <file>res/Lisp/Examples/test_extensions.lisp</file>
         <file>res/Lisp/Examples/est_temp.lisp</file>
+        <file>res/Lisp/Examples/plot_interpolation.lisp</file>
     </qresource>
 </RCC>

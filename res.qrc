@@ -326,5 +326,7 @@
         <file>res/+theme_light/icons/Package-96.png</file>
         <file>res/icons/Connected-hl-96.png</file>
         <file>res/+theme_light/icons/Connected-hl-96.png</file>
+        <file>res/icons/glow.png</file>
+        <file>res/+theme_light/icons/glow.png</file>
     </qresource>
 </RCC>

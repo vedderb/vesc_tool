@@ -30,10 +30,6 @@ ExperimentPlot::ExperimentPlot(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
 
     QString theme = Utility::getThemePath();
-    ui->experimentClearDataButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
-    ui->experimentShowLineButton->setIcon(QPixmap(theme + "icons/3ph_sine.png"));
-    ui->experimentScatterButton->setIcon(QPixmap(theme + "icons/Polyline-96.png"));
-
     QIcon mycon = QIcon(theme + "icons/expand_on.png");
     mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
     mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
@@ -48,6 +44,53 @@ ExperimentPlot::ExperimentPlot(QWidget *parent) :
     mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
     mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
     ui->experimentAutoScaleButton->setIcon(mycon);
+
+    auto genPic = [](QString p1, QString p2, QString text) {
+        QPixmap pix(133, 133);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+
+        p.setRenderHint(QPainter::Antialiasing, true);
+        p.setRenderHint(QPainter::TextAntialiasing, true);
+        p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+        if (!p1.isEmpty()) {
+            p.drawImage(pix.rect(), QImage(p1));
+        }
+
+        if (!p2.isEmpty()) {
+            p.drawImage(pix.rect(), QImage(p2));
+        }
+
+        if (!text.isEmpty()) {
+            QFont font = p.font();
+            font.setPixelSize(pix.height());
+            font.setBold(true);
+            p.setFont(font);
+            p.setPen(Utility::getAppQColor("lightText"));
+            p.drawText(pix.rect(), Qt::AlignCenter, text);
+        }
+
+        return QPixmap(pix);
+    };
+
+    auto updateIcon = [genPic](QToolButton *btn, QString pic, QString txt) {
+        QIcon mycon = QIcon(genPic(pic, "", txt));
+        mycon.addPixmap(genPic(Utility::getThemePath() + "icons/glow.png", pic, txt), QIcon::Normal, QIcon::On);
+        mycon.addPixmap(genPic("", pic, txt), QIcon::Normal, QIcon::Off);
+        btn->setIcon(mycon);
+    };
+
+    updateIcon(ui->experimentGraph1Button, "", "1");
+    updateIcon(ui->experimentGraph2Button, "", "2");
+    updateIcon(ui->experimentGraph3Button, "", "3");
+    updateIcon(ui->experimentGraph4Button, "", "4");
+    updateIcon(ui->experimentGraph5Button, "", "5");
+    updateIcon(ui->experimentGraph6Button, "", "6");
+    updateIcon(ui->experimentShowLineButton, theme + "icons/3ph_sine.png", "");
+    updateIcon(ui->experimentScatterButton, theme + "icons/Polyline-96.png", "");
+
+    ui->experimentClearDataButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
 
     mVesc = 0;
     mExperimentReplot = false;

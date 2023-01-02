@@ -61,9 +61,9 @@ void PageMotorInfo::reloadParams()
         ui->generalTab->clearParams();
         ui->qualityTab->clearParams();
 
-        ui->setupTab->addParamSubgroup(mVesc->mcConfig(), "Additional Info", "setup", mVesc);
-        ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "Additional Info", "general", mVesc);
-        ui->qualityTab->addParamSubgroup(mVesc->mcConfig(), "Additional Info", "quality", mVesc);
+        ui->setupTab->addParamSubgroup(mVesc->mcConfig(), "Additional Info", "setup");
+        ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "Additional Info", "general");
+        ui->qualityTab->addParamSubgroup(mVesc->mcConfig(), "Additional Info", "quality");
 
         ui->descriptionEdit->document()->setHtml(mVesc->mcConfig()->getParamQString("motor_description"));
         ui->qualityEdit->document()->setHtml(mVesc->mcConfig()->getParamQString("motor_quality_description"));

@@ -46,6 +46,10 @@
      <property name="text">
       <string/>
      </property>
+     <property name="icon">
+      <iconset resource="../res.qrc">
+       <normaloff>:/res/icons/Upload-96.png</normaloff>:/res/icons/Upload-96.png</iconset>
+     </property>
     </widget>
    </item>
    <item>
@@ -61,6 +65,10 @@
      </property>
      <property name="text">
       <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../res.qrc">
+       <normaloff>:/res/icons/Data Backup-96.png</normaloff>:/res/icons/Data Backup-96.png</iconset>
      </property>
     </widget>
    </item>
@@ -78,10 +86,16 @@
      <property name="text">
       <string/>
      </property>
+     <property name="icon">
+      <iconset resource="../res.qrc">
+       <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
+     </property>
     </widget>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -22,22 +22,16 @@
 #include "helpdialog.h"
 #include "utility.h"
 
-ParamEditString::ParamEditString(QWidget *parent, VescInterface *vesc) :
+ParamEditString::ParamEditString(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ParamEditString)
 {
     ui->setupUi(this);
 
     QString theme = Utility::getThemePath();
-    if (vesc) {
-        ui->helpButton->setIcon(vesc->getPixmap(theme + "icons/Help-96.png"));
-        ui->readButton->setIcon(vesc->getPixmap(theme + "icons/Upload-96.png"));
-        ui->readDefaultButton->setIcon(vesc->getPixmap(theme + "icons/Data Backup-96.png"));
-    } else {
-        ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-        ui->readButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
-        ui->readDefaultButton->setIcon(QPixmap(theme + "icons/Data Backup-96.png"));
-    }
+    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
+    ui->readButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
+    ui->readDefaultButton->setIcon(QPixmap(theme + "icons/Data Backup-96.png"));
 }
 
 ParamEditString::~ParamEditString()

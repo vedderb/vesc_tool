@@ -32,7 +32,7 @@ class ParamEditBool : public QWidget
     Q_OBJECT
 
 public:
-    explicit ParamEditBool(QWidget *parent = nullptr, VescInterface *vesc = nullptr);
+    explicit ParamEditBool(QWidget *parent = 0);
     ~ParamEditBool();
     void setConfig(ConfigParams *config);
     QString name() const;

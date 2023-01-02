@@ -34,7 +34,7 @@ class ParamEditInt : public QWidget
     Q_OBJECT
 
 public:
-    explicit ParamEditInt(QWidget *parent = nullptr, VescInterface *vesc = nullptr);
+    explicit ParamEditInt(QWidget *parent = 0);
     ~ParamEditInt();
 
     void setConfig(ConfigParams *config);

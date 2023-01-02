@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>146</width>
-    <height>27</height>
+    <width>86</width>
+    <height>26</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,6 +45,10 @@
        <property name="text">
         <string/>
        </property>
+       <property name="icon">
+        <iconset resource="../res.qrc">
+         <normaloff>:/res/icons/Upload-96.png</normaloff>:/res/icons/Upload-96.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
@@ -60,6 +64,10 @@
        </property>
        <property name="text">
         <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../res.qrc">
+         <normaloff>:/res/icons/Data Backup-96.png</normaloff>:/res/icons/Data Backup-96.png</iconset>
        </property>
       </widget>
      </item>
@@ -77,12 +85,18 @@
        <property name="text">
         <string/>
        </property>
+       <property name="icon">
+        <iconset resource="../res.qrc">
+         <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
+       </property>
       </widget>
      </item>
     </layout>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -39,10 +39,10 @@ ParamTable::ParamTable(QWidget *parent) : QTableWidget(parent)
     verticalHeader()->setVisible(false);
 }
 
-bool ParamTable::addParamRow(ConfigParams *params, QString paramName, VescInterface *vesc)
+bool ParamTable::addParamRow(ConfigParams *params, QString paramName)
 {
     bool res = false;
-    QWidget *editor = params->getEditor(paramName, nullptr, vesc);
+    QWidget *editor = params->getEditor(paramName);
     QString name = params->getLongName(paramName);
 
     if (editor) {
@@ -86,14 +86,14 @@ void ParamTable::addRowSeparator(QString text)
     resizeRowsToContents();
 }
 
-void ParamTable::addParamSubgroup(ConfigParams *params, QString groupName, QString subgroupName, VescInterface *vesc)
+void ParamTable::addParamSubgroup(ConfigParams *params, QString groupName, QString subgroupName)
 {
     setUpdatesEnabled(false);
     foreach (auto p, params->getParamsFromSubgroup(groupName, subgroupName)) {
         if (p.startsWith("::sep::")) {
             addRowSeparator(p.mid(7));
         } else {
-            addParamRow(params, p, vesc);
+            addParamRow(params, p);
         }
     }
     QTimer::singleShot(0, [this]() {

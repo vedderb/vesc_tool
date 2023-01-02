@@ -32,7 +32,7 @@ class ParamEditEnum : public QWidget
     Q_OBJECT
 
 public:
-    explicit ParamEditEnum(QWidget *parent = nullptr, VescInterface *vesc = nullptr);
+    explicit ParamEditEnum(QWidget *parent = 0);
     ~ParamEditEnum();
     void setConfig(ConfigParams *config);
     QString name() const;

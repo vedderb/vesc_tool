@@ -76,8 +76,8 @@ void PageAppNunchuk::reloadParams()
         ui->generalTab->clearParams();
         ui->throttleCurveTab->clearParams();
 
-        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "vesc remote", "general", mVesc);
-        ui->throttleCurveTab->addParamSubgroup(mVesc->appConfig(), "vesc remote", "throttle curve", mVesc);
+        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "vesc remote", "general");
+        ui->throttleCurveTab->addParamSubgroup(mVesc->appConfig(), "vesc remote", "throttle curve");
     }
 }
 

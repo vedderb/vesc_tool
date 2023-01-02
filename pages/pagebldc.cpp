@@ -57,9 +57,9 @@ void PageBldc::reloadParams()
         ui->sensorTab->clearParams();
         ui->advancedTab->clearParams();
 
-        ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "bldc", "general", mVesc);
-        ui->sensorlessTab->addParamSubgroup(mVesc->mcConfig(), "bldc", "sensorless", mVesc);
-        ui->sensorTab->addParamSubgroup(mVesc->mcConfig(), "bldc", "sensors", mVesc);
-        ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "bldc", "advanced", mVesc);
+        ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "bldc", "general");
+        ui->sensorlessTab->addParamSubgroup(mVesc->mcConfig(), "bldc", "sensorless");
+        ui->sensorTab->addParamSubgroup(mVesc->mcConfig(), "bldc", "sensors");
+        ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "bldc", "advanced");
     }
 }

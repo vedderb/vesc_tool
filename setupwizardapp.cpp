@@ -448,18 +448,18 @@ void AppNunchukPage::initializePage()
 {
     mParamTab->setRowCount(0);
 
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ctrl_type", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ramp_time_pos", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ramp_time_neg", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.stick_erpm_per_s_in_cc", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.hyst", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.use_smart_rev", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_max_duty", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_ramp_time", mVesc);
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ctrl_type");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ramp_time_pos");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.ramp_time_neg");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.stick_erpm_per_s_in_cc");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.hyst");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.use_smart_rev");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_max_duty");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.smart_rev_ramp_time");
 
     mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc_max_diff", mVesc);
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_chuk_conf.tc_max_diff");
     mVesc->appConfig()->updateParamBool("app_chuk_conf.multi_esc", true);
 
     if (field("Input").toInt() == SetupWizardApp::Input_Nunchuk) {
@@ -554,10 +554,10 @@ void AppPpmMapPage::initializePage()
 {
     mParamTab->setRowCount(0);
 
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_start", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_end", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_center", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.hyst", mVesc);
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_start");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_end");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pulse_center");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.hyst");
 
     mVesc->appConfig()->updateParamEnum("app_ppm_conf.ctrl_type", 0);
     mVesc->appConfig()->updateParamEnum("app_to_use", 4);
@@ -626,19 +626,19 @@ void AppPpmPage::initializePage()
     mParamTab->setRowCount(0);
 
     mParamTab->addRowSeparator(tr("General"));
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ctrl_type", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.median_filter", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.safe_start", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_pos", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_neg", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pid_max_erpm", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.max_erpm_for_dir", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_max_duty", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_ramp_time", mVesc);
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ctrl_type");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.median_filter");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.safe_start");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_pos");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.ramp_time_neg");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.pid_max_erpm");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.max_erpm_for_dir");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_max_duty");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.smart_rev_ramp_time");
 
     mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc_max_diff", mVesc);
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.tc_max_diff");
     mVesc->appConfig()->updateParamBool("app_ppm_conf.multi_esc", true);
 
     mVesc->appConfig()->updateParamEnum("app_ppm_conf.ctrl_type", 3);
@@ -686,14 +686,14 @@ void AppAdcMapPage::initializePage()
 {
     mParamTab->setRowCount(0);
 
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_start", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_end", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_center", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_inverted", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_start", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_end", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_inverted", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.hyst", mVesc);
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_start");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_end");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_center");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage_inverted");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_start");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_end");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.voltage2_inverted");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.hyst");
 
     mVesc->appConfig()->updateParamEnum("app_to_use", 5);
     mVesc->appConfig()->updateParamEnum("app_adc_conf.ctrl_type", 0);
@@ -775,17 +775,17 @@ void AppAdcPage::initializePage()
     mParamTab->setRowCount(0);
 
     mParamTab->addRowSeparator(tr("General"));
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ctrl_type", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.use_filter", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.safe_start", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.cc_button_inverted", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.rev_button_inverted", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_pos", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_neg", mVesc);
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ctrl_type");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.use_filter");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.safe_start");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.cc_button_inverted");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.rev_button_inverted");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_pos");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.ramp_time_neg");
 
     mParamTab->addRowSeparator(tr("Multiple VESCs over CAN-bus"));
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc", mVesc);
-    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc_max_diff", mVesc);
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc");
+    mParamTab->addParamRow(mVesc->appConfig(), "app_adc_conf.tc_max_diff");
     mVesc->appConfig()->updateParamBool("app_adc_conf.multi_esc", true);
 
     mVesc->appConfig()->updateParamEnum("app_adc_conf.ctrl_type", 1);

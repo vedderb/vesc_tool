@@ -52,6 +52,6 @@ void PageAppPas::reloadParams()
 {
     if (mVesc) {
         ui->generalTab->clearParams();
-        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "pas", "general", mVesc);
+        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "pas", "general");
     }
 }

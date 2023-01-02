@@ -62,8 +62,8 @@ void PageCanAnalyzer::reloadParams()
 {
     if (mVesc) {
         ui->paramTable->clearParams();
-        ui->paramTable->addParamRow(mVesc->appConfig(), "can_mode", mVesc);
-        ui->paramTable->addParamRow(mVesc->appConfig(), "can_baud_rate", mVesc);
+        ui->paramTable->addParamRow(mVesc->appConfig(), "can_mode");
+        ui->paramTable->addParamRow(mVesc->appConfig(), "can_baud_rate");
     }
 }
 

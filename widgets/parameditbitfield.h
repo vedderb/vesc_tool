@@ -22,7 +22,6 @@
 
 #include <QWidget>
 #include "configparams.h"
-#include "vescinterface.h"
 
 namespace Ui {
 class ParamEditBitfield;
@@ -33,7 +32,7 @@ class ParamEditBitfield : public QWidget
     Q_OBJECT
 
 public:
-    explicit ParamEditBitfield(QWidget *parent = nullptr, VescInterface *vesc = nullptr);
+    explicit ParamEditBitfield(QWidget *parent = nullptr);
     ~ParamEditBitfield();
 
     void setConfig(ConfigParams *config);

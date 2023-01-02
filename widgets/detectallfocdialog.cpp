@@ -116,21 +116,21 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
     ui->motorList->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->motorList->setCurrentRow(0);
 
-    ui->simpleBatteryTab->addParamRow(mVesc->mcConfig(), "si_battery_type", mVesc);
-    ui->simpleBatteryTab->addParamRow(mVesc->mcConfig(), "si_battery_cells", mVesc);
-    ui->simpleBatteryTab->addParamRow(mVesc->mcConfig(), "si_battery_ah", mVesc);
+    ui->simpleBatteryTab->addParamRow(mVesc->mcConfig(), "si_battery_type");
+    ui->simpleBatteryTab->addParamRow(mVesc->mcConfig(), "si_battery_cells");
+    ui->simpleBatteryTab->addParamRow(mVesc->mcConfig(), "si_battery_ah");
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mVesc->mcConfig()->getEditor("si_wheel_diameter"));
     ui->wheelDiameterBox->setLayout(layout);
 
     // Advanced tab
-    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_motor_poles", mVesc);
-    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_gear_ratio", mVesc);
-    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_wheel_diameter", mVesc);
-    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_battery_type", mVesc);
-    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_battery_cells", mVesc);
-    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_battery_ah", mVesc);
+    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_motor_poles");
+    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_gear_ratio");
+    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_wheel_diameter");
+    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_battery_type");
+    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_battery_cells");
+    ui->paramTab->addParamRow(mVesc->mcConfig(), "si_battery_ah");
 
     connect(ui->pulleyMotorBox, SIGNAL(valueChanged(int)),
             this, SLOT(updateGearRatio()));

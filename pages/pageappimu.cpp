@@ -154,7 +154,7 @@ void PageAppImu::reloadParams()
 {
     if (mVesc) {
         ui->tableWidget->clearParams();
-        ui->tableWidget->addParamSubgroup(mVesc->appConfig(), "imu", "general", mVesc);
+        ui->tableWidget->addParamSubgroup(mVesc->appConfig(), "imu", "general");
     }
 }
 

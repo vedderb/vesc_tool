@@ -20,6 +20,7 @@
 #ifndef VESCINTERFACE_H
 #define VESCINTERFACE_H
 
+#include "qpixmap.h"
 #include <QObject>
 #include <QDateTime>
 #include <QTimer>
@@ -260,6 +261,16 @@ public:
         updateFwRx(false);
     }
 
+    QPixmap getPixmap(QString path) {
+        if (mPixmapCache.contains(path)) {
+            return mPixmapCache[path];
+        } else {
+            QPixmap p(path);
+            mPixmapCache.insert(path, p);
+            return p;
+        }
+    }
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -459,6 +470,8 @@ private:
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);
+
+    QMap<QString, QPixmap> mPixmapCache;
 
 };
 

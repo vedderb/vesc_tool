@@ -81,7 +81,7 @@ void PageCustomConfig::customConfigLoadDone()
             ui->tabWidget->setTabText(i, tabNames.at(i));
             ParamTable *t = dynamic_cast<ParamTable*>(ui->tabWidget->widget(i));
             t->clearParams();
-            t->addParamSubgroup(p, "General", tabNames.at(i));
+            t->addParamSubgroup(p, "General", tabNames.at(i), mVesc);
         }
     }
 }

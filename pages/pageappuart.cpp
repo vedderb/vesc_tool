@@ -52,6 +52,6 @@ void PageAppUart::reloadParams()
 {
     if (mVesc) {
         ui->generalTab->clearParams();
-        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "uart", "general");
+        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "uart", "general", mVesc);
     }
 }

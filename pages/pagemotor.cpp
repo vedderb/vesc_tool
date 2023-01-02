@@ -63,13 +63,13 @@ void PageMotor::reloadParams()
     ui->bmsTab->clearParams();
     ui->advancedTab->clearParams();
 
-    ui->motorTab->addParamSubgroup(mVesc->mcConfig(), "general", "general");
-    ui->sensorsTab->addParamSubgroup(mVesc->mcConfig(), "general", "sensors");
-    ui->currentTab->addParamSubgroup(mVesc->mcConfig(), "general", "current");
-    ui->voltageTab->addParamSubgroup(mVesc->mcConfig(), "general", "voltage");
-    ui->rpmTab->addParamSubgroup(mVesc->mcConfig(), "general", "rpm");
-    ui->wattageTab->addParamSubgroup(mVesc->mcConfig(), "general", "wattage");
-    ui->tempTab->addParamSubgroup(mVesc->mcConfig(), "general", "temperature");
-    ui->bmsTab->addParamSubgroup(mVesc->mcConfig(), "general", "bms");
-    ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "general", "advanced");
+    ui->motorTab->addParamSubgroup(mVesc->mcConfig(), "general", "general", mVesc);
+    ui->sensorsTab->addParamSubgroup(mVesc->mcConfig(), "general", "sensors", mVesc);
+    ui->currentTab->addParamSubgroup(mVesc->mcConfig(), "general", "current", mVesc);
+    ui->voltageTab->addParamSubgroup(mVesc->mcConfig(), "general", "voltage", mVesc);
+    ui->rpmTab->addParamSubgroup(mVesc->mcConfig(), "general", "rpm", mVesc);
+    ui->wattageTab->addParamSubgroup(mVesc->mcConfig(), "general", "wattage", mVesc);
+    ui->tempTab->addParamSubgroup(mVesc->mcConfig(), "general", "temperature", mVesc);
+    ui->bmsTab->addParamSubgroup(mVesc->mcConfig(), "general", "bms", mVesc);
+    ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "general", "advanced", mVesc);
 }

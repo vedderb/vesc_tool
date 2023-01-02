@@ -74,9 +74,9 @@ void PageAppPpm::reloadParams()
         ui->mappingTab->clearParams();
         ui->throttleCurveTab->clearParams();
 
-        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "ppm", "general");
-        ui->mappingTab->addParamSubgroup(mVesc->appConfig(), "ppm", "mapping");
-        ui->throttleCurveTab->addParamSubgroup(mVesc->appConfig(), "ppm", "throttle curve");
+        ui->generalTab->addParamSubgroup(mVesc->appConfig(), "ppm", "general", mVesc);
+        ui->mappingTab->addParamSubgroup(mVesc->appConfig(), "ppm", "mapping", mVesc);
+        ui->throttleCurveTab->addParamSubgroup(mVesc->appConfig(), "ppm", "throttle curve", mVesc);
     }
 }
 

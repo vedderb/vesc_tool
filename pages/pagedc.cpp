@@ -52,6 +52,6 @@ void PageDc::reloadParams()
 {
     if (mVesc) {
         ui->paramTab->clearParams();
-        ui->paramTab->addParamSubgroup(mVesc->mcConfig(), "dc", "general");
+        ui->paramTab->addParamSubgroup(mVesc->mcConfig(), "dc", "general", mVesc);
     }
 }

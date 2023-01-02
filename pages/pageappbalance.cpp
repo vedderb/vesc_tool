@@ -121,12 +121,12 @@ void PageAppBalance::reloadParams()
         ui->faultPane->clearParams();
         ui->multiescPane->clearParams();
 
-        ui->tunePane->addParamSubgroup(mVesc->appConfig(), "balance", "tune");
-        ui->modifiersPane->addParamSubgroup(mVesc->appConfig(), "balance", "tune modifiers");
-        ui->startupPane->addParamSubgroup(mVesc->appConfig(), "balance", "startup");
-        ui->tiltbackPane->addParamSubgroup(mVesc->appConfig(), "balance", "tiltback");
-        ui->faultPane->addParamSubgroup(mVesc->appConfig(), "balance", "fault");
-        ui->multiescPane->addParamSubgroup(mVesc->appConfig(), "balance", "multi esc");
+        ui->tunePane->addParamSubgroup(mVesc->appConfig(), "balance", "tune", mVesc);
+        ui->modifiersPane->addParamSubgroup(mVesc->appConfig(), "balance", "tune modifiers", mVesc);
+        ui->startupPane->addParamSubgroup(mVesc->appConfig(), "balance", "startup", mVesc);
+        ui->tiltbackPane->addParamSubgroup(mVesc->appConfig(), "balance", "tiltback", mVesc);
+        ui->faultPane->addParamSubgroup(mVesc->appConfig(), "balance", "fault", mVesc);
+        ui->multiescPane->addParamSubgroup(mVesc->appConfig(), "balance", "multi esc", mVesc);
     }
 }
 

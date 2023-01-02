@@ -1056,39 +1056,39 @@ void BoardSetupWindow::loadAppConfXML(QString path){
 
         switch(mAppConfig_Target->getParamEnum("app_to_use")){
         case 4: //ppm and uart
-            ui->appTab->addParamRow(mAppConfig_Target, "app_uart_baudrate");
+            ui->appTab->addParamRow(mAppConfig_Target, "app_uart_baudrate", mVesc);
             [[clang::fallthrough]];
         case 1: //ppm
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ctrl_type");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.pulse_start");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.pulse_center");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.hyst");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ramp_time_pos");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ramp_time_neg");
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ctrl_type", mVesc);
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.pulse_start", mVesc);
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.pulse_center", mVesc);
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.hyst", mVesc);
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ramp_time_pos", mVesc);
+            ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ramp_time_neg", mVesc);
             if(mAppConfig_Target->getParamBool("app_ppm_conf.tc")){
-                ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.tc");
-                ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.tc_max_diff");
+                ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.tc", mVesc);
+                ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.tc_max_diff", mVesc);
             }
             if(mAppConfig_Target->getParamEnum("app_ppm_conf.ctrl_type") == 9){
-                ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.smart_rev_max_duty");
-                ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.smart_rev_ramp_time");
+                ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.smart_rev_max_duty", mVesc);
+                ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.smart_rev_ramp_time", mVesc);
             }
             break;
         case 2: //adc
             break;
         case 3: //uart
-            ui->appTab->addParamRow(mAppConfig_Target, "app_uart_baudrate");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ctrl_type");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.hyst");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ramp_time_pos");
-            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ramp_time_neg");
+            ui->appTab->addParamRow(mAppConfig_Target, "app_uart_baudrate", mVesc);
+            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ctrl_type", mVesc);
+            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.hyst", mVesc);
+            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ramp_time_pos", mVesc);
+            ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.ramp_time_neg", mVesc);
             if(mAppConfig_Target->getParamBool("app_chuk_conf.tc")){
-                ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.tc");
-                ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.tc_max_diff");
+                ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.tc", mVesc);
+                ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.tc_max_diff", mVesc);
             }
             if(mAppConfig_Target->getParamBool("app_chuk_conf.use_smart_rev")){
-                ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.smart_rev_max_duty");
-                ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.smart_rev_ramp_time");
+                ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.smart_rev_max_duty", mVesc);
+                ui->appTab->addParamRow(mAppConfig_Target, "app_chuk_conf.smart_rev_ramp_time", mVesc);
             }
             break;
         default:
@@ -1108,7 +1108,7 @@ void BoardSetupWindow::loadAppConfXML(QString path){
         showStatusInfo("Loaded app configuration", true);
         QString str;
 
-        ui->appTab->addParamRow(mAppConfig_Target, "app_to_use");
+        ui->appTab->addParamRow(mAppConfig_Target, "app_to_use", mVesc);
         foreach(QObject *p, ui->appTab->children().at(0)->children()){
             p->setProperty("enabled",false);
         }
@@ -1149,16 +1149,16 @@ void BoardSetupWindow::loadMotorConfXML(QString path){
         mcXmlPath = path;
         showStatusInfo("Loaded motor configuration", true);
         QString str;
-        ui->motorTab->addParamRow(mMcConfig_Target, "foc_motor_r");
-        ui->motorTab->addParamRow(mMcConfig_Target, "foc_motor_l");
-        ui->motorTab->addParamRow(mMcConfig_Target, "foc_motor_flux_linkage");
-        ui->motorTab->addParamRow(mMcConfig_Target, "foc_sensor_mode");
-        ui->motorTab->addParamRow(mMcConfig_Target, "l_current_max");
-        ui->motorTab->addParamRow(mMcConfig_Target, "l_current_min");
-        ui->motorTab->addParamRow(mMcConfig_Target, "l_in_current_max");
-        ui->motorTab->addParamRow(mMcConfig_Target, "l_in_current_min");
-        ui->motorTab->addParamRow(mMcConfig_Target, "l_battery_cut_start");
-        ui->motorTab->addParamRow(mMcConfig_Target, "l_battery_cut_end");
+        ui->motorTab->addParamRow(mMcConfig_Target, "foc_motor_r", mVesc);
+        ui->motorTab->addParamRow(mMcConfig_Target, "foc_motor_l", mVesc);
+        ui->motorTab->addParamRow(mMcConfig_Target, "foc_motor_flux_linkage", mVesc);
+        ui->motorTab->addParamRow(mMcConfig_Target, "foc_sensor_mode", mVesc);
+        ui->motorTab->addParamRow(mMcConfig_Target, "l_current_max", mVesc);
+        ui->motorTab->addParamRow(mMcConfig_Target, "l_current_min", mVesc);
+        ui->motorTab->addParamRow(mMcConfig_Target, "l_in_current_max", mVesc);
+        ui->motorTab->addParamRow(mMcConfig_Target, "l_in_current_min", mVesc);
+        ui->motorTab->addParamRow(mMcConfig_Target, "l_battery_cut_start", mVesc);
+        ui->motorTab->addParamRow(mMcConfig_Target, "l_battery_cut_end", mVesc);
         ui->motorConfigEdit->setText(path);
 
         foreach(QObject *p, ui->motorTab->children().at(0)->children()){

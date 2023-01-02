@@ -216,7 +216,7 @@ MotorTypePage::MotorTypePage(VescInterface *vesc, QWidget *parent)
                    "configuration pages."));
 
     mParamTab = new ParamTable;
-    mParamTab->addParamRow(mVesc->mcConfig(), "motor_type");
+    mParamTab->addParamRow(mVesc->mcConfig(), "motor_type", mVesc);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mParamTab);
@@ -266,11 +266,11 @@ CurrentsPage::CurrentsPage(VescInterface *vesc, QWidget *parent)
 
     mParamTab = new ParamTable;
     mParamTab->addRowSeparator(tr("Motor"));
-    mParamTab->addParamRow(mVesc->mcConfig(), "l_current_max");
-    mParamTab->addParamRow(mVesc->mcConfig(), "l_current_min");
+    mParamTab->addParamRow(mVesc->mcConfig(), "l_current_max", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "l_current_min", mVesc);
     mParamTab->addRowSeparator(tr("Battery"));
-    mParamTab->addParamRow(mVesc->mcConfig(), "l_in_current_max");
-    mParamTab->addParamRow(mVesc->mcConfig(), "l_in_current_min");
+    mParamTab->addParamRow(mVesc->mcConfig(), "l_in_current_max", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "l_in_current_min", mVesc);
     mConfigureBatteryCutoff = true;
 
     mLabel = new QLabel(tr("<font color=\"red\">WARNING: </font>"
@@ -337,8 +337,8 @@ VoltagesPage::VoltagesPage(VescInterface *vesc, QWidget *parent)
     setSubTitle(tr("Set soft voltage limits to prevent overdischarging your battery."));
 
     mParamTab = new ParamTable;
-    mParamTab->addParamRow(mVesc->mcConfig(), "l_battery_cut_start");
-    mParamTab->addParamRow(mVesc->mcConfig(), "l_battery_cut_end");
+    mParamTab->addParamRow(mVesc->mcConfig(), "l_battery_cut_start", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "l_battery_cut_end", mVesc);
 
     mCalc = new BatteryCalculator(this);
     mCalc->setVesc(vesc);
@@ -373,7 +373,7 @@ SensorsPage::SensorsPage(VescInterface *vesc, QWidget *parent)
     mParamTab = new ParamTable;
     mTypeBefore = -1;
 
-    mParamTab->addParamRow(mVesc->mcConfig(), "m_encoder_counts");
+    mParamTab->addParamRow(mVesc->mcConfig(), "m_encoder_counts", mVesc);
     registerField("SensorMode", mSensorMode, "currentData");
 
     QVBoxLayout *layout = new QVBoxLayout;
@@ -550,14 +550,14 @@ bool BldcPage::validatePage()
 void BldcPage::initializePage()
 {
     mParamTab->setRowCount(0);
-    mParamTab->addParamRow(mVesc->mcConfig(), "sl_cycle_int_limit");
-    mParamTab->addParamRow(mVesc->mcConfig(), "sl_bemf_coupling_k");
+    mParamTab->addParamRow(mVesc->mcConfig(), "sl_cycle_int_limit", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "sl_bemf_coupling_k", mVesc);
     mParamTab->addRowSeparator(tr("Hall Sensor Settings"));
 
     if (field("SensorMode").toInt() == SetupWizardMotor::Sensor_Hall) {
-        mParamTab->addParamRow(mVesc->mcConfig(), "hall_sl_erpm");
+        mParamTab->addParamRow(mVesc->mcConfig(), "hall_sl_erpm", mVesc);
         for (int i = 0;i < 8;i++) {
-            mParamTab->addParamRow(mVesc->mcConfig(), QString("hall_table_%1").arg(i));
+            mParamTab->addParamRow(mVesc->mcConfig(), QString("hall_table_%1").arg(i), mVesc);
         }
     }
 }
@@ -574,12 +574,12 @@ FocPage::FocPage(VescInterface *vesc, QWidget *parent)
     mDetect = new DetectFoc(this);
     mDetect->setVesc(vesc);
 
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_motor_r");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_motor_l");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_motor_flux_linkage");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_current_kp");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_current_ki");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_observer_gain");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_motor_r", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_motor_l", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_motor_flux_linkage", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_current_kp", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_current_ki", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_observer_gain", mVesc);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mParamTab);
@@ -705,15 +705,15 @@ FocHallPage::FocHallPage(VescInterface *vesc, QWidget *parent)
     mDetect = new DetectFocHall(this);
     mDetect->setVesc(vesc);
 
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_sl_erpm");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__0");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__1");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__2");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__3");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__4");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__5");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__6");
-    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__7");
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_sl_erpm", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__0", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__1", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__2", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__3", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__4", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__5", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__6", mVesc);
+    mParamTab->addParamRow(mVesc->mcConfig(), "foc_hall_table__7", mVesc);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mParamTab);

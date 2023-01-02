@@ -32,7 +32,7 @@ class ParamEditString : public QWidget
     Q_OBJECT
 
 public:
-    explicit ParamEditString(QWidget *parent = 0);
+    explicit ParamEditString(QWidget *parent = nullptr, VescInterface *vesc = nullptr);
     ~ParamEditString();
     void setConfig(ConfigParams *config);
     QString name() const;

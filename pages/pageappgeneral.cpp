@@ -52,7 +52,7 @@ void PageAppGeneral::reloadParams()
 {
     if (mVesc) {
         ui->appTab->clearParams();
-        ui->appTab->addParamSubgroup(mVesc->appConfig(), "general", "general");
+        ui->appTab->addParamSubgroup(mVesc->appConfig(), "general", "general", mVesc);
     }
 }
 

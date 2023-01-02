@@ -36,7 +36,7 @@ class ParamEditDouble : public QWidget
     Q_OBJECT
 
 public:
-    explicit ParamEditDouble(QWidget *parent = 0);
+    explicit ParamEditDouble(QWidget *parent = nullptr, VescInterface *vesc = nullptr);
     ~ParamEditDouble();
     void setConfig(ConfigParams *config);
     QString name() const;

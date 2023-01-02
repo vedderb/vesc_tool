@@ -554,7 +554,7 @@ void ConfigParams::setParamOrder(const QStringList &order)
     mParamList = order;
 }
 
-QWidget *ConfigParams::getEditor(const QString &name, QWidget *parent)
+QWidget *ConfigParams::getEditor(const QString &name, QWidget *parent, VescInterface *vesc)
 {
     QWidget *retVal = 0;
 
@@ -605,7 +605,7 @@ QWidget *ConfigParams::getEditor(const QString &name, QWidget *parent)
         } break;
 
         case CFG_T_BITFIELD: {
-            ParamEditBitfield *edit = new ParamEditBitfield(parent);
+            ParamEditBitfield *edit = new ParamEditBitfield(parent, vesc);
             edit->setName(name);
             edit->setConfig(this);
             retVal = edit;

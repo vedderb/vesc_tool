@@ -67,16 +67,16 @@ void PageFoc::reloadParams()
         ui->fwTab->clearParams();
         ui->advancedTab->clearParams();
 
-        ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "foc", "general");
-        ui->sensorlessTab->addParamSubgroup(mVesc->mcConfig(), "foc", "sensorless");
-        ui->hallTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hall sensors");
-        ui->encoderTab->addParamSubgroup(mVesc->mcConfig(), "foc", "encoder");
-        ui->hfiTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hfi");
-        ui->vssTab->addParamSubgroup(mVesc->mcConfig(), "foc", "vss");
-        ui->filterTab->addParamSubgroup(mVesc->mcConfig(), "foc", "filters");
-        ui->offsetTab->addParamSubgroup(mVesc->mcConfig(), "foc", "offsets");
-        ui->fwTab->addParamSubgroup(mVesc->mcConfig(), "foc", "field weakening");
-        ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "foc", "advanced");
+        ui->generalTab->addParamSubgroup(mVesc->mcConfig(), "foc", "general", mVesc);
+        ui->sensorlessTab->addParamSubgroup(mVesc->mcConfig(), "foc", "sensorless", mVesc);
+        ui->hallTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hall sensors", mVesc);
+        ui->encoderTab->addParamSubgroup(mVesc->mcConfig(), "foc", "encoder", mVesc);
+        ui->hfiTab->addParamSubgroup(mVesc->mcConfig(), "foc", "hfi", mVesc);
+        ui->vssTab->addParamSubgroup(mVesc->mcConfig(), "foc", "vss", mVesc);
+        ui->filterTab->addParamSubgroup(mVesc->mcConfig(), "foc", "filters", mVesc);
+        ui->offsetTab->addParamSubgroup(mVesc->mcConfig(), "foc", "offsets", mVesc);
+        ui->fwTab->addParamSubgroup(mVesc->mcConfig(), "foc", "field weakening", mVesc);
+        ui->advancedTab->addParamSubgroup(mVesc->mcConfig(), "foc", "advanced", mVesc);
     }
 }
 

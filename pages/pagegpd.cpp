@@ -49,5 +49,5 @@ void PageGPD::setVesc(VescInterface *vesc)
 void PageGPD::reloadParams()
 {
     ui->paramTab->clearParams();
-    ui->paramTab->addParamSubgroup(mVesc->mcConfig(), "gpd", "general");
+    ui->paramTab->addParamSubgroup(mVesc->mcConfig(), "gpd", "general", mVesc);
 }

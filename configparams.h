@@ -27,6 +27,9 @@
 #include "configparam.h"
 #include "vbytearray.h"
 
+// Forward declaration to avoid recursive inclusion
+class VescInterface;
+
 class ConfigParams : public QObject
 {
     Q_OBJECT
@@ -78,7 +81,7 @@ public:
     Q_INVOKABLE QStringList getParamOrder() const;
     void setParamOrder(const QStringList &order);
 
-    QWidget *getEditor(const QString &name, QWidget *parent = nullptr);
+    QWidget *getEditor(const QString &name, QWidget *parent = nullptr, VescInterface *vesc = nullptr);
 
     void getParamSerial(VByteArray &vb, const QString &name);
     void setParamSerial(VByteArray &vb, const QString &name, QObject *src = nullptr);

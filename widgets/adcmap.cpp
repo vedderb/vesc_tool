@@ -29,10 +29,9 @@ AdcMap::AdcMap(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->resetButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
-    ui->applyButton->setIcon(QPixmap(theme + "icons/Ok-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->resetButton->setIcon(Utility::getIcon("icons/Restart-96.png"));
+    ui->applyButton->setIcon(Utility::getIcon("icons/Ok-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;

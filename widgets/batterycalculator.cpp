@@ -28,10 +28,8 @@ BatteryCalculator::BatteryCalculator(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->batteryCalcButton->setIcon(QPixmap(theme + "icons/apply.png"));
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-
+    ui->batteryCalcButton->setIcon(Utility::getIcon("icons/apply.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;

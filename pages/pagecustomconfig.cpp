@@ -31,12 +31,11 @@ PageCustomConfig::PageCustomConfig(QWidget *parent) :
     mVesc = nullptr;
     mConfNum = 0;
 
-    QString theme = Utility::getThemePath();
-    ui->readButton->setIcon(QPixmap(theme + "/icons/Upload-96.png"));
-    ui->readDefaultButton->setIcon(QPixmap(theme + "/icons/Upload-96.png"));
-    ui->writeButton->setIcon(QPixmap(theme + "/icons/Download-96.png"));
-    ui->saveXmlButton->setIcon(QPixmap(theme + "/icons/Save as-96.png"));
-    ui->loadXmlButton->setIcon(QPixmap(theme + "/icons/Open Folder-96.png"));
+    ui->readButton->setIcon(Utility::getIcon("/icons/Upload-96.png"));
+    ui->readDefaultButton->setIcon(Utility::getIcon("/icons/Upload-96.png"));
+    ui->writeButton->setIcon(Utility::getIcon("/icons/Download-96.png"));
+    ui->saveXmlButton->setIcon(Utility::getIcon("/icons/Save as-96.png"));
+    ui->loadXmlButton->setIcon(Utility::getIcon("/icons/Open Folder-96.png"));
 }
 
 PageCustomConfig::~PageCustomConfig()

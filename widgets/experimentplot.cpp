@@ -29,20 +29,19 @@ ExperimentPlot::ExperimentPlot(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
 
-    QString theme = Utility::getThemePath();
-    QIcon mycon = QIcon(theme + "icons/expand_on.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    QIcon mycon = QIcon(Utility::getIcon("icons/expand_on.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_off.png"), QIcon::Normal, QIcon::Off);
     ui->experimentHZoomButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/expand_v_on.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/expand_v_on.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
     ui->experimentVZoomButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/size_on.png");
-    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/size_on.png"));
+    mycon.addPixmap(Utility::getIcon("icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/size_off.png"), QIcon::Normal, QIcon::Off);
     ui->experimentAutoScaleButton->setIcon(mycon);
 
     auto genPic = [](QString p1, QString p2, QString text) {
@@ -55,11 +54,11 @@ ExperimentPlot::ExperimentPlot(QWidget *parent) :
         p.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
         if (!p1.isEmpty()) {
-            p.drawImage(pix.rect(), QImage(p1));
+            p.drawImage(pix.rect(), Utility::getIcon(p1).toImage());
         }
 
         if (!p2.isEmpty()) {
-            p.drawImage(pix.rect(), QImage(p2));
+            p.drawImage(pix.rect(), Utility::getIcon(p2).toImage());
         }
 
         if (!text.isEmpty()) {
@@ -76,7 +75,7 @@ ExperimentPlot::ExperimentPlot(QWidget *parent) :
 
     auto updateIcon = [genPic](QToolButton *btn, QString pic, QString txt) {
         QIcon mycon = QIcon(genPic(pic, "", txt));
-        mycon.addPixmap(genPic(Utility::getThemePath() + "icons/glow.png", pic, txt), QIcon::Normal, QIcon::On);
+        mycon.addPixmap(genPic("icons/glow.png", pic, txt), QIcon::Normal, QIcon::On);
         mycon.addPixmap(genPic("", pic, txt), QIcon::Normal, QIcon::Off);
         btn->setIcon(mycon);
     };
@@ -87,10 +86,10 @@ ExperimentPlot::ExperimentPlot(QWidget *parent) :
     updateIcon(ui->experimentGraph4Button, "", "4");
     updateIcon(ui->experimentGraph5Button, "", "5");
     updateIcon(ui->experimentGraph6Button, "", "6");
-    updateIcon(ui->experimentShowLineButton, theme + "icons/3ph_sine.png", "");
-    updateIcon(ui->experimentScatterButton, theme + "icons/Polyline-96.png", "");
+    updateIcon(ui->experimentShowLineButton, "icons/3ph_sine.png", "");
+    updateIcon(ui->experimentScatterButton, "icons/Polyline-96.png", "");
 
-    ui->experimentClearDataButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->experimentClearDataButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
 
     mVesc = 0;
     mExperimentReplot = false;

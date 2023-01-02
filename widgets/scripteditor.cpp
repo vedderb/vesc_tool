@@ -35,11 +35,10 @@ ScriptEditor::ScriptEditor(QWidget *parent) :
     ui->setupUi(this);
     mIsModeLisp = false;
 
-    QString theme = Utility::getThemePath();
-    ui->searchHideButton->setIcon(QPixmap(theme + "icons/Cancel-96.png"));
-    ui->openFileButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->saveButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
-    ui->saveAsButton->setIcon(QPixmap(theme + "icons/Save as-96.png"));
+    ui->searchHideButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
+    ui->openFileButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->saveButton->setIcon(Utility::getIcon("icons/Save-96.png"));
+    ui->saveAsButton->setIcon(Utility::getIcon("icons/Save as-96.png"));
     ui->searchWidget->setVisible(false);
     ui->codeEdit->setTabReplaceSize(4);
 

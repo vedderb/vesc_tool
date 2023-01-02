@@ -40,17 +40,16 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->cancelButton->setEnabled(false);
     mVesc = nullptr;
 
-    QString theme = Utility::getThemePath();
-    ui->changelogButton->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->chooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->choose2Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->choose3Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->choose4Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->cancelButton->setIcon(QPixmap(theme + "icons/Cancel-96.png"));
-    ui->uploadButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
-    ui->uploadAllButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
-    ui->readVersionButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
-    ui->dlArchiveButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
+    ui->changelogButton->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->chooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->choose2Button->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->choose3Button->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->choose4Button->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->cancelButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
+    ui->uploadButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->uploadAllButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->readVersionButton->setIcon(Utility::getIcon("icons/Upload-96.png"));
+    ui->dlArchiveButton->setIcon(Utility::getIcon("icons/Download-96.png"));
 
     updateHwList(FW_RX_PARAMS());
     updateBlList(FW_RX_PARAMS());

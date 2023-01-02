@@ -36,35 +36,34 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
     ui->qmlWidget->setClearColor(Utility::getAppQColor("normalBackground"));
 
-    QString theme = Utility::getThemePath();
-    ui->testRunButton->setIcon(QPixmap(theme + "icons/Process-96.png"));
-    ui->rescaleButton->setIcon(QPixmap(theme + "icons/expand_off.png"));
-    ui->qmlChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->qmlRunButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
-    ui->savePlotPdfButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
-    ui->savePlotPngButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
+    ui->testRunButton->setIcon(Utility::getIcon("icons/Process-96.png"));
+    ui->rescaleButton->setIcon(Utility::getIcon("icons/expand_off.png"));
+    ui->qmlChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->qmlRunButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->savePlotPdfButton->setIcon(Utility::getIcon("icons/Line Chart-96.png"));
+    ui->savePlotPngButton->setIcon(Utility::getIcon("icons/Line Chart-96.png"));
 
-    ui->m1SetupGearingButton->setIcon(QPixmap(theme + "icons/motor_up.png"));
-    ui->m1LoadConfButton->setIcon(QPixmap(theme + "icons/motor_up.png"));
-    ui->m1ConfChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->m1SetupGearingButton->setIcon(Utility::getIcon("icons/motor_up.png"));
+    ui->m1LoadConfButton->setIcon(Utility::getIcon("icons/motor_up.png"));
+    ui->m1ConfChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
 
-    ui->m2SetupGearingButton->setIcon(QPixmap(theme + "icons/motor_up.png"));
-    ui->m2LoadConfButton->setIcon(QPixmap(theme + "icons/motor_up.png"));
-    ui->m2ConfChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
+    ui->m2SetupGearingButton->setIcon(Utility::getIcon("icons/motor_up.png"));
+    ui->m2LoadConfButton->setIcon(Utility::getIcon("icons/motor_up.png"));
+    ui->m2ConfChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
 
-    QIcon mycon = QIcon(theme + "icons/expand_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    QIcon mycon = QIcon(Utility::getIcon("icons/expand_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomHButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/expand_v_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/expand_v_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomVButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/size_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/size_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/size_off.png"), QIcon::Normal, QIcon::Off);
     ui->autoscaleButton->setIcon(mycon);
 
 

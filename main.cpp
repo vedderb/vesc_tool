@@ -34,6 +34,7 @@
 #include <QSettings>
 #include <QDesktopWidget>
 #include <QFontDatabase>
+#include <QPixmapCache>
 
 #include "tcphub.h"
 
@@ -126,6 +127,7 @@ int main(int argc, char *argv[])
     QSettings set;
     bool isDark = set.value("darkMode", true).toBool();
     Utility::setDarkMode(isDark);
+    QPixmapCache::setCacheLimit(256000);
 
     if (isDark) {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2_dark.conf");

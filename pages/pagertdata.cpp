@@ -34,27 +34,26 @@ PageRtData::PageRtData(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 
-    QString theme = Utility::getThemePath();
-    ui->rescaleButton->setIcon(QPixmap(theme + "icons/expand_off.png"));
+    ui->rescaleButton->setIcon(Utility::getIcon("icons/expand_off.png"));
 
-    QIcon mycon = QIcon(theme + "icons/expand_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    QIcon mycon = QIcon(Utility::getIcon("icons/expand_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomHButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/expand_v_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/expand_v_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomVButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/size_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/size_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/size_off.png"), QIcon::Normal, QIcon::Off);
     ui->autoscaleButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/rt_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/rt_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/rt_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/rt_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/rt_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/rt_off.png"), QIcon::Normal, QIcon::Off);
     ui->logRtButton->setIcon(mycon);
 
     mTimer = new QTimer(this);

@@ -29,9 +29,8 @@ NrfPair::NrfPair(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->startButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->startButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;

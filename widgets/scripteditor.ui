@@ -106,10 +106,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../res.qrc">
-          <normaloff>:/res/icons/Cancel-96.png</normaloff>:/res/icons/Cancel-96.png</iconset>
-        </property>
         <property name="flat">
          <bool>true</bool>
         </property>
@@ -141,10 +137,6 @@
        <property name="text">
         <string>Open</string>
        </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-       </property>
        <property name="flat">
         <bool>false</bool>
        </property>
@@ -155,10 +147,6 @@
        <property name="text">
         <string>Save</string>
        </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
-       </property>
        <property name="flat">
         <bool>false</bool>
        </property>
@@ -168,10 +156,6 @@
       <widget class="QPushButton" name="saveAsButton">
        <property name="text">
         <string>Save As</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
        </property>
        <property name="flat">
         <bool>false</bool>
@@ -189,8 +173,6 @@
    <header>QCodeEditor</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

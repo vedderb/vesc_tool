@@ -38,35 +38,34 @@ PageLisp::PageLisp(QWidget *parent) :
     makeEditorConnections(ui->mainEdit);
 
     QPushButton *plusButton = new QPushButton();
-    QString theme = Utility::getThemePath();
-    plusButton->setIcon(QIcon(theme +"icons/Plus Math-96.png"));
-    ui->runButton->setIcon(QIcon(theme +"icons/Circled Play-96.png"));
-    ui->stopButton->setIcon(QIcon(theme +"icons/Shutdown-96.png"));
-    ui->helpButton->setIcon(QIcon(theme +"icons/Help-96.png"));
-    ui->clearConsoleButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
-    ui->openRecentButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->removeSelectedButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
-    ui->clearRecentButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
-    ui->openExampleButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->uploadButton->setIcon(QIcon(theme +"icons/Download-96.png"));
-    ui->readExistingButton->setIcon(QIcon(theme +"icons/Upload-96.png"));
-    ui->eraseButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
-    ui->replHelpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->streamButton->setIcon(QIcon(theme +"icons/Download-96.png"));
+    plusButton->setIcon(Utility::getIcon("icons/Plus Math-96.png"));
+    ui->runButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->stopButton->setIcon(Utility::getIcon("icons/Shutdown-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->clearConsoleButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->openRecentButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->removeSelectedButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->clearRecentButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->openExampleButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->uploadButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->readExistingButton->setIcon(Utility::getIcon("icons/Upload-96.png"));
+    ui->eraseButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->replHelpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->streamButton->setIcon(Utility::getIcon("icons/Download-96.png"));
 
-    QIcon mycon = QIcon(theme + "icons/expand_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    QIcon mycon = Utility::getIcon( "icons/expand_off.png");
+    mycon.addPixmap(Utility::getIcon("icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomHButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/expand_v_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = Utility::getIcon( "icons/expand_v_off.png");
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomVButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/size_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = Utility::getIcon( "icons/size_off.png");
+    mycon.addPixmap(Utility::getIcon("icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/size_off.png"), QIcon::Normal, QIcon::Off);
     ui->autoscaleButton->setIcon(mycon);
 
     plusButton->setFlat(true);
@@ -137,7 +136,7 @@ PageLisp::PageLisp(QWidget *parent) :
 
     // Add close button that clears the main editor
     QPushButton *closeButton = new QPushButton();
-    closeButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    closeButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(0, QTabBar::RightSide, closeButton);
 
@@ -385,10 +384,9 @@ void PageLisp::createEditorTab(QString fileName, QString content)
 
     editor->setFileNow(fileName);
     editor->codeEditor()->setPlainText(content);
-    QString theme = Utility::getThemePath();
 
     QPushButton *closeButton = new QPushButton();
-    closeButton->setIcon(QIcon(theme +"icons/Cancel-96.png"));
+    closeButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(tabIndex, QTabBar::RightSide, closeButton);
 

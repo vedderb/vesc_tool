@@ -29,8 +29,7 @@ PageControllers::PageControllers(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 
-    QString theme = Utility::getThemePath();
-    ui->posOffsetApplyButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
+    ui->posOffsetApplyButton->setIcon(Utility::getIcon("icons/Download-96.png"));
 }
 
 PageControllers::~PageControllers()

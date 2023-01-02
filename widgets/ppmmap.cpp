@@ -29,10 +29,9 @@ PpmMap::PpmMap(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
-    ui->applyButton->setIcon(QPixmap(theme + "icons/Ok-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->applyButton->setIcon(Utility::getIcon("icons/apply.png"));
+    ui->applyButton->setIcon(Utility::getIcon("icons/Ok-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;

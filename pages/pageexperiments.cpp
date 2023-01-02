@@ -40,33 +40,32 @@ PageExperiments::PageExperiments(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
 
-    QString theme = Utility::getThemePath();
-    ui->currentRunButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
-    ui->dutyRunButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
-    ui->rpmRunButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
-    ui->rescaleButton->setIcon(QPixmap(theme + "icons/size_off.png"));
-    ui->victronRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->victronConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
-    ui->victronDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
-    ui->openButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->openCompButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->saveCsvButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
-    ui->savePngButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
-    ui->savePdfButton->setIcon(QPixmap(theme + "icons/Save-96.png"));
+    ui->currentRunButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->dutyRunButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->rpmRunButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->rescaleButton->setIcon(Utility::getIcon("icons/size_off.png"));
+    ui->victronRefreshButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->victronConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->victronDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->openButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->openCompButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->saveCsvButton->setIcon(Utility::getIcon("icons/Save-96.png"));
+    ui->savePngButton->setIcon(Utility::getIcon("icons/Save-96.png"));
+    ui->savePdfButton->setIcon(Utility::getIcon("icons/Save-96.png"));
 
-    QIcon mycon = QIcon(theme + "icons/expand_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    QIcon mycon = QIcon(Utility::getIcon("icons/expand_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomHButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/expand_v_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/expand_v_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomVButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/size_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/size_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/size_off.png"), QIcon::Normal, QIcon::Off);
     ui->autoscaleButton->setIcon(mycon);
 
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>605</width>
-    <height>66</height>
+    <width>626</width>
+    <height>70</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,10 +46,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../res.qrc">
-          <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
-        </property>
        </widget>
       </item>
       <item>
@@ -81,10 +77,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../res.qrc">
-          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
         </property>
        </widget>
       </item>
@@ -175,10 +167,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../res.qrc">
-          <normaloff>:/res/icons/apply.png</normaloff>:/res/icons/apply.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>45</width>
@@ -192,8 +180,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

@@ -33,18 +33,17 @@ PageVescPackage::PageVescPackage(QWidget *parent) :
     mVesc = nullptr;
     layout()->setContentsMargins(0, 0, 0, 0);
 
-    QString theme = Utility::getThemePath();
-    ui->chooseLoadButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->chooseLispButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->chooseOutputButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->chooseQmlButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->writeButton->setIcon(QIcon(theme +"icons/Download-96.png"));
-    ui->loadRefreshButton->setIcon(QIcon(theme +"icons/Refresh-96.png"));
-    ui->outputRefreshButton->setIcon(QIcon(theme +"icons/Refresh-96.png"));
-    ui->saveButton->setIcon(QIcon(theme +"icons/Save-96.png"));
-    ui->dlArchiveButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->installButton->setIcon(QIcon(theme +"icons/Download-96.png"));
-    ui->uninstallButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    ui->chooseLoadButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->chooseLispButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->chooseOutputButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->chooseQmlButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->writeButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->loadRefreshButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->outputRefreshButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->saveButton->setIcon(Utility::getIcon("icons/Save-96.png"));
+    ui->dlArchiveButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->installButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->uninstallButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
 
     QSettings set;
     ui->loadEdit->setText(set.value("pagevescpackage/lastpkgload", "").toString());

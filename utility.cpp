@@ -36,7 +36,7 @@
 #include <QtGlobal>
 #include <QNetworkInterface>
 #include <QDirIterator>
-
+#include <QPixmapCache>
 
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
@@ -2271,6 +2271,17 @@ QString Utility::waitForLine(QTcpSocket *socket, int timeoutMs)
     return res;
 }
 
+QPixmap Utility::getIcon(QString path)
+{
+    QPixmap pm;
+    if (!QPixmapCache::find(path, &pm)) {
+        pm.load(getThemePath() + path);
+        QPixmapCache::insert(path, pm);
+    }
+
+    return pm;
+}
+
 void Utility::setDarkMode(bool isDarkSetting)
 {
     isDark = isDarkSetting;
@@ -2283,7 +2294,7 @@ bool Utility::isDarkMode()
 
 QString Utility::getThemePath()
 {
-    if(isDark) {
+    if (isDark) {
         return ":/res/";
     } else {
         return ":/res/+theme_light/";

@@ -27,8 +27,7 @@ PageAppSettings::PageAppSettings(QWidget *parent) :
     ui(new Ui::PageAppSettings)
 {
     ui->setupUi(this);
-    QString theme = Utility::getThemePath();
-    ui->appWizardButton->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->appWizardButton->setIcon(Utility::getIcon("icons/Wizard-96.png"));
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 }

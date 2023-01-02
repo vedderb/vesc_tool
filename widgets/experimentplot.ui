@@ -82,11 +82,6 @@
             <property name="text">
              <string/>
             </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/expand_off.png</normaloff>
-              <normalon>:/res/icons/expand_on.png</normalon>:/res/icons/expand_off.png</iconset>
-            </property>
             <property name="checkable">
              <bool>true</bool>
             </property>
@@ -109,11 +104,6 @@
             <property name="text">
              <string/>
             </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/expand_v_off.png</normaloff>
-              <normalon>:/res/icons/expand_v_on.png</normalon>:/res/icons/expand_v_off.png</iconset>
-            </property>
             <property name="checkable">
              <bool>true</bool>
             </property>
@@ -135,11 +125,6 @@
             </property>
             <property name="text">
              <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/size_off.png</normaloff>
-              <normalon>:/res/icons/size_on.png</normalon>:/res/icons/size_off.png</iconset>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -212,10 +197,6 @@
             </property>
             <property name="text">
              <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Polyline-96.png</normaloff>:/res/icons/Polyline-96.png</iconset>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -358,10 +339,6 @@
             <property name="text">
              <string/>
             </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
-            </property>
            </widget>
           </item>
           <item row="2" column="1">
@@ -377,10 +354,6 @@
             </property>
             <property name="text">
              <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/3ph_sine.png</normaloff>:/res/icons/3ph_sine.png</iconset>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -561,8 +534,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

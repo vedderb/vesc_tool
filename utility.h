@@ -137,6 +137,8 @@ public:
 
     static QString waitForLine(QTcpSocket *socket, int timeoutMs);
 
+    static QPixmap getIcon(QString path);
+
 signals:
 
 public slots:

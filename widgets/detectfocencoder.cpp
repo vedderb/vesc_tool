@@ -29,10 +29,9 @@ DetectFocEncoder::DetectFocEncoder(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->startButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
-    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->startButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->applyButton->setIcon(Utility::getIcon("icons/apply.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;

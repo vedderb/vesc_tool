@@ -31,8 +31,7 @@ PageMotorSettings::PageMotorSettings(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 
-    QString theme = Utility::getThemePath();
-    ui->motorSetupWizardButton->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
+    ui->motorSetupWizardButton->setIcon(Utility::getIcon("icons/Wizard-96.png"));
 }
 
 PageMotorSettings::~PageMotorSettings()

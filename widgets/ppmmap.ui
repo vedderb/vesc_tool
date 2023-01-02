@@ -46,10 +46,6 @@
           <property name="text">
            <string>Help</string>
           </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
-          </property>
          </widget>
         </item>
         <item>
@@ -65,10 +61,6 @@
           </property>
           <property name="text">
            <string>Reset</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
           </property>
          </widget>
         </item>
@@ -241,8 +233,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

@@ -29,10 +29,9 @@ ParamEditBool::ParamEditBool(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->readButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
-    ui->readDefaultButton->setIcon(QPixmap(theme + "icons/Data Backup-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->readButton->setIcon(Utility::getIcon("icons/Upload-96.png"));
+    ui->readDefaultButton->setIcon(Utility::getIcon("icons/Data Backup-96.png"));
 }
 
 ParamEditBool::~ParamEditBool()

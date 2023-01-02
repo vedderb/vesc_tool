@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>509</width>
-    <height>140</height>
+    <height>151</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -84,10 +84,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/apply.png</normaloff>:/res/icons/apply.png</iconset>
-          </property>
           <property name="iconSize">
            <size>
             <width>45</width>
@@ -131,10 +127,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
-          </property>
          </widget>
         </item>
         <item row="1" column="0">
@@ -144,10 +136,6 @@
           </property>
           <property name="text">
            <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
           </property>
          </widget>
         </item>
@@ -168,8 +156,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

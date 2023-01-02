@@ -35,23 +35,22 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     resetInds();
 
-    QString theme = Utility::getThemePath();
-    ui->centerButton->setIcon(QPixmap(theme + "icons/icons8-target-96.png"));
-    ui->playButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
-    ui->logListRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->logListOpenButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->openCurrentButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->openCsvButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->savePlotPdfButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
-    ui->savePlotPngButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
-    ui->saveMapPdfButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
-    ui->saveMapPngButton->setIcon(QPixmap(theme + "icons/Waypoint Map-96.png"));
-    ui->vescLogListRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->vescLogListOpenButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->vescUpButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
-    ui->vescSaveAsButton->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->vescLogDeleteButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
-    ui->saveCsvButton->setIcon(QPixmap(theme + "icons/Line Chart-96.png"));
+    ui->centerButton->setIcon(Utility::getIcon("icons/icons8-target-96.png"));
+    ui->playButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->logListRefreshButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->logListOpenButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->openCurrentButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->openCsvButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->savePlotPdfButton->setIcon(Utility::getIcon("icons/Line Chart-96.png"));
+    ui->savePlotPngButton->setIcon(Utility::getIcon("icons/Line Chart-96.png"));
+    ui->saveMapPdfButton->setIcon(Utility::getIcon("icons/Waypoint Map-96.png"));
+    ui->saveMapPngButton->setIcon(Utility::getIcon("icons/Waypoint Map-96.png"));
+    ui->vescLogListRefreshButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->vescLogListOpenButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->vescUpButton->setIcon(Utility::getIcon("icons/Upload-96.png"));
+    ui->vescSaveAsButton->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->vescLogDeleteButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->saveCsvButton->setIcon(Utility::getIcon("icons/Line Chart-96.png"));
 
     updateTileServers();
 
@@ -1389,10 +1388,9 @@ void PageLogAnalysis::on_vescLogListRefreshButton_clicked()
             continue;
         }
 
-        QString theme = Utility::getThemePath();
         QTableWidgetItem *itName = new QTableWidgetItem(fe.name);
         itName->setData(Qt::UserRole, QVariant::fromValue(fe));
-        itName->setIcon(fe.isDir ? QPixmap(theme + "icons/Open Folder-96.png") : QPixmap(theme + "icons/Line Chart-96.png"));
+        itName->setIcon(fe.isDir ? Utility::getIcon("icons/Open Folder-96.png") : Utility::getIcon("icons/Line Chart-96.png"));
         ui->vescLogTable->setRowCount(ui->vescLogTable->rowCount() + 1);
         ui->vescLogTable->setItem(ui->vescLogTable->rowCount() - 1, 0, itName);
 

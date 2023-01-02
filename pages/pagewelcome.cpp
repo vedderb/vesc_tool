@@ -37,15 +37,14 @@ PageWelcome::PageWelcome(QWidget *parent) :
     ui->setupUi(this);
     mUtil = new Utility(this);
 
-    QString theme = Utility::getThemePath();
-    ui->autoConnectButton->setIcon(QIcon(theme + "icons/Connected-96.png"));
-    ui->wizardFocSimpleButton->setIcon(QIcon(theme + "icons/Wizard-96.png"));
-    ui->wizardAppButton->setIcon(QIcon(theme + "icons/Wizard-96.png"));
-    ui->nrfPairButton->setIcon(QIcon(theme + "icons/icons8-fantasy-96.png"));
-    ui->multiSettingButton->setIcon(QIcon(theme + "icons/Settings-96.png"));
-    ui->invertDirButton->setIcon(QIcon(theme + "icons/Process-96.png"));
-    ui->setupBluetoothButton->setIcon(QIcon(theme + "icons/bluetooth.png"));
-    ui->wizardIMUButton->setIcon(QIcon(theme + "icons/imu_off.png"));
+    ui->autoConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->wizardFocSimpleButton->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->wizardAppButton->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->nrfPairButton->setIcon(Utility::getIcon("icons/icons8-fantasy-96.png"));
+    ui->multiSettingButton->setIcon(Utility::getIcon("icons/Settings-96.png"));
+    ui->invertDirButton->setIcon(Utility::getIcon("icons/Process-96.png"));
+    ui->setupBluetoothButton->setIcon(Utility::getIcon("icons/bluetooth.png"));
+    ui->wizardIMUButton->setIcon(Utility::getIcon("icons/imu_off.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;

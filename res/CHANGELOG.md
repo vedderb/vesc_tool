@@ -13,6 +13,7 @@
 * Automatically reload UI after installing and uninstalling packages.
 * Automatically scan mobile CAN-list if empty.
 * Changelogs updated and changed to markdown.
+* Pixmap caching for faster start and config reload.
 
 ---
 

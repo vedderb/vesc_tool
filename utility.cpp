@@ -2273,6 +2273,10 @@ QString Utility::waitForLine(QTcpSocket *socket, int timeoutMs)
 
 QPixmap Utility::getIcon(QString path)
 {
+    while (path.startsWith("/")) {
+        path.remove(0, 1);
+    }
+
     QPixmap pm;
     if (!QPixmapCache::find(path, &pm)) {
         pm.load(getThemePath() + path);

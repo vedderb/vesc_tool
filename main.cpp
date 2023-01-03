@@ -74,11 +74,13 @@ static void preloadImages() {
     QElapsedTimer t;
     t.start();
 
+    QPixmapCache::setCacheLimit(256000);
+
     QVector<QFuture<QPair<QString, QPixmap>>> futures;
 
     auto loadImage = [&futures](QString path) {
         auto loadFun = [](QString path) {
-            path.remove("://res/+theme_light/");
+            path = path.remove("://res/+theme_light/");
 
             QPixmap res;
             res.load(Utility::getThemePath() + path);
@@ -169,7 +171,6 @@ int main(int argc, char *argv[])
     QSettings set;
     bool isDark = set.value("darkMode", true).toBool();
     Utility::setDarkMode(isDark);
-    QPixmapCache::setCacheLimit(256000);
 
     if (isDark) {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2_dark.conf");

@@ -74,6 +74,7 @@ static void preloadImages() {
     QElapsedTimer t;
     t.start();
 
+    // Not sure why this is needed here...
     QPixmapCache::setCacheLimit(256000);
 
     QVector<QFuture<QPair<QString, QPixmap>>> futures;
@@ -171,6 +172,7 @@ int main(int argc, char *argv[])
     QSettings set;
     bool isDark = set.value("darkMode", true).toBool();
     Utility::setDarkMode(isDark);
+    QPixmapCache::setCacheLimit(256000);
 
     if (isDark) {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2_dark.conf");

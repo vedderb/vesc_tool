@@ -70,49 +70,6 @@ public:
     }
 };
 
-static void preloadImages() {
-    QElapsedTimer t;
-    t.start();
-
-    // Not sure why this is needed here...
-    QPixmapCache::setCacheLimit(256000);
-
-    QVector<QFuture<QPair<QString, QPixmap>>> futures;
-
-    auto loadImage = [&futures](QString path) {
-        auto loadFun = [](QString path) {
-            path = path.remove("://res/+theme_light/");
-
-            QPixmap res;
-            res.load(Utility::getThemePath() + path);
-            return qMakePair(path, res);
-        };
-
-        futures.append(QtConcurrent::run(loadFun, path));
-    };
-
-    QDir dir("://res/+theme_light");
-    dir.setSorting(QDir::Name);
-    foreach (auto fi, dir.entryInfoList()) {
-        if (fi.isDir()) {
-            QDir dir2(fi.absoluteFilePath());
-            dir2.setSorting(QDir::Name);
-            foreach (auto fi2, dir2.entryInfoList()) {
-                loadImage(fi2.absoluteFilePath());
-            }
-        } else {
-            loadImage(fi.absoluteFilePath());
-        }
-    }
-
-    foreach (auto f, futures) {
-        f.waitForFinished();
-        QPixmapCache::insert(f.result().first, f.result().second);
-    }
-
-    qDebug() << "Preloading icons took" << t.elapsed() <<  "ms";
-}
-
 static void showHelp()
 {
     qDebug() << "Arguments";
@@ -317,7 +274,6 @@ int main(int argc, char *argv[])
 
         if ((dash && str.contains('h')) || str == "--help") {
             showHelp();
-            found = true;
             return 0;
         }
 
@@ -392,6 +348,7 @@ int main(int argc, char *argv[])
                 return 1;
             }
         }
+
         if (str == "--tcpHub") {
             if ((i + 1) < args.size()) {
                 i++;
@@ -400,6 +357,7 @@ int main(int argc, char *argv[])
                 found = true;
             }
         }
+
         if (str == "--buildPkg") {
             if ((i + 1) < args.size()) {
                 i++;
@@ -778,7 +736,7 @@ int main(int argc, char *argv[])
             bw = new BoardSetupWindow;
             bw->show();
         } else {
-            preloadImages();
+            QPixmapCache::setCacheLimit(256000);
             w = new MainWindow;
             w->show();
         }

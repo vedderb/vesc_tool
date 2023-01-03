@@ -18,8 +18,11 @@
     */
 
 #include "fwhelper.h"
-#include <QDirIterator>
 #include "hexfile.h"
+
+#include <QDirIterator>
+#include <QStandardPaths>
+#include <QResource>
 
 FwHelper::FwHelper(QObject *parent) : QObject(parent)
 {
@@ -204,4 +207,56 @@ bool FwHelper::uploadFirmwareSingleShotTimer(QString filename, VescInterface *ve
         emit fwUploadRes(res, isBootloader);
     });
     return true;
+}
+
+QVariantMap FwHelper::getArchiveDirs()
+{
+    QVariantMap fws;
+
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw.rcc";
+    QFile file(path);
+    if (file.exists()) {
+        QResource::unregisterResource(path);
+        QResource::registerResource(path);
+
+        QString fwDir = "://fw_archive";
+
+        QDirIterator it(fwDir);
+        while (it.hasNext()) {
+            QFileInfo fi(it.next());
+            fws.insert(fi.fileName(), fi.absoluteFilePath());
+        }
+    }
+
+    return fws;
+}
+
+QVariantMap FwHelper::getArchiveFirmwares(QString fwPath, FW_RX_PARAMS params)
+{
+    QVariantMap fws;
+
+    QDirIterator it(fwPath);
+    while (it.hasNext()) {
+        QFileInfo fi(it.next());
+
+        QDirIterator it2(fi.absoluteFilePath());
+        while (it2.hasNext()) {
+            QFileInfo fi2(it2.next());
+
+            QStringList names = fi.fileName().split("_o_");
+
+            if (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive)) {
+                if (fi2.fileName().toLower() == "vesc_default.bin") {
+                    QString name = names.at(0);
+                    for(int i = 1;i < names.size();i++) {
+                        name += " & " + names.at(i);
+                    }
+
+                    fws.insert("HW " + name + ": " + fi2.fileName(), fi2.absoluteFilePath());
+                }
+            }
+        }
+    }
+
+    return fws;
 }

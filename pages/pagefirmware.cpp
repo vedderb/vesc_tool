@@ -25,11 +25,6 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDirIterator>
-#include <QNetworkAccessManager>
-#include <QUrl>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QEventLoop>
 
 PageFirmware::PageFirmware(QWidget *parent) :
     QWidget(parent),
@@ -104,6 +99,11 @@ void PageFirmware::setVesc(VescInterface *vesc)
                 this, SLOT(fwUploadStatus(QString,double,bool)));
         connect(mVesc, SIGNAL(fwRxChanged(bool,bool)),
                 this, SLOT(fwRxChanged(bool,bool)));
+
+        connect(mVesc, &VescInterface::fwArchiveDlProgress, [this](QString msg, double prog) {
+            ui->displayDl->setText(msg);
+            ui->displayDl->setValue(100.0 * prog);
+        });
     }
 }
 
@@ -658,8 +658,7 @@ void PageFirmware::uploadFw(bool allOverCan)
 
 void PageFirmware::reloadArchive()
 {
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-            "/res_fw.rcc";
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw.rcc";
     QFile file(path);
     if (file.exists()) {
         QResource::unregisterResource(path);
@@ -686,42 +685,11 @@ void PageFirmware::on_dlArchiveButton_clicked()
     ui->dlArchiveButton->setEnabled(false);
     ui->displayDl->setText("Preparing download...");
 
-    QUrl url("http://home.vedder.se/vesc_fw_archive/res_fw.rcc");
-    QNetworkAccessManager manager;
-    QNetworkRequest request(url);
-    QNetworkReply *reply = manager.get(request);
-
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw.rcc";
-    QFile file(path);
-    QResource::unregisterResource(path);
-    if (file.open(QIODevice::WriteOnly)) {
-        auto conn = connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this]
-                            (qint64 bytesReceived, qint64 bytesTotal) {
-            ui->displayDl->setText("Downloading...");
-            ui->displayDl->setValue(100.0 * (double)bytesReceived / (double)bytesTotal);
-            file.write(reply->read(reply->size()));
-        });
-
-        QEventLoop loop;
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec();
-        disconnect(conn);
-
-        if (reply->error() == QNetworkReply::NoError) {
-            file.write(reply->readAll());
-            ui->displayDl->setText("Download Done");
-        } else {
-            ui->displayDl->setText("Download Failed");
+    if (mVesc) {
+        if (mVesc->downloadFwArchive()) {
+            reloadArchive();
         }
-
-        file.close();
-        reloadArchive();
-    } else {
-        ui->displayDl->setText("Could not open local file");
     }
-
-    reply->abort();
-    reply->deleteLater();
 
     ui->dlArchiveButton->setEnabled(true);
 }

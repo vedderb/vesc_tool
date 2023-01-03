@@ -37,6 +37,12 @@
 #include <QSerialPortInfo>
 #endif
 
+#include <QNetworkAccessManager>
+#include <QUrl>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
+
 #ifdef HAS_CANBUS
 #include <QCanBus>
 #endif
@@ -3977,6 +3983,49 @@ bool VescInterface::connectTcpHubUuid(QString uuid)
     }
 
     return false;
+}
+
+bool VescInterface::downloadFwArchive()
+{
+    bool res = false;
+
+    QUrl url("http://home.vedder.se/vesc_fw_archive/res_fw.rcc");
+    QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    QNetworkReply *reply = manager.get(request);
+
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw.rcc";
+    QFile file(path);
+    QResource::unregisterResource(path);
+    if (file.open(QIODevice::WriteOnly)) {
+        auto conn = connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this]
+                            (qint64 bytesReceived, qint64 bytesTotal) {
+            emit fwArchiveDlProgress("Downloading...", (double)bytesReceived / (double)bytesTotal);
+            file.write(reply->read(reply->size()));
+        });
+
+        QEventLoop loop;
+        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        if (reply->error() == QNetworkReply::NoError) {
+            file.write(reply->readAll());
+            emit fwArchiveDlProgress("Download Done", 1.0);
+        } else {
+            emit fwArchiveDlProgress("Download Failed", 0.0);
+        }
+
+        file.close();
+        res = true;
+    } else {
+        emit fwArchiveDlProgress("Could not open local file", 0.0);
+    }
+
+    reply->abort();
+    reply->deleteLater();
+
+    return res;
 }
 
 QString VescInterface::getLastTcpHubServer() const

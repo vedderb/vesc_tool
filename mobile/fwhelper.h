@@ -36,6 +36,8 @@ public:
                                     bool isBootloader, bool isIncluded, bool fwdCan);
     Q_INVOKABLE bool uploadFirmwareSingleShotTimer(QString filename, VescInterface *vesc,
                                                  bool isBootloader, bool isIncluded, bool fwdCan, QString BLfilename);
+    Q_INVOKABLE QVariantMap getArchiveDirs();
+    Q_INVOKABLE QVariantMap getArchiveFirmwares(QString fwPath, FW_RX_PARAMS params);
 
 signals:
     void fwUploadRes(bool res, bool isBootloader);

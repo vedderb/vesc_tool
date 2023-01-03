@@ -71,6 +71,9 @@ public:
 };
 
 static void preloadImages() {
+    QElapsedTimer t;
+    t.start();
+
     QVector<QFuture<QPair<QString, QPixmap>>> futures;
 
     auto loadImage = [&futures](QString path) {
@@ -103,6 +106,8 @@ static void preloadImages() {
         f.waitForFinished();
         QPixmapCache::insert(f.result().first, f.result().second);
     }
+
+    qDebug() << "Preloading icons took" << t.elapsed() <<  "ms";
 }
 
 static void showHelp()

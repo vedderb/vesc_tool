@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2021 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2023 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -28,6 +28,7 @@
 #include "pages/pagemotorcomparison.h"
 #include "codeloader.h"
 #include "configparam.h"
+#include "utility.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -53,6 +54,7 @@
 #ifndef USE_MOBILE
 
 #include <QProxyStyle>
+#include <QtConcurrent/QtConcurrent>
 
 // Disables focus drawing for all widgets
 class Style_tweaks : public QProxyStyle
@@ -67,6 +69,41 @@ public:
         QProxyStyle::drawPrimitive(element, option, painter, widget);
     }
 };
+
+static void preloadImages() {
+    QVector<QFuture<QPair<QString, QPixmap>>> futures;
+
+    auto loadImage = [&futures](QString path) {
+        auto loadFun = [](QString path) {
+            path.remove("://res/+theme_light/");
+
+            QPixmap res;
+            res.load(Utility::getThemePath() + path);
+            return qMakePair(path, res);
+        };
+
+        futures.append(QtConcurrent::run(loadFun, path));
+    };
+
+    QDir dir("://res/+theme_light");
+    dir.setSorting(QDir::Name);
+    foreach (auto fi, dir.entryInfoList()) {
+        if (fi.isDir()) {
+            QDir dir2(fi.absoluteFilePath());
+            dir2.setSorting(QDir::Name);
+            foreach (auto fi2, dir2.entryInfoList()) {
+                loadImage(fi2.absoluteFilePath());
+            }
+        } else {
+            loadImage(fi.absoluteFilePath());
+        }
+    }
+
+    foreach (auto f, futures) {
+        f.waitForFinished();
+        QPixmapCache::insert(f.result().first, f.result().second);
+    }
+}
 
 static void showHelp()
 {
@@ -733,6 +770,7 @@ int main(int argc, char *argv[])
             bw = new BoardSetupWindow;
             bw->show();
         } else {
+            preloadImages();
             w = new MainWindow;
             w->show();
         }

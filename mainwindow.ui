@@ -663,6 +663,8 @@
     <addaction name="actionSaveAppConfigurationHeader"/>
     <addaction name="actionSaveAppConfigurationHeaderWrap"/>
     <addaction name="separator"/>
+    <addaction name="actionLaunch_Board_Configurator"/>
+    <addaction name="actionLaunch_Android_Tool"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -1400,6 +1402,16 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcutVisibleInContextMenu">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionLaunch_Board_Configurator">
+   <property name="text">
+    <string>Restart + Launch Board Configurator</string>
+   </property>
+  </action>
+  <action name="actionLaunch_Android_Tool">
+   <property name="text">
+    <string>Restart + Launch Android Tool</string>
    </property>
   </action>
  </widget>

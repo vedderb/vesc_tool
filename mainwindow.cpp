@@ -1167,6 +1167,22 @@ void MainWindow::on_actionExit_triggered()
     qApp->exit();
 }
 
+void MainWindow::on_actionLaunch_Board_Configurator_triggered()
+{
+    QString program = qApp->arguments()[0];
+    QStringList params = QStringList() << "--useBoardSetupWindow" ;
+    qApp->quit();
+    QProcess::startDetached(program, params);
+}
+
+void MainWindow::on_actionLaunch_Android_Tool_triggered()
+{
+    QString program = qApp->arguments()[0];
+    QStringList params = QStringList() << "--useMobileUi" ;
+    qApp->quit();
+    QProcess::startDetached(program, params);
+}
+
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "VESC Tool", Utility::aboutText());

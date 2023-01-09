@@ -80,6 +80,8 @@
 <name>event-can-eid</name>
 <name>event-data-rx</name>
 <name>event-shutdown</name>
+<name>event-icu-width</name>
+<name>event-icu-period</name>
 <name>stat-speed-avg</name>
 <name>stat-speed-max</name>
 <name>stat-power-avg</name>
@@ -190,7 +192,9 @@
 <name>sysinfo</name>
 <name>stats</name>
 <name>stats-reset</name>
-<name>import</name>
+<name>icu-start</name>
+<name>icu-width</name>
+<name>icu-period</name>
 <name>app-adc-detach</name>
 <name>app-adc-override</name>
 <name>app-ppm-detach</name>

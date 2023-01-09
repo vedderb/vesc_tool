@@ -39,5 +39,6 @@
         <file>res/Lisp/Examples/test_extensions.lisp</file>
         <file>res/Lisp/Examples/est_temp.lisp</file>
         <file>res/Lisp/Examples/plot_interpolation.lisp</file>
+        <file>res/Lisp/Examples/input_capture.lisp</file>
     </qresource>
 </RCC>

@@ -149,6 +149,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionVESCToolChangelog->setIcon(Utility::getIcon("icons/About-96.png"));
     ui->actionFirmwareChangelog->setIcon(Utility::getIcon("icons/About-96.png"));
     ui->actionWarrantyStatement->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionAbout->setIcon(Utility::getIcon("icons/About-96.png"));
     ui->actionLicense->setIcon(Utility::getIcon("icons/About-96.png"));
     ui->actionVESCProjectForums->setIcon(Utility::getIcon("icons/User Group Man Man-96.png"));
     ui->actionLoadFirmwareConfigs->setIcon(Utility::getIcon("icons/Electronics-96.png"));
@@ -169,6 +170,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionReadAppconf->setIcon(Utility::getIcon("icons/app_up.png"));
     ui->actionReadAppconfDefault->setIcon(Utility::getIcon("icons/app_default.png"));
     ui->actionWriteAppconf->setIcon(Utility::getIcon("icons/app_down.png"));
+    ui->actionLaunchMobileTool->setIcon(Utility::getIcon("icons/v_icon-96.png"));
+    ui->actionLaunchBoardConfigurator->setIcon(Utility::getIcon("icons/v_icon-96.png"));
 
     QIcon mycon = QIcon(Utility::getIcon("icons/keys_off.png"));
     mycon.addPixmap(Utility::getIcon("icons/keys_on.png"), QIcon::Normal, QIcon::On);
@@ -1167,7 +1170,7 @@ void MainWindow::on_actionExit_triggered()
     qApp->exit();
 }
 
-void MainWindow::on_actionLaunch_Board_Configurator_triggered()
+void MainWindow::on_actionLaunchBoardConfigurator_triggered()
 {
     QString program = qApp->arguments()[0];
     QStringList params = QStringList() << "--useBoardSetupWindow" ;
@@ -1175,7 +1178,7 @@ void MainWindow::on_actionLaunch_Board_Configurator_triggered()
     QProcess::startDetached(program, params);
 }
 
-void MainWindow::on_actionLaunch_Android_Tool_triggered()
+void MainWindow::on_actionLaunchMobileTool_triggered()
 {
     QString program = qApp->arguments()[0];
     QStringList params = QStringList() << "--useMobileUi" ;

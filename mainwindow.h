@@ -111,8 +111,8 @@ private slots:
     void on_actionSaveAppconfXml_triggered();
     void on_actionLoadAppconfXml_triggered();
     void on_actionExit_triggered();
-    void on_actionLaunch_Board_Configurator_triggered();
-    void on_actionLaunch_Android_Tool_triggered();
+    void on_actionLaunchBoardConfigurator_triggered();
+    void on_actionLaunchMobileTool_triggered();
     void on_actionAbout_triggered();
     void on_actionLibrariesUsed_triggered();
     void on_dutyButton_clicked();

@@ -202,6 +202,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->speedButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
     ui->posButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
     ui->brakeCurrentButton->setIcon(Utility::getIcon("icons/Brake Warning-96.png"));
+    ui->stopButton->setIcon(Utility::getIcon("icons/Stop Sign-96.png"));
     ui->handbrakeButton->setIcon(Utility::getIcon("icons/Brake Warning-96.png"));
     ui->fullBrakeButton->setIcon(Utility::getIcon("icons/Anchor-96.png"));
 

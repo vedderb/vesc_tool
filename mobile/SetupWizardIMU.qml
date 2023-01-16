@@ -664,7 +664,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "Yaw Offset: " + (calculatedYawOffset * 180.0/pi).toFixed(2)
+                        text: "Yaw Offset: " + (-(calculatedYawOffset * 180.0/pi).toFixed(2))
                     }// Text
                     Button {
                         id: skipYawButton
@@ -990,41 +990,19 @@ Item {
                         stackLayout.currentIndex = pages.menu
                     }else if(stackLayout.currentIndex === pages.orientationRoll){
                         var roll = -filteredIMUValues.roll
-                        mAppConf.updateParamDouble(
-                        "imu_conf.rot_roll",
-                        (mAppConf.getParamDouble("imu_conf.rot_roll") + (roll * 180.0/pi)),
-                        null
-                        )
-                        var yawRotation = mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
-                        var pitchRotation = mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180
-                        applyRotationToCalibrationConfig(0, 0, -yawRotation)
-                        applyRotationToCalibrationConfig(0, -pitchRotation, 0)
-                        applyRotationToCalibrationConfig(roll, 0, 0)
-                        applyRotationToCalibrationConfig(0, pitchRotation, 0)
-                        applyRotationToCalibrationConfig(0, 0, yawRotation)
-
+                        applyRollOffset(roll)
                         mCommands.setAppConf()
                         stackLayout.currentIndex = pages.orientationPitch
                     }else if(stackLayout.currentIndex === pages.orientationPitch){
                         var pitch = filteredIMUValues.pitch
-                        mAppConf.updateParamDouble(
-                        "imu_conf.rot_pitch",
-                        (mAppConf.getParamDouble("imu_conf.rot_pitch") + (pitch * 180.0/pi)),
-                        null
-                        )
-
-                        var yawRotation = mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
-                        applyRotationToCalibrationConfig(0, 0, -yawRotation)
-                        applyRotationToCalibrationConfig(0, pitch, 0)
-                        applyRotationToCalibrationConfig(0, 0, yawRotation)
-
+                        applyPitchOffset(pitch)
                         mCommands.setAppConf()
                         stackLayout.currentIndex = pages.orientationYaw
                     }else if(stackLayout.currentIndex === pages.orientationYaw){
-                        var yaw = calculatedYawOffset
+                        var yaw = -calculatedYawOffset
                         mAppConf.updateParamDouble(
                         "imu_conf.rot_yaw",
-                        (mAppConf.getParamDouble("imu_conf.rot_yaw") + (yaw * 180.0/pi)),
+                        constrainDegrees(mAppConf.getParamDouble("imu_conf.rot_yaw") + (yaw * 180.0/pi)),
                         null
                         )
                         applyRotationToCalibrationConfig(0, 0, yaw)
@@ -1045,29 +1023,49 @@ Item {
 
     }//Dialog
 
-    function applyRotationToCalibrationConfig(roll, pitch, yaw){
+    function constrainDegrees(degrees){
+        if(degrees > 360){
+            return degrees - 360
+        }else if (degrees < -360){
+            return degrees + 360
+        }else{
+            return degrees
+        }
+    }
+
+    function constrainRadians(radians){
+        if(radians > 360){
+            return radians - 360
+        }else if (radians < -360){
+            return radians + 360
+        }else{
+            return radians
+        }
+    }
+
+    function rotateEulerAngles(angles, rotation){
         // Calculate sin & cos
         var s1, c1, s2, c2, s3, c3
 
-        if (yaw !== 0.0) {
-            s1 = Math.sin(yaw)
-            c1 = Math.cos(yaw)
+        if (rotation.yaw !== 0.0) {
+            s1 = Math.sin(rotation.yaw)
+            c1 = Math.cos(rotation.yaw)
         } else {
             s1 = 0.0
             c1 = 1.0
         }
 
-        if (pitch !== 0.0) {
-            s2 = Math.sin(pitch)
-            c2 = Math.cos(pitch)
+        if (rotation.pitch !== 0.0) {
+            s2 = Math.sin(rotation.pitch)
+            c2 = Math.cos(rotation.pitch)
         } else {
             s2 = 0.0
             c2 = 1.0
         }
 
-        if (roll !== 0.0) {
-            s3 = Math.sin(roll)
-            c3 = Math.cos(roll)
+        if (rotation.roll !== 0.0) {
+            s3 = Math.sin(rotation.roll)
+            c3 = Math.cos(rotation.roll)
         } else {
             s3 = 0.0
             c3 = 1.0
@@ -1086,6 +1084,104 @@ Item {
         var m32 = c2 * s3
         var m33 = c2 * c3
 
+
+        // Calculate and return rotated angles
+        return {
+            "roll": angles.roll * m11 + angles.pitch * m12 + angles.yaw * m13,
+            "pitch": angles.roll * m21 + angles.pitch * m22 + angles.yaw * m23,
+            "yaw": angles.roll * m31 + angles.pitch * m32 + angles.yaw * m33
+        }
+    }
+
+    function applyRollOffset(roll){
+        // Read previous offsets before modifying so we can translate calibration
+        var previousOffsetRoll = mAppConf.getParamDouble("imu_conf.rot_roll") * pi/180
+        var previousOffsetPitch = mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180
+        var previousOffsetYaw = mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
+
+        // Calculate derotated roll offset
+        var derotatedOffset = rotateEulerAngles(
+                    {"roll": roll, "pitch": 0, "yaw": 0},
+                    {"roll": 0, "pitch": 0, "yaw": -previousOffsetYaw}
+        )
+        derotatedOffset = rotateEulerAngles(
+                    {"roll": roll, "pitch": 0, "yaw": 0},
+                    {"roll": 0, "pitch": -previousOffsetPitch, "yaw": 0}
+        )
+
+        // Update settings
+        mAppConf.updateParamDouble(
+        "imu_conf.rot_roll",
+        (mAppConf.getParamDouble("imu_conf.rot_roll") + (derotatedOffset.roll * 180.0/pi)),
+        null
+        )
+        mAppConf.updateParamDouble(
+        "imu_conf.rot_pitch",
+        (mAppConf.getParamDouble("imu_conf.rot_pitch") + (derotatedOffset.pitch * 180.0/pi)),
+        null
+        )
+        mAppConf.updateParamDouble(
+        "imu_conf.rot_yaw",
+        (mAppConf.getParamDouble("imu_conf.rot_yaw") + (derotatedOffset.yaw * 180.0/pi)),
+        null
+        )
+
+        // Remove rotation from calibration offsets
+        // TODO: Add a derotate function instead of 3 successive rotations
+        applyRotationToCalibrationConfig(0, 0, -previousOffsetYaw)
+        applyRotationToCalibrationConfig(0, -previousOffsetPitch, 0)
+        applyRotationToCalibrationConfig(-previousOffsetRoll, 0, 0)
+        // Apply new rotation to calibration
+        applyRotationToCalibrationConfig(
+                    mAppConf.getParamDouble("imu_conf.rot_roll") * pi/180,
+                    mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180,
+                    mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
+                    )
+    }
+
+    function applyPitchOffset(pitch){
+        // Read previous offsets before modifying so we can translate calibration
+        var previousOffsetRoll = mAppConf.getParamDouble("imu_conf.rot_roll") * pi/180
+        var previousOffsetPitch = mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180
+        var previousOffsetYaw = mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
+
+        // Calculate derotated pitch offset
+        var derotatedOffset = rotateEulerAngles(
+                    {"roll": 0, "pitch": pitch, "yaw": 0},
+                    {"roll": 0, "pitch": 0, "yaw": -previousOffsetYaw}
+        )
+
+        // Update settings
+        mAppConf.updateParamDouble(
+        "imu_conf.rot_roll",
+        (mAppConf.getParamDouble("imu_conf.rot_roll") + (derotatedOffset.roll * 180.0/pi)),
+        null
+        )
+        mAppConf.updateParamDouble(
+        "imu_conf.rot_pitch",
+        (mAppConf.getParamDouble("imu_conf.rot_pitch") + (derotatedOffset.pitch * 180.0/pi)),
+        null
+        )
+        mAppConf.updateParamDouble(
+        "imu_conf.rot_yaw",
+        (mAppConf.getParamDouble("imu_conf.rot_yaw") + (derotatedOffset.yaw * 180.0/pi)),
+        null
+        )
+
+        // Remove rotation from calibration offsets
+        // TODO: Add a derotate function instead of 3 successive rotations
+        applyRotationToCalibrationConfig(0, 0, -previousOffsetYaw)
+        applyRotationToCalibrationConfig(0, -previousOffsetPitch, 0)
+        applyRotationToCalibrationConfig(-previousOffsetRoll, 0, 0)
+        // Apply new rotation to calibration
+        applyRotationToCalibrationConfig(
+                    mAppConf.getParamDouble("imu_conf.rot_roll") * pi/180,
+                    mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180,
+                    mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
+                    )
+    }
+
+    function applyRotationToCalibrationConfig(roll, pitch, yaw){
         // Read current calibration
         var offsetGyroX = mAppConf.getParamDouble("imu_conf.gyro_offsets__0")
         var offsetGyroY = mAppConf.getParamDouble("imu_conf.gyro_offsets__1")
@@ -1096,74 +1192,32 @@ Item {
         var offsetAccelZ = mAppConf.getParamDouble("imu_conf.accel_offsets__2")
 
         // Calculate rotated calibration
-        var rotatedOffsetGyroX = offsetGyroX * m11 + offsetGyroY * m12 + offsetGyroZ * m13;
-        var rotatedOffsetGyroY = offsetGyroX * m21 + offsetGyroY * m22 + offsetGyroZ * m23;
-        var rotatedOffsetGyroZ = offsetGyroX * m31 + offsetGyroY * m32 + offsetGyroZ * m33;
+        var rotatedGyroOffsets = rotateEulerAngles(
+                    {"roll": offsetGyroX, "pitch": offsetGyroY, "yaw": offsetGyroZ},
+                    {"roll": roll, "pitch": pitch, "yaw": yaw}
+        )
+        var rotatedAccelOffsets = rotateEulerAngles(
+                    {"roll": offsetAccelX, "pitch": offsetAccelY, "yaw": offsetAccelZ},
+                    {"roll": roll, "pitch": pitch, "yaw": yaw}
+        )
 
-        var rotatedOffsetAccelX = offsetAccelX * m11 + offsetAccelY * m12 + offsetAccelZ * m13;
-        var rotatedOffsetAccelY = offsetAccelX * m21 + offsetAccelY * m22 + offsetAccelZ * m23;
-        var rotatedOffsetAccelZ = offsetAccelX * m31 + offsetAccelY * m32 + offsetAccelZ * m33;
+        // Update settings (roll = x, pitch = y, yaw = z)
+        mAppConf.updateParamDouble("imu_conf.gyro_offsets__0", rotatedGyroOffsets.roll, null)
+        mAppConf.updateParamDouble("imu_conf.gyro_offsets__1", rotatedGyroOffsets.pitch, null)
+        mAppConf.updateParamDouble("imu_conf.gyro_offsets__2", rotatedGyroOffsets.yaw, null)
 
-        // Update settings
-        mAppConf.updateParamDouble("imu_conf.gyro_offsets__0", rotatedOffsetGyroX, null)
-        mAppConf.updateParamDouble("imu_conf.gyro_offsets__1", rotatedOffsetGyroY, null)
-        mAppConf.updateParamDouble("imu_conf.gyro_offsets__2", rotatedOffsetGyroZ, null)
-
-        mAppConf.updateParamDouble("imu_conf.accel_offsets__0", rotatedOffsetAccelX, null)
-        mAppConf.updateParamDouble("imu_conf.accel_offsets__1", rotatedOffsetAccelY, null)
-        mAppConf.updateParamDouble("imu_conf.accel_offsets__2", rotatedOffsetAccelZ, null)
+        mAppConf.updateParamDouble("imu_conf.accel_offsets__0", rotatedAccelOffsets.roll, null)
+        mAppConf.updateParamDouble("imu_conf.accel_offsets__1", rotatedAccelOffsets.pitch, null)
+        mAppConf.updateParamDouble("imu_conf.accel_offsets__2", rotatedAccelOffsets.yaw, null)
     }
 
     function getPitchForYawOffset(yaw){
-        var roll = 0
-        var pitch = 0
+        var rotated = rotateEulerAngles(
+                    {"roll": filteredIMUValues.roll, "pitch": filteredIMUValues.pitch, "yaw": filteredIMUValues.yaw},
+                    {"roll": 0, "pitch": 0, "yaw": yaw}
+        )
 
-        // Calculate sin & cos
-        var s1, c1, s2, c2, s3, c3
-
-        if (yaw !== 0.0) {
-            s1 = Math.sin(yaw)
-            c1 = Math.cos(yaw)
-        } else {
-            s1 = 0.0
-            c1 = 1.0
-        }
-
-        if (pitch !== 0.0) {
-            s2 = Math.sin(pitch)
-            c2 = Math.cos(pitch)
-        } else {
-            s2 = 0.0
-            c2 = 1.0
-        }
-
-        if (roll !== 0.0) {
-            s3 = Math.sin(roll)
-            c3 = Math.cos(roll)
-        } else {
-            s3 = 0.0
-            c3 = 1.0
-        }
-
-        // Create rotation matrix
-        var m11 = c1 * c2
-        var m12 = c1 * s2 * s3 - c3 * s1
-        var m13 = s1 * s3 + c1 * c3 * s2
-
-        var m21 = c2 * s1
-        var m22 = c1 * c3 + s1 * s2 * s3
-        var m23 = c3 * s1 * s2 - c1 * s3
-
-        var m31 = -s2
-        var m32 = c2 * s3
-        var m33 = c2 * c3
-
-        // Apply rotation to calibrations
-        var rotatedRoll  = filteredIMUValues.roll * m11 + filteredIMUValues.pitch * m12 + filteredIMUValues.yaw * m13;
-        var rotatedPitch = filteredIMUValues.roll * m21 + filteredIMUValues.pitch * m22 + filteredIMUValues.yaw * m23;
-        var rotatedYaw   = filteredIMUValues.roll * m31 + filteredIMUValues.pitch * m32 + filteredIMUValues.yaw * m33;
-
-        return rotatedPitch
+        return rotated.pitch
     }
 
     function updateIMUType(){

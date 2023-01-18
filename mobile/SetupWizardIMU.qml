@@ -1127,7 +1127,7 @@ Item {
                     {"roll": 0, "pitch": 0, "yaw": -previousOffsetYaw}
         )
         derotatedOffset = rotateEulerAngles(
-                    {"roll": roll, "pitch": 0, "yaw": 0},
+                    {"roll": derotatedOffset.roll, "pitch": derotatedOffset.pitch, "yaw": derotatedOffset.yaw},
                     {"roll": 0, "pitch": -previousOffsetPitch, "yaw": 0}
         )
 

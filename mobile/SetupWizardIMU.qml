@@ -26,6 +26,7 @@ Item {
     property bool workingIMU: false
     property int imuType: 0
     property string imuString: "Unknown"
+    property var configuratorRestore: ({})
     property var filteredIMUValues: {
         'roll': 0.0,
         'pitch': 0.0,
@@ -214,6 +215,15 @@ Item {
                         flat: false
 
                         onClicked: {
+                            configuratorRestore = {
+                                "type": mAppConf.getParamEnum("imu_conf.type"),
+                                "sample_rate_hz": mAppConf.getParamInt("imu_conf.sample_rate_hz"),
+                                "mode": mAppConf.getParamEnum("imu_conf.mode"),
+                                "accel_confidence_decay": mAppConf.getParamDouble("imu_conf.accel_confidence_decay"),
+                                "mahony_kp": mAppConf.getParamDouble("imu_conf.mahony_kp"),
+                                "accel_lowpass_filter_z": mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z"),
+                                "gyro_lowpass_filter": mAppConf.getParamDouble("imu_conf.gyro_lowpass_filter")
+                            }
                             configuratorRadioDefault.checked = true
                             configuratorRadioDefault.onClicked()
                             updateIMUType()
@@ -723,6 +733,23 @@ Item {
                         text: "Search for IMU"
                         flat: false
 
+                        function onIMUSearchCompleted(previousApp) {
+                            searchIMUButton.enabled = true
+                            searchIMUButton.text = "Search for IMU"
+                            mAppConf.updateParamEnum("app_to_use", previousApp)
+                            mCommands.setAppConfNoStore()
+                            updateIMUType()
+                            if(configuratorRadioDefault.checked){
+                                configuratorRadioDefault.onClicked()
+                            }else if(configuratorRadioLogs.checked){
+                                configuratorRadioLogs.onClicked()
+                            }else if(configuratorRadioBUni.checked){
+                                configuratorRadioBUni.onClicked()
+                            }else if(configuratorRadioBSkate.checked){
+                                configuratorRadioBSkate.onClicked()
+                            }
+                        }
+
                         onClicked: {
                             searchIMUButton.enabled = false
                             searchIMUButton.text = "Searching...."
@@ -761,38 +788,22 @@ Item {
                                                                 if(!workingIMU){
                                                                     mAppConf.updateParamEnum("imu_conf.type", 0)
                                                                 }
-                                                                searchIMUButton.enabled = true
-                                                                searchIMUButton.text = "Search for IMU"
-                                                                mAppConf.updateParamEnum("app_to_use", previousApp)
-                                                                mCommands.setAppConfNoStore()
-                                                                updateIMUType()
+                                                                onIMUSearchCompleted(previousApp)
                                                             })
                                                         }else{
-                                                            searchIMUButton.enabled = true
-                                                            searchIMUButton.text = "Search for IMU"
-                                                            mAppConf.updateParamEnum("app_to_use", previousApp)
-                                                            mCommands.setAppConfNoStore()
+                                                            onIMUSearchCompleted(previousApp)
                                                         }
                                                     })
                                                 }else{
-                                                    searchIMUButton.enabled = true
-                                                    searchIMUButton.text = "Search for IMU"
-                                                    mAppConf.updateParamEnum("app_to_use", previousApp)
-                                                    mCommands.setAppConfNoStore()
+                                                    onIMUSearchCompleted(previousApp)
                                                 }
                                             })
                                         }else{
-                                            searchIMUButton.enabled = true
-                                            searchIMUButton.text = "Search for IMU"
-                                            mAppConf.updateParamEnum("app_to_use", previousApp)
-                                            mCommands.setAppConfNoStore()
+                                            onIMUSearchCompleted(previousApp)
                                         }
                                     })
                                 }else{
-                                    searchIMUButton.enabled = true
-                                    searchIMUButton.text = "Search for IMU"
-                                    mAppConf.updateParamEnum("app_to_use", previousApp)
-                                    mCommands.setAppConfNoStore()
+                                    onIMUSearchCompleted(previousApp)
                                 }
                             })
                         }
@@ -824,6 +835,7 @@ Item {
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.03)
                                 mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
+                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -836,6 +848,7 @@ Item {
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.03)
                                 mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
+                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -854,6 +867,7 @@ Item {
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.02)
                                 mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
+                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -872,6 +886,7 @@ Item {
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 0.02)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 2.0)
                                 mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 1.0)
+                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 100.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -882,7 +897,8 @@ Item {
                                 "AHRS: " + getAHRS() + "\n" +
                                 "Acc Decay: " + mAppConf.getParamDouble("imu_conf.accel_confidence_decay").toFixed(3) + "\n" +
                                 "Mahony kp: " + mAppConf.getParamDouble("imu_conf.mahony_kp").toFixed(3) + "\n" +
-                                "Accel Z Filter: " + mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z").toFixed(1)
+                                "Accel Z Filter: " + mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z").toFixed(1) + "\n" +
+                                "Gyro Filter: " + mAppConf.getParamDouble("imu_conf.gyro_lowpass_filter").toFixed(1)
                         }
 
                         id: configuratorText5
@@ -922,8 +938,14 @@ Item {
                         dialog.close()
                         openTimer.stop()
                     } else if(stackLayout.currentIndex === pages.configurator){
-                        mCommands.getAppConf()
-                        mCommands.setAppConf()
+                        mAppConf.updateParamEnum("imu_conf.type", configuratorRestore.type)
+                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", configuratorRestore.sample_rate_hz)
+                        mAppConf.updateParamEnum("imu_conf.mode", configuratorRestore.mode)
+                        mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", configuratorRestore.accel_confidence_decay)
+                        mAppConf.updateParamDouble("imu_conf.mahony_kp", configuratorRestore.mahony_kp)
+                        mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", configuratorRestore.accel_lowpass_filter_z)
+                        mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", configuratorRestore.gyro_lowpass_filter)
+                        mCommands.setAppConfNoStore()
                         stackLayout.currentIndex = pages.menu
                     } else {
                         stackLayout.currentIndex = pages.menu
@@ -1235,6 +1257,9 @@ Item {
                 imuType = 4
             }else if(internalTypeString === "LSM6DS3"){
                 imuType = 5
+            }else if(internalTypeString === "-> imu_type_internal \n"){
+                imuString = "Internal: Read error, redo search."
+                imuType = 1
             }
         }else if(imuType === 2){ //MPU6050
             imuString = "MPU6050"

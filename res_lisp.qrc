@@ -40,5 +40,6 @@
         <file>res/Lisp/Examples/est_temp.lisp</file>
         <file>res/Lisp/Examples/plot_interpolation.lisp</file>
         <file>res/Lisp/Examples/input_capture.lisp</file>
+        <file>res/Lisp/Examples/event_custom_data.lisp</file>
     </qresource>
 </RCC>

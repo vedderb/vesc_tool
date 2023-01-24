@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1035</width>
-    <height>590</height>
+    <height>615</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,7 +104,11 @@
          <widget class="QWidget" name="layoutWidget1">
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
-            <widget class="QTextBrowser" name="storeBrowser"/>
+            <widget class="VTextBrowser" name="storeBrowser">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="installButton">
@@ -456,6 +460,11 @@
    <extends>QWidget</extends>
    <header>widgets/displaypercentage.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VTextBrowser</class>
+   <extends>QTextEdit</extends>
+   <header>widgets/vtextbrowser.h</header>
   </customwidget>
  </customwidgets>
  <resources>

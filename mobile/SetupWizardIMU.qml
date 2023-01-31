@@ -27,6 +27,7 @@ Item {
     property int imuType: 0
     property string imuString: "Unknown"
     property var configuratorRestore: ({})
+    property var orientationRestore: ({})
     property var filteredIMUValues: {
         'roll': 0.0,
         'pitch': 0.0,
@@ -263,6 +264,24 @@ Item {
                         flat: false
 
                         onClicked: {
+                            orientationRestore = {
+                                "rot_roll": mAppConf.getParamDouble("imu_conf.rot_roll"),
+                                "rot_pitch": mAppConf.getParamDouble("imu_conf.rot_pitch"),
+                                "rot_yaw": mAppConf.getParamDouble("imu_conf.rot_yaw"),
+                                "gyro_offsets__0": mAppConf.getParamDouble("imu_conf.gyro_offsets__0"),
+                                "gyro_offsets__1": mAppConf.getParamDouble("imu_conf.gyro_offsets__1"),
+                                "gyro_offsets__2": mAppConf.getParamDouble("imu_conf.gyro_offsets__2"),
+                                "accel_offsets__0": mAppConf.getParamDouble("imu_conf.accel_offsets__0"),
+                                "accel_offsets__1": mAppConf.getParamDouble("imu_conf.accel_offsets__1"),
+                                "accel_offsets__2": mAppConf.getParamDouble("imu_conf.accel_offsets__2"),
+                            }
+                            mAppConf.updateParamDouble("imu_conf.rot_roll", 0, null)
+                            mAppConf.updateParamDouble("imu_conf.rot_pitch", 0, null)
+                            mAppConf.updateParamDouble("imu_conf.rot_yaw", 0, null)
+                            applyRotationToCalibrationConfig(0, 0, -orientationRestore.rot_yaw * pi/180)
+                            applyRotationToCalibrationConfig(0, -orientationRestore.rot_pitch * pi/180, 0)
+                            applyRotationToCalibrationConfig(-orientationRestore.rot_roll * pi/180, 0, 0)
+                            mCommands.setAppConfNoStore()
                             stackLayout.currentIndex = pages.orientationRoll
                         }
                     }
@@ -579,6 +598,7 @@ Item {
                         flat: true
 
                         onClicked: {
+                            applyRollOffset(orientationRestore.rot_roll * pi/180)
                             stackLayout.currentIndex = pages.orientationPitch
                         }
                     }// Button
@@ -631,6 +651,7 @@ Item {
                         flat: true
 
                         onClicked: {
+                            applyPitchOffset(orientationRestore.rot_pitch * pi/180)
                             stackLayout.currentIndex = pages.orientationYaw
                         }
                     }// Button
@@ -683,6 +704,7 @@ Item {
                         flat: true
 
                         onClicked: {
+                            applyYawOffset(orientationRestore.rot_yaw * pi/180)
                             stackLayout.currentIndex = pages.menu
                         }
                     }// Button
@@ -947,6 +969,20 @@ Item {
                         mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", configuratorRestore.gyro_lowpass_filter)
                         mCommands.setAppConfNoStore()
                         stackLayout.currentIndex = pages.menu
+                    } else if(stackLayout.currentIndex === pages.orientationRoll ||
+                              stackLayout.currentIndex === pages.orientationPitch ||
+                              stackLayout.currentIndex === pages.orientationYaw){
+                        mAppConf.updateParamDouble("imu_conf.rot_roll", orientationRestore.rot_roll, null)
+                        mAppConf.updateParamDouble("imu_conf.rot_pitch", orientationRestore.rot_pitch, null)
+                        mAppConf.updateParamDouble("imu_conf.rot_yaw", orientationRestore.rot_yaw, null)
+                        mAppConf.updateParamDouble("imu_conf.gyro_offsets__0", orientationRestore.gyro_offsets__0, null)
+                        mAppConf.updateParamDouble("imu_conf.gyro_offsets__1", orientationRestore.gyro_offsets__1, null)
+                        mAppConf.updateParamDouble("imu_conf.gyro_offsets__2", orientationRestore.gyro_offsets__2, null)
+                        mAppConf.updateParamDouble("imu_conf.accel_offsets__0", orientationRestore.accel_offsets__0, null)
+                        mAppConf.updateParamDouble("imu_conf.accel_offsets__1", orientationRestore.accel_offsets__1, null)
+                        mAppConf.updateParamDouble("imu_conf.accel_offsets__2", orientationRestore.accel_offsets__2, null)
+                        mCommands.setAppConfNoStore()
+                        stackLayout.currentIndex = pages.menu
                     } else {
                         stackLayout.currentIndex = pages.menu
                     }
@@ -1011,25 +1047,13 @@ Item {
                         mCommands.setAppConf()
                         stackLayout.currentIndex = pages.menu
                     }else if(stackLayout.currentIndex === pages.orientationRoll){
-                        var roll = -filteredIMUValues.roll
-                        applyRollOffset(roll)
-                        mCommands.setAppConf()
+                        applyRollOffset(-filteredIMUValues.roll)
                         stackLayout.currentIndex = pages.orientationPitch
                     }else if(stackLayout.currentIndex === pages.orientationPitch){
-                        var pitch = filteredIMUValues.pitch
-                        applyPitchOffset(pitch)
-                        mCommands.setAppConf()
+                        applyPitchOffset(filteredIMUValues.pitch)
                         stackLayout.currentIndex = pages.orientationYaw
                     }else if(stackLayout.currentIndex === pages.orientationYaw){
-                        var yaw = -calculatedYawOffset
-                        mAppConf.updateParamDouble(
-                        "imu_conf.rot_yaw",
-                        constrainDegrees(mAppConf.getParamDouble("imu_conf.rot_yaw") + (yaw * 180.0/pi)),
-                        null
-                        )
-                        applyRotationToCalibrationConfig(0, 0, yaw)
-
-                        mCommands.setAppConf()
+                        applyYawOffset(-calculatedYawOffset)
                         stackLayout.currentIndex = pages.menu
                     }else if(stackLayout.currentIndex === pages.configurator){
                         mCommands.setAppConf()
@@ -1116,91 +1140,21 @@ Item {
     }
 
     function applyRollOffset(roll){
-        // Read previous offsets before modifying so we can translate calibration
-        var previousOffsetRoll = mAppConf.getParamDouble("imu_conf.rot_roll") * pi/180
-        var previousOffsetPitch = mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180
-        var previousOffsetYaw = mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
-
-        // Calculate derotated roll offset
-        var derotatedOffset = rotateEulerAngles(
-                    {"roll": roll, "pitch": 0, "yaw": 0},
-                    {"roll": 0, "pitch": 0, "yaw": -previousOffsetYaw}
-        )
-        derotatedOffset = rotateEulerAngles(
-                    {"roll": derotatedOffset.roll, "pitch": derotatedOffset.pitch, "yaw": derotatedOffset.yaw},
-                    {"roll": 0, "pitch": -previousOffsetPitch, "yaw": 0}
-        )
-
-        // Update settings
-        mAppConf.updateParamDouble(
-        "imu_conf.rot_roll",
-        (mAppConf.getParamDouble("imu_conf.rot_roll") + (derotatedOffset.roll * 180.0/pi)),
-        null
-        )
-        mAppConf.updateParamDouble(
-        "imu_conf.rot_pitch",
-        (mAppConf.getParamDouble("imu_conf.rot_pitch") + (derotatedOffset.pitch * 180.0/pi)),
-        null
-        )
-        mAppConf.updateParamDouble(
-        "imu_conf.rot_yaw",
-        (mAppConf.getParamDouble("imu_conf.rot_yaw") + (derotatedOffset.yaw * 180.0/pi)),
-        null
-        )
-
-        // Remove rotation from calibration offsets
-        // TODO: Add a derotate function instead of 3 successive rotations
-        applyRotationToCalibrationConfig(0, 0, -previousOffsetYaw)
-        applyRotationToCalibrationConfig(0, -previousOffsetPitch, 0)
-        applyRotationToCalibrationConfig(-previousOffsetRoll, 0, 0)
-        // Apply new rotation to calibration
-        applyRotationToCalibrationConfig(
-                    mAppConf.getParamDouble("imu_conf.rot_roll") * pi/180,
-                    mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180,
-                    mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
-                    )
+        mAppConf.updateParamDouble("imu_conf.rot_roll", roll * 180.0/pi, null)
+        applyRotationToCalibrationConfig(roll, 0, 0)
+        mCommands.setAppConfNoStore()
     }
 
     function applyPitchOffset(pitch){
-        // Read previous offsets before modifying so we can translate calibration
-        var previousOffsetRoll = mAppConf.getParamDouble("imu_conf.rot_roll") * pi/180
-        var previousOffsetPitch = mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180
-        var previousOffsetYaw = mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
+        mAppConf.updateParamDouble("imu_conf.rot_pitch", pitch * 180.0/pi, null)
+        applyRotationToCalibrationConfig(0, pitch, 0)
+        mCommands.setAppConfNoStore()
+    }
 
-        // Calculate derotated pitch offset
-        var derotatedOffset = rotateEulerAngles(
-                    {"roll": 0, "pitch": pitch, "yaw": 0},
-                    {"roll": 0, "pitch": 0, "yaw": -previousOffsetYaw}
-        )
-
-        // Update settings
-        mAppConf.updateParamDouble(
-        "imu_conf.rot_roll",
-        (mAppConf.getParamDouble("imu_conf.rot_roll") + (derotatedOffset.roll * 180.0/pi)),
-        null
-        )
-        mAppConf.updateParamDouble(
-        "imu_conf.rot_pitch",
-        (mAppConf.getParamDouble("imu_conf.rot_pitch") + (derotatedOffset.pitch * 180.0/pi)),
-        null
-        )
-        mAppConf.updateParamDouble(
-        "imu_conf.rot_yaw",
-        (mAppConf.getParamDouble("imu_conf.rot_yaw") + (derotatedOffset.yaw * 180.0/pi)),
-        null
-        )
-
-        // Remove rotation from calibration offsets
-        // TODO: Add a derotate function instead of 3 successive rotations
-        applyRotationToCalibrationConfig(0, 0, -previousOffsetYaw)
-        applyRotationToCalibrationConfig(0, -previousOffsetPitch, 0)
-        applyRotationToCalibrationConfig(-previousOffsetRoll, 0, 0)
-        // Apply new rotation to calibration
-        applyRotationToCalibrationConfig(
-                    mAppConf.getParamDouble("imu_conf.rot_roll") * pi/180,
-                    mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180,
-                    mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
-                    )
+    function applyYawOffset(yaw){
+        mAppConf.updateParamDouble("imu_conf.rot_yaw", yaw * 180.0/pi, null)
+        applyRotationToCalibrationConfig(0, 0, yaw)
+        mCommands.setAppConf()
     }
 
     function applyRotationToCalibrationConfig(roll, pitch, yaw){

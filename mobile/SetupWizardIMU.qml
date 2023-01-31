@@ -26,6 +26,8 @@ Item {
     property bool workingIMU: false
     property int imuType: 0
     property string imuString: "Unknown"
+    property var configuratorRestore: ({})
+    property var orientationRestore: ({})
     property var filteredIMUValues: {
         'roll': 0.0,
         'pitch': 0.0,
@@ -214,6 +216,15 @@ Item {
                         flat: false
 
                         onClicked: {
+                            configuratorRestore = {
+                                "type": mAppConf.getParamEnum("imu_conf.type"),
+                                "sample_rate_hz": mAppConf.getParamInt("imu_conf.sample_rate_hz"),
+                                "mode": mAppConf.getParamEnum("imu_conf.mode"),
+                                "accel_confidence_decay": mAppConf.getParamDouble("imu_conf.accel_confidence_decay"),
+                                "mahony_kp": mAppConf.getParamDouble("imu_conf.mahony_kp"),
+                                "accel_lowpass_filter_z": mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z"),
+                                "gyro_lowpass_filter": mAppConf.getParamDouble("imu_conf.gyro_lowpass_filter")
+                            }
                             configuratorRadioDefault.checked = true
                             configuratorRadioDefault.onClicked()
                             updateIMUType()
@@ -253,6 +264,24 @@ Item {
                         flat: false
 
                         onClicked: {
+                            orientationRestore = {
+                                "rot_roll": mAppConf.getParamDouble("imu_conf.rot_roll"),
+                                "rot_pitch": mAppConf.getParamDouble("imu_conf.rot_pitch"),
+                                "rot_yaw": mAppConf.getParamDouble("imu_conf.rot_yaw"),
+                                "gyro_offsets__0": mAppConf.getParamDouble("imu_conf.gyro_offsets__0"),
+                                "gyro_offsets__1": mAppConf.getParamDouble("imu_conf.gyro_offsets__1"),
+                                "gyro_offsets__2": mAppConf.getParamDouble("imu_conf.gyro_offsets__2"),
+                                "accel_offsets__0": mAppConf.getParamDouble("imu_conf.accel_offsets__0"),
+                                "accel_offsets__1": mAppConf.getParamDouble("imu_conf.accel_offsets__1"),
+                                "accel_offsets__2": mAppConf.getParamDouble("imu_conf.accel_offsets__2"),
+                            }
+                            mAppConf.updateParamDouble("imu_conf.rot_roll", 0, null)
+                            mAppConf.updateParamDouble("imu_conf.rot_pitch", 0, null)
+                            mAppConf.updateParamDouble("imu_conf.rot_yaw", 0, null)
+                            applyRotationToCalibrationConfig(0, 0, -orientationRestore.rot_yaw * pi/180)
+                            applyRotationToCalibrationConfig(0, -orientationRestore.rot_pitch * pi/180, 0)
+                            applyRotationToCalibrationConfig(-orientationRestore.rot_roll * pi/180, 0, 0)
+                            mCommands.setAppConfNoStore()
                             stackLayout.currentIndex = pages.orientationRoll
                         }
                     }
@@ -569,6 +598,7 @@ Item {
                         flat: true
 
                         onClicked: {
+                            applyRollOffset(orientationRestore.rot_roll * pi/180)
                             stackLayout.currentIndex = pages.orientationPitch
                         }
                     }// Button
@@ -621,6 +651,7 @@ Item {
                         flat: true
 
                         onClicked: {
+                            applyPitchOffset(orientationRestore.rot_pitch * pi/180)
                             stackLayout.currentIndex = pages.orientationYaw
                         }
                     }// Button
@@ -664,7 +695,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "Yaw Offset: " + (calculatedYawOffset * 180.0/pi).toFixed(2)
+                        text: "Yaw Offset: " + (-(calculatedYawOffset * 180.0/pi).toFixed(2))
                     }// Text
                     Button {
                         id: skipYawButton
@@ -673,6 +704,7 @@ Item {
                         flat: true
 
                         onClicked: {
+                            applyYawOffset(orientationRestore.rot_yaw * pi/180)
                             stackLayout.currentIndex = pages.menu
                         }
                     }// Button
@@ -723,6 +755,23 @@ Item {
                         text: "Search for IMU"
                         flat: false
 
+                        function onIMUSearchCompleted(previousApp) {
+                            searchIMUButton.enabled = true
+                            searchIMUButton.text = "Search for IMU"
+                            mAppConf.updateParamEnum("app_to_use", previousApp)
+                            mCommands.setAppConfNoStore()
+                            updateIMUType()
+                            if(configuratorRadioDefault.checked){
+                                configuratorRadioDefault.onClicked()
+                            }else if(configuratorRadioLogs.checked){
+                                configuratorRadioLogs.onClicked()
+                            }else if(configuratorRadioBUni.checked){
+                                configuratorRadioBUni.onClicked()
+                            }else if(configuratorRadioBSkate.checked){
+                                configuratorRadioBSkate.onClicked()
+                            }
+                        }
+
                         onClicked: {
                             searchIMUButton.enabled = false
                             searchIMUButton.text = "Searching...."
@@ -761,38 +810,22 @@ Item {
                                                                 if(!workingIMU){
                                                                     mAppConf.updateParamEnum("imu_conf.type", 0)
                                                                 }
-                                                                searchIMUButton.enabled = true
-                                                                searchIMUButton.text = "Search for IMU"
-                                                                mAppConf.updateParamEnum("app_to_use", previousApp)
-                                                                mCommands.setAppConfNoStore()
-                                                                updateIMUType()
+                                                                onIMUSearchCompleted(previousApp)
                                                             })
                                                         }else{
-                                                            searchIMUButton.enabled = true
-                                                            searchIMUButton.text = "Search for IMU"
-                                                            mAppConf.updateParamEnum("app_to_use", previousApp)
-                                                            mCommands.setAppConfNoStore()
+                                                            onIMUSearchCompleted(previousApp)
                                                         }
                                                     })
                                                 }else{
-                                                    searchIMUButton.enabled = true
-                                                    searchIMUButton.text = "Search for IMU"
-                                                    mAppConf.updateParamEnum("app_to_use", previousApp)
-                                                    mCommands.setAppConfNoStore()
+                                                    onIMUSearchCompleted(previousApp)
                                                 }
                                             })
                                         }else{
-                                            searchIMUButton.enabled = true
-                                            searchIMUButton.text = "Search for IMU"
-                                            mAppConf.updateParamEnum("app_to_use", previousApp)
-                                            mCommands.setAppConfNoStore()
+                                            onIMUSearchCompleted(previousApp)
                                         }
                                     })
                                 }else{
-                                    searchIMUButton.enabled = true
-                                    searchIMUButton.text = "Search for IMU"
-                                    mAppConf.updateParamEnum("app_to_use", previousApp)
-                                    mCommands.setAppConfNoStore()
+                                    onIMUSearchCompleted(previousApp)
                                 }
                             })
                         }
@@ -824,6 +857,7 @@ Item {
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.03)
                                 mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
+                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -836,6 +870,7 @@ Item {
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.03)
                                 mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
+                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -854,6 +889,7 @@ Item {
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.02)
                                 mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
+                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -872,6 +908,7 @@ Item {
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 0.02)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 2.0)
                                 mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 1.0)
+                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 100.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }
@@ -882,7 +919,8 @@ Item {
                                 "AHRS: " + getAHRS() + "\n" +
                                 "Acc Decay: " + mAppConf.getParamDouble("imu_conf.accel_confidence_decay").toFixed(3) + "\n" +
                                 "Mahony kp: " + mAppConf.getParamDouble("imu_conf.mahony_kp").toFixed(3) + "\n" +
-                                "Accel Z Filter: " + mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z").toFixed(1)
+                                "Accel Z Filter: " + mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z").toFixed(1) + "\n" +
+                                "Gyro Filter: " + mAppConf.getParamDouble("imu_conf.gyro_lowpass_filter").toFixed(1)
                         }
 
                         id: configuratorText5
@@ -922,8 +960,28 @@ Item {
                         dialog.close()
                         openTimer.stop()
                     } else if(stackLayout.currentIndex === pages.configurator){
-                        mCommands.getAppConf()
-                        mCommands.setAppConf()
+                        mAppConf.updateParamEnum("imu_conf.type", configuratorRestore.type)
+                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", configuratorRestore.sample_rate_hz)
+                        mAppConf.updateParamEnum("imu_conf.mode", configuratorRestore.mode)
+                        mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", configuratorRestore.accel_confidence_decay)
+                        mAppConf.updateParamDouble("imu_conf.mahony_kp", configuratorRestore.mahony_kp)
+                        mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", configuratorRestore.accel_lowpass_filter_z)
+                        mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", configuratorRestore.gyro_lowpass_filter)
+                        mCommands.setAppConfNoStore()
+                        stackLayout.currentIndex = pages.menu
+                    } else if(stackLayout.currentIndex === pages.orientationRoll ||
+                              stackLayout.currentIndex === pages.orientationPitch ||
+                              stackLayout.currentIndex === pages.orientationYaw){
+                        mAppConf.updateParamDouble("imu_conf.rot_roll", orientationRestore.rot_roll, null)
+                        mAppConf.updateParamDouble("imu_conf.rot_pitch", orientationRestore.rot_pitch, null)
+                        mAppConf.updateParamDouble("imu_conf.rot_yaw", orientationRestore.rot_yaw, null)
+                        mAppConf.updateParamDouble("imu_conf.gyro_offsets__0", orientationRestore.gyro_offsets__0, null)
+                        mAppConf.updateParamDouble("imu_conf.gyro_offsets__1", orientationRestore.gyro_offsets__1, null)
+                        mAppConf.updateParamDouble("imu_conf.gyro_offsets__2", orientationRestore.gyro_offsets__2, null)
+                        mAppConf.updateParamDouble("imu_conf.accel_offsets__0", orientationRestore.accel_offsets__0, null)
+                        mAppConf.updateParamDouble("imu_conf.accel_offsets__1", orientationRestore.accel_offsets__1, null)
+                        mAppConf.updateParamDouble("imu_conf.accel_offsets__2", orientationRestore.accel_offsets__2, null)
+                        mCommands.setAppConfNoStore()
                         stackLayout.currentIndex = pages.menu
                     } else {
                         stackLayout.currentIndex = pages.menu
@@ -989,47 +1047,13 @@ Item {
                         mCommands.setAppConf()
                         stackLayout.currentIndex = pages.menu
                     }else if(stackLayout.currentIndex === pages.orientationRoll){
-                        var roll = -filteredIMUValues.roll
-                        mAppConf.updateParamDouble(
-                        "imu_conf.rot_roll",
-                        (mAppConf.getParamDouble("imu_conf.rot_roll") + (roll * 180.0/pi)),
-                        null
-                        )
-                        var yawRotation = mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
-                        var pitchRotation = mAppConf.getParamDouble("imu_conf.rot_pitch") * pi/180
-                        applyRotationToCalibrationConfig(0, 0, -yawRotation)
-                        applyRotationToCalibrationConfig(0, -pitchRotation, 0)
-                        applyRotationToCalibrationConfig(roll, 0, 0)
-                        applyRotationToCalibrationConfig(0, pitchRotation, 0)
-                        applyRotationToCalibrationConfig(0, 0, yawRotation)
-
-                        mCommands.setAppConf()
+                        applyRollOffset(-filteredIMUValues.roll)
                         stackLayout.currentIndex = pages.orientationPitch
                     }else if(stackLayout.currentIndex === pages.orientationPitch){
-                        var pitch = filteredIMUValues.pitch
-                        mAppConf.updateParamDouble(
-                        "imu_conf.rot_pitch",
-                        (mAppConf.getParamDouble("imu_conf.rot_pitch") + (pitch * 180.0/pi)),
-                        null
-                        )
-
-                        var yawRotation = mAppConf.getParamDouble("imu_conf.rot_yaw") * pi/180
-                        applyRotationToCalibrationConfig(0, 0, -yawRotation)
-                        applyRotationToCalibrationConfig(0, pitch, 0)
-                        applyRotationToCalibrationConfig(0, 0, yawRotation)
-
-                        mCommands.setAppConf()
+                        applyPitchOffset(filteredIMUValues.pitch)
                         stackLayout.currentIndex = pages.orientationYaw
                     }else if(stackLayout.currentIndex === pages.orientationYaw){
-                        var yaw = calculatedYawOffset
-                        mAppConf.updateParamDouble(
-                        "imu_conf.rot_yaw",
-                        (mAppConf.getParamDouble("imu_conf.rot_yaw") + (yaw * 180.0/pi)),
-                        null
-                        )
-                        applyRotationToCalibrationConfig(0, 0, yaw)
-
-                        mCommands.setAppConf()
+                        applyYawOffset(-calculatedYawOffset)
                         stackLayout.currentIndex = pages.menu
                     }else if(stackLayout.currentIndex === pages.configurator){
                         mCommands.setAppConf()
@@ -1045,29 +1069,49 @@ Item {
 
     }//Dialog
 
-    function applyRotationToCalibrationConfig(roll, pitch, yaw){
+    function constrainDegrees(degrees){
+        if(degrees > 360){
+            return degrees - 360
+        }else if (degrees < -360){
+            return degrees + 360
+        }else{
+            return degrees
+        }
+    }
+
+    function constrainRadians(radians){
+        if(radians > 360){
+            return radians - 360
+        }else if (radians < -360){
+            return radians + 360
+        }else{
+            return radians
+        }
+    }
+
+    function rotateEulerAngles(angles, rotation){
         // Calculate sin & cos
         var s1, c1, s2, c2, s3, c3
 
-        if (yaw !== 0.0) {
-            s1 = Math.sin(yaw)
-            c1 = Math.cos(yaw)
+        if (rotation.yaw !== 0.0) {
+            s1 = Math.sin(rotation.yaw)
+            c1 = Math.cos(rotation.yaw)
         } else {
             s1 = 0.0
             c1 = 1.0
         }
 
-        if (pitch !== 0.0) {
-            s2 = Math.sin(pitch)
-            c2 = Math.cos(pitch)
+        if (rotation.pitch !== 0.0) {
+            s2 = Math.sin(rotation.pitch)
+            c2 = Math.cos(rotation.pitch)
         } else {
             s2 = 0.0
             c2 = 1.0
         }
 
-        if (roll !== 0.0) {
-            s3 = Math.sin(roll)
-            c3 = Math.cos(roll)
+        if (rotation.roll !== 0.0) {
+            s3 = Math.sin(rotation.roll)
+            c3 = Math.cos(rotation.roll)
         } else {
             s3 = 0.0
             c3 = 1.0
@@ -1086,6 +1130,34 @@ Item {
         var m32 = c2 * s3
         var m33 = c2 * c3
 
+
+        // Calculate and return rotated angles
+        return {
+            "roll": angles.roll * m11 + angles.pitch * m12 + angles.yaw * m13,
+            "pitch": angles.roll * m21 + angles.pitch * m22 + angles.yaw * m23,
+            "yaw": angles.roll * m31 + angles.pitch * m32 + angles.yaw * m33
+        }
+    }
+
+    function applyRollOffset(roll){
+        mAppConf.updateParamDouble("imu_conf.rot_roll", roll * 180.0/pi, null)
+        applyRotationToCalibrationConfig(roll, 0, 0)
+        mCommands.setAppConfNoStore()
+    }
+
+    function applyPitchOffset(pitch){
+        mAppConf.updateParamDouble("imu_conf.rot_pitch", pitch * 180.0/pi, null)
+        applyRotationToCalibrationConfig(0, pitch, 0)
+        mCommands.setAppConfNoStore()
+    }
+
+    function applyYawOffset(yaw){
+        mAppConf.updateParamDouble("imu_conf.rot_yaw", yaw * 180.0/pi, null)
+        applyRotationToCalibrationConfig(0, 0, yaw)
+        mCommands.setAppConf()
+    }
+
+    function applyRotationToCalibrationConfig(roll, pitch, yaw){
         // Read current calibration
         var offsetGyroX = mAppConf.getParamDouble("imu_conf.gyro_offsets__0")
         var offsetGyroY = mAppConf.getParamDouble("imu_conf.gyro_offsets__1")
@@ -1096,74 +1168,32 @@ Item {
         var offsetAccelZ = mAppConf.getParamDouble("imu_conf.accel_offsets__2")
 
         // Calculate rotated calibration
-        var rotatedOffsetGyroX = offsetGyroX * m11 + offsetGyroY * m12 + offsetGyroZ * m13;
-        var rotatedOffsetGyroY = offsetGyroX * m21 + offsetGyroY * m22 + offsetGyroZ * m23;
-        var rotatedOffsetGyroZ = offsetGyroX * m31 + offsetGyroY * m32 + offsetGyroZ * m33;
+        var rotatedGyroOffsets = rotateEulerAngles(
+                    {"roll": offsetGyroX, "pitch": offsetGyroY, "yaw": offsetGyroZ},
+                    {"roll": roll, "pitch": pitch, "yaw": yaw}
+        )
+        var rotatedAccelOffsets = rotateEulerAngles(
+                    {"roll": offsetAccelX, "pitch": offsetAccelY, "yaw": offsetAccelZ},
+                    {"roll": roll, "pitch": pitch, "yaw": yaw}
+        )
 
-        var rotatedOffsetAccelX = offsetAccelX * m11 + offsetAccelY * m12 + offsetAccelZ * m13;
-        var rotatedOffsetAccelY = offsetAccelX * m21 + offsetAccelY * m22 + offsetAccelZ * m23;
-        var rotatedOffsetAccelZ = offsetAccelX * m31 + offsetAccelY * m32 + offsetAccelZ * m33;
+        // Update settings (roll = x, pitch = y, yaw = z)
+        mAppConf.updateParamDouble("imu_conf.gyro_offsets__0", rotatedGyroOffsets.roll, null)
+        mAppConf.updateParamDouble("imu_conf.gyro_offsets__1", rotatedGyroOffsets.pitch, null)
+        mAppConf.updateParamDouble("imu_conf.gyro_offsets__2", rotatedGyroOffsets.yaw, null)
 
-        // Update settings
-        mAppConf.updateParamDouble("imu_conf.gyro_offsets__0", rotatedOffsetGyroX, null)
-        mAppConf.updateParamDouble("imu_conf.gyro_offsets__1", rotatedOffsetGyroY, null)
-        mAppConf.updateParamDouble("imu_conf.gyro_offsets__2", rotatedOffsetGyroZ, null)
-
-        mAppConf.updateParamDouble("imu_conf.accel_offsets__0", rotatedOffsetAccelX, null)
-        mAppConf.updateParamDouble("imu_conf.accel_offsets__1", rotatedOffsetAccelY, null)
-        mAppConf.updateParamDouble("imu_conf.accel_offsets__2", rotatedOffsetAccelZ, null)
+        mAppConf.updateParamDouble("imu_conf.accel_offsets__0", rotatedAccelOffsets.roll, null)
+        mAppConf.updateParamDouble("imu_conf.accel_offsets__1", rotatedAccelOffsets.pitch, null)
+        mAppConf.updateParamDouble("imu_conf.accel_offsets__2", rotatedAccelOffsets.yaw, null)
     }
 
     function getPitchForYawOffset(yaw){
-        var roll = 0
-        var pitch = 0
+        var rotated = rotateEulerAngles(
+                    {"roll": filteredIMUValues.roll, "pitch": filteredIMUValues.pitch, "yaw": filteredIMUValues.yaw},
+                    {"roll": 0, "pitch": 0, "yaw": yaw}
+        )
 
-        // Calculate sin & cos
-        var s1, c1, s2, c2, s3, c3
-
-        if (yaw !== 0.0) {
-            s1 = Math.sin(yaw)
-            c1 = Math.cos(yaw)
-        } else {
-            s1 = 0.0
-            c1 = 1.0
-        }
-
-        if (pitch !== 0.0) {
-            s2 = Math.sin(pitch)
-            c2 = Math.cos(pitch)
-        } else {
-            s2 = 0.0
-            c2 = 1.0
-        }
-
-        if (roll !== 0.0) {
-            s3 = Math.sin(roll)
-            c3 = Math.cos(roll)
-        } else {
-            s3 = 0.0
-            c3 = 1.0
-        }
-
-        // Create rotation matrix
-        var m11 = c1 * c2
-        var m12 = c1 * s2 * s3 - c3 * s1
-        var m13 = s1 * s3 + c1 * c3 * s2
-
-        var m21 = c2 * s1
-        var m22 = c1 * c3 + s1 * s2 * s3
-        var m23 = c3 * s1 * s2 - c1 * s3
-
-        var m31 = -s2
-        var m32 = c2 * s3
-        var m33 = c2 * c3
-
-        // Apply rotation to calibrations
-        var rotatedRoll  = filteredIMUValues.roll * m11 + filteredIMUValues.pitch * m12 + filteredIMUValues.yaw * m13;
-        var rotatedPitch = filteredIMUValues.roll * m21 + filteredIMUValues.pitch * m22 + filteredIMUValues.yaw * m23;
-        var rotatedYaw   = filteredIMUValues.roll * m31 + filteredIMUValues.pitch * m32 + filteredIMUValues.yaw * m33;
-
-        return rotatedPitch
+        return rotated.pitch
     }
 
     function updateIMUType(){
@@ -1181,6 +1211,9 @@ Item {
                 imuType = 4
             }else if(internalTypeString === "LSM6DS3"){
                 imuType = 5
+            }else if(internalTypeString === "-> imu_type_internal \n"){
+                imuString = "Internal: Read error, redo search."
+                imuType = 1
             }
         }else if(imuType === 2){ //MPU6050
             imuString = "MPU6050"

@@ -203,20 +203,6 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="2" column="1">
-           <widget class="QProgressBar" name="memBar">
-            <property name="value">
-             <number>0</number>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Stack</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
@@ -245,8 +231,8 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QProgressBar" name="stackBar">
+          <item row="2" column="1">
+           <widget class="QProgressBar" name="memBar">
             <property name="value">
              <number>0</number>
             </property>
@@ -760,6 +746,17 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>VTextBrowser</class>
+   <extends>QTextEdit</extends>
+   <header>widgets/vtextbrowser.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEditor</class>
+   <extends>QWidget</extends>
+   <header>widgets/scripteditor.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
    <header>widgets/qcustomplot.h</header>
@@ -769,17 +766,6 @@
    <class>ExperimentPlot</class>
    <extends>QWidget</extends>
    <header>widgets/experimentplot.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>VTextBrowser</class>
-   <extends>QTextEdit</extends>
-   <header>widgets/vtextbrowser.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ScriptEditor</class>
-   <extends>QWidget</extends>
-   <header>widgets/scripteditor.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

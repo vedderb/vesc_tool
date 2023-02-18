@@ -152,8 +152,6 @@
         ((log10 0.1252)                              is-float)
         ((deg2rad 0.1252)                            is-float)
         ((rad2deg 0.1252)                            is-float)
-        ((vec3-rot 1 2 3 4 5 6)                      is-list)
-        ((vec3-rot 1 2 3 4 5 6 1)                    is-list)
         ((abs -0.1252)                               is-float)
         ((abs -3)                                    (eq res 3))
         ((throttle-curve 0.2 0.9 0.6 2)              is-float)

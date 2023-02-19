@@ -23,6 +23,7 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QFileDialog>
+#include <QProcess>
 #include <QListWidgetItem>
 #include <cmath>
 #include <QEventLoop>
@@ -1171,6 +1172,7 @@ void MainWindow::on_actionExit_triggered()
     qApp->exit();
 }
 
+#ifndef Q_OS_IOS
 void MainWindow::on_actionLaunchBoardConfigurator_triggered()
 {
     QString program = qApp->arguments()[0];
@@ -1186,6 +1188,7 @@ void MainWindow::on_actionLaunchMobileTool_triggered()
     qApp->quit();
     QProcess::startDetached(program, params);
 }
+#endif
 
 void MainWindow::on_actionAbout_triggered()
 {

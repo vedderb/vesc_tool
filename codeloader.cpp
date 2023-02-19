@@ -799,18 +799,12 @@ bool CodeLoader::installVescPackageFromPath(QString path)
 QVariantList CodeLoader::reloadPackageArchive()
 {
     QVariantList res;
-#ifdef Q_OS_IOS
-    QString path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/vesc_pkg_all.rcc";
-    QFile file(path);
-    if (!file.exists()) {
-        if (!file.open(QIODevice::ReadWrite))
-            qDebug() << "can't open";
-        file.close();
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if(!QDir(appDataLoc).exists()) {
+            QDir().mkpath(appDataLoc);
     }
-#else
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/vesc_pkg_all.rcc";
+    QString path = appDataLoc + "/vesc_pkg_all.rcc";
     QFile file(path);
-#endif
     if (file.exists()) {
         QResource::unregisterResource(path);
         QResource::registerResource(path);
@@ -860,11 +854,11 @@ bool CodeLoader::downloadPackageArchive()
     loop.exec();
 
     if (reply->error() == QNetworkReply::NoError) {
-#ifdef Q_OS_IOS
-        QString path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/vesc_pkg_all.rcc";
-#else
-        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/vesc_pkg_all.rcc";
-#endif
+        QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        if(!QDir(appDataLoc).exists()) {
+                QDir().mkpath(appDataLoc);
+        }
+        QString path = appDataLoc + "/vesc_pkg_all.rcc";
         QResource::unregisterResource(path);
         QFile file(path);
         if (file.open(QIODevice::WriteOnly)) {

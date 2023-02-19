@@ -111,8 +111,10 @@ private slots:
     void on_actionSaveAppconfXml_triggered();
     void on_actionLoadAppconfXml_triggered();
     void on_actionExit_triggered();
+    #ifndef Q_OS_IOS
     void on_actionLaunchBoardConfigurator_triggered();
     void on_actionLaunchMobileTool_triggered();
+    #endif
     void on_actionAbout_triggered();
     void on_actionLibrariesUsed_triggered();
     void on_dutyButton_clicked();

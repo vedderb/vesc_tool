@@ -212,8 +212,11 @@ bool FwHelper::uploadFirmwareSingleShotTimer(QString filename, VescInterface *ve
 QVariantMap FwHelper::getArchiveDirs()
 {
     QVariantMap fws;
-
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw.rcc";
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if(!QDir(appDataLoc).exists()) {
+        QDir().mkpath(appDataLoc);
+    }
+    QString path = appDataLoc + "/res_fw.rcc";
     QFile file(path);
     if (file.exists()) {
         QResource::unregisterResource(path);

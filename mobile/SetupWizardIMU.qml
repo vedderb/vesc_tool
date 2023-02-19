@@ -588,7 +588,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "Roll Offset: " + (filteredIMUValues.roll * 180.0/pi).toFixed(2)
+                        text: "Roll Offset: " + ((-filteredIMUValues.roll * 180.0/pi) - orientationRestore.rot_roll).toFixed(2)
                     }// Text
 
                     Button {
@@ -642,7 +642,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "Pitch Offset: " + (filteredIMUValues.pitch * 180.0/pi).toFixed(2)
+                        text: "Pitch Offset: " + ((filteredIMUValues.pitch * 180.0/pi) - orientationRestore.rot_pitch).toFixed(2)
                     }// Text
                     Button {
                         id: skipPitchButton
@@ -695,7 +695,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "Yaw Offset: " + (-(calculatedYawOffset * 180.0/pi).toFixed(2))
+                        text: "Yaw Offset: " + ((-calculatedYawOffset * 180.0/pi) - orientationRestore.rot_yaw).toFixed(2)
                     }// Text
                     Button {
                         id: skipYawButton
@@ -898,9 +898,9 @@ Item {
                             text: "Balance Skateboard"
                             onClicked: {
                                 if(imuType == 4){
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 400)
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 800)
                                 }else if(imuType == 5){
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 416)
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 832)
                                 }else{
                                     mAppConf.updateParamInt("imu_conf.sample_rate_hz", 1000)
                                 }
@@ -908,7 +908,7 @@ Item {
                                 mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 0.02)
                                 mAppConf.updateParamDouble("imu_conf.mahony_kp", 2.0)
                                 mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 1.0)
-                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 100.0)
+                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
                                 configuratorText5.text = configuratorText5.getText()
                             }
                         }

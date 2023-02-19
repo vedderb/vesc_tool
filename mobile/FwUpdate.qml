@@ -625,6 +625,17 @@ Item {
 
         onAccepted: {
             archUpdateButton.enabled = false
+            workaroundTimerDl.start()
+        }
+    }
+
+    Timer {
+        id: workaroundTimerDl
+        interval: 0
+        repeat: false
+        running: false
+        onTriggered: {
+            // dlArchive...
             VescIf.downloadFwArchive()
             updateArch(VescIf.getLastFwRxParams())
             archUpdateButton.enabled = true

@@ -17,7 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-
+#include <QFileDialog>
+#include <QMessageBox>
 #include "experimentplot.h"
 #include "ui_experimentplot.h"
 #include "utility.h"

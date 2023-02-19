@@ -1,4 +1,4 @@
-﻿/*
+/*
     Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
@@ -3993,8 +3993,11 @@ bool VescInterface::downloadFwArchive()
     QNetworkAccessManager manager;
     QNetworkRequest request(url);
     QNetworkReply *reply = manager.get(request);
-
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw.rcc";
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if(!QDir(appDataLoc).exists()) {
+        QDir().mkpath(appDataLoc);
+    }
+    QString path = appDataLoc + "/res_fw.rcc";
     QFile file(path);
     QResource::unregisterResource(path);
     if (file.open(QIODevice::WriteOnly)) {

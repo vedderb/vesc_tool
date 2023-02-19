@@ -799,7 +799,11 @@ bool CodeLoader::installVescPackageFromPath(QString path)
 QVariantList CodeLoader::reloadPackageArchive()
 {
     QVariantList res;
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/vesc_pkg_all.rcc";
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if(!QDir(appDataLoc).exists()) {
+            QDir().mkpath(appDataLoc);
+    }
+    QString path = appDataLoc + "/vesc_pkg_all.rcc";
     QFile file(path);
     if (file.exists()) {
         QResource::unregisterResource(path);
@@ -850,7 +854,11 @@ bool CodeLoader::downloadPackageArchive()
     loop.exec();
 
     if (reply->error() == QNetworkReply::NoError) {
-        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/vesc_pkg_all.rcc";
+        QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        if(!QDir(appDataLoc).exists()) {
+                QDir().mkpath(appDataLoc);
+        }
+        QString path = appDataLoc + "/vesc_pkg_all.rcc";
         QResource::unregisterResource(path);
         QFile file(path);
         if (file.open(QIODevice::WriteOnly)) {

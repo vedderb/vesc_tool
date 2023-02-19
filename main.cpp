@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2021 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2023 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -28,12 +28,14 @@
 #include "pages/pagemotorcomparison.h"
 #include "codeloader.h"
 #include "configparam.h"
+#include "utility.h"
 
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
 #include <QDesktopWidget>
 #include <QFontDatabase>
+#include <QPixmapCache>
 
 #include "tcphub.h"
 
@@ -52,6 +54,7 @@
 #ifndef USE_MOBILE
 
 #include <QProxyStyle>
+#include <QtConcurrent/QtConcurrent>
 
 // Disables focus drawing for all widgets
 class Style_tweaks : public QProxyStyle
@@ -126,6 +129,7 @@ int main(int argc, char *argv[])
     QSettings set;
     bool isDark = set.value("darkMode", true).toBool();
     Utility::setDarkMode(isDark);
+    QPixmapCache::setCacheLimit(256000);
 
     if (isDark) {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2_dark.conf");
@@ -270,7 +274,6 @@ int main(int argc, char *argv[])
 
         if ((dash && str.contains('h')) || str == "--help") {
             showHelp();
-            found = true;
             return 0;
         }
 
@@ -345,6 +348,7 @@ int main(int argc, char *argv[])
                 return 1;
             }
         }
+
         if (str == "--tcpHub") {
             if ((i + 1) < args.size()) {
                 i++;
@@ -353,6 +357,7 @@ int main(int argc, char *argv[])
                 found = true;
             }
         }
+
         if (str == "--buildPkg") {
             if ((i + 1) < args.size()) {
                 i++;
@@ -731,6 +736,7 @@ int main(int argc, char *argv[])
             bw = new BoardSetupWindow;
             bw->show();
         } else {
+            QPixmapCache::setCacheLimit(256000);
             w = new MainWindow;
             w->show();
         }

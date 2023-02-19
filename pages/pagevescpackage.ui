@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1035</width>
-    <height>590</height>
+    <height>615</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,13 +29,6 @@
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <widget class="QPushButton" name="uninstallButton">
-           <property name="text">
-            <string>Uninstall Current</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <widget class="DisplayPercentage" name="displayDl" native="true">
            <property name="sizePolicy">
@@ -111,15 +104,19 @@
          <widget class="QWidget" name="layoutWidget1">
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
-            <widget class="QTextBrowser" name="storeBrowser"/>
+            <widget class="VTextBrowser" name="storeBrowser">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="installButton">
-             <property name="text">
-              <string>Install to VESC</string>
-             </property>
              <property name="toolTip">
               <string>Uninstall current package and install the selected package to the connected VESC</string>
+             </property>
+             <property name="text">
+              <string>Install</string>
              </property>
             </widget>
            </item>
@@ -191,15 +188,15 @@
           </item>
           <item>
            <widget class="QPushButton" name="writeButton">
+            <property name="toolTip">
+             <string>Uninstall current package and install the selected package to the connected VESC</string>
+            </property>
             <property name="text">
-             <string>Install to VESC</string>
+             <string>Install</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
-            </property>
-            <property name="toolTip">
-             <string>Uninstall current package and install the selected package to the connected VESC</string>
             </property>
            </widget>
           </item>
@@ -420,6 +417,35 @@
      </widget>
     </widget>
    </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Tools</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QPushButton" name="uninstallButton">
+        <property name="text">
+         <string>Uninstall Current</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -434,6 +460,11 @@
    <extends>QWidget</extends>
    <header>widgets/displaypercentage.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VTextBrowser</class>
+   <extends>QTextEdit</extends>
+   <header>widgets/vtextbrowser.h</header>
   </customwidget>
  </customwidgets>
  <resources>

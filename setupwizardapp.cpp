@@ -44,8 +44,7 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
 
     setStartId(Page_Intro);
     setWizardStyle(ModernStyle);
-    QString theme = Utility::getThemePath();
-    QPixmap icon_logo = QIcon(":/res/icon.svg").pixmap(QSize(this->devicePixelRatioF() * 48, this->devicePixelRatioF() * 48));
+    QPixmap icon_logo = QIcon(Utility::getIcon(":/res/icon.svg")).pixmap(QSize(this->devicePixelRatioF() * 48, this->devicePixelRatioF() * 48));
     icon_logo.setDevicePixelRatio(this->devicePixelRatioF());
     setPixmap(QWizard::LogoPixmap, icon_logo);
     resize(800, 450);
@@ -53,7 +52,7 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     setWindowTitle(tr("App Setup Wizard"));
 
     mSideLabel = new AspectImgLabel(Qt::Vertical);
-    mSideLabel->setPixmap(QPixmap(theme +"logo_vertical.png"));
+    mSideLabel->setPixmap(Utility::getIcon("logo_vertical.png"));
     mSideLabel->setScaledContents(true);
     setSideWidget(mSideLabel);
 
@@ -100,7 +99,9 @@ AppIntroPage::AppIntroPage(VescInterface *vesc, QWidget *parent)
 int AppIntroPage::nextId() const
 {
     if (mVesc->isPortConnected()) {
-        if (mVesc->commands()->isLimitedMode() || !mResetInputOk) {
+        if ((mVesc->commands()->isLimitedMode() &&
+             !mVesc->commands()->getLimitedCompatibilityCommands().contains(int(COMM_GET_APPCONF))) ||
+                !mResetInputOk) {
             return SetupWizardApp::Page_Firmware;
         } else {
             if (mVesc->getCanDevsLast().size() == 0) {
@@ -174,7 +175,8 @@ AppConnectionPage::AppConnectionPage(VescInterface *vesc, QWidget *parent)
 
 int AppConnectionPage::nextId() const
 {
-    if (mVesc->commands()->isLimitedMode()) {
+    if (mVesc->commands()->isLimitedMode() &&
+            !mVesc->commands()->getLimitedCompatibilityCommands().contains(int(COMM_GET_APPCONF))) {
         return SetupWizardApp::Page_Firmware;
     } else {
         return SetupWizardApp::Page_Multi;
@@ -241,13 +243,11 @@ void AppMultiPage::initializePage()
     FW_RX_PARAMS params;
     Utility::getFwVersionBlocking(mVesc, &params);
 
-    QString theme = Utility::getThemePath();
-
     if (params.hwType == HW_TYPE_VESC) {
         QListWidgetItem *item = new QListWidgetItem;
         item->setText(tr("This VESC (ID: %1)").
                       arg(mVesc->appConfig()->getParamInt("controller_id")));
-        item->setIcon(QIcon(theme +"icons/Connected-96.png"));
+        item->setIcon(Utility::getIcon("icons/Connected-96.png"));
         item->setData(Qt::UserRole, -1);
         mCanFwdList->addItem(item);
     }
@@ -266,7 +266,7 @@ void AppMultiPage::initializePage()
 
         QListWidgetItem *item = new QListWidgetItem;
         item->setText(tr("VESC with ID: %1").arg(dev));
-        item->setIcon(QIcon(theme +"icons/can_off.png"));
+        item->setIcon(Utility::getIcon("icons/can_off.png"));
         item->setData(Qt::UserRole, dev);
         mCanFwdList->addItem(item);
     }
@@ -406,8 +406,7 @@ AppNunchukPage::AppNunchukPage(VescInterface *vesc, QWidget *parent)
     mNrfPair = new NrfPair;
     mTimer = new QTimer(this);
     mWriteButton = new QPushButton(tr(" | Write Configuration To Vesc"));
-    QString theme = Utility::getThemePath();
-    mWriteButton->setIcon(QIcon(theme +"icons/app_down.png"));
+    mWriteButton->setIcon(Utility::getIcon("icons/app_down.png"));
     mWriteButton->setIconSize(QSize(24, 24));
 
     mNrfPair->setVesc(mVesc);
@@ -594,8 +593,7 @@ AppPpmPage::AppPpmPage(VescInterface *vesc, QWidget *parent)
 
     mParamTab = new ParamTable;
     mWriteButton = new QPushButton(tr(" | Write Configuration To Vesc"));
-    QString theme = Utility::getThemePath();
-    mWriteButton->setIcon(QIcon(theme +"icons/app_down.png"));
+    mWriteButton->setIcon(Utility::getIcon("icons/app_down.png"));
     mWriteButton->setIconSize(QSize(24, 24));
 
     QVBoxLayout *layout = new QVBoxLayout;
@@ -743,8 +741,7 @@ AppAdcPage::AppAdcPage(VescInterface *vesc, QWidget *parent)
 
     mParamTab = new ParamTable;
     mWriteButton = new QPushButton(tr(" | Write Configuration To Vesc"));
-    QString theme = Utility::getThemePath();
-    mWriteButton->setIcon(QIcon(theme +"icons/app_down.png"));
+    mWriteButton->setIcon(Utility::getIcon("icons/app_down.png"));
     mWriteButton->setIconSize(QSize(24, 24));
 
     QVBoxLayout *layout = new QVBoxLayout;

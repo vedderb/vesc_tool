@@ -119,89 +119,92 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setWindowIcon(QIcon(":/res/icon.svg"));
 
-    QString theme = Utility::getThemePath();
-    ui->actionParameterEditorMcconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionParameterEditorAppconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionParameterEditorFW->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionParameterEditorCustomConf0->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionSaveAppconfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionPreferences->setIcon(QPixmap(theme + "icons/Settings-96.png"));
-    ui->actionLoadAppconfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->actionSaveMotorConfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionLoadMotorConfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->actionSaveAppConfigurationHeader->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionSaveAppConfigurationHeaderWrap->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionSaveMotorConfigurationHeader->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionSaveMotorConfigurationHeaderWrap->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionExportConfigurationParser->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionTerminalPrintFaults->setIcon(QPixmap(theme + "icons/Console-96.png"));
-    ui->actionTerminalShowHelp->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->actionTerminalClear->setIcon(QPixmap(theme + "icons/Delete-96.png"));
-    ui->actionTerminalPrintThreads->setIcon(QPixmap(theme + "icons/Electronics-96.png"));
-    ui->actionTerminalDRVResetLatchedFaults->setIcon(QPixmap(theme + "icons/Bug-96.png"));
-    ui->actionLibrariesUsed->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionMotorSetupWizard->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
-    ui->actionAppSetupWizard->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
-    ui->actionAutoSetupFOC->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
-    ui->actionSetupMotorsFOCQuick->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
-    ui->actionAboutQt->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionParameterEditorInfo->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionSafetyInformation->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionVESCToolChangelog->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionFirmwareChangelog->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionWarrantyStatement->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionLicense->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionVESCProjectForums->setIcon(QPixmap(theme + "icons/User Group Man Man-96.png"));
-    ui->actionLoadFirmwareConfigs->setIcon(QPixmap(theme + "icons/Electronics-96.png"));
-    ui->actionBackupConfiguration->setIcon(QPixmap(theme + "icons/Save-96.png"));
-    ui->actionBackupConfigurationsCAN->setIcon(QPixmap(theme + "icons/Save-96.png"));
-    ui->actionRestoreConfiguration->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->actionRestoreConfigurationsCAN->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->actionClearConfigurationBackups->setIcon(QPixmap(theme + "icons/Delete-96.png"));
-    ui->actionBackupConfiguration->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionReboot->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->actionExit->setIcon(QPixmap(theme + "icons/Shutdown-96.png"));
-    ui->pageLabel->setPixmap(QPixmap(theme + "logo.png"));
-    ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-96.png"));
-    ui->actionDisconnect->setIcon(QIcon(theme + "icons/Disconnected-96.png"));
-    ui->actionReadMcconf->setIcon(QIcon(theme + "icons/motor_up.png"));
-    ui->actionReadMcconfDefault->setIcon(QIcon(theme + "icons/motor_default.png"));
-    ui->actionWriteMcconf->setIcon(QIcon(theme + "icons/motor_down.png"));
-    ui->actionReadAppconf->setIcon(QIcon(theme + "icons/app_up.png"));
-    ui->actionReadAppconfDefault->setIcon(QIcon(theme + "icons/app_default.png"));
-    ui->actionWriteAppconf->setIcon(QIcon(theme + "icons/app_down.png"));
+    ui->actionParameterEditorMcconf->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorAppconf->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorFW->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorCustomConf0->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionSaveAppconfXml->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionPreferences->setIcon(Utility::getIcon("icons/Settings-96.png"));
+    ui->actionLoadAppconfXml->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->actionSaveMotorConfXml->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionLoadMotorConfXml->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->actionSaveAppConfigurationHeader->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionSaveAppConfigurationHeaderWrap->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionSaveMotorConfigurationHeader->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionSaveMotorConfigurationHeaderWrap->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionExportConfigurationParser->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionTerminalPrintFaults->setIcon(Utility::getIcon("icons/Console-96.png"));
+    ui->actionTerminalShowHelp->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->actionTerminalClear->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->actionTerminalPrintThreads->setIcon(Utility::getIcon("icons/Electronics-96.png"));
+    ui->actionTerminalDRVResetLatchedFaults->setIcon(Utility::getIcon("icons/Bug-96.png"));
+    ui->actionLibrariesUsed->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionMotorSetupWizard->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->actionAppSetupWizard->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->actionAutoSetupFOC->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->actionSetupMotorsFOCQuick->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->actionAboutQt->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionParameterEditorInfo->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionSafetyInformation->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionVESCToolChangelog->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionFirmwareChangelog->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionWarrantyStatement->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionAbout->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionLicense->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionVESCProjectForums->setIcon(Utility::getIcon("icons/User Group Man Man-96.png"));
+    ui->actionLoadFirmwareConfigs->setIcon(Utility::getIcon("icons/Electronics-96.png"));
+    ui->actionBackupConfiguration->setIcon(Utility::getIcon("icons/Save-96.png"));
+    ui->actionBackupConfigurationsCAN->setIcon(Utility::getIcon("icons/Save-96.png"));
+    ui->actionRestoreConfiguration->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->actionRestoreConfigurationsCAN->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->actionClearConfigurationBackups->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->actionBackupConfiguration->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionReboot->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->actionExit->setIcon(Utility::getIcon("icons/Shutdown-96.png"));
+    ui->pageLabel->setPixmap(Utility::getIcon("logo.png"));
+    ui->actionReconnect->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->actionDisconnect->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->actionReadMcconf->setIcon(Utility::getIcon("icons/motor_up.png"));
+    ui->actionReadMcconfDefault->setIcon(Utility::getIcon("icons/motor_default.png"));
+    ui->actionWriteMcconf->setIcon(Utility::getIcon("icons/motor_down.png"));
+    ui->actionReadAppconf->setIcon(Utility::getIcon("icons/app_up.png"));
+    ui->actionReadAppconfDefault->setIcon(Utility::getIcon("icons/app_default.png"));
+    ui->actionWriteAppconf->setIcon(Utility::getIcon("icons/app_down.png"));
+    ui->actionLaunchMobileTool->setIcon(Utility::getIcon("icons/v_icon-96.png"));
+    ui->actionLaunchBoardConfigurator->setIcon(Utility::getIcon("icons/v_icon-96.png"));
 
-    QIcon mycon = QIcon(theme + "icons/keys_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/keys_on.png"), QIcon::Normal, QIcon::On);
+    QIcon mycon = QIcon(Utility::getIcon("icons/keys_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/keys_on.png"), QIcon::Normal, QIcon::On);
     ui->actionKeyboardControl->setIcon(mycon);
-    ui->actionGamepadControl->setIcon(QIcon(theme + "icons/Controller-96.png"));
-    mycon = QIcon(theme + "icons/rt_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/rt_on.png"), QIcon::Normal, QIcon::On);
+    ui->actionGamepadControl->setIcon(Utility::getIcon("icons/Controller-96.png"));
+    mycon = QIcon(Utility::getIcon("icons/rt_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/rt_on.png"), QIcon::Normal, QIcon::On);
     ui->actionRtData->setIcon(mycon);
-    mycon = QIcon(theme + "icons/rt_app_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/rt_app_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/rt_app_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/rt_app_on.png"), QIcon::Normal, QIcon::On);
     ui->actionRtDataApp->setIcon(mycon);
-    mycon = QIcon(theme + "icons/imu_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/imu_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/imu_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/imu_on.png"), QIcon::Normal, QIcon::On);
     ui->actionIMU->setIcon(mycon);
-    mycon = QIcon(theme + "icons/bms_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/bms_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/bms_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/bms_on.png"), QIcon::Normal, QIcon::On);
     ui->actionrtDataBms->setIcon(mycon);
-    mycon = QIcon(theme + "icons/alive_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/alive_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/alive_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/alive_on.png"), QIcon::Normal, QIcon::On);
     ui->actionSendAlive->setIcon(mycon);
-    mycon = QIcon(theme + "icons/can_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/can_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/can_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/can_on.png"), QIcon::Normal, QIcon::On);
     ui->actionCanFwd->setIcon(mycon);
-    ui->scanCanButton->setIcon(QIcon(theme + "icons/Refresh-96.png"));
+    ui->scanCanButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
 
-    ui->dutyButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
-    ui->currentButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
-    ui->speedButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
-    ui->posButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
-    ui->brakeCurrentButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
-    ui->handbrakeButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
-    ui->fullBrakeButton->setIcon(QIcon(theme + "icons/Anchor-96.png"));
+    ui->dutyButton->setIcon(Utility::getIcon( "icons/Circled Play-96.png"));
+    ui->currentButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->speedButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->posButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->brakeCurrentButton->setIcon(Utility::getIcon("icons/Brake Warning-96.png"));
+    ui->stopButton->setIcon(Utility::getIcon("icons/Stop Sign-96.png"));
+    ui->handbrakeButton->setIcon(Utility::getIcon("icons/Brake Warning-96.png"));
+    ui->fullBrakeButton->setIcon(Utility::getIcon("icons/Anchor-96.png"));
 
     qRegisterMetaType<QtMsgType>("QtMsgType");
 
@@ -252,7 +255,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *fwMenu = new QMenu(this);
     fwMenu->setTitle("Load Firmware Configs");
-    fwMenu->setIcon(QIcon( theme + "icons/Electronics-96.png"));
+    fwMenu->setIcon(Utility::getIcon("icons/Electronics-96.png"));
     for (auto fw: Utility::configSupportedFws()) {
         QAction *action = new QAction(fwMenu);
         action->setText(QString("%1.%2").arg(fw.first).arg(fw.second, 2, 10, QChar('0')));
@@ -268,11 +271,10 @@ MainWindow::MainWindow(QWidget *parent) :
     auto reloadBackupMenu = [this, backupMenu]() {
         backupMenu->clear();
         backupMenu->setTitle("Load Configuration Backups for UUID");
-        QString theme = Utility::getThemePath();
-        backupMenu->setIcon(QIcon( theme + "icons/Open Folder-96.png"));
+        backupMenu->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
         for (auto uuid: mVesc->confListBackups()) {
             QAction *action = new QAction(backupMenu);
-            action->setIcon(QIcon( theme + "icons/Electronics-96.png"));
+            action->setIcon(Utility::getIcon("icons/Electronics-96.png"));
             QString txt = uuid;
             QString name = mVesc->confBackupName(uuid);
             if (!name.isEmpty()) {
@@ -516,12 +518,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mPortTimer.start(1000);
     connect(&mPortTimer, &QTimer::timeout, [this]() {
-        QString theme = Utility::getThemePath();
-
         if (!mVesc->isPortConnected() && mVesc->lastPortAvailable()) {
-            ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-hl-96.png"));
+            ui->actionReconnect->setIcon(Utility::getIcon("icons/Connected-hl-96.png"));
         } else {
-            ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-96.png"));
+            ui->actionReconnect->setIcon(Utility::getIcon("icons/Connected-96.png"));
         }
 
         ui->actionReconnect->setEnabled(!mVesc->isPortConnected());
@@ -1171,6 +1171,22 @@ void MainWindow::on_actionExit_triggered()
     qApp->exit();
 }
 
+void MainWindow::on_actionLaunchBoardConfigurator_triggered()
+{
+    QString program = qApp->arguments()[0];
+    QStringList params = QStringList() << "--useBoardSetupWindow" ;
+    qApp->quit();
+    QProcess::startDetached(program, params);
+}
+
+void MainWindow::on_actionLaunchMobileTool_triggered()
+{
+    QString program = qApp->arguments()[0];
+    QStringList params = QStringList() << "--useMobileUi" ;
+    qApp->quit();
+    QProcess::startDetached(program, params);
+}
+
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "VESC Tool", Utility::aboutText());
@@ -1314,8 +1330,6 @@ void MainWindow::reloadPages()
             mPageWelcome, SLOT(startSetupWizardApp()));
     connect(ui->actionSetupMotorsFOCQuick, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardFocSimple()));
-
-
 
     mPageConnection = new PageConnection(this);
     mPageConnection->setVesc(mVesc);

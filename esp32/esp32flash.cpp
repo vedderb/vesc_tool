@@ -129,13 +129,18 @@ bool Esp32Flash::flashFirmware(QByteArray data, size_t address)
     const uint8_t *bin_addr = (uint8_t*)data.data();
 
     emit stateUpdate("Erasing flash (this may take a while)...");
+    Utility::sleepWithEventLoop(500);
+
     err = esp_loader_flash_start(address, size, sizeof(payload));
     if (err != ESP_LOADER_SUCCESS) {
-        emit stateUpdate(QString("Erasing flash failed with error: %1").arg(err));
+        QString errStr = QString("Erasing flash failed with error: %1").arg(err);
+        emit stateUpdate(errStr);
+        qWarning() << errStr;
         return false;
     }
 
     emit stateUpdate("Programming...");
+    Utility::sleepWithEventLoop(500);
 
     size_t binary_size = size;
     size_t written = 0;
@@ -146,7 +151,9 @@ bool Esp32Flash::flashFirmware(QByteArray data, size_t address)
 
         err = esp_loader_flash_write(payload, to_read);
         if (err != ESP_LOADER_SUCCESS) {
-            emit stateUpdate(QString("Packet could not be written! Error: %1").arg(err));
+            QString errStr = QString("Packet could not be written! Code: %1").arg(err);
+            emit stateUpdate(errStr);
+            qWarning() << errStr;
             return false;
         }
 
@@ -158,10 +165,18 @@ bool Esp32Flash::flashFirmware(QByteArray data, size_t address)
     };
 
     emit stateUpdate("Done, verifying flash...");
+    Utility::sleepWithEventLoop(500);
 
     err = esp_loader_flash_verify();
     if (err != ESP_LOADER_SUCCESS) {
-        emit stateUpdate(QString("MD5 does not match. err: %1").arg(err));
+        QString errStr = QString("MD5 error. Code: %1").arg(err);
+
+        if (err == ESP_LOADER_ERROR_TIMEOUT) {
+            errStr = "MD5 Timeout, but probably OK";
+        }
+
+        emit stateUpdate(errStr);
+        qWarning() << errStr;
         return false;
     }
     emit stateUpdate("Flash verified");

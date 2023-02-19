@@ -29,15 +29,15 @@ AdcMap::AdcMap(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->resetButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
-    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->resetButton->setIcon(Utility::getIcon("icons/Restart-96.png"));
+    ui->applyButton->setIcon(Utility::getIcon("icons/Ok-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
     mResetDone = true;
-    on_controlTypeBox_currentIndexChanged(ui->controlTypeBox->currentIndex());
+
+    on_dualBox_toggled(ui->dualBox->isChecked());
 }
 
 AdcMap::~AdcMap()
@@ -55,11 +55,6 @@ void AdcMap::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ConfigParam *p = mVesc->appConfig()->getParam("app_adc_conf.ctrl_type");
-        if (p) {
-            ui->controlTypeBox->addItems(p->enumNames);
-        }
-
         connect(mVesc->commands(), SIGNAL(decodedAdcReceived(double,double,double,double)),
                 this, SLOT(decodedAdcReceived(double,double,double,double)));
     }
@@ -133,38 +128,6 @@ void AdcMap::decodedAdcReceived(double value, double voltage, double value2, dou
     }
 }
 
-void AdcMap::on_controlTypeBox_currentIndexChanged(int index)
-{
-    // Cast to the enum to get a warning when unhandled cases
-    // are added in datatypes.h.
-    switch (adc_control_type(index)) {
-    case ADC_CTRL_TYPE_CURRENT_REV_CENTER:
-    case ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_CENTER:
-    case ADC_CTRL_TYPE_DUTY_REV_CENTER:
-    case ADC_CTRL_TYPE_PID_REV_CENTER:
-    case ADC_CTRL_TYPE_CURRENT_REV_BUTTON_BRAKE_CENTER:
-        ui->displayCh1->setDual(true);
-        break;
-
-    case ADC_CTRL_TYPE_NONE:
-    case ADC_CTRL_TYPE_CURRENT:
-    case ADC_CTRL_TYPE_CURRENT_REV_BUTTON:
-    case ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_BUTTON:
-    case ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_ADC:
-    case ADC_CTRL_TYPE_DUTY:
-    case ADC_CTRL_TYPE_DUTY_REV_BUTTON:
-    case ADC_CTRL_TYPE_PID_REV_BUTTON:
-    case ADC_CTRL_TYPE_CURRENT_REV_BUTTON_BRAKE_ADC:
-    case ADC_CTRL_TYPE_PID:
-        ui->displayCh1->setDual(false);
-        break;
-    }
-
-    ui->displayCh1->setEnabled(index != ADC_CTRL_TYPE_NONE);
-    ui->displayCh2->setEnabled(index == ADC_CTRL_TYPE_CURRENT_NOREV_BRAKE_ADC ||
-                               index == ADC_CTRL_TYPE_CURRENT_REV_BUTTON_BRAKE_ADC);
-}
-
 void AdcMap::on_helpButton_clicked()
 {
     if (mVesc) {
@@ -198,4 +161,9 @@ void AdcMap::on_applyButton_clicked()
                                  tr("Please activate RT app data and measure the ADC voltages first."));
         }
     }
+}
+
+void AdcMap::on_dualBox_toggled(bool checked)
+{
+    ui->displayCh1->setDual(checked);
 }

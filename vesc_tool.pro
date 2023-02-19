@@ -5,16 +5,16 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 6.00
+VT_VERSION = 6.02
 VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
-11
-# Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 0
 
-VT_ANDROID_VERSION_ARMV7 = 120
-VT_ANDROID_VERSION_ARM64 = 121
-VT_ANDROID_VERSION_X86 = 122
+# Set to 0 for stable versions and to test version number for development versions.
+VT_IS_TEST_VERSION = 3
+
+VT_ANDROID_VERSION_ARMV7 = 126
+VT_ANDROID_VERSION_ARM64 = 127
+VT_ANDROID_VERSION_X86 = 128
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -40,6 +40,9 @@ ios: {
 
 # Build mobile GUI
 #CONFIG += build_mobile
+
+# Exclude built-in firmwares
+#CONFIG += exclude_fw
 
 ios: {
     CONFIG    += build_mobile
@@ -264,12 +267,15 @@ include(QCodeEditor/qcodeeditor.pri)
 include(esp32/esp32.pri)
 
 RESOURCES += res.qrc \
-    res_fw_bms.qrc \
-    res/firmwares/res_fw.qrc \
     res_lisp.qrc \
-    res_qml.qrc \
-    res/firmwares_esp/res_fw_esp.qrc
+    res_qml.qrc
 RESOURCES += res_config.qrc
+
+!exclude_fw {
+    RESOURCES += res_fw_bms.qrc
+    RESOURCES += res/firmwares/res_fw.qrc
+    RESOURCES += res/firmwares_esp/res_fw_esp.qrc
+}
 
 build_original {
     RESOURCES += res_original.qrc

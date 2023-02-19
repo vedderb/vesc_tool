@@ -28,14 +28,13 @@ PageBms::PageBms(QWidget *parent) :
     ui->setupUi(this);
     mVesc = nullptr;
 
-    QString theme = Utility::getThemePath();
-    ui->balOnButton->setIcon(QPixmap(theme + "/icons/Circled Play-96.png"));
-    ui->chgEnButton->setIcon(QPixmap(theme + "/icons/Circled Play-96.png"));
-    ui->balOffButton->setIcon(QPixmap(theme + "/icons/Stop-96.png"));
-    ui->chgDisButton->setIcon(QPixmap(theme + "/icons/Stop-96.png"));
-    ui->resetAhButton->setIcon(QPixmap(theme + "/icons/Restart-96.png"));
-    ui->resetWhButton->setIcon(QPixmap(theme + "/icons/Restart-96.png"));
-    ui->zeroCurrentButton->setIcon(QPixmap(theme + "/icons/Refresh-96.png"));
+    ui->balOnButton->setIcon(Utility::getIcon("/icons/Circled Play-96.png"));
+    ui->chgEnButton->setIcon(Utility::getIcon("/icons/Circled Play-96.png"));
+    ui->balOffButton->setIcon(Utility::getIcon("/icons/Stop-96.png"));
+    ui->chgDisButton->setIcon(Utility::getIcon("/icons/Stop-96.png"));
+    ui->resetAhButton->setIcon(Utility::getIcon("/icons/Restart-96.png"));
+    ui->resetWhButton->setIcon(Utility::getIcon("/icons/Restart-96.png"));
+    ui->zeroCurrentButton->setIcon(Utility::getIcon("/icons/Refresh-96.png"));
 
     ui->valTable->setColumnWidth(0, 200);
     ui->splitter->setSizes(QList<int>({1000, 500}));

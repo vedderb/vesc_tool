@@ -20,7 +20,7 @@
       <enum>Qt::Vertical</enum>
      </property>
      <property name="handleWidth">
-      <number>8</number>
+      <number>4</number>
      </property>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -155,7 +155,7 @@
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabPosition">
-       <enum>QTabWidget::West</enum>
+       <enum>QTabWidget::North</enum>
       </property>
       <property name="tabShape">
        <enum>QTabWidget::Triangular</enum>

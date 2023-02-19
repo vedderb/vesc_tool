@@ -80,6 +80,8 @@
 <name>event-can-eid</name>
 <name>event-data-rx</name>
 <name>event-shutdown</name>
+<name>event-icu-width</name>
+<name>event-icu-period</name>
 <name>stat-speed-avg</name>
 <name>stat-speed-max</name>
 <name>stat-power-avg</name>
@@ -190,7 +192,9 @@
 <name>sysinfo</name>
 <name>stats</name>
 <name>stats-reset</name>
-<name>import</name>
+<name>icu-start</name>
+<name>icu-width</name>
+<name>icu-period</name>
 <name>app-adc-detach</name>
 <name>app-adc-override</name>
 <name>app-ppm-detach</name>
@@ -217,6 +221,9 @@
 <name>get-iq</name>
 <name>get-vd</name>
 <name>get-vq</name>
+<name>get-est-lambda</name>
+<name>get-est-res</name>
+<name>get-est-ind</name>
 <name>get-duty</name>
 <name>get-rpm</name>
 <name>get-temp-fet</name>
@@ -271,6 +278,9 @@
 <name>sqrt</name>
 <name>log</name>
 <name>log10</name>
+<name>floor</name>
+<name>ceil</name>
+<name>round</name>
 <name>deg2rad</name>
 <name>rad2deg</name>
 <name>vec3-rot</name>

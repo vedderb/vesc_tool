@@ -5,8 +5,8 @@
         <file>res/images/ebike_throttle.jpg</file>
         <file>res/images/nunchuk.jpg</file>
         <file>res/images/vedder_nunchuk.jpg</file>
-        <file>res/firmwares/CHANGELOG</file>
-        <file>res/CHANGELOG</file>
+        <file>res/firmwares/CHANGELOG.md</file>
+        <file>res/CHANGELOG.md</file>
         <file>res/images/multi_master.png</file>
         <file>res/images/multi_single.png</file>
         <file>res/images/multi_slave.png</file>
@@ -326,5 +326,7 @@
         <file>res/+theme_light/icons/Package-96.png</file>
         <file>res/icons/Connected-hl-96.png</file>
         <file>res/+theme_light/icons/Connected-hl-96.png</file>
+        <file>res/icons/glow.png</file>
+        <file>res/+theme_light/icons/glow.png</file>
     </qresource>
 </RCC>

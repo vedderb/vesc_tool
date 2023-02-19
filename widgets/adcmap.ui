@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>610</width>
-    <height>145</height>
+    <height>159</height>
    </rect>
   </property>
   <property name="font">
@@ -28,9 +28,12 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QComboBox" name="controlTypeBox">
+         <widget class="QCheckBox" name="dualBox">
           <property name="toolTip">
-           <string>Choose the control type. Some control types have centered input, some don't.</string>
+           <string>Show centered graph, which is how the centered control modes interpret the throttle.</string>
+          </property>
+          <property name="text">
+           <string>Use Centered Control</string>
           </property>
          </widget>
         </item>
@@ -46,11 +49,7 @@
            <string>Show help</string>
           </property>
           <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
+           <string>Help</string>
           </property>
          </widget>
         </item>
@@ -66,11 +65,7 @@
            <string>Reset min and max</string>
           </property>
           <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
+           <string>Reset</string>
           </property>
          </widget>
         </item>
@@ -86,11 +81,7 @@
            <string>Apply min and max to configuration</string>
           </property>
           <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/apply.png</normaloff>:/res/icons/apply.png</iconset>
+           <string>Apply</string>
           </property>
           <property name="iconSize">
            <size>
@@ -302,8 +293,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

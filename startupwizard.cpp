@@ -34,7 +34,6 @@ StartupWizard::StartupWizard(VescInterface *vesc, QWidget *parent)
     setPage(Page_Warranty, new StartupWarrantyPage(vesc));
     setPage(Page_Conclusion, new StartupConclusionPage(vesc));
 
-    QString theme = Utility::getThemePath();
     setStartId(Page_Intro);
     setWizardStyle(ModernStyle);
     QPixmap icon_logo = QIcon(":/res/icon.svg").pixmap(QSize(this->devicePixelRatioF() * 48, this->devicePixelRatioF() * 48));
@@ -45,7 +44,7 @@ StartupWizard::StartupWizard(VescInterface *vesc, QWidget *parent)
     setWindowTitle(tr("VESC Tool Introduction"));
 
     mSideLabel = new AspectImgLabel(Qt::Vertical);
-    mSideLabel->setPixmap(QPixmap(theme + "logo_vertical.png"));
+    mSideLabel->setPixmap(Utility::getIcon("logo_vertical.png"));
     mSideLabel->setScaledContents(true);
     setSideWidget(mSideLabel);
 

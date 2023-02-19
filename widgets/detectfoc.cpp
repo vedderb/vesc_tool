@@ -30,17 +30,16 @@ DetectFoc::DetectFoc(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->pushButton->setIcon(QPixmap(theme + "icons/arrow_r.png"));
-    ui->pushButton_2->setIcon(QPixmap(theme + "icons/arrow_r.png"));
-    ui->pushButton_3->setIcon(QPixmap(theme + "icons/arrow_r.png"));
-    ui->rlButton->setIcon(QPixmap(theme + "icons/rl.png"));
-    ui->lambdaButton->setIcon(QPixmap(theme + "icons/lambda.png"));
-    ui->applyAllButton->setIcon(QPixmap(theme + "icons/apply.png"));
-    ui->calcGainButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
-    ui->calcKpKiButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
-    ui->calcApplyLocalButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->pushButton->setIcon(Utility::getIcon("icons/arrow_r.png"));
+    ui->pushButton_2->setIcon(Utility::getIcon("icons/arrow_r.png"));
+    ui->pushButton_3->setIcon(Utility::getIcon("icons/arrow_r.png"));
+    ui->rlButton->setIcon(Utility::getIcon("icons/rl.png"));
+    ui->lambdaButton->setIcon(Utility::getIcon("icons/lambda.png"));
+    ui->applyAllButton->setIcon(Utility::getIcon("icons/apply.png"));
+    ui->calcGainButton->setIcon(Utility::getIcon("icons/Calculator-96.png"));
+    ui->calcKpKiButton->setIcon(Utility::getIcon("icons/Calculator-96.png"));
+    ui->calcApplyLocalButton->setIcon(Utility::getIcon("icons/Calculator-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;

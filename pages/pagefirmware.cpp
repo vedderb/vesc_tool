@@ -25,11 +25,6 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDirIterator>
-#include <QNetworkAccessManager>
-#include <QUrl>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QEventLoop>
 
 PageFirmware::PageFirmware(QWidget *parent) :
     QWidget(parent),
@@ -40,17 +35,16 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->cancelButton->setEnabled(false);
     mVesc = nullptr;
 
-    QString theme = Utility::getThemePath();
-    ui->changelogButton->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->chooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->choose2Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->choose3Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->choose4Button->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->cancelButton->setIcon(QPixmap(theme + "icons/Cancel-96.png"));
-    ui->uploadButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
-    ui->uploadAllButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
-    ui->readVersionButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
-    ui->dlArchiveButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
+    ui->changelogButton->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->chooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->choose2Button->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->choose3Button->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->choose4Button->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->cancelButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
+    ui->uploadButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->uploadAllButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->readVersionButton->setIcon(Utility::getIcon("icons/Upload-96.png"));
+    ui->dlArchiveButton->setIcon(Utility::getIcon("icons/Download-96.png"));
 
     updateHwList(FW_RX_PARAMS());
     updateBlList(FW_RX_PARAMS());
@@ -105,6 +99,11 @@ void PageFirmware::setVesc(VescInterface *vesc)
                 this, SLOT(fwUploadStatus(QString,double,bool)));
         connect(mVesc, SIGNAL(fwRxChanged(bool,bool)),
                 this, SLOT(fwRxChanged(bool,bool)));
+
+        connect(mVesc, &VescInterface::fwArchiveDlProgress, [this](QString msg, double prog) {
+            ui->displayDl->setText(msg);
+            ui->displayDl->setValue(100.0 * prog);
+        });
     }
 }
 
@@ -659,8 +658,7 @@ void PageFirmware::uploadFw(bool allOverCan)
 
 void PageFirmware::reloadArchive()
 {
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-            "/res_fw.rcc";
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw.rcc";
     QFile file(path);
     if (file.exists()) {
         QResource::unregisterResource(path);
@@ -687,36 +685,11 @@ void PageFirmware::on_dlArchiveButton_clicked()
     ui->dlArchiveButton->setEnabled(false);
     ui->displayDl->setText("Preparing download...");
 
-    QUrl url("http://home.vedder.se/vesc_fw_archive/res_fw.rcc");
-    QNetworkAccessManager manager;
-    QNetworkRequest request(url);
-    QNetworkReply *reply = manager.get(request);
-
-    connect(reply, &QNetworkReply::downloadProgress, [this](qint64 bytesReceived, qint64 bytesTotal) {
-        ui->displayDl->setText("Downloading...");
-        ui->displayDl->setValue(100.0 * (double)bytesReceived / (double)bytesTotal);
-    });
-
-    QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
-
-    if (reply->error() == QNetworkReply::NoError) {
-        ui->displayDl->setText("Download Finished");
-        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-                "/res_fw.rcc";
-        QFile file(path);
-        if (file.open(QIODevice::WriteOnly)) {
-            file.write(reply->readAll());
-            file.close();
+    if (mVesc) {
+        if (mVesc->downloadFwArchive()) {
             reloadArchive();
         }
-    } else {
-        ui->displayDl->setText("Download Failed");
     }
-
-    reply->abort();
-    reply->deleteLater();
 
     ui->dlArchiveButton->setEnabled(true);
 }

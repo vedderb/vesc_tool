@@ -3,5 +3,8 @@
         <file>ESP32-C3/VESC Express/bootloader.bin</file>
         <file>ESP32-C3/VESC Express/partition-table.bin</file>
         <file>ESP32-C3/VESC Express/app.bin</file>
+        <file>ESP32-C3/DevKitM-1/app.bin</file>
+        <file>ESP32-C3/DevKitM-1/bootloader.bin</file>
+        <file>ESP32-C3/DevKitM-1/partition-table.bin</file>
     </qresource>
 </RCC>

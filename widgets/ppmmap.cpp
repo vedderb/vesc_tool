@@ -29,14 +29,15 @@ PpmMap::PpmMap(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
-    ui->resetButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->applyButton->setIcon(Utility::getIcon("icons/apply.png"));
+    ui->applyButton->setIcon(Utility::getIcon("icons/Ok-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
     mResetDone = true;
+
+    on_dualBox_toggled(ui->dualBox->isChecked());
 }
 
 PpmMap::~PpmMap()
@@ -54,11 +55,6 @@ void PpmMap::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ConfigParam *p = mVesc->appConfig()->getParam("app_ppm_conf.ctrl_type");
-        if (p) {
-            ui->controlTypeBox->addItems(p->enumNames);
-        }
-
         connect(mVesc->commands(), SIGNAL(decodedPpmReceived(double,double)),
                 this, SLOT(decodedPpmReceived(double,double)));
     }
@@ -128,32 +124,6 @@ void PpmMap::decodedPpmReceived(double value, double last_len)
     }
 }
 
-void PpmMap::on_controlTypeBox_currentIndexChanged(int index)
-{
-    switch (index) {
-    case 0: // Off
-    case 1: // Current
-    case 3: // Current No Reverse With Brake
-    case 4: // Duty Cycle
-    case 6: // PID Speed Control
-        ui->display->setDual(true);
-        ui->displayVesc->setDual(true);
-        break;
-
-    case 2: // Current No Reverse
-    case 5: // Duty Cycle No Reverse
-    case 7: // PID Speed Control No Reverse
-        ui->display->setDual(false);
-        ui->displayVesc->setDual(false);
-        break;
-
-    default:
-        break;
-    }
-
-    ui->display->setEnabled(index != 0);
-}
-
 void PpmMap::on_helpButton_clicked()
 {
     if (mVesc) {
@@ -183,4 +153,10 @@ void PpmMap::on_applyButton_clicked()
                                  tr("Please activate RT app data and measure the pulselengths first."));
         }
     }
+}
+
+void PpmMap::on_dualBox_toggled(bool checked)
+{
+    ui->display->setDual(checked);
+    ui->displayVesc->setDual(checked);
 }

@@ -30,9 +30,8 @@ DetectBldc::DetectBldc(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->applyButton->setIcon(QPixmap(theme + "icons/apply.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->applyButton->setIcon(Utility::getIcon("icons/apply.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;

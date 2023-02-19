@@ -692,6 +692,9 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
     VescPackage pkg;
     VByteArray vb(qUncompress(data));
 
+    // Yes, packet is a typo and should say package...
+    // That does not matter in practice and changing that now breaks
+    // compatibility.
     if (vb.vbPopFrontString() != "VESC Packet") {
         qWarning() << "Invalid VESC Packet";
         return pkg;
@@ -765,6 +768,9 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
         mVesc->commands()->lispSetRunning(1);
     }
 
+    Utility::sleepWithEventLoop(500);
+    mVesc->reloadFirmware();
+
     return res;
 }
 
@@ -773,6 +779,22 @@ bool CodeLoader::installVescPackage(QByteArray data)
     return installVescPackage(unpackVescPackage(data));
 }
 
+bool CodeLoader::installVescPackageFromPath(QString path)
+{
+    if (path.startsWith("file:/")) {
+        path.remove(0, 6);
+    }
+
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly)) {
+        mVesc->emitMessageDialog(tr("Write Package"),
+                                 tr("Could not open package file for reading."),
+                                 false, false);
+        return false;
+    }
+
+    return installVescPackage(f.readAll());
+}
 
 QVariantList CodeLoader::reloadPackageArchive()
 {
@@ -843,6 +865,7 @@ bool CodeLoader::downloadPackageArchive()
 #else
         QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/vesc_pkg_all.rcc";
 #endif
+        QResource::unregisterResource(path);
         QFile file(path);
         if (file.open(QIODevice::WriteOnly)) {
             file.write(reply->readAll());

@@ -30,15 +30,14 @@ PageEspProg::PageEspProg(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 
-    QString theme = Utility::getThemePath();
-    ui->blChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->partChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->appChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->flashButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
-    ui->flashBlButton->setIcon(QPixmap(theme + "icons/Download-96.png"));
-    ui->serialConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
-    ui->serialDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
-    ui->serialRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
+    ui->blChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->partChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->appChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->flashButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->flashBlButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->serialConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->serialDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->serialRefreshButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
 
     QSettings set;
     if (set.contains("pageespprog/lastcustomblfile")) {
@@ -238,13 +237,13 @@ void PageEspProg::on_flashButton_clicked()
     ui->progWidget->setText("Flashing bootloader...");
     mEspFlash.flashFirmware(fBl.readAll(), 0x0);
 
-    ui->progWidget->setText("Flashing firmware...");
-    ui->progWidget->setValue(0.0);
-    mEspFlash.flashFirmware(fApp.readAll(), ui->appOffsetBox->value());
-
     ui->progWidget->setText("Flashing partition table...");
     ui->progWidget->setValue(0.0);
     mEspFlash.flashFirmware(fPart.readAll(), ui->partOffsetBox->value());
+
+    ui->progWidget->setText("Flashing firmware...");
+    ui->progWidget->setValue(0.0);
+    mEspFlash.flashFirmware(fApp.readAll(), ui->appOffsetBox->value());
 
     ui->flashButton->setEnabled(true);
 }

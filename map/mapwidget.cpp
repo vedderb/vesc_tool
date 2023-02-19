@@ -1183,7 +1183,8 @@ void MapWidget::printPdf(QString path, int width, int height)
     printer.setPageLayout(pageLayout);
 
     QPainter painter(&printer);
-    paint(painter, printer.pageRect().width(), printer.pageRect().height(), true);
+    auto rect = printer.pageLayout().paintRectPixels(printer.resolution());
+    paint(painter, rect.width(), rect.height(), true);
 #endif
 }
 

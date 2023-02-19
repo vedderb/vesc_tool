@@ -37,6 +37,12 @@
 #include <QSerialPortInfo>
 #endif
 
+#include <QNetworkAccessManager>
+#include <QUrl>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
+
 #ifdef HAS_CANBUS
 #include <QCanBus>
 #endif
@@ -3544,6 +3550,39 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_CUSTOM_HW_DATA));
         compCommands.append(int(COMM_QMLUI_ERASE));
         compCommands.append(int(COMM_QMLUI_WRITE));
+        compCommands.append(int(COMM_IO_BOARD_GET_ALL));
+        compCommands.append(int(COMM_IO_BOARD_SET_PWM));
+        compCommands.append(int(COMM_IO_BOARD_SET_DIGITAL));
+        compCommands.append(int(COMM_BM_MEM_WRITE));
+        compCommands.append(int(COMM_BMS_BLNC_SELFTEST));
+        compCommands.append(int(COMM_GET_EXT_HUM_TMP));
+        compCommands.append(int(COMM_GET_STATS));
+    }
+
+    if (fw_connected >= qMakePair(6, 00)) {
+        compCommands.append(int(COMM_RESET_STATS));
+        compCommands.append(int(COMM_LISP_READ_CODE));
+        compCommands.append(int(COMM_LISP_WRITE_CODE));
+        compCommands.append(int(COMM_LISP_ERASE_CODE));
+        compCommands.append(int(COMM_LISP_SET_RUNNING));
+        compCommands.append(int(COMM_LISP_GET_STATS));
+        compCommands.append(int(COMM_LISP_PRINT));
+        compCommands.append(int(COMM_BMS_SET_BATT_TYPE));
+        compCommands.append(int(COMM_BMS_GET_BATT_TYPE));
+        compCommands.append(int(COMM_LISP_REPL_CMD));
+        compCommands.append(int(COMM_LISP_STREAM_CODE));
+        compCommands.append(int(COMM_FILE_LIST));
+        compCommands.append(int(COMM_FILE_READ));
+        compCommands.append(int(COMM_FILE_WRITE));
+        compCommands.append(int(COMM_FILE_MKDIR));
+        compCommands.append(int(COMM_FILE_REMOVE));
+        compCommands.append(int(COMM_LOG_START));
+        compCommands.append(int(COMM_LOG_STOP));
+        compCommands.append(int(COMM_LOG_CONFIG_FIELD));
+        compCommands.append(int(COMM_LOG_DATA_F32));
+        compCommands.append(int(COMM_SET_APPCONF_NO_STORE));
+        compCommands.append(int(COMM_GET_GNSS));
+        compCommands.append(int(COMM_LOG_DATA_F64));
     }
 
     if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {
@@ -3946,6 +3985,49 @@ bool VescInterface::connectTcpHubUuid(QString uuid)
     return false;
 }
 
+bool VescInterface::downloadFwArchive()
+{
+    bool res = false;
+
+    QUrl url("http://home.vedder.se/vesc_fw_archive/res_fw.rcc");
+    QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    QNetworkReply *reply = manager.get(request);
+
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw.rcc";
+    QFile file(path);
+    QResource::unregisterResource(path);
+    if (file.open(QIODevice::WriteOnly)) {
+        auto conn = connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this]
+                            (qint64 bytesReceived, qint64 bytesTotal) {
+            emit fwArchiveDlProgress("Downloading...", (double)bytesReceived / (double)bytesTotal);
+            file.write(reply->read(reply->size()));
+        });
+
+        QEventLoop loop;
+        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        if (reply->error() == QNetworkReply::NoError) {
+            file.write(reply->readAll());
+            emit fwArchiveDlProgress("Download Done", 1.0);
+        } else {
+            emit fwArchiveDlProgress("Download Failed", 0.0);
+        }
+
+        file.close();
+        res = true;
+    } else {
+        emit fwArchiveDlProgress("Could not open local file", 0.0);
+    }
+
+    reply->abort();
+    reply->deleteLater();
+
+    return res;
+}
+
 QString VescInterface::getLastTcpHubServer() const
 {
     return mLastTcpHubServer;
@@ -4034,13 +4116,17 @@ bool VescInterface::confStoreBackup(bool can, QString name)
         commands()->setSendCan(false);
     }
 
-    res = storeConf();
+    FW_RX_PARAMS fwp;
+    Utility::getFwVersionBlocking(this, &fwp);
+
+    if (fwp.hwType == HW_TYPE_VESC) {
+        res = storeConf();
+    }
 
     if (res && can) {
         for (int d: scanCan()) {
             commands()->setSendCan(true, d);
 
-            FW_RX_PARAMS fwp;
             Utility::getFwVersionBlocking(this, &fwp);
 
             if (fwp.hwType == HW_TYPE_VESC) {
@@ -4178,13 +4264,17 @@ bool VescInterface::confRestoreBackup(bool can)
         commands()->setSendCan(false);
     }
 
-    res = restoreConf();
+    FW_RX_PARAMS fwp;
+    Utility::getFwVersionBlocking(this, &fwp);
+
+    if (fwp.hwType == HW_TYPE_VESC) {
+        res = restoreConf();
+    }
 
     if (res && can) {
         for (int d: scanCan()) {
             commands()->setSendCan(true, d);
 
-            FW_RX_PARAMS fwp;
             Utility::getFwVersionBlocking(this, &fwp);
 
             if (fwp.hwType == HW_TYPE_VESC) {

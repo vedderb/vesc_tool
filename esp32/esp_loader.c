@@ -30,9 +30,9 @@
 #define MIN(a, b) ((a) < (b)) ? (a) : (b)
 #endif
 
-static const uint32_t DEFAULT_TIMEOUT = 1000;
-static const uint32_t DEFAULT_FLASH_TIMEOUT = 3000;       // timeout for most flash operations
-static const uint32_t ERASE_REGION_TIMEOUT_PER_MB = 10000; // timeout (per megabyte) for erasing a region
+static const uint32_t DEFAULT_TIMEOUT = 3000;
+static const uint32_t DEFAULT_FLASH_TIMEOUT = 4000;       // timeout for most flash operations
+static const uint32_t ERASE_REGION_TIMEOUT_PER_MB = 12000; // timeout (per megabyte) for erasing a region
 static const uint8_t  PADDING_PATTERN = 0xFF;
 
 typedef enum {
@@ -43,7 +43,7 @@ static uint32_t s_flash_write_size = 0;
 static const target_registers_t *s_reg = NULL;
 static target_chip_t s_target = ESP_UNKNOWN_CHIP;
 
-static const uint32_t MD5_TIMEOUT_PER_MB = 800;
+static const uint32_t MD5_TIMEOUT_PER_MB = 1200;
 static struct MD5Context s_md5_context;
 static uint32_t s_start_address;
 static uint32_t s_image_size;

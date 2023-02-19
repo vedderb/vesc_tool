@@ -471,7 +471,7 @@ Item {
             var removed = false
             for (var i = 0; i < vescsUdp.length;i++) {
                 var age = new Date().getTime() - vescsUdp[i].updateTime
-                if (age > 3000) {
+                if (age > 4000) {
                     vescsUdp.splice(i, 1)
                     removed = true
                     i--;

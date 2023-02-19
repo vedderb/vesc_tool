@@ -30,32 +30,30 @@ PageSampledData::PageSampledData(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->rescaleButton->setIcon(Utility::getIcon("icons/expand_off.png"));
+    ui->saveDataButton->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->sampleNowButton->setIcon(Utility::getIcon("icons/3ph_sine.png"));
+    ui->sampleStartButton->setIcon(Utility::getIcon("icons/motor.png"));
+    ui->sampleStopButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
+    ui->sampleTriggerFaultButton->setIcon(Utility::getIcon("icons/sample_trigger_fault.png"));
+    ui->sampleTriggerFaultNosendButton->setIcon(Utility::getIcon("icons/sample_trigger_fault_nosend.png"));
+    ui->sampleTriggerStartButton->setIcon(Utility::getIcon("icons/sampl_trigger_start.png"));
+    ui->sampleTriggerStartNosendButton->setIcon(Utility::getIcon("icons/sample_trigger_start_nosend.png"));
+    ui->sampleLastButton->setIcon(Utility::getIcon("icons/Upload-96.png"));
 
-    QString theme = Utility::getThemePath();
-    ui->rescaleButton->setIcon(QPixmap(theme + "icons/expand_off.png"));
-    ui->saveDataButton->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->sampleNowButton->setIcon(QPixmap(theme + "icons/3ph_sine.png"));
-    ui->sampleStartButton->setIcon(QPixmap(theme + "icons/motor.png"));
-    ui->sampleStopButton->setIcon(QPixmap(theme + "icons/Cancel-96.png"));
-    ui->sampleTriggerFaultButton->setIcon(QPixmap(theme + "icons/sample_trigger_fault.png"));
-    ui->sampleTriggerFaultNosendButton->setIcon(QPixmap(theme + "icons/sample_trigger_fault_nosend.png"));
-    ui->sampleTriggerStartButton->setIcon(QPixmap(theme + "icons/sampl_trigger_start.png"));
-    ui->sampleTriggerStartNosendButton->setIcon(QPixmap(theme + "icons/sample_trigger_start_nosend.png"));
-    ui->sampleLastButton->setIcon(QPixmap(theme + "icons/Upload-96.png"));
-
-    QIcon mycon = QIcon(theme + "icons/expand_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    QIcon mycon = QIcon(Utility::getIcon("icons/expand_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomHButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/expand_v_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/expand_v_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomVButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/size_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/size_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/size_off.png"), QIcon::Normal, QIcon::Off);
 
 
     layout()->setContentsMargins(0, 0, 0, 0);

@@ -588,7 +588,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "Roll Offset: " + (filteredIMUValues.roll * 180.0/pi).toFixed(2)
+                        text: "Roll Offset: " + (-filteredIMUValues.roll * 180.0/pi).toFixed(2)
                     }// Text
 
                     Button {

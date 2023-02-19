@@ -588,7 +588,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "Roll Offset: " + (-filteredIMUValues.roll * 180.0/pi).toFixed(2)
+                        text: "Roll Offset: " + ((-filteredIMUValues.roll * 180.0/pi) - orientationRestore.rot_roll).toFixed(2)
                     }// Text
 
                     Button {
@@ -642,7 +642,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "Pitch Offset: " + (filteredIMUValues.pitch * 180.0/pi).toFixed(2)
+                        text: "Pitch Offset: " + ((filteredIMUValues.pitch * 180.0/pi) - orientationRestore.rot_pitch).toFixed(2)
                     }// Text
                     Button {
                         id: skipPitchButton
@@ -695,7 +695,7 @@ Item {
                         font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "Yaw Offset: " + (-(calculatedYawOffset * 180.0/pi).toFixed(2))
+                        text: "Yaw Offset: " + ((-calculatedYawOffset * 180.0/pi) - orientationRestore.rot_yaw).toFixed(2)
                     }// Text
                     Button {
                         id: skipYawButton

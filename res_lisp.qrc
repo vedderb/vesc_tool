@@ -41,5 +41,6 @@
         <file>res/Lisp/Examples/plot_interpolation.lisp</file>
         <file>res/Lisp/Examples/input_capture.lisp</file>
         <file>res/Lisp/Examples/event_custom_data.lisp</file>
+        <file>res/Lisp/Examples/crc16_v2.lisp</file>
     </qresource>
 </RCC>

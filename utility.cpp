@@ -567,14 +567,14 @@ QString Utility::detectAllFoc(VescInterface *vesc,
             case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: reason = "High offset on current sensor 3, check for hardware failure"; break;
             case -100 + FAULT_CODE_UNBALANCED_CURRENTS: reason = "Unbalanced currents, check for hardware failure"; break;
             case -100 + FAULT_CODE_BRK: reason = "BRK, hardware protection triggered, check for shorts or possible hardware failure"; break;
-            case -100 + FAULT_CODE_RESOLVER_LOT: reason = "?"; break;
-            case -100 + FAULT_CODE_RESOLVER_DOS: reason = "?"; break;
-            case -100 + FAULT_CODE_RESOLVER_LOS: reason = "?"; break;
+            case -100 + FAULT_CODE_RESOLVER_LOT: reason = "Encoder/Resolver: Loss of tracking"; break;
+            case -100 + FAULT_CODE_RESOLVER_DOS: reason = "Encoder/Resolver: Degradation of signal"; break;
+            case -100 + FAULT_CODE_RESOLVER_LOS: reason = "Encoder/Resolver: Loss of signal"; break;
             case -100 + FAULT_CODE_FLASH_CORRUPTION_APP_CFG: reason = "Flash corruption, App config corrupt, rewrite app config to restore"; break;
             case -100 + FAULT_CODE_FLASH_CORRUPTION_MC_CFG: reason = "Flash corruption, Motor config corrupt, rewrite motor config to restore"; break;
             case -100 + FAULT_CODE_ENCODER_NO_MAGNET: reason = "Encoder no magnet, magnet is too weak or too far from the encoder"; break;
             case -100 + FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: reason = "Magnet too strong, magnet is too strong or too close to the encoder"; break;
-            case -100 + FAULT_CODE_PHASE_FILTER: reason = "Phase filter fault, ?"; break;
+            case -100 + FAULT_CODE_PHASE_FILTER: reason = "Phase filter fault, invalid phase filter readings"; break;
             case -100 + FAULT_CODE_ENCODER_FAULT: reason = "Encoder fault, check encoder connections and alignment"; break;
 
             default: reason = QString::number(resDetect); break;

@@ -26,6 +26,12 @@ import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    property bool showControls: true
+
+    function connectToHub() {
+        VescIf.connectTcpHub(serverText.text, portBox.value, idText.text, passText.text)
+    }
+
     implicitHeight: grid.implicitHeight
 
     GridLayout {
@@ -45,6 +51,7 @@ Item {
             text: "Connect as Server"
             Layout.fillWidth: true
             Layout.columnSpan: 2
+            visible: showControls
 
             onClicked: {
                 if (checked) {
@@ -171,6 +178,7 @@ Item {
         RowLayout {
             Layout.columnSpan: 2
             Layout.fillWidth: true
+            visible: showControls
 
             Button {
                 Layout.topMargin: 5
@@ -192,7 +200,7 @@ Item {
                 enabled: !enableBox.checked
 
                 onClicked: {
-                    VescIf.connectTcpHub(serverText.text, portBox.value, idText.text, passText.text)
+                    connectToHub()
                 }
             }
         }

@@ -184,6 +184,42 @@ Item {
                     }
 
                     MenuItem {
+                        text: "Connect TCP Hub..."
+                        onTriggered: {
+                            tcpHubConnDialog.open()
+                        }
+
+                        Dialog {
+                            id: tcpHubConnDialog
+                            standardButtons: Dialog.Ok | Dialog.Cancel
+                            modal: true
+                            focus: true
+                            rightMargin: 10
+                            leftMargin: 10
+                            closePolicy: Popup.CloseOnEscape
+                            y: 10 + parent.height / 2 - height / 2
+                            x: parent.width/2 - width/2
+                            width: parent.width - 20 - notchLeft - notchRight
+                            parent: rootItem.parent
+                            Overlay.modal: Rectangle {
+                                color: "#AA000000"
+                            }
+
+                            onAccepted: {
+                                hubBox.connectToHub()
+                            }
+
+                            title: "Connect TCP Hub"
+
+                            TcpHubBox {
+                                id: hubBox
+                                anchors.fill: parent
+                                showControls: false
+                            }
+                        }
+                    }
+
+                    MenuItem {
                         text: "Clear TCP hub devs"
                         onTriggered: {
                             tcpHubClearDialog.open()

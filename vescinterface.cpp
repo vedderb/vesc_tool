@@ -2999,7 +2999,7 @@ void VescInterface::tcpInputConnected()
     mTcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, true);
 
     if (!mLastTcpHubVescID.isEmpty()) {
-        QString login = QString("VESCTOOL:%1:%2\n").arg(mLastTcpHubVescID).arg(mLastTcpHubVescPass);
+        QString login = QString("VESCTOOL:%1:%2\n\0").arg(mLastTcpHubVescID).arg(mLastTcpHubVescPass);
         mTcpSocket->write(login.toLocal8Bit());
 
         mSettings.setValue("tcp_hub_server", mLastTcpHubServer);

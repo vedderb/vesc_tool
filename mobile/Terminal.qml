@@ -106,6 +106,12 @@ Item {
                             mCommands.sendTerminalCmd("help")
                         }
                     }
+                    MenuItem {
+                        text: "Reboot"
+                        onTriggered: {
+                            mCommands.reboot()
+                        }
+                    }
                 }
             }
         }

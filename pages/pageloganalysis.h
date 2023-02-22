@@ -111,6 +111,13 @@ private:
     int mInd_yaw;
     int mInd_fault;
 
+    struct SelectoData {
+        QStringList dataLabels;
+        int scrollPos;
+    };
+
+    SelectoData mSelection;
+
     void resetInds() {
         mInd_t_day = -1;
         mInd_t_day_pos = -1;
@@ -167,6 +174,9 @@ private:
                      double scaleStep = 0.1, double scaleMax = 99.99);
     void openLog(QByteArray data);
     void generateMissingEntries();
+
+    void storeSelection();
+    void restoreSelection();
 
 };
 

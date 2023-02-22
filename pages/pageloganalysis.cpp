@@ -259,6 +259,8 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
 
     if (mVesc) {
         auto updatePlots = [this]() {
+            storeSelection();
+
             resetInds();
 
             mLogHeader = mLogRtHeader;
@@ -267,20 +269,17 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
             updateInds();
             generateMissingEntries();
 
-            auto sel = ui->dataTable->selectionModel()->selectedIndexes();
             ui->dataTable->setRowCount(0);
 
             if (mLog.size() == 0) {
                 return;
             }
 
-            for (auto e: mLogHeader) {
+            foreach (auto e, mLogHeader) {
                 addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
             }
 
-            foreach (QModelIndex ind, sel) {
-                ui->dataTable->selectRow(ind.row());
-            }
+            restoreSelection();
 
             truncateDataAndPlot(ui->autoZoomBox->isChecked());
 
@@ -419,6 +418,8 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
 
 void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
 {
+    storeSelection();
+
     resetInds();
 
     mLog.clear();
@@ -593,9 +594,11 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
         return;
     }
 
-    for (auto e: mLogHeader) {
+    foreach (auto e, mLogHeader) {
         addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
     }
+
+    restoreSelection();
 
     truncateDataAndPlot();
 }
@@ -1113,6 +1116,8 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
 
 void PageLogAnalysis::openLog(QByteArray data)
 {
+    storeSelection();
+
     QTextStream in(&data);
     auto tokensLine1 = in.readLine().split(";");
     if (tokensLine1.size() < 1) {
@@ -1179,6 +1184,8 @@ void PageLogAnalysis::openLog(QByteArray data)
         for (auto e: mLogHeader) {
             addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
         }
+
+        restoreSelection();
 
         truncateDataAndPlot();
     }
@@ -1285,6 +1292,37 @@ void PageLogAnalysis::generateMissingEntries()
     }
 
     updateInds();
+}
+
+void PageLogAnalysis::storeSelection()
+{
+    mSelection.dataLabels.clear();
+    foreach (auto i, ui->dataTable->selectionModel()->selectedRows()) {
+        mSelection.dataLabels.append(ui->dataTable->item(i.row(), 0)->text());
+    }
+    mSelection.scrollPos = ui->dataTable->verticalScrollBar()->value();
+}
+
+void PageLogAnalysis::restoreSelection()
+{
+    ui->dataTable->clearSelection();
+    auto modeOld = ui->dataTable->selectionMode();
+    ui->dataTable->setSelectionMode(QAbstractItemView::MultiSelection);
+    for (int row = 0;row < ui->dataTable->rowCount();row++) {
+        bool selected = false;
+        foreach (auto i, mSelection.dataLabels) {
+            if (ui->dataTable->item(row, 0)->text() == i) {
+                selected = true;
+                break;
+            }
+        }
+
+        if (selected) {
+            ui->dataTable->selectRow(row);
+        }
+    }
+    ui->dataTable->setSelectionMode(modeOld);
+    ui->dataTable->verticalScrollBar()->setValue(mSelection.scrollPos);
 }
 
 void PageLogAnalysis::on_saveMapPdfButton_clicked()

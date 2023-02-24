@@ -2395,8 +2395,13 @@ QVariantList Commands::fileBlockList(QString path)
         qWarning() << "Could not list files";
     }
 
+    std::sort(files.begin(), files.end(), []
+              (const FILE_LIST_ENTRY & a, const FILE_LIST_ENTRY & b) {
+        return a.name.toLower() < b.name.toLower();
+    });
+
     QVariantList retVal;
-    for (auto f: files) {
+    foreach (auto f, files) {
         retVal.append(QVariant::fromValue(f));
     }
 

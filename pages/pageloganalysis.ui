@@ -230,7 +230,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="tabPosition">
-        <enum>QTabWidget::East</enum>
+        <enum>QTabWidget::North</enum>
        </property>
        <property name="tabShape">
         <enum>QTabWidget::Triangular</enum>
@@ -264,7 +264,7 @@
          <item>
           <widget class="QTabWidget" name="browseTabWidget">
            <property name="tabPosition">
-            <enum>QTabWidget::East</enum>
+            <enum>QTabWidget::North</enum>
            </property>
            <property name="tabShape">
             <enum>QTabWidget::Triangular</enum>

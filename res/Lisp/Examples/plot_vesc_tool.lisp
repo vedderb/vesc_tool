@@ -1,4 +1,4 @@
-; This makes a plot on the Realtime Data -> Experiment page
+; This makes a plot on the experiment plot tab.
 
 (plot-init "x-name" "y-name")
 (plot-add-graph "sin")

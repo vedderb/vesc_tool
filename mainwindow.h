@@ -70,6 +70,7 @@
 #include "pages/pagelisp.h"
 #include "pages/pageespprog.h"
 #include "pages/pagevescpackage.h"
+#include "pages/pagedisplaytool.h"
 
 namespace Ui {
 class MainWindow;
@@ -224,6 +225,7 @@ private:
     PageLisp *mPageLisp;
     PageEspProg *mPageEspProg;
     QTabWidget *mPageVESCDev;
+    PageDisplayTool *mPageDisplayTool;
     Preferences *mPreferences;
 
     void addPageItem(QString name,

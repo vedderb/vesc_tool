@@ -1553,26 +1553,30 @@ void MainWindow::reloadPages()
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
-    mPageVESCDev->addTab(mPageTerminal,QIcon(theme + "icons/Console-96.png"), tr("VESC Terminal"));
+    mPageVESCDev->addTab(mPageTerminal, Utility::getIcon("icons/Console-96.png"), tr("VESC Terminal"));
 
     mPageScripting = new PageScripting(this);
     mPageScripting->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageScripting);
-    mPageVESCDev->addTab(mPageScripting, QIcon(theme + "icons_textedit/Outdent-96.png"), tr("QML"));
+    mPageVESCDev->addTab(mPageScripting, Utility::getIcon("icons_textedit/Outdent-96.png"), tr("QML"));
 
     mPageLisp = new PageLisp(this);
     mPageLisp->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageLisp);
-    mPageVESCDev->addTab(mPageLisp, QIcon(theme + "icons_textedit/Outdent-96.png"), tr("Lisp"));
+    mPageVESCDev->addTab(mPageLisp, Utility::getIcon("icons_textedit/Outdent-96.png"), tr("Lisp"));
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageCanAnalyzer);
-    mPageVESCDev->addTab(mPageCanAnalyzer,QIcon(theme + "icons/can_off.png"), tr("CAN Analyzer"));
+    mPageVESCDev->addTab(mPageCanAnalyzer, Utility::getIcon("icons/can_off.png"), tr("CAN Analyzer"));
+
+    mPageDisplayTool = new PageDisplayTool(this);
+    ui->pageWidget->addWidget(mPageDisplayTool);
+    mPageVESCDev->addTab(mPageDisplayTool, Utility::getIcon("icons/Calculator-96.png"), tr("Display Tool"));
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
-    mPageVESCDev->addTab(mPageDebugPrint,QIcon(theme + "icons/Bug-96.png"), tr("Debug Console"));
+    mPageVESCDev->addTab(mPageDebugPrint, Utility::getIcon("icons/Bug-96.png"), tr("Debug Console"));
 
     ui->pageWidget->addWidget(mPageVESCDev);
     addPageItem(tr("VESC Dev Tools"),  theme + "icons/Console-96.png", "", true);

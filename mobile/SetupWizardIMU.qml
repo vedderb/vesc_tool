@@ -952,7 +952,7 @@ Item {
                 id: prevButton
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
-                text: "Cancel"
+                text: (stackLayout.currentIndex != 0) ? "Cancel" : "Close"
                 flat: true
 
                 onClicked: {

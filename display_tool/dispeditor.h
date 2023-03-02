@@ -55,6 +55,7 @@ private:
     Ui::DispEditor *ui;
     QVector<QColor> mPalette;
     void updatePalette();
+    int imgBits();
 
 };
 

@@ -132,17 +132,17 @@
        </item>
        <item>
         <property name="text">
-         <string>RGB332 (TODO)</string>
+         <string>RGB332</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>RGB565 (TODO)</string>
+         <string>RGB565</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>RGB888 (TODO)</string>
+         <string>RGB888</string>
         </property>
        </item>
       </widget>
@@ -176,7 +176,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>262</width>
+          <width>256</width>
           <height>256</height>
          </rect>
         </property>

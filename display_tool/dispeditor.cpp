@@ -105,11 +105,7 @@ void DispEditor::on_saveCButton_clicked()
         int h = img.height();
 
         VByteArray imgArr;
-        int colors = mPalette.size();
-        int bits = 0;
-        while (colors >>= 1) {
-            bits++;
-        }
+        int bits = imgBits();
 
         for (auto &c: imgArr) {
             c = 0;
@@ -119,20 +115,51 @@ void DispEditor::on_saveCButton_clicked()
         imgArr.vbAppendInt16(h);
         imgArr.vbAppendInt8(bits);
 
-        int arrOfs = 0;
-        int bitCnt = 0;
-        uint8_t pixNow = 0;
-        for (int j = 0;j < img.height();j++) {
-            for (int i = 0;i < img.width();i++) {
-                auto pix = mPalette.indexOf(img.pixelColor(i, j));
-                pixNow >>= bits;
-                pixNow |= pix << (8 - bits);
-                bitCnt += bits;
+        if (bits <= 4) {
+            int arrOfs = 0;
+            int bitCnt = 0;
+            uint8_t pixNow = 0;
+            for (int j = 0;j < img.height();j++) {
+                for (int i = 0;i < img.width();i++) {
+                    auto pix = mPalette.indexOf(img.pixelColor(i, j));
+                    pixNow >>= bits;
+                    pixNow |= pix << (8 - bits);
+                    bitCnt += bits;
 
-                if (bitCnt >= 8) {
-                    imgArr.vbAppendUint8(pixNow);
-                    pixNow = 0;
-                    bitCnt = 0;
+                    if (bitCnt >= 8) {
+                        imgArr.vbAppendUint8(pixNow);
+                        pixNow = 0;
+                        bitCnt = 0;
+                    }
+                }
+            }
+        } else {
+            for (int j = 0;j < img.height();j++) {
+                for (int i = 0;i < img.width();i++) {
+                    auto pix = img.pixelColor(i, j).rgb();
+                    uint8_t r = qRed(pix);
+                    uint8_t g = qGreen(pix);
+                    uint8_t b = qBlue(pix);
+
+                    if (bits == 8) {
+                        r >>= 5;
+                        g >>= 5;
+                        b >>= 6;
+                        uint8_t pix1 = (r << 5) | (g << 2) | b;
+                        imgArr.vbAppendUint8(pix1);
+                    } else  if (bits == 16) {
+                        r >>= 3;
+                        g >>= 2;
+                        b >>= 3;
+                        uint8_t pix1 = (r << 3) | (g >> 3);
+                        uint8_t pix2 = (g << 5) | b;
+                        imgArr.vbAppendUint8(pix1);
+                        imgArr.vbAppendUint8(pix2);
+                    } else {
+                        imgArr.vbAppendUint8(r);
+                        imgArr.vbAppendUint8(g);
+                        imgArr.vbAppendUint8(b);
+                    }
                 }
             }
         }
@@ -168,21 +195,54 @@ void DispEditor::on_loadCButton_clicked()
         updateSize(w, h);
         QImage img(w, h, QImage::Format_ARGB32);
         img.fill(Qt::black);
-        uint8_t pixNow = data.vbPopFrontUint8();
-        int bitCnt = 0;
 
-        for (int j = 0;j < h;j++) {
-            for (int i = 0;i < w;i++) {
-                int pix = pixNow & ~(0xff << bits);
-                pixNow >>= bits;
-                bitCnt += bits;
-                if (bitCnt >= 8) {
-                    pixNow = data.vbPopFrontUint8();
-                    bitCnt = 0;
+        if (bits <= 4) {
+            int bitCnt = 0;
+            uint8_t pixNow = data.vbPopFrontUint8();
+            for (int j = 0;j < h;j++) {
+                for (int i = 0;i < w;i++) {
+                    int pix = pixNow & ~(0xff << bits);
+                    pixNow >>= bits;
+                    bitCnt += bits;
+                    if (bitCnt >= 8) {
+                        pixNow = data.vbPopFrontUint8();
+                        bitCnt = 0;
+                    }
+
+                    if (pix < mPalette.size()) {
+                        img.setPixelColor(i, j, mPalette.at(pix));
+                    }
                 }
+            }
+        } else {
+            for (int j = 0;j < h;j++) {
+                for (int i = 0;i < w;i++) {
+                    QColor pix;
 
-                if (pix < mPalette.size()) {
-                    img.setPixelColor(i, j, mPalette.at(pix));
+                    if (bits == 8) {
+                        uint8_t pix1 = data.vbPopFrontUint8();
+                        uint8_t r = pix1 & 0b11100000;
+                        uint8_t g = (pix1 << 3) & 0b11100000;
+                        uint8_t b = (pix1 << 6) & 0b11000000;
+                        pix.setRed(r);
+                        pix.setGreen(g);
+                        pix.setBlue(b);
+                    } else if (bits == 16) {
+                        uint8_t pix1 = data.vbPopFrontUint8();
+                        uint8_t pix2 = data.vbPopFrontUint8();
+                        uint8_t r = pix1 & 0b11111000;
+                        uint8_t g = ((pix1 << 5) & 0b11100000) | ((pix2 >> 3) & 0b00011100);
+                        uint8_t b = (pix2 << 3) & 0b11111000;
+                        pix.setRed(r);
+                        pix.setGreen(g);
+                        pix.setBlue(b);
+                    } else {
+                        pix.setRed(data.vbPopFrontUint8());
+                        pix.setGreen(data.vbPopFrontUint8());
+                        pix.setBlue(data.vbPopFrontUint8());
+                    }
+
+                    img.setPixelColor(i, j, pix);
                 }
             }
         }
@@ -237,75 +297,124 @@ void DispEditor::on_loadPngButton_clicked()
         }
 
         if (!validPalette) {
-            if (ui->ditherBox->isChecked()) {
+            int bits = imgBits();
+
+            if (ui->ditherBox->isChecked() || bits > 4) {
                 int imgW = img.width();
                 int imgH = img.height();
 
-                int bits = 4;
-                if (mPalette.size() == 2) {
-                    bits = 1;
-                } else if (mPalette.size() == 4) {
-                    bits = 2;
-                }
+                auto ditherChannel = [](int bits, int **img_buffer, int w, int h, bool dither = true) {
+                    for (int y = 0; y < h;y++) {
+                        for (int x = 0;x < w;x++) {
+                            int pix = img_buffer[x][y];
 
-                int **img_buffer = new int*[imgW];
-                for(int i = 0; i < imgW; i++) {
-                    img_buffer[i] = new int[imgH];
-                }
+                            if (pix > 255) pix = 255;
+                            if (pix < 0) pix = 0;
 
-                int mask = (0xFF << (8 - bits)) & 0xFF;
+                            int mask = (0xFF << (8 - bits)) & 0xFF;
+                            int pix_n = pix & mask;
+                            int quant_error = pix - pix_n;
+                            img_buffer[x][y]= pix_n;
 
-                for (int y = 0;y < imgH;y++) {
-                    for (int x = 0;x < imgW;x++) {
-                        QRgb col = img.pixel(x, y);
-                        img_buffer[x][y] = qGray(col);
-                    }
-                }
+                            if (dither) {
+                                if (x < (w - 1)) {
+                                    img_buffer[x + 1][y] += ((quant_error << 12) * 7) >> 16;
+                                }
 
-                for (int y = 0;y < imgH;y++) {
-                    for (int x = 0;x < imgW;x++) {
-                        int pix = img_buffer[x][y];
+                                if (y < (h - 1)) {
+                                    img_buffer[x][y + 1] += ((quant_error << 12) * 5) >> 16;
+                                }
 
-                        if (pix > 255) {
-                            pix = 255;
-                        }
+                                if (x > 0 && y < (h - 1)) {
+                                    img_buffer[x - 1][y + 1] += ((quant_error << 12) * 3) >> 16;
+                                }
 
-                        if (pix < 0) {
-                            pix = 0;
-                        }
-
-                        int pix_n = pix & mask;
-                        int quant_error = pix - pix_n;
-                        img_buffer[x][y]= pix_n;
-
-                        if (x < (imgW - 1)) {
-                            img_buffer[x + 1][y] += ((quant_error << 12) * 7) >> 16;
-                        }
-
-                        if (y < (imgH - 1)) {
-                            img_buffer[x][y + 1] += ((quant_error << 12) * 5) >> 16;
-                        }
-
-                        if (x > 0 && y < (imgH - 1)) {
-                            img_buffer[x - 1][y + 1] += ((quant_error << 12) * 3) >> 16;
-                        }
-
-                        if (x < (imgW - 1) && y < (imgH - 1)) {
-                            img_buffer[x + 1][y + 1] += ((quant_error << 12) * 1) >> 16;
+                                if (x < (w - 1) && y < (h - 1)) {
+                                    img_buffer[x + 1][y + 1] += ((quant_error << 12) * 1) >> 16;
+                                }
+                            }
                         }
                     }
-                }
+                };
 
-                for (int y = 0;y < imgH;y++) {
-                    for (int x = 0;x < imgW;x++) {
-                        img.setPixelColor(x, y, mPalette.at(img_buffer[x][y] / (256 / mPalette.size())));
+                if (bits <= 4) {
+                    int **img_buffer = new int*[imgW];
+                    for(int i = 0; i < imgW; i++) {
+                        img_buffer[i] = new int[imgH];
                     }
-                }
 
-                for(int i = 0; i < imgW; i++) {
-                    delete[] img_buffer[i];
+                    for (int y = 0;y < imgH;y++) {
+                        for (int x = 0;x < imgW;x++) {
+                            QRgb col = img.pixel(x, y);
+                            img_buffer[x][y] = qGray(col);
+                        }
+                    }
+
+                    ditherChannel(bits, img_buffer, imgW, imgH);
+
+                    for (int y = 0;y < imgH;y++) {
+                        for (int x = 0;x < imgW;x++) {
+                            img.setPixelColor(x, y, mPalette.at(img_buffer[x][y] / (256 / mPalette.size())));
+                        }
+                    }
+
+                    for(int i = 0; i < imgW; i++) {
+                        delete[] img_buffer[i];
+                    }
+                    delete[] img_buffer;
+                } else {
+                    int **buf_r = new int*[imgW];
+                    int **buf_g = new int*[imgW];
+                    int **buf_b = new int*[imgW];
+                    for(int i = 0; i < imgW; i++) {
+                        buf_r[i] = new int[imgH];
+                        buf_g[i] = new int[imgH];
+                        buf_b[i] = new int[imgH];
+                    }
+
+                    for (int y = 0;y < imgH;y++) {
+                        for (int x = 0;x < imgW;x++) {
+                            QRgb col = img.pixel(x, y);
+                            buf_r[x][y] = qRed(col);
+                            buf_g[x][y] = qGreen(col);
+                            buf_b[x][y] = qBlue(col);
+                        }
+                    }
+
+                    if (bits < 24) {
+                        int bits_r = 3;
+                        int bits_g = 3;
+                        int bits_b = 2;
+
+                        if (bits == 16) {
+                            bits_r = 5;
+                            bits_g = 6;
+                            bits_b = 5;
+                        }
+
+                        ditherChannel(bits_r, buf_r, imgW, imgH, ui->ditherBox->isChecked());
+                        ditherChannel(bits_g, buf_g, imgW, imgH, ui->ditherBox->isChecked());
+                        ditherChannel(bits_b, buf_b, imgW, imgH, ui->ditherBox->isChecked());
+                    }
+
+                    for (int y = 0;y < imgH;y++) {
+                        for (int x = 0;x < imgW;x++) {
+                            img.setPixelColor(x, y,
+                                              QColor(buf_r[x][y],
+                                                     buf_g[x][y],
+                                                     buf_b[x][y]));
+                        }
+                    }
+
+                    for(int i = 0; i < imgW; i++) {
+                        delete[] buf_r[i];
+                        delete[] buf_g[i];
+                        delete[] buf_b[i];
+                    }
+                    delete[] buf_r;
+                    delete[] buf_g;
+                    delete[] buf_b;
                 }
-                delete[] img_buffer;
             } else {
                 for (int i = 0;i < img.width();i++) {
                     for (int j = 0;j < img.height();j++) {
@@ -359,11 +468,13 @@ void DispEditor::updatePalette()
     l->setHorizontalSpacing(1);
     l->setMargin(1);
 
-    int colors = 16;
+    int colors = 0;
     if (ui->formatBox->currentIndex() == 0) {
         colors = 2;
     } else if (ui->formatBox->currentIndex() == 1) {
         colors = 4;
+    } else if (ui->formatBox->currentIndex() == 2) {
+        colors = 16;
     }
 
     mPalette.clear();
@@ -415,6 +526,26 @@ void DispEditor::updatePalette()
     }
 
     ui->colorWidget->setLayout(l);
+}
+
+int DispEditor::imgBits()
+{
+    int bits = 4;
+    if (ui->formatBox->currentIndex() == 0) {
+        bits = 1;
+    } else if (ui->formatBox->currentIndex() == 1) {
+        bits = 2;
+    } else if (ui->formatBox->currentIndex() == 2) {
+        bits = 4;
+    } else if (ui->formatBox->currentIndex() == 3) {
+        bits = 8;
+    } else if (ui->formatBox->currentIndex() == 4) {
+        bits = 16;
+    } else if (ui->formatBox->currentIndex() == 5) {
+        bits = 24;
+    }
+
+    return bits;
 }
 
 void DispEditor::on_formatBox_currentIndexChanged(int index)

@@ -122,8 +122,8 @@ void DispEditor::on_saveCButton_clicked()
             for (int j = 0;j < img.height();j++) {
                 for (int i = 0;i < img.width();i++) {
                     auto pix = mPalette.indexOf(img.pixelColor(i, j));
-                    pixNow >>= bits;
-                    pixNow |= pix << (8 - bits);
+                    pixNow <<= bits;
+                    pixNow |= pix;
                     bitCnt += bits;
 
                     if (bitCnt >= 8) {
@@ -201,8 +201,8 @@ void DispEditor::on_loadCButton_clicked()
             uint8_t pixNow = data.vbPopFrontUint8();
             for (int j = 0;j < h;j++) {
                 for (int i = 0;i < w;i++) {
-                    int pix = pixNow & ~(0xff << bits);
-                    pixNow >>= bits;
+                    int pix = pixNow >> (8 - bits);
+                    pixNow <<= bits;
                     bitCnt += bits;
                     if (bitCnt >= 8) {
                         pixNow = data.vbPopFrontUint8();

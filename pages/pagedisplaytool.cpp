@@ -138,7 +138,7 @@ void PageDisplayTool::updateOverlay()
 
         ui->fullEditor->getEdit()->setOverlayImage(
                     xPos, yPos,
-                    0, 128, 0, 128, 0, 0, 0, 0, 0, 1.0, Qt::black,
+                    0, 512, 0, 512, 0, 0, 0, 0, 0, 1.0, Qt::black,
                     img);
     }
 

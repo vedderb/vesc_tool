@@ -345,8 +345,17 @@ void DispEditor::on_loadPngButton_clicked()
 
                     for (int y = 0;y < imgH;y++) {
                         for (int x = 0;x < imgW;x++) {
-                            QRgb col = img.pixel(x, y);
-                            img_buffer[x][y] = qGray(col);
+                            QColor c = img.pixelColor(x, y);
+                            int gray = qGray(c.rgb());
+                            if (c.alpha() == 0) {
+                                gray = 0;
+                            }
+                            gray = (int)((double)gray * ui->loadScaleSpinBox->value());
+                            if (gray > 255) {
+                                gray = 255;
+                            }
+
+                            img_buffer[x][y] = gray;
                         }
                     }
 
@@ -420,6 +429,14 @@ void DispEditor::on_loadPngButton_clicked()
                     for (int j = 0;j < img.height();j++) {
                         QColor c = img.pixelColor(i, j);
                         int gray = qGray(c.rgb());
+                        if (c.alpha() == 0) {
+                            gray = 0;
+                        }
+                        gray = (int)((double)gray * ui->loadScaleSpinBox->value());
+                        if (gray > 255) {
+                            gray = 255;
+                        }
+
                         gray /= (256 / mPalette.size());
 
                         if (256 % mPalette.size() != 0) {
@@ -508,7 +525,9 @@ void DispEditor::updatePalette()
             auto mod = QGuiApplication::keyboardModifiers();
             if (mod == Qt::ControlModifier) {
                 auto color = QColorDialog::getColor(mPalette.at(i), b, "Choose Color", QColorDialog::DontUseNativeDialog);
-                updateColor(color);
+                if (color.isValid()) {
+                    updateColor(color);
+                }
             } else {
                 updateColor(mPalette.at(i));
             }

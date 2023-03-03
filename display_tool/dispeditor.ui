@@ -33,127 +33,10 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="4" column="1">
-      <widget class="QPushButton" name="loadCButton">
-       <property name="text">
-        <string>Import Bin</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0" colspan="2">
-      <widget class="QCheckBox" name="antialiasBox">
-       <property name="text">
-        <string>Antialias when loading</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="0">
-      <widget class="QPushButton" name="clearButton">
-       <property name="text">
-        <string>Clear Screen</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QPushButton" name="savePngButton">
-       <property name="toolTip">
-        <string>Save image, as seen above, to PNG file.</string>
-       </property>
-       <property name="text">
-        <string>Save PNG</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="0" colspan="2">
-      <widget class="QCheckBox" name="showLayer2Box">
-       <property name="toolTip">
-        <string/>
-       </property>
-       <property name="text">
-        <string>Show Layer 2</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item row="4" column="0">
       <widget class="QPushButton" name="saveCButton">
        <property name="text">
         <string>Export Bin</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0" colspan="2">
-      <widget class="QCheckBox" name="ditherBox">
-       <property name="text">
-        <string>Dither when loading</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="2">
-      <widget class="QSpinBox" name="imgScaleBox">
-       <property name="prefix">
-        <string>Preview Scale: </string>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>10</number>
-       </property>
-       <property name="value">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="formatBox">
-       <item>
-        <property name="text">
-         <string>Indexed 2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Indexed 4</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Indexed 16</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>RGB332</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>RGB565</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>RGB888</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QPushButton" name="loadPngButton">
-       <property name="toolTip">
-        <string/>
-       </property>
-       <property name="text">
-        <string>Load Image</string>
        </property>
       </widget>
      </item>
@@ -232,27 +115,131 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="1">
+     <item row="10" column="1">
       <widget class="QPushButton" name="clearLayer2Button">
        <property name="text">
         <string>Clear Layer 2</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <item row="5" column="1">
+      <widget class="QPushButton" name="loadPngButton">
+       <property name="toolTip">
+        <string/>
        </property>
        <property name="text">
-        <string>Format</string>
+        <string>Load Image</string>
        </property>
       </widget>
      </item>
-     <item row="10" column="0" colspan="2">
+     <item row="1" column="0" colspan="2">
+      <widget class="QSpinBox" name="imgScaleBox">
+       <property name="prefix">
+        <string>Preview Scale: </string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>10</number>
+       </property>
+       <property name="value">
+        <number>2</number>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QPushButton" name="loadCButton">
+       <property name="text">
+        <string>Import Bin</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0" colspan="2">
+      <widget class="QCheckBox" name="antialiasBox">
+       <property name="text">
+        <string>Antialias when loading</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="formatBox">
+       <item>
+        <property name="text">
+         <string>Indexed 2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Indexed 4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Indexed 16</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>RGB332</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>RGB565</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>RGB888</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QPushButton" name="clearButton">
+       <property name="text">
+        <string>Clear Screen</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QPushButton" name="savePngButton">
+       <property name="toolTip">
+        <string>Save image, as seen above, to PNG file.</string>
+       </property>
+       <property name="text">
+        <string>Save PNG</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0" colspan="2">
+      <widget class="QCheckBox" name="showLayer2Box">
+       <property name="toolTip">
+        <string/>
+       </property>
+       <property name="text">
+        <string>Show Layer 2</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0" colspan="2">
+      <widget class="QCheckBox" name="ditherBox">
+       <property name="text">
+        <string>Dither when loading</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0" colspan="2">
       <widget class="QLabel" name="ColorNowLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -280,6 +267,35 @@
        </property>
        <property name="scaledContents">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Format</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0" colspan="2">
+      <widget class="QDoubleSpinBox" name="loadScaleSpinBox">
+       <property name="toolTip">
+        <string>Scale colors when loading image. Useful if the loaded image becomes too dark or too bright.</string>
+       </property>
+       <property name="prefix">
+        <string>Load Color Scale: </string>
+       </property>
+       <property name="singleStep">
+        <double>0.010000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
        </property>
       </widget>
      </item>

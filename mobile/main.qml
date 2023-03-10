@@ -114,7 +114,7 @@ ApplicationWindow {
         sourceComponent: Drawer {
             id: canDrawer
             edge: Qt.RightEdge
-            width: Math.min(0.6 *appWindow.width, 0.8 *appWindow.height)
+            width: Math.min(0.6 * appWindow.width, 0.8 * appWindow.height)
             height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
             y: appWindow.height > appWindow.width ?  headerBar.height : 0
             dragMargin: 20
@@ -129,7 +129,7 @@ ApplicationWindow {
                 anchors.fill: parent
             }
 
-            onVisibleChanged: {
+            onOpened: {
                 if (visible) {
                     canScreen.scanIfEmpty()
                 }

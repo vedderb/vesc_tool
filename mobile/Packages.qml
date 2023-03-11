@@ -227,7 +227,7 @@ Item {
                     repeat: false
                     running: false
                     onTriggered: {
-                        mLoader.lispErase()
+                        mLoader.lispErase(-1)
                         mLoader.qmlErase()
                         Utility.sleepWithEventLoop(500)
                         VescIf.reloadFirmware()

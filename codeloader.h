@@ -34,7 +34,7 @@ public:
     VescInterface *vesc() const;
     Q_INVOKABLE void setVesc(VescInterface *vesc);
 
-    Q_INVOKABLE bool lispErase();
+    Q_INVOKABLE bool lispErase(int size);
     QByteArray lispPackImports(QString codeStr, QString editorPath = QDir::currentPath());
     QPair<QString, QList<QPair<QString, QByteArray> > > lispUnpackImports(QByteArray data);
     bool lispUpload(VByteArray vb);

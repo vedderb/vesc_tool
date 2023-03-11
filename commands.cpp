@@ -2067,10 +2067,11 @@ void Commands::qmlUiAppGet(int len, int offset)
     emitData(vb);
 }
 
-void Commands::qmlUiErase()
+void Commands::qmlUiErase(int size)
 {
     VByteArray vb;
     vb.vbAppendUint8(COMM_QMLUI_ERASE);
+    vb.vbAppendInt32(size);
     emitData(vb);
 }
 
@@ -2170,10 +2171,11 @@ void Commands::lispStreamCode(QByteArray data, quint32 offset, quint32 totLen, q
     emitData(vb);
 }
 
-void Commands::lispEraseCode()
+void Commands::lispEraseCode(int size)
 {
     VByteArray vb;
     vb.vbAppendUint8(COMM_LISP_ERASE_CODE);
+    vb.vbAppendInt32(size);
     emitData(vb);
 }
 

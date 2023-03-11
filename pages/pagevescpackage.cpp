@@ -276,7 +276,7 @@ void PageVescPackage::on_uninstallButton_clicked()
     dialog.show();
 
     mLoader.qmlErase();
-    mLoader.lispErase();
+    mLoader.lispErase(-1);
 
     Utility::sleepWithEventLoop(500);
     mVesc->reloadFirmware();

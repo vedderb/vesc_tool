@@ -531,12 +531,12 @@ void PageLisp::openRecentList()
     }
 }
 
-bool PageLisp::eraseCode()
+bool PageLisp::eraseCode(int size)
 {
     QProgressDialog dialog("Erasing old script...", QString(), 0, 0, this);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
-    auto res = mLoader.lispErase();
+    auto res = mLoader.lispErase(size);
     dialog.close();
     return res;
 }
@@ -595,10 +595,6 @@ void PageLisp::on_stopButton_clicked()
 
 void PageLisp::on_uploadButton_clicked()
 {
-    if (!eraseCode()) {
-        return;
-    }
-
     QProgressDialog dialog(tr("Uploading..."), QString(), 0, 0, this);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
@@ -622,7 +618,16 @@ void PageLisp::on_uploadButton_clicked()
         }
     }
 
-    bool ok = mLoader.lispUpload(codeStr, editorPath);
+    VByteArray vb = mLoader.lispPackImports(codeStr, editorPath);
+    if (vb.isEmpty()) {
+        return;
+    }
+
+    if (!eraseCode(vb.size() + 100)) {
+        return;
+    }
+
+    bool ok = mLoader.lispUpload(vb);
 
     if (ok && ui->autoRunBox->isChecked()) {
         on_runButton_clicked();

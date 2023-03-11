@@ -43,7 +43,7 @@ void CodeLoader::setVesc(VescInterface *vesc)
     mVesc = vesc;
 }
 
-bool CodeLoader::lispErase()
+bool CodeLoader::lispErase(int size)
 {
     if (!mVesc) {
         return false;
@@ -60,7 +60,7 @@ bool CodeLoader::lispErase()
         QEventLoop loop;
         QTimer timeoutTimer;
         timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(6000);
+        timeoutTimer.start(8000);
         auto conn = connect(mVesc->commands(), &Commands::lispEraseCodeRx,
                             [&res,&loop](bool erRes) {
             res = erRes ? 1 : -1;
@@ -74,7 +74,7 @@ bool CodeLoader::lispErase()
         return res;
     };
 
-    mVesc->commands()->lispEraseCode();
+    mVesc->commands()->lispEraseCode(size);
 
     int erRes = waitEraseRes();
     if (erRes != 1) {
@@ -495,7 +495,7 @@ QString CodeLoader::lispRead(QWidget *parent)
 
                 QString lastDir = "";
                 if (reply == QMessageBox::Yes) {
-                    for (auto i: unpacked.second) {
+                    foreach (auto i, unpacked.second) {
                         QString fileName = QFileDialog::getSaveFileName(parent,
                                                                         tr("Save Import %1").arg(i.first),
                                                                         lastDir + "/" + i.first + ".bin");
@@ -562,7 +562,7 @@ bool CodeLoader::qmlErase()
         return res;
     };
 
-    mVesc->commands()->qmlUiErase();
+    mVesc->commands()->qmlUiErase(-1);
 
     int erRes = waitEraseRes();
     if (erRes != 1) {
@@ -765,7 +765,7 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
     }
 
     if (res && !pkg.lispData.isEmpty()) {
-        res = lispErase();
+        res = lispErase(pkg.lispData.size() + 100);
     }
 
     if (res && !pkg.lispData.isEmpty()) {

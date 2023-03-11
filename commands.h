@@ -256,7 +256,7 @@ public slots:
 
     void qmlUiHwGet(int len, int offset);
     void qmlUiAppGet(int len, int offset);
-    void qmlUiErase();
+    void qmlUiErase(int size);
     void qmlUiWrite(QByteArray data, quint32 offset);
 
     void ioBoardGetAll(int id);
@@ -271,7 +271,7 @@ public slots:
     void lispReadCode(int len, int offset);
     void lispWriteCode(QByteArray data, quint32 offset);
     void lispStreamCode(QByteArray data, quint32 offset, quint32 totLen, qint8 mode);
-    void lispEraseCode();
+    void lispEraseCode(int size);
     void lispSetRunning(bool running);
     void lispGetStats();
     void lispSendReplCmd(QString str);

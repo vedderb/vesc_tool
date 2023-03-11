@@ -40,8 +40,8 @@ rm -rf build/android/*
 export PATH=/opt/Qt5/5.15.2/android/bin/:$PATH
 
 # Mobile
-qmake -config release "CONFIG += release_android build_mobile vt_test_version" ANDROID_ABIS="armeabi-v7a" -spec android-clang
-#qmake -config release "CONFIG += release_android build_mobile vt_test_version" ANDROID_ABIS="arm64-v8a" -spec android-clang
+#qmake -config release "CONFIG += release_android build_mobile vt_test_version" ANDROID_ABIS="armeabi-v7a" -spec android-clang
+qmake -config release "CONFIG += release_android build_mobile vt_test_version" ANDROID_ABIS="arm64-v8a" -spec android-clang
 make clean
 make -j8
 make install INSTALL_ROOT=build/android/build

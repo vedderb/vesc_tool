@@ -313,7 +313,15 @@ bool CodeLoader::lispUpload(VByteArray vb)
     data.vbAppendUint16(crc);
     data.append(vb);
 
-    if (data.size() > (1024 * 120)) {
+    // The ESP32 partition table has 512k space for lisp scripts. The STM32
+    // has one 128k flash page.
+    auto fwParams = mVesc->getLastFwRxParams();
+    int max_size = 1024 * 500;
+    if (fwParams.hwType == HW_TYPE_VESC) {
+        max_size = 1024 * 120;
+    }
+
+    if (data.size() > max_size) {
         mVesc->emitMessageDialog(tr("Upload Code"), tr("Not enough space"), false);
         return false;
     }

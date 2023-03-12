@@ -20,7 +20,6 @@
 #include "pagescripting.h"
 #include "ui_pagescripting.h"
 #include "widgets/helpdialog.h"
-#include "packet.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -144,6 +143,11 @@ PageScripting::PageScripting(QWidget *parent) :
     });
 
     ui->splitter_2->setSizes(QList<int>({1000, 600}));
+
+    // Clear debug edit from messages that appeared from loading other qml-components
+    QTimer::singleShot(2000, [this]() {
+        ui->debugEdit->clear();
+    });
 }
 
 PageScripting::~PageScripting()
@@ -526,11 +530,14 @@ void PageScripting::setEditorClean(ScriptEditor *editor)
 }
 
 
-QString PageScripting::qmlToRun(bool importDir)
+QString PageScripting::qmlToRun(bool importDir, bool prependImports)
 {
     QString res = ui->mainEdit->codeEditor()->toPlainText();
-    res.prepend("import \"qrc:/mobile\";");
-    res.prepend("import Vedder.vesc.vescinterface 1.0;");
+
+    if (prependImports) {
+        res.prepend("import \"qrc:/mobile\";");
+        res.prepend("import Vedder.vesc.vescinterface 1.0;");
+    }
 
     if (importDir) {
         QFileInfo f(mDirNow);
@@ -633,7 +640,7 @@ bool PageScripting::exportCArray(QString name)
     return true;
 }
 
-bool PageScripting::eraseQml()
+bool PageScripting::eraseQml(int size, bool reload)
 {
     if (!mVesc) {
         return false;
@@ -645,9 +652,12 @@ bool PageScripting::eraseQml()
     }
 
     ui->uploadTextEdit->appendPlainText("Erasing QMLUI...");
-    bool res = mLoader.qmlErase();
+    bool res = mLoader.qmlErase(size);
 
     if (res) {
+        if (reload) {
+            mVesc->reloadFirmware();
+        }
         ui->uploadTextEdit->appendPlainText("Erase OK!");
     } else {
         ui->uploadTextEdit->appendPlainText("Erasing QMLUI failed");
@@ -719,20 +729,24 @@ void PageScripting::on_uploadButton_clicked()
     ui->uploadButton->setEnabled(false);
     ui->eraseOnlyButton->setEnabled(false);
 
-    if (!eraseQml()) {
+    auto script = mLoader.qmlCompress(qmlToRun(false, false));
+
+    if (!eraseQml(script.size() + 100, false)) {
         ui->uploadButton->setEnabled(true);
         ui->eraseOnlyButton->setEnabled(true);
         return;
     }
 
     ui->uploadTextEdit->appendPlainText("Writing data...");
-    bool res = mLoader.qmlUpload(qmlToRun(false), ui->uploadFullscreenBox->isChecked());
+    bool res = mLoader.qmlUpload(script, ui->uploadFullscreenBox->isChecked());
 
     if (res) {
         ui->uploadTextEdit->appendPlainText("Write OK!");
     } else {
         ui->uploadTextEdit->appendPlainText("Write failed");
     }
+
+    mVesc->reloadFirmware();
 
     ui->uploadButton->setEnabled(true);
     ui->eraseOnlyButton->setEnabled(true);
@@ -741,7 +755,7 @@ void PageScripting::on_uploadButton_clicked()
 void PageScripting::on_eraseOnlyButton_clicked()
 {
     ui->eraseOnlyButton->setEnabled(false);
-    eraseQml();
+    eraseQml(16);
     ui->eraseOnlyButton->setEnabled(true);
 }
 

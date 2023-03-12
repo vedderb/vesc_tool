@@ -76,7 +76,7 @@ private:
     void setEditorClean(ScriptEditor * editor);
     void openExample();
     void openRecentList();
-    bool eraseCode(int size = -1);
+    bool eraseCode(int size);
 
 };
 

@@ -650,7 +650,7 @@ void PageLisp::on_readExistingButton_clicked()
 
 void PageLisp::on_eraseButton_clicked()
 {
-    eraseCode();
+    eraseCode(16);
 }
 
 void PageLisp::on_rescaleButton_clicked()

@@ -86,9 +86,9 @@ private:
     void removeEditor(ScriptEditor *editor);
     void setEditorDirty(ScriptEditor *editor);
     void setEditorClean(ScriptEditor *editor);
-    QString qmlToRun(bool importDir = true);
+    QString qmlToRun(bool importDir = true, bool prependImports = true);
     bool exportCArray(QString name);
-    bool eraseQml();
+    bool eraseQml(int size, bool reload = true);
     void openExample();
     void openRecentList();
 

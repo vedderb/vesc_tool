@@ -42,8 +42,9 @@ public:
     bool lispStream(VByteArray vb, qint8 mode);
     QString lispRead(QWidget *parent = nullptr);
 
-    Q_INVOKABLE bool qmlErase();
-    bool qmlUpload(QString script, bool isFullscreen);
+    Q_INVOKABLE bool qmlErase(int size);
+    QByteArray qmlCompress(QString script);
+    bool qmlUpload(QByteArray scripr, bool isFullscreen);
 
     QByteArray packVescPackage(VescPackage pkg);
     VescPackage unpackVescPackage(QByteArray data);

@@ -531,7 +531,7 @@ QString CodeLoader::lispRead(QWidget *parent)
     return "";
 }
 
-bool CodeLoader::qmlErase()
+bool CodeLoader::qmlErase(int size)
 {
     if (!mVesc) {
         return false;
@@ -562,7 +562,7 @@ bool CodeLoader::qmlErase()
         return res;
     };
 
-    mVesc->commands()->qmlUiErase(-1);
+    mVesc->commands()->qmlUiErase(size);
 
     int erRes = waitEraseRes();
     if (erRes != 1) {
@@ -581,11 +581,15 @@ bool CodeLoader::qmlErase()
     return true;
 }
 
-bool CodeLoader::qmlUpload(QString script, bool isFullscreen)
+QByteArray CodeLoader::qmlCompress(QString script)
 {
     script.prepend("import \"qrc:/mobile\";");
     script.prepend("import Vedder.vesc.vescinterface 1.0;");
+    return qCompress(script.toUtf8(), 9);
+}
 
+bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
+{
     auto waitWriteRes = [this]() {
         int res = -10;
 
@@ -623,7 +627,7 @@ bool CodeLoader::qmlUpload(QString script, bool isFullscreen)
 
     VByteArray vb;
     vb.vbAppendUint16(isFullscreen ? 2 : 1);
-    vb.append(qCompress(script.toUtf8(), 9));
+    vb.append(script);
     quint16 crc = Packet::crc16((const unsigned char*)vb.constData(),
                                 uint32_t(vb.size()));
     VByteArray data;
@@ -755,13 +759,15 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
 bool CodeLoader::installVescPackage(VescPackage pkg)
 {
     bool res = true;
+    QByteArray qml;
 
     if (res && !pkg.qmlFile.isEmpty()) {
-        res = qmlErase();
+        qml = qmlCompress(pkg.qmlFile);
+        res = qmlErase(qml.size() + 100);
     }
 
     if (res && !pkg.qmlFile.isEmpty()) {
-        res = qmlUpload(pkg.qmlFile, pkg.qmlIsFullscreen);
+        res = qmlUpload(qml, pkg.qmlIsFullscreen);
     }
 
     if (res && !pkg.lispData.isEmpty()) {

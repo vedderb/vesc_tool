@@ -275,8 +275,8 @@ void PageVescPackage::on_uninstallButton_clicked()
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
 
-    mLoader.qmlErase();
-    mLoader.lispErase(-1);
+    mLoader.qmlErase(16);
+    mLoader.lispErase(16);
 
     Utility::sleepWithEventLoop(500);
     mVesc->reloadFirmware();

@@ -2017,7 +2017,9 @@ void MainWindow::on_scanCanButton_clicked()
         ui->canList->clear();
     } else {
         ui->canList->clear();
-        showStatusInfo("Connect to VESC before scanning", false);
+        mVesc->emitMessageDialog(
+                    "Scan CAN",
+                    "Please connect before scanning", false);
     }
 }
 

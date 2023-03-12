@@ -3786,9 +3786,6 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         mCustomConfigsLoaded = readConfigsOk;
     }
 
-    mCustomConfigRxDone = true;
-    emit customConfigLoadDone();
-
     // Read qmlui
     if (mLoadQmlUiOnConnect && params.hasQmlHw) {
         QByteArray qmlData;
@@ -3893,6 +3890,9 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     for (int i = 0;i < mCustomConfigs.size();i++) {
         commands()->customConfigGet(i, false);
     }
+
+    mCustomConfigRxDone = true;
+    emit customConfigLoadDone();
 }
 
 void VescInterface::appconfUpdated()

@@ -1,5 +1,5 @@
 ### 6.02
-#### Released TBD
+#### Released 2023-03-12
 * Improved experiment plot.
 * Updated PPM and ADC mapping widgets.
 * Better compatibility with old firmwares.
@@ -15,6 +15,8 @@
 * Changelogs updated and changed to markdown.
 * Pixmap caching for faster start and config reload.
 * Firmware archive added in mobile VESC Tool.
+* Added display tool.
+* QML upload bug fixes.
 
 ---
 

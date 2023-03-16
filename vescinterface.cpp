@@ -4086,7 +4086,6 @@ bool VescInterface::confStoreBackup(bool can, QString name)
         if (pCustom != nullptr) {
             commands()->customConfigGet(0, false);
             rxCustom = Utility::waitSignal(pCustom, SIGNAL(updated()), 1500);
-            qDebug() << rxCustom;
         }
 
         if (rxMc && rxApp) {
@@ -4114,7 +4113,10 @@ bool VescInterface::confStoreBackup(bool can, QString name)
     int canLastId = commands()->getCanSendId();
     auto fwLast = getFirmwareNowPair();
 
+    QVector<int> canDevs;
+
     if (can) {
+        canDevs = scanCan();
         ignoreCanChange(true);
         commands()->setSendCan(false);
     }
@@ -4127,7 +4129,7 @@ bool VescInterface::confStoreBackup(bool can, QString name)
     }
 
     if (res && can) {
-        for (int d: scanCan()) {
+        foreach (int d, canDevs) {
             commands()->setSendCan(true, d);
 
             Utility::getFwVersionBlocking(this, &fwp);
@@ -4152,8 +4154,15 @@ bool VescInterface::confStoreBackup(bool can, QString name)
         storeSettings();
         emit configurationBackupsChanged();
 
+        // Refresh configs
+        commands()->getMcconf();
+        commands()->getAppConf();
+        if (customConfig(0) != nullptr) {
+            commands()->customConfigGet(0, false);
+        }
+
         QString uuidsStr;
-        for (auto s: uuidsOk) {
+        foreach (auto s, uuidsOk) {
             uuidsStr += s + "\n";
         }
 
@@ -4261,8 +4270,10 @@ bool VescInterface::confRestoreBackup(bool can)
     bool canLastFwd = commands()->getSendCan();
     int canLastId = commands()->getCanSendId();
     auto fwLast = getFirmwareNowPair();
+    QVector<int> canDevs;
 
     if (can) {
+        canDevs = scanCan();
         ignoreCanChange(true);
         commands()->setSendCan(false);
     }
@@ -4275,7 +4286,7 @@ bool VescInterface::confRestoreBackup(bool can)
     }
 
     if (res && can) {
-        for (int d: scanCan()) {
+        foreach (int d, canDevs) {
             commands()->setSendCan(true, d);
 
             Utility::getFwVersionBlocking(this, &fwp);
@@ -4300,12 +4311,16 @@ bool VescInterface::confRestoreBackup(bool can)
         storeSettings();
         emit configurationBackupsChanged();
 
-        commands()->getMcconf(); //Refresh Motor conf.
-        commands()->getAppConf(); //Refresh App conf.
+        // Refresh configs
+        commands()->getMcconf();
+        commands()->getAppConf();
+        if (customConfig(0) != nullptr) {
+            commands()->customConfigGet(0, false);
+        }
 
         if (!uuidsOk.isEmpty()) {
             QString uuidsStr;
-            for (auto s: uuidsOk) {
+            foreach (auto s, uuidsOk) {
                 uuidsStr += s + "\n";
             }
 
@@ -4316,7 +4331,7 @@ bool VescInterface::confRestoreBackup(bool can)
 
         if (!missingConfigs.empty()) {
             QString missing;
-            for (auto s: missingConfigs) {
+            foreach (auto s, missingConfigs) {
                 missing += s + "\n";
             }
 

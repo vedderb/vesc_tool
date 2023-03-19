@@ -1,20 +1,9 @@
-; M365 dashboard compability lisp script by Netzpfuscher and 1zuna
-; Tested with Flipsky 75100 on COMM connector
-; UART Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with R470 Resistor
-; German guide: https://rollerplausch.com/threads/vesc-controller-einbau-1s-pro2-g30.6032/
+; M365 dashboard compability lisp script by Netzpfuscher
+; Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with R470 Resistor
+
+(app-adc-detach 3 1) ; Detach ADC1/2 and cc/rev button from APP
 
 ; **** User parameters ****
-;Calibrate throttle min max
-(define cal-thr-lo 41.0)
-(define cal-thr-hi 167.0)
-(define thr-deadzone 0.05)
-
-;Calibrate brake min max
-(define cal-brk-lo 39.0)
-(define cal-brk-hi 179.0)
-(define brk-deadzone 0.05)
-(define brk-minspeed 1)
-
 (define light-default 0)
 (define show-faults 1)
 (define show-batt-in-idle 1)
@@ -38,10 +27,7 @@
 (bufset-u16 tx-frame 4 0x6400)
 
 (define uart-buf (array-create type-byte 64))
-(define current-speed 0)
-(define throttle-in 0)
 (define throttle 0)
-(define brake-in 0)
 (define brake 0)
 (define buttonold 0)
 (define light 0)
@@ -69,53 +55,20 @@
 
 (defun inp(buffer) ; Frame 0x65
     (progn
-        (setvar 'current-speed (* (get-speed) 3.6))
-        
-        ; Throttle
-        (setvar 'throttle-in (bufget-u8 uart-buf 4))
-        (setvar 'throttle (/(- throttle-in cal-thr-lo) cal-thr-hi))
-        
-        (if (< throttle thr-deadzone)
-            (setvar 'throttle 0)
-        )
-        (if (> throttle 1)
-            (setvar 'throttle 1)
-        )
-        
-        ; Brake
-        (setvar 'brake-in (bufget-u8 uart-buf 5))
-        (setvar 'brake (/(- brake-in cal-brk-lo) cal-brk-hi))
-        
-        (if(< brake brk-deadzone)
-            (setvar 'brake 0)
-        )
-        (if (< current-speed brk-minspeed)
-            (setvar 'brake 0)
-        )
-        (if (> brake 1)
-            (setvar 'brake 1)
-        )
+        (setvar 'throttle (/(bufget-u8 uart-buf 4) 255.0))
+        (setvar 'brake (/(bufget-u8 uart-buf 5) 255.0))
 
         (if (= (+ off lock) 0)
-            (progn ; Driving mode
-                (if (> current-speed min-speed)
-                    (set-current-rel throttle)
-                    (set-current-rel 0)
-                )
-                (if (not (= brake 0))
-                    (set-brake-rel brake)
+            (progn
+                (app-adc-override 0 throttle)
+                (if (= lock 1)
+                    (app-adc-override 1 1)
+                    (app-adc-override 1 brake)
                 )
             )
             (progn
-                (set-current-rel 0) ; No throttle input when off or locked
-                
-                (if (= lock 1) ; Check if it is locked
-                    (if (> current-speed min-speed) ; Brake when being pushed while locked
-                        (set-brake-rel 1) ; Full power brake
-                        (set-brake-rel 0) ; No brake
-                    )
-                    (set-brake-rel 0) ; No brake input when off
-                )
+                (app-adc-override 0 0)
+                (app-adc-override 1 0)
             )
         )
     )
@@ -221,8 +174,8 @@
 (loopwhile t
     (progn
         ; If you do not have any R470 resistors or it still occours to press buttons randomly, try uncommenting this:
-        (if (<= (* (get-speed) 3.6) min-speed)
-        (progn
+        ;(if (<= (* (get-speed) 3.6) min-speed)
+        ;(progn
             (if (> buttonold (gpio-read 'pin-rx))
                 (progn
                     (setvar 'presses (+ presses 1))
@@ -255,7 +208,7 @@
                             
                             (if (>= presses 2) ; double press
                                 (progn
-                                    (if (> brake 0.02)
+                                    (if (> brake 0.4)
                                         (setvar 'lock (bitwise-xor lock 1))
                                         (progn
                                             (if (= speedmode 1) ; is drive?
@@ -291,7 +244,7 @@
             )
 
             (setvar 'buttonold (gpio-read 'pin-rx))
-        ))
+        ;))
         (sleep 0.01)
     )
 )

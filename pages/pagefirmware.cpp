@@ -244,6 +244,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
     QString extraPath;
     if (params.hw == "VESC Express T") {
         extraPath = "://res/firmwares_esp/ESP32-C3/VESC Express";
+    } else if (params.hw == "Devkit C3") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/DevKitM-1";
     }
 
     if (!extraPath.isEmpty()) {

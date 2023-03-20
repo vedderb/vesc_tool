@@ -1784,7 +1784,7 @@ QPair<int, int> Utility::configLatestSupported()
         QStringList names = fi.fileName().split("_o_");
 
         if (fi.isDir()) {
-            for(auto name: names) {
+            foreach (auto name, names) {
                 auto parts = name.split(".");
                 if (parts.size() == 2) {
                     QPair<int, int> ver = qMakePair(parts.at(0).toInt(), parts.at(1).toInt());

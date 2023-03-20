@@ -27,6 +27,7 @@
 <name>call-cc</name>
 <name>quote</name>
 <name>closure</name>
+<name>var</name>
 </section>
 
 <section name="Label">

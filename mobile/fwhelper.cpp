@@ -57,6 +57,8 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
     // Manually added entries. TODO: Come up with a system for them
     if (params.hw == "VESC Express T") {
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VESC Express");
+    } else if (params.hw == "Devkit C3") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/DevKitM-1");
     }
 
     return hws;

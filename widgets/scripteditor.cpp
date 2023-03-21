@@ -89,8 +89,8 @@ void ScriptEditor::setModeLisp()
     ui->codeEdit->setHighlighter(new LispHighlighter);
     ui->codeEdit->setCompleter(new QLispCompleter);
     ui->codeEdit->setCommentStr(";");
-    ui->codeEdit->setIndentStrs("(", ")");
-    ui->codeEdit->setAutoParentheses(false);
+    ui->codeEdit->setIndentStrs("{(", "})");
+    ui->codeEdit->setAutoParentheses(true);
     ui->codeEdit->setSeparateMinus(false);
     mIsModeLisp = true;
 }

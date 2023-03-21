@@ -5,6 +5,7 @@
 <name>undefine</name>
 <name>def</name>
 <name>defun</name>
+<name>defunret</name>
 <name>macro</name>
 <name>lambda</name>
 <name>fn</name>
@@ -22,12 +23,14 @@
 <name>looprange</name>
 <name>loopforeach</name>
 <name>break</name>
+<name>return</name>
 <name>import</name>
 <name>atomic</name>
 <name>call-cc</name>
 <name>quote</name>
 <name>closure</name>
 <name>var</name>
+<name>setq</name>
 </section>
 
 <section name="Label">
@@ -140,6 +143,7 @@
 <name>cdr</name>
 <name>setcar</name>
 <name>setcdr</name>
+<name>set</name>
 <name>setvar</name>
 <name>setix</name>
 <name>systime</name>

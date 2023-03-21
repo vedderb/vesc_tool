@@ -583,14 +583,34 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
             return;
         }
 
+        // Have Qt Edior like behaviour, if {|} and enter is pressed indent the two
+        // parenthesis
+        bool indentNext = false;
+        auto charBefore = charUnderCursor(-1);
+        auto charAfter = charUnderCursor();
+        if (m_autoIndentation && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) &&
+                m_indentStartStr.contains(charBefore) && m_indentEndStr.contains(charAfter)) {
+            insertPlainText("\n\n");
+            moveCursor(QTextCursor::MoveOperation::Left);
+            indentNext = true;
+
+            auto tcStart = textCursor();
+            auto tcEnd = textCursor();
+            tcStart.setPosition(textCursor().selectionStart());
+            tcEnd.setPosition(textCursor().selectionEnd());
+            lineStart = tcStart.blockNumber();
+            lineEnd = tcEnd.blockNumber() + 1;
+        }
+
         // Auto-indent selected line or block
-        if (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier) {
+        if (indentNext || (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier)) {
             auto txtOld = toPlainText();
+            qDebug() << txtOld;
             int indentNow = 0;
             bool isComment = false;
 
             int lineNum = -1;
-            for (auto line: txtOld.split("\n")) {
+            foreach (auto line, txtOld.split("\n")) {
                 lineNum++;
 
                 bool indent = true;
@@ -632,14 +652,14 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
 
                 int indentLine = 0;
                 for (auto c: line) {
-                    if (c == m_indentStartStr) {
+                    if (m_indentStartStr.contains(c)) {
                         indentNow++;
                         indentLine++;
                     }
                 }
 
                 for (auto c: line) {
-                    if (c == m_indentEndStr) {
+                    if (m_indentEndStr.contains(c)) {
                         indentNow--;
                         indentLine--;
                     }
@@ -718,43 +738,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         int tabCounts =
                 indentationLevel * fontMetrics().averageCharWidth() / tabStopWidth();
 #endif
-
-        // Have Qt Edior like behaviour, if {|} and enter is pressed indent the two
-        // parenthesis
-        auto charAfter = charUnderCursor();
-
-        if (m_autoIndentation &&
-                (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) &&
-                charUnderCursor(-1) == '{')
-        {
-            int charsBack = 0;
-            insertPlainText("\n");
-
-            if (m_replaceTab)
-                insertPlainText(QString(indentationLevel + defaultIndent, ' '));
-            else
-                insertPlainText(QString(tabCounts + 1, '\t'));
-
-            if (charAfter == '}') {
-                insertPlainText("\n");
-                charsBack++;
-
-                if (m_replaceTab)
-                {
-                    insertPlainText(QString(indentationLevel, ' '));
-                    charsBack += indentationLevel;
-                }
-                else
-                {
-                    insertPlainText(QString(tabCounts, '\t'));
-                    charsBack += tabCounts;
-                }
-            }
-
-            while (charsBack--)
-                moveCursor(QTextCursor::MoveOperation::Left);
-            return;
-        }
 
         // Shortcut for moving line to left
         if (m_replaceTab && e->key() == Qt::Key_Backtab) {

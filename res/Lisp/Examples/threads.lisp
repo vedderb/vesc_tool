@@ -1,8 +1,8 @@
-(defun counter (var rate start)
+(defun counter (v rate start)
     (progn
-        (setvar var start)
+        (setvar v start)
         (yield (/ 1000000 rate))
-        (counter var rate (+ start 1))
+        (counter v rate (+ start 1))
 ))
 
 ; Start lots of threads where each thread has

@@ -605,7 +605,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         // Auto-indent selected line or block
         if (indentNext || (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier)) {
             auto txtOld = toPlainText();
-            qDebug() << txtOld;
             int indentNow = 0;
             bool isComment = false;
 

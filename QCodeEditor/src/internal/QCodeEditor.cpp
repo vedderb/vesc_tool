@@ -25,8 +25,6 @@ static QVector<QPair<QString, QString>> parentheses = {
     {"(", ")"},
     {"{", "}"},
     {"[", "]"},
-    {"\"", "\""},
-    {"'", "'"}
 };
 
 QCodeEditor::QCodeEditor(QWidget* widget) :

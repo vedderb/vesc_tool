@@ -605,13 +605,13 @@ void PageLisp::on_uploadButton_clicked()
     QString editorPath = QDir::currentPath();
 
     if (e != nullptr) {
-        codeStr = e->codeEditor()->toPlainText();
+        codeStr = e->contentAsText();
         QFileInfo fi(e->fileNow());
         if (fi.exists()) {
             editorPath = fi.canonicalPath();
         }
     } else {
-        ui->mainEdit->codeEditor()->toPlainText();
+        codeStr = ui->mainEdit->contentAsText();
         QFileInfo fi(ui->mainEdit->fileNow());
         if (fi.exists()) {
             editorPath = fi.canonicalPath();
@@ -707,9 +707,9 @@ void PageLisp::on_streamButton_clicked()
     QString codeStr = "";
 
     if (e != nullptr) {
-        codeStr = e->codeEditor()->toPlainText();
+        codeStr = e->contentAsText();
     } else {
-        ui->mainEdit->codeEditor()->toPlainText();
+        ui->mainEdit->contentAsText();
     }
 
     mLoader.lispStream(codeStr.toLocal8Bit(), ui->streamModeBox->currentIndex());

@@ -131,28 +131,15 @@ Preferences::Preferences(QWidget *parent) :
     }
 #endif
 
+    ui->uploadContentEditorButton->setChecked(mSettings.value("scripting/uploadContentEditor", true).toBool());
+    ui->uploadContentFileButton->setChecked(!mSettings.value("scripting/uploadContentEditor", true).toBool());
+
     saveSettingsChanged();
 }
 
 Preferences::~Preferences()
 {
-#ifdef HAS_GAMEPAD
-    mSettings.setValue("js_is_configured", ui->jsConfigOkBox->isChecked());
-    mSettings.setValue("js_is_inverted", ui->jsInvertedBox->isChecked());
-    mSettings.setValue("js_is_bidirectional", ui->jsBidirectionalBox->isChecked());
-    mSettings.setValue("js_axis", ui->jseAxisBox->currentIndex());
-    mSettings.setValue("js_control_type", ui->jsControlTypeBox->currentIndex());
-    mSettings.setValue("js_current_min", ui->jsCurrentMinBox->value());
-    mSettings.setValue("js_current_max", ui->jsCurrentMaxBox->value());
-    mSettings.setValue("js_erpm_min", ui->jsErpmMinBox->value());
-    mSettings.setValue("js_erpm_max", ui->jsErpmMaxBox->value());
-    mSettings.setValue("js_range_min", ui->jsMinBox->value());
-    mSettings.setValue("js_range_max", ui->jsMaxBox->value());
-    if (mGamepad) {
-        mSettings.setValue("js_name", mGamepad->name());
-    }
-#endif
-
+    saveSettingsChanged();
     delete ui;
 }
 
@@ -450,6 +437,24 @@ void Preferences::on_okButton_clicked(){
 
 void Preferences::saveSettingsChanged()
 {
+#ifdef HAS_GAMEPAD
+    mSettings.setValue("js_is_configured", ui->jsConfigOkBox->isChecked());
+    mSettings.setValue("js_is_inverted", ui->jsInvertedBox->isChecked());
+    mSettings.setValue("js_is_bidirectional", ui->jsBidirectionalBox->isChecked());
+    mSettings.setValue("js_axis", ui->jseAxisBox->currentIndex());
+    mSettings.setValue("js_control_type", ui->jsControlTypeBox->currentIndex());
+    mSettings.setValue("js_current_min", ui->jsCurrentMinBox->value());
+    mSettings.setValue("js_current_max", ui->jsCurrentMaxBox->value());
+    mSettings.setValue("js_erpm_min", ui->jsErpmMinBox->value());
+    mSettings.setValue("js_erpm_max", ui->jsErpmMaxBox->value());
+    mSettings.setValue("js_range_min", ui->jsMinBox->value());
+    mSettings.setValue("js_range_max", ui->jsMaxBox->value());
+    if (mGamepad) {
+        mSettings.setValue("js_name", mGamepad->name());
+    }
+#endif
+
     mLastScaling = mSettings.value("app_scale_factor", 1.0).toDouble();
     mLastIsDark = Utility::isDarkMode();
+    mSettings.setValue("scripting/uploadContentEditor", ui->uploadContentEditorButton->isChecked());
 }

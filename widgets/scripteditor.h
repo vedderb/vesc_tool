@@ -40,6 +40,7 @@ public:
     void setFileNow(QString fileName);
     void setModeQml();
     void setModeLisp();
+    QString contentAsText();
 
     bool isDirty = false;
 
@@ -62,6 +63,7 @@ private slots:
     void on_replaceAllButton_clicked();
     void on_searchHideButton_clicked();
     void on_searchCaseSensitiveBox_toggled(bool checked);
+    void on_refreshButton_clicked();
 
 private:
     Ui::ScriptEditor *ui;

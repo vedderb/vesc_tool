@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="tabPosition">
-      <enum>QTabWidget::West</enum>
+      <enum>QTabWidget::North</enum>
      </property>
      <property name="tabShape">
       <enum>QTabWidget::Rounded</enum>
@@ -843,6 +843,58 @@
           <size>
            <width>20</width>
            <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>Scripting</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Upload/Stream/Run</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QRadioButton" name="uploadContentEditorButton">
+            <property name="toolTip">
+             <string>Use editor content when uploading/streaming/running code.</string>
+            </property>
+            <property name="text">
+             <string>Use Editor Content</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="uploadContentFileButton">
+            <property name="toolTip">
+             <string>Use file content when uploading/streaming/running code. If the content is not saved and a file path does not exist the editor content will be used instead.</string>
+            </property>
+            <property name="text">
+             <string>Use File Content</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>342</height>
           </size>
          </property>
         </spacer>

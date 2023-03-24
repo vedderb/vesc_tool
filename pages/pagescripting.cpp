@@ -532,7 +532,7 @@ void PageScripting::setEditorClean(ScriptEditor *editor)
 
 QString PageScripting::qmlToRun(bool importDir, bool prependImports)
 {
-    QString res = ui->mainEdit->codeEditor()->toPlainText();
+    QString res = ui->mainEdit->contentAsText();
 
     if (prependImports) {
         res.prepend("import \"qrc:/mobile\";");

@@ -134,8 +134,11 @@
      </item>
      <item>
       <widget class="QPushButton" name="openFileButton">
+       <property name="toolTip">
+        <string>Open file...</string>
+       </property>
        <property name="text">
-        <string>Open</string>
+        <string/>
        </property>
        <property name="flat">
         <bool>false</bool>
@@ -144,8 +147,11 @@
      </item>
      <item>
       <widget class="QPushButton" name="saveButton">
+       <property name="toolTip">
+        <string>Save file</string>
+       </property>
        <property name="text">
-        <string>Save</string>
+        <string/>
        </property>
        <property name="flat">
         <bool>false</bool>
@@ -154,11 +160,24 @@
      </item>
      <item>
       <widget class="QPushButton" name="saveAsButton">
+       <property name="toolTip">
+        <string>Save file as...</string>
+       </property>
        <property name="text">
-        <string>Save As</string>
+        <string/>
        </property>
        <property name="flat">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="refreshButton">
+       <property name="toolTip">
+        <string>Refresh editor with file content. Warning: This will replace unsaved changes in the editor.</string>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>

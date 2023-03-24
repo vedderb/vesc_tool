@@ -1,3 +1,8 @@
+### 6.05
+#### Released TBD
+* Scripting-setting to select whether to upload the editor content or file content.
+* Autocompletion and bracket matching completion improvements.
+
 ### 6.02
 #### Released 2023-03-12
 * Improved experiment plot.

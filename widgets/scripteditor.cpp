@@ -26,6 +26,7 @@
 #include <QLispCompleter>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QSettings>
 #include "utility.h"
 
 ScriptEditor::ScriptEditor(QWidget *parent) :
@@ -39,6 +40,7 @@ ScriptEditor::ScriptEditor(QWidget *parent) :
     ui->openFileButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
     ui->saveButton->setIcon(Utility::getIcon("icons/Save-96.png"));
     ui->saveAsButton->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->refreshButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
     ui->searchWidget->setVisible(false);
     ui->codeEdit->setTabReplaceSize(4);
 
@@ -93,6 +95,31 @@ void ScriptEditor::setModeLisp()
     ui->codeEdit->setAutoParentheses(true);
     ui->codeEdit->setSeparateMinus(false);
     mIsModeLisp = true;
+}
+
+QString ScriptEditor::contentAsText()
+{
+    QString res = ui->codeEdit->toPlainText();
+
+    if (!QSettings().value("scripting/uploadContentEditor", true).toBool()) {
+        QString fileName = ui->fileNowLabel->text();
+
+        QFileInfo fi(fileName);
+        if (!fi.exists()) {
+            return res;
+        }
+
+        QFile file(fileName);
+        if (!file.open(QIODevice::ReadOnly)) {
+            return res;
+        }
+
+        res = file.readAll();
+
+        file.close();
+    }
+
+    return res;
 }
 
 void ScriptEditor::keyPressEvent(QKeyEvent *event)
@@ -225,4 +252,28 @@ void ScriptEditor::on_searchHideButton_clicked()
 void ScriptEditor::on_searchCaseSensitiveBox_toggled(bool checked)
 {
     ui->codeEdit->searchSetCaseSensitive(checked);
+}
+
+void ScriptEditor::on_refreshButton_clicked()
+{
+    QString fileName = ui->fileNowLabel->text();
+
+    QFileInfo fi(fileName);
+    if (!fi.exists()) {
+        QMessageBox::warning(this, tr("Refresh File"), tr("No file is open."));
+        return;
+    }
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::critical(this, tr("Refresh File"),
+                              "Could not open\n" + fileName + "\nfor reading.");
+        return;
+    }
+
+    ui->codeEdit->setPlainText(file.readAll());
+    ui->fileNowLabel->setText(fileName);
+    emit fileOpened(fileName);
+
+    file.close();
 }

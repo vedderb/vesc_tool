@@ -383,6 +383,50 @@ p, li { white-space: pre-wrap; }
             <suffix> V</suffix>
             <vTx>9</vTx>
         </l_battery_cut_end>
+        <l_battery_regen_cut_start>
+            <longName>Battery Voltage Regen Cutoff Start</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The input voltage where regen current starts to get reduced to avoid overcharging the battery on long downhills.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_L_BATTERY_REGEN_CUT_START</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>700</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>55</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>9</vTx>
+        </l_battery_regen_cut_start>
+        <l_battery_regen_cut_end>
+            <longName>Battery Voltage Regen Cutoff End</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The input voltage above which regen current is not allowed anymore to avoid overcharging the battery on long downhills.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_L_BATTERY_REGEN_CUT_END</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>700</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>57</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>9</vTx>
+        </l_battery_regen_cut_end>
         <l_slow_abs_current>
             <longName>Slow ABS Current Limit</longName>
             <type>5</type>
@@ -4367,6 +4411,8 @@ p, li { white-space: pre-wrap; }
         <ser>l_max_vin</ser>
         <ser>l_battery_cut_start</ser>
         <ser>l_battery_cut_end</ser>
+        <ser>l_battery_regen_cut_start</ser>
+        <ser>l_battery_regen_cut_end</ser>
         <ser>l_slow_abs_current</ser>
         <ser>l_temp_fet_start</ser>
         <ser>l_temp_fet_end</ser>
@@ -4588,6 +4634,8 @@ p, li { white-space: pre-wrap; }
                 <subgroupParams>
                     <param>l_battery_cut_start</param>
                     <param>l_battery_cut_end</param>
+                    <param>l_battery_regen_cut_start</param>
+                    <param>l_battery_regen_cut_end</param>
                     <param>m_batt_filter_const</param>
                 </subgroupParams>
             </subgroup>

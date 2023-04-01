@@ -302,20 +302,20 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The input voltage below which a fault code is thrown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_MIN_VOLTAGE</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>700</maxDouble>
+            <maxDouble>1100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>8</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> V</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_min_vin>
         <l_max_vin>
             <longName>Maximum Input Voltage</longName>
@@ -324,20 +324,20 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The input voltage above which a fault code is thrown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_MAX_VOLTAGE</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>700</maxDouble>
+            <maxDouble>1100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>57</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> V</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_max_vin>
         <l_battery_cut_start>
             <longName>Battery Voltage Cutoff Start</longName>
@@ -346,20 +346,20 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The input voltage where current starts to get reduced. There is still full braking current available as braking only charges the battery.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_BATTERY_CUT_START</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>700</maxDouble>
+            <maxDouble>1100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>10</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> V</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_battery_cut_start>
         <l_battery_cut_end>
             <longName>Battery Voltage Cutoff End</longName>
@@ -368,20 +368,20 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The input voltage below which current draw is not allowed anymore. There is still full braking current available as braking only charges the battery.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_BATTERY_CUT_END</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>700</maxDouble>
+            <maxDouble>1100</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>8</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> V</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_battery_cut_end>
         <l_battery_regen_cut_start>
             <longName>Battery Voltage Regen Cutoff Start</longName>
@@ -401,7 +401,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_BATTERY_REGEN_CUT_START</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>1100</maxDouble>
@@ -409,9 +409,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>1000</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> V</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_battery_regen_cut_start>
         <l_battery_regen_cut_end>
             <longName>Battery Voltage Regen Cutoff End</longName>
@@ -429,7 +429,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Note that beyond this value, regen braking will be completely disabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_BATTERY_REGEN_CUT_END</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>1100</maxDouble>
@@ -437,9 +437,9 @@ p, li { white-space: pre-wrap; }
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>1100</valDouble>
-            <vTxDoubleScale>1000</vTxDoubleScale>
+            <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> V</suffix>
-            <vTx>9</vTx>
+            <vTx>7</vTx>
         </l_battery_regen_cut_end>
         <l_slow_abs_current>
             <longName>Slow ABS Current Limit</longName>

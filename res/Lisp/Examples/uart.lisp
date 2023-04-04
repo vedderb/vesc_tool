@@ -1,6 +1,6 @@
 (uart-start 115200)
 
-(define uart-buf (array-create type-byte 100))
+(define uart-buf (array-create 100))
 
 (defun read-thd ()
     (loopwhile t

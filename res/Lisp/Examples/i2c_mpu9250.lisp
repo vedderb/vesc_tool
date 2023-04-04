@@ -19,7 +19,7 @@
 (i2c-tx-rx mpu-addr (list reg-gyro-config (shl 0x03 3)))
 
 ; Receive buffer for accel and gyro
-(define rx-buf (array-create type-byte 14))
+(define rx-buf (array-create 14))
 
 (loopwhile t
     (progn

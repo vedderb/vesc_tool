@@ -157,11 +157,6 @@
 <name>assoc</name>
 <name>cossa</name>
 <name>setassoc</name>
-<name>array-create</name>
-<name>array-size</name>
-<name>array-read</name>
-<name>array-write</name>
-<name>array-clear</name>
 <name>type-of</name>
 <name>timeout-reset</name>
 <name>get-ppm</name>
@@ -327,6 +322,8 @@
 <name>conf-set-pid-offset</name>
 <name>conf-measure-res</name>
 <name>free</name>
+<name>bufcreate</name>
+<name>array-create</name>
 <name>bufset-i8</name>
 <name>bufset-i16</name>
 <name>bufset-i24</name>

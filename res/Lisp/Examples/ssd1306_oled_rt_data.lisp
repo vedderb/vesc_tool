@@ -94,7 +94,7 @@
 )
 
 ; display buffer
-(def pixbuf (array-create type-byte 1025))
+(def pixbuf (array-create 1025))
 (bufset-u8 pixbuf 0 0x40) ; First byte tells the SSD1306 that this is data
 (bufclear pixbuf 0 1)
 

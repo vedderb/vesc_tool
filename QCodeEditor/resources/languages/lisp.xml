@@ -13,6 +13,7 @@
 <name>read-program</name>
 <name>eval</name>
 <name>eval-program</name>
+<name>read-eval-program</name>
 <name>let</name>
 <name>progn</name>
 <name>if</name>
@@ -32,6 +33,8 @@
 <name>var</name>
 <name>setq</name>
 <name>move-to-flash</name>
+<name>@const-start</name>
+<name>@const-end</name>
 </section>
 
 <section name="Label">

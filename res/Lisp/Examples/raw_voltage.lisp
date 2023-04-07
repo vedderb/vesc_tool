@@ -1,7 +1,7 @@
 (define rate 500) ; Update rate in hz
 (define filter-const 0.2)
 
-(defun filter (val sample)
+(defun lpf (val sample)
     (- val (* filter-const (- val sample)))
 )
 
@@ -20,7 +20,7 @@
         (define vb-z (- vb vz))
         (define vc-z (- vc vz))
         
-        (define va-f (filter va-f va-z))
+        (define va-f (lpf va-f va-z))
 
         (sleep (/ 1.0 rate))
 ))

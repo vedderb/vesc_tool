@@ -40,7 +40,7 @@
                 (print (str-merge (str-from-n c-amp "Cos Amp: %.3f ") (str-from-n c-ofs "Cos Offset: %.3f ")))
 ))))
 
-(def filter-const 0.1)
+(def filter-const 0.8)
 (defun lpf (val sample)
     (- val (* filter-const (- val sample)))
 )

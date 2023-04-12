@@ -148,6 +148,7 @@ Item {
                                 var params = VescIf.getLastFwRxParams()
                                 updateHw(params)
                                 updateBl(params)
+                                updateFwText()
                             }
 
                             onCurrentIndexChanged: {
@@ -867,36 +868,38 @@ Item {
         target: VescIf
 
         function onFwRxChanged(rx, limited) {
-            if (!rx) {
-                return;
+            if (rx) {
+                updateFwText()
             }
-
-            var params = VescIf.getLastFwRxParams()
-
-            updateHw(params)
-            updateBl(params)
-            updateArch()
-
-            var testFwStr = "";
-            var fwNameStr = "";
-
-            if (params.isTestFw > 0) {
-                testFwStr = " BETA " +  params.isTestFw
-            }
-
-            if (params.fwName !== "") {
-                fwNameStr = " (" + params.fwName + ")"
-            }
-
-            versionText.text =
-                    "FW   : v" + params.major + "." + params.minor + fwNameStr + testFwStr + "\n" +
-                    "HW   : " + params.hw + "\n" +
-                    "UUID : " + Utility.uuid2Str(params.uuid, false)
         }
 
         function onFwArchiveDlProgress(msg, prog) {
             dlProg.value = prog
             dlText.text = msg
         }
+    }
+
+    function updateFwText() {
+        var params = VescIf.getLastFwRxParams()
+
+        updateHw(params)
+        updateBl(params)
+        updateArch()
+
+        var testFwStr = "";
+        var fwNameStr = "";
+
+        if (params.isTestFw > 0) {
+            testFwStr = " BETA " +  params.isTestFw
+        }
+
+        if (params.fwName !== "") {
+            fwNameStr = " (" + params.fwName + ")"
+        }
+
+        versionText.text =
+                "FW   : v" + params.major + "." + params.minor + fwNameStr + testFwStr + "\n" +
+                "HW   : " + params.hw + "\n" +
+                "UUID : " + Utility.uuid2Str(params.uuid, false)
     }
 }

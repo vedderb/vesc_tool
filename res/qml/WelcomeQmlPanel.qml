@@ -193,6 +193,7 @@ Item {
                 id: uiHw
                 anchors.fill: parent
                 property var tabBarItem: tabBar
+                property var swipeViewItem: swipeView
             }
         }
 
@@ -211,6 +212,7 @@ Item {
                 id: uiApp
                 anchors.fill: parent
                 property var tabBarItem: tabBar
+                property var swipeViewItem: swipeView
             }
         }
 

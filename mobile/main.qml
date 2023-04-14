@@ -577,6 +577,7 @@ ApplicationWindow {
             id: uiHw
             anchors.fill: parent
             property var tabBarItem: tabBar
+            property var swipeViewItem: swipeView
         }
     }
 
@@ -595,6 +596,7 @@ ApplicationWindow {
             id: uiApp
             anchors.fill: parent
             property var tabBarItem: tabBar
+            property var swipeViewItem: swipeView
         }
     }
 

@@ -2632,6 +2632,11 @@ void Commands::fileBlockCancel()
     emit fileProgress(0, 0, mFilePercentage, mFileSpeed);
 }
 
+bool Commands::fileBlockDidCancel()
+{
+    return mFileShouldCancel;
+}
+
 bool Commands::getLimitedSupportsFwdAllCan() const
 {
     return mLimitedSupportsFwdAllCan;

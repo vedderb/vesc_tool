@@ -81,6 +81,7 @@ public:
     Q_INVOKABLE bool fileBlockMkdir(QString path);
     Q_INVOKABLE bool fileBlockRemove(QString path);
     Q_INVOKABLE void fileBlockCancel();
+    Q_INVOKABLE bool fileBlockDidCancel();
 
     Q_INVOKABLE double getFilePercentage() const;
     Q_INVOKABLE double getFileSpeed() const;

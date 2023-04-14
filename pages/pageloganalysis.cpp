@@ -1325,6 +1325,15 @@ void PageLogAnalysis::restoreSelection()
     ui->dataTable->verticalScrollBar()->setValue(mSelection.scrollPos);
 }
 
+void PageLogAnalysis::setFileButtonsEnabled(bool en)
+{
+    ui->vescLogListOpenButton->setEnabled(en);
+    ui->vescSaveAsButton->setEnabled(en);
+    ui->vescLogListRefreshButton->setEnabled(en);
+    ui->vescLogDeleteButton->setEnabled(en);
+    ui->vescUpButton->setEnabled(en);
+}
+
 void PageLogAnalysis::on_saveMapPdfButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -1445,6 +1454,8 @@ void PageLogAnalysis::on_vescLogListRefreshButton_clicked()
     }
 }
 
+
+
 void PageLogAnalysis::on_vescLogListOpenButton_clicked()
 {
     if (!ui->vescLogListOpenButton->isEnabled()) {
@@ -1470,11 +1481,9 @@ void PageLogAnalysis::on_vescLogListOpenButton_clicked()
             mVescLastPath.replace("//", "/");
             on_vescLogListRefreshButton_clicked();
         } else {
-            ui->vescLogListOpenButton->setEnabled(false);
-            ui->vescSaveAsButton->setEnabled(false);
+            setFileButtonsEnabled(false);
             auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
-            ui->vescLogListOpenButton->setEnabled(true);
-            ui->vescSaveAsButton->setEnabled(true);
+            setFileButtonsEnabled(true);
             if (!data.isEmpty()) {
                 openLog(data);
             }
@@ -1524,30 +1533,63 @@ void PageLogAnalysis::on_vescSaveAsButton_clicked()
     if (fe.isDir) {
         mVesc->emitMessageDialog("Save File", "Cannot save directory, only files", false);
     } else {
-        QString fileName = QFileDialog::getSaveFileName(this,
-                                                        tr("Save Log File"), "",
-                                                        tr("CSV files (*.csv)"));
+        qDebug() << items.size();
 
-        if (!fileName.isEmpty()) {
-            if (!fileName.toLower().endsWith(".csv")) {
-                fileName += ".csv";
+        if (items.size() == 2) {
+            QString fileName = QFileDialog::getSaveFileName(this,
+                                                            tr("Save Log File"), "",
+                                                            tr("CSV files (*.csv)"));
+
+            if (!fileName.isEmpty()) {
+                if (!fileName.endsWith(".csv", Qt::CaseInsensitive)) {
+                    fileName += ".csv";
+                }
+
+                QFile file(fileName);
+
+                if (!file.open(QIODevice::WriteOnly)) {
+                    mVesc->emitMessageDialog("Save File", "Cannot open destination", false);
+                    return;
+                }
+
+                setFileButtonsEnabled(false);
+                auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
+                setFileButtonsEnabled(true);
+
+                file.write(data);
+                file.close();
             }
+        } else {
+            QString path = QFileDialog::getExistingDirectory(this,
+                                                             tr("Choose Destination"),
+                                                             "",
+                                                             QFileDialog::ShowDirsOnly |
+                                                             QFileDialog::DontResolveSymlinks);
+            if (!path.isEmpty()) {
+                setFileButtonsEnabled(false);
 
-            QFile file(fileName);
+                bool didCancel = false;
+                foreach (auto it, items) {
+                    if (didCancel) {
+                        break;
+                    }
 
-            if (!file.open(QIODevice::WriteOnly)) {
-                mVesc->emitMessageDialog("Save File", "Cannot open destination", false);
-                return;
+                    if (it->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
+                        fe = it->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
+                        if (!fe.isDir) {
+                            QFile file(path + "/" + fe.name);
+                            if (file.open(QIODevice::WriteOnly)) {
+                                auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
+                                didCancel = mVesc->commands()->fileBlockDidCancel();
+                                file.write(data);
+                                file.close();
+                            }
+                        }
+                    }
+                }
+
+                setFileButtonsEnabled(true);
             }
-
-            ui->vescLogListOpenButton->setEnabled(false);
-            ui->vescSaveAsButton->setEnabled(false);
-            auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
-            ui->vescLogListOpenButton->setEnabled(true);
-            ui->vescSaveAsButton->setEnabled(true);
-
-            file.write(data);
-            file.close();
         }
     }
 }
@@ -1561,31 +1603,48 @@ void PageLogAnalysis::on_vescLogDeleteButton_clicked()
         return;
     }
 
-    FILE_LIST_ENTRY fe;
-    if (items.first()->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
-        fe = items.first()->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
-    }
-
     int ret = QMessageBox::Cancel;
-    if (fe.isDir) {
-        ret = QMessageBox::warning(this,
-                                   tr("Delete Directory"),
-                                   tr("This is going to delete %1 and its content permanently. Are you sure?").arg(fe.name),
-                                   QMessageBox::Yes | QMessageBox::Cancel);
+    if (items.size() == 2) {
+        FILE_LIST_ENTRY fe;
+        if (items.first()->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
+            fe = items.first()->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
+        }
+
+        if (fe.isDir) {
+            ret = QMessageBox::warning(this,
+                                       tr("Delete Directory"),
+                                       tr("This is going to delete %1 and its content permanently. Are you sure?").arg(fe.name),
+                                       QMessageBox::Yes | QMessageBox::Cancel);
+        } else {
+            ret = QMessageBox::warning(this,
+                                       tr("Delete File"),
+                                       tr("This is going to delete %1 permanently. Are you sure?").arg(fe.name),
+                                       QMessageBox::Yes | QMessageBox::Cancel);
+        }
     } else {
         ret = QMessageBox::warning(this,
-                                   tr("Delete File"),
-                                   tr("This is going to delete %1 permanently. Are you sure?").arg(fe.name),
+                                   tr("Delete"),
+                                   tr("This is going to delete the selected files and directories. Are you sure?"),
                                    QMessageBox::Yes | QMessageBox::Cancel);
     }
 
     if (ret == QMessageBox::Yes) {
         ui->vescLogTab->setEnabled(false);
-        bool ok = mVesc->commands()->fileBlockRemove(mVescLastPath + "/" + fe.name);
+        int cnt = 0;
+        foreach (auto it, items) {
+            if (it->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
+                auto fe = it->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
+                bool ok = mVesc->commands()->fileBlockRemove(mVescLastPath + "/" + fe.name);
+                if (ok) {
+                    cnt++;
+                    mVesc->emitStatusMessage("File deleted", true);
+                }
+            }
+        }
         ui->vescLogTab->setEnabled(true);
-        if (ok) {
+
+        if (cnt > 0) {
             on_vescLogListRefreshButton_clicked();
-            mVesc->emitStatusMessage("File deleted", true);
         }
     }
 }

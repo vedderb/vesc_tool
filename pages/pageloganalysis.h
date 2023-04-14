@@ -177,6 +177,7 @@ private:
 
     void storeSelection();
     void restoreSelection();
+    void setFileButtonsEnabled(bool en);
 
 };
 

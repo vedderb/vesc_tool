@@ -308,11 +308,17 @@ Item {
     }
 
     property var hwUiObj: 0
+    property var appUiObj: 0
 
-    function updateHwUi () {
+    function updateHwAppUi () {
         if (hwUiObj != 0) {
             hwUiObj.destroy()
             hwUiObj = 0
+        }
+
+        if (appUiObj != 0) {
+            appUiObj.destroy()
+            appUiObj = 0
         }
 
         swipeView.interactive = true
@@ -338,19 +344,6 @@ Item {
             uiHwPage.parent = null
             uiHwButton.parent = null
         }
-    }
-
-    property var appUiObj: 0
-
-    function updateAppUi () {
-        if (appUiObj != 0) {
-            appUiObj.destroy()
-            appUiObj = 0
-        }
-
-        swipeView.interactive = true
-        tabBar.visible = true
-        tabBar.enabled = true
 
         if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
             if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
@@ -377,16 +370,14 @@ Item {
         target: VescIf
 
         function onFwRxChanged(rx, limited) {
-            updateHwUi()
-            updateAppUi()
+            updateHwAppUi()
         }
 
         function onQmlLoadDone() {
             if (VescIf.askQmlLoad()) {
                 qmlLoadDialog.open()
             } else {
-                updateHwUi()
-                updateAppUi()
+                updateHwAppUi()
             }
         }
     }
@@ -440,6 +431,7 @@ Item {
 
         parent: container
         y: parent.y + parent.height / 2 - height / 2
+        width: parent.width - 20
 
         ColumnLayout {
             anchors.fill: parent
@@ -466,8 +458,7 @@ Item {
 
         onAccepted: {
             VescIf.setAskQmlLoad(!qmlDoNotAskAgainBox.checked)
-            updateHwUi()
-            updateAppUi()
+            updateHwAppUi()
         }
 
         onRejected: {

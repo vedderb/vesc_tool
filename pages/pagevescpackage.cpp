@@ -56,8 +56,6 @@ PageVescPackage::PageVescPackage(QWidget *parent) :
     on_loadRefreshButton_clicked();
     on_outputRefreshButton_clicked();
 
-    ui->splitter->setSizes(QList<int>({500, 1000}));
-
     reloadArchive();
 }
 

@@ -19,7 +19,6 @@
 
 #include "pagedisplaytool.h"
 #include "ui_pagedisplaytool.h"
-#include "utility.h"
 
 #include <QLayout>
 #include <QFileDialog>

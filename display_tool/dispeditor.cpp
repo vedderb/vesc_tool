@@ -35,7 +35,7 @@ DispEditor::DispEditor(QWidget *parent) :
     ui->setupUi(this);
     ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
 
-    updateSize(128, 128);
+    updateSize(128, 64);
 
     ui->imageWidget->setPixmap(QPixmap::fromImage(ui->displayEdit->getImageNow()));
 

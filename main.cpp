@@ -74,10 +74,10 @@ static void showHelp()
 {
     qDebug() << "Arguments";
     qDebug() << "-h, --help : Show help text";
-    qDebug() << "--tcpServer [port] : Autoconnect to VESC and start TCP server on [port]";
+    qDebug() << "--tcpServer [port] : Connect to VESC and start TCP server on [port]";
     qDebug() << "--loadQml [file] : Load QML UI from file instead of the regular VESC Tool UI";
     qDebug() << "--loadQmlVesc : Load QML UI from the connected VESC instead of the regular VESC Tool UI";
-    qDebug() << "--qmlAutoConn : Autoconnect over USB before loading the QML UI";
+    qDebug() << "--qmlAutoConn : Connect over USB before loading the QML UI";
     qDebug() << "--qmlFullscreen : Run QML UI in fullscreen mode";
     qDebug() << "--qmlOtherScreen : Run QML UI on other screen";
     qDebug() << "--qmlRotation [deg] : Rotate screen by deg degrees";
@@ -87,6 +87,10 @@ static void showHelp()
     qDebug() << "--buildPkg [pkgPath:lispPath:qmlPath:isFullscreen:optMd:optName] : Build VESC Package";
     qDebug() << "--useBoardSetupWindow : Start board setup window instead of the main UI";
     qDebug() << "--xmlConfToCode [xml-file] : Generate C code from XML configuration file (the files are saved in the same directory as the XML)";
+    qDebug() << "--vescPort [port] : VESC Port for commands that connect, e.g. /dev/ttyACM0. If this command is left out autoconnect will be used.";
+    qDebug() << "--canFwd [canId] : Can ID for CAN forwarding";
+    qDebug() << "--getMcConf [confPath] : Connect and read motor configuration and store the XML to confPath.";
+    qDebug() << "--setMcConf [confPath] : Connect and write motor configuration XML from confPath.";
 }
 
 #ifdef Q_OS_LINUX
@@ -255,6 +259,10 @@ int main(int argc, char *argv[])
     bool isTcpHub = false;
     QStringList pkgArgs;
     QString xmlCodePath = "";
+    QString vescPort = "";
+    int canFwd = -1;
+    QString getMcConfPath = "";
+    QString setMcConfPath = "";
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -374,6 +382,54 @@ int main(int argc, char *argv[])
             } else {
                 i++;
                 qCritical() << "No path to xml file";
+                return 1;
+            }
+        }
+
+        if (str == "--vescPort") {
+            if ((i + 1) < args.size()) {
+                i++;
+                vescPort = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No port specified";
+                return 1;
+            }
+        }
+
+        if (str == "--canFwd") {
+            if ((i + 1) < args.size()) {
+                i++;
+                canFwd = args.at(i).toInt(),
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No can id specified";
+                return 1;
+            }
+        }
+
+        if (str == "--getMcConf") {
+            if ((i + 1) < args.size()) {
+                i++;
+                getMcConfPath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path specified";
+                return 1;
+            }
+        }
+
+        if (str == "--setMcConf") {
+            if ((i + 1) < args.size()) {
+                i++;
+                setMcConfPath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path specified";
                 return 1;
             }
         }
@@ -551,12 +607,17 @@ int main(int argc, char *argv[])
     connTimer.setInterval(1000);
     QObject::connect(&connTimer, &QTimer::timeout, [&]() {
         if (!vesc->isPortConnected()) {
-            bool ok = vesc->autoconnect();
+            bool ok = false;
+            if (vescPort.isEmpty()) {
+                ok = vesc->autoconnect();
+            } else {
+                ok = vesc->connectSerial(vescPort);
+            }
 
             if (ok) {
                 qDebug() << "Connected";
             } else {
-                qDebug() << "Could not autoconnect";
+                qDebug() << "Could not connect";
 
                 if (!retryConn) {
                     qApp->quit();
@@ -565,11 +626,88 @@ int main(int argc, char *argv[])
         }
     });
 
-    if (useTcp) {
+    if (!getMcConfPath.isEmpty() || !setMcConfPath.isEmpty()) {
         qputenv("QT_QPA_PLATFORM", "offscreen");
-
         app = new QCoreApplication(argc, argv);
+        vesc = new VescInterface;
+        vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+        Utility::configLoadLatest(vesc);
 
+        QTimer::singleShot(10, [&]() {
+            bool ok = false;
+            if (vescPort.isEmpty()) {
+                ok = vesc->autoconnect();
+            } else {
+                ok = vesc->connectSerial(vescPort);
+            }
+
+            if (ok) {
+                qDebug() << "Connected";
+
+                if (canFwd >= 0) {
+                    vesc->commands()->setSendCan(true, canFwd);
+                }
+
+                auto res = Utility::waitSignal(vesc, SIGNAL(customConfigLoadDone()), 4000);
+                if (res) {
+                    ConfigParams *p = vesc->mcConfig();
+                    vesc->commands()->getMcconf();
+                    res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
+                    if (res) {
+                        if (!setMcConfPath.isEmpty()) {
+                            res = p->loadXml(setMcConfPath, "MCConfiguration");
+
+                            if (res) {
+                                vesc->commands()->setMcconf(false);
+                                res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+
+                                if (res) {
+                                    qDebug() << "Wrote XML from" << setMcConfPath;
+                                    qApp->exit();
+                                } else {
+                                    qWarning() << "Could not write config";
+                                    qApp->exit(-4);
+                                }
+
+                            } else {
+                                qWarning() << "Could not load XML from" << setMcConfPath;
+                                qApp->exit(-3);
+                            }
+                        } else {
+                            res = p->saveXml(getMcConfPath, "MCConfiguration");
+
+                            if (res) {
+                                qDebug() << "Saved XML to" << getMcConfPath;
+                                qApp->exit();
+                            } else {
+                                qWarning() << "Could not save XML";
+                                qApp->exit(-3);
+                            }
+                        }
+                    } else {
+                        qWarning() << "Could not load config";
+                        qApp->exit(-2);
+                    }
+                } else {
+                    qWarning() << "Could not load config";
+                    qApp->exit(-1);
+                }
+            } else {
+                qWarning() << "Could not connect";
+                qApp->exit(-1);
+            }
+        });
+
+        QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
+            if (isGood) {
+                qDebug() << msg;
+            } else  {
+                qWarning() << msg;
+            }
+        });
+    } else if (useTcp) {
+        qputenv("QT_QPA_PLATFORM", "offscreen");
+        app = new QCoreApplication(argc, argv);
         vesc = new VescInterface;
         vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
         Utility::configLoadLatest(vesc);

@@ -243,7 +243,7 @@ QString Utility::aboutText()
           #elif defined(VER_FREE)
               "Free of Charge Version<br>"
           #endif
-              "&copy; Benjamin Vedder 2016 - 2022<br>"
+              "&copy; Benjamin Vedder 2016 - 2023<br>"
               "<a href=\"mailto:benjamin@vedder.se\">benjamin@vedder.se</a><br>"
               "<a href=\"https://vesc-project.com/\">https://vesc-project.com/</a>").
             arg(QString::number(VT_VERSION, 'f', 2))

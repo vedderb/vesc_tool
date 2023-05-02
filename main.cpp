@@ -81,6 +81,7 @@ static void showHelp()
     qDebug() << "--qmlFullscreen : Run QML UI in fullscreen mode";
     qDebug() << "--qmlOtherScreen : Run QML UI on other screen";
     qDebug() << "--qmlRotation [deg] : Rotate screen by deg degrees";
+    qDebug() << "--qmlWindowSize [width:height] : Specify qml window size";
     qDebug() << "--retryConn : Keep trying to reconnect to the VESC when the connection fails";
     qDebug() << "--useMobileUi : Start the mobile UI instead of the full desktop UI";
     qDebug() << "--tcpHub [port] : Start a TCP hub for remote access to connected VESCs";
@@ -91,6 +92,7 @@ static void showHelp()
     qDebug() << "--canFwd [canId] : Can ID for CAN forwarding";
     qDebug() << "--getMcConf [confPath] : Connect and read motor configuration and store the XML to confPath.";
     qDebug() << "--setMcConf [confPath] : Connect and write motor configuration XML from confPath.";
+    qDebug() << "--debugOutFile [path] : Print debug output to file with path.";
 }
 
 #ifdef Q_OS_LINUX
@@ -101,6 +103,16 @@ static void m_cleanup(int sig)
 }
 #endif
 #endif
+
+QFile m_debug_msg_file;
+
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
+    if (m_debug_msg_file.isOpen()) {
+        m_debug_msg_file.write(msg.toUtf8());
+        m_debug_msg_file.write("\n");
+        m_debug_msg_file.flush();
+    }
+}
 
 static void addFonts() {
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSans.ttf");
@@ -263,6 +275,7 @@ int main(int argc, char *argv[])
     int canFwd = -1;
     QString getMcConfPath = "";
     QString setMcConfPath = "";
+    QSize qmlWindowSize = QSize(-1, -1);
 
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
@@ -357,6 +370,26 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (str == "--qmlWindowSize") {
+            if ((i + 1) < args.size()) {
+                i++;
+                auto p = args.at(i).split(":");
+                if (p.size() == 2) {
+                    qmlWindowSize.setWidth(p.at(0).toInt());
+                    qmlWindowSize.setHeight(p.at(1).toInt());
+                } else {
+                    qCritical() << "Invalid size specified";
+                    return 1;
+                }
+
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No size specified";
+                return 1;
+            }
+        }
+
         if (str == "--tcpHub") {
             if ((i + 1) < args.size()) {
                 i++;
@@ -426,6 +459,23 @@ int main(int argc, char *argv[])
             if ((i + 1) < args.size()) {
                 i++;
                 setMcConfPath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path specified";
+                return 1;
+            }
+        }
+
+        if (str == "--debugOutFile") {
+            if ((i + 1) < args.size()) {
+                i++;
+                if (!m_debug_msg_file.isOpen()) {
+                    m_debug_msg_file.setFileName(args.at(i));
+                    if (m_debug_msg_file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                        qInstallMessageHandler(myMessageOutput);
+                    }
+                }
                 found = true;
             } else {
                 i++;
@@ -607,6 +657,14 @@ int main(int argc, char *argv[])
     connTimer.setInterval(1000);
     QObject::connect(&connTimer, &QTimer::timeout, [&]() {
         if (!vesc->isPortConnected()) {
+            if (qmlUi != nullptr) {
+                qmlUi->clearQmlCache();
+
+                QTimer::singleShot(10, [&]() {
+                    qmlUi->emitReloadCustomGui("qrc:/res/qml/DynamicLoader.qml");
+                });
+            }
+
             bool ok = false;
             if (vescPort.isEmpty()) {
                 ok = vesc->autoconnect();
@@ -848,7 +906,8 @@ int main(int argc, char *argv[])
             }
 
             qmlUi = new QmlUi;
-            qmlUi->startCustomGui(vesc);
+            qmlUi->startCustomGui(vesc, "qrc:/res/qml/MainLoader.qml",
+                                  qmlWindowSize.width(), qmlWindowSize.height());
 
             if (qmlFullscreen) {
                 qmlUi->emitToggleFullscreen();
@@ -907,6 +966,10 @@ int main(int argc, char *argv[])
 #endif
 
     delete app;
+
+    if (m_debug_msg_file.isOpen()) {
+        m_debug_msg_file.close();
+    }
 
     return res;
 }

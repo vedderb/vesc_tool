@@ -84,7 +84,7 @@ void QmlUi::setVisible(bool visible)
     }
 }
 
-void QmlUi::startCustomGui(VescInterface *vesc, QString qmlFile)
+void QmlUi::startCustomGui(VescInterface *vesc, QString qmlFile, int width, int height)
 {
     if (mEngine) {
         mEngine->deleteLater();
@@ -96,6 +96,17 @@ void QmlUi::startCustomGui(VescInterface *vesc, QString qmlFile)
     mEngine->rootContext()->setContextProperty("VescIf", vesc);
     mEngine->rootContext()->setContextProperty("Utility", &mUtil);
     mEngine->load(QUrl(qmlFile));
+
+    auto objs = mEngine->rootObjects();
+    if (!objs.isEmpty()) {
+        if (width > 0) {
+            objs.first()->setProperty("width", width);
+        }
+
+        if (height > 0) {
+            objs.first()->setProperty("height", height);
+        }
+    }
 
     if (!mImportPathList.isEmpty()) {
         mEngine->setImportPathList(mImportPathList);

@@ -277,6 +277,11 @@ int main(int argc, char *argv[])
     QString setMcConfPath = "";
     QSize qmlWindowSize = QSize(-1, -1);
 
+    // Arguments can be hard-coded in a build like this:
+//    qmlWindowSize = QSize(400, 800);
+//    loadQmlVesc = true;
+//    retryConn = true;
+
     for (int i = 0;i < args.size();i++) {
         // Skip the program argument
         if (i == 0) {

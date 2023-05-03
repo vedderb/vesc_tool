@@ -341,7 +341,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             notes += tr("<b>Current Checks</b><br>"
                         "The absolute maximum current is set close to the maximum motor current. This can cause "
                         "overcurrent faults and stop the motor when requesting high currents. Please check your configuration "
-                        "and make sure that it is correct.");
+                        "and make sure that it is correct. It is recommended to set the absolute maximum current to around 1.5 "
+                        "times the motor current (or braking current if it is higher).");
         }
 
         if (mMcConfig->getParamBool("l_slow_abs_current")) {

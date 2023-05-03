@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -201,7 +201,7 @@ Item {
 
             GroupBox {
                 id: toolsBox
-                title: qsTr("Tools")
+                title: qsTr("Tools and Operations")
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.rowSpan: isHorizontal ? 2 : 1
@@ -309,6 +309,34 @@ Item {
 
                         onClicked: {
                             requestOpenMultiSettings()
+                        }
+                    }
+
+                    ImageButton {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "Update\nFirmware"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Electronics-96.png"
+
+                        onClicked: {
+                            firmwareDialog.open()
+                        }
+                    }
+
+                    ImageButton {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: 500
+                        Layout.preferredHeight: 80
+
+                        buttonText: "Package\nStore"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
+
+                        onClicked: {
+                            packageDialog.open()
                         }
                     }
                 }
@@ -542,6 +570,89 @@ Item {
         ProgressBar {
             anchors.fill: parent
             indeterminate: visible
+        }
+    }
+
+    Dialog {
+        id: firmwareDialog
+        standardButtons: Dialog.Close
+        closePolicy: Popup.CloseOnEscape
+        modal: true
+        focus: true
+
+        width: parent.width - 20 - notchLeft - notchRight
+        height: parent.height - 20 - notchBot - notchTop
+        x: parent.width/2 - width/2
+        y: parent.height / 2 - height / 2 + notchTop
+        parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        contentItem: FwUpdate {
+            id: fwUpdate
+            anchors.fill: parent
+            anchors.bottomMargin: 50
+            anchors.topMargin: tabBar.implicitHeight
+            pageIndicatorVisible: false
+            swipeOrientation: Qt.Horizontal
+            currentPage: tabBar.currentIndex
+        }
+
+        header: Rectangle {
+            color: Utility.getAppHexColor("lightText")
+            height: tabBar.implicitHeight
+
+            TabBar {
+                id: tabBar
+                currentIndex: fwUpdate.currentPage
+                anchors.fill: parent
+                clip: true
+
+                background: Rectangle {
+                    opacity: 1
+                    color: Utility.getAppHexColor("lightestBackground")
+                }
+
+                property int buttonWidth: Math.max(120, tabBar.width / (rep.model.length))
+
+                Repeater {
+                    id: rep
+                    model: ["Included", "Custom", "Bootloader", "Archive"]
+
+                    TabButton {
+                        text: modelData
+                        width: tabBar.buttonWidth
+                    }
+                }
+
+                Component.onCompleted: {
+                    tabBar.setCurrentIndex(0)
+                }
+            }
+        }
+    }
+
+    Dialog {
+        id: packageDialog
+        standardButtons: Dialog.Close
+        closePolicy: Popup.CloseOnEscape
+        modal: true
+        focus: true
+
+        width: parent.width - 20 - notchLeft - notchRight
+        height: parent.height - 20 - notchBot - notchTop
+        x: parent.width/2 - width/2
+        y: parent.height / 2 - height / 2 + notchTop
+        parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        contentItem: Packages {
+            dialogParent: parent
         }
     }
 }

@@ -450,23 +450,11 @@ ApplicationWindow {
 
         Page {
             Loader {
-                anchors.fill: parent
-                asynchronous: true
-                visible: status == Loader.Ready
-                sourceComponent: FwUpdate {
-                    anchors.fill: parent
-                }
-            }
-        }
-
-        Page {
-            Loader {
                 id: confPageMotor
                 anchors.fill: parent
                 asynchronous: true
                 visible: status == Loader.Ready
                 sourceComponent: ConfigPageMotor {
-                    //id: confPageMotor
                     anchors.fill: parent
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
@@ -495,20 +483,6 @@ ApplicationWindow {
                 asynchronous: true
                 visible: status == Loader.Ready
                 sourceComponent: Terminal {
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    anchors.topMargin: 10
-                }
-            }
-        }
-
-        Page {
-            Loader {
-                anchors.fill: parent
-                asynchronous: true
-                visible: status == Loader.Ready
-                sourceComponent: Packages {
                     anchors.fill: parent
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
@@ -549,13 +523,12 @@ ApplicationWindow {
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "Profiles", "BMS", "Firmware", "Motor Cfg",
-                        "App Cfg", "Terminal", "Packages"]
+                    model: ["Start", "RT Data", "Profiles", "BMS", "Motor Cfg",
+                        "App Cfg", "Terminal"]
 
                     TabButton {
                         text: modelData
                         width: tabBar.buttonWidth
-
                     }
                 }
             }
@@ -1088,7 +1061,6 @@ ApplicationWindow {
                 if (limited && !VescIf.getFwSupportsConfiguration()) {
                     confPageMotor.enabled = false
                     confPageApp.enabled = false
-                    swipeView.setCurrentIndex(4 + indexOffset() + (confCustomPage.visible ? 1 : 0))
                 } else {
                     confPageMotor.enabled = true
                     confPageApp.enabled = true

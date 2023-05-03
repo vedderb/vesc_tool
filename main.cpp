@@ -107,6 +107,9 @@ static void m_cleanup(int sig)
 QFile m_debug_msg_file;
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
+    (void)type;
+    (void)context;
+
     if (m_debug_msg_file.isOpen()) {
         m_debug_msg_file.write(msg.toUtf8());
         m_debug_msg_file.write("\n");

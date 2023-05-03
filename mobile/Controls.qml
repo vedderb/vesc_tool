@@ -408,7 +408,7 @@ Item {
 
         header: Rectangle {
             color: Utility.getAppHexColor("lightText")
-            height: tabBar.height
+            height: tabBar.implicitHeight
             opacity: opacitySlider.value
 
             TabBar {

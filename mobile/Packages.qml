@@ -160,12 +160,15 @@ Item {
                                     repeat: false
                                     running: false
                                     onTriggered: {
-                                        mLoader.installVescPackage(pkg.compressedData)
+                                        var res = mLoader.installVescPackage(pkg.compressedData)
                                         enableDialog()
-                                        VescIf.emitMessageDialog("Install Package",
-                                                                 "Install Done! Please disconnect and reconnect to " +
-                                                                 "apply possible VESC Tool GUI updates from this package.",
-                                                                 true, false)
+
+                                        if (res) {
+                                            VescIf.emitMessageDialog("Install Package",
+                                                                     "Install Done! Please disconnect and reconnect to " +
+                                                                     "apply possible VESC Tool GUI updates from this package.",
+                                                                     true, false)
+                                        }
                                     }
                                 }
                             }

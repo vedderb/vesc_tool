@@ -29,6 +29,10 @@ import Vedder.vesc.fwhelper 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    property alias currentPage: swipeView.currentIndex
+    property alias swipeOrientation: swipeView.orientation
+    property alias pageIndicatorVisible: indicator.visible
+
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
     property bool isHorizontal: width > height

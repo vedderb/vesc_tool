@@ -230,14 +230,21 @@ Item {
                     repeat: false
                     running: false
                     onTriggered: {
-                        mLoader.lispErase(16)
-                        mLoader.qmlErase(16)
+                        var resLisp = mLoader.lispErase(16)
+                        var resQml = mLoader.qmlErase(16)
                         Utility.sleepWithEventLoop(500)
-                        VescIf.reloadFirmware()
+
+                        if (resLisp || resQml) {
+                            VescIf.reloadFirmware()
+                        }
+
                         enableDialog()
-                        VescIf.emitMessageDialog("Uninstall Package",
-                                                 "Uninstallation Done!",
-                                                 true, false)
+
+                        if (resLisp && resQml) {
+                            VescIf.emitMessageDialog("Uninstall Package",
+                                                     "Uninstallation Done!",
+                                                     true, false)
+                        }
                     }
                 }
             }

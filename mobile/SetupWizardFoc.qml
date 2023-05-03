@@ -69,10 +69,12 @@ Item {
 
     function updateUsageListParams() {
         mMcConf.updateParamDouble("l_duty_start", usageList.currentItem.modelData.duty_start, null)
+        mMcConf.updateParamInt("m_fault_stop_time_ms", usageList.currentItem.modelData.fault_stop_ms, null)
     }
 
     Component.onCompleted: {
         paramListUsage.addEditorMc("l_duty_start")
+        paramListUsage.addEditorMc("m_fault_stop_time_ms")
 
         paramListBatt.addEditorMc("si_battery_type")
         paramListBatt.addEditorMc("si_battery_cells")
@@ -111,10 +113,14 @@ Item {
                     id: usageModel
                     property string iconPath: {iconPath = "qrc" + Utility.getThemePath() + "icons/"}
                     Component.onCompleted: {
-                        append({name: "Generic", usageImg:iconPath + "motor.png", duty_start: 1.0, hfi_start: false})
-                        append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg", duty_start: 0.85, hfi_start: true})
-                        append({name: "EUC", usageImg:iconPath + "EUC-96.png", duty_start: 1.0, hfi_start: false})
-                        append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg", duty_start: 1.0, hfi_start: false})
+                        append({name: "Generic", usageImg:iconPath + "motor.png",
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500})
+                        append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg",
+                                   duty_start: 0.85, hfi_start: true, fault_stop_ms: 50})
+                        append({name: "EUC", usageImg:iconPath + "EUC-96.png",
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 50})
+                        append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg",
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500})
                     }
                 }
 

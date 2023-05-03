@@ -3585,7 +3585,8 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_LOG_DATA_F64));
     }
 
-    if (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected)) {
+    if (params.hwType == HW_TYPE_VESC &&
+            (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected))) {
         compCommands.append(int(COMM_SET_MCCONF));
         compCommands.append(int(COMM_GET_MCCONF));
         compCommands.append(int(COMM_GET_MCCONF_DEFAULT));

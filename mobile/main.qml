@@ -229,12 +229,12 @@ ApplicationWindow {
                 flat: true
 
                 onClicked: {
-                    if(Qt.platform.os == "ios"){
+                    if (Qt.platform.os == "ios"){
                         VescIf.emitMessageDialog(
                                     mInfoConf.getLongName("ios_license_text"),
                                     mInfoConf.getDescription("ios_license_text"),
                                     true, true)
-                    }else{
+                    } else {
                         VescIf.emitMessageDialog(
                                     mInfoConf.getLongName("gpl_text"),
                                     mInfoConf.getDescription("gpl_text"),
@@ -247,6 +247,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "Privacy Policy"
                 flat: true
+
                 onClicked: {
                     Qt.openUrlExternally("https://vesc-project.com/privacy_policies")
                 }
@@ -450,35 +451,6 @@ ApplicationWindow {
 
         Page {
             Loader {
-                id: confPageMotor
-                anchors.fill: parent
-                asynchronous: true
-                visible: status == Loader.Ready
-                sourceComponent: ConfigPageMotor {
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                }
-            }
-        }
-
-        Page {
-            Loader {
-                id: confPageApp
-                anchors.fill: parent
-                asynchronous: true
-                visible: status == Loader.Ready
-                sourceComponent: ConfigPageApp {
-                    //id: confPageApp
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                }
-            }
-        }
-
-        Page {
-            Loader {
                 anchors.fill: parent
                 asynchronous: true
                 visible: status == Loader.Ready
@@ -519,12 +491,14 @@ ApplicationWindow {
                                                    tabBar.width /
                                                    (rep.model.length +
                                                     (uiHwPage.visible ? 1 : 0) +
-                                                    (uiAppPage.visible ? 1 : 0)))
+                                                    (uiAppPage.visible ? 1 : 0) +
+                                                    (confCustomButton.visible ? 1 : 0) +
+                                                    (confPageMotor.visible ? 1 : 0) +
+                                                    (confPageApp.visible ? 1 : 0)))
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "Profiles", "BMS", "Motor Cfg",
-                        "App Cfg", "Terminal"]
+                    model: ["Start", "RT Data", "Profiles", "BMS", "Terminal"]
 
                     TabButton {
                         text: modelData
@@ -574,10 +548,56 @@ ApplicationWindow {
     }
 
     TabButton {
+        id: confMotorButton
+        visible: confPageMotor.visible
+        text: "Motor Cfg"
+        width: tabBar.buttonWidth
+    }
+
+    TabButton {
+        id: confAppButton
+        visible: confPageApp.visible
+        text: "App Cfg"
+        width: tabBar.buttonWidth
+    }
+
+    TabButton {
         id: confCustomButton
         visible: confCustomPage.visible
-        text: "ConfCustom"
+        text: "Custom Cfg"
         width: tabBar.buttonWidth
+    }
+
+    Page {
+        id: confPageMotor
+        visible: false
+
+        Loader {
+            id: confMotorLoader
+            anchors.fill: parent
+            asynchronous: true
+            sourceComponent: ConfigPageMotor {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+            }
+        }
+    }
+
+    Page {
+        id: confPageApp
+        visible: false
+
+        Loader {
+            id: confAppLoader
+            anchors.fill: parent
+            asynchronous: true
+            sourceComponent: ConfigPageApp {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+            }
+        }
     }
 
     Page {
@@ -953,6 +973,11 @@ ApplicationWindow {
             tabBar.insertItem(1, uiHwButton)
             uiHwPage.visible = true
 
+            uiHwButton.text = "HwUi"
+            if (hwUiObj.tabTitle) {
+                uiHwButton.text = hwUiObj.tabTitle
+            }
+
             if (VescIf.getLastFwRxParams().qmlHwFullscreen) {
                 swipeView.setCurrentIndex(0)
                 swipeView.setCurrentIndex(1)
@@ -975,6 +1000,11 @@ ApplicationWindow {
             tabBar.insertItem(1, uiAppButton)
             uiAppPage.visible = true
 
+            uiAppButton.text = "AppUi"
+            if (appUiObj.tabTitle) {
+                uiAppButton.text = appUiObj.tabTitle
+            }
+
             if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
                 swipeView.setCurrentIndex(0)
                 swipeView.setCurrentIndex(1)
@@ -988,8 +1018,8 @@ ApplicationWindow {
 
     function updateConfCustom () {
         if (VescIf.isPortConnected() && VescIf.customConfig(0) !== null) {
-            swipeView.insertItem(5, confCustomPage)
-            tabBar.insertItem(5, confCustomButton)
+            swipeView.insertItem(4, confCustomPage)
+            tabBar.insertItem(4, confCustomButton)
             confCustomPage.visible = true
             confCustomLoader.item.reloadConfig()
             confCustomButton.text = VescIf.customConfig(0).getLongName("hw_name")
@@ -1058,15 +1088,28 @@ ApplicationWindow {
 
         function onFwRxChanged(rx, limited) {
             if (rx) {
-                if (limited && !VescIf.getFwSupportsConfiguration()) {
-                    confPageMotor.enabled = false
-                    confPageApp.enabled = false
+                if (VescIf.getFwSupportsConfiguration()) {
+                    confPageMotor.visible = true
+                    confPageApp.visible = true
+
+                    swipeView.insertItem(4, confPageApp)
+                    tabBar.insertItem(4, confAppButton)
+                    swipeView.insertItem(4, confPageMotor)
+                    tabBar.insertItem(4, confMotorButton)
                 } else {
-                    confPageMotor.enabled = true
-                    confPageApp.enabled = true
+                    confPageMotor.visible = false
+                    confPageApp.visible = false
+                    confPageMotor.parent = null
+                    confPageApp.parent = null
+                    confMotorButton.parent = null
+                    confAppButton.parent = null
+                }
+
+                if (!limited && VescIf.getFwSupportsConfiguration()) {
                     mCommands.getMcconf()
                     mCommands.getAppConf()
                 }
+
                 fwReadCorrectly = true
                 bleDisconnectTimer.stop()
             } else {

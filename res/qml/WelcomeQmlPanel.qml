@@ -333,6 +333,12 @@ Item {
             }
 
             hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
+
+            uiHwButton.text = "HwUi"
+            if (hwUiObj.tabTitle) {
+                uiHwButton.text = hwUiObj.tabTitle
+            }
+
             uiHwButton.visible = true
             swipeView.insertItem(0, uiHwPage)
             tabBar.insertItem(0, uiHwButton)
@@ -353,6 +359,12 @@ Item {
             }
 
             appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
+
+            uiAppButton.text = "AppUi"
+            if (appUiObj.tabTitle) {
+                uiAppButton.text = appUiObj.tabTitle
+            }
+
             uiAppButton.visible = true
             swipeView.insertItem(0, uiAppPage)
             tabBar.insertItem(0, uiAppButton)

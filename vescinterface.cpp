@@ -328,6 +328,39 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
     connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
 
+    // Sanity-check motor parameters
+    connect(mCommands, &Commands::mcConfigWriteSent, [this](bool checkSet) {
+        if (!checkSet) {
+            return;
+        }
+
+        QString notes = "";
+
+        if ((mMcConfig->getParamDouble("l_current_max") * 1.3) > mMcConfig->getParamDouble("l_abs_current_max") ||
+                (fabs(mMcConfig->getParamDouble("l_current_min")) * 1.3) > mMcConfig->getParamDouble("l_abs_current_max")) {
+            notes += tr("<b>Current Checks</b><br>"
+                        "The absolute maximum current is set close to the maximum motor current. This can cause "
+                        "overcurrent faults and stop the motor when requesting high currents. Please check your configuration "
+                        "and make sure that it is correct.");
+        }
+
+        if (mMcConfig->getParamBool("l_slow_abs_current")) {
+            if (!notes.isEmpty()) {
+                notes.append("<br><br>");
+            }
+
+            notes += tr("<b>Limit Checks</b><br>"
+                        "Slow ABS Current Limit is set. This should generally not be done as it greatly increases the "
+                        "chance of permanently damaging the motor controller. Only change this setting if you know "
+                        "exactly what you are doing! In general ABS overcurrent faults indicate that something is "
+                        "wrong with the configuration or that the setup is pushed beyond reasonable limits.");
+        }
+
+        if (!notes.isEmpty()) {
+            emitMessageDialog(tr("Potential Configuration Issues"), notes, false, true);
+        }
+    });
+
     connect(mCommands, &Commands::valuesSetupReceived, [this](SETUP_VALUES v) {
         mLastSetupValues = v;
         mLastSetupTime = QDateTime::currentDateTimeUtc();

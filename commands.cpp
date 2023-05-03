@@ -1382,6 +1382,8 @@ void Commands::setMcconf(bool check)
         if (check) {
             checkMcConfig();
         }
+
+        emit mcConfigWriteSent(check);
     }
 }
 

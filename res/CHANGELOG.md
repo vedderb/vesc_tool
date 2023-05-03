@@ -5,6 +5,7 @@
 * Support for selecting multiple files when saving and deleting files from the log browser.
 * Removed firmware and package tabs and replaced them with buttons.
 * Shorter fault stop time for esk8 and balance in FOC wizard.
+* Sanity-check motor parameters on write.
 
 ### 6.02
 #### Released 2023-03-12

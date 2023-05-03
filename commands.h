@@ -112,6 +112,7 @@ signals:
     void focHallTableReceived(QVector<int> hall_table, int res);
     void nrfPairingRes(int res);
     void mcConfigCheckResult(QStringList paramsNotSet);
+    void mcConfigWriteSent(bool checkSet);
     void gpdBufferNotifyReceived();
     void gpdBufferSizeLeftReceived(int sizeLeft);
     void valuesSetupReceived(SETUP_VALUES values, unsigned int mask);

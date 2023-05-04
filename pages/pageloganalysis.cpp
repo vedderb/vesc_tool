@@ -1032,7 +1032,7 @@ QVector<double> PageLogAnalysis::getLogSample(double time)
         d = mLogTruncated.first();
 
         if (mInd_t_day >= 0) {
-            int startTime = d[mInd_t_day];
+            double startTime = d[mInd_t_day];
 
             for (auto dn: mLogTruncated) {
                 double timeNow = dn[mInd_t_day] - startTime;

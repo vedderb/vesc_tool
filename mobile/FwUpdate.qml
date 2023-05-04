@@ -902,7 +902,7 @@ Item {
         }
 
         versionText.text =
-                "FW   : v" + params.major + "." + params.minor + fwNameStr + testFwStr + "\n" +
+                "FW   : v" + params.major + "." + (1e5 + params.minor + '').slice(-2) + fwNameStr + testFwStr + "\n" +
                 "HW   : " + params.hw + "\n" +
                 "UUID : " + Utility.uuid2Str(params.uuid, false)
     }

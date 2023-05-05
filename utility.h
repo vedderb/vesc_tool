@@ -69,7 +69,7 @@ public:
     Q_INVOKABLE static bool waitMotorStop(VescInterface *vesc, double erpmTres, int timeoutMs);
     Q_INVOKABLE static bool resetInputCan(VescInterface *vesc, QVector<int> canIds);
     Q_INVOKABLE static bool setBatteryCutCan(VescInterface *vesc, QVector<int> canIds, double cutStart, double cutEnd);
-    Q_INVOKABLE static bool setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds);
+    Q_INVOKABLE static bool setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds, bool cautious);
     Q_INVOKABLE static bool setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<int> canIds, QStringList params);
     Q_INVOKABLE static bool setInvertDirection(VescInterface *vesc, int canId, bool inverted);
     Q_INVOKABLE static bool getInvertDirection(VescInterface *vesc, int canId);

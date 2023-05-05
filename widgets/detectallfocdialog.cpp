@@ -303,7 +303,7 @@ void DetectAllFocDialog::runDetect(bool can)
                                         ui->sensorlessErpmBox->value());
 
     if (res.startsWith("Success!")) {
-        Utility::setBatteryCutCanFromCurrentConfig(mVesc, canDevs);
+        Utility::setBatteryCutCanFromCurrentConfig(mVesc, canDevs, true);
     }
 
     ui->progressBar->setRange(0, 100);

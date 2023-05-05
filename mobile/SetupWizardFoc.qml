@@ -116,13 +116,17 @@ Item {
                     property string iconPath: {iconPath = "qrc" + Utility.getThemePath() + "icons/"}
                     Component.onCompleted: {
                         append({name: "Generic", usageImg:iconPath + "motor.png",
-                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500, bms_limit_mode: 3})
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500,
+                                   bms_limit_mode: 3, use_vin_min_limit: true})
                         append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg",
-                                   duty_start: 0.85, hfi_start: true, fault_stop_ms: 50, bms_limit_mode: 3})
+                                   duty_start: 0.85, hfi_start: true, fault_stop_ms: 50,
+                                   bms_limit_mode: 3, use_vin_min_limit: true})
                         append({name: "Balance", usageImg:iconPath + "EUC-96.png",
-                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 50, bms_limit_mode: 0})
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 50,
+                                   bms_limit_mode: 0, use_vin_min_limit: false})
                         append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg",
-                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500, bms_limit_mode: 3})
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500,
+                                   bms_limit_mode: 3, use_vin_min_limit: true})
                     }
                 }
 
@@ -922,7 +926,9 @@ Item {
                 if (res.startsWith("Success!")) {
                     resDetect = true
 
-                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs)
+                    if (usageList.currentItem.modelData.use_vin_min_limit) {
+                        Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs)
+                    }
 
                     var updateAllParams = ["l_duty_start"]
 

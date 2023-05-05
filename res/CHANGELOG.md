@@ -7,6 +7,7 @@
 * Shorter fault stop time for esk8 and balance in FOC wizard.
 * Sanity-check motor parameters on write.
 * Log analysis graph and table alignment fix.
+* Disable BMS limits on balance vehicles in wizard.
 
 ### 6.02
 #### Released 2023-03-12

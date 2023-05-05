@@ -70,9 +70,11 @@ Item {
     function updateUsageListParams() {
         mMcConf.updateParamDouble("l_duty_start", usageList.currentItem.modelData.duty_start, null)
         mMcConf.updateParamInt("m_fault_stop_time_ms", usageList.currentItem.modelData.fault_stop_ms, null)
+        mMcConf.updateParamInt("bms.limit_mode", usageList.currentItem.modelData.bms_limit_mode, null)
     }
 
     Component.onCompleted: {
+        paramListUsage.addEditorMc("bms.limit_mode")
         paramListUsage.addEditorMc("l_duty_start")
         paramListUsage.addEditorMc("m_fault_stop_time_ms")
 
@@ -114,13 +116,13 @@ Item {
                     property string iconPath: {iconPath = "qrc" + Utility.getThemePath() + "icons/"}
                     Component.onCompleted: {
                         append({name: "Generic", usageImg:iconPath + "motor.png",
-                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500})
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500, bms_limit_mode: 3})
                         append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg",
-                                   duty_start: 0.85, hfi_start: true, fault_stop_ms: 50})
-                        append({name: "EUC", usageImg:iconPath + "EUC-96.png",
-                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 50})
+                                   duty_start: 0.85, hfi_start: true, fault_stop_ms: 50, bms_limit_mode: 3})
+                        append({name: "Balance", usageImg:iconPath + "EUC-96.png",
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 50, bms_limit_mode: 0})
                         append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg",
-                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500})
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500, bms_limit_mode: 3})
                     }
                 }
 
@@ -213,10 +215,11 @@ Item {
                     }
 
                     GroupBox {
-                        Layout.preferredHeight: implicitHeight
+                        Layout.preferredHeight: dialog.isHorizontal ? implicitHeight : parent.height * 0.5
                         Layout.fillWidth: true
                         Layout.column: 0
                         Layout.row: dialog.isHorizontal ? 0 : 1
+                        Layout.alignment: Qt.AlignTop
                         contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
                         label: CheckBox {

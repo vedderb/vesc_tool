@@ -346,7 +346,7 @@ Item {
                     "Wh Cnt     : " + parseFloat(val.wh_cnt).toFixed(2) + " Wh\n" +
                     "Power      : " + parseFloat(val.v_tot * val.i_in_ic).toFixed(2) + " W\n" +
                     "Humidity   : " + parseFloat(val.humidity).toFixed(1) + " %\n" +
-                    "Temp Hum   : " + parseFloat(val.temp_hum_sensor).toFixed(1) + " \u00B0C\n" +
+                    "Temp BMS   : " + parseFloat(val.temp_hum_sensor).toFixed(1) + " \u00B0C\n" +
                     "Temp Max   : " + parseFloat(val.temp_cells_highest).toFixed(1) + " \u00B0C\n" +
                     "SoC        : " + parseFloat(val.soc * 100).toFixed(1) + " %\n" +
                     "SoH        : " + parseFloat(val.soh * 100).toFixed(1) + " %\n" +

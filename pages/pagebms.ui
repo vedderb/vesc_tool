@@ -139,7 +139,10 @@
          </row>
          <row>
           <property name="text">
-           <string>Temp Hum Sensor</string>
+           <string>Temp BMS</string>
+          </property>
+          <property name="toolTip">
+           <string>Temperature sensor on the BMS (may be part of the humidity sensor)</string>
           </property>
          </row>
          <row>

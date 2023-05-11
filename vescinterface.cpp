@@ -1462,10 +1462,18 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     int addr = 0;
 
     if (isBootloader) {
-        if (mLastFwParams.hwType != HW_TYPE_VESC) {
-            addr += 0x0803E000 - 0x08020000;
-        } else {
+        switch (mLastFwParams.hwType) {
+        case HW_TYPE_VESC:
             addr += (1024 * 128 * 3);
+            break;
+
+        case HW_TYPE_VESC_BMS:
+            addr += 0x0803E000 - 0x08020000;
+            break;
+
+        case HW_TYPE_CUSTOM_MODULE:
+            addr += 0x0801E000 - 0x08010000;
+            break;
         }
     }
 

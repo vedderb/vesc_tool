@@ -156,6 +156,10 @@ Item {
                             }
 
                             onCurrentIndexChanged: {
+                                updateFws()
+                            }
+
+                            function updateFws() {
                                 if (hwItems.rowCount() === 0) {
                                     return
                                 }
@@ -658,6 +662,7 @@ Item {
         }
 
         hwBox.currentIndex = 0
+        hwBox.updateFws()
     }
 
     function updateBl(params) {

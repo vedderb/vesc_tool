@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/bootloaders_custom_module/stm32g431.bin</file>
+    </qresource>
+</RCC>

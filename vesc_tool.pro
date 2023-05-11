@@ -268,6 +268,7 @@ include(esp32/esp32.pri)
 include(display_tool/display_tool.pri)
 
 RESOURCES += res.qrc \
+    res_custom_module.qrc \
     res_lisp.qrc \
     res_qml.qrc
 RESOURCES += res_config.qrc

@@ -84,12 +84,30 @@ QVariantMap FwHelper::getBootloaders(FW_RX_PARAMS params, QString hw)
 {
     QVariantMap bls;
 
-    QString blDir;
-    if (params.hwType == HW_TYPE_VESC) {
+    QString blDir = "";
+    switch (params.hwType) {
+    case HW_TYPE_VESC:
         blDir = "://res/bootloaders";
-    } else if (params.hwType == HW_TYPE_VESC_BMS) {
+        break;
+
+    case HW_TYPE_VESC_BMS:
         blDir = "://res/bootloaders_bms";
-    } else {
+        break;
+
+    case HW_TYPE_CUSTOM_MODULE:
+        QByteArray endEsp;
+        endEsp.append('\0');
+        endEsp.append('\0');
+        endEsp.append('\0');
+        endEsp.append('\0');
+
+        if (!params.uuid.endsWith(endEsp)) {
+            blDir = "://res/bootloaders_custom_module";
+        }
+        break;
+    }
+
+    if (blDir.isEmpty()) {
         return bls;
     }
 
@@ -109,9 +127,18 @@ QVariantMap FwHelper::getBootloaders(FW_RX_PARAMS params, QString hw)
     }
 
     if (bls.isEmpty()) {
-        QFileInfo generic(blDir + "/generic.bin");
-        if (generic.exists()) {
-            bls.insert("generic", generic.absoluteFilePath());
+        {
+            QFileInfo generic(blDir + "/generic.bin");
+            if (generic.exists()) {
+                bls.insert("generic", generic.absoluteFilePath());
+            }
+        }
+
+        {
+            QFileInfo stm32g431(blDir + "/stm32g431.bin");
+            if (stm32g431.exists()) {
+                bls.insert("stm32g431", stm32g431.absoluteFilePath());
+            }
         }
     }
 

@@ -28,7 +28,7 @@ Item {
                 id: adc1Gauge
                 Layout.fillWidth: true
                 Layout.preferredWidth: gaugeColumn.width * 0.45
-                Layout.preferredHeight: gaugeColumn.height * 0.45
+                Layout.preferredHeight: gaugeColumn.width * 0.45
                 maximumValue: 120
                 minimumValue: 0
                 tickmarkScale: 1
@@ -43,7 +43,7 @@ Item {
                 id: adc2Gauge
                 Layout.fillWidth: true
                 Layout.preferredWidth: gaugeColumn.width * 0.45
-                Layout.preferredHeight: gaugeColumn.height * 0.45
+                Layout.preferredHeight: gaugeColumn.width * 0.45
                 maximumValue: 30
                 minimumValue: 0
                 tickmarkScale: 1
@@ -58,7 +58,7 @@ Item {
                 id: adc3Gauge
                 Layout.fillWidth: true
                 Layout.preferredWidth: gaugeColumn.width * 0.45
-                Layout.preferredHeight: gaugeColumn.height * 0.45
+                Layout.preferredHeight: gaugeColumn.width * 0.45
                 maximumValue: 120
                 minimumValue: -20
                 tickmarkScale: 1
@@ -73,7 +73,7 @@ Item {
                 id: adc4Gauge
                 Layout.fillWidth: true
                 Layout.preferredWidth: gaugeColumn.width * 0.45
-                Layout.preferredHeight: gaugeColumn.height * 0.45
+                Layout.preferredHeight: gaugeColumn.width * 0.45
                 maximumValue: 20
                 minimumValue: 0
                 tickmarkScale: 1

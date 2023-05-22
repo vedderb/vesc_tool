@@ -124,6 +124,8 @@
 <name>set-mailbox-size</name>
 <name>yield</name>
 <name>ix</name>
+<name>take</name>
+<name>drop</name>
 <name>list</name>
 <name>append</name>
 <name>mod</name>

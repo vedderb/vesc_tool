@@ -1128,12 +1128,23 @@ void ParameterEditor::on_actionSave_XML_and_export_config_parser_and_compressed_
         }
     }
 
+    QString filenamePrefix = "";
+    {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Optional Filename Prefix",
+                                             "Prefix:", QLineEdit::Normal,
+                                             filenamePrefix, &ok);
+        if (ok) {
+            filenamePrefix = text.replace(" ", "_");
+        }
+    }
+
     QFileInfo fi(path);
     path.chop(fi.fileName().length());
-    QString pathXml = path + "settings.xml";
-    QString pathDefines = path + "conf_default.h";
-    QString pathParser = path + "confparser.c";
-    QString pathCompressed = path + "confxml.c";
+    QString pathXml = path + filenamePrefix + "settings.xml";
+    QString pathDefines = path + filenamePrefix + "conf_default.h";
+    QString pathParser = path + filenamePrefix + "confparser.c";
+    QString pathCompressed = path + filenamePrefix + "confxml.c";
 
     Utility::createCompressedConfigC(&mParams, nameConfig, pathCompressed);
     Utility::createParamParserC(&mParams, nameConfig, pathParser);

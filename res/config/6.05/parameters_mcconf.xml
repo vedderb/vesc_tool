@@ -163,6 +163,30 @@ p, li { white-space: pre-wrap; }
             <suffix> A</suffix>
             <vTx>9</vTx>
         </l_in_current_min>
+        <l_in_current_map_start>
+            <longName>Input Current Limit Map Start</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Start limiting the Q axis current when the input current reaches this fraction of the maximum input current. The default value of 100% disables this function. This is useful for limiting the input current when using field weakening and MTPA.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Setting this value too low will limit the current more than needed and setting it too high can lead to oscillation close to the maximum current. A value of 80-90% is a good starting point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_L_IN_CURRENT_MAP_START</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>1</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>1</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>1</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>7</vTx>
+        </l_in_current_map_start>
         <l_abs_current_max>
             <longName>Absolute Maximum Current</longName>
             <type>1</type>
@@ -4415,6 +4439,7 @@ p, li { white-space: pre-wrap; }
         <ser>l_current_min</ser>
         <ser>l_in_current_max</ser>
         <ser>l_in_current_min</ser>
+        <ser>l_in_current_map_start</ser>
         <ser>l_abs_current_max</ser>
         <ser>l_min_erpm</ser>
         <ser>l_max_erpm</ser>
@@ -4638,6 +4663,7 @@ p, li { white-space: pre-wrap; }
                     <param>::sep::Battery</param>
                     <param>l_in_current_max</param>
                     <param>l_in_current_min</param>
+                    <param>l_in_current_map_start</param>
                     <param>::sep::DRV8301</param>
                     <param>m_drv8301_oc_mode</param>
                     <param>m_drv8301_oc_adj</param>

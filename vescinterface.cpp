@@ -3690,10 +3690,12 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                                            false, false);
                     }
                 } else {
-                    emit messageDialog(tr("Warning"), tr("The connected VESC has too old firmware. Since the"
-                                                         " connected VESC has firmware with bootloader support, it can be"
-                                                         " updated from the Firmware page."
-                                                         " Until then, limited communication mode will be used."), false, false);
+                    if (params.hwType == HW_TYPE_VESC) {
+                        emit messageDialog(tr("Warning"), tr("The connected VESC has too old firmware. Since the"
+                                                             " connected VESC has firmware with bootloader support, it can be"
+                                                             " updated from the Firmware page."
+                                                             " Until then, limited communication mode will be used."), false, false);
+                    }
                 }
             }
         } else {

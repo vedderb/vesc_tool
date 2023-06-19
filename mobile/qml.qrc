@@ -43,7 +43,6 @@
         <file>Vesc3DView.qml</file>
         <file>DirectoryPicker.qml</file>
         <file>Settings.qml</file>
-        <file>RtDataBalance.qml</file>
         <file>RtDataIMU.qml</file>
         <file>BMS.qml</file>
         <file>CustomGaugeV2.qml</file>

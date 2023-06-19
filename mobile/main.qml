@@ -616,20 +616,6 @@ ApplicationWindow {
         }
     }
 
-    Page {
-        id: rtDataBalance
-        visible: false
-        Loader {
-            anchors.fill: parent
-            asynchronous: true
-            active: parent.visible
-            visible: status == Loader.Ready
-            sourceComponent: RtDataBalance {
-                anchors.fill: parent
-            }
-        }
-    }
-
     footer: Rectangle {
         id: connectedRect
         clip: true
@@ -827,14 +813,6 @@ ApplicationWindow {
         repeat: true
 
         onTriggered: {
-            if(mAppConf.getParamEnum("app_to_use") === 9 && rtSwipeView.count == 4) {
-                rtSwipeView.addItem(rtDataBalance)
-                rtDataBalance.visible = true
-            } else if(mAppConf.getParamEnum("app_to_use") !== 9 && rtSwipeView.count == 5) {
-                rtSwipeView.removeItem(4)
-                rtDataBalance.visible = false
-            }
-
             if (VescIf.isPortConnected()) {
                 // Sample RT data when the corresponding page is selected, or when
                 // RT logging is active.
@@ -869,12 +847,6 @@ ApplicationWindow {
                         interval = 100
                         mCommands.getValuesSetupSelective(0x7E00)
                         mCommands.getStats(0xFFFFFFFF)
-                    }
-
-                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 4) {
-                        interval = 50
-                        mCommands.getValuesSetup()
-                        mCommands.getDecodedBalance()
                     }
 
                     if (tabBar.currentIndex == (3 + indexOffset())) {

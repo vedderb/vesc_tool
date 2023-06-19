@@ -359,7 +359,6 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(false);
-            ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(false);
@@ -387,10 +386,8 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(true);
-            ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(true);
-            //            ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("data_sampled"))->setHidden(true);
         }
     });

@@ -1471,9 +1471,13 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             addr += 0x0803E000 - 0x08020000;
             break;
 
-        case HW_TYPE_CUSTOM_MODULE:
-            addr += 0x0801E000 - 0x08010000;
-            break;
+        case HW_TYPE_CUSTOM_MODULE: {
+            if (mLastFwParams.hw == "hm1") {
+                addr += 0x0803E000 - 0x08020000;
+            } else {
+                addr += 0x0801E000 - 0x08010000;
+            }
+        } break;
         }
     }
 

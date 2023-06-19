@@ -102,7 +102,11 @@ QVariantMap FwHelper::getBootloaders(FW_RX_PARAMS params, QString hw)
         endEsp.append('\0');
 
         if (!params.uuid.endsWith(endEsp)) {
-            blDir = "://res/bootloaders_custom_module";
+            if (params.hw == "hm1") {
+                blDir = "://res/bootloaders_bms";
+            } else {
+                blDir = "://res/bootloaders_custom_module";
+            }
         }
         break;
     }

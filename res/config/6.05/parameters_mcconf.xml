@@ -187,6 +187,28 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>7</vTx>
         </l_in_current_map_start>
+        <l_in_current_map_filter>
+            <longName>Input Current Map Filter</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Input current filter for the mapped Q axis current limit. Range 0.0 to 1.0 where 1.0 is no filtering and the closer to 0.0 the more filtering there is. Filtering the input current before the mapped limit can affect oscillations caused by the limit.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_L_IN_CURRENT_MAP_FILTER</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>1</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>1</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>7</vTx>
+        </l_in_current_map_filter>
         <l_abs_current_max>
             <longName>Absolute Maximum Current</longName>
             <type>1</type>
@@ -4440,6 +4462,7 @@ p, li { white-space: pre-wrap; }
         <ser>l_in_current_max</ser>
         <ser>l_in_current_min</ser>
         <ser>l_in_current_map_start</ser>
+        <ser>l_in_current_map_filter</ser>
         <ser>l_abs_current_max</ser>
         <ser>l_min_erpm</ser>
         <ser>l_max_erpm</ser>
@@ -4664,6 +4687,7 @@ p, li { white-space: pre-wrap; }
                     <param>l_in_current_max</param>
                     <param>l_in_current_min</param>
                     <param>l_in_current_map_start</param>
+                    <param>l_in_current_map_filter</param>
                     <param>::sep::DRV8301</param>
                     <param>m_drv8301_oc_mode</param>
                     <param>m_drv8301_oc_adj</param>

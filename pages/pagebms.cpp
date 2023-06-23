@@ -131,6 +131,8 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
     ui->valTable->item(13, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_chg_total, 0, 'f', 3));
     ui->valTable->item(14, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_dis_total, 0, 'f', 3));
     ui->valTable->item(15, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_dis_total, 0, 'f', 3));
+    ui->valTable->item(16, 0)->setText(Commands::bmsFaultToStr(bms_fault_code(val.fault_code)));
+    ui->valTable->item(17, 0)->setText(Commands::bmsOpStateToStr(bms_op_state(val.op_state)));
 }
 
 void PageBms::reloadCellBars(int cells)

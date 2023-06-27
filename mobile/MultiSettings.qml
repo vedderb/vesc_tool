@@ -87,6 +87,8 @@ Item {
             // General
             paramListGeneral.addEditorMc("foc_sensor_mode")
             paramListGeneral.addEditorMc("l_duty_start")
+            paramListGeneral.addEditorMc("m_motor_temp_sens_type")
+            paramListGeneral.addEditorMc("m_ntc_motor_beta")
 
             // Limits
             paramListLimits.addSeparator("Current")
@@ -94,6 +96,7 @@ Item {
             paramListLimits.addEditorMc("l_current_min")
             paramListLimits.addEditorMc("l_in_current_max")
             paramListLimits.addEditorMc("l_in_current_min")
+            paramListLimits.addEditorMc("l_abs_current_max")
 
             paramListLimits.addSeparator("ERPM")
             paramListLimits.addEditorMc("l_min_erpm")

@@ -85,6 +85,8 @@ Item {
         paramListSetup.addEditorMc("si_wheel_diameter")
         paramListSetup.addSeparator("↓ Only change if needed ↓")
         paramListSetup.addEditorMc("si_motor_poles")
+        paramListSetup.addEditorMc("m_motor_temp_sens_type")
+        paramListSetup.addEditorMc("m_ntc_motor_beta")
     }
 
     Dialog {
@@ -914,6 +916,8 @@ Item {
                     enableDialog()
                     return
                 }
+
+                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, ["m_motor_temp_sens_type", "m_ntc_motor_beta"])
 
                 var res  = Utility.detectAllFoc(VescIf, detectCanBox.checked,
                                                 maxPowerLossBox.realValue,

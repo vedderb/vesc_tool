@@ -228,6 +228,26 @@ void PageLisp::setVesc(VescInterface *vesc)
         ui->debugEdit->moveCursor(QTextCursor::End);
         ui->debugEdit->insertPlainText(str + "\n");
         ui->debugEdit->moveCursor(QTextCursor::End);
+
+        int maxLines = 5000;
+        int removeLines = 1000;
+
+        if (ui->debugEdit->document()->lineCount() > maxLines) {
+            QString txt = ui->debugEdit->toPlainText();
+            auto lines = txt.split("\n");
+            if (lines.length() >= removeLines) {
+                QString shorter;
+                for (int i = removeLines;i < lines.length();i++) {
+                    shorter.append(lines.at(i));
+
+                    if (i != (lines.length() - 1)) {
+                        shorter.append("\n");
+                    }
+                }
+                ui->debugEdit->setText(shorter);
+                ui->debugEdit->moveCursor(QTextCursor::End);
+            }
+        }
     });
 
     connect(mVesc->commands(), &Commands::lispRunningResRx, [this](bool ok) {

@@ -40,9 +40,15 @@ private slots:
     void on_ovSaveButton_clicked();
     void on_updateSizeButton_clicked();
     void on_updateSizeButtonDisp_clicked();
+    void on_fontEditExportButton_clicked();
+    void on_fontEditApplyButton_clicked();
+    void on_fontEditImportButton_clicked();
 
 private:
     QFont getSelectedFont(bool antialias);
+    QFont getSelectedFontEditor();
+    void reloadFontEditor();
+    void reloadFontEditorOverlay();
 
     Ui::PageDisplayTool *ui;
     bool mOverlayUpdating;

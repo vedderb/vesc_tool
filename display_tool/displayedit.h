@@ -29,6 +29,7 @@ public:
     explicit DisplayEdit(QWidget *parent = nullptr);
     QPoint getPixelUnderCursor();
     QImage getImageNow();
+    QImage getImageBase();
     void loadFromImage(QImage img);
     void loadMaskImage(QImage img);
     void setImageSize(int width, int height);

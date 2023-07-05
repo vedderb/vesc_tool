@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1235</width>
-    <height>421</height>
+    <width>685</width>
+    <height>462</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -687,6 +687,149 @@
        </item>
        <item>
         <widget class="DispEditor" name="customEditor" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>Font Editor</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="1" colspan="2">
+          <widget class="QRadioButton" name="fontEditNumOnlyButton">
+           <property name="text">
+            <string>Numbers Only</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="fontEditAllButton">
+           <property name="text">
+            <string>All</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QCheckBox" name="fontEditBorderBox">
+           <property name="toolTip">
+            <string>Draw border around characters to see their bounding box</string>
+           </property>
+           <property name="text">
+            <string>Border</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QCheckBox" name="fontEditBoldBox">
+           <property name="text">
+            <string>Bold</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QFontComboBox" name="fontEditFontBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QSpinBox" name="fontEditWBox">
+           <property name="prefix">
+            <string>W: </string>
+           </property>
+           <property name="maximum">
+            <number>128</number>
+           </property>
+           <property name="value">
+            <number>10</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QSpinBox" name="fontEditHBox">
+           <property name="prefix">
+            <string>H: </string>
+           </property>
+           <property name="maximum">
+            <number>128</number>
+           </property>
+           <property name="value">
+            <number>16</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2" colspan="2">
+          <widget class="QDoubleSpinBox" name="fontEditScaleBox">
+           <property name="prefix">
+            <string>Scale: </string>
+           </property>
+           <property name="decimals">
+            <number>2</number>
+           </property>
+           <property name="maximum">
+            <double>10.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QPushButton" name="fontEditApplyButton">
+           <property name="toolTip">
+            <string>Apply font and settings</string>
+           </property>
+           <property name="text">
+            <string>Apply</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0" colspan="2">
+          <widget class="QPushButton" name="fontEditExportButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Export Font</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="2" colspan="2">
+          <widget class="QPushButton" name="fontEditImportButton">
+           <property name="text">
+            <string>Import Font</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="DispEditor" name="fontEditor" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>

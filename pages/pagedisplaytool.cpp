@@ -19,9 +19,11 @@
 
 #include "pagedisplaytool.h"
 #include "ui_pagedisplaytool.h"
+#include "vbytearray.h"
 
 #include <QLayout>
 #include <QFileDialog>
+#include <QDebug>
 
 PageDisplayTool::PageDisplayTool(QWidget *parent) :
     QWidget(parent),
@@ -32,6 +34,10 @@ PageDisplayTool::PageDisplayTool(QWidget *parent) :
 
     mOverlayUpdating = false;
     on_updateSizeButton_clicked();
+
+    // This seems to be required to scale the right pane layout properly. No idea why...
+    ui->fontEditor->setVisible(false);
+    ui->fontEditor->setVisible(true);
 
     connect(ui->ovCrHBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
     connect(ui->ovCrWBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
@@ -69,6 +75,12 @@ PageDisplayTool::PageDisplayTool(QWidget *parent) :
             updateOverlay();
         }
     });
+
+    connect(ui->fontEditBorderBox, &QCheckBox::toggled, [this]() {
+        reloadFontEditorOverlay();
+    });
+
+    reloadFontEditor();
 }
 
 PageDisplayTool::~PageDisplayTool()
@@ -207,12 +219,10 @@ void PageDisplayTool::on_exportFontButton_clicked()
     f.close();
 }
 
-
 void PageDisplayTool::on_ovSaveButton_clicked()
 {
     ui->fullEditor->getEdit()->saveOverlayToLayer2();
 }
-
 
 void PageDisplayTool::on_updateSizeButton_clicked()
 {
@@ -235,9 +245,184 @@ QFont PageDisplayTool::getSelectedFont(bool antialias)
     return f;
 }
 
+QFont PageDisplayTool::getSelectedFontEditor()
+{
+    QFont f = ui->fontEditFontBox->currentFont();
+    f.setPointSizeF(500.0);
+    f.setBold(ui->fontEditBoldBox->isChecked());
+    f.setStyleStrategy(QFont::NoAntialias);
+
+    QFontMetrics fm(f);
+    double fh = (500.0 * (double)ui->fontEditHBox->value()) / (double)fm.ascent();
+    f.setPointSizeF(fh * ui->fontEditScaleBox->value());
+    return f;
+}
+
+void PageDisplayTool::reloadFontEditor()
+{
+    int w = ui->fontEditWBox->value();
+    int h = ui->fontEditHBox->value();
+    int charNum = ui->fontEditNumOnlyButton->isChecked() ? 10 : 95;
+
+    ui->fontEditor->updateSize(w * charNum, h);
+
+    QImage img(w * charNum, h, QImage::Format_ARGB32);
+    img.fill(Qt::black);
+    QPainter p(&img);
+
+    p.setFont(getSelectedFontEditor());
+
+    for (int i = 0;i < charNum;i++) {
+        p.setPen(Qt::white);
+        p.drawText(QRect(i * w, 0, w, h), Qt::AlignCenter, QChar(i + (charNum == 10 ? '0' : ' ')));
+    }
+
+    ui->fontEditor->getEdit()->loadFromImage(img);
+
+    reloadFontEditorOverlay();
+}
+
+void PageDisplayTool::reloadFontEditorOverlay()
+{
+    if (!ui->fontEditBorderBox->isChecked()) {
+        ui->fontEditor->getEdit()->clearOverlayImage();
+        return;
+    }
+
+    int w = ui->fontEditWBox->value();
+    int h = ui->fontEditHBox->value();
+    int charNum = ui->fontEditNumOnlyButton->isChecked() ? 10 : 95;
+
+    QImage imgBorder(w * charNum, h, QImage::Format_ARGB32);
+    imgBorder.fill(Qt::transparent);
+    QPainter p(&imgBorder);
+
+    QColor col = Qt::red;
+    col.setAlphaF(0.5);
+
+    for (int i = 0;i < charNum;i++) {
+        p.setPen(col);
+        p.drawRect(i * w, 0, w - 1, h - 1);
+    }
+
+    ui->fontEditor->getEdit()->setOverlayImage(0, 0, 0, w * charNum, 0, h, 0, 0,
+                                               0, 0, 0, 1, Qt::yellow, imgBorder);
+}
 
 void PageDisplayTool::on_updateSizeButtonDisp_clicked()
 {
     ui->fullEditor->updateSize(ui->wBoxDisp->value(), ui->hBoxDisp->value());
 }
 
+void PageDisplayTool::on_fontEditExportButton_clicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this,
+                                                    tr("Save Binary File"), "",
+                                                    tr("Bin files (*.bin *.BIN *.Bin)"));
+
+    if (filename.isEmpty()) {
+        return;
+    }
+
+    if (!filename.endsWith(".bin", Qt::CaseInsensitive)) {
+        filename.append(".bin");
+    }
+
+    QFile f(filename);
+
+    if (!f.open(QIODevice::WriteOnly)) {
+        return;
+    }
+
+    int w = ui->fontEditWBox->value();
+    int h = ui->fontEditHBox->value();
+    int bytesPerChar = (w * h) / 8;
+    int charNum = ui->fontEditNumOnlyButton->isChecked() ? 10 : 95;
+
+    if ((w * h) % 8 != 0) {
+        bytesPerChar++;
+    }
+
+    QByteArray fontArr;
+    fontArr.resize(bytesPerChar * charNum + 4);
+
+    for (auto &c: fontArr) {
+        c = 0;
+    }
+
+    fontArr[0] = w;
+    fontArr[1] = h;
+    fontArr[2] = charNum;
+    fontArr[3] = 1; // 1 bit per char
+
+    auto imgFont = ui->fontEditor->getEdit()->getImageBase();
+
+    for (int ch = 0;ch < charNum; ch++) {
+        for (int i = 0;i < w * h; i++) {
+            QColor px = imgFont.pixel(ch * w + i % w, i / w);
+            char c = fontArr[4 + bytesPerChar * ch + i / 8];
+            c |= (px != Qt::black) << (i % 8);
+            fontArr[4 + bytesPerChar * ch + (i / 8)] = c;
+        }
+    }
+
+    f.write(fontArr);
+    f.close();
+}
+
+void PageDisplayTool::on_fontEditApplyButton_clicked()
+{
+    reloadFontEditor();
+}
+
+void PageDisplayTool::on_fontEditImportButton_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("Load Binary Font"), "",
+                                                    tr("Bin files (*.bin *.BIN *.Bin)"));
+
+    if (!filename.isEmpty()) {
+        QFile f(filename);
+        if (!f.open(QIODevice::ReadOnly)) {
+            return;
+        }
+        VByteArray data = f.readAll();
+        f.close();
+
+        int w = data.vbPopFrontUint8();
+        int h = data.vbPopFrontUint8();
+        int charNum = data.vbPopFrontUint8();
+        data.vbPopFrontUint8();
+
+        int bytesPerChar = (w * h) / 8;
+        if ((w * h) % 8 != 0) {
+            bytesPerChar++;
+        }
+
+        ui->fontEditor->updateSize(w * charNum, h);
+
+        QImage img(w * charNum, h, QImage::Format_ARGB32);
+        img.fill(Qt::black);
+
+        for (int ch = 0;ch < charNum; ch++) {
+            for (int i = 0;i < w * h; i++) {
+                char c = data[bytesPerChar * ch + i / 8];
+                QColor px = (c >> (i % 8) & 0x01) ? Qt::white : Qt::black;
+                img.setPixelColor(ch * w + i % w, i / w, px);
+            }
+        }
+
+        ui->fontEditor->getEdit()->loadFromImage(img);
+
+        if (charNum == 10) {
+            ui->fontEditNumOnlyButton->setChecked(true);
+        } else {
+            ui->fontEditAllButton->setChecked(true);
+        }
+
+        ui->fontEditWBox->setValue(w);
+        ui->fontEditHBox->setValue(h);
+
+        reloadFontEditorOverlay();
+    }
+}

@@ -52,6 +52,19 @@ QImage DisplayEdit::getImageNow()
     return res;
 }
 
+QImage DisplayEdit::getImageBase()
+{
+    QImage res(mPixelsX, mPixelsY, QImage::Format_RGB32);
+
+    for (int i = 0;i < mPixelsX;i++) {
+        for (int j = 0;j < mPixelsY;j++) {
+            res.setPixelColor(i, j, mImage.at(i).at(j));
+        }
+    }
+
+    return res;
+}
+
 void DisplayEdit::loadFromImage(QImage img)
 {
     for (int i = 0;i < mPixelsX;i++) {
@@ -520,7 +533,9 @@ QColor DisplayEdit::pixel(int x, int y, bool withMask)
                 cPix = cL2;
             }
         } else {
-            cPix = cO;
+            cPix.setRedF(cO.redF() * cO.alphaF() + c.redF() * (1.0 - cO.alphaF()));
+            cPix.setGreenF(cO.greenF() * cO.alphaF() + c.greenF() * (1.0 - cO.alphaF()));
+            cPix.setBlueF(cO.blueF() * cO.alphaF() + c.blueF() * (1.0 - cO.alphaF()));
         }
     } else {
         cPix = withMask ? cM : Qt::black;

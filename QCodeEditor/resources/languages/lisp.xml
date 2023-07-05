@@ -35,6 +35,7 @@
 <name>move-to-flash</name>
 <name>@const-start</name>
 <name>@const-end</name>
+<name>@const-symbol-strings</name>
 </section>
 
 <section name="Label">

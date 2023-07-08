@@ -59,7 +59,7 @@ QLispCompleter::QLispCompleter(QObject *parent) :
 
         if (language.isLoaded()) {
             auto keys = language.keys();
-            for (auto&& key : keys) {
+            foreach (auto&& key, keys) {
                 for (auto name: language.names(key)) {
                     addItem(name);
                 }

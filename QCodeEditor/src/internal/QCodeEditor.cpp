@@ -313,7 +313,7 @@ void QCodeEditor::highlightParenthesis(
                 selection.format = m_syntaxStyle->getFormat("HighlightedBlock");
                 selection.cursor = tc;
                 extraSelection.append(selection);
-                m_highlightedBlock = tc.selectedText();
+                m_highlightedBlock = tc.selectedText().replace("\u2029", "\n");
             }
         }
 

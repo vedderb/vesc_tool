@@ -55,6 +55,7 @@ ScriptEditor::ScriptEditor(QWidget *parent) :
         }
         ui->codeEdit->searchForString(ui->searchEdit->text());
         ui->searchEdit->setFocus();
+        ui->searchEdit->selectAll();
     });
 }
 
@@ -83,6 +84,7 @@ void ScriptEditor::setModeQml()
 {
     ui->codeEdit->setHighlighter(new QmlHighlighter);
     ui->codeEdit->setCompleter(new QVescCompleter);
+    ui->codeEdit->setHighlightBlocks(false);
     mIsModeLisp = false;
 }
 
@@ -94,6 +96,7 @@ void ScriptEditor::setModeLisp()
     ui->codeEdit->setIndentStrs("{(", "})");
     ui->codeEdit->setAutoParentheses(true);
     ui->codeEdit->setSeparateMinus(false);
+    ui->codeEdit->setHighlightBlocks(true);
     mIsModeLisp = true;
 }
 
@@ -276,4 +279,13 @@ void ScriptEditor::on_refreshButton_clicked()
     emit fileOpened(fileName);
 
     file.close();
+}
+
+void ScriptEditor::on_searchEdit_returnPressed()
+{
+    if (QApplication::keyboardModifiers() == Qt::ControlModifier) {
+        ui->codeEdit->searchPreviousResult();
+    } else {
+        ui->codeEdit->searchNextResult();
+    }
 }

@@ -64,6 +64,7 @@ private slots:
     void on_searchHideButton_clicked();
     void on_searchCaseSensitiveBox_toggled(bool checked);
     void on_refreshButton_clicked();
+    void on_searchEdit_returnPressed();
 
 private:
     Ui::ScriptEditor *ui;

@@ -377,6 +377,9 @@ void PageLisp::makeEditorConnections(ScriptEditor *editor)
     connect(editor->codeEditor(), &QCodeEditor::stopTriggered, [this]() {
         on_stopButton_clicked();
     });
+    connect(editor->codeEditor(), &QCodeEditor::runBlockTriggered, [this](QString text) {
+        mVesc->commands()->lispSendReplCmd(text);
+    });
 }
 
 void PageLisp::createEditorTab(QString fileName, QString content)
@@ -700,7 +703,8 @@ void PageLisp::on_helpButton_clicked()
                    "Ctrl + 'w'   : Stream application<br>"
                    "Ctrl + 'q'   : Stop application<br>"
                    "Ctrl + 'd'   : Clear console<br>"
-                   "Ctrl + 's'   : Save file<br>";
+                   "Ctrl + 's'   : Save file<br>"
+                   "Ctrl + 'r'   : Run selected block in REPL<br>";
 
     HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html);
 }

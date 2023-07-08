@@ -5,7 +5,6 @@
 #include <QStyleSyntaxHighlighter>
 #include <QCXXHighlighter>
 
-
 // Qt
 #include <QTextBlock>
 #include <QPaintEvent>
@@ -41,14 +40,16 @@ QCodeEditor::QCodeEditor(QWidget* widget) :
     m_commentStr("//"),
     m_indentStartStr("{"),
     m_indentEndStr("}"),
-    m_separateMinus(true)
+    m_separateMinus(true),
+    m_highlightBlocks(false)
 {
 
     initFont();
     performConnections();
-    if(Utility::isDarkMode()){
+
+    if (Utility::isDarkMode()) {
         setSyntaxStyle(QSyntaxStyle::darkStyle());
-    }else{
+    } else {
         setSyntaxStyle(QSyntaxStyle::defaultStyle());
     }
 }
@@ -87,15 +88,13 @@ void QCodeEditor::performConnections()
 
 void QCodeEditor::setHighlighter(QStyleSyntaxHighlighter* highlighter)
 {
-    if (m_highlighter)
-    {
+    if (m_highlighter) {
         m_highlighter->setDocument(nullptr);
     }
 
     m_highlighter = highlighter;
 
-    if (m_highlighter)
-    {
+    if (m_highlighter) {
         m_highlighter->setSyntaxStyle(m_syntaxStyle);
         m_highlighter->setDocument(document());
     }
@@ -104,11 +103,9 @@ void QCodeEditor::setHighlighter(QStyleSyntaxHighlighter* highlighter)
 void QCodeEditor::setSyntaxStyle(QSyntaxStyle* style)
 {
     m_syntaxStyle = style;
-
     m_lineNumberArea->setSyntaxStyle(m_syntaxStyle);
 
-    if (m_highlighter)
-    {
+    if (m_highlighter) {
         m_highlighter->setSyntaxStyle(m_syntaxStyle);
     }
 
@@ -117,13 +114,11 @@ void QCodeEditor::setSyntaxStyle(QSyntaxStyle* style)
 
 void QCodeEditor::updateStyle()
 {
-    if (m_highlighter)
-    {
+    if (m_highlighter) {
         m_highlighter->rehighlight();
     }
 
-    if (m_syntaxStyle)
-    {
+    if (m_syntaxStyle) {
         auto currentPalette = palette();
 
         // Setting text format/color
@@ -153,7 +148,6 @@ void QCodeEditor::updateStyle()
 void QCodeEditor::resizeEvent(QResizeEvent* e)
 {
     QTextEdit::resizeEvent(e);
-
     updateLineGeometry();
 }
 
@@ -196,39 +190,37 @@ void QCodeEditor::updateExtraSelection()
 
     highlightSearch(extra);
     highlightCurrentLine(extra);
-    highlightParenthesis(extra);
+    highlightParenthesis(extra, false);
 
     setExtraSelections(extra);
 }
 
-void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSelection)
+void QCodeEditor::highlightParenthesis(
+        QList<QTextEdit::ExtraSelection>& extraSelection,
+        bool selectBlock)
 {
     auto currentSymbol = charUnderCursor();
     auto prevSymbol = charUnderCursor(-1);
 
-    for (auto& pair : parentheses)
-    {
+    m_highlightedBlock.clear();
+
+    for (auto& pair : parentheses) {
         int direction;
 
         QChar counterSymbol;
         QChar activeSymbol;
         auto position = textCursor().position();
 
-        if (pair.first == currentSymbol)
-        {
+        if (pair.first == currentSymbol) {
             direction = 1;
             counterSymbol = pair.second[0];
             activeSymbol = currentSymbol;
-        }
-        else if (pair.second == prevSymbol)
-        {
+        } else if (pair.second == prevSymbol) {
             direction = -1;
             counterSymbol = pair.first[0];
             activeSymbol = prevSymbol;
             position--;
-        }
-        else
-        {
+        } else {
             continue;
         }
 
@@ -243,21 +235,19 @@ void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSe
 
             auto character = document()->characterAt(position);
             // Checking symbol under position
-            if (character == activeSymbol)
-            {
+            if (character == activeSymbol) {
                 ++counter;
-            }
-            else if (character == counterSymbol)
-            {
+            } else if (character == counterSymbol) {
                 --counter;
             }
         }
 
         auto format = m_syntaxStyle->getFormat("Parentheses");
 
+        QList<QTextEdit::ExtraSelection> selectedParantheses;
+
         // Found
-        if (counter == 0)
-        {
+        if (counter == 0) {
             ExtraSelection selection{};
 
             auto directionEnum =
@@ -281,7 +271,7 @@ void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSe
                 1
             );
 
-            extraSelection.append(selection);
+            selectedParantheses.append(selection);
 
             selection.cursor = textCursor();
             selection.cursor.clearSelection();
@@ -291,7 +281,40 @@ void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSe
                 1
             );
 
-            extraSelection.append(selection);
+            selectedParantheses.append(selection);
+        }
+
+        extraSelection.append(selectedParantheses);
+
+        // Block contained in parantheses
+        if (selectedParantheses.length() == 2) {
+            int first = selectedParantheses.first().cursor.position();
+            int second = selectedParantheses.at(1).cursor.position();
+
+            if (first > second) {
+                int temp = first;
+                first = second - 1;
+                second = temp;
+            } else {
+                first--;
+                second++;
+            }
+
+            auto tc = textCursor();
+            tc.setPosition(first);
+            tc.movePosition(
+                        QTextCursor::MoveOperation::Right,
+                        QTextCursor::MoveMode::KeepAnchor,
+                        second - first
+                        );
+
+            if (selectBlock) {
+                QTextEdit::ExtraSelection selection{};
+                selection.format = m_syntaxStyle->getFormat("HighlightedBlock");
+                selection.cursor = tc;
+                extraSelection.append(selection);
+                m_highlightedBlock = tc.selectedText();
+            }
         }
 
         break;
@@ -498,6 +521,21 @@ void QCodeEditor::proceedCompleterEnd(QKeyEvent *e)
 
 void QCodeEditor::keyPressEvent(QKeyEvent* e) {
     const int defaultIndent = 4;
+
+    if (e->key() == Qt::Key_Control && m_highlightBlocks) {
+        QList<QTextEdit::ExtraSelection> extra;
+        highlightParenthesis(extra, true);
+
+        if (extra.length() > 1) {
+            setExtraSelections(extra);
+        }
+    }
+
+    if (e->key() == Qt::Key_R && e->modifiers() & Qt::ControlModifier) {
+        if (!m_highlightedBlock.isEmpty()) {
+            emit runBlockTriggered(m_highlightedBlock);
+        }
+    }
 
     auto completerSkip = proceedCompleterBegin(e);
 
@@ -791,6 +829,13 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
     proceedCompleterEnd(e);
 }
 
+void QCodeEditor::keyReleaseEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Control && m_highlightBlocks) {
+        updateExtraSelection();
+    }
+}
+
 void QCodeEditor::setAutoIndentation(bool enabled)
 {
     m_autoIndentation = enabled;
@@ -1013,6 +1058,16 @@ QString QCodeEditor::getCompletionWordNow(int *linePosStart, int *linePosEnd)
     }
 
     return res;
+}
+
+bool QCodeEditor::highlightBlocks() const
+{
+    return m_highlightBlocks;
+}
+
+void QCodeEditor::setHighlightBlocks(bool newHighlightBlocks)
+{
+    m_highlightBlocks = newHighlightBlocks;
 }
 
 bool QCodeEditor::getSeparateMinus() const

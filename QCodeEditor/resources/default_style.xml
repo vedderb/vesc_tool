@@ -63,4 +63,5 @@
     <style name="Declaration" bold="true"/>
     <style name="FunctionDefinition"/>
     <style name="OutputArgument" italic="true"/>
+    <style name="HighlightedBlock" background="#ccccff"/>
 </style-scheme>

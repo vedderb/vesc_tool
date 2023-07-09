@@ -390,7 +390,13 @@ void PageLisp::makeEditorConnections(ScriptEditor *editor)
         on_stopButton_clicked();
     });
     connect(editor->codeEditor(), &QCodeEditor::runBlockTriggered, [this](QString text) {
-        mVesc->commands()->lispSendReplCmd(text);
+        if (text.length() > 400) {
+            mVesc->emitMessageDialog("Run Block",
+                                     "Too much code selected, please select a smaller block.",
+                                     false, false);
+        } else {
+            mVesc->commands()->lispSendReplCmd(text);
+        }
     });
 }
 

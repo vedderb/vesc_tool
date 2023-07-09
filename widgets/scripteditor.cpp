@@ -125,6 +125,30 @@ QString ScriptEditor::contentAsText()
     return res;
 }
 
+bool ScriptEditor::hasUnsavedContent()
+{
+    bool res = false;
+
+    QString fileName = ui->fileNowLabel->text();
+    QFileInfo fi(fileName);
+    if (!fi.exists()) {
+        // Use a threshold of 5 characters
+        if (ui->codeEdit->toPlainText().size() > 5) {
+            res = true;
+        }
+    } else {
+        QFile file(fileName);
+        if (file.open(QIODevice::ReadOnly)) {
+            if (QString::fromUtf8(file.readAll()) !=
+                    ui->codeEdit->toPlainText().toUtf8()) {
+                res = true;
+            }
+        }
+    }
+
+    return res;
+}
+
 void ScriptEditor::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) {
@@ -274,7 +298,7 @@ void ScriptEditor::on_refreshButton_clicked()
         return;
     }
 
-    ui->codeEdit->setPlainText(file.readAll());
+    ui->codeEdit->setPlainText(QString::fromUtf8(file.readAll()));
     ui->fileNowLabel->setText(fileName);
     emit fileOpened(fileName);
 

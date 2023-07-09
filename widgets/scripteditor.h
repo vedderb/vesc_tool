@@ -41,6 +41,7 @@ public:
     void setModeQml();
     void setModeLisp();
     QString contentAsText();
+    bool hasUnsavedContent();
 
     bool isDirty = false;
 

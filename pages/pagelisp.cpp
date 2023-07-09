@@ -334,6 +334,18 @@ void PageLisp::reloadParams()
 
 }
 
+bool PageLisp::hasUnsavedTabs()
+{
+    for (int i = 0; i < ui->fileTabs->count(); i++) {
+        auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(i));
+        if (e->hasUnsavedContent()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void PageLisp::updateRecentList()
 {
     ui->recentList->clear();
@@ -425,7 +437,7 @@ void PageLisp::removeEditor(ScriptEditor *editor)
     bool shouldCloseTab = false;
 
     // Check if tab is dirty
-    if (editor->isDirty == true) {
+    if (editor->hasUnsavedContent()) {
         // Ask user for confirmation
         QMessageBox::StandardButton answer = QMessageBox::question(
              this,

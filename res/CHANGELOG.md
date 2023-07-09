@@ -10,6 +10,7 @@
 * Disable BMS limits on balance vehicles in wizard.
 * Ctrl+R to run selected code block LBM in repl.
 * Script editor search improvements.
+* Check if there are unsaved scripts before closing.
 
 ### 6.02
 #### Released 2023-03-12

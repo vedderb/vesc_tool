@@ -40,6 +40,7 @@ public:
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
     void reloadParams();
+    bool hasUnsavedTabs();
 
 private slots:
     void on_openRecentButton_clicked();

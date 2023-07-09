@@ -549,7 +549,8 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         int lineEnd = tcEnd.blockNumber();
 
         // Toggle block comment
-        if (e->text() == "\u001F") {
+        if (e->text() == "\u001F" ||
+                (e->modifiers() & Qt::ControlModifier) && e->text() == "#") {
             for (int i = lineStart;i <= lineEnd;i++) {
                 auto tc = textCursor();
 

@@ -582,21 +582,27 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         if (e->modifiers() == Qt::ControlModifier) {
             if (e->key() == Qt::Key_S) {
                 emit saveTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_E) {
                 emit runEmbeddedTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_W) {
                 emit runWindowTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_Q) {
                 emit stopTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_D) {
                 emit clearConsoleTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_F) {
                 emit searchTriggered();
+                updateExtraSelection();
                 return;
             }
         }

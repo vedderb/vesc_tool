@@ -33,6 +33,8 @@
 <name>var</name>
 <name>setq</name>
 <name>move-to-flash</name>
+<name>unflatten</name>
+<name>flatten</name>
 <name>@const-start</name>
 <name>@const-end</name>
 <name>@const-symbol-strings</name>
@@ -120,7 +122,9 @@
 <name>self</name>
 <name>exit-ok</name>
 <name>exit-error</name>
+<name>timeout</name>
 <name>recv</name>
+<name>recv-to</name>
 <name>send</name>
 <name>set-mailbox-size</name>
 <name>yield</name>

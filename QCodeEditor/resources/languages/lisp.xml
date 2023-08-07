@@ -277,6 +277,7 @@
 <name>canget-vin</name>
 <name>can-list-devs</name>
 <name>can-scan</name>
+<name>can-local-id</name>
 <name>can-send-sid</name>
 <name>can-send-eid</name>
 <name>can-cmd</name>
@@ -416,5 +417,7 @@
 <name>rgbled-color</name>
 <name>sleep-deep</name>
 <name>sleep-config-wakeup-pin</name>
+<name>rmsg-send-can</name>
+<name>rmsg-wait</name>
 </section>
 </root>

@@ -756,6 +756,12 @@ void MainWindow::timerSlot()
         on_scanCanButton_clicked();
     }
 
+    if (ui->scanCanButton->isEnabled()) {
+        ui->canList->setEnabled(mVesc->fwRx() && mVesc->customConfigRxDone());
+    } else {
+        ui->canList->setEnabled(false);
+    }
+
     // If disconnected for a short time clear the can list so it scans on reconnect.
     // Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
     static int disconected_cnt = 0;
@@ -2083,6 +2089,8 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
 
 void MainWindow::on_canList_currentRowChanged(int currentRow)
 {
+    ui->canList->setEnabled(false);
+
     if (currentRow >= 0) {
         if (currentRow == 0) {
             if (mVesc->commands()->getSendCan()) {

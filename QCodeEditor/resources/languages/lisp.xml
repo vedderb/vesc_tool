@@ -407,6 +407,7 @@
 <name>esp-now-start</name>
 <name>esp-now-add-peer</name>
 <name>esp-now-send</name>
+<name>esp-now-recv</name>
 <name>get-mac-addr</name>
 <name>wifi-get-chan</name>
 <name>wifi-set-chan</name>

@@ -476,3 +476,11 @@ void PageRtData::on_logRtButton_toggled(bool checked)
         mVesc->closeRtLogFile();
     }
 }
+
+void PageRtData::on_posHallObserverErrorButton_clicked()
+{
+    if (mVesc) {
+        mVesc->commands()->setDetect(DISP_POS_MODE_HALL_OBSERVER_ERROR);
+    }
+}
+

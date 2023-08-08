@@ -58,6 +58,7 @@ private slots:
     void on_tempShowMosfetBox_toggled(bool checked);
     void on_tempShowMotorBox_toggled(bool checked);
     void on_logRtButton_toggled(bool checked);
+    void on_posHallObserverErrorButton_clicked();
 
 private:
     Ui::PageRtData *ui;

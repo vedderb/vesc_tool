@@ -187,7 +187,17 @@
               <string>Plot the difference between the observer and encoder position (FOC only)</string>
              </property>
              <property name="text">
-              <string>Observer Error</string>
+              <string>Obs vs Enc</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="posHallObserverErrorButton">
+             <property name="toolTip">
+              <string>Plot the difference between the observer and hall sensor position (FOC only)</string>
+             </property>
+             <property name="text">
+              <string>Obs vs Hall</string>
              </property>
             </widget>
            </item>

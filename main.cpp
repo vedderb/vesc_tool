@@ -845,8 +845,13 @@ int main(int argc, char *argv[])
             qApp->setPalette(darkPalette);
             qApp->setStyleSheet(
                         "QTabBar::tab:selected, QTabBar::tab:hover {"
-                        "        background: #204070;"
-                        "    }"
+                        "    background: #3d3d3d;"
+                        "    color: #eeeeee;"
+                        "}"
+                        "QTabBar::tab:!selected {"
+                        "    background: #272727;"
+                        "    color: #a5a5a5;"
+                        "}"
                         );
         } else {
             QPalette lightPalette = qApp->style()->standardPalette();

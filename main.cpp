@@ -843,6 +843,11 @@ int main(int argc, char *argv[])
             darkPalette.setColor(QPalette::Link, QColor(150,150,255));
             darkPalette.setColor(QPalette::LinkVisited, QColor(220,150,255));
             qApp->setPalette(darkPalette);
+            qApp->setStyleSheet(
+                        "QTabBar::tab:selected, QTabBar::tab:hover {"
+                        "        background: #204070;"
+                        "    }"
+                        );
         } else {
             QPalette lightPalette = qApp->style()->standardPalette();
             lightPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("darkAccent"));

@@ -677,14 +677,19 @@ void PageLisp::on_uploadButton_clicked()
 
 void PageLisp::on_readExistingButton_clicked()
 {
-    auto code = mLoader.lispRead(this);
+    QProgressDialog dialog(tr("Reading Code..."), QString(), 0, 0, this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.show();
+
+    QString lispPath = "From VESC";
+    auto code = mLoader.lispRead(this, lispPath);
 
     if (!code.isEmpty()) {
         if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
             ui->mainEdit->codeEditor()->setPlainText(code);
             ui->fileTabs->setTabText(ui->fileTabs->indexOf(ui->mainEdit), "From VESC");
         } else {
-            createEditorTab("From VESC", code);
+            createEditorTab(lispPath, code);
         }
     }
 }

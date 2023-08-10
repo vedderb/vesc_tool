@@ -40,7 +40,7 @@ public:
     bool lispUpload(VByteArray vb);
     bool lispUpload(QString codeStr, QString editorPath = QDir::currentPath());
     bool lispStream(VByteArray vb, qint8 mode);
-    QString lispRead(QWidget *parent = nullptr);
+    QString lispRead(QWidget *parent, QString &lispPath);
 
     Q_INVOKABLE bool qmlErase(int size);
     QByteArray qmlCompress(QString script);
@@ -60,6 +60,7 @@ signals:
 
 private:
     VescInterface *mVesc;
+    bool getImportFromLine(QString line, QString &path, QString &tag, bool &isInvalid);
 
 };
 

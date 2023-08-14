@@ -72,7 +72,7 @@ QVariantMap FwHelper::getFirmwares(QString hw)
     while (it.hasNext()) {
         QFileInfo fi(it.next());
         if (fi.fileName().toLower() == "vesc_default.bin" ||
-                fi.fileName().toLower() == "app.bin") {
+                fi.fileName().toLower() == "vesc_express.bin") {
             fws.insert(fi.fileName(), fi.absoluteFilePath());
         }
     }

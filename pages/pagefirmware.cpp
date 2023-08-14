@@ -274,7 +274,7 @@ void PageFirmware::updateFwList()
             QFileInfo fi(it.next());
             if (ui->showNonDefaultBox->isChecked() ||
                     fi.fileName().toLower() == "vesc_default.bin" ||
-                    fi.fileName().toLower() == "app.bin") {
+                    fi.fileName().toLower() == "vesc_express.bin") {
                 QListWidgetItem *item = new QListWidgetItem;
                 item->setText(fi.fileName());
                 item->setData(Qt::UserRole, fi.absoluteFilePath());

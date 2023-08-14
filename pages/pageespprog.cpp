@@ -140,7 +140,7 @@ void PageEspProg::on_serialConnectButton_clicked()
             QDir dir("://res/firmwares_esp/ESP32-C3");
             dir.setSorting(QDir::Name);
             for (auto fi: dir.entryInfoList()) {
-                QFileInfo fiApp(fi.absoluteFilePath() + "/app.bin");
+                QFileInfo fiApp(fi.absoluteFilePath() + "/vesc_express.bin");
                 QFileInfo fiBl(fi.absoluteFilePath() + "/bootloader.bin");
                 QFileInfo fiPart(fi.absoluteFilePath() + "/partition-table.bin");
 
@@ -169,7 +169,7 @@ void PageEspProg::on_flashButton_clicked()
             QString path = item->data(Qt::UserRole).toString();
             blPath = path + "/bootloader.bin";
             partPath = path + "/partition-table.bin";
-            appPath = path + "/app.bin";
+            appPath = path + "/vesc_express.bin";
         } else {
             mVesc->emitMessageDialog("Flash Firmware",
                                      "No Firmware Selected",
@@ -297,7 +297,7 @@ void PageEspProg::on_flashBlButton_clicked()
         auto item = ui->fwList->currentItem();
         if (item != nullptr) {
             QString path = item->data(Qt::UserRole).toString();
-            appPath = path + "/app.bin";
+            appPath = path + "/vesc_express.bin";
         } else {
             mVesc->emitMessageDialog("Flash Firmware",
                                      "No Firmware Selected",
@@ -336,7 +336,7 @@ void PageEspProg::listAllFw()
     QDir dir("://res/firmwares_esp/ESP32-C3");
     dir.setSorting(QDir::Name);
     for (auto fi: dir.entryInfoList()) {
-        QFileInfo fiApp(fi.absoluteFilePath() + "/app.bin");
+        QFileInfo fiApp(fi.absoluteFilePath() + "/vesc_express.bin");
         QFileInfo fiBl(fi.absoluteFilePath() + "/bootloader.bin");
         QFileInfo fiPart(fi.absoluteFilePath() + "/partition-table.bin");
 

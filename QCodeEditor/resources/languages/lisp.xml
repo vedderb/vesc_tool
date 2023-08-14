@@ -23,6 +23,7 @@
 <name>loopwhile</name>
 <name>looprange</name>
 <name>loopforeach</name>
+<name>loopwhile-thd</name>
 <name>break</name>
 <name>return</name>
 <name>import</name>

@@ -205,6 +205,7 @@
 <name>get-imu-acc-derot</name>
 <name>get-imu-gyro-derot</name>
 <name>send-data</name>
+<name>recv-data</name>
 <name>get-remote-state</name>
 <name>eeprom-store-f</name>
 <name>eeprom-read-f</name>
@@ -289,6 +290,8 @@
 <name>can-local-id</name>
 <name>can-send-sid</name>
 <name>can-send-eid</name>
+<name>can-recv-sid</name>
+<name>can-recv-eid</name>
 <name>can-cmd</name>
 <name>sin</name>
 <name>cos</name>

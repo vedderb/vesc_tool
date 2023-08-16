@@ -427,7 +427,7 @@
 <name>rgbled-color</name>
 <name>sleep-deep</name>
 <name>sleep-config-wakeup-pin</name>
-<name>rmsg-send-can</name>
-<name>rmsg-wait</name>
+<name>canmsg-send</name>
+<name>canmsg-recv</name>
 </section>
 </root>

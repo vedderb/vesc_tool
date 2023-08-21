@@ -86,7 +86,7 @@ PageExperiments::PageExperiments(QWidget *parent) :
     ui->plot->legend->setFont(legendFont);
     ui->plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignLeft);
     ui->plot->xAxis->setLabel("Seconds (s)");
-    ui->plot->yAxis2->setLabel("RPM");
+    ui->plot->yAxis2->setLabel("ERPM");
     ui->plot->yAxis2->setVisible(true);
 
 #ifdef HAS_SERIALPORT
@@ -493,7 +493,7 @@ void PageExperiments::plotSamples(bool exportFormat)
 
     ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
     ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph11"), lineWidth));
-    ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " RPM");
+    ui->plot->graph(graphIndex)->setName(ui->compAEdit->text() + " ERPM");
     ui->plot->graph(graphIndex)->setData(mTimeVec, mRpmVec);
     graphIndex++;
 
@@ -587,7 +587,7 @@ void PageExperiments::plotSamples(bool exportFormat)
 
         ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
         ui->plot->graph(graphIndex)->setPen(QPen(Utility::getAppQColor("plot_graph11"), lineWidth, penStyle));
-        ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " RPM");
+        ui->plot->graph(graphIndex)->setName(ui->compBEdit->text() + " ERPM");
         ui->plot->graph(graphIndex)->setData(mCTimeVec, mCRpmVec);
         graphIndex++;
     }

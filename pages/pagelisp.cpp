@@ -363,20 +363,18 @@ void PageLisp::makeEditorConnections(ScriptEditor *editor)
         ui->debugEdit->clear();
     });
     connect(editor, &ScriptEditor::fileOpened, [this](QString fileName) {
-        if (!mRecentFiles.contains(fileName)) {
-            mRecentFiles.append(fileName);
-            updateRecentList();
-        }
+        mRecentFiles.removeAll(fileName);
+        mRecentFiles.append(fileName);
+        updateRecentList();
     });
     connect(editor, &ScriptEditor::fileSaved, [editor, this](QString fileName) {
         if (mVesc) {
             mVesc->emitStatusMessage("Saved " + fileName, true);
         }
 
-        if (!mRecentFiles.contains(fileName)) {
-            mRecentFiles.append(fileName);
-            updateRecentList();
-        }
+        mRecentFiles.removeAll(fileName);
+        mRecentFiles.append(fileName);
+        updateRecentList();
 
         setEditorClean(editor);
     });

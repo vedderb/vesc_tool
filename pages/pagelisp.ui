@@ -433,9 +433,30 @@
        <attribute name="title">
         <string>Recent</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
         <item>
-         <widget class="QListWidget" name="recentList"/>
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Filter</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="recentFilterEdit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QListWidget" name="recentList"/>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -505,9 +526,30 @@
        <attribute name="title">
         <string>Examples</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <layout class="QHBoxLayout" name="horizontalLayout_10">
         <item>
-         <widget class="QListWidget" name="exampleList"/>
+         <layout class="QVBoxLayout" name="verticalLayout_11">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Filter</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="exampleFilterEdit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QListWidget" name="exampleList"/>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -746,17 +788,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>VTextBrowser</class>
-   <extends>QTextEdit</extends>
-   <header>widgets/vtextbrowser.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ScriptEditor</class>
-   <extends>QWidget</extends>
-   <header>widgets/scripteditor.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
    <header>widgets/qcustomplot.h</header>
@@ -766,6 +797,17 @@
    <class>ExperimentPlot</class>
    <extends>QWidget</extends>
    <header>widgets/experimentplot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VTextBrowser</class>
+   <extends>QTextEdit</extends>
+   <header>widgets/vtextbrowser.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEditor</class>
+   <extends>QWidget</extends>
+   <header>widgets/scripteditor.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

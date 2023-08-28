@@ -352,6 +352,8 @@ void PageLisp::updateRecentList()
     for (auto f: mRecentFiles) {
         ui->recentList->addItem(f);
     }
+
+    on_recentFilterEdit_textChanged(ui->recentFilterEdit->text());
 }
 
 void PageLisp::makeEditorConnections(ScriptEditor *editor)
@@ -763,4 +765,28 @@ void PageLisp::on_streamButton_clicked()
     }
 
     mLoader.lispStream(codeStr.toLocal8Bit(), ui->streamModeBox->currentIndex());
+}
+
+void PageLisp::on_recentFilterEdit_textChanged(const QString &filter)
+{
+    for (int row = 0; row < ui->recentList->count(); ++row) {
+        if (filter.isEmpty()) {
+            ui->recentList->item(row)->setHidden(false);
+        } else {
+            ui->recentList->item(row)->setHidden(!ui->recentList->item(row)->text().
+                                                 contains(filter, Qt::CaseInsensitive));
+        }
+    }
+}
+
+void PageLisp::on_exampleFilterEdit_textChanged(const QString &filter)
+{
+    for (int row = 0; row < ui->exampleList->count(); ++row) {
+        if (filter.isEmpty()) {
+            ui->exampleList->item(row)->setHidden(false);
+        } else {
+            ui->exampleList->item(row)->setHidden(!ui->exampleList->item(row)->text().
+                                                 contains(filter, Qt::CaseInsensitive));
+        }
+    }
 }

@@ -71,6 +71,8 @@ private slots:
     void on_uploadButton_clicked();
     void on_eraseOnlyButton_clicked();
     void on_calcSizeButton_clicked();
+    void on_recentFilterEdit_textChanged(const QString &arg1);
+    void on_exampleFilterEdit_textChanged(const QString &arg1);
 
 private:
     Ui::PageScripting *ui;

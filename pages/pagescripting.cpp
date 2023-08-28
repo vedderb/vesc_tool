@@ -377,6 +377,8 @@ void PageScripting::updateRecentList()
     for (auto f: mRecentFiles) {
         ui->recentList->addItem(f);
     }
+
+    on_recentFilterEdit_textChanged(ui->recentFilterEdit->text());
 }
 
 void PageScripting::makeEditorConnections(ScriptEditor *editor)
@@ -779,4 +781,28 @@ void PageScripting::on_calcSizeButton_clicked()
     QMessageBox::information(this, "QML Size",
                              QString("Compressed QML size: %1").
                              arg(qCompress(qmlToRun(false).toUtf8(), 9).size()));
+}
+
+void PageScripting::on_recentFilterEdit_textChanged(const QString &filter)
+{
+    for (int row = 0; row < ui->recentList->count(); ++row) {
+        if (filter.isEmpty()) {
+            ui->recentList->item(row)->setHidden(false);
+        } else {
+            ui->recentList->item(row)->setHidden(!ui->recentList->item(row)->text().
+                                                 contains(filter, Qt::CaseInsensitive));
+        }
+    }
+}
+
+void PageScripting::on_exampleFilterEdit_textChanged(const QString &filter)
+{
+    for (int row = 0; row < ui->exampleList->count(); ++row) {
+        if (filter.isEmpty()) {
+            ui->exampleList->item(row)->setHidden(false);
+        } else {
+            ui->exampleList->item(row)->setHidden(!ui->exampleList->item(row)->text().
+                                                 contains(filter, Qt::CaseInsensitive));
+        }
+    }
 }

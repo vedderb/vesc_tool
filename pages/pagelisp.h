@@ -59,6 +59,8 @@ private slots:
     void on_replEdit_returnPressed();
     void on_replHelpButton_clicked();
     void on_streamButton_clicked();
+    void on_recentFilterEdit_textChanged(const QString &arg1);
+    void on_exampleFilterEdit_textChanged(const QString &arg1);
 
 private:
     Ui::PageLisp *ui;

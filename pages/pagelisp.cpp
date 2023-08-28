@@ -563,6 +563,11 @@ void PageLisp::openRecentList()
             createEditorTab(fileName, file.readAll());
         }
 
+        mRecentFiles.removeAll(fileName);
+        mRecentFiles.append(fileName);
+        updateRecentList();
+        ui->recentList->setCurrentRow(ui->recentList->count() - 1);
+
         file.close();
     } else {
         QMessageBox::critical(this, "Open Recent",

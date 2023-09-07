@@ -371,6 +371,7 @@
 <name>bufclear</name>
 <name>bufcpy</name>
 <name>bufset-bit</name>
+<name>buf-find</name>
 <name>load-native-lib</name>
 <name>unload-native-lib</name>
 <name>uavcan-last-rawcmd</name>

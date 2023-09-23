@@ -14,6 +14,8 @@
 * Better lisp code read import handling.
 * Added filter-box to example and recent lists in script editors.
 
+---
+
 ### 6.02
 #### Released 2023-03-12
 * Improved experiment plot.

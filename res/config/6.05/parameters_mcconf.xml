@@ -2069,36 +2069,55 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>9</vTx>
         </foc_sl_erpm>
-        <foc_sample_v0_v7>
-            <longName>Sample in V0 and V7</longName>
-            <type>5</type>
+        <foc_control_sample_mode>
+            <longName>Control Sample Mode</longName>
+            <type>4</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Sample currents and voltages in both V0 and V7 of the space vector modulation, and run the control loop at twice the rate. Can be useful for high speed motors at limited switching frequency, or in order to decrease the modulation noise. Notice that this option will require twice the amount of computational power for a given switching frequency.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Note&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;This option is only valid for hardware with phase shunts, such as the VESC Six. For other shunt configurations it is ignored.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_SAMPLE_V0_V7</cDefine>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;V0 Only&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sample and run the control loop in V0 only.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;V0 and V7&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sample currents and voltages in both V0 and V7 and run the full control loop at twice the rate. Can be useful for high speed motors at limited switching frequency, or in order to decrease the modulation noise. Notice that this option will require twice the amount of computational power for a given switching frequency.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This mode is only valid for hardware with phase shunts, such as the VESC Six. For other shunt configurations it is ignored.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;V0 and V7 Interpolation&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Regular sampling and control in V0 and advance the voltage vector with interpolation in V7. This can help motors run better at high speeds.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_CONTROL_SAMPLE_MODE</cDefine>
             <valInt>0</valInt>
-        </foc_sample_v0_v7>
-        <foc_sample_high_current>
-            <longName>High Current Sampling Mode</longName>
-            <type>5</type>
+            <enumNames>V0 Only</enumNames>
+            <enumNames>V0 and V7</enumNames>
+            <enumNames>V0 and V7 Interpolation</enumNames>
+        </foc_control_sample_mode>
+        <foc_current_sample_mode>
+            <longName>Current Sample Mode</longName>
+            <type>4</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Choose the lowest currents during sampling to derive the highest current. Since the motor currents are balanced and sum to 0, two of the phase currents can be used to derive the third one. Enabling this option will make the current measurement compare all motor currents and derive the highest one from the two lower currents. This way higher currents can be measured than the ADC gain allows by a factor of 2 / sqrt(3), or roughly 1.15. For example, for the VESC6 this increases the current measurement capability from 165A to roughly 190A.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Note&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;This option is only valid for hardware with three shunts, such as the VESC Six. For other shunt configurations it is ignored.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_SAMPLE_HIGH_CURRENT</cDefine>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Longest Zero Time&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Pick the two sensors that spend the longest time in the zero vectors and calculate the third current from them. This can help reduce noise and gives low side shunt hardware more time to rise before the sample is taken on high modulation.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;All Sensors Combined&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use all three current readings and make a full Clarke transform. This helps reject common mode noise and also reduces current offsets on motors with low inductance with high current ripple.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;High Current&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Choose the lowest currents during sampling to derive the highest current. Since the motor currents are balanced and sum to 0, two of the phase currents can be used to derive the third one. Enabling this option will make the current measurement compare all motor currents and derive the highest one from the two lower currents. This way higher currents can be measured than the ADC gain allows by a factor of 2 / sqrt(3), or roughly 1.15. For example, for the VESC6 this increases the current measurement capability from 165A to roughly 190A.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This parameter is only valid for hardware with three shunts, such as the VESC Six. For other shunt configurations it is ignored.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_CURRENT_SAMPLE_MODE</cDefine>
             <valInt>0</valInt>
-        </foc_sample_high_current>
+            <enumNames>Longest Zero Time</enumNames>
+            <enumNames>All Sensors Combined</enumNames>
+            <enumNames>High Current</enumNames>
+        </foc_current_sample_mode>
         <foc_sat_comp_mode>
             <longName>Saturation Compensation Mode</longName>
             <type>4</type>
@@ -4570,8 +4589,8 @@ p, li { white-space: pre-wrap; }
         <ser>foc_hall_interp_erpm</ser>
         <ser>foc_sl_erpm_start</ser>
         <ser>foc_sl_erpm</ser>
-        <ser>foc_sample_v0_v7</ser>
-        <ser>foc_sample_high_current</ser>
+        <ser>foc_control_sample_mode</ser>
+        <ser>foc_current_sample_mode</ser>
         <ser>foc_sat_comp_mode</ser>
         <ser>foc_sat_comp</ser>
         <ser>foc_temp_comp</ser>
@@ -4977,8 +4996,8 @@ p, li { white-space: pre-wrap; }
                     <param>foc_pll_ki</param>
                     <param>foc_duty_dowmramp_kp</param>
                     <param>foc_duty_dowmramp_ki</param>
-                    <param>foc_sample_v0_v7</param>
-                    <param>foc_sample_high_current</param>
+                    <param>foc_control_sample_mode</param>
+                    <param>foc_current_sample_mode</param>
                     <param>foc_observer_gain_slow</param>
                     <param>foc_current_filter_const</param>
                     <param>foc_cc_decoupling</param>

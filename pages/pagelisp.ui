@@ -441,6 +441,9 @@
           </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <item>
              <widget class="QLabel" name="label_2">
               <property name="text">
@@ -450,6 +453,20 @@
             </item>
             <item>
              <widget class="QLineEdit" name="recentFilterEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="recentFilterClearButton">
+              <property name="toolTip">
+               <string>Clear Filter Text</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/+theme_light/icons/Cancel-96.png</normaloff>:/res/+theme_light/icons/Cancel-96.png</iconset>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -534,6 +551,9 @@
           </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <item>
              <widget class="QLabel" name="label_5">
               <property name="text">
@@ -543,6 +563,20 @@
             </item>
             <item>
              <widget class="QLineEdit" name="exampleFilterEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="exampleFilterClearButton">
+              <property name="toolTip">
+               <string>Clear Filter Text</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/+theme_light/icons/Cancel-96.png</normaloff>:/res/+theme_light/icons/Cancel-96.png</iconset>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -827,12 +861,44 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1524</x>
-     <y>374</y>
+     <x>1465</x>
+     <y>553</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1456</x>
-     <y>379</y>
+     <x>1429</x>
+     <y>818</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>recentFilterClearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>recentFilterEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1357</x>
+     <y>535</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1308</x>
+     <y>532</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exampleFilterClearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>exampleFilterEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1358</x>
+     <y>537</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1291</x>
+     <y>538</y>
     </hint>
    </hints>
   </connection>

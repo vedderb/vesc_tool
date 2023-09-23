@@ -63,6 +63,8 @@ PageScripting::PageScripting(QWidget *parent) :
     ui->uploadButton->setIcon(Utility::getIcon("icons/Download-96.png"));
     ui->eraseOnlyButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
     ui->clearUploadTextButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->recentFilterClearButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
+    ui->exampleFilterClearButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
 
     plusButton->setFlat(true);
     plusButton->setText("New Tab");

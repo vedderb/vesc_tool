@@ -219,6 +219,9 @@
           </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <item>
              <widget class="QLabel" name="label">
               <property name="text">
@@ -228,6 +231,17 @@
             </item>
             <item>
              <widget class="QLineEdit" name="recentFilterEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="recentFilterClearButton">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/+theme_light/icons/Cancel-96.png</normaloff>:/res/+theme_light/icons/Cancel-96.png</iconset>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -312,6 +326,9 @@
           </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <item>
              <widget class="QLabel" name="label_2">
               <property name="text">
@@ -321,6 +338,17 @@
             </item>
             <item>
              <widget class="QLineEdit" name="exampleFilterEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="exampleFilterClearButton">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/+theme_light/icons/Cancel-96.png</normaloff>:/res/+theme_light/icons/Cancel-96.png</iconset>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -616,12 +644,44 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1385</x>
-     <y>168</y>
+     <x>1402</x>
+     <y>201</y>
     </hint>
     <hint type="destinationlabel">
      <x>1386</x>
      <y>236</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>recentFilterClearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>recentFilterEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1306</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1226</x>
+     <y>147</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exampleFilterClearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>exampleFilterEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1310</x>
+     <y>164</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1265</x>
+     <y>157</y>
     </hint>
    </hints>
   </connection>

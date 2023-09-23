@@ -52,6 +52,8 @@ PageLisp::PageLisp(QWidget *parent) :
     ui->eraseButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
     ui->replHelpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
     ui->streamButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->recentFilterClearButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
+    ui->exampleFilterClearButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
 
     QIcon mycon = Utility::getIcon( "icons/expand_off.png");
     mycon.addPixmap(Utility::getIcon("icons/expand_on.png"), QIcon::Normal, QIcon::On);

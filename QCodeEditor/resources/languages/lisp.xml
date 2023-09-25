@@ -433,5 +433,17 @@
 <name>sleep-config-wakeup-pin</name>
 <name>canmsg-send</name>
 <name>canmsg-recv</name>
+<name>f-open</name>
+<name>f-close</name>
+<name>f-read</name>
+<name>f-readline</name>
+<name>f-write</name>
+<name>f-tell</name>
+<name>f-seek</name>
+<name>f-mkdir</name>
+<name>f-rm</name>
+<name>f-ls</name>
+<name>f-size</name>
+<name>f-fatinfo</name>
 </section>
 </root>

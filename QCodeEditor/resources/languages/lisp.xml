@@ -219,6 +219,7 @@
 <name>icu-period</name>
 <name>app-adc-detach</name>
 <name>app-adc-override</name>
+<name>app-adc-range-ok</name>
 <name>app-ppm-detach</name>
 <name>app-ppm-override</name>
 <name>set-remote-state</name>

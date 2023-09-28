@@ -234,6 +234,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="recentFilterClearButton">
+              <property name="toolTip">
+               <string>Clear Filter Text</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -341,6 +344,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="exampleFilterClearButton">
+              <property name="toolTip">
+               <string>Clear Filter Text</string>
+              </property>
               <property name="text">
                <string/>
               </property>

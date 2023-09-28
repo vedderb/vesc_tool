@@ -63,7 +63,29 @@ void PageTerminal::setVesc(VescInterface *vesc)
 
 void PageTerminal::printReceived(QString str)
 {
-    ui->terminalBrowser->append(str);
+    ui->terminalBrowser->moveCursor(QTextCursor::End);
+    ui->terminalBrowser->insertPlainText(str + "\n");
+    ui->terminalBrowser->moveCursor(QTextCursor::End);
+
+    int maxLines = 5000;
+    int removeLines = 1000;
+
+    if (ui->terminalBrowser->document()->lineCount() > maxLines) {
+        QString txt = ui->terminalBrowser->toPlainText();
+        auto lines = txt.split("\n");
+        if (lines.length() >= removeLines) {
+            QString shorter;
+            for (int i = removeLines;i < lines.length();i++) {
+                shorter.append(lines.at(i));
+
+                if (i != (lines.length() - 1)) {
+                    shorter.append("\n");
+                }
+            }
+            ui->terminalBrowser->setText(shorter);
+            ui->terminalBrowser->moveCursor(QTextCursor::End);
+        }
+    }
 }
 
 void PageTerminal::on_sendButton_clicked()

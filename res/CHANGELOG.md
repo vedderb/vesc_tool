@@ -13,6 +13,8 @@
 * Check if there are unsaved scripts before closing.
 * Better lisp code read import handling.
 * Added filter-box to example and recent lists in script editors.
+* Limit output size in vesc and lbm terminal to prevent problems when printing too much.
+* Use all 3 measured currents in sampled data instead of calculating one.
 
 ---
 

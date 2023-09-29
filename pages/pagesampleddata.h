@@ -69,6 +69,7 @@ private:
 
     QVector<double> curr1Vector;
     QVector<double> curr2Vector;
+    QVector<double> curr3Vector;
     QVector<double> ph1Vector;
     QVector<double> ph2Vector;
     QVector<double> ph3Vector;
@@ -80,6 +81,7 @@ private:
 
     QVector<double> tmpCurr1Vector;
     QVector<double> tmpCurr2Vector;
+    QVector<double> tmpCurr3Vector;
     QVector<double> tmpPh1Vector;
     QVector<double> tmpPh2Vector;
     QVector<double> tmpPh3Vector;

@@ -683,13 +683,13 @@
         <string>Samp: </string>
        </property>
        <property name="maximum">
-        <number>2000</number>
+        <number>1600</number>
        </property>
        <property name="singleStep">
         <number>100</number>
        </property>
        <property name="value">
-        <number>1000</number>
+        <number>800</number>
        </property>
       </widget>
      </item>

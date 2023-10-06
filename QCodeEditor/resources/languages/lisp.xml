@@ -378,6 +378,7 @@
 <name>uavcan-last-rawcmd</name>
 <name>uavcan-last-rpmcmd</name>
 <name>lbm-set-quota</name>
+<name>lbm-set-gc-stack-size</name>
 <name>plot-init</name>
 <name>plot-add-graph</name>
 <name>plot-set-graph</name>

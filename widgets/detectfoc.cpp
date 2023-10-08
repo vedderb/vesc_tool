@@ -90,19 +90,29 @@ void DetectFoc::on_lambdaButton_clicked()
             return;
         }
 
-        if (ui->resistanceBox->value() < 1e-10) {
-            QMessageBox::critical(this,
-                                  tr("Measure Error"),
-                                  tr("R is 0. Please measure it first."));
-            return;
-        }
+        QMessageBox::StandardButton reply = QMessageBox::Cancel;
+        if (ui->currentBox->value() > 0.001) {
+            if (ui->resistanceBox->value() < 1e-10) {
+                QMessageBox::critical(this,
+                                      tr("Measure Error"),
+                                      tr("R is 0. Please measure it first."));
+                return;
+            }
 
-        QMessageBox::StandardButton reply = QMessageBox::warning(this,
-                                     tr("Warning"),
-                                     tr("<font color=\"red\">Warning: </font>"
-                                        "This is going to spin up the motor. Make "
-                                        "sure that nothing is in the way."),
-                                     QMessageBox::Ok | QMessageBox::Cancel);
+            reply = QMessageBox::warning(this,
+                                         tr("Warning"),
+                                         tr("<font color=\"red\">Warning: </font>"
+                                            "This is going to spin up the motor. Make "
+                                            "sure that nothing is in the way."),
+                                         QMessageBox::Ok | QMessageBox::Cancel);
+        } else {
+            reply = QMessageBox::warning(this,
+                                         tr("Warning"),
+                                         tr("As the current is 0 this is going to perform passive flux "
+                                            "linkage measurement. Make sure that the motor is driven "
+                                            "externally."),
+                                         QMessageBox::Ok | QMessageBox::Cancel);
+        }
 
         if (reply == QMessageBox::Ok) {
             mVesc->commands()->measureLinkageOpenloop(ui->currentBox->value(),

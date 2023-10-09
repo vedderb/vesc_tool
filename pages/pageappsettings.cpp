@@ -61,18 +61,14 @@ void PageAppSettings::reloadParams()
             QStringList imgs = {"app_up", "app_default" , "app_down","Upload-96","Data Backup-96","Help-96"};
             QString theme = "<img src=\"" + Utility::getThemePath() + "icons/";
             QString out;
-            if(imgs.length() > htmls.length()/2 - 1)
-            {
-                for(int i =0; i < htmls.length()-1; i+=2)
-                {
+            if(imgs.length() > htmls.length()/2 - 1) {
+                for(int i =0; i < htmls.length()-1; i+=2) {
                     out.append(htmls[i] + theme + imgs[i/2]);
                     out.append(".png\" width=");
                 }
                 out.append(htmls.last());
                 ui->textEdit->setHtml(out);
-            }
-            else
-            {
+            } else {
                 ui->textEdit->setHtml(p->description);
             }
         } else {

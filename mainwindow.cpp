@@ -1574,39 +1574,41 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageLogAnalysis);
     addPageItem(tr("Log Analysis"),  theme + "icons/Waypoint Map-96.png", "", false, true);
 
-    mPageVESCDev = new QTabWidget(this);
-    mPageVESCDev->setTabShape(QTabWidget::Triangular);
+    VTextBrowser *vt = new VTextBrowser(this);
+    ConfigParam *p = mVesc->infoConfig()->getParam("dev_tools_description");
+    if (p) {
+        vt->setText(p->description);
+    }
+    ui->pageWidget->addWidget(vt);
+    addPageItem(tr("VESC Dev Tools"),  theme + "icons/v_icon-96.png", "", true);
 
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
-    mPageVESCDev->addTab(mPageTerminal, Utility::getIcon("icons/Console-96.png"), tr("VESC Terminal"));
+    addPageItem(tr("Terminal"),  theme + "icons/Console-96.png", "", false, true);
 
     mPageScripting = new PageScripting(this);
     mPageScripting->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageScripting);
-    mPageVESCDev->addTab(mPageScripting, Utility::getIcon("icons_textedit/Outdent-96.png"), tr("QML"));
+    addPageItem(tr("QML Scripting"),  theme + "icons_textedit/Outdent-96.png", "", false, true);
 
     mPageLisp = new PageLisp(this);
     mPageLisp->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageLisp);
-    mPageVESCDev->addTab(mPageLisp, Utility::getIcon("icons_textedit/Outdent-96.png"), tr("Lisp"));
+    addPageItem(tr("LispBM Scripting"),  theme + "icons_textedit/Outdent-96.png", "", false, true);
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageCanAnalyzer);
-    mPageVESCDev->addTab(mPageCanAnalyzer, Utility::getIcon("icons/can_off.png"), tr("CAN Analyzer"));
+    addPageItem(tr("CAN Analyzer"),  theme + "icons/can_off.png", "", false, true);
 
     mPageDisplayTool = new PageDisplayTool(this);
     ui->pageWidget->addWidget(mPageDisplayTool);
-    mPageVESCDev->addTab(mPageDisplayTool, Utility::getIcon("icons/Calculator-96.png"), tr("Display Tool"));
+    addPageItem(tr("Display Tool"),  theme + "icons/Calculator-96.png", "", false, true);
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
-    mPageVESCDev->addTab(mPageDebugPrint, Utility::getIcon("icons/Bug-96.png"), tr("Debug Console"));
-
-    ui->pageWidget->addWidget(mPageVESCDev);
-    addPageItem(tr("VESC Dev Tools"),  theme + "icons/Console-96.png", "", true);
+    addPageItem(tr("Debug Console"),  theme + "icons/Bug-96.png", "", false, true);
 
     mPageSwdProg = new PageSwdProg(this);
     mPageSwdProg->setVesc(mVesc);
@@ -1883,29 +1885,25 @@ void MainWindow::on_actionSaveAppConfigurationHeaderWrap_triggered()
 void MainWindow::on_actionTerminalPrintFaults_triggered()
 {
     mVesc->commands()->sendTerminalCmd("faults");
-    showPage("VESC Dev Tools");
-    mPageVESCDev->setCurrentIndex(0);
+    showPage("Terminal");
 }
 
 void MainWindow::on_actionTerminalShowHelp_triggered()
 {
     mVesc->commands()->sendTerminalCmd("help");
-    showPage("VESC Dev Tools");
-    mPageVESCDev->setCurrentIndex(0);
+    showPage("Terminal");
 }
 
 void MainWindow::on_actionTerminalClear_triggered()
 {
     mPageTerminal->clearTerminal();
-    showPage("VESC Dev Tools");
-    mPageVESCDev->setCurrentIndex(0);
+    showPage("Terminal");
 }
 
 void MainWindow::on_actionTerminalPrintThreads_triggered()
 {
     mVesc->commands()->sendTerminalCmd("threads");
-    showPage("VESC Dev Tools");
-    mPageVESCDev->setCurrentIndex(0);
+    showPage("Terminal");
 }
 
 void MainWindow::on_actionTerminalDRVResetLatchedFaults_triggered()

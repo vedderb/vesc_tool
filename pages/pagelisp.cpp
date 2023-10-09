@@ -148,7 +148,7 @@ PageLisp::PageLisp(QWidget *parent) :
         removeEditor(mainEditor);
     });
 
-    ui->splitter->setSizes(QList<int>({1000, 600}));
+    ui->splitter->setSizes(QList<int>({1000, 100}));
     ui->splitter_2->setSizes(QList<int>({1000, 600}));
 
     mPollTimer.start(1000 / ui->pollRateBox->value());

@@ -223,7 +223,6 @@ private:
     PageScripting *mPageScripting;
     PageLisp *mPageLisp;
     PageEspProg *mPageEspProg;
-    QTabWidget *mPageVESCDev;
     PageDisplayTool *mPageDisplayTool;
     Preferences *mPreferences;
 

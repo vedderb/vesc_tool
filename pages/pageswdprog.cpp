@@ -563,6 +563,12 @@ void PageSwdProg::bmConnRes(int res)
         addSwdFw("Trampa 18s Light BMS",
                  "://res/firmwares_bms/18s_light/vesc_default.bin", 0,
                  "://res/bootloaders_bms/generic.bin", 0x3E000);
+        addSwdFw("Trampa 18s Light LMP BMS",
+                 "://res/firmwares_bms/18s_light_lmp/vesc_default.bin", 0,
+                 "://res/bootloaders_bms/generic.bin", 0x3E000);
+        addSwdFw("Trampa 18s Light MK2 BMS",
+                 "://res/firmwares_bms/18s_light_mk2/vesc_default.bin", 0,
+                 "://res/bootloaders_bms/generic.bin", 0x3E000);
         addSwdFw("Power Switch 120V",
                  "://res/other_fw/vesc_power_switch_120.bin", 0,
                  "://res/bootloaders_bms/generic.bin", 0x3E000);

@@ -596,9 +596,7 @@ void Commands::processPacket(QByteArray data)
             values.q3 = vb.vbPopFrontDouble32Auto();
         }
         if (vb.size() >= 1) {
-            if (mask & (uint32_t(1) << 16)) {
-                values.vesc_id = vb.vbPopFrontUint8();
-            }
+            values.vesc_id = vb.vbPopFrontUint8();
         }
 
         emit valuesImuReceived(values, mask);

@@ -93,6 +93,8 @@ static void showHelp()
     qDebug() << "--getMcConf [confPath] : Connect and read motor configuration and store the XML to confPath.";
     qDebug() << "--setMcConf [confPath] : Connect and write motor configuration XML from confPath.";
     qDebug() << "--debugOutFile [path] : Print debug output to file with path.";
+    qDebug() << "--uploadLisp [path] : Upload lisp-script.";
+    qDebug() << "--eraseLisp : Erase lisp-script.";
 }
 
 #ifdef Q_OS_LINUX
@@ -279,6 +281,8 @@ int main(int argc, char *argv[])
     QString getMcConfPath = "";
     QString setMcConfPath = "";
     QSize qmlWindowSize = QSize(-1, -1);
+    QString lispPath = "";
+    bool eraseLisp = false;
 
     // Arguments can be hard-coded in a build like this:
 //    qmlWindowSize = QSize(400, 800);
@@ -475,6 +479,23 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (str == "--uploadLisp") {
+            if ((i + 1) < args.size()) {
+                i++;
+                lispPath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path specified";
+                return 1;
+            }
+        }
+
+        if (str == "--eraseLisp") {
+            eraseLisp = true;
+            found = true;
+        }
+
         if (str == "--debugOutFile") {
             if ((i + 1) < args.size()) {
                 i++;
@@ -538,7 +559,7 @@ int main(int argc, char *argv[])
 
         CodeLoader loader;
         QString pkgPath = pkgArgs.at(0);
-        QString lispPath = pkgArgs.at(1);
+        lispPath = pkgArgs.at(1);
         QString qmlPath = pkgArgs.at(2);
         bool isFullscreen = pkgArgs.at(3).toInt();
 
@@ -692,14 +713,36 @@ int main(int argc, char *argv[])
         }
     });
 
-    if (!getMcConfPath.isEmpty() || !setMcConfPath.isEmpty()) {
+    bool isMcConf = !getMcConfPath.isEmpty() || !setMcConfPath.isEmpty();
+
+    if (isMcConf || !lispPath.isEmpty() || eraseLisp) {
         qputenv("QT_QPA_PLATFORM", "offscreen");
         app = new QCoreApplication(argc, argv);
         vesc = new VescInterface;
         vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
         Utility::configLoadLatest(vesc);
 
+        QObject::connect(vesc, &VescInterface::statusMessage, []
+                         (const QString &msg, bool isGood) {
+            if (isGood) {
+                qDebug() << msg;
+            } else {
+                qWarning() << msg;
+            }
+        });
+
+        QObject::connect(vesc, &VescInterface::messageDialog, []
+                         (const QString &title, const QString &msg, bool isGood, bool richText) {
+            (void)richText;
+            if (isGood) {
+                qDebug() << title << ":" << msg;
+            } else {
+                qWarning() << title << ":" << msg;
+            }
+        });
+
         QTimer::singleShot(10, [&]() {
+            int exitCode = 0;
             bool ok = false;
             if (vescPort.isEmpty()) {
                 ok = vesc->autoconnect();
@@ -714,62 +757,101 @@ int main(int argc, char *argv[])
                     vesc->commands()->setSendCan(true, canFwd);
                 }
 
-                auto res = Utility::waitSignal(vesc, SIGNAL(customConfigLoadDone()), 4000);
-                if (res) {
-                    ConfigParams *p = vesc->mcConfig();
-                    vesc->commands()->getMcconf();
-                    res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
-                    if (res) {
-                        if (!setMcConfPath.isEmpty()) {
-                            res = p->loadXml(setMcConfPath, "MCConfiguration");
+                CodeLoader loader;
+                loader.setVesc(vesc);
 
-                            if (res) {
-                                vesc->commands()->setMcconf(false);
-                                res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+                if (eraseLisp) {
+                    if (loader.lispErase(16)) {
+                        qDebug() << "Lisp erase OK!";
+                    } else {
+                        qWarning() << "Could not erase lisp";
+                        exitCode = -10;
+                    }
+                }
 
-                                if (res) {
-                                    qDebug() << "Wrote XML from" << setMcConfPath;
-                                    qApp->exit();
-                                } else {
-                                    qWarning() << "Could not write config";
-                                    qApp->exit(-4);
-                                }
+                if (!lispPath.isEmpty()) {
+                    QFile f(lispPath);
+                    if (f.open(QIODevice::ReadOnly)) {
+                        QFileInfo fi(f);
+                        VByteArray lispData = loader.lispPackImports(f.readAll(), fi.canonicalPath());
+                        f.close();
 
+                        if (!lispData.isEmpty()) {
+                            bool ok = loader.lispErase(lispData.size() + 100);
+                            if (ok) {
+                                ok = loader.lispUpload(lispData);
                             } else {
-                                qWarning() << "Could not load XML from" << setMcConfPath;
-                                qApp->exit(-3);
+                                qWarning() << "Could not erase lisp";
+                                exitCode = -10;
+                            }
+                            if (ok) {
+                                qDebug() << "Lisp upload OK!";
+                                vesc->commands()->lispSetRunning(1);
+                                Utility::sleepWithEventLoop(100);
+                            } else
+                                qWarning() << "Could not upload lisp";{
+                                exitCode = -11;
                             }
                         } else {
-                            res = p->saveXml(getMcConfPath, "MCConfiguration");
+                            qWarning() << "Empty or invalid lisp-file.";
+                            exitCode = -12;
+                        }
+                    } else {
+                        qWarning() << "Could not open lisp file for reading.";
+                        exitCode = -13;
+                    }
+                }
 
-                            if (res) {
-                                qDebug() << "Saved XML to" << getMcConfPath;
-                                qApp->exit();
+                if (isMcConf) {
+                    auto res = Utility::waitSignal(vesc, SIGNAL(customConfigLoadDone()), 4000);
+                    if (res) {
+                        ConfigParams *p = vesc->mcConfig();
+                        vesc->commands()->getMcconf();
+                        res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
+                        if (res) {
+                            if (!setMcConfPath.isEmpty()) {
+                                res = p->loadXml(setMcConfPath, "MCConfiguration");
+
+                                if (res) {
+                                    vesc->commands()->setMcconf(false);
+                                    res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+
+                                    if (res) {
+                                        qDebug() << "Wrote XML from" << setMcConfPath;
+                                    } else {
+                                        qWarning() << "Could not write config";
+                                        exitCode = -4;
+                                    }
+
+                                } else {
+                                    qWarning() << "Could not load XML from" << setMcConfPath;
+                                    exitCode = -3;
+                                }
                             } else {
-                                qWarning() << "Could not save XML";
-                                qApp->exit(-3);
+                                res = p->saveXml(getMcConfPath, "MCConfiguration");
+
+                                if (res) {
+                                    qDebug() << "Saved XML to" << getMcConfPath;
+                                } else {
+                                    qWarning() << "Could not save XML";
+                                    exitCode = -3;
+                                }
                             }
+                        } else {
+                            qWarning() << "Could not load config";
+                            exitCode = -2;
                         }
                     } else {
                         qWarning() << "Could not load config";
-                        qApp->exit(-2);
+                        exitCode = -1;
                     }
-                } else {
-                    qWarning() << "Could not load config";
-                    qApp->exit(-1);
                 }
             } else {
                 qWarning() << "Could not connect";
-                qApp->exit(-1);
+                exitCode = -1;
             }
-        });
 
-        QObject::connect(vesc, &VescInterface::statusMessage, [&](QString msg, bool isGood) {
-            if (isGood) {
-                qDebug() << msg;
-            } else  {
-                qWarning() << msg;
-            }
+            qApp->exit(exitCode);
         });
     } else if (useTcp) {
         qputenv("QT_QPA_PLATFORM", "offscreen");

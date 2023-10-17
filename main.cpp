@@ -95,6 +95,7 @@ static void showHelp()
     qDebug() << "--debugOutFile [path] : Print debug output to file with path.";
     qDebug() << "--uploadLisp [path] : Upload lisp-script.";
     qDebug() << "--eraseLisp : Erase lisp-script.";
+    qDebug() << "--uploadFirmware [path] : Upload firmware-file from path.";
 }
 
 #ifdef Q_OS_LINUX
@@ -283,6 +284,7 @@ int main(int argc, char *argv[])
     QSize qmlWindowSize = QSize(-1, -1);
     QString lispPath = "";
     bool eraseLisp = false;
+    QString firmwarePath = "";
 
     // Arguments can be hard-coded in a build like this:
 //    qmlWindowSize = QSize(400, 800);
@@ -494,6 +496,18 @@ int main(int argc, char *argv[])
         if (str == "--eraseLisp") {
             eraseLisp = true;
             found = true;
+        }
+
+        if (str == "--uploadFirmware") {
+            if ((i + 1) < args.size()) {
+                i++;
+                firmwarePath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path specified";
+                return 1;
+            }
         }
 
         if (str == "--debugOutFile") {
@@ -715,19 +729,22 @@ int main(int argc, char *argv[])
 
     bool isMcConf = !getMcConfPath.isEmpty() || !setMcConfPath.isEmpty();
 
-    if (isMcConf || !lispPath.isEmpty() || eraseLisp) {
+    if (isMcConf || !lispPath.isEmpty() || eraseLisp || !firmwarePath.isEmpty()) {
         qputenv("QT_QPA_PLATFORM", "offscreen");
         app = new QCoreApplication(argc, argv);
         vesc = new VescInterface;
         vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
         Utility::configLoadLatest(vesc);
 
-        QObject::connect(vesc, &VescInterface::statusMessage, []
+        QObject::connect(vesc, &VescInterface::statusMessage, [firmwarePath]
                          (const QString &msg, bool isGood) {
             if (isGood) {
                 qDebug() << msg;
             } else {
-                qWarning() << msg;
+                // Firmware upload tends to end with a serial port error when jumping to the bootloader, do not print it
+                if (firmwarePath.isEmpty() || !msg.startsWith("Serial port error")) {
+                    qWarning() << msg;
+                }
             }
         });
 
@@ -741,6 +758,24 @@ int main(int argc, char *argv[])
             }
         });
 
+        QObject::connect(vesc, &VescInterface::fwUploadStatus, []
+                         (const QString &status, double progress, bool isOngoing) {
+            (void)status;
+            (void)isOngoing;
+
+            static double progress_last = 0.0;
+            progress *= 100.0;
+
+            if (progress < progress_last) {
+                progress_last = 0.0;
+            }
+
+            if (progress > 0.5 && (progress - progress_last) >= 1.0) {
+                fprintf(stderr, "%s", QString("\rUpload progress: %1%").arg(floor(progress)).toLatin1().data());
+                progress_last = progress;
+            }
+        });
+
         QTimer::singleShot(10, [&]() {
             int exitCode = 0;
             bool ok = false;
@@ -748,10 +783,17 @@ int main(int argc, char *argv[])
                 ok = vesc->autoconnect();
             } else {
                 ok = vesc->connectSerial(vescPort);
+                if (ok) {
+                    ok = Utility::waitSignal(vesc, SIGNAL(fwRxChanged(`bool, bool)), 1000);
+                    if (!ok) {
+                        qWarning() << "Could not read firmware version";
+                    }
+                }
             }
 
             if (ok) {
                 qDebug() << "Connected";
+                Utility::sleepWithEventLoop(100);
 
                 if (canFwd >= 0) {
                     vesc->commands()->setSendCan(true, canFwd);
@@ -844,6 +886,24 @@ int main(int argc, char *argv[])
                     } else {
                         qWarning() << "Could not load config";
                         exitCode = -1;
+                    }
+                }
+
+                if (!firmwarePath.isEmpty()) {
+                    QFile f(firmwarePath);
+                    if (f.open(QIODevice::ReadOnly)) {
+                        auto fwData = f.readAll();
+                        qDebug() << "Erasing firmware buffer...";
+                        if (vesc->fwUpload(fwData, false, false, false)) {
+                            fprintf(stderr, "\r\n");
+                            qDebug() << "Firmware upload OK!";
+                        } else {
+                            qWarning() << "Firmware upload failed.";
+                            exitCode = -20;
+                        }
+                    } else {
+                        qWarning() << "Could not open firmware file for reading.";
+                        exitCode = -21;
                     }
                 }
             } else {

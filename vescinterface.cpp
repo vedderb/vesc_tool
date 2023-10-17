@@ -1266,7 +1266,7 @@ bool VescInterface::fwEraseNewApp(bool fwdCan, quint32 fwSize)
     };
 
     mCommands->eraseNewApp(fwdCan, fwSize, mLastFwParams.hwType, mLastFwParams.hw);
-    emit fwUploadStatus("Erasing buffer...", 0.0, true);
+    emit fwUploadStatus("Erasing buffer", 0.0, true);
     int erRes = waitEraseRes();
     if (erRes != 1) {
         QString msg = QString("Unknown failure: %1").arg(erRes);

@@ -96,6 +96,7 @@ static void showHelp()
     qDebug() << "--uploadLisp [path] : Upload lisp-script.";
     qDebug() << "--eraseLisp : Erase lisp-script.";
     qDebug() << "--uploadFirmware [path] : Upload firmware-file from path.";
+    qDebug() << "--uploadBootloaderBuiltin : Upload bootloader from generic included bootloaders.";
 }
 
 #ifdef Q_OS_LINUX
@@ -285,6 +286,7 @@ int main(int argc, char *argv[])
     QString lispPath = "";
     bool eraseLisp = false;
     QString firmwarePath = "";
+    bool uploadBootloaderBuiltin = false;
 
     // Arguments can be hard-coded in a build like this:
 //    qmlWindowSize = QSize(400, 800);
@@ -510,6 +512,11 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (str == "--uploadBootloaderBuiltin") {
+            uploadBootloaderBuiltin = true;
+            found = true;
+        }
+
         if (str == "--debugOutFile") {
             if ((i + 1) < args.size()) {
                 i++;
@@ -729,7 +736,7 @@ int main(int argc, char *argv[])
 
     bool isMcConf = !getMcConfPath.isEmpty() || !setMcConfPath.isEmpty();
 
-    if (isMcConf || !lispPath.isEmpty() || eraseLisp || !firmwarePath.isEmpty()) {
+    if (isMcConf || !lispPath.isEmpty() || eraseLisp || !firmwarePath.isEmpty() || uploadBootloaderBuiltin) {
         qputenv("QT_QPA_PLATFORM", "offscreen");
         app = new QCoreApplication(argc, argv);
         vesc = new VescInterface;
@@ -886,6 +893,58 @@ int main(int argc, char *argv[])
                     } else {
                         qWarning() << "Could not load config";
                         exitCode = -1;
+                    }
+                }
+
+                if (uploadBootloaderBuiltin) {
+                    FW_RX_PARAMS params = vesc->getLastFwRxParams();
+                    QString path = "";
+
+                    switch (params.hwType) {
+                    case HW_TYPE_VESC:
+                        path = "://res/bootloaders/generic.bin";
+                        break;
+
+                    case HW_TYPE_VESC_BMS:
+                        path = "://res/bootloaders_bms/generic.bin";
+                        break;
+
+                    case HW_TYPE_CUSTOM_MODULE:
+                        QByteArray endEsp;
+                        endEsp.append('\0');
+                        endEsp.append('\0');
+                        endEsp.append('\0');
+                        endEsp.append('\0');
+
+                        if (!params.uuid.endsWith(endEsp)) {
+                            if (params.hw == "hm1") {
+                                path = "://res/bootloaders_bms/generic.bin";
+                            } else {
+                                path = "://res/bootloaders_custom_module/stm32g431.bin";
+                            }
+                        }
+                        break;
+                    }
+
+                    if (!path.isEmpty()) {
+                        QFile f(path);
+                        if (f.open(QIODevice::ReadOnly)) {
+                            auto fwData = f.readAll();
+                            qDebug() << "Erasing old bootloader...";
+                            if (vesc->fwUpload(fwData, true, false, false)) {
+                                fprintf(stderr, "\r\n");
+                                qDebug() << "Bootloader upload OK!";
+                            } else {
+                                qWarning() << "Bootloader upload failed.";
+                                exitCode = -20;
+                            }
+                        } else {
+                            qWarning() << "Could not open bootloader file for reading.";
+                            exitCode = -21;
+                        }
+                    } else {
+                        qWarning() << "No included bootloader found.";
+                        exitCode = -30;
                     }
                 }
 

@@ -92,6 +92,10 @@ static void showHelp()
     qDebug() << "--canFwd [canId] : Can ID for CAN forwarding";
     qDebug() << "--getMcConf [confPath] : Connect and read motor configuration and store the XML to confPath.";
     qDebug() << "--setMcConf [confPath] : Connect and write motor configuration XML from confPath.";
+    qDebug() << "--getAppConf [confPath] : Connect and read app configuration and store the XML to confPath.";
+    qDebug() << "--setAppConf [confPath] : Connect and write app configuration XML from confPath.";
+    qDebug() << "--getCustomConf [confPath] : Connect and read custom configuration 1 and store the XML to confPath.";
+    qDebug() << "--setCustomConf [confPath] : Connect and write custom configuration 1 XML from confPath.";
     qDebug() << "--debugOutFile [path] : Print debug output to file with path.";
     qDebug() << "--uploadLisp [path] : Upload lisp-script.";
     qDebug() << "--eraseLisp : Erase lisp-script.";
@@ -282,6 +286,10 @@ int main(int argc, char *argv[])
     int canFwd = -1;
     QString getMcConfPath = "";
     QString setMcConfPath = "";
+    QString getAppConfPath = "";
+    QString setAppConfPath = "";
+    QString getCustomConfPath = "";
+    QString setCustomConfPath = "";
     QSize qmlWindowSize = QSize(-1, -1);
     QString lispPath = "";
     bool eraseLisp = false;
@@ -475,6 +483,54 @@ int main(int argc, char *argv[])
             if ((i + 1) < args.size()) {
                 i++;
                 setMcConfPath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path specified";
+                return 1;
+            }
+        }
+
+        if (str == "--getAppConf") {
+            if ((i + 1) < args.size()) {
+                i++;
+                getAppConfPath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path specified";
+                return 1;
+            }
+        }
+
+        if (str == "--setAppConf") {
+            if ((i + 1) < args.size()) {
+                i++;
+                setAppConfPath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path specified";
+                return 1;
+            }
+        }
+
+        if (str == "--getCustomConf") {
+            if ((i + 1) < args.size()) {
+                i++;
+                getCustomConfPath = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path specified";
+                return 1;
+            }
+        }
+
+        if (str == "--setCustomConf") {
+            if ((i + 1) < args.size()) {
+                i++;
+                setCustomConfPath = args.at(i);
                 found = true;
             } else {
                 i++;
@@ -735,8 +791,11 @@ int main(int argc, char *argv[])
     });
 
     bool isMcConf = !getMcConfPath.isEmpty() || !setMcConfPath.isEmpty();
+    bool isAppConf = !getAppConfPath.isEmpty() || !setAppConfPath.isEmpty();
+    bool isCustomConf = !getCustomConfPath.isEmpty() || !setCustomConfPath.isEmpty();
 
-    if (isMcConf || !lispPath.isEmpty() || eraseLisp || !firmwarePath.isEmpty() || uploadBootloaderBuiltin) {
+    if (isMcConf || isAppConf || isCustomConf || !lispPath.isEmpty() ||
+            eraseLisp || !firmwarePath.isEmpty() || uploadBootloaderBuiltin) {
         qputenv("QT_QPA_PLATFORM", "offscreen");
         app = new QCoreApplication(argc, argv);
         vesc = new VescInterface;
@@ -791,7 +850,7 @@ int main(int argc, char *argv[])
             } else {
                 ok = vesc->connectSerial(vescPort);
                 if (ok) {
-                    ok = Utility::waitSignal(vesc, SIGNAL(fwRxChanged(`bool, bool)), 1000);
+                    ok = Utility::waitSignal(vesc, SIGNAL(fwRxChanged(bool, bool)), 1000);
                     if (!ok) {
                         qWarning() << "Could not read firmware version";
                     }
@@ -851,44 +910,128 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                if (isMcConf) {
-                    auto res = Utility::waitSignal(vesc, SIGNAL(customConfigLoadDone()), 4000);
-                    if (res) {
-                        ConfigParams *p = vesc->mcConfig();
-                        vesc->commands()->getMcconf();
-                        res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
-                        if (res) {
-                            if (!setMcConfPath.isEmpty()) {
-                                res = p->loadXml(setMcConfPath, "MCConfiguration");
+                if (isMcConf || isAppConf || isCustomConf) {
+                    bool res = vesc->customConfigRxDone();
+                    if (!res) {
+                        res = Utility::waitSignal(vesc, SIGNAL(customConfigLoadDone()), 4000);
+                    }
 
-                                if (res) {
-                                    vesc->commands()->setMcconf(false);
-                                    res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+                    if (res) {
+                        if (isMcConf) {
+                            ConfigParams *p = vesc->mcConfig();
+                            vesc->commands()->getMcconf();
+                            res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
+
+                            if (res) {
+                                if (!setMcConfPath.isEmpty()) {
+                                    res = p->loadXml(setMcConfPath, "MCConfiguration");
 
                                     if (res) {
-                                        qDebug() << "Wrote XML from" << setMcConfPath;
-                                    } else {
-                                        qWarning() << "Could not write config";
-                                        exitCode = -4;
-                                    }
+                                        vesc->commands()->setMcconf(false);
+                                        res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
 
+                                        if (res) {
+                                            qDebug() << "Wrote XML from" << setMcConfPath;
+                                        } else {
+                                            qWarning() << "Could not write config";
+                                            exitCode = -4;
+                                        }
+                                    } else {
+                                        qWarning() << "Could not load XML from" << setMcConfPath;
+                                        exitCode = -3;
+                                    }
                                 } else {
-                                    qWarning() << "Could not load XML from" << setMcConfPath;
-                                    exitCode = -3;
+                                    res = p->saveXml(getMcConfPath, "MCConfiguration");
+
+                                    if (res) {
+                                        qDebug() << "Saved XML to" << getMcConfPath;
+                                    } else {
+                                        qWarning() << "Could not save XML";
+                                        exitCode = -3;
+                                    }
                                 }
                             } else {
-                                res = p->saveXml(getMcConfPath, "MCConfiguration");
-
-                                if (res) {
-                                    qDebug() << "Saved XML to" << getMcConfPath;
-                                } else {
-                                    qWarning() << "Could not save XML";
-                                    exitCode = -3;
-                                }
+                                qWarning() << "Could not load config";
+                                exitCode = -2;
                             }
-                        } else {
-                            qWarning() << "Could not load config";
-                            exitCode = -2;
+                        }
+
+                        if (isAppConf) {
+                            ConfigParams *p = vesc->appConfig();
+                            vesc->commands()->getAppConf();
+                            res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
+
+                            if (res) {
+                                if (!setAppConfPath.isEmpty()) {
+                                    res = p->loadXml(setAppConfPath, "APPConfiguration");
+
+                                    if (res) {
+                                        vesc->commands()->setAppConf();
+                                        res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+
+                                        if (res) {
+                                            qDebug() << "Wrote XML from" << setAppConfPath;
+                                        } else {
+                                            qWarning() << "Could not write config";
+                                            exitCode = -4;
+                                        }
+                                    } else {
+                                        qWarning() << "Could not load XML from" << setAppConfPath;
+                                        exitCode = -3;
+                                    }
+                                } else {
+                                    res = p->saveXml(getAppConfPath, "APPConfiguration");
+
+                                    if (res) {
+                                        qDebug() << "Saved XML to" << getAppConfPath;
+                                    } else {
+                                        qWarning() << "Could not save XML";
+                                        exitCode = -3;
+                                    }
+                                }
+                            } else {
+                                qWarning() << "Could not load config";
+                                exitCode = -2;
+                            }
+                        }
+
+                        if (isCustomConf) {
+                            ConfigParams *p = vesc->customConfig(0);
+                            vesc->commands()->customConfigGet(0, false);
+                            res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
+
+                            if (res) {
+                                if (!setCustomConfPath.isEmpty()) {
+                                    res = p->loadXml(setCustomConfPath, "CustomConfiguration");
+
+                                    if (res) {
+                                        vesc->commands()->customConfigSet(0, p);
+                                        res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+
+                                        if (res) {
+                                            qDebug() << "Wrote XML from" << setCustomConfPath;
+                                        } else {
+                                            qWarning() << "Could not write config";
+                                            exitCode = -4;
+                                        }
+                                    } else {
+                                        qWarning() << "Could not load XML from" << setCustomConfPath;
+                                        exitCode = -3;
+                                    }
+                                } else {
+                                    res = p->saveXml(getCustomConfPath, "CustomConfiguration");
+
+                                    if (res) {
+                                        qDebug() << "Saved XML to" << getCustomConfPath;
+                                    } else {
+                                        qWarning() << "Could not save XML";
+                                        exitCode = -3;
+                                    }
+                                }
+                            } else {
+                                qWarning() << "Could not load config";
+                                exitCode = -2;
+                            }
                         }
                     } else {
                         qWarning() << "Could not load config";

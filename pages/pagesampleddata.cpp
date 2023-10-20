@@ -767,7 +767,17 @@ void PageSampledData::on_loadDataButton_clicked()
                 return;
             }
 
-            clearBuffers();
+            fSwVector.clear();
+            curr1Vector.clear();
+            curr2Vector.clear();
+            curr3Vector.clear();
+            ph1Vector.clear();
+            ph2Vector.clear();
+            ph3Vector.clear();
+            currTotVector.clear();
+            vZeroVector.clear();
+            phaseArray.clear();
+            statusArray.clear();
 
             int indT = -1;
             int indI1 = -1;

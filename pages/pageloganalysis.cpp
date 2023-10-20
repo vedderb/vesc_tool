@@ -606,13 +606,13 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
 void PageLogAnalysis::on_openCsvButton_clicked()
 {
     if (mVesc) {
+        QString dirPath = QSettings().value("pageloganalysis/lastdir", "").toString();
         QString fileName = QFileDialog::getOpenFileName(this,
-                                                        tr("Load CSV File"), "",
+                                                        tr("Load CSV File"), dirPath,
                                                         tr("CSV files (*.csv)"));
 
         if (!fileName.isEmpty()) {
-            QSettings set;
-            set.setValue("pageloganalysis/lastdir",
+            QSettings().setValue("pageloganalysis/lastdir",
                          QFileInfo(fileName).absolutePath());
 
             QFile inFile(fileName);

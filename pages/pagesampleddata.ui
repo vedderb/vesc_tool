@@ -487,10 +487,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/3ph_sine.png</normaloff>:/res/icons/3ph_sine.png</iconset>
-       </property>
       </widget>
      </item>
      <item>
@@ -500,10 +496,6 @@
        </property>
        <property name="text">
         <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/motor.png</normaloff>:/res/icons/motor.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -520,10 +512,6 @@
        </property>
        <property name="text">
         <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/sampl_trigger_start.png</normaloff>:/res/icons/sampl_trigger_start.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -544,10 +532,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/sample_trigger_fault.png</normaloff>:/res/icons/sample_trigger_fault.png</iconset>
-       </property>
        <property name="iconSize">
         <size>
          <width>30</width>
@@ -563,10 +547,6 @@
        </property>
        <property name="text">
         <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/sample_trigger_start_nosend.png</normaloff>:/res/icons/sample_trigger_start_nosend.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -584,10 +564,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/sample_trigger_fault_nosend.png</normaloff>:/res/icons/sample_trigger_fault_nosend.png</iconset>
-       </property>
        <property name="iconSize">
         <size>
          <width>40</width>
@@ -604,10 +580,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Upload-96.png</normaloff>:/res/icons/Upload-96.png</iconset>
-       </property>
       </widget>
      </item>
      <item>
@@ -617,10 +589,6 @@
        </property>
        <property name="text">
         <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Cancel-96.png</normaloff>:/res/icons/Cancel-96.png</iconset>
        </property>
       </widget>
      </item>
@@ -648,6 +616,16 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="loadDataButton">
+       <property name="toolTip">
+        <string>Load samples from CSV-file</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="saveDataButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -660,10 +638,6 @@
        </property>
        <property name="text">
         <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
        </property>
       </widget>
      </item>
@@ -735,11 +709,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/expand_off.png</normaloff>
-         <normalon>:/res/icons/expand_on.png</normalon>:/res/icons/expand_off.png</iconset>
-       </property>
        <property name="iconSize">
         <size>
          <width>20</width>
@@ -773,11 +742,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/expand_v_off.png</normaloff>
-         <normalon>:/res/icons/expand_v_on.png</normalon>:/res/icons/expand_v_off.png</iconset>
-       </property>
        <property name="iconSize">
         <size>
          <width>20</width>
@@ -800,10 +764,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/size_off.png</normaloff>:/res/icons/size_off.png</iconset>
-       </property>
        <property name="iconSize">
         <size>
          <width>20</width>
@@ -824,8 +784,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

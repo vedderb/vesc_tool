@@ -1545,7 +1545,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         QByteArray in = newFirmware.mid(0, sz);
 
         bool hasData = false;
-        for (auto b: in) {
+        foreach (auto b, in) {
             if (b != (char)0xff) {
                 hasData = true;
                 break;

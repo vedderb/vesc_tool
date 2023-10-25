@@ -29,6 +29,7 @@
 #include "codeloader.h"
 #include "configparam.h"
 #include "utility.h"
+#include "heatshrink/heatshrinkif.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -101,6 +102,8 @@ static void showHelp()
     qDebug() << "--eraseLisp : Erase lisp-script.";
     qDebug() << "--uploadFirmware [path] : Upload firmware-file from path.";
     qDebug() << "--uploadBootloaderBuiltin : Upload bootloader from generic included bootloaders.";
+    qDebug() << "--createFirmwareForBootloader [fileIn:fileOut] : Generate firmware-file compatible with the bootloader. ";
+    qDebug() << "--writeFileToSdCard [fileLocal:pathSdcard] : Write file to SD-card.";
 }
 
 #ifdef Q_OS_LINUX
@@ -295,6 +298,10 @@ int main(int argc, char *argv[])
     bool eraseLisp = false;
     QString firmwarePath = "";
     bool uploadBootloaderBuiltin = false;
+    QString fwForBootloaderIn = "";
+    QString fwForBootloaderOut = "";
+    QString fileForSdIn = "";
+    QString fileForSdOut = "";
 
     // Arguments can be hard-coded in a build like this:
 //    qmlWindowSize = QSize(400, 800);
@@ -590,6 +597,46 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (str == "--createFirmwareForBootloader") {
+            if ((i + 1) < args.size()) {
+                i++;
+                auto p = args.at(i).split(":");
+                if (p.size() == 2) {
+                    fwForBootloaderIn = p.at(0);
+                    fwForBootloaderOut = p.at(1);
+                } else {
+                    qCritical() << "Invalid paths specified";
+                    return 1;
+                }
+
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No paths specified";
+                return 1;
+            }
+        }
+
+        if (str == "--writeFileToSdCard") {
+            if ((i + 1) < args.size()) {
+                i++;
+                auto p = args.at(i).split(":");
+                if (p.size() == 2) {
+                    fileForSdIn = p.at(0);
+                    fileForSdOut = p.at(1);
+                } else {
+                    qCritical() << "Invalid paths specified";
+                    return 1;
+                }
+
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No paths specified";
+                return 1;
+            }
+        }
+
         if (!found) {
             if (dash) {
                 qCritical() << "At least one of the flags is invalid:" << str;
@@ -623,6 +670,68 @@ int main(int argc, char *argv[])
         Utility::createCompressedConfigC(&conf, nameConfig, pathCompressed);
         Utility::createParamParserC(&conf, nameConfig, pathParser);
         conf.saveCDefines(pathDefines, true);
+
+        qDebug() << "Done!";
+        return 0;
+    }
+
+    if (!fwForBootloaderIn.isEmpty()) {
+        QFile fIn(fwForBootloaderIn);
+        if (!fIn.open(QIODevice::ReadOnly)) {
+            qWarning() << QString("Could not open %1 for reading.").arg(fwForBootloaderIn);
+            return 1;
+        }
+
+        QFile fOut(fwForBootloaderOut);
+        if (!fOut.open(QIODevice::WriteOnly)) {
+            qWarning() << QString("Could not open %1 for writing.").arg(fwForBootloaderOut);
+            return 1;
+        }
+
+        QByteArray newFirmware = fIn.readAll();
+        fIn.close();
+
+        int szTot = newFirmware.size();
+
+        bool useHeatshrink = false;
+        if (szTot > 393208 && szTot < 700000) { // If fw is much larger it is probably for the esp32
+            useHeatshrink = true;
+            qDebug() << "Firmware is big, using heatshrink compression library";
+            int szOld = szTot;
+            HeatshrinkIf hs;
+            newFirmware = hs.encode(newFirmware);
+            szTot = newFirmware.size();
+            qDebug() << "New size:" << szTot << "(" << 100.0 * (double)szTot / (double)szOld << "%)";
+
+            if (szTot > 393208) {
+                qWarning() << "Firmware too big" <<
+                            "The firmware you are trying to upload is too large for the bootloader even after compression.";
+                return -1;
+            }
+        }
+
+        if (szTot > 5000000) {
+            qWarning() << "Firmware too big" <<
+                        "The firmware you are trying to upload is unreasonably "
+                        "large, most likely it is an invalid file";
+            return -2;
+        }
+
+        quint16 crc = Packet::crc16((const unsigned char*)newFirmware.constData(),
+                                    uint32_t(newFirmware.size()));
+        VByteArray sizeCrc;
+        if (useHeatshrink) {
+            uint32_t szShift = 0xCC;
+            szShift <<= 24;
+            szShift |= szTot;
+            sizeCrc.vbAppendUint32(szShift);
+        } else {
+            sizeCrc.vbAppendUint32(szTot);
+        }
+        sizeCrc.vbAppendUint16(crc);
+        newFirmware.prepend(sizeCrc);
+        fOut.write(newFirmware);
+        fOut.close();
 
         qDebug() << "Done!";
         return 0;
@@ -795,7 +904,8 @@ int main(int argc, char *argv[])
     bool isCustomConf = !getCustomConfPath.isEmpty() || !setCustomConfPath.isEmpty();
 
     if (isMcConf || isAppConf || isCustomConf || !lispPath.isEmpty() ||
-            eraseLisp || !firmwarePath.isEmpty() || uploadBootloaderBuiltin) {
+            eraseLisp || !firmwarePath.isEmpty() || uploadBootloaderBuiltin ||
+            !fileForSdIn.isEmpty()) {
         qputenv("QT_QPA_PLATFORM", "offscreen");
         app = new QCoreApplication(argc, argv);
         vesc = new VescInterface;
@@ -840,6 +950,15 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "%s", QString("\rUpload progress: %1%").arg(floor(progress)).toLatin1().data());
                 progress_last = progress;
             }
+        });
+
+        QObject::connect(vesc->commands(), &Commands::fileProgress, []
+                         (int32_t prog, int32_t tot, double percentage, double bytesPerSec) {
+            (void)prog;
+            (void)tot;
+
+            fprintf(stderr, "%s", QString("\rUpload progress: %1% (%2 kbps)").
+                    arg(floor(percentage)).arg(bytesPerSec / 1024).toLatin1().data());
         });
 
         QTimer::singleShot(10, [&]() {
@@ -907,6 +1026,27 @@ int main(int argc, char *argv[])
                     } else {
                         qWarning() << "Could not open lisp file for reading.";
                         exitCode = -13;
+                    }
+                }
+
+                if (!fileForSdIn.isEmpty()) {
+                    QFile f(fileForSdIn);
+                    QFileInfo fi(f);
+                    if (f.open(QIODevice::ReadOnly)) {
+                        QFileInfo fi(f);
+                        vesc->commands()->fileBlockMkdir(fileForSdOut);
+                        QString target = fileForSdOut + "/" + fi.fileName();
+                        if (vesc->commands()->fileBlockWrite(target.replace("//", "/"), f.readAll())) {
+                            qDebug() << "Done!";
+                        } else {
+                            qWarning() << "Could not write file";
+                            exitCode = -51;
+                        }
+
+                        f.close();
+                    } else {
+                        qWarning() << "Could not open file for reading.";
+                        exitCode = -50;
                     }
                 }
 

@@ -450,5 +450,8 @@
 <name>f-ls</name>
 <name>f-size</name>
 <name>f-fatinfo</name>
+<name>fw-erase</name>
+<name>fw-write</name>
+<name>fw-reboot</name>
 </section>
 </root>

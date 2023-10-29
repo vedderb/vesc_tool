@@ -8,6 +8,6 @@ rm -rf build/lin/*
 # Original
 qmake -config release "CONFIG += release_lin build_original"
 make clean
-make -j8
+make -j$(nproc)
 rm -rf build/lin/obj
 

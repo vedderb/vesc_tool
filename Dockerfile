@@ -32,16 +32,13 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     # gperf bison libbz2-dev libgcrypt20-dev libdrm-dev libcups2-dev \
     # libatkmm-1.6-dev libasound2-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
     # libbluetooth-dev bluetooth blueman bluez libusb-dev libdbus-1-dev bluez-hcidump \
-    # bluez-tools 
-
+    # bluez-tools
     qtbase5-private-dev qtscript5-dev \
     qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras \
     qml-module-qtquick-controls2 qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5quickcontrols2-5 qtquickcontrols2-5-dev \
     qtcreator qtcreator-doc libqt5serialport5-dev qml-module-qt3d qt3d5-dev \
     qtdeclarative5-dev qtconnectivity5-dev qtmultimedia5-dev qtpositioning5-dev \
     libqt5gamepad5-dev qml-module-qt-labs-settings qml-module-qt-labs-platform libqt5svg5-dev
-
-
 
 ENV USER=${USER_NAME}
 

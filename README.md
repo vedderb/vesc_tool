@@ -34,14 +34,14 @@ If you have custom hardware and you want to add support for it in the official r
 
 ## How to Build the Docker Image
 
-# tested only Linux
+### tested only Linux
 
 docker build . -t vesc_tool
 
-# run bach
+### run bach
 
 docker run --rm -it -v `pwd`:/vesc_tool vesc_tool:latest bash
 
-# or build in docker
+### or build in docker
 
 docker run --rm -it -v `pwd`:/vesc_tool vesc_tool:latest /vesc_tool/build_lin

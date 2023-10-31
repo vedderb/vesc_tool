@@ -3181,7 +3181,10 @@ void VescInterface::timerSlot()
                         emit statusMessage(tr("No firmware read response"), false);
                         emit messageDialog(tr("Read Firmware Version"),
                                            tr("Could not read firmware version. Make sure that "
-                                              "the selected port really belongs to the VESC. "),
+                                              "the selected port really belongs to the VESC. If "
+                                              "you are using UART, make sure that the port is enabled, "
+                                              "connected correctly (rx to tx and tx to rx) and uses "
+                                              "the correct baudrate"),
                                            false, false);
                         disconnectPort();
                     }

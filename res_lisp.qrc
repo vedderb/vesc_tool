@@ -45,5 +45,6 @@
         <file>res/Lisp/Examples/speed_test_tak_q2.lisp</file>
         <file>res/Lisp/Examples/log_vesc_tool.lisp</file>
         <file>res/Lisp/Examples/fw_update.lisp</file>
+        <file>res/Lisp/Examples/lbm_update.lisp</file>
     </qresource>
 </RCC>

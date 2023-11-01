@@ -453,5 +453,11 @@
 <name>fw-erase</name>
 <name>fw-write</name>
 <name>fw-reboot</name>
+<name>lbm-erase</name>
+<name>lbm-write</name>
+<name>lbm-run</name>
+<name>qml-erase</name>
+<name>qml-write</name>
+<name>shutdown-hold</name>
 </section>
 </root>

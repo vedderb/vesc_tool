@@ -102,8 +102,9 @@ static void showHelp()
     qDebug() << "--eraseLisp : Erase lisp-script.";
     qDebug() << "--uploadFirmware [path] : Upload firmware-file from path.";
     qDebug() << "--uploadBootloaderBuiltin : Upload bootloader from generic included bootloaders.";
-    qDebug() << "--createFirmwareForBootloader [fileIn:fileOut] : Generate firmware-file compatible with the bootloader. ";
     qDebug() << "--writeFileToSdCard [fileLocal:pathSdcard] : Write file to SD-card.";
+    qDebug() << "--packFirmware [fileIn:fileOut] : Pack firmware-file for compatibility with the bootloader. ";
+    qDebug() << "--packLisp [fileIn:fileOut] : Pack lisp-file and the included imports.";
 }
 
 #ifdef Q_OS_LINUX
@@ -298,10 +299,12 @@ int main(int argc, char *argv[])
     bool eraseLisp = false;
     QString firmwarePath = "";
     bool uploadBootloaderBuiltin = false;
-    QString fwForBootloaderIn = "";
-    QString fwForBootloaderOut = "";
+    QString fwPackIn = "";
+    QString fwPackOut = "";
     QString fileForSdIn = "";
     QString fileForSdOut = "";
+    QString lispPackIn = "";
+    QString lispPackOut = "";
 
     // Arguments can be hard-coded in a build like this:
 //    qmlWindowSize = QSize(400, 800);
@@ -597,13 +600,13 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (str == "--createFirmwareForBootloader") {
+        if (str == "--writeFileToSdCard") {
             if ((i + 1) < args.size()) {
                 i++;
                 auto p = args.at(i).split(":");
                 if (p.size() == 2) {
-                    fwForBootloaderIn = p.at(0);
-                    fwForBootloaderOut = p.at(1);
+                    fileForSdIn = p.at(0);
+                    fileForSdOut = p.at(1);
                 } else {
                     qCritical() << "Invalid paths specified";
                     return 1;
@@ -617,13 +620,33 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (str == "--writeFileToSdCard") {
+        if (str == "--packFirmware") {
             if ((i + 1) < args.size()) {
                 i++;
                 auto p = args.at(i).split(":");
                 if (p.size() == 2) {
-                    fileForSdIn = p.at(0);
-                    fileForSdOut = p.at(1);
+                    fwPackIn = p.at(0);
+                    fwPackOut = p.at(1);
+                } else {
+                    qCritical() << "Invalid paths specified";
+                    return 1;
+                }
+
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No paths specified";
+                return 1;
+            }
+        }
+
+        if (str == "--packLisp") {
+            if ((i + 1) < args.size()) {
+                i++;
+                auto p = args.at(i).split(":");
+                if (p.size() == 2) {
+                    lispPackIn = p.at(0);
+                    lispPackOut = p.at(1);
                 } else {
                     qCritical() << "Invalid paths specified";
                     return 1;
@@ -675,16 +698,16 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    if (!fwForBootloaderIn.isEmpty()) {
-        QFile fIn(fwForBootloaderIn);
+    if (!fwPackIn.isEmpty()) {
+        QFile fIn(fwPackIn);
         if (!fIn.open(QIODevice::ReadOnly)) {
-            qWarning() << QString("Could not open %1 for reading.").arg(fwForBootloaderIn);
+            qWarning() << QString("Could not open %1 for reading.").arg(fwPackIn);
             return 1;
         }
 
-        QFile fOut(fwForBootloaderOut);
+        QFile fOut(fwPackOut);
         if (!fOut.open(QIODevice::WriteOnly)) {
-            qWarning() << QString("Could not open %1 for writing.").arg(fwForBootloaderOut);
+            qWarning() << QString("Could not open %1 for writing.").arg(fwPackOut);
             return 1;
         }
 
@@ -731,6 +754,37 @@ int main(int argc, char *argv[])
         sizeCrc.vbAppendUint16(crc);
         newFirmware.prepend(sizeCrc);
         fOut.write(newFirmware);
+        fOut.close();
+
+        qDebug() << "Done!";
+        return 0;
+    }
+
+    if (!lispPackIn.isEmpty()) {
+        QFile fIn(lispPackIn);
+        if (!fIn.open(QIODevice::ReadOnly)) {
+            qWarning() << QString("Could not open %1 for reading.").arg(lispPackIn);
+            return 1;
+        }
+
+        QFile fOut(lispPackOut);
+        if (!fOut.open(QIODevice::WriteOnly)) {
+            qWarning() << QString("Could not open %1 for writing.").arg(lispPackOut);
+            return 1;
+        }
+
+        CodeLoader loader;
+        QFileInfo fi(fIn);
+        VByteArray vb = loader.lispPackImports(fIn.readAll(), fi.canonicalPath());
+        fIn.close();
+
+        quint16 crc = Packet::crc16((const unsigned char*)vb.constData(), uint32_t(vb.size()));
+        VByteArray data;
+        data.vbAppendUint32(vb.size() - 2);
+        data.vbAppendUint16(crc);
+        data.append(vb);
+
+        fOut.write(data);
         fOut.close();
 
         qDebug() << "Done!";

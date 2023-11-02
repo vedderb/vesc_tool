@@ -421,6 +421,7 @@
 <name>gnss-date-time</name>
 <name>gnss-age</name>
 <name>crc16</name>
+<name>crc32</name>
 <name>main-init-done</name>
 <name>esp-now-start</name>
 <name>esp-now-add-peer</name>
@@ -459,5 +460,6 @@
 <name>qml-erase</name>
 <name>qml-write</name>
 <name>shutdown-hold</name>
+<name>reboot</name>
 </section>
 </root>

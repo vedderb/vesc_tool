@@ -347,6 +347,7 @@
 <name>conf-detect-foc</name>
 <name>conf-set-pid-offset</name>
 <name>conf-measure-res</name>
+<name>conf-measure-ind</name>
 <name>conf-restore-mc</name>
 <name>conf-restore-app</name>
 <name>conf-dc-cal</name>

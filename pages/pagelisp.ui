@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1487</width>
-    <height>870</height>
+    <width>1180</width>
+    <height>701</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -87,11 +87,28 @@
              <string>Read lisp code from connected VESC</string>
             </property>
             <property name="text">
-             <string>Read Existing</string>
+             <string>Read</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
               <normaloff>:/res/icons/Upload-96.png</normaloff>:/res/icons/Upload-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="helpButton">
+            <property name="toolTip">
+             <string>Show help</string>
+            </property>
+            <property name="text">
+             <string>Help</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -110,23 +127,6 @@
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="helpButton">
-            <property name="toolTip">
-             <string>Show help</string>
-            </property>
-            <property name="text">
-             <string>Help</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
           </item>
          </layout>
         </item>
@@ -149,45 +149,62 @@
       </widget>
       <widget class="QWidget" name="layoutWidget2">
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>3</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
           <item>
-           <widget class="QPushButton" name="runButton">
+           <widget class="QRadioButton" name="pollOffButton">
+            <property name="toolTip">
+             <string>Data polling disabled</string>
+            </property>
             <property name="text">
-             <string>Run</string>
+             <string>Poll Off</string>
             </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-            </property>
-            <property name="flat">
+            <property name="checked">
              <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="stopButton">
+           <widget class="QRadioButton" name="pollVtButton">
+            <property name="toolTip">
+             <string>Poll variables starting with vt only</string>
+            </property>
             <property name="text">
-             <string>Stop</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
+             <string>Poll VT</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="pollBox">
+           <widget class="QRadioButton" name="pollAllButton">
+            <property name="toolTip">
+             <string>Poll all variables</string>
+            </property>
             <property name="text">
-             <string>Poll Status</string>
+             <string>Poll All</string>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QSpinBox" name="pollRateBox">
+            <property name="toolTip">
+             <string>Poll Rate</string>
+            </property>
             <property name="suffix">
              <string> Hz</string>
             </property>
@@ -277,41 +294,43 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <layout class="QHBoxLayout" name="horizontalLayout_11">
           <item>
-           <widget class="QLabel" name="label_6">
+           <widget class="QPushButton" name="runButton">
+            <property name="toolTip">
+             <string>Run or re-run evaluator</string>
+            </property>
             <property name="text">
-             <string>Stream Mode:</string>
+             <string>Run</string>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="streamModeBox">
-            <property name="currentIndex">
-             <number>1</number>
+           <widget class="QPushButton" name="stopButton">
+            <property name="toolTip">
+             <string>Stop evaluator</string>
             </property>
-            <item>
-             <property name="text">
-              <string>Load on top</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Reset &amp; Load</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Reload Flash &amp; Load</string>
-             </property>
-            </item>
+            <property name="text">
+             <string>Stop</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer_2">
+           <spacer name="horizontalSpacer_4">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -337,6 +356,34 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QComboBox" name="streamModeBox">
+          <property name="toolTip">
+           <string>Stream Mode</string>
+          </property>
+          <property name="currentIndex">
+           <number>1</number>
+          </property>
+          <property name="frame">
+           <bool>false</bool>
+          </property>
+          <item>
+           <property name="text">
+            <string>After Stream: Load on top</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>After Stream: Reset &amp; Load</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>After Stream: Reload Flash &amp; Load</string>
+           </property>
+          </item>
+         </widget>
         </item>
        </layout>
       </widget>

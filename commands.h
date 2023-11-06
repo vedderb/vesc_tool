@@ -273,7 +273,7 @@ public slots:
     void lispStreamCode(QByteArray data, quint32 offset, quint32 totLen, qint8 mode);
     void lispEraseCode(int size);
     void lispSetRunning(bool running);
-    void lispGetStats();
+    void lispGetStats(bool all);
     void lispSendReplCmd(QString str);
 
     void setBleName(QString name);

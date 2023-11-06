@@ -153,9 +153,9 @@ PageLisp::PageLisp(QWidget *parent) :
 
     mPollTimer.start(1000 / ui->pollRateBox->value());
     connect(&mPollTimer, &QTimer::timeout, [this]() {
-        if (ui->pollBox->isChecked()) {
+        if (!ui->pollOffButton->isChecked()) {
             if (mVesc) {
-                mVesc->commands()->lispGetStats();
+                mVesc->commands()->lispGetStats(ui->pollAllButton->isChecked());
             }
         }
     });

@@ -2154,10 +2154,11 @@ void Commands::lispSetRunning(bool running)
     emitData(vb);
 }
 
-void Commands::lispGetStats()
+void Commands::lispGetStats(bool all)
 {
     VByteArray vb;
     vb.vbAppendUint8(COMM_LISP_GET_STATS);
+    vb.vbAppendInt8(all);
     emitData(vb);
 }
 

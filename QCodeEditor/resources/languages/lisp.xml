@@ -436,6 +436,9 @@
 <name>rgbled-init</name>
 <name>rgbled-deinit</name>
 <name>rgbled-color</name>
+<name>as504x-init</name>
+<name>as504x-deinit</name>
+<name>as504x-angle</name>
 <name>sleep-deep</name>
 <name>sleep-config-wakeup-pin</name>
 <name>canmsg-send</name>

@@ -328,6 +328,7 @@
 <name>i2c-start</name>
 <name>i2c-tx-rx</name>
 <name>i2c-restore</name>
+<name>imu-start-lsm6</name>
 <name>gpio-configure</name>
 <name>gpio-write</name>
 <name>gpio-read</name>

@@ -108,29 +108,24 @@ protected:
     parseBlock(std::string& line) override
     {
         QString style = QString("\"background: %1; margin-left:12px; color:%2;\"").
-                arg(Utility::getAppHexColor("lightBackground")).
-                arg(Utility::getAppHexColor("lightText"));
+                arg(Utility::getAppHexColor("lightBackground"), Utility::getAppHexColor("lightText"));
 
-        if (line == "```")
-        {
-            if (!this->isStarted)
-            {
-                line = "<pre style=" + style.toStdString() + "><code>\n";
+        if (line == "```") {
+            if (!this->isStarted) {
+                line = "<pre style=" + style.toStdString() +
+                        "><span style=\"font-family:'DejaVu Sans Mono';\"<code>\n";
                 this->isStarted = true;
                 this->isFinished = false;
                 return;
-            }
-            else
-            {
-                line = "</code></pre>";
+            } else {
+                line = "</span></code></pre>";
                 this->isFinished = true;
                 this->isStarted = false;
                 return;
             }
-        }
-        else if (!this->isStarted && line.substr(0, 3) == "```")
-        {
-            line = "<pre style=" + style.toStdString() + " class=\"" + line.substr(3) + "\"><code>\n";
+        } else if (!this->isStarted && line.substr(0, 3) == "```") {
+            line = "<pre style=" + style.toStdString() + " class=\"" +
+                    line.substr(3) + "\"><span style=\"font-family:'DejaVu Sans Mono';\"<code>\n";
             this->isStarted = true;
             this->isFinished = false;
             return;

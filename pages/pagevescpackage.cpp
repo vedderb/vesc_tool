@@ -129,6 +129,7 @@ void PageVescPackage::on_chooseOutputButton_clicked()
 
         ui->outputEdit->setText(filename);
         on_outputRefreshButton_clicked();
+        on_saveButton_clicked();
     }
 }
 
@@ -182,7 +183,7 @@ void PageVescPackage::on_saveButton_clicked()
     }
 
     pkg.name = ui->nameEdit->text();
-    pkg.description = ui->descriptionEdit->document()->toHtml();
+    pkg.description = ui->descriptionEdit->document()->toPlainText();
 
     file.write(mLoader.packVescPackage(pkg));
     file.close();
@@ -200,7 +201,7 @@ void PageVescPackage::on_loadRefreshButton_clicked()
     }
 
     auto pkg = mLoader.unpackVescPackage(f.readAll());
-    ui->loadBrowser->document()->setHtml(pkg.description);
+    ui->loadBrowser->document()->setHtml(Utility::md2html(pkg.description));
 }
 
 void PageVescPackage::on_writeButton_clicked()
@@ -229,7 +230,7 @@ void PageVescPackage::on_outputRefreshButton_clicked()
     }
 
     auto pkg = mLoader.unpackVescPackage(f.readAll());
-    ui->descriptionEdit->document()->setHtml(pkg.description);
+    ui->descriptionEdit->document()->setPlainText(pkg.description);
     ui->nameEdit->setText(pkg.name);
 }
 
@@ -319,7 +320,7 @@ void PageVescPackage::reloadArchive()
     ui->applicationList->clear();
     ui->libraryList->clear();
 
-    for (auto p: pList) {
+    foreach (auto p, pList) {
         auto pVal = p.value<VescPackage>();
         QListWidgetItem *item = new QListWidgetItem;
         item->setText(pVal.name);
@@ -336,7 +337,7 @@ void PageVescPackage::reloadArchive()
 void PageVescPackage::packageSelected(VescPackage pkg)
 {
     mCurrentPkg = pkg;
-    ui->storeBrowser->document()->setHtml(pkg.description);
+    ui->storeBrowser->document()->setHtml(Utility::md2html(pkg.description));
     ui->installButton->setEnabled(!pkg.isLibrary);
     if (ui->installButton->isEnabled()) {
         ui->installButton->setToolTip("");

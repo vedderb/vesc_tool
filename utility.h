@@ -139,6 +139,10 @@ public:
 
     static QPixmap getIcon(QString path);
 
+    Q_INVOKABLE static bool downloadUrlEventloop(QString path, QString dest);
+
+    Q_INVOKABLE static QString md2html(QString md);
+
 signals:
 
 public slots:

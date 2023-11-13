@@ -1,0 +1,12 @@
+# AppVeyor build configuration
+# http://www.appveyor.com/docs/build-configuration
+os: unstable
+skip_tags: true
+
+install:
+  - set QTDIR=C:\Qt\5.10.1\mingw53_32
+  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin
+
+build_script:
+  - qmake qmarkdowntextedit.pro -r -spec win32-g++
+  - mingw32-make

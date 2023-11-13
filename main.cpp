@@ -818,17 +818,11 @@ int main(int argc, char *argv[])
                 return 1;
             }
 
-            qputenv("QT_QPA_PLATFORM", "offscreen");
-            QApplication a(argc, argv);
-            addFonts();
-
-            QTextDocument d;
-            d.setMarkdown(QString::fromUtf8(f.readAll()));
-
+            QString desc = QString::fromUtf8(f.readAll());
             f.close();
 
             pkg.name = name;
-            pkg.description = d.toHtml();
+            pkg.description = desc;
         } else {
             QFile f(pkgPath);
             if (!f.open(QIODevice::ReadOnly)) {

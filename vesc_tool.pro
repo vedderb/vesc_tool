@@ -266,6 +266,8 @@ include(heatshrink/heatshrink.pri)
 include(QCodeEditor/qcodeeditor.pri)
 include(esp32/esp32.pri)
 include(display_tool/display_tool.pri)
+include(qmarkdowntextedit/qmarkdowntextedit.pri)
+include(maddy/maddy.pri)
 
 RESOURCES += res.qrc \
     res_custom_module.qrc \

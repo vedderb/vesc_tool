@@ -38,6 +38,8 @@
 #include <QDirIterator>
 #include <QPixmapCache>
 
+#include "maddy/parser.h"
+
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
 #include <QAndroidJniObject>
@@ -2297,6 +2299,49 @@ QPixmap Utility::getIcon(QString path)
     }
 
     return pm;
+}
+
+bool Utility::downloadUrlEventloop(QString path, QString dest)
+{
+    bool res = false;
+
+    QUrl url(path);
+
+    if (!url.isValid()) {
+        return res;
+    }
+
+    QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    QNetworkReply *reply = manager.get(request);
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() == QNetworkReply::NoError) {
+        QFile file(dest);
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(reply->readAll());
+            file.close();
+            res = true;
+        }
+    }
+
+    reply->abort();
+    reply->deleteLater();
+
+    return res;
+}
+
+QString Utility::md2html(QString md)
+{
+    std::shared_ptr<maddy::ParserConfig> config = std::make_shared<maddy::ParserConfig>();
+    config->enabledParsers = maddy::types::ALL;
+    std::shared_ptr<maddy::Parser> parser = std::make_shared<maddy::Parser>(config);
+
+    std::stringstream markdownInput(md.toStdString());
+    return QString::fromStdString(parser->Parse(markdownInput));
 }
 
 void Utility::setDarkMode(bool isDarkSetting)

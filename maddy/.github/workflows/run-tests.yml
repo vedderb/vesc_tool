@@ -1,0 +1,65 @@
+name: run-tests
+run-name: test ${{ github.ref }}
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
+jobs:
+  test-on-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "~3.25.0"  # <--= optional, use most recent 3.25.x version
+          ninjaVersion: "^1.11.1"  # <--= optional, use most recent 1.x version
+      - name: build
+        run: |
+          mkdir tmp
+          cd tmp
+          cmake -DMADDY_BUILD_WITH_TESTS=ON ..
+          make -j4
+      - name: run tests
+        run: |
+          ./build/MaddyTests
+
+  test-on-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "~3.25.0"  # <--= optional, use most recent 3.25.x version
+          ninjaVersion: "^1.11.1"  # <--= optional, use most recent 1.x version
+      - name: build
+        run: |
+          mkdir tmp
+          cd tmp
+          cmake -G "Visual Studio 17 2022" -A x64 -DMADDY_BUILD_WITH_TESTS=ON ..
+          cmake --build . --config Debug
+      - name: run tests
+        run: |
+          ./build/Debug/MaddyTests.exe
+
+  test-on-osx:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "~3.25.0"  # <--= optional, use most recent 3.25.x version
+          ninjaVersion: "^1.11.1"  # <--= optional, use most recent 1.x version
+      - name: build
+        run: |
+          mkdir tmp
+          cd tmp
+          cmake -DMADDY_BUILD_WITH_TESTS=ON ..
+          make -j4
+      - name: run tests
+        run: |
+          ./build/MaddyTests

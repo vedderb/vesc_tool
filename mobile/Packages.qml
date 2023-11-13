@@ -180,7 +180,7 @@ Item {
                                 text: "Info"
 
                                 onClicked: {
-                                    VescIf.emitMessageDialog(pkgName, pkgDescription, true, true)
+                                    VescIf.emitMessageDialog(pkgName, Utility.md2html(pkgDescription), true, true)
                                 }
                             }
                         }

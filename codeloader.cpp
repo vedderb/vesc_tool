@@ -901,6 +901,10 @@ bool CodeLoader::downloadPackageArchive()
             file.close();
             res = true;
         }
+
+        // Remove image cache
+        QString cacheLoc = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+        QDir(cacheLoc + "/img/").removeRecursively();
     }
 
     reply->abort();

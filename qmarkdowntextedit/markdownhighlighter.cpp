@@ -243,7 +243,7 @@ void MarkdownHighlighter::initTextFormats(int defaultFontSize) {
 
     // set character format for code blocks
     format = QTextCharFormat();
-    format.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    format.setFont(QFont("DejaVu Sans Mono"));
     // format.setBackground(QColor(220, 220, 220));
     _formats[CodeBlock] = format;
     _formats[InlineCodeBlock] = format;
@@ -276,7 +276,7 @@ void MarkdownHighlighter::initTextFormats(int defaultFontSize) {
 
     // set character format for tables
     format = QTextCharFormat();
-    format.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    format.setFont(QFont("DejaVu Sans Mono"));
     format.setForeground(Utility::getAppQColor("lightAccent"));
     _formats[Table] = std::move(format);
 
@@ -298,37 +298,37 @@ void MarkdownHighlighter::initTextFormats(int defaultFontSize) {
      ***************************************/
 
     format = QTextCharFormat();
-    format.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    format.setFont(QFont("DejaVu Sans Mono"));
     format.setForeground(sstyle->getFormat("Keyword").foreground().color());
     _formats[CodeKeyWord] = std::move(format);
 
     format = QTextCharFormat();
-    format.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    format.setFont(QFont("DejaVu Sans Mono"));
     format.setForeground(sstyle->getFormat("String").foreground().color());
     _formats[CodeString] = std::move(format);
 
     format = QTextCharFormat();
-    format.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    format.setFont(QFont("DejaVu Sans Mono"));
     format.setForeground(sstyle->getFormat("Comment").foreground().color());
     _formats[CodeComment] = std::move(format);
 
     format = QTextCharFormat();
-    format.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    format.setFont(QFont("DejaVu Sans Mono"));
     format.setForeground(sstyle->getFormat("Type").foreground().color());
     _formats[CodeType] = std::move(format);
 
     format = QTextCharFormat();
-    format.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    format.setFont(QFont("DejaVu Sans Mono"));
     format.setForeground(sstyle->getFormat("VirtualMethod").foreground().color());
     _formats[CodeOther] = std::move(format);
 
     format = QTextCharFormat();
-    format.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    format.setFont(QFont("DejaVu Sans Mono"));
     format.setForeground(sstyle->getFormat("Number").foreground().color());
     _formats[CodeNumLiteral] = std::move(format);
 
     format = QTextCharFormat();
-    format.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    format.setFont(QFont("DejaVu Sans Mono"));
     format.setForeground(sstyle->getFormat("PrimitiveType").foreground().color());
     _formats[CodeBuiltIn] = std::move(format);
 }

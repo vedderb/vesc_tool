@@ -127,9 +127,27 @@ void PageVescPackage::on_chooseOutputButton_clicked()
             filename += ".vescpkg";
         }
 
-        ui->outputEdit->setText(filename);
-        on_outputRefreshButton_clicked();
-        on_saveButton_clicked();
+        if (QFile::exists(filename)) {
+            if (ui->descriptionEdit->toPlainText().size() > 10) {
+                QMessageBox::StandardButton reply =
+                        QMessageBox::warning(this,
+                                             tr("Replace Content"),
+                                             tr("Opening an existing package will replace the content "
+                                                "in the editor. Do you want to continue?"),
+                                             QMessageBox::Ok | QMessageBox::Cancel);
+
+                if (reply == QMessageBox::Ok) {
+                    ui->outputEdit->setText(filename);
+                    on_outputRefreshButton_clicked();
+                }
+            } else {
+                ui->outputEdit->setText(filename);
+                on_outputRefreshButton_clicked();
+            }
+        } else {
+            ui->outputEdit->setText(filename);
+            on_saveButton_clicked();
+        }
     }
 }
 
@@ -188,9 +206,7 @@ void PageVescPackage::on_saveButton_clicked()
     file.write(mLoader.packVescPackage(pkg));
     file.close();
 
-    mVesc->emitMessageDialog(tr("Save Package"),
-                             tr("Package Saved"),
-                             true, false);
+    mVesc->emitStatusMessage(tr("Package Saved"), true);
 }
 
 void PageVescPackage::on_loadRefreshButton_clicked()

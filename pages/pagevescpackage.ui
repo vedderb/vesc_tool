@@ -343,7 +343,19 @@
         </layout>
        </item>
        <item>
-        <widget class="QMarkdownTextEdit" name="descriptionEdit"/>
+        <widget class="QSplitter" name="splitter_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <widget class="QMarkdownTextEdit" name="descriptionEdit"/>
+         <widget class="VTextBrowser" name="descriptionBrowser"/>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="lispBox_2">

@@ -57,6 +57,23 @@ PageVescPackage::PageVescPackage(QWidget *parent) :
     on_outputRefreshButton_clicked();
 
     reloadArchive();
+
+    mDescriptionUpdated = true;
+    connect(ui->descriptionEdit, &QMarkdownTextEdit::textChanged, [this]() {
+        mDescriptionUpdated = true;
+    });
+
+    mPreviewTimer = new QTimer(this);
+    mPreviewTimer->start(500);
+    connect(mPreviewTimer, &QTimer::timeout, [this]() {
+        if (mDescriptionUpdated) {
+            mDescriptionUpdated = false;
+            auto posOld = ui->descriptionBrowser->verticalScrollBar()->value();
+            ui->descriptionBrowser->setHtml(
+                        Utility::md2html(ui->descriptionEdit->document()->toPlainText()));
+            ui->descriptionBrowser->verticalScrollBar()->setValue(posOld);
+        }
+    });
 }
 
 PageVescPackage::~PageVescPackage()
@@ -261,6 +278,8 @@ void PageVescPackage::on_outputRefreshButton_clicked()
     } else {
         ui->descriptionEdit->document()->setPlainText(pkg.description);
     }
+
+    mDescriptionUpdated = true;
 
     ui->nameEdit->setText(pkg.name);
 }

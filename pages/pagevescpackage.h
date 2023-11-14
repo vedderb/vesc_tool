@@ -22,6 +22,7 @@
 
 #include <QWidget>
 #include <QListWidgetItem>
+#include <QTimer>
 #include "vescinterface.h"
 #include "codeloader.h"
 
@@ -61,6 +62,8 @@ private:
     VescInterface *mVesc;
     CodeLoader mLoader;
     VescPackage mCurrentPkg;
+    bool mDescriptionUpdated;
+    QTimer *mPreviewTimer;
 
     void reloadArchive();
     void packageSelected(VescPackage pkg);

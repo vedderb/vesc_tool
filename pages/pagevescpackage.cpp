@@ -217,7 +217,13 @@ void PageVescPackage::on_loadRefreshButton_clicked()
     }
 
     auto pkg = mLoader.unpackVescPackage(f.readAll());
-    ui->loadBrowser->document()->setHtml(Utility::md2html(pkg.description));
+
+    QString line1 = QTextStream(&pkg.description).readLine();
+    if (line1.contains("<!DOCTYPE HTML PUBLIC", Qt::CaseInsensitive)) {
+        ui->loadBrowser->document()->setHtml(pkg.description);
+    } else {
+        ui->loadBrowser->document()->setHtml(Utility::md2html(pkg.description));
+    }
 }
 
 void PageVescPackage::on_writeButton_clicked()
@@ -246,7 +252,16 @@ void PageVescPackage::on_outputRefreshButton_clicked()
     }
 
     auto pkg = mLoader.unpackVescPackage(f.readAll());
-    ui->descriptionEdit->document()->setPlainText(pkg.description);
+
+    QString line1 = QTextStream(&pkg.description).readLine();
+    if (line1.contains("<!DOCTYPE HTML PUBLIC", Qt::CaseInsensitive)) {
+        ui->descriptionEdit->document()->setHtml(pkg.description);
+        QString md = ui->descriptionEdit->document()->toMarkdown();
+        ui->descriptionEdit->document()->setPlainText(md);
+    } else {
+        ui->descriptionEdit->document()->setPlainText(pkg.description);
+    }
+
     ui->nameEdit->setText(pkg.name);
 }
 

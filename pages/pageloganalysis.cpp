@@ -1164,6 +1164,9 @@ void PageLogAnalysis::openLog(QByteArray data)
             QStringList tokens = in.readLine().split(";");
             QVector<double> entry;
             for (int i = 0;i < tokens.size();i++) {
+                if (i >= entryLastData.size()) {
+                   break;
+                }
                 if (!tokens.at(i).isEmpty()) {
                     entryLastData[i] = tokens.at(i).toDouble();
                 }

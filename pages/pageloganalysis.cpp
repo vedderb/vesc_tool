@@ -1188,7 +1188,7 @@ void PageLogAnalysis::openLog(QByteArray data)
             return;
         }
 
-        for (auto e: mLogHeader) {
+        foreach (auto e, mLogHeader) {
             addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
         }
 

@@ -16,8 +16,7 @@
 
 ; Handler for EID CAN-frames
 (defun proc-eid (id data)
-    (if (= id 0x18ff03f1u32)
-        (progn
+    (if (= id 0x18ff03f1u32) {
             (def can-cnt (+ can-cnt 1))
             
             ; Note: the axes are 10 bits in the datasheet, but they change in
@@ -25,24 +24,24 @@
             ; why they don't use just 7 bits for that.
             
             (def x-axis (* 0.001
-                (* (if (= (bits-dec-int (bufget-u8 data 0) 2 1) 0) 1.0 -1.0)
-                (+ (bits-dec-int (bufget-u8 data 0) 6 2) (* 4 (bufget-u8 data 1))
+                    (* (if (= (bits-dec-int (bufget-u8 data 0) 2 1) 0) 1.0 -1.0)
+                        (+ (bits-dec-int (bufget-u8 data 0) 6 2) (* 4 (bufget-u8 data 1))
             ))))
             
             (def y-axis (* 0.001
-                (* (if (= (bits-dec-int (bufget-u8 data 2) 2 1) 0) 1.0 -1.0)
-                (+ (bits-dec-int (bufget-u8 data 2) 6 2) (* 4 (bufget-u8 data 3))
+                    (* (if (= (bits-dec-int (bufget-u8 data 2) 2 1) 0) 1.0 -1.0)
+                        (+ (bits-dec-int (bufget-u8 data 2) 6 2) (* 4 (bufget-u8 data 3))
             ))))
-                        
+            
             ; Decode the buttons that are currently pressed
             (def btn-lst (list
-                (bits-dec-int (bufget-u8 data 5) 6 2)
-                (bits-dec-int (bufget-u8 data 5) 4 2)
-                (bits-dec-int (bufget-u8 data 5) 2 2)
-                (bits-dec-int (bufget-u8 data 5) 0 2)
-                (bits-dec-int (bufget-u8 data 6) 6 2)
-                (bits-dec-int (bufget-u8 data 6) 4 2)
-                (bits-dec-int (bufget-u8 data 6) 2 2)
+                    (bits-dec-int (bufget-u8 data 5) 6 2)
+                    (bits-dec-int (bufget-u8 data 5) 4 2)
+                    (bits-dec-int (bufget-u8 data 5) 2 2)
+                    (bits-dec-int (bufget-u8 data 5) 0 2)
+                    (bits-dec-int (bufget-u8 data 6) 6 2)
+                    (bits-dec-int (bufget-u8 data 6) 4 2)
+                    (bits-dec-int (bufget-u8 data 6) 2 2)
             ))
             
             ; Save memory by freeing data when done. This can be omitted as GC
@@ -52,17 +51,16 @@
             
 ;            (set-duty y-axis)
 ;            (timeout-reset)
-        )
-        nil
-))
+}))
 
 ; This function waits for events from the C code and calls the
 ; handlers for them when the events arrive.
 (defun event-handler ()
     (loopwhile t
-        (recv ((event-can-eid (? id) . (? data)) (proc-eid id data))
-              (_ nil))
-))
+        (recv
+            ((event-can-eid (? id) . (? data)) (proc-eid id data))
+            (_ nil)
+)))
 
 ; Set LEDs in button.
 ; 0: off, 1: on, 2: slow blink, 3: med blink, 4: fast blink
@@ -70,11 +68,10 @@
 ; l: Left LED
 ; c: Center LED
 ; r: Right LED
-(defun set-btn-leds (btn l c r)
-    (progn
+(defun set-btn-leds (btn l c r) {
         (def msg (list btn (bits-enc-int l 4 c 4) r))
         (can-send-eid id-send msg)
-))
+})
 
 ; Spawn the event handler thread and pass the ID it returns to C
 (event-register-handler (spawn 150 event-handler))
@@ -84,13 +81,12 @@
 
 (def btn-now 1)
 
-(loopwhile t
-    (progn 
+(loopwhile t {
         (set-btn-leds btn-now 1 4 1)
-        (yield 1500000)
+        (sleep 1.5)
         (set-btn-leds btn-now 0 0 0)
         
         (def btn-now (+ btn-now 1))
         (if (= btn-now 6) (def btn-now 7)) ; Index 6 is missing, so skip it
         (if (> btn-now 7) (def btn-now 1))
-))
+})

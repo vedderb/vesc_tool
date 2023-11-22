@@ -19,6 +19,7 @@
 <name>if</name>
 <name>cond</name>
 <name>match</name>
+<name>loop</name>
 <name>loopfor</name>
 <name>loopwhile</name>
 <name>looprange</name>
@@ -136,6 +137,7 @@
 <name>append</name>
 <name>mod</name>
 <name>print</name>
+<name>puts</name>
 <name>range</name>
 <name>length</name>
 <name>shl</name>

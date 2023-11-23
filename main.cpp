@@ -1251,7 +1251,7 @@ int main(int argc, char *argv[])
                             if (params.hw == "hm1") {
                                 path = "://res/bootloaders_bms/generic.bin";
                             } else {
-                                path = "://res/bootloaders_custom_module/stm32g431.bin";
+                                path = "://res/bootloaders_custom_module/stm32g431/stm32g431.bin";
                             }
                         }
                         break;

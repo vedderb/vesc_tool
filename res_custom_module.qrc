@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/bootloaders_custom_module/stm32g431.bin</file>
+        <file>res/bootloaders_custom_module/stm32g431/stm32g431.bin</file>
+        <file>res/firmwares_custom_module/str-dcdc/vesc_default.bin</file>
     </qresource>
 </RCC>

@@ -246,6 +246,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         extraPath = "://res/firmwares_esp/ESP32-C3/VESC Express";
     } else if (params.hw == "Devkit C3") {
         extraPath = "://res/firmwares_esp/ESP32-C3/DevKitM-1";
+    } else if (params.hw == "STR-DCDC") {
+        extraPath = "://res/firmwares_custom_module/str-dcdc";
     }
 
     if (!extraPath.isEmpty()) {
@@ -356,7 +358,7 @@ void PageFirmware::updateBlList(FW_RX_PARAMS params)
             if (params.hw == "hm1") {
                 blDir = "://res/bootloaders_bms";
             } else {
-                blDir = "://res/bootloaders_custom_module";
+                blDir = "://res/bootloaders_custom_module/stm32g431";
             }
         }
         break;

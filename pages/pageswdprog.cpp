@@ -64,7 +64,7 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
     if (set.contains("pageswdprog/lastcustomfile3")) {
         ui->fw3Edit->setText(set.value("pageswdprog/lastcustomfile3").toString());
     }
-    if (set.contains("pageswdprog/lastcustomfil4e")) {
+    if (set.contains("pageswdprog/lastcustomfile4")) {
         ui->fw4Edit->setText(set.value("pageswdprog/lastcustomfile4").toString());
     }
 
@@ -498,6 +498,15 @@ void PageSwdProg::bmConnRes(int res)
     } else if (res == 10) {
         ui->targetLabel->setText("STM32L47x");
         mFlashOffset = 0x08000000;
+    } else if (res == 11) {
+        ui->targetLabel->setText("STM32G43");
+        mFlashOffset = 0x08000000;
+    } else if (res == 12) {
+        ui->targetLabel->setText("STM32G47");
+        mFlashOffset = 0x08000000;
+    } else if (res == 13) {
+        ui->targetLabel->setText("STM32G49");
+        mFlashOffset = 0x08000000;
     }
 
     switch (res) {
@@ -573,6 +582,11 @@ void PageSwdProg::bmConnRes(int res)
                  "://res/other_fw/vesc_power_switch_120.bin", 0,
                  "://res/bootloaders_bms/generic.bin", 0x3E000);
         break;
+
+    case 11:
+        addSwdFw("VESC DCDC",
+                 "://res/firmwares_custom_module/str-dcdc/vesc_default.bin", 0,
+                 "://res/bootloaders_custom_module/stm32g431/stm32g431.bin", 0x1E000);
 
     default:
         break;

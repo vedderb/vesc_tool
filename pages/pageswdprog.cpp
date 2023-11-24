@@ -584,7 +584,7 @@ void PageSwdProg::bmConnRes(int res)
         break;
 
     case 11:
-        addSwdFw("VESC DCDC",
+        addSwdFw("STR-DCDC",
                  "://res/firmwares_custom_module/str-dcdc/vesc_default.bin", 0,
                  "://res/bootloaders_custom_module/stm32g431/stm32g431.bin", 0x1E000);
 

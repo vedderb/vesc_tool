@@ -59,7 +59,7 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VESC Express");
     } else if (params.hw == "Devkit C3") {
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/DevKitM-1");
-    } else if (params.hw == "Devkit C3") {
+    } else if (params.hw == "STR-DCDC") {
         hws.insert(params.hw, "://res/firmwares_custom_module/str-dcdc");
     }
 

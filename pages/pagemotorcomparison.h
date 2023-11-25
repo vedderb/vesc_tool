@@ -134,9 +134,23 @@ public:
         params = prm;
     }
 
-    Q_INVOKABLE void update(double rpm, double torque) {
+    Q_INVOKABLE bool updateTorqueVBus(double torque, double vbus) {
+        double rpm_guess = 1000.0;
+
+        for (int i = 0;i < 20;i++) {
+            if (!update(rpm_guess, torque)) {
+                return false;
+            }
+
+            rpm_guess *= vbus / vbus_min;
+        }
+
+        return true;
+    }
+
+    Q_INVOKABLE bool update(double rpm, double torque) {
         if (config == nullptr) {
-            return;
+            return false;
         }
 
         // See https://www.mathworks.com/help/physmod/sps/ref/pmsm.html
@@ -214,6 +228,8 @@ public:
 
         kv_bldc = rpm_motor_shaft / (vbus_min * (sqrt(3.0) / 2.0));
         kv_bldc_noload = (60.0 * 0.95) / (lambda * (3.0 / 2.0) * M_PI * 2.0 * pole_pairs);
+
+        return true;
     }
 
     ConfigParams *config;

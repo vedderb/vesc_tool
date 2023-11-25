@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1586</width>
-    <height>946</height>
+    <width>1450</width>
+    <height>945</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,7 +41,7 @@
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
-         <string>Common</string>
+         <string>Custom</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_5">
          <property name="spacing">
@@ -61,6 +61,26 @@
          </property>
          <item>
           <layout class="QGridLayout" name="gridLayout_4">
+           <item row="1" column="0">
+            <widget class="QRadioButton" name="testModeRpmPowerButton">
+             <property name="toolTip">
+              <string>Sweep from the start RPM to the end RPM at the set Power.</string>
+             </property>
+             <property name="text">
+              <string>RPM/Power</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QRadioButton" name="testModeExpButton">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Torque + RPM Exponential mode. Sweep from 0 to end RPM and use the base torque + exponent on the RPM to derive the power requirement. The test will be scaled such that the specified power is at the full RPM. The power for the base torque will be required in addition to that.&lt;/p&gt;&lt;p&gt;Propellers and impellers in air and water usually just have the exponent while traction vehicles have a base torque from the rolling resistance + an exponent from wind resistance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>Exp</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="0">
             <widget class="QRadioButton" name="testModeTorqueButton">
              <property name="toolTip">
@@ -87,23 +107,13 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QRadioButton" name="testModeRpmPowerButton">
+           <item row="0" column="2">
+            <widget class="QRadioButton" name="testModeVbusButton">
              <property name="toolTip">
-              <string>Sweep from the start RPM to the end RPM at the set Power.</string>
+              <string>Torque sweep while keeping the bus voltage constant.</string>
              </property>
              <property name="text">
-              <string>RPM/Power</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QRadioButton" name="testModeExpButton">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Torque + RPM Exponential mode. Sweep from 0 to end RPM and use the base torque + exponent on the RPM to derive the power requirement. The test will be scaled such that the specified power is at the full RPM. The power for the base torque will be required in addition to that.&lt;/p&gt;&lt;p&gt;Propellers and impellers in air and water usually just have the exponent while traction vehicles have a base torque from the rolling resistance + an exponent from wind resistance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <property name="text">
-              <string>Torque + Exp</string>
+              <string>Vbus</string>
              </property>
             </widget>
            </item>
@@ -273,13 +283,32 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="2">
+           <item row="3" column="0">
             <widget class="QCheckBox" name="testNegativeBox">
              <property name="toolTip">
               <string>Include negative RPM and Torque in tests.</string>
              </property>
              <property name="text">
-              <string>Include Negative</string>
+              <string>Negative</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QDoubleSpinBox" name="testVbusBox">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="suffix">
+              <string> V</string>
+             </property>
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <double>9999.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>48.000000000000000</double>
              </property>
             </widget>
            </item>

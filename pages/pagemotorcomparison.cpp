@@ -322,6 +322,39 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
         addDataItem(name, ui->m2PlotTable, hasScale);
     };
 
+    mSettingUpdateRequired = false;
+    mSettingUpdateTimer = new QTimer(this);
+    mSettingUpdateTimer->start(20);
+
+    connect(mSettingUpdateTimer, &QTimer::timeout, [this]() {
+        if (mSettingUpdateRequired) {
+            ui->testTorqueBox->setEnabled(ui->testModeTorqueButton->isChecked() ||
+                                          ui->testModeRpmButton->isChecked() ||
+                                          ui->testModeVbusButton->isChecked());
+            ui->testPowerBox->setEnabled(ui->testModeRpmPowerButton->isChecked() ||
+                                         ui->testModeExpButton->isChecked());
+            ui->testRpmStartBox->setEnabled(ui->testModeRpmPowerButton->isChecked() ||
+                                            ui->testModeExpButton->isChecked());
+            ui->testRpmBox->setEnabled(ui->testModeRpmPowerButton->isChecked() ||
+                                       ui->testModeExpButton->isChecked() ||
+                                       ui->testModeRpmButton->isChecked() ||
+                                       ui->testModeTorqueButton->isChecked());
+            ui->testExpBox->setEnabled(ui->testModeExpButton->isChecked());
+            ui->testExpBaseTorqueBox->setEnabled(ui->testModeExpButton->isChecked());
+            ui->testVbusBox->setEnabled(ui->testModeVbusButton->isChecked());
+
+            if (ui->tabWidget->currentIndex() == 1) {
+                setQmlMotorParams();
+            }
+
+            if (ui->testLiveUpdateBox->isChecked()) {
+                on_testRunButton_clicked();
+            }
+
+            mSettingUpdateRequired = false;
+        }
+    });
+
     addDataItemBoth("Efficiency");
     addDataItemBoth("Mot Loss Tot");
     addDataItemBoth("Mot Loss Res");
@@ -397,28 +430,7 @@ void PageMotorComparison::setVesc(VescInterface *vesc)
 
 void PageMotorComparison::settingChanged()
 {
-    ui->testTorqueBox->setEnabled(ui->testModeTorqueButton->isChecked() ||
-                                  ui->testModeRpmButton->isChecked() ||
-                                  ui->testModeVbusButton->isChecked());
-    ui->testPowerBox->setEnabled(ui->testModeRpmPowerButton->isChecked() ||
-                                 ui->testModeExpButton->isChecked());
-    ui->testRpmStartBox->setEnabled(ui->testModeRpmPowerButton->isChecked() ||
-                                    ui->testModeExpButton->isChecked());
-    ui->testRpmBox->setEnabled(ui->testModeRpmPowerButton->isChecked() ||
-                               ui->testModeExpButton->isChecked() ||
-                               ui->testModeRpmButton->isChecked() ||
-                               ui->testModeTorqueButton->isChecked());
-    ui->testExpBox->setEnabled(ui->testModeExpButton->isChecked());
-    ui->testExpBaseTorqueBox->setEnabled(ui->testModeExpButton->isChecked());
-    ui->testVbusBox->setEnabled(ui->testModeVbusButton->isChecked());
-
-    if (ui->tabWidget->currentIndex() == 1) {
-        setQmlMotorParams();
-    }
-
-    if (ui->testLiveUpdateBox->isChecked()) {
-        on_testRunButton_clicked();
-    }
+    mSettingUpdateRequired = true;
 }
 
 bool PageMotorComparison::reloadConfigs()

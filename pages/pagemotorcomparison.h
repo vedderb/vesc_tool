@@ -22,6 +22,7 @@
 
 #include <QWidget>
 #include <QPair>
+#include <QTimer>
 #include "vescinterface.h"
 #include "configparams.h"
 #include "widgets/qcustomplot.h"
@@ -352,6 +353,8 @@ private:
     QPair<double, double> mVerticalLineYLast;
     bool mRunDone;
     Utility mUtil;
+    QTimer *mSettingUpdateTimer;
+    bool mSettingUpdateRequired;
 
     bool mQmlXNameOk;
     bool mQmlXMinOk;

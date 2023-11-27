@@ -225,6 +225,8 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
             [this](double value) { (void)value; settingChanged(); });
     connect(ui->testExpBaseTorqueBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
+    connect(ui->testVbusBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double value) { (void)value; settingChanged(); });
     connect(ui->pointsBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
 

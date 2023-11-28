@@ -135,9 +135,53 @@ public:
         params = prm;
     }
 
-    Q_INVOKABLE bool updateTorqueVBus(double torque, double vbus) {
-        double rpm_guess = 1000.0;
+    Q_INVOKABLE bool updateTorqueVBusFW(double torque, double rpm, double vbus) {
+        double fw_max = params.fwCurrent;
+        params.fwCurrent = 0.0;
 
+        if (!update(rpm, torque)) {
+            params.fwCurrent = fw_max;
+            return false;
+        }
+
+        if (vbus_min < vbus) {
+            params.fwCurrent = fw_max;
+            return true;
+        }
+
+        double vbus_lower = vbus_min;
+        params.fwCurrent = fw_max;
+        update(rpm, torque);
+        double vbus_upper = vbus_min;
+
+        if (vbus_upper > vbus) {
+            return updateTorqueVBus(torque, vbus);
+        }
+
+        params.fwCurrent = Utility::map(vbus, vbus_lower, vbus_upper, 0.0, fw_max);
+
+        for (int j = 0;j < 20;j++) {
+            if (!update(rpm, torque)) {
+                params.fwCurrent = fw_max;
+                return false;
+            }
+
+            params.fwCurrent *= vbus_min / vbus;
+
+            if (params.fwCurrent > fw_max) {
+                params.fwCurrent = fw_max;
+            }
+
+            if (params.fwCurrent < 0.0) {
+                params.fwCurrent = 0.0;
+            }
+        }
+
+        params.fwCurrent = fw_max;
+        return true;
+    }
+
+    Q_INVOKABLE bool updateTorqueVBus(double torque, double vbus, double rpm_guess = 1000.0) {
         for (int i = 0;i < 20;i++) {
             if (!update(rpm_guess, torque)) {
                 return false;
@@ -187,7 +231,7 @@ public:
         // Iterate taking motor saliency into account to get the current that produces the desired torque
         double torque_motor_shaft_updated = torque_motor_shaft;
         double iq_adj = 0.0;
-        for (int i = 0;i < 50;i++) {
+        for (int i = 0;i < 30;i++) {
             iq -= 0.2 * iq * (torque_motor_shaft_updated - torque_motor_shaft) /
                     (SIGN(torque_motor_shaft_updated) * fmax(fabs(torque_motor_shaft_updated), 1.0));
             iq += iq_adj;

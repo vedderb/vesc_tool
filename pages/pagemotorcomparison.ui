@@ -113,7 +113,17 @@
               <string>Torque sweep while keeping the bus voltage constant.</string>
              </property>
              <property name="text">
-              <string>Vbus</string>
+              <string>VBus</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QRadioButton" name="testModeVBFWButton">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Torque-sweep at fixed RPM and limited bus voltage. Uses field weakening according to the duty in the configuration and the current in the FW-box.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>VB+FW</string>
              </property>
             </widget>
            </item>
@@ -450,14 +460,14 @@
           <item>
            <widget class="QLineEdit" name="compAEdit">
             <property name="text">
-             <string>A</string>
+             <string>Motor A</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QLineEdit" name="compBEdit">
             <property name="text">
-             <string>B</string>
+             <string>Motor B</string>
             </property>
            </widget>
           </item>

@@ -160,7 +160,7 @@ public:
 
         params.fwCurrent = Utility::map(vbus, vbus_lower, vbus_upper, 0.0, fw_max);
 
-        for (int j = 0;j < 20;j++) {
+        for (int i = 0;i < 20;i++) {
             if (!update(rpm, torque)) {
                 params.fwCurrent = fw_max;
                 return false;

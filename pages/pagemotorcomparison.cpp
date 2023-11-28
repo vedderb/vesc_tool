@@ -384,8 +384,8 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
     addDataItemBoth("ExtraVal2");
     addDataItemBoth("ExtraVal3");
     addDataItemBoth("ExtraVal4");
-    addDataItemBoth("ERPM", false);
-    addDataItemBoth("km/h", false);
+    addDataItemBoth("ERPM");
+    addDataItemBoth("km/h");
     addDataItemBoth("mph", false);
     addDataItemBoth("wh/km", false);
     addDataItemBoth("wh/mi", false);
@@ -775,6 +775,16 @@ void PageMotorComparison::on_testRunButton_clicked()
             case 21:
                 if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
                 yAxes[rowInd].append(md.extraVal4 * rowScale);
+                names.append(namePrefix + QString("(Unit * %1)").arg(rowScale));
+                rowInd++; break;
+            case 22:
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(md.erpm * rowScale);
+                names.append(namePrefix + QString("(Unit * %1)").arg(rowScale));
+                rowInd++; break;
+            case 23:
+                if (yAxes.size() <= rowInd) yAxes.append(QVector<double>());
+                yAxes[rowInd].append(md.km_h * rowScale);
                 names.append(namePrefix + QString("(Unit * %1)").arg(rowScale));
                 rowInd++; break;
             default:

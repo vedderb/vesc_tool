@@ -108,7 +108,7 @@ Item {
             tripText.text =
                     "Time       : " + new Date(val.count_time * 1000).toISOString().substr(11, 8) + "\n" +
                     "Distance   : " + parseFloat(val.distance()).toFixed(2) + " m\n" +
-                    "Efficiency : " + parseFloat(val.efficiency() * impFact).toFixed(3) + " " + efficiencyUnit + "\n" +
+                    "Efficiency : " + parseFloat(val.efficiency() / impFact).toFixed(3) + " " + efficiencyUnit + "\n" +
                     "Energy     : " + parseFloat(val.energy()).toFixed(3) + " Wh\n" +
                     "Ah         : " + parseFloat(val.ah()).toFixed(3) + " Ah\n" +
                     "Speed Avg  : " + parseFloat(val.speed_avg * 3.6 * impFact).toFixed(1) + " " + speedUnit + "\n" +

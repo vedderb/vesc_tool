@@ -815,20 +815,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                     moveCursor(QTextCursor::MoveOperation::Left);
                     break;
                 }
-
-                // If it's close brace - check parentheses
-                if (el.second == e->text())
-                {
-                    auto symbol = charUnderCursor();
-
-                    if (symbol == el.second)
-                    {
-                        textCursor().deletePreviousChar();
-                        moveCursor(QTextCursor::MoveOperation::Right);
-                    }
-
-                    break;
-                }
             }
         }
     }

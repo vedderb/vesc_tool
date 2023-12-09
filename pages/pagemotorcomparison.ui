@@ -61,13 +61,26 @@
          </property>
          <item>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="1" column="0">
-            <widget class="QRadioButton" name="testModeRpmPowerButton">
+           <item row="0" column="1">
+            <widget class="QRadioButton" name="testModeRpmButton">
              <property name="toolTip">
-              <string>Sweep from the start RPM to the end RPM at the set Power.</string>
+              <string>Sweep from 0 to the end RPM at the set torque.</string>
              </property>
              <property name="text">
-              <string>RPM/Power</string>
+              <string>RPM</string>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QRadioButton" name="testModeVBFWButton">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Torque-sweep at fixed RPM and limited bus voltage. Uses field weakening according to the current in the FW-box.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>VB+FW</string>
              </property>
             </widget>
            </item>
@@ -94,16 +107,13 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QRadioButton" name="testModeRpmButton">
+           <item row="1" column="0">
+            <widget class="QRadioButton" name="testModeRpmPowerButton">
              <property name="toolTip">
-              <string>Sweep from 0 to the end RPM at the set torque.</string>
+              <string>Sweep from the start RPM to the end RPM at the set Power.</string>
              </property>
              <property name="text">
-              <string>RPM</string>
-             </property>
-             <property name="checked">
-              <bool>false</bool>
+              <string>RPM/Power</string>
              </property>
             </widget>
            </item>
@@ -117,13 +127,13 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
-            <widget class="QRadioButton" name="testModeVBFWButton">
+           <item row="2" column="0">
+            <widget class="QRadioButton" name="testModeVBRPMButton">
              <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Torque-sweep at fixed RPM and limited bus voltage. Uses field weakening according to the current in the FW-box.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;RPM sweep while limiting the torque by the bus voltage.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>VB+FW</string>
+              <string>VB+RPM</string>
              </property>
             </widget>
            </item>
@@ -811,7 +821,7 @@
             <property name="spacing">
              <number>2</number>
             </property>
-            <item row="0" column="2">
+            <item row="0" column="3">
              <widget class="QPushButton" name="m1SetupGearingButton">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -831,6 +841,25 @@
               </property>
              </widget>
             </item>
+            <item row="3" column="0" colspan="4">
+             <widget class="QDoubleSpinBox" name="m1TempIncBox">
+              <property name="prefix">
+               <string>Temp Increase: </string>
+              </property>
+              <property name="suffix">
+               <string> °C</string>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="minimum">
+               <double>-200.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>200.000000000000000</double>
+              </property>
+             </widget>
+            </item>
             <item row="2" column="0">
              <widget class="QDoubleSpinBox" name="m1MotorNumBox">
               <property name="toolTip">
@@ -847,22 +876,28 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0" colspan="3">
-             <widget class="QDoubleSpinBox" name="m1TempIncBox">
+            <item row="1" column="0">
+             <widget class="QDoubleSpinBox" name="m1GearEfficiencyBox">
               <property name="prefix">
-               <string>Temp Increase: </string>
+               <string>Gear Eff: </string>
               </property>
               <property name="suffix">
-               <string> °C</string>
+               <string> %</string>
               </property>
               <property name="decimals">
                <number>1</number>
               </property>
               <property name="minimum">
-               <double>-200.000000000000000</double>
+               <double>0.100000000000000</double>
               </property>
               <property name="maximum">
-               <double>200.000000000000000</double>
+               <double>100.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.200000000000000</double>
+              </property>
+              <property name="value">
+               <double>100.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -897,7 +932,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1" colspan="2">
+            <item row="2" column="1" colspan="3">
              <widget class="QDoubleSpinBox" name="m1FwBox">
               <property name="toolTip">
                <string>Field Weakening Current</string>
@@ -913,32 +948,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QDoubleSpinBox" name="m1GearEfficiencyBox">
-              <property name="prefix">
-               <string>Gear Eff: </string>
-              </property>
-              <property name="suffix">
-               <string> %</string>
-              </property>
-              <property name="decimals">
-               <number>1</number>
-              </property>
-              <property name="minimum">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>100.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.200000000000000</double>
-              </property>
-              <property name="value">
-               <double>100.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1" colspan="2">
+            <item row="1" column="1" colspan="3">
              <widget class="QDoubleSpinBox" name="m1MaxRpmBox">
               <property name="toolTip">
                <string>Maximum motor shaft RPM</string>
@@ -954,6 +964,13 @@
               </property>
               <property name="value">
                <double>50000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QCheckBox" name="m1MtpaBox">
+              <property name="text">
+               <string>MTPA</string>
               </property>
              </widget>
             </item>
@@ -1125,7 +1142,58 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
+            <item row="1" column="1" colspan="3">
+             <widget class="QDoubleSpinBox" name="m2MaxRpmBox">
+              <property name="toolTip">
+               <string>Maximum motor shaft RPM</string>
+              </property>
+              <property name="prefix">
+               <string>Max RPM: </string>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <double>500000.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>50000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="3">
+             <widget class="QDoubleSpinBox" name="m2FwBox">
+              <property name="toolTip">
+               <string>Field Weakening Current</string>
+              </property>
+              <property name="prefix">
+               <string>FW: </string>
+              </property>
+              <property name="suffix">
+               <string> A</string>
+              </property>
+              <property name="maximum">
+               <double>999.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="4">
+             <widget class="QDoubleSpinBox" name="m2TempIncBox">
+              <property name="prefix">
+               <string>Temp Increase: </string>
+              </property>
+              <property name="suffix">
+               <string> °C</string>
+              </property>
+              <property name="minimum">
+               <double>-200.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>200.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
              <widget class="QPushButton" name="m2SetupGearingButton">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1161,38 +1229,6 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QDoubleSpinBox" name="m2FwBox">
-              <property name="toolTip">
-               <string>Field Weakening Current</string>
-              </property>
-              <property name="prefix">
-               <string>FW: </string>
-              </property>
-              <property name="suffix">
-               <string> A</string>
-              </property>
-              <property name="maximum">
-               <double>999.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0" colspan="3">
-             <widget class="QDoubleSpinBox" name="m2TempIncBox">
-              <property name="prefix">
-               <string>Temp Increase: </string>
-              </property>
-              <property name="suffix">
-               <string> °C</string>
-              </property>
-              <property name="minimum">
-               <double>-200.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>200.000000000000000</double>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QDoubleSpinBox" name="m2GearEfficiencyBox">
               <property name="prefix">
@@ -1218,22 +1254,10 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1" colspan="2">
-             <widget class="QDoubleSpinBox" name="m2MaxRpmBox">
-              <property name="toolTip">
-               <string>Maximum motor shaft RPM</string>
-              </property>
-              <property name="prefix">
-               <string>Max RPM: </string>
-              </property>
-              <property name="decimals">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <double>500000.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>50000.000000000000000</double>
+            <item row="0" column="2">
+             <widget class="QCheckBox" name="m2MtpaBox">
+              <property name="text">
+               <string>MTPA</string>
               </property>
              </widget>
             </item>

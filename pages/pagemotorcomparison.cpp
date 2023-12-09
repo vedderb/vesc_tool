@@ -207,6 +207,8 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
             [this]() { settingChanged(); });
     connect(ui->testModeVBFWButton, &QRadioButton::toggled,
             [this]() { settingChanged(); });
+    connect(ui->testModeVBRPMButton, &QRadioButton::toggled,
+            [this]() { settingChanged(); });
 
     connect(ui->testLiveUpdateBox, &QCheckBox::toggled,
             [this](bool checked) { (void)checked; settingChanged(); });
@@ -251,6 +253,10 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
             [this](double value) { (void)value; settingChanged(); });
     connect(ui->m2FwBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged();});
+    connect(ui->m1MtpaBox, &QCheckBox::toggled,
+            [this](bool checked) { (void)checked; settingChanged(); });
+    connect(ui->m2MtpaBox, &QCheckBox::toggled,
+            [this](bool checked) { (void)checked; settingChanged(); });
 
     connect(ui->m1TempIncBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double value) { (void)value; settingChanged(); });
@@ -335,7 +341,8 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
             ui->testTorqueBox->setEnabled(ui->testModeTorqueButton->isChecked() ||
                                           ui->testModeRpmButton->isChecked() ||
                                           ui->testModeVbusButton->isChecked() ||
-                                          ui->testModeVBFWButton->isChecked());
+                                          ui->testModeVBFWButton->isChecked() ||
+                                          ui->testModeVBRPMButton->isChecked());
             ui->testPowerBox->setEnabled(ui->testModeRpmPowerButton->isChecked() ||
                                          ui->testModeExpButton->isChecked());
             ui->testRpmStartBox->setEnabled(ui->testModeRpmPowerButton->isChecked() ||
@@ -344,11 +351,13 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
                                        ui->testModeExpButton->isChecked() ||
                                        ui->testModeRpmButton->isChecked() ||
                                        ui->testModeTorqueButton->isChecked() ||
-                                       ui->testModeVBFWButton->isChecked());
+                                       ui->testModeVBFWButton->isChecked() ||
+                                       ui->testModeVBRPMButton->isChecked());
             ui->testExpBox->setEnabled(ui->testModeExpButton->isChecked());
             ui->testExpBaseTorqueBox->setEnabled(ui->testModeExpButton->isChecked());
             ui->testVbusBox->setEnabled(ui->testModeVbusButton->isChecked() ||
-                                        ui->testModeVBFWButton->isChecked());
+                                        ui->testModeVBFWButton->isChecked() ||
+                                        ui->testModeVBRPMButton->isChecked());
 
             if (ui->tabWidget->currentIndex() == 1) {
                 setQmlMotorParams();
@@ -608,6 +617,14 @@ void PageMotorComparison::updateDataAndPlot(double posx, double yMin, double yMa
             md.configure(&mM2Config, getParamsUi(2));
             md.updateTorqueVBusFW(posx, ui->testRpmBox->value(), ui->testVbusBox->value());
             updateTable(md, ui->m2PlotTable);
+        } else if (ui->testModeVBRPMButton->isChecked()) {
+            MotorData md;
+            md.configure(&mM1Config, getParamsUi(1));
+            md.updateRpmVBusFW(ui->testTorqueBox->value(), posx, ui->testVbusBox->value());
+            updateTable(md, ui->m1PlotTable);
+            md.configure(&mM2Config, getParamsUi(2));
+            md.updateRpmVBusFW(ui->testTorqueBox->value(), posx, ui->testVbusBox->value());
+            updateTable(md, ui->m2PlotTable);
         }
     }
 }
@@ -623,6 +640,7 @@ MotorDataParams PageMotorComparison::getParamsUi(int motor)
         sel.tempInc = ui->m1TempIncBox->value();
         sel.fwCurrent = ui->m1FwBox->value();
         sel.maxRpm = ui->m1MaxRpmBox->value();
+        sel.mtpa = ui->m1MtpaBox->isChecked();
     } else if (motor == 2) {
         sel.gearing = ui->m2GearingBox->value();
         sel.gearingEfficiency = ui->m2GearEfficiencyBox->value() / 100.0;
@@ -630,6 +648,7 @@ MotorDataParams PageMotorComparison::getParamsUi(int motor)
         sel.tempInc = ui->m2TempIncBox->value();
         sel.fwCurrent = ui->m2FwBox->value();
         sel.maxRpm = ui->m2MaxRpmBox->value();
+        sel.mtpa = ui->m2MtpaBox->isChecked();
     }
 
     return sel;
@@ -1053,6 +1072,38 @@ void PageMotorComparison::on_testRunButton_clicked()
         updateGraphs(xAxis, yAxes, names);
     };
 
+    auto plotVBRPMSweep = [this, updateData, updateGraphs, plotPoints](QTableWidget *table,
+            ConfigParams &config, MotorDataParams param) {
+        double torque = fabs(ui->testTorqueBox->value());
+        double vbus = ui->testVbusBox->value();
+        double rpm = ui->testRpmBox->value();
+
+        QVector<double> xAxis;
+        QVector<QVector<double> > yAxes;
+        QVector<QString> names;
+
+        double rpm_start = -rpm;
+        if (!ui->testNegativeBox->isChecked()) {
+            rpm_start = rpm / plotPoints;
+        }
+
+        for (double r = rpm_start;r < rpm;r += (rpm / plotPoints)) {
+            MotorData md;
+            md.configure(&config, param);
+            md.updateRpmVBusFW(torque, r, vbus);
+            xAxis.append(r);
+            updateData(md, table, yAxes, names);
+
+            if (md.rpm_motor_shaft >= param.maxRpm) {
+                mVesc->emitMessageDialog("Max RPM", "Maximum motor shaft RPM exceeded", false);
+                break;
+            }
+        }
+
+        ui->plot->xAxis->setLabel("RPM");
+        updateGraphs(xAxis, yAxes, names);
+    };
+
     auto plotQmlSweep = [this, updateData, updateGraphs, plotPoints](QTableWidget *table,
             ConfigParams &config, MotorDataParams param, int motor) {
 
@@ -1123,6 +1174,10 @@ void PageMotorComparison::on_testRunButton_clicked()
             ui->plot->clearGraphs();
             plotVBFWSweep(ui->m1PlotTable, mM1Config, getParamsUi(1));
             plotVBFWSweep(ui->m2PlotTable, mM2Config, getParamsUi(2));
+        } else if (ui->testModeVBRPMButton->isChecked()) {
+            ui->plot->clearGraphs();
+            plotVBRPMSweep(ui->m1PlotTable, mM1Config, getParamsUi(1));
+            plotVBRPMSweep(ui->m2PlotTable, mM2Config, getParamsUi(2));
         }
     }
 

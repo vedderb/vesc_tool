@@ -36,6 +36,7 @@ struct MotorDataParams {
         fwCurrent = 0.0;
         motorNum = 1.0;
         tempInc = 0.0;
+        mtpa = false;
     }
 
     double gearing;
@@ -44,6 +45,7 @@ struct MotorDataParams {
     double fwCurrent;
     double motorNum;
     double tempInc;
+    bool mtpa;
 };
 
 struct MotorData {
@@ -135,6 +137,64 @@ public:
         params = prm;
     }
 
+    Q_INVOKABLE bool updateRpmVBusFW(double torque, double rpm, double vbus) {
+        double fw_max = params.fwCurrent;
+        params.fwCurrent = 0.0;
+
+        if (!update(rpm, torque)) {
+            params.fwCurrent = fw_max;
+            return false;
+        }
+
+        if (vbus_min < vbus) {
+            params.fwCurrent = fw_max;
+            return true;
+        }
+
+        double vbus_lower = vbus_min;
+        params.fwCurrent = fw_max;
+        update(rpm, torque);
+        double vbus_upper = vbus_min;
+
+        if (vbus_upper > vbus) {
+            return updateRpmVBus(rpm, vbus);
+        }
+
+        params.fwCurrent = Utility::map(vbus, vbus_lower, vbus_upper, 0.0, fw_max);
+
+        for (int i = 0;i < 20;i++) {
+            if (!update(rpm, torque)) {
+                params.fwCurrent = fw_max;
+                return false;
+            }
+
+            params.fwCurrent *= vbus_min / vbus;
+
+            if (params.fwCurrent > fw_max) {
+                params.fwCurrent = fw_max;
+            }
+
+            if (params.fwCurrent < 0.0) {
+                params.fwCurrent = 0.0;
+            }
+        }
+
+        params.fwCurrent = fw_max;
+        return true;
+    }
+
+    Q_INVOKABLE bool updateRpmVBus(double rpm, double vbus, double torque_guess = 5.0) {
+        for (int i = 0;i < 20;i++) {
+            if (!update(rpm, torque_guess)) {
+                return false;
+            }
+
+            torque_guess *= vbus / vbus_min;
+        }
+
+        return true;
+    }
+
     Q_INVOKABLE bool updateTorqueVBusFW(double torque, double rpm, double vbus) {
         double fw_max = params.fwCurrent;
         params.fwCurrent = 0.0;
@@ -210,7 +270,6 @@ public:
         double i_nl = config->getParamDouble("si_motor_nl_current");
         double pole_pairs = double(config->getParamInt("si_motor_poles")) / 2.0;
         double wheel_diam = config->getParamDouble("si_wheel_diameter");
-        bool use_mpta = config->getParamEnum("foc_mtpa_mode");
 
         r += r * 0.00386 * (params.tempInc);
 
@@ -237,7 +296,7 @@ public:
             iq += iq_adj;
 
             // See https://github.com/vedderb/bldc/pull/179
-            if (use_mpta && fabs(ld_lq_diff) > 1e-9) {
+            if (params.mtpa && fabs(ld_lq_diff) > 1e-9) {
                 id = (lambda - sqrt(SQ(lambda) + 8.0 * SQ(ld_lq_diff) * SQ(iq))) / (4.0 * ld_lq_diff);
                 iq_adj = iq - SIGN(iq) * sqrt(SQ(iq) - SQ(id));
                 iq = SIGN(iq) * sqrt(SQ(iq) - SQ(id));

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1070</width>
-    <height>668</height>
+    <width>1301</width>
+    <height>716</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,6 +63,29 @@
            </property>
            <property name="text">
             <string>AutoZoom</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="pollGnssBox">
+           <property name="toolTip">
+            <string>Poll realtime GNSS-data from the connected device.</string>
+           </property>
+           <property name="text">
+            <string>Poll GNSS</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="updateRtBox">
+           <property name="toolTip">
+            <string>Update plots while receiving data</string>
+           </property>
+           <property name="text">
+            <string>Update RT</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -167,7 +190,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="../res.qrc">
              <normaloff>:/res/icons/icons8-target-96.png</normaloff>:/res/icons/icons8-target-96.png</iconset>
            </property>
           </widget>
@@ -181,7 +204,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="../res.qrc">
              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
            </property>
            <property name="checkable">
@@ -207,7 +230,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="tabPosition">
-        <enum>QTabWidget::East</enum>
+        <enum>QTabWidget::North</enum>
        </property>
        <property name="tabShape">
         <enum>QTabWidget::Triangular</enum>
@@ -215,6 +238,291 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
+       <widget class="QWidget" name="tab_4">
+        <attribute name="title">
+         <string>Browse</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>Browse directory of last log file.</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTabWidget" name="browseTabWidget">
+           <property name="tabPosition">
+            <enum>QTabWidget::North</enum>
+           </property>
+           <property name="tabShape">
+            <enum>QTabWidget::Triangular</enum>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="vescLogTab">
+            <attribute name="title">
+             <string>Connected Device</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_9">
+             <property name="spacing">
+              <number>3</number>
+             </property>
+             <property name="leftMargin">
+              <number>3</number>
+             </property>
+             <property name="topMargin">
+              <number>3</number>
+             </property>
+             <property name="rightMargin">
+              <number>3</number>
+             </property>
+             <property name="bottomMargin">
+              <number>3</number>
+             </property>
+             <item>
+              <widget class="QTableWidget" name="vescLogTable">
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="selectionMode">
+                <enum>QAbstractItemView::ExtendedSelection</enum>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectRows</enum>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>Name</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Size</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="DisplayPercentage" name="vescDisplay" native="true">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="vescLogCancelButton">
+                 <property name="text">
+                  <string>Cancel</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QWidget" name="widget" native="true">
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <property name="spacing">
+                 <number>2</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="vescSaveAsButton">
+                  <property name="text">
+                   <string>Save as...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="vescLogDeleteButton">
+                  <property name="text">
+                   <string>Delete</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../res.qrc">
+                    <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="vescLogListOpenButton">
+                  <property name="text">
+                   <string>Open</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../res.qrc">
+                    <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="vescLogListRefreshButton">
+                  <property name="text">
+                   <string>Refresh</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../res.qrc">
+                    <normaloff>:/res/icons/Refresh-96.png</normaloff>:/res/icons/Refresh-96.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="vescUpButton">
+                  <property name="toolTip">
+                   <string>Go up one directory</string>
+                  </property>
+                  <property name="text">
+                   <string>Up</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../res.qrc">
+                    <normaloff>:/res/icons/Upload-96.png</normaloff>:/res/icons/Upload-96.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tab_5">
+            <attribute name="title">
+             <string>Filesystem</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <property name="spacing">
+              <number>3</number>
+             </property>
+             <property name="leftMargin">
+              <number>3</number>
+             </property>
+             <property name="topMargin">
+              <number>3</number>
+             </property>
+             <property name="rightMargin">
+              <number>3</number>
+             </property>
+             <property name="bottomMargin">
+              <number>3</number>
+             </property>
+             <item>
+              <widget class="QTableWidget" name="logTable">
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="selectionMode">
+                <enum>QAbstractItemView::SingleSelection</enum>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectRows</enum>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>Name</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Size</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <spacer name="horizontalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="logListRefreshButton">
+                 <property name="text">
+                  <string>Refresh</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../res.qrc">
+                   <normaloff>:/res/icons/Refresh-96.png</normaloff>:/res/icons/Refresh-96.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="logListOpenButton">
+                 <property name="text">
+                  <string>Open Selected</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../res.qrc">
+                   <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="tab">
         <attribute name="title">
          <string>Data</string>
@@ -322,96 +630,6 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_4"/>
        </widget>
-       <widget class="QWidget" name="tab_4">
-        <attribute name="title">
-         <string>Browse</string>
-        </attribute>
-        <attribute name="toolTip">
-         <string>Browse directory of last log file.</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_7">
-         <property name="spacing">
-          <number>3</number>
-         </property>
-         <property name="leftMargin">
-          <number>3</number>
-         </property>
-         <property name="topMargin">
-          <number>3</number>
-         </property>
-         <property name="rightMargin">
-          <number>3</number>
-         </property>
-         <property name="bottomMargin">
-          <number>3</number>
-         </property>
-         <item>
-          <widget class="QTableWidget" name="logTable">
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::SingleSelection</enum>
-           </property>
-           <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
-           </property>
-           <attribute name="horizontalHeaderStretchLastSection">
-            <bool>true</bool>
-           </attribute>
-           <column>
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Size</string>
-            </property>
-           </column>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="logListRefreshButton">
-             <property name="text">
-              <string>Refresh</string>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>:/res/icons/Refresh-96.png</normaloff>:/res/icons/Refresh-96.png</iconset>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="logListOpenButton">
-             <property name="text">
-              <string>Open</string>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
       </widget>
      </widget>
     </widget>
@@ -429,23 +647,29 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QPushButton" name="openCsvButton">
+      <widget class="QPushButton" name="openCurrentButton">
+       <property name="toolTip">
+        <string>Open log from RT data page</string>
+       </property>
        <property name="text">
-        <string>Open CSV</string>
+        <string>RtPage</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="openCurrentButton">
+      <widget class="QPushButton" name="openCsvButton">
+       <property name="toolTip">
+        <string>Open CSV file...</string>
+       </property>
        <property name="text">
-        <string>Open Current</string>
+        <string>CSV</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
        </property>
       </widget>
@@ -510,7 +734,7 @@
         <string>PDF</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Line Chart-96.png</normaloff>:/res/icons/Line Chart-96.png</iconset>
        </property>
       </widget>
@@ -524,7 +748,7 @@
         <string>PNG</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Line Chart-96.png</normaloff>:/res/icons/Line Chart-96.png</iconset>
        </property>
       </widget>
@@ -538,7 +762,7 @@
         <string>PDF</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Waypoint Map-96.png</normaloff>:/res/icons/Waypoint Map-96.png</iconset>
        </property>
       </widget>
@@ -552,8 +776,18 @@
         <string>PNG</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../res.qrc">
          <normaloff>:/res/icons/Waypoint Map-96.png</normaloff>:/res/icons/Waypoint Map-96.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="saveCsvButton">
+       <property name="toolTip">
+        <string>Save all data as CSV-file...</string>
+       </property>
+       <property name="text">
+        <string>CSV</string>
        </property>
       </widget>
      </item>
@@ -562,6 +796,12 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>DisplayPercentage</class>
+   <extends>QWidget</extends>
+   <header>widgets/displaypercentage.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
@@ -580,6 +820,8 @@
    <header>widgets/superslider.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

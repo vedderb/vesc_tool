@@ -26,14 +26,16 @@ Item {
 //            mCommands.getValuesSetup()
 //            mCommands.bmsGetValues()
 //            mCommands.ioBoardGetAll(255)
-//            mCommands.getStats(0xFFFFFFFF);
+//            mCommands.getStats(0xFFFFFFFF)
+//            mCommands.getGnss(0xFFFF)
+//            mCommands.getImuData(0xFFFFFFFF)
         }
     }
     
     Connections {
         target: mCommands
         
-        onValuesReceived: { // values, mask
+        function onValuesReceived(values, mask) {
             // Members of values
 //            values.v_in
 //            values.temp_mos
@@ -63,7 +65,7 @@ Item {
 //            values.kill_sw_active
         }
         
-        onValuesSetupReceived: { // values, mask
+        function onValuesSetupReceived(values, mask) {
             // Members of values
 //            values.temp_mos
 //            values.temp_motor
@@ -89,7 +91,7 @@ Item {
 //            values.odometer
         }
         
-        onBmsValuesRx: { // val
+        function onBmsValuesRx(val) {
             // Members of val
 //            val.v_tot
 //            val.v_charge
@@ -109,7 +111,7 @@ Item {
 //            val.can_id
         }
         
-        onIoBoardValRx: {
+        function onIoBoardValRx(val) {
             // Members of val
 //            val.id
 //            val.adc_1_4[ch]
@@ -120,7 +122,7 @@ Item {
 //            val.digital_age
         }
         
-        onStatsRx: { // val, mask
+        function onStatsRx(val, mask) {
             // Members of val
 //            val.speed_avg
 //            val.speed_max
@@ -137,6 +139,40 @@ Item {
 //            val.energy() // Wh
 //            val.efficiency() // Wh / km
 //            val.ah()
+        }
+        
+        function onGnssRx(val, mask) {
+            // Members of val
+//            val.lat
+//            val.lon
+//            val.height
+//            val.speed
+//            val.hdop
+//            val.ms_today
+//            val.yy
+//            val.mo
+//            val.dd
+//            val.age_s
+        }
+        
+        function onValuesImuReceived(val, mask) {
+//            val.roll
+//            val.pitch
+//            val.yaw
+//            val.accX
+//            val.accY
+//            val.accZ
+//            val.gyroX
+//            val.gyroY
+//            val.gyroZ
+//            val.magX
+//            val.magY
+//            val.magZ
+//            val.q0
+//            val.q1
+//            val.q2
+//            val.q3
+//            val.vesc_id
         }
     }
 }

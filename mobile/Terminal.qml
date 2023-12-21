@@ -106,6 +106,12 @@ Item {
                             mCommands.sendTerminalCmd("help")
                         }
                     }
+                    MenuItem {
+                        text: "Reboot"
+                        onTriggered: {
+                            mCommands.reboot()
+                        }
+                    }
                 }
             }
         }
@@ -132,7 +138,7 @@ Item {
     Connections {
         target: mCommands
 
-        onPrintReceived: {
+        function onPrintReceived(str) {
             terminalText.text += "\n" + str
         }
     }

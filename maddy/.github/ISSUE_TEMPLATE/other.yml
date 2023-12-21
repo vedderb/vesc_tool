@@ -1,0 +1,10 @@
+name: Other
+description: Anything that doesn't fit into one of the other issue categories
+body:
+  - type: textarea
+    id: whats-up
+    attributes:
+      label: What is the issue?
+      description: Is some tooling not working? Performance issues? ...
+    validations:
+      required: true

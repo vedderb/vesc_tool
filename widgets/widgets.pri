@@ -1,4 +1,6 @@
 FORMS += \
+    $$PWD/experimentplot.ui \
+    $$PWD/parameditbitfield.ui \
     $$PWD/parameditbool.ui \
     $$PWD/parameditdouble.ui \
     $$PWD/parameditenum.ui \
@@ -10,7 +12,6 @@ FORMS += \
     $$PWD/detectfoc.ui \
     $$PWD/detectfocencoder.ui \
     $$PWD/detectfochall.ui \
-    $$PWD/detectimu.ui \
     $$PWD/ppmmap.ui \
     $$PWD/adcmap.ui \
     $$PWD/nrfpair.ui \
@@ -18,11 +19,13 @@ FORMS += \
     $$PWD/paramdialog.ui \
     $$PWD/detectallfocdialog.ui \
     $$PWD/dirsetup.ui \
-    $$PWD/qmleditor.ui
+    $$PWD/scripteditor.ui
 
 HEADERS += \
     $$PWD/batttempplot.h \
     $$PWD/canlistitem.h \
+    $$PWD/experimentplot.h \
+    $$PWD/parameditbitfield.h \
     $$PWD/parameditbool.h \
     $$PWD/parameditdouble.h \
     $$PWD/parameditenum.h \
@@ -40,12 +43,11 @@ HEADERS += \
     $$PWD/detectfoc.h \
     $$PWD/detectfocencoder.h \
     $$PWD/detectfochall.h \
-    $$PWD/detectimu.h \
     $$PWD/ppmmap.h \
     $$PWD/adcmap.h \
-    $$PWD/qmleditor.h \
     $$PWD/rtdatatext.h \
     $$PWD/nrfpair.h \
+    $$PWD/scripteditor.h \
     $$PWD/vtextbrowser.h \
     $$PWD/imagewidget.h \
     $$PWD/parameditstring.h \
@@ -60,6 +62,8 @@ HEADERS += \
 SOURCES += \
     $$PWD/batttempplot.cpp \
     $$PWD/canlistitem.cpp \
+    $$PWD/experimentplot.cpp \
+    $$PWD/parameditbitfield.cpp \
     $$PWD/parameditbool.cpp \
     $$PWD/parameditdouble.cpp \
     $$PWD/parameditenum.cpp \
@@ -77,12 +81,11 @@ SOURCES += \
     $$PWD/detectfoc.cpp \
     $$PWD/detectfocencoder.cpp \
     $$PWD/detectfochall.cpp \
-    $$PWD/detectimu.cpp \
     $$PWD/ppmmap.cpp \
     $$PWD/adcmap.cpp \
-    $$PWD/qmleditor.cpp \
     $$PWD/rtdatatext.cpp \
     $$PWD/nrfpair.cpp \
+    $$PWD/scripteditor.cpp \
     $$PWD/vtextbrowser.cpp \
     $$PWD/imagewidget.cpp \
     $$PWD/parameditstring.cpp \

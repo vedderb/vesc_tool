@@ -37,6 +37,12 @@ Item {
         scanButton.enabled = VescIf.isPortConnected()
     }
 
+    function scanIfEmpty() {
+        if (canList.count == 0 && VescIf.isPortConnected()) {
+            scanButton.clicked()
+        }
+    }
+
     Timer {
         repeat: true
         interval: 1000
@@ -116,7 +122,7 @@ Item {
                         anchors.fill: parent
                         onClicked: {
                             canList.currentIndex = index
-                            if(index == 0){
+                            if(index === 0){
                                 mCommands.setSendCan(false,0)
                             }else{
                                 mCommands.setSendCan(true,ID)
@@ -188,6 +194,10 @@ Item {
                 scanButton.enabled = false
                 canModel.clear()
                 scanDialog.open()
+                if (mCommands.getSendCan()) {
+                    mCommands.setSendCan(false, -1)
+                    Utility.sleepWithEventLoop(1500)
+                }
                 mCommands.pingCan()
             }
         }
@@ -196,7 +206,7 @@ Item {
     Connections {
         target: mBle
 
-        onBleError: {
+        function onBleError(info) {
             VescIf.emitMessageDialog("BLE Error", info, false, false)
             enableDialog()
         }
@@ -259,7 +269,7 @@ Item {
     Connections {
         target: VescIf
 
-        onPortConnectedChanged: {
+        function onPortConnectedChanged() {
             scanButton.enabled = VescIf.isPortConnected()
         }
     }
@@ -267,7 +277,7 @@ Item {
     Connections {
         target: mCommands
 
-        onPingCanRx: {
+        function onPingCanRx(devs, isTimeout) {
             if (scanButton.enabled) {
                 return
             }
@@ -276,7 +286,7 @@ Item {
             scanButton.text = qsTr("Scan")
             if (VescIf.isPortConnected()) {
                 canModel.clear()
-                mCommands.setSendCan(0,0);
+                mCommands.setSendCan(0,0)
                 var params = Utility.getFwVersionBlocking(VescIf)
                 var name = params.hw
                 var theme ="qrc"  + Utility.getThemePath()
@@ -293,7 +303,7 @@ Item {
                     name = "BMS (" + params.hw + ")"
                 } else {
                     devicePath = theme + "icons/Electronics-96.png"
-                    name = "BMS (" + params.hw + ")"
+                    name = "Device (" + params.hw + ")"
                 }
                 name = name.replace("_", " ")
 
@@ -312,7 +322,7 @@ Item {
                         name = "BMS (" + params.hw + ")";
                     } else {
                         devicePath = theme + "icons/Electronics-96.png"
-                        name = params.hw;
+                        name = "Device (" + params.hw + ")"
                     }
                     name = name.replace("_", " ")
                     canModel.append({"name": name,

@@ -28,9 +28,15 @@ import Vedder.vesc.configparams 1.0
 Item {
     implicitHeight: column.implicitHeight
     property bool hideAfterPair: false
+    property bool pairOngoing: false
 
     function startPairing() {
         mCommands.pairNrf(timeBox.realValue * 1000.0)
+        pairCnt = timeBox.realValue
+        cntBar.value = 1
+        startButton.enabled = false
+        pairOngoing = true
+        afterPairTimer.stop()
     }
 
     property real pairCnt: 0.0
@@ -108,6 +114,33 @@ Item {
                 }
 
                 cntBar.value = pairCnt / timeBox.realValue
+            } else {
+                if (visible) {
+                    afterPairTimer.start()
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: afterPairTimer
+        interval: 2000
+        running: false
+        repeat: false
+
+        onTriggered: {
+            if (pairOngoing) {
+                pairOngoing = false
+                if (hideAfterPair) {
+                    visible = false
+                }
+
+                VescIf.emitMessageDialog(
+                            "VESC Remote Pairing",
+                            "No response received. This most likely means that the " +
+                            "hardware you are using is not capable of VESC Remote pairing " +
+                            "or that something is not plugged in properly.",
+                            true, false)
             }
         }
     }
@@ -115,25 +148,20 @@ Item {
     Connections {
         target: mCommands
 
-        onNrfPairingRes: {
+        function onNrfPairingRes(res) {
             if (!visible) {
                 return
             }
 
             switch (res) {
-            case 0:
-                pairCnt = timeBox.realValue
-                cntBar.value = 1
-                startButton.enabled = false
-                break;
-
             case 1:
                 startButton.enabled = true
                 pairCnt = 0.0
                 cntBar.value = 0
-                VescIf.emitStatusMessage("Pairing NRF Sucessful", true)
+                pairOngoing = false
+                VescIf.emitStatusMessage("Pairing Sucessful", true)
                 VescIf.emitMessageDialog(
-                            "NRF Pairing",
+                            "VESC Remote Pairing",
                             "Pairing was successful.",
                             true, false)
                 break;
@@ -142,17 +170,17 @@ Item {
                 startButton.enabled = true
                 pairCnt = 0.0
                 cntBar.value = 0
+                pairOngoing = false
                 VescIf.emitStatusMessage("Pairing NRF Timed Out", false)
                 VescIf.emitMessageDialog(
-                            "NRF Pairing",
-                            "Pairing timed out. Make sure to put your device (e.g. NRF nunchuk) " +
+                            "VESC Remote Pairing",
+                            "Pairing timed out. Make sure to put your device (e.g. VESC Wand) " +
                             "in pairing mode before the time runs out." +
                             "<br><br>" +
-                            "To put the NRF nunchuk in " +
+                            "To put a VESC-compatible Remote in " +
                             "pairing mode, just switch it on using any of the buttons. Then it " +
                             "will enter pairing mode if it was switched off previously.",
                             false, false)
-//                VescIf.emitMessageDialog("Test", "test23", false, false)
                 break;
 
             default:

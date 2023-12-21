@@ -30,17 +30,16 @@ DetectFoc::DetectFoc(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->pushButton->setIcon(QPixmap(theme + "icons/arrow_r.png"));
-    ui->pushButton_2->setIcon(QPixmap(theme + "icons/arrow_r.png"));
-    ui->pushButton_3->setIcon(QPixmap(theme + "icons/arrow_r.png"));
-    ui->rlButton->setIcon(QPixmap(theme + "icons/rl.png"));
-    ui->lambdaButton->setIcon(QPixmap(theme + "icons/lambda.png"));
-    ui->applyAllButton->setIcon(QPixmap(theme + "icons/apply.png"));
-    ui->calcGainButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
-    ui->calcKpKiButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
-    ui->calcApplyLocalButton->setIcon(QPixmap(theme + "icons/Calculator-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->pushButton->setIcon(Utility::getIcon("icons/arrow_r.png"));
+    ui->pushButton_2->setIcon(Utility::getIcon("icons/arrow_r.png"));
+    ui->pushButton_3->setIcon(Utility::getIcon("icons/arrow_r.png"));
+    ui->rlButton->setIcon(Utility::getIcon("icons/rl.png"));
+    ui->lambdaButton->setIcon(Utility::getIcon("icons/lambda.png"));
+    ui->applyAllButton->setIcon(Utility::getIcon("icons/apply.png"));
+    ui->calcGainButton->setIcon(Utility::getIcon("icons/Calculator-96.png"));
+    ui->calcKpKiButton->setIcon(Utility::getIcon("icons/Calculator-96.png"));
+    ui->calcApplyLocalButton->setIcon(Utility::getIcon("icons/Calculator-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
@@ -91,19 +90,29 @@ void DetectFoc::on_lambdaButton_clicked()
             return;
         }
 
-        if (ui->resistanceBox->value() < 1e-10) {
-            QMessageBox::critical(this,
-                                  tr("Measure Error"),
-                                  tr("R is 0. Please measure it first."));
-            return;
-        }
+        QMessageBox::StandardButton reply = QMessageBox::Cancel;
+        if (ui->currentBox->value() > 0.001) {
+            if (ui->resistanceBox->value() < 1e-10) {
+                QMessageBox::critical(this,
+                                      tr("Measure Error"),
+                                      tr("R is 0. Please measure it first."));
+                return;
+            }
 
-        QMessageBox::StandardButton reply = QMessageBox::warning(this,
-                                     tr("Warning"),
-                                     tr("<font color=\"red\">Warning: </font>"
-                                        "This is going to spin up the motor. Make "
-                                        "sure that nothing is in the way."),
-                                     QMessageBox::Ok | QMessageBox::Cancel);
+            reply = QMessageBox::warning(this,
+                                         tr("Warning"),
+                                         tr("<font color=\"red\">Warning: </font>"
+                                            "This is going to spin up the motor. Make "
+                                            "sure that nothing is in the way."),
+                                         QMessageBox::Ok | QMessageBox::Cancel);
+        } else {
+            reply = QMessageBox::warning(this,
+                                         tr("Warning"),
+                                         tr("As the current is 0 this is going to perform passive flux "
+                                            "linkage measurement. Make sure that the motor is driven "
+                                            "externally."),
+                                         QMessageBox::Ok | QMessageBox::Cancel);
+        }
 
         if (reply == QMessageBox::Ok) {
             mVesc->commands()->measureLinkageOpenloop(ui->currentBox->value(),
@@ -247,13 +256,6 @@ void DetectFoc::on_applyAllButton_clicked()
                                   tr("Apply Error"),
                                   tr(u8"\u03BB is 0. Please measure it first."));
             return;
-        }
-
-        if (ld_lq_diff > (l / 4.0)) {
-            QMessageBox::information(this,
-                                  tr("Salient Motor"),
-                                  tr("This motor has some saliency and could benefit from the MTPA-algorithm. You "
-                                     "can activate it from the FOC->Advanced page. Be careful when testing!"));
         }
 
         mVesc->mcConfig()->updateParamDouble("foc_motor_r", r);

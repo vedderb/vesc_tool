@@ -27,10 +27,9 @@ PageTerminal::PageTerminal(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->sendButton->setIcon(QPixmap(theme + "icons/Send File-96.png"));
-    ui->clearButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->sendButton->setIcon(Utility::getIcon("icons/Send File-96.png"));
+    ui->clearButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;
@@ -64,7 +63,29 @@ void PageTerminal::setVesc(VescInterface *vesc)
 
 void PageTerminal::printReceived(QString str)
 {
-    ui->terminalBrowser->append(str);
+    ui->terminalBrowser->moveCursor(QTextCursor::End);
+    ui->terminalBrowser->insertPlainText(str + "\n");
+    ui->terminalBrowser->moveCursor(QTextCursor::End);
+
+    int maxLines = 5000;
+    int removeLines = 1000;
+
+    if (ui->terminalBrowser->document()->lineCount() > maxLines) {
+        QString txt = ui->terminalBrowser->toPlainText();
+        auto lines = txt.split("\n");
+        if (lines.length() >= removeLines) {
+            QString shorter;
+            for (int i = removeLines;i < lines.length();i++) {
+                shorter.append(lines.at(i));
+
+                if (i != (lines.length() - 1)) {
+                    shorter.append("\n");
+                }
+            }
+            ui->terminalBrowser->setText(shorter);
+            ui->terminalBrowser->moveCursor(QTextCursor::End);
+        }
+    }
 }
 
 void PageTerminal::on_sendButton_clicked()

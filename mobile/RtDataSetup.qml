@@ -655,19 +655,22 @@ Item {
         id: commandsUpdate
         target: mCommands
 
-        onValuesImuReceived: {
+        property string lastFault: ""
+
+        function onValuesImuReceived(values, mask) {
             inclineCanvas.incline = Math.tan(values.pitch) * 100
         }
 
-        onValuesSetupReceived: {
+        function onValuesSetupReceived(values, mask) {
             var currentMaxRound = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
+            var currentMinRound = Math.floor(mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
 
             if (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7)) {
                 currentGauge.maximumValue = currentMaxRound
-                currentGauge.minimumValue = -currentMaxRound
+                currentGauge.minimumValue = currentMinRound
             }
 
-            currentGauge.labelStep = Math.ceil(currentMaxRound / 20) * 5
+            currentGauge.labelStep = Math.ceil((currentMaxRound - currentMinRound) / 40) * 5
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
             batteryGauge.value = values.battery_level * 100.0
@@ -680,6 +683,11 @@ Item {
             var speedFact = ((mMcConf.getParamInt("si_motor_poles") / 2.0) * 60.0 *
                              mMcConf.getParamDouble("si_gear_ratio")) /
                     (mMcConf.getParamDouble("si_wheel_diameter") * Math.PI)
+
+            if (speedFact < 1e-3) {
+                speedFact = 1e-3
+            }
+
             var speedMax = 3.6 * rpmMax / speedFact
             var impFact = useImperial ? 0.621371192 : 1.0
             var speedMaxRound = Math.ceil((speedMax * impFact) / 10.0) * 10.0
@@ -690,6 +698,13 @@ Item {
 
             if (speedMaxRound > speedGauge.maximumValue || speedMaxRound < (speedGauge.maximumValue * 0.6) ||
                     useNegativeSpeedValues !== speedGauge.minimumValue < 0) {
+                var labelStep = Math.ceil(speedMaxRound / 100) * 10
+
+                if ((speedMaxRound / labelStep) > 30) {
+                    labelStep = speedMaxRound / 30
+                }
+
+                speedGauge.labelStep = labelStep
                 speedGauge.maximumValue = speedMaxRound
                 speedGauge.minimumValue = useNegativeSpeedValues ? -speedMaxRound : 0
             }
@@ -720,7 +735,11 @@ Item {
             efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow
             efficiencyGauge.value = efficiency_lpf
             efficiencyGauge.unitText = useImperial ? "WH/MI" : "WH/KM"
-            consumValLabel.text = parseFloat(wh_km_total / impFact).toFixed(1)
+            if( (wh_km_total / impFact) < 999.0) {
+                consumValLabel.text = parseFloat(wh_km_total / impFact).toFixed(1)
+            } else {
+                consumValLabel.text = "∞"
+            }
 
             odometerValue = values.odometer
             batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) + "%"
@@ -736,12 +755,18 @@ Item {
 
             escTempGauge.value = values.temp_mos
             escTempGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_end") / 5) * 5
-            motTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
+            escTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_fet_start") / 5) * 5
             escTempGauge.labelStep = Math.ceil(escTempGauge.maximumValue/ 50) * 5
             motTempGauge.value = values.temp_motor
             motTempGauge.labelStep = Math.ceil(motTempGauge.maximumValue/ 50) * 5
             motTempGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_end") / 5) * 5
             motTempGauge.throttleStartValue = Math.ceil(mMcConf.getParamDouble("l_temp_motor_start") / 5) * 5
+
+            if (lastFault !== values.fault_str && values.fault_str !== "FAULT_CODE_NONE") {
+                VescIf.emitStatusMessage(values.fault_str, false)
+            }
+
+            lastFault = values.fault_str
         }
     }
 }

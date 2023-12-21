@@ -55,18 +55,28 @@ Item {
             }
         }
 
+        SwipeView {
+            id: swipeView
+            currentIndex: tabBar.currentIndex
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
+            visible: false
+        }
+
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             id: container
             property var tabBarItem: tabBar
+            property var swipeViewItem: swipeView
         }
     }
 
     Connections {
         target: QmlUi
 
-        onReloadQml: {
+        function onReloadQml(str) {
             Qt.createQmlObject(str, container, "myCode");
         }
     }

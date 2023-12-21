@@ -171,7 +171,7 @@ Item {
     Connections {
         target: mMcConf
 
-        onUpdated: {
+        function onUpdated() {
             var currentMaxRound = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5
 
             if (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7)) {
@@ -187,7 +187,7 @@ Item {
         id: commandsUpdate
         target: mCommands
 
-        onValuesReceived: {
+        function onValuesReceived(values, mask) {
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
 

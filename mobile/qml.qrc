@@ -43,8 +43,6 @@
         <file>Vesc3DView.qml</file>
         <file>DirectoryPicker.qml</file>
         <file>Settings.qml</file>
-        <file>DetectIMU.qml</file>
-        <file>RtDataBalance.qml</file>
         <file>RtDataIMU.qml</file>
         <file>BMS.qml</file>
         <file>CustomGaugeV2.qml</file>
@@ -55,5 +53,11 @@
         <file>MultiSettings.qml</file>
         <file>CanScreen.qml</file>
         <file>StatPage.qml</file>
+        <file>BleSetupDialog.qml</file>
+        <file>ParamEditBitfield.qml</file>
+        <file>ConfigPageCustom.qml</file>
+        <file>TcpHubBox.qml</file>
+        <file>Packages.qml</file>
+        <file>SetupWizardIMU.qml</file>
     </qresource>
 </RCC>

@@ -89,7 +89,7 @@ Item {
     Connections {
         target: mCommands
 
-        onValuesSetupReceived: {
+        function onValuesSetupReceived(values, mask) {
             statText.text =
                     "Ah Drawn   : " + parseFloat(values.amp_hours * 1000).toFixed(1) + " mAh\n" +
                     "Ah Charged : " + parseFloat(values.amp_hours_charged * 1000).toFixed(1) + " mAh\n" +
@@ -99,7 +99,7 @@ Item {
                     "Dist Abs   : " + parseFloat(values.tachometer_abs).toFixed(2) + " m\n"
         }
 
-        onStatsRx: {
+        function onStatsRx(val, mask) {
             var useImperial = VescIf.useImperialUnits()
             var impFact = useImperial ? 0.621371192 : 1.0
             var speedUnit = useImperial ? "mph" : "km/h"

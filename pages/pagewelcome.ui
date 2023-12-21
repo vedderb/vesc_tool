@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1450</width>
-    <height>499</height>
+    <width>1506</width>
+    <height>785</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,7 +54,78 @@
             <string>Quick Configuration</string>
            </property>
            <layout class="QGridLayout" name="gridLayout">
-            <item row="1" column="1">
+            <item row="2" column="1">
+             <widget class="QPushButton" name="wizardAppButton">
+              <property name="text">
+               <string>Setup Input</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QPushButton" name="multiSettingButton">
+              <property name="text">
+               <string>Multi Settings</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/icons/Settings-96.png</normaloff>:/res/icons/Settings-96.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QPushButton" name="invertDirButton">
+              <property name="text">
+               <string>Invert Motor Directions</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/icons/Process-96.png</normaloff>:/res/icons/Process-96.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QPushButton" name="setupBluetoothButton">
+              <property name="text">
+               <string>Setup Bluetooth Module</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../res.qrc">
+                <normaloff>:/res/icons/bluetooth.png</normaloff>:/res/icons/bluetooth.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>45</width>
+                <height>45</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
              <widget class="QPushButton" name="nrfPairButton">
               <property name="text">
                <string>NRF Quick Pair</string>
@@ -114,51 +185,14 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QPushButton" name="wizardAppButton">
-              <property name="text">
-               <string>Setup Input</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../res.qrc">
-                <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>45</width>
-                <height>45</height>
-               </size>
-              </property>
-              <property name="flat">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="0">
-             <widget class="QPushButton" name="multiSettingButton">
+             <widget class="QPushButton" name="wizardIMUButton">
               <property name="text">
-               <string>Multi Settings</string>
+               <string>Setup IMU</string>
               </property>
               <property name="icon">
                <iconset resource="../res.qrc">
-                <normaloff>:/res/icons/Settings-96.png</normaloff>:/res/icons/Settings-96.png</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>45</width>
-                <height>45</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QPushButton" name="invertDirButton">
-              <property name="text">
-               <string>Invert Motor Directions</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../res.qrc">
-                <normaloff>:/res/icons/Process-96.png</normaloff>:/res/icons/Process-96.png</iconset>
+                <normaloff>:/res/icons/imu_off.png</normaloff>:/res/icons/imu_off.png</iconset>
               </property>
               <property name="iconSize">
                <size>

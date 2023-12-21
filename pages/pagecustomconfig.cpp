@@ -20,6 +20,8 @@
 #include "pagecustomconfig.h"
 #include "ui_pagecustomconfig.h"
 #include "widgets/paramtable.h"
+#include "utility.h"
+#include <QFileDialog>
 
 PageCustomConfig::PageCustomConfig(QWidget *parent) :
     QWidget(parent),
@@ -28,6 +30,12 @@ PageCustomConfig::PageCustomConfig(QWidget *parent) :
     ui->setupUi(this);
     mVesc = nullptr;
     mConfNum = 0;
+
+    ui->readButton->setIcon(Utility::getIcon("/icons/Upload-96.png"));
+    ui->readDefaultButton->setIcon(Utility::getIcon("/icons/Upload-96.png"));
+    ui->writeButton->setIcon(Utility::getIcon("/icons/Download-96.png"));
+    ui->saveXmlButton->setIcon(Utility::getIcon("/icons/Save as-96.png"));
+    ui->loadXmlButton->setIcon(Utility::getIcon("/icons/Open Folder-96.png"));
 }
 
 PageCustomConfig::~PageCustomConfig()
@@ -45,8 +53,6 @@ void PageCustomConfig::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(customConfigRx(int,QByteArray)),
-                this, SLOT(customConfigRx(int,QByteArray)));
         connect(mVesc, SIGNAL(customConfigLoadDone()),
                 this, SLOT(customConfigLoadDone()));
     }
@@ -55,23 +61,6 @@ void PageCustomConfig::setVesc(VescInterface *vesc)
 void PageCustomConfig::setConfNum(int num)
 {
     mConfNum = num;
-}
-
-void PageCustomConfig::customConfigRx(int confInd, QByteArray data)
-{
-    if (confInd == mConfNum) {
-        ConfigParams *params = mVesc->customConfig(mConfNum);
-        if (params) {
-            auto vb = VByteArray(data);
-            if (params->deSerialize(vb)) {
-                mVesc->emitStatusMessage(tr("Custom config %1 updated").arg(mConfNum), true);
-            } else {
-                mVesc->emitMessageDialog(tr("Custom Configuration"),
-                                         tr("Could not deserialize custom config %1").arg(mConfNum),
-                                         false, false);
-            }
-        }
-    }
 }
 
 void PageCustomConfig::customConfigLoadDone()
@@ -93,8 +82,6 @@ void PageCustomConfig::customConfigLoadDone()
             t->clearParams();
             t->addParamSubgroup(p, "General", tabNames.at(i));
         }
-
-        on_readButton_clicked();
     }
 }
 
@@ -117,9 +104,59 @@ void PageCustomConfig::on_writeButton_clicked()
     if (mVesc) {
         ConfigParams *params = mVesc->customConfig(mConfNum);
         if (params) {
-            VByteArray data;
-            params->serialize(data);
-            mVesc->commands()->customConfigSet(mConfNum, data);
+            mVesc->commands()->customConfigSet(mConfNum, params);
         }
+    }
+}
+
+void PageCustomConfig::on_saveXmlButton_clicked()
+{
+    QString path;
+    path = QFileDialog::getSaveFileName(this,
+                                        tr("Choose where to save the motor configuration XML file"),
+                                        ".",
+                                        tr("Xml files (*.xml)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    if (!path.toLower().endsWith(".xml")) {
+        path += ".xml";
+    }
+
+    bool res = mVesc->customConfig(mConfNum)->saveXml(path, "CustomConfiguration");
+
+    if (res) {
+        mVesc->emitStatusMessage("Saved custom configuration", true);
+    } else {
+        mVesc->emitMessageDialog(tr("Save custom configuration"),
+                                 tr("Could not save custom configuration:<BR>"
+                                    "%1").arg(mVesc->mcConfig()->xmlStatus()),
+                                 false, false);
+    }
+}
+
+void PageCustomConfig::on_loadXmlButton_clicked()
+{
+    QString path;
+    path = QFileDialog::getOpenFileName(this,
+                                        tr("Choose custom configuration file to load"),
+                                        ".",
+                                        tr("Xml files (*.xml)"));
+
+    if (path.isNull()) {
+        return;
+    }
+
+    bool res = mVesc->customConfig(mConfNum)->loadXml(path, "CustomConfiguration");
+
+    if (res) {
+        mVesc->emitStatusMessage("Loaded custom configuration", true);
+    } else {
+        mVesc->emitMessageDialog(tr("Load custom configuration"),
+                                 tr("Could not load custom configuration:<BR>"
+                                    "%1").arg(mVesc->mcConfig()->xmlStatus()),
+                                 false, false);
     }
 }

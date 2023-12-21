@@ -26,13 +26,31 @@
 #include <QVector>
 #include <QDateTime>
 #include <QTime>
-#include <stdint.h>
+#include <QMap>
+#include <cstdint>
+#include "tcphub.h"
 
-typedef struct {
+struct VSerialInfo_t {
+    Q_GADGET
+
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString systemPath MEMBER systemPath)
+    Q_PROPERTY(bool isVesc MEMBER isVesc)
+    Q_PROPERTY(bool isEsp MEMBER isEsp)
+
+public:
+    VSerialInfo_t() {
+        isVesc = false;
+        isEsp = false;
+    }
+
     QString name;
     QString systemPath;
     bool isVesc;
-} VSerialInfo_t;
+    bool isEsp;
+};
+
+Q_DECLARE_METATYPE(VSerialInfo_t)
 
 typedef enum {
     CFG_T_UNDEFINED = 0,
@@ -40,7 +58,8 @@ typedef enum {
     CFG_T_INT,
     CFG_T_QSTRING,
     CFG_T_ENUM,
-    CFG_T_BOOL
+    CFG_T_BOOL,
+    CFG_T_BITFIELD
 } CFG_T;
 
 typedef enum {
@@ -97,7 +116,9 @@ typedef enum {
     FAULT_CODE_FLASH_CORRUPTION_APP_CFG,
     FAULT_CODE_FLASH_CORRUPTION_MC_CFG,
     FAULT_CODE_ENCODER_NO_MAGNET,
-    FAULT_CODE_ENCODER_MAGNET_TOO_STRONG
+    FAULT_CODE_ENCODER_MAGNET_TOO_STRONG,
+    FAULT_CODE_PHASE_FILTER,
+    FAULT_CODE_ENCODER_FAULT
 } mc_fault_code;
 
 typedef enum {
@@ -107,8 +128,11 @@ typedef enum {
     DISP_POS_MODE_ENCODER,
     DISP_POS_MODE_PID_POS,
     DISP_POS_MODE_PID_POS_ERROR,
-    DISP_POS_MODE_ENCODER_OBSERVER_ERROR
+    DISP_POS_MODE_ENCODER_OBSERVER_ERROR,
+    DISP_POS_MODE_HALL_OBSERVER_ERROR
 } disp_pos_mode;
+
+Q_DECLARE_METATYPE(disp_pos_mode)
 
 // ADC control types. Remember to add new types here when adding them to the firmware.
 typedef enum {
@@ -515,6 +539,58 @@ public:
 
 Q_DECLARE_METATYPE(LOG_DATA)
 
+struct LOG_HEADER {
+    Q_GADGET
+
+    Q_PROPERTY(QString key MEMBER key)
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString unit MEMBER unit)
+    Q_PROPERTY(int precision MEMBER precision)
+    Q_PROPERTY(bool isTimeStamp MEMBER isTimeStamp)
+    Q_PROPERTY(bool isRelativeToFirst MEMBER isRelativeToFirst)
+    Q_PROPERTY(double scaleStep MEMBER scaleStep)
+    Q_PROPERTY(double scaleMax MEMBER scaleMax)
+
+public:
+    LOG_HEADER() {
+        precision = 2;
+        isRelativeToFirst = false;
+        isTimeStamp = false;
+        scaleStep = 0.1;
+        scaleMax = 99.99;
+    }
+
+    LOG_HEADER(QString key,
+              QString name,
+              QString unit,
+              int precision = 2,
+              bool isRelativeToFirst = false,
+              bool isTimeStamp = false,
+              double scaleStep = 0.1,
+              double scaleMax = 99.99) {
+        this->key = key;
+        this->name = name;
+        this->unit = unit;
+        this->precision = precision;
+        this->isRelativeToFirst = isRelativeToFirst;
+        this->isTimeStamp = isTimeStamp;
+        this->scaleStep = scaleStep;
+        this->scaleMax = scaleMax;
+    }
+
+    QString key;
+    QString name;
+    QString unit;
+    int precision;
+    bool isRelativeToFirst;
+    bool isTimeStamp;
+    double scaleStep;
+    double scaleMax;
+
+};
+
+Q_DECLARE_METATYPE(LOG_HEADER)
+
 struct MCCONF_TEMP {
     Q_GADGET
 
@@ -549,12 +625,14 @@ struct CONFIG_BACKUP {
     Q_PROPERTY(QString vesc_uuid MEMBER vesc_uuid)
     Q_PROPERTY(QString mcconf_xml_compressed MEMBER mcconf_xml_compressed)
     Q_PROPERTY(QString appconf_xml_compressed MEMBER appconf_xml_compressed)
+    Q_PROPERTY(QString customconf_xml_compressed MEMBER customconf_xml_compressed)
 
 public:
     QString name;
     QString vesc_uuid;
     QString mcconf_xml_compressed;
     QString appconf_xml_compressed;
+    QString customconf_xml_compressed;
 };
 
 Q_DECLARE_METATYPE(CONFIG_BACKUP)
@@ -564,6 +642,7 @@ struct FW_RX_PARAMS {
 
     Q_PROPERTY(int major MEMBER major)
     Q_PROPERTY(int minor MEMBER minor)
+    Q_PROPERTY(QString fwName MEMBER fwName)
     Q_PROPERTY(QString hw MEMBER hw)
     Q_PROPERTY(QByteArray uuid MEMBER uuid)
     Q_PROPERTY(bool isPaired MEMBER isPaired)
@@ -574,6 +653,8 @@ struct FW_RX_PARAMS {
     Q_PROPERTY(bool qmlHwFullscreen MEMBER qmlHwFullscreen)
     Q_PROPERTY(bool hasQmlApp MEMBER hasQmlApp)
     Q_PROPERTY(bool qmlAppFullscreen MEMBER qmlAppFullscreen)
+    Q_PROPERTY(bool nrfNameSupported MEMBER nrfNameSupported)
+    Q_PROPERTY(bool nrfPinSupported MEMBER nrfPinSupported)
 
 public:
     FW_RX_PARAMS() {
@@ -588,6 +669,8 @@ public:
         qmlHwFullscreen = false;
         hasQmlApp = false;
         qmlAppFullscreen = false;
+        nrfNameSupported = false;
+        nrfPinSupported = false;
     }
 
     Q_INVOKABLE QString hwTypeStr() {
@@ -611,6 +694,7 @@ public:
 
     int major;
     int minor;
+    QString fwName;
     QString hw;
     QByteArray uuid;
     bool isPaired;
@@ -622,6 +706,8 @@ public:
     bool qmlHwFullscreen;
     bool hasQmlApp;
     bool qmlAppFullscreen;
+    bool nrfNameSupported;
+    bool nrfPinSupported;
 
 };
 
@@ -937,6 +1023,36 @@ typedef enum {
     COMM_GET_EXT_HUM_TMP,
     COMM_GET_STATS,
     COMM_RESET_STATS,
+
+    // Lisp
+    COMM_LISP_READ_CODE,
+    COMM_LISP_WRITE_CODE,
+    COMM_LISP_ERASE_CODE,
+    COMM_LISP_SET_RUNNING,
+    COMM_LISP_GET_STATS,
+    COMM_LISP_PRINT,
+
+    COMM_BMS_SET_BATT_TYPE,
+    COMM_BMS_GET_BATT_TYPE,
+
+    COMM_LISP_REPL_CMD,
+    COMM_LISP_STREAM_CODE,
+
+    COMM_FILE_LIST,
+    COMM_FILE_READ,
+    COMM_FILE_WRITE,
+    COMM_FILE_MKDIR,
+    COMM_FILE_REMOVE,
+
+    COMM_LOG_START,
+    COMM_LOG_STOP,
+    COMM_LOG_CONFIG_FIELD,
+    COMM_LOG_DATA_F32,
+
+    COMM_SET_APPCONF_NO_STORE,
+    COMM_GET_GNSS,
+
+    COMM_LOG_DATA_F64,
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -996,6 +1112,15 @@ typedef enum {
     CAN_PACKET_BMS_HW_DATA_5,
     CAN_PACKET_BMS_AH_WH_CHG_TOTAL,
     CAN_PACKET_BMS_AH_WH_DIS_TOTAL,
+    CAN_PACKET_UPDATE_PID_POS_OFFSET,
+    CAN_PACKET_POLL_ROTOR_POS,
+    CAN_PACKET_NOTIFY_BOOT,
+    CAN_PACKET_STATUS_6,
+    CAN_PACKET_GNSS_TIME,
+    CAN_PACKET_GNSS_LAT,
+    CAN_PACKET_GNSS_LON,
+    CAN_PACKET_GNSS_ALT_SPEED_HDOP,
+    CAN_PACKET_MAKE_ENUM_32_BITS = 0xFFFFFFFF,
 } CAN_PACKET_ID;
 
 typedef struct {
@@ -1031,49 +1156,179 @@ typedef enum {
     NRF_PAIR_FAIL
 } NRF_PAIR_RES;
 
-struct BALANCE_VALUES {
+struct LISP_STATS {
     Q_GADGET
 
-    Q_PROPERTY(double pid_output MEMBER pid_output)
-    Q_PROPERTY(double pitch_angle MEMBER pitch_angle)
-    Q_PROPERTY(double roll_angle MEMBER roll_angle)
-    Q_PROPERTY(int diff_time MEMBER diff_time)
-    Q_PROPERTY(double motor_current MEMBER motor_current)
-    Q_PROPERTY(int state MEMBER state)
-    Q_PROPERTY(int switch_value MEMBER switch_value)
-    Q_PROPERTY(double adc1 MEMBER adc1)
-    Q_PROPERTY(double adc2 MEMBER adc2)
-    Q_PROPERTY(double debug1 MEMBER debug1)
-    Q_PROPERTY(double debug2 MEMBER debug2)
-
 public:
-    BALANCE_VALUES() {
-        pid_output = 0;
-        pitch_angle = 0;
-        roll_angle = 0;
-        diff_time = 0;
-        motor_current = 0;
-        state = 0;
-        switch_value = 0;
-        adc1 = 0;
-        adc2 = 0;
-        debug1 = 0;
-        debug2 = 0;
+    Q_PROPERTY(double cpu_use MEMBER cpu_use)
+    Q_PROPERTY(double heap_use MEMBER heap_use)
+    Q_PROPERTY(double mem_use MEMBER mem_use)
+    Q_PROPERTY(double stack_use MEMBER stack_use)
+    Q_PROPERTY(QString done_ctx_r MEMBER done_ctx_r)
+
+    LISP_STATS() {
+        cpu_use = 0.0;
+        heap_use = 0.0;
+        mem_use = 0.0;
+        stack_use = 0.0;
     }
 
-    double pid_output;
-    double pitch_angle;
-    double roll_angle;
-    int diff_time;
-    double motor_current;
-    int state;
-    int switch_value;
-    double adc1;
-    double adc2;
-    double debug1;
-    double debug2;
+    double cpu_use;
+    double heap_use;
+    double mem_use;
+    double stack_use;
+    QString done_ctx_r;
+    QVector<QPair<QString, double>> number_bindings;
 };
 
-Q_DECLARE_METATYPE(BALANCE_VALUES)
+Q_DECLARE_METATYPE(LISP_STATS)
+
+struct ENCODER_DETECT_RES {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(double offset MEMBER offset)
+    Q_PROPERTY(double ratio MEMBER ratio)
+    Q_PROPERTY(bool inverted MEMBER inverted)
+    Q_PROPERTY(bool detect_rx MEMBER detect_rx)
+
+    ENCODER_DETECT_RES() {
+        offset = 0.0;
+        ratio = 0.0;
+        inverted = false;
+        detect_rx = false;
+    }
+
+    double offset;
+    double ratio;
+    bool inverted;
+    bool detect_rx;
+};
+
+Q_DECLARE_METATYPE(ENCODER_DETECT_RES)
+
+struct FILE_LIST_ENTRY {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(bool isDir MEMBER isDir)
+    Q_PROPERTY(qint32 size MEMBER size)
+
+    FILE_LIST_ENTRY() {
+        isDir = false;
+        size = false;
+    }
+
+    QString name;
+    bool isDir;
+    qint32 size;
+};
+
+Q_DECLARE_METATYPE(FILE_LIST_ENTRY)
+
+struct VescPackage {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString description MEMBER description)
+    Q_PROPERTY(QByteArray lispData MEMBER lispData)
+    Q_PROPERTY(QString qmlFile MEMBER qmlFile)
+    Q_PROPERTY(bool qmlIsFullscreen MEMBER qmlIsFullscreen)
+    Q_PROPERTY(bool isLibrary MEMBER isLibrary)
+    Q_PROPERTY(bool loadOk MEMBER loadOk)
+    Q_PROPERTY(QByteArray compressedData MEMBER compressedData)
+
+    VescPackage () {
+        name = "VESC Package Name";
+        qmlIsFullscreen = false;
+        isLibrary = false;
+        loadOk = false;
+    }
+
+    QByteArray compressedData;
+    QString name;
+    QString description;
+    QByteArray lispData;
+    QString qmlFile;
+    bool qmlIsFullscreen;
+    bool isLibrary;
+    bool loadOk;
+
+};
+
+Q_DECLARE_METATYPE(VescPackage)
+
+struct TCP_HUB_DEVICE {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(QString server MEMBER server)
+    Q_PROPERTY(int port MEMBER port)
+    Q_PROPERTY(QString id MEMBER id)
+    Q_PROPERTY(QString password MEMBER password)
+
+    TCP_HUB_DEVICE() {
+        port = 65101;
+    }
+
+    Q_INVOKABLE bool ping() {
+        return TcpHub::ping(server, port, id);
+    }
+
+    Q_INVOKABLE QString uuid() {
+        return QString("%1:%2:%3").arg(server).arg(port).arg(id);
+    }
+
+    QString server;
+    int port;
+    QString id;
+    QString password;
+};
+
+Q_DECLARE_METATYPE(TCP_HUB_DEVICE)
+
+struct GNSS_DATA {
+    Q_GADGET
+
+public:
+    Q_PROPERTY(double lat MEMBER lat)
+    Q_PROPERTY(double lon MEMBER lon)
+    Q_PROPERTY(double height MEMBER height)
+    Q_PROPERTY(double speed MEMBER speed)
+    Q_PROPERTY(double hdop MEMBER hdop)
+    Q_PROPERTY(qint32 ms_today MEMBER ms_today)
+    Q_PROPERTY(int yy MEMBER yy)
+    Q_PROPERTY(int mo MEMBER mo)
+    Q_PROPERTY(int dd MEMBER dd)
+    Q_PROPERTY(double age_s MEMBER age_s)
+
+    GNSS_DATA() {
+        lat = 0.0;
+        lon = 0.0;
+        height = 0.0;
+        speed = 0.0;
+        hdop = 0.0;
+        ms_today = 0;
+        yy = 0;
+        mo = 0;
+        dd = 0;
+        age_s = 0.0;
+    }
+
+    double lat;
+    double lon;
+    double height;
+    double speed;
+    double hdop;
+    qint32 ms_today;
+    int yy;
+    int mo;
+    int dd;
+    double age_s;
+};
+
+Q_DECLARE_METATYPE(GNSS_DATA)
 
 #endif // DATATYPES_H

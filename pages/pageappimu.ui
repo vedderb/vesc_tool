@@ -63,28 +63,6 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_4">
-          <attribute name="title">
-           <string>Detect Calibration</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_6">
-           <property name="leftMargin">
-            <number>3</number>
-           </property>
-           <property name="topMargin">
-            <number>3</number>
-           </property>
-           <property name="rightMargin">
-            <number>3</number>
-           </property>
-           <property name="bottomMargin">
-            <number>3</number>
-           </property>
-           <item>
-            <widget class="DetectIMU" name="detectIMU" native="true"/>
-           </item>
-          </layout>
-         </widget>
         </widget>
        </item>
        <item>
@@ -108,12 +86,6 @@
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
    <header>widgets/qcustomplot.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>DetectIMU</class>
-   <extends>QWidget</extends>
-   <header location="global">widgets/detectimu.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

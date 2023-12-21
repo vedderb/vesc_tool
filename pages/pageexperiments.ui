@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>689</width>
+    <width>811</width>
     <height>544</height>
    </rect>
   </property>
@@ -275,7 +275,7 @@
        <item row="2" column="0">
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>RPM Sweep</string>
+          <string>ERPM Sweep</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <property name="leftMargin">
@@ -408,7 +408,7 @@
           <item row="1" column="2">
            <widget class="QCheckBox" name="keepRPMcheckBox">
             <property name="text">
-             <string>Keep End RPM</string>
+             <string>Keep End Speed</string>
             </property>
             <property name="checked">
              <bool>false</bool>
@@ -1184,7 +1184,6 @@
           <font>
            <family>DejaVu Sans Mono</family>
            <pointsize>14</pointsize>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -1199,7 +1198,6 @@
           <font>
            <family>DejaVu Sans Mono</family>
            <pointsize>14</pointsize>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>

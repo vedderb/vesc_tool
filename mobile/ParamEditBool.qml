@@ -34,7 +34,7 @@ Item {
     property real maxVal: 1.0
 
     Component.onCompleted: {
-        if (params !== null) {
+        if (params != null) {
             nameText.text = params.getLongName(paramName)
             boolSwitch.checked = params.getParamBool(paramName)
 
@@ -76,7 +76,7 @@ Item {
                 Layout.fillWidth: true
 
                 onCheckedChanged: {
-                    if (params !== null) {
+                    if (params != null) {
                         if (params.getUpdateOnly() !== paramName) {
                             params.setUpdateOnly("")
                         }
@@ -131,8 +131,8 @@ Item {
     Connections {
         target: params
 
-        onParamChangedBool: {
-            if (src !== editor && name == paramName) {
+        function onParamChangedBool(src, name, newParam) {
+            if (src !== editor && name === paramName) {
                 boolSwitch.checked = newParam
             }
         }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>512</width>
-    <height>181</height>
+    <height>187</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,9 +23,12 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QComboBox" name="controlTypeBox">
+         <widget class="QCheckBox" name="dualBox">
           <property name="toolTip">
-           <string>Choose the control type. Some control types have centered input, some don't.</string>
+           <string>Show centered graph, which is how the centered control modes interpret the throttle.</string>
+          </property>
+          <property name="text">
+           <string>Use Centered Control</string>
           </property>
          </widget>
         </item>
@@ -41,11 +44,23 @@
            <string>Show help</string>
           </property>
           <property name="text">
-           <string/>
+           <string>Help</string>
           </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="resetButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Reset min and max</string>
+          </property>
+          <property name="text">
+           <string>Reset</string>
           </property>
          </widget>
         </item>
@@ -61,11 +76,7 @@
            <string>Apply min, max and center to VESC Tool configuration</string>
           </property>
           <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/apply.png</normaloff>:/res/icons/apply.png</iconset>
+           <string>Apply</string>
           </property>
           <property name="iconSize">
            <size>
@@ -157,26 +168,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QPushButton" name="resetButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Reset min and max</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>
@@ -210,7 +201,7 @@
            <string>Current VESC output. Will be updated after writing the app configuration.</string>
           </property>
           <property name="text">
-           <string>From VESC</string>
+           <string>VESC Firmware</string>
           </property>
          </widget>
         </item>
@@ -230,15 +221,6 @@
        </layout>
       </item>
      </layout>
-     <zorder>display</zorder>
-     <zorder>controlTypeBox</zorder>
-     <zorder>resetButton</zorder>
-     <zorder>helpButton</zorder>
-     <zorder>applyButton</zorder>
-     <zorder>centerBox</zorder>
-     <zorder>label</zorder>
-     <zorder>label_2</zorder>
-     <zorder>displayVesc</zorder>
     </widget>
    </item>
   </layout>
@@ -251,8 +233,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

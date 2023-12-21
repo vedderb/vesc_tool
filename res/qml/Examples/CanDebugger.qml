@@ -139,50 +139,50 @@ Item {
     Connections {
         target: mCommands
         
-        onCanFrameRx: { // data, id, isExtended
+        function onCanFrameRx(data, id, isExtended) {
             var dv = new DataView(data);
             
             var param = dv.getUInt8(0)
             var sub = dv.getUInt8(1)
             
-            if (!isExtended && id == 0x660) {                
-                if (param == 2) {
+            if (!isExtended && id === 0x660) {
+                if (param === 2) {
                     for (var i = 0;i < 3;i++) {
                         var volt = dv.getUint16(2, true)
-                        if (volt != 65535) {
+                        if (volt !== 65535) {
                             cellv[sub * 3 + i] = volt / 1000
                         }
                     }
-                } else if (param == 3) {
+                } else if (param === 3) {
                     for (var i = 0;i < 3;i++) {
                         var temp = dv.getInt16(2, true)
-                        if (temp != 32767) {
+                        if (temp !== 32767) {
                             cellt[sub * 3 + i] = temp
                         }
                     }
-                } else if (param == 5) {
-                    if (sub == 1) {
+                } else if (param === 5) {
+                    if (sub === 1) {
                         var secs = dv.getUint32(2, true)
                         relh = secs / 60 / 60
-                    } else if (sub == 2) {
+                    } else if (sub === 2) {
                         var secs = dv.getUint32(2, true)
                         chargeh = secs / 60 / 60
                     }
-                } else if (param == 6) {
-                    if (sub == 0) {
+                } else if (param === 6) {
+                    if (sub === 0) {
                         var curr = dv.getUint32(2, true)
                         chargeCurrent = curr / 1000
-                    } else if (sub == 1) {
+                    } else if (sub === 1) {
                         var curr = dv.getUint32(2, true)
                         dischargeCurrent = curr / 1000
                     }
-                } else if (param == 9) {
+                } else if (param === 9) {
                     var str = ""
                     for (var i = 0;i < 6;i++) {
                         str += String.fromCharCode(dv.getUint8(2 + i));
                     }
                     
-                    if (sub == 0) {
+                    if (sub === 0) {
                         line = str
                     } else {
                         line += str

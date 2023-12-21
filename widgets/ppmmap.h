@@ -41,10 +41,10 @@ public:
 private slots:
     void decodedPpmReceived(double value, double last_len);
 
-    void on_controlTypeBox_currentIndexChanged(int index);
     void on_helpButton_clicked();
     void on_resetButton_clicked();
     void on_applyButton_clicked();
+    void on_dualBox_toggled(bool checked);
 
 private:
     Ui::PpmMap *ui;

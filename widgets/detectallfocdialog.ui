@@ -47,8 +47,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>770</width>
-            <height>432</height>
+            <width>796</width>
+            <height>481</height>
            </rect>
           </property>
           <attribute name="label">
@@ -78,10 +78,6 @@
                <property name="text">
                 <string>Next</string>
                </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Down-96.png</normaloff>:/res/icons/Down-96.png</iconset>
-               </property>
               </widget>
              </item>
             </layout>
@@ -93,8 +89,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>770</width>
-            <height>432</height>
+            <width>796</width>
+            <height>481</height>
            </rect>
           </property>
           <attribute name="label">
@@ -124,20 +120,12 @@
                <property name="text">
                 <string>Previous</string>
                </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Up-96.png</normaloff>:/res/icons/Up-96.png</iconset>
-               </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="nextBattButton">
                <property name="text">
                 <string>Next</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Down-96.png</normaloff>:/res/icons/Down-96.png</iconset>
                </property>
               </widget>
              </item>
@@ -150,8 +138,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>770</width>
-            <height>432</height>
+            <width>796</width>
+            <height>481</height>
            </rect>
           </property>
           <attribute name="label">
@@ -246,20 +234,12 @@
                <property name="text">
                 <string>Previous</string>
                </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Up-96.png</normaloff>:/res/icons/Up-96.png</iconset>
-               </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="runNoCanButton">
                <property name="text">
                 <string>Run Detection (no CAN)</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
                </property>
               </widget>
              </item>
@@ -274,10 +254,6 @@
                <property name="text">
                 <string>Run Detection</string>
                </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-               </property>
               </widget>
              </item>
             </layout>
@@ -289,8 +265,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>770</width>
-            <height>432</height>
+            <width>796</width>
+            <height>481</height>
            </rect>
           </property>
           <attribute name="label">
@@ -327,20 +303,12 @@
                <property name="text">
                 <string>Previous</string>
                </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Up-96.png</normaloff>:/res/icons/Up-96.png</iconset>
-               </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="finishButton">
                <property name="text">
                 <string>Finish</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../res.qrc">
-                 <normaloff>:/res/icons/Ok-96.png</normaloff>:/res/icons/Ok-96.png</iconset>
                </property>
               </widget>
              </item>

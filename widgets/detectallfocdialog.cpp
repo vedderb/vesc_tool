@@ -31,19 +31,17 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    ui->tabWidget->setTabIcon(0, QPixmap(theme + "icons/Wizard-96.png"));
-    ui->tabWidget->setTabIcon(1, QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->nextMotorButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
-    ui->prevBattButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
-    ui->nextBattButton->setIcon(QPixmap(theme + "icons/Down-96.png"));
-    ui->prevSetupButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
-    ui->prevDirButton->setIcon(QPixmap(theme + "icons/Up-96.png"));
-    ui->runButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
-    ui->runNoCanButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
-    ui->runAdvancedButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
-    ui->finishButton->setIcon(QPixmap(theme + "icons/Circled Ok-96.png"));
-
+    ui->tabWidget->setTabIcon(0, Utility::getIcon("icons/Wizard-96.png"));
+    ui->tabWidget->setTabIcon(1, Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->nextMotorButton->setIcon(Utility::getIcon("icons/Down-96.png"));
+    ui->prevBattButton->setIcon(Utility::getIcon("icons/Up-96.png"));
+    ui->nextBattButton->setIcon(Utility::getIcon("icons/Down-96.png"));
+    ui->prevSetupButton->setIcon(Utility::getIcon("icons/Up-96.png"));
+    ui->prevDirButton->setIcon(Utility::getIcon("icons/Up-96.png"));
+    ui->runButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->runNoCanButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->runAdvancedButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->finishButton->setIcon(Utility::getIcon("icons/Ok-96.png"));
 
     mVesc = vesc;
     mRejectOk = true;
@@ -75,7 +73,7 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
 
     item = new QListWidgetItem;
     item->setText(tr("Large Outrunner (~2000 g)"));
-    item->setIcon(QIcon(theme +"icons/motor.png"));
+    item->setIcon(Utility::getIcon("icons/motor.png"));
     item->setData(Qt::UserRole, QVariant::fromValue(MotorData(400, 700, 4000, 14)));
     ui->motorList->addItem(item);
 
@@ -93,7 +91,7 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
 
     item = new QListWidgetItem;
     item->setText(tr("Large Inrunner (~2000 g)"));
-    item->setIcon(QIcon(theme +"icons/motor.png"));
+    item->setIcon(Utility::getIcon("icons/motor.png"));
     item->setData(Qt::UserRole, QVariant::fromValue(MotorData(400, 1000, 4000, 4)));
     ui->motorList->addItem(item);
 
@@ -305,7 +303,7 @@ void DetectAllFocDialog::runDetect(bool can)
                                         ui->sensorlessErpmBox->value());
 
     if (res.startsWith("Success!")) {
-        Utility::setBatteryCutCanFromCurrentConfig(mVesc, canDevs);
+        Utility::setBatteryCutCanFromCurrentConfig(mVesc, canDevs, true);
     }
 
     ui->progressBar->setRange(0, 100);

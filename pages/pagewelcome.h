@@ -49,12 +49,14 @@ public slots:
 private slots:
     void on_autoConnectButton_clicked();
     void on_nrfPairButton_clicked();
+    void on_setupBluetoothButton_clicked();
+    void on_wizardIMUButton_clicked();
 
 private:
     Ui::PageWelcome *ui;
     VescInterface *mVesc;
     QmlUi mQmlUi;
-    Utility mUtil;
+    Utility *mUtil;
 
 };
 

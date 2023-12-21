@@ -61,14 +61,14 @@ ApplicationWindow {
     Connections {
         target: QmlUi
 
-        onReloadFile: {
+        function onReloadFile(fileName) {
             loader.source = ""
             QmlUi.clearQmlCache()
             loadTimer.start()
             lastFile = fileName
         }
 
-        onToggleFullscreen: {
+        function onToggleFullscreen() {
             wasFullscreen = !wasFullscreen
             if (wasFullscreen) {
                 mainWindow.visibility = Window.FullScreen
@@ -77,13 +77,13 @@ ApplicationWindow {
             }
         }
 
-        onMoveToOtherScreen: {
+        function onMoveToOtherScreen() {
             var screenInd = Qt.application.screens.length - 1
             mainWindow.x = Qt.application.screens[screenInd].virtualX;
             mainWindow.y = Qt.application.screens[screenInd].virtualY;
         }
 
-        onMoveToFirstScreen: {
+        function onMoveToFirstScreen() {
             mainWindow.x = Qt.application.screens[0].virtualX;
             mainWindow.y = Qt.application.screens[0].virtualY;
         }
@@ -121,7 +121,7 @@ ApplicationWindow {
             };
         }
 
-        onRotateScreen: {
+        function onRotateScreen(rot) {
             loaderContainer.rotation = rot
 
             loaderContainer.width = Qt.binding(function() {

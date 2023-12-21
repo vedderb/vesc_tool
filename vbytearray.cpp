@@ -37,6 +37,34 @@ VByteArray::VByteArray(const QByteArray &data) : QByteArray(data)
 
 }
 
+void VByteArray::vbAppendInt64(qint64 number)
+{
+    QByteArray data;
+    data.append((char)((number >> 56) & 0xFF));
+    data.append((char)((number >> 48) & 0xFF));
+    data.append((char)((number >> 40) & 0xFF));
+    data.append((char)((number >> 32) & 0xFF));
+    data.append((char)((number >> 24) & 0xFF));
+    data.append((char)((number >> 16) & 0xFF));
+    data.append((char)((number >> 8) & 0xFF));
+    data.append((char)(number & 0xFF));
+    append(data);
+}
+
+void VByteArray::vbAppendUint64(quint64 number)
+{
+    QByteArray data;
+    data.append((char)((number >> 56) & 0xFF));
+    data.append((char)((number >> 48) & 0xFF));
+    data.append((char)((number >> 40) & 0xFF));
+    data.append((char)((number >> 32) & 0xFF));
+    data.append((char)((number >> 24) & 0xFF));
+    data.append((char)((number >> 16) & 0xFF));
+    data.append((char)((number >> 8) & 0xFF));
+    data.append((char)(number & 0xFF));
+    append(data);
+}
+
 void VByteArray::vbAppendInt32(qint32 number)
 {
     QByteArray data;
@@ -83,6 +111,11 @@ void VByteArray::vbAppendUint8(quint8 number)
     append((char)number);
 }
 
+void VByteArray::vbAppendDouble64(double number, double scale)
+{
+    vbAppendInt64((qint64)roundDouble(number * scale));
+}
+
 void VByteArray::vbAppendDouble32(double number, double scale)
 {
     vbAppendInt32((qint32)roundDouble(number * scale));
@@ -119,10 +152,56 @@ void VByteArray::vbAppendDouble32Auto(double number)
     vbAppendUint32(res);
 }
 
+void VByteArray::vbAppendDouble64Auto(double number)
+{
+    float n = number;
+    float err = float(number - double(n));
+    vbAppendDouble32Auto(n);
+    vbAppendDouble32Auto(err);
+}
+
 void VByteArray::vbAppendString(QString str)
 {
     append(str.toLocal8Bit());
     append((char)0);
+}
+
+qint64 VByteArray::vbPopFrontInt64()
+{
+    if (size() < 8) {
+        return 0;
+    }
+
+    qint64 res = (quint64)((quint8) at(0)) << 56 |
+                 (quint64)((quint8) at(1)) << 48 |
+                 (quint64)((quint8) at(2)) << 40 |
+                 (quint64)((quint8) at(3)) << 32 |
+                 (quint64)((quint8) at(4)) << 24 |
+                 (quint64)((quint8) at(5)) << 16 |
+                 (quint64)((quint8) at(6)) << 8 |
+                 (quint64)((quint8) at(7));
+
+    remove(0, 8);
+    return res;
+}
+
+quint64 VByteArray::vbPopFrontUint64()
+{
+    if (size() < 8) {
+        return 0;
+    }
+
+    quint64 res = (quint64)((quint8) at(0)) << 56 |
+                  (quint64)((quint8) at(1)) << 48 |
+                  (quint64)((quint8) at(2)) << 40 |
+                  (quint64)((quint8) at(3)) << 32 |
+                  (quint64)((quint8) at(4)) << 24 |
+                  (quint64)((quint8) at(5)) << 16 |
+                  (quint64)((quint8) at(6)) << 8 |
+                  (quint64)((quint8) at(7));
+
+    remove(0, 8);
+    return res;
 }
 
 qint32 VByteArray::vbPopFrontInt32()
@@ -205,6 +284,11 @@ quint8 VByteArray::vbPopFrontUint8()
     return res;
 }
 
+double VByteArray::vbPopFrontDouble64(double scale)
+{
+    return (double)vbPopFrontInt64() / scale;
+}
+
 double VByteArray::vbPopFrontDouble32(double scale)
 {
     return (double)vbPopFrontInt32() / scale;
@@ -234,6 +318,13 @@ double VByteArray::vbPopFrontDouble32Auto()
     }
 
     return ldexpf(f, e);
+}
+
+double VByteArray::vbPopFrontDouble64Auto()
+{
+    double n = vbPopFrontDouble32Auto();
+    double err = vbPopFrontDouble32Auto();
+    return n + err;
 }
 
 QString VByteArray::vbPopFrontString()

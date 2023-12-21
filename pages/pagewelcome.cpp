@@ -35,14 +35,16 @@ PageWelcome::PageWelcome(QWidget *parent) :
     ui(new Ui::PageWelcome)
 {
     ui->setupUi(this);
+    mUtil = new Utility(this);
 
-    QString theme = Utility::getThemePath();
-    ui->autoConnectButton->setIcon(QIcon(theme + "icons/Connected-96.png"));
-    ui->wizardFocSimpleButton->setIcon(QIcon(theme + "icons/Wizard-96.png"));
-    ui->wizardAppButton->setIcon(QIcon(theme + "icons/Wizard-96.png"));
-    ui->nrfPairButton->setIcon(QIcon(theme + "icons/icons8-fantasy-96.png"));
-    ui->multiSettingButton->setIcon(QIcon(theme + "icons/Settings-96.png"));
-    ui->invertDirButton->setIcon(QIcon(theme + "icons/Process-96.png"));
+    ui->autoConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->wizardFocSimpleButton->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->wizardAppButton->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->nrfPairButton->setIcon(Utility::getIcon("icons/icons8-fantasy-96.png"));
+    ui->multiSettingButton->setIcon(Utility::getIcon("icons/Settings-96.png"));
+    ui->invertDirButton->setIcon(Utility::getIcon("icons/Process-96.png"));
+    ui->setupBluetoothButton->setIcon(Utility::getIcon("icons/bluetooth.png"));
+    ui->wizardIMUButton->setIcon(Utility::getIcon("icons/imu_off.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
@@ -110,7 +112,7 @@ void PageWelcome::setVesc(VescInterface *vesc)
 
     ui->qmlWidget->engine()->rootContext()->setContextProperty("VescIf", mVesc);
     ui->qmlWidget->engine()->rootContext()->setContextProperty("QmlUi", this);
-    ui->qmlWidget->engine()->rootContext()->setContextProperty("Utility", &mUtil);
+    ui->qmlWidget->engine()->rootContext()->setContextProperty("Utility", mUtil);
 
     ui->qmlWidget->setSource(QUrl(QLatin1String("qrc:/res/qml/WelcomeQmlPanel.qml")));
 }
@@ -124,3 +126,14 @@ void PageWelcome::on_nrfPairButton_clicked()
 {
     QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "nrfQuickPair");
 }
+
+void PageWelcome::on_setupBluetoothButton_clicked()
+{
+    QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "openBleSetup");
+}
+
+void PageWelcome::on_wizardIMUButton_clicked()
+{
+    QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "openWizardIMU");
+}
+

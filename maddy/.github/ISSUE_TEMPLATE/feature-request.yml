@@ -1,0 +1,15 @@
+name: Feature Request
+description: Missing some feature?
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to create a feature request!
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: What are you missing in maddy?
+      description: If you want some extra Markdown supported, please also write a Markdown example and an expected HTML output.
+    validations:
+      required: true

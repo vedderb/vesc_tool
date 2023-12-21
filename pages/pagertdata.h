@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2022 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -24,7 +24,6 @@
 #include <QVector>
 #include <QTimer>
 #include "vescinterface.h"
-#include "widgets/qcustomplot.h"
 
 namespace Ui {
 class PageRtData;
@@ -45,10 +44,6 @@ private slots:
     void timerSlot();
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void rotorPosReceived(double pos);
-    void plotInitReceived(QString xLabel, QString yLabel);
-    void plotDataReceived(double x, double y);
-    void plotAddGraphReceived(QString name);
-    void plotSetGraphReceived(int graph);
 
     void on_zoomHButton_toggled(bool checked);
     void on_zoomVButton_toggled(bool checked);
@@ -62,12 +57,8 @@ private slots:
     void on_posStopButton_clicked();
     void on_tempShowMosfetBox_toggled(bool checked);
     void on_tempShowMotorBox_toggled(bool checked);
-    void on_experimentLoadXmlButton_clicked();
-    void on_experimentSaveXmlButton_clicked();
-    void on_experimentSavePngButton_clicked();
-    void on_experimentSavePdfButton_clicked();
-    void on_experimentClearDataButton_clicked();
     void on_logRtButton_toggled(bool checked);
+    void on_posHallObserverErrorButton_clicked();
 
 private:
     Ui::PageRtData *ui;
@@ -95,17 +86,6 @@ private:
 
     bool mUpdateValPlot;
     bool mUpdatePosPlot;
-
-    typedef struct {
-        QString label;
-        QColor color;
-        QVector<double> xData;
-        QVector<double> yData;
-    } EXPERIMENT_PLOT;
-
-    QVector<EXPERIMENT_PLOT> mExperimentPlots;
-    int mExperimentPlotNow;
-    bool mExperimentReplot;
 
     void appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize);
     void updateZoom();

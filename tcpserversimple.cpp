@@ -19,6 +19,9 @@
 
 #include "tcpserversimple.h"
 #include <QDebug>
+#include <QHostInfo>
+#include <QEventLoop>
+#include <QTimer>
 
 TcpServerSimple::TcpServerSimple(QObject *parent) : QObject(parent)
 {
@@ -26,6 +29,7 @@ TcpServerSimple::TcpServerSimple(QObject *parent) : QObject(parent)
     mPacket = new Packet(this);
     mTcpSocket = nullptr;
     mUsePacket = false;
+    mLastPort = -1;
 
     connect(mTcpServer, SIGNAL(newConnection()), this, SLOT(newTcpConnection()));
     connect(mPacket, SIGNAL(dataToSend(QByteArray&)),
@@ -34,11 +38,58 @@ TcpServerSimple::TcpServerSimple(QObject *parent) : QObject(parent)
 
 bool TcpServerSimple::startServer(int port, QHostAddress addr)
 {
-    if (!mTcpServer->listen(addr,  port)) {
-        return false;
+    mLastPort = port;
+    return mTcpServer->listen(addr,  port);
+}
+
+bool TcpServerSimple::connectToHub(QString server, int port, QString id, QString pass)
+{
+    QHostAddress host;
+    host.setAddress(server);
+
+    // Try DNS lookup
+    if (host.isNull()) {
+        QList<QHostAddress> addresses = QHostInfo::fromName(server).addresses();
+
+        if (!addresses.isEmpty()) {
+            host.setAddress(addresses.first().toString());
+        }
     }
 
-    return true;
+    stopServer();
+
+    mTcpSocket = new QTcpSocket(this);
+    mTcpSocket->connectToHost(host, port);
+
+    QEventLoop loop;
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    timeoutTimer.start(3000);
+    auto conn = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+
+    connect(mTcpSocket, &QTcpSocket::connected, [&id, &pass, this, &loop]() {
+        QString login = QString("VESC:%1:%2\n").arg(id).arg(pass);
+        mTcpSocket->write(login.toLocal8Bit());
+        loop.quit();
+    });
+
+    loop.exec();
+    disconnect(conn);
+
+    if (timeoutTimer.isActive()) {
+        connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
+        connect(mTcpSocket, SIGNAL(disconnected()),
+                this, SLOT(tcpInputDisconnected()));
+        connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+                this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
+        emit connectionChanged(true, mTcpSocket->peerAddress().toString());
+        return true;
+    } else {
+        qWarning() << "Connection timed out";
+    }
+
+    stopServer();
+    return false;
 }
 
 void TcpServerSimple::stopServer()
@@ -101,7 +152,7 @@ void TcpServerSimple::tcpInputDisconnected()
 {
     emit connectionChanged(false, mTcpSocket->peerAddress().toString());
     mTcpSocket->deleteLater();
-    mTcpSocket = 0;
+    mTcpSocket = nullptr;
 }
 
 void TcpServerSimple::tcpInputDataAvailable()
@@ -120,12 +171,17 @@ void TcpServerSimple::tcpInputError(QAbstractSocket::SocketError socketError)
 {
     (void)socketError;
     mTcpSocket->abort();
-//    qDebug() << socketError;
+    qDebug() << socketError;
 }
 
 void TcpServerSimple::dataToSend(QByteArray &data)
 {
     sendData(data);
+}
+
+int TcpServerSimple::lastPort() const
+{
+    return mLastPort;
 }
 
 bool TcpServerSimple::usePacket() const

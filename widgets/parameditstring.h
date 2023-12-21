@@ -43,6 +43,8 @@ private slots:
 
     void on_helpButton_clicked();
     void on_valueEdit_textChanged(const QString &arg1);
+    void on_readButton_clicked();
+    void on_readDefaultButton_clicked();
 
 private:
     Ui::ParamEditString *ui;

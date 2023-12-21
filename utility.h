@@ -27,6 +27,7 @@
 #include <QtGui/qpa/qplatformwindow.h>
 #include "vescinterface.h"
 #include "widgets/qcustomplot.h"
+#include "datatypes.h"
 
 #define FE_WGS84        (1.0/298.257223563) // earth flattening (WGS84)
 #define RE_WGS84        6378137.0           // earth semimajor axis (WGS84) (m)
@@ -51,6 +52,8 @@ public:
     Q_INVOKABLE static QString uuid2Str(QByteArray uuid, bool space);
     Q_INVOKABLE static bool requestFilePermission();
     Q_INVOKABLE static bool hasLocationPermission();
+    Q_INVOKABLE static bool requestBleScanPermission();
+    Q_INVOKABLE static bool requestBleConnectPermission();
     Q_INVOKABLE static void keepScreenOn(bool on);
     Q_INVOKABLE static void allowScreenRotation(bool enabled);
     Q_INVOKABLE static bool waitSignal(QObject *sender, QString signal, int timeoutMs);
@@ -62,10 +65,11 @@ public:
     Q_INVOKABLE static double measureLinkageOpenloopBlocking(VescInterface *vesc, double current, double erpm_per_sec, double low_duty,
                                                              double resistance, double inductance);
     Q_INVOKABLE static QVector<int> measureHallFocBlocking(VescInterface *vesc, double current);
+    Q_INVOKABLE static ENCODER_DETECT_RES measureEncoderBlocking(VescInterface *vesc, double current);
     Q_INVOKABLE static bool waitMotorStop(VescInterface *vesc, double erpmTres, int timeoutMs);
     Q_INVOKABLE static bool resetInputCan(VescInterface *vesc, QVector<int> canIds);
     Q_INVOKABLE static bool setBatteryCutCan(VescInterface *vesc, QVector<int> canIds, double cutStart, double cutEnd);
-    Q_INVOKABLE static bool setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds);
+    Q_INVOKABLE static bool setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int> canIds, bool cautious);
     Q_INVOKABLE static bool setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<int> canIds, QStringList params);
     Q_INVOKABLE static bool setInvertDirection(VescInterface *vesc, int canId, bool inverted);
     Q_INVOKABLE static bool getInvertDirection(VescInterface *vesc, int canId);
@@ -78,6 +82,7 @@ public:
     static uint32_t crc32c(uint8_t *data, uint32_t len);
     static bool getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params);
     static bool getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId);
+    Q_INVOKABLE static bool isConnectedToHwVesc(VescInterface *vesc);
     Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlocking(VescInterface *vesc);
     Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlockingCan(VescInterface *vesc, int canId);
     Q_INVOKABLE static MC_VALUES getMcValuesBlocking(VescInterface *vesc);
@@ -86,6 +91,8 @@ public:
     Q_INVOKABLE static void startGnssForegroundService();
     Q_INVOKABLE static void stopGnssForegroundService();
     Q_INVOKABLE static bool isBleScanEnabled();
+    Q_INVOKABLE static QString strCrc32(QString str);
+    Q_INVOKABLE static QString readInternalImuType(VescInterface *vesc);
 
     static void llhToXyz(double lat, double lon, double height, double *x, double *y, double *z);
     static void xyzToLlh(double x, double y, double z, double *lat, double *lon, double *height);
@@ -118,6 +125,8 @@ public:
         return QString(QMetaEnum::fromType<QEnum>().valueToKey(value));
     }
 
+    Q_INVOKABLE static QString arr2str(QByteArray a) {return QString(a);}
+
     Q_INVOKABLE static bool hasSerialport() {
 #ifdef HAS_SERIALPORT
         return true;
@@ -125,6 +134,14 @@ public:
         return false;
 #endif
     };
+
+    static QString waitForLine(QTcpSocket *socket, int timeoutMs);
+
+    static QPixmap getIcon(QString path);
+
+    Q_INVOKABLE static bool downloadUrlEventloop(QString path, QString dest);
+
+    Q_INVOKABLE static QString md2html(QString md);
 
 signals:
 

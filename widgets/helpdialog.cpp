@@ -29,13 +29,18 @@ HelpDialog::HelpDialog(QString title, QString text, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString theme = Utility::getThemePath();
-    this->setWindowIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->label->setPixmap(QPixmap(theme + "icons/About-96.png"));
+    this->setWindowIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->label->setPixmap(Utility::getIcon("icons/About-96.png"));
 
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowTitle(title);
-    ui->textEdit->setText(text);
+
+    if (text.trimmed().startsWith('#')) {
+        ui->textEdit->setMarkdown(text);
+    } else {
+        ui->textEdit->setText(text);
+    }
+
     ui->textEdit->viewport()->setAutoFillBackground(false);
 }
 

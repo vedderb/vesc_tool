@@ -3,25 +3,25 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>$(Vesc Tool)</string>
+	<string>Vesc Tool</string>
 	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
+	<string>VESC Tool</string>
 	<key>CFBundleGetInfoString</key>
 	<string>Created by Qt/QMake</string>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>com.vesc-project.vesc-tool</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>VESC Tool</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
+	<string>6.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>6.0</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationCategoryType</key>
@@ -37,7 +37,7 @@
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Need access to connect to VESC</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>$(PRODUCT_NAME) searches Bluetooth LE Devices (WaiterLock, Barcode Scanner, eGK)</string>
+	<string>VESC Tool searches Bluetooth LE Devices (WaiterLock, Barcode Scanner, eGK)</string>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>Saves log files here</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -47,13 +47,13 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Used for Ride Tracking</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>$(PRODUCT_NAME) uses photos</string>
+	<string>VESC Tool uses photos</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>location</string>
 		<string>bluetooth-central</string>
+		<string>location</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>

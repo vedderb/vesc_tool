@@ -18,20 +18,6 @@
 # sudo make install
 # sudo ldconfig
 
-# Qt 5.9:
-# cd /opt
-# sudo mkdir qt5
-# sudo chown $USER qt5
-# git clone https://code.qt.io/qt/qt5.git
-# cd qt5
-# git checkout 5.9
-# perl init-repository --module-subset=default,-qtwebkit,-qtwebkit-examples,-qtwebengine
-# mkdir build
-# cd build
-# ../configure -prefix /opt/Qt/5.9-static/ -release -opensource -confirm-license -static -no-sql-mysql -no-sql-psql -no-sql-sqlite -no-journald -qt-zlib -no-mtdev -no-gif -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-pcre -qt-xcb -no-xinput2 -no-glib -qt-xkbcommon-x11 -no-compile-examples -no-cups -no-iconv -no-tslib -dbus-linked -no-xcb-xlib -no-eglfs -no-directfb -no-linuxfb -no-kms -nomake examples -nomake tests -skip qtwebsockets -skip qtwebchannel -skip qtwebengine -skip qtwayland -skip qtwinextras -skip qtsvg -skip qtsensors -skip multimedia -no-xkbcommon-evdev -no-evdev -no-libproxy -no-icu -skip imageformats -no-xinput2 -qt-freetype -opengl es2
-# make -j9
-# sudo make install
-
 # Qt 5.12:
 # cd /opt
 # sudo mkdir qt5
@@ -42,7 +28,7 @@
 # perl init-repository --module-subset=default,-qtwebkit,-qtwebkit-examples,-qtwebengine
 # mkdir build
 # cd build
-# ../configure -prefix /opt/Qt/5.12-static/ -release -opensource -confirm-license -static -no-sql-mysql -no-sql-psql -no-sql-sqlite -no-journald -qt-zlib -no-mtdev -no-gif -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-pcre -qt-xcb -no-glib -no-compile-examples -no-cups -no-iconv -no-tslib -dbus-linked -no-xcb-xlib -no-eglfs -no-directfb -no-linuxfb -no-kms -nomake examples -nomake tests -skip qtwebsockets -skip qtwebchannel -skip qtwebengine -skip qtwayland -skip qtwinextras -skip qtsensors -skip multimedia -no-evdev -no-libproxy -no-icu -qt-freetype -skip qtimageformats -opengl es2
+# ../configure -prefix /opt/Qt/5.12-static/ -release -opensource -confirm-license -static -no-sql-mysql -no-sql-psql -no-sql-sqlite -no-journald -qt-zlib -no-mtdev -no-gif -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-pcre -qt-xcb -no-glib -no-compile-examples -no-cups -no-iconv -no-tslib -dbus-linked -no-xcb-xlib -no-eglfs -no-directfb -no-linuxfb -no-kms -nomake examples -nomake tests -skip qtwebsockets -skip qtwebchannel -skip qtwebengine -skip qtwayland -skip qtwinextras -skip qtsensors -skip multimedia -no-libproxy -no-icu -qt-freetype -skip qtimageformats -opengl es2
 # make -j9
 # sudo make install
 
@@ -56,7 +42,7 @@
 # perl init-repository --module-subset=default,-qtwebkit,-qtwebkit-examples,-qtwebengine
 # mkdir build
 # cd build
-# ../configure -prefix /opt/Qt/5.15-static/ -release -opensource -confirm-license -static -no-sql-mysql -no-sql-psql -no-sql-sqlite -no-journald -qt-zlib -no-mtdev -no-gif -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-pcre -no-glib -no-compile-examples -no-cups -no-iconv -no-tslib -dbus-linked -no-xcb-xlib -no-eglfs -no-directfb -no-linuxfb -no-kms -nomake examples -nomake tests -skip qtwebsockets -skip qtwebchannel -skip qtwebengine -skip qtwayland -skip qtwinextras -skip qtsensors -skip multimedia -no-evdev -no-libproxy -no-icu -no-accessibility -qt-freetype -skip qtimageformats -opengl es2
+# ../configure -prefix /opt/Qt/5.15-static/ -release -opensource -confirm-license -static -no-sql-mysql -no-sql-psql -no-sql-sqlite -no-journald -qt-zlib -no-mtdev -no-gif -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-pcre -no-glib -no-compile-examples -no-cups -no-iconv -no-tslib -dbus-linked -no-xcb-xlib -no-eglfs -no-directfb -no-linuxfb -no-kms -nomake examples -nomake tests -skip qtwebsockets -skip qtwebchannel -skip qtwebengine -skip qtwayland -skip qtwinextras -skip qtsensors -skip multimedia -no-libproxy -no-icu -qt-freetype -skip qtimageformats -opengl es2
 # make -j9
 # sudo make install
 
@@ -64,7 +50,7 @@
 
 set -e
 
-export PATH=/opt/Qt/5.12-static/bin:$PATH
+export PATH=/opt/Qt/5.15-static/bin:$PATH
 rm -rf build/lin/*
 
 # Original

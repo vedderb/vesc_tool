@@ -5,7 +5,6 @@
 #include <QStyleSyntaxHighlighter>
 #include <QCXXHighlighter>
 
-
 // Qt
 #include <QTextBlock>
 #include <QPaintEvent>
@@ -25,8 +24,6 @@ static QVector<QPair<QString, QString>> parentheses = {
     {"(", ")"},
     {"{", "}"},
     {"[", "]"},
-    {"\"", "\""},
-    {"'", "'"}
 };
 
 QCodeEditor::QCodeEditor(QWidget* widget) :
@@ -39,14 +36,20 @@ QCodeEditor::QCodeEditor(QWidget* widget) :
     m_autoIndentation(true),
     m_autoParentheses(true),
     m_replaceTab(true),
-    m_tabReplace(QString(4, ' '))
+    m_tabReplace(QString(4, ' ')),
+    m_commentStr("//"),
+    m_indentStartStr("{"),
+    m_indentEndStr("}"),
+    m_separateMinus(true),
+    m_highlightBlocks(false)
 {
 
     initFont();
     performConnections();
-    if(Utility::isDarkMode()){
+
+    if (Utility::isDarkMode()) {
         setSyntaxStyle(QSyntaxStyle::darkStyle());
-    }else{
+    } else {
         setSyntaxStyle(QSyntaxStyle::defaultStyle());
     }
 }
@@ -85,15 +88,13 @@ void QCodeEditor::performConnections()
 
 void QCodeEditor::setHighlighter(QStyleSyntaxHighlighter* highlighter)
 {
-    if (m_highlighter)
-    {
+    if (m_highlighter) {
         m_highlighter->setDocument(nullptr);
     }
 
     m_highlighter = highlighter;
 
-    if (m_highlighter)
-    {
+    if (m_highlighter) {
         m_highlighter->setSyntaxStyle(m_syntaxStyle);
         m_highlighter->setDocument(document());
     }
@@ -102,11 +103,9 @@ void QCodeEditor::setHighlighter(QStyleSyntaxHighlighter* highlighter)
 void QCodeEditor::setSyntaxStyle(QSyntaxStyle* style)
 {
     m_syntaxStyle = style;
-
     m_lineNumberArea->setSyntaxStyle(m_syntaxStyle);
 
-    if (m_highlighter)
-    {
+    if (m_highlighter) {
         m_highlighter->setSyntaxStyle(m_syntaxStyle);
     }
 
@@ -115,13 +114,11 @@ void QCodeEditor::setSyntaxStyle(QSyntaxStyle* style)
 
 void QCodeEditor::updateStyle()
 {
-    if (m_highlighter)
-    {
+    if (m_highlighter) {
         m_highlighter->rehighlight();
     }
 
-    if (m_syntaxStyle)
-    {
+    if (m_syntaxStyle) {
         auto currentPalette = palette();
 
         // Setting text format/color
@@ -151,7 +148,6 @@ void QCodeEditor::updateStyle()
 void QCodeEditor::resizeEvent(QResizeEvent* e)
 {
     QTextEdit::resizeEvent(e);
-
     updateLineGeometry();
 }
 
@@ -194,39 +190,37 @@ void QCodeEditor::updateExtraSelection()
 
     highlightSearch(extra);
     highlightCurrentLine(extra);
-    highlightParenthesis(extra);
+    highlightParenthesis(extra, false);
 
     setExtraSelections(extra);
 }
 
-void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSelection)
+void QCodeEditor::highlightParenthesis(
+        QList<QTextEdit::ExtraSelection>& extraSelection,
+        bool selectBlock)
 {
     auto currentSymbol = charUnderCursor();
     auto prevSymbol = charUnderCursor(-1);
 
-    for (auto& pair : parentheses)
-    {
+    m_highlightedBlock.clear();
+
+    for (auto& pair : parentheses) {
         int direction;
 
         QChar counterSymbol;
         QChar activeSymbol;
         auto position = textCursor().position();
 
-        if (pair.first == currentSymbol)
-        {
+        if (pair.first == currentSymbol) {
             direction = 1;
             counterSymbol = pair.second[0];
             activeSymbol = currentSymbol;
-        }
-        else if (pair.second == prevSymbol)
-        {
+        } else if (pair.second == prevSymbol) {
             direction = -1;
             counterSymbol = pair.first[0];
             activeSymbol = prevSymbol;
             position--;
-        }
-        else
-        {
+        } else {
             continue;
         }
 
@@ -241,21 +235,19 @@ void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSe
 
             auto character = document()->characterAt(position);
             // Checking symbol under position
-            if (character == activeSymbol)
-            {
+            if (character == activeSymbol) {
                 ++counter;
-            }
-            else if (character == counterSymbol)
-            {
+            } else if (character == counterSymbol) {
                 --counter;
             }
         }
 
         auto format = m_syntaxStyle->getFormat("Parentheses");
 
+        QList<QTextEdit::ExtraSelection> selectedParantheses;
+
         // Found
-        if (counter == 0)
-        {
+        if (counter == 0) {
             ExtraSelection selection{};
 
             auto directionEnum =
@@ -279,7 +271,7 @@ void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSe
                 1
             );
 
-            extraSelection.append(selection);
+            selectedParantheses.append(selection);
 
             selection.cursor = textCursor();
             selection.cursor.clearSelection();
@@ -289,7 +281,40 @@ void QCodeEditor::highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSe
                 1
             );
 
-            extraSelection.append(selection);
+            selectedParantheses.append(selection);
+        }
+
+        extraSelection.append(selectedParantheses);
+
+        // Block contained in parantheses
+        if (selectedParantheses.length() == 2) {
+            int first = selectedParantheses.first().cursor.position();
+            int second = selectedParantheses.at(1).cursor.position();
+
+            if (first > second) {
+                int temp = first;
+                first = second - 1;
+                second = temp;
+            } else {
+                first--;
+                second++;
+            }
+
+            auto tc = textCursor();
+            tc.setPosition(first);
+            tc.movePosition(
+                        QTextCursor::MoveOperation::Right,
+                        QTextCursor::MoveMode::KeepAnchor,
+                        second - first
+                        );
+
+            if (selectBlock) {
+                QTextEdit::ExtraSelection selection{};
+                selection.format = m_syntaxStyle->getFormat("HighlightedBlock");
+                selection.cursor = tc;
+                extraSelection.append(selection);
+                m_highlightedBlock = tc.selectedText().replace("\u2029", "\n");
+            }
         }
 
         break;
@@ -452,16 +477,23 @@ void QCodeEditor::proceedCompleterEnd(QKeyEvent *e)
 
     auto isShortcut = ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Space);
     auto isDot = charUnderCursor(-1) == ".";
+    auto isMinus = charUnderCursor(-1) == "-";
     auto isSpace = charUnderCursor(-1) == " " || charUnderCursor(-1) == "\t";
 
-    if (isSpace || (word.isEmpty() && !isDot)) {
+    if (isSpace || (word.isEmpty() && !isDot && !(!m_separateMinus && isMinus))) {
         m_completer->popup()->hide();
         return;
     }
 
     QString completionPrefix = getCompletionWordNow(0, 0);
 
-    static QString eow(R"(~!@#$%^&*()_+{}|:"<>?,/;'[]\-=)");
+    QString eow;
+    if (m_separateMinus) {
+        eow = R"(~!@#$%^&*()-+{}|:"<>?,/;'[]\=)";
+    } else {
+        eow = R"(~!@#$%^&*()+{}|:"<>?,/;'[]\=)";
+    }
+
     if (!isShortcut &&
             (isComment ||
              e->text().isEmpty() ||
@@ -490,6 +522,21 @@ void QCodeEditor::proceedCompleterEnd(QKeyEvent *e)
 void QCodeEditor::keyPressEvent(QKeyEvent* e) {
     const int defaultIndent = 4;
 
+    if (e->key() == Qt::Key_Control && m_highlightBlocks) {
+        QList<QTextEdit::ExtraSelection> extra;
+        highlightParenthesis(extra, true);
+
+        if (extra.length() > 1) {
+            setExtraSelections(extra);
+        }
+    }
+
+    if (e->key() == Qt::Key_R && e->modifiers() & Qt::ControlModifier) {
+        if (!m_highlightedBlock.isEmpty()) {
+            emit runBlockTriggered(m_highlightedBlock);
+        }
+    }
+
     auto completerSkip = proceedCompleterBegin(e);
 
     if (!completerSkip) {
@@ -502,7 +549,8 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         int lineEnd = tcEnd.blockNumber();
 
         // Toggle block comment
-        if (e->text() == "\u001F") {
+        if (e->text() == "\u001F" ||
+                (e->modifiers() & Qt::ControlModifier) && e->text() == "#") {
             for (int i = lineStart;i <= lineEnd;i++) {
                 auto tc = textCursor();
 
@@ -515,10 +563,10 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                         auto line2 = line;
                         line2.replace(" ", "");
                         line2.replace("\t", "");
-                        if (line2.startsWith("//")) {
-                            line.replace(line.indexOf("/"), 2, "");
+                        if (line2.startsWith(m_commentStr)) {
+                            line.replace(line.indexOf(m_commentStr.at(0)), m_commentStr.size(), "");
                         } else {
-                            line.prepend("//");
+                            line.prepend(m_commentStr);
                         }
 
                         tc.insertText(line);
@@ -535,21 +583,27 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         if (e->modifiers() == Qt::ControlModifier) {
             if (e->key() == Qt::Key_S) {
                 emit saveTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_E) {
                 emit runEmbeddedTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_W) {
                 emit runWindowTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_Q) {
                 emit stopTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_D) {
                 emit clearConsoleTriggered();
+                updateExtraSelection();
                 return;
             } else if (e->key() == Qt::Key_F) {
                 emit searchTriggered();
+                updateExtraSelection();
                 return;
             }
         }
@@ -572,17 +626,41 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
             return;
         }
 
+        // Have Qt Edior like behaviour, if {|} and enter is pressed indent the two
+        // parenthesis
+        bool indentNext = false;
+        auto charBefore = charUnderCursor(-1);
+        auto charAfter = charUnderCursor();
+        if (m_autoIndentation && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) &&
+                m_indentStartStr.contains(charBefore) && m_indentEndStr.contains(charAfter)) {
+            insertPlainText("\n\n");
+            moveCursor(QTextCursor::MoveOperation::Left);
+            indentNext = true;
+
+            auto tcStart = textCursor();
+            auto tcEnd = textCursor();
+            tcStart.setPosition(textCursor().selectionStart());
+            tcEnd.setPosition(textCursor().selectionEnd());
+            lineStart = tcStart.blockNumber();
+            lineEnd = tcEnd.blockNumber() + 1;
+        }
+
         // Auto-indent selected line or block
-        if (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier) {
+        if (indentNext || (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier)) {
             auto txtOld = toPlainText();
             int indentNow = 0;
             bool isComment = false;
 
             int lineNum = -1;
-            for (auto line: txtOld.split("\n")) {
+            foreach (auto line, txtOld.split("\n")) {
                 lineNum++;
 
                 bool indent = true;
+
+                if (m_indentStartStr.isEmpty()) {
+                    indent = false;
+                }
+
                 bool removeTrailing = true;
 
                 if (lineNum < lineStart || lineNum > lineEnd) {
@@ -614,18 +692,27 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                     }
                 }
 
+                int indentLine = 0;
                 for (auto c: line) {
-                    if (c == '}') {
-                        indentNow--;
-                    }
-
-                    if (indentNow < 0) {
-                        indentNow = 0;
+                    if (m_indentStartStr.contains(c)) {
+                        indentNow++;
+                        indentLine++;
                     }
                 }
 
+                for (auto c: line) {
+                    if (m_indentEndStr.contains(c)) {
+                        indentNow--;
+                        indentLine--;
+                    }
+                }
+
+                if (indentLine < 0) {
+                    indentLine = 0;
+                }
+
                 if (indent) {
-                    for (int i = 0;i < indentNow;i++) {
+                    for (int i = 0;i < (indentNow - indentLine);i++) {
                         line.prepend(m_tabReplace);
                     }
                 }
@@ -643,12 +730,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                             break;
                         }
                         tc.setPosition(posStart++);
-                    }
-                }
-
-                for (auto c: line) {
-                    if (c == '{') {
-                        indentNow++;
                     }
                 }
             }
@@ -699,43 +780,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         int tabCounts =
                 indentationLevel * fontMetrics().averageCharWidth() / tabStopWidth();
 #endif
-
-        // Have Qt Edior like behaviour, if {|} and enter is pressed indent the two
-        // parenthesis
-        auto charAfter = charUnderCursor();
-
-        if (m_autoIndentation &&
-                (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) &&
-                charUnderCursor(-1) == '{')
-        {
-            int charsBack = 0;
-            insertPlainText("\n");
-
-            if (m_replaceTab)
-                insertPlainText(QString(indentationLevel + defaultIndent, ' '));
-            else
-                insertPlainText(QString(tabCounts + 1, '\t'));
-
-            if (charAfter == '}') {
-                insertPlainText("\n");
-                charsBack++;
-
-                if (m_replaceTab)
-                {
-                    insertPlainText(QString(indentationLevel, ' '));
-                    charsBack += indentationLevel;
-                }
-                else
-                {
-                    insertPlainText(QString(tabCounts, '\t'));
-                    charsBack += tabCounts;
-                }
-            }
-
-            while (charsBack--)
-                moveCursor(QTextCursor::MoveOperation::Left);
-            return;
-        }
 
         // Shortcut for moving line to left
         if (m_replaceTab && e->key() == Qt::Key_Backtab) {
@@ -790,6 +834,13 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
     }
 
     proceedCompleterEnd(e);
+}
+
+void QCodeEditor::keyReleaseEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Control && m_highlightBlocks) {
+        updateExtraSelection();
+    }
 }
 
 void QCodeEditor::setAutoIndentation(bool enabled)
@@ -977,7 +1028,7 @@ int QCodeEditor::getIndentationSpaces()
 
 QString QCodeEditor::getCompletionWordNow(int *linePosStart, int *linePosEnd)
 {
-    QString lineStartChars = " \t[{\"!";
+    QString lineStartChars = " \t[{\"!'";
     QString lineEndChars = " \t)]}\"!";
     auto posStart = textCursor().positionInBlock() - 1;
     auto posEnd = posStart;
@@ -1014,4 +1065,40 @@ QString QCodeEditor::getCompletionWordNow(int *linePosStart, int *linePosEnd)
     }
 
     return res;
+}
+
+bool QCodeEditor::highlightBlocks() const
+{
+    return m_highlightBlocks;
+}
+
+void QCodeEditor::setHighlightBlocks(bool newHighlightBlocks)
+{
+    m_highlightBlocks = newHighlightBlocks;
+}
+
+bool QCodeEditor::getSeparateMinus() const
+{
+    return m_separateMinus;
+}
+
+void QCodeEditor::setSeparateMinus(bool separateMinus)
+{
+    m_separateMinus = separateMinus;
+}
+
+void QCodeEditor::setIndentStrs(const QString &start, const QString &end)
+{
+    m_indentStartStr = start;
+    m_indentEndStr = end;
+}
+
+QString QCodeEditor::getCommentStr() const
+{
+    return m_commentStr;
+}
+
+void QCodeEditor::setCommentStr(const QString &commentStr)
+{
+    m_commentStr = commentStr;
 }

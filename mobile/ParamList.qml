@@ -52,6 +52,11 @@ Item {
 
     function addEditorMc(param) {
         var e = editors.createEditorMc(scrollCol, param)
+
+        if (e === null) {
+            return
+        }
+
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
         editorsVisible.push(e)
@@ -61,6 +66,25 @@ Item {
 
     function addEditorApp(param) {
         var e = editors.createEditorApp(scrollCol, param)
+
+        if (e === null) {
+            return
+        }
+
+        e.Layout.preferredWidth = 500
+        e.Layout.fillsWidth = true
+        editorsVisible.push(e)
+        paramNames.push(param)
+        paramNamesAll.push(param)
+    }
+
+    function addEditorCustom(param, customInd) {
+        var e = editors.createEditorCustom(scrollCol, param, customInd)
+
+        if (e === null) {
+            return
+        }
+
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
         editorsVisible.push(e)

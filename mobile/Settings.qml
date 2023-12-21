@@ -96,6 +96,13 @@ Item {
                 }
 
                 CheckBox {
+                    id: qmlUiAskBox
+                    Layout.fillWidth: true
+                    text: "Ask before loading QML UI"
+                    checked: VescIf.askQmlLoad()
+                }
+
+                CheckBox {
                     id: darkModeBox
                     Layout.fillWidth: true
                     text: "Use Dark Mode"
@@ -113,6 +120,7 @@ Item {
             screenOnBox.checked = VescIf.keepScreenOn()
             screenRotBox.checked = VescIf.getAllowScreenRotation()
             qmlUiBox.checked = VescIf.getLoadQmlUiOnConnect()
+            qmlUiAskBox.checked = VescIf.askQmlLoad()
         }
 
         onClosed: {
@@ -121,6 +129,7 @@ Item {
             VescIf.setKeepScreenOn(screenOnBox.checked)
             VescIf.setAllowScreenRotation(screenRotBox.checked)
             VescIf.setLoadQmlUiOnConnect(qmlUiBox.checked)
+            VescIf.setAskQmlLoad(qmlUiAskBox.checked)
             VescIf.storeSettings()
 
             Utility.keepScreenOn(VescIf.keepScreenOn())

@@ -89,7 +89,7 @@ Item {
     Connections {
         target: mCommands
         
-        onValuesReceived: {
+        function onValuesReceived(values, mask) {
             if (!motorRunning) {
                 posSlider.value = values.position
                 posSet = values.position

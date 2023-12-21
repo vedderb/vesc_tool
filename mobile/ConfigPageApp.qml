@@ -20,6 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.3 as Dl
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -97,28 +98,6 @@ Item {
         parent: ApplicationWindow.overlay
 
         NrfPair {
-            anchors.fill: parent
-        }
-    }
-
-    Dialog {
-        id: detectImu
-        title: "IMU Calibration"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: (parent.height - height) / 2
-        parent: ApplicationWindow.overlay
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        DetectIMU {
             anchors.fill: parent
         }
     }
@@ -272,9 +251,81 @@ Item {
                         }
                     }
                     MenuItem {
-                        text: "Calibrate IMU..."
+                        text: "Save XML"
                         onTriggered: {
-                            detectImu.open()
+                            if (Utility.requestFilePermission()) {
+                                fileDialogSave.close()
+                                fileDialogSave.open()
+                            } else {
+                                VescIf.emitMessageDialog(
+                                            "File Permissions",
+                                            "Unable to request file system permission.",
+                                            false, false)
+                            }
+                        }
+
+                        Dl.FileDialog {
+                            id: fileDialogSave
+                            title: "Please choose a file"
+                            nameFilters: ["*"]
+                            selectExisting: false
+                            selectMultiple: false
+                            onAccepted: {
+                                var path = fileUrl.toString()
+                                if (!path.toLowerCase().endsWith(".xml")) {
+                                    path += ".xml"
+                                }
+
+                                if (VescIf.appConfig().saveXml(path, "APPConfiguration")) {
+                                    VescIf.emitStatusMessage("Appconf Saved", true)
+                                } else {
+                                    VescIf.emitStatusMessage("Appconf Save Failed", false)
+                                }
+
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                            onRejected: {
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                        }
+                    }
+                    MenuItem {
+                        text: "Load XML"
+                        onTriggered: {
+                            if (Utility.requestFilePermission()) {
+                                fileDialogLoad.close()
+                                fileDialogLoad.open()
+                            } else {
+                                VescIf.emitMessageDialog(
+                                            "File Permissions",
+                                            "Unable to request file system permission.",
+                                            false, false)
+                            }
+                        }
+
+                        Dl.FileDialog {
+                            id: fileDialogLoad
+                            title: "Please choose a file"
+                            nameFilters: ["*"]
+                            selectExisting: true
+                            selectMultiple: false
+                            onAccepted: {
+                                var path = fileUrl.toString()
+                                if (VescIf.appConfig().loadXml(path, "APPConfiguration")) {
+                                    VescIf.emitStatusMessage("Appconf Loaded", true)
+                                } else {
+                                    VescIf.emitStatusMessage("Appconf Load Failed", false)
+                                }
+
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                            onRejected: {
+                                close()
+                                parent.forceActiveFocus()
+                            }
                         }
                     }
                 }
@@ -284,7 +335,7 @@ Item {
 
     Connections {
         target: VescIf
-        onConfigurationChanged: {
+        function onConfigurationChanged() {
             pageBox.model = VescIf.appConfig().getParamGroups()
 
             var tabTextOld = tabBox.currentText

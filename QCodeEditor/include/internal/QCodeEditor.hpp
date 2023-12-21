@@ -51,6 +51,17 @@ public:
     void searchPreviousResult();
     void searchSetCaseSensitive(bool isCaseSensitive);
 
+    QString getCommentStr() const;
+    void setCommentStr(const QString &commentStr);
+
+    void setIndentStrs(const QString &start, const QString &end);
+
+    bool getSeparateMinus() const;
+    void setSeparateMinus(bool separateMinus);
+
+    bool highlightBlocks() const;
+    void setHighlightBlocks(bool newHighlightBlocks);
+
 signals:
     void saveTriggered();
     void runEmbeddedTriggered();
@@ -58,6 +69,7 @@ signals:
     void stopTriggered();
     void clearConsoleTriggered();
     void searchTriggered();
+    void runBlockTriggered(QString text);
 
 public Q_SLOTS:
 
@@ -124,6 +136,7 @@ protected:
      * 4. Auto parenthesis
      */
     void keyPressEvent(QKeyEvent* e) override;
+    void keyReleaseEvent(QKeyEvent* e) override;
 
     /**
      * @brief Method, that's called on focus into widget.
@@ -184,7 +197,9 @@ private:
      * @brief Method, that adds highlighting of
      * parenthesis if available.
      */
-    void highlightParenthesis(QList<QTextEdit::ExtraSelection>& extraSelection);
+    void highlightParenthesis(
+            QList<QTextEdit::ExtraSelection>& extraSelection,
+            bool selectBlock);
 
     void highlightSearch(QList<QTextEdit::ExtraSelection>& extraSelection);
 
@@ -210,5 +225,12 @@ private:
     bool m_autoParentheses;
     bool m_replaceTab;
     QString m_tabReplace;
+    QString m_commentStr;
+    QString m_indentStartStr;
+    QString m_indentEndStr;
+    bool m_separateMinus;
+    bool m_highlightBlocks;
+    QString m_highlightedBlock;
+
 };
 

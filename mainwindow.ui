@@ -19,7 +19,7 @@
    <string>VESC Tool</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res_platinum.qrc">
+   <iconset>
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -74,9 +74,6 @@
           </property>
           <property name="text">
            <string/>
-          </property>
-          <property name="pixmap">
-           <pixmap resource="res_platinum.qrc">:/res/logo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -141,7 +138,6 @@
               <property name="font">
                <font>
                 <family>Roboto</family>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -194,10 +190,6 @@
           </property>
           <property name="text">
            <string>Scan CAN</string>
-          </property>
-          <property name="icon">
-           <iconset resource="res.qrc">
-            <normaloff>:/res/icons/Refresh-96.png</normaloff>:/res/icons/Refresh-96.png</iconset>
           </property>
          </widget>
         </item>
@@ -276,10 +268,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-        </property>
        </widget>
       </item>
       <item row="0" column="5">
@@ -289,10 +277,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
         </property>
        </widget>
       </item>
@@ -304,10 +288,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Brake Warning-96.png</normaloff>:/res/icons/Brake Warning-96.png</iconset>
-        </property>
        </widget>
       </item>
       <item row="0" column="3">
@@ -317,10 +297,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
         </property>
        </widget>
       </item>
@@ -337,10 +313,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Stop Sign-96.png</normaloff>:/res/icons/Stop Sign-96.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -363,10 +335,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Anchor-96.png</normaloff>:/res/icons/Anchor-96.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -505,10 +473,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
-        </property>
        </widget>
       </item>
       <item row="0" column="1">
@@ -518,10 +482,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="res.qrc">
-          <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
         </property>
         <property name="flat">
          <bool>false</bool>
@@ -663,6 +623,8 @@
     <addaction name="actionSaveAppConfigurationHeader"/>
     <addaction name="actionSaveAppConfigurationHeaderWrap"/>
     <addaction name="separator"/>
+    <addaction name="actionLaunchBoardConfigurator"/>
+    <addaction name="actionLaunchMobileTool"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -748,10 +710,6 @@
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionReadMcconf">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/motor_up.png</normaloff>:/res/icons/motor_up.png</iconset>
-   </property>
    <property name="text">
     <string>readMcconf</string>
    </property>
@@ -760,10 +718,6 @@
    </property>
   </action>
   <action name="actionReadMcconfDefault">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/motor_default.png</normaloff>:/res/icons/motor_default.png</iconset>
-   </property>
    <property name="text">
     <string>readMcconfDefault</string>
    </property>
@@ -772,10 +726,6 @@
    </property>
   </action>
   <action name="actionWriteMcconf">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/motor_down.png</normaloff>:/res/icons/motor_down.png</iconset>
-   </property>
    <property name="text">
     <string>writeMcconf</string>
    </property>
@@ -784,28 +734,16 @@
    </property>
   </action>
   <action name="actionSaveMotorConfXml">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
-   </property>
    <property name="text">
     <string>Save Motor Configuration XML as...</string>
    </property>
   </action>
   <action name="actionLoadMotorConfXml">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-   </property>
    <property name="text">
     <string>Load Motor Configuration XML</string>
    </property>
   </action>
   <action name="actionDisconnect">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Disconnected-96.png</normaloff>:/res/icons/Disconnected-96.png</iconset>
-   </property>
    <property name="text">
     <string>disconnect</string>
    </property>
@@ -814,10 +752,6 @@
    </property>
   </action>
   <action name="actionReboot">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Restart-96.png</normaloff>:/res/icons/Restart-96.png</iconset>
-   </property>
    <property name="text">
     <string>Reboot</string>
    </property>
@@ -829,11 +763,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/can_off.png</normaloff>
-     <normalon>:/res/icons/can_on.png</normalon>:/res/icons/can_off.png</iconset>
-   </property>
    <property name="text">
     <string>canFwd</string>
    </property>
@@ -842,10 +771,6 @@
    </property>
   </action>
   <action name="actionReconnect">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Connected-96.png</normaloff>:/res/icons/Connected-96.png</iconset>
-   </property>
    <property name="text">
     <string>reconnect</string>
    </property>
@@ -857,11 +782,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/rt_off.png</normaloff>
-     <normalon>:/res/icons/rt_on.png</normalon>:/res/icons/rt_off.png</iconset>
-   </property>
    <property name="text">
     <string>rtData</string>
    </property>
@@ -870,10 +790,6 @@
    </property>
   </action>
   <action name="actionReadAppconf">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/app_up.png</normaloff>:/res/icons/app_up.png</iconset>
-   </property>
    <property name="text">
     <string>readAppconf</string>
    </property>
@@ -882,10 +798,6 @@
    </property>
   </action>
   <action name="actionReadAppconfDefault">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/app_default.png</normaloff>:/res/icons/app_default.png</iconset>
-   </property>
    <property name="text">
     <string>readAppconfDefault</string>
    </property>
@@ -894,10 +806,6 @@
    </property>
   </action>
   <action name="actionWriteAppconf">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/app_down.png</normaloff>:/res/icons/app_down.png</iconset>
-   </property>
    <property name="text">
     <string>writeAppconf</string>
    </property>
@@ -906,40 +814,21 @@
    </property>
   </action>
   <action name="actionSaveAppconfXml">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
-   </property>
    <property name="text">
     <string>Save App Configuration XML as...</string>
    </property>
   </action>
   <action name="actionLoadAppconfXml">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-   </property>
    <property name="text">
     <string>Load App Configuration XML</string>
    </property>
   </action>
   <action name="actionExit">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Shutdown-96.png</normaloff>:/res/icons/Shutdown-96.png</iconset>
-   </property>
    <property name="text">
     <string>Exit</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+Q</string>
-   </property>
   </action>
   <action name="actionAbout">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
-   </property>
    <property name="text">
     <string>About VESC Tool</string>
    </property>
@@ -947,11 +836,6 @@
   <action name="actionKeyboardControl">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/keys_off.png</normaloff>
-     <normalon>:/res/icons/keys_on.png</normalon>:/res/icons/keys_off.png</iconset>
    </property>
    <property name="text">
     <string>keyboardControl</string>
@@ -969,7 +853,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;left corner.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;Right and Left Arrow Keys&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Duty cycle control. Slowly ramps up and down the cuty&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Duty cycle control. Slowly ramps up and down the duty&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;cycle. When e.g. starting with right and then also holding&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;left, the duty cycle is ramped higher.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
@@ -978,55 +862,31 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionParameterEditorMcconf">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
-   </property>
    <property name="text">
     <string>Parameter Editor Mcconf</string>
    </property>
   </action>
   <action name="actionParameterEditorAppconf">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
-   </property>
    <property name="text">
     <string>Parameter Editor Appconf</string>
    </property>
   </action>
   <action name="actionSaveAppConfigurationHeader">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
-   </property>
    <property name="text">
     <string>Save App Configuration C Header as...</string>
    </property>
   </action>
   <action name="actionSaveMotorConfigurationHeader">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
-   </property>
    <property name="text">
     <string>Save Motor Configuration C Header as...</string>
    </property>
   </action>
   <action name="actionSaveAppConfigurationHeaderWrap">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
-   </property>
    <property name="text">
     <string>Save App Configuration C Header (ifdef wrapped) as...</string>
    </property>
   </action>
   <action name="actionSaveMotorConfigurationHeaderWrap">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
-   </property>
    <property name="text">
     <string>Save Motor Configuration C Header (ifdef wrapped) as...</string>
    </property>
@@ -1034,11 +894,6 @@ p, li { white-space: pre-wrap; }
   <action name="actionRtDataApp">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/rt_app_off.png</normaloff>
-     <normalon>:/res/icons/rt_app_on.png</normalon>:/res/icons/rt_app_off.png</iconset>
    </property>
    <property name="text">
     <string>rtDataApp</string>
@@ -1048,10 +903,6 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionTerminalPrintFaults">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Console-96.png</normaloff>:/res/icons/Console-96.png</iconset>
-   </property>
    <property name="text">
     <string>Print Faults</string>
    </property>
@@ -1060,28 +911,16 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionTerminalShowHelp">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
-   </property>
    <property name="text">
     <string>Show Help</string>
    </property>
   </action>
   <action name="actionTerminalClear">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
-   </property>
    <property name="text">
     <string>Clear Terminal</string>
    </property>
   </action>
   <action name="actionTerminalPrintThreads">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Electronics-96.png</normaloff>:/res/icons/Electronics-96.png</iconset>
-   </property>
    <property name="text">
     <string>Print Threads</string>
    </property>
@@ -1093,11 +932,6 @@ p, li { white-space: pre-wrap; }
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/alive_off.png</normaloff>
-     <normalon>:/res/icons/alive_on.png</normalon>:/res/icons/alive_off.png</iconset>
-   </property>
    <property name="text">
     <string>Send Alive Commands</string>
    </property>
@@ -1106,19 +940,11 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionLibrariesUsed">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
-   </property>
    <property name="text">
     <string>About Libraries Used</string>
    </property>
   </action>
   <action name="actionMotorSetupWizard">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
-   </property>
    <property name="text">
     <string>Setup Other Motors</string>
    </property>
@@ -1130,10 +956,6 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionAppSetupWizard">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
-   </property>
    <property name="text">
     <string>Setup Input</string>
    </property>
@@ -1145,10 +967,6 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionAboutQt">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
-   </property>
    <property name="text">
     <string>About Qt</string>
    </property>
@@ -1157,28 +975,16 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionParameterEditorInfo">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
-   </property>
    <property name="text">
     <string>Parameter Editor Info</string>
    </property>
   </action>
   <action name="actionSafetyInformation">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
-   </property>
    <property name="text">
     <string>Safety Information</string>
    </property>
   </action>
   <action name="actionWarrantyStatement">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
-   </property>
    <property name="text">
     <string>Limited Warranty Statement</string>
    </property>
@@ -1187,55 +993,31 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionVESCToolChangelog">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
-   </property>
    <property name="text">
     <string>VESC Tool Changelog</string>
    </property>
   </action>
   <action name="actionTerminalDRVResetLatchedFaults">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Bug-96.png</normaloff>:/res/icons/Bug-96.png</iconset>
-   </property>
    <property name="text">
     <string>DRV Reset Latched Faults</string>
    </property>
   </action>
   <action name="actionVESCProjectForums">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/User Group Man Man-96.png</normaloff>:/res/icons/User Group Man Man-96.png</iconset>
-   </property>
    <property name="text">
     <string>VESC Project Forums</string>
    </property>
   </action>
   <action name="actionFirmwareChangelog">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
-   </property>
    <property name="text">
     <string>Firmware Changelog</string>
    </property>
   </action>
   <action name="actionLicense">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/About-96.png</normaloff>:/res/icons/About-96.png</iconset>
-   </property>
    <property name="text">
     <string>License</string>
    </property>
   </action>
   <action name="actionAutoSetupFOC">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
-   </property>
    <property name="text">
     <string>Setup Motors FOC</string>
    </property>
@@ -1244,10 +1026,6 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionExportConfigurationParser">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Save as-96.png</normaloff>:/res/icons/Save as-96.png</iconset>
-   </property>
    <property name="text">
     <string>Export Configuration Parser</string>
    </property>
@@ -1255,11 +1033,6 @@ p, li { white-space: pre-wrap; }
   <action name="actionIMU">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/imu_off.png</normaloff>
-     <normalon>:/res/icons/imu_on.png</normalon>:/res/icons/imu_off.png</iconset>
    </property>
    <property name="text">
     <string>IMU</string>
@@ -1278,10 +1051,6 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionBackupConfiguration">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
-   </property>
    <property name="text">
     <string>Backup Configuration</string>
    </property>
@@ -1290,10 +1059,6 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionRestoreConfiguration">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-   </property>
    <property name="text">
     <string>Restore Configuration</string>
    </property>
@@ -1302,19 +1067,11 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionClearConfigurationBackups">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
-   </property>
    <property name="text">
     <string>Clear Configuration Backups</string>
    </property>
   </action>
   <action name="actionParameterEditorFW">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
-   </property>
    <property name="text">
     <string>Parameter Editor FW</string>
    </property>
@@ -1323,19 +1080,11 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionBackupConfigurationsCAN">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Save-96.png</normaloff>:/res/icons/Save-96.png</iconset>
-   </property>
    <property name="text">
     <string>Backup Configurations (Including CAN)</string>
    </property>
   </action>
   <action name="actionRestoreConfigurationsCAN">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-   </property>
    <property name="text">
     <string>Restore Configurations (Including CAN)</string>
    </property>
@@ -1343,11 +1092,6 @@ p, li { white-space: pre-wrap; }
   <action name="actionrtDataBms">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/bms_off.png</normaloff>
-     <normalon>:/res/icons/bms_on.png</normalon>:/res/icons/bms_off.png</iconset>
    </property>
    <property name="text">
     <string>rtDataBms</string>
@@ -1360,11 +1104,6 @@ p, li { white-space: pre-wrap; }
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Controller-96.png</normaloff>
-     <normalon>:/res/icons/Controller-96_on.png</normalon>:/res/icons/Controller-96.png</iconset>
-   </property>
    <property name="text">
     <string>Gamepad Control</string>
    </property>
@@ -1373,19 +1112,11 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionParameterEditorCustomConf0">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Horizontal Settings Mixer-96.png</normaloff>:/res/icons/Horizontal Settings Mixer-96.png</iconset>
-   </property>
    <property name="text">
     <string>Parameter Editor Custom Conf 0</string>
    </property>
   </action>
   <action name="actionSetupMotorsFOCQuick">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Wizard-96.png</normaloff>:/res/icons/Wizard-96.png</iconset>
-   </property>
    <property name="text">
     <string>Setup Motors FOC (old)</string>
    </property>
@@ -1394,15 +1125,21 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
   <action name="actionPreferences">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/icons/Settings-96.png</normaloff>:/res/icons/Settings-96.png</iconset>
-   </property>
    <property name="text">
     <string>Preferences</string>
    </property>
    <property name="shortcutVisibleInContextMenu">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionLaunchBoardConfigurator">
+   <property name="text">
+    <string>Restart + Launch Board Configurator</string>
+   </property>
+  </action>
+  <action name="actionLaunchMobileTool">
+   <property name="text">
+    <string>Restart + Launch Mobile Tool</string>
    </property>
   </action>
  </widget>
@@ -1417,7 +1154,6 @@ p, li { white-space: pre-wrap; }
  </customwidgets>
  <resources>
   <include location="res.qrc"/>
-  <include location="res_platinum.qrc"/>
  </resources>
  <connections/>
 </ui>

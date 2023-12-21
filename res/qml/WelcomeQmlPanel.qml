@@ -74,13 +74,44 @@ Item {
         multiSettings.openDialog()
     }
 
+    function openWizardIMU() {
+        imuWizard.openDialog()
+    }
+
+    function openBleSetup() {
+        if (!VescIf.isPortConnected()) {
+            VescIf.emitMessageDialog("BLE Setup",
+                                     "You are not connected to the VESC.", false, false)
+        } else {
+            if (VescIf.getLastFwRxParams().nrfNameSupported &&
+                    VescIf.getLastFwRxParams().nrfPinSupported) {
+                bleSetupDialog.openDialog()
+            } else {
+                VescIf.emitMessageDialog("BLE Setup",
+                                         "The BLE module does not support setup. You can try " +
+                                         "updating the firmware on it from the SWD programmer page.",
+                                         false, false)
+            }
+        }
+    }
+
     SetupWizardFoc {
         id: focWizard
         dialogParent: container
     }
 
+    SetupWizardIMU {
+        id: imuWizard
+        dialogParent: container
+    }
+
     MultiSettings {
         id: multiSettings
+        dialogParent: container
+    }
+
+    BleSetupDialog {
+        id: bleSetupDialog
         dialogParent: container
     }
 
@@ -162,6 +193,7 @@ Item {
                 id: uiHw
                 anchors.fill: parent
                 property var tabBarItem: tabBar
+                property var swipeViewItem: swipeView
             }
         }
 
@@ -180,6 +212,7 @@ Item {
                 id: uiApp
                 anchors.fill: parent
                 property var tabBarItem: tabBar
+                property var swipeViewItem: swipeView
             }
         }
 
@@ -244,12 +277,48 @@ Item {
         }
     }
 
-    property var hwUiObj: 0
+    Rectangle {
+        parent: container
+        anchors.fill: parent
+        color: "black"
 
-    function updateHwUi () {
+        ConnectScreen {
+            id: connScreen
+            x: 0
+            y: 0
+            height: parent.height
+            width: parent.width
+            opened: true
+
+            Component.onCompleted: {
+                VescIf.bleDevice().emitScanDone()
+            }
+
+            onYChanged: {
+                parent.color.a = Math.min(1, Math.max(1 - y / height, 0))
+            }
+        }
+    }
+
+    Connections {
+        target: VescIf
+        function onPortConnectedChanged() {
+            connScreen.opened = VescIf.isPortConnected() ? false : true
+        }
+    }
+
+    property var hwUiObj: 0
+    property var appUiObj: 0
+
+    function updateHwAppUi () {
         if (hwUiObj != 0) {
             hwUiObj.destroy()
             hwUiObj = 0
+        }
+
+        if (appUiObj != 0) {
+            appUiObj.destroy()
+            appUiObj = 0
         }
 
         swipeView.interactive = true
@@ -264,6 +333,12 @@ Item {
             }
 
             hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
+
+            uiHwButton.text = "HwUi"
+            if (hwUiObj.tabTitle) {
+                uiHwButton.text = hwUiObj.tabTitle
+            }
+
             uiHwButton.visible = true
             swipeView.insertItem(0, uiHwPage)
             tabBar.insertItem(0, uiHwButton)
@@ -275,19 +350,6 @@ Item {
             uiHwPage.parent = null
             uiHwButton.parent = null
         }
-    }
-
-    property var appUiObj: 0
-
-    function updateAppUi () {
-        if (appUiObj != 0) {
-            appUiObj.destroy()
-            appUiObj = 0
-        }
-
-        swipeView.interactive = true
-        tabBar.visible = true
-        tabBar.enabled = true
 
         if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
             if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
@@ -297,6 +359,12 @@ Item {
             }
 
             appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
+
+            uiAppButton.text = "AppUi"
+            if (appUiObj.tabTitle) {
+                uiAppButton.text = appUiObj.tabTitle
+            }
+
             uiAppButton.visible = true
             swipeView.insertItem(0, uiAppPage)
             tabBar.insertItem(0, uiAppButton)
@@ -313,13 +381,16 @@ Item {
     Connections {
         target: VescIf
 
-        onFwRxChanged: {
-            updateHwUi()
-            updateAppUi()
+        function onFwRxChanged(rx, limited) {
+            updateHwAppUi()
         }
 
-        onQmlLoadDone: {
-            qmlLoadDialog.open()
+        function onQmlLoadDone() {
+            if (VescIf.askQmlLoad()) {
+                qmlLoadDialog.open()
+            } else {
+                updateHwAppUi()
+            }
         }
     }
 
@@ -372,22 +443,34 @@ Item {
 
         parent: container
         y: parent.y + parent.height / 2 - height / 2
+        width: parent.width - 20
 
-        Text {
-            color: {color = Utility.getAppHexColor("lightText")}
-            verticalAlignment: Text.AlignVCenter
+        ColumnLayout {
             anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "The hardware you are connecting to contains code that will alter the " +
-                "user interface of VESC Tool. This code has not been verified by the " +
-                "authors of VESC Tool and could contain bugs and security problems. \n\n" +
-                "Do you want to load this custom user interface?"
+
+            Text {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: Utility.getAppHexColor("lightText")
+                verticalAlignment: Text.AlignVCenter
+                wrapMode: Text.WordWrap
+                text:
+                    "The hardware you are connecting to contains code that will alter the " +
+                    "user interface of VESC Tool. This code has not been verified by the " +
+                    "authors of VESC Tool and could contain bugs and security problems. \n\n" +
+                    "Do you want to load this custom user interface?"
+            }
+
+            CheckBox {
+                Layout.fillWidth: true
+                id: qmlDoNotAskAgainBox
+                text: "Load without asking"
+            }
         }
 
         onAccepted: {
-            updateHwUi()
-            updateAppUi()
+            VescIf.setAskQmlLoad(!qmlDoNotAskAgainBox.checked)
+            updateHwAppUi()
         }
 
         onRejected: {

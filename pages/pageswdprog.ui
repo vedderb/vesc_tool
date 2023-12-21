@@ -349,7 +349,7 @@
         <string>Connect to internal NRF5x MCU</string>
        </property>
        <property name="text">
-        <string>Connect NRF5X</string>
+        <string>Connect Internal</string>
        </property>
        <property name="icon">
         <iconset resource="../res.qrc">

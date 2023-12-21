@@ -1,0 +1,60 @@
+language: cpp
+
+os:
+  - linux
+  - osx
+
+branches:
+  only:
+    - develop
+    - master
+    - testing
+
+env:
+  matrix:
+    - CONFIG=release
+    #- CONFIG=debug
+
+install:
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+         lsb_release -a
+      && sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
+      && sudo apt-get -qq update
+      && sudo apt-get -qq install g++ libc6 qt5-default qt5-qmake
+      && export CXX="g++"
+      && export CC="gcc"
+      ;
+    else
+         brew update > /dev/null
+      && brew install qt5
+      && chmod -R 755 /usr/local/opt/qt5/*
+      ;
+    fi
+
+script:
+  - if [ "${TRAVIS_OS_NAME}" != "linux" ]; then
+         QTDIR="/usr/local/opt/qt5"
+      && PATH="$QTDIR/bin:$PATH"
+      && LDFLAGS=-L$QTDIR/lib
+      && CPPFLAGS=-I$QTDIR/include
+      ;
+    fi
+  - qmake qmarkdowntextedit.pro CONFIG+=$CONFIG
+  - make
+
+notifications:
+  email:
+    recipients:
+      - developer@bekerle.com
+    on_success: change
+    on_failure: change
+#  irc:
+#    # https://docs.travis-ci.com/user/notifications/#IRC-notification
+#    channels:
+#      - "chat.freenode.net#qownnotes"
+#    template:
+#      - "[%{commit}] %{repository} (%{branch}): %{message} | Commit message: %{commit_message} | Changes: %{compare_url} | Build details: %{build_url}"
+#    on_success: always
+#    on_failure: always
+#    use_notice: true
+#    skip_join: true

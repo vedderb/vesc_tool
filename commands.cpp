@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2022 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -18,6 +18,7 @@
     */
 
 #include "commands.h"
+#include "qelapsedtimer.h"
 #include <QDebug>
 #include <QEventLoop>
 
@@ -48,10 +49,12 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mTimeoutDecPpm = 0;
     mTimeoutDecAdc = 0;
     mTimeoutDecChuk = 0;
-    mTimeoutDecBalance = 0;
     mTimeoutPingCan = 0;
     mTimeoutCustomConf = 0;
     mTimeoutBmsVal = 0;
+
+    mFilePercentage = 0.0;
+    mFileSpeed = 0.0;
 
     connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
 }
@@ -144,6 +147,16 @@ void Commands::processPacket(QByteArray data)
             params.qmlHwFullscreen = qmlHw == 2;
             params.hasQmlApp = qmlApp > 0;
             params.qmlAppFullscreen = qmlApp == 2;
+        }
+
+        if (vb.size() >= 1) {
+            auto nrfFlags = vb.vbPopFrontUint8();
+            params.nrfNameSupported = nrfFlags & 1;
+            params.nrfPinSupported = nrfFlags & 2;
+        }
+
+        if (vb.size() >= 1) {
+            params.fwName = vb.vbPopFrontString();
         }
 
         emit fwVersionReceived(params);
@@ -347,10 +360,12 @@ void Commands::processPacket(QByteArray data)
     } break;
 
     case COMM_DETECT_ENCODER: {
-        double offset = vb.vbPopFrontDouble32(1e6);
-        double ratio = vb.vbPopFrontDouble32(1e6);
-        bool inverted = vb.vbPopFrontInt8();
-        emit encoderParamReceived(offset, ratio, inverted);
+        ENCODER_DETECT_RES res;
+        res.offset = vb.vbPopFrontDouble32(1e6);
+        res.ratio = vb.vbPopFrontDouble32(1e6);
+        res.inverted = vb.vbPopFrontInt8();
+        res.detect_rx = true;
+        emit encoderParamReceived(res);
     } break;
 
     case COMM_DETECT_HALL_FOC: {
@@ -383,31 +398,16 @@ void Commands::processPacket(QByteArray data)
         emit decodedChukReceived(vb.vbPopFrontDouble32(1000000.0));
         break;
 
-    case COMM_GET_DECODED_BALANCE: {
-        mTimeoutDecBalance = 0;
-
-        BALANCE_VALUES values;
-
-        values.pid_output = vb.vbPopFrontDouble32(1e6);
-        values.pitch_angle = vb.vbPopFrontDouble32(1e6);
-        values.roll_angle = vb.vbPopFrontDouble32(1e6);
-        values.diff_time = vb.vbPopFrontUint32();
-        values.motor_current = vb.vbPopFrontDouble32(1e6);
-        values.debug1 = vb.vbPopFrontDouble32(1e6);
-        values.state = vb.vbPopFrontUint16();
-        values.switch_value = vb.vbPopFrontUint16();
-        values.adc1 = vb.vbPopFrontDouble32(1e6);
-        values.adc2 = vb.vbPopFrontDouble32(1e6);
-        values.debug2 = vb.vbPopFrontDouble32(1e6);
-        emit decodedBalanceReceived(values);
-    } break;
-
     case COMM_SET_MCCONF:
         emit ackReceived("MCCONF Write OK");
         break;
 
     case COMM_SET_APPCONF:
         emit ackReceived("APPCONF Write OK");
+        break;
+
+    case COMM_SET_APPCONF_NO_STORE:
+        emit ackReceived("APPCONF_NO_STORE Write OK");
         break;
 
     case COMM_CUSTOM_APP_DATA:
@@ -596,9 +596,7 @@ void Commands::processPacket(QByteArray data)
             values.q3 = vb.vbPopFrontDouble32Auto();
         }
         if (vb.size() >= 1) {
-            if (mask & (uint32_t(1) << 16)) {
-                values.vesc_id = vb.vbPopFrontUint8();
-            }
+            values.vesc_id = vb.vbPopFrontUint8();
         }
 
         emit valuesImuReceived(values, mask);
@@ -952,6 +950,146 @@ void Commands::processPacket(QByteArray data)
         emit statsRx(values, mask);
     } break;
 
+    case COMM_LISP_READ_CODE: {
+        int qmlSize = vb.vbPopFrontInt32();
+        int offset = vb.vbPopFrontInt32();
+        emit lispReadCodeRx(qmlSize, offset, vb);
+    } break;
+
+    case COMM_LISP_ERASE_CODE:
+        emit lispEraseCodeRx(vb.at(0));
+        break;
+
+    case COMM_LISP_WRITE_CODE: {
+        bool ok = vb.vbPopFrontInt8();
+        quint32 offset = vb.vbPopFrontUint32();
+        emit lispWriteCodeRx(ok, offset);
+    } break;
+
+    case COMM_LISP_PRINT:
+        emit lispPrintReceived(QString::fromLatin1(vb));
+        break;
+
+    case COMM_LISP_GET_STATS: {
+        LISP_STATS stats;
+        stats.cpu_use = vb.vbPopFrontDouble16(1e2);
+        stats.heap_use = vb.vbPopFrontDouble16(1e2);
+        stats.mem_use = vb.vbPopFrontDouble16(1e2);
+        stats.stack_use = vb.vbPopFrontDouble16(1e2);
+        stats.done_ctx_r = vb.vbPopFrontString();
+        while (vb.size() > 0) {
+            auto name = vb.vbPopFrontString();
+            auto num = vb.vbPopFrontDouble32Auto();
+            stats.number_bindings.append(qMakePair(name, num));
+        }
+        emit lispStatsRx(stats);
+    } break;
+
+    case COMM_LISP_SET_RUNNING:
+        emit lispRunningResRx(vb.at(0));
+        break;
+
+    case COMM_LISP_STREAM_CODE: {
+        quint32 offset = vb.vbPopFrontInt32();
+        quint32 res = vb.vbPopFrontInt16();
+        emit lispStreamCodeRx(offset, res);
+    } break;
+
+    case COMM_FILE_LIST: {
+        auto hasMore = vb.vbPopFrontInt8();
+        QList<FILE_LIST_ENTRY> files;
+        while (vb.size() > 0) {
+            FILE_LIST_ENTRY f;
+            f.isDir = vb.vbPopFrontInt8();
+            f.size = vb.vbPopFrontInt32();
+            f.name = vb.vbPopFrontString();
+            files.append(f);
+        }
+        emit fileListRx(hasMore, files);
+    } break;
+
+    case COMM_FILE_READ: {
+        auto offset = vb.vbPopFrontInt32();
+        auto size = vb.vbPopFrontInt32();
+        emit fileReadRx(offset, size, vb);
+    } break;
+
+    case COMM_FILE_WRITE: {
+        auto offset = vb.vbPopFrontInt32();
+        auto ok = vb.vbPopFrontInt8();
+        emit fileWriteRx(offset, ok);
+    } break;
+
+    case COMM_FILE_MKDIR: {
+        auto ok = vb.vbPopFrontInt8();
+        emit fileMkdirRx(ok);
+    } break;
+
+    case COMM_FILE_REMOVE: {
+        auto ok = vb.vbPopFrontInt8();
+        emit fileRemoveRx(ok);
+    } break;
+
+    case COMM_GET_GNSS: {
+        mTimeoutStats = 0;
+        GNSS_DATA values;
+        uint32_t mask = vb.vbPopFrontUint32();
+        if (mask & ((uint32_t)1 << 0)) { values.lat = vb.vbPopFrontDouble64(1e16); }
+        if (mask & ((uint32_t)1 << 1)) { values.lon = vb.vbPopFrontDouble64(1e16); }
+        if (mask & ((uint32_t)1 << 2)) { values.height = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 3)) { values.speed = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 4)) { values.hdop = vb.vbPopFrontDouble32Auto(); }
+        if (mask & ((uint32_t)1 << 5)) { values.ms_today = vb.vbPopFrontInt32(); }
+        if (mask & ((uint32_t)1 << 6)) { values.yy = vb.vbPopFrontInt16(); }
+        if (mask & ((uint32_t)1 << 7)) { values.mo = vb.vbPopFrontInt8(); }
+        if (mask & ((uint32_t)1 << 8)) { values.dd = vb.vbPopFrontInt8(); }
+        if (mask & ((uint32_t)1 << 9)) { values.age_s = vb.vbPopFrontDouble32Auto(); }
+        emit gnssRx(values, mask);
+    } break;
+
+    case COMM_LOG_START: {
+        int fieldNum = vb.vbPopFrontInt16();
+        double rateHz = vb.vbPopFrontDouble32Auto();
+        bool appendTime = vb.vbPopFrontInt8();
+        bool appendGnss = vb.vbPopFrontInt8();
+        bool appendGnssTime = vb.vbPopFrontInt8();
+        emit logStart(fieldNum, rateHz, appendTime, appendGnss, appendGnssTime);
+    } break;
+
+    case COMM_LOG_STOP: {
+        emit logStop();
+    } break;
+
+    case COMM_LOG_CONFIG_FIELD: {
+        LOG_HEADER h;
+        int fieldInd = vb.vbPopFrontInt16();
+        h.key = vb.vbPopFrontString();
+        h.name = vb.vbPopFrontString();
+        h.unit = vb.vbPopFrontString();
+        h.precision = vb.vbPopFrontInt8();
+        h.isRelativeToFirst = vb.vbPopFrontInt8();
+        h.isTimeStamp = vb.vbPopFrontInt8();
+        emit logConfigField(fieldInd, h);
+    } break;
+
+    case COMM_LOG_DATA_F32: {
+        int fieldStart = vb.vbPopFrontInt16();
+        QVector<double> samples;
+        while (vb.size() >= 4) {
+            samples.append(vb.vbPopFrontDouble32Auto());
+        }
+        emit logSamples(fieldStart, samples);
+    } break;
+
+    case COMM_LOG_DATA_F64: {
+        int fieldStart = vb.vbPopFrontInt16();
+        QVector<double> samples;
+        while (vb.size() >= 8) {
+            samples.append(vb.vbPopFrontDouble64Auto());
+        }
+        emit logSamples(fieldStart, samples);
+    } break;
+
     default:
         break;
     }
@@ -1222,6 +1360,8 @@ void Commands::setMcconf(bool check)
         if (check) {
             checkMcConfig();
         }
+
+        emit mcConfigWriteSent(check);
     }
 }
 
@@ -1256,6 +1396,16 @@ void Commands::setAppConf()
     if (mAppConfig) {
         VByteArray vb;
         vb.vbAppendInt8(COMM_SET_APPCONF);
+        mAppConfig->serialize(vb);
+        emitData(vb);
+    }
+}
+
+void Commands::setAppConfNoStore()
+{
+    if (mAppConfig) {
+        VByteArray vb;
+        vb.vbAppendInt8(COMM_SET_APPCONF_NO_STORE);
         mAppConfig->serialize(vb);
         emitData(vb);
     }
@@ -1321,19 +1471,6 @@ void Commands::getDecodedChuk()
 
     VByteArray vb;
     vb.vbAppendInt8(COMM_GET_DECODED_CHUK);
-    emitData(vb);
-}
-
-void Commands::getDecodedBalance()
-{
-    if (mTimeoutDecBalance > 0) {
-        return;
-    }
-
-    mTimeoutDecBalance = mTimeoutCount;
-
-    VByteArray vb;
-    vb.vbAppendInt8(COMM_GET_DECODED_BALANCE);
     emitData(vb);
 }
 
@@ -1851,12 +1988,12 @@ void Commands::customConfigGet(int confInd, bool isDefault)
     emitData(vb);
 }
 
-void Commands::customConfigSet(int confInd, QByteArray confData)
+void Commands::customConfigSet(int confInd, ConfigParams *conf)
 {
     VByteArray vb;
     vb.vbAppendUint8(COMM_SET_CUSTOM_CONFIG);
     vb.vbAppendInt8(int8_t(confInd));
-    vb.append(confData);
+    conf->serialize(vb);
     emitData(vb);
 }
 
@@ -1897,10 +2034,11 @@ void Commands::qmlUiAppGet(int len, int offset)
     emitData(vb);
 }
 
-void Commands::qmlUiErase()
+void Commands::qmlUiErase(int size)
 {
     VByteArray vb;
     vb.vbAppendUint8(COMM_QMLUI_ERASE);
+    vb.vbAppendInt32(size);
     emitData(vb);
 }
 
@@ -1963,6 +2101,136 @@ void Commands::resetStats(bool sendAck)
     emitData(vb);
 }
 
+void Commands::getGnss(unsigned int mask)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_GET_GNSS);
+    vb.vbAppendUint16(mask);
+    emitData(vb);
+}
+
+void Commands::lispReadCode(int len, int offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_READ_CODE);
+    vb.vbAppendInt32(len);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::lispWriteCode(QByteArray data, quint32 offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_WRITE_CODE);
+    vb.vbAppendUint32(offset);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::lispStreamCode(QByteArray data, quint32 offset, quint32 totLen, qint8 mode)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_STREAM_CODE);
+    vb.vbAppendInt32(offset);
+    vb.vbAppendInt32(totLen);
+    vb.vbAppendInt8(mode);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::lispEraseCode(int size)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_ERASE_CODE);
+    vb.vbAppendInt32(size);
+    emitData(vb);
+}
+
+void Commands::lispSetRunning(bool running)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_SET_RUNNING);
+    vb.vbAppendInt8(running);
+    emitData(vb);
+}
+
+void Commands::lispGetStats(bool all)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_GET_STATS);
+    vb.vbAppendInt8(all);
+    emitData(vb);
+}
+
+void Commands::lispSendReplCmd(QString str)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_LISP_REPL_CMD);
+    vb.vbAppendString(str);
+    emitData(vb);
+}
+
+void Commands::setBleName(QString name)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_SET_BLE_NAME);
+    vb.vbAppendString(name);
+    emitData(vb);
+}
+
+void Commands::setBlePin(QString pin)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_SET_BLE_PIN);
+    vb.vbAppendString(pin);
+    emitData(vb);
+}
+
+void Commands::fileList(QString path, QString from)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_LIST);
+    vb.vbAppendString(path);
+    vb.vbAppendString(from);
+    emitData(vb);
+}
+
+void Commands::fileRead(QString path, qint32 offset)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_READ);
+    vb.vbAppendString(path);
+    vb.vbAppendInt32(offset);
+    emitData(vb);
+}
+
+void Commands::fileWrite(QString path, qint32 offset, qint32 size, QByteArray data)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_WRITE);
+    vb.vbAppendString(path);
+    vb.vbAppendInt32(offset);
+    vb.vbAppendInt32(size);
+    vb.append(data);
+    emitData(vb);
+}
+
+void Commands::fileMkdir(QString path)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_MKDIR);
+    vb.vbAppendString(path);
+    emitData(vb);
+}
+
+void Commands::fileRemove(QString path)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_FILE_REMOVE);
+    vb.vbAppendString(path);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;
@@ -1979,7 +2247,6 @@ void Commands::timerSlot()
     if (mTimeoutDecPpm > 0) mTimeoutDecPpm--;
     if (mTimeoutDecAdc > 0) mTimeoutDecAdc--;
     if (mTimeoutDecChuk > 0) mTimeoutDecChuk--;
-    if (mTimeoutDecBalance > 0) mTimeoutDecBalance--;
     if (mTimeoutPingCan > 0) {
         mTimeoutPingCan--;
         if (mTimeoutPingCan == 0) {
@@ -2019,6 +2286,16 @@ void Commands::emitData(QByteArray data)
     emit dataToSend(data);
 }
 
+double Commands::getFileSpeed() const
+{
+    return mFileSpeed;
+}
+
+double Commands::getFilePercentage() const
+{
+    return mFilePercentage;
+}
+
 bool Commands::getMaxPowerLossBug() const
 {
     return mMaxPowerLossBug;
@@ -2027,6 +2304,304 @@ bool Commands::getMaxPowerLossBug() const
 void Commands::setMaxPowerLossBug(bool maxPowerLossBug)
 {
     mMaxPowerLossBug = maxPowerLossBug;
+}
+
+QVariantList Commands::fileBlockList(QString path)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this](QList<FILE_LIST_ENTRY> &filesNow) {
+        bool res = false;
+        bool more = false;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileListRx,
+                            [&res,&loop,&filesNow,&more](bool hasMore, QList<FILE_LIST_ENTRY> files) {
+            filesNow.append(files);
+            res = true;
+            more = hasMore;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return qMakePair(res, more);
+    };
+
+    auto waitResRetry = [waitRes,path,this](QList<FILE_LIST_ENTRY> &filesNow) {
+        QString from = "";
+        if (!filesNow.isEmpty()) {
+            from = filesNow.last().name;
+        }
+        fileList(path, from);
+        auto res = waitRes(filesNow);
+        int retries = 3;
+        while (!res.first && retries > 0) {
+            fileList(path, from);
+            res = waitRes(filesNow);
+            retries--;
+        }
+        return res;
+    };
+
+    QList<FILE_LIST_ENTRY> files;
+    auto res = waitResRetry(files);
+
+    while (res.second) {
+        res = waitResRetry(files);
+
+        if (mFileShouldCancel) {
+            break;
+        }
+    }
+
+    if (!res.first) {
+        qWarning() << "Could not list files";
+    }
+
+    std::sort(files.begin(), files.end(), []
+              (const FILE_LIST_ENTRY & a, const FILE_LIST_ENTRY & b) {
+        return a.name.toLower() < b.name.toLower();
+    });
+
+    QVariantList retVal;
+    foreach (auto f, files) {
+        retVal.append(QVariant::fromValue(f));
+    }
+
+    return retVal;
+}
+
+QByteArray Commands::fileBlockRead(QString path)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this](QByteArray &dataNow, qint32 offsetNow) {
+        qint32 sizeRet = -1.0;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileReadRx,
+                            [&sizeRet,&loop,&dataNow,&offsetNow]
+                            (qint32 offset, qint32 size, QByteArray data) {
+            if (offset == offsetNow) {
+                sizeRet = size;
+                dataNow.append(data);
+            } else {
+                qWarning() << "Wrong offset";
+            }
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+
+        disconnect(conn);
+        return sizeRet;
+    };
+
+    auto waitResRetry = [waitRes,path,this](QByteArray &dataNow, qint32 offsetNow) {
+        fileRead(path, offsetNow);
+        auto res = waitRes(dataNow, offsetNow);
+        int retries = 3;
+        while (res < 0 && retries > 0) {
+            fileRead(path, offsetNow);
+            res = waitRes(dataNow, offsetNow);
+            retries--;
+        }
+        return res;
+    };
+
+    QElapsedTimer t;
+    t.start();
+
+    QByteArray data;
+    auto res = waitResRetry(data, 0);
+
+    while (res >= 0 && data.size() < res) {
+        mFilePercentage = (double(data.size()) / double(res)) * 100.0;
+        mFileSpeed = (double(data.size()) / double(t.elapsed())) * 1000.0;
+        emit fileProgress(data.size(), res, mFilePercentage, mFileSpeed);
+        res = waitResRetry(data, data.size());
+
+        if (mFileShouldCancel) {
+            return QByteArray();
+            break;
+        }
+    }
+
+    if (res < 0) {
+        qWarning() << "Could not read file";
+        return QByteArray();
+    }
+
+    return data;
+}
+
+bool Commands::fileBlockWrite(QString path, QByteArray data)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this]() {
+        bool res = false;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileWriteRx,
+                            [&res,&loop]
+                            (qint32 offset, bool ok) {
+            (void)offset;
+            res = ok;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        return res;
+    };
+
+    auto waitResRetry = [waitRes,path,this](qint32 offsetNow, qint32 size, QByteArray dataNow) {
+        fileWrite(path, offsetNow, size, dataNow);
+        auto res = waitRes();
+        int retries = 3;
+        while (!res && retries > 0) {
+            fileWrite(path, offsetNow, size, dataNow);
+            res = waitRes();
+            retries--;
+        }
+        return res;
+    };
+
+    const int chunkSize = 384;
+    qint32 size = data.size();
+    int sz = data.size() > chunkSize ? chunkSize : data.size();
+
+    QElapsedTimer t;
+    t.start();
+
+    qint32 offset = 0;
+    auto res = waitResRetry(offset, size, data.mid(0, sz));
+    offset += sz;
+    data.remove(0, sz);
+
+    while (res && data.size() > 0) {
+        mFilePercentage = (double(size - data.size()) / double(size)) * 100.0;
+        mFileSpeed = (double(size - data.size()) / double(t.elapsed())) * 1000.0;
+        emit fileProgress(size - data.size(), size, mFilePercentage, mFileSpeed);
+
+        sz = data.size() > chunkSize ? chunkSize : data.size();
+        res = waitResRetry(offset, size, data.mid(0, sz));
+        offset += sz;
+        data.remove(0, sz);
+
+        if (mFileShouldCancel) {
+            return false;
+        }
+    }
+
+    return res;
+}
+
+bool Commands::fileBlockMkdir(QString path)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this]() {
+        bool res = false;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileMkdirRx,
+                            [&res,&loop](bool ok) {
+            res = ok;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        return res;
+    };
+
+    auto waitResRetry = [waitRes,path,this]() {
+        fileMkdir(path);
+        auto res = waitRes();
+        int retries = 3;
+        while (!res && retries > 0) {
+            fileMkdir(path);
+            res = waitRes();
+            retries--;
+        }
+        return res;
+    };
+
+    return waitResRetry();
+}
+
+bool Commands::fileBlockRemove(QString path)
+{
+    mFileShouldCancel = false;
+
+    auto waitRes = [this]() {
+        bool res = false;
+
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(1500);
+        auto conn = connect(this, &Commands::fileRemoveRx,
+                            [&res,&loop](bool ok) {
+            res = ok;
+            loop.quit();
+        });
+
+        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        return res;
+    };
+
+    auto waitResRetry = [waitRes,path,this]() {
+        fileRemove(path);
+        auto res = waitRes();
+        int retries = 3;
+        while (!res && retries > 0) {
+            fileRemove(path);
+            res = waitRes();
+            retries--;
+        }
+        return res;
+    };
+
+    return waitResRetry();
+}
+
+void Commands::fileBlockCancel()
+{
+    mFileShouldCancel = true;
+    mFilePercentage = 0.0;
+    mFileSpeed = 0;
+    emit fileProgress(0, 0, mFilePercentage, mFileSpeed);
+}
+
+bool Commands::fileBlockDidCancel()
+{
+    return mFileShouldCancel;
 }
 
 bool Commands::getLimitedSupportsFwdAllCan() const
@@ -2089,6 +2664,8 @@ QString Commands::faultToStr(mc_fault_code fault)
     case FAULT_CODE_FLASH_CORRUPTION_MC_CFG: return "FAULT_CODE_FLASH_CORRUPTION_MC_CFG";
     case FAULT_CODE_ENCODER_NO_MAGNET: return "FAULT_CODE_ENCODER_NO_MAGNET";
     case FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: return "FAULT_CODE_ENCODER_MAGNET_TOO_STRONG";
+    case FAULT_CODE_PHASE_FILTER: return "FAULT_CODE_PHASE_FILTER";
+    case FAULT_CODE_ENCODER_FAULT: return "FAULT_CODE_ENCODER_FAULT";
     }
 
     return "Unknown fault";

@@ -37,9 +37,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="pixmap">
-        <pixmap resource="../res.qrc">:/res/icons/About-96.png</pixmap>
-       </property>
        <property name="scaledContents">
         <bool>true</bool>
        </property>

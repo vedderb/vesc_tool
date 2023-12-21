@@ -18,8 +18,11 @@
     */
 
 #include "fwhelper.h"
-#include <QDirIterator>
 #include "hexfile.h"
+
+#include <QDirIterator>
+#include <QStandardPaths>
+#include <QResource>
 
 FwHelper::FwHelper(QObject *parent) : QObject(parent)
 {
@@ -51,6 +54,15 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
         }
     }
 
+    // Manually added entries. TODO: Come up with a system for them
+    if (params.hw == "VESC Express T") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VESC Express");
+    } else if (params.hw == "Devkit C3") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/DevKitM-1");
+    } else if (params.hw == "STR-DCDC") {
+        hws.insert(params.hw, "://res/firmwares_custom_module/str-dcdc");
+    }
+
     return hws;
 }
 
@@ -61,7 +73,10 @@ QVariantMap FwHelper::getFirmwares(QString hw)
     QDirIterator it(hw);
     while (it.hasNext()) {
         QFileInfo fi(it.next());
-        fws.insert(fi.fileName(), fi.absoluteFilePath());
+        if (fi.fileName().toLower() == "vesc_default.bin" ||
+                fi.fileName().toLower() == "vesc_express.bin") {
+            fws.insert(fi.fileName(), fi.absoluteFilePath());
+        }
     }
 
     return fws;
@@ -71,10 +86,35 @@ QVariantMap FwHelper::getBootloaders(FW_RX_PARAMS params, QString hw)
 {
     QVariantMap bls;
 
-    QString blDir = "://res/bootloaders";
+    QString blDir = "";
+    switch (params.hwType) {
+    case HW_TYPE_VESC:
+        blDir = "://res/bootloaders";
+        break;
 
-    if (params.hwType == HW_TYPE_VESC_BMS) {
+    case HW_TYPE_VESC_BMS:
         blDir = "://res/bootloaders_bms";
+        break;
+
+    case HW_TYPE_CUSTOM_MODULE:
+        QByteArray endEsp;
+        endEsp.append('\0');
+        endEsp.append('\0');
+        endEsp.append('\0');
+        endEsp.append('\0');
+
+        if (!params.uuid.endsWith(endEsp)) {
+            if (params.hw == "hm1") {
+                blDir = "://res/bootloaders_bms";
+            } else {
+                blDir = "://res/bootloaders_custom_module/stm32g431";
+            }
+        }
+        break;
+    }
+
+    if (blDir.isEmpty()) {
+        return bls;
     }
 
     QDirIterator it(blDir);
@@ -93,9 +133,18 @@ QVariantMap FwHelper::getBootloaders(FW_RX_PARAMS params, QString hw)
     }
 
     if (bls.isEmpty()) {
-        QFileInfo generic(blDir + "/generic.bin");
-        if (generic.exists()) {
-            bls.insert("generic", generic.absoluteFilePath());
+        {
+            QFileInfo generic(blDir + "/generic.bin");
+            if (generic.exists()) {
+                bls.insert("generic", generic.absoluteFilePath());
+            }
+        }
+
+        {
+            QFileInfo stm32g431(blDir + "/stm32g431.bin");
+            if (stm32g431.exists()) {
+                bls.insert("stm32g431", stm32g431.absoluteFilePath());
+            }
         }
     }
 
@@ -132,7 +181,7 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
         return false;
     }
 
-    if (file.size() > 400000) {
+    if (file.size() > 1500000) {
         vesc->emitMessageDialog(tr("Upload Error"),
                                 tr("The selected file is too large to be a firmware."),
                                 false);
@@ -193,4 +242,59 @@ bool FwHelper::uploadFirmwareSingleShotTimer(QString filename, VescInterface *ve
         emit fwUploadRes(res, isBootloader);
     });
     return true;
+}
+
+QVariantMap FwHelper::getArchiveDirs()
+{
+    QVariantMap fws;
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if(!QDir(appDataLoc).exists()) {
+        QDir().mkpath(appDataLoc);
+    }
+    QString path = appDataLoc + "/res_fw.rcc";
+    QFile file(path);
+    if (file.exists()) {
+        QResource::unregisterResource(path);
+        QResource::registerResource(path);
+
+        QString fwDir = "://fw_archive";
+
+        QDirIterator it(fwDir);
+        while (it.hasNext()) {
+            QFileInfo fi(it.next());
+            fws.insert(fi.fileName(), fi.absoluteFilePath());
+        }
+    }
+
+    return fws;
+}
+
+QVariantMap FwHelper::getArchiveFirmwares(QString fwPath, FW_RX_PARAMS params)
+{
+    QVariantMap fws;
+
+    QDirIterator it(fwPath);
+    while (it.hasNext()) {
+        QFileInfo fi(it.next());
+
+        QDirIterator it2(fi.absoluteFilePath());
+        while (it2.hasNext()) {
+            QFileInfo fi2(it2.next());
+
+            QStringList names = fi.fileName().split("_o_");
+
+            if (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive)) {
+                if (fi2.fileName().toLower() == "vesc_default.bin") {
+                    QString name = names.at(0);
+                    for(int i = 1;i < names.size();i++) {
+                        name += " & " + names.at(i);
+                    }
+
+                    fws.insert("HW " + name + ": " + fi2.fileName(), fi2.absoluteFilePath());
+                }
+            }
+        }
+    }
+
+    return fws;
 }

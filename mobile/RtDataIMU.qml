@@ -12,19 +12,19 @@ Item {
     height: rect.height
     function updateText(values) {
         valText1.text =
-                "Roll   : " + (values.roll * 57.2958).toFixed(2) + "\n" +
-                "Acc X  : " + values.accX.toFixed(2) + "\n" +
-                "Gyro X : " + values.gyroX.toFixed(2)
+                "Roll   : " + (values.roll * 57.2958).toFixed(3) + "\n" +
+                "Acc X  : " + values.accX.toFixed(3) + "\n" +
+                "Gyro X : " + values.gyroX.toFixed(3)
 
         valText2.text =
-                "Pitch  : " + (values.pitch * 57.2958).toFixed(2) + "\n" +
-                "Acc Y  : " + values.accY.toFixed(2) + "\n" +
-                "Gyro Y : " + values.gyroY.toFixed(2)
+                "Pitch  : " + (values.pitch * 57.2958).toFixed(3) + "\n" +
+                "Acc Y  : " + values.accY.toFixed(3) + "\n" +
+                "Gyro Y : " + values.gyroY.toFixed(3)
 
         valText3.text =
-                "yaw    : " + (values.yaw * 57.2958).toFixed(2) + "\n" +
-                "Acc Z  : " + values.accZ.toFixed(2) + "\n" +
-                "Gyro Z : " + values.gyroZ.toFixed(2)
+                "yaw    : " + (values.yaw * 57.2958).toFixed(3) + "\n" +
+                "Acc Z  : " + values.accZ.toFixed(3) + "\n" +
+                "Gyro Z : " + values.gyroZ.toFixed(3)
     }
 
     Rectangle {

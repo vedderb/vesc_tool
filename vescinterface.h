@@ -48,6 +48,8 @@
 
 #ifdef HAS_BLUETOOTH
 #include "bleuart.h"
+#else
+#include "bleuartdummy.h"
 #endif
 
 #ifdef HAS_POS
@@ -140,6 +142,7 @@ public:
     Q_INVOKABLE QString rtLogFilePath();
     Q_INVOKABLE QVector<LOG_DATA> getRtLogData();
     Q_INVOKABLE bool loadRtLogFile(QString file);
+    Q_INVOKABLE bool loadRtLogFile(QByteArray data);
     Q_INVOKABLE LOG_DATA getRtLogSample(double progress);
     Q_INVOKABLE LOG_DATA getRtLogSampleAtValTimeFromStart(int time);
 
@@ -157,7 +160,8 @@ public:
     Q_INVOKABLE void setAllowScreenRotation(bool allowScreenRotation);
     Q_INVOKABLE bool speedGaugeUseNegativeValues();
     Q_INVOKABLE void setSpeedGaugeUseNegativeValues(bool useNegativeValues);
-
+    Q_INVOKABLE bool askQmlLoad() const;
+    Q_INVOKABLE void setAskQmlLoad(bool newAskQmlLoad);
 
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
@@ -166,16 +170,24 @@ public:
     Q_INVOKABLE QString getLastBleAddr() const;
     Q_INVOKABLE void storeBlePreferred(QString address, bool preferred);
     Q_INVOKABLE bool getBlePreferred(QString address);
+    Q_INVOKABLE bool hasBluetooth() {return true;}
+#else
+    Q_INVOKABLE BleUartDummy* bleDevice() {return mBleUart;}
+    Q_INVOKABLE bool hasBluetooth() {return false;}
 #endif
 
     // Connection
     Q_INVOKABLE bool isPortConnected();
     Q_INVOKABLE void disconnectPort();
     Q_INVOKABLE bool reconnectLastPort();
+    Q_INVOKABLE bool lastPortAvailable();
     Q_INVOKABLE bool autoconnect();
     Q_INVOKABLE QString getConnectedPortName();
-    bool connectSerial(QString port, int baudrate = 115200);
-    QList<VSerialInfo_t> listSerialPorts();
+    Q_INVOKABLE bool connectSerial(QString port, int baudrate);
+    bool connectSerial(QString port) {
+        return connectSerial(port, 115200);
+    }
+    Q_INVOKABLE QVariantList listSerialPorts();
     QList<QString> listCANbusInterfaces();
     Q_INVOKABLE bool connectCANbus(QString backend, QString ifName, int bitrate);
     Q_INVOKABLE bool isCANbusConnected();
@@ -183,6 +195,7 @@ public:
     Q_INVOKABLE void scanCANbus();
 
     Q_INVOKABLE void connectTcp(QString server, int port);
+    Q_INVOKABLE void connectTcpHub(QString server, int port, QString id, QString pass);
     Q_INVOKABLE void connectUdp(QString server, int port);
     Q_INVOKABLE void connectBle(QString address);
     Q_INVOKABLE bool isAutoconnectOngoing() const;
@@ -199,6 +212,7 @@ public:
     Q_INVOKABLE bool tcpServerIsRunning();
     Q_INVOKABLE bool tcpServerIsClientConnected();
     Q_INVOKABLE QString tcpServerClientIp();
+    Q_INVOKABLE bool tcpServerConnectToHub(QString server, int port, QString id, QString pass);
 
     Q_INVOKABLE bool udpServerStart(int port);
     Q_INVOKABLE void udpServerStop();
@@ -224,12 +238,29 @@ public:
 
     Q_INVOKABLE int customConfigNum();
     Q_INVOKABLE bool customConfigsLoaded();
-    ConfigParams *customConfig(int configNum);
+    Q_INVOKABLE bool customConfigRxDone();
+    Q_INVOKABLE ConfigParams *customConfig(int configNum);
 
     Q_INVOKABLE bool qmlHwLoaded();
     Q_INVOKABLE bool qmlAppLoaded();
     Q_INVOKABLE QString qmlHw();
     Q_INVOKABLE QString qmlApp();
+
+    Q_INVOKABLE QString getLastTcpHubVescID() const;
+    Q_INVOKABLE QString getLastTcpHubVescPass() const;
+    Q_INVOKABLE QString getLastTcpHubServer() const;
+    Q_INVOKABLE int getLastTcpHubPort() const;
+    Q_INVOKABLE QVariantList getTcpHubDevs();
+    Q_INVOKABLE void clearTcpHubDevs();
+    Q_INVOKABLE bool updateTcpHubPassword(QString uuid, QString newPass);
+    Q_INVOKABLE bool connectTcpHubUuid(QString uuid);
+
+    // Force reloading of firmware version, custom UIs and custom configs
+    Q_INVOKABLE void reloadFirmware() {
+        updateFwRx(false);
+    }
+
+    Q_INVOKABLE bool downloadFwArchive();
 
 signals:
     void statusMessage(const QString &msg, bool isGood);
@@ -242,6 +273,7 @@ signals:
     void autoConnectFinished();
     void profilesUpdated();
     void pairingListUpdated();
+    void unintentionalBleDisconnect();
     void CANbusNewNode(int node);
     void CANbusInterfaceListUpdated();
     void useImperialUnitsChanged(bool useImperialUnits);
@@ -249,6 +281,7 @@ signals:
     void configurationBackupsChanged();
     void customConfigLoadDone();
     void qmlLoadDone();
+    void fwArchiveDlProgress(QString msg, double prog);
 
 public slots:
 
@@ -273,6 +306,7 @@ private slots:
 
 #ifdef HAS_BLUETOOTH
     void bleDataRx(QByteArray data);
+    void bleUnintentionalDisconnect();
 #endif
 
     void timerSlot();
@@ -283,6 +317,7 @@ private slots:
     void appconfUpdated();
     void mcconfUpdated();
     void ackReceived(QString ackType);
+    void customConfigRx(int confId, QByteArray data);
 
 private:
     typedef enum {
@@ -292,6 +327,7 @@ private:
         CONN_TCP,
         CONN_BLE,
         CONN_UDP,
+        CONN_TCP_HUB,
     } conn_t;
 
     QSettings mSettings;
@@ -302,6 +338,8 @@ private:
     QStringList mPairedUuids;
     TcpServerSimple *mTcpServer;
     UdpServerSimple *mUdpServer;
+    QTimer *mTimerBroadcast;
+    QVariantList mTcpHubDevs;
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;
@@ -309,6 +347,7 @@ private:
     ConfigParams *mFwConfig;
     QVector<ConfigParams*> mCustomConfigs;
     bool mCustomConfigsLoaded;
+    bool mCustomConfigRxDone;
 
     bool mQmlHwLoaded;
     QString mQmlHw;
@@ -362,6 +401,10 @@ private:
     bool mTcpConnected;
     QString mLastTcpServer;
     int mLastTcpPort;
+    QString mLastTcpHubServer;
+    int mLastTcpHubPort;
+    QString mLastTcpHubVescID;
+    QString mLastTcpHubVescPass;
 
     QUdpSocket *mUdpSocket;
     bool mUdpConnected;
@@ -371,6 +414,8 @@ private:
 #ifdef HAS_BLUETOOTH
     BleUart *mBleUart;
     QString mLastBleAddr;
+#else
+    BleUartDummy *mBleUart;
 #endif
 
 #ifdef HAS_POS
@@ -413,6 +458,7 @@ private:
     bool mLoadQmlUiOnConnect;
     bool mAllowScreenRotation;
     bool mSpeedGaugeUseNegativeValues;
+    bool mAskQmlLoad;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

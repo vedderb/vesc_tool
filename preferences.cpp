@@ -41,19 +41,18 @@ Preferences::Preferences(QWidget *parent) :
             this, SLOT(timerSlot()));
 
     ui->setupUi(this);
-    QString theme = Utility::getThemePath();
 
-    ui->pollRestoreButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
-    ui->pathScriptInputChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->pathRtLogChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->pathScriptOutputChooseButton->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->jsConf1Button->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->jsConf2Button->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->jsConf3Button->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->jsConf4Button->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->jsConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
-    ui->jsScanButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
-    ui->jsResetConfigButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
+    ui->pollRestoreButton->setIcon(Utility::getIcon("icons/Restart-96.png"));
+    ui->pathScriptInputChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->pathRtLogChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->pathScriptOutputChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->jsConf1Button->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->jsConf2Button->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->jsConf3Button->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->jsConf4Button->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->jsConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->jsScanButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->jsResetConfigButton->setIcon(Utility::getIcon("icons/Restart-96.png"));
 
     ui->uiScaleBox->setValue(mSettings.value("app_scale_factor", 1.0).toDouble());
     ui->uiPlotWidthBox->setValue(mSettings.value("plot_line_width",4.0).toDouble());
@@ -132,28 +131,15 @@ Preferences::Preferences(QWidget *parent) :
     }
 #endif
 
+    ui->uploadContentEditorButton->setChecked(mSettings.value("scripting/uploadContentEditor", true).toBool());
+    ui->uploadContentFileButton->setChecked(!mSettings.value("scripting/uploadContentEditor", true).toBool());
+
     saveSettingsChanged();
 }
 
 Preferences::~Preferences()
 {
-#ifdef HAS_GAMEPAD
-    mSettings.setValue("js_is_configured", ui->jsConfigOkBox->isChecked());
-    mSettings.setValue("js_is_inverted", ui->jsInvertedBox->isChecked());
-    mSettings.setValue("js_is_bidirectional", ui->jsBidirectionalBox->isChecked());
-    mSettings.setValue("js_axis", ui->jseAxisBox->currentIndex());
-    mSettings.setValue("js_control_type", ui->jsControlTypeBox->currentIndex());
-    mSettings.setValue("js_current_min", ui->jsCurrentMinBox->value());
-    mSettings.setValue("js_current_max", ui->jsCurrentMaxBox->value());
-    mSettings.setValue("js_erpm_min", ui->jsErpmMinBox->value());
-    mSettings.setValue("js_erpm_max", ui->jsErpmMaxBox->value());
-    mSettings.setValue("js_range_min", ui->jsMinBox->value());
-    mSettings.setValue("js_range_max", ui->jsMaxBox->value());
-    if (mGamepad) {
-        mSettings.setValue("js_name", mGamepad->name());
-    }
-#endif
-
+    saveSettingsChanged();
     delete ui;
 }
 
@@ -165,9 +151,6 @@ VescInterface *Preferences::vesc() const
 void Preferences::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
-    if (mVesc) {
-        ui->loadQmlUiConnectBox->setChecked(mVesc->getLoadQmlUiOnConnect());
-    }
 }
 
 void Preferences::setUseGamepadControl(bool useControl)
@@ -216,6 +199,15 @@ void Preferences::closeEvent(QCloseEvent *event)
     }
 
     saveSettingsChanged();
+    event->accept();
+}
+
+void Preferences::showEvent(QShowEvent *event)
+{
+    if (mVesc) {
+        ui->loadQmlUiConnectBox->setChecked(mVesc->getLoadQmlUiOnConnect());
+        ui->qmlUiAskBox->setChecked(mVesc->askQmlLoad());
+    }
     event->accept();
 }
 
@@ -359,6 +351,13 @@ void Preferences::on_loadQmlUiConnectBox_toggled(bool checked)
     }
 }
 
+void Preferences::on_qmlUiAskBox_toggled(bool checked)
+{
+    if (mVesc) {
+        mVesc->setAskQmlLoad(checked);
+    }
+}
+
 void Preferences::on_pathRtLogChooseButton_clicked()
 {
     ui->pathRtLogEdit->setText(
@@ -438,6 +437,24 @@ void Preferences::on_okButton_clicked(){
 
 void Preferences::saveSettingsChanged()
 {
+#ifdef HAS_GAMEPAD
+    mSettings.setValue("js_is_configured", ui->jsConfigOkBox->isChecked());
+    mSettings.setValue("js_is_inverted", ui->jsInvertedBox->isChecked());
+    mSettings.setValue("js_is_bidirectional", ui->jsBidirectionalBox->isChecked());
+    mSettings.setValue("js_axis", ui->jseAxisBox->currentIndex());
+    mSettings.setValue("js_control_type", ui->jsControlTypeBox->currentIndex());
+    mSettings.setValue("js_current_min", ui->jsCurrentMinBox->value());
+    mSettings.setValue("js_current_max", ui->jsCurrentMaxBox->value());
+    mSettings.setValue("js_erpm_min", ui->jsErpmMinBox->value());
+    mSettings.setValue("js_erpm_max", ui->jsErpmMaxBox->value());
+    mSettings.setValue("js_range_min", ui->jsMinBox->value());
+    mSettings.setValue("js_range_max", ui->jsMaxBox->value());
+    if (mGamepad) {
+        mSettings.setValue("js_name", mGamepad->name());
+    }
+#endif
+
     mLastScaling = mSettings.value("app_scale_factor", 1.0).toDouble();
     mLastIsDark = Utility::isDarkMode();
+    mSettings.setValue("scripting/uploadContentEditor", ui->uploadContentEditorButton->isChecked());
 }

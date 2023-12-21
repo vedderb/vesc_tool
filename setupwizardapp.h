@@ -71,8 +71,6 @@ private slots:
 private:
     AspectImgLabel *mSideLabel;
     VescInterface *mVesc;
-    bool mCanLastFwd;
-    int mCanLastId;
 
 };
 

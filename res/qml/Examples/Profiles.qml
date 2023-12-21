@@ -204,7 +204,7 @@ Item {
     Connections {
         target: VescIf
 
-        onProfilesUpdated: {
+        function onProfilesUpdated() {
             updateVisibleProfiles()
         }
     }

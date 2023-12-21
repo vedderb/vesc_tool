@@ -3909,6 +3909,14 @@ public:
   
   QCPAxis *xAxis, *yAxis, *xAxis2, *yAxis2;
   QCPLegend *legend;
+
+  void replotWhenVisible() {
+      if (isVisible()) {
+          replot(rpQueuedReplot);
+      } else {
+          doReplotOnShow = true;
+      }
+  }
   
 signals:
   void mouseDoubleClick(QMouseEvent *event);
@@ -3932,6 +3940,17 @@ signals:
   void afterReplot();
   
 protected:
+  bool doReplotOnShow;
+
+  virtual void showEvent(QShowEvent *event) override
+  {
+      (void)event;
+      if (doReplotOnShow) {
+          replot(rpQueuedReplot);
+          doReplotOnShow = false;
+      }
+  }
+
   // property members:
   QRect mViewport;
   double mBufferDevicePixelRatio;

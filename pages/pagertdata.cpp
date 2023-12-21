@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2022 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -19,7 +19,6 @@
 
 #include "pagertdata.h"
 #include "ui_pagertdata.h"
-#include "widgets/helpdialog.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include "utility.h"
@@ -35,33 +34,26 @@ PageRtData::PageRtData(QWidget *parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = nullptr;
 
-    QString theme = Utility::getThemePath();
-    ui->experimentClearDataButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
-    ui->experimentShowLineButton->setIcon(QPixmap(theme + "icons/3ph_sine.png"));
-    ui->experimentScatterButton->setIcon(QPixmap(theme + "icons/Polyline-96.png"));
-    ui->rescaleButton->setIcon(QPixmap(theme + "icons/expand_off.png"));
+    ui->rescaleButton->setIcon(Utility::getIcon("icons/expand_off.png"));
 
-    QIcon mycon = QIcon(theme + "icons/expand_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_off.png"), QIcon::Normal, QIcon::Off);
+    QIcon mycon = QIcon(Utility::getIcon("icons/expand_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomHButton->setIcon(mycon);
-    ui->experimentHZoomButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/expand_v_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/expand_v_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/expand_v_off.png"), QIcon::Normal, QIcon::Off);
     ui->zoomVButton->setIcon(mycon);
-    ui->experimentVZoomButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/size_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/size_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/size_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/size_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/size_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/size_off.png"), QIcon::Normal, QIcon::Off);
     ui->autoscaleButton->setIcon(mycon);
-    ui->experimentAutoScaleButton->setIcon(mycon);
 
-    mycon = QIcon(theme + "icons/rt_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/rt_on.png"), QIcon::Normal, QIcon::On);
-    mycon.addPixmap(QPixmap(theme + "icons/rt_off.png"), QIcon::Normal, QIcon::Off);
+    mycon = QIcon(Utility::getIcon("icons/rt_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/rt_on.png"), QIcon::Normal, QIcon::On);
+    mycon.addPixmap(Utility::getIcon("icons/rt_off.png"), QIcon::Normal, QIcon::Off);
     ui->logRtButton->setIcon(mycon);
 
     mTimer = new QTimer(this);
@@ -73,17 +65,12 @@ PageRtData::PageRtData(QWidget *parent) :
     mUpdateValPlot = false;
     mUpdatePosPlot = false;
 
-    mExperimentReplot = false;
-    mExperimentPlotNow = 0;
-
-    QCustomPlot* allPlots[6] =
+    QCustomPlot* allPlots[] =
                 {ui->currentPlot, ui->tempPlot, ui->focPlot,
-                ui->posPlot, ui->experimentPlot, ui->rpmPlot};
-    for(int j = 0; j<6; j++)
-    {
+                ui->posPlot, ui->rpmPlot};
+    for(int j = 0;j < 5; j++) {
         Utility::setPlotColors(allPlots[j]);
         allPlots[j]->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-        //allPlots[j]->setBufferDevicePixelRatio(1.5);
     }
 
     // Current and duty
@@ -184,43 +171,6 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->posPlot->xAxis->setLabel("Sample");
     ui->posPlot->yAxis->setLabel("Degrees");
 
-    // Experiment
-    ui->experimentPlot->xAxis->grid()->setSubGridVisible(true);
-    ui->experimentPlot->yAxis->grid()->setSubGridVisible(true);
-
-    connect(ui->experimentGraph1Button, &QPushButton::toggled,
-            [=]() {mExperimentReplot = true;});
-    connect(ui->experimentGraph2Button, &QPushButton::toggled,
-            [=]() {mExperimentReplot = true;});
-    connect(ui->experimentGraph3Button, &QPushButton::toggled,
-            [=]() {mExperimentReplot = true;});
-    connect(ui->experimentGraph4Button, &QPushButton::toggled,
-            [=]() {mExperimentReplot = true;});
-    connect(ui->experimentGraph5Button, &QPushButton::toggled,
-            [=]() {mExperimentReplot = true;});
-    connect(ui->experimentGraph6Button, &QPushButton::toggled,
-            [=]() {mExperimentReplot = true;});
-    connect(ui->experimentScatterButton, &QPushButton::toggled,
-            [=]() {mExperimentReplot = true;});
-    connect(ui->experimentShowLineButton, &QPushButton::toggled,
-            [=]() {mExperimentReplot = true;});
-
-    connect(ui->experimentHZoomButton, &QPushButton::toggled,
-            [=]() {
-        Qt::Orientations plotOrientations = Qt::Orientations(
-                ((ui->experimentHZoomButton->isChecked() ? Qt::Horizontal : 0) |
-                 (ui->experimentVZoomButton->isChecked() ? Qt::Vertical : 0)));
-        ui->experimentPlot->axisRect()->setRangeZoom(plotOrientations);
-    });
-
-    connect(ui->experimentVZoomButton, &QPushButton::toggled,
-            [=]() {
-        Qt::Orientations plotOrientations = Qt::Orientations(
-                ((ui->experimentHZoomButton->isChecked() ? Qt::Horizontal : 0) |
-                 (ui->experimentVZoomButton->isChecked() ? Qt::Vertical : 0)));
-        ui->experimentPlot->axisRect()->setRangeZoom(plotOrientations);
-    });
-
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
 }
@@ -239,19 +189,13 @@ void PageRtData::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
 
+    ui->experimentPlot->setVesc(vesc);
+
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,unsigned int)),
-                this, SLOT(valuesReceived(MC_VALUES, unsigned int)));
+        connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,uint)),
+                this, SLOT(valuesReceived(MC_VALUES,uint)));
         connect(mVesc->commands(), SIGNAL(rotorPosReceived(double)),
                 this, SLOT(rotorPosReceived(double)));
-        connect(mVesc->commands(), SIGNAL(plotInitReceived(QString,QString)),
-                this, SLOT(plotInitReceived(QString,QString)));
-        connect(mVesc->commands(), SIGNAL(plotDataReceived(double,double)),
-                this, SLOT(plotDataReceived(double,double)));
-        connect(mVesc->commands(), SIGNAL(plotAddGraphReceived(QString)),
-                this, SLOT(plotAddGraphReceived(QString)));
-        connect(mVesc->commands(), SIGNAL(plotSetGraphReceived(int)),
-                this, SLOT(plotSetGraphReceived(int)));
     }
 }
 
@@ -338,10 +282,10 @@ void PageRtData::timerSlot()
             ui->focPlot->rescaleAxes();
         }
 
-        ui->currentPlot->replot();
-        ui->tempPlot->replot();
-        ui->rpmPlot->replot();
-        ui->focPlot->replot();
+        ui->currentPlot->replotWhenVisible();
+        ui->tempPlot->replotWhenVisible();
+        ui->rpmPlot->replotWhenVisible();
+        ui->focPlot->replotWhenVisible();
 
         mUpdateValPlot = false;
     }
@@ -359,48 +303,9 @@ void PageRtData::timerSlot()
             ui->posPlot->rescaleAxes();
         }
 
-        ui->posPlot->replot();
+        ui->posPlot->replotWhenVisible();
 
         mUpdatePosPlot = false;
-    }
-
-    if (mExperimentReplot) {
-        ui->experimentPlot->clearGraphs();
-
-        for (int i = 0;i < mExperimentPlots.size();i++) {
-            switch (i) {
-            case 0: if (!ui->experimentGraph1Button->isChecked()) {continue;} break;
-            case 1: if (!ui->experimentGraph2Button->isChecked()) {continue;} break;
-            case 2: if (!ui->experimentGraph3Button->isChecked()) {continue;} break;
-            case 3: if (!ui->experimentGraph4Button->isChecked()) {continue;} break;
-            case 4: if (!ui->experimentGraph5Button->isChecked()) {continue;} break;
-            case 5: if (!ui->experimentGraph6Button->isChecked()) {continue;} break;
-            default: break;
-            }
-
-            ui->experimentPlot->addGraph();
-            ui->experimentPlot->graph()->setData(mExperimentPlots.at(i).xData, mExperimentPlots.at(i).yData);
-            ui->experimentPlot->graph()->setName(mExperimentPlots.at(i).label);
-
-            ui->experimentPlot->graph()->setPen(QPen(mExperimentPlots.at(i).color));
-            if (ui->experimentScatterButton->isChecked()) {
-                ui->experimentPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
-            }
-            if (ui->experimentShowLineButton->isChecked()) {
-                ui->experimentPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsLine);
-            } else {
-                ui->experimentPlot->graph()->setLineStyle(QCPGraph::LineStyle::lsNone);
-            }
-        }
-
-        ui->experimentPlot->legend->setVisible(mExperimentPlots.size() > 1);
-
-        if (ui->experimentAutoScaleButton->isChecked()) {
-            ui->experimentPlot->rescaleAxes();
-        }
-
-        ui->experimentPlot->replot();
-        mExperimentReplot = false;
     }
 }
 
@@ -447,63 +352,6 @@ void PageRtData::rotorPosReceived(double pos)
     mUpdatePosPlot = true;
 }
 
-void PageRtData::plotInitReceived(QString xLabel, QString yLabel)
-{
-    mExperimentPlots.clear();
-
-    ui->experimentPlot->clearGraphs();
-    ui->experimentPlot->xAxis->setLabel(xLabel);
-    ui->experimentPlot->yAxis->setLabel(yLabel);
-
-    mExperimentReplot = true;
-}
-
-void PageRtData::plotDataReceived(double x, double y)
-{
-    if (mExperimentPlots.size() <= mExperimentPlotNow) {
-        mExperimentPlots.resize(mExperimentPlotNow + 1);
-    }
-
-    mExperimentPlots[mExperimentPlotNow].xData.append(x);
-    mExperimentPlots[mExperimentPlotNow].yData.append(y);
-
-    int samples = mExperimentPlots[mExperimentPlotNow].xData.size();
-    int historyMax = ui->experimentHistoryBox->value();
-    if (samples > historyMax) {
-        mExperimentPlots[mExperimentPlotNow].xData.remove(0, samples - historyMax);
-        mExperimentPlots[mExperimentPlotNow].yData.remove(0, samples - historyMax);
-    }
-
-    mExperimentReplot = true;
-}
-
-void PageRtData::plotAddGraphReceived(QString name)
-{
-    mExperimentPlots.resize(mExperimentPlots.size() + 1);
-    mExperimentPlots.last().label = name;
-
-    if (mExperimentPlots.size() == 1) {
-        mExperimentPlots.last().color = Utility::getAppQColor("plot_graph1");
-    } else if (mExperimentPlots.size() == 2) {
-        mExperimentPlots.last().color = Utility::getAppQColor("plot_graph2");
-    } else if (mExperimentPlots.size() == 3) {
-        mExperimentPlots.last().color = Utility::getAppQColor("plot_graph3");
-    } else if (mExperimentPlots.size() == 4) {
-        mExperimentPlots.last().color = Utility::getAppQColor("plot_graph4");
-    } else if (mExperimentPlots.size() == 5) {
-        mExperimentPlots.last().color = Utility::getAppQColor("plot_graph5");
-    } else {
-        mExperimentPlots.last().color = Utility::getAppQColor("plot_graph6");
-    }
-
-    mExperimentReplot = true;
-}
-
-void PageRtData::plotSetGraphReceived(int graph)
-{
-    mExperimentPlotNow = graph;
-}
-
 void PageRtData::appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize)
 {
     vec->append(num);
@@ -546,11 +394,11 @@ void PageRtData::on_rescaleButton_clicked()
     ui->focPlot->rescaleAxes();
     ui->posPlot->rescaleAxes();
 
-    ui->currentPlot->replot();
-    ui->tempPlot->replot();
-    ui->rpmPlot->replot();
-    ui->focPlot->replot();
-    ui->posPlot->replot();
+    ui->currentPlot->replotWhenVisible();
+    ui->tempPlot->replotWhenVisible();
+    ui->rpmPlot->replotWhenVisible();
+    ui->focPlot->replotWhenVisible();
+    ui->posPlot->replotWhenVisible();
 }
 
 void PageRtData::on_posInductanceButton_clicked()
@@ -616,187 +464,6 @@ void PageRtData::on_tempShowMotorBox_toggled(bool checked)
     }
 }
 
-void PageRtData::on_experimentLoadXmlButton_clicked()
-{
-    QString filename = QFileDialog::getOpenFileName(this,
-                                                    tr("Load Plot"), "",
-                                                    tr("Xml files (*.xml)"));
-
-    if (!filename.isEmpty()) {
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Load Plot",
-                                  "Could not open\n" + filename + "\nfor reading");
-            return;
-        }
-
-        QXmlStreamReader stream(&file);
-
-        // Look for plot tag
-        bool plots_found = false;
-        while (stream.readNextStartElement()) {
-            if (stream.name() == "plot") {
-                plots_found = true;
-                break;
-            }
-        }
-
-        if (plots_found) {
-            mExperimentPlots.clear();
-
-            while (stream.readNextStartElement()) {
-                QString name = stream.name().toString();
-
-                if (name == "xlabel") {
-                    ui->experimentPlot->xAxis->setLabel(stream.readElementText());
-                } else if (name == "ylabel") {
-                    ui->experimentPlot->yAxis->setLabel(stream.readElementText());
-                } else if (name == "graph") {
-                    EXPERIMENT_PLOT p;
-
-                    while (stream.readNextStartElement()) {
-                        QString name2 = stream.name().toString();
-
-                        if (name2 == "label") {
-                            p.label = stream.readElementText();
-                        } else if (name2 == "color") {
-                            p.color = QColor(stream.readElementText());
-                        } else if (name2 == "point") {
-                            while (stream.readNextStartElement()) {
-                                QString name3 = stream.name().toString();
-
-                                if (name3 == "x") {
-                                    p.xData.append(stream.readElementText().toDouble());
-                                } else if (name3 == "y") {
-                                    p.yData.append(stream.readElementText().toDouble());
-                                } else {
-                                    qWarning() << ": Unknown XML element :" << name2;
-                                    stream.skipCurrentElement();
-                                }
-                            }
-                        } else {
-                            qWarning() << ": Unknown XML element :" << name2;
-                            stream.skipCurrentElement();
-                        }
-
-                        if (stream.hasError()) {
-                            qWarning() << " : XML ERROR :" << stream.errorString();
-                        }
-                    }
-
-                    mExperimentPlots.append(p);
-                }
-
-                if (stream.hasError()) {
-                    qWarning() << "XML ERROR :" << stream.errorString();
-                    qWarning() << stream.lineNumber() << stream.columnNumber();
-                }
-            }
-
-            mExperimentReplot = true;
-
-            file.close();
-            if (mVesc) {
-                mVesc->emitStatusMessage("Loaded plot", true);
-            }
-        } else {
-            QMessageBox::critical(this, "Load Plot",
-                                  "plot tag not found in " + filename);
-        }
-    }
-}
-
-void PageRtData::on_experimentSaveXmlButton_clicked()
-{
-    QString filename = QFileDialog::getSaveFileName(this,
-                                                    tr("Save Plot"), "",
-                                                    tr("Xml files (*.xml)"));
-
-    if (filename.isEmpty()) {
-        return;
-    }
-
-    if (!filename.toLower().endsWith(".xml")) {
-        filename.append(".xml");
-    }
-
-    QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this, "Save Plot",
-                              "Could not open\n" + filename + "\nfor writing");
-        return;
-    }
-
-    QXmlStreamWriter stream(&file);
-    stream.setCodec("UTF-8");
-    stream.setAutoFormatting(true);
-    stream.writeStartDocument();
-
-    stream.writeStartElement("plot");
-    stream.writeTextElement("xlabel", ui->experimentPlot->xAxis->label());
-    stream.writeTextElement("ylabel", ui->experimentPlot->yAxis->label());
-
-    for (EXPERIMENT_PLOT p: mExperimentPlots) {
-        stream.writeStartElement("graph");
-        stream.writeTextElement("label", p.label);
-        stream.writeTextElement("color", p.color.name());
-        for (int i = 0;i < p.xData.size();i++) {
-            stream.writeStartElement("point");
-            stream.writeTextElement("x", QString::number(p.xData.at(i)));
-            stream.writeTextElement("y", QString::number(p.yData.at(i)));
-            stream.writeEndElement();
-        }
-        stream.writeEndElement();
-    }
-
-    stream.writeEndDocument();
-    file.close();
-}
-
-void PageRtData::on_experimentSavePngButton_clicked()
-{
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save Image"), "",
-                                                    tr("PNG Files (*.png)"));
-
-    if (!fileName.isEmpty()) {
-        if (!fileName.toLower().endsWith(".png")) {
-            fileName.append(".png");
-        }
-
-        ui->experimentPlot->savePng(fileName,
-                                    ui->experimentWBox->value(),
-                                    ui->experimentHBox->value(),
-                                    ui->experimentScaleBox->value());
-    }
-}
-
-void PageRtData::on_experimentSavePdfButton_clicked()
-{
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save PDF"), "",
-                                                    tr("PDF Files (*.pdf)"));
-
-    if (!fileName.isEmpty()) {
-        if (!fileName.toLower().endsWith(".pdf")) {
-            fileName.append(".pdf");
-        }
-
-        ui->experimentPlot->savePdf(fileName,
-                                    ui->experimentWBox->value(),
-                                    ui->experimentHBox->value());
-    }
-}
-
-void PageRtData::on_experimentClearDataButton_clicked()
-{
-    for (auto &d: mExperimentPlots) {
-        d.xData.clear();
-        d.yData.clear();
-    }
-    mExperimentReplot = true;
-}
-
 void PageRtData::on_logRtButton_toggled(bool checked)
 {
     QSettings set;
@@ -809,3 +476,11 @@ void PageRtData::on_logRtButton_toggled(bool checked)
         mVesc->closeRtLogFile();
     }
 }
+
+void PageRtData::on_posHallObserverErrorButton_clicked()
+{
+    if (mVesc) {
+        mVesc->commands()->setDetect(DISP_POS_MODE_HALL_OBSERVER_ERROR);
+    }
+}
+

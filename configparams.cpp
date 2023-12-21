@@ -24,6 +24,7 @@
 #include "widgets/parameditstring.h"
 #include "widgets/parameditenum.h"
 #include "widgets/parameditbool.h"
+#include "widgets/parameditbitfield.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
@@ -176,6 +177,15 @@ bool ConfigParams::isParamBool(const QString &name)
     }
 }
 
+bool ConfigParams::isParamBitfield(const QString &name)
+{
+    if (mParams.contains(name) && mParams[name].type == CFG_T_BITFIELD) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 double ConfigParams::getParamDouble(const QString &name)
 {
     double retVal = 0.0;
@@ -202,7 +212,7 @@ int ConfigParams::getParamInt(const QString &name)
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
 
-        if (p.type == CFG_T_INT) {
+        if (p.type == CFG_T_INT || p.type == CFG_T_BITFIELD) {
             retVal = p.valInt;
         } else {
             qWarning() << name << "wrong type";
@@ -430,6 +440,25 @@ int ConfigParams::getParamStepInt(const QString &name)
     return retVal;
 }
 
+int ConfigParams::getParamMaxLen(const QString &name)
+{
+    int retVal = 0;
+
+    if (mParams.contains(name)) {
+        ConfigParam &p = mParams[name];
+
+        if (p.type == CFG_T_QSTRING) {
+            retVal = p.maxLen;
+        } else {
+            qWarning() << name << "wrong type";
+        }
+    } else {
+        qWarning() << name << "not found";
+    }
+
+    return retVal;
+}
+
 QStringList ConfigParams::getParamEnumNames(const QString &name)
 {
     QStringList retVal;
@@ -437,7 +466,7 @@ QStringList ConfigParams::getParamEnumNames(const QString &name)
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
 
-        if (p.type == CFG_T_ENUM) {
+        if (p.type == CFG_T_ENUM || p.type == CFG_T_BITFIELD) {
             retVal = p.enumNames;
         } else {
             qWarning() << name << "wrong type";
@@ -575,6 +604,13 @@ QWidget *ConfigParams::getEditor(const QString &name, QWidget *parent)
             retVal = edit;
         } break;
 
+        case CFG_T_BITFIELD: {
+            ParamEditBitfield *edit = new ParamEditBitfield(parent);
+            edit->setName(name);
+            edit->setConfig(this);
+            retVal = edit;
+        } break;
+
         default:
             qWarning() << "no editor for" << name << "could be created";
             break;
@@ -628,11 +664,12 @@ void ConfigParams::getParamSerial(VByteArray &vb, const QString &name)
             break;
 
         case CFG_T_QSTRING:
-            qWarning() << name << ": QString not supported.";
+            vb.vbAppendString(p.valString);
             break;
 
         case CFG_T_ENUM:
         case CFG_T_BOOL:
+        case CFG_T_BITFIELD:
             vb.vbAppendInt8(p.valInt);
             break;
         }
@@ -671,10 +708,11 @@ void ConfigParams::setParamSerial(VByteArray &vb, const QString &name, QObject *
             }
         } break;
 
-        case CFG_T_INT: {
+        case CFG_T_INT:
+        case CFG_T_BITFIELD: {
             int val = 0;
 
-            if (p.vTx == VESC_TX_UINT8) {
+            if (p.vTx == VESC_TX_UINT8 || p.type == CFG_T_BITFIELD) {
                 val = vb.vbPopFrontUint8();
             } else if (p.vTx == VESC_TX_INT8) {
                 val = vb.vbPopFrontInt8();
@@ -698,9 +736,16 @@ void ConfigParams::setParamSerial(VByteArray &vb, const QString &name, QObject *
             }
         } break;
 
-        case CFG_T_QSTRING:
-            qWarning() << name << ": QString not supported.";
-            break;
+        case CFG_T_QSTRING: {
+            QString val = vb.vbPopFrontString();
+
+            if (mUpdatesEnabled && (mUpdateOnlyName.isEmpty() || mUpdateOnlyName == name)) {
+                if (p.valString != val) {
+                    p.valString = val;
+                    emit paramChangedQString(src, name, val);
+                }
+            }
+        } break;
 
         case CFG_T_ENUM:
         case CFG_T_BOOL: {
@@ -752,7 +797,7 @@ void ConfigParams::updateParamInt(QString name, int param, QObject *src)
 
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
-        if (p.type == CFG_T_INT) {
+        if (p.type == CFG_T_INT || p.type == CFG_T_BITFIELD) {
             if (p.valInt != param) {
                 p.valInt = param;
                 emit paramChangedInt(src, name, param);
@@ -835,7 +880,8 @@ void ConfigParams::updateParamFromOther(QString name, const ConfigParam &other, 
         updateParamDouble(name, other.valDouble, src);
     } break;
 
-    case CFG_T_INT: {
+    case CFG_T_INT:
+    case CFG_T_BITFIELD: {
         updateParamInt(name, other.valInt, src);
     } break;
 
@@ -953,6 +999,7 @@ void ConfigParams::getXML(QXmlStreamWriter &stream, QString configName)
         case CFG_T_BOOL:
         case CFG_T_ENUM:
         case CFG_T_INT:
+        case CFG_T_BITFIELD:
             stream.writeTextElement(name, QString::number(p.valInt));
             break;
 
@@ -1013,6 +1060,7 @@ bool ConfigParams::setXML(QXmlStreamReader &stream, QString configName)
                     break;
 
                 case CFG_T_INT:
+                case CFG_T_BITFIELD:
                     if (valInt != p.valInt) {
                         p.valInt = valInt;
                         emit paramChangedInt(nullptr, name, valInt);
@@ -1060,6 +1108,10 @@ bool ConfigParams::setXML(QXmlStreamReader &stream, QString configName)
 
 bool ConfigParams::saveXml(QString fileName, QString configName)
 {
+    if (fileName.startsWith("file:/")) {
+        fileName.remove(0, 6);
+    }
+
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly)) {
         mXmlStatus = tr("Could not open %1 for writing").arg(fileName);
@@ -1082,6 +1134,10 @@ bool ConfigParams::saveXml(QString fileName, QString configName)
 
 bool ConfigParams::loadXml(QString fileName, QString configName)
 {
+    if (fileName.startsWith("file:/")) {
+        fileName.remove(0, 6);
+    }
+
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
         mXmlStatus = tr("Could not open %1 for reading").arg(fileName);
@@ -1197,9 +1253,11 @@ void ConfigParams::getParamsXML(QXmlStreamWriter &stream)
 
         case CFG_T_QSTRING:
             stream.writeTextElement("valString", p->valString);
+            stream.writeTextElement("maxLen", QString::number(p->maxLen));
             break;
 
         case CFG_T_ENUM:
+        case CFG_T_BITFIELD:
             stream.writeTextElement("valInt", QString::number(p->valInt));
             for (int j = 0;j < p->enumNames.size();j++) {
                 stream.writeTextElement("enumNames", p->enumNames.at(j));
@@ -1299,6 +1357,8 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
                             p.stepDouble = stream.readElementText().toDouble();
                         } else if (name == "stepInt") {
                             p.stepInt = stream.readElementText().toInt();
+                        } else if (name == "maxLen") {
+                            p.maxLen = stream.readElementText().toInt();
                         } else if (name == "suffix") {
                             p.suffix = stream.readElementText();
                         } else if (name == "type") {
@@ -1489,6 +1549,7 @@ bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
                 case CFG_T_BOOL:
                 case CFG_T_ENUM:
                 case CFG_T_INT:
+                case CFG_T_BITFIELD:
                     out << "#define " + p.cDefine + " " + QString::number(p.valInt) + "\n";
                     break;
 
@@ -1497,7 +1558,7 @@ bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
                     break;
 
                 case CFG_T_QSTRING:
-                    out << "#define " + p.cDefine + " " + p.valString + "\n";
+                    out << "#define " + p.cDefine + " \"" + p.valString + "\"\n";
                     break;
 
                 default:
@@ -1549,6 +1610,7 @@ QStringList ConfigParams::checkDifference(ConfigParams *config)
                 case CFG_T_BOOL:
                 case CFG_T_ENUM:
                 case CFG_T_INT:
+                case CFG_T_BITFIELD:
                     if (thisParam->valInt != otherParam->valInt) {
                         res.append(p);
                     }
@@ -1775,7 +1837,7 @@ bool ConfigParams::moveGroupUp(QString group)
     for (int i = 0;i < mParamGrouping.size();i++) {
         if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
             if (i > 0) {
-                mParamGrouping.swap(i, i - 1);
+                mParamGrouping.swapItemsAt(i, i - 1);
                 return true;
             } else {
                 return false;
@@ -1790,7 +1852,7 @@ bool ConfigParams::moveGroupDown(QString group)
     for (int i = 0;i < mParamGrouping.size();i++) {
         if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
             if (i < (mParamGrouping.size() - 1)) {
-                mParamGrouping.swap(i, i + 1);
+                mParamGrouping.swapItemsAt(i, i + 1);
                 return true;
             } else {
                 return false;
@@ -1807,7 +1869,7 @@ bool ConfigParams::moveSubgroupUp(QString group, QString subgroup)
             for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
                 if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
                     if (j > 0) {
-                        mParamGrouping[i].second.swap(j, j - 1);
+                        mParamGrouping[i].second.swapItemsAt(j, j - 1);
                         return true;
                     } else {
                         return false;
@@ -1826,7 +1888,7 @@ bool ConfigParams::moveSubgroupDown(QString group, QString subgroup)
             for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
                 if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
                     if (j < (mParamGrouping.at(i).second.size() - 1)) {
-                        mParamGrouping[i].second.swap(j, j + 1);
+                        mParamGrouping[i].second.swapItemsAt(j, j + 1);
                         return true;
                     } else {
                         return false;
@@ -1847,7 +1909,7 @@ bool ConfigParams::moveSubgroupParamUp(QString group, QString subgroup, QString 
                     for (int k = 0;k < mParamGrouping.at(i).second.at(j).second.size();k++) {
                         if (mParamGrouping.at(i).second.at(j).second.at(k).toLower() == param.toLower()) {
                             if (k > 0) {
-                                mParamGrouping[i].second[j].second.swap(k, k - 1);
+                                mParamGrouping[i].second[j].second.swapItemsAt(k, k - 1);
                                 return true;
                             } else {
                                 return false;
@@ -1870,7 +1932,7 @@ bool ConfigParams::moveSubgroupParamDown(QString group, QString subgroup, QStrin
                     for (int k = 0;k < mParamGrouping.at(i).second.at(j).second.size();k++) {
                         if (mParamGrouping.at(i).second.at(j).second.at(k).toLower() == param.toLower()) {
                             if (k < (mParamGrouping.at(i).second.at(j).second.size() - 1)) {
-                                mParamGrouping[i].second[j].second.swap(k, k + 1);
+                                mParamGrouping[i].second[j].second.swapItemsAt(k, k + 1);
                                 return true;
                             } else {
                                 return false;

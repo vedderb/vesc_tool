@@ -21,10 +21,19 @@
 #define CONFIGPARAM_H
 
 #include <QImage>
+#include <QObject>
 #include "datatypes.h"
 
-class ConfigParam
-{
+class ConfigParam {
+    Q_GADGET
+
+    Q_PROPERTY(QString longName MEMBER longName)
+    Q_PROPERTY(QString description MEMBER description)
+    Q_PROPERTY(QString cDefine MEMBER cDefine)
+    Q_PROPERTY(double valDouble MEMBER valDouble)
+    Q_PROPERTY(int valInt MEMBER valInt)
+    Q_PROPERTY(QString valString MEMBER valString)
+
 public:
     ConfigParam();
 
@@ -34,7 +43,7 @@ public:
                    double step = 1.0, int decimals = 2);
     void setDoubleTx(VESC_TX_T tx, double scale);
     void setEnum(int val, QStringList names);
-    void setString(QString val);
+    void setString(QString val, int maxLen);
     void setBool(bool val);
 
     CFG_T type;
@@ -52,6 +61,7 @@ public:
     int maxInt;
     int minInt;
     int stepInt;
+    int maxLen;
     VESC_TX_T vTx;
     double vTxDoubleScale;
     QString suffix;
@@ -59,7 +69,8 @@ public:
     bool editAsPercentage;
     bool showDisplay;
     bool transmittable;
-
 };
+
+Q_DECLARE_METATYPE(ConfigParam)
 
 #endif // CONFIGPARAM_H

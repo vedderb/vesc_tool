@@ -969,8 +969,10 @@ bool MapWidget::event(QEvent *event)
                            QPointF(0, 0),
                            QPoint(0, 0),
                            QPoint(0, 120),
-                           0, Qt::Vertical, nullptr,
-                           ke->modifiers());
+                           Qt::MouseButtons(),
+                           ke->modifiers(),
+                           Qt::NoScrollPhase,
+                           false);
             wheelEvent(&we);
             return true;
         } else if (ke->key() == Qt::Key_Down) {
@@ -978,8 +980,10 @@ bool MapWidget::event(QEvent *event)
                            QPointF(0, 0),
                            QPoint(0, 0),
                            QPoint(0, -120),
-                           0, Qt::Vertical, nullptr,
-                           ke->modifiers());
+                           Qt::MouseButtons(),
+                           ke->modifiers(),
+                           Qt::NoScrollPhase,
+                           false);
             wheelEvent(&we);
             return true;
         }
@@ -1179,7 +1183,8 @@ void MapWidget::printPdf(QString path, int width, int height)
     printer.setPageLayout(pageLayout);
 
     QPainter painter(&printer);
-    paint(painter, printer.pageRect().width(), printer.pageRect().height(), true);
+    auto rect = printer.pageLayout().paintRectPixels(printer.resolution());
+    paint(painter, rect.width(), rect.height(), true);
 #endif
 }
 

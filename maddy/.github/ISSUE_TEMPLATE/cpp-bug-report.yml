@@ -1,0 +1,65 @@
+name: C++ Bug Report
+description: File a bug report regarding C++ problems
+title: "[Bug][C++]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: On which OS are you running maddy?
+      placeholder: ex. Windows/Linux/OSX
+    validations:
+      required: true
+  - type: input
+    id: compiler
+    attributes:
+      label: Compiler
+      description: Which compiler do you use?
+      placeholder: ex. mingw/Visual Studio/clang
+    validations:
+      required: true
+  - type: input
+    id: compiler_flags
+    attributes:
+      label: Compiler flags
+      description: Which compiler flags do you use?
+      placeholder: ex. -fno-rtti
+    validations:
+      required: true
+  - type: dropdown
+    id: maddy_version
+    attributes:
+      label: maddy version
+      description: What version of maddy are you using?
+      options:
+        - 1.3.0 (latest)
+        - 1.2.1
+        - 1.2.0
+        - 1.1.2
+        - 1.1.1
+        - 1.1.0
+        - 1.0.3
+        - 1.0.2
+        - 1.0.1
+        - 1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Minimal C++ example
+      description: To be able to reproduce your issue, please give some example C++ code which creates problems.
+    validations:
+      required: true
+  - type: textarea
+    id: whats-wrong
+    attributes:
+      label: What is not working? What did you try?
+      description: Also, what did you expect to happen?
+    validations:
+      required: true

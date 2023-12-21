@@ -58,7 +58,7 @@ Packet::Packet(QObject *parent) : QObject(parent)
 {
     mRxTimer = 0;
     mByteTimeout = 50;
-    mMaxPacketLen = 512;
+    mMaxPacketLen = 10000;
     mRxReadPtr = 0;
     mRxWritePtr = 0;
     mBytesLeft = 0;

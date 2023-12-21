@@ -37,7 +37,7 @@ Item {
     property int isInverted: maxAngle > minAngle ? 1 : -1
 
     property real angleRange: maxAngle - minAngle
-    property int tickmarkCount: Math.floor(labelStep > 0 ? (maximumValue - minimumValue) / labelStep + 1 : 0)
+    property int tickmarkCount: Math.min(100, Math.floor(labelStep > 0 ? (maximumValue - minimumValue) / labelStep + 1 : 0))
     property int minorTickmarkCount:4
     property double minimumValue: 0
     property double maximumValue: 100

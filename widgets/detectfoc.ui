@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>791</width>
-    <height>196</height>
+    <width>769</width>
+    <height>197</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -196,10 +196,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../res.qrc">
-          <normaloff>:/res/icons/Calculator-96.png</normaloff>:/res/icons/Calculator-96.png</iconset>
-        </property>
        </widget>
       </item>
       <item row="3" column="1">
@@ -215,10 +211,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../res.qrc">
-          <normaloff>:/res/icons/Calculator-96.png</normaloff>:/res/icons/Calculator-96.png</iconset>
         </property>
        </widget>
       </item>
@@ -278,10 +270,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
-          </property>
           <property name="iconSize">
            <size>
             <width>16</width>
@@ -323,10 +311,6 @@
           <property name="text">
            <string/>
           </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/rl.png</normaloff>:/res/icons/rl.png</iconset>
-          </property>
           <property name="iconSize">
            <size>
             <width>20</width>
@@ -367,10 +351,6 @@
           </property>
           <property name="text">
            <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/lambda.png</normaloff>:/res/icons/lambda.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -418,10 +398,6 @@
           </property>
           <property name="text">
            <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/res/icons/apply.png</normaloff>:/res/icons/apply.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -527,10 +503,6 @@
         </property>
         <property name="text">
          <string>Calc Apply Old</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../res.qrc">
-          <normaloff>:/res/icons/Calculator-96.png</normaloff>:/res/icons/Calculator-96.png</iconset>
         </property>
        </widget>
       </item>

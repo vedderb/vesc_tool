@@ -52,10 +52,12 @@ Item {
 
     function setCanDevs(canDevs) {
         canIdModel.clear()
-        canIdModel.append({"name": "This VESC",
-                              "canId": mAppConf.getParamInt("controller_id"),
-                              "isCan": false,
-                              "isInv": Utility.getInvertDirection(VescIf, -1)})
+        if (!mCommands.getSendCan() && Utility.isConnectedToHwVesc(VescIf)) {
+            canIdModel.append({"name": "This VESC",
+                                  "canId": mAppConf.getParamInt("controller_id"),
+                                  "isCan": false,
+                                  "isInv": Utility.getInvertDirection(VescIf, -1)})
+        }
 
         for (var i = 0;i < canDevs.length;i++) {
             canIdModel.append({"name": "VESC on CAN-bus",

@@ -40,12 +40,13 @@ public:
     void setConfNum(int num);
 
 private slots:
-    void customConfigRx(int confId, QByteArray data);
     void customConfigLoadDone();
 
     void on_readButton_clicked();
     void on_readDefaultButton_clicked();
     void on_writeButton_clicked();
+    void on_saveXmlButton_clicked();
+    void on_loadXmlButton_clicked();
 
 private:
     Ui::PageCustomConfig *ui;

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>474</width>
-    <height>125</height>
+    <height>134</height>
    </rect>
   </property>
   <property name="font">
@@ -63,10 +63,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../res.qrc">
-          <normaloff>:/res/icons/apply.png</normaloff>:/res/icons/apply.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -135,10 +131,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../res.qrc">
-          <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
-        </property>
        </widget>
       </item>
      </layout>
@@ -146,8 +138,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

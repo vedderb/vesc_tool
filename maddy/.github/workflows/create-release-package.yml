@@ -1,0 +1,34 @@
+name: release
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "~3.25.0"  # <--= optional, use most recent 3.25.x version
+          ninjaVersion: "^1.11.1"  # <--= optional, use most recent 1.x version
+
+      - name: create zip
+        run: |
+          mkdir build
+          mkdir tmp
+          cd tmp
+          cmake -DMADDY_CREATE_PACKAGE=ON ..
+          make maddy_package
+
+      - name: create release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/maddy-src.zip
+          tag: ${{ github.ref }}
+          body: "You can find all changes of this release in the [changelog](https://github.com/progsource/maddy/blob/master/CHANGELOG.md)"

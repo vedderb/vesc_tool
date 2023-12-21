@@ -39,37 +39,70 @@ PageConnection::PageConnection(QWidget *parent) :
 
     mTimer->start(20);
 
-    QString theme = Utility::getThemePath();
-    ui->CANbusScanButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->canRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->CANbusConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
-    ui->CANbusDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
-    ui->tcpConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
-    ui->tcpDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
-    ui->udpConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
-    ui->udpDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
-    ui->serialRefreshButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->serialConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
-    ui->serialDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
-    ui->bleConnectButton->setIcon(QPixmap(theme + "icons/Connected-96.png"));
-    ui->bleDisconnectButton->setIcon(QPixmap(theme + "icons/Disconnected-96.png"));
-    ui->bleScanButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->CANbusScanButton->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->addConnectedButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
-    ui->addUuidButton->setIcon(QPixmap(theme + "icons/Plus Math-96.png"));
-    ui->unpairButton->setIcon(QPixmap(theme + "icons/Restart-96.png"));
-    ui->deletePairedButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
-    ui->clearPairedButton->setIcon(QPixmap(theme + "icons/Delete-96.png"));
-    ui->canDefaultButton->setIcon(QPixmap(theme + "icons/Bug-96.png"));
-    ui->helpButton->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->autoConnectButton->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
-    ui->bleSetNameButton->setIcon(QPixmap(theme + "icons/Ok-96.png"));
-    ui->pairConnectedButton->setIcon(QPixmap(theme + "icons/Circled Play-96.png"));
+    ui->CANbusScanButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->canRefreshButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->CANbusConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->CANbusDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->tcpConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->tcpDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->udpConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->udpDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->serialRefreshButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->serialConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->serialDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->bleConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->bleDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->bleScanButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->CANbusScanButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->addConnectedButton->setIcon(Utility::getIcon("icons/Plus Math-96.png"));
+    ui->addUuidButton->setIcon(Utility::getIcon("icons/Plus Math-96.png"));
+    ui->unpairButton->setIcon(Utility::getIcon("icons/Restart-96.png"));
+    ui->deletePairedButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->clearPairedButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->canDefaultButton->setIcon(Utility::getIcon("icons/Bug-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->autoConnectButton->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->bleSetNameButton->setIcon(Utility::getIcon("icons/Ok-96.png"));
+    ui->pairConnectedButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->tcpHubConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->tcpHubDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->hubDefaultButton->setIcon(Utility::getIcon("icons/Restart-96.png"));
+    ui->tcpDetectConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->tcpDetectDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
 
-    QIcon mycon = QIcon(theme + "icons/can_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/can_off.png"), QIcon::Normal, QIcon::Off);
-    mycon.addPixmap(QPixmap(theme + "icons/can_on.png"), QIcon::Normal, QIcon::On);
+    QIcon mycon = QIcon(Utility::getIcon("icons/can_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/can_off.png"), QIcon::Normal, QIcon::Off);
+    mycon.addPixmap(Utility::getIcon("icons/can_on.png"), QIcon::Normal, QIcon::On);
     ui->canFwdButton->setIcon(mycon);
+
+    mUdpListen = new UdpServerSimple(this);
+    mUdpListen->startServerBroadcast(65109);
+
+    connect(mUdpListen, &UdpServerSimple::dataRx, [this](const QByteArray &data) {
+        QString str(data);
+        auto tokens = str.split("::");
+        if (tokens.size() == 3) {
+            auto name = tokens.at(0);
+            auto ip = tokens.at(1);
+            auto port = tokens.at(2);
+            tokens.append(QString::number(QTime::currentTime().msecsSinceStartOfDay()));
+
+            bool found = false;
+            for (int i = 0;i < ui->tcpDetectBox->count();i++) {
+                auto d = ui->tcpDetectBox->itemData(i).toStringList();
+                if (d.at(1) == ip) {
+                    ui->tcpDetectBox->setItemData(i, tokens);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                QString itemName = name + " - " + ip + ":" + port;
+                ui->tcpDetectBox->addItem(itemName, tokens);
+            }
+        }
+    });
 }
 
 PageConnection::~PageConnection()
@@ -91,6 +124,11 @@ void PageConnection::setVesc(VescInterface *vesc)
 
     ui->udpServerEdit->setText(mVesc->getLastUdpServer());
     ui->udpPortBox->setValue(mVesc->getLastUdpPort());
+
+    ui->tcpHubServerEdit->setText(mVesc->getLastTcpHubServer());
+    ui->tcpHubPortBox->setValue(mVesc->getLastTcpHubPort());
+    ui->tcpHubVescIdLineEdit->setText(mVesc->getLastTcpHubVescID());
+    ui->tcpHubVescPasswordLineEdit->setText(mVesc->getLastTcpHubVescPass());
 
 #ifdef HAS_BLUETOOTH
     connect(mVesc->bleDevice(), SIGNAL(scanDone(QVariantMap,bool)),
@@ -145,6 +183,14 @@ void PageConnection::setVesc(VescInterface *vesc)
 
 void PageConnection::timerSlot()
 {
+    for (int i = 0;i < ui->tcpDetectBox->count();i++) {
+        auto d = ui->tcpDetectBox->itemData(i).toStringList();
+        if ((QTime::currentTime().msecsSinceStartOfDay() - d.at(3).toInt()) > 3000) {
+            ui->tcpDetectBox->removeItem(i);
+            break;
+        }
+    }
+
     if (mVesc) {
         QString str = mVesc->getConnectedPortName();
         if (str != ui->statusLabel->text()) {
@@ -308,8 +354,9 @@ void PageConnection::on_serialRefreshButton_clicked()
 {
     if (mVesc) {
         ui->serialPortBox->clear();
-        QList<VSerialInfo_t> ports = mVesc->listSerialPorts();
-        foreach(const VSerialInfo_t &port, ports) {
+        auto ports = mVesc->listSerialPorts();
+        foreach(auto &info, ports) {
+            auto port = info.value<VSerialInfo_t>();
             ui->serialPortBox->addItem(port.name, port.systemPath);
         }
         ui->serialPortBox->setCurrentIndex(0);
@@ -647,12 +694,59 @@ void PageConnection::on_tcpServerEnableBox_toggled(bool isEnabled)
 void PageConnection::on_udpServerEnableBox_toggled(bool isEnabled)
 {
     if (mVesc) {
-        if (isEnabled)
-        {
+        if (isEnabled) {
             mVesc->udpServerStart(ui->udpServerPortBox->value());
             ui->udpServerPortBox->setEnabled(false);
         } else {
            mVesc->udpServerStop();
         }
     }
+}
+
+void PageConnection::on_tcpDetectConnectButton_clicked()
+{
+    if (mVesc && ui->tcpDetectBox->count() > 0) {
+        auto d = ui->tcpDetectBox->currentData().toStringList();
+        mVesc->connectTcp(d.at(1), d.at(2).toInt());
+    }
+}
+
+void PageConnection::on_tcpDetectDisconnectButton_clicked()
+{
+    if (mVesc) {
+        mVesc->disconnectPort();
+    }
+}
+
+void PageConnection::on_tcpHubConnectButton_clicked()
+{
+    if (mVesc) {
+        QString tcpServer = ui->tcpHubServerEdit->text();
+        int tcpPort = ui->tcpHubPortBox->value();
+        QString uuid = ui->tcpHubVescIdLineEdit->text().replace(" ", "").replace(":", "").toUpper();
+        QString pass = ui->tcpHubVescPasswordLineEdit->text();
+
+        if (ui->hubClientButton->isChecked()) {
+            mVesc->connectTcpHub(tcpServer, tcpPort, uuid, pass);
+        } else {
+            mVesc->tcpServerConnectToHub(tcpServer, tcpPort, uuid, pass);
+        }
+    }
+}
+
+void PageConnection::on_tcpHubDisconnectButton_clicked()
+{
+    if (mVesc) {
+        if (ui->hubClientButton->isChecked()) {
+            mVesc->disconnectPort();
+        } else {
+            mVesc->tcpServerStop();
+        }
+    }
+}
+
+void PageConnection::on_hubDefaultButton_clicked()
+{
+    ui->tcpHubServerEdit->setText("veschub.vedder.se");
+    ui->tcpHubPortBox->setValue(65101);
 }

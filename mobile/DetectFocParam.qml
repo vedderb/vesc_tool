@@ -362,7 +362,7 @@ Item {
     Connections {
         target: mCommands
 
-        onMotorRLReceived: {
+        function onMotorRLReceived(r, l, ld_lq_diff) {
             if (r < 1e-9 && l < 1e-9) {
                 VescIf.emitStatusMessage("Bad FOC Detection Result Received", false)
                 VescIf.emitMessageDialog("Bad Detection Result",
@@ -376,7 +376,7 @@ Item {
             }
         }
 
-        onMotorLinkageReceived: {
+        function onMotorLinkageReceived(flux_linkage) {
             if (flux_linkage < 1e-9) {
                 VescIf.emitStatusMessage("Bad FOC Detection Result Received", false)
                 VescIf.emitMessageDialog("Bad Detection Result",
@@ -394,8 +394,8 @@ Item {
     Connections {
         target: mMcConf
 
-        onParamChangedDouble: {
-            if (name == "l_current_max") {
+        function onParamChangedDouble(src, name, newParam) {
+            if (name === "l_current_max") {
                 currentBox.realValue = newParam / 3.0
             }
         }

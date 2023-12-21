@@ -39,7 +39,7 @@ public:
     void setVesc(VescInterface *vesc);
 
 private slots:
-    void encoderParamReceived(double offset, double ratio, bool inverted);
+    void encoderParamReceived(ENCODER_DETECT_RES res);
 
     void on_helpButton_clicked();
     void on_startButton_clicked();

@@ -188,17 +188,17 @@ Item {
     Connections {
         target: mCommands
 
-        onEncoderParamReceived: {
-            if (offset > 1000.0) {
+        function onEncoderParamReceived(res) {
+            if (res.offset > 1000.0) {
                 VescIf.emitStatusMessage("Encoder not enabled in firmware", false)
                 VescIf.emitMessageDialog("Error",
                                          "Encoder support is not enabled. Enable it in the general settings.",
                                          false, false)
             } else {
                 VescIf.emitStatusMessage("Encoder Result Received", true)
-                mOffset = offset
-                mRatio = ratio
-                mInverted = inverted
+                mOffset = res.offset
+                mRatio = res.ratio
+                mInverted = res.inverted
                 updateDisplay()
             }
         }

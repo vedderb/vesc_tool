@@ -28,6 +28,7 @@
         <name>if</name>
         <name>implements</name>
         <name>in</name>
+        <name>of</name>
         <name>instanceof</name>
         <name>int</name>
         <name>interface</name>
@@ -99,6 +100,7 @@
         <name>SwipeView</name>
         <name>Page</name>
         <name>CheckBox</name>
+        <name>SpinBox</name>
         <name>DoubleSpinBox</name>
         <name>Slider</name>
         <name>PageIndicator</name>
@@ -107,6 +109,7 @@
         <name>MenuItem</name>
         <name>Repeater</name>
         <name>TcpServerSimple</name>
+        <name>UdpServerSimple</name>
         <name>LogWriter</name>
         <name>LogReader</name>
         <name>ImageButton</name>
@@ -116,5 +119,14 @@
         <name>ApplicationWindow</name>
         <name>ProgressBar</name>
         <name>Gamepad</name>
+        <name>TextArea</name>
+        <name>TextInput</name>
+        <name>RtDataSetup</name>
+        <name>ComboBox</name>
+        <name>ListModel</name>
+        <name>RadioButton</name>
+        <name>FwHelper</name>
+        <name>ParamList</name>
+        <name>TcpHub</name>
     </section>
 </root>

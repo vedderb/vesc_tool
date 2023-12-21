@@ -54,6 +54,7 @@ void PageMotor::setVesc(VescInterface *vesc)
 void PageMotor::reloadParams()
 {
     ui->motorTab->clearParams();
+    ui->sensorsTab->clearParams();
     ui->currentTab->clearParams();
     ui->voltageTab->clearParams();
     ui->rpmTab->clearParams();
@@ -63,6 +64,7 @@ void PageMotor::reloadParams()
     ui->advancedTab->clearParams();
 
     ui->motorTab->addParamSubgroup(mVesc->mcConfig(), "general", "general");
+    ui->sensorsTab->addParamSubgroup(mVesc->mcConfig(), "general", "sensors");
     ui->currentTab->addParamSubgroup(mVesc->mcConfig(), "general", "current");
     ui->voltageTab->addParamSubgroup(mVesc->mcConfig(), "general", "voltage");
     ui->rpmTab->addParamSubgroup(mVesc->mcConfig(), "general", "rpm");

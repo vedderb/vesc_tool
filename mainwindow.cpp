@@ -23,6 +23,7 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QFileDialog>
+#include <QProcess>
 #include <QListWidgetItem>
 #include <cmath>
 #include <QEventLoop>
@@ -33,7 +34,6 @@
 #include "widgets/helpdialog.h"
 #include "utility.h"
 #include "widgets/paramdialog.h"
-#include "widgets/detectallfocdialog.h"
 
 namespace {
 void stepTowards(double &value, double goal, double step) {
@@ -120,89 +120,92 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setWindowIcon(QIcon(":/res/icon.svg"));
 
-    QString theme = Utility::getThemePath();
-    ui->actionParameterEditorMcconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionParameterEditorAppconf->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionParameterEditorFW->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionParameterEditorCustomConf0->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionSaveAppconfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionPreferences->setIcon(QPixmap(theme + "icons/Settings-96.png"));
-    ui->actionLoadAppconfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->actionSaveMotorConfXml->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionLoadMotorConfXml->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->actionSaveAppConfigurationHeader->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionSaveAppConfigurationHeaderWrap->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionSaveMotorConfigurationHeader->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionSaveMotorConfigurationHeaderWrap->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionExportConfigurationParser->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionTerminalPrintFaults->setIcon(QPixmap(theme + "icons/Console-96.png"));
-    ui->actionTerminalShowHelp->setIcon(QPixmap(theme + "icons/Help-96.png"));
-    ui->actionTerminalClear->setIcon(QPixmap(theme + "icons/Delete-96.png"));
-    ui->actionTerminalPrintThreads->setIcon(QPixmap(theme + "icons/Electronics-96.png"));
-    ui->actionTerminalDRVResetLatchedFaults->setIcon(QPixmap(theme + "icons/Bug-96.png"));
-    ui->actionLibrariesUsed->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionMotorSetupWizard->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
-    ui->actionAppSetupWizard->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
-    ui->actionAutoSetupFOC->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
-    ui->actionSetupMotorsFOCQuick->setIcon(QPixmap(theme + "icons/Wizard-96.png"));
-    ui->actionAboutQt->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionParameterEditorInfo->setIcon(QPixmap(theme + "icons/Horizontal Settings Mixer-96.png"));
-    ui->actionSafetyInformation->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionVESCToolChangelog->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionFirmwareChangelog->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionWarrantyStatement->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionLicense->setIcon(QPixmap(theme + "icons/About-96.png"));
-    ui->actionVESCProjectForums->setIcon(QPixmap(theme + "icons/User Group Man Man-96.png"));
-    ui->actionLoadFirmwareConfigs->setIcon(QPixmap(theme + "icons/Electronics-96.png"));
-    ui->actionBackupConfiguration->setIcon(QPixmap(theme + "icons/Save-96.png"));
-    ui->actionBackupConfigurationsCAN->setIcon(QPixmap(theme + "icons/Save-96.png"));
-    ui->actionRestoreConfiguration->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->actionRestoreConfigurationsCAN->setIcon(QPixmap(theme + "icons/Open Folder-96.png"));
-    ui->actionClearConfigurationBackups->setIcon(QPixmap(theme + "icons/Delete-96.png"));
-    ui->actionBackupConfiguration->setIcon(QPixmap(theme + "icons/Save as-96.png"));
-    ui->actionReboot->setIcon(QPixmap(theme + "icons/Refresh-96.png"));
-    ui->actionExit->setIcon(QPixmap(theme + "icons/Shutdown-96.png"));
-    ui->pageLabel->setPixmap(QPixmap(theme + "logo.png"));
-    ui->actionReconnect->setIcon(QIcon(theme + "icons/Connected-96.png"));
-    ui->actionDisconnect->setIcon(QIcon(theme + "icons/Disconnected-96.png"));
-    ui->actionReadMcconf->setIcon(QIcon(theme + "icons/motor_up.png"));
-    ui->actionReadMcconfDefault->setIcon(QIcon(theme + "icons/motor_default.png"));
-    ui->actionWriteMcconf->setIcon(QIcon(theme + "icons/motor_down.png"));
-    ui->actionReadAppconf->setIcon(QIcon(theme + "icons/app_up.png"));
-    ui->actionReadAppconfDefault->setIcon(QIcon(theme + "icons/app_default.png"));
-    ui->actionWriteAppconf->setIcon(QIcon(theme + "icons/app_down.png"));
+    ui->actionParameterEditorMcconf->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorAppconf->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorFW->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionParameterEditorCustomConf0->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionSaveAppconfXml->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionPreferences->setIcon(Utility::getIcon("icons/Settings-96.png"));
+    ui->actionLoadAppconfXml->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->actionSaveMotorConfXml->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionLoadMotorConfXml->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->actionSaveAppConfigurationHeader->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionSaveAppConfigurationHeaderWrap->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionSaveMotorConfigurationHeader->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionSaveMotorConfigurationHeaderWrap->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionExportConfigurationParser->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionTerminalPrintFaults->setIcon(Utility::getIcon("icons/Console-96.png"));
+    ui->actionTerminalShowHelp->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->actionTerminalClear->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->actionTerminalPrintThreads->setIcon(Utility::getIcon("icons/Electronics-96.png"));
+    ui->actionTerminalDRVResetLatchedFaults->setIcon(Utility::getIcon("icons/Bug-96.png"));
+    ui->actionLibrariesUsed->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionMotorSetupWizard->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->actionAppSetupWizard->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->actionAutoSetupFOC->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->actionSetupMotorsFOCQuick->setIcon(Utility::getIcon("icons/Wizard-96.png"));
+    ui->actionAboutQt->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionParameterEditorInfo->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
+    ui->actionSafetyInformation->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionVESCToolChangelog->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionFirmwareChangelog->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionWarrantyStatement->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionAbout->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionLicense->setIcon(Utility::getIcon("icons/About-96.png"));
+    ui->actionVESCProjectForums->setIcon(Utility::getIcon("icons/User Group Man Man-96.png"));
+    ui->actionLoadFirmwareConfigs->setIcon(Utility::getIcon("icons/Electronics-96.png"));
+    ui->actionBackupConfiguration->setIcon(Utility::getIcon("icons/Save-96.png"));
+    ui->actionBackupConfigurationsCAN->setIcon(Utility::getIcon("icons/Save-96.png"));
+    ui->actionRestoreConfiguration->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->actionRestoreConfigurationsCAN->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->actionClearConfigurationBackups->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->actionBackupConfiguration->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->actionReboot->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->actionExit->setIcon(Utility::getIcon("icons/Shutdown-96.png"));
+    ui->pageLabel->setPixmap(Utility::getIcon("logo.png"));
+    ui->actionReconnect->setIcon(Utility::getIcon("icons/Connected-96.png"));
+    ui->actionDisconnect->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
+    ui->actionReadMcconf->setIcon(Utility::getIcon("icons/motor_up.png"));
+    ui->actionReadMcconfDefault->setIcon(Utility::getIcon("icons/motor_default.png"));
+    ui->actionWriteMcconf->setIcon(Utility::getIcon("icons/motor_down.png"));
+    ui->actionReadAppconf->setIcon(Utility::getIcon("icons/app_up.png"));
+    ui->actionReadAppconfDefault->setIcon(Utility::getIcon("icons/app_default.png"));
+    ui->actionWriteAppconf->setIcon(Utility::getIcon("icons/app_down.png"));
+    ui->actionLaunchMobileTool->setIcon(Utility::getIcon("icons/v_icon-96.png"));
+    ui->actionLaunchBoardConfigurator->setIcon(Utility::getIcon("icons/v_icon-96.png"));
 
-    QIcon mycon = QIcon(theme + "icons/keys_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/keys_on.png"), QIcon::Normal, QIcon::On);
+    QIcon mycon = QIcon(Utility::getIcon("icons/keys_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/keys_on.png"), QIcon::Normal, QIcon::On);
     ui->actionKeyboardControl->setIcon(mycon);
-    ui->actionGamepadControl->setIcon(QIcon(theme + "icons/Controller-96.png"));
-    mycon = QIcon(theme + "icons/rt_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/rt_on.png"), QIcon::Normal, QIcon::On);
+    ui->actionGamepadControl->setIcon(Utility::getIcon("icons/Controller-96.png"));
+    mycon = QIcon(Utility::getIcon("icons/rt_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/rt_on.png"), QIcon::Normal, QIcon::On);
     ui->actionRtData->setIcon(mycon);
-    mycon = QIcon(theme + "icons/rt_app_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/rt_app_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/rt_app_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/rt_app_on.png"), QIcon::Normal, QIcon::On);
     ui->actionRtDataApp->setIcon(mycon);
-    mycon = QIcon(theme + "icons/imu_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/imu_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/imu_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/imu_on.png"), QIcon::Normal, QIcon::On);
     ui->actionIMU->setIcon(mycon);
-    mycon = QIcon(theme + "icons/bms_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/bms_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/bms_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/bms_on.png"), QIcon::Normal, QIcon::On);
     ui->actionrtDataBms->setIcon(mycon);
-    mycon = QIcon(theme + "icons/alive_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/alive_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/alive_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/alive_on.png"), QIcon::Normal, QIcon::On);
     ui->actionSendAlive->setIcon(mycon);
-    mycon = QIcon(theme + "icons/can_off.png");
-    mycon.addPixmap(QPixmap(theme + "icons/can_on.png"), QIcon::Normal, QIcon::On);
+    mycon = QIcon(Utility::getIcon("icons/can_off.png"));
+    mycon.addPixmap(Utility::getIcon("icons/can_on.png"), QIcon::Normal, QIcon::On);
     ui->actionCanFwd->setIcon(mycon);
-    ui->scanCanButton->setIcon(QIcon(theme + "icons/Refresh-96.png"));
+    ui->scanCanButton->setIcon(Utility::getIcon("icons/Refresh-96.png"));
 
-    ui->dutyButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
-    ui->currentButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
-    ui->speedButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
-    ui->posButton->setIcon(QIcon(theme + "icons/Circled Play-96.png"));
-    ui->brakeCurrentButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
-    ui->handbrakeButton->setIcon(QIcon(theme + "icons/Brake Warning-96.png"));
-    ui->fullBrakeButton->setIcon(QIcon(theme + "icons/Anchor-96.png"));
+    ui->dutyButton->setIcon(Utility::getIcon( "icons/Circled Play-96.png"));
+    ui->currentButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->speedButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->posButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->brakeCurrentButton->setIcon(Utility::getIcon("icons/Brake Warning-96.png"));
+    ui->stopButton->setIcon(Utility::getIcon("icons/Stop Sign-96.png"));
+    ui->handbrakeButton->setIcon(Utility::getIcon("icons/Brake Warning-96.png"));
+    ui->fullBrakeButton->setIcon(Utility::getIcon("icons/Anchor-96.png"));
 
     qRegisterMetaType<QtMsgType>("QtMsgType");
 
@@ -253,7 +256,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *fwMenu = new QMenu(this);
     fwMenu->setTitle("Load Firmware Configs");
-    fwMenu->setIcon(QIcon( theme + "icons/Electronics-96.png"));
+    fwMenu->setIcon(Utility::getIcon("icons/Electronics-96.png"));
     for (auto fw: Utility::configSupportedFws()) {
         QAction *action = new QAction(fwMenu);
         action->setText(QString("%1.%2").arg(fw.first).arg(fw.second, 2, 10, QChar('0')));
@@ -269,11 +272,10 @@ MainWindow::MainWindow(QWidget *parent) :
     auto reloadBackupMenu = [this, backupMenu]() {
         backupMenu->clear();
         backupMenu->setTitle("Load Configuration Backups for UUID");
-        QString theme = Utility::getThemePath();
-        backupMenu->setIcon(QIcon( theme + "icons/Open Folder-96.png"));
+        backupMenu->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
         for (auto uuid: mVesc->confListBackups()) {
             QAction *action = new QAction(backupMenu);
-            action->setIcon(QIcon( theme + "icons/Electronics-96.png"));
+            action->setIcon(Utility::getIcon("icons/Electronics-96.png"));
             QString txt = uuid;
             QString name = mVesc->confBackupName(uuid);
             if (!name.isEmpty()) {
@@ -319,15 +321,13 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden
                     (!(type == 1 || type == 4 || type == 8));
             ui->pageList->item(mPageNameIdList.value("app_adc"))->setHidden
-                    (!(type == 2 || type == 5 || type == 8 || type == 11));
+                    (!(type == 2 || type == 5 || type == 8 || type == 10));
             ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden
                     (!(type == 3 || type == 4 || type == 5 || type == 8));
             ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden
                     (!(type == 0 || type == 3 || type == 6 || type == 7 || type == 8));
-            ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden
-                    (!(type == 8 || type == 9));
             ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden
-                    (!(type == 10 || type == 11));
+                    (!(type == 9 || type == 10));
         }
     };
 
@@ -359,7 +359,6 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(false);
-            ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(false);
             ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(false);
@@ -387,10 +386,8 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(true);
-            ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(true);
-            //            ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("data_sampled"))->setHidden(true);
         }
     });
@@ -416,12 +413,13 @@ MainWindow::MainWindow(QWidget *parent) :
         mPageAppUart->reloadParams();
         mPageAppNunchuk->reloadParams();
         mPageAppNrf->reloadParams();
-        mPageAppBalance->reloadParams();
         mPageAppPas->reloadParams();
         mPageAppImu->reloadParams();
         mPageFirmware->reloadParams();
+        mPagePackage->reloadParams();
         mPageCanAnalyzer->reloadParams();
         mPageScripting->reloadParams();
+        mPageLisp->reloadParams();
 
         updateMotortype();
         updateAppToUse();
@@ -482,9 +480,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&mPollRtTimer, &QTimer::timeout, [this]() {
         if (ui->actionRtData->isChecked()) {
+            mVesc->commands()->getStats(0xFFFFFFFF);
             mVesc->commands()->getValues();
             mVesc->commands()->getValuesSetup();
-            mVesc->commands()->getStats(0xFFFFFFFF);
             mPollRtTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
         }
     });
@@ -494,7 +492,6 @@ MainWindow::MainWindow(QWidget *parent) :
             mVesc->commands()->getDecodedAdc();
             mVesc->commands()->getDecodedChuk();
             mVesc->commands()->getDecodedPpm();
-            mVesc->commands()->getDecodedBalance();
             mPollAppTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_app_data", 50).toDouble()));
         }
     });
@@ -513,6 +510,18 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
 
+    mPortTimer.start(1000);
+    connect(&mPortTimer, &QTimer::timeout, [this]() {
+        if (!mVesc->isPortConnected() && mVesc->lastPortAvailable()) {
+            ui->actionReconnect->setIcon(Utility::getIcon("icons/Connected-hl-96.png"));
+        } else {
+            ui->actionReconnect->setIcon(Utility::getIcon("icons/Connected-96.png"));
+        }
+
+        ui->actionReconnect->setEnabled(!mVesc->isPortConnected());
+        ui->actionDisconnect->setEnabled(mVesc->isPortConnected());
+    });
+
     // Restore size and position
     if (mSettings.contains("mainwindow/size")) {
         resize(mSettings.value("mainwindow/size").toSize());
@@ -529,6 +538,10 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
+    mLastParamParserCPath = (mSettings.value("mainwindow/mLastParamParserCPath", "./confgenerator").toString());
+    mLastMCConfigXMLPath  = (mSettings.value("mainwindow/mLastMCConfigXMLPath", "./vesc_mcconf").toString());
+    mLastAppConfigXMLPath = (mSettings.value("mainwindow/mLastAppConfigXMLPath", "./vesc_appconf").toString());
+
     updateMotortype();
     updateAppToUse();
 
@@ -543,6 +556,9 @@ MainWindow::~MainWindow()
     mSettings.setValue("introVersion", VT_INTRO_VERSION);
     mSettings.setValue("mainwindow/position", pos());
     mSettings.setValue("mainwindow/maximized", isMaximized());
+    mSettings.setValue("mainwindow/mLastParamParserCPath", mLastParamParserCPath);
+    mSettings.setValue("mainwindow/mLastMCConfigXMLPath", mLastMCConfigXMLPath);
+    mSettings.setValue("mainwindow/mLastAppConfigXMLPath", mLastAppConfigXMLPath);
 
     if (!isMaximized()) {
         mSettings.setValue("mainwindow/size", size());
@@ -654,6 +670,41 @@ bool MainWindow::eventFilter(QObject *object, QEvent *e)
     return false;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (mPageLisp->hasUnsavedTabs()) {
+        QMessageBox::StandardButton answer = QMessageBox::question(
+                    this,
+                    tr("Unsaved Lisp-Tabs"),
+                    tr("There are unsaved Lisp-tabs open. Do you want to close "
+                       "VESC Tool without saving them?"),
+                    QMessageBox::Yes | QMessageBox::Cancel
+                    );
+
+        if (answer == QMessageBox::Yes) {
+            event->accept();
+        } else {
+            event->ignore();
+        }
+    } else if (mPageScripting->hasUnsavedTabs()) {
+        QMessageBox::StandardButton answer = QMessageBox::question(
+                    this,
+                    tr("Unsaved Qml-Tabs"),
+                    tr("There are unsaved Qml-tabs open. Do you want to close "
+                       "VESC Tool without saving them?"),
+                    QMessageBox::Yes | QMessageBox::Cancel
+                    );
+
+        if (answer == QMessageBox::Yes) {
+            event->accept();
+        } else {
+            event->ignore();
+        }
+    } else {
+        event->accept();
+    }
+}
+
 void MainWindow::timerSlotDebugMsg()
 {
     QMutexLocker locker(&myDebugMsgMutex);
@@ -700,8 +751,15 @@ void MainWindow::timerSlot()
     }
 
     // Scan can bus on connect
-    if (mVesc->isPortConnected() && ui->canList->count() == 0 && ui->scanCanButton->isEnabled() && mVesc->fwRx()) {
+    if (mVesc->isPortConnected() && ui->canList->count() == 0 &&
+            ui->scanCanButton->isEnabled() && mVesc->fwRx() && mVesc->customConfigRxDone()) {
         on_scanCanButton_clicked();
+    }
+
+    if (ui->scanCanButton->isEnabled()) {
+        ui->canList->setEnabled(mVesc->fwRx() && mVesc->customConfigRxDone());
+    } else {
+        ui->canList->setEnabled(false);
     }
 
     // If disconnected for a short time clear the can list so it scans on reconnect.
@@ -730,8 +788,11 @@ void MainWindow::timerSlot()
         if (mVesc->commands()->getSendCan()) {
             int id_set = mVesc->commands()->getCanSendId();
             for (int i = 1; i <  ui->canList->count(); i++) {
-                int id_ui = ui->canList->item(i)->text().split(" ").last().toInt();
-                if (id_ui == id_set) {
+                int id = 0;
+                auto current = ui->canList->itemWidget(ui->canList->item(i));
+                bool ok = QMetaObject::invokeMethod(current, "getID", Q_RETURN_ARG(int, id));
+
+                if (ok && id == id_set) {
                     ui->canList->setCurrentRow(i);
                     break;
                 }
@@ -1037,7 +1098,7 @@ void MainWindow::on_actionSaveMotorConfXml_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the motor configuration XML file"),
-                                        ".",
+                                        mLastMCConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1052,6 +1113,7 @@ void MainWindow::on_actionSaveMotorConfXml_triggered()
 
     if (res) {
         showStatusInfo("Saved motor configuration", true);
+        mLastMCConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Save motor configuration"),
                           tr("Could not save motor configuration:<BR>"
@@ -1065,7 +1127,7 @@ void MainWindow::on_actionLoadMotorConfXml_triggered()
     QString path;
     path = QFileDialog::getOpenFileName(this,
                                         tr("Choose motor configuration file to load"),
-                                        ".",
+                                        mLastMCConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1076,6 +1138,7 @@ void MainWindow::on_actionLoadMotorConfXml_triggered()
 
     if (res) {
         showStatusInfo("Loaded motor configuration", true);
+        mLastMCConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Load motor configuration"),
                           tr("Could not load motor configuration:<BR>"
@@ -1089,7 +1152,7 @@ void MainWindow::on_actionSaveAppconfXml_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the app configuration XML file"),
-                                        ".",
+                                        mLastAppConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1104,6 +1167,7 @@ void MainWindow::on_actionSaveAppconfXml_triggered()
 
     if (res) {
         showStatusInfo("Saved app configuration", true);
+        mLastAppConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Save app configuration"),
                           tr("Could not save app configuration:<BR>"
@@ -1117,7 +1181,7 @@ void MainWindow::on_actionLoadAppconfXml_triggered()
     QString path;
     path = QFileDialog::getOpenFileName(this,
                                         tr("Choose app configuration file to load"),
-                                        ".",
+                                        mLastAppConfigXMLPath,
                                         tr("Xml files (*.xml)"));
 
     if (path.isNull()) {
@@ -1128,6 +1192,7 @@ void MainWindow::on_actionLoadAppconfXml_triggered()
 
     if (res) {
         showStatusInfo("Loaded app configuration", true);
+        mLastAppConfigXMLPath = path;
     } else {
         showMessageDialog(tr("Load app configuration"),
                           tr("Could not load app configuration:<BR>"
@@ -1140,6 +1205,24 @@ void MainWindow::on_actionExit_triggered()
 {
     qApp->exit();
 }
+
+#ifndef Q_OS_IOS
+void MainWindow::on_actionLaunchBoardConfigurator_triggered()
+{
+    QString program = qApp->arguments()[0];
+    QStringList params = QStringList() << "--useBoardSetupWindow" ;
+    qApp->quit();
+    QProcess::startDetached(program, params);
+}
+
+void MainWindow::on_actionLaunchMobileTool_triggered()
+{
+    QString program = qApp->arguments()[0];
+    QStringList params = QStringList() << "--useMobileUi" ;
+    qApp->quit();
+    QProcess::startDetached(program, params);
+}
+#endif
 
 void MainWindow::on_actionAbout_triggered()
 {
@@ -1221,7 +1304,7 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the configuration header file"),
-                                        ".",
+                                        QString("./%1_default").arg(conf.toLower()),
                                         tr("h files (*.h)"));
 
     if (path.isNull()) {
@@ -1285,8 +1368,6 @@ void MainWindow::reloadPages()
     connect(ui->actionSetupMotorsFOCQuick, SIGNAL(triggered(bool)),
             mPageWelcome, SLOT(startSetupWizardFocSimple()));
 
-
-
     mPageConnection = new PageConnection(this);
     mPageConnection->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageConnection);
@@ -1296,6 +1377,11 @@ void MainWindow::reloadPages()
     mPageFirmware->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageFirmware);
     addPageItem(tr("Firmware"),  theme + "icons/Electronics-96.png", "", true);
+
+    mPagePackage = new PageVescPackage(this);
+    mPagePackage->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPagePackage);
+    addPageItem(tr("VESC Packages"),  theme + "icons/Package-96.png", "", true);
 
     mPageMotorSettings = new PageMotorSettings(this);
     mPageMotorSettings->setVesc(mVesc);
@@ -1416,13 +1502,6 @@ void MainWindow::reloadPages()
                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_nrf", ui->pageList->count() - 1);
 
-    mPageAppBalance = new PageAppBalance(this);
-    mPageAppBalance->setVesc(mVesc);
-    ui->pageWidget->addWidget(mPageAppBalance);
-    addPageItem(tr("Balance"),  theme + "icons/EUC-96.png",
-                theme + "icons/appconf.png", false, true);
-    mPageNameIdList.insert("app_balance", ui->pageList->count() - 1);
-
     mPageAppPas = new PageAppPas(this);
     mPageAppPas->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppPas);
@@ -1457,7 +1536,7 @@ void MainWindow::reloadPages()
     mPageCustomConfig2->setVesc(mVesc);
     mPageCustomConfig2->setConfNum(2);
     ui->pageWidget->addWidget(mPageCustomConfig2);
-    addPageItem(tr("Config0"),  theme + "icons/Electronics-96.png", "", true);
+    addPageItem(tr("Config2"),  theme + "icons/Electronics-96.png", "", true);
     mPageNameIdList.insert("app_custom_config_2", ui->pageList->count() - 1);
     ui->pageList->item(ui->pageList->count() - 1)->setHidden(true);
 
@@ -1475,13 +1554,13 @@ void MainWindow::reloadPages()
     mPageSampledData = new PageSampledData(this);
     mPageSampledData->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSampledData);
-    addPageItem(tr("Sampled Data"),  theme + "icons/Gyroscope-96.png", "", false, true);
+    addPageItem(tr("Sampled Data"),  theme + "icons/Line Chart-96.png", "", false, true);
     mPageNameIdList.insert("data_sampled", ui->pageList->count() - 1);
 
     mPageImu = new PageImu(this);
     mPageImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageImu);
-    addPageItem(tr("IMU Data"),  theme + "icons/Line Chart-96.png", "", false, true);
+    addPageItem(tr("IMU Data"),  theme + "icons/Gyroscope-96.png", "", false, true);
     mPageNameIdList.insert("data_imu", ui->pageList->count() - 1);
 
     mPageBms = new PageBms(this);
@@ -1495,35 +1574,51 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageLogAnalysis);
     addPageItem(tr("Log Analysis"),  theme + "icons/Waypoint Map-96.png", "", false, true);
 
-    mPageVESCDev = new QTabWidget(this);
-    mPageVESCDev->setTabShape(QTabWidget::Triangular);
+    VTextBrowser *vt = new VTextBrowser(this);
+    ConfigParam *p = mVesc->infoConfig()->getParam("dev_tools_description");
+    if (p) {
+        vt->setText(p->description);
+    }
+    ui->pageWidget->addWidget(vt);
+    addPageItem(tr("VESC Dev Tools"),  theme + "icons/v_icon-96.png", "", true);
 
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
-    mPageVESCDev->addTab(mPageTerminal,QIcon(theme + "icons/Console-96.png"), tr("VESC Terminal"));
+    addPageItem(tr("Terminal"),  theme + "icons/Console-96.png", "", false, true);
 
     mPageScripting = new PageScripting(this);
     mPageScripting->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageScripting);
-    mPageVESCDev->addTab(mPageScripting, QIcon(theme + "icons_textedit/Outdent-96.png"), tr("Scripting"));
+    addPageItem(tr("QML Scripting"),  theme + "icons_textedit/Outdent-96.png", "", false, true);
+
+    mPageLisp = new PageLisp(this);
+    mPageLisp->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageLisp);
+    addPageItem(tr("LispBM Scripting"),  theme + "icons_textedit/Outdent-96.png", "", false, true);
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageCanAnalyzer);
-    mPageVESCDev->addTab(mPageCanAnalyzer,QIcon(theme + "icons/can_off.png"), tr("CAN Analyzer"));
+    addPageItem(tr("CAN Analyzer"),  theme + "icons/can_off.png", "", false, true);
+
+    mPageDisplayTool = new PageDisplayTool(this);
+    ui->pageWidget->addWidget(mPageDisplayTool);
+    addPageItem(tr("Display Tool"),  theme + "icons/Calculator-96.png", "", false, true);
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
-    mPageVESCDev->addTab(mPageDebugPrint,QIcon(theme + "icons/Bug-96.png"), tr("Debug Console"));
-
-    ui->pageWidget->addWidget(mPageVESCDev);
-    addPageItem(tr("VESC Dev Tools"),  theme + "icons/Console-96.png", "", true);
+    addPageItem(tr("Debug Console"),  theme + "icons/Bug-96.png", "", false, true);
 
     mPageSwdProg = new PageSwdProg(this);
     mPageSwdProg->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSwdProg);
     addPageItem(tr("SWD Programmer"),  theme + "icons/Electronics-96.png", "", true);
+
+    mPageEspProg = new PageEspProg(this);
+    mPageEspProg->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageEspProg);
+    addPageItem(tr("ESP Programmer"),  theme + "icons/Electronics-96.png", "", true);
 
     /*
      * Page IDs
@@ -1545,7 +1640,6 @@ void MainWindow::reloadPages()
      * app_uart
      * app_vescremote
      * app_nrf
-     * app_balance
      * app_imu
      * app_custom_config_0
      * app_custom_config_1
@@ -1791,29 +1885,25 @@ void MainWindow::on_actionSaveAppConfigurationHeaderWrap_triggered()
 void MainWindow::on_actionTerminalPrintFaults_triggered()
 {
     mVesc->commands()->sendTerminalCmd("faults");
-    showPage("VESC Dev Tools");
-    mPageVESCDev->setCurrentIndex(0);
+    showPage("Terminal");
 }
 
 void MainWindow::on_actionTerminalShowHelp_triggered()
 {
     mVesc->commands()->sendTerminalCmd("help");
-    showPage("VESC Dev Tools");
-    mPageVESCDev->setCurrentIndex(0);
+    showPage("Terminal");
 }
 
 void MainWindow::on_actionTerminalClear_triggered()
 {
     mPageTerminal->clearTerminal();
-    showPage("VESC Dev Tools");
-    mPageVESCDev->setCurrentIndex(0);
+    showPage("Terminal");
 }
 
 void MainWindow::on_actionTerminalPrintThreads_triggered()
 {
     mVesc->commands()->sendTerminalCmd("threads");
-    showPage("VESC Dev Tools");
-    mPageVESCDev->setCurrentIndex(0);
+    showPage("Terminal");
 }
 
 void MainWindow::on_actionTerminalDRVResetLatchedFaults_triggered()
@@ -1879,7 +1969,7 @@ void MainWindow::on_actionExportConfigurationParser_triggered()
     QString path;
     path = QFileDialog::getSaveFileName(this,
                                         tr("Choose where to save the parser C source and header file"),
-                                        ".",
+                                        mLastParamParserCPath,
                                         tr("C Source/Header files (*.c *.h)"));
 
     if (path.isNull()) {
@@ -1887,6 +1977,7 @@ void MainWindow::on_actionExportConfigurationParser_triggered()
     }
 
     Utility::createParamParserC(mVesc, path);
+    mLastParamParserCPath = path;
 }
 
 void MainWindow::on_actionBackupConfiguration_triggered()
@@ -1950,7 +2041,9 @@ void MainWindow::on_scanCanButton_clicked()
         ui->canList->clear();
     } else {
         ui->canList->clear();
-        showStatusInfo("Connect to VESC before scanning", false);
+        mVesc->emitMessageDialog(
+                    "Scan CAN",
+                    "Please connect before scanning", false);
     }
 }
 
@@ -1994,6 +2087,8 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
 
 void MainWindow::on_canList_currentRowChanged(int currentRow)
 {
+    ui->canList->setEnabled(false);
+
     if (currentRow >= 0) {
         if (currentRow == 0) {
             if (mVesc->commands()->getSendCan()) {

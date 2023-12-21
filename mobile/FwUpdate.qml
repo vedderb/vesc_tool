@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 - 2021 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2023 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -17,9 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.11
-import QtQuick.Controls 2.10
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.3 as Dl
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -28,9 +29,14 @@ import Vedder.vesc.fwhelper 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    property alias currentPage: swipeView.currentIndex
+    property alias swipeOrientation: swipeView.orientation
+    property alias pageIndicatorVisible: indicator.visible
+
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
     property bool isHorizontal: width > height
+    property bool showUploadAllButton: true
     anchors.fill: parent
 
     FwHelper {
@@ -143,10 +149,17 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                updateHw(VescIf.getLastFwRxParams())
+                                var params = VescIf.getLastFwRxParams()
+                                updateHw(params)
+                                updateBl(params)
+                                updateFwText()
                             }
 
                             onCurrentIndexChanged: {
+                                updateFws()
+                            }
+
+                            function updateFws() {
                                 if (hwItems.rowCount() === 0) {
                                     return
                                 }
@@ -250,8 +263,8 @@ Item {
 
                             onClicked: {
                                 if (Utility.requestFilePermission()) {
-                                    filePicker.enabled = true
-                                    filePicker.visible = true
+                                    fileDialog.close()
+                                    fileDialog.open()
                                 } else {
                                     VescIf.emitMessageDialog(
                                                 "File Permissions",
@@ -268,18 +281,19 @@ Item {
                         }
                     }
 
-                    FilePicker {
-                        id: filePicker
-                        anchors.fill: parent
-                        showDotAndDotDot: true
-                        nameFilters: "*.bin"
-                        visible: false
-                        enabled: false
-
-                        onFileSelected: {
-                            customFwText.text = currentFolder() + "/" + fileName
-                            visible = false
-                            enabled = false
+                    Dl.FileDialog {
+                        id: fileDialog
+                        title: "Choose a firmware file"
+                        nameFilters: ["*"]
+                        selectedNameFilter: "*"
+                        onAccepted: {
+                            customFwText.text = fileUrl
+                            close()
+                            parent.forceActiveFocus()
+                        }
+                        onRejected: {
+                            close()
+                            parent.forceActiveFocus()
                         }
                     }
                 }
@@ -345,6 +359,130 @@ Item {
                         }
                     }
                 }
+
+                Page {
+                    id: pageArchive
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        anchors.topMargin: 10
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 30;
+                            border.width: 0
+                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
+                            border.color: Utility.getAppHexColor("lightestBackground")
+
+                            Text {
+                                anchors.centerIn: parent
+                                color: Utility.getAppHexColor("lightText")
+                                text: "Firmware Archive"
+                                font.bold: true
+                                verticalAlignment: Text.AlignVCenter
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+                        }
+
+                        Item {
+                            // Spacer
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                        }
+
+                        Text {
+                            color: Utility.getAppHexColor("lightText")
+                            Layout.fillWidth: true
+                            height: 30;
+                            text: "Firmware Version"
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
+                        ComboBox {
+                            id: archVerBox
+                            Layout.preferredHeight: 48
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                            popup.bottomMargin: 100
+
+                            textRole: "key"
+                            model: ListModel {
+                                id: archVerItems
+                            }
+
+                            Component.onCompleted: {
+                                updateArch()
+                            }
+
+                            onCurrentIndexChanged: {
+                                if (archVerItems.rowCount() === 0) {
+                                    return
+                                }
+
+                                archFwItems.clear()
+                                var fws = fwHelper.getArchiveFirmwares(
+                                            archVerItems.get(archVerBox.currentIndex).value,
+                                            VescIf.getLastFwRxParams())
+
+                                for (var name in fws) {
+                                    archFwItems.append({ key: name, value: fws[name] })
+                                }
+
+                                archFwBox.currentIndex = 0
+                            }
+                        }
+
+                        Text {
+                            color: Utility.getAppHexColor("lightText")
+                            Layout.fillWidth: true
+                            height: 30;
+                            text: "File"
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
+                        ComboBox {
+                            id: archFwBox
+                            Layout.preferredHeight: 48
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                            popup.bottomMargin: 100
+
+                            textRole: "key"
+                            model: ListModel {
+                                id: archFwItems
+                            }
+                        }
+
+                        Button {
+                            id: archUpdateButton
+                            text: "Update Archive"
+                            Layout.fillWidth: true
+
+                            onClicked: {
+                                dlArchiveDialog.open()
+                            }
+                        }
+
+                        ProgressBar {
+                            id: dlProg
+                            Layout.fillWidth: true
+                        }
+
+                        Text {
+                            id: dlText
+                            Layout.fillWidth: true
+                            color: Utility.getAppHexColor("lightText")
+                        }
+
+                        Item {
+                            // Spacer
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                        }
+                    }
+                }
             }
         }
 
@@ -393,6 +531,7 @@ Item {
                         id: uploadAllButton
                         text: qsTr("Upload All")
                         Layout.fillWidth: true
+                        visible: showUploadAllButton
 
                         onClicked: {
                             uploadFw(true)
@@ -430,9 +569,9 @@ Item {
         id: uploadDialog
         property bool fwdCan: false
         standardButtons: Dialog.Ok | Dialog.Cancel
+        width: parent.width - 20
         modal: true
         focus: true
-        width: parent.width - 20
         closePolicy: Popup.CloseOnEscape
 
         Overlay.modal: Rectangle {
@@ -460,10 +599,55 @@ Item {
                     okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(fwItems.get(fwBox.currentIndex).value, VescIf, false, false, fwdCan, "")
                 }
             } else if (swipeView.currentIndex == 1) {
-                okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(customFwText.text, VescIf, false, true, fwdCan,"")
+                okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(customFwText.text, VescIf, false, Qt.platform.os != "android", fwdCan,"")
             } else if (swipeView.currentIndex == 2) {
                 fwHelper.uploadFirmwareSingleShotTimer(blItems.get(blBox.currentIndex).value, VescIf, true, false, fwdCan,"")
+            } else if (swipeView.currentIndex == 3) {
+                okUploadFw = fwHelper.uploadFirmwareSingleShotTimer(archFwItems.get(archFwBox.currentIndex).value, VescIf, false, false, fwdCan, "")
             }
+        }
+    }
+
+    Dialog {
+        id: dlArchiveDialog
+        property bool fwdCan: false
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        width: parent.width - 20
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+
+        Text {
+            color: Utility.getAppHexColor("lightText")
+            text: "This is going do download a few 100 MB of old firmwares. Continue?"
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+        }
+
+        onAccepted: {
+            archUpdateButton.enabled = false
+            workaroundTimerDl.start()
+        }
+    }
+
+    Timer {
+        id: workaroundTimerDl
+        interval: 0
+        repeat: false
+        running: false
+        onTriggered: {
+            // dlArchive...
+            VescIf.downloadFwArchive()
+            updateArch(VescIf.getLastFwRxParams())
+            archUpdateButton.enabled = true
         }
     }
 
@@ -471,16 +655,14 @@ Item {
         var hws = fwHelper.getHardwares(params, params.hw)
 
         hwItems.clear()
+        fwItems.clear()
 
         for (var name in hws) {
-            if (name.indexOf("412") !== -1) {
-                hwItems.insert(0, { key: name, value: hws[name] })
-            } else {
-                hwItems.append({ key: name, value: hws[name] })
-            }
+            hwItems.append({ key: name, value: hws[name] })
         }
 
         hwBox.currentIndex = 0
+        hwBox.updateFws()
     }
 
     function updateBl(params) {
@@ -499,24 +681,37 @@ Item {
         blBox.currentIndex = 0
     }
 
+    function updateArch() {
+        var fws = fwHelper.getArchiveDirs()
+
+        archVerItems.clear()
+        archFwItems.clear()
+
+        for (var name in fws) {
+            archVerItems.append({ key: name, value: fws[name] })
+        }
+
+        archVerBox.currentIndex = 0
+    }
+
     function uploadFw(fwdCan) {
         if (!VescIf.isPortConnected()) {
             VescIf.emitMessageDialog(
                         "Connection Error",
-                        "The VESC is not connected. Please open a connection.",
+                        "Not connected to device. Please connect first.",
                         false)
             return
         }
 
-        var msg = "You are about to upload new firmware to the connected VESC"
-        var msgBl = "You are about to upload a bootloader to the connected VESC"
+        var msg = "You are about to upload new firmware to the connected device"
+        var msgBl = "You are about to upload a bootloader to the connected device"
 
         var msgEnd = "."
         if (fwdCan) {
-            msgEnd = ", as well as all VESCs found on the CAN-bus. \n\n" +
+            msgEnd = ", as well as all decices found on the CAN-bus. \n\n" +
                     "WARNING: The upload all function should ONLY be used if all " +
-                    "VESCs on the CAN-bus have the same hardware version. If that " +
-                    "is not the case, you must upload firmware to the VESCs individually."
+                    "decices on the CAN-bus have the same hardware version. If that " +
+                    "is not the case, you must upload firmware to the decices individually."
         }
 
         msg += msgEnd
@@ -541,13 +736,13 @@ Item {
 
                 if (VescIf.getFwSupportsConfiguration()) {
                     msg += "\n\n" +
-                            "Uploading new firmware will clear all settings on your VESC. You can make " +
+                            "Uploading new firmware will clear all settings in the VESC firmware. You can make " +
                             "a backup of the settings from the connection page and restore them after the " +
                             "update if you'd like (if you haven't done the backup already). " +
                             "Do you want to continue with the update, or cancel and do the backup first?"
                 } else {
                     msg += "\n\n" +
-                            "Uploading new firmware will clear all settings on your VESC " +
+                            "Uploading new firmware will clear all settings on your device " +
                             "and you have to do the configuration again. Do you want to " +
                             "continue?"
                 }
@@ -559,7 +754,7 @@ Item {
                 uploadDialogLabel.text =
                         msg + "\n\n" +
                         "Uploading firmware for the wrong hardware version " +
-                        "WILL damage the VESC for sure. Are you sure that you have " +
+                        "WILL damage the hardware. Are you sure that you have " +
                         "chosen the correct hardware version?"
                 uploadDialog.open()
             }
@@ -569,7 +764,7 @@ Item {
                 uploadDialogLabel.text =
                         msg + "\n\n" +
                         "Uploading firmware for the wrong hardware version " +
-                        "WILL damage the VESC for sure. Are you sure that you have " +
+                        "WILL damage the hardware. Are you sure that you have " +
                         "chosen the correct hardware version?"
                 uploadDialog.open()
             } else {
@@ -592,13 +787,33 @@ Item {
 
             var msgBl2 = ""
             if (!mCommands.getLimitedSupportsEraseBootloader()) {
-                msgBl2 = "If the VESC already has a bootloader this will destroy " +
+                msgBl2 = "If the device already has a bootloader this will destroy " +
                         "the bootloader and firmware updates cannot be done anymore. "
             }
 
             uploadDialogLabel.text =
                     msgBl + "\n\n" + msgBl2 +
                     "Do you want to continue?"
+            uploadDialog.open()
+        } else if (swipeView.currentIndex === 3) {
+            if (archFwItems.rowCount() === 0) {
+                VescIf.emitMessageDialog(
+                            "Upload Error",
+                            "This version of VESC Tool does not include the selected firmware " +
+                            "for your hardware version. You can try to update the archive and see " +
+                            "if it has been added since your last update.",
+                            false)
+                return;
+            }
+
+            uploadDialog.title = "Warning"
+
+            msg += "\n\n" +
+                    "Uploading new firmware will clear all settings on your device " +
+                    "and you have to do the configuration again. Do you want to " +
+                    "continue?"
+
+            uploadDialogLabel.text = msg
             uploadDialog.open()
         }
     }
@@ -624,7 +839,7 @@ Item {
     Connections {
         target: VescIf
 
-        onFwUploadStatus: {
+        function onFwUploadStatus(status, progress, isOngoing) {
             if (isOngoing) {
                 uploadText.text = status + " (" + parseFloat(progress * 100.0).toFixed(2) + " %)"
             } else {
@@ -636,21 +851,23 @@ Item {
             cancelButton.enabled = isOngoing
         }
     }
+
     Connections {
         target: fwHelper
 
-        onFwUploadRes: {
+        function onFwUploadRes(res, isBootloader) {
             if (res) {
                 if(isBootloader) {
-                        VescIf.emitMessageDialog("Bootloader Finished",
-                                                 "Bootloader upload is done.",
-                                                 true, false)
+                    VescIf.emitMessageDialog("Bootloader Finished",
+                                             "Bootloader upload is done.",
+                                             true, false)
                 } else {
-                        VescIf.emitMessageDialog("Warning",
-                                                 "The firmware upload is done. You must wait at least " +
-                                                 "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your " +
-                                                 "VESC will become bricked. If that happens you need a SWD programmer to recover it.",
-                                                 true, false)
+                    VescIf.disconnectPort()
+                    VescIf.emitMessageDialog("Warning",
+                                             "The firmware upload is done. The device should reboot automatically within 10 seconds. Do " +
+                                             "NOT remove power before the reboot is done as that can brick the CPU and requires a programmer " +
+                                             "to fix.",
+                                             true, false)
                 }
             }
         }
@@ -659,26 +876,39 @@ Item {
     Connections {
         target: VescIf
 
-        onFwRxChanged: {
-            if (!rx) {
-                return;
+        function onFwRxChanged(rx, limited) {
+            if (rx) {
+                updateFwText()
             }
-
-            var params = VescIf.getLastFwRxParams()
-
-            updateHw(params)
-            updateBl(params)
-
-            var testFwStr = "";
-
-            if (params.isTestFw > 0) {
-                testFwStr = " BETA " +  params.isTestFw
-            }
-
-            versionText.text =
-                    "FW   : " + params.major + "." + params.minor + testFwStr + "\n" +
-                    "HW   : " + params.hw + "\n" +
-                    "UUID : " + Utility.uuid2Str(params.uuid, false)
         }
+
+        function onFwArchiveDlProgress(msg, prog) {
+            dlProg.value = prog
+            dlText.text = msg
+        }
+    }
+
+    function updateFwText() {
+        var params = VescIf.getLastFwRxParams()
+
+        updateHw(params)
+        updateBl(params)
+        updateArch()
+
+        var testFwStr = "";
+        var fwNameStr = "";
+
+        if (params.isTestFw > 0) {
+            testFwStr = " BETA " +  params.isTestFw
+        }
+
+        if (params.fwName !== "") {
+            fwNameStr = " (" + params.fwName + ")"
+        }
+
+        versionText.text =
+                "FW   : v" + params.major + "." + (1e5 + params.minor + '').slice(-2) + fwNameStr + testFwStr + "\n" +
+                "HW   : " + params.hw + "\n" +
+                "UUID : " + Utility.uuid2Str(params.uuid, false)
     }
 }

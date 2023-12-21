@@ -254,7 +254,7 @@ Item {
     Connections {
         target: mCommands
 
-        onBldcDetectReceived: {
+        function onBldcDetectReceived(param) {
             if (param.cycle_int_limit < 0.01 && param.bemf_coupling_k < 0.01) {
                 VescIf.emitStatusMessage("Bad Detection Result Received", false)
                 VescIf.emitMessageDialog("BLDC Detection",

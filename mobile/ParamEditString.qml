@@ -29,14 +29,19 @@ Item {
     id: editor
     property string paramName: ""
     property ConfigParams params: null
-    height: column.implicitHeight + 2 * column.anchors.margins
+    height: 140
     Layout.fillWidth: true
     property real maxVal: 1.0
 
     Component.onCompleted: {
-        if (params !== null) {
+        if (params != null) {
             nameText.text = params.getLongName(paramName)
             stringInput.text = params.getParamQString(paramName)
+
+            var maxLen = params.getParamMaxLen(paramName)
+            if (maxLen > 0) {
+                stringInput.maximumLength = maxLen
+            }
 
             if (params.getParamTransmittable(paramName)) {
                 nowButton.visible = true
@@ -86,7 +91,7 @@ Item {
                     focus: true
 
                     onTextChanged: {
-                        if (params !== null) {
+                        if (params != null) {
                             if (params.getUpdateOnly() !== paramName) {
                                 params.setUpdateOnly("")
                             }
@@ -142,8 +147,8 @@ Item {
     Connections {
         target: params
 
-        onParamChangedQString: {
-            if (src !== editor && name == paramName) {
+        function onParamChangedQString(src, name, newParam) {
+            if (src !== editor && name === paramName) {
                 stringInput.text = newParam
             }
         }

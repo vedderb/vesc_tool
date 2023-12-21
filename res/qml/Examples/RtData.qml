@@ -144,7 +144,7 @@ Item {
     Connections {
         target: mMcConf
 
-        onUpdated: {
+        function onUpdated() {
             currentGauge.maximumValue = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5
             currentGauge.minimumValue = -currentGauge.maximumValue
         }
@@ -153,7 +153,7 @@ Item {
     Connections {
         target: mCommands
 
-        onValuesReceived: {
+        function onValuesReceived(values, mask) {
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
 

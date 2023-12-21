@@ -282,7 +282,7 @@ Item {
         onAccepted: {
             VescIf.addPairedUuid(VescIf.getConnectedUuid());
             VescIf.storeSettings()
-            mAppConf.updateParamBool("pairing_done", true, 0)
+            mAppConf.updateParamBool("pairing_done", true, null)
             mCommands.setAppConf()
             if (Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)) {
                 VescIf.emitMessageDialog("Pairing Successful!",
@@ -322,7 +322,7 @@ Item {
         onAccepted: {
             VescIf.deletePairedUuid(VescIf.getConnectedUuid());
             VescIf.storeSettings()
-            mAppConf.updateParamBool("pairing_done", false, 0)
+            mAppConf.updateParamBool("pairing_done", false, null)
             mCommands.setAppConf()
         }
     }
@@ -372,7 +372,7 @@ Item {
     Connections {
         target: VescIf
 
-        onPairingListUpdated: {
+        function onPairingListUpdated() {
             loadUuids()
         }
     }

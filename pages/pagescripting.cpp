@@ -20,7 +20,6 @@
 #include "pagescripting.h"
 #include "ui_pagescripting.h"
 #include "widgets/helpdialog.h"
-#include "packet.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -41,29 +40,31 @@ PageScripting::PageScripting(QWidget *parent) :
     ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
     ui->qmlWidget->setClearColor(Utility::getAppQColor("normalBackground"));
 
+    ui->mainEdit->setModeQml();
     makeEditorConnections(ui->mainEdit);
 
     QPushButton *plusButton = new QPushButton();
-    QString theme = Utility::getThemePath();
-    plusButton->setIcon(QIcon(theme +"icons/Plus Math-96.png"));
-    ui->runButton->setIcon(QIcon(theme +"icons/Circled Play-96.png"));
-    ui->runWindowButton->setIcon(QIcon(theme +"icons/Circled Play-96.png"));
-    ui->fullscreenButton->setIcon(QIcon(theme +"icons/size_off.png"));
-    ui->stopButton->setIcon(QIcon(theme +"icons/Shutdown-96.png"));
-    ui->helpButton->setIcon(QIcon(theme +"icons/Help-96.png"));
-    ui->clearConsoleButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
-    ui->openRecentButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->removeSelectedButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
-    ui->clearRecentButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
-    ui->openExampleButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->exportCArrayAppButton->setIcon(QIcon(theme +"icons/Save as-96.png"));
-    ui->exportCArrayHwButton->setIcon(QIcon(theme +"icons/Save as-96.png"));
-    ui->calcSizeButton->setIcon(QIcon(theme +"icons/Calculator-96.png"));
-    ui->openQmluiAppButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->openQmluiHwButton->setIcon(QIcon(theme +"icons/Open Folder-96.png"));
-    ui->uploadButton->setIcon(QIcon(theme +"icons/Download-96.png"));
-    ui->eraseOnlyButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
-    ui->clearUploadTextButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    plusButton->setIcon(Utility::getIcon("icons/Plus Math-96.png"));
+    ui->runButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->runWindowButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
+    ui->fullscreenButton->setIcon(Utility::getIcon("icons/size_off.png"));
+    ui->stopButton->setIcon(Utility::getIcon("icons/Shutdown-96.png"));
+    ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
+    ui->clearConsoleButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->openRecentButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->removeSelectedButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->clearRecentButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->openExampleButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->exportCArrayAppButton->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->exportCArrayHwButton->setIcon(Utility::getIcon("icons/Save as-96.png"));
+    ui->calcSizeButton->setIcon(Utility::getIcon("icons/Calculator-96.png"));
+    ui->openQmluiAppButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->openQmluiHwButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
+    ui->uploadButton->setIcon(Utility::getIcon("icons/Download-96.png"));
+    ui->eraseOnlyButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->clearUploadTextButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
+    ui->recentFilterClearButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
+    ui->exampleFilterClearButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
 
     plusButton->setFlat(true);
     plusButton->setText("New Tab");
@@ -72,7 +73,7 @@ PageScripting::PageScripting(QWidget *parent) :
         createEditorTab("", "");
     });
 
-    connect(ui->mainEdit, &QmlEditor::fileNameChanged, [this](QString fileName) {
+    connect(ui->mainEdit, &ScriptEditor::fileNameChanged, [this](QString fileName) {
         QFileInfo f(fileName);
         QString txt = "main";
 
@@ -133,17 +134,22 @@ PageScripting::PageScripting(QWidget *parent) :
 
     // Add close button that clears the main editor
     QPushButton *closeButton = new QPushButton();
-    closeButton->setIcon(QIcon(theme +"icons/Delete-96.png"));
+    closeButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(0, QTabBar::RightSide, closeButton);
 
-    QmlEditor *mainQmlEditor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
+    ScriptEditor *mainQmlEditor = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(0));
     connect(closeButton, &QPushButton::clicked, [this, mainQmlEditor]() {
         // Clear main tab
         removeEditor(mainQmlEditor);
     });
 
     ui->splitter_2->setSizes(QList<int>({1000, 600}));
+
+    // Clear debug edit from messages that appeared from loading other qml-components
+    QTimer::singleShot(2000, [this]() {
+        ui->debugEdit->clear();
+    });
 }
 
 PageScripting::~PageScripting()
@@ -164,7 +170,7 @@ PageScripting::~PageScripting()
         set.remove("pagescripting/recentopenfiles");
         set.beginWriteArray("pagescripting/recentopenfiles");
         for (int i = 0;i < ui->fileTabs->count();i++) {
-            auto e = qobject_cast<QmlEditor*>(ui->fileTabs->widget(i));
+            auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(i));
             set.setArrayIndex(i);
             set.setValue("path", e->fileNow());
         }
@@ -182,6 +188,7 @@ VescInterface *PageScripting::vesc() const
 void PageScripting::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
+    mLoader.setVesc(vesc);
 
     ui->qmlWidget->engine()->rootContext()->setContextProperty("VescIf", mVesc);
     ui->qmlWidget->engine()->rootContext()->setContextProperty("QmlUi", this);
@@ -191,6 +198,18 @@ void PageScripting::setVesc(VescInterface *vesc)
 void PageScripting::reloadParams()
 {
 
+}
+
+bool PageScripting::hasUnsavedTabs()
+{
+    for (int i = 0; i < ui->fileTabs->count(); i++) {
+        auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(i));
+        if (e->hasUnsavedContent()) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void PageScripting::debugMsgRx(QtMsgType type, const QString msg)
@@ -268,6 +287,11 @@ void PageScripting::openRecentList()
         } else {
             createEditorTab(fileName, file.readAll());
         }
+
+        mRecentFiles.removeAll(fileName);
+        mRecentFiles.append(fileName);
+        updateRecentList();
+        ui->recentList->setCurrentRow(ui->recentList->count() - 1);
 
         file.close();
     } else {
@@ -355,9 +379,11 @@ void PageScripting::updateRecentList()
     for (auto f: mRecentFiles) {
         ui->recentList->addItem(f);
     }
+
+    on_recentFilterEdit_textChanged(ui->recentFilterEdit->text());
 }
 
-void PageScripting::makeEditorConnections(QmlEditor *editor)
+void PageScripting::makeEditorConnections(ScriptEditor *editor)
 {
     connect(editor->codeEditor(), &QCodeEditor::textChanged, [editor, this]() {
        setEditorDirty(editor);
@@ -374,21 +400,19 @@ void PageScripting::makeEditorConnections(QmlEditor *editor)
     connect(editor->codeEditor(), &QCodeEditor::clearConsoleTriggered, [this]() {
         ui->debugEdit->clear();
     });
-    connect(editor, &QmlEditor::fileOpened, [this](QString fileName) {
-        if (!mRecentFiles.contains(fileName)) {
-            mRecentFiles.append(fileName);
-            updateRecentList();
-        }
+    connect(editor, &ScriptEditor::fileOpened, [this](QString fileName) {
+        mRecentFiles.removeAll(fileName);
+        mRecentFiles.append(fileName);
+        updateRecentList();
     });
-    connect(editor, &QmlEditor::fileSaved, [editor, this](QString fileName) {
+    connect(editor, &ScriptEditor::fileSaved, [editor, this](QString fileName) {
         if (mVesc) {
             mVesc->emitStatusMessage("Saved " + fileName, true);
         }
 
-        if (!mRecentFiles.contains(fileName)) {
-            mRecentFiles.append(fileName);
-            updateRecentList();
-        }
+        mRecentFiles.removeAll(fileName);
+        mRecentFiles.append(fileName);
+        updateRecentList();
 
         setEditorClean(editor);
     });
@@ -396,13 +420,14 @@ void PageScripting::makeEditorConnections(QmlEditor *editor)
 
 void PageScripting::createEditorTab(QString fileName, QString content)
 {
-    QmlEditor *editor = new QmlEditor();
+    ScriptEditor *editor = new ScriptEditor();
+    editor->setModeQml();
     int tabIndex = ui->fileTabs->addTab(editor, "");
     ui->fileTabs->setCurrentIndex(tabIndex);
 
     makeEditorConnections(editor);
 
-    connect(editor, &QmlEditor::fileNameChanged, [this, editor](QString fileName) {
+    connect(editor, &ScriptEditor::fileNameChanged, [this, editor](QString fileName) {
         QFileInfo f(fileName);
         QString txt = "Unnamed";
 
@@ -417,10 +442,9 @@ void PageScripting::createEditorTab(QString fileName, QString content)
 
     editor->setFileNow(fileName);
     editor->codeEditor()->setPlainText(content);
-    QString theme = Utility::getThemePath();
 
     QPushButton *closeButton = new QPushButton();
-    closeButton->setIcon(QIcon(theme +"icons/Cancel-96.png"));
+    closeButton->setIcon(Utility::getIcon("icons/Cancel-96.png"));
     closeButton->setFlat(true);
     ui->fileTabs->tabBar()->setTabButton(tabIndex, QTabBar::RightSide, closeButton);
 
@@ -437,12 +461,12 @@ void PageScripting::createEditorTab(QString fileName, QString content)
  * @brief PageScripting::removeEditor Removes the editor (unless it is the 0th, in which case it simply clears it)
  * @param qmlEditor
  */
-void PageScripting::removeEditor(QmlEditor *qmlEditor)
+void PageScripting::removeEditor(ScriptEditor *editor)
 {
    bool shouldCloseTab = false;
 
    // Check if tab is dirty
-   if (qmlEditor->isDirty == true) {
+   if (editor->hasUnsavedContent()) {
        // Ask user for confirmation
        QMessageBox::StandardButton answer = QMessageBox::question(
             this,
@@ -464,17 +488,16 @@ void PageScripting::removeEditor(QmlEditor *qmlEditor)
    // Only close if appropriate
    if (shouldCloseTab) {
        // Get index for this tab
-       int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+       int tabIdx = ui->fileTabs->indexOf(editor);
 
        // Special handling of tabIdx == 0
        if (tabIdx == 0) {
-            qmlEditor->codeEditor()->clear();
-            qmlEditor->setFileNow("");
+            editor->codeEditor()->clear();
+            editor->setFileNow("");
        } else {
            ui->fileTabs->removeTab(tabIdx);
        }
    }
-
 }
 
 
@@ -482,15 +505,15 @@ void PageScripting::removeEditor(QmlEditor *qmlEditor)
  * @brief PageScripting::setEditorDirtySet the editor as dirty, i.e. having text modifications
  * @param qmlEditor
  */
-void PageScripting::setEditorDirty(QmlEditor *qmlEditor)
+void PageScripting::setEditorDirty(ScriptEditor *editor)
 {
     // Check if the editor is not already dirty
-    if (qmlEditor->isDirty == false) {
+    if (editor->isDirty == false) {
         // Set editor as dirty
-        qmlEditor->isDirty = true;
+        editor->isDirty = true;
 
         // Get editor index
-        int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+        int tabIdx = ui->fileTabs->indexOf(editor);
 
         // Append a `*` to signify a dirty editor
         QString tabText = ui->fileTabs->tabText(tabIdx);
@@ -503,15 +526,15 @@ void PageScripting::setEditorDirty(QmlEditor *qmlEditor)
  * @brief PageScripting::setEditorClean Set the editor as clean, i.e. having no text modifications
  * @param qmlEditor
  */
-void PageScripting::setEditorClean(QmlEditor *qmlEditor)
+void PageScripting::setEditorClean(ScriptEditor *editor)
 {
     // Check if the editor is not already clean
-    if (qmlEditor->isDirty == true) {
+    if (editor->isDirty == true) {
         // Set editor as clean
-        qmlEditor->isDirty = false;
+        editor->isDirty = false;
 
         // Get editor index
-        int tabIdx = ui->fileTabs->indexOf(qmlEditor);
+        int tabIdx = ui->fileTabs->indexOf(editor);
 
         // Get the tab's label
         QString tabText = ui->fileTabs->tabText(tabIdx);
@@ -526,11 +549,14 @@ void PageScripting::setEditorClean(QmlEditor *qmlEditor)
 }
 
 
-QString PageScripting::qmlToRun(bool importDir)
+QString PageScripting::qmlToRun(bool importDir, bool prependImports)
 {
-    QString res = ui->mainEdit->codeEditor()->toPlainText();
-    res.prepend("import \"qrc:/mobile\";");
-    res.prepend("import Vedder.vesc.vescinterface 1.0;");
+    QString res = ui->mainEdit->contentAsText();
+
+    if (prependImports) {
+        res.prepend("import \"qrc:/mobile\";");
+        res.prepend("import Vedder.vesc.vescinterface 1.0;");
+    }
 
     if (importDir) {
         QFileInfo f(mDirNow);
@@ -547,7 +573,7 @@ bool PageScripting::exportCArray(QString name)
     QString filename;
     QString dir = ".";
 
-    auto editor = qobject_cast<QmlEditor*>(ui->fileTabs->widget(0));
+    auto editor = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(0));
     QFileInfo fileNow = QFileInfo(editor->fileNow());
     if (fileNow.exists()) {
         dir = fileNow.path();
@@ -633,7 +659,7 @@ bool PageScripting::exportCArray(QString name)
     return true;
 }
 
-bool PageScripting::eraseQml()
+bool PageScripting::eraseQml(int size, bool reload)
 {
     if (!mVesc) {
         return false;
@@ -644,46 +670,19 @@ bool PageScripting::eraseQml()
         return false;
     }
 
-    auto waitEraseRes = [this]() {
-        int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(6000);
-        auto conn = connect(mVesc->commands(), &Commands::eraseQmluiResReceived,
-                            [&res,&loop](bool erRes) {
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
-        return res;
-    };
-
-    mVesc->commands()->qmlUiErase();
-
     ui->uploadTextEdit->appendPlainText("Erasing QMLUI...");
+    bool res = mLoader.qmlErase(size);
 
-    int erRes = waitEraseRes();
-    if (erRes != 1) {
-        QString msg = "Unknown failure";
-
-        if (erRes == -10) {
-            msg = "Erase timed out";
-        } else if (erRes == -1) {
-            msg = "Erasing QMLUI failed";
+    if (res) {
+        if (reload) {
+            mVesc->reloadFirmware();
         }
-
-        ui->uploadTextEdit->appendPlainText(msg);
-        return false;
+        ui->uploadTextEdit->appendPlainText("Erase OK!");
+    } else {
+        ui->uploadTextEdit->appendPlainText("Erasing QMLUI failed");
     }
 
-    ui->uploadTextEdit->appendPlainText("Erase OK!");
-    return true;
+    return res;
 }
 
 void PageScripting::on_helpButton_clicked()
@@ -749,72 +748,24 @@ void PageScripting::on_uploadButton_clicked()
     ui->uploadButton->setEnabled(false);
     ui->eraseOnlyButton->setEnabled(false);
 
-    if (!eraseQml()) {
-        ui->uploadButton->setEnabled(true);
-        ui->eraseOnlyButton->setEnabled(true);
-        return;
-    }
+    auto script = mLoader.qmlCompress(qmlToRun(false, false));
 
-    auto waitWriteRes = [this]() {
-        int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1000);
-        auto conn = connect(mVesc->commands(), &Commands::writeQmluiResReceived,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
-        return res;
-    };
-
-    VByteArray vb;
-    vb.vbAppendUint16(ui->uploadFullscreenBox->isChecked() ? 2 : 1);
-    vb.append(qCompress(qmlToRun(false).toUtf8(), 9));
-    quint16 crc = Packet::crc16((const unsigned char*)vb.constData(),
-                                uint32_t(vb.size()));
-    VByteArray data;
-    data.vbAppendUint32(vb.size() - 2);
-    data.vbAppendUint16(crc);
-    data.append(vb);
-
-    if (data.size() > (1024 * 120)) {
-        ui->uploadTextEdit->appendPlainText("Not enough space");
+    if (!eraseQml(script.size() + 100, false)) {
         ui->uploadButton->setEnabled(true);
         ui->eraseOnlyButton->setEnabled(true);
         return;
     }
 
     ui->uploadTextEdit->appendPlainText("Writing data...");
+    bool res = mLoader.qmlUpload(script, ui->uploadFullscreenBox->isChecked());
 
-    quint32 offset = 0;
-    bool ok = true;
-    while (data.size() > 0) {
-        const int chunkSize = 384;
-        int sz = data.size() > chunkSize ? chunkSize : data.size();
-
-        mVesc->commands()->qmlUiWrite(data.mid(0, sz), offset);
-        if (!waitWriteRes()) {
-            ui->uploadTextEdit->appendPlainText("Write failed");
-            ok = false;
-            break;
-        }
-
-        offset += sz;
-        data.remove(0, sz);
-    }
-
-    if (ok) {
+    if (res) {
         ui->uploadTextEdit->appendPlainText("Write OK!");
+    } else {
+        ui->uploadTextEdit->appendPlainText("Write failed");
     }
+
+    mVesc->reloadFirmware();
 
     ui->uploadButton->setEnabled(true);
     ui->eraseOnlyButton->setEnabled(true);
@@ -823,7 +774,7 @@ void PageScripting::on_uploadButton_clicked()
 void PageScripting::on_eraseOnlyButton_clicked()
 {
     ui->eraseOnlyButton->setEnabled(false);
-    eraseQml();
+    eraseQml(16);
     ui->eraseOnlyButton->setEnabled(true);
 }
 
@@ -832,4 +783,28 @@ void PageScripting::on_calcSizeButton_clicked()
     QMessageBox::information(this, "QML Size",
                              QString("Compressed QML size: %1").
                              arg(qCompress(qmlToRun(false).toUtf8(), 9).size()));
+}
+
+void PageScripting::on_recentFilterEdit_textChanged(const QString &filter)
+{
+    for (int row = 0; row < ui->recentList->count(); ++row) {
+        if (filter.isEmpty()) {
+            ui->recentList->item(row)->setHidden(false);
+        } else {
+            ui->recentList->item(row)->setHidden(!ui->recentList->item(row)->text().
+                                                 contains(filter, Qt::CaseInsensitive));
+        }
+    }
+}
+
+void PageScripting::on_exampleFilterEdit_textChanged(const QString &filter)
+{
+    for (int row = 0; row < ui->exampleList->count(); ++row) {
+        if (filter.isEmpty()) {
+            ui->exampleList->item(row)->setHidden(false);
+        } else {
+            ui->exampleList->item(row)->setHidden(!ui->exampleList->item(row)->text().
+                                                 contains(filter, Qt::CaseInsensitive));
+        }
+    }
 }

@@ -34,6 +34,7 @@ Item {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
     property var dialogParent: ApplicationWindow.overlay
+    property var canDevs: []
 
     signal dialogClosed()
 
@@ -51,6 +52,16 @@ Item {
         repeat: false
 
         onTriggered: {
+            disableDialog()
+            canDevs = Utility.scanCanVescOnly(VescIf)
+            enableDialog()
+
+            if (!Utility.isConnectedToHwVesc(VescIf)) {
+                if (canDevs.length > 0) {
+                    mCommands.setSendCan(true, canDevs[0])
+                }
+            }
+
             updateUsageListParams()
             loadDefaultDialog.open()
         }
@@ -58,10 +69,14 @@ Item {
 
     function updateUsageListParams() {
         mMcConf.updateParamDouble("l_duty_start", usageList.currentItem.modelData.duty_start, null)
+        mMcConf.updateParamInt("m_fault_stop_time_ms", usageList.currentItem.modelData.fault_stop_ms, null)
+        mMcConf.updateParamInt("bms.limit_mode", usageList.currentItem.modelData.bms_limit_mode, null)
     }
 
     Component.onCompleted: {
+        paramListUsage.addEditorMc("bms.limit_mode")
         paramListUsage.addEditorMc("l_duty_start")
+        paramListUsage.addEditorMc("m_fault_stop_time_ms")
 
         paramListBatt.addEditorMc("si_battery_type")
         paramListBatt.addEditorMc("si_battery_cells")
@@ -70,6 +85,8 @@ Item {
         paramListSetup.addEditorMc("si_wheel_diameter")
         paramListSetup.addSeparator("↓ Only change if needed ↓")
         paramListSetup.addEditorMc("si_motor_poles")
+        paramListSetup.addEditorMc("m_motor_temp_sens_type")
+        paramListSetup.addEditorMc("m_ntc_motor_beta")
     }
 
     Dialog {
@@ -100,10 +117,18 @@ Item {
                     id: usageModel
                     property string iconPath: {iconPath = "qrc" + Utility.getThemePath() + "icons/"}
                     Component.onCompleted: {
-                        append({name: "Generic", usageImg:iconPath + "motor.png", duty_start: 1.0, hfi_start: false})
-                        append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg", duty_start: 0.85, hfi_start: true})
-                        append({name: "EUC", usageImg:iconPath + "EUC-96.png", duty_start: 1.0, hfi_start: false})
-                        append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg", duty_start: 1.0, hfi_start: false})
+                        append({name: "Generic", usageImg:iconPath + "motor.png",
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500,
+                                   bms_limit_mode: 3, batt_cut_cautious: true})
+                        append({name: "E-Skate", usageImg:"qrc:/res/images/esk8.jpg",
+                                   duty_start: 0.85, hfi_start: true, fault_stop_ms: 50,
+                                   bms_limit_mode: 3, batt_cut_cautious: true})
+                        append({name: "Balance", usageImg:iconPath + "EUC-96.png",
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 50,
+                                   bms_limit_mode: 0, batt_cut_cautious: false})
+                        append({name: "Propeller", usageImg:"qrc:/res/images/propeller.jpg",
+                                   duty_start: 1.0, hfi_start: false, fault_stop_ms: 500,
+                                   bms_limit_mode: 3, batt_cut_cautious: true})
                     }
                 }
 
@@ -196,10 +221,11 @@ Item {
                     }
 
                     GroupBox {
-                        Layout.preferredHeight: implicitHeight
+                        Layout.preferredHeight: dialog.isHorizontal ? implicitHeight : parent.height * 0.5
                         Layout.fillWidth: true
                         Layout.column: 0
                         Layout.row: dialog.isHorizontal ? 0 : 1
+                        Layout.alignment: Qt.AlignTop
                         contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
                         label: CheckBox {
@@ -760,7 +786,8 @@ Item {
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
-            text: "Warning: Choosing a significantly too large motor for detection is likely to destroy the motor " +
+            text: "Warning: This selection determines the recommended max current for your motor based on heat dissipation. " +
+                  "Selecting a motor here that is significantly larger than your motor is likely to destroy your motor " +
                   "during detection. It is important to choose a motor size similar to the motor you are using. " +
                   "Are you sure that your motor selection is within range?"
         }
@@ -787,7 +814,10 @@ Item {
                 if (val.v_in > 39.0 && val.v_in < 51.0) {
                     mMcConf.updateParamInt("si_battery_cells", 12)
                 } else {
-                    mMcConf.updateParamInt("si_battery_cells", 3)
+                    // Roughly work out by dividing by 4.2 (most common max voltage) and ceil
+                    // This will give the minimum cell count
+                    var cells = Math.ceil(val.v_in / 4.2)
+                    mMcConf.updateParamInt("si_battery_cells", cells)
                 }
             }
         }
@@ -815,10 +845,11 @@ Item {
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
-            text: "Warning: You have not specified battery current limits, which essentially only limits " +
-                  "the current if the voltage drops too much. This is fine in most cases, but check with " +
-                  "your battery and BMS specification to be safe. Keep in mind that you have to divide the " +
-                  "battery current settings by the number of VESCs."
+            text: "Warning: You have not specified battery current limits (advanced box). This means that " +
+                  "the battery current will only be limited if, the battery voltage drops so much from the " +
+                  "internal resistance of the battery that it falls below the battery cutoff voltage. " +
+                  "This is fine in most cases, but check with your battery and BMS specification to be safe. " +
+                  "Keep in mind that you have to divide the battery current settings by the number of VESCs."
         }
 
         onAccepted: {
@@ -838,7 +869,7 @@ Item {
         title: "Detect FOC Parameters"
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
-        property var canDevs: []
+
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -853,7 +884,7 @@ Item {
                 color: {color = Utility.getAppHexColor("lightText")}
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap
-                text: "This is going to spin up all motors. Make " +
+                text: "WARNING: This is going to spin up all motors. Make " +
                       "sure that nothing is in the way."
             }
 
@@ -881,16 +912,12 @@ Item {
             onTriggered: {
                 Utility.waitSignal(mCommands, "2ackReceived(QString)", 4000)
 
-                if (detectCanBox.checked) {
-                    detectDialog.canDevs = Utility.scanCanVescOnly(VescIf)
-                } else {
-                    detectDialog.canDevs = []
-                }
-
-                if (!Utility.setBatteryCutCan(VescIf, detectDialog.canDevs, 6.0, 6.0)) {
+                if (!Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0)) {
                     enableDialog()
                     return
                 }
+
+                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, ["m_motor_temp_sens_type", "m_ntc_motor_beta"])
 
                 var res  = Utility.detectAllFoc(VescIf, detectCanBox.checked,
                                                 maxPowerLossBox.realValue,
@@ -903,7 +930,7 @@ Item {
                 if (res.startsWith("Success!")) {
                     resDetect = true
 
-                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, detectDialog.canDevs)
+                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs, usageList.currentItem.modelData.batt_cut_cautious)
 
                     var updateAllParams = ["l_duty_start"]
 
@@ -926,7 +953,7 @@ Item {
                         updateAllParams.push("foc_sensor_mode")
                     }
 
-                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, detectDialog.canDevs, updateAllParams)
+                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, updateAllParams)
                 }
                 enableDialog()
 
@@ -987,7 +1014,7 @@ Item {
         running: false
 
         onTriggered: {
-            dirSetup.setCanDevs(detectDialog.canDevs)
+            dirSetup.setCanDevs(canDevs)
         }
     }
 

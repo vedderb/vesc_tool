@@ -89,6 +89,7 @@ private:
     QTimer *mTimer;
     QLabel *mStatusLabel;
     int mStatusInfoTime;
+    QString mLastXmlPath;
 
     void updateUi();
     void setEditorValues(QString name, ConfigParam p);

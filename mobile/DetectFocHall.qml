@@ -200,7 +200,7 @@ Item {
     Connections {
         target: mCommands
 
-        onFocHallTableReceived: {
+        function onFocHallTableReceived(hall_table, res) {
             if (res !== 0) {
                 VescIf.emitStatusMessage("Bad FOC Hall Detection Result Received", false)
                 VescIf.emitMessageDialog("Bad FOC Hall Detection Result Received",

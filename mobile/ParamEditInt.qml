@@ -35,7 +35,7 @@ Item {
     property bool createReady: false
 
     Component.onCompleted: {
-        if (params !== null) {
+        if (params != null) {
             if (Math.abs(params.getParamMaxInt(paramName)) > params.getParamMinInt(paramName)) {
                 maxVal = Math.abs(params.getParamMaxInt(paramName))
             } else {
@@ -107,7 +107,7 @@ Item {
                     if (!params.getParamEditAsPercentage(paramName)) {
                         var val = value / params.getParamEditorScale(paramName)
 
-                        if (params !== null && createReady) {
+                        if (params != null && createReady) {
                             if (params.getUpdateOnly() !== paramName) {
                                 params.setUpdateOnly("")
                             }
@@ -137,7 +137,7 @@ Item {
                     if (params.getParamEditAsPercentage(paramName)) {
                         var val = (value / 100.0) * maxVal
 
-                        if (params !== null && createReady) {
+                        if (params != null && createReady) {
                             if (params.getUpdateOnly() !== paramName) {
                                 params.setUpdateOnly("")
                             }
@@ -203,8 +203,8 @@ Item {
     Connections {
         target: params
 
-        onParamChangedInt: {
-            if (src !== editor && name == paramName) {
+        function onParamChangedInt(src, name, newParam) {
+            if (src !== editor && name === paramName) {
                 valueBox.value = newParam * params.getParamEditorScale(paramName)
                 percentageBox.value = Math.round((100.0 * newParam) / maxVal)
             }

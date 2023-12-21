@@ -31,6 +31,7 @@ class TcpServerSimple : public QObject
 public:
     explicit TcpServerSimple(QObject *parent = nullptr);
     Q_INVOKABLE bool startServer(int port, QHostAddress addr = QHostAddress::Any);
+    Q_INVOKABLE bool connectToHub(QString server, int port, QString id, QString pass);
     Q_INVOKABLE void stopServer();
     Q_INVOKABLE bool sendData(const QByteArray &data);
     Q_INVOKABLE QString errorString();
@@ -40,6 +41,7 @@ public:
     Q_INVOKABLE bool isClientConnected();
     Q_INVOKABLE QString getConnectedClientIp();
     Q_INVOKABLE bool isServerRunning();
+    int lastPort() const;
 
 signals:
     void dataRx(const QByteArray &data);
@@ -57,6 +59,7 @@ private:
     QTcpSocket *mTcpSocket;
     Packet *mPacket;
     bool mUsePacket;
+    int mLastPort;
 
 };
 

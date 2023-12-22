@@ -62,6 +62,8 @@ public:
     bool highlightBlocks() const;
     void setHighlightBlocks(bool newHighlightBlocks);
 
+    int searchMatches() const;
+
 signals:
     void saveTriggered();
     void runEmbeddedTriggered();
@@ -217,6 +219,7 @@ private:
     QLineNumberArea* m_lineNumberArea;
     QCompleter* m_completer;
     QString m_searchStrNow;
+    int m_searchMatches;
     bool m_searchSelectNext;
     bool m_searchSelectPrev;
     bool m_searchIsCaseSensitive;

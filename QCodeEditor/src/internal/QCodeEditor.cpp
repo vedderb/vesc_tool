@@ -334,22 +334,33 @@ void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelecti
 
     auto tc2 = document()->find(m_searchStrNow, tc, flags);
     auto tcLast = tc2;
+    auto tcFirst = tc2;
+
+    bool lastAbort = false;
+    m_searchMatches = 0;
 
     while (!tc2.isNull()) {
         ExtraSelection sel;
         sel.cursor = tc2;
         sel.format = format;
         extraSelection.append(sel);
+        m_searchMatches++;
 
         if (m_searchSelectNext && tc2.position() > textCursor().position()) {
             m_searchSelectNext = false;
             setTextCursor(tc2);
         }
 
-        if (m_searchSelectPrev && tc2.position() >= textCursor().position()) {
-            m_searchSelectPrev = false;
+        if (!lastAbort && m_searchSelectPrev &&
+                tc2.position() >= textCursor().position()) {
+
             if (!tcLast.isNull()) {
-                setTextCursor(tcLast);
+                if (tcLast.position() == textCursor().position()) {
+                    lastAbort = true;
+                } else {
+                    m_searchSelectPrev = false;
+                    setTextCursor(tcLast);
+                }
             }
         }
 
@@ -357,14 +368,21 @@ void QCodeEditor::highlightSearch(QList<QTextEdit::ExtraSelection> &extraSelecti
         tc2 = document()->find(m_searchStrNow, tc2, flags);
     }
 
-    m_searchSelectNext = false;
+    if (m_searchSelectNext && !tcFirst.isNull()) {
+        m_searchSelectNext = false;
 
-    if (m_searchSelectPrev && !tcLast.isNull()) {
-        m_searchSelectPrev = false;
-        setTextCursor(tcLast);
+        if (!tcFirst.isNull()) {
+            setTextCursor(tcFirst);
+        }
     }
 
-    m_searchSelectPrev = false;
+    if (m_searchSelectPrev) {
+        m_searchSelectPrev = false;
+
+        if (!tcLast.isNull()) {
+            setTextCursor(tcLast);
+        }
+    }
 }
 
 void QCodeEditor::highlightCurrentLine(QList<QTextEdit::ExtraSelection>& extraSelection)
@@ -1051,6 +1069,11 @@ QString QCodeEditor::getCompletionWordNow(int *linePosStart, int *linePosEnd)
     }
 
     return res;
+}
+
+int QCodeEditor::searchMatches() const
+{
+    return m_searchMatches;
 }
 
 bool QCodeEditor::highlightBlocks() const

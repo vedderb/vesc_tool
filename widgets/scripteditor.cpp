@@ -160,8 +160,13 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event)
 
 void ScriptEditor::on_openFileButton_clicked()
 {
+    QString path = ui->fileNowLabel->text();
+    if (path.isEmpty()) {
+        path = QSettings().value("scripting/lastPath", "").toString();
+    }
+
     QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"), ui->fileNowLabel->text(),
+                                                    tr("Open %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"), path,
                                                     mIsModeLisp ? tr("Lisp files (*.lisp)") : tr("QML files (*.qml)"));
 
     if (!fileName.isEmpty()) {
@@ -171,6 +176,8 @@ void ScriptEditor::on_openFileButton_clicked()
                                   "Could not open\n" + fileName + "\nfor reading");
             return;
         }
+
+        QSettings().setValue("scripting/lastPath", QFileInfo(file).canonicalPath());
 
         ui->codeEdit->setPlainText(file.readAll());
         ui->fileNowLabel->setText(fileName);
@@ -262,10 +269,10 @@ void ScriptEditor::on_replaceThisButton_clicked()
 
 void ScriptEditor::on_replaceAllButton_clicked()
 {
-    ui->codeEdit->searchNextResult();
-    while (!ui->codeEdit->textCursor().selectedText().isEmpty()) {
-        ui->codeEdit->textCursor().insertText(ui->replaceEdit->text());
+    auto matches = ui->codeEdit->searchMatches();
+    for (int i = 0;i < matches;i++) {
         ui->codeEdit->searchNextResult();
+        ui->codeEdit->textCursor().insertText(ui->replaceEdit->text());
     }
 }
 

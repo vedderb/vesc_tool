@@ -420,6 +420,8 @@
 <name>second</name>
 <name>third</name>
 <name>abs</name>
+<name>rand</name>
+<name>rand-max</name>
 <name>gnss-lat-lon</name>
 <name>gnss-height</name>
 <name>gnss-speed</name>

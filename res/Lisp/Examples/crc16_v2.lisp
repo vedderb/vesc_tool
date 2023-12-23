@@ -93,20 +93,18 @@
 ; The following code can be used to print the generated CRC table as an array
 ; that can be pasted into the code
 
-(defun print-crc-tab ()
-    (progn
+(defun print-crc-tab () {
         (print "(def crc-tab [")
-        (let (
-                (rows 32)
-                (cols 16)
-            )
-            (looprange i 0 rows
-                (print (apply str-merge
-                        (map
-                            (fn (x) (str-from-n (bufget-u8 crc-tab (+ x (* i cols))) "0x%02x "))
-                            (range cols)
-                        )
-            )))
-        )
+        (var rows 32)
+        (var cols 16)
+        
+        (looprange i 0 rows
+            (print (apply str-merge
+                    (map
+                        (fn (x) (str-from-n (bufget-u8 crc-tab (+ x (* i cols))) "0x%02x "))
+                        (range cols)
+                    
+                    )
+        )))
         (print "])")
-))
+})

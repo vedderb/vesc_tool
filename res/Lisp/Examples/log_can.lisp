@@ -78,18 +78,16 @@
 (event-register-handler (spawn 30 event-handler))
 (event-enable 'event-shutdown)
 
-(defun voltage-monitor ()
-    (progn
+(defun voltage-monitor () {
         (if (< (get-vin) vin-min)
             (log-stop esp-can-id)
         )
         (sleep 0.01)
-))
+})
 
 (spawn 30 voltage-monitor)
 
-(loopwhile t
-    (progn
+(loopwhile t {
         (log-send-f32 esp-can-id 0
             (map
                 (fn (x) (eval (ix x -1)))
@@ -97,4 +95,4 @@
             )
         )
         (sleep (/ 1.0 rate-hz))
-))
+})

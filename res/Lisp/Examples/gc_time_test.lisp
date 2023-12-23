@@ -1,7 +1,7 @@
 (defun repeat (f times)
     (if (<= times 1)
         (f)
-        (progn (f) (repeat f (- times 1)))
+        { (f) (repeat f (- times 1)) }
 ))
 
 (defun run-gc () {

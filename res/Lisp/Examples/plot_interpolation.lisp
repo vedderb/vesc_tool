@@ -6,29 +6,28 @@
     (+ (* y1 (- 1 mu)) (* y2 mu))
 )
 
-(defun fun-cos (y0 y1 y2 y3 mu) (let (
-            (mu2 (/ (- 1.0 (cos (* mu 3.1415923))) 2.0))
-        )
+(defun fun-cos (y0 y1 y2 y3 mu) {
+        (var mu2 (/ (- 1.0 (cos (* mu 3.1415923))) 2.0))
         (+ (* y1 (- 1.0 mu2)) (* y2 mu2))
-))
+})
 
-(defun fun-cubic (y0 y1 y2 y3 mu) (let (
-            (mu2 (* mu mu))
-            (a0 (+ (- y3 y2 y0) y1))
-            (a1 (- y0 y1 a0))
-            (a2 (- y2 y0))
-        )
+(defun fun-cubic (y0 y1 y2 y3 mu) {
+        (var mu2 (* mu mu))
+        (var a0 (+ (- y3 y2 y0) y1))
+        (var a1 (- y0 y1 a0))
+        (var a2 (- y2 y0))
+        
         (+ (* a0 mu mu2) (* a1 mu2) (* a2 mu) y1)
-))
+})
 
-(defun fun-hermite (y0 y1 y2 y3 mu) (let (
-            (mu2 (* mu mu))
-            (a0 (+ (* -0.5 y0) (* 1.5 y1) (* -1.5 y2) (* 0.5 y3)))
-            (a1 (+ y0 (* -2.5 y1) (* 2.0 y2) (* -0.5 y3)))
-            (a2 (+ (* -0.5 y0) (* 0.5 y2)))
-        )
+(defun fun-hermite (y0 y1 y2 y3 mu) {
+        (var mu2 (* mu mu))
+        (var a0 (+ (* -0.5 y0) (* 1.5 y1) (* -1.5 y2) (* 0.5 y3)))
+        (var a1 (+ y0 (* -2.5 y1) (* 2.0 y2) (* -0.5 y3)))
+        (var a2 (+ (* -0.5 y0) (* 0.5 y2)))
+        
         (+ (* a0 mu mu2) (* a1 mu2) (* a2 mu) y1)
-))
+})
 
 (defun trunc (val min max)
     (cond
@@ -61,12 +60,11 @@
 ))
 
 (defun plot-range (start end points tab fun)
-    (looprange i 0 points
-        (let (
-                (val (+ (* (/ i (to-float points)) (- end start)) start))
-            )
+    (looprange i 0 points {
+            (var val (+ (* (/ i (to-float points)) (- end start)) start))
             (plot-send-points val (interpolate val tab fun))
-)))
+    })
+)
 
 (def int-tab '(
         (-500.0 90.0)
@@ -104,14 +102,13 @@
 
 ; Measure the time it takes to run expr in milliseconds.
 ; Repeat times and take average.
-(defun time-expr-ms (expr times)
-    (let (
-            (seq (append '(progn) (map (fn (x) expr) (range times))))
-            (start (systime))
-            (res (eval seq))
-        )
+(defun time-expr-ms (expr times) {
+        (var seq (append '(progn) (map (fn (x) expr) (range times))))
+        (var start (systime))
+        (var res (eval seq))
+        
         (* (/ (secs-since start) times) 1000)
-))
+})
 
 (print (str-from-n (time-expr-ms '(interpolate -600 int-tab fun-linear) 50) "\nLinear start : %.2f ms"))
 (print (str-from-n (time-expr-ms '(interpolate 1100 int-tab fun-linear) 50) "Linear mid   : %.2f ms"))

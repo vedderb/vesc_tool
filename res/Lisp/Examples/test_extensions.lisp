@@ -9,7 +9,7 @@
 
 ; The first element in each row is an expression that is evaluated to res. The second
 ; element is an expression that can use res and must evaluate to true for the test to pass.
-(define test-cmds '(
+(def test-cmds '(
         ((timeout-reset)                             is-true)
         ((get-ppm)                                   is-float)
         ((get-ppm-age)                               is-float)
@@ -236,22 +236,22 @@
 ))
 
 (def test-res (loopforeach i test-cmds
-    (let (
-            (cmd (ix i 0))
-            (res-expr (ix i 1))
-            (res (eval cmd))
-            (ok (eval (eval res-expr)))
-        )
-        (if (eq ok true)
-            (progn
-                (print (str-merge "Testing " (to-str cmd) "... OK! Res: " (to-str res)))
-                true
+        (let (
+                (cmd (ix i 0))
+                (res-expr (ix i 1))
+                (res (eval cmd))
+                (ok (eval (eval res-expr)))
             )
-            (progn
-                (print (str-merge "Testing " (to-str cmd) "... Failed. Res: " (to-str res) " res-expr: " (to-str ok)))
-                (break false)
+            (if (eq ok true)
+                {
+                    (print (str-merge "Testing " (to-str cmd) "... OK! Res: " (to-str res)))
+                    true
+                }
+                {
+                    (print (str-merge "Testing " (to-str cmd) "... Failed. Res: " (to-str res) " res-expr: " (to-str ok)))
+                    (break false)
+                }
             )
-        )
 )))
 
 (if test-res

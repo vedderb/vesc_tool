@@ -4,12 +4,11 @@
 ; Callback counter
 (def cb-cnt 0)
 
-(defun proc-icu (width period)
-    (progn
+(defun proc-icu (width period) {
         (def icu-w width)
         (def icu-p period)
         (def cb-cnt (+ cb-cnt 1))
-))
+})
 
 (defun event-handler ()
     (loopwhile t

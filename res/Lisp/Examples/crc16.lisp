@@ -33,36 +33,36 @@
     0x82 0x01 0x42 0xC0 0x43 0x80 0x83 0x41 0x41 0x00 0x81 0xC1 0x80 0x81 0x40 0x40]
 )
 
-; Using globals
-(defun crc16-a (msg)
-    (progn
-        (def crc 0xFFFF)
-        (looprange it 0 (buflen msg)
-            (progn
-                (def xor (bufget-i8 msg it))
-                (def xor (bitwise-xor xor crc))
-                (def crc (shr crc 8))
-                (def tabind (* 2 (bitwise-and xor 0xFF)))
-                (def crc (bitwise-xor crc (bufget-u16 crc-tab16 tabind)))
-        ))
+; Using var
+(defun crc16-a (msg) {
+        (var crc 0xFFFF)
+        
+        (looprange it 0 (buflen msg) {
+                (var xor (bufget-i8 msg it))
+                (setq xor (bitwise-xor xor crc))
+                (setq crc (shr crc 8))
+                (var tabind (* 2 (bitwise-and xor 0xFF)))
+                (setq crc (bitwise-xor crc (bufget-u16 crc-tab16 tabind)))
+        })
+        
         crc
-))
+})
 
-; Using local environment to avoid globals
+; Using local environment
 (defun crc16-b (msg)
     (let (
             (crc 0xFFFF)
             (xor 0)
             (tabind 0)
         )
-        (looprange it 0 (buflen msg)
-            (progn
-                (setvar 'xor (bufget-i8 msg it))
-                (setvar 'xor (bitwise-xor xor crc))
-                (setvar 'crc (shr crc 8))
-                (setvar 'tabind  (* 2 (bitwise-and xor 0xFF)))
-                (setvar 'crc (bitwise-xor crc (bufget-u16 crc-tab16 tabind)))
-        ))
+        (looprange it 0 (buflen msg) {
+                (setq xor (bufget-i8 msg it))
+                (setq xor (bitwise-xor xor crc))
+                (setq crc (shr crc 8))
+                (setq tabind  (* 2 (bitwise-and xor 0xFF)))
+                (setq crc (bitwise-xor crc (bufget-u16 crc-tab16 tabind)))
+        })
+        
         crc
 ))
 

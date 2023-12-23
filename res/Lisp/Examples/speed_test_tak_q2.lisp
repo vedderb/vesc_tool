@@ -23,15 +23,12 @@
 (print (list "Time tak:" time))
 
 ; Q2 takes more stack, so use thread with extra stack
-(def q2thd (spawn 1024 (fn ()
-            (progn
+(wait (spawn 1024 (fn () {
                 (def start (systime))
                 (def q2res (q2 7 8))
                 (def time (secs-since start))
                 (print (list "Time q2:" time))
-))))
-
-(wait q2thd)
+})))
 
 (def start (systime))
 (gc)(gc)(gc)(gc)(gc)

@@ -17,7 +17,7 @@
 ; Handler for EID CAN-frames
 (defun proc-eid (id data)
     (if (= id 0x18ff03f1u32) {
-            (def can-cnt (+ can-cnt 1))
+            (setq can-cnt (+ can-cnt 1))
             
             ; Note: the axes are 10 bits in the datasheet, but they change in
             ; steps of 2 percent, so the lower bits are always 0. Not sure
@@ -86,7 +86,7 @@
         (sleep 1.5)
         (set-btn-leds btn-now 0 0 0)
         
-        (def btn-now (+ btn-now 1))
+        (setq btn-now (+ btn-now 1))
         (if (= btn-now 6) (def btn-now 7)) ; Index 6 is missing, so skip it
         (if (> btn-now 7) (def btn-now 1))
 })

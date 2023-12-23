@@ -5,10 +5,9 @@
 (def r-base (- (* 0.001 (conf-get 'foc-motor-r)) r-comp))
 (def t-base 25.0) ; Temperature at which the motor resistance was measured
 
-(loopwhile t
-    (progn
+(loopwhile t {
         (def t-meas (get-temp-mot))
         (def r-est (- (get-est-res) r-comp))
         (def t-est (+ t-base (/ (- r-est r-base) (* tfac r-base))))
         (sleep 0.1)
-))
+})

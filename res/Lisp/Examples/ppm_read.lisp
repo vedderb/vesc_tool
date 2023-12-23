@@ -1,6 +1,5 @@
-(loopwhile 1
-    (progn
-        (define ppm (get-ppm)) ; This will make ppm show up in the variable table
+(loopwhile t {
+        (def ppm (get-ppm)) ; This will make ppm show up in the variable table
         (set-duty ppm)
-        (yield 20000)
-))
+        (sleep 0.02)
+})

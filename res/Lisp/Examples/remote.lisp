@@ -1,11 +1,10 @@
-(loopwhile t
-    (progn
-        (define state (get-remote-state))
-        (define mote-y (ix state 0))
-        (define mote-x (ix state 1))
-        (define mote-c (ix state 2))
-        (define mote-z (ix state 3))
-        (define mote-rev (ix state 4))
+(loopwhile t {
+        (def state (get-remote-state))
+        (def mote-y (ix state 0))
+        (def mote-x (ix state 1))
+        (def mote-c (ix state 2))
+        (def mote-z (ix state 3))
+        (def mote-rev (ix state 4))
         
         (sleep 0.02)
-))
+})

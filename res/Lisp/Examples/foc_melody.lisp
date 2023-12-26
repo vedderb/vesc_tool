@@ -1,0 +1,61 @@
+(def pause '(246.942 . 0))
+(def h '(246.942 . 1.0))
+(def c '(261.626 . 1.0))
+(def d '(293.665 . 1.0))
+(def e '(329.628 . 1.0))
+(def f '(349.228 . 1.0))
+(def fs '(369.994 . 1.0))
+(def g '(391.995 . 1.0))
+(def a '(440 . 1.0))
+(def h1 '(493.883 . 1.0))
+(def c1 '(523.251 . 1.0))
+
+(def quarter 0.5)
+(def eight   0.25)
+
+(def melody (list
+  `(,quarter . ,g)  `(,eight . ,g) `(,eight . ,a) `(,quarter . ,g)
+  `(,quarter . ,e)  `(,eight . ,e) `(,eight . ,f) `(,quarter . ,e)
+  `(,quarter . ,d)  `(,eight . ,d) `(,eight . ,e) `(,eight   . ,d)
+  `(,eight   . ,h)
+  `(,eight   . ,c)  `(,eight . ,d) `(,eight . ,e) `(,eight   . ,f)
+  `(,quarter . ,g)
+  `(,quarter . ,g)  `(,eight . ,g) `(,eight . ,a) `(,quarter . ,g)
+  `(,quarter . ,d)  `(,eight . ,g) `(,eight . ,a) `(,quarter . ,h1)
+  `(,quarter . ,c1) `(,quarter . ,e) `(,quarter . ,fs)
+  `(,quarter . ,g)  `(,quarter . ,pause) `(,quarter . ,pause)
+  `(,eight   . ,c)  `(,eight . ,c)
+  `(,eight   . ,c)  `(,eight . ,d) `(,eight . ,e)   `(,eight . ,d)
+  `(,eight   . ,c)  `(,eight . ,d) `(,quarter . ,e) `(,quarter . ,c)
+  `(,eight   . ,d)  `(,eight . ,d) `(,eight . ,d)   `(,eight . ,e)
+  `(,eight   . ,f)  `(,eight . ,d)
+  `(,eight   . ,d)  `(,eight . ,e) `(,quarter . ,f) `(,quarter . ,d)
+  `(,eight   . ,e)  `(,eight . ,f) `(,quarter . ,g) `(,eight . ,f)
+  `(,eight   . ,e)
+  `(,eight   . ,f)  `(,eight . ,g) `(,quarter . ,a) `(,eight . ,g)
+  `(,eight   . ,f)
+  `(,eight   . ,g)  `(,eight . ,a) `(,quarter . ,h1) `(,eight . ,a)
+  `(,eight   . ,g)
+  `(,quarter . ,c1)  `(,quarter . ,c1) `(,quarter . ,pause)
+))
+
+; Play tone with exponential decay
+(defun play-tone (ch freq time vol) {
+        (looprange i 0 30 {
+                (setq vol (* vol 0.93))
+                (foc-play-tone ch freq vol)
+                (sleep (/ time 30.0))
+        })
+})
+
+(defun play (x)
+    (loopforeach ls x {
+            (var time (car ls))
+            (var freq (car (cdr ls)))
+            (var vol (* (cdr (cdr ls)) 1.2))
+            
+            (play-tone 0 freq time vol)
+            (sleep 0.05)
+}))
+
+(play melody)

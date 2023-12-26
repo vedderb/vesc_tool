@@ -239,6 +239,8 @@
 <name>set-pos</name>
 <name>foc-openloop</name>
 <name>foc-beep</name>
+<name>foc-play-tone</name>
+<name>foc-play-stop</name>
 <name>get-current</name>
 <name>get-current-dir</name>
 <name>get-current-in</name>

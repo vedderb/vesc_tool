@@ -31,5 +31,6 @@
         <file>res/qml/Examples/ParamTableAndPlot.qml</file>
         <file>res/qml/Examples/SendToLbm.qml</file>
         <file>res/qml/Examples/DCDC.qml</file>
+        <file>res/qml/Examples/Mp3Stream.qml</file>
     </qresource>
 </RCC>

@@ -268,6 +268,7 @@ include(esp32/esp32.pri)
 include(display_tool/display_tool.pri)
 include(qmarkdowntextedit/qmarkdowntextedit.pri)
 include(maddy/maddy.pri)
+include(minimp3/minimp3.pri)
 
 RESOURCES += res.qrc \
     res_custom_module.qrc \

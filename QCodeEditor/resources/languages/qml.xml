@@ -128,5 +128,6 @@
         <name>FwHelper</name>
         <name>ParamList</name>
         <name>TcpHub</name>
+        <name>QMiniMp3</name>
     </section>
 </root>

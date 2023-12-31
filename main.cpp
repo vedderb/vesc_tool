@@ -30,6 +30,7 @@
 #include "configparam.h"
 #include "utility.h"
 #include "heatshrink/heatshrinkif.h"
+#include "minimp3/qminimp3.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -238,6 +239,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<LogReader>("Vedder.vesc.logreader", 1, 0, "LogReader");
     qmlRegisterType<TcpHub>("Vedder.vesc.tcphub", 1, 0, "TcpHub");
     qmlRegisterType<CodeLoader>("Vedder.vesc.codeloader", 1, 0, "CodeLoader");
+    qmlRegisterType<QMiniMp3>("Vedder.vesc.qminimp3", 1, 0, "QMiniMp3");
 
     qRegisterMetaType<VSerialInfo_t>();
     qRegisterMetaType<MCCONF_TEMP>();
@@ -253,6 +255,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<TCP_HUB_DEVICE>();
     qRegisterMetaType<ConfigParam>();
     qRegisterMetaType<GNSS_DATA>();
+    qRegisterMetaType<MiniMp3Dec>();
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD

@@ -49,5 +49,6 @@
         <file>res/Lisp/Examples/sort_test1.lisp</file>
         <file>res/Lisp/Examples/sort_test2.lisp</file>
         <file>res/Lisp/Examples/foc_melody.lisp</file>
+        <file>res/Lisp/Examples/play_mp3.lisp</file>
     </qresource>
 </RCC>

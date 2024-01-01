@@ -57,6 +57,8 @@ public:
     void setLimitedCompatibilityCommands(QVector<int> compatibilityCommands);
 
     Q_INVOKABLE static QString faultToStr(mc_fault_code fault);
+    Q_INVOKABLE static QString bmsFaultToStr(bms_fault_code fault);
+    Q_INVOKABLE static QString bmsOpStateToStr(bms_op_state opState);
 
     Q_INVOKABLE QByteArray bmReadMemWait(uint32_t addr, quint16 size, int timeoutMs = 3000);
     Q_INVOKABLE int bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs = 3000);

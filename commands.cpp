@@ -722,6 +722,9 @@ void Commands::processPacket(QByteArray data)
             val.wh_cnt_dis_total = vb.vbPopFrontDouble32Auto();
         }
 
+        val.fault_code = vb.vbPopFrontUint8();
+        val.op_state = vb.vbPopFrontUint8();
+
         val.updateTimeStamp();
 
         emit bmsValuesRx(val);
@@ -2669,6 +2672,63 @@ QString Commands::faultToStr(mc_fault_code fault)
     }
 
     return "Unknown fault";
+}
+
+QString Commands::bmsFaultToStr(bms_fault_code fault)
+{
+    switch (fault) {
+    case BMS_FAULT_CODE_NONE: return "NONE";
+    case BMS_FAULT_CODE_PACK_OVER_VOLTAGE: return "PACK_OVER_VOLTAGE";
+    case BMS_FAULT_CODE_PACK_UNDER_VOLTAGE: return "PACK_UNDER_VOLTAGE";
+    case BMS_FAULT_CODE_LOAD_OVER_VOLTAGE: return "LOAD_OVER_VOLTAGE";
+    case BMS_FAULT_CODE_LOAD_UNDER_VOLTAGE: return "LOAD_UNDER_VOLTAGE";
+    case BMS_FAULT_CODE_CHARGER_OVER_VOLTAGE: return "CHARGER_OVER_VOLTAGE";
+    case BMS_FAULT_CODE_CHARGER_UNDER_VOLTAGE: return "CHARGER_UNDER_VOLTAGE";
+    case BMS_FAULT_CODE_CELL_HARD_OVER_VOLTAGE: return "CELL_HARD_OVER_VOLTAGE";
+    case BMS_FAULT_CODE_CELL_HARD_UNDER_VOLTAGE: return "CELL_HARD_UNDER_VOLTAGE";
+    case BMS_FAULT_CODE_CELL_SOFT_OVER_VOLTAGE: return "CELL_SOFT_OVER_VOLTAGE";
+    case BMS_FAULT_CODE_CELL_SOFT_UNDER_VOLTAGE: return "CELL_SOFT_UNDER_VOLTAGE";
+    case BMS_FAULT_CODE_MAX_UVP_OVP_ERRORS: return "MAX_UVP_OVP_ERRORS";
+    case BMS_FAULT_CODE_MAX_UVT_OVT_ERRORS: return "MAX_UVT_OVT_ERRORS";
+    case BMS_FAULT_CODE_OVER_CURRENT: return "OVER_CURRENT";
+    case BMS_FAULT_CODE_OVER_TEMP_BMS: return "OVER_TEMP_BMS";
+    case BMS_FAULT_CODE_UNDER_TEMP_BMS: return "UNDER_TEMP_BMS";
+    case BMS_FAULT_CODE_DISCHARGE_OVER_TEMP_CELLS: return "DISCHARGE_OVER_TEMP_CELLS";
+    case BMS_FAULT_CODE_DISCHARGE_UNDER_TEMP_CELLS: return "DISCHARGE_UNDER_TEMP_CELLS";
+    case BMS_FAULT_CODE_CHARGE_OVER_TEMP_CELLS: return "CHARGE_OVER_TEMP_CELLS";
+    case BMS_FAULT_CODE_CHARGE_UNDER_TEMP_CELLS: return "CHARGE_UNDER_TEMP_CELLS";
+    case BMS_FAULT_CODE_PRECHARGE_TIMEOUT: return "PRECHARGE_TIMEOUT";
+    case BMS_FAULT_CODE_DISCHARGE_RETRY: return "DISCHARGE_RETRY";
+    case BMS_FAULT_CODE_CHARGE_RETRY: return "CHARGE_RETRY";
+    case BMS_FAULT_CODE_CAN_DELAYED_POWER_DOWN: return "CAN_DELAYED_POWER_DOWN";
+    case BMS_FAULT_CODE_NOT_USED_TIMEOUT: return "NOT_USED_TIMEOUT";
+    case BMS_FAULT_CODE_CHARGER_DISCONNECT: return "CHARGER_DISCONNECT";
+    case BMS_FAULT_CODE_CHARGER_CURRENT_THRESHOLD_TIMEOUT: return "CHARGER_CURRENT_THRESHOLD_TIMEOUT";
+    }
+    return "Unknown BMS fault";
+
+}
+
+QString Commands::bmsOpStateToStr(bms_op_state opState)
+{
+    switch (opState) {
+    case BMS_OP_STATE_UNKNOWN: return "UNKNOWN";
+    case BMS_OP_STATE_INIT: return "INIT";
+    case BMS_OP_STATE_CHARGING: return "CHARGING";
+    case BMS_OP_STATE_PRE_CHARGE: return "PRE_CHARGE";
+    case BMS_OP_STATE_LOAD_ENABLED: return "LOAD_ENABLED";
+    case BMS_OP_STATE_BATTERY_DEAD: return "BATTERY_DEAD";
+    case BMS_OP_STATE_IDLE: return "IDLE";
+    case BMS_OP_STATE_EXTERNAL: return "EXTERNAL";
+    case BMS_OP_STATE_ERROR: return "ERROR";
+    case BMS_OP_STATE_ERROR_PRECHARGE: return "ERROR_PRECHARGE";
+    case BMS_OP_STATE_BALANCING: return "BALANCING";
+    case BMS_OP_STATE_CHARGED: return "CHARGED";
+    case BMS_OP_STATE_FORCEON: return "FORCEON";
+
+    }
+    return "Unknown fault";
+
 }
 
 QByteArray Commands::bmReadMemWait(uint32_t addr, quint16 size, int timeoutMs)

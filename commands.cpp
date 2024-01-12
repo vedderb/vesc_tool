@@ -722,6 +722,10 @@ void Commands::processPacket(QByteArray data)
             val.wh_cnt_dis_total = vb.vbPopFrontDouble32Auto();
         }
 
+        if (vb.size() >= 2) {
+            val.pressure = vb.vbPopFrontDouble16(1e-1);
+        }
+
         val.updateTimeStamp();
 
         emit bmsValuesRx(val);

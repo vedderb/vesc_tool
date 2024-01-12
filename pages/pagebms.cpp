@@ -126,11 +126,12 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
     ui->valTable->item(8, 0)->setText(QString("%1 %").arg(val.soh * 100.0, 0, 'f', 0));
     ui->valTable->item(9, 0)->setText(QString("%1 °C").arg(val.temp_cells_highest, 0, 'f', 2));
     ui->valTable->item(10, 0)->setText(QString("%1 %").arg(val.humidity, 0, 'f', 2));
-    ui->valTable->item(11, 0)->setText(QString("%1 °C").arg(val.temp_hum_sensor, 0, 'f', 2));
-    ui->valTable->item(12, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_chg_total, 0, 'f', 3));
-    ui->valTable->item(13, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_chg_total, 0, 'f', 3));
-    ui->valTable->item(14, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_dis_total, 0, 'f', 3));
-    ui->valTable->item(15, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_dis_total, 0, 'f', 3));
+    ui->valTable->item(11, 0)->setText(QString("%1 Pa").arg(val.pressure, 0, 'f', 0));
+    ui->valTable->item(12, 0)->setText(QString("%1 °C").arg(val.temp_hum_sensor, 0, 'f', 2));
+    ui->valTable->item(13, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_chg_total, 0, 'f', 3));
+    ui->valTable->item(14, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_chg_total, 0, 'f', 3));
+    ui->valTable->item(15, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_dis_total, 0, 'f', 3));
+    ui->valTable->item(16, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_dis_total, 0, 'f', 3));
 }
 
 void PageBms::reloadCellBars(int cells)

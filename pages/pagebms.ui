@@ -139,6 +139,11 @@
          </row>
          <row>
           <property name="text">
+           <string>Pressure</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
            <string>Temp Hum Sensor</string>
           </property>
          </row>
@@ -243,6 +248,11 @@
           </property>
          </item>
          <item row="15" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="16" column="0">
           <property name="text">
            <string/>
           </property>

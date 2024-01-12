@@ -727,6 +727,7 @@ struct BMS_VALUES {
     Q_PROPERTY(QVector<bool> is_balancing MEMBER is_balancing)
     Q_PROPERTY(double temp_ic MEMBER temp_ic)
     Q_PROPERTY(double humidity MEMBER humidity)
+    Q_PROPERTY(double pressure MEMBER pressure)
     Q_PROPERTY(double temp_hum_sensor MEMBER temp_hum_sensor)
     Q_PROPERTY(double temp_cells_highest MEMBER temp_cells_highest)
     Q_PROPERTY(double soc MEMBER soc)
@@ -746,6 +747,7 @@ public:
         ah_cnt = 0.0;
         wh_cnt = 0.0;
         humidity = 0.0;
+        pressure = 0.0;
         temp_hum_sensor = 0.0;
         temp_cells_highest = 0.0;
         soc = 0.0;
@@ -784,6 +786,7 @@ public:
     QVector<bool> is_balancing;
     double temp_ic;
     double humidity;
+    double pressure;
     double temp_hum_sensor;
     double temp_cells_highest;
     double soc;

@@ -192,6 +192,7 @@ public slots:
     void setAppConfNoStore();
     void detectMotorParam(double current, double min_rpm, double low_duty);
     void reboot();
+    void shutdown();
     void sendAlive();
     void getDecodedPpm();
     void getDecodedAdc();

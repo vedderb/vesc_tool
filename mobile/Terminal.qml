@@ -112,6 +112,12 @@ Item {
                             mCommands.reboot()
                         }
                     }
+                    MenuItem {
+                        text: "Shutdown"
+                        onTriggered: {
+                            mCommands.shutdown()
+                        }
+                    }
                 }
             }
         }

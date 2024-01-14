@@ -99,6 +99,7 @@ private slots:
     void on_actionReconnect_triggered();
     void on_actionDisconnect_triggered();
     void on_actionReboot_triggered();
+    void on_actionShutdown_triggered();
     void on_stopButton_clicked();
     void on_fullBrakeButton_clicked();
     void on_actionReadMcconf_triggered();

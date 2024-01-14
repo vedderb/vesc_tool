@@ -670,6 +670,7 @@
     <addaction name="actionTerminalClear"/>
     <addaction name="separator"/>
     <addaction name="actionReboot"/>
+    <addaction name="actionShutdown"/>
    </widget>
    <widget class="QMenu" name="menuCommands">
     <property name="font">
@@ -756,7 +757,15 @@
     <string>Reboot</string>
    </property>
    <property name="toolTip">
-    <string>Reboot</string>
+    <string>Reboot via CPU reset</string>
+   </property>
+  </action>
+  <action name="actionShutdown">
+   <property name="text">
+    <string>Shutdown</string>
+   </property>
+   <property name="toolTip">
+    <string>Shutdown (for controllers with auto-shutdown support only)</string>
    </property>
   </action>
   <action name="actionCanFwd">

@@ -839,12 +839,6 @@ int main(int argc, char *argv[])
             qDebug() << "Opened package" << pkg.name;
         }
 
-        QFile file(pkgPath);
-        if (!file.open(QIODevice::WriteOnly)) {
-            qWarning() << QString("Could not open %1 for writing.").arg(pkgPath);
-            return 1;
-        }
-
         if (!lispPath.isEmpty()) {
             QFile f(lispPath);
             if (!f.open(QIODevice::ReadOnly)) {
@@ -876,6 +870,12 @@ int main(int argc, char *argv[])
             f.close();
 
             qDebug() << "Read qml script done";
+        }
+
+        QFile file(pkgPath);
+        if (!file.open(QIODevice::WriteOnly)) {
+            qWarning() << QString("Could not open %1 for writing.").arg(pkgPath);
+            return 1;
         }
 
         file.write(loader.packVescPackage(pkg));

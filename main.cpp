@@ -854,6 +854,11 @@ int main(int argc, char *argv[])
 
             QFileInfo fi(f);
             pkg.lispData = loader.lispPackImports(f.readAll(), fi.canonicalPath());
+            // Empty array means an error. Otherwise, CodeLoader.lispPackImports() always returns data.
+            if (pkg.lispData.isEmpty()) {
+                qWarning() << "Errors when processing lisp imports.";
+                return 1;
+            }
             f.close();
 
             qDebug() << "Read lisp script done";

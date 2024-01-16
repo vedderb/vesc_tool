@@ -787,25 +787,31 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
     bool res = true;
     QByteArray qml;
 
-    if (res && !pkg.qmlFile.isEmpty()) {
+    if (!pkg.qmlFile.isEmpty()) {
         qml = qmlCompress(pkg.qmlFile);
         res = qmlErase(qml.size() + 100);
+
+        if (res) {
+            res = qmlUpload(qml, pkg.qmlIsFullscreen);
+        }
+    } else {
+        res = qmlErase(16);
     }
 
-    if (res && !pkg.qmlFile.isEmpty()) {
-        res = qmlUpload(qml, pkg.qmlIsFullscreen);
-    }
+    if (res) {
+        if (!pkg.lispData.isEmpty()) {
+            res = lispErase(pkg.lispData.size() + 100);
 
-    if (res && !pkg.lispData.isEmpty()) {
-        res = lispErase(pkg.lispData.size() + 100);
-    }
+            if (res) {
+                res = lispUpload(VByteArray(pkg.lispData));
 
-    if (res && !pkg.lispData.isEmpty()) {
-        res = lispUpload(VByteArray(pkg.lispData));
-    }
-
-    if (res && !pkg.lispData.isEmpty()) {
-        mVesc->commands()->lispSetRunning(1);
+                if (res) {
+                    mVesc->commands()->lispSetRunning(1);
+                }
+            }
+        } else {
+            res = lispErase(16);
+        }
     }
 
     Utility::sleepWithEventLoop(500);

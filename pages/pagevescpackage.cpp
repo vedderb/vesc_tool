@@ -235,6 +235,11 @@ void PageVescPackage::on_loadRefreshButton_clicked()
 
     auto pkg = mLoader.unpackVescPackage(f.readAll());
 
+    if (!pkg.loadOk) {
+        mVesc->emitMessageDialog(tr("Open Package"), tr("Package is not valid."), false);
+        return;
+    }
+
     QString line1 = QTextStream(&pkg.description).readLine();
     if (line1.contains("<!DOCTYPE HTML PUBLIC", Qt::CaseInsensitive)) {
         ui->loadBrowser->document()->setHtml(pkg.description);
@@ -269,6 +274,11 @@ void PageVescPackage::on_outputRefreshButton_clicked()
     }
 
     auto pkg = mLoader.unpackVescPackage(f.readAll());
+
+    if (!pkg.loadOk) {
+        mVesc->emitMessageDialog(tr("Open Package"), tr("Package is not valid."), false);
+        return;
+    }
 
     QString line1 = QTextStream(&pkg.description).readLine();
     if (line1.contains("<!DOCTYPE HTML PUBLIC", Qt::CaseInsensitive)) {

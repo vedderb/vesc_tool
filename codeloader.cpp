@@ -779,6 +779,11 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
 
 bool CodeLoader::installVescPackage(VescPackage pkg)
 {
+    if (!pkg.loadOk) {
+        mVesc->emitMessageDialog(tr("Write Package"), tr("Package is not valid."), false);
+        return false;
+    }
+
     bool res = true;
     QByteArray qml;
 

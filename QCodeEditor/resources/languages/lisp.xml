@@ -192,6 +192,8 @@
 <name>get-bms-val</name>
 <name>set-bms-val</name>
 <name>send-bms-can</name>
+<name>set-bms-chg-allowed</name>
+<name>bms-force-balance</name>
 <name>get-adc</name>
 <name>override-temp-motor</name>
 <name>get-adc-decoded</name>

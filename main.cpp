@@ -839,12 +839,6 @@ int main(int argc, char *argv[])
             qDebug() << "Opened package" << pkg.name;
         }
 
-        QFile file(pkgPath);
-        if (!file.open(QIODevice::WriteOnly)) {
-            qWarning() << QString("Could not open %1 for writing.").arg(pkgPath);
-            return 1;
-        }
-
         if (!lispPath.isEmpty()) {
             QFile f(lispPath);
             if (!f.open(QIODevice::ReadOnly)) {
@@ -854,6 +848,11 @@ int main(int argc, char *argv[])
 
             QFileInfo fi(f);
             pkg.lispData = loader.lispPackImports(f.readAll(), fi.canonicalPath());
+            // Empty array means an error. Otherwise, CodeLoader.lispPackImports() always returns data.
+            if (pkg.lispData.isEmpty()) {
+                qWarning() << "Errors when processing lisp imports.";
+                return 1;
+            }
             f.close();
 
             qDebug() << "Read lisp script done";
@@ -871,6 +870,12 @@ int main(int argc, char *argv[])
             f.close();
 
             qDebug() << "Read qml script done";
+        }
+
+        QFile file(pkgPath);
+        if (!file.open(QIODevice::WriteOnly)) {
+            qWarning() << QString("Could not open %1 for writing.").arg(pkgPath);
+            return 1;
         }
 
         file.write(loader.packVescPackage(pkg));

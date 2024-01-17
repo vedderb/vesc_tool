@@ -136,9 +136,9 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                     return QByteArray();
                 }
 
-                auto pkgErrorMsg = "If you are importing from a package in the git repository you might "
-                                   "need to update the package archive. That can be done from the the "
-                                   "VESC Packages page.";
+                auto pkgErrorMsg = "If you are importing from a package downloaded from the package store, "
+                                   "you might need to update the package archive. That can be done from "
+                                   "the VESC Packages page.";
 
                 bool isPkgImport = false;
                 QString pkgImportName;

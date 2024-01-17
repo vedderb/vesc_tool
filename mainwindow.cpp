@@ -161,6 +161,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionClearConfigurationBackups->setIcon(Utility::getIcon("icons/Delete-96.png"));
     ui->actionBackupConfiguration->setIcon(Utility::getIcon("icons/Save as-96.png"));
     ui->actionReboot->setIcon(Utility::getIcon("icons/Refresh-96.png"));
+    ui->actionShutdown->setIcon(Utility::getIcon("icons/Shutdown-96.png"));
     ui->actionExit->setIcon(Utility::getIcon("icons/Shutdown-96.png"));
     ui->pageLabel->setPixmap(Utility::getIcon("logo.png"));
     ui->actionReconnect->setIcon(Utility::getIcon("icons/Connected-96.png"));
@@ -1048,6 +1049,11 @@ void MainWindow::on_actionDisconnect_triggered()
 void MainWindow::on_actionReboot_triggered()
 {
     mVesc->commands()->reboot();
+}
+
+void MainWindow::on_actionShutdown_triggered()
+{
+    mVesc->commands()->shutdown();
 }
 
 void MainWindow::on_stopButton_clicked()

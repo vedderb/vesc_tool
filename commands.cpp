@@ -1432,6 +1432,15 @@ void Commands::reboot()
     emitData(vb);
 }
 
+void Commands::shutdown()
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_SHUTDOWN);
+    vb.vbAppendInt8(0);
+    vb.vbAppendInt8(0);
+    emitData(vb);
+}
+
 void Commands::sendAlive()
 {
     VByteArray vb;

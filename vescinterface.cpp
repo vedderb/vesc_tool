@@ -105,6 +105,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mCanTmpFwdSendCanLast = false;
     mCanTmpFwdIdLast = -1;
 
+    mIgnoreCustomConfigs = false;
+
 #ifdef Q_OS_ANDROID
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
                 "org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
@@ -3765,7 +3767,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     }
 
     // Read custom configs
-    if (params.customConfigNum > 0) {
+    if (!mIgnoreCustomConfigs && params.customConfigNum > 0) {
         while (!mCustomConfigs.isEmpty()) {
             mCustomConfigs.last()->deleteLater();
             mCustomConfigs.removeLast();
@@ -3993,6 +3995,16 @@ void VescInterface::customConfigRx(int confId, QByteArray data)
                               false, false);
         }
     }
+}
+
+bool VescInterface::ignoreCustomConfigs() const
+{
+    return mIgnoreCustomConfigs;
+}
+
+void VescInterface::setIgnoreCustomConfigs(bool newIgnoreCustomConfigs)
+{
+    mIgnoreCustomConfigs = newIgnoreCustomConfigs;
 }
 
 int VescInterface::getLastTcpHubPort() const

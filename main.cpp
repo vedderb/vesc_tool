@@ -981,6 +981,8 @@ int main(int argc, char *argv[])
         }
         app = new QCoreApplication(argc, argv);
         vesc = new VescInterface;
+        vesc->setIgnoreCustomConfigs(!isCustomConf);
+
         vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
         Utility::configLoadLatest(vesc);
 

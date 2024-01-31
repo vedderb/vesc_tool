@@ -262,6 +262,9 @@ public:
 
     Q_INVOKABLE bool downloadFwArchive();
 
+    bool ignoreCustomConfigs() const;
+    void setIgnoreCustomConfigs(bool newIgnoreCustomConfigs);
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -459,6 +462,7 @@ private:
     bool mAllowScreenRotation;
     bool mSpeedGaugeUseNegativeValues;
     bool mAskQmlLoad;
+    bool mIgnoreCustomConfigs;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

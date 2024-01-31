@@ -21,7 +21,6 @@
 #define PACKET_H
 
 #include <QObject>
-#include <QTimer>
 
 class Packet : public QObject
 {
@@ -40,13 +39,7 @@ signals:
 public slots:
     void processData(QByteArray data);
 
-private slots:
-    void timerSlot();
-
 private:
-    QTimer *mTimer;
-    int mRxTimer;
-    int mByteTimeout;
     unsigned int mRxReadPtr;
     unsigned int mRxWritePtr;
     int mBytesLeft;

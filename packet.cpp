@@ -56,20 +56,12 @@ const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
 
 Packet::Packet(QObject *parent) : QObject(parent)
 {
-    mRxTimer = 0;
-    mByteTimeout = 50;
     mMaxPacketLen = 10000;
     mRxReadPtr = 0;
     mRxWritePtr = 0;
     mBytesLeft = 0;
     mBufferLen = mMaxPacketLen + 8;
     mRxBuffer = new unsigned char[mBufferLen];
-
-    mTimer = new QTimer(this);
-    mTimer->setInterval(10);
-    mTimer->start();
-
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
 }
 
 Packet::~Packet()
@@ -131,8 +123,6 @@ void Packet::processData(QByteArray data)
     QVector<QByteArray> decodedPackets;
 
     for(unsigned char rx_data: data) {
-        mRxTimer = mByteTimeout;
-
         unsigned int data_len = mRxWritePtr - mRxReadPtr;
 
         // Out of space (should not happen)
@@ -188,19 +178,8 @@ void Packet::processData(QByteArray data)
         }
     }
 
-    for (QByteArray b: decodedPackets) {
+    foreach (QByteArray b, decodedPackets) {
         emit packetReceived(b);
-    }
-}
-
-void Packet::timerSlot()
-{
-    if (mRxTimer) {
-        mRxTimer--;
-    } else {
-        mRxReadPtr = 0;
-        mRxWritePtr = 0;
-        mBytesLeft = 0;
     }
 }
 

@@ -54,6 +54,20 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="reloadAndRunButton">
+            <property name="text">
+             <string>Reload and Run</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res.qrc">
+              <normaloff>:/res/icons/Circled Play-96.png</normaloff>:/res/icons/Circled Play-96.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="runWindowButton">
             <property name="text">
              <string>Run in Window</string>

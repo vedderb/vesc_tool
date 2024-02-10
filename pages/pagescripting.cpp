@@ -242,6 +242,25 @@ void PageScripting::on_stopButton_clicked()
     mQmlUi.stopCustomGui();
 }
 
+void PageScripting::on_reloadAndRunButton_clicked()
+{
+    QFile file(ui->mainEdit->fileNow());
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::critical(this, "Open QML File",
+                              "Could not open example for reading");
+        return;
+    }
+
+    ui->mainEdit->codeEditor()->setPlainText(file.readAll());
+
+    file.close();
+
+    ui->qmlWidget->setSource(QUrl(QLatin1String("qrc:/res/qml/DynamicLoader.qml")));
+    ui->qmlWidget->engine()->clearComponentCache();
+    emit reloadQml(qmlToRun());
+}
+
 void PageScripting::on_runWindowButton_clicked()
 {
     ui->runWindowButton->setEnabled(false);

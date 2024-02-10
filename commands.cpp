@@ -731,9 +731,10 @@ void Commands::processPacket(QByteArray data)
         emit bmsValuesRx(val);
     } break;
 
-    case COMM_SET_CUSTOM_CONFIG:
-        emit ackReceived("COMM_SET_CUSTOM_CONFIG Write OK");
-        break;
+    case COMM_SET_CUSTOM_CONFIG: {
+        int confId = vb.vbPopFrontUint8();
+        emit ackReceived(tr("Custom config %1 write OK").arg(confId));
+    } break;
 
     case COMM_GET_CUSTOM_CONFIG:
     case COMM_GET_CUSTOM_CONFIG_DEFAULT: {

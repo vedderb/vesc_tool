@@ -733,7 +733,7 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_SET_CUSTOM_CONFIG: {
         int confId = vb.vbPopFrontUint8();
-        emit ackReceived(tr("Custom config %1 write OK").arg(confId));
+        emit customConfigAckReceived(confId);
     } break;
 
     case COMM_GET_CUSTOM_CONFIG:

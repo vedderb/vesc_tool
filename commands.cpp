@@ -399,15 +399,15 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_SET_MCCONF:
-        emit ackReceived("MCCONF Write OK");
+        emit ackReceived("Motor config write OK");
         break;
 
     case COMM_SET_APPCONF:
-        emit ackReceived("APPCONF Write OK");
+        emit ackReceived("App config write OK");
         break;
 
     case COMM_SET_APPCONF_NO_STORE:
-        emit ackReceived("APPCONF_NO_STORE Write OK");
+        emit ackReceived("App config set OK");
         break;
 
     case COMM_CUSTOM_APP_DATA:

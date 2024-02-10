@@ -3951,12 +3951,12 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
 void VescInterface::appconfUpdated()
 {
-    emit statusMessage(tr("App configuration updated"), true);
+    emit statusMessage(tr("App config updated"), true);
 }
 
 void VescInterface::mcconfUpdated()
 {
-    emit statusMessage(tr("MC configuration updated"), true);
+    emit statusMessage(tr("Motor config updated"), true);
 
     if (isPortConnected() && fwRx()) {
         QPair<int, int> fw_connected = qMakePair(mLastFwParams.major, mLastFwParams.minor);
@@ -4305,17 +4305,17 @@ bool VescInterface::confRestoreBackup(bool can)
 
                 if (!txMc) {
                     emitMessageDialog("Restore Configuration",
-                                      "No response when writing MC configuration to " + uuid + ".", false, false);
+                                      "No response when writing Motor config to " + uuid + ".", false, false);
                 }
 
                 if (!txApp) {
                     emitMessageDialog("Restore Configuration",
-                                      "No response when writing app configuration to " + uuid + ".", false, false);
+                                      "No response when writing App config to " + uuid + ".", false, false);
                 }
 
                 if (!txCustom) {
                     emitMessageDialog("Restore Configuration",
-                                      "No response when writing" + pCustom->getParam("hw_name")->longName + "configuration to " + uuid + ".", false, false);
+                                      "No response when writing " + pCustom->getParam("hw_name")->longName + " configuration to " + uuid + ".", false, false);
                 }
 
                 return txMc && txApp;

@@ -537,6 +537,17 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mCommands, SIGNAL(customConfigRx(int,QByteArray)),
             this, SLOT(customConfigRx(int,QByteArray)));
 
+    connect(mCommands, &Commands::customConfigAckReceived, [this](int confId) {
+        ConfigParams *custConf = customConfig(confId);
+        QString name;
+        if (custConf) {
+            name = custConf->getLongName("hw_name");
+        } else {
+            name = tr("Custom config %1").arg(confId);
+        }
+        emit ackReceived(tr("%1 write OK").arg(name));
+    });
+
 #if VT_IS_TEST_VERSION
     QTimer::singleShot(1000, [this]() {
         emitMessageDialog("VESC Tool Test Version",
@@ -3823,7 +3834,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                         break;
                     }
 
-                    emitStatusMessage(QString("Got custom config %1").arg(i), true);
+                    emitStatusMessage(QString("Got %1").arg(mCustomConfigs.last()->getLongName("hw_name")), true);
                 } else {
                     emitMessageDialog("Get Custom Config",
                                       "Could not read custom config from hardware",
@@ -3951,12 +3962,12 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
 void VescInterface::appconfUpdated()
 {
-    emit statusMessage(tr("App configuration updated"), true);
+    emit statusMessage(tr("App config updated"), true);
 }
 
 void VescInterface::mcconfUpdated()
 {
-    emit statusMessage(tr("MC configuration updated"), true);
+    emit statusMessage(tr("Motor config updated"), true);
 
     if (isPortConnected() && fwRx()) {
         QPair<int, int> fw_connected = qMakePair(mLastFwParams.major, mLastFwParams.minor);
@@ -3988,7 +3999,7 @@ void VescInterface::customConfigRx(int confId, QByteArray data)
         auto vb = VByteArray(data);
         if (params->deSerialize(vb)) {
             params->updateDone();
-            emitStatusMessage(tr("Custom config %1 updated").arg(confId), true);
+            emitStatusMessage(tr("%1 updated").arg(params->getLongName("hw_name")), true);
         } else {
             emitMessageDialog(tr("Custom Configuration"),
                               tr("Could not deserialize custom config %1").arg(confId),
@@ -4305,17 +4316,17 @@ bool VescInterface::confRestoreBackup(bool can)
 
                 if (!txMc) {
                     emitMessageDialog("Restore Configuration",
-                                      "No response when writing MC configuration to " + uuid + ".", false, false);
+                                      "No response when writing Motor config to " + uuid + ".", false, false);
                 }
 
                 if (!txApp) {
                     emitMessageDialog("Restore Configuration",
-                                      "No response when writing app configuration to " + uuid + ".", false, false);
+                                      "No response when writing App config to " + uuid + ".", false, false);
                 }
 
                 if (!txCustom) {
                     emitMessageDialog("Restore Configuration",
-                                      "No response when writing" + pCustom->getParam("hw_name")->longName + "configuration to " + uuid + ".", false, false);
+                                      "No response when writing " + pCustom->getLongName("hw_name") + " configuration to " + uuid + ".", false, false);
                 }
 
                 return txMc && txApp;

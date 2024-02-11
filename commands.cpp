@@ -399,15 +399,15 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_SET_MCCONF:
-        emit ackReceived("MCCONF Write OK");
+        emit ackReceived("Motor config write OK");
         break;
 
     case COMM_SET_APPCONF:
-        emit ackReceived("APPCONF Write OK");
+        emit ackReceived("App config write OK");
         break;
 
     case COMM_SET_APPCONF_NO_STORE:
-        emit ackReceived("APPCONF_NO_STORE Write OK");
+        emit ackReceived("App config set OK");
         break;
 
     case COMM_CUSTOM_APP_DATA:
@@ -731,9 +731,10 @@ void Commands::processPacket(QByteArray data)
         emit bmsValuesRx(val);
     } break;
 
-    case COMM_SET_CUSTOM_CONFIG:
-        emit ackReceived("COMM_SET_CUSTOM_CONFIG Write OK");
-        break;
+    case COMM_SET_CUSTOM_CONFIG: {
+        int confId = vb.vbPopFrontUint8();
+        emit customConfigAckReceived(confId);
+    } break;
 
     case COMM_GET_CUSTOM_CONFIG:
     case COMM_GET_CUSTOM_CONFIG_DEFAULT: {

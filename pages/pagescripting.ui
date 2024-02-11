@@ -37,10 +37,13 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="spacing">
-           <number>12</number>
+           <number>2</number>
           </property>
           <item>
            <widget class="QPushButton" name="runButton">
+            <property name="toolTip">
+             <string>Run in panel.</string>
+            </property>
             <property name="text">
              <string>Run</string>
             </property>
@@ -54,9 +57,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="reloadAndRunButton">
+           <widget class="QPushButton" name="runWindowButton">
+            <property name="toolTip">
+             <string>Run in Window</string>
+            </property>
             <property name="text">
-             <string>Reload and Run</string>
+             <string>Window</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
@@ -68,9 +74,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="runWindowButton">
+           <widget class="QPushButton" name="reloadAndRunButton">
+            <property name="toolTip">
+             <string>Reload file from filesystem and run in panel. Warning: This will replace the editor content if it is unsaved.</string>
+            </property>
             <property name="text">
-             <string>Run in Window</string>
+             <string>Reload &amp;&amp; Run</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">
@@ -83,8 +92,11 @@
           </item>
           <item>
            <widget class="QPushButton" name="fullscreenButton">
+            <property name="toolTip">
+             <string>Toggle fullscreen in running window.</string>
+            </property>
             <property name="text">
-             <string>Toggle Fullscreen</string>
+             <string>Fullscreen</string>
             </property>
             <property name="icon">
              <iconset resource="../res.qrc">

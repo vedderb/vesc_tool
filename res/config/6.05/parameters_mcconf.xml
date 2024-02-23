@@ -2379,6 +2379,28 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>7</vTx>
         </foc_hfi_gain>
+        <foc_hfi_max_err>
+            <longName>HFI Max Error</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Maximum HFI angle error. Lowe values help reject noise at high current, but do not keep up with too fast acceleration.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_HFI_MAX_ERR</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>6</maxDouble>
+            <minDouble>0.001</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.01</stepDouble>
+            <valDouble>0.15</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>7</vTx>
+        </foc_hfi_max_err>
         <foc_hfi_hyst>
             <longName>HFI Current Hysteresis</longName>
             <type>1</type>
@@ -4602,6 +4624,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_hfi_voltage_run</ser>
         <ser>foc_hfi_voltage_max</ser>
         <ser>foc_hfi_gain</ser>
+        <ser>foc_hfi_max_err</ser>
         <ser>foc_hfi_hyst</ser>
         <ser>foc_sl_erpm_hfi</ser>
         <ser>foc_hfi_start_samples</ser>
@@ -4937,6 +4960,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_hfi_voltage_run</param>
                     <param>foc_hfi_voltage_max</param>
                     <param>foc_hfi_gain</param>
+                    <param>foc_hfi_max_err</param>
                     <param>foc_hfi_hyst</param>
                     <param>foc_sl_erpm_hfi</param>
                     <param>foc_hfi_start_samples</param>

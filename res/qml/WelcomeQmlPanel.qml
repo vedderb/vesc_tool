@@ -275,6 +275,23 @@ Item {
             visible: false
             hideAfterPair: true
         }
+
+        ImageButton {
+            id: connectButton
+            Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.preferredWidth: 500
+            Layout.preferredHeight: 80
+
+            buttonText: "Connect"
+            imageSrc: "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
+
+            onClicked: {
+                if (!VescIf.isPortConnected()) {
+                    connScreen.opened = true
+                }
+            }
+        }
     }
 
     Rectangle {
@@ -304,6 +321,7 @@ Item {
         target: VescIf
         function onPortConnectedChanged() {
             connScreen.opened = VescIf.isPortConnected() ? false : true
+            connectButton.visible = !VescIf.isPortConnected()
         }
     }
 

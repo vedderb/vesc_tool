@@ -528,9 +528,13 @@ MainWindow::MainWindow(QWidget *parent) :
         resize(mSettings.value("mainwindow/size").toSize());
     }
 
+    // Restoring the position is not reliable on windows when the last position
+    // was on an external monitor.
+#ifndef Q_OS_WIN
     if (mSettings.contains("mainwindow/position")) {
         move(mSettings.value("mainwindow/position").toPoint());
     }
+#endif
 
     if (mSettings.contains("mainwindow/maximized")) {
         bool maximized = mSettings.value("mainwindow/maximized").toBool();

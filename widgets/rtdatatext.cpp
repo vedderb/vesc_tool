@@ -94,6 +94,7 @@ void RtDataText::paintEvent(QPaintEvent *event)
         mBoxH = boxh_new;
         mBoxW = boxw_new;
         mTxtOfs = txtofs_new;
+        setMinimumHeight(mBoxH + 2 * mTxtOfs);
         updateGeometry();
     }
 

@@ -79,6 +79,7 @@ private:
     QString mVescLastPath;
     qint32 mGnssMsTodayLast;
     QString mLastSaveCsvPath;
+    QString mLastSaveAsPath;
 
     QVector<LOG_HEADER> mLogHeader;
     QVector<QVector<double> > mLog;

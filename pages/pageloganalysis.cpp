@@ -238,12 +238,14 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     QSettings set;
     mLastSaveCsvPath = set.value("pageloganalysis/lastSaveCsvPath", true).toString();
+    mLastSaveAsPath = set.value("pageloganalysis/lastSaveAsPath", true).toString();
 }
 
 PageLogAnalysis::~PageLogAnalysis()
 {
     QSettings set;
     set.setValue("pageloganalysis/lastSaveCsvPath", mLastSaveCsvPath);
+    set.setValue("pageloganalysis/lastSaveAsPath", mLastSaveAsPath);
     set.sync();
 
     delete ui;
@@ -1538,19 +1540,27 @@ void PageLogAnalysis::on_vescSaveAsButton_clicked()
     }
 
     if (fe.isDir) {
-        mVesc->emitMessageDialog("Save File", "Cannot save directory, only files", false);
+        mVesc->emitMessageDialog("Save File", "Cannot save directory, only files. Multiple "
+                                              "files can be selected too.", false);
     } else {
-        qDebug() << items.size();
-
         if (items.size() == 2) {
+            QString path = "";
+            if (!mLastSaveAsPath.isEmpty()) {
+                path = mLastSaveAsPath + "/" + fe.name;
+            }
+
             QString fileName = QFileDialog::getSaveFileName(this,
-                                                            tr("Save Log File"), "",
+                                                            tr("Save Log File"),
+                                                            path,
                                                             tr("CSV files (*.csv)"));
 
             if (!fileName.isEmpty()) {
                 if (!fileName.endsWith(".csv", Qt::CaseInsensitive)) {
                     fileName += ".csv";
                 }
+
+                QFileInfo fi(fileName);
+                mLastSaveAsPath = fi.canonicalPath();
 
                 QFile file(fileName);
 
@@ -1569,11 +1579,13 @@ void PageLogAnalysis::on_vescSaveAsButton_clicked()
         } else {
             QString path = QFileDialog::getExistingDirectory(this,
                                                              tr("Choose Destination"),
-                                                             "",
+                                                             mLastSaveAsPath,
                                                              QFileDialog::ShowDirsOnly |
                                                              QFileDialog::DontResolveSymlinks);
             if (!path.isEmpty()) {
                 setFileButtonsEnabled(false);
+
+                mLastSaveAsPath = path;
 
                 bool didCancel = false;
                 foreach (auto it, items) {

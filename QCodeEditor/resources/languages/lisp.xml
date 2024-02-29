@@ -330,6 +330,7 @@
 <name>raw-mod-beta-measured</name>
 <name>raw-hall</name>
 <name>uart-start</name>
+<name>uart-stop</name>
 <name>uart-write</name>
 <name>uart-read</name>
 <name>i2c-start</name>

@@ -33,20 +33,20 @@ Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
-    
+
     ColumnLayout {
         anchors.fill: parent
-        
+
         TabBar {
             id: tabBar
             currentIndex: swipeView.currentIndex
             Layout.fillWidth: true
             implicitWidth: 0
             clip: true
-            
+
             property int buttons: 4
             property int buttonWidth: 120
-            
+
             TabButton {
                 text: qsTr("Current")
                 width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
@@ -64,19 +64,19 @@ Item {
                 width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
             }
         }
-        
+
         SwipeView {
             id: swipeView
             currentIndex: tabBar.currentIndex
             Layout.fillHeight: true
             Layout.fillWidth: true
             clip: true
-            
+
             Page {
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 0
-                    
+
                     DoubleSpinBox {
                         id: currentBox
                         Layout.fillWidth: true
@@ -88,24 +88,24 @@ Item {
                         realValue: 3.0
                         realStepSize: 1.0
                     }
-                    
+
                     Rectangle {
                         Layout.fillHeight: true
                     }
-                    
+
                     CheckBox {
                         id: maintainCurrentBox
                         text: "Continue after release"
                     }
-                    
+
                     RowLayout {
                         Layout.fillWidth: true
-                        
+
                         Button {
                             Layout.fillWidth: true
                             Layout.preferredWidth: 100
                             text: "Set REV"
-                            
+
                             onPressedChanged: {
                                 if (pressed) {
                                     mCommands.setCurrent(-currentBox.realValue)
@@ -114,12 +114,12 @@ Item {
                                 }
                             }
                         }
-                        
+
                         Button {
                             Layout.fillWidth: true
                             Layout.preferredWidth: 100
                             text: "Set FWD"
-                            
+
                             onPressedChanged: {
                                 if (pressed) {
                                     mCommands.setCurrent(currentBox.realValue)
@@ -129,11 +129,11 @@ Item {
                             }
                         }
                     }
-                    
+
                     Button {
                         Layout.fillWidth: true
                         text: "Brake"
-                        
+
                         onPressedChanged: {
                             if (pressed) {
                                 mCommands.setCurrentBrake(currentBox.realValue)
@@ -142,27 +142,27 @@ Item {
                             }
                         }
                     }
-                    
+
                     Button {
                         Layout.fillWidth: true
                         text: "Release"
-                        
+
                         onClicked: {
                             mCommands.setCurrent(0.0)
                         }
                     }
                 }
             }
-            
+
             Page {
                 background: Rectangle {
                     opacity: 0.0
                 }
-                
+
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 0
-                    
+
                     DoubleSpinBox {
                         id: dutyBox
                         Layout.fillWidth: true
@@ -173,24 +173,24 @@ Item {
                         realValue: 0.1
                         realStepSize: 0.01
                     }
-                    
+
                     Rectangle {
                         Layout.fillHeight: true
                     }
-                    
+
                     CheckBox {
                         id: maintainDutyBox
                         text: "Continue after release"
                     }
-                    
+
                     RowLayout {
                         Layout.fillWidth: true
-                        
+
                         Button {
                             Layout.fillWidth: true
                             Layout.preferredWidth: 100
                             text: "Set REV"
-                            
+
                             onPressedChanged: {
                                 if (pressed) {
                                     mCommands.setDutyCycle(-dutyBox.realValue)
@@ -199,12 +199,12 @@ Item {
                                 }
                             }
                         }
-                        
+
                         Button {
                             Layout.fillWidth: true
                             Layout.preferredWidth: 100
                             text: "Set FWD"
-                            
+
                             onPressedChanged: {
                                 if (pressed) {
                                     mCommands.setDutyCycle(dutyBox.realValue)
@@ -214,11 +214,11 @@ Item {
                             }
                         }
                     }
-                    
+
                     Button {
                         Layout.fillWidth: true
                         text: "0 Duty (brake)"
-                        
+
                         onPressedChanged: {
                             if (pressed) {
                                 mCommands.setDutyCycle(0.0)
@@ -227,27 +227,27 @@ Item {
                             }
                         }
                     }
-                    
+
                     Button {
                         Layout.fillWidth: true
                         text: "Release"
-                        
+
                         onClicked: {
                             mCommands.setCurrent(0.0)
                         }
                     }
                 }
             }
-            
+
             Page {
                 background: Rectangle {
                     opacity: 0.0
                 }
-                
+
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 0
-                    
+
                     DoubleSpinBox {
                         id: speedBox
                         Layout.fillWidth: true
@@ -259,24 +259,24 @@ Item {
                         realValue: 3000
                         realStepSize: 500
                     }
-                    
+
                     Rectangle {
                         Layout.fillHeight: true
                     }
-                    
+
                     CheckBox {
                         id: maintainSpeedBox
                         text: "Continue after release"
                     }
-                    
+
                     RowLayout {
                         Layout.fillWidth: true
-                        
+
                         Button {
                             Layout.fillWidth: true
                             Layout.preferredWidth: 100
                             text: "Set REV"
-                            
+
                             onPressedChanged: {
                                 if (pressed) {
                                     mCommands.setRpm(-speedBox.realValue)
@@ -285,12 +285,12 @@ Item {
                                 }
                             }
                         }
-                        
+
                         Button {
                             Layout.fillWidth: true
                             Layout.preferredWidth: 100
                             text: "Set FWD"
-                            
+
                             onPressedChanged: {
                                 if (pressed) {
                                     mCommands.setRpm(speedBox.realValue)
@@ -300,11 +300,11 @@ Item {
                             }
                         }
                     }
-                    
+
                     Button {
                         Layout.fillWidth: true
                         text: "0 ERPM (brake)"
-                        
+
                         onPressedChanged: {
                             if (pressed) {
                                 mCommands.setRpm(0.0)
@@ -313,27 +313,27 @@ Item {
                             }
                         }
                     }
-                    
+
                     Button {
                         Layout.fillWidth: true
                         text: "Release"
-                        
+
                         onClicked: {
                             mCommands.setCurrent(0.0)
                         }
                     }
                 }
             }
-            
+
             Page {
                 background: Rectangle {
                     opacity: 0.0
                 }
-                
+
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 0
-                    
+
                     DoubleSpinBox {
                         id: posBox
                         Layout.fillWidth: true
@@ -345,20 +345,20 @@ Item {
                         realValue: 20
                         realStepSize: 0.1
                     }
-                    
+
                     Rectangle {
                         Layout.fillHeight: true
                     }
-                    
+
                     CheckBox {
                         id: maintainPosBox
                         text: "Continue after release"
                     }
-                    
+
                     Button {
                         Layout.fillWidth: true
                         text: "Set"
-                        
+
                         onPressedChanged: {
                             if (pressed) {
                                 mCommands.setPos(posBox.realValue)
@@ -367,11 +367,11 @@ Item {
                             }
                         }
                     }
-                    
+
                     Button {
                         Layout.fillWidth: true
                         text: "Release"
-                        
+
                         onClicked: {
                             mCommands.setCurrent(0.0)
                         }
@@ -380,13 +380,13 @@ Item {
             }
         }
     }
-    
+
     Timer {
         id: aliveTimer
         interval: 200
         running: true
         repeat: true
-        
+
         onTriggered: {
             if (VescIf.isPortConnected()) {
                 // Send alive every 200 ms to keep the motor running

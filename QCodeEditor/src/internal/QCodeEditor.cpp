@@ -598,11 +598,11 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
             return;
         }
 
+        bool doSave = false;
+
         if (e->modifiers() == Qt::ControlModifier) {
             if (e->key() == Qt::Key_S) {
-                emit saveTriggered();
-                updateExtraSelection();
-                return;
+                doSave = true;
             } else if (e->key() == Qt::Key_E) {
                 emit runEmbeddedTriggered();
                 updateExtraSelection();
@@ -664,7 +664,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         }
 
         // Auto-indent selected line or block
-        if (indentNext || (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier)) {
+        if (doSave || indentNext || (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier)) {
             auto txtOld = toPlainText();
             int indentNow = 0;
             bool isComment = false;
@@ -684,6 +684,12 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                 if (lineNum < lineStart || lineNum > lineEnd) {
                     indent = false;
                     removeTrailing = false;
+                }
+
+                // Always remove trailing whitespaces on save
+                if (doSave) {
+                    indent = false;
+                    removeTrailing = true;
                 }
 
                 if (isComment) {
@@ -750,6 +756,11 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                         tc.setPosition(posStart++);
                     }
                 }
+            }
+
+            if (doSave) {
+                emit saveTriggered();
+                updateExtraSelection();
             }
 
             return;

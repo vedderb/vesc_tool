@@ -16,6 +16,7 @@
 * Limit output size in vesc and lbm terminal to prevent problems when printing too much.
 * Use all 3 measured currents in sampled data instead of calculating one.
 * Added support for loading sampled data CSV files.
+* Always remove trailing whitespaces on save in CodeEditor.
 
 ---
 

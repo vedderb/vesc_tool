@@ -476,8 +476,6 @@ QString Utility::detectAllFoc(VescInterface *vesc,
             vesc->commands()->getAppConf();
             waitSignal(ap, SIGNAL(updated()), 4000);
 
-
-
             auto genRes = [&p, &ap]() {
                 QString sensors;
                 switch (p->getParamEnum("foc_sensor_mode")) {

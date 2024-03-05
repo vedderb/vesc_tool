@@ -303,6 +303,9 @@
 <name>can-recv-sid</name>
 <name>can-recv-eid</name>
 <name>can-cmd</name>
+<name>can-start</name>
+<name>can-stop</name>
+<name>can-use-vesc</name>
 <name>sin</name>
 <name>cos</name>
 <name>tan</name>

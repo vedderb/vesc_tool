@@ -276,6 +276,7 @@
 <name>setup-current</name>
 <name>setup-current-in</name>
 <name>setup-num-vescs</name>
+<name>can-msg-age</name>
 <name>canset-current</name>
 <name>canset-current-rel</name>
 <name>canset-duty</name>

@@ -743,17 +743,12 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
 
                 if (indent || removeTrailing) {
                     auto tc = textCursor();
-                    int posStart = 0;
-                    tc.setPosition(posStart++);
-                    while (!tc.atEnd()) {
-                        if (tc.blockNumber() == lineNum) {
-                            tc.select(QTextCursor::LineUnderCursor);
-                            if (tc.selectedText() != line) {
-                                tc.insertText(line);
-                            }
-                            break;
-                        }
-                        tc.setPosition(posStart++);
+
+                    tc.setPosition(0);
+                    tc.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, lineNum);
+                    tc.select(QTextCursor::LineUnderCursor);
+                    if (tc.selectedText() != line) {
+                        tc.insertText(line);
                     }
                 }
             }

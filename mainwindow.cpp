@@ -818,7 +818,7 @@ void MainWindow::timerSlot()
     }
 
     // Read configurations if they haven't been read since starting VESC Tool
-    if (mVesc->isPortConnected() && mVesc->fwRx()) {
+    if (mVesc->isPortConnected()) {
         static int conf_cnt = 0;
         disconected_cnt = 0;
         conf_cnt++;

@@ -35,6 +35,9 @@
 #define SIGN(x)         ((x < 0) ? -1 : 1)
 #define SQ(x)           ((x) * (x))
 
+#define STR1(x)         #x
+#define STR(x)          STR1(x)
+
 class Utility : public QObject
 {
     Q_OBJECT

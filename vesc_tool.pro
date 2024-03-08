@@ -10,7 +10,10 @@ VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 2
 
 # Set to 0 for stable versions and to test version number for development versions.
-VT_IS_TEST_VERSION = 1
+VT_IS_TEST_VERSION = 2
+
+# GIT commit
+VT_GIT_COMMIT = $$system(git rev-parse --short=8 HEAD)
 
 VT_ANDROID_VERSION_ARMV7 = 134
 VT_ANDROID_VERSION_ARM64 = 135
@@ -25,6 +28,7 @@ DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
 DEFINES += VT_CONFIG_VERSION=$$VT_CONFIG_VERSION
 DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
+DEFINES += VT_GIT_COMMIT=$$VT_GIT_COMMIT
 QT_LOGGING_RULES="qt.qml.connections=false"
 #CONFIG += qtquickcompiler
 

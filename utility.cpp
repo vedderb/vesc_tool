@@ -232,6 +232,7 @@ QString Utility::aboutText()
           #if VT_IS_TEST_VERSION
               "Test Version %2<br>"
           #endif
+              "GIT Commit " STR(VT_GIT_COMMIT) "<br>"
           #if defined(VER_ORIGINAL)
               "Original Version<br>"
           #elif defined(VER_PLATINUM)
@@ -245,10 +246,10 @@ QString Utility::aboutText()
           #elif defined(VER_FREE)
               "Free of Charge Version<br>"
           #endif
-              "&copy; Benjamin Vedder 2016 - 2023<br>"
+              "&copy; Benjamin Vedder 2016 - 2024<br>"
               "<a href=\"mailto:benjamin@vedder.se\">benjamin@vedder.se</a><br>"
-              "<a href=\"https://vesc-project.com/\">https://vesc-project.com/</a>").
-            arg(QString::number(VT_VERSION, 'f', 2))
+              "<a href=\"https://vesc-project.com/\">https://vesc-project.com/</a>")
+            .arg(QString::number(VT_VERSION, 'f', 2))
         #if VT_IS_TEST_VERSION
             .arg(QString::number(VT_IS_TEST_VERSION))
         #endif

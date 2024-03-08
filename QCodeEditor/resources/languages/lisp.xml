@@ -37,6 +37,7 @@
 <name>move-to-flash</name>
 <name>unflatten</name>
 <name>flatten</name>
+<name>rest-args</name>
 <name>@const-start</name>
 <name>@const-end</name>
 <name>@const-symbol-strings</name>

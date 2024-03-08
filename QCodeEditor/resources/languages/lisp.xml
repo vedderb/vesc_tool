@@ -444,6 +444,7 @@
 <name>main-init-done</name>
 <name>esp-now-start</name>
 <name>esp-now-add-peer</name>
+<name>esp-now-del-peer</name>
 <name>esp-now-send</name>
 <name>esp-now-recv</name>
 <name>get-mac-addr</name>

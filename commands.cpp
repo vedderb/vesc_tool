@@ -159,6 +159,10 @@ void Commands::processPacket(QByteArray data)
             params.fwName = vb.vbPopFrontString();
         }
 
+        if (vb.size() >= 4) {
+            params.hwConfCrc = vb.vbPopFrontUint32();
+        }
+
         emit fwVersionReceived(params);
     } break;
 

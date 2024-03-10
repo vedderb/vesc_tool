@@ -566,33 +566,51 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         int lineStart = tcStart.blockNumber();
         int lineEnd = tcEnd.blockNumber();
 
+        QString keyText = QKeySequence(e->key()).toString();
+
         // Toggle block comment
         if (e->text() == "\u001F" ||
-                (e->modifiers() & Qt::ControlModifier) && e->text() == "#") {
+                ((e->modifiers() & Qt::ControlModifier) && keyText == "#") ||
+                ((e->modifiers() & Qt::ControlModifier) && keyText == "/")) {
             for (int i = lineStart;i <= lineEnd;i++) {
                 auto tc = textCursor();
 
-                int posStart = 0;
-                tc.setPosition(posStart++);
-                while (!tc.atEnd()) {
-                    if (tc.blockNumber() == i) {
-                        tc.select(QTextCursor::LineUnderCursor);
-                        auto line = tc.selectedText();
-                        auto line2 = line;
-                        line2.replace(" ", "");
-                        line2.replace("\t", "");
-                        if (line2.startsWith(m_commentStr)) {
-                            line.replace(line.indexOf(m_commentStr.at(0)), m_commentStr.size(), "");
-                        } else {
-                            line.prepend(m_commentStr);
-                        }
+                tc.setPosition(0);
+                tc.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, i);
+                tc.select(QTextCursor::LineUnderCursor);
+                auto line = tc.selectedText();
 
-                        tc.insertText(line);
+                int commentPos = -1;
+                int charPos = -1;
+
+                for (int i = 0;i < line.length();i++) {
+                    if (line.at(i) != " " && line.at(i) != "\t") {
+                        charPos = i;
                         break;
                     }
-
-                    tc.setPosition(posStart++);
                 }
+
+                commentPos = line.indexOf(m_commentStr);
+                if (commentPos > charPos) {
+                    commentPos = -1;
+                }
+
+                if (commentPos >= 0) {
+                    if (line.length() <= (commentPos + m_commentStr.length()) ||
+                            line.at(commentPos + m_commentStr.length()) == " " ||
+                            line.at(commentPos + m_commentStr.length()) == "\t") {
+                        commentPos = -1;
+                        charPos = -1;
+                    }
+                }
+
+                if (commentPos >= 0) {
+                    line.replace(commentPos, m_commentStr.length(), "");
+                } else if (charPos >= 0) {
+                    line.insert(charPos, m_commentStr);
+                }
+
+                tc.insertText(line);
             }
 
             return;
@@ -667,7 +685,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         if (doSave || indentNext || (e->key() == Qt::Key_I && e->modifiers() == Qt::ControlModifier)) {
             auto txtOld = toPlainText();
             int indentNow = 0;
-            bool isComment = false;
 
             int lineNum = -1;
             foreach (auto line, txtOld.split("\n")) {
@@ -690,18 +707,6 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                 if (doSave) {
                     indent = false;
                     removeTrailing = true;
-                }
-
-                if (isComment) {
-                    if (line.contains("*/") && !line.contains("/*")) {
-                        isComment = false;
-                    }
-
-                    indent = false;
-                } else {
-                    if (line.contains("/*") && !line.contains("*/")) {
-                        isComment = true;
-                    }
                 }
 
                 if (indent) {

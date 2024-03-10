@@ -711,6 +711,7 @@ void PageScripting::on_helpButton_clicked()
                    "Ctrl + '-'   : Decrease font size<br>"
                    "Ctrl + space : Show auto-complete suggestions<br>"
                    "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
+                   "Ctrl + '#'   : Toggle auto-comment on line or block<br>"
                    "Ctrl + 'i'   : Auto-indent selected line or block<br>"
                    "Ctrl + 'f'   : Open search (and replace) bar<br>"
                    "Ctrl + 'e'   : Run or restart embedded<br>"

@@ -319,7 +319,7 @@ private:
     int mTimeoutDecAdc;
     int mTimeoutDecChuk;
     int mTimeoutPingCan;
-    int mTimeoutCustomConf;
+    QVector<int> mTimeoutCustomConf;
     int mTimeoutBmsVal;
     int mTimeoutStats;
 

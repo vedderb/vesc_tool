@@ -3784,13 +3784,13 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         QDir().mkpath(confCacheDir);
     }
 
+    while (!mCustomConfigs.isEmpty()) {
+        mCustomConfigs.last()->deleteLater();
+        mCustomConfigs.removeLast();
+    }
+
     // Read custom configs
     if (!mIgnoreCustomConfigs && params.customConfigNum > 0) {
-        while (!mCustomConfigs.isEmpty()) {
-            mCustomConfigs.last()->deleteLater();
-            mCustomConfigs.removeLast();
-        }
-
         bool readConfigsOk = true;
         for (int i = 0;i < params.customConfigNum;i++) {
             QString confCacheFile;

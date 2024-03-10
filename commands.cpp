@@ -50,7 +50,6 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mTimeoutDecAdc = 0;
     mTimeoutDecChuk = 0;
     mTimeoutPingCan = 0;
-    mTimeoutCustomConf = 0;
     mTimeoutBmsVal = 0;
 
     mFilePercentage = 0.0;
@@ -742,8 +741,12 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_GET_CUSTOM_CONFIG:
     case COMM_GET_CUSTOM_CONFIG_DEFAULT: {
-        mTimeoutCustomConf = 0;
         int confInd = vb.vbPopFrontInt8();
+
+        if (mTimeoutCustomConf.size() > confInd) {
+            mTimeoutCustomConf[confInd] = 0;
+        }
+
         emit customConfigRx(confInd, vb);
     } break;
 
@@ -1994,11 +1997,15 @@ void Commands::customConfigGetChunk(int confInd, int len, int offset)
 
 void Commands::customConfigGet(int confInd, bool isDefault)
 {
-    if (mTimeoutCustomConf > 0) {
+    while (mTimeoutCustomConf.size() <= confInd) {
+        mTimeoutCustomConf.append(0);
+    }
+
+    if (mTimeoutCustomConf[confInd] > 0) {
         return;
     }
 
-    mTimeoutCustomConf = mTimeoutCount;
+    mTimeoutCustomConf[confInd] = mTimeoutCount;
 
     VByteArray vb;
     vb.vbAppendUint8(isDefault ? COMM_GET_CUSTOM_CONFIG_DEFAULT : COMM_GET_CUSTOM_CONFIG);
@@ -2272,7 +2279,10 @@ void Commands::timerSlot()
             qWarning() << "CAN ping timed out";
         }
     }
-    if (mTimeoutCustomConf > 0) mTimeoutCustomConf--;
+    for (int i = 0;i < mTimeoutCustomConf.size();i++) {
+        if (mTimeoutCustomConf.at(i) > 0) mTimeoutCustomConf[i]--;
+    }
+
     if (mTimeoutBmsVal > 0) mTimeoutBmsVal--;
     if (mTimeoutStats > 0) mTimeoutStats--;
 }

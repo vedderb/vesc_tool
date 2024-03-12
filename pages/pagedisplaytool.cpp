@@ -250,7 +250,9 @@ QFont PageDisplayTool::getSelectedFontEditor()
     QFont f = ui->fontEditFontBox->currentFont();
     f.setPointSizeF(500.0);
     f.setBold(ui->fontEditBoldBox->isChecked());
-    f.setStyleStrategy(QFont::NoAntialias);
+    if (!ui->fontEditAABox->isChecked()) {
+        f.setStyleStrategy(QFont::NoAntialias);
+    }
 
     QFontMetrics fm(f);
     double fh = (500.0 * (double)ui->fontEditHBox->value()) / (double)fm.ascent();
@@ -336,10 +338,11 @@ void PageDisplayTool::on_fontEditExportButton_clicked()
 
     int w = ui->fontEditWBox->value();
     int h = ui->fontEditHBox->value();
-    int bytesPerChar = (w * h) / 8;
     int charNum = ui->fontEditNumOnlyButton->isChecked() ? 10 : 95;
 
-    if ((w * h) % 8 != 0) {
+    int bitsNeededPerChar = w * h * (ui->fontEditAABox->isChecked() ? 2 : 1);
+    int bytesPerChar = bitsNeededPerChar / 8;
+    if (bitsNeededPerChar % 8 != 0) {
         bytesPerChar++;
     }
 
@@ -353,16 +356,48 @@ void PageDisplayTool::on_fontEditExportButton_clicked()
     fontArr[0] = w;
     fontArr[1] = h;
     fontArr[2] = charNum;
-    fontArr[3] = 1; // 1 bit per char
+    fontArr[3] = (ui->fontEditAABox->isChecked() ? 2 : 1); // 1 or 2 bits per pixel
 
     auto imgFont = ui->fontEditor->getEdit()->getImageBase();
 
-    for (int ch = 0;ch < charNum; ch++) {
-        for (int i = 0;i < w * h; i++) {
-            QColor px = imgFont.pixel(ch * w + i % w, i / w);
-            char c = fontArr[4 + bytesPerChar * ch + i / 8];
-            c |= (px != Qt::black) << (i % 8);
-            fontArr[4 + bytesPerChar * ch + (i / 8)] = c;
+    if (ui->fontEditAABox->isChecked()) {
+        // 2 bits per pixel
+        QColor colors[] = { QColor(0x00, 0x00, 0x00), QColor(0x55, 0x55, 0x55), QColor(0xAA, 0xAA, 0xAA), QColor(0xFF, 0xFF, 0xFF) };
+        for (int ch = 0; ch < charNum; ch++) {
+            for (int i = 0; i < w * h; i += 4) {
+                char byteValue = 0;
+                for (int bitPos = 0; bitPos < 4; bitPos++) {
+                    int pixelIndex = i + bitPos;
+                    if (pixelIndex >= w * h) break;
+                    QColor px = imgFont.pixel((ch * w + pixelIndex % w), pixelIndex / w);
+                    int grayValue = qGray(px.rgb());
+
+                    // Find the closest palette color
+                    int minDistance = INT_MAX;
+                    int palletIndex = 0;
+                    for (int k = 0; k < 4; k++) {
+                        int distance = abs(grayValue - qGray(colors[k].rgb()));
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            palletIndex = k;
+                        }
+                    }
+                    // Shift pixel value into position
+                    byteValue |= palletIndex << (bitPos * 2);
+                }
+                // Store byte with 4 indexed pixels
+                fontArr[4 + bytesPerChar * ch + i / 4] = byteValue;
+            }
+        }
+    } else {
+        // 1 bit per pixel
+        for (int ch = 0; ch < charNum; ch++) {
+            for (int i = 0;i < w * h; i++) {
+                QColor px = imgFont.pixel(ch * w + i % w, i / w);
+                char c = fontArr[4 + bytesPerChar * ch + i / 8];
+                c |= (px != Qt::black) << (i % 8);
+                fontArr[4 + bytesPerChar * ch + (i / 8)] = c;
+            }
         }
     }
 
@@ -392,10 +427,10 @@ void PageDisplayTool::on_fontEditImportButton_clicked()
         int w = data.vbPopFrontUint8();
         int h = data.vbPopFrontUint8();
         int charNum = data.vbPopFrontUint8();
-        data.vbPopFrontUint8();
+        int bitsPerPixel = data.vbPopFrontUint8();
 
-        int bytesPerChar = (w * h) / 8;
-        if ((w * h) % 8 != 0) {
+        int bytesPerChar = (w * h) / (bitsPerPixel == 2 ? 4 : 8);
+        if ((w * h) % (bitsPerPixel == 2 ? 4 : 8) != 0) {
             bytesPerChar++;
         }
 
@@ -404,10 +439,22 @@ void PageDisplayTool::on_fontEditImportButton_clicked()
         QImage img(w * charNum, h, QImage::Format_ARGB32);
         img.fill(Qt::black);
 
+        //TODO: How do I get these colors from the pallet below the view?
+        QColor colors[] = { QColor(0x00, 0x00, 0x00), QColor(0x55, 0x55, 0x55), QColor(0xAA, 0xAA, 0xAA), QColor(0xFF, 0xFF, 0xFF) };
+
         for (int ch = 0;ch < charNum; ch++) {
             for (int i = 0;i < w * h; i++) {
-                char c = data[bytesPerChar * ch + i / 8];
-                QColor px = (c >> (i % 8) & 0x01) ? Qt::white : Qt::black;
+                char c = data[bytesPerChar * ch + i / (bitsPerPixel == 2 ? 4 : 8)];
+                QColor px;
+                if (bitsPerPixel == 2) {
+                    // Extract 2 bits
+                    int palletIndex = (c >> ((i % 4) * 2)) & 0x03;
+                    px = colors[palletIndex];
+                } else {
+                    // 1 bitsPerPixel
+                    int bitValue = (c >> (i % 8)) & 0x01;
+                    px = bitValue ? Qt::white : Qt::black;
+                }
                 img.setPixelColor(ch * w + i % w, i / w, px);
             }
         }

@@ -38,6 +38,7 @@ public:
     void updateSize(int width, int height);
     DisplayEdit *getEdit();
     QColor paletteColor(int ind);
+    void setColors(int colors);
 
 private slots:
     void on_saveCButton_clicked();

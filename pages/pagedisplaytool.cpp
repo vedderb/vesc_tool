@@ -80,6 +80,14 @@ PageDisplayTool::PageDisplayTool(QWidget *parent) :
         reloadFontEditorOverlay();
     });
 
+    connect(ui->fontEditAABox, &QCheckBox::toggled, [this]() {
+        if (ui->fontEditAABox->isChecked()) {
+            ui->fontEditor->setColors(4);
+        } else {
+            ui->fontEditor->setColors(2);
+        }
+    });
+
     reloadFontEditor();
 }
 

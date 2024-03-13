@@ -79,6 +79,26 @@ QColor DispEditor::paletteColor(int ind)
     }
 }
 
+void DispEditor::setColors(int colors)
+{
+    switch (colors) {
+    case 2:
+        ui->formatBox->setCurrentIndex(0);
+        break;
+
+    case 4:
+        ui->formatBox->setCurrentIndex(1);
+        break;
+
+    case 16:
+        ui->formatBox->setCurrentIndex(2);
+        break;
+
+    default:
+        break;
+    }
+}
+
 DispEditor::~DispEditor()
 {
     delete ui;

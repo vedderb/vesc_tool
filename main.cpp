@@ -108,6 +108,7 @@ static void showHelp()
     qDebug() << "--packLisp [fileIn:fileOut] : Pack lisp-file and the included imports.";
     qDebug() << "--bridgeAppData : Send app data (such as data from send-data in lisp) to stdout.";
     qDebug() << "--offscreen : Use offscreen QPA so that X is not required for the CLI-mode.";
+    qDebug() << "--downloadPackageArchive : Download package archive to application data directory.";
 }
 
 #ifdef Q_OS_LINUX
@@ -312,6 +313,7 @@ int main(int argc, char *argv[])
     QString lispPackOut = "";
     bool bridgeAppData = false;
     bool offscreen = false;
+    bool downloadPackageArchive = false;
 
     // Arguments can be hard-coded in a build like this:
 //    qmlWindowSize = QSize(400, 800);
@@ -677,6 +679,11 @@ int main(int argc, char *argv[])
             found = true;
         }
 
+        if (str == "--downloadPackageArchive") {
+            downloadPackageArchive = true;
+            found = true;
+        }
+
         if (!found) {
             if (dash) {
                 qCritical() << "At least one of the flags is invalid:" << str;
@@ -687,6 +694,14 @@ int main(int argc, char *argv[])
             showHelp();
             return 1;
         }
+    }
+
+    if (downloadPackageArchive) {
+        QCoreApplication appTmp(argc, argv);
+        CodeLoader loader;
+        qDebug() << "Downloading package archive...";
+        loader.downloadPackageArchive();
+        qDebug() << "Package archive downloaded!";
     }
 
     if (!xmlCodePath.isEmpty()) {
@@ -1521,6 +1536,8 @@ int main(int argc, char *argv[])
         } else if (useBoardSetupWindow){
             bw = new BoardSetupWindow;
             bw->show();
+        } else if (downloadPackageArchive) {
+            return 0;
         } else {
             QPixmapCache::setCacheLimit(256000);
             w = new MainWindow;

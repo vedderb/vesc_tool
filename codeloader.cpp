@@ -31,6 +31,7 @@
 CodeLoader::CodeLoader(QObject *parent) : QObject(parent)
 {
     mVesc = nullptr;
+    reloadPackageArchive();
 }
 
 VescInterface *CodeLoader::vesc() const

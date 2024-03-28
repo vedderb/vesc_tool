@@ -43,7 +43,7 @@ static uint32_t s_flash_write_size = 0;
 static const target_registers_t *s_reg = NULL;
 static target_chip_t s_target = ESP_UNKNOWN_CHIP;
 
-static const uint32_t MD5_TIMEOUT_PER_MB = 1200;
+static const uint32_t MD5_TIMEOUT_PER_MB = 12000;
 static struct MD5Context s_md5_context;
 static uint32_t s_start_address;
 static uint32_t s_image_size;

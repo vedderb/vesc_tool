@@ -728,7 +728,7 @@ void PageLisp::on_helpButton_clicked()
                    "Ctrl + space : Show auto-complete suggestions<br>"
                    "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
                    "Ctrl + '#'   : Toggle auto-comment on line or block<br>"
-                   "Ctrl + 'i'   : Remove trailing whitespaces from selected lines<br>"
+                   "Ctrl + 'i'   : Auto-indent selected lines<br>"
                    "Ctrl + 'f'   : Open search (and replace) bar<br>"
                    "Ctrl + 'e'   : Upload (and run if set) application<br>"
                    "Ctrl + 'w'   : Stream application<br>"

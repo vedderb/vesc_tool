@@ -121,7 +121,7 @@
         })
 })
 
-(defun rotate (ax ay) {
+(defun rotate-cube (ax ay) {
         (var sx (sin ax))
         (var cx (cos ax))
         (var sy (sin ay))
@@ -145,7 +145,7 @@
 (loopwhile t {
         (var t-start (systime))
         (draw-edges)
-        (rotate 0.1 0.05)
+        (rotate-cube 0.1 0.05)
         (putstr 0 7 (str-from-n fps "FPS %.1f "))
         (i2c-tx-rx #SSD-ADDRESS pixbuf)
         (bufclear pixbuf 0 1)

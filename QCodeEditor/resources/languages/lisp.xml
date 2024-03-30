@@ -422,6 +422,7 @@
 <name>zipwith</name>
 <name>sleep</name>
 <name>filter</name>
+<name>rotate</name>
 <name>str-len</name>
 <name>sort</name>
 <name>str-cmp-asc</name>

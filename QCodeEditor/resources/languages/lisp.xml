@@ -488,5 +488,11 @@
 <name>qml-write</name>
 <name>shutdown-hold</name>
 <name>reboot</name>
+<name>color-make</name>
+<name>color-split</name>
+<name>color-mix</name>
+<name>color-add</name>
+<name>color-sub</name>
+<name>color-scale</name>
 </section>
 </root>

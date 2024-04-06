@@ -338,6 +338,8 @@
 <name>uart-stop</name>
 <name>uart-write</name>
 <name>uart-read</name>
+<name>uartcomm-start</name>
+<name>uartcomm-stop</name>
 <name>i2c-start</name>
 <name>i2c-tx-rx</name>
 <name>i2c-restore</name>

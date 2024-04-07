@@ -222,6 +222,9 @@
 <name>icu-start</name>
 <name>icu-width</name>
 <name>icu-period</name>
+<name>pwm-start</name>
+<name>pwm-stop</name>
+<name>pwm-set-duty</name>
 <name>app-adc-detach</name>
 <name>app-adc-override</name>
 <name>app-adc-range-ok</name>

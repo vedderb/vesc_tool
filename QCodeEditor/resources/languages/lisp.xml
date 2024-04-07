@@ -471,6 +471,8 @@
 <name>sleep-config-wakeup-pin</name>
 <name>canmsg-send</name>
 <name>canmsg-recv</name>
+<name>f-connect</name>
+<name>f-disconnect</name>
 <name>f-open</name>
 <name>f-close</name>
 <name>f-read</name>

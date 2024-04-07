@@ -305,6 +305,10 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
                 fieldNum++;
             }
 
+            if (fieldNum >= 0) {
+                return;
+            }
+
             mLogRtHeader.resize(fieldNum);
 
             if (mLogRtAppendTime) {

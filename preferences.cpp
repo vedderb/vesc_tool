@@ -151,6 +151,15 @@ VescInterface *Preferences::vesc() const
 void Preferences::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
+
+    if (mVesc) {
+        ui->useImperialBox->setChecked(vesc->useImperialUnits());
+
+        connect(mVesc, &VescInterface::useImperialUnitsChanged,
+                [this](bool useImperialUnits) {
+            ui->useImperialBox->setChecked(useImperialUnits);
+        });
+    }
 }
 
 void Preferences::setUseGamepadControl(bool useControl)
@@ -457,4 +466,12 @@ void Preferences::saveSettingsChanged()
     mLastScaling = mSettings.value("app_scale_factor", 1.0).toDouble();
     mLastIsDark = Utility::isDarkMode();
     mSettings.setValue("scripting/uploadContentEditor", ui->uploadContentEditorButton->isChecked());
+}
+
+void Preferences::on_useImperialBox_toggled(bool checked)
+{
+    if (mVesc) {
+        mVesc->setUseImperialUnits(checked);
+        mVesc->commands()->emitEmptySetupValues();
+    }
 }

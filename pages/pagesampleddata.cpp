@@ -63,8 +63,11 @@ PageSampledData::PageSampledData(QWidget *parent) :
     mDoReplot = false;
     mDoFilterReplot = false;
     mDoRescale = false;
-    mSamplesToWait = 0; // TODO: Use timeout instead?
+    mSamplesToWait = 0;
+    tmpSampleCnt = 0;
+    tmpSampleRetryCnt = 0;
 
+    mSampleGetTimer = new QTimer(this);
     mTimer = new QTimer(this);
     mTimer->start(20);
 
@@ -75,8 +78,8 @@ PageSampledData::PageSampledData(QWidget *parent) :
         plots[i]->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     }
 
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
+    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    connect(mSampleGetTimer, SIGNAL(timeout()), this, SLOT(sampleGetTimerSlot()));
 
     connect(ui->compDelayBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
     connect(ui->currentFilterFreqBox, SIGNAL(valueChanged(double)), this, SLOT(replotAll()));
@@ -487,32 +490,98 @@ void PageSampledData::timerSlot()
     }
 }
 
+void PageSampledData::sampleGetTimerSlot()
+{
+    tmpSampleRetryCnt++;
+
+    if (tmpSampleRetryCnt == 3) {
+        if (mVesc) {
+            mVesc->emitMessageDialog(tr("Sampled Data"),
+                                     tr("Getting samples timed out"),
+                                     false, false);
+        }
+        mSampleGetTimer->stop();
+        return;
+    }
+
+    for (int i = 0; i < mSamplesToWait; i++) {
+        if (tmpIndexVector.size() < i || tmpIndexVector.at(i) == -1) {
+            mVesc->commands()->samplePrint(DEBUG_SAMPLING_SEND_SINGLE_SAMPLE, i,
+                                           ui->decimationBox->value(), ui->rawBox->isChecked());
+        }
+    }
+}
+
 void PageSampledData::samplesReceived(QByteArray bytes)
 {
     VByteArray vb(bytes);
 
-    tmpCurr1Vector.append(vb.vbPopFrontDouble32Auto());
-    tmpCurr2Vector.append(vb.vbPopFrontDouble32Auto());
-
-    if (vb.size() >= 30) {
-        tmpCurr3Vector.append(vb.vbPopFrontDouble32Auto());
-    } else {
-        tmpCurr3Vector.append(-(tmpCurr1Vector.last() + tmpCurr2Vector.last()));
+    bool supportsSendSingleSample = false;
+    int sampleIndex = tmpIndexVector.size();
+    if (vb.size() >= 44) {
+        sampleIndex = vb.vbPopFrontInt16();
+        supportsSendSingleSample = true;
     }
 
-    tmpPh1Vector.append(vb.vbPopFrontDouble32Auto());
-    tmpPh2Vector.append(vb.vbPopFrontDouble32Auto());
-    tmpPh3Vector.append(vb.vbPopFrontDouble32Auto());
-    tmpVZeroVector.append(vb.vbPopFrontDouble32Auto());
-    tmpCurrTotVector.append(vb.vbPopFrontDouble32Auto());
-    tmpFSwVector.append(vb.vbPopFrontDouble32Auto());
-    tmpStatusArray.append(vb.vbPopFrontInt8());
-    tmpPhaseArray.append(vb.vbPopFrontInt8());
+    // Pad vectors with zeroes for missing samples
+    while (tmpIndexVector.size() <= sampleIndex) {
+        tmpIndexVector.append(-1);
+        tmpCurr1Vector.append(0.0);
+        tmpCurr2Vector.append(0.0);
+        tmpCurr3Vector.append(0.0);
+        tmpPh1Vector.append(0.0);
+        tmpPh2Vector.append(0.0);
+        tmpPh3Vector.append(0.0);
+        tmpVZeroVector.append(0.0);
+        tmpCurrTotVector.append(0.0);
+
+        if (tmpFSwVector.size() > 0) {
+            tmpFSwVector.append(tmpFSwVector.last());
+        } else {
+            tmpFSwVector.append(0.0);
+        }
+
+        tmpStatusArray.append(int(0));
+        tmpPhaseArray.append(int(0));
+    }
+
+    if (tmpIndexVector[sampleIndex] == -1) {
+        tmpSampleCnt++;
+    }
+
+    tmpIndexVector[sampleIndex] = sampleIndex;
+
+    tmpCurr1Vector[sampleIndex] = vb.vbPopFrontDouble32Auto();
+    tmpCurr2Vector[sampleIndex] = vb.vbPopFrontDouble32Auto();
+
+    if (vb.size() >= 30) {
+        tmpCurr3Vector[sampleIndex] = vb.vbPopFrontDouble32Auto();
+    } else {
+        tmpCurr3Vector[sampleIndex] = -(tmpCurr1Vector[sampleIndex] + tmpCurr2Vector[sampleIndex]);
+    }
+
+    tmpPh1Vector[sampleIndex] = vb.vbPopFrontDouble32Auto();
+    tmpPh2Vector[sampleIndex] = vb.vbPopFrontDouble32Auto();
+    tmpPh3Vector[sampleIndex] = vb.vbPopFrontDouble32Auto();
+    tmpVZeroVector[sampleIndex] = vb.vbPopFrontDouble32Auto();
+    tmpCurrTotVector[sampleIndex] = vb.vbPopFrontDouble32Auto();
+    tmpFSwVector[sampleIndex] = vb.vbPopFrontDouble32Auto();
+    tmpStatusArray[sampleIndex] = vb.vbPopFrontInt8();
+    tmpPhaseArray[sampleIndex] = vb.vbPopFrontInt8();
 
     double prog = double(tmpCurr1Vector.size()) / double(mSamplesToWait);
     ui->sampProgBar->setValue(prog * 100.0);
 
-    if (tmpCurr1Vector.size() == mSamplesToWait) {
+    if (supportsSendSingleSample) {
+        mSampleGetTimer->start(1000);
+        tmpSampleRetryCnt = 0;
+    } else {
+        tmpSampleCnt = tmpIndexVector.size();
+    }
+
+    if (tmpSampleCnt == mSamplesToWait) {
+        mSampleGetTimer->stop();
+
         curr1Vector = tmpCurr1Vector;
         curr2Vector = tmpCurr2Vector;
         curr3Vector = tmpCurr3Vector;
@@ -609,6 +678,8 @@ void PageSampledData::on_sampleLastButton_clicked()
 
 void PageSampledData::on_sampleStopButton_clicked()
 {
+    mSampleGetTimer->stop();
+
     if (mVesc) {
         mVesc->commands()->samplePrint(DEBUG_SAMPLING_OFF, ui->samplesBox->value(),
                                        ui->decimationBox->value(), ui->rawBox->isChecked());
@@ -644,7 +715,11 @@ void PageSampledData::on_rescaleButton_clicked()
 
 void PageSampledData::clearBuffers()
 {
-    mSampleInt = 0;
+    mSampleGetTimer->stop();
+
+    tmpSampleCnt = 0;
+    tmpSampleRetryCnt = 0;
+    tmpIndexVector.clear();
     tmpCurr1Vector.clear();
     tmpCurr2Vector.clear();
     tmpCurr3Vector.clear();

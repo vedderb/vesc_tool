@@ -42,6 +42,7 @@ public:
 
 private slots:
     void timerSlot();
+    void sampleGetTimerSlot();
     void samplesReceived(QByteArray bytes);
     void replotAll();
 
@@ -65,8 +66,7 @@ private:
     Ui::PageSampledData *ui;
     VescInterface *mVesc;
     QTimer *mTimer;
-
-    int mSampleInt;
+    QTimer *mSampleGetTimer;
 
     QVector<double> curr1Vector;
     QVector<double> curr2Vector;
@@ -80,6 +80,7 @@ private:
     QByteArray statusArray;
     QByteArray phaseArray;
 
+    QVector<int> tmpIndexVector;
     QVector<double> tmpCurr1Vector;
     QVector<double> tmpCurr2Vector;
     QVector<double> tmpCurr3Vector;
@@ -91,6 +92,8 @@ private:
     QVector<double> tmpFSwVector;
     QByteArray tmpStatusArray;
     QByteArray tmpPhaseArray;
+    int tmpSampleCnt;
+    int tmpSampleRetryCnt;
 
     bool mDoReplot;
     bool mDoRescale;

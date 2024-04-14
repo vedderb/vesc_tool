@@ -541,8 +541,8 @@ void PageSampledData::samplesReceived(QByteArray bytes)
             tmpFSwVector.append(0.0);
         }
 
-        tmpStatusArray.append(int(0));
-        tmpPhaseArray.append(int(0));
+        tmpStatusArray.append(char(0));
+        tmpPhaseArray.append(char(0));
     }
 
     if (tmpIndexVector[sampleIndex] == -1) {

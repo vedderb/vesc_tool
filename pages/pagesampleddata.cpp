@@ -505,7 +505,7 @@ void PageSampledData::sampleGetTimerSlot()
     }
 
     for (int i = 0; i < mSamplesToWait; i++) {
-        if (tmpIndexVector.size() < i || tmpIndexVector.at(i) == -1) {
+        if (tmpIndexVector.size() <= i || tmpIndexVector.at(i) == -1) {
             mVesc->commands()->samplePrint(DEBUG_SAMPLING_SEND_SINGLE_SAMPLE, i,
                                            ui->decimationBox->value(), ui->rawBox->isChecked());
         }

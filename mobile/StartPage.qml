@@ -252,6 +252,7 @@ Item {
                     }
 
                     ImageButton {
+                        id: backupConfButton
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         Layout.preferredWidth: 500
@@ -266,6 +267,7 @@ Item {
                     }
 
                     ImageButton {
+                        id: restoreConfButton
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         Layout.preferredWidth: 500
@@ -338,6 +340,17 @@ Item {
                         onClicked: {
                             packageDialog.open()
                         }
+                    }
+                }
+
+                Timer {
+                    id: toolsTimer
+                    interval: 100
+                    repeat: true
+                    running: true
+                    onTriggered: {
+                        restoreConfButton.enabled = VescIf.customConfigRxDone()
+                        backupConfButton.enabled = VescIf.customConfigRxDone()
                     }
                 }
             }

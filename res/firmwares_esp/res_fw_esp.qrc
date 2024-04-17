@@ -6,5 +6,8 @@
         <file>ESP32-C3/DevKitM-1/vesc_express.bin</file>
         <file>ESP32-C3/DevKitM-1/bootloader.bin</file>
         <file>ESP32-C3/DevKitM-1/partition-table.bin</file>
+        <file>ESP32-C3/STR365/bootloader.bin</file>
+        <file>ESP32-C3/STR365/partition-table.bin</file>
+        <file>ESP32-C3/STR365/vesc_express.bin</file>
     </qresource>
 </RCC>

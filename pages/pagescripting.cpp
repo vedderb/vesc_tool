@@ -308,9 +308,9 @@ void PageScripting::openRecentList()
         }
 
         mRecentFiles.removeAll(fileName);
-        mRecentFiles.append(fileName);
+        mRecentFiles.prepend(fileName);
         updateRecentList();
-        ui->recentList->setCurrentRow(ui->recentList->count() - 1);
+        ui->recentList->setCurrentRow(0);
 
         file.close();
     } else {
@@ -421,7 +421,7 @@ void PageScripting::makeEditorConnections(ScriptEditor *editor)
     });
     connect(editor, &ScriptEditor::fileOpened, [this](QString fileName) {
         mRecentFiles.removeAll(fileName);
-        mRecentFiles.append(fileName);
+        mRecentFiles.prepend(fileName);
         updateRecentList();
     });
     connect(editor, &ScriptEditor::fileSaved, [editor, this](QString fileName) {
@@ -430,7 +430,7 @@ void PageScripting::makeEditorConnections(ScriptEditor *editor)
         }
 
         mRecentFiles.removeAll(fileName);
-        mRecentFiles.append(fileName);
+        mRecentFiles.prepend(fileName);
         updateRecentList();
 
         setEditorClean(editor);

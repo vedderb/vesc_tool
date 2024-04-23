@@ -16,7 +16,7 @@
         (var a0 (+ (- y3 y2 y0) y1))
         (var a1 (- y0 y1 a0))
         (var a2 (- y2 y0))
-        
+
         (+ (* a0 mu mu2) (* a1 mu2) (* a2 mu) y1)
 })
 
@@ -25,7 +25,7 @@
         (var a0 (+ (* -0.5 y0) (* 1.5 y1) (* -1.5 y2) (* 0.5 y3)))
         (var a1 (+ y0 (* -2.5 y1) (* 2.0 y2) (* -0.5 y3)))
         (var a2 (+ (* -0.5 y0) (* 0.5 y2)))
-        
+
         (+ (* a0 mu mu2) (* a1 mu2) (* a2 mu) y1)
 })
 
@@ -55,7 +55,7 @@
                     (trunc (/ (- val p0) (- p1 p0)) 0.0 1.0)
             ))
         )
-        
+
         (fun y0 y1 y2 y3 mu)
 ))
 
@@ -106,7 +106,7 @@
         (var seq (append '(progn) (map (fn (x) expr) (range times))))
         (var start (systime))
         (var res (eval seq))
-        
+
         (* (/ (secs-since start) times) 1000)
 })
 

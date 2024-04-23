@@ -731,6 +731,10 @@ int main(int argc, char *argv[])
     }
 
     if (!fwPackIn.isEmpty()) {
+        if (!fwPackIn.endsWith(".bin", Qt::CaseInsensitive)) {
+            qWarning() << "Warning: Unexpected file extension for a firmware-file.";
+        }
+
         QFile fIn(fwPackIn);
         if (!fIn.open(QIODevice::ReadOnly)) {
             qWarning() << QString("Could not open %1 for reading.").arg(fwPackIn);
@@ -793,6 +797,10 @@ int main(int argc, char *argv[])
     }
 
     if (!lispPackIn.isEmpty()) {
+        if (!lispPackIn.endsWith(".lisp", Qt::CaseInsensitive)) {
+            qWarning() << "Warning: Unexpected file extension for a lisp-file.";
+        }
+
         QFile fIn(lispPackIn);
         if (!fIn.open(QIODevice::ReadOnly)) {
             qWarning() << QString("Could not open %1 for reading.").arg(lispPackIn);

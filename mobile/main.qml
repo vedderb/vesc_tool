@@ -308,6 +308,8 @@ ApplicationWindow {
         }
 
         Page {
+            id: rtDataPage
+
             PageIndicator {
                 count: rtSwipeView.count
                 currentIndex: rtSwipeView.currentIndex
@@ -439,6 +441,7 @@ ApplicationWindow {
         }
 
         Page {
+            id: bmsPage
             Loader {
                 anchors.fill: parent
                 asynchronous: true
@@ -823,33 +826,33 @@ ApplicationWindow {
                     mCommands.getValuesSetup()
                     mCommands.getImuData(0xFFFF)
 
-                    if (tabBar.currentIndex == (3 + indexOffset())) {
+                    if (swipeView.currentItem == bmsPage) {
                         mCommands.bmsGetValues()
                     }
                 } else {
-                    if ((tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0)) {
+                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 0) {
                         interval = 50
                         mCommands.getValues()
                     }
 
-                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1) {
+                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 1) {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getImuData(0x2)
                     }
 
-                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
+                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 2) {
                         interval = 20
                         mCommands.getImuData(0x1FF)
                     }
 
-                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 3) {
+                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 3) {
                         interval = 100
                         mCommands.getValuesSetupSelective(0x7E00)
                         mCommands.getStats(0xFFFFFFFF)
                     }
 
-                    if (tabBar.currentIndex == (3 + indexOffset())) {
+                    if (swipeView.currentItem == bmsPage) {
                         interval = 100
                         mCommands.bmsGetValues()
                     }

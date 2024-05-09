@@ -484,10 +484,12 @@
 <name>f-rm</name>
 <name>f-ls</name>
 <name>f-size</name>
+<name>f-rename</name>
 <name>f-fatinfo</name>
 <name>fw-erase</name>
 <name>fw-write</name>
 <name>fw-reboot</name>
+<name>fw-data</name>
 <name>lbm-erase</name>
 <name>lbm-write</name>
 <name>lbm-run</name>
@@ -501,5 +503,7 @@
 <name>color-add</name>
 <name>color-sub</name>
 <name>color-scale</name>
+<name>unzip</name>
+<name>zip-ls</name>
 </section>
 </root>

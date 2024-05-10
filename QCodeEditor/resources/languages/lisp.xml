@@ -134,6 +134,9 @@
 <name>ix</name>
 <name>take</name>
 <name>drop</name>
+<name>array-to-list</name>
+<name>mkarray</name>
+<name>list-to-array</name>
 <name>list</name>
 <name>append</name>
 <name>mod</name>

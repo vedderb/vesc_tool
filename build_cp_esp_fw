@@ -1,0 +1,50 @@
+#!/bin/bash -i
+
+set -e
+
+get_idf
+
+FWPATH="../../ESP32/vesc_express/"
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+mv $FWPATH/main/conf_general.h $FWPATH/main/conf_general_tmp.h
+
+# Express
+BOARD="$DIR/res/firmwares_esp/ESP32-C3/VESC Express"
+cd $FWPATH
+cp "$BOARD/conf_general.h" main/
+idf.py build
+cp build/vesc_express.bin "$BOARD"
+cp build/partition_table/partition-table.bin "$BOARD"
+cp build/bootloader/bootloader.bin "$BOARD"
+
+# Devkit
+BOARD="$DIR/res/firmwares_esp/ESP32-C3/DevKitM-1"
+cd $FWPATH
+cp "$BOARD/conf_general.h" main/
+idf.py build
+cp build/vesc_express.bin "$BOARD"
+cp build/partition_table/partition-table.bin "$BOARD"
+cp build/bootloader/bootloader.bin "$BOARD"
+
+# STR365
+BOARD="$DIR/res/firmwares_esp/ESP32-C3/STR365"
+cd $FWPATH
+cp "$BOARD/conf_general.h" main/
+idf.py build
+cp build/vesc_express.bin "$BOARD"
+cp build/partition_table/partition-table.bin "$BOARD"
+cp build/bootloader/bootloader.bin "$BOARD"
+
+# VBMS32
+BOARD="$DIR/res/firmwares_esp/ESP32-C3/VBMS32"
+cd $FWPATH
+cp "$BOARD/conf_general.h" main/
+idf.py build
+cp build/vesc_express.bin "$BOARD"
+cp build/partition_table/partition-table.bin "$BOARD"
+cp build/bootloader/bootloader.bin "$BOARD"
+
+mv $FWPATH/main/conf_general_tmp.h $FWPATH/main/conf_general.h
+rm -r $FWPATH/build
+

@@ -195,6 +195,8 @@ double ConfigParams::getParamDouble(const QString &name)
 
         if (p.type == CFG_T_DOUBLE) {
             retVal = p.valDouble;
+        } else if (p.type == CFG_T_INT) {
+            retVal = double(p.valInt);
         } else {
             qWarning() << name << "wrong type";
         }
@@ -214,6 +216,8 @@ int ConfigParams::getParamInt(const QString &name)
 
         if (p.type == CFG_T_INT || p.type == CFG_T_BITFIELD) {
             retVal = p.valInt;
+        } else if (p.type == CFG_T_DOUBLE) {
+            retVal = int(p.valDouble);
         } else {
             qWarning() << name << "wrong type";
         }

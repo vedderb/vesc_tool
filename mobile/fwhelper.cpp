@@ -61,6 +61,12 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/DevKitM-1");
     } else if (params.hw == "STR-DCDC") {
         hws.insert(params.hw, "://res/firmwares_custom_module/str-dcdc");
+    } else if (params.hw == "VBMS32") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VBMS32");
+    } else if (params.hw == "STR365 IO") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/STR365");
+    } else if (params.hw == "VDisp") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VDisp");
     }
 
     return hws;

@@ -248,6 +248,12 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         extraPath = "://res/firmwares_esp/ESP32-C3/DevKitM-1";
     } else if (params.hw == "STR-DCDC") {
         extraPath = "://res/firmwares_custom_module/str-dcdc";
+    } else if (params.hw == "VBMS32") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VBMS32";
+    } else if (params.hw == "STR365 IO") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/STR365";
+    } else if (params.hw == "VDisp") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VDisp";
     }
 
     if (!extraPath.isEmpty()) {

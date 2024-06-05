@@ -19,6 +19,7 @@
 <name>if</name>
 <name>cond</name>
 <name>match</name>
+<name>trap</name>
 <name>loop</name>
 <name>loopfor</name>
 <name>loopwhile</name>

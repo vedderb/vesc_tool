@@ -510,5 +510,17 @@
 <name>color-scale</name>
 <name>unzip</name>
 <name>zip-ls</name>
+<name>wifi-scan-networks</name>
+<name>wifi-connect</name>
+<name>wifi-disconnect</name>
+<name>wifi-status</name>
+<name>wifi-auto-reconnect</name>
+<name>wifi-ftm-measure</name>
+<name>tcp-connect</name>
+<name>tcp-close</name>
+<name>tcp-status</name>
+<name>tcp-send</name>
+<name>tcp-recv</name>
+<name>tcp-recv-to-char</name>
 </section>
 </root>

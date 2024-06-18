@@ -3252,6 +3252,7 @@ void VescInterface::timerSlot()
             }
 
             mDeserialFailedMessageShown = false;
+            mPacket->resetState();
         }
 
         emit portConnectedChanged();

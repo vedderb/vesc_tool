@@ -522,5 +522,8 @@
 <name>tcp-send</name>
 <name>tcp-recv</name>
 <name>tcp-recv-to-char</name>
+<name>connected-wifi</name>
+<name>connected-ble</name>
+<name>connected-usb</name>
 </section>
 </root>

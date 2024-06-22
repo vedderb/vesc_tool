@@ -473,6 +473,7 @@
 <name>as504x-angle</name>
 <name>sleep-deep</name>
 <name>sleep-config-wakeup-pin</name>
+<name>rtc-data</name>
 <name>canmsg-send</name>
 <name>canmsg-recv</name>
 <name>f-connect</name>

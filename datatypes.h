@@ -1249,6 +1249,7 @@ struct VescPackage {
 public:
     Q_PROPERTY(QString name MEMBER name)
     Q_PROPERTY(QString description MEMBER description)
+    Q_PROPERTY(QString description_md MEMBER description_md)
     Q_PROPERTY(QByteArray lispData MEMBER lispData)
     Q_PROPERTY(QString qmlFile MEMBER qmlFile)
     Q_PROPERTY(bool qmlIsFullscreen MEMBER qmlIsFullscreen)
@@ -1266,6 +1267,7 @@ public:
     QByteArray compressedData;
     QString name;
     QString description;
+    QString description_md;
     QByteArray lispData;
     QString qmlFile;
     bool qmlIsFullscreen;

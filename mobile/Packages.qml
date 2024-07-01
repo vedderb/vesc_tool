@@ -180,7 +180,12 @@ Item {
                                 text: "Info"
 
                                 onClicked: {
-                                    VescIf.emitMessageDialog(pkgName, Utility.md2html(pkgDescription), true, true)
+                                    var line1 = pkgDescription.slice(0, pkgDescription.indexOf("\n"))
+                                    if (line1.toUpperCase().includes("<!DOCTYPE HTML PUBLIC")) {
+                                        VescIf.emitMessageDialog(pkgName, pkgDescription, true, true)
+                                    } else {
+                                        VescIf.emitMessageDialog(pkgName, Utility.md2html(pkgDescription), true, true)
+                                    }
                                 }
                             }
                         }

@@ -701,6 +701,13 @@ QByteArray CodeLoader::packVescPackage(VescPackage pkg)
         data.append(dataRaw);
     }
 
+    if (!pkg.description_md.isEmpty()) {
+        auto dataRaw = pkg.description_md.toUtf8();
+        data.vbAppendString("description_md");
+        data.vbAppendInt32(dataRaw.size());
+        data.append(dataRaw);
+    }
+
     if (!pkg.lispData.isEmpty()) {
         data.vbAppendString("lispData");
         data.vbAppendInt32(pkg.lispData.size());
@@ -755,6 +762,11 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
             auto dataRaw = vb.left(len);
             vb.remove(0, len);
             pkg.description = QString::fromUtf8(dataRaw);
+        } else if (name == "description_md") {
+            auto len = vb.vbPopFrontInt32();
+            auto dataRaw = vb.left(len);
+            vb.remove(0, len);
+            pkg.description_md = QString::fromUtf8(dataRaw);
         } else if (name == "lispData") {
             auto len = vb.vbPopFrontInt32();
             auto dataRaw = vb.left(len);

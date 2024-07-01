@@ -862,7 +862,8 @@ int main(int argc, char *argv[])
             f.close();
 
             pkg.name = name;
-            pkg.description = desc;
+            pkg.description_md = desc;
+            pkg.description = Utility::md2html(desc);
         } else {
             QFile f(pkgPath);
             if (!f.open(QIODevice::ReadOnly)) {

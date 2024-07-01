@@ -218,7 +218,8 @@ void PageVescPackage::on_saveButton_clicked()
     }
 
     pkg.name = ui->nameEdit->text();
-    pkg.description = ui->descriptionEdit->document()->toPlainText();
+    pkg.description_md = ui->descriptionEdit->document()->toPlainText();
+    pkg.description = Utility::md2html(pkg.description_md);
 
     file.write(mLoader.packVescPackage(pkg));
     file.close();
@@ -280,13 +281,17 @@ void PageVescPackage::on_outputRefreshButton_clicked()
         return;
     }
 
-    QString line1 = QTextStream(&pkg.description).readLine();
-    if (line1.contains("<!DOCTYPE HTML PUBLIC", Qt::CaseInsensitive)) {
-        ui->descriptionEdit->document()->setHtml(pkg.description);
-        QString md = ui->descriptionEdit->document()->toMarkdown();
-        ui->descriptionEdit->document()->setPlainText(md);
+    if (!pkg.description_md.isEmpty()) {
+        ui->descriptionEdit->document()->setPlainText(pkg.description_md);
     } else {
-        ui->descriptionEdit->document()->setPlainText(pkg.description);
+        QString line1 = QTextStream(&pkg.description).readLine();
+        if (line1.contains("<!DOCTYPE HTML PUBLIC", Qt::CaseInsensitive)) {
+            ui->descriptionEdit->document()->setHtml(pkg.description);
+            QString md = ui->descriptionEdit->document()->toMarkdown();
+            ui->descriptionEdit->document()->setPlainText(md);
+        } else {
+            ui->descriptionEdit->document()->setPlainText(pkg.description);
+        }
     }
 
     mDescriptionUpdated = true;
@@ -397,7 +402,14 @@ void PageVescPackage::reloadArchive()
 void PageVescPackage::packageSelected(VescPackage pkg)
 {
     mCurrentPkg = pkg;
-    ui->storeBrowser->document()->setHtml(Utility::md2html(pkg.description));
+
+    QString line1 = QTextStream(&pkg.description).readLine();
+    if (line1.contains("<!DOCTYPE HTML PUBLIC", Qt::CaseInsensitive)) {
+        ui->storeBrowser->document()->setHtml(pkg.description);
+    } else {
+        ui->storeBrowser->document()->setHtml(Utility::md2html(pkg.description));
+    }
+
     ui->installButton->setEnabled(!pkg.isLibrary);
     if (ui->installButton->isEnabled()) {
         ui->installButton->setToolTip("");

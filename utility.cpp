@@ -2342,7 +2342,11 @@ QString Utility::md2html(QString md)
     std::shared_ptr<maddy::Parser> parser = std::make_shared<maddy::Parser>(config);
 
     std::stringstream markdownInput(md.toStdString());
-    return QString::fromStdString(parser->Parse(markdownInput));
+
+    QString result = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n";
+    result.append(QString::fromStdString(parser->Parse(markdownInput)));
+
+    return result;
 }
 
 void Utility::setDarkMode(bool isDarkSetting)

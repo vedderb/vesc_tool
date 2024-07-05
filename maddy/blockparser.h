@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------------
 
 #include <functional>
+#include <memory>
 #include <sstream>
 #include <string>
 // windows compatibility includes
@@ -119,6 +120,12 @@ public:
     return this->result;
   }
 
+  std::string
+  GetReparseLine()
+  {
+    return this->reparseLine;
+  }
+
   /**
    * Clear
    *
@@ -138,6 +145,7 @@ public:
 protected:
   std::stringstream result;
   std::shared_ptr<BlockParser> childParser;
+  std::string reparseLine;
 
   virtual bool isInlineBlockAllowed() const = 0;
   virtual bool isLineParserAllowed() const = 0;

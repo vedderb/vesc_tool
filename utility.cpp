@@ -2338,7 +2338,7 @@ bool Utility::downloadUrlEventloop(QString path, QString dest)
 QString Utility::md2html(QString md)
 {
     std::shared_ptr<maddy::ParserConfig> config = std::make_shared<maddy::ParserConfig>();
-    config->enabledParsers = maddy::types::ALL;
+    config->enabledParsers = maddy::types::DEFAULT;
     std::shared_ptr<maddy::Parser> parser = std::make_shared<maddy::Parser>(config);
 
     std::stringstream markdownInput(md.toStdString());

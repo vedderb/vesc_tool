@@ -9,6 +9,7 @@
 #include <memory>
 #include <functional>
 #include <string>
+#include <QDebug>
 
 #include "maddy/parserconfig.h"
 
@@ -158,23 +159,34 @@ public:
     std::string result = "";
     std::shared_ptr<BlockParser> currentBlockParser = nullptr;
 
-    for (std::string line; std::getline(markdown, line);)
-    {
-      if (!currentBlockParser)
-      {
-        currentBlockParser = getBlockParserForLine(line);
-      }
+    for (std::string line; std::getline(markdown, line);) {
+        bool reparse = true;
 
-      if (currentBlockParser)
-      {
-        currentBlockParser->AddLine(line);
+        while (reparse) {
+            reparse = false;
 
-        if (currentBlockParser->IsFinished())
-        {
-          result += currentBlockParser->GetResult().str();
-          currentBlockParser = nullptr;
+            if (!currentBlockParser)
+            {
+                currentBlockParser = getBlockParserForLine(line);
+            }
+
+            if (currentBlockParser)
+            {
+                currentBlockParser->AddLine(line);
+
+                if (currentBlockParser->IsFinished())
+                {
+                    result += currentBlockParser->GetResult().str();
+
+                    if (!currentBlockParser->GetReparseLine().empty()) {
+                        reparse = true;
+                        line = currentBlockParser->GetReparseLine();
+                    }
+
+                    currentBlockParser = nullptr;
+                }
+            }
         }
-      }
     }
 
     // make sure, that all parsers are finished

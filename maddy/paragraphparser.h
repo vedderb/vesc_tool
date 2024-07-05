@@ -8,8 +8,18 @@
 
 #include <functional>
 #include <string>
+#include <QDebug>
 
 #include "maddy/blockparser.h"
+#include "maddy/codeblockparser.h"
+#include "maddy/headlineparser.h"
+#include "maddy/horizontallineparser.h"
+#include "maddy/quoteparser.h"
+#include "maddy/tableparser.h"
+#include "maddy/checklistparser.h"
+#include "maddy/orderedlistparser.h"
+#include "maddy/unorderedlistparser.h"
+#include "maddy/htmlparser.h"
 
 // -----------------------------------------------------------------------------
 
@@ -87,42 +97,48 @@ protected:
     return true;
   }
 
-  void
-  parseBlock(std::string& line) override
-  {
-    if (this->isEnabled && !this->isStarted)
-    {
-      line = "<p>" + line + " ";
-      this->isStarted = true;
-      return;
-    }
-    else if (!this->isEnabled && !this->isStarted)
-    {
-      line += " ";
-      this->isStarted = true;
-      return;
-    }
+  void parseBlock(std::string& line) override {
+      // Check if another parser should take over
+      if (this->isStarted && (
+                  maddy::CodeBlockParser::IsStartingLine(line) ||
+                  maddy::HeadlineParser::IsStartingLine(line) ||
+                  maddy::HorizontalLineParser::IsStartingLine(line) ||
+                  maddy::QuoteParser::IsStartingLine(line) ||
+                  maddy::TableParser::IsStartingLine(line) ||
+                  maddy::ChecklistParser::IsStartingLine(line) ||
+                  maddy::OrderedListParser::IsStartingLine(line) ||
+                  maddy::UnorderedListParser::IsStartingLine(line) ||
+                  maddy::HtmlParser::IsStartingLine(line)
+                  )) {
+          this->reparseLine = line;
+          line = this->isEnabled ? "</p>" : "<br/>";
+          this->isFinished = true;
+          return;
+      }
 
-    if (this->isEnabled && line.empty())
-    {
-      line += "</p>";
-      this->isFinished = true;
-      return;
-    }
-    else if (!this->isEnabled && line.empty())
-    {
-      line += "<br/>";
-      this->isFinished = true;
-      return;
-    }
+      if (!this->isStarted) {
+          if (this->isEnabled) {
+              line = "<p>" + line + " ";
+          } else {
+              line += " ";
+          }
 
-    line += " ";
+          this->isStarted = true;
+      } else {
+          if (line.empty()) {
+              line += this->isEnabled ? "</p>" : "<br/>";
+              this->isFinished = true;
+          } else {
+              line += " ";
+          }
+      }
   }
 
 private:
   bool isStarted;
   bool isFinished;
   bool isEnabled;
+
 }; // class ParagraphParser
 
 // -----------------------------------------------------------------------------

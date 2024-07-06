@@ -3813,13 +3813,13 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                     auto confData = f.readAll();
                     f.close();
 
-                    if (!mCustomConfigs.last()->loadCompressedParamsXml(confData)) {
-                        readConfigsOk = false;
-                        break;
+                    if (mCustomConfigs.last()->loadCompressedParamsXml(confData)) {
+                        emitStatusMessage(QString("Got cached %1").arg(mCustomConfigs.last()->getLongName("hw_name")), true);
+                        continue;
+                    } else {
+                        mCustomConfigs.last()->deleteLater();
+                        mCustomConfigs.removeLast();
                     }
-
-                    emitStatusMessage(QString("Got cached %1").arg(mCustomConfigs.last()->getLongName("hw_name")), true);
-                    continue;
                 }
             }
 

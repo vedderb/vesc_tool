@@ -991,18 +991,33 @@ ApplicationWindow {
         }
     }
 
-    function updateConfCustom () {
-        if (VescIf.isPortConnected() && VescIf.customConfig(0) !== null) {
-            swipeView.insertItem(4, confCustomPage)
-            tabBar.insertItem(4, confCustomButton)
-            confCustomPage.visible = true
-            confCustomLoader.item.reloadConfig()
-            confCustomButton.text = VescIf.customConfig(0).getLongName("hw_name")
-        } else {
-            confCustomPage.visible = false
-            confCustomPage.parent = null
-            confCustomButton.parent = null
+    Timer {
+        id: confCustomTimer
+        running: false
+        triggeredOnStart: true
+        interval: 500
+        repeat: true
+        onTriggered: {
+            if (confCustomLoader.status == Loader.Ready) {
+                stop()
+
+                if (VescIf.isPortConnected() && VescIf.customConfig(0) !== null) {
+                    swipeView.insertItem(4, confCustomPage)
+                    tabBar.insertItem(4, confCustomButton)
+                    confCustomPage.visible = true
+                    confCustomLoader.item.reloadConfig()
+                    confCustomButton.text = VescIf.customConfig(0).getLongName("hw_name")
+                } else {
+                    confCustomPage.visible = false
+                    confCustomPage.parent = null
+                    confCustomButton.parent = null
+                }
+            }
         }
+    }
+
+    function updateConfCustom () {
+        confCustomTimer.start()
     }
 
     function indexOffset() {

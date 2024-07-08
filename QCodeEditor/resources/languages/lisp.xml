@@ -350,6 +350,7 @@
 <name>i2c-start</name>
 <name>i2c-tx-rx</name>
 <name>i2c-restore</name>
+<name>i2c-detect-addr</name>
 <name>imu-start-lsm6</name>
 <name>imu-stop</name>
 <name>gpio-configure</name>

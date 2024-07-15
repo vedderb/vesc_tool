@@ -366,6 +366,8 @@
 <name>str-to-lower</name>
 <name>str-to-upper</name>
 <name>str-cmp</name>
+<name>str-find</name>
+<name>str-join</name>
 <name>conf-set</name>
 <name>conf-get</name>
 <name>conf-store</name>
@@ -401,7 +403,6 @@
 <name>bufclear</name>
 <name>bufcpy</name>
 <name>bufset-bit</name>
-<name>buf-find</name>
 <name>buf-resize</name>
 <name>load-native-lib</name>
 <name>unload-native-lib</name>

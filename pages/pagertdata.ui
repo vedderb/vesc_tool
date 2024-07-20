@@ -238,16 +238,6 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab_7">
-        <attribute name="title">
-         <string>Experiment</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_10">
-         <item>
-          <widget class="ExperimentPlot" name="experimentPlot" native="true"/>
-         </item>
-        </layout>
-       </widget>
       </widget>
      </item>
      <item>
@@ -472,12 +462,6 @@
    <class>RtDataText</class>
    <extends>QWidget</extends>
    <header>widgets/rtdatatext.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ExperimentPlot</class>
-   <extends>QWidget</extends>
-   <header>widgets/experimentplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

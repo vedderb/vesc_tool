@@ -31,6 +31,7 @@
 #include <QProgressDialog>
 #include "parametereditor.h"
 #include "startupwizard.h"
+#include "widgets/experimentplot.h"
 #include "widgets/helpdialog.h"
 #include "utility.h"
 #include "widgets/paramdialog.h"
@@ -389,6 +390,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("data_sampled"))->setHidden(true);
         }
     });
@@ -1567,6 +1569,12 @@ void MainWindow::reloadPages()
     addPageItem(tr("Sampled Data"),  theme + "icons/Line Chart-96.png", "", false, true);
     mPageNameIdList.insert("data_sampled", ui->pageList->count() - 1);
 
+    auto experimentPlot = new ExperimentPlot(this);
+    experimentPlot->setVesc(mVesc);
+    ui->pageWidget->addWidget(experimentPlot);
+    addPageItem(tr("Experiment Plot"),  theme + "icons/rt_off.png", "", false, true);
+    mPageNameIdList.insert("data_experiment", ui->pageList->count() - 1);
+
     mPageImu = new PageImu(this);
     mPageImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageImu);
@@ -1656,6 +1664,7 @@ void MainWindow::reloadPages()
      * app_custom_config_2
      * data_rt
      * data_sampled
+     * data_experiment
      * data_imu
      * data_bms
      */

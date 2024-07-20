@@ -203,7 +203,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>1</valDouble>
+            <valDouble>0.005</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>7</vTx>
@@ -1111,7 +1111,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.03</valDouble>
+            <valDouble>0.0123</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1133,7 +1133,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>50</valDouble>
+            <valDouble>11.85</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1168,7 +1168,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>25000</valDouble>
+            <valDouble>30000</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> kHz</suffix>
             <vTx>9</vTx>
@@ -1365,13 +1365,13 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>7e-06</valDouble>
+            <valDouble>1.227e-05</valDouble>
             <vTxDoubleScale>1e+08</vTxDoubleScale>
             <suffix> µH</suffix>
             <vTx>9</vTx>
         </foc_motor_l>
         <foc_motor_ld_lq_diff>
-            <longName>Motor Inductance Difference (Ld - Lq)</longName>
+            <longName>Motor Inductance Difference (Lq - Ld)</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -1387,7 +1387,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-10</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>3.77e-06</valDouble>
             <vTxDoubleScale>1e+08</vTxDoubleScale>
             <suffix> µH</suffix>
             <vTx>9</vTx>
@@ -1409,7 +1409,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.015</valDouble>
+            <valDouble>0.0118</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix> mΩ</suffix>
             <vTx>9</vTx>
@@ -1431,7 +1431,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.00245</valDouble>
+            <valDouble>0.004014</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix> mWb</suffix>
             <vTx>9</vTx>
@@ -1453,7 +1453,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>9e+07</valDouble>
+            <valDouble>6.206e+07</valDouble>
             <vTxDoubleScale>0.01</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1526,7 +1526,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>10</valDouble>
+            <valDouble>50</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1548,7 +1548,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>200</valDouble>
+            <valDouble>1000</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1594,7 +1594,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
-            <valDouble>400</valDouble>
+            <valDouble>2500</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1616,7 +1616,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
-            <valDouble>400</valDouble>
+            <valDouble>1500</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1644,7 +1644,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.1</valDouble>
+            <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>7</vTx>
@@ -1754,7 +1754,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.05</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.1</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> S</suffix>
             <vTx>7</vTx>
@@ -1776,7 +1776,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.05</stepDouble>
-            <valDouble>0.1</valDouble>
+            <valDouble>0.05</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> S</suffix>
             <vTx>7</vTx>
@@ -2033,7 +2033,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
-            <valDouble>1000</valDouble>
+            <valDouble>2500</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2247,7 +2247,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_CC_DECOUPLING_CROSS_BEMF&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Both options above are enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_CC_DECOUPLING</cDefine>
-            <valInt>2</valInt>
+            <valInt>0</valInt>
             <enumNames>FOC_CC_DECOUPLING_DISABLED</enumNames>
             <enumNames>FOC_CC_DECOUPLING_CROSS</enumNames>
             <enumNames>FOC_CC_DECOUPLING_BEMF</enumNames>
@@ -2274,7 +2274,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXLEMMING_LAMBDA_COMP&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Same as the others, but with flux linkage tracking. The flux linkage tracker uses the observer gain for both observers, but it is less critical to get it right here as the flux linkage is mostly DC (unless the current is high and the motor starts to saturate).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_OBSERVER_TYPE</cDefine>
-            <valInt>0</valInt>
+            <valInt>3</valInt>
             <enumNames>FOC_OBSERVER_ORTEGA_ORIGINAL</enumNames>
             <enumNames>FOC_OBSERVER_MXLEMMING</enumNames>
             <enumNames>FOC_OBSERVER_ORTEGA_LAMBDA_COMP</enumNames>
@@ -2343,7 +2343,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>5</valDouble>
+            <valDouble>6</valDouble>
             <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2365,7 +2365,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.4</valDouble>
+            <valDouble>0.3</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>7</vTx>
@@ -2409,7 +2409,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.5</stepDouble>
-            <valDouble>2</valDouble>
+            <valDouble>0</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> A</suffix>
             <vTx>7</vTx>
@@ -2431,7 +2431,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
-            <valDouble>2000</valDouble>
+            <valDouble>3000</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2452,7 +2452,7 @@ p, li { white-space: pre-wrap; }
             <minInt>2</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>65</valInt>
+            <valInt>5</valInt>
             <suffix></suffix>
             <vTx>3</vTx>
         </foc_hfi_start_samples>
@@ -2524,7 +2524,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>2048</valDouble>
+            <valDouble>2047.39</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2546,7 +2546,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>2048</valDouble>
+            <valDouble>2048.29</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2568,7 +2568,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>2048</valDouble>
+            <valDouble>2048.89</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2590,7 +2590,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.0002</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2612,7 +2612,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.0006</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2634,7 +2634,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>-0.0009</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2656,7 +2656,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.0005</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2678,7 +2678,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>-0.0003</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2700,7 +2700,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>-0.0002</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2727,7 +2727,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Disable the phase filter fault code. This can be useful if the phase filter fault seems to trigger for no reason on some difficult motors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_PHASE_FILTER_DISABLE_FAULT</cDefine>
-            <valInt>0</valInt>
+            <valInt>1</valInt>
         </foc_phase_filter_disable_fault>
         <foc_phase_filter_max_erpm>
             <longName>Maximum ERPM for phase filters</longName>
@@ -2746,7 +2746,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>10</stepDouble>
-            <valDouble>10000</valDouble>
+            <valDouble>4000</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> ERPM</suffix>
             <vTx>9</vTx>
@@ -2862,7 +2862,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>10</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.2</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> ms</suffix>
             <vTx>7</vTx>
@@ -2884,10 +2884,22 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use the observer position. This is usually less noisy than hall sensors or hfi, but it can drift slowly at 0 speed.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_SPEED_SOURCE</cDefine>
-            <valInt>1</valInt>
+            <valInt>0</valInt>
             <enumNames>Corrected Position</enumNames>
             <enumNames>Observer</enumNames>
         </foc_speed_soure>
+        <foc_short_ls_on_zero_duty>
+            <longName>Short Low-Side FETs on Zero Duty</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Short low-side FETs on 0 duty cycle. This will give a bit more braking torque when the motor is standing still and braking is requested. It also uses less power to drive the FETs. The downsides are that the low-side FETs will take all load by themselves and that the transition to and from full brake will be a bit more rough.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_SHORT_LS_ON_ZERO_DUTY</cDefine>
+            <valInt>0</valInt>
+        </foc_short_ls_on_zero_duty>
         <sp_pid_loop_rate>
             <longName>PID Loop Rate</longName>
             <type>4</type>
@@ -3094,7 +3106,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.001</stepDouble>
-            <valDouble>0.03</valDouble>
+            <valDouble>0.025</valDouble>
             <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -3138,7 +3150,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0001</stepDouble>
-            <valDouble>0.0004</valDouble>
+            <valDouble>0</valDouble>
             <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -3182,7 +3194,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0001</stepDouble>
-            <valDouble>0.0004</valDouble>
+            <valDouble>0.00035</valDouble>
             <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -3675,7 +3687,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>16</valInt>
+            <valInt>19</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </m_drv8301_oc_adj>
@@ -3895,7 +3907,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>1</valInt>
+            <valInt>3</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </m_hall_extra_samples>
@@ -3915,7 +3927,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>1</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>1</valInt>
+            <valInt>45</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </m_batt_filter_const>
@@ -4272,7 +4284,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;VCell Max&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Decrease the input regen current as the highest cell voltage gets too high.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_BMS_LIMIT_MODE</cDefine>
-            <valInt>0</valInt>
+            <valInt>3</valInt>
             <enumNames>Overtemp</enumNames>
             <enumNames>SOC</enumNames>
             <enumNames>VCell Min</enumNames>
@@ -4631,6 +4643,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_fw_ramp_time</ser>
         <ser>foc_fw_q_current_factor</ser>
         <ser>foc_speed_soure</ser>
+        <ser>foc_short_ls_on_zero_duty</ser>
         <ser>sp_pid_loop_rate</ser>
         <ser>s_pid_kp</ser>
         <ser>s_pid_ki</ser>
@@ -5016,6 +5029,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_mtpa_mode</param>
                     <param>foc_observer_offset</param>
                     <param>foc_speed_soure</param>
+                    <param>foc_short_ls_on_zero_duty</param>
                 </subgroupParams>
             </subgroup>
         </group>

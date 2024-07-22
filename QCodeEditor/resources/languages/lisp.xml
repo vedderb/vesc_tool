@@ -199,6 +199,7 @@
 <name>send-bms-can</name>
 <name>set-bms-chg-allowed</name>
 <name>bms-force-balance</name>
+<name>bms-zero-offset</name>
 <name>get-adc</name>
 <name>override-temp-motor</name>
 <name>get-adc-decoded</name>

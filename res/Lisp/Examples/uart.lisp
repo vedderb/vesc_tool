@@ -1,4 +1,8 @@
-(uart-start 115200)
+; Express has a different UART start function, see the documentation for details
+(if (eq (sysinfo 'hw-type) 'hw-express)
+    (uart-start 1 20 21 115200)
+    (uart-start 115200)
+)
 
 (define uart-buf (array-create 100))
 

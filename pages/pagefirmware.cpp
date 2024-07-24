@@ -553,6 +553,14 @@ void PageFirmware::uploadFw(bool allOverCan)
                                       tr("The selected file name seems to be invalid."));
                 return;
             }
+
+            if (ui->fwCustomBlBox->isChecked() && mVesc->commands()->getLimitedSupportsEraseBootloader()) {
+                QListWidgetItem *item = ui->blList->currentItem();
+
+                if (item) {
+                    fileBl.setFileName(item->data(Qt::UserRole).toString());
+                }
+            }
         } else {
             QListWidgetItem *item = ui->blList->currentItem();
 

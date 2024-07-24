@@ -146,6 +146,8 @@ public:
 
     Q_INVOKABLE static QString md2html(QString md);
 
+    Q_INVOKABLE QByteArray readAllFromFile(const QString &filePath);
+
 signals:
 
 public slots:

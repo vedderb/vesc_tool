@@ -114,7 +114,7 @@ bool Esp32Flash::disconnectEsp()
     return true;
 }
 
-bool Esp32Flash::flashFirmware(QByteArray data, size_t address)
+bool Esp32Flash::flashFirmware(QByteArray data, quint64 address)
 {
 #ifdef HAS_SERIALPORT
     if (!sPort->isOpen()) {
@@ -187,7 +187,7 @@ bool Esp32Flash::flashFirmware(QByteArray data, size_t address)
 #endif
 }
 
-bool Esp32Flash::eraseFlash(size_t size, size_t address)
+bool Esp32Flash::eraseFlash(quint64 size, quint64 address)
 {
 #ifdef HAS_SERIALPORT
     esp_loader_error_t err = esp_loader_flash_start(address, size, 1024);

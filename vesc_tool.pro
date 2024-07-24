@@ -251,6 +251,12 @@ HEADERS  += mainwindow.h \
     tcpserversimple.h \
     hexfile.h
 
+unix: {
+!ios: {
+    HEADERS += systemcommandexecutor.h
+}
+}
+
 FORMS    += mainwindow.ui \
     boardsetupwindow.ui \
     parametereditor.ui \

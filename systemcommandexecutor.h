@@ -18,18 +18,31 @@ public:
 
         process.setReadChannel(QProcess::StandardOutput);
 
-        auto conn = connect(&process, SIGNAL(finished()), &loop, SLOT(quit()));
-        QTimer::singleShot(0, [&, command]() {
-            process.start("sh", QStringList() << "-c" << command);
+        auto conn1 = connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+        auto conn2 = connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+        auto conn3 = connect(&process, &QProcess::readyReadStandardOutput, [&]() {
+            emit processOutput(QString::fromUtf8(process.readAllStandardOutput()));
+        });
+        auto conn4 = connect(&process, &QProcess::readyReadStandardError, [&]() {
+            emit processOutput(QString::fromUtf8(process.readAllStandardError()));
         });
 
-        auto conn2 = connect(&process, &QIODevice::readyRead, [&]() {
-            emit processOutput(QString::fromUtf8(process.readAll()));
-        });
+        process.start("sh", QStringList() << "-c" << command);
+        
+        if (!process.waitForStarted()) {
+            disconnect(conn1);
+            disconnect(conn2);
+            disconnect(conn3);
+            disconnect(conn4);
+            return "Failed to start process";
+        }
 
         loop.exec();
-        disconnect(conn);
+
+        disconnect(conn1);
         disconnect(conn2);
+        disconnect(conn3);
+        disconnect(conn4);
 
         QString output = process.readAllStandardOutput();
         QString errorOutput = process.readAllStandardError();

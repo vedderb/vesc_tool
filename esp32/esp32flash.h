@@ -35,14 +35,14 @@ public:
     explicit Esp32Flash(QObject *parent = nullptr);
     ~Esp32Flash();
 
-    bool connectEsp(QString port);
-    bool disconnectEsp();
-    bool flashFirmware(QByteArray data, size_t address);
-    bool eraseFlash(size_t size, size_t address);
-    QString espPort();
-    bool isBuiltinUsb();
-    bool isEspConnected();
-    target_chip_t getTarget();
+    Q_INVOKABLE bool connectEsp(QString port);
+    Q_INVOKABLE bool disconnectEsp();
+    Q_INVOKABLE bool flashFirmware(QByteArray data, quint64 address);
+    Q_INVOKABLE bool eraseFlash(quint64 size, quint64 address);
+    Q_INVOKABLE QString espPort();
+    Q_INVOKABLE bool isBuiltinUsb();
+    Q_INVOKABLE bool isEspConnected();
+    Q_INVOKABLE target_chip_t getTarget();
 
 signals:
     void flashProgress(double prog);

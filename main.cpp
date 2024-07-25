@@ -51,6 +51,7 @@
 
 #ifdef Q_OS_LINUX
 #include <signal.h>
+#include <systemcommandexecutor.h>
 #endif
 
 #ifndef USE_MOBILE
@@ -244,6 +245,9 @@ int main(int argc, char *argv[])
     qmlRegisterType<TcpHub>("Vedder.vesc.tcphub", 1, 0, "TcpHub");
     qmlRegisterType<CodeLoader>("Vedder.vesc.codeloader", 1, 0, "CodeLoader");
     qmlRegisterType<QMiniMp3>("Vedder.vesc.qminimp3", 1, 0, "QMiniMp3");
+#ifdef Q_OS_LINUX
+    qmlRegisterType<SystemCommandExecutor>("Vedder.vesc.syscmd", 1, 0, "SysCmd");
+#endif
 
     qRegisterMetaType<VSerialInfo_t>();
     qRegisterMetaType<MCCONF_TEMP>();

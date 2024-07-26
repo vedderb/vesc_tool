@@ -254,6 +254,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         extraPath = "://res/firmwares_esp/ESP32-C3/STR365";
     } else if (params.hw == "VDisp") {
         extraPath = "://res/firmwares_esp/ESP32-C3/VDisp";
+    } else if (params.hw == "VDisp Dual") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VDisp Dual";
     }
 
     if (!extraPath.isEmpty()) {

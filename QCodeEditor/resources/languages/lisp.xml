@@ -357,6 +357,8 @@
 <name>gpio-configure</name>
 <name>gpio-write</name>
 <name>gpio-read</name>
+<name>gpio-hold</name>
+<name>gpio-hold-deepsleep</name>
 <name>str-from-n</name>
 <name>str-merge</name>
 <name>str-to-i</name>
@@ -475,6 +477,7 @@
 <name>as504x-deinit</name>
 <name>as504x-angle</name>
 <name>sleep-deep</name>
+<name>sleep-light</name>
 <name>sleep-config-wakeup-pin</name>
 <name>rtc-data</name>
 <name>canmsg-send</name>
@@ -520,6 +523,8 @@
 <name>wifi-status</name>
 <name>wifi-auto-reconnect</name>
 <name>wifi-ftm-measure</name>
+<name>wifi-stop</name>
+<name>wifi-start</name>
 <name>tcp-connect</name>
 <name>tcp-close</name>
 <name>tcp-status</name>

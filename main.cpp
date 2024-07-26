@@ -1125,8 +1125,8 @@ int main(int argc, char *argv[])
                                 qDebug() << "Lisp upload OK!";
                                 vesc->commands()->lispSetRunning(1);
                                 Utility::sleepWithEventLoop(100);
-                            } else
-                                qWarning() << "Could not upload lisp";{
+                            } else {
+                                qWarning() << "Could not upload lisp";
                                 exitCode = -11;
                             }
                         } else {

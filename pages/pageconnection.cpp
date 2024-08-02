@@ -512,7 +512,7 @@ void PageConnection::on_bleSetNameButton_clicked()
 #endif
 }
 
-void PageConnection::on_canFwdBox_activated()
+void PageConnection::on_canFwdBox_activated(int)
 {
     if (mVesc && ui->canFwdBox->count() > 0) {
         mVesc->commands()->setCanSendId(quint32(ui->canFwdBox->currentData().toInt()));

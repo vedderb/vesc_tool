@@ -65,7 +65,7 @@ private slots:
     void on_bleDisconnectButton_clicked();
     void on_bleConnectButton_clicked();
     void on_bleSetNameButton_clicked();
-    void on_canFwdBox_activated();
+    void on_canFwdBox_activated(int);
     void on_canRefreshButton_clicked();
     void on_canDefaultButton_clicked();
     void on_pairConnectedButton_clicked();

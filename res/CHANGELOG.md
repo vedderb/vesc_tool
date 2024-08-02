@@ -19,6 +19,7 @@
 * Always remove trailing whitespaces on save in CodeEditor.
 * Comment block fix on windows and general improvements.
 * Added custom config and QML cache for faster connecting and CAN device switching.
+* Added option to reconnect to last CAN-device on connect.
 
 ---
 

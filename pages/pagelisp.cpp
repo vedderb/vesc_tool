@@ -348,6 +348,11 @@ bool PageLisp::hasUnsavedTabs()
     return false;
 }
 
+void PageLisp::disablePolling()
+{
+    ui->pollOffButton->setChecked(true);
+}
+
 void PageLisp::updateRecentList()
 {
     ui->recentList->clear();

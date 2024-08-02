@@ -32,6 +32,7 @@ Item {
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
     property int animationSpeed: 500
+    property int canIdAtScan: -1
 
     Component.onCompleted: {
         scanButton.enabled = VescIf.isPortConnected()
@@ -54,6 +55,20 @@ Item {
                 canList.currentIndex = 0;
                 canModel.clear()
                 scanButton.enabled = VescIf.isPortConnected()
+            } else {
+                if (mCommands.getSendCan()) {
+                    for (var i = 0; i < canModel.count;i++) {
+                        var id = parseInt(canModel.get(i).ID)
+                        if (id === mCommands.getCanSendId() && canList.currentIndex != i) {
+                            canList.currentIndex = i
+                            break
+                        }
+                    }
+                } else {
+                    if (canList.currentIndex != 0) {
+                        canList.currentIndex = 0
+                    }
+                }
             }
         }
     }
@@ -118,7 +133,7 @@ Item {
                     height: 40
                     color: canList.currentIndex == index ? Utility.getAppHexColor("darkAccent") : Utility.getAppHexColor("normalBackground")
                     radius: 10
-                    MouseArea{
+                    MouseArea {
                         anchors.fill: parent
                         onClicked: {
                             canList.currentIndex = index
@@ -195,9 +210,13 @@ Item {
                 canModel.clear()
                 scanDialog.open()
                 if (mCommands.getSendCan()) {
+                    canIdAtScan = mCommands.getCanSendId()
                     mCommands.setSendCan(false, -1)
                     Utility.sleepWithEventLoop(1500)
+                } else {
+                    canIdAtScan = -1
                 }
+
                 mCommands.pingCan()
             }
         }
@@ -335,6 +354,10 @@ Item {
                     scanDialog.close()
                     scanButton.enabled = true
                     VescIf.emitStatusMessage("CAN Scan Finished", true)
+
+                    if (canIdAtScan >= 0) {
+                        mCommands.setSendCan(true, canIdAtScan)
+                    }
                 } else {
                     scanDialog.close()
                     scanButton.enabled = true

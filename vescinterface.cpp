@@ -107,6 +107,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     mIgnoreCustomConfigs = false;
 
+    mFwSwapDone = false;
+
 #ifdef Q_OS_ANDROID
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
                 "org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
@@ -312,6 +314,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mAllowScreenRotation = mSettings.value("allowScreenRotation", false).toBool();
     mSpeedGaugeUseNegativeValues =  mSettings.value("speedGaugeUseNegativeValues", true).toBool();
     mAskQmlLoad =  mSettings.value("askQmlLoad", true).toBool();
+    mLastFwUuid =  mSettings.value("lastFwUuid", "").toString();
+    mLastFwCanId =  mSettings.value("lastFwCanId", -1).toInt();
 
     mCommands->setAppConfig(mAppConfig);
     mCommands->setMcConfig(mMcConfig);
@@ -745,6 +749,8 @@ void VescInterface::storeSettings()
     mSettings.setValue("allowScreenRotation", mAllowScreenRotation);
     mSettings.setValue("speedGaugeUseNegativeValues", mSpeedGaugeUseNegativeValues);
     mSettings.setValue("askQmlLoad", mAskQmlLoad);
+    mSettings.setValue("lastFwUuid", mLastFwUuid);
+    mSettings.setValue("lastFwCanId", mLastFwCanId);
     mSettings.sync();
 }
 
@@ -3253,6 +3259,7 @@ void VescInterface::timerSlot()
 
             mDeserialFailedMessageShown = false;
             mPacket->resetState();
+            mFwSwapDone = false;
         }
 
         emit portConnectedChanged();
@@ -3411,6 +3418,25 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     mUuidStr = uuidStr.toUpper();
     mUuidStr.replace(" ", "");
     mFwSupportsConfiguration = false;
+
+    if (mSettings.value("reconnectLastCan", true).toBool() &&
+            !mLastFwUuid.isEmpty() && mLastFwCanId >= 0 && mLastFwUuid != mUuidStr &&
+            !mFwSwapDone) {
+        FW_RX_PARAMS pRx;
+        bool ok = Utility::getFwVersionBlockingCan(this, &pRx, mLastFwCanId, 1500);
+        if (ok && Utility::uuid2Str(pRx.uuid, false) == mLastFwUuid) {
+            mFwSwapDone = true;
+            mCommands->setSendCan(true, mLastFwCanId);
+            return;
+        }
+    }
+
+    mLastFwUuid = mUuidStr;
+    if (mCommands->getSendCan()) {
+        mLastFwCanId = mCommands->getCanSendId();
+    } else {
+        mLastFwCanId = -1;
+    }
 
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
@@ -4125,6 +4151,16 @@ bool VescInterface::ignoreCustomConfigs() const
 void VescInterface::setIgnoreCustomConfigs(bool newIgnoreCustomConfigs)
 {
     mIgnoreCustomConfigs = newIgnoreCustomConfigs;
+}
+
+bool VescInterface::reconnectLastCan()
+{
+    return mSettings.value("reconnectLastCan", true).toBool();
+}
+
+void VescInterface::setReconnectLastCan(bool set)
+{
+    mSettings.setValue("reconnectLastCan", set);
 }
 
 int VescInterface::getLastTcpHubPort() const

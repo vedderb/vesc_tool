@@ -103,6 +103,13 @@ Item {
                 }
 
                 CheckBox {
+                    id: reconnectLastCanBox
+                    Layout.fillWidth: true
+                    text: "Reconnect CAN on connect"
+                    checked: VescIf.reconnectLastCan()
+                }
+
+                CheckBox {
                     id: darkModeBox
                     Layout.fillWidth: true
                     text: "Use Dark Mode"
@@ -121,6 +128,7 @@ Item {
             screenRotBox.checked = VescIf.getAllowScreenRotation()
             qmlUiBox.checked = VescIf.getLoadQmlUiOnConnect()
             qmlUiAskBox.checked = VescIf.askQmlLoad()
+            reconnectLastCanBox.checked = VescIf.reconnectLastCan()
         }
 
         onClosed: {
@@ -130,6 +138,7 @@ Item {
             VescIf.setAllowScreenRotation(screenRotBox.checked)
             VescIf.setLoadQmlUiOnConnect(qmlUiBox.checked)
             VescIf.setAskQmlLoad(qmlUiAskBox.checked)
+            VescIf.setReconnectLastCan(reconnectLastCanBox.checked)
             VescIf.storeSettings()
 
             Utility.keepScreenOn(VescIf.keepScreenOn())

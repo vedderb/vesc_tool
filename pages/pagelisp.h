@@ -41,6 +41,7 @@ public:
     void setVesc(VescInterface *vesc);
     void reloadParams();
     bool hasUnsavedTabs();
+    void disablePolling();
 
 private slots:
     void on_openRecentButton_clicked();

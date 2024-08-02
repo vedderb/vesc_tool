@@ -71,7 +71,6 @@ PageConnection::PageConnection(QWidget *parent) :
     ui->tcpDetectDisconnectButton->setIcon(Utility::getIcon("icons/Disconnected-96.png"));
 
     QIcon mycon = QIcon(Utility::getIcon("icons/can_off.png"));
-    mycon.addPixmap(Utility::getIcon("icons/can_off.png"), QIcon::Normal, QIcon::Off);
     mycon.addPixmap(Utility::getIcon("icons/can_on.png"), QIcon::Normal, QIcon::On);
     ui->canFwdButton->setIcon(mycon);
 
@@ -446,8 +445,10 @@ void PageConnection::on_helpButton_clicked()
     }
 }
 
-void PageConnection::on_canFwdButton_toggled(bool checked)
+void PageConnection::on_canFwdButton_clicked()
 {
+    bool checked = ui->canFwdButton->isChecked();
+
     if (mVesc) {
         if (mVesc->commands()->getCanSendId() >= 0 || !checked) {
             mVesc->commands()->setSendCan(checked);
@@ -511,9 +512,8 @@ void PageConnection::on_bleSetNameButton_clicked()
 #endif
 }
 
-void PageConnection::on_canFwdBox_currentIndexChanged(const QString &arg1)
+void PageConnection::on_canFwdBox_activated()
 {
-    (void)arg1;
     if (mVesc && ui->canFwdBox->count() > 0) {
         mVesc->commands()->setCanSendId(quint32(ui->canFwdBox->currentData().toInt()));
     }

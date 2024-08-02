@@ -265,6 +265,9 @@ public:
     bool ignoreCustomConfigs() const;
     void setIgnoreCustomConfigs(bool newIgnoreCustomConfigs);
 
+    Q_INVOKABLE bool reconnectLastCan();
+    Q_INVOKABLE void setReconnectLastCan(bool set);
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -453,6 +456,9 @@ private:
     QVector<int> mCanDevsLast;
 
     FW_RX_PARAMS mLastFwParams;
+    QString mLastFwUuid;
+    int mLastFwCanId;
+    bool mFwSwapDone;
 
     // Other settings
     bool mUseImperialUnits;

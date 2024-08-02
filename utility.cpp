@@ -1468,7 +1468,7 @@ uint32_t Utility::crc32c(uint8_t *data, uint32_t len)
     return ~crc;
 }
 
-bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
+bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params, int timeout)
 {
     bool res = false;
 
@@ -1484,7 +1484,7 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
                vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 4000);
+    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), timeout);
 
     disconnect(conn);
 
@@ -1494,10 +1494,10 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
     return res;
 }
 
-bool Utility::getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId)
+bool Utility::getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId, int timeout)
 {
-    vesc->canTmpOverride(true, canId);
-    bool res = getFwVersionBlocking(vesc, params);
+    vesc->canTmpOverride(canId >= 0, canId);
+    bool res = getFwVersionBlocking(vesc, params, timeout);
     vesc->canTmpOverrideEnd();
     return res;
 }

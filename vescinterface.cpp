@@ -303,6 +303,21 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
         mSettings.endArray();
     }
+
+    {
+        int size = mSettings.beginReadArray("lastFwUuids");
+        for (int i = 0; i < size; ++i) {
+            mSettings.setArrayIndex(i);
+            QString uuidLocal = mSettings.value("uuidLocal", "").toString().toUpper();
+            QString uuidCan = mSettings.value("uuidCan", "").toString().toUpper();
+            int canId = mSettings.value("canId", -1).toInt();
+
+            if (!uuidLocal.isEmpty() && !uuidCan.isEmpty() && canId >= 0) {
+                mLastFwUuids[uuidLocal] = qMakePair(uuidCan, canId);
+            }
+        }
+        mSettings.endArray();
+    }
     
     QLocale systemLocale;
     bool useImperialByDefault = systemLocale.measurementSystem() == QLocale::ImperialSystem;
@@ -314,8 +329,6 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mAllowScreenRotation = mSettings.value("allowScreenRotation", false).toBool();
     mSpeedGaugeUseNegativeValues =  mSettings.value("speedGaugeUseNegativeValues", true).toBool();
     mAskQmlLoad =  mSettings.value("askQmlLoad", true).toBool();
-    mLastFwUuid =  mSettings.value("lastFwUuid", "").toString();
-    mLastFwCanId =  mSettings.value("lastFwCanId", -1).toInt();
 
     mCommands->setAppConfig(mAppConfig);
     mCommands->setMcConfig(mMcConfig);
@@ -741,6 +754,20 @@ void VescInterface::storeSettings()
         mSettings.endArray();
     }
 
+    {
+        mSettings.beginWriteArray("lastFwUuids");
+        QMapIterator<QString, QPair<QString, int> > i(mLastFwUuids);
+        int ind = 0;
+        while (i.hasNext()) {
+            i.next();
+            mSettings.setArrayIndex(ind++);
+            mSettings.setValue("uuidLocal", i.key());
+            mSettings.setValue("uuidCan", i.value().first);
+            mSettings.setValue("canId", i.value().second);
+        }
+        mSettings.endArray();
+    }
+
     mSettings.setValue("useImperialUnits", mUseImperialUnits);
     mSettings.setValue("keepScreenOn", mKeepScreenOn);
     mSettings.setValue("useWakeLock", mUseWakeLock);
@@ -749,8 +776,6 @@ void VescInterface::storeSettings()
     mSettings.setValue("allowScreenRotation", mAllowScreenRotation);
     mSettings.setValue("speedGaugeUseNegativeValues", mSpeedGaugeUseNegativeValues);
     mSettings.setValue("askQmlLoad", mAskQmlLoad);
-    mSettings.setValue("lastFwUuid", mLastFwUuid);
-    mSettings.setValue("lastFwCanId", mLastFwCanId);
     mSettings.sync();
 }
 
@@ -3419,23 +3444,33 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     mUuidStr.replace(" ", "");
     mFwSupportsConfiguration = false;
 
+    if (!mCommands->getSendCan()) {
+        mUuidStrLocal = mUuidStr;
+    }
+
     if (mSettings.value("reconnectLastCan", true).toBool() &&
-            !mLastFwUuid.isEmpty() && mLastFwCanId >= 0 && mLastFwUuid != mUuidStr &&
-            !mFwSwapDone) {
-        FW_RX_PARAMS pRx;
-        bool ok = Utility::getFwVersionBlockingCan(this, &pRx, mLastFwCanId, 1500);
-        if (ok && Utility::uuid2Str(pRx.uuid, false) == mLastFwUuid) {
-            mFwSwapDone = true;
-            mCommands->setSendCan(true, mLastFwCanId);
-            return;
+            !mUuidStrLocal.isEmpty() && mLastFwUuids.contains(mUuidStrLocal)) {
+
+        auto pair = mLastFwUuids[mUuidStrLocal];
+
+        if (pair.second >= 0 && pair.first != mUuidStr && !mFwSwapDone) {
+            FW_RX_PARAMS pRx;
+            bool ok = Utility::getFwVersionBlockingCan(this, &pRx, pair.second, 1500);
+            if (ok && Utility::uuid2Str(pRx.uuid, false) == pair.first) {
+                mFwSwapDone = true;
+                mCommands->setSendCan(true, pair.second);
+                return;
+            }
         }
     }
 
-    mLastFwUuid = mUuidStr;
-    if (mCommands->getSendCan()) {
-        mLastFwCanId = mCommands->getCanSendId();
-    } else {
-        mLastFwCanId = -1;
+    if (!mUuidStrLocal.isEmpty()) {
+        int canId = -1;
+         if (mCommands->getSendCan()) {
+             canId = mCommands->getCanSendId();
+         }
+
+        mLastFwUuids[mUuidStrLocal] = qMakePair(mUuidStr, canId);
     }
 
 #ifdef HAS_BLUETOOTH

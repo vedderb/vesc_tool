@@ -371,6 +371,7 @@ private:
     QPair<int, int> mFwPair;
     QString mHwTxt;
     QString mUuidStr;
+    QString mUuidStrLocal;
     bool mIsUploadingFw;
     bool mIsLastFwBootloader;
     bool mFwSupportsConfiguration;
@@ -456,8 +457,7 @@ private:
     QVector<int> mCanDevsLast;
 
     FW_RX_PARAMS mLastFwParams;
-    QString mLastFwUuid;
-    int mLastFwCanId;
+    QMap<QString, QPair<QString, int> > mLastFwUuids;
     bool mFwSwapDone;
 
     // Other settings

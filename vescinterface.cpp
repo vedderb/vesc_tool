@@ -754,6 +754,7 @@ void VescInterface::storeSettings()
         mSettings.endArray();
     }
 
+    mSettings.remove("lastFwUuids");
     {
         mSettings.beginWriteArray("lastFwUuids");
         QMapIterator<QString, QPair<QString, int> > i(mLastFwUuids);

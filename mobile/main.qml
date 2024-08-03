@@ -128,12 +128,6 @@ ApplicationWindow {
                 id: canScreen
                 anchors.fill: parent
             }
-
-            onOpened: {
-                if (visible) {
-                    canScreen.scanIfEmpty()
-                }
-            }
         }
     }
 

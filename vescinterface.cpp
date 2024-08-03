@@ -3458,7 +3458,6 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
             FW_RX_PARAMS pRx;
             bool ok = Utility::getFwVersionBlockingCan(this, &pRx, pair.second, 1500);
             if (ok && Utility::uuid2Str(pRx.uuid, false) == pair.first) {
-                mFwSwapDone = true;
                 mCommands->setSendCan(true, pair.second);
                 return;
             }
@@ -3467,12 +3466,14 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
     if (!mUuidStrLocal.isEmpty()) {
         int canId = -1;
-         if (mCommands->getSendCan()) {
-             canId = mCommands->getCanSendId();
-         }
+        if (mCommands->getSendCan()) {
+            canId = mCommands->getCanSendId();
+        }
 
         mLastFwUuids[mUuidStrLocal] = qMakePair(mUuidStr, canId);
     }
+
+    mFwSwapDone = true;
 
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {

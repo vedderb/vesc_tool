@@ -181,7 +181,11 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
             ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
 
             double upper = ui->plot->xAxis->range().upper;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
             double progress = ui->plot->xAxis->pixelToCoord(event->position().x()) / upper;
+#else
+            double progress = ui->plot->xAxis->pixelToCoord(event->x()) / upper;
+#endif
             double diff = event->angleDelta().y();
             double d1 = diff * progress;
             double d2 = diff * (1.0 - progress);
@@ -1712,8 +1716,12 @@ void PageLogAnalysis::on_saveCsvButton_clicked()
 
         for (int i = 0;i < mLog.size();i++) {
             for (int j = 0;j < mLog.at(i).size();j++) {
-                os << Qt::fixed
-                   << qSetRealNumberPrecision(mLogHeader.at(j).precision)
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+                os << Qt::fixed;
+#else
+                os.setRealNumberNotation(QTextStream::FixedNotation);
+#endif
+                os << qSetRealNumberPrecision(mLogHeader.at(j).precision)
                    << mLog.at(i).at(j);
 
                 if (j < (mLog.at(i).size() - 1)) {

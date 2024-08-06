@@ -35,11 +35,15 @@ HelpDialog::HelpDialog(QString title, QString text, QWidget *parent) :
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowTitle(title);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
     if (text.trimmed().startsWith('#')) {
         ui->textEdit->setMarkdown(text);
     } else {
         ui->textEdit->setText(text);
     }
+#else
+    ui->textEdit->setText(text);
+#endif
 
     ui->textEdit->viewport()->setAutoFillBackground(false);
 }

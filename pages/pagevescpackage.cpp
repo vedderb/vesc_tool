@@ -267,6 +267,26 @@ void PageVescPackage::on_writeButton_clicked()
     mLoader.installVescPackageFromPath(ui->loadEdit->text());
 }
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+QString PageVescPackage::convertHtmlToMarkdown(const QString &html) {
+    QString markdown = html;
+
+    // <b> and </b> to **
+    markdown.replace(QRegularExpression("<b>(.*?)</b>"), "**\\1**");
+
+    // <i> and </i> to *
+    markdown.replace(QRegularExpression("<i>(.*?)</i>"), "*\\1*");
+
+    // <br> and <br/> to newline
+    markdown.replace(QRegularExpression("<br\\s*/?>"), "\n");
+
+    // Remove other HTML tags
+    markdown.remove(QRegularExpression("<[^>]*>"));
+
+    return markdown;
+}
+#endif
+
 void PageVescPackage::on_outputRefreshButton_clicked()
 {
     QFile f(ui->outputEdit->text());
@@ -287,7 +307,13 @@ void PageVescPackage::on_outputRefreshButton_clicked()
         QString line1 = QTextStream(&pkg.description).readLine();
         if (line1.contains("<!DOCTYPE HTML PUBLIC", Qt::CaseInsensitive)) {
             ui->descriptionEdit->document()->setHtml(pkg.description);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
             QString md = ui->descriptionEdit->document()->toMarkdown();
+#else
+            QString md = convertHtmlToMarkdown(ui->descriptionEdit->document()->toHtml());
+#endif
+
             ui->descriptionEdit->document()->setPlainText(md);
         } else {
             ui->descriptionEdit->document()->setPlainText(pkg.description);

@@ -29,7 +29,11 @@ void AspectImgLabel::resizeEvent(QResizeEvent *event)
 {
     QLabel::resizeEvent(event);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
     const QPixmap &pix = pixmap(Qt::ReturnByValue);
+#else
+    const QPixmap &pix = *pixmap();
+#endif
 
     if (!pix.isNull()) {
         int wLabel = width();

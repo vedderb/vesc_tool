@@ -280,6 +280,31 @@ QString PageVescPackage::convertHtmlToMarkdown(const QString &html) {
     // <br> and <br/> to newline
     markdown.replace(QRegularExpression("<br\\s*/?>"), "\n");
 
+    // <h1> to <h6> to #
+    markdown.replace(QRegularExpression("<h1>(.*?)</h1>"), "# \\1\n");
+    markdown.replace(QRegularExpression("<h2>(.*?)</h2>"), "## \\1\n");
+    markdown.replace(QRegularExpression("<h3>(.*?)</h3>"), "### \\1\n");
+    markdown.replace(QRegularExpression("<h4>(.*?)</h4>"), "#### \\1\n");
+    markdown.replace(QRegularExpression("<h5>(.*?)</h5>"), "##### \\1\n");
+    markdown.replace(QRegularExpression("<h6>(.*?)</h6>"), "###### \\1\n");
+
+    // <ul> and <ol> to list
+    markdown.replace(QRegularExpression("<ul>"), "");
+    markdown.replace(QRegularExpression("<ol>"), "");
+    markdown.replace(QRegularExpression("<li>(.*?)</li>"), "- \\1\n");
+    markdown.replace(QRegularExpression("</ul>"), "");
+    markdown.replace(QRegularExpression("</ol>"), "");
+
+    // <a href="url">text</a> to [text](url)
+    markdown.replace(QRegularExpression("<a\\s+href=\"(.*?)\".*?>(.*?)</a>"), "[\\2](\\1)");
+
+    // <img src="url" alt="alt" /> to ![alt](url)
+    markdown.replace(QRegularExpression("<img\\s+src=\"(.*?)\".*?alt=\"(.*?)\".*?/?>"), "!\\[\\2\\](\\1)");
+
+    // <p> to newline and </p> to another newline
+    markdown.replace(QRegularExpression("<p>"), "");
+    markdown.replace(QRegularExpression("</p>"), "\n\n");
+
     // Remove other HTML tags
     markdown.remove(QRegularExpression("<[^>]*>"));
 

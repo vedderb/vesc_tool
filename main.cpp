@@ -158,6 +158,20 @@ static void addFonts() {
 
 int main(int argc, char *argv[])
 {
+    // Set the platform plugin to xcb
+    qputenv("QT_QPA_PLATFORM", QByteArray("xcb"));
+    qputenv("QT_XCB_GL_INTEGRATION", QByteArray("glx"));
+    qputenv("LIBGL_ALWAYS_SOFTWARE", QByteArray("1"));
+    qputenv("QT_QUICK_BACKEND", QByteArray("software"));
+
+    // Set OpenGL format
+    QSurfaceFormat format;
+    format.setDepthBufferSize(24);
+    format.setStencilBufferSize(8);
+    format.setVersion(2, 0); // Set OpenGL version to 2.0
+    format.setProfile(QSurfaceFormat::NoProfile);
+    QSurfaceFormat::setDefaultFormat(format);
+    
     // Settings
     QCoreApplication::setOrganizationName("VESC");
     QCoreApplication::setOrganizationDomain("vesc-project.com");

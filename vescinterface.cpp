@@ -2566,7 +2566,9 @@ bool VescInterface::connectCANbus(QString backend, QString ifName, int bitrate)
     mCanDevice->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, false);
     // bitrate change not supported yet by socketcan. It is possible to set the rate when
     // configuring the CAN network interface using the ip link command.
-    // mCanDevice->setConfigurationParameter(QCanBusDevice::BitRateKey, bitrate);
+    // This needs to happen or Qt will try and set a default bitrate which libsocketsocket can doesn't accept
+    mCanDevice->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant());
+
     mCanDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, false);
     mCanDevice->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, false);
 

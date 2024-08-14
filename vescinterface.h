@@ -129,7 +129,8 @@ public:
     // Firmware Updates
     bool fwEraseNewApp(bool fwdCan, quint32 fwSize);
     bool fwEraseBootloader(bool fwdCan);
-    bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true);
+    bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true, bool autoDisconnect = true);
+    Q_INVOKABLE bool fwUpdate(QByteArray newFirmware) { return fwUpload(newFirmware, false, false, true, false); }
     Q_INVOKABLE void fwUploadCancel();
     Q_INVOKABLE double getFwUploadProgress();
     Q_INVOKABLE QString getFwUploadStatus();

@@ -707,6 +707,7 @@ int main(int argc, char *argv[])
         qDebug() << "Downloading package archive...";
         loader.downloadPackageArchive();
         qDebug() << "Package archive downloaded!";
+        return 0;
     }
 
     if (!xmlCodePath.isEmpty()) {
@@ -1550,8 +1551,6 @@ int main(int argc, char *argv[])
         } else if (useBoardSetupWindow){
             bw = new BoardSetupWindow;
             bw->show();
-        } else if (downloadPackageArchive) {
-            return 0;
         } else {
             QPixmapCache::setCacheLimit(256000);
             w = new MainWindow;

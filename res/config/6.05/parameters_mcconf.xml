@@ -2270,15 +2270,25 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXLEMMING&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Observer by David Molony, also known as mxlemming. This observer does not rely on the observer gain parameter, which is a significant advantage.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXV&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Same as MXLEMMING, but truncates the flux linkage in two dimensions.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_ORTEGA_LAMBDA_COMP&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXLEMMING_LAMBDA_COMP&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Same as the others, but with flux linkage tracking. The flux linkage tracker uses the observer gain for both observers, but it is less critical to get it right here as the flux linkage is mostly DC (unless the current is high and the motor starts to saturate).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXV_LAMBDA_COMP&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Same as the others, but with flux linkage tracking. The flux linkage tracker uses the observer gain for both observers, but it is less critical to get it right here as the flux linkage is mostly DC (unless the current is high and the motor starts to saturate).&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXV_LAMBDA_COMP_LIN&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Uses linear lambda compensation instead of squares.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_OBSERVER_TYPE</cDefine>
             <valInt>3</valInt>
             <enumNames>FOC_OBSERVER_ORTEGA_ORIGINAL</enumNames>
             <enumNames>FOC_OBSERVER_MXLEMMING</enumNames>
             <enumNames>FOC_OBSERVER_ORTEGA_LAMBDA_COMP</enumNames>
             <enumNames>FOC_OBSERVER_MXLEMMING_LAMBDA_COMP</enumNames>
+            <enumNames>FOC_OBSERVER_MXV</enumNames>
+            <enumNames>FOC_OBSERVER_MXV_LAMBDA_COMP</enumNames>
+            <enumNames>FOC_OBSERVER_MXV_LAMBDA_COMP_LIN</enumNames>
         </foc_observer_type>
         <foc_hfi_voltage_start>
             <longName>HFI Start Voltage</longName>

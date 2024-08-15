@@ -221,11 +221,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         fwDir = "://res/firmwares_bms";
     }
 
-    QDirIterator it(fwDir);
-    while (it.hasNext()) {
-        QFileInfo fi(it.next());
+    foreach (const auto &fi, QDir(fwDir).entryInfoList(QDir::NoFilter, QDir::Name)) {
         QStringList names = fi.fileName().split("_o_");
-
         if (fi.isDir() && (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
             QListWidgetItem *item = new QListWidgetItem;
 

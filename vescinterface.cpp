@@ -1378,7 +1378,7 @@ bool VescInterface::fwEraseBootloader(bool fwdCan)
     return true;
 }
 
-bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan, bool isLzo)
+bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan, bool isLzo, bool autoDisconnect)
 {
     mIsLastFwBootloader = isBootloader;
     mFwUploadProgress = 0.0;
@@ -1687,7 +1687,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     if (!isBootloader) {
         mCommands->jumpToBootloader(fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
         Utility::sleepWithEventLoop(500);
-        disconnectPort();
+        if (autoDisconnect) disconnectPort();
     }
 
     return true;

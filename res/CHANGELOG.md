@@ -1,3 +1,6 @@
+### 6.06
+#### Released TBD
+
 ### 6.05
 #### Released 2024-08-19
 * Scripting-setting to select whether to upload the editor content or file content.

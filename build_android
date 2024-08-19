@@ -21,7 +21,7 @@ qmake -config release "CONFIG += release_android build_mobile" ANDROID_ABIS="arm
 make clean
 make -j8
 make install INSTALL_ROOT=build/android/build
-androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-vesc_tool-deployment-settings.json --android-platform android-31
+androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-vesc_tool-deployment-settings.json --android-platform android-33
 mv build/android/build/build/outputs/apk/debug/build-debug.apk build/android/vesc_tool_mobile.apk
 rm -rf build/android/build
 rm -rf build/android/obj
@@ -32,7 +32,7 @@ qmake -config release "CONFIG += release_android" ANDROID_ABIS="arm64-v8a" -spec
 make clean
 make -j8
 make install INSTALL_ROOT=build/android/build
-androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-vesc_tool-deployment-settings.json --android-platform android-31
+androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-vesc_tool-deployment-settings.json --android-platform android-33
 mv build/android/build/build/outputs/apk/debug/build-debug.apk build/android/vesc_tool_full.apk
 rm -rf build/android/build
 rm -rf build/android/obj

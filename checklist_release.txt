@@ -20,6 +20,9 @@
  * Build VESC Project versions
  * Ask Jeff to build ios and mac versions
  
+- Other
+ * Update FW archive repo and rebuild archive QRC file
+ 
 == Next beta ==
 
 - VESC Tool

@@ -556,7 +556,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
             case -100 + FAULT_CODE_DRV: reason = "DRV fault, hardware fault occured. Check there are no shorts"; break;
             case -100 + FAULT_CODE_ABS_OVER_CURRENT: reason = "Overcurrent fault, Check there are no shorts and ABS Overcurrent limit is sensible"; break;
             case -100 + FAULT_CODE_OVER_TEMP_FET: reason = "Mosfet Overtemperature fault, Mosfets overheated, check for shorts. Cool down device"; break;
-            case -100 + FAULT_CODE_OVER_TEMP_MOTOR: reason = "Motor Overtemperature fault, Motor overheaded, is the current limit OK?"; break;
+            case -100 + FAULT_CODE_OVER_TEMP_MOTOR: reason = "Motor Overtemperature fault, Motor overheated, is the current limit OK?"; break;
             case -100 + FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: reason = "Gate Driver over voltage, check for hardware failure"; break;
             case -100 + FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: reason = "Gate Driver under voltage, check for hardware failure"; break;
             case -100 + FAULT_CODE_MCU_UNDER_VOLTAGE: reason = "MCU under voltage, check for hardware failure, shorts on outputs"; break;

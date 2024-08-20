@@ -108,11 +108,12 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             contentWidth: column.width
+            contentHeight: scrollCol.preferredHeight
             clip: true
 
             GridLayout {
                 id: scrollCol
-                anchors.fill: parent
+                width: column.width
                 columns: isHorizontal ? 2 : 1
             }
         }

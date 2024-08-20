@@ -270,25 +270,8 @@ QString Utility::uuid2Str(QByteArray uuid, bool space)
 
 bool Utility::requestFilePermission()
 {
-#ifdef Q_OS_ANDROID
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-    // https://codereview.qt-project.org/#/c/199162/
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-    if(r == QtAndroid::PermissionResult::Denied) {
-        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE", 10000);
-        r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-        if(r == QtAndroid::PermissionResult::Denied) {
-            return false;
-        }
-    }
-
+    // Not working since android 13, can only write files
     return true;
-#else
-    return true;
-#endif
-#else
-    return true;
-#endif
 }
 
 bool Utility::requestBleScanPermission()

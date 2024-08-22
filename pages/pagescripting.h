@@ -41,6 +41,7 @@ public:
     explicit PageScripting(QWidget *parent = nullptr);
     ~PageScripting();
 
+    void saveStateToSettings();
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
     void reloadParams();

@@ -154,12 +154,18 @@ PageScripting::PageScripting(QWidget *parent) :
 
 PageScripting::~PageScripting()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageScripting::saveStateToSettings()
+{
     QSettings set;
     {
         set.remove("pagescripting/recentfiles");
         set.beginWriteArray("pagescripting/recentfiles");
         int ind = 0;
-        for (auto f: mRecentFiles) {
+        foreach (auto f, mRecentFiles) {
             set.setArrayIndex(ind);
             set.setValue("path", f);
             ind++;
@@ -176,8 +182,6 @@ PageScripting::~PageScripting()
         }
         set.endArray();
     }
-
-    delete ui;
 }
 
 VescInterface *PageScripting::vesc() const

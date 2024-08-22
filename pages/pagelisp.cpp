@@ -189,6 +189,12 @@ PageLisp::PageLisp(QWidget *parent) :
 
 PageLisp::~PageLisp()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageLisp::saveStateToSettings()
+{
     QSettings set;
     {
         set.remove("pagelisp/recentfiles");
@@ -211,8 +217,6 @@ PageLisp::~PageLisp()
         }
         set.endArray();
     }
-
-    delete ui;
 }
 
 VescInterface *PageLisp::vesc() const

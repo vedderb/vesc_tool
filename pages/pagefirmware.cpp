@@ -73,12 +73,17 @@ PageFirmware::PageFirmware(QWidget *parent) :
 
 PageFirmware::~PageFirmware()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageFirmware::saveStateToSettings()
+{
     QSettings set;
     set.setValue("pagefirmware/lastcustomfile", ui->fwEdit->text());
     set.setValue("pagefirmware/lastcustomfile2", ui->fw2Edit->text());
     set.setValue("pagefirmware/lastcustomfile3", ui->fw3Edit->text());
     set.setValue("pagefirmware/lastcustomfile4", ui->fw4Edit->text());
-    delete ui;
 }
 
 VescInterface *PageFirmware::vesc() const

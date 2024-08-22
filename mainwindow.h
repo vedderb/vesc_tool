@@ -184,6 +184,7 @@ private:
     QTimer mPollImuTimer;
     QTimer mPollBmsTimer;
     QTimer mPortTimer;
+    QTimer mSettingSyncTimer;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;

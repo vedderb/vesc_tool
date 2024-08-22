@@ -78,12 +78,17 @@ PageVescPackage::PageVescPackage(QWidget *parent) :
 
 PageVescPackage::~PageVescPackage()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageVescPackage::saveStateToSettings()
+{
     QSettings set;
     set.setValue("pagevescpackage/lastpkgload", ui->loadEdit->text());
     set.setValue("pagevescpackage/lastlisp", ui->lispEdit->text());
     set.setValue("pagevescpackage/lastqml", ui->qmlEdit->text());
     set.setValue("pagevescpackage/lastoutput", ui->outputEdit->text());
-    delete ui;
 }
 
 VescInterface *PageVescPackage::vesc() const

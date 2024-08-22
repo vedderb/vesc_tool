@@ -69,11 +69,16 @@ PageEspProg::PageEspProg(QWidget *parent) :
 
 PageEspProg::~PageEspProg()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageEspProg::saveStateToSettings()
+{
     QSettings set;
     set.setValue("pageespprog/lastcustomblfile", ui->blEdit->text());
     set.setValue("pageespprog/lastcustompartfile", ui->partEdit->text());
     set.setValue("pageespprog/lastcustomappfile", ui->appEdit->text());
-    delete ui;
 }
 
 VescInterface *PageEspProg::vesc() const

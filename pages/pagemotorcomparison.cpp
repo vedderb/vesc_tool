@@ -405,12 +405,17 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
 }
 
 PageMotorComparison::~PageMotorComparison()
-{    
+{
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageMotorComparison::saveStateToSettings()
+{
     QSettings set;
     set.setValue("pagemotorcomparison/m1confpath", ui->m1ConfFileEdit->text());
     set.setValue("pagemotorcomparison/m2confpath", ui->m2ConfFileEdit->text());
     set.setValue("pagemotorcomparison/qmlpath", ui->qmlFileEdit->text());
-    delete ui;
 }
 
 VescInterface *PageMotorComparison::vesc() const

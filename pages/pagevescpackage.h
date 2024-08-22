@@ -38,6 +38,7 @@ public:
     explicit PageVescPackage(QWidget *parent = nullptr);
     ~PageVescPackage();
 
+    void saveStateToSettings();
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
     void reloadParams();

@@ -34,9 +34,6 @@ PageLisp::PageLisp(QWidget *parent) :
 
     Utility::setPlotColors(ui->bindingPlot);
 
-    ui->mainEdit->setModeLisp();
-    makeEditorConnections(ui->mainEdit);
-
     QPushButton *plusButton = new QPushButton();
     plusButton->setIcon(Utility::getIcon("icons/Plus Math-96.png"));
     ui->runButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
@@ -77,20 +74,6 @@ PageLisp::PageLisp(QWidget *parent) :
         createEditorTab("", "");
     });
 
-    connect(ui->mainEdit, &ScriptEditor::fileNameChanged, [this](QString fileName) {
-        QFileInfo f(fileName);
-        QString txt = "main";
-
-        if (f.exists()) {
-            txt = f.fileName() + " (main)";
-            mDirNow = f.path();
-        } else {
-            mDirNow = "";
-        }
-
-        ui->fileTabs->setTabText(0, txt);
-    });
-
     QSettings set;
     {
         int size = set.beginReadArray("pagelisp/recentfiles");
@@ -113,19 +96,18 @@ PageLisp::PageLisp(QWidget *parent) :
             if (f.exists()) {
                 QFile file(path);
                 if (file.open(QIODevice::ReadOnly)) {
-                    if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
-                        ui->mainEdit->codeEditor()->setPlainText(file.readAll());
-                        ui->mainEdit->setFileNow(path);
-                    } else {
-                        createEditorTab(path, file.readAll());
-                    }
+                    createEditorTab(path, file.readAll());
                 }
             }
         }
         set.endArray();
-        ui->fileTabs->setCurrentIndex(0);
     }
 
+    if (ui->fileTabs->count() == 0) {
+        createEditorTab("", "");
+    }
+
+    ui->fileTabs->setCurrentIndex(0);
     updateRecentList();
 
     // Load examples
@@ -135,18 +117,6 @@ PageLisp::PageLisp(QWidget *parent) :
         item->setData(Qt::UserRole, fi.filePath());
         ui->exampleList->addItem(item);
     }
-
-    // Add close button that clears the main editor
-    QPushButton *closeButton = new QPushButton();
-    closeButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
-    closeButton->setFlat(true);
-    ui->fileTabs->tabBar()->setTabButton(0, QTabBar::RightSide, closeButton);
-
-    ScriptEditor *mainEditor = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(0));
-    connect(closeButton, &QPushButton::clicked, [this, mainEditor]() {
-        // Clear main tab
-        removeEditor(mainEditor);
-    });
 
     ui->splitter->setSizes(QList<int>({1000, 100}));
     ui->splitter_2->setSizes(QList<int>({1000, 600}));
@@ -413,6 +383,16 @@ void PageLisp::makeEditorConnections(ScriptEditor *editor)
 
 void PageLisp::createEditorTab(QString fileName, QString content)
 {
+    if (ui->fileTabs->count() > 0 && !content.isEmpty()) {
+        auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(ui->fileTabs->currentIndex()));
+
+        if (e != nullptr && e->codeEditor()->toPlainText().isEmpty()) {
+            e->codeEditor()->setPlainText(content);
+            e->setFileNow(fileName);
+            return;
+        }
+    }
+
     ScriptEditor *editor = new ScriptEditor();
     editor->setModeLisp();
     int tabIndex = ui->fileTabs->addTab(editor, "");
@@ -473,17 +453,12 @@ void PageLisp::removeEditor(ScriptEditor *editor)
         shouldCloseTab = true;
     }
 
-    // Only close if appropriate
-    if (shouldCloseTab) {
-        // Get index for this tab
-        int tabIdx = ui->fileTabs->indexOf(editor);
-
-        // Special handling of tabIdx == 0
-        if (tabIdx == 0) {
-             editor->codeEditor()->clear();
-             editor->setFileNow("");
+    if (shouldCloseTab) {        
+        if (ui->fileTabs->count() == 1) {
+            editor->codeEditor()->clear();
+            editor->setFileNow("");
         } else {
-            ui->fileTabs->removeTab(tabIdx);
+            ui->fileTabs->removeTab(ui->fileTabs->indexOf(editor));
         }
     }
 }
@@ -539,14 +514,7 @@ void PageLisp::openExample()
             return;
         }
 
-        if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
-            ui->mainEdit->codeEditor()->setPlainText(file.readAll());
-            ui->mainEdit->setFileNow("");
-
-            setEditorClean(ui->mainEdit);
-        } else {
-            createEditorTab("", file.readAll());
-        }
+        createEditorTab("", file.readAll());
 
         file.close();
     } else {
@@ -569,10 +537,17 @@ void PageLisp::openRecentList()
             return;
         }
 
-        if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
-            ui->mainEdit->codeEditor()->setPlainText(file.readAll());
-            ui->mainEdit->setFileNow(fileName);
-        } else {
+        bool fileOpen = false;
+        for (int i = 0;i < ui->fileTabs->count(); i++) {
+            auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(i));
+            if (e->fileNow() == fileName) {
+                ui->fileTabs->setCurrentIndex(i);
+                fileOpen = true;
+                break;
+            }
+        }
+
+        if (!fileOpen) {
             createEditorTab(fileName, file.readAll());
         }
 
@@ -661,18 +636,18 @@ void PageLisp::on_uploadButton_clicked()
     QString codeStr = "";
     QString editorPath = QDir::currentPath();
 
-    if (e != nullptr) {
-        codeStr = e->contentAsText();
-        QFileInfo fi(e->fileNow());
-        if (fi.exists()) {
-            editorPath = fi.canonicalPath();
-        }
-    } else {
-        codeStr = ui->mainEdit->contentAsText();
-        QFileInfo fi(ui->mainEdit->fileNow());
-        if (fi.exists()) {
-            editorPath = fi.canonicalPath();
-        }
+    if (e == nullptr) {
+        mVesc->emitMessageDialog(
+            tr("No tab is open"),
+            tr(""),
+            false);
+        return;
+    }
+
+    codeStr = e->contentAsText();
+    QFileInfo fi(e->fileNow());
+    if (fi.exists()) {
+        editorPath = fi.canonicalPath();
     }
 
     VByteArray vb = mLoader.lispPackImports(codeStr, editorPath);
@@ -701,12 +676,7 @@ void PageLisp::on_readExistingButton_clicked()
     auto code = mLoader.lispRead(this, lispPath);
 
     if (!code.isEmpty()) {
-        if (ui->mainEdit->codeEditor()->toPlainText().isEmpty()) {
-            ui->mainEdit->codeEditor()->setPlainText(code);
-            ui->fileTabs->setTabText(ui->fileTabs->indexOf(ui->mainEdit), "From VESC");
-        } else {
-            createEditorTab(lispPath, code);
-        }
+        createEditorTab(lispPath, code);
     }
 }
 
@@ -770,11 +740,15 @@ void PageLisp::on_streamButton_clicked()
 
     QString codeStr = "";
 
-    if (e != nullptr) {
-        codeStr = e->contentAsText();
-    } else {
-        ui->mainEdit->contentAsText();
+    if (e == nullptr) {
+        mVesc->emitMessageDialog(
+            tr("No tab is open"),
+            tr(""),
+            false);
+        return;
     }
+
+    codeStr = e->contentAsText();
 
     mLoader.lispStream(codeStr.toLocal8Bit(), ui->streamModeBox->currentIndex());
 }

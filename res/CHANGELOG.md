@@ -1,5 +1,7 @@
 ### 6.06
 #### Released TBD
+* Auto-save UI-state on regular intervals.
+* Movable lisp-tabs and better tab behavior in general.
 
 ### 6.05
 #### Released 2024-08-19

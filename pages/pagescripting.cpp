@@ -712,20 +712,21 @@ bool PageScripting::eraseQml(int size, bool reload)
 void PageScripting::on_helpButton_clicked()
 {
     QString html = "<b>Keyboard Commands</b><br>"
-                   "Ctrl + '+'   : Increase font size<br>"
-                   "Ctrl + '-'   : Decrease font size<br>"
-                   "Ctrl + space : Show auto-complete suggestions<br>"
-                   "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
-                   "Ctrl + '#'   : Toggle auto-comment on line or block<br>"
-                   "Ctrl + 'i'   : Auto-indent selected line or block<br>"
-                   "Ctrl + 'f'   : Open search (and replace) bar<br>"
-                   "Ctrl + 'e'   : Run or restart embedded<br>"
-                   "Ctrl + 'w'   : Run or restart window<br>"
-                   "Ctrl + 'q'   : Stop code<br>"
-                   "Ctrl + 'd'   : Clear console<br>"
-                   "Ctrl + 's'   : Save file<br>";
+                   "Ctrl + '+'         : Increase font size<br>"
+                   "Ctrl + '-'         : Decrease font size<br>"
+                   "Ctrl + space       : Show auto-complete suggestions<br>"
+                   "Ctrl + '/'         : Toggle auto-comment on line or block<br>"
+                   "Ctrl + '#'         : Toggle auto-comment on line or block<br>"
+                   "Ctrl + 'i'         : Auto-indent selected line or block<br>"
+                   "Ctrl + 'f'         : Open search (and replace) bar<br>"
+                   "Ctrl + 'e'         : Run or restart embedded<br>"
+                   "Ctrl + 'w'         : Run or restart window<br>"
+                   "Ctrl + 'q'         : Stop code<br>"
+                   "Ctrl + 'd'         : Clear console<br>"
+                   "Ctrl + 's'         : Save file<br>"
+                   "Ctrl + Shift + 'd' : Duplicate current line<br>";
 
-    HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html.replace(" ","&nbsp;"));
+    HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html);
 }
 
 void PageScripting::on_exportCArrayHwButton_clicked()

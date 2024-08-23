@@ -2,6 +2,8 @@
 #### Released TBD
 * Auto-save UI-state on regular intervals.
 * Movable lisp-tabs and better tab behavior in general.
+* Detect file system changes in script editor.
+* Duplicate line shortcut in script editor.
 
 ### 6.05
 #### Released 2024-08-19

@@ -703,19 +703,20 @@ void PageLisp::on_helpButton_clicked()
                    "in the lisp-scripting chat at<br>"
                    "<a href=\"https://discord.gg/JgvV5NwYts\">https://discord.gg/JgvV5NwYts</a><br><br>"
                    "<b>Keyboard Commands</b><br>"
-                   "Ctrl + '+'   : Increase font size<br>"
-                   "Ctrl + '-'   : Decrease font size<br>"
-                   "Ctrl + space : Show auto-complete suggestions<br>"
-                   "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
-                   "Ctrl + '#'   : Toggle auto-comment on line or block<br>"
-                   "Ctrl + 'i'   : Auto-indent selected lines<br>"
-                   "Ctrl + 'f'   : Open search (and replace) bar<br>"
-                   "Ctrl + 'e'   : Upload (and run if set) application<br>"
-                   "Ctrl + 'w'   : Stream application<br>"
-                   "Ctrl + 'q'   : Stop application<br>"
-                   "Ctrl + 'd'   : Clear console<br>"
-                   "Ctrl + 's'   : Save file<br>"
-                   "Ctrl + 'r'   : Run selected block in REPL<br>";
+                   "Ctrl + '+'         : Increase font size<br>"
+                   "Ctrl + '-'         : Decrease font size<br>"
+                   "Ctrl + space       : Show auto-complete suggestions<br>"
+                   "Ctrl + '/'         : Toggle auto-comment on line or block<br>"
+                   "Ctrl + '#'         : Toggle auto-comment on line or block<br>"
+                   "Ctrl + 'i'         : Auto-indent selected lines<br>"
+                   "Ctrl + 'f'         : Open search (and replace) bar<br>"
+                   "Ctrl + 'e'         : Upload (and run if set) application<br>"
+                   "Ctrl + 'w'         : Stream application<br>"
+                   "Ctrl + 'q'         : Stop application<br>"
+                   "Ctrl + 'd'         : Clear console<br>"
+                   "Ctrl + 's'         : Save file<br>"
+                   "Ctrl + 'r'         : Run selected block in REPL<br>"
+                   "Ctrl + Shift + 'd' : Duplicate current line<br>";
 
     HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html);
 }

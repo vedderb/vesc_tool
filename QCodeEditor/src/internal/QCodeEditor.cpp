@@ -616,6 +616,23 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
             return;
         }
 
+        // Duplicate line
+        if (e->key() == Qt::Key_D &&
+            (e->modifiers() & Qt::ControlModifier) &&
+            (e->modifiers() & Qt::ShiftModifier)) {
+            auto tc = textCursor();
+            auto linepos = tc.positionInBlock();
+            tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+            tc.movePosition(QTextCursor::NextBlock, QTextCursor::KeepAnchor);
+            auto line = tc.selectedText();
+            tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+            tc.insertText(line);
+            tc.movePosition(QTextCursor::PreviousBlock, QTextCursor::MoveAnchor);
+            tc.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, linepos);
+            setTextCursor(tc);
+            return;
+        }
+
         bool doSave = false;
 
         if (e->modifiers() == Qt::ControlModifier) {

@@ -423,10 +423,11 @@ void PageScripting::makeEditorConnections(ScriptEditor *editor)
     connect(editor->codeEditor(), &QCodeEditor::clearConsoleTriggered, [this]() {
         ui->debugEdit->clear();
     });
-    connect(editor, &ScriptEditor::fileOpened, [this](QString fileName) {
+    connect(editor, &ScriptEditor::fileOpened, [editor, this](QString fileName) {
         mRecentFiles.removeAll(fileName);
         mRecentFiles.prepend(fileName);
         updateRecentList();
+        setEditorClean(editor);
     });
     connect(editor, &ScriptEditor::fileSaved, [editor, this](QString fileName) {
         if (mVesc) {

@@ -22,6 +22,7 @@
 
 #include <QWidget>
 #include <QCodeEditor>
+#include <QFileSystemWatcher>
 
 namespace Ui {
 class ScriptEditor;
@@ -66,10 +67,13 @@ private slots:
     void on_searchCaseSensitiveBox_toggled(bool checked);
     void on_refreshButton_clicked();
     void on_searchEdit_returnPressed();
+    void on_fileChangeIgnoreButton_clicked();
+    void on_fileChangedReloadButton_clicked();
 
 private:
     Ui::ScriptEditor *ui;
     bool mIsModeLisp;
+    QFileSystemWatcher mFsWatcher;
 
 };
 

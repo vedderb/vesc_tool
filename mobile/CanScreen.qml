@@ -37,6 +37,14 @@ Item {
         scanButton.enabled = VescIf.isPortConnected()
     }
 
+    function scanIfEmpty() {
+        if (canList.count == 0 &&
+                VescIf.isPortConnected() &&
+                scanButton.enabled) {
+            scanButton.clicked()
+        }
+    }
+
     function selectDeviceInList() {
         if (mCommands.getSendCan()) {
             for (var i = 0; i < canModel.count;i++) {
@@ -63,9 +71,16 @@ Item {
                 mCommands.setSendCan(false, -1)
                 canList.currentIndex = 0;
                 canModel.clear()
-                scanButton.enabled = VescIf.isPortConnected()
+                scanButton.enabled = false
             } else {
                 selectDeviceInList()
+            }
+
+            if (VescIf.scanCanOnConnect() &&
+                    scanButton.enabled && canList.count == 0 &&
+                    VescIf.isPortConnected() &&
+                    VescIf.fwRx() && VescIf.customConfigRxDone()) {
+                scanButton.clicked()
             }
         }
     }
@@ -259,10 +274,6 @@ Item {
 
         function onPortConnectedChanged() {
             scanButton.enabled = VescIf.isPortConnected()
-
-            if (canList.count == 0 && VescIf.isPortConnected()) {
-                scanButton.clicked()
-            }
         }
     }
 
@@ -276,6 +287,7 @@ Item {
 
             scanButton.enabled = true
             scanButton.text = qsTr("Scan")
+
             if (VescIf.isPortConnected()) {
                 canModel.clear()
                 var params = Utility.getFwVersionBlockingCan(VescIf, -1)
@@ -321,18 +333,17 @@ Item {
                                         "deviceIconPath": devicePath,
                                         "logoIconPath": logoPath})
                 }
+
                 canList.currentIndex = 0
-                if (!isTimeout){
-                    scanButton.enabled = true
+
+                if (!isTimeout) {
                     VescIf.emitStatusMessage("CAN Scan Finished", true)
                 } else {
-                    scanButton.enabled = true
                     VescIf.emitStatusMessage("CAN Scan Timed Out", false)
                 }
 
                 selectDeviceInList()
             } else {
-                scanButton.enabled = true
                 VescIf.emitStatusMessage("Device not connected", false)
             }
         }

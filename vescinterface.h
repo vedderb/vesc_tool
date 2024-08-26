@@ -269,6 +269,9 @@ public:
     Q_INVOKABLE bool reconnectLastCan();
     Q_INVOKABLE void setReconnectLastCan(bool set);
 
+    Q_INVOKABLE bool scanCanOnConnect();
+    Q_INVOKABLE void setScanCanOnConnect(bool set);
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);

@@ -110,6 +110,13 @@ Item {
                 }
 
                 CheckBox {
+                    id: scanCanConnectBox
+                    Layout.fillWidth: true
+                    text: "Scan CAN on connect"
+                    checked: VescIf.scanCanOnConnect()
+                }
+
+                CheckBox {
                     id: darkModeBox
                     Layout.fillWidth: true
                     text: "Use Dark Mode"
@@ -129,6 +136,7 @@ Item {
             qmlUiBox.checked = VescIf.getLoadQmlUiOnConnect()
             qmlUiAskBox.checked = VescIf.askQmlLoad()
             reconnectLastCanBox.checked = VescIf.reconnectLastCan()
+            scanCanConnectBox.checked = VescIf.scanCanOnConnect()
         }
 
         onClosed: {
@@ -139,6 +147,7 @@ Item {
             VescIf.setLoadQmlUiOnConnect(qmlUiBox.checked)
             VescIf.setAskQmlLoad(qmlUiAskBox.checked)
             VescIf.setReconnectLastCan(reconnectLastCanBox.checked)
+            VescIf.setScanCanOnConnect(scanCanConnectBox.checked)
             VescIf.storeSettings()
 
             Utility.keepScreenOn(VescIf.keepScreenOn())

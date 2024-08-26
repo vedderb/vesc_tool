@@ -4200,6 +4200,16 @@ void VescInterface::setReconnectLastCan(bool set)
     mSettings.setValue("reconnectLastCan", set);
 }
 
+bool VescInterface::scanCanOnConnect()
+{
+    return mSettings.value("scanCanOnConnect", true).toBool();
+}
+
+void VescInterface::setScanCanOnConnect(bool set)
+{
+    mSettings.setValue("scanCanOnConnect", set);
+}
+
 int VescInterface::getLastTcpHubPort() const
 {
     return mLastTcpHubPort;

@@ -17,14 +17,14 @@
    <item>
     <widget class="QSplitter" name="splitter_2">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <property name="handleWidth">
       <number>4</number>
      </property>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
       <property name="handleWidth">
        <number>8</number>
@@ -141,7 +141,7 @@
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -156,7 +156,7 @@
         <item>
          <widget class="QTabWidget" name="fileTabs">
           <property name="tabShape">
-           <enum>QTabWidget::Triangular</enum>
+           <enum>QTabWidget::TabShape::Triangular</enum>
           </property>
           <property name="currentIndex">
            <number>0</number>
@@ -175,16 +175,16 @@
         <bool>true</bool>
        </property>
        <property name="resizeMode">
-        <enum>QQuickWidget::SizeRootObjectToView</enum>
+        <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
        </property>
       </widget>
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabPosition">
-       <enum>QTabWidget::North</enum>
+       <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="tabShape">
-       <enum>QTabWidget::Triangular</enum>
+       <enum>QTabWidget::TabShape::Triangular</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -193,7 +193,7 @@
        <attribute name="title">
         <string>Console</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
         <item>
          <widget class="VTextBrowser" name="debugEdit">
           <property name="font">
@@ -201,10 +201,13 @@
             <family>DejaVu Sans Mono</family>
            </font>
           </property>
+          <property name="lineWrapMode">
+           <enum>QTextEdit::LineWrapMode::NoWrap</enum>
+          </property>
          </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
           <item>
            <widget class="QPushButton" name="clearConsoleButton">
             <property name="text">
@@ -219,7 +222,7 @@
           <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -237,7 +240,7 @@
        <attribute name="title">
         <string>Recent</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,0">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <property name="spacing">
@@ -280,7 +283,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_6">
+         <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,1">
           <property name="spacing">
            <number>3</number>
           </property>
@@ -329,7 +332,7 @@
           <item>
            <spacer name="verticalSpacer_3">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -347,9 +350,9 @@
        <attribute name="title">
         <string>Examples</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,0">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
+         <layout class="QVBoxLayout" name="verticalLayout_11" stretch="0,1">
           <property name="spacing">
            <number>2</number>
           </property>
@@ -390,7 +393,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1">
           <item>
            <widget class="QPushButton" name="openExampleButton">
             <property name="text">
@@ -405,7 +408,7 @@
           <item>
            <spacer name="verticalSpacer_2">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -425,13 +428,13 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0,1">
           <item>
            <widget class="QGroupBox" name="groupBox">
             <property name="title">
              <string>Export C Array</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_5">
+            <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,1">
              <property name="spacing">
               <number>2</number>
              </property>
@@ -474,7 +477,7 @@
              <item>
               <spacer name="verticalSpacer_4">
                <property name="orientation">
-                <enum>Qt::Vertical</enum>
+                <enum>Qt::Orientation::Vertical</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
@@ -492,7 +495,7 @@
             <property name="title">
              <string>Connected VESC</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_8">
+            <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,0,1">
              <property name="spacing">
               <number>2</number>
              </property>
@@ -521,7 +524,7 @@
              <item>
               <spacer name="verticalSpacer_5">
                <property name="orientation">
-                <enum>Qt::Vertical</enum>
+                <enum>Qt::Orientation::Vertical</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
@@ -545,7 +548,7 @@
             <property name="title">
              <string>QML Upload</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_9">
+            <layout class="QVBoxLayout" name="verticalLayout_9" stretch="0,1">
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <property name="spacing">
@@ -586,7 +589,7 @@
                <item>
                 <spacer name="horizontalSpacer_2">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Orientation::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>

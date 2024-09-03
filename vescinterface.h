@@ -25,6 +25,7 @@
 #include <QTimer>
 #include <QByteArray>
 #include <QList>
+#include <QVariantList>
 #include <QTcpSocket>
 #include <QUdpSocket>
 #include <QSettings>

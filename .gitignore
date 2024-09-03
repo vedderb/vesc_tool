@@ -49,3 +49,4 @@ build_android_signed
 *.DS_Store
 
 res/firmwares/*/
+/build

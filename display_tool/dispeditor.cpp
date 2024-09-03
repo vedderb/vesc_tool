@@ -27,6 +27,7 @@
 #include <QColor>
 #include <QImage>
 #include <QColorDialog>
+#include <QMessageBox>
 
 DispEditor::DispEditor(QWidget *parent) :
     QWidget(parent),

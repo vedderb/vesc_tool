@@ -24,6 +24,9 @@
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <QDirIterator>
+#include <QDirIterator>
+#include <QScrollBar>
+
 
 PageVescPackage::PageVescPackage(QWidget *parent) :
     QWidget(parent),

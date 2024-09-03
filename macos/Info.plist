@@ -4,6 +4,8 @@
 <dict>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>VESC Tool uses bluetooth to connect to embedded devices</string>
+        <key>NSBluetoothAlwaysUsageDescription</key>
+        <string>VESC Tool uses bluetooth to connect to embedded devices</string>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>VESC Tool can store various logs and data files for configuration</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>

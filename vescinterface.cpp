@@ -1395,7 +1395,7 @@ bool VescInterface::fwEraseBootloader(bool fwdCan)
     return true;
 }
 
-bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan, bool isLzo)
+bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan, bool isLzo, bool autoDisconnect)
 {
     mIsLastFwBootloader = isBootloader;
     mFwUploadProgress = 0.0;
@@ -1704,7 +1704,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     if (!isBootloader) {
         mCommands->jumpToBootloader(fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
         Utility::sleepWithEventLoop(500);
-        disconnectPort();
+        if (autoDisconnect) disconnectPort();
     }
 
     return true;
@@ -4215,6 +4215,16 @@ bool VescInterface::reconnectLastCan()
 void VescInterface::setReconnectLastCan(bool set)
 {
     mSettings.setValue("reconnectLastCan", set);
+}
+
+bool VescInterface::scanCanOnConnect()
+{
+    return mSettings.value("scanCanOnConnect", true).toBool();
+}
+
+void VescInterface::setScanCanOnConnect(bool set)
+{
+    mSettings.setValue("scanCanOnConnect", set);
 }
 
 int VescInterface::getLastTcpHubPort() const

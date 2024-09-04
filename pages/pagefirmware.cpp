@@ -73,12 +73,17 @@ PageFirmware::PageFirmware(QWidget *parent) :
 
 PageFirmware::~PageFirmware()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageFirmware::saveStateToSettings()
+{
     QSettings set;
     set.setValue("pagefirmware/lastcustomfile", ui->fwEdit->text());
     set.setValue("pagefirmware/lastcustomfile2", ui->fw2Edit->text());
     set.setValue("pagefirmware/lastcustomfile3", ui->fw3Edit->text());
     set.setValue("pagefirmware/lastcustomfile4", ui->fw4Edit->text());
-    delete ui;
 }
 
 VescInterface *PageFirmware::vesc() const
@@ -221,11 +226,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         fwDir = "://res/firmwares_bms";
     }
 
-    QDirIterator it(fwDir);
-    while (it.hasNext()) {
-        QFileInfo fi(it.next());
+    foreach (const auto &fi, QDir(fwDir).entryInfoList(QDir::NoFilter, QDir::Name)) {
         QStringList names = fi.fileName().split("_o_");
-
         if (fi.isDir() && (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
             QListWidgetItem *item = new QListWidgetItem;
 

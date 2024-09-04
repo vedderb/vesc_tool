@@ -1,8 +1,62 @@
 ### 6.05
-#### TBD
+#### 2024-08-19
 * LispBM:
 	* Support for var in progn.
-* Hall sensors: smooth transition to sensorless.
+	* Support for curly brackets instead of progn.
+	* Added set and setq.
+	* Added defunret.
+	* Added support for detaching only one of the ADCs.
+	* Added set-encoder.
+	* Support for moving code and data to flash.
+	* Incremental read of uploaded code.
+	* Removed array types other than byte arrays.
+	* Added more position extensions.
+	* Use timeout when app_adc is detached.
+	* Added extension conf-restore-mc.
+	* Added extension conf-restore-app.
+	* Added extension conf-dc-cal.
+	* Added access to several config parameters.
+	* Many improvements and bug fixes.
+	* Better error descriptions.
+	* Added thread profiler.
+	* Added flat value support.
+	* Added recv-to with a timeout argument.
+	* Added remote message extensions.
+	* Added phase-hall extension.
+	* Added loopwhile-thd.
+	* Added can-recv-sid.
+	* Added can-recv-eid.
+	* Added app-adc-range-ok.
+	* Much faster return on error for i2c-tx-rx.
+	* Added shutdown-hold.
+	* Added crc32.
+	* Support for only polling variables starting with VT.
+	* Added rand.
+	* Built-in sort function that is much faster and can sort much larger lists.
+	* Added foc-play-tone and foc-play-stop.
+	* Added foc-play-samples.
+	* Added can-msg-age.
+	* Massive performance boost for string functions and 64-bit operations due to much faster memory allocation.
+* Hall sensors improvements:
+	* Smooth transition to sensorless.
+	* Bug fix in interpolation.
+	* Use less noisy speed estimator for interpolation.
+	* Adjusted rate limit.
+* Added soft regen cutoff. See https://github.com/vedderb/vesc_tool/pull/310
+* Attempt at limiting the input current when using MTPA and field weakening.
+* Removed built-in balance app. The balance-package can be used instead, which is where new development is done.
+* Added option to select PID-controller speed source.
+* Try to make odometer persistent even without shutdown switch. See https://github.com/vedderb/bldc/pull/624
+* Dual motor flux linkage measurement current spike bug fix.
+* Fix possible runaway after faults during openloop measurements (flux linkage, encoder).
+* Added more current sampling modes.
+* Added FOC interpolation mode.
+* Allow passive flux linkage measurement.
+* Fixed some braking glitches.
+* Configurable HFI error truncation to reject noise.
+* Removed GPDrive.
+* FOC: Option to short phases on 0 duty.
+* FOC: Added MXV observer.
 
 ### 6.02
 #### 2023-03-12
@@ -835,3 +889,4 @@
 * HW60 support
 * 3 low/high side shunt support
 * permanent NRF option
+

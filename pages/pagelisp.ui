@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1180</width>
-    <height>701</height>
+    <width>1255</width>
+    <height>733</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,11 +17,11 @@
    <item>
     <widget class="QSplitter" name="splitter_2">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -118,7 +118,7 @@
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -133,16 +133,14 @@
         <item>
          <widget class="QTabWidget" name="fileTabs">
           <property name="tabShape">
-           <enum>QTabWidget::Triangular</enum>
+           <enum>QTabWidget::TabShape::Triangular</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>-1</number>
           </property>
-          <widget class="ScriptEditor" name="mainEdit">
-           <attribute name="title">
-            <string>main</string>
-           </attribute>
-          </widget>
+          <property name="movable">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
        </layout>
@@ -190,7 +188,7 @@
           <item>
            <spacer name="horizontalSpacer_3">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -273,10 +271,10 @@
         <item>
          <widget class="QTableWidget" name="bindingTable">
           <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
+           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
           </property>
           <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
+           <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
           </property>
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
@@ -332,7 +330,7 @@
           <item>
            <spacer name="horizontalSpacer_4">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -390,10 +388,10 @@
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabPosition">
-       <enum>QTabWidget::North</enum>
+       <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="tabShape">
-       <enum>QTabWidget::Triangular</enum>
+       <enum>QTabWidget::TabShape::Triangular</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -402,7 +400,7 @@
        <attribute name="title">
         <string>Console/REPL</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,0">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <property name="spacing">
@@ -414,6 +412,9 @@
              <font>
               <family>DejaVu Sans Mono</family>
              </font>
+            </property>
+            <property name="lineWrapMode">
+             <enum>QTextEdit::LineWrapMode::NoWrap</enum>
             </property>
            </widget>
           </item>
@@ -447,9 +448,15 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
           <item>
            <widget class="QPushButton" name="clearConsoleButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -462,7 +469,7 @@
           <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -480,7 +487,7 @@
        <attribute name="title">
         <string>Recent</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="1,0">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <property name="spacing">
@@ -523,7 +530,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_6">
+         <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,1">
           <property name="spacing">
            <number>3</number>
           </property>
@@ -572,7 +579,7 @@
           <item>
            <spacer name="verticalSpacer_3">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -590,7 +597,7 @@
        <attribute name="title">
         <string>Examples</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="1,0">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <property name="spacing">
@@ -633,7 +640,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1">
           <item>
            <widget class="QPushButton" name="openExampleButton">
             <property name="text">
@@ -648,7 +655,7 @@
           <item>
            <spacer name="verticalSpacer_2">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -679,12 +686,12 @@
            </sizepolicy>
           </property>
           <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+           <enum>QFrame::Shape::StyledPanel</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
+           <enum>QFrame::Shadow::Plain</enum>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_7">
+          <layout class="QVBoxLayout" name="verticalLayout_7" stretch="0,0,0,0,1">
            <property name="spacing">
             <number>3</number>
            </property>
@@ -837,7 +844,7 @@
            <item>
             <spacer name="verticalSpacer_4">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -884,12 +891,6 @@
    <class>VTextBrowser</class>
    <extends>QTextEdit</extends>
    <header>widgets/vtextbrowser.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ScriptEditor</class>
-   <extends>QWidget</extends>
-   <header>widgets/scripteditor.h</header>
-   <container>1</container>
   </customwidget>
   <customwidget>
    <class>HistoryLineEdit</class>

@@ -37,6 +37,7 @@ public:
     explicit PageLisp(QWidget *parent = nullptr);
     ~PageLisp();
 
+    void saveStateToSettings();
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
     void reloadParams();

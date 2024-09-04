@@ -104,9 +104,14 @@ ParameterEditor::ParameterEditor(QWidget *parent) :
 
 ParameterEditor::~ParameterEditor()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void ParameterEditor::saveStateToSettings()
+{
     QSettings set;
     set.setValue("parametereditor/lastxmlpath", mLastXmlPath);
-    delete ui;
 }
 
 void ParameterEditor::setParams(const ConfigParams *params)

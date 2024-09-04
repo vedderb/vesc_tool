@@ -37,6 +37,7 @@ public:
     explicit PageEspProg(QWidget *parent = nullptr);
     ~PageEspProg();
 
+    void saveStateToSettings();
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
 

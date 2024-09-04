@@ -1418,6 +1418,8 @@ int main(int argc, char *argv[])
             qCritical() << "Could not start TcpHub on port" << tcpPort;
             qApp->quit();
         }
+    } else if (downloadPackageArchive) {
+        return 0;
     } else {
         QApplication *a = new QApplication(argc, argv);
         app = a;
@@ -1564,8 +1566,6 @@ int main(int argc, char *argv[])
         } else if (useBoardSetupWindow){
             bw = new BoardSetupWindow;
             bw->show();
-        } else if (downloadPackageArchive) {
-            return 0;
         } else {
             QPixmapCache::setCacheLimit(256000);
             w = new MainWindow;

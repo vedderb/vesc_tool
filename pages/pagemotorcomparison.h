@@ -385,6 +385,7 @@ public:
     explicit PageMotorComparison(QWidget *parent = nullptr);
     ~PageMotorComparison();
 
+    void saveStateToSettings();
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
 

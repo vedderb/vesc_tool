@@ -25,6 +25,7 @@
 #include <QMessageBox>
 #include <cmath>
 #include <QStandardPaths>
+#include <QScrollBar>
 
 PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     QWidget(parent),

@@ -525,6 +525,16 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->actionDisconnect->setEnabled(mVesc->isPortConnected());
     });
 
+    mSettingSyncTimer.start(10000);
+    connect(&mSettingSyncTimer, &QTimer::timeout, [this]() {
+        mPageEspProg->saveStateToSettings();
+        mPageFirmware->saveStateToSettings();
+        mPageLisp->saveStateToSettings();
+        mPageMotorComparison->saveStateToSettings();
+        mPageScripting->saveStateToSettings();
+        mPagePackage->saveStateToSettings();
+    });
+
     // Restore size and position
     if (mSettings.contains("mainwindow/size")) {
         resize(mSettings.value("mainwindow/size").toSize());

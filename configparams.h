@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QStringList>
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 #include "configparam.h"

@@ -36,6 +36,7 @@ public:
     explicit PageFirmware(QWidget *parent = nullptr);
     ~PageFirmware();
 
+    void saveStateToSettings();
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
     void reloadParams();

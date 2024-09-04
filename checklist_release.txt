@@ -1,0 +1,45 @@
+- BLDC
+ * Create release branch and switch to it
+ * Set test version to 0
+ * Update changelog release date
+ 
+- Express
+ * Create release branch and switch to it
+ * Set test version to 0
+
+- VESC Tool
+ * Create release branch and switch to it
+ * Set test version to 0
+ * Update changelog release date
+ * Update android version numbers
+ * Update target api in build scripts
+ * Update target api in manifest
+ * Build STM firmwares in release branch
+ * Build ESP firmwares in release branch
+ * Build android signed versions and upload to google play
+ * Build VESC Project versions
+ * Ask Jeff to build ios and mac versions
+ 
+- Other
+ * Update FW archive repo and rebuild archive QRC file
+ 
+== Next beta ==
+
+- VESC Tool
+ * Switch to master
+ * Sync release
+ * Update version number
+ * Add new version to changelog
+ * Add new config files to res
+ * Update ESP conf_general FW version
+
+- BLDC
+ * Switch to master
+ * Sync release
+ * Update version number
+ * Add new version to changelog
+
+- Express
+ * Switch to main
+ * Sync release
+ * Update version number

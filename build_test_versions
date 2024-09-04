@@ -45,7 +45,7 @@ qmake -config release "CONFIG += release_android build_mobile vt_test_version" A
 make clean
 make -j8
 make install INSTALL_ROOT=build/android/build
-androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-vesc_tool-deployment-settings.json --android-platform android-31
+androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-vesc_tool-deployment-settings.json --android-platform android-33
 mv build/android/build/build/outputs/apk/debug/build-debug.apk build/test_all/vesc_tool_test_android.apk
 rm -rf build/android/build
 rm -rf build/android/obj

@@ -270,25 +270,8 @@ QString Utility::uuid2Str(QByteArray uuid, bool space)
 
 bool Utility::requestFilePermission()
 {
-#ifdef Q_OS_ANDROID
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-    // https://codereview.qt-project.org/#/c/199162/
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-    if(r == QtAndroid::PermissionResult::Denied) {
-        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE", 10000);
-        r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-        if(r == QtAndroid::PermissionResult::Denied) {
-            return false;
-        }
-    }
-
+    // Not working since android 13, can only write files
     return true;
-#else
-    return true;
-#endif
-#else
-    return true;
-#endif
 }
 
 bool Utility::requestBleScanPermission()
@@ -556,7 +539,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
             case -100 + FAULT_CODE_DRV: reason = "DRV fault, hardware fault occured. Check there are no shorts"; break;
             case -100 + FAULT_CODE_ABS_OVER_CURRENT: reason = "Overcurrent fault, Check there are no shorts and ABS Overcurrent limit is sensible"; break;
             case -100 + FAULT_CODE_OVER_TEMP_FET: reason = "Mosfet Overtemperature fault, Mosfets overheated, check for shorts. Cool down device"; break;
-            case -100 + FAULT_CODE_OVER_TEMP_MOTOR: reason = "Motor Overtemperature fault, Motor overheaded, is the current limit OK?"; break;
+            case -100 + FAULT_CODE_OVER_TEMP_MOTOR: reason = "Motor Overtemperature fault, Motor overheated, is the current limit OK?"; break;
             case -100 + FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: reason = "Gate Driver over voltage, check for hardware failure"; break;
             case -100 + FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: reason = "Gate Driver under voltage, check for hardware failure"; break;
             case -100 + FAULT_CODE_MCU_UNDER_VOLTAGE: reason = "MCU under voltage, check for hardware failure, shorts on outputs"; break;

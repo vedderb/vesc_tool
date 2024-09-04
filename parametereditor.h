@@ -36,6 +36,8 @@ class ParameterEditor : public QMainWindow
 public:
     explicit ParameterEditor(QWidget *parent = nullptr);
     ~ParameterEditor();
+
+    void saveStateToSettings();
     void setParams(const ConfigParams *params);
 
 private slots:

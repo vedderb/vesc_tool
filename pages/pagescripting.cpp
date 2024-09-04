@@ -154,12 +154,18 @@ PageScripting::PageScripting(QWidget *parent) :
 
 PageScripting::~PageScripting()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageScripting::saveStateToSettings()
+{
     QSettings set;
     {
         set.remove("pagescripting/recentfiles");
         set.beginWriteArray("pagescripting/recentfiles");
         int ind = 0;
-        for (auto f: mRecentFiles) {
+        foreach (auto f, mRecentFiles) {
             set.setArrayIndex(ind);
             set.setValue("path", f);
             ind++;
@@ -176,8 +182,6 @@ PageScripting::~PageScripting()
         }
         set.endArray();
     }
-
-    delete ui;
 }
 
 VescInterface *PageScripting::vesc() const
@@ -419,10 +423,11 @@ void PageScripting::makeEditorConnections(ScriptEditor *editor)
     connect(editor->codeEditor(), &QCodeEditor::clearConsoleTriggered, [this]() {
         ui->debugEdit->clear();
     });
-    connect(editor, &ScriptEditor::fileOpened, [this](QString fileName) {
+    connect(editor, &ScriptEditor::fileOpened, [editor, this](QString fileName) {
         mRecentFiles.removeAll(fileName);
         mRecentFiles.prepend(fileName);
         updateRecentList();
+        setEditorClean(editor);
     });
     connect(editor, &ScriptEditor::fileSaved, [editor, this](QString fileName) {
         if (mVesc) {
@@ -707,20 +712,21 @@ bool PageScripting::eraseQml(int size, bool reload)
 void PageScripting::on_helpButton_clicked()
 {
     QString html = "<b>Keyboard Commands</b><br>"
-                   "Ctrl + '+'   : Increase font size<br>"
-                   "Ctrl + '-'   : Decrease font size<br>"
-                   "Ctrl + space : Show auto-complete suggestions<br>"
-                   "Ctrl + '/'   : Toggle auto-comment on line or block<br>"
-                   "Ctrl + '#'   : Toggle auto-comment on line or block<br>"
-                   "Ctrl + 'i'   : Auto-indent selected line or block<br>"
-                   "Ctrl + 'f'   : Open search (and replace) bar<br>"
-                   "Ctrl + 'e'   : Run or restart embedded<br>"
-                   "Ctrl + 'w'   : Run or restart window<br>"
-                   "Ctrl + 'q'   : Stop code<br>"
-                   "Ctrl + 'd'   : Clear console<br>"
-                   "Ctrl + 's'   : Save file<br>";
+                   "Ctrl + '+'         : Increase font size<br>"
+                   "Ctrl + '-'         : Decrease font size<br>"
+                   "Ctrl + space       : Show auto-complete suggestions<br>"
+                   "Ctrl + '/'         : Toggle auto-comment on line or block<br>"
+                   "Ctrl + '#'         : Toggle auto-comment on line or block<br>"
+                   "Ctrl + 'i'         : Auto-indent selected line or block<br>"
+                   "Ctrl + 'f'         : Open search (and replace) bar<br>"
+                   "Ctrl + 'e'         : Run or restart embedded<br>"
+                   "Ctrl + 'w'         : Run or restart window<br>"
+                   "Ctrl + 'q'         : Stop code<br>"
+                   "Ctrl + 'd'         : Clear console<br>"
+                   "Ctrl + 's'         : Save file<br>"
+                   "Ctrl + Shift + 'd' : Duplicate current line<br>";
 
-    HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html.replace(" ","&nbsp;"));
+    HelpDialog::showHelpMonospace(this, "VESC Tool Script Editor", html);
 }
 
 void PageScripting::on_exportCArrayHwButton_clicked()

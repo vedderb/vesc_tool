@@ -27,6 +27,12 @@
 #include <QStandardPaths>
 #include <QScrollBar>
 
+const int dataTableColName = 0;
+const int dataTableColValue = 1;
+const int dataTableColPlot = 2;
+const int dataTableColAltAxis = 3;
+const int dataTableColScale = 4;
+
 PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PageLogAnalysis)
@@ -70,11 +76,19 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->plot->axisRect()->setRangeZoom(Qt::Orientations());
     ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
 
-    ui->dataTable->setColumnWidth(0, 140);
-    ui->dataTable->setColumnWidth(1, 120);
     ui->statTable->setColumnWidth(0, 140);
     ui->logTable->setColumnWidth(0, 250);
     ui->vescLogTable->setColumnWidth(0, 250);
+
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColName, QHeaderView::Interactive);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColValue, QHeaderView::Stretch);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColScale, QHeaderView::Fixed);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColAltAxis, QHeaderView::Fixed);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColPlot, QHeaderView::Fixed);
+
+    ui->dataTable->setColumnWidth(dataTableColAltAxis, 30);
+    ui->dataTable->setColumnWidth(dataTableColPlot, 45);
+    ui->dataTable->setColumnWidth(dataTableColScale, 60);
 
     m3dView = new Vesc3DView(this);
     m3dView->setMinimumWidth(200);
@@ -739,7 +753,21 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
 
 void PageLogAnalysis::updateGraphs()
 {
-    auto rows = ui->dataTable->selectionModel()->selectedRows();
+    QSet<QModelIndex> uniqueRows;
+
+    auto selectedRows = ui->dataTable->selectionModel()->selectedRows();
+    for (const QModelIndex &index : selectedRows) {
+        uniqueRows.insert(index);
+    }
+
+    for (int row = 0; row < ui->dataTable->rowCount(); ++row) {
+        QTableWidgetItem *item = ui->dataTable->item(row, dataTableColPlot);
+        if (item && item->checkState() == Qt::Checked) {
+            uniqueRows.insert(ui->dataTable->model()->index(row, 0));
+        }
+    }
+
+    auto rows = uniqueRows.values();
 
     QVector<double> xAxis;
     QVector<QVector<double> > yAxes;
@@ -789,6 +817,7 @@ void PageLogAnalysis::updateGraphs()
     }
 
     ui->plot->clearGraphs();
+    ui->plot->yAxis2->setVisible(false);
 
     for (int i = 0;i < yAxes.size();i++) {
         QPen pen = QPen(Utility::getAppQColor("plot_graph1"));
@@ -805,9 +834,26 @@ void PageLogAnalysis::updateGraphs()
             pen = QPen(Utility::getAppQColor("plot_graph4"));
         }
 
-        ui->plot->addGraph();
+        auto row = rows.at(i).row();
+
+        bool altAxis = false;
+        
+        if(QTableWidgetItem *aaWidget = ui->dataTable->item(row, dataTableColAltAxis)) {
+            altAxis = (aaWidget->checkState() == Qt::Checked);
+        }
+
+        if (altAxis){
+            ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
+            ui->plot->yAxis2->setVisible(true);
+        }
+        else{
+            ui->plot->addGraph();
+        }
+
+
         ui->plot->graph(i)->setPen(pen);
         ui->plot->graph(i)->setName(names.at(i));
+      
         ui->plot->graph(i)->setData(xAxis, yAxes.at(i));
     }
 
@@ -1105,8 +1151,8 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
 {
     ui->dataTable->setRowCount(ui->dataTable->rowCount() + 1);
     auto item1 = new QTableWidgetItem(name);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 0, item1);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 1, new QTableWidgetItem(""));
+    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColName, item1);
+    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColValue, new QTableWidgetItem(""));
     if (hasScale) {
         QDoubleSpinBox *sb = new QDoubleSpinBox;
         sb->setSingleStep(scaleStep);
@@ -1114,15 +1160,37 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
         sb->setMaximum(scaleMax);
         // Prevent mouse wheel focus to avoid changing the selection
         sb->setFocusPolicy(Qt::StrongFocus);
-        ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, 2, sb);
+        ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, dataTableColScale, sb);
         connect(sb, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 [this](double value) {
             (void)value;
+         printf("scale changed\n");
             updateGraphs();
         });
     } else {
-        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 2, new QTableWidgetItem("Not Plottable"));
+        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColScale, new QTableWidgetItem("N/A"));
     }
+
+    // Axis
+    QTableWidgetItem *axisItem = new QTableWidgetItem("");
+    axisItem->setCheckState(Qt::Unchecked);
+    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColAltAxis, axisItem);
+
+    connect(ui->dataTable, &QTableWidget::itemChanged, [this, axisItem](QTableWidgetItem *item) {
+        if (item == axisItem){
+            updateGraphs();
+        }
+    });
+
+    // Plot
+    QTableWidgetItem *plotItem = new QTableWidgetItem("");
+    plotItem->setCheckState(Qt::Unchecked);
+    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColPlot, plotItem);
+    connect(ui->dataTable, &QTableWidget::itemChanged, [this, plotItem](QTableWidgetItem *item) {
+        if (item == plotItem){
+            updateGraphs();
+        }
+    });
 }
 
 void PageLogAnalysis::openLog(QByteArray data)

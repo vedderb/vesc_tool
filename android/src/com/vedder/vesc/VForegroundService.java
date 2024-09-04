@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
+import android.content.pm.ServiceInfo;
 
 import vedder.vesctool.R;
 
@@ -103,7 +104,7 @@ public class VForegroundService extends Service {
         Notification.Action prevAction = new Notification.Action(android.R.drawable.ic_media_pause, "Stop", pendingPrevIntent);
         builder.addAction(prevAction);
 
-        startForeground(1, builder.build());
+        startForeground(1, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
     }
 
     private void stopForegroundService()

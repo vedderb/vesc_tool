@@ -1408,26 +1408,27 @@ void PageLogAnalysis::restoreSelection()
     auto modeOld = ui->dataTable->selectionMode();
     ui->dataTable->setSelectionMode(QAbstractItemView::MultiSelection);
     for (int row = 0;row < ui->dataTable->rowCount();row++) {
+        auto rowText = ui->dataTable->item(row, 0)->text();
         bool selected = false;
         bool checkedPlot = false;
         bool checkedY2 = false;
 
         foreach (auto i, mSelection.dataLabels) {
-            if (ui->dataTable->item(row, 0)->text() == i) {
+            if (rowText == i) {
                 selected = true;
                 break;
             }
         }
 
         foreach (auto i, mSelection.checkedPlotBoxes) {
-            if (ui->dataTable->item(row, 0)->text() == i) {
+            if (rowText == i) {
                 checkedPlot = true;
                 break;
             }
         }
 
         foreach (auto i, mSelection.checkedY2Boxes) {
-            if (ui->dataTable->item(row, 0)->text() == i) {
+            if (rowText == i) {
                 checkedY2 = true;
                 break;
             }

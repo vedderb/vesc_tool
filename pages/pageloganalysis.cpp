@@ -90,6 +90,18 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->dataTable->setColumnWidth(dataTableColY2, 30);
     ui->dataTable->setColumnWidth(dataTableColScale, 60);
 
+    connect(ui->dataTable, &QTableWidget::itemChanged, [this](QTableWidgetItem *item) {
+        if (item->checkState() == Qt::Checked) {
+            if (item->column() == dataTableColY1){
+                    ui->dataTable->item(item->row(), dataTableColY2)->setCheckState(Qt::Unchecked);
+            }
+            if (item->column() == dataTableColY2) {
+                ui->dataTable->item(item->row(), dataTableColY1)->setCheckState(Qt::Unchecked);
+            }
+        }
+        updateGraphs();
+    });
+
     m3dView = new Vesc3DView(this);
     m3dView->setMinimumWidth(200);
     m3dView->setRollPitchYaw(20, 20, 0);
@@ -1183,21 +1195,7 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
     y2Item->setCheckState(Qt::Unchecked);
     ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColY2, y2Item);
 
-    connect(ui->dataTable, &QTableWidget::itemChanged, [this, axisItem](QTableWidgetItem *item) {
-        if (item == axisItem){
-            updateGraphs();
-        }
-    });
 
-    // Plot
-    QTableWidgetItem *plotItem = new QTableWidgetItem("");
-    plotItem->setCheckState(Qt::Unchecked);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColPlot, plotItem);
-    connect(ui->dataTable, &QTableWidget::itemChanged, [this, plotItem](QTableWidgetItem *item) {
-        if (item == plotItem){
-            updateGraphs();
-        }
-    });
 }
 
 void PageLogAnalysis::openLog(QByteArray data)

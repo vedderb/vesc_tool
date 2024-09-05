@@ -102,6 +102,8 @@ public:
     static void createEnuMatrix(double lat, double lon, double *enuMat);
     static void llhToEnu(const double *iLlh, const double *llh, double *xyz);
     static void enuToLlh(const double *iLlh, const double *xyz, double *llh);
+    static double distLlhToLlh(double lat, double lon, double height,
+                              double lat2, double lon2, double height2);
 
     static bool configCheckCompatibility(int fwMajor, int fwMinor);
     static bool configLoad(VescInterface *vesc, int fwMajor, int fwMinor);

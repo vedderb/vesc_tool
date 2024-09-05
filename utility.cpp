@@ -1709,6 +1709,15 @@ void Utility::enuToLlh(const double *iLlh, const double *xyz, double *llh)
     xyzToLlh(x, y, z, &llh[0], &llh[1], &llh[2]);
 }
 
+double Utility::distLlhToLlh(double lat, double lon, double height,
+                            double lat2, double lon2, double height2)
+{
+    double x, y, z, x2, y2, z2;
+    llhToXyz(lat, lon, height, &x, &y, &z);
+    llhToXyz(lat2, lon2, height2, &x2, &y2, &z2);
+    return sqrt(SQ(x - x2) + SQ(y - y2) + SQ(z - z2));
+}
+
 bool Utility::configCheckCompatibility(int fwMajor, int fwMinor)
 {
     QDirIterator it("://res/config");

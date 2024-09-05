@@ -171,6 +171,28 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="filterdMaxBox">
+              <property name="toolTip">
+               <string>Maximum distance from origin</string>
+              </property>
+              <property name="prefix">
+               <string>dMax: </string>
+              </property>
+              <property name="suffix">
+               <string> km</string>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <double>999.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>50.000000000000000</double>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -181,6 +203,12 @@
            </property>
            <property name="sizeType">
             <enum>QSizePolicy::Policy::MinimumExpanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
            </property>
           </spacer>
          </item>

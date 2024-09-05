@@ -237,11 +237,19 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     connect(ui->filterhAccBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double newVal) {
-        (void)newVal;
-        if (ui->filterOutlierBox->isChecked()) {
-            truncateDataAndPlot(ui->autoZoomBox->isChecked());
-        }
-    });
+                (void)newVal;
+                if (ui->filterOutlierBox->isChecked()) {
+                    truncateDataAndPlot(ui->autoZoomBox->isChecked());
+                }
+            });
+
+    connect(ui->filterdMaxBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double newVal) {
+                (void)newVal;
+                if (ui->filterOutlierBox->isChecked()) {
+                    truncateDataAndPlot(ui->autoZoomBox->isChecked());
+                }
+            });
 
     connect(ui->tabWidget, &QTabWidget::currentChanged, [this](int index) {
         (void)index;
@@ -400,11 +408,6 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
             if (val.ms_today != mGnssMsTodayLast) {
                 mGnssMsTodayLast = val.ms_today;
 
-                if (ui->filterOutlierBox->isChecked() &&
-                        (val.hdop * 5.0) > ui->filterhAccBox->value()) {
-                    return;
-                }
-
                 double llh[3];
                 double i_llh[3];
                 double xyz[3];
@@ -413,6 +416,16 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
                 llh[0] = val.lat;
                 llh[1] = val.lon;
                 llh[2] = val.height;
+
+                if (ui->filterOutlierBox->isChecked()) {
+                    if ((val.hdop * 5.0) > ui->filterhAccBox->value()) {
+                        return;
+                    }
+
+                    if (val.distanceTo(i_llh[0], i_llh[1], i_llh[2]) > (ui->filterdMaxBox->value() * 1000.0)) {
+                        return;
+                    }
+                }
 
                 Utility::llhToEnu(i_llh, llh, xyz);
 
@@ -443,6 +456,11 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
 
 void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
 {
+    if (log.isEmpty()) {
+        mVesc->emitMessageDialog("Load Log", "No data", false);
+        return;
+    }
+
     storeSelection();
 
     resetInds();
@@ -504,26 +522,34 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
     mLogHeader.append(LOG_HEADER("gnss_v_acc", "V. Accuracy GNSS", "m"));
     mLogHeader.append(LOG_HEADER("num_vesc", "VESC num", "", 0));
 
-    double i_llh[3];
-    for (auto d: log) {
-        if (d.posTime >= 0 && (!ui->filterOutlierBox->isChecked() ||
-                               d.hAcc < ui->filterhAccBox->value())) {
-            i_llh[0] = d.lat;
-            i_llh[1] = d.lon;
-            i_llh[2] = d.alt;
-            ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
-            break;
+    LOG_DATA bestPoint = log.first();
+    foreach (auto &d, log) {
+        if (d.posTime >= 0) {
+            if (d.hAcc < bestPoint.hAcc) {
+                bestPoint = d;
+            }
         }
+    }
+
+    if (bestPoint.posTime >= 0) {
+        double i_llh[3];
+        i_llh[0] = bestPoint.lat;
+        i_llh[1] = bestPoint.lon;
+        i_llh[2] = bestPoint.alt;
+        ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
     }
 
     LOG_DATA prevSampleGnss;
     bool prevSampleGnssSet = false;
     double metersGnss = 0.0;
 
-    for (auto d: log) {
+    foreach (auto &d, log) {
         if (d.posTime >= 0 &&
-                (!ui->filterOutlierBox->isChecked() ||
-                 d.hAcc < ui->filterhAccBox->value())) {
+            (!ui->filterOutlierBox->isChecked() ||
+                               (
+                                   d.hAcc < ui->filterhAccBox->value()) &&
+                                   d.distanceTo(bestPoint) < (ui->filterdMaxBox->value() * 1000.0)
+                               )) {
             if (prevSampleGnssSet) {
                 double i_llh[3];
                 double llh[3];
@@ -728,17 +754,21 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
             } else {
                 llh[2] = 0.0;
             }
-            Utility::llhToEnu(i_llh, llh, xyz);
 
-            LocPoint p;
-            p.setXY(xyz[0], xyz[1]);
-            p.setRadius(5);
+            if (!ui->filterOutlierBox->isChecked() ||
+                Utility::distLlhToLlh(llh[0], llh[1], 0.0, i_llh[0], i_llh[1], 0.0) < (ui->filterdMaxBox->value() * 1000.0)) {
+                Utility::llhToEnu(i_llh, llh, xyz);
 
-            if (mInd_t_day >= 0) {
-                p.setInfo(QString("%1").arg(d[mInd_t_day]));
+                LocPoint p;
+                p.setXY(xyz[0], xyz[1]);
+                p.setRadius(5);
+
+                if (mInd_t_day >= 0) {
+                    p.setInfo(QString("%1").arg(d[mInd_t_day]));
+                }
+
+                ui->map->addInfoPoint(p, false);
             }
-
-            ui->map->addInfoPoint(p, false);
         }
     }
 
@@ -1058,18 +1088,22 @@ void PageLogAnalysis::updateDataAndPlot(double time)
         } else {
             llh[2] = 0.0;
         }
-        Utility::llhToEnu(i_llh, llh, xyz);
 
-        LocPoint p;
-        p.setXY(xyz[0], xyz[1]);
-        p.setRadius(10);
+        if (!ui->filterOutlierBox->isChecked() ||
+            Utility::distLlhToLlh(llh[0], llh[1], 0.0, i_llh[0], i_llh[1], 0.0) < (ui->filterdMaxBox->value() * 1000.0)) {
+            Utility::llhToEnu(i_llh, llh, xyz);
 
-        ui->map->setInfoTraceNow(1);
-        ui->map->clearInfoTrace();
-        ui->map->addInfoPoint(p);
+            LocPoint p;
+            p.setXY(xyz[0], xyz[1]);
+            p.setRadius(10);
 
-        if (ui->followBox->isChecked()) {
-            ui->map->moveView(xyz[0], xyz[1]);
+            ui->map->setInfoTraceNow(1);
+            ui->map->clearInfoTrace();
+            ui->map->addInfoPoint(p);
+
+            if (ui->followBox->isChecked()) {
+                ui->map->moveView(xyz[0], xyz[1]);
+            }
         }
     }
 
@@ -1283,11 +1317,12 @@ void PageLogAnalysis::generateMissingEntries()
 
     updateInds();
 
+    // Initialize map enu ref
     if (mInd_gnss_lat >= 0 && mInd_gnss_lon >= 0) {
-
-        // Initialize map enu ref
+        double haccBest = 100000.0;
         double i_llh[3] = {57.71495867, 12.89134921, 220.0};
-        for (auto d: mLog) {
+
+        foreach (auto &d, mLog) {
             double lat = d.at(mInd_gnss_lat);
             double lon = d.at(mInd_gnss_lon);
             double alt = 0;
@@ -1300,15 +1335,20 @@ void PageLogAnalysis::generateMissingEntries()
                 hacc = d.at(mInd_gnss_h_acc);
             }
 
-            if (hacc > 0.0 && (!ui->filterOutlierBox->isChecked() ||
-                             hacc < ui->filterhAccBox->value())) {
+            if (hacc < haccBest) {
+                haccBest = hacc;
                 i_llh[0] = lat;
                 i_llh[1] = lon;
                 i_llh[2] = alt;
-                ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
+            }
+
+            // Use first point when hacc is not available
+            if (mInd_gnss_h_acc < 0) {
                 break;
             }
         }
+
+        ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
 
         // Create GNSS trip counter if it is missing
         if (mInd_trip_vesc < 0) {
@@ -1331,8 +1371,11 @@ void PageLogAnalysis::generateMissingEntries()
                     hacc = mLog.at(i).at(mInd_gnss_h_acc);
                 }
 
-                if (hacc > 0 && (!ui->filterOutlierBox->isChecked() ||
-                                 hacc < ui->filterhAccBox->value())) {
+                if (hacc > 0.0 && (!ui->filterOutlierBox->isChecked() ||
+                                   (
+                                       hacc < ui->filterhAccBox->value()) &&
+                                       Utility::distLlhToLlh(lat, lon, alt, 0.0, i_llh[1], 0.0) < (ui->filterdMaxBox->value() * 1000.0)
+                                   )) {
                     if (prevSampleGnssSet) {
                         double i_llh[3];
                         double llh[3];

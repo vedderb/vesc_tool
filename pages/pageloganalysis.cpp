@@ -93,13 +93,15 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     connect(ui->dataTable, &QTableWidget::itemChanged, [this](QTableWidgetItem *item) {
         if (item->checkState() == Qt::Checked) {
             if (item->column() == dataTableColY1){
-                    ui->dataTable->item(item->row(), dataTableColY2)->setCheckState(Qt::Unchecked);
+                ui->dataTable->item(item->row(), dataTableColY2)->setCheckState(Qt::Unchecked);
             }
             if (item->column() == dataTableColY2) {
                 ui->dataTable->item(item->row(), dataTableColY1)->setCheckState(Qt::Unchecked);
             }
         }
-        updateGraphs();
+        if (item->column() > dataTableColValue) {
+            updateGraphs();
+        }
     });
 
     m3dView = new Vesc3DView(this);
@@ -816,7 +818,7 @@ void PageLogAnalysis::updateGraphs()
             int row = rows.at(r).row();
             double rowScale = 1.0;
             if(QDoubleSpinBox *sb = qobject_cast<QDoubleSpinBox*>
-                    (ui->dataTable->cellWidget(row, 2))) {
+                    (ui->dataTable->cellWidget(row, dataTableColScale))) {
                 rowScale = sb->value();
             }
 
@@ -1165,9 +1167,13 @@ void PageLogAnalysis::logListRefresh()
 void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep, double scaleMax)
 {
     ui->dataTable->setRowCount(ui->dataTable->rowCount() + 1);
-    auto item1 = new QTableWidgetItem(name);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColName, item1);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColValue, new QTableWidgetItem(""));
+    auto currentRow = ui->dataTable->rowCount() - 1;
+    
+    auto nameItem = new QTableWidgetItem(name);
+    ui->dataTable->setItem(currentRow, dataTableColName, nameItem);
+
+    ui->dataTable->setItem(currentRow, dataTableColValue, new QTableWidgetItem(""));
+
     if (hasScale) {
         QDoubleSpinBox *sb = new QDoubleSpinBox;
         sb->setSingleStep(scaleStep);
@@ -1175,25 +1181,26 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
         sb->setMaximum(scaleMax);
         // Prevent mouse wheel focus to avoid changing the selection
         sb->setFocusPolicy(Qt::StrongFocus);
-        ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, dataTableColScale, sb);
+        ui->dataTable->setCellWidget(currentRow, dataTableColScale, sb);
         connect(sb, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 [this](double value) {
-                    (void)value;
-                    updateGraphs();
-                });
-    } else {
-        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColScale, new QTableWidgetItem("N/A"));
-    }
+            (void)value;
+            updateGraphs();
+        });
 
     // Y1
     QTableWidgetItem *y1Item = new QTableWidgetItem("");
     y1Item->setCheckState(Qt::Unchecked);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColY1, y1Item);
+    ui->dataTable->setItem(currentRow, dataTableColY1, y1Item);
 
     // Y2
     QTableWidgetItem *y2Item = new QTableWidgetItem("");
     y2Item->setCheckState(Qt::Unchecked);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColY2, y2Item);
+    ui->dataTable->setItem(currentRow, dataTableColY2, y2Item);
+
+    } else {
+        ui->dataTable->setItem(currentRow, dataTableColScale, new QTableWidgetItem("N/A"));
+    }
 
 
 }

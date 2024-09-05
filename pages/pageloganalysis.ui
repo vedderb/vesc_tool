@@ -568,6 +568,16 @@
            </attribute>
            <column>
             <property name="text">
+             <string>Name</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Value</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
              <string>Y1</string>
             </property>
            </column>
@@ -577,16 +587,6 @@
             </property>
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show this data series on the second Y axis to the right&lt;/p&gt;&lt;p&gt;Y axes will be autoscaled independently&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Value</string>
             </property>
            </column>
            <column>

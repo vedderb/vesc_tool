@@ -104,6 +104,32 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
         }
     });
 
+    connect(ui->dataTable, &QTableWidget::itemClicked, [this](QTableWidgetItem *item) {
+printf("itemClicked %d %d %d\n", item->row(), item->column(), item->checkState());
+
+            if (item->column() == dataTableColY2){
+                auto i1 = ui->dataTable->item(item->row(), dataTableColY2);
+
+                if(i1->checkState() == Qt::Checked) {
+                    ui->dataTable->item(i1->row(), dataTableColY2)->setCheckState(Qt::Unchecked);
+
+                }else if(i1->checkState() == Qt::Unchecked) {
+                    ui->dataTable->item(i1->row(), dataTableColY2)->setCheckState(Qt::Checked);
+                }
+            }
+            if (item->column() == dataTableColY1) {
+                auto i1 = ui->dataTable->item(item->row(), dataTableColY1);
+
+                if(i1->checkState() == Qt::Checked) {
+                    ui->dataTable->item(i1->row(), dataTableColY1)->setCheckState(Qt::Unchecked);
+
+                }else if(i1->checkState() == Qt::Unchecked) {
+                    ui->dataTable->item(i1->row(), dataTableColY1)->setCheckState(Qt::Checked);
+                }
+            }
+    });
+
+
     m3dView = new Vesc3DView(this);
     m3dView->setMinimumWidth(200);
     m3dView->setRollPitchYaw(20, 20, 0);
@@ -769,10 +795,10 @@ void PageLogAnalysis::updateGraphs()
 {
     QSet<QModelIndex> uniqueRows;
 
-    auto selectedRows = ui->dataTable->selectionModel()->selectedRows();
-    for (const QModelIndex &index : selectedRows) {
-        uniqueRows.insert(index);
-    }
+    // auto selectedRows = ui->dataTable->selectionModel()->selectedRows();
+    // for (const QModelIndex &index : selectedRows) {
+    //     uniqueRows.insert(index);
+    // }
 
     for (int row = 0; row < ui->dataTable->rowCount(); ++row) {
         QTableWidgetItem *item;

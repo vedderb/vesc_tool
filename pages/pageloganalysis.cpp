@@ -1441,17 +1441,17 @@ void PageLogAnalysis::storeSelection()
         mSelection.dataLabels.append(ui->dataTable->item(i.row(), dataTableColName)->text());
     }
 
-    // Selected plot and y2 boxes
+    // Selected y1 and y2 boxes
     for (int row = 0; row < ui->dataTable->rowCount(); row++) {
         auto rowText = ui->dataTable->item(row, dataTableColName)->text();
 
-        QTableWidgetItem *itemPlot = ui->dataTable->item(row, dataTableColY1);
-        if (itemPlot->checkState() == Qt::Checked) {
+        QTableWidgetItem *itemY1 = ui->dataTable->item(row, dataTableColY1);
+        if (itemY1 != nullptr && itemY1->checkState() == Qt::Checked) {
             mSelection.checkedY1Boxes.append(rowText);
         }
 
         QTableWidgetItem *itemY2 = ui->dataTable->item(row, dataTableColY2);
-        if (itemY2->checkState() == Qt::Checked) {
+        if (itemY2 != nullptr && itemY2->checkState() == Qt::Checked) {
             mSelection.checkedY2Boxes.append(rowText);
         }
     }

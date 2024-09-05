@@ -778,11 +778,11 @@ void PageLogAnalysis::updateGraphs()
         QTableWidgetItem *item;
         item = ui->dataTable->item(row, dataTableColY1);
         if (item && item->checkState() == Qt::Checked) {
-            uniqueRows.insert(ui->dataTable->model()->index(row, 0));
+            uniqueRows.insert(ui->dataTable->model()->index(row, dataTableColName));
         }
         item = ui->dataTable->item(row, dataTableColY2);
         if (item && item->checkState() == Qt::Checked) {
-            uniqueRows.insert(ui->dataTable->model()->index(row, 0));
+            uniqueRows.insert(ui->dataTable->model()->index(row, dataTableColName));
         }
     }
 
@@ -855,19 +855,18 @@ void PageLogAnalysis::updateGraphs()
 
         auto row = rows.at(i).row();
 
-        bool altAxis = false;
+        bool y2Axis = false;
         
-        if(QTableWidgetItem *aaWidget = ui->dataTable->item(row, dataTableColAltAxis)) {
-            altAxis = (aaWidget->checkState() == Qt::Checked);
+        if(QTableWidgetItem *y2Widget = ui->dataTable->item(row, dataTableColY2)) {
+            y2Axis = (y2Widget->checkState() == Qt::Checked);
         }
 
-        if(altAxis){
+        if(y2Axis){
             ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
             ui->plot->yAxis2->setVisible(true);
         } else{
             ui->plot->addGraph();
         }
-
 
         ui->plot->graph(i)->setPen(pen);
         ui->plot->graph(i)->setName(names.at(i));
@@ -1036,13 +1035,13 @@ void PageLogAnalysis::updateDataAndPlot(double time)
             if (header.isTimeStamp) {
                 QTime t(0, 0, 0, 0);
                 t = t.addMSecs(value * 1000);
-                ui->dataTable->item(ind, 1)->setText(t.toString("hh:mm:ss.zzz"));
+                ui->dataTable->item(ind, dataTableColValue)->setText(t.toString("hh:mm:ss.zzz"));
             } else {
-                ui->dataTable->item(ind, 1)->setText(
+                ui->dataTable->item(ind, dataTableColValue)->setText(
                             QString::number(value, 'f', header.precision) + " " + header.unit);
             }
         } else {
-            ui->dataTable->item(ind, 1)->setText(Commands::faultToStr(mc_fault_code(round(value))).mid(11));
+            ui->dataTable->item(ind, dataTableColValue)->setText(Commands::faultToStr(mc_fault_code(round(value))).mid(11));
         }
 
         ind++;
@@ -1391,24 +1390,24 @@ void PageLogAnalysis::generateMissingEntries()
 void PageLogAnalysis::storeSelection()
 {
     mSelection.dataLabels.clear();
-    mSelection.checkedPlotBoxes.clear();
+    mSelection.checkedY1Boxes.clear();
     mSelection.checkedY2Boxes.clear();
 
     // Selected rows
     foreach (auto i, ui->dataTable->selectionModel()->selectedRows()) {
-        mSelection.dataLabels.append(ui->dataTable->item(i.row(), 0)->text());
+        mSelection.dataLabels.append(ui->dataTable->item(i.row(), dataTableColName)->text());
     }
 
     // Selected plot and y2 boxes
     for (int row = 0; row < ui->dataTable->rowCount(); row++) {
-        QTableWidgetItem *itemPlot = ui->dataTable->item(row, dataTableColPlot);
-        auto rowText = ui->dataTable->item(row, 0)->text();
+        auto rowText = ui->dataTable->item(row, dataTableColName)->text();
 
+        QTableWidgetItem *itemPlot = ui->dataTable->item(row, dataTableColY1);
         if (itemPlot->checkState() == Qt::Checked) {
-            mSelection.checkedPlotBoxes.append(rowText);
+            mSelection.checkedY1Boxes.append(rowText);
         }
 
-        QTableWidgetItem *itemY2 = ui->dataTable->item(row, dataTableColAltAxis);
+        QTableWidgetItem *itemY2 = ui->dataTable->item(row, dataTableColY2);
         if (itemY2->checkState() == Qt::Checked) {
             mSelection.checkedY2Boxes.append(rowText);
         }
@@ -1423,9 +1422,9 @@ void PageLogAnalysis::restoreSelection()
     auto modeOld = ui->dataTable->selectionMode();
     ui->dataTable->setSelectionMode(QAbstractItemView::MultiSelection);
     for (int row = 0;row < ui->dataTable->rowCount();row++) {
-        auto rowText = ui->dataTable->item(row, 0)->text();
+        auto rowText = ui->dataTable->item(row, dataTableColName)->text();
         bool selected = false;
-        bool checkedPlot = false;
+        bool checkedY1 = false;
         bool checkedY2 = false;
 
         foreach (auto i, mSelection.dataLabels) {
@@ -1435,9 +1434,9 @@ void PageLogAnalysis::restoreSelection()
             }
         }
 
-        foreach (auto i, mSelection.checkedPlotBoxes) {
+        foreach (auto i, mSelection.checkedY1Boxes) {
             if (rowText == i) {
-                checkedPlot = true;
+                checkedY1 = true;
                 break;
             }
         }
@@ -1453,12 +1452,12 @@ void PageLogAnalysis::restoreSelection()
             ui->dataTable->selectRow(row);
         }
 
-        if (checkedPlot) {
-            ui->dataTable->item(row, dataTableColAltAxis)->setCheckState(Qt::Checked);
+        if (checkedY1) {
+            ui->dataTable->item(row, dataTableColY1)->setCheckState(Qt::Checked);
         }
 
         if (checkedY2) {
-            ui->dataTable->item(row, dataTableColPlot)->setCheckState(Qt::Checked);
+            ui->dataTable->item(row, dataTableColY2)->setCheckState(Qt::Checked);
         }
     }
     ui->dataTable->setSelectionMode(modeOld);

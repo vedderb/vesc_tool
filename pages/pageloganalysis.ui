@@ -182,6 +182,12 @@
            <property name="sizeType">
             <enum>QSizePolicy::Policy::MinimumExpanding</enum>
            </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
           </spacer>
          </item>
          <item>
@@ -239,7 +245,7 @@
         <enum>QTabWidget::TabShape::Triangular</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -562,16 +568,6 @@
            </attribute>
            <column>
             <property name="text">
-             <string>Name</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Value</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
              <string>Y1</string>
             </property>
            </column>
@@ -581,6 +577,16 @@
             </property>
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show this data series on the second Y axis to the right&lt;/p&gt;&lt;p&gt;Y axes will be autoscaled independently&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Name</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Value</string>
             </property>
            </column>
            <column>

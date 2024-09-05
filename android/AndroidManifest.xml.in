@@ -62,7 +62,8 @@
     <service
             android:name='"com.vedder.vesc.VForegroundService"'
             android:enabled='"true"'
-            android:exported='"true"' />
+            android:exported='"true"'
+            android:foregroundServiceType='"location"' />
 
     <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
 
@@ -89,6 +90,7 @@
     <uses-permission android:name='"android.permission.ACCESS_FINE_LOCATION"' />
     <uses-permission android:name='"android.permission.ACCESS_BACKGROUND_LOCATION"' />
     <uses-permission android:name='"android.permission.FOREGROUND_SERVICE"' />
+    <uses-permission android:name='"android.permission.FOREGROUND_SERVICE_LOCATION"' />
     <uses-permission android:name='"android.permission.BLUETOOTH_SCAN"'/>
     <uses-permission android:name='"android.permission.BLUETOOTH_CONNECT"'/>
 </manifest>

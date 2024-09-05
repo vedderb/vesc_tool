@@ -538,8 +538,8 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
 
     LOG_DATA bestPoint = log.first();
     foreach (auto &d, log) {
-        if (d.posTime >= 0) {
-            if (d.hAcc < bestPoint.hAcc) {
+        if (d.posTime >= 0 && d.hAcc > 0.0) {
+            if (d.hAcc < bestPoint.hAcc || bestPoint.hAcc <= 0.0) {
                 bestPoint = d;
             }
         }
@@ -1234,8 +1234,6 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
     } else {
         ui->dataTable->setItem(currentRow, dataTableColScale, new QTableWidgetItem("N/A"));
     }
-
-
 }
 
 void PageLogAnalysis::openLog(QByteArray data)
@@ -1262,7 +1260,7 @@ void PageLogAnalysis::openLog(QByteArray data)
 
         QVector<double> entryLastData;
 
-        for (auto t: tokensLine1) {
+        foreach (auto &t, tokensLine1) {
             auto token = t.split(":");
             LOG_HEADER h;
             for (int i = 0;i < t.size();i++) {
@@ -1349,7 +1347,7 @@ void PageLogAnalysis::generateMissingEntries()
                 hacc = d.at(mInd_gnss_h_acc);
             }
 
-            if (hacc < haccBest) {
+            if (hacc > 0.0 && hacc < haccBest) {
                 haccBest = hacc;
                 i_llh[0] = lat;
                 i_llh[1] = lon;

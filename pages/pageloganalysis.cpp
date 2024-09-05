@@ -99,7 +99,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
                 ui->dataTable->item(item->row(), dataTableColY1)->setCheckState(Qt::Unchecked);
             }
         }
-        if (item->column() > dataTableColValue) {
+        if (item->column() != dataTableColValue && item->column() != dataTableColName) {
             updateGraphs();
         }
     });

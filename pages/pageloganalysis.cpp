@@ -29,8 +29,8 @@
 
 static const int dataTableColName = 0;
 static const int dataTableColValue = 1;
-static const int dataTableColPlot = 2;
-static const int dataTableColAltAxis = 3;
+static const int dataTableColY1 = 2;
+static const int dataTableColY2 = 3;
 static const int dataTableColScale = 4;
 
 PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
@@ -82,13 +82,27 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColName, QHeaderView::Interactive);
     ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColValue, QHeaderView::Stretch);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColY1, QHeaderView::Fixed);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColY2, QHeaderView::Fixed);
     ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColScale, QHeaderView::Fixed);
-    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColAltAxis, QHeaderView::Fixed);
-    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColPlot, QHeaderView::Fixed);
 
-    ui->dataTable->setColumnWidth(dataTableColAltAxis, 30);
-    ui->dataTable->setColumnWidth(dataTableColPlot, 45);
+    ui->dataTable->setColumnWidth(dataTableColY1, 30);
+    ui->dataTable->setColumnWidth(dataTableColY2, 30);
     ui->dataTable->setColumnWidth(dataTableColScale, 60);
+
+    connect(ui->dataTable, &QTableWidget::itemChanged, [this](QTableWidgetItem *item) {
+        if (item->checkState() == Qt::Checked) {
+            if (item->column() == dataTableColY1){
+                ui->dataTable->item(item->row(), dataTableColY2)->setCheckState(Qt::Unchecked);
+            }
+            if (item->column() == dataTableColY2) {
+                ui->dataTable->item(item->row(), dataTableColY1)->setCheckState(Qt::Unchecked);
+            }
+        }
+        if (item->column() > dataTableColValue) {
+            updateGraphs();
+        }
+    });
 
     m3dView = new Vesc3DView(this);
     m3dView->setMinimumWidth(200);
@@ -791,9 +805,14 @@ void PageLogAnalysis::updateGraphs()
     }
 
     for (int row = 0; row < ui->dataTable->rowCount(); ++row) {
-        QTableWidgetItem *item = ui->dataTable->item(row, dataTableColPlot);
+        QTableWidgetItem *item;
+        item = ui->dataTable->item(row, dataTableColY1);
         if (item && item->checkState() == Qt::Checked) {
-            uniqueRows.insert(ui->dataTable->model()->index(row, 0));
+            uniqueRows.insert(ui->dataTable->model()->index(row, dataTableColName));
+        }
+        item = ui->dataTable->item(row, dataTableColY2);
+        if (item && item->checkState() == Qt::Checked) {
+            uniqueRows.insert(ui->dataTable->model()->index(row, dataTableColName));
         }
     }
 
@@ -829,7 +848,7 @@ void PageLogAnalysis::updateGraphs()
             int row = rows.at(r).row();
             double rowScale = 1.0;
             if(QDoubleSpinBox *sb = qobject_cast<QDoubleSpinBox*>
-                    (ui->dataTable->cellWidget(row, 2))) {
+                    (ui->dataTable->cellWidget(row, dataTableColScale))) {
                 rowScale = sb->value();
             }
 
@@ -866,19 +885,18 @@ void PageLogAnalysis::updateGraphs()
 
         auto row = rows.at(i).row();
 
-        bool altAxis = false;
+        bool y2Axis = false;
         
-        if (QTableWidgetItem *aaWidget = ui->dataTable->item(row, dataTableColAltAxis)) {
-            altAxis = (aaWidget->checkState() == Qt::Checked);
+        if(QTableWidgetItem *y2Widget = ui->dataTable->item(row, dataTableColY2)) {
+            y2Axis = (y2Widget->checkState() == Qt::Checked);
         }
 
-        if (altAxis) {
+        if(y2Axis){
             ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
             ui->plot->yAxis2->setVisible(true);
-        } else {
+        } else{
             ui->plot->addGraph();
         }
-
 
         ui->plot->graph(i)->setPen(pen);
         ui->plot->graph(i)->setName(names.at(i));
@@ -1047,13 +1065,13 @@ void PageLogAnalysis::updateDataAndPlot(double time)
             if (header.isTimeStamp) {
                 QTime t(0, 0, 0, 0);
                 t = t.addMSecs(value * 1000);
-                ui->dataTable->item(ind, 1)->setText(t.toString("hh:mm:ss.zzz"));
+                ui->dataTable->item(ind, dataTableColValue)->setText(t.toString("hh:mm:ss.zzz"));
             } else {
-                ui->dataTable->item(ind, 1)->setText(
+                ui->dataTable->item(ind, dataTableColValue)->setText(
                             QString::number(value, 'f', header.precision) + " " + header.unit);
             }
         } else {
-            ui->dataTable->item(ind, 1)->setText(Commands::faultToStr(mc_fault_code(round(value))).mid(11));
+            ui->dataTable->item(ind, dataTableColValue)->setText(Commands::faultToStr(mc_fault_code(round(value))).mid(11));
         }
 
         ind++;
@@ -1182,9 +1200,13 @@ void PageLogAnalysis::logListRefresh()
 void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep, double scaleMax)
 {
     ui->dataTable->setRowCount(ui->dataTable->rowCount() + 1);
-    auto item1 = new QTableWidgetItem(name);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColName, item1);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColValue, new QTableWidgetItem(""));
+    auto currentRow = ui->dataTable->rowCount() - 1;
+    
+    auto nameItem = new QTableWidgetItem(name);
+    ui->dataTable->setItem(currentRow, dataTableColName, nameItem);
+
+    ui->dataTable->setItem(currentRow, dataTableColValue, new QTableWidgetItem(""));
+
     if (hasScale) {
         QDoubleSpinBox *sb = new QDoubleSpinBox;
         sb->setSingleStep(scaleStep);
@@ -1192,36 +1214,28 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
         sb->setMaximum(scaleMax);
         // Prevent mouse wheel focus to avoid changing the selection
         sb->setFocusPolicy(Qt::StrongFocus);
-        ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, dataTableColScale, sb);
+        ui->dataTable->setCellWidget(currentRow, dataTableColScale, sb);
         connect(sb, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 [this](double value) {
-                    (void)value;
-                    updateGraphs();
-                });
+            (void)value;
+            updateGraphs();
+        });
+
+    // Y1
+    QTableWidgetItem *y1Item = new QTableWidgetItem("");
+    y1Item->setCheckState(Qt::Unchecked);
+    ui->dataTable->setItem(currentRow, dataTableColY1, y1Item);
+
+    // Y2
+    QTableWidgetItem *y2Item = new QTableWidgetItem("");
+    y2Item->setCheckState(Qt::Unchecked);
+    ui->dataTable->setItem(currentRow, dataTableColY2, y2Item);
+
     } else {
-        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColScale, new QTableWidgetItem("N/A"));
+        ui->dataTable->setItem(currentRow, dataTableColScale, new QTableWidgetItem("N/A"));
     }
 
-    // Axis
-    QTableWidgetItem *axisItem = new QTableWidgetItem("");
-    axisItem->setCheckState(Qt::Unchecked);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColAltAxis, axisItem);
 
-    connect(ui->dataTable, &QTableWidget::itemChanged, [this, axisItem](QTableWidgetItem *item) {
-        if (item == axisItem){
-            updateGraphs();
-        }
-    });
-
-    // Plot
-    QTableWidgetItem *plotItem = new QTableWidgetItem("");
-    plotItem->setCheckState(Qt::Unchecked);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColPlot, plotItem);
-    connect(ui->dataTable, &QTableWidget::itemChanged, [this, plotItem](QTableWidgetItem *item) {
-        if (item == plotItem){
-            updateGraphs();
-        }
-    });
 }
 
 void PageLogAnalysis::openLog(QByteArray data)
@@ -1419,24 +1433,24 @@ void PageLogAnalysis::generateMissingEntries()
 void PageLogAnalysis::storeSelection()
 {
     mSelection.dataLabels.clear();
-    mSelection.checkedPlotBoxes.clear();
+    mSelection.checkedY1Boxes.clear();
     mSelection.checkedY2Boxes.clear();
 
     // Selected rows
     foreach (auto i, ui->dataTable->selectionModel()->selectedRows()) {
-        mSelection.dataLabels.append(ui->dataTable->item(i.row(), 0)->text());
+        mSelection.dataLabels.append(ui->dataTable->item(i.row(), dataTableColName)->text());
     }
 
     // Selected plot and y2 boxes
     for (int row = 0; row < ui->dataTable->rowCount(); row++) {
-        QTableWidgetItem *itemPlot = ui->dataTable->item(row, dataTableColPlot);
-        auto rowText = ui->dataTable->item(row, 0)->text();
+        auto rowText = ui->dataTable->item(row, dataTableColName)->text();
 
+        QTableWidgetItem *itemPlot = ui->dataTable->item(row, dataTableColY1);
         if (itemPlot->checkState() == Qt::Checked) {
-            mSelection.checkedPlotBoxes.append(rowText);
+            mSelection.checkedY1Boxes.append(rowText);
         }
 
-        QTableWidgetItem *itemY2 = ui->dataTable->item(row, dataTableColAltAxis);
+        QTableWidgetItem *itemY2 = ui->dataTable->item(row, dataTableColY2);
         if (itemY2->checkState() == Qt::Checked) {
             mSelection.checkedY2Boxes.append(rowText);
         }
@@ -1451,9 +1465,9 @@ void PageLogAnalysis::restoreSelection()
     auto modeOld = ui->dataTable->selectionMode();
     ui->dataTable->setSelectionMode(QAbstractItemView::MultiSelection);
     for (int row = 0;row < ui->dataTable->rowCount();row++) {
-        auto rowText = ui->dataTable->item(row, 0)->text();
+        auto rowText = ui->dataTable->item(row, dataTableColName)->text();
         bool selected = false;
-        bool checkedPlot = false;
+        bool checkedY1 = false;
         bool checkedY2 = false;
 
         foreach (auto i, mSelection.dataLabels) {
@@ -1463,9 +1477,9 @@ void PageLogAnalysis::restoreSelection()
             }
         }
 
-        foreach (auto i, mSelection.checkedPlotBoxes) {
+        foreach (auto i, mSelection.checkedY1Boxes) {
             if (rowText == i) {
-                checkedPlot = true;
+                checkedY1 = true;
                 break;
             }
         }
@@ -1481,12 +1495,12 @@ void PageLogAnalysis::restoreSelection()
             ui->dataTable->selectRow(row);
         }
 
-        if (checkedPlot) {
-            ui->dataTable->item(row, dataTableColAltAxis)->setCheckState(Qt::Checked);
+        if (checkedY1) {
+            ui->dataTable->item(row, dataTableColY1)->setCheckState(Qt::Checked);
         }
 
         if (checkedY2) {
-            ui->dataTable->item(row, dataTableColPlot)->setCheckState(Qt::Checked);
+            ui->dataTable->item(row, dataTableColY2)->setCheckState(Qt::Checked);
         }
     }
     ui->dataTable->setSelectionMode(modeOld);

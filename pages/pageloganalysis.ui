@@ -572,7 +572,7 @@
            </column>
            <column>
             <property name="text">
-             <string>Plot</string>
+             <string>Y1</string>
             </property>
            </column>
            <column>

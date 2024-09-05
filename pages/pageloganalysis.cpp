@@ -29,8 +29,8 @@
 
 static const int dataTableColName = 0;
 static const int dataTableColValue = 1;
-static const int dataTableColPlot = 2;
-static const int dataTableColAltAxis = 3;
+static const int dataTableColY1 = 2;
+static const int dataTableColY2 = 3;
 static const int dataTableColScale = 4;
 
 PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
@@ -82,12 +82,12 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColName, QHeaderView::Interactive);
     ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColValue, QHeaderView::Stretch);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColY1, QHeaderView::Fixed);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColY2, QHeaderView::Fixed);
     ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColScale, QHeaderView::Fixed);
-    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColAltAxis, QHeaderView::Fixed);
-    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColPlot, QHeaderView::Fixed);
 
-    ui->dataTable->setColumnWidth(dataTableColAltAxis, 30);
-    ui->dataTable->setColumnWidth(dataTableColPlot, 45);
+    ui->dataTable->setColumnWidth(dataTableColY1, 30);
+    ui->dataTable->setColumnWidth(dataTableColY2, 30);
     ui->dataTable->setColumnWidth(dataTableColScale, 60);
 
     m3dView = new Vesc3DView(this);
@@ -761,7 +761,12 @@ void PageLogAnalysis::updateGraphs()
     }
 
     for (int row = 0; row < ui->dataTable->rowCount(); ++row) {
-        QTableWidgetItem *item = ui->dataTable->item(row, dataTableColPlot);
+        QTableWidgetItem *item;
+        item = ui->dataTable->item(row, dataTableColY1);
+        if (item && item->checkState() == Qt::Checked) {
+            uniqueRows.insert(ui->dataTable->model()->index(row, 0));
+        }
+        item = ui->dataTable->item(row, dataTableColY2);
         if (item && item->checkState() == Qt::Checked) {
             uniqueRows.insert(ui->dataTable->model()->index(row, 0));
         }
@@ -838,14 +843,14 @@ void PageLogAnalysis::updateGraphs()
 
         bool altAxis = false;
         
-        if (QTableWidgetItem *aaWidget = ui->dataTable->item(row, dataTableColAltAxis)) {
+        if(QTableWidgetItem *aaWidget = ui->dataTable->item(row, dataTableColAltAxis)) {
             altAxis = (aaWidget->checkState() == Qt::Checked);
         }
 
-        if (altAxis) {
+        if(altAxis){
             ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
             ui->plot->yAxis2->setVisible(true);
-        } else {
+        } else{
             ui->plot->addGraph();
         }
 
@@ -1168,10 +1173,15 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
         ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColScale, new QTableWidgetItem("N/A"));
     }
 
-    // Axis
-    QTableWidgetItem *axisItem = new QTableWidgetItem("");
-    axisItem->setCheckState(Qt::Unchecked);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColAltAxis, axisItem);
+    // Y1
+    QTableWidgetItem *y1Item = new QTableWidgetItem("");
+    y1Item->setCheckState(Qt::Unchecked);
+    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColY1, y1Item);
+
+    // Y2
+    QTableWidgetItem *y2Item = new QTableWidgetItem("");
+    y2Item->setCheckState(Qt::Unchecked);
+    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColY2, y2Item);
 
     connect(ui->dataTable, &QTableWidget::itemChanged, [this, axisItem](QTableWidgetItem *item) {
         if (item == axisItem){

@@ -27,11 +27,11 @@
 #include <QStandardPaths>
 #include <QScrollBar>
 
-const int dataTableColName = 0;
-const int dataTableColValue = 1;
-const int dataTableColPlot = 2;
-const int dataTableColAltAxis = 3;
-const int dataTableColScale = 4;
+static const int dataTableColName = 0;
+static const int dataTableColValue = 1;
+static const int dataTableColPlot = 2;
+static const int dataTableColAltAxis = 3;
+static const int dataTableColScale = 4;
 
 PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     QWidget(parent),
@@ -838,22 +838,20 @@ void PageLogAnalysis::updateGraphs()
 
         bool altAxis = false;
         
-        if(QTableWidgetItem *aaWidget = ui->dataTable->item(row, dataTableColAltAxis)) {
+        if (QTableWidgetItem *aaWidget = ui->dataTable->item(row, dataTableColAltAxis)) {
             altAxis = (aaWidget->checkState() == Qt::Checked);
         }
 
-        if (altAxis){
+        if (altAxis) {
             ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
             ui->plot->yAxis2->setVisible(true);
-        }
-        else{
+        } else {
             ui->plot->addGraph();
         }
 
 
         ui->plot->graph(i)->setPen(pen);
         ui->plot->graph(i)->setName(names.at(i));
-      
         ui->plot->graph(i)->setData(xAxis, yAxes.at(i));
     }
 
@@ -1163,10 +1161,9 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
         ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, dataTableColScale, sb);
         connect(sb, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 [this](double value) {
-            (void)value;
-         printf("scale changed\n");
-            updateGraphs();
-        });
+                    (void)value;
+                    updateGraphs();
+                });
     } else {
         ui->dataTable->setItem(ui->dataTable->rowCount() - 1, dataTableColScale, new QTableWidgetItem("N/A"));
     }
@@ -1379,9 +1376,29 @@ void PageLogAnalysis::generateMissingEntries()
 void PageLogAnalysis::storeSelection()
 {
     mSelection.dataLabels.clear();
+    mSelection.checkedPlotBoxes.clear();
+    mSelection.checkedY2Boxes.clear();
+
+    // Selected rows
     foreach (auto i, ui->dataTable->selectionModel()->selectedRows()) {
         mSelection.dataLabels.append(ui->dataTable->item(i.row(), 0)->text());
     }
+
+    // Selected plot and y2 boxes
+    for (int row = 0; row < ui->dataTable->rowCount(); row++) {
+        QTableWidgetItem *itemPlot = ui->dataTable->item(row, dataTableColPlot);
+        auto rowText = ui->dataTable->item(row, 0)->text();
+
+        if (itemPlot->checkState() == Qt::Checked) {
+            mSelection.checkedPlotBoxes.append(rowText);
+        }
+
+        QTableWidgetItem *itemY2 = ui->dataTable->item(row, dataTableColAltAxis);
+        if (itemY2->checkState() == Qt::Checked) {
+            mSelection.checkedY2Boxes.append(rowText);
+        }
+    }
+
     mSelection.scrollPos = ui->dataTable->verticalScrollBar()->value();
 }
 
@@ -1392,6 +1409,9 @@ void PageLogAnalysis::restoreSelection()
     ui->dataTable->setSelectionMode(QAbstractItemView::MultiSelection);
     for (int row = 0;row < ui->dataTable->rowCount();row++) {
         bool selected = false;
+        bool checkedPlot = false;
+        bool checkedY2 = false;
+
         foreach (auto i, mSelection.dataLabels) {
             if (ui->dataTable->item(row, 0)->text() == i) {
                 selected = true;
@@ -1399,8 +1419,30 @@ void PageLogAnalysis::restoreSelection()
             }
         }
 
+        foreach (auto i, mSelection.checkedPlotBoxes) {
+            if (ui->dataTable->item(row, 0)->text() == i) {
+                checkedPlot = true;
+                break;
+            }
+        }
+
+        foreach (auto i, mSelection.checkedY2Boxes) {
+            if (ui->dataTable->item(row, 0)->text() == i) {
+                checkedY2 = true;
+                break;
+            }
+        }
+
         if (selected) {
             ui->dataTable->selectRow(row);
+        }
+
+        if (checkedPlot) {
+            ui->dataTable->item(row, dataTableColAltAxis)->setCheckState(Qt::Checked);
+        }
+
+        if (checkedY2) {
+            ui->dataTable->item(row, dataTableColPlot)->setCheckState(Qt::Checked);
         }
     }
     ui->dataTable->setSelectionMode(modeOld);

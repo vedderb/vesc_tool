@@ -20,7 +20,7 @@
       <enum>Qt::Orientation::Vertical</enum>
      </property>
      <widget class="QWidget" name="layoutWidget">
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
        <item>
         <widget class="MapWidget" name="map" native="true">
          <property name="sizePolicy">
@@ -32,7 +32,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,0,0,0,1,0,0">
          <property name="spacing">
           <number>2</number>
          </property>
@@ -121,6 +121,12 @@
          </item>
          <item>
           <widget class="QGroupBox" name="filterOutlierBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="title">
             <string>Filter Outliers</string>
            </property>
@@ -173,11 +179,8 @@
            <property name="orientation">
             <enum>Qt::Orientation::Vertical</enum>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
+           <property name="sizeType">
+            <enum>QSizePolicy::Policy::MinimumExpanding</enum>
            </property>
           </spacer>
          </item>
@@ -236,7 +239,7 @@
         <enum>QTabWidget::TabShape::Triangular</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">

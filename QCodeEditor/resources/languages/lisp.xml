@@ -537,5 +537,6 @@
 <name>connected-wifi</name>
 <name>connected-ble</name>
 <name>connected-usb</name>
+<name>aes-ctr-crypt</name>
 </section>
 </root>

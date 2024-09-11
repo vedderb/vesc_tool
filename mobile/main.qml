@@ -1095,7 +1095,11 @@ ApplicationWindow {
                     confAppButton.parent = null
                 }
 
-                if (!limited && VescIf.getFwSupportsConfiguration()) {
+                if (VescIf.getFwSupportsConfiguration()) {
+                    confTimer.restart()
+                    confTimer.mcConfRx = false
+                    confTimer.appConfRx = false
+
                     mCommands.getMcconf()
                     mCommands.getAppConf()
                 }

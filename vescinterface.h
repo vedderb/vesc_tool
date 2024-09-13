@@ -350,6 +350,7 @@ private:
     TcpServerSimple *mTcpServer;
     UdpServerSimple *mUdpServer;
     QTimer *mTimerBroadcast;
+    QTimer *mTimerConfigUpdate;
     QVariantList mTcpHubDevs;
 
     ConfigParams *mMcConfig;

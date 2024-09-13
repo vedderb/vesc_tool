@@ -236,6 +236,19 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
     });
 
+    mTimerConfigUpdate = new QTimer(this);
+    mTimerConfigUpdate->setInterval(1000);
+    mTimerConfigUpdate->start();
+    connect(mTimerConfigUpdate, &QTimer::timeout, [this]() {
+        if (isPortConnected()) {
+            for (int i = 0;i < mCustomConfigs.size();i++) {
+                if (mCustomConfigs.at(i)->updateCnt() == 0) {
+                    mCommands->customConfigGet(i, false);
+                }
+            }
+        }
+    });
+
     mUdpServer = new UdpServerSimple(this);
     mUdpServer->setUsePacket(true);
     connect(mUdpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {

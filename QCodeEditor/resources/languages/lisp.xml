@@ -111,6 +111,8 @@
 </section>
 
 <section name="Type">
+<name>dm-create</name>
+<name>dm-alloc</name>
 <name>to-byte</name>
 <name>to-i</name>
 <name>to-u</name>

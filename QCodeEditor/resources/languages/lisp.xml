@@ -272,9 +272,11 @@
 <name>get-rpm</name>
 <name>get-rpm-fast</name>
 <name>get-rpm-faster</name>
+<name>get-rpm-set</name>
 <name>get-temp-fet</name>
 <name>get-temp-mot</name>
 <name>get-speed</name>
+<name>get-speed-set</name>
 <name>get-dist</name>
 <name>get-dist-abs</name>
 <name>get-batt</name>

@@ -225,6 +225,7 @@
 <name>eeprom-store-i</name>
 <name>eeprom-read-i</name>
 <name>sysinfo</name>
+<name>set-odometer</name>
 <name>stats</name>
 <name>stats-reset</name>
 <name>icu-start</name>

@@ -18,5 +18,8 @@
         <file>ESP32-C3/VDisp Dual/bootloader.bin</file>
         <file>ESP32-C3/VDisp Dual/partition-table.bin</file>
         <file>ESP32-C3/VDisp Dual/vesc_express.bin</file>
+        <file>ESP32-C3/BMS RB/bootloader.bin</file>
+        <file>ESP32-C3/BMS RB/partition-table.bin</file>
+        <file>ESP32-C3/BMS RB/vesc_express.bin</file>
     </qresource>
 </RCC>

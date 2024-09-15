@@ -258,6 +258,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         extraPath = "://res/firmwares_esp/ESP32-C3/VDisp";
     } else if (params.hw == "VDisp Dual") {
         extraPath = "://res/firmwares_esp/ESP32-C3/VDisp Dual";
+    } else if (params.hw == "BMS RB") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/BMS RB";
     }
 
     if (!extraPath.isEmpty()) {

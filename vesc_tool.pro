@@ -7,7 +7,7 @@
 # Version
 VT_VERSION = 6.06
 VT_INTRO_VERSION = 1
-VT_CONFIG_VERSION = 3
+VT_CONFIG_VERSION = 4
 
 # Set to 0 for stable versions and to test version number for development versions.
 VT_IS_TEST_VERSION = 2

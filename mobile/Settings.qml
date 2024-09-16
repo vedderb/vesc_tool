@@ -117,6 +117,13 @@ Item {
                 }
 
                 CheckBox {
+                    id: fwUpdateAvailableBox
+                    Layout.fillWidth: true
+                    text: "Show firmware update message"
+                    checked: VescIf.showFwUpdateAvailable()()
+                }
+
+                CheckBox {
                     id: darkModeBox
                     Layout.fillWidth: true
                     text: "Use Dark Mode"
@@ -137,6 +144,7 @@ Item {
             qmlUiAskBox.checked = VescIf.askQmlLoad()
             reconnectLastCanBox.checked = VescIf.reconnectLastCan()
             scanCanConnectBox.checked = VescIf.scanCanOnConnect()
+            fwUpdateAvailableBox.checked = VescIf.showFwUpdateAvailable()
         }
 
         onClosed: {
@@ -148,6 +156,7 @@ Item {
             VescIf.setAskQmlLoad(qmlUiAskBox.checked)
             VescIf.setReconnectLastCan(reconnectLastCanBox.checked)
             VescIf.setScanCanOnConnect(scanCanConnectBox.checked)
+            VescIf.setShowFwUpdateAvailable(fwUpdateAvailableBox.checked)
             VescIf.storeSettings()
 
             Utility.keepScreenOn(VescIf.keepScreenOn())

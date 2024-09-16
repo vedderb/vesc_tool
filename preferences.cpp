@@ -217,6 +217,7 @@ void Preferences::showEvent(QShowEvent *event)
     if (mVesc) {
         ui->loadQmlUiConnectBox->setChecked(mVesc->getLoadQmlUiOnConnect());
         ui->qmlUiAskBox->setChecked(mVesc->askQmlLoad());
+        ui->showFwUpdateBox->setChecked(mVesc->showFwUpdateAvailable());
     }
     event->accept();
 }
@@ -479,3 +480,11 @@ void Preferences::on_useImperialBox_toggled(bool checked)
         mVesc->commands()->emitEmptySetupValues();
     }
 }
+
+void Preferences::on_showFwUpdateBox_toggled(bool checked)
+{
+    if (mVesc) {
+        mVesc->setShowFwUpdateAvailable(checked);
+    }
+}
+

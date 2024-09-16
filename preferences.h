@@ -88,6 +88,7 @@ private slots:
     void on_darkModeBox_toggled(bool checked);
     void on_okButton_clicked();
     void on_useImperialBox_toggled(bool checked);
+    void on_showFwUpdateBox_toggled(bool checked);
 
 private:
     Ui::Preferences *ui;

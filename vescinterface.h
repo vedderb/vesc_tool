@@ -273,6 +273,9 @@ public:
     Q_INVOKABLE bool scanCanOnConnect();
     Q_INVOKABLE void setScanCanOnConnect(bool set);
 
+    Q_INVOKABLE bool showFwUpdateAvailable() const;
+    Q_INVOKABLE void setShowFwUpdateAvailable(bool set);
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);

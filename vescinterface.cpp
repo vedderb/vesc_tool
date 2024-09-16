@@ -3493,10 +3493,10 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         if (params.isPaired && !hasPairedUuid(mUuidStr)) {
             disconnectPort();
             emitMessageDialog("Pairing",
-                              "This VESC is not paired to your local version of VESC Tool. You can either "
+                              "This device is not paired to your local version of VESC Tool. You can either "
                               "add the UUID to the pairing list manually, or connect over USB and set the app "
                               "pairing flag to false for this VESC. Then you can pair to this version of VESC "
-                              "tool, or leave the VESC unpaired.",
+                              "tool, or leave the device unpaired.",
                               false, false);
             return;
         }
@@ -3759,17 +3759,17 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         updateFwRx(false);
         mFwRetries = 0;
         disconnectPort();
-        emit messageDialog(tr("Error"), tr("The firmware on the connected VESC is too old. Please"
-                                           " update it using a programmer."), false, false);
+        emit messageDialog(tr("Error"), tr("The firmware on the connected device is too old. Please "
+                                           "update it using a programmer."), false, false);
     } else if (fw_connected > highest_supported) {
         mCommands->setLimitedMode(true);
         updateFwRx(true);
         if (!wasReceived) {
-            emit messageDialog(tr("Warning"), tr("The connected VESC has newer firmware than this version of"
-                                                " VESC Tool supports. It is recommended that you update VESC "
-                                                " Tool to the latest version. Alternatively, the firmware on"
-                                                " the connected VESC can be downgraded in the firmware page."
-                                                " Until then, limited communication mode will be used."), false, false);
+            emit messageDialog(tr("Warning"), tr("The connected device has newer firmware than this version of "
+                                                "VESC Tool supports. It is recommended that you update VESC "
+                                                "Tool to the latest version. Alternatively, the firmware on "
+                                                "the connected device can be downgraded in the firmware page. "
+                                                "Until then, limited communication mode will be used."), false, false);
         }
     } else if (!fwPairs.contains(fw_connected)) {
         if (fw_connected >= qMakePair(1, 1)) {
@@ -3777,21 +3777,24 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
             updateFwRx(true);
             if (!wasReceived) {
                 if (mFwSupportsConfiguration) {
-                    if (params.hwType == HW_TYPE_VESC) {
-                        emit messageDialog(tr("Warning"), tr("The connected VESC has old, but mostly compatible firmware. This is fine if "
-                                                             "your setup works properly.<br><br>"
-                                                             "Check out the firmware changelog (from the help menu) to decide if you want to "
-                                                             "use some of the new features that have been added after your firmware version. "
-                                                             "Keep in mind that you only should upgrade firmware if you have time to test "
-                                                             "it after the upgrade and carefully make sure that everything works as expected."),
+                    if (params.hwType == HW_TYPE_VESC && mSettings.value("showFwUpdateAvailable", true).toBool()) {
+                        emit messageDialog(tr("Firmware Update Available"),
+                                           tr("The connected VESC-based ESC has old, but mostly compatible firmware. This is "
+                                              "fine if your setup works properly.<br><br>"
+                                              "Check out the firmware changelog (from the help menu or firmware page) to decide "
+                                              "if you want to use some of the new features that have been added after your "
+                                              "firmware version was released. Keep in mind that you only should upgrade firmware "
+                                              "if you have time to test it after the upgrade and carefully make sure that "
+                                              "everything works as expected.<br><br>"
+                                              "This message can be disabled from the settings."),
                                            false, false);
                     }
                 } else {
                     if (params.hwType == HW_TYPE_VESC) {
-                        emit messageDialog(tr("Warning"), tr("The connected VESC has too old firmware. Since the"
-                                                             " connected VESC has firmware with bootloader support, it can be"
-                                                             " updated from the Firmware page."
-                                                             " Until then, limited communication mode will be used."), false, false);
+                        emit messageDialog(tr("Warning"), tr("The connected VESC-based ESC has too old firmware. Since the "
+                                                             "connected VESC has firmware with bootloader support, it can be "
+                                                             "updated from the Firmware page. "
+                                                             "Until then, limited communication mode will be used."), false, false);
                     }
                 }
             }
@@ -3800,16 +3803,16 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
             mFwRetries = 0;
             disconnectPort();
             if (!wasReceived) {
-                emit messageDialog(tr("Error"), tr("The firmware on the connected VESC is too old. Please"
-                                                   " update it using a programmer."), false, false);
+                emit messageDialog(tr("Error"), tr("The firmware on the connected device is too old. Please "
+                                                   "update it using a programmer."), false, false);
             }
         }
     } else {
         updateFwRx(true);
         if (fw_connected < highest_supported) {
             if (!wasReceived) {
-                emit messageDialog(tr("Warning"), tr("The connected VESC has compatible, but old"
-                                                    " firmware. It is recommended that you update it."), false, false);
+                emit messageDialog(tr("Warning"), tr("The connected device has compatible, but old "
+                                                    "firmware. It is recommended that you update it."), false, false);
             }
         }
 
@@ -3849,7 +3852,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
     if (params.isTestFw > 0 && !VT_IS_TEST_VERSION) {
         emitMessageDialog("Test Firmware",
-                          "The connected VESC-based device has test firmware and this is not a test build of VESC Tool."
+                          "The connected VESC-based device has test firmware and this is not a test build of VESC Tool. "
                           "You should update the firmware urgently, this may not be a safe situation.",
                           false, false);
     }
@@ -4164,8 +4167,8 @@ void VescInterface::mcconfUpdated()
                                   "version of VESC Tool. If it does not work properly you should run the motor wizard "
                                   "again or re-measure the parameters manually.\n\n"
                                   ""
-                                  "The main reason for this is that the motor resistance and induction values are defined "
-                                  "differently after firmware 5.03, so old configs will not run properly.",
+                                  "When updating firmware it is always best to reset to the default configuration and "
+                                  "run the detection and/or wizards again.",
                                   false);
             }
         }
@@ -4191,6 +4194,16 @@ void VescInterface::customConfigRx(int confId, QByteArray data)
                               false, false);
         }
     }
+}
+
+bool VescInterface::showFwUpdateAvailable() const
+{
+    return mSettings.value("showFwUpdateAvailable", true).toBool();
+}
+
+void VescInterface::setShowFwUpdateAvailable(bool set)
+{
+    mSettings.setValue("showFwUpdateAvailable", set);
 }
 
 bool VescInterface::ignoreCustomConfigs() const

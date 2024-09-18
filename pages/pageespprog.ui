@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1021</width>
-    <height>541</height>
+    <width>918</width>
+    <height>444</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -110,7 +110,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="tabShape">
-      <enum>QTabWidget::Triangular</enum>
+      <enum>QTabWidget::TabShape::Triangular</enum>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -123,7 +123,7 @@
        <item>
         <widget class="QListWidget" name="fwList">
          <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectRows</enum>
+          <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
          </property>
         </widget>
        </item>
@@ -231,7 +231,7 @@
        <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -252,16 +252,35 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
+       <widget class="DisplayPercentage" name="progWidget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="DisplayPercentage" name="progWidget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
-         </widget>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <widget class="QPushButton" name="cancelButton">
@@ -291,6 +310,20 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="eraseLispButton">
+          <property name="text">
+           <string>Erase Lisp</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="eraseQmlButton">
+          <property name="text">
+           <string>Erase QML</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -298,7 +331,7 @@
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -309,16 +342,9 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Partition Table Offset</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QSpinBox" name="partOffsetBox">
           <property name="prefix">
-           <string>0x</string>
+           <string>Partition Table: 0x</string>
           </property>
           <property name="maximum">
            <number>9999999</number>
@@ -332,22 +358,47 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>App Offset</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QSpinBox" name="appOffsetBox">
           <property name="prefix">
-           <string>0x</string>
+           <string>App: 0x</string>
           </property>
           <property name="maximum">
            <number>9999999</number>
           </property>
           <property name="value">
            <number>131072</number>
+          </property>
+          <property name="displayIntegerBase">
+           <number>16</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="lispOffsetBox">
+          <property name="prefix">
+           <string>Lisp: 0x</string>
+          </property>
+          <property name="maximum">
+           <number>9999999</number>
+          </property>
+          <property name="value">
+           <number>3407872</number>
+          </property>
+          <property name="displayIntegerBase">
+           <number>16</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="qmlOffsetBox">
+          <property name="prefix">
+           <string>Qml: 0x</string>
+          </property>
+          <property name="maximum">
+           <number>9999999</number>
+          </property>
+          <property name="value">
+           <number>3932160</number>
           </property>
           <property name="displayIntegerBase">
            <number>16</number>

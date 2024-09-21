@@ -1362,11 +1362,40 @@ void PageLogAnalysis::generateMissingEntries()
 
         ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
 
-        // Create GNSS trip counter if it is missing
+        bool tripEmpty = true;
+
         if (mInd_trip_gnss < 0) {
             mInd_trip_gnss = mLogHeader.size();
             mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, true));
+            for (int i = 0;i < mLog.size();i++) {
+                mLog[i].append(0.0);
+            }
+        } else {
+            auto first = mLog.size() > 0 ? mLog.first().at(mInd_trip_gnss) : 0.0;
+            for (int i = 1;i < mLog.size();i++) {
+                if (mLog.at(i).at(mInd_trip_gnss) != first) {
+                    tripEmpty = false;
+                    break;
+                }
+            }
 
+            // Some logs have huge jumps. When that is the case we recompute
+            // the trip counter.
+            if (!tripEmpty) {
+                for (int i = 1;i < mLog.size();i++) {
+                    if (ui->filterOutlierBox->isChecked() &&
+                        fabs(mLog.at(i - 1).at(mInd_trip_gnss) - mLog.at(i).at(mInd_trip_gnss)) >
+                            (ui->filterdMaxBox->value() * 1000.0)) {
+                        tripEmpty = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        qDebug() << tripEmpty;
+
+        if (tripEmpty) {
             double prevSampleGnss[3];
             bool prevSampleGnssSet = false;
             double metersGnss = 0.0;
@@ -1374,7 +1403,7 @@ void PageLogAnalysis::generateMissingEntries()
             for (int i = 0;i < mLog.size();i++) {
                 double lat = mLog.at(i).at(mInd_gnss_lat);
                 double lon = mLog.at(i).at(mInd_gnss_lon);
-                double alt = 0;
+                double alt = 0.0;
                 if (mInd_gnss_alt >= 0) {
                     alt = mLog.at(i).at(mInd_gnss_alt);
                 }
@@ -1387,7 +1416,8 @@ void PageLogAnalysis::generateMissingEntries()
                 if (hacc > 0.0 && (!ui->filterOutlierBox->isChecked() ||
                                    (
                                        hacc < ui->filterhAccBox->value()) &&
-                                       Utility::distLlhToLlh(lat, lon, alt, i_llh[0], i_llh[1], 0.0) < (ui->filterdMaxBox->value() * 1000.0)
+                                       Utility::distLlhToLlh(lat, lon, alt, i_llh[0], i_llh[1], i_llh[2]) <
+                                           (ui->filterdMaxBox->value() * 1000.0)
                                    )) {
                     if (prevSampleGnssSet) {
                         double i_llh[3];
@@ -1421,7 +1451,7 @@ void PageLogAnalysis::generateMissingEntries()
                     prevSampleGnss[2] = alt;
                 }
 
-                mLog[i].append(metersGnss);
+                mLog[i][mInd_trip_gnss] = metersGnss;
             }
         }
     }

@@ -1363,7 +1363,8 @@ void PageLogAnalysis::generateMissingEntries()
         ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
 
         // Create GNSS trip counter if it is missing
-        if (mInd_trip_vesc < 0) {
+        if (mInd_trip_gnss < 0) {
+            mInd_trip_gnss = mLogHeader.size();
             mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, true));
 
             double prevSampleGnss[3];
@@ -1386,7 +1387,7 @@ void PageLogAnalysis::generateMissingEntries()
                 if (hacc > 0.0 && (!ui->filterOutlierBox->isChecked() ||
                                    (
                                        hacc < ui->filterhAccBox->value()) &&
-                                       Utility::distLlhToLlh(lat, lon, alt, 0.0, i_llh[1], 0.0) < (ui->filterdMaxBox->value() * 1000.0)
+                                       Utility::distLlhToLlh(lat, lon, alt, i_llh[0], i_llh[1], 0.0) < (ui->filterdMaxBox->value() * 1000.0)
                                    )) {
                     if (prevSampleGnssSet) {
                         double i_llh[3];

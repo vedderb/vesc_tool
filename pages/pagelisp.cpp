@@ -659,7 +659,7 @@ void PageLisp::on_uploadButton_clicked()
     QTimer closeStopTimer;
     closeStopTimer.start(100);
     auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog]() {
-        if (!dialog.isVisible()) {
+        if (!dialog.isVisible() && dialog.value() > 0) {
             dialog.show();
         }
     });
@@ -691,12 +691,28 @@ void PageLisp::on_readExistingButton_clicked()
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
 
+    QTimer closeStopTimer;
+    closeStopTimer.start(100);
+    auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog]() {
+        if (!dialog.isVisible() && dialog.value() > 0) {
+            dialog.show();
+        }
+    });
+
+    auto conn2 = connect(&mLoader, &CodeLoader::lispUploadProgress, [&dialog](qint64 bytes, qint64 bytesTotal) {
+        dialog.setMaximum(bytesTotal);
+        dialog.setValue(bytes);
+    });
+
     QString lispPath = "From VESC";
     auto code = mLoader.lispRead(this, lispPath);
 
     if (!code.isEmpty()) {
         createEditorTab(lispPath, code);
     }
+
+    disconnect(conn1);
+    disconnect(conn2);
 }
 
 void PageLisp::on_eraseButton_clicked()

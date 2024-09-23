@@ -465,6 +465,8 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
             if (!getLispChunk(dataLeft > 400 ? 400 : dataLeft, lispData.size(), 5, 1500)) {
                 break;
             }
+
+            emit lispUploadProgress(lispData.size(), lenLispLast);
         }
 
         if (lispData.size() == lenLispLast) {

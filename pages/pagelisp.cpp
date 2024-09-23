@@ -628,7 +628,7 @@ void PageLisp::on_stopButton_clicked()
 
 void PageLisp::on_uploadButton_clicked()
 {
-    QProgressDialog dialog(tr("Uploading..."), QString(), 0, 0, this);
+    QProgressDialog dialog(tr("Erasing..."), QString(), 0, 0, this);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
 
@@ -656,11 +656,29 @@ void PageLisp::on_uploadButton_clicked()
         return;
     }
 
+    QTimer closeStopTimer;
+    closeStopTimer.start(100);
+    auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog]() {
+        if (!dialog.isVisible()) {
+            dialog.show();
+        }
+    });
+
     if (!eraseCode(vb.size() + 100)) {
+        disconnect(conn1);
         return;
     }
 
+    auto conn2 = connect(&mLoader, &CodeLoader::lispUploadProgress, [&dialog](qint64 bytes, qint64 bytesTotal) {
+        dialog.setMaximum(bytesTotal);
+        dialog.setValue(bytes);
+    });
+
+    dialog.setLabelText("Uploading");
     bool ok = mLoader.lispUpload(vb);
+
+    disconnect(conn1);
+    disconnect(conn2);
 
     if (ok && ui->autoRunBox->isChecked()) {
         on_runButton_clicked();

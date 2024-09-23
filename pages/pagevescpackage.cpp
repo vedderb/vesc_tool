@@ -272,7 +272,16 @@ void PageVescPackage::on_writeButton_clicked()
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
 
+    QTimer closeStopTimer;
+    closeStopTimer.start(100);
+    auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog]() {
+        if (!dialog.isVisible()) {
+            dialog.show();
+        }
+    });
+
     mLoader.installVescPackageFromPath(ui->loadEdit->text());
+    disconnect(conn1);
 }
 
 void PageVescPackage::on_outputRefreshButton_clicked()
@@ -374,7 +383,17 @@ void PageVescPackage::on_installButton_clicked()
         dialog.setWindowModality(Qt::WindowModal);
         dialog.show();
 
+        QTimer closeStopTimer;
+        closeStopTimer.start(100);
+        auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog]() {
+            if (!dialog.isVisible()) {
+                dialog.show();
+            }
+        });
+
         mLoader.installVescPackage(mCurrentPkg);
+
+        disconnect(conn1);
 
         mVesc->emitMessageDialog(tr("Install Package"),
                                  tr("Installation Done!"),

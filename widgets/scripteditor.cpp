@@ -96,7 +96,10 @@ void ScriptEditor::setFileNow(QString fileName)
 {
     ui->fileNowLabel->setText(fileName);
 
-    mFsWatcher.removePaths(mFsWatcher.files());
+    if (!mFsWatcher.files().isEmpty()) {
+        mFsWatcher.removePaths(mFsWatcher.files());
+    }
+
     QFileInfo f(fileName);
     if (f.exists()) {
         mFsWatcher.addPath(fileName);
@@ -230,7 +233,10 @@ void ScriptEditor::on_saveButton_clicked()
         return;
     }
 
-    mFsWatcher.removePaths(mFsWatcher.files());
+    if (!mFsWatcher.files().isEmpty()) {
+        mFsWatcher.removePaths(mFsWatcher.files());
+    }
+
     file.write(ui->codeEdit->toPlainText().toUtf8());
     file.close();
     mFsWatcher.addPath(fileName);
@@ -258,7 +264,10 @@ void ScriptEditor::on_saveAsButton_clicked()
             return;
         }
 
-        mFsWatcher.removePaths(mFsWatcher.files());
+        if (!mFsWatcher.files().isEmpty()) {
+            mFsWatcher.removePaths(mFsWatcher.files());
+        }
+
         file.write(ui->codeEdit->toPlainText().toUtf8());
         file.close();
 

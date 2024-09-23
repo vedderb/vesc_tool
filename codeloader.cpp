@@ -342,6 +342,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
         return res;
     };
 
+    auto sizeTotal = data.size();
     quint32 offset = 0;
     bool ok = true;
     while (data.size() > 0) {
@@ -354,9 +355,13 @@ bool CodeLoader::lispUpload(VByteArray vb)
             break;
         }
 
+        emit lispUploadProgress(sizeTotal - data.size(), sizeTotal);
+
         offset += sz;
         data.remove(0, sz);
     }
+
+    emit lispUploadProgress(sizeTotal, sizeTotal);
 
     return ok;
 }

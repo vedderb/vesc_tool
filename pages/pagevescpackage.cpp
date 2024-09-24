@@ -244,7 +244,7 @@ void PageVescPackage::on_loadRefreshButton_clicked()
 
     auto pkg = mLoader.unpackVescPackage(f.readAll());
 
-    if (!pkg.loadOk) {
+    if (!pkg.loadOk && mVesc) {
         mVesc->emitMessageDialog(tr("Open Package"), tr("Package is not valid."), false);
         return;
     }

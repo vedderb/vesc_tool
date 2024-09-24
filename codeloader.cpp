@@ -769,21 +769,25 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
             auto dataRaw = vb.left(len);
             vb.remove(0, len);
             pkg.description = QString::fromUtf8(dataRaw);
+            pkg.loadOk = true;
         } else if (name == "description_md") {
             auto len = vb.vbPopFrontInt32();
             auto dataRaw = vb.left(len);
             vb.remove(0, len);
             pkg.description_md = QString::fromUtf8(dataRaw);
+            pkg.loadOk = true;
         } else if (name == "lispData") {
             auto len = vb.vbPopFrontInt32();
             auto dataRaw = vb.left(len);
             vb.remove(0, len);
             pkg.lispData = dataRaw;
+            pkg.loadOk = true;
         } else if (name == "qmlFile") {
             auto len = vb.vbPopFrontInt32();
             auto dataRaw = vb.left(len);
             vb.remove(0, len);
             pkg.qmlFile = QString::fromUtf8(dataRaw);
+            pkg.loadOk = true;
         } else if (name == "qmlIsFullscreen") {
             vb.vbPopFrontInt32(); // Discard length
             pkg.qmlIsFullscreen = vb.vbPopFrontInt8();

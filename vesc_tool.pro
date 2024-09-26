@@ -286,10 +286,11 @@ RESOURCES += res.qrc \
     res_qml.qrc
 RESOURCES += res_config.qrc
 
+RESOURCES += res_fw_bms.qrc
+RESOURCES += res/firmwares_esp/res_fw_esp.qrc
+
 !exclude_fw {
-    RESOURCES += res_fw_bms.qrc
     RESOURCES += res/firmwares/res_fw.qrc
-    RESOURCES += res/firmwares_esp/res_fw_esp.qrc
 }
 
 build_original {

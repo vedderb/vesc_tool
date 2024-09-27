@@ -628,7 +628,7 @@ void PageLisp::on_stopButton_clicked()
 
 void PageLisp::on_uploadButton_clicked()
 {
-    QProgressDialog dialog(tr("Erasing..."), QString(), 0, 0, this);
+    QProgressDialog dialog(tr("Erasing..."), tr("Cancel"), 0, 0, this);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
 
@@ -658,9 +658,13 @@ void PageLisp::on_uploadButton_clicked()
 
     QTimer closeStopTimer;
     closeStopTimer.start(100);
-    auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog]() {
+    auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog, this]() {
         if (!dialog.isVisible() && dialog.value() > 0) {
             dialog.show();
+        }
+
+        if (dialog.wasCanceled()) {
+            mLoader.abortDownloadUpload();
         }
     });
 
@@ -687,15 +691,19 @@ void PageLisp::on_uploadButton_clicked()
 
 void PageLisp::on_readExistingButton_clicked()
 {
-    QProgressDialog dialog(tr("Reading Code..."), QString(), 0, 0, this);
+    QProgressDialog dialog(tr("Reading Code..."), tr("Cancel"), 0, 0, this);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.show();
 
     QTimer closeStopTimer;
     closeStopTimer.start(100);
-    auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog]() {
+    auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog, this]() {
         if (!dialog.isVisible() && dialog.value() > 0) {
             dialog.show();
+        }
+
+        if (dialog.wasCanceled()) {
+            mLoader.abortDownloadUpload();
         }
     });
 

@@ -31,6 +31,7 @@
 CodeLoader::CodeLoader(QObject *parent) : QObject(parent)
 {
     mVesc = nullptr;
+    mAbortDownloadUpload = false;
     reloadPackageArchive();
 }
 
@@ -345,7 +346,8 @@ bool CodeLoader::lispUpload(VByteArray vb)
     auto sizeTotal = data.size();
     quint32 offset = 0;
     bool ok = true;
-    while (data.size() > 0) {
+    mAbortDownloadUpload = false;
+    while (data.size() > 0 && !mAbortDownloadUpload) {
         const int chunkSize = 384;
         int sz = data.size() > chunkSize ? chunkSize : data.size();
 
@@ -359,6 +361,10 @@ bool CodeLoader::lispUpload(VByteArray vb)
 
         offset += sz;
         data.remove(0, sz);
+    }
+
+    if (mAbortDownloadUpload) {
+        ok = false;
     }
 
     emit lispUploadProgress(sizeTotal, sizeTotal);
@@ -458,15 +464,20 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
     };
 
     QString res = "";
+    mAbortDownloadUpload = false;
 
     if (getLispChunk(10, 0, 5, 1500)) {
-        while (lispData.size() < lenLispLast) {
+        while (lispData.size() < lenLispLast && !mAbortDownloadUpload) {
             int dataLeft = lenLispLast - lispData.size();
             if (!getLispChunk(dataLeft > 400 ? 400 : dataLeft, lispData.size(), 5, 1500)) {
                 break;
             }
 
             emit lispUploadProgress(lispData.size(), lenLispLast);
+        }
+
+        if (mAbortDownloadUpload) {
+            return res;
         }
 
         if (lispData.size() == lenLispLast) {
@@ -946,6 +957,11 @@ bool CodeLoader::downloadPackageArchive()
     reply->deleteLater();
 
     return res;
+}
+
+void CodeLoader::abortDownloadUpload()
+{
+    mAbortDownloadUpload = true;
 }
 
 bool CodeLoader::getImportFromLine(QString line, QString &path, QString &tag, bool &isInvalid)

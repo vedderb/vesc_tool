@@ -55,12 +55,15 @@ public:
     Q_INVOKABLE QVariantList reloadPackageArchive();
     Q_INVOKABLE bool downloadPackageArchive();
 
+    Q_INVOKABLE void abortDownloadUpload();
+
 signals:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void lispUploadProgress(qint64 bytes, qint64 bytesTotal);
 
 private:
     VescInterface *mVesc;
+    bool mAbortDownloadUpload;
     bool getImportFromLine(QString line, QString &path, QString &tag, bool &isInvalid);
 
 };

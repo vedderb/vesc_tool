@@ -543,5 +543,7 @@
 <name>connected-ble</name>
 <name>connected-usb</name>
 <name>aes-ctr-crypt</name>
+<name>number?</name>
+<name>list?</name>
 </section>
 </root>

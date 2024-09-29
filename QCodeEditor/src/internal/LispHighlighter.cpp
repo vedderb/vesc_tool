@@ -35,7 +35,7 @@ LispHighlighter::LispHighlighter(QTextDocument* document) :
         for (auto&& name : names)
         {
             m_highlightRulesLang.append({
-                QRegularExpression(QString(R"(\b%1\b)").arg(name.replace("-", "_"))),
+                QRegularExpression(QString(R"(\b%1\b)").arg(name.replace("-", "_").replace("?", "_"))),
                 key
             });
         }
@@ -63,7 +63,7 @@ LispHighlighter::LispHighlighter(QTextDocument* document) :
 void LispHighlighter::highlightBlock(const QString& text)
 {
     for (auto&& rule : m_highlightRulesLang) {
-        auto matchIterator = rule.pattern.globalMatch(QString(text).replace("-", "_").replace("#", "_"));
+        auto matchIterator = rule.pattern.globalMatch(QString(text).replace("-", "_").replace("#", "_").replace("?", "_"));
 
         while (matchIterator.hasNext()) {
             auto match = matchIterator.next();

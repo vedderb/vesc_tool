@@ -2505,18 +2505,33 @@ p, li { white-space: pre-wrap; }
             <enumNames>16</enumNames>
             <enumNames>32</enumNames>
         </foc_hfi_samples>
-        <foc_offsets_cal_on_boot>
-            <longName>Run calibration at boot</longName>
-            <type>5</type>
+        <foc_offsets_cal_mode>
+            <longName>Offset Calibration Mode</longName>
+            <type>6</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Run calibration every boot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_FOC_OFFSETS_CAL_ON_BOOT</cDefine>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Calibrate on Boot&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Calibrate offsets each boot. Makes the boot slower, but ensures that the offsets are correct. Note that calibration on boot will fail if there is a fault code is active during boot that does not go away within a few seconds.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Write Enabled&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Enable writing from VESC Tool. When disabled, the offsets will be ignored when writing the motor configuration.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Auto Calibrate&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Automatically calibrate offsets while the motor is undriven.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OFFSETS_CAL_MODE</cDefine>
             <valInt>1</valInt>
-        </foc_offsets_cal_on_boot>
+            <enumNames>Calibrate on Boot</enumNames>
+            <enumNames>Write Enabled</enumNames>
+            <enumNames>Auto Calibrate</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+        </foc_offsets_cal_mode>
         <foc_offsets_current__0>
             <longName>Current Offset 0</longName>
             <type>1</type>
@@ -4634,7 +4649,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_hfi_start_samples</ser>
         <ser>foc_hfi_obs_ovr_sec</ser>
         <ser>foc_hfi_samples</ser>
-        <ser>foc_offsets_cal_on_boot</ser>
+        <ser>foc_offsets_cal_mode</ser>
         <ser>foc_offsets_current__0</ser>
         <ser>foc_offsets_current__1</ser>
         <ser>foc_offsets_current__2</ser>
@@ -4995,7 +5010,7 @@ p, li { white-space: pre-wrap; }
             <subgroup>
                 <subgroupName>Offsets</subgroupName>
                 <subgroupParams>
-                    <param>foc_offsets_cal_on_boot</param>
+                    <param>foc_offsets_cal_mode</param>
                     <param>::sep::Current</param>
                     <param>foc_offsets_current__0</param>
                     <param>foc_offsets_current__1</param>

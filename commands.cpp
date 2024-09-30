@@ -317,7 +317,26 @@ void Commands::processPacket(QByteArray data)
 
                 if (mCheckNextMcConfig) {
                     mCheckNextMcConfig = false;
-                    emit mcConfigCheckResult(mMcConfig->checkDifference(&mMcConfigLast));
+                    auto diff = mMcConfig->checkDifference(&mMcConfigLast);
+
+                    // Kind of a hack: Remove offsets from check if they are not supposed
+                    // to be updated.
+                    if (mMcConfig->hasParam("foc_offsets_cal_mode") &&
+                        !(mMcConfig->getParamInt("foc_offsets_cal_mode") & (1 << 1))) {
+                        diff.removeAll("foc_offsets_current__0");
+                        diff.removeAll("foc_offsets_current__1");
+                        diff.removeAll("foc_offsets_current__2");
+
+                        diff.removeAll("foc_offsets_voltage__0");
+                        diff.removeAll("foc_offsets_voltage__1");
+                        diff.removeAll("foc_offsets_voltage__2");
+
+                        diff.removeAll("foc_offsets_voltage_undriven__0");
+                        diff.removeAll("foc_offsets_voltage_undriven__1");
+                        diff.removeAll("foc_offsets_voltage_undriven__2");
+                    }
+
+                    emit mcConfigCheckResult(diff);
                 }
             } else {
                 emit deserializeConfigFailed(true, false);

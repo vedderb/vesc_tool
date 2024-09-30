@@ -549,6 +549,7 @@ void ParameterEditor::setEditorValues(QString name, ConfigParam p)
     ui->boolBox->setCurrentIndex(p.valInt > 0 ? 1 : 0);
 
     // Bitfield
+    ui->bitfieldValBox->setValue(p.valInt);
     for (int i = 0;i < p.enumNames.size();i++) {
         if (ui->bitfieldWidget->count() > i) {
             ui->bitfieldWidget->item(i)->setText(p.enumNames.at(i));

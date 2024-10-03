@@ -1,5 +1,4 @@
 (def samples 30) ; 0 - 300 A
-(def hfi-res (range 0 samples))
 
 ; Start with reasonable valies for something like a QS165
 (conf-set 'foc-hfi-amb-mode 2)

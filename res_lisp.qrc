@@ -54,5 +54,6 @@
         <file>res/Lisp/Examples/speed_test_i64.lisp</file>
         <file>res/Lisp/Examples/speed_test_strings.lisp</file>
         <file>res/Lisp/Examples/str_find_any.lisp</file>
+        <file>res/Lisp/Examples/hfi_start_analyze.lisp</file>
     </qresource>
 </RCC>

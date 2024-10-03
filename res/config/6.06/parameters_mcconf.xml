@@ -2290,6 +2290,72 @@ p, li { white-space: pre-wrap; }
             <enumNames>FOC_OBSERVER_MXV_LAMBDA_COMP</enumNames>
             <enumNames>FOC_OBSERVER_MXV_LAMBDA_COMP_LIN</enumNames>
         </foc_observer_type>
+        <foc_hfi_amb_mode>
+            <longName>HFI Ambiguity Resolve Mode</longName>
+            <type>4</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;When starting HFI it is possible to be off by 180 degrees with the tracking, which will make the motor run in the wrong direction. This ambiguity needs to be resolved and the following methods are available for doing that.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Six Vectors&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;This is the old method and works for most hobby outrunners. It is faster and less intrusive, but does not work on all motors.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Id Single Pulse&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Inject current into the D-axis to cause saturation and measure how the inductance changes. That is done while tracking using coupled HFI and the result is used to determine if the tracking direction should be flipped. This method is more intrusive than six vectors, but works more reliably on motors with a large iron rotor and more saliency, such as the QS165.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Id Double Pulse&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Same as Id Single Pulse, but injects both a positive and a negative pulse. It is a bit more intrusive and draws a bit more power, but does not require manyally setting a threshold.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_HFI_AMB_MODE</cDefine>
+            <valInt>0</valInt>
+            <enumNames>Six Vectors</enumNames>
+            <enumNames>Id Single Pulse</enumNames>
+            <enumNames>Id Double Pulse</enumNames>
+        </foc_hfi_amb_mode>
+        <foc_hfi_amb_current>
+            <longName>HFI Ambiguity Resolve Current</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;D-axis current for HFI ambiguity resolution. Not used in the six vector mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_HFI_AMB_CURRENT</cDefine>
+            <editorDecimalsDouble>1</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>2000</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>60</valDouble>
+            <vTxDoubleScale>10</vTxDoubleScale>
+            <suffix> A</suffix>
+            <vTx>7</vTx>
+        </foc_hfi_amb_current>
+        <foc_hfi_amb_tres>
+            <longName>HFI Ambiguity Resolve Threshold</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;HFI ambiguity resolution threshold in one-pulse mode. Should be set to half of what the inductance is expected to drop by for the ambiguity resolution current.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_HFI_AMB_TRES</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>50</maxInt>
+            <minInt>0</minInt>
+            <showDisplay>1</showDisplay>
+            <stepInt>1</stepInt>
+            <valInt>15</valInt>
+            <suffix> %</suffix>
+            <vTx>1</vTx>
+        </foc_hfi_amb_tres>
         <foc_hfi_voltage_start>
             <longName>HFI Start Voltage</longName>
             <type>1</type>
@@ -4639,6 +4705,9 @@ p, li { white-space: pre-wrap; }
         <ser>foc_current_filter_const</ser>
         <ser>foc_cc_decoupling</ser>
         <ser>foc_observer_type</ser>
+        <ser>foc_hfi_amb_mode</ser>
+        <ser>foc_hfi_amb_current</ser>
+        <ser>foc_hfi_amb_tres</ser>
         <ser>foc_hfi_voltage_start</ser>
         <ser>foc_hfi_voltage_run</ser>
         <ser>foc_hfi_voltage_max</ser>
@@ -4978,6 +5047,9 @@ p, li { white-space: pre-wrap; }
             <subgroup>
                 <subgroupName>HFI</subgroupName>
                 <subgroupParams>
+                    <param>foc_hfi_amb_mode</param>
+                    <param>foc_hfi_amb_current</param>
+                    <param>foc_hfi_amb_tres</param>
                     <param>foc_hfi_samples</param>
                     <param>foc_hfi_voltage_start</param>
                     <param>foc_hfi_voltage_run</param>

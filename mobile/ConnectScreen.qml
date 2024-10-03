@@ -402,7 +402,7 @@ Item {
                                             VescIf.connectSerial(bleAddr, 115200)
                                         }
                                     } else if (isSerial === 2) {
-                                        VescIf.connectTcp(bleAddr, 65102)
+                                        VescIf.connectTcp(bleAddr, tcpPort)
                                     } else if (isSerial === 3) {
                                         VescIf.connectTcpHubUuid(hubUuid)
                                     } else {
@@ -598,6 +598,7 @@ Item {
                                         "setName": "",
                                         "preferred": true,
                                         "bleAddr": vescsUdp[k].ip,
+                                        "tcpPort": vescsUdp[k].port,
                                         "hubUuid": "",
                                         "isSerial": 2})
                 }

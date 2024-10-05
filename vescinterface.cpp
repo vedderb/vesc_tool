@@ -508,8 +508,17 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
             os << mLastImuValues.gyroZ << ";";
 
             os << msPos << ";";
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
             os << Qt::fixed << qSetRealNumberPrecision(8) << lat << ";";
             os << Qt::fixed << qSetRealNumberPrecision(8) << lon << ";";
+#else
+            os.setRealNumberNotation(QTextStream::FixedNotation);
+            os.setRealNumberPrecision(8);
+            os << lat << ";";
+            os.setRealNumberNotation(QTextStream::FixedNotation);
+            os.setRealNumberPrecision(8);
+            os << lon << ";";
+#endif
             os << alt << ";";
             os << gVel << ";";
             os << vVel << ";";
@@ -821,7 +830,11 @@ void VescInterface::deleteProfile(int index)
 void VescInterface::moveProfileUp(int index)
 {
     if (index > 0 && index < mProfiles.size()) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         mProfiles.swapItemsAt(index, index - 1);
+#else
+        qSwap(mProfiles[index], mProfiles[index - 1]);
+#endif
         emit profilesUpdated();
     }
 }
@@ -829,7 +842,11 @@ void VescInterface::moveProfileUp(int index)
 void VescInterface::moveProfileDown(int index)
 {
     if (index >= 0 && index < (mProfiles.size() - 1)) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         mProfiles.swapItemsAt(index, index + 1);
+#else
+        qSwap(mProfiles[index], mProfiles[index + 1]);
+#endif
         emit profilesUpdated();
     }
 }

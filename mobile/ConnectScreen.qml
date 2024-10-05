@@ -489,7 +489,7 @@ Item {
                     vescsUdp[vescsUdp.length] = {
                         "name" : tokens[0],
                         "ip" : tokens[1],
-                        "port" : tokens[2],
+                        "port" : parseInt(tokens[2]),
                         "updateTime" : new Date().getTime()
                     }
                     mBle.emitScanDone()
@@ -570,6 +570,7 @@ Item {
                                             "setName": setNameShort,
                                             "preferred": preferred,
                                             "bleAddr": addr,
+                                            "tcpPort": 0,
                                             "hubUuid": "",
                                             "isSerial": 0})
                     } else {
@@ -577,6 +578,7 @@ Item {
                                             "setName": setNameShort,
                                             "preferred": preferred,
                                             "bleAddr": addr,
+                                            "tcpPort": 0,
                                             "hubUuid": "",
                                             "isSerial": 0})
                     }
@@ -594,7 +596,8 @@ Item {
                 }
 
                 if (addToList) {
-                    bleModel.insert(0, {"name": vescsUdp[k].name + " (TCP)\n" + vescsUdp[k].ip,
+                    bleModel.insert(0, {"name": vescsUdp[k].name + " (TCP)\n" +
+                                        vescsUdp[k].ip + ":" + vescsUdp[k].port,
                                         "setName": "",
                                         "preferred": true,
                                         "bleAddr": vescsUdp[k].ip,
@@ -621,6 +624,7 @@ Item {
                                                 "setName": "",
                                                 "preferred": true,
                                                 "bleAddr": ports[j].systemPath,
+                                                "tcpPort": 0,
                                                 "hubUuid": "",
                                                 "isSerial": 1})
                         }
@@ -640,6 +644,7 @@ Item {
                                                 "setName": "",
                                                 "preferred": true,
                                                 "bleAddr": ports[j].systemPath,
+                                                "tcpPort": 0,
                                                 "hubUuid": "",
                                                 "isSerial": 1})
                         }
@@ -679,6 +684,7 @@ Item {
                                             "setName": "",
                                             "preferred": true,
                                             "bleAddr": "",
+                                            "tcpPort": 0,
                                             "hubUuid": hubDevs[j].uuid(),
                                             "isSerial": 3})
                     }

@@ -67,6 +67,10 @@ void PageCanAnalyzer::reloadParams()
 
 void PageCanAnalyzer::canFrameRx(QByteArray data, quint32 id, bool isExtended)
 {
+    while (ui->msgTable->rowCount() > 3999) {
+        ui->msgTable->removeRow(0);
+    }
+
     ui->msgTable->setRowCount(ui->msgTable->rowCount() + 1);
 
     ui->msgTable->setItem(ui->msgTable->rowCount() - 1, 0,

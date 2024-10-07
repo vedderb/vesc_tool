@@ -467,20 +467,28 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                 case 1: sensors = "Encoder"; break;
                 case 2: sensors = "Hall Sensors"; break;
                 default: break; }
+
+                float kv = (20.0*sqrt(3.0)) / (M_PI * p->getParamDouble("foc_motor_flux_linkage") * (double)p->getParamInt("si_motor_poles"));
+                float kt = 30.0 / (M_PI * kv);
+
                 return QString("VESC ID            : %1\n"
                                "Motor current      : %2 A\n"
                                "Motor R            : %3 mΩ\n"
                                "Motor L            : %4 µH\n"
                                "Motor Lq-Ld        : %5 µH\n"
                                "Motor Flux Linkage : %6 mWb\n"
-                               "Temp Comp          : %7\n"
-                               "Sensors            : %8").
+                               "Motor Kv           : %7 RPM/V\n"
+                               "Motor Kt           : %8 Nm/A\n"
+                               "Temp Comp          : %9\n"
+                               "Sensors            : %10").
                         arg(ap->getParamInt("controller_id")).
                         arg(p->getParamDouble("l_current_max"), 0, 'f', 2).
                         arg(p->getParamDouble("foc_motor_r") * 1e3, 0, 'f', 2).
                         arg(p->getParamDouble("foc_motor_l") * 1e6, 0, 'f', 2).
                         arg(p->getParamDouble("foc_motor_ld_lq_diff") * 1e6, 0, 'f', 2).
                         arg(p->getParamDouble("foc_motor_flux_linkage") * 1e3, 0, 'f', 2).
+                        arg(kv, 0, 'f', 2).
+                        arg(kt, 0, 'f', 2).
                         arg(p->getParamBool("foc_temp_comp") ? "True" : "False").
                         arg(sensors);
             };
@@ -562,7 +570,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
             case -100 + FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: reason = "Magnet too strong, magnet is too strong or too close to the encoder"; break;
             case -100 + FAULT_CODE_PHASE_FILTER: reason = "Phase filter fault, invalid phase filter readings"; break;
             case -100 + FAULT_CODE_ENCODER_FAULT: reason = "Encoder fault, check encoder connections and alignment"; break;
-
+            case -100 + FAULT_CODE_PHASE_OUTPUT_ERROR: reason = "Phase outputs shorted or disconnected, Check for damage to cables or connectors"; break;
             default: reason = QString::number(resDetect); break;
             }
 

@@ -468,14 +468,7 @@ bool BoardSetupWindow::tryFirmwareUpload(){
             testResult = false;
             return false;
         }
-        if (file.size() > 400000) {
-            QMessageBox::critical(this,
-                                  tr("Upload Error"),
-                                  tr("The selected file is too large to be a firmware."));
-            testResultMsg = "The included firmware file is too large.";
-            testResult = false;
-            return false;
-        }
+
         QByteArray data = file.readAll();
 
         fwRes = mVesc->fwUpload(data, is_Bootloader, num_VESCs > 1);

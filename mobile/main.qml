@@ -634,7 +634,7 @@ ApplicationWindow {
                     GradientStop { position: 0.0; color: "#15ffffff"}
                     GradientStop { position: 0.3; color: "#04ffffff"}
                     GradientStop { position: 1.0; color: "transparent" }
-                }
+            }
         }
         Behavior on color {
             ColorAnimation {

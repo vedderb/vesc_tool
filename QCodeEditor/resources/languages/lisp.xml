@@ -517,6 +517,7 @@
 <name>qml-erase</name>
 <name>qml-write</name>
 <name>shutdown-hold</name>
+<name>const-heap-erase</name>
 <name>reboot</name>
 <name>color-make</name>
 <name>color-split</name>

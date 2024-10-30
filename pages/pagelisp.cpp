@@ -494,7 +494,7 @@ void PageLisp::setEditorClean(ScriptEditor *editor)
         QString tabText = ui->fileTabs->tabText(tabIdx);
 
         // Check if the final character is a `*`, which indicated it was a dirty file
-        if (tabText.back() == "*") {
+        if (tabText.back() == '*') {
             // Remove the terminal `*`
             tabText.chop(1);
             ui->fileTabs->setTabText(tabIdx, tabText);

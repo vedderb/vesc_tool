@@ -46,7 +46,7 @@ ios: {
 #CONFIG += build_mobile
 
 # Exclude built-in firmwares
-#CONFIG += exclude_fw
+CONFIG += exclude_fw
 
 ios: {
     CONFIG    += build_mobile
@@ -78,8 +78,10 @@ DEFINES += HAS_POS
 !android: {
     # Serial port available
     DEFINES += HAS_SERIALPORT
-    DEFINES += HAS_GAMEPAD
-}
+!macos: {
+      DEFINES += HAS_GAMEPAD
+    }
+  }
 }
 
 win32: {
@@ -109,6 +111,8 @@ QT       += quickcontrols2
 QT       += quickwidgets
 QT       += svg
 QT       += gui-private
+QT += openglwidgets
+QT += core5compat
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport

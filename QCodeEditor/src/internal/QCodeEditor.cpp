@@ -494,9 +494,9 @@ void QCodeEditor::proceedCompleterEnd(QKeyEvent *e)
     }
 
     auto isShortcut = ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Space);
-    auto isDot = charUnderCursor(-1) == ".";
-    auto isMinus = charUnderCursor(-1) == "-";
-    auto isSpace = charUnderCursor(-1) == " " || charUnderCursor(-1) == "\t";
+    auto isDot = charUnderCursor(-1) == '.';
+    auto isMinus = charUnderCursor(-1) == '-';
+    auto isSpace = charUnderCursor(-1) == ' ' || charUnderCursor(-1) == '\t';
 
     if (isSpace || (word.isEmpty() && !isDot && !(!m_separateMinus && isMinus))) {
         m_completer->popup()->hide();
@@ -584,7 +584,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
                 int charPos = -1;
 
                 for (int i = 0;i < line.length();i++) {
-                    if (line.at(i) != " " && line.at(i) != "\t") {
+                    if (line.at(i) != ' ' && line.at(i) != '\t') {
                         charPos = i;
                         break;
                     }
@@ -597,8 +597,8 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
 
                 if (commentPos >= 0) {
                     if (line.length() <= (commentPos + m_commentStr.length()) ||
-                            line.at(commentPos + m_commentStr.length()) == " " ||
-                            line.at(commentPos + m_commentStr.length()) == "\t") {
+                            line.at(commentPos + m_commentStr.length()) == ' ' ||
+                            line.at(commentPos + m_commentStr.length()) == '\t') {
                         commentPos = -1;
                         charPos = -1;
                     }
@@ -829,7 +829,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
 
         // Shortcut for moving line to left
         if (m_replaceTab && e->key() == Qt::Key_Backtab) {
-            indentationLevel = std::min(indentationLevel, m_tabReplace.size());
+            indentationLevel = std::min((qsizetype)indentationLevel, m_tabReplace.size());
 
             auto cursor = textCursor();
 

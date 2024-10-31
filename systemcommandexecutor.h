@@ -12,45 +12,44 @@ class SystemCommandExecutor : public QObject
 public:
     explicit SystemCommandExecutor(QObject *parent = nullptr) : QObject(parent) {}
 
-    Q_INVOKABLE QString executeCommand(const QString &command) {
+    Q_INVOKABLE int executeCommand(const QString &command) {
         QProcess process;
         QEventLoop loop;
 
         process.setReadChannel(QProcess::StandardOutput);
 
-        auto conn1 = connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
-        auto conn2 = connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
-        auto conn3 = connect(&process, &QProcess::readyReadStandardOutput, [&]() {
-            emit processOutput(QString::fromUtf8(process.readAllStandardOutput()));
+        auto quitHandler = connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+        auto errHandler = connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+        auto stdOutHandler = connect(&process, &QProcess::readyReadStandardOutput, [&]() {
+            emit processStandardOutput(QString::fromUtf8(process.readAllStandardOutput()));
         });
-        auto conn4 = connect(&process, &QProcess::readyReadStandardError, [&]() {
-            emit processOutput(QString::fromUtf8(process.readAllStandardError()));
+        auto stdErrHandler = connect(&process, &QProcess::readyReadStandardError, [&]() {
+            emit processStandardError(QString::fromUtf8(process.readAllStandardError()));
         });
 
         process.start("sh", QStringList() << "-c" << command);
         
         if (!process.waitForStarted()) {
-            disconnect(conn1);
-            disconnect(conn2);
-            disconnect(conn3);
-            disconnect(conn4);
-            return "Failed to start process";
+            disconnect(quitHandler);
+            disconnect(errHandler);
+            disconnect(stdOutHandler);
+            disconnect(stdErrHandler);
+            return -1;
         }
 
         loop.exec();
 
-        disconnect(conn1);
-        disconnect(conn2);
-        disconnect(conn3);
-        disconnect(conn4);
+        disconnect(quitHandler);
+        disconnect(errHandler);
+        disconnect(stdOutHandler);
+        disconnect(stdErrHandler);
 
-        QString output = process.readAllStandardOutput();
-        QString errorOutput = process.readAllStandardError();
-        return output + errorOutput;
+        return process.exitCode();
     }
 
 signals:
-    void processOutput(QString);
+    void processStandardOutput(QString);
+    void processStandardError(QString);
 
 };
 

@@ -1181,6 +1181,14 @@ void PageLogAnalysis::logListRefresh()
         QString dirPath = set.value("pageloganalysis/lastdir").toString();
         QDir dir(dirPath);
         if (dir.exists()) {
+            for (QFileInfo d: dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot , QDir::Name)) {
+                QTableWidgetItem *itName = new QTableWidgetItem(d.fileName());
+                itName->setData(Qt::UserRole, d.absoluteFilePath());
+                ui->logTable->setRowCount(ui->logTable->rowCount() + 1);
+                ui->logTable->setItem(ui->logTable->rowCount() - 1, 0, itName);
+                ui->logTable->setItem(ui->logTable->rowCount() - 1, 1,
+                                      new QTableWidgetItem("Folder"));
+            }
             for (QFileInfo f: dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
                                                 QDir::Files, QDir::Name)) {
                 QTableWidgetItem *itName = new QTableWidgetItem(f.fileName());
@@ -1194,6 +1202,18 @@ void PageLogAnalysis::logListRefresh()
                                                                0, 'f', 2)));
             }
         }
+    }
+}
+
+void PageLogAnalysis::on_logListUpButton_clicked()
+{
+    QSettings set;
+    if (set.contains("pageloganalysis/lastdir")) {
+        QString dirPath = set.value("pageloganalysis/lastdir").toString();
+        QDir dir(dirPath);
+        dir.cdUp();
+        set.setValue("pageloganalysis/lastdir", dir.absolutePath());
+        logListRefresh();
     }
 }
 
@@ -1601,11 +1621,18 @@ void PageLogAnalysis::on_logListOpenButton_clicked()
     if (items.size() > 0) {
         QString fileName = items.
                 first()->data(Qt::UserRole).toString();
+        
+        if (QDir(fileName).exists()) {
+            QSettings set;
+            set.setValue("pageloganalysis/lastdir", fileName);
+            logListRefresh();
+            return;
+        }
 
         QFile inFile(fileName);
         if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
             openLog(inFile.readAll());
-        }
+        } 
     } else {
         mVesc->emitMessageDialog("Open Log", "No Log Selected", false);
     }

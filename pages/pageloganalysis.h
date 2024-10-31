@@ -57,6 +57,7 @@ private slots:
     void on_centerButton_clicked();
     void on_logListOpenButton_clicked();
     void on_logListRefreshButton_clicked();
+    void on_logListUpButton_clicked();
     void on_logTable_cellDoubleClicked(int row, int column);
     void on_vescLogListRefreshButton_clicked();
     void on_vescLogListOpenButton_clicked();

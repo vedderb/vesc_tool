@@ -474,7 +474,7 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
         mVesc->emitMessageDialog("Load Log", "No data", false);
         return;
     }
-
+    ui->currentLog->setText("Realtime");
     storeSelection();
 
     resetInds();
@@ -682,7 +682,7 @@ void PageLogAnalysis::on_openCsvButton_clicked()
 
             QFile inFile(fileName);
             if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                openLog(inFile.readAll());
+                openLog("Local: " + fileName, inFile.readAll());
             }
         }
     }
@@ -1256,10 +1256,11 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
     }
 }
 
-void PageLogAnalysis::openLog(QByteArray data)
+void PageLogAnalysis::openLog(QString name, QByteArray data)
 {
     storeSelection();
-
+    // get label for current open file
+    ui->currentLog->setText(name);
     QTextStream in(&data);
     auto tokensLine1 = in.readLine().split(";");
     if (tokensLine1.size() < 1) {
@@ -1631,7 +1632,7 @@ void PageLogAnalysis::on_logListOpenButton_clicked()
 
         QFile inFile(fileName);
         if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            openLog(inFile.readAll());
+            openLog("Local: " + fileName, inFile.readAll());
         } 
     } else {
         mVesc->emitMessageDialog("Open Log", "No Log Selected", false);
@@ -1723,7 +1724,7 @@ void PageLogAnalysis::on_vescLogListOpenButton_clicked()
             auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
             setFileButtonsEnabled(true);
             if (!data.isEmpty()) {
-                openLog(data);
+                openLog("Device: " + fe.name, data);
             }
         }
     }

@@ -666,6 +666,24 @@ QPair<int, int> VescInterface::getFirmwareNowPair()
     return mFwPair;
 }
 
+QString VescInterface::getHardwareNow()
+{
+    return mHwTxt;
+}
+
+QString VescInterface::getHardwareTypeNow()
+{
+    switch (mHwType){
+    case HW_TYPE_VESC:
+        return "VESC";
+    case HW_TYPE_VESC_BMS:
+        return "VESC BMS";
+    case HW_TYPE_CUSTOM_MODULE:
+        return "Custom Module";
+    }
+    return "Unknown";
+}
+
 void VescInterface::emitStatusMessage(const QString &msg, bool isGood)
 {
     emit statusMessage(msg, isGood);
@@ -3832,6 +3850,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         mFwTxt = QString("Fw: %1.%2").arg(params.major).arg(params.minor);
         mFwPair = qMakePair(params.major, params.minor);
         mHwTxt = params.hw;
+        mHwType = params.hwType;
         if (!params.hw.isEmpty()) {
             mFwTxt += ", Hw: " + params.hw;
         }

@@ -81,6 +81,8 @@ public:
     Q_INVOKABLE void emitStatusMessage(const QString &msg, bool isGood);
     Q_INVOKABLE void emitMessageDialog(const QString &title, const QString &msg, bool isGood, bool richText = false);
     Q_INVOKABLE bool fwRx();
+    Q_INVOKABLE QString getHardwareNow();
+    Q_INVOKABLE QString getHardwareTypeNow();
     Q_INVOKABLE void storeSettings();
 
     // Profiles
@@ -379,6 +381,7 @@ private:
     QString mFwTxt;
     QPair<int, int> mFwPair;
     QString mHwTxt;
+    HW_TYPE mHwType;
     QString mUuidStr;
     QString mUuidStrLocal;
     bool mIsUploadingFw;

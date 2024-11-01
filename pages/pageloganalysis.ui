@@ -15,9 +15,36 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="currentLog">
+       <property name="text">
+        <string>No log opened</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QSplitter" name="mapSplitter">
      <property name="orientation">
-      <enum>Qt::Orientation::Vertical</enum>
+      <enum>Qt::Vertical</enum>
      </property>
      <widget class="QWidget" name="layoutWidget">
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
@@ -199,10 +226,10 @@
          <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
+            <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Policy::MinimumExpanding</enum>
+            <enum>QSizePolicy::MinimumExpanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -249,7 +276,7 @@
      </widget>
      <widget class="QSplitter" name="statSplitter">
       <property name="orientation">
-       <enum>Qt::Orientation::Horizontal</enum>
+       <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QCustomPlot" name="plot" native="true">
        <property name="sizePolicy">
@@ -261,17 +288,17 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="tabPosition">
-        <enum>QTabWidget::TabPosition::North</enum>
+        <enum>QTabWidget::North</enum>
        </property>
        <property name="tabShape">
-        <enum>QTabWidget::TabShape::Triangular</enum>
+        <enum>QTabWidget::Triangular</enum>
        </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
-         <string>Browse</string>
+         <string>Source</string>
         </attribute>
         <attribute name="toolTip">
          <string>Browse directory of last log file.</string>
@@ -295,10 +322,10 @@
          <item>
           <widget class="QTabWidget" name="browseTabWidget">
            <property name="tabPosition">
-            <enum>QTabWidget::TabPosition::North</enum>
+            <enum>QTabWidget::North</enum>
            </property>
            <property name="tabShape">
-            <enum>QTabWidget::TabShape::Triangular</enum>
+            <enum>QTabWidget::Triangular</enum>
            </property>
            <property name="currentIndex">
             <number>0</number>
@@ -326,13 +353,13 @@
              <item>
               <widget class="QTableWidget" name="vescLogTable">
                <property name="editTriggers">
-                <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+                <set>QAbstractItemView::NoEditTriggers</set>
                </property>
                <property name="selectionMode">
-                <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
+                <enum>QAbstractItemView::ExtendedSelection</enum>
                </property>
                <property name="selectionBehavior">
-                <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                <enum>QAbstractItemView::SelectRows</enum>
                </property>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
@@ -394,7 +421,7 @@
                 <item>
                  <spacer name="horizontalSpacer_3">
                   <property name="orientation">
-                   <enum>Qt::Orientation::Horizontal</enum>
+                   <enum>Qt::Horizontal</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -486,13 +513,13 @@
              <item>
               <widget class="QTableWidget" name="logTable">
                <property name="editTriggers">
-                <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+                <set>QAbstractItemView::NoEditTriggers</set>
                </property>
                <property name="selectionMode">
-                <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+                <enum>QAbstractItemView::SingleSelection</enum>
                </property>
                <property name="selectionBehavior">
-                <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                <enum>QAbstractItemView::SelectRows</enum>
                </property>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
@@ -512,9 +539,23 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
+                <widget class="QPushButton" name="openCsvButton">
+                 <property name="toolTip">
+                  <string>Open CSV file...</string>
+                 </property>
+                 <property name="text">
+                  <string>Browse...</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../res.qrc">
+                   <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <spacer name="horizontalSpacer_2">
                  <property name="orientation">
-                  <enum>Qt::Orientation::Horizontal</enum>
+                  <enum>Qt::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -523,6 +564,17 @@
                   </size>
                  </property>
                 </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="logListOpenButton">
+                 <property name="text">
+                  <string>Open Selected</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../res.qrc">
+                   <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
+                 </property>
+                </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="logListRefreshButton">
@@ -536,15 +588,53 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="logListOpenButton">
+                <widget class="QPushButton" name="logListUpButton">
                  <property name="text">
-                  <string>Open Selected</string>
+                  <string>Up</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../res.qrc">
+                   <normaloff>:/res/icons/Upload-96.png</normaloff>:/res/icons/Upload-96.png</iconset>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tab_7">
+            <attribute name="title">
+             <string>Realtime</string>
+            </attribute>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_13">
+               <item>
+                <widget class="QPushButton" name="openCurrentButton">
+                 <property name="toolTip">
+                  <string>Open log from RT data page</string>
+                 </property>
+                 <property name="text">
+                  <string>Open current</string>
                  </property>
                  <property name="icon">
                   <iconset resource="../res.qrc">
                    <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
                  </property>
                 </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </item>
@@ -574,16 +664,16 @@
          <item>
           <widget class="QTableWidget" name="dataTable">
            <property name="editTriggers">
-            <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+            <set>QAbstractItemView::NoEditTriggers</set>
            </property>
            <property name="alternatingRowColors">
             <bool>true</bool>
            </property>
            <property name="selectionMode">
-            <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
+            <enum>QAbstractItemView::ExtendedSelection</enum>
            </property>
            <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+            <enum>QAbstractItemView::SelectRows</enum>
            </property>
            <attribute name="horizontalHeaderStretchLastSection">
             <bool>false</bool>
@@ -640,16 +730,16 @@
          <item>
           <widget class="QTableWidget" name="statTable">
            <property name="editTriggers">
-            <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+            <set>QAbstractItemView::NoEditTriggers</set>
            </property>
            <property name="alternatingRowColors">
             <bool>true</bool>
            </property>
            <property name="selectionMode">
-            <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+            <enum>QAbstractItemView::NoSelection</enum>
            </property>
            <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+            <enum>QAbstractItemView::SelectRows</enum>
            </property>
            <attribute name="horizontalHeaderStretchLastSection">
             <bool>true</bool>
@@ -674,6 +764,189 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_4"/>
        </widget>
+       <widget class="QWidget" name="tab_6">
+        <attribute name="title">
+         <string>Export</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string>Image</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_14">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QSpinBox" name="saveHeightBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="prefix">
+                 <string>H: </string>
+                </property>
+                <property name="maximum">
+                 <number>9999</number>
+                </property>
+                <property name="value">
+                 <number>720</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="saveWidthBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="prefix">
+                 <string>W: </string>
+                </property>
+                <property name="maximum">
+                 <number>9999</number>
+                </property>
+                <property name="value">
+                 <number>1280</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <item>
+               <widget class="QPushButton" name="saveMapPdfButton">
+                <property name="toolTip">
+                 <string>Save map as PDF image</string>
+                </property>
+                <property name="text">
+                 <string>PDF</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/res/icons/Waypoint Map-96.png</normaloff>:/res/icons/Waypoint Map-96.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="saveMapPngButton">
+                <property name="toolTip">
+                 <string>Save map as Png image</string>
+                </property>
+                <property name="text">
+                 <string>PNG</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/res/icons/Waypoint Map-96.png</normaloff>:/res/icons/Waypoint Map-96.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_10">
+              <item>
+               <widget class="QPushButton" name="savePlotPdfButton">
+                <property name="toolTip">
+                 <string>Save plot as PDF image</string>
+                </property>
+                <property name="text">
+                 <string>PDF</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/res/icons/Line Chart-96.png</normaloff>:/res/icons/Line Chart-96.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="savePlotPngButton">
+                <property name="toolTip">
+                 <string>Save plot as PNG image</string>
+                </property>
+                <property name="text">
+                 <string>PNG</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/res/icons/Line Chart-96.png</normaloff>:/res/icons/Line Chart-96.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="title">
+            <string>All Data</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_15">
+            <item>
+             <widget class="QPushButton" name="saveCsvButton">
+              <property name="toolTip">
+               <string>Save all data as CSV-file...</string>
+              </property>
+              <property name="text">
+               <string>CSV</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>203</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </widget>
@@ -681,161 +954,9 @@
    <item>
     <widget class="SuperSlider" name="spanSlider">
      <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="spacing">
-      <number>2</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="openCurrentButton">
-       <property name="toolTip">
-        <string>Open log from RT data page</string>
-       </property>
-       <property name="text">
-        <string>RtPage</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="openCsvButton">
-       <property name="toolTip">
-        <string>Open CSV file...</string>
-       </property>
-       <property name="text">
-        <string>CSV</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Open Folder-96.png</normaloff>:/res/icons/Open Folder-96.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="saveWidthBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="prefix">
-        <string>W: </string>
-       </property>
-       <property name="maximum">
-        <number>9999</number>
-       </property>
-       <property name="value">
-        <number>1280</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="saveHeightBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="prefix">
-        <string>H: </string>
-       </property>
-       <property name="maximum">
-        <number>9999</number>
-       </property>
-       <property name="value">
-        <number>720</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="savePlotPdfButton">
-       <property name="toolTip">
-        <string>Save plot as PDF image</string>
-       </property>
-       <property name="text">
-        <string>PDF</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Line Chart-96.png</normaloff>:/res/icons/Line Chart-96.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="savePlotPngButton">
-       <property name="toolTip">
-        <string>Save plot as PNG image</string>
-       </property>
-       <property name="text">
-        <string>PNG</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Line Chart-96.png</normaloff>:/res/icons/Line Chart-96.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="saveMapPdfButton">
-       <property name="toolTip">
-        <string>Save map as PDF image</string>
-       </property>
-       <property name="text">
-        <string>PDF</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Waypoint Map-96.png</normaloff>:/res/icons/Waypoint Map-96.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="saveMapPngButton">
-       <property name="toolTip">
-        <string>Save map as Png image</string>
-       </property>
-       <property name="text">
-        <string>PNG</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../res.qrc">
-         <normaloff>:/res/icons/Waypoint Map-96.png</normaloff>:/res/icons/Waypoint Map-96.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="saveCsvButton">
-       <property name="toolTip">
-        <string>Save all data as CSV-file...</string>
-       </property>
-       <property name="text">
-        <string>CSV</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
   </layout>
  </widget>

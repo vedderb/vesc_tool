@@ -383,6 +383,25 @@ bool CodeLoader::lispUpload(QString codeStr, QString editorPath)
     return lispUpload(vb);
 }
 
+bool CodeLoader::lispUploadFromPath(QString path)
+{
+    QFile f(path);
+    if (f.open(QIODevice::ReadOnly)) {
+        QFileInfo fi(f);
+        VByteArray lispData = lispPackImports(f.readAll(), fi.canonicalPath());
+        f.close();
+
+        if (!lispData.isEmpty()) {
+            bool ok = lispErase(lispData.size() + 100);
+            if (ok) {
+                return lispUpload(lispData);
+            }
+        }
+    }
+
+    return false;
+}
+
 bool CodeLoader::lispStream(VByteArray vb, qint8 mode)
 {
     if (!mVesc->isPortConnected()) {

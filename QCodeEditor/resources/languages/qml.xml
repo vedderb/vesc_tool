@@ -129,5 +129,6 @@
         <name>ParamList</name>
         <name>TcpHub</name>
         <name>QMiniMp3</name>
+        <name>CodeLoader</name>
     </section>
 </root>

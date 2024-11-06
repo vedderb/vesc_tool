@@ -1177,11 +1177,23 @@ void PageLogAnalysis::logListRefresh()
 {
     ui->logTable->setRowCount(0);
     QSettings set;
-    if (set.contains("pageloganalysis/lastdir")) {
+    if (set.contains("pageloganalysis/lastdir")) {    
         QString dirPath = set.value("pageloganalysis/lastdir").toString();
+
+        while (dirPath.startsWith("/..")) {
+            dirPath.remove(0, 3);
+        }
+        set.setValue("pageloganalysis/lastdir", dirPath);
+
+        ui->pathLabel->setText(dirPath);
+
         QDir dir(dirPath);
         if (dir.exists()) {
-            for (QFileInfo d: dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot , QDir::Name)) {
+            foreach (QFileInfo d, dir.entryInfoList(QDir::Dirs | QDir::NoDot, QDir::Name)) {
+                if (d.fileName() == ".." && dirPath == "/") {
+                    continue;
+                }
+
                 QTableWidgetItem *itName = new QTableWidgetItem(d.fileName());
                 itName->setData(Qt::UserRole, d.absoluteFilePath());
                 ui->logTable->setRowCount(ui->logTable->rowCount() + 1);
@@ -1189,7 +1201,7 @@ void PageLogAnalysis::logListRefresh()
                 ui->logTable->setItem(ui->logTable->rowCount() - 1, 1,
                                       new QTableWidgetItem("Folder"));
             }
-            for (QFileInfo f: dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
+            foreach (QFileInfo f, dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
                                                 QDir::Files, QDir::Name)) {
                 QTableWidgetItem *itName = new QTableWidgetItem(f.fileName());
                 itName->setData(Qt::UserRole, f.absoluteFilePath());
@@ -1224,7 +1236,6 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
     
     auto nameItem = new QTableWidgetItem(name);
     ui->dataTable->setItem(currentRow, dataTableColName, nameItem);
-
     ui->dataTable->setItem(currentRow, dataTableColValue, new QTableWidgetItem(""));
 
     if (hasScale) {

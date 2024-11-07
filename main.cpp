@@ -104,6 +104,7 @@ static void showHelp()
     qDebug() << "--eraseLisp : Erase lisp-script.";
     qDebug() << "--uploadFirmware [path] : Upload firmware-file from path.";
     qDebug() << "--uploadBootloaderBuiltin : Upload bootloader from generic included bootloaders.";
+    qDebug() << "--queryDeviceFwParams : Connect and print out device fw parameters.";
     qDebug() << "--writeFileToSdCard [fileLocal:pathSdcard] : Write file to SD-card.";
     qDebug() << "--packFirmware [fileIn:fileOut] : Pack firmware-file for compatibility with the bootloader. ";
     qDebug() << "--packLisp [fileIn:fileOut] : Pack lisp-file and the included imports.";
@@ -310,6 +311,7 @@ int main(int argc, char *argv[])
     bool eraseLisp = false;
     QString firmwarePath = "";
     bool uploadBootloaderBuiltin = false;
+    bool queryDeviceFwParams = false;
     QString fwPackIn = "";
     QString fwPackOut = "";
     QString fileForSdIn = "";
@@ -594,6 +596,11 @@ int main(int argc, char *argv[])
 
         if (str == "--uploadBootloaderBuiltin") {
             uploadBootloaderBuiltin = true;
+            found = true;
+        }
+
+        if (str == "--queryDeviceFwParams") {
+            queryDeviceFwParams = true;
             found = true;
         }
 
@@ -1004,7 +1011,7 @@ int main(int argc, char *argv[])
 
     if (isMcConf || isAppConf || isCustomConf || !lispPath.isEmpty() ||
             eraseLisp || !firmwarePath.isEmpty() || uploadBootloaderBuiltin ||
-            !fileForSdIn.isEmpty() || bridgeAppData) {
+            queryDeviceFwParams || !fileForSdIn.isEmpty() || bridgeAppData) {
         if (offscreen) {
             qputenv("QT_QPA_PLATFORM", "offscreen");
         }
@@ -1160,7 +1167,7 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                if (isMcConf || isAppConf || isCustomConf) {
+                if (isMcConf || isAppConf || isCustomConf || queryDeviceFwParams) {
                     bool res = vesc->customConfigRxDone();
                     if (!res) {
                         res = Utility::waitSignal(vesc, SIGNAL(customConfigLoadDone()), 4000);
@@ -1339,6 +1346,33 @@ int main(int argc, char *argv[])
                         qWarning() << "No included bootloader found.";
                         exitCode = -30;
                     }
+                }
+
+                if (queryDeviceFwParams) {
+                    FW_RX_PARAMS params = vesc->getLastFwRxParams();
+
+                    QString fwStr;
+                    QString strUuid = Utility::uuid2Str(params.uuid, true);
+
+                    if (params.major >= 0) {
+                        fwStr = QString("FW: V%1.%2").arg(params.major).arg(params.minor, 2, 10, QLatin1Char('0'));
+                        if (!params.fwName.isEmpty()) {
+                            fwStr += " (" + params.fwName + ")";
+                        }
+
+                        if (!params.hw.isEmpty()) {
+                            fwStr += ", Hw: " + params.hw;
+                        }
+
+                        if (!strUuid.isEmpty()) {
+                            fwStr += ", UUID: " + strUuid;
+                        }
+
+                        fwStr += ", isTestFw: " + QString::number(params.isTestFw);
+                        fwStr += ", hwType: " + params.hwTypeStr();
+                        fwStr += ", hwConfCrc: " + QString::number(params.hwConfCrc);
+                    }
+                    qInfo() << fwStr;
                 }
 
                 if (!firmwarePath.isEmpty()) {

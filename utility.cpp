@@ -39,6 +39,7 @@
 #include <QPixmapCache>
 
 #include "maddy/parser.h"
+#include "heatshrink/heatshrinkif.h"
 
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
@@ -2359,13 +2360,20 @@ QByteArray Utility::removeFirmwareHeader(QByteArray in)
     }
 
     VByteArray vb(in);
-    vb.vbPopFrontInt32();
+    auto size = vb.vbPopFrontUint32();
+    bool isCompressed = (size >> 24) == 0xCC;
     unsigned short crc = vb.vbPopFrontUint16();
     unsigned short crcCalc = Packet::crc16((const unsigned char*)vb.constData(), uint32_t(vb.size()));
 
     if (crc == crcCalc) {
-        qDebug() << "Removed header from firmware file...";
-        return vb;
+        if (isCompressed) {
+            qDebug() << "Decompressed and removed header from firmware file...";
+            HeatshrinkIf hs;
+            return hs.decode(vb);
+        } else {
+            qDebug() << "Removed header from firmware file...";
+            return vb;
+        }
     } else {
         return in;
     }

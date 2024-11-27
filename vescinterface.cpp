@@ -1393,6 +1393,8 @@ bool VescInterface::fwEraseBootloader(bool fwdCan)
 
 bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan, bool isLzo, bool autoDisconnect)
 {
+    newFirmware = Utility::removeFirmwareHeader(newFirmware);
+
     mIsLastFwBootloader = isBootloader;
     mFwUploadProgress = 0.0;
     mCancelFwUpload = false;
@@ -1426,7 +1428,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             bool ignoreBefore = mIgnoreCanChange;
             mIgnoreCanChange = true;
 
-            for (auto d: devs) {
+            foreach (auto d, devs) {
                 mCommands->setSendCan(true, d);
                 FW_RX_PARAMS fwParamsCan;
                 Utility::getFwVersionBlocking(this, &fwParamsCan);

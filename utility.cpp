@@ -2352,6 +2352,25 @@ QByteArray Utility::readAllFromFile(const QString &filePath)
     return data;
 }
 
+QByteArray Utility::removeFirmwareHeader(QByteArray in)
+{
+    if (in.size() <= 6) {
+        return in;
+    }
+
+    VByteArray vb(in);
+    vb.vbPopFrontInt32();
+    unsigned short crc = vb.vbPopFrontUint16();
+    unsigned short crcCalc = Packet::crc16((const unsigned char*)vb.constData(), uint32_t(vb.size()));
+
+    if (crc == crcCalc) {
+        qDebug() << "Removed header from firmware file...";
+        return vb;
+    } else {
+        return in;
+    }
+}
+
 void Utility::setDarkMode(bool isDarkSetting)
 {
     isDark = isDarkSetting;

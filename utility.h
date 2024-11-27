@@ -148,7 +148,9 @@ public:
 
     Q_INVOKABLE static QString md2html(QString md);
 
-    Q_INVOKABLE QByteArray readAllFromFile(const QString &filePath);
+    Q_INVOKABLE static QByteArray readAllFromFile(const QString &filePath);
+
+    static QByteArray removeFirmwareHeader(QByteArray in);
 
 signals:
 

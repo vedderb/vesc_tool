@@ -753,7 +753,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        QByteArray newFirmware = fIn.readAll();
+        QByteArray newFirmware = Utility::removeFirmwareHeader(fIn.readAll());
         fIn.close();
 
         QFile fOut(fwPackOut);

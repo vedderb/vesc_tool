@@ -753,14 +753,14 @@ int main(int argc, char *argv[])
             return 1;
         }
 
+        QByteArray newFirmware = fIn.readAll();
+        fIn.close();
+
         QFile fOut(fwPackOut);
         if (!fOut.open(QIODevice::WriteOnly)) {
             qWarning() << QString("Could not open %1 for writing.").arg(fwPackOut);
             return 1;
         }
-
-        QByteArray newFirmware = fIn.readAll();
-        fIn.close();
 
         int szTot = newFirmware.size();
 

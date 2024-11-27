@@ -542,6 +542,7 @@
 <name>tcp-recv</name>
 <name>tcp-recv-to-char</name>
 <name>connected-wifi</name>
+<name>connected-hub</name>
 <name>connected-ble</name>
 <name>connected-usb</name>
 <name>aes-ctr-crypt</name>

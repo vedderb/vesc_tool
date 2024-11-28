@@ -1848,7 +1848,11 @@ bool ConfigParams::moveGroupUp(QString group)
     for (int i = 0;i < mParamGrouping.size();i++) {
         if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
             if (i > 0) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
                 mParamGrouping.swapItemsAt(i, i - 1);
+#else
+                qSwap(mParamGrouping[i], mParamGrouping[i - 1]);
+#endif
                 return true;
             } else {
                 return false;
@@ -1863,7 +1867,11 @@ bool ConfigParams::moveGroupDown(QString group)
     for (int i = 0;i < mParamGrouping.size();i++) {
         if (mParamGrouping.at(i).first.toLower() == group.toLower()) {
             if (i < (mParamGrouping.size() - 1)) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
                 mParamGrouping.swapItemsAt(i, i + 1);
+#else
+                qSwap(mParamGrouping[i], mParamGrouping[i + 1]);
+#endif
                 return true;
             } else {
                 return false;
@@ -1880,7 +1888,11 @@ bool ConfigParams::moveSubgroupUp(QString group, QString subgroup)
             for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
                 if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
                     if (j > 0) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
                         mParamGrouping[i].second.swapItemsAt(j, j - 1);
+#else
+                        qSwap(mParamGrouping[i].second[j], mParamGrouping[i].second[j - 1]);
+#endif
                         return true;
                     } else {
                         return false;
@@ -1899,7 +1911,11 @@ bool ConfigParams::moveSubgroupDown(QString group, QString subgroup)
             for (int j = 0;j < mParamGrouping.at(i).second.size();j++) {
                 if (mParamGrouping.at(i).second.at(j).first.toLower() == subgroup.toLower()) {
                     if (j < (mParamGrouping.at(i).second.size() - 1)) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
                         mParamGrouping[i].second.swapItemsAt(j, j + 1);
+#else
+                        qSwap(mParamGrouping[i].second[j], mParamGrouping[i].second[j + 1]);
+#endif
                         return true;
                     } else {
                         return false;
@@ -1920,7 +1936,11 @@ bool ConfigParams::moveSubgroupParamUp(QString group, QString subgroup, QString 
                     for (int k = 0;k < mParamGrouping.at(i).second.at(j).second.size();k++) {
                         if (mParamGrouping.at(i).second.at(j).second.at(k).toLower() == param.toLower()) {
                             if (k > 0) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
                                 mParamGrouping[i].second[j].second.swapItemsAt(k, k - 1);
+#else
+                                qSwap(mParamGrouping[i].second[j].second[k], mParamGrouping[i].second[j].second[k - 1]);
+#endif
                                 return true;
                             } else {
                                 return false;
@@ -1943,7 +1963,11 @@ bool ConfigParams::moveSubgroupParamDown(QString group, QString subgroup, QStrin
                     for (int k = 0;k < mParamGrouping.at(i).second.at(j).second.size();k++) {
                         if (mParamGrouping.at(i).second.at(j).second.at(k).toLower() == param.toLower()) {
                             if (k < (mParamGrouping.at(i).second.at(j).second.size() - 1)) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
                                 mParamGrouping[i].second[j].second.swapItemsAt(k, k + 1);
+#else
+                                qSwap(mParamGrouping[i].second[j].second[k], mParamGrouping[i].second[j].second[k + 1]);
+#endif
                                 return true;
                             } else {
                                 return false;

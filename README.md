@@ -31,3 +31,17 @@ If you have custom hardware and you want to add support for it in the official r
 1) Go to https://github.com/vedderb/bldc and use the github fork function.  
 2) Make your changes, test them and make a pull request to the main repository.  
 3) If the pull request gets accepted your hardware will become part of the next official release. It will show up in the binary beta typically after a few days and in the stable version the next time a stable release is made.
+
+## How to Build the Docker Image
+
+### tested only Linux
+
+docker build . -t vesc_tool
+
+### run bach
+
+docker run --rm -it -v `pwd`:/vesc_tool vesc_tool:latest bash
+
+### or build in docker
+
+docker run --rm -it -v `pwd`:/vesc_tool vesc_tool:latest /vesc_tool/build_lin

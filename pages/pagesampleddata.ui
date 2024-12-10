@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="tabShape">
-      <enum>QTabWidget::Triangular</enum>
+      <enum>QTabWidget::TabShape::Triangular</enum>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -26,7 +26,7 @@
       <attribute name="title">
        <string>Current</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0">
        <item>
         <widget class="QStackedWidget" name="currentStack">
          <property name="currentIndex">
@@ -126,7 +126,7 @@
                <item>
                 <spacer name="horizontalSpacer_3">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Orientation::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -159,7 +159,7 @@
            <item>
             <widget class="QSplitter" name="splitter">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <widget class="QWidget" name="layoutWidget_3">
               <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -196,7 +196,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
+        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,1">
          <item>
           <widget class="QComboBox" name="plotModeBox">
            <property name="toolTip">
@@ -351,12 +351,12 @@
          <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>20</width>
-             <height>40</height>
+             <width>10</width>
+             <height>10</height>
             </size>
            </property>
           </spacer>
@@ -448,7 +448,7 @@
          <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -605,7 +605,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -657,13 +657,13 @@
         <string>Samp: </string>
        </property>
        <property name="maximum">
-        <number>1600</number>
+        <number>1000</number>
        </property>
        <property name="singleStep">
         <number>100</number>
        </property>
        <property name="value">
-        <number>800</number>
+        <number>600</number>
        </property>
       </widget>
      </item>

@@ -1173,6 +1173,26 @@ p, li { white-space: pre-wrap; }
             <suffix> kHz</suffix>
             <vTx>9</vTx>
         </foc_f_zv>
+        <foc_f_zv_bandwidth_pct>
+            <longName>Zero Vector Frequency modulation bandwidth(EXPERIMENTAL)</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Makes high-pitched noise emitted by the motor less perceptible by modulating the setting above by this many percent. Note that this is the total size of the bandwidth, e.g. setting this setting to 10 modulates ZVF +-5% around the frequency set above.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_F_ZV_BANDWIDTH_PCT</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>30</maxInt>
+            <minInt>0</minInt>
+            <showDisplay>0</showDisplay>
+            <stepInt>1</stepInt>
+            <valInt>0</valInt>
+            <suffix> %</suffix>
+            <vTx>5</vTx>
+        </foc_f_zv_bandwidth_pct>
         <foc_dt_us>
             <longName>Dead Time Compensation</longName>
             <type>1</type>
@@ -4657,6 +4677,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_current_kp</ser>
         <ser>foc_current_ki</ser>
         <ser>foc_f_zv</ser>
+        <ser>foc_f_zv_bandwidth_pct</ser>
         <ser>foc_dt_us</ser>
         <ser>foc_encoder_inverted</ser>
         <ser>foc_encoder_offset</ser>
@@ -5110,6 +5131,7 @@ p, li { white-space: pre-wrap; }
                 <subgroupName>Advanced</subgroupName>
                 <subgroupParams>
                     <param>foc_f_zv</param>
+                    <param>foc_f_zv_bandwidth_pct</param>
                     <param>foc_dt_us</param>
                     <param>foc_pll_kp</param>
                     <param>foc_pll_ki</param>

@@ -93,22 +93,32 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
         ui->tempPlot->unload();
     }
 
-    if (mTempBars.size() != (val.temps.size() + 1)) {
-        reloadTempBars(val.temps.size() + 1);
+    if (mTempBars.size() != (val.temps.size())) {
+        reloadTempBars(val.temps.size());
     }
 
+    QStringList tLabels = {"IC", "Cell Min", "Cell Max", "Mosfet"};
     QSharedPointer<QCPAxisTickerText> textTicker2(new QCPAxisTickerText);
-    val.temps.prepend(val.temp_ic);
+
+    int labelInd = 1;
     for (int i = 0;i < val.temps.size();i++) {
         double t = val.temps.at(i);
+
         QVector<double> sensor, temp;
         sensor.append(i + 1);
-        temp.append(t);
+        temp.append(t > -280.0 ? t : 0.0);
         mTempBars.at(i)->setData(sensor, temp);
         mTempBars.at(i)->setBrush(t > 55 ? Utility::getAppQColor("red") : Utility::getAppQColor("blue"));
 
-        textTicker2->addTick(i + 1, QString("T%1 (%2 °C)").
-                            arg(i + 1).arg(t));
+        QString tempTxt = QString("(%1 °C)").arg(t);
+        if (t <= -280.0) {
+            tempTxt = "(N/A)";
+        }
+        if (i < tLabels.size()) {
+            textTicker2->addTick(i + 1, QString("%1 %2").arg(tLabels.at(i)).arg(tempTxt));
+        } else {
+            textTicker2->addTick(i + 1, QString("T%1 %2").arg(labelInd++).arg(tempTxt));
+        }
     }
 
     ui->plotTemp->xAxis->setTicker(textTicker2);

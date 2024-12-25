@@ -179,7 +179,11 @@ Item {
                             var cellWidth = width - xOfsLeft - xOfsRight
 
                             var tInd = 1
-                            var tLabels = ["IC", "Cell Min", "Cell Max", "Mosfet"]
+                            var tLabels = []
+
+                            if (mVal.data_version === 1) {
+                                tLabels = ["IC", "Cell Min", "Cell Max", "Mosfet"]
+                            }
 
                             for (var i = 0;i < tempNum;i++) {
                                 ctx.fillStyle = Utility.getAppHexColor("lightAccent")

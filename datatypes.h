@@ -693,6 +693,7 @@ struct BMS_VALUES {
     Q_PROPERTY(double wh_cnt_chg_total MEMBER wh_cnt_chg_total)
     Q_PROPERTY(double ah_cnt_dis_total MEMBER ah_cnt_dis_total)
     Q_PROPERTY(double wh_cnt_dis_total MEMBER wh_cnt_dis_total)
+    Q_PROPERTY(int data_version MEMBER data_version)
 
 public:
     BMS_VALUES() {
@@ -713,6 +714,7 @@ public:
         wh_cnt_chg_total = 0.0;
         ah_cnt_dis_total = 0.0;
         wh_cnt_dis_total = 0.0;
+        data_version = 0;
         updateTime = -1;
     }
 
@@ -752,6 +754,7 @@ public:
     double wh_cnt_chg_total;
     double ah_cnt_dis_total;
     double wh_cnt_dis_total;
+    int data_version;
     qint64 updateTime;
 };
 

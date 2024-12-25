@@ -748,6 +748,10 @@ void Commands::processPacket(QByteArray data)
             val.pressure = vb.vbPopFrontDouble16(1e-1);
         }
 
+        if (vb.size() >= 1) {
+            val.data_version = vb.vbPopFrontUint8();
+        }
+
         val.updateTimeStamp();
 
         emit bmsValuesRx(val);

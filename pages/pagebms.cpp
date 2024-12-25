@@ -97,7 +97,11 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
         reloadTempBars(val.temps.size());
     }
 
-    QStringList tLabels = {"IC", "Cell Min", "Cell Max", "Mosfet"};
+    QStringList tLabels;
+    if (val.data_version == 1) {
+        tLabels.append({"IC", "Cell Min", "Cell Max", "Mosfet"});
+    }
+
     QSharedPointer<QCPAxisTickerText> textTicker2(new QCPAxisTickerText);
 
     int labelInd = 1;

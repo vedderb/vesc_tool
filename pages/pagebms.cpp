@@ -99,7 +99,7 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
 
     QStringList tLabels;
     if (val.data_version == 1) {
-        tLabels.append({"IC", "Cell Min", "Cell Max", "Mosfet"});
+        tLabels.append({"IC", "Cell Min", "Cell Max", "Mosfet", "Ambient"});
     }
 
     QSharedPointer<QCPAxisTickerText> textTicker2(new QCPAxisTickerText);

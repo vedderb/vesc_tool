@@ -182,7 +182,7 @@ Item {
                             var tLabels = []
 
                             if (mVal.data_version === 1) {
-                                tLabels = ["IC", "Cell Min", "Cell Max", "Mosfet"]
+                                tLabels = ["IC", "Cell Min", "Cell Max", "Mosfet", "Ambient"]
                             }
 
                             for (var i = 0;i < tempNum;i++) {

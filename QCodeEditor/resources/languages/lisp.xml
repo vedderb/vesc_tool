@@ -548,5 +548,9 @@
 <name>aes-ctr-crypt</name>
 <name>number?</name>
 <name>list?</name>
+<name>nvs-qml-erase</name>
+<name>nvs-qml-init</name>
+<name>nvs-qml-read</name>
+<name>nvs-qml-write</name>
 </section>
 </root>

@@ -552,5 +552,6 @@
 <name>nvs-qml-init</name>
 <name>nvs-qml-read</name>
 <name>nvs-qml-write</name>
+<name>nvs-qml-erase-key</name>
 </section>
 </root>

@@ -483,9 +483,14 @@ bool BoardSetupWindow::tryFirmwareUpload(){
         testResultMsg = "The firmware file path is non-existent.";
         return false;
     }
-    for(int j = 15; j>-1; j--){
+    for(int j = 25; j >= 0; j--){
         ui->firmwareLabel->setText("Waiting for Reboot: " + QString::number(j)  + " s");
         Utility::sleepWithEventLoop(1000);
+
+        if (j < 20 && mVesc->lastPortAvailable()) {
+            Utility::sleepWithEventLoop(1000);
+            break;
+        }
     }
     bool reconnected = trySerialConnect();
     if(reconnected){

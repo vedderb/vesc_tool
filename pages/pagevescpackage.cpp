@@ -284,6 +284,51 @@ void PageVescPackage::on_writeButton_clicked()
     disconnect(conn1);
 }
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+QString PageVescPackage::convertHtmlToMarkdown(const QString &html) {
+    QString markdown = html;
+
+    // <b> and </b> to **
+    markdown.replace(QRegularExpression("<b>(.*?)</b>"), "**\\1**");
+
+    // <i> and </i> to *
+    markdown.replace(QRegularExpression("<i>(.*?)</i>"), "*\\1*");
+
+    // <br> and <br/> to newline
+    markdown.replace(QRegularExpression("<br\\s*/?>"), "\n");
+
+    // <h1> to <h6> to #
+    markdown.replace(QRegularExpression("<h1>(.*?)</h1>"), "# \\1\n");
+    markdown.replace(QRegularExpression("<h2>(.*?)</h2>"), "## \\1\n");
+    markdown.replace(QRegularExpression("<h3>(.*?)</h3>"), "### \\1\n");
+    markdown.replace(QRegularExpression("<h4>(.*?)</h4>"), "#### \\1\n");
+    markdown.replace(QRegularExpression("<h5>(.*?)</h5>"), "##### \\1\n");
+    markdown.replace(QRegularExpression("<h6>(.*?)</h6>"), "###### \\1\n");
+
+    // <ul> and <ol> to list
+    markdown.replace(QRegularExpression("<ul>"), "");
+    markdown.replace(QRegularExpression("<ol>"), "");
+    markdown.replace(QRegularExpression("<li>(.*?)</li>"), "- \\1\n");
+    markdown.replace(QRegularExpression("</ul>"), "");
+    markdown.replace(QRegularExpression("</ol>"), "");
+
+    // <a href="url">text</a> to [text](url)
+    markdown.replace(QRegularExpression("<a\\s+href=\"(.*?)\".*?>(.*?)</a>"), "[\\2](\\1)");
+
+    // <img src="url" alt="alt" /> to ![alt](url)
+    markdown.replace(QRegularExpression("<img\\s+src=\"(.*?)\".*?alt=\"(.*?)\".*?/?>"), "!\\[\\2\\](\\1)");
+
+    // <p> to newline and </p> to another newline
+    markdown.replace(QRegularExpression("<p>"), "");
+    markdown.replace(QRegularExpression("</p>"), "\n\n");
+
+    // Remove other HTML tags
+    markdown.remove(QRegularExpression("<[^>]*>"));
+
+    return markdown;
+}
+#endif
+
 void PageVescPackage::on_outputRefreshButton_clicked()
 {
     QFile f(ui->outputEdit->text());
@@ -304,7 +349,13 @@ void PageVescPackage::on_outputRefreshButton_clicked()
         QString line1 = QTextStream(&pkg.description).readLine();
         if (line1.contains("<!DOCTYPE HTML PUBLIC", Qt::CaseInsensitive)) {
             ui->descriptionEdit->document()->setHtml(pkg.description);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
             QString md = ui->descriptionEdit->document()->toMarkdown();
+#else
+            QString md = convertHtmlToMarkdown(ui->descriptionEdit->document()->toHtml());
+#endif
+
             ui->descriptionEdit->document()->setPlainText(md);
         } else {
             ui->descriptionEdit->document()->setPlainText(pkg.description);

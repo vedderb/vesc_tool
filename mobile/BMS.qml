@@ -230,13 +230,16 @@ Item {
         }
 
         ColumnLayout {
+            property int textRows: 12
+
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
             Layout.column:0
             Layout.row: isHorizontal ? 0 : 1
-            Layout.preferredHeight: valMetrics.height * 12 + 20 + menuButton.implicitHeight
+            Layout.preferredHeight: valMetrics.height * textRows + 20 + menuButton.implicitHeight
             spacing: 0
+
             Rectangle {
                 id: textRect
                 color: Utility.getAppHexColor("darkBackground")
@@ -249,7 +252,7 @@ Item {
                 }
 
                 Layout.fillWidth: true
-                Layout.preferredHeight: valMetrics.height * 12 + 20
+                Layout.preferredHeight: valMetrics.height * parent.textRows + 20
                 Layout.alignment: Qt.AlignBottom
 
                 Text {
@@ -351,19 +354,25 @@ Item {
             mVal = val
             mValSet = true
 
+            var cvMin = Math.min(...mVal.v_cells)
+            var cvMax = Math.max(...mVal.v_cells)
+
             valText.text =
-                    "V Tot      : " + parseFloat(val.v_tot).toFixed(2) + " V\n" +
-                    "V Charge   : " + parseFloat(val.v_charge).toFixed(2) + " V\n" +
-                    "I In       : " + parseFloat(val.i_in_ic).toFixed(2) + " A\n" +
-                    "Ah Cnt     : " + parseFloat(val.ah_cnt).toFixed(3) + " Ah\n" +
-                    "Wh Cnt     : " + parseFloat(val.wh_cnt).toFixed(2) + " Wh\n" +
-                    "Power      : " + parseFloat(val.v_tot * val.i_in_ic).toFixed(2) + " W\n" +
-                    "Humidity   : " + parseFloat(val.humidity).toFixed(1) + " %\n" +
-                    "Pressure   : " + parseFloat(val.pressure).toFixed(0) + " Pa\n" +
-                    "Temp Hum   : " + parseFloat(val.temp_hum_sensor).toFixed(1) + " \u00B0C\n" +
-                    "SoC        : " + parseFloat(val.soc * 100).toFixed(1) + " %\n" +
-                    "Ah Chg Tot : " + parseFloat(val.ah_cnt_chg_total).toFixed(3) + " Ah\n" +
-                    "Ah Dis Tot : " + parseFloat(val.ah_cnt_dis_total).toFixed(3) + " Ah"
+                    "Min-Max-Diff : " + parseFloat(cvMin).toFixed(3) + " - " +
+                                        parseFloat(cvMax).toFixed(3) + " - " +
+                                        parseFloat(cvMax - cvMin).toFixed(3) + " V\n" +
+                    "V Tot        : " + parseFloat(val.v_tot).toFixed(2) + " V\n" +
+                    "V Charge     : " + parseFloat(val.v_charge).toFixed(2) + " V\n" +
+                    "I In         : " + parseFloat(val.i_in_ic).toFixed(2) + " A\n" +
+                    "Ah Cnt       : " + parseFloat(val.ah_cnt).toFixed(3) + " Ah\n" +
+                    "Wh Cnt       : " + parseFloat(val.wh_cnt).toFixed(2) + " Wh\n" +
+                    "Power        : " + parseFloat(val.v_tot * val.i_in_ic).toFixed(2) + " W\n" +
+                    "Hum (temp)   : " + parseFloat(val.humidity).toFixed(1) + " %" +
+                                        " (" + parseFloat(val.temp_hum_sensor).toFixed(1) + " \u00B0C)\n" +
+                    "Pressure     : " + parseFloat(val.pressure).toFixed(0) + " Pa\n" +
+                    "SoC          : " + parseFloat(val.soc * 100).toFixed(1) + " %\n" +
+                    "Ah Chg Tot   : " + parseFloat(val.ah_cnt_chg_total).toFixed(3) + " Ah\n" +
+                    "Ah Dis Tot   : " + parseFloat(val.ah_cnt_dis_total).toFixed(3) + " Ah"
 
             cellCanvas.requestPaint()
             tempCanvas.requestPaint()

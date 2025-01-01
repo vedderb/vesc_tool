@@ -120,7 +120,7 @@ Item {
                     id: fwUpdateAvailableBox
                     Layout.fillWidth: true
                     text: "Show firmware update message"
-                    checked: VescIf.showFwUpdateAvailable()()
+                    checked: VescIf.showFwUpdateAvailable()
                 }
 
                 CheckBox {

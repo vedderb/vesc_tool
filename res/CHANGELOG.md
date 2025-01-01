@@ -4,6 +4,10 @@
 * Movable lisp-tabs and better tab behavior in general.
 * Detect file system changes in script editor.
 * Duplicate line shortcut in script editor.
+* Use temperature convention on BMS page.
+* Show Min, Max and Diff voltage on BMS page.
+
+---
 
 ### 6.05
 #### Released 2024-08-19

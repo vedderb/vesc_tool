@@ -17,7 +17,7 @@
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <property name="handleWidth">
       <number>8</number>
@@ -27,7 +27,7 @@
      </property>
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabShape">
-       <enum>QTabWidget::Triangular</enum>
+       <enum>QTabWidget::TabShape::Triangular</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -64,11 +64,11 @@
       </widget>
      </widget>
      <widget class="QWidget" name="layoutWidget">
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0">
        <item>
         <widget class="QTableWidget" name="valTable">
          <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
+          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
          </property>
          <attribute name="horizontalHeaderVisible">
           <bool>false</bool>
@@ -85,6 +85,21 @@
          <row>
           <property name="text">
            <string>Total Voltage</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>Cell Min</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>Cell Max</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>Cell Diff</string>
           </property>
          </row>
          <row>
@@ -257,10 +272,25 @@
            <string/>
           </property>
          </item>
+         <item row="17" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="18" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="19" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
+        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,1">
          <property name="spacing">
           <number>2</number>
          </property>
@@ -358,7 +388,7 @@
          <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>

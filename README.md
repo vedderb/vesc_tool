@@ -36,12 +36,12 @@ If you have custom hardware and you want to add support for it in the official r
 
 ### tested only Linux
 
-docker build . -t vesc_tool
+    docker build . -t vesc_tool
 
 ### run bach
 
-docker run --rm -it -v `pwd`:/vesc_tool vesc_tool:latest bash
+    docker run --rm -it -v `pwd`:/vesc_tool vesc_tool:latest bash
 
 ### or build in docker
 
-docker run --rm -it -v `pwd`:/vesc_tool vesc_tool:latest /vesc_tool/build_lin
+    docker run --rm -it -v `pwd`:/vesc_tool vesc_tool:latest /vesc_tool/build_lin

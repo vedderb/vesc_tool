@@ -1036,41 +1036,47 @@ bool CodeLoader::createPackageFromDescription(QString path)
 
     prop = qmlItem->property("pkgDescriptionMd");
     if (prop.isValid()) {
-        QFile f(prop.toString());
-        if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qWarning() << "Could not open markdown file.";
-            result = false;
+        auto mdPath = prop.toString();
+
+        if (!mdPath.isEmpty()) {
+            QFile f(mdPath);
+            if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                qWarning() << "Could not open markdown file.";
+                result = false;
+            }
+
+            QString desc = QString::fromUtf8(f.readAll());
+            f.close();
+
+            qDebug() << "Package description found!";
+            pkg.description_md = desc;
+            pkg.description = Utility::md2html(desc);
         }
-
-        QString desc = QString::fromUtf8(f.readAll());
-        f.close();
-
-        qDebug() << "Package description found!";
-        pkg.description_md = desc;
-        pkg.description = Utility::md2html(desc);
     }
 
     prop = qmlItem->property("pkgLisp");
     if (prop.isValid()) {
         auto lispPath = prop.toString();
 
-        QFile f(lispPath);
-        if (f.open(QIODevice::ReadOnly)) {
-            QFileInfo fi(f);
-            pkg.lispData = lispPackImports(f.readAll(), fi.canonicalPath());
+        if (!lispPath.isEmpty()) {
+            QFile f(lispPath);
+            if (f.open(QIODevice::ReadOnly)) {
+                QFileInfo fi(f);
+                pkg.lispData = lispPackImports(f.readAll(), fi.canonicalPath());
 
-            // Empty array means an error. Otherwise, lispPackImports() always returns data.
-            if (pkg.lispData.isEmpty()) {
-                qWarning() << "Errors when processing lisp imports.";
+                // Empty array means an error. Otherwise, lispPackImports() always returns data.
+                if (pkg.lispData.isEmpty()) {
+                    qWarning() << "Errors when processing lisp imports.";
+                    result = false;
+                }
+
+                f.close();
+
+                qDebug() << "Package lisp found and parsed!";
+            } else {
+                qWarning() << "Could not open lisp file.";
                 result = false;
             }
-
-            f.close();
-
-            qDebug() << "Package lisp found and parsed!";
-        } else {
-            qWarning() << "Could not open lisp file.";
-            result = false;
         }
     }
 

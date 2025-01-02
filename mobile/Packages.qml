@@ -66,12 +66,13 @@ Item {
         var pkgs = mLoader.reloadPackageArchive()
 
         for (var i = 0;i < pkgs.length;i++) {
-            if (!pkgs[i].isLibrary) {
+            if (!pkgs[i].isLibrary && mLoader.shouldShowPackage(pkgs[i])) {
                 pkgModel.append({"pkgName": pkgs[i].name,
                                     "pkgDescription": pkgs[i].description,
                                     "pkg": pkgs[i]})
             }
         }
+
         enableDialog()
     }
 
@@ -358,6 +359,20 @@ Item {
         ProgressBar {
             anchors.fill: parent
             indeterminate: visible
+        }
+    }
+
+    Connections {
+        target: VescIf
+
+        function onPortConnectedChanged() {
+            if (!VescIf.isPortConnected()) {
+                reloadArchive()
+            }
+        }
+
+        function onCustomConfigLoadDone() {
+            reloadArchive()
         }
     }
 }

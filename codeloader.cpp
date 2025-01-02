@@ -27,6 +27,9 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QEventLoop>
+#include <QQmlEngine>
+#include <QQmlComponent>
+#include <QQuickItem>
 
 CodeLoader::CodeLoader(QObject *parent) : QObject(parent)
 {
@@ -758,6 +761,13 @@ QByteArray CodeLoader::packVescPackage(VescPackage pkg)
         data.append(dataRaw);
     }
 
+    if (!pkg.pkgDescQml.isEmpty()) {
+        auto dataRaw = pkg.pkgDescQml.toUtf8();
+        data.vbAppendString("pkgDescQml");
+        data.vbAppendInt32(dataRaw.size());
+        data.append(dataRaw);
+    }
+
     data.vbAppendString("qmlIsFullscreen");
     data.vbAppendInt32(1);
     data.vbAppendInt8(pkg.qmlIsFullscreen);
@@ -821,6 +831,12 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
         } else if (name == "qmlIsFullscreen") {
             vb.vbPopFrontInt32(); // Discard length
             pkg.qmlIsFullscreen = vb.vbPopFrontInt8();
+        } else if (name == "pkgDescQml") {
+            auto len = vb.vbPopFrontInt32();
+            auto dataRaw = vb.left(len);
+            vb.remove(0, len);
+            pkg.pkgDescQml = QString::fromUtf8(dataRaw);
+            pkg.loadOk = true;
         } else {
             // Unknown identifier, skip
             auto len = vb.vbPopFrontInt32();
@@ -981,6 +997,161 @@ bool CodeLoader::downloadPackageArchive()
 void CodeLoader::abortDownloadUpload()
 {
     mAbortDownloadUpload = true;
+}
+
+bool CodeLoader::createPackageFromDescription(QString path)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Could not open package description file.";
+        return false;
+    }
+
+    QString qmlData = QString::fromUtf8(f.readAll());
+    f.close();
+
+    QQmlEngine *engine = new QQmlEngine(this);
+    QQmlComponent component(engine);
+    component.setData(qmlData.toUtf8(), QUrl());
+    QQuickItem *qmlItem = qobject_cast<QQuickItem*>(component.create());
+
+    if (!qmlItem) {
+        qWarning() << "Loading QML package description failed";
+        qWarning() << component.errorString();
+        engine->deleteLater();
+        return false;
+    }
+
+    VescPackage pkg;
+    pkg.pkgDescQml = qmlData;
+
+    bool result = true;
+    QString pkgOutput = "";
+
+    auto prop = qmlItem->property("pkgName");
+    if (prop.isValid()) {
+        pkg.name = prop.toString();
+        qDebug() << "Package name found:" << pkg.name;
+    }
+
+    prop = qmlItem->property("pkgDescriptionMd");
+    if (prop.isValid()) {
+        QFile f(prop.toString());
+        if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qWarning() << "Could not open markdown file.";
+            result = false;
+        }
+
+        QString desc = QString::fromUtf8(f.readAll());
+        f.close();
+
+        qDebug() << "Package description found!";
+        pkg.description_md = desc;
+        pkg.description = Utility::md2html(desc);
+    }
+
+    prop = qmlItem->property("pkgLisp");
+    if (prop.isValid()) {
+        auto lispPath = prop.toString();
+
+        QFile f(lispPath);
+        if (f.open(QIODevice::ReadOnly)) {
+            QFileInfo fi(f);
+            pkg.lispData = lispPackImports(f.readAll(), fi.canonicalPath());
+
+            // Empty array means an error. Otherwise, lispPackImports() always returns data.
+            if (pkg.lispData.isEmpty()) {
+                qWarning() << "Errors when processing lisp imports.";
+                result = false;
+            }
+
+            f.close();
+
+            qDebug() << "Package lisp found and parsed!";
+        } else {
+            qWarning() << "Could not open lisp file.";
+            result = false;
+        }
+    }
+
+    prop = qmlItem->property("pkgQml");
+    if (prop.isValid()) {
+        auto qmlPath = prop.toString();
+
+        if (!qmlPath.isEmpty()) {
+            QFile f(qmlPath);
+            if (f.open(QIODevice::ReadOnly)) {
+                pkg.qmlFile = f.readAll();
+                f.close();
+                qDebug() << "Package qml found!";
+            } else {
+                qWarning() << "Could not open qml file.";
+                result = false;
+            }
+        }
+    }
+
+    prop = qmlItem->property("pkgQmlIsFullscreen");
+    if (prop.isValid()) {
+        pkg.qmlIsFullscreen = prop.toBool();
+        qDebug() << "QML fullscreen:" << pkg.qmlIsFullscreen;
+    }
+
+    prop = qmlItem->property("pkgOutput");
+    if (prop.isValid()) {
+        pkgOutput = prop.toString();
+    }
+
+    if (pkgOutput.isEmpty()) {
+        qWarning() << "No package output specified";
+        result = false;
+    } else {
+        QFile file(pkgOutput);
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(packVescPackage(pkg));
+            file.close();
+            qDebug() << "Package saved as" << pkgOutput;
+        } else {
+            qWarning() << QString("Could not open %1 for writing.").arg(pkgOutput);
+            result = false;
+        }
+    }
+
+    engine->deleteLater();
+
+    return result;
+}
+
+bool CodeLoader::shouldShowPackage(VescPackage pkg)
+{
+    if (!mVesc) {
+        return true;
+    }
+
+    bool res = true;
+    if (!pkg.pkgDescQml.isEmpty()) {
+        QQmlEngine *engine = new QQmlEngine();
+        QQmlComponent component(engine);
+        component.setData(pkg.pkgDescQml.toUtf8(), QUrl());
+        QQuickItem *qmlItem = qobject_cast<QQuickItem*>(component.create());
+
+        QVariant returnedValue;
+        QMetaObject::invokeMethod(qmlItem,
+                                  "isCompatible",
+                                  Q_RETURN_ARG(QVariant, returnedValue),
+                                  Q_ARG(QVariant, QVariant::fromValue(mVesc)));
+
+        engine->setObjectOwnership(mVesc, QQmlEngine::CppOwnership);
+        engine->deleteLater();
+
+        if (returnedValue.isValid()) {
+            res = returnedValue.toBool();
+        } else {
+            qWarning() << "Failed to run isCompatible from package" << pkg.name;
+        }
+    }
+
+    return res;
 }
 
 bool CodeLoader::getImportFromLine(QString line, QString &path, QString &tag, bool &isInvalid)

@@ -58,6 +58,9 @@ public:
 
     Q_INVOKABLE void abortDownloadUpload();
 
+    bool createPackageFromDescription(QString path);
+    Q_INVOKABLE bool shouldShowPackage(VescPackage pkg);
+
 signals:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void lispUploadProgress(qint64 bytes, qint64 bytesTotal);

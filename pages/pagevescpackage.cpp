@@ -103,6 +103,18 @@ void PageVescPackage::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
     mLoader.setVesc(vesc);
+
+    if (mVesc) {
+        connect(mVesc, &VescInterface::portConnectedChanged, [this]() {
+            if (!mVesc->isPortConnected()) {
+                reloadArchive();
+            }
+        });
+
+        connect(mVesc, &VescInterface::customConfigLoadDone, [this]() {
+            reloadArchive();
+        });
+    }
 }
 
 void PageVescPackage::reloadParams()
@@ -421,9 +433,14 @@ void PageVescPackage::reloadArchive()
         if (pVal.isLibrary) {
             ui->libraryList->insertItem(ui->libraryList->count(), item);
         } else {
-            ui->applicationList->insertItem(ui->applicationList->count(), item);
+            if (mLoader.shouldShowPackage(pVal)) {
+                ui->applicationList->insertItem(ui->applicationList->count(), item);
+            }
         }
     }
+
+    mCurrentPkg.loadOk = false;
+    ui->storeBrowser->clear();
 }
 
 void PageVescPackage::packageSelected(VescPackage pkg)

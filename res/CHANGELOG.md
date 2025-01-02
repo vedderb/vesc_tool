@@ -6,6 +6,8 @@
 * Duplicate line shortcut in script editor.
 * Use temperature convention on BMS page.
 * Show Min, Max and Diff voltage on BMS page.
+* Support building VESC Packages from QML description file.
+* Filter package store based on rules from QML description.
 
 ---
 

@@ -89,6 +89,7 @@ static void showHelp()
     qDebug() << "--useMobileUi : Start the mobile UI instead of the full desktop UI";
     qDebug() << "--tcpHub [port] : Start a TCP hub for remote access to connected VESCs";
     qDebug() << "--buildPkg [pkgPath:lispPath:qmlPath:isFullscreen:optMd:optName] : Build VESC Package";
+    qDebug() << "--buildPkgFromDesc [qmlDesc] : Build VESC Package from QML description file";
     qDebug() << "--useBoardSetupWindow : Start board setup window instead of the main UI";
     qDebug() << "--xmlConfToCode [xml-file] : Generate C code from XML configuration file (the files are saved in the same directory as the XML)";
     qDebug() << "--vescPort [port] : VESC Port for commands that connect, e.g. /dev/ttyACM0. If this command is left out autoconnect will be used.";
@@ -297,6 +298,7 @@ int main(int argc, char *argv[])
     double qmlRot = 0.0;
     bool isTcpHub = false;
     QStringList pkgArgs;
+    QString pkgDesc = "";
     QString xmlCodePath = "";
     QString vescPort = "";
     int canFwd = -1;
@@ -454,6 +456,18 @@ int main(int argc, char *argv[])
                 i++;
                 pkgArgs = args.at(i).split(":");
                 found = true;
+            }
+        }
+
+        if (str == "--buildPkgFromDesc") {
+            if ((i + 1) < args.size()) {
+                i++;
+                pkgDesc = args.at(i);
+                found = true;
+            } else {
+                i++;
+                qCritical() << "No path to qml file";
+                return 1;
             }
         }
 
@@ -866,7 +880,7 @@ int main(int argc, char *argv[])
 
             QFile f(mdPath);
             if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                qWarning() << "Could not open markdown file for reading.";
+                qWarning() << "Could not open markdown file.";
                 return 1;
             }
 
@@ -1399,6 +1413,19 @@ int main(int argc, char *argv[])
 
             if (!bridgeAppData) {
                 qApp->exit(exitCode);
+            }
+        });
+    } else if (!pkgDesc.isEmpty()) {
+        app = new QCoreApplication(argc, argv);
+        qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
+
+        QTimer::singleShot(10, [pkgDesc]() {
+            CodeLoader loader;
+            if (loader.createPackageFromDescription(pkgDesc)) {
+                qApp->exit(0);
+            } else {
+                qWarning() << "Could not save package.";
+                qApp->exit(1);
             }
         });
     } else if (useTcp) {

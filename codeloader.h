@@ -58,8 +58,9 @@ public:
 
     Q_INVOKABLE void abortDownloadUpload();
 
-    bool createPackageFromDescription(QString path);
+    bool createPackageFromDescription(QString path, VescPackage *pkgRes = nullptr);
     Q_INVOKABLE bool shouldShowPackage(VescPackage pkg);
+    Q_INVOKABLE static bool shouldShowPackageFromRxp(VescPackage pkg, FW_RX_PARAMS rxp, bool *runOk = nullptr);
 
 signals:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);

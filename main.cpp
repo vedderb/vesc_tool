@@ -90,6 +90,7 @@ static void showHelp()
     qDebug() << "--tcpHub [port] : Start a TCP hub for remote access to connected VESCs";
     qDebug() << "--buildPkg [pkgPath:lispPath:qmlPath:isFullscreen:optMd:optName] : Build VESC Package";
     qDebug() << "--buildPkgFromDesc [qmlDesc] : Build VESC Package from QML description file";
+    qDebug() << "--testPkgDesc [hwtype:hwname:optfwname] : Test isCompatible from package QML description after build";
     qDebug() << "--useBoardSetupWindow : Start board setup window instead of the main UI";
     qDebug() << "--xmlConfToCode [xml-file] : Generate C code from XML configuration file (the files are saved in the same directory as the XML)";
     qDebug() << "--vescPort [port] : VESC Port for commands that connect, e.g. /dev/ttyACM0. If this command is left out autoconnect will be used.";
@@ -299,6 +300,7 @@ int main(int argc, char *argv[])
     bool isTcpHub = false;
     QStringList pkgArgs;
     QString pkgDesc = "";
+    QStringList pkgDescTests;
     QString xmlCodePath = "";
     QString vescPort = "";
     int canFwd = -1;
@@ -468,6 +470,14 @@ int main(int argc, char *argv[])
                 i++;
                 qCritical() << "No path to qml file";
                 return 1;
+            }
+        }
+
+        if (str == "--testPkgDesc") {
+            if ((i + 1) < args.size()) {
+                i++;
+                pkgDescTests.append(args.at(i));
+                found = true;
             }
         }
 
@@ -1417,12 +1427,57 @@ int main(int argc, char *argv[])
         });
     } else if (!pkgDesc.isEmpty()) {
         app = new QCoreApplication(argc, argv);
-        qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
 
-        QTimer::singleShot(10, [pkgDesc]() {
+        QTimer::singleShot(10, [pkgDesc, &pkgDescTests]() {
             CodeLoader loader;
-            if (loader.createPackageFromDescription(pkgDesc)) {
-                qApp->exit(0);
+            VescPackage pkg;
+
+            if (loader.createPackageFromDescription(pkgDesc, &pkg)) {
+                int retCode = 0;
+
+                if (!pkgDescTests.isEmpty()) {
+                    qDebug() << "== Running isCompatible with testPkgDesc tests ==";
+                }
+
+                foreach (auto str, pkgDescTests) {
+                    auto args = str.split(":");
+                    // hwtype:hwname:optfwname
+                    if (args.size() >= 2) {
+                        FW_RX_PARAMS rxp;
+
+                        if (args.at(0).toLower() == "vesc") {
+                            rxp.hwType = HW_TYPE_VESC;
+                        } else if (args.at(0).toLower() == "vesc bms") {
+                            rxp.hwType = HW_TYPE_VESC_BMS;
+                        } else {
+                            rxp.hwType = HW_TYPE_CUSTOM_MODULE;
+                        }
+
+                        rxp.hw = args.at(1);
+
+                        if (args.size() >= 3) {
+                            rxp.fwName = args.at(2);
+                        }
+
+                        bool runOk = false;
+                        bool isCompatibleRes = CodeLoader::shouldShowPackageFromRxp(pkg, rxp, &runOk);
+
+                        if (!runOk) {
+                            retCode = 1;
+                            break;
+                        }
+
+                        qDebug() << str << "=>" <<
+                            "HW Type:" << rxp.hwTypeStr() <<
+                            "HW Name:" << rxp.hw <<
+                            "FW Name:" << rxp.fwName <<
+                            "isCompatible() =>" << isCompatibleRes;
+                    } else {
+                        qWarning() << "Invalid package test" << str;
+                    }
+                }
+
+                qApp->exit(retCode);
             } else {
                 qWarning() << "Could not save package.";
                 qApp->exit(1);

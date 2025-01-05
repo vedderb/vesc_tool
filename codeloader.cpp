@@ -999,7 +999,7 @@ void CodeLoader::abortDownloadUpload()
     mAbortDownloadUpload = true;
 }
 
-bool CodeLoader::createPackageFromDescription(QString path)
+bool CodeLoader::createPackageFromDescription(QString path, VescPackage *pkgRes)
 {
     QFile f(path);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -1125,6 +1125,10 @@ bool CodeLoader::createPackageFromDescription(QString path)
 
     engine->deleteLater();
 
+    if (pkgRes != nullptr) {
+        *pkgRes = pkg;
+    }
+
     return result;
 }
 
@@ -1134,6 +1138,15 @@ bool CodeLoader::shouldShowPackage(VescPackage pkg)
         return true;
     }
 
+    if (!mVesc->isPortConnected()) {
+        return true;
+    }
+
+    return shouldShowPackageFromRxp(pkg, mVesc->getLastFwRxParams());
+}
+
+bool CodeLoader::shouldShowPackageFromRxp(VescPackage pkg, FW_RX_PARAMS rxp, bool *runOk)
+{
     bool res = true;
     if (!pkg.pkgDescQml.isEmpty()) {
         QQmlEngine *engine = new QQmlEngine();
@@ -1145,10 +1158,13 @@ bool CodeLoader::shouldShowPackage(VescPackage pkg)
         QMetaObject::invokeMethod(qmlItem,
                                   "isCompatible",
                                   Q_RETURN_ARG(QVariant, returnedValue),
-                                  Q_ARG(QVariant, QVariant::fromValue(mVesc)));
+                                  Q_ARG(QVariant, QVariant::fromValue(rxp)));
 
-        engine->setObjectOwnership(mVesc, QQmlEngine::CppOwnership);
         engine->deleteLater();
+
+        if (runOk != nullptr) {
+            *runOk = returnedValue.isValid();
+        }
 
         if (returnedValue.isValid()) {
             res = returnedValue.toBool();

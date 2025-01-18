@@ -109,11 +109,7 @@ QString CodeLoader::reduceLispFile(QString fileData)
             line.truncate(indComment);
         }
 
-        while (line.startsWith(" ")) {
-            line.remove(0, 1);
-        }
-
-        while (line.startsWith("\t")) {
+        while (line.startsWith(" ") || line.startsWith("\t")) {
             line.remove(0, 1);
         }
 

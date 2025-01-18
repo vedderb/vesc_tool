@@ -38,10 +38,6 @@
             <property name="text">
              <string>Erase</string>
             </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Delete-96.png</normaloff>:/res/icons/Delete-96.png</iconset>
-            </property>
             <property name="flat">
              <bool>true</bool>
             </property>
@@ -54,10 +50,6 @@
             </property>
             <property name="text">
              <string>Upload</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -72,10 +64,6 @@
             <property name="text">
              <string>Stream</string>
             </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Download-96.png</normaloff>:/res/icons/Download-96.png</iconset>
-            </property>
             <property name="flat">
              <bool>true</bool>
             </property>
@@ -89,9 +77,15 @@
             <property name="text">
              <string>Read</string>
             </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Upload-96.png</normaloff>:/res/icons/Upload-96.png</iconset>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="infoButton">
+            <property name="text">
+             <string>Info</string>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -105,10 +99,6 @@
             </property>
             <property name="text">
              <string>Help</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../res.qrc">
-              <normaloff>:/res/icons/Help-96.png</normaloff>:/res/icons/Help-96.png</iconset>
             </property>
             <property name="flat">
              <bool>true</bool>

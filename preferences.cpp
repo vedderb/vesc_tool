@@ -134,6 +134,7 @@ Preferences::Preferences(QWidget *parent) :
     ui->uploadContentEditorButton->setChecked(mSettings.value("scripting/uploadContentEditor", true).toBool());
     ui->uploadContentFileButton->setChecked(!mSettings.value("scripting/uploadContentEditor", true).toBool());
     ui->reconnectCanBox->setChecked(mSettings.value("reconnectLastCan", true).toBool());
+    ui->reduceLispBox->setChecked(mSettings.value("reduceLisp", false).toBool());
 
     saveSettingsChanged();
 }
@@ -469,6 +470,7 @@ void Preferences::saveSettingsChanged()
     mLastIsDark = Utility::isDarkMode();
     mSettings.setValue("scripting/uploadContentEditor", ui->uploadContentEditorButton->isChecked());
     mSettings.setValue("reconnectLastCan", ui->reconnectCanBox->isChecked());
+    mSettings.setValue("reduceLisp", ui->reduceLispBox->isChecked());
 
     mSettings.sync();
 }

@@ -103,6 +103,7 @@ static void showHelp()
     qDebug() << "--setCustomConf [confPath] : Connect and write custom configuration 1 XML from confPath.";
     qDebug() << "--debugOutFile [path] : Print debug output to file with path.";
     qDebug() << "--uploadLisp [path] : Upload lisp-script.";
+    qDebug() << "--reduceLisp : Reduce LispBM file size by removing comments, spaces and imports.";
     qDebug() << "--eraseLisp : Erase lisp-script.";
     qDebug() << "--uploadFirmware [path] : Upload firmware-file from path.";
     qDebug() << "--uploadBootloaderBuiltin : Upload bootloader from generic included bootloaders.";
@@ -312,6 +313,7 @@ int main(int argc, char *argv[])
     QString setCustomConfPath = "";
     QSize qmlWindowSize = QSize(-1, -1);
     QString lispPath = "";
+    bool reduceLisp = false;
     bool eraseLisp = false;
     QString firmwarePath = "";
     bool uploadBootloaderBuiltin = false;
@@ -601,6 +603,11 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (str == "--reduceLisp") {
+            reduceLisp = true;
+            found = true;
+        }
+
         if (str == "--eraseLisp") {
             eraseLisp = true;
             found = true;
@@ -851,7 +858,7 @@ int main(int argc, char *argv[])
 
         CodeLoader loader;
         QFileInfo fi(fIn);
-        VByteArray vb = loader.lispPackImports(fIn.readAll(), fi.canonicalPath());
+        VByteArray vb = loader.lispPackImports(fIn.readAll(), fi.canonicalPath(), reduceLisp);
         fIn.close();
 
         quint16 crc = Packet::crc16((const unsigned char*)vb.constData(), uint32_t(vb.size()));
@@ -921,7 +928,7 @@ int main(int argc, char *argv[])
             }
 
             QFileInfo fi(f);
-            pkg.lispData = loader.lispPackImports(f.readAll(), fi.canonicalPath());
+            pkg.lispData = loader.lispPackImports(f.readAll(), fi.canonicalPath(), reduceLisp);
             // Empty array means an error. Otherwise, CodeLoader.lispPackImports() always returns data.
             if (pkg.lispData.isEmpty()) {
                 qWarning() << "Errors when processing lisp imports.";
@@ -1141,7 +1148,7 @@ int main(int argc, char *argv[])
                     QFile f(lispPath);
                     if (f.open(QIODevice::ReadOnly)) {
                         QFileInfo fi(f);
-                        VByteArray lispData = loader.lispPackImports(f.readAll(), fi.canonicalPath());
+                        VByteArray lispData = loader.lispPackImports(f.readAll(), fi.canonicalPath(), reduceLisp);
                         f.close();
 
                         if (!lispData.isEmpty()) {
@@ -1428,11 +1435,11 @@ int main(int argc, char *argv[])
     } else if (!pkgDesc.isEmpty()) {
         app = new QCoreApplication(argc, argv);
 
-        QTimer::singleShot(10, [pkgDesc, &pkgDescTests]() {
+        QTimer::singleShot(10, [pkgDesc, &pkgDescTests, reduceLisp]() {
             CodeLoader loader;
             VescPackage pkg;
 
-            if (loader.createPackageFromDescription(pkgDesc, &pkg)) {
+            if (loader.createPackageFromDescription(pkgDesc, &pkg, reduceLisp)) {
                 int retCode = 0;
 
                 if (!pkgDescTests.isEmpty()) {

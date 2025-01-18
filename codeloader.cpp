@@ -1,5 +1,5 @@
 /*
-    Copyright 2022 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2022 - 2025 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -98,11 +98,67 @@ bool CodeLoader::lispErase(int size)
     return true;
 }
 
-QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
+QString CodeLoader::reduceLispFile(QString fileData)
+{
+    QString res;
+    auto lines = fileData.split("\n");
+
+    foreach (auto line, lines) {
+        int indComment = line.indexOf(";");
+        if (indComment >= 0) {
+            line.truncate(indComment);
+        }
+
+        while (line.startsWith(" ")) {
+            line.remove(0, 1);
+        }
+
+        while (line.startsWith("\t")) {
+            line.remove(0, 1);
+        }
+
+        while (line.endsWith(" ") || line.endsWith("\t")) {
+            line.chop(1);
+        }
+
+        if (!line.startsWith("(import", Qt::CaseInsensitive) &&
+            !line.isEmpty()) {
+            res.append(line + "\n");
+        }
+    }
+
+    // Print files before and after reduction
+#if 0
+    QDir().mkpath("lispReduceBefore");
+    QDir().mkpath("lispReduceAfter");
+    int fileNum = QDir("lispReduceBefore").
+                  entryInfoList(QDir::NoFilter, QDir::Name).size();
+
+    QFile fBefore(QString("lispReduceBefore/lispBeforeReduce%1.lisp").arg(fileNum));
+    if (fBefore.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        fBefore.write(fileData.toUtf8());
+        fBefore.close();
+    }
+
+    QFile fAfter(QString("lispReduceAfter/lispAfterBefore%1.lisp").arg(fileNum));
+    if (fAfter.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        fAfter.write(res.toUtf8());
+        fAfter.close();
+    }
+#endif
+
+    return res;
+}
+
+QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath, bool reduceLisp)
 {
     VByteArray vb;
     vb.vbAppendUint16(0); // Flags: 0
-    vb.append(codeStr.toLocal8Bit());
+    if (reduceLisp) {
+        vb.append(reduceLispFile(codeStr).toLocal8Bit());
+    } else {
+        vb.append(codeStr.toLocal8Bit());
+    }
 
     if (vb.at(vb.size() - 1) != '\0') {
         vb.append('\0');
@@ -187,7 +243,7 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                                 files.append(qMakePair(tag, importData));
                             } else {
                                 bool found = false;
-                                for (auto i: imports.second) {
+                                foreach (auto i, imports.second) {
                                     if (i.first == pkgImportName) {
                                         auto importData = i.second;
                                         importData.append('\0'); // Pad with 0 in case it is a text file
@@ -206,6 +262,9 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                                 }
                             }
                         } else {
+                            if (reduceLisp && fi.absoluteFilePath().endsWith(".lisp", Qt::CaseInsensitive)) {
+                                fileData = reduceLispFile(QString::fromUtf8(fileData)).toUtf8();
+                            }
                             fileData.append('\0'); // Pad with 0 in case it is a text file
                             files.append(qMakePair(tag, fileData));
                         }
@@ -375,9 +434,9 @@ bool CodeLoader::lispUpload(VByteArray vb)
     return ok;
 }
 
-bool CodeLoader::lispUpload(QString codeStr, QString editorPath)
+bool CodeLoader::lispUpload(QString codeStr, QString editorPath, bool reduceLisp)
 {
-    VByteArray vb = lispPackImports(codeStr, editorPath);
+    VByteArray vb = lispPackImports(codeStr, editorPath, reduceLisp);
 
     if (vb.isEmpty()) {
         return false;
@@ -386,12 +445,12 @@ bool CodeLoader::lispUpload(QString codeStr, QString editorPath)
     return lispUpload(vb);
 }
 
-bool CodeLoader::lispUploadFromPath(QString path)
+bool CodeLoader::lispUploadFromPath(QString path, bool reduceLisp)
 {
     QFile f(path);
     if (f.open(QIODevice::ReadOnly)) {
         QFileInfo fi(f);
-        VByteArray lispData = lispPackImports(f.readAll(), fi.canonicalPath());
+        VByteArray lispData = lispPackImports(f.readAll(), fi.canonicalPath(), reduceLisp);
         f.close();
 
         if (!lispData.isEmpty()) {
@@ -999,7 +1058,7 @@ void CodeLoader::abortDownloadUpload()
     mAbortDownloadUpload = true;
 }
 
-bool CodeLoader::createPackageFromDescription(QString path, VescPackage *pkgRes)
+bool CodeLoader::createPackageFromDescription(QString path, VescPackage *pkgRes, bool reduceLisp)
 {
     QFile f(path);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -1062,7 +1121,7 @@ bool CodeLoader::createPackageFromDescription(QString path, VescPackage *pkgRes)
             QFile f(lispPath);
             if (f.open(QIODevice::ReadOnly)) {
                 QFileInfo fi(f);
-                pkg.lispData = lispPackImports(f.readAll(), fi.canonicalPath());
+                pkg.lispData = lispPackImports(f.readAll(), fi.canonicalPath(), reduceLisp);
 
                 // Empty array means an error. Otherwise, lispPackImports() always returns data.
                 if (pkg.lispData.isEmpty()) {

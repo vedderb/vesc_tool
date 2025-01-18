@@ -219,7 +219,9 @@ void PageVescPackage::on_saveButton_clicked()
         }
 
         QFileInfo fi(f);
-        pkg.lispData = mLoader.lispPackImports(f.readAll(), fi.canonicalPath());
+        QSettings set;
+        pkg.lispData = mLoader.lispPackImports(
+            f.readAll(), fi.canonicalPath(), set.value("reduceLisp", false).toBool());
         f.close();
     }
 

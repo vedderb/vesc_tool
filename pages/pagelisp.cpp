@@ -38,6 +38,7 @@ PageLisp::PageLisp(QWidget *parent) :
     plusButton->setIcon(Utility::getIcon("icons/Plus Math-96.png"));
     ui->runButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
     ui->stopButton->setIcon(Utility::getIcon("icons/Shutdown-96.png"));
+    ui->infoButton->setIcon(Utility::getIcon("icons/Help-96.png"));
     ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
     ui->clearConsoleButton->setIcon(Utility::getIcon("icons/Delete-96.png"));
     ui->openRecentButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
@@ -651,7 +652,9 @@ void PageLisp::on_uploadButton_clicked()
         editorPath = fi.canonicalPath();
     }
 
-    VByteArray vb = mLoader.lispPackImports(codeStr, editorPath);
+    QSettings set;
+    VByteArray vb = mLoader.lispPackImports(
+        codeStr, editorPath, set.value("reduceLisp", false).toBool());
     if (vb.isEmpty()) {
         return;
     }
@@ -819,4 +822,46 @@ void PageLisp::on_exampleFilterEdit_textChanged(const QString &filter)
                                                  contains(filter, Qt::CaseInsensitive));
         }
     }
+}
+
+void PageLisp::on_infoButton_clicked()
+{
+    auto e = qobject_cast<ScriptEditor*>(ui->fileTabs->widget(ui->fileTabs->currentIndex()));
+
+    QString codeStr = "";
+    QString editorPath = QDir::currentPath();
+
+    if (e == nullptr) {
+        mVesc->emitMessageDialog(
+            tr("No tab is open"),
+            tr(""),
+            false);
+        return;
+    }
+
+    codeStr = e->contentAsText();
+    QFileInfo fi(e->fileNow());
+    if (fi.exists()) {
+        editorPath = fi.canonicalPath();
+    }
+
+    VByteArray vbNoReduce = mLoader.lispPackImports(codeStr, editorPath, false);
+    VByteArray vbReduce = mLoader.lispPackImports(codeStr, editorPath, true);
+    bool reduceEnabled = QSettings().value("reduceLisp", false).toBool();
+
+    QString html = QString(
+                       "<b>File Info</b><br>"
+                       "<br>"
+                       "Size                : %1<br>"
+                       "Size after reduction: %2<br>"
+                       "Reduction enabled   : %3<br>"
+                       "<br>"
+                       "The sizes include the size of all imports. All "
+                       "imports that end with .lisp are also reduced. "
+                       "The reduction option can be enabled in the preferences."
+                       ).arg(vbNoReduce.size()).
+                   arg(vbReduce.size()).
+                   arg(reduceEnabled);
+
+    HelpDialog::showHelpMonospace(this, "File Info", html);
 }

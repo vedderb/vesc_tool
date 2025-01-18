@@ -8,6 +8,7 @@
 * Show Min, Max and Diff voltage on BMS page.
 * Support building VESC Packages from QML description file.
 * Filter package store based on rules from QML description.
+* Added option to reduce Lisp file size by removing comments, spaces and imports.
 
 ---
 

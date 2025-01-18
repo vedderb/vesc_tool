@@ -35,11 +35,12 @@ public:
     Q_INVOKABLE void setVesc(VescInterface *vesc);
 
     Q_INVOKABLE bool lispErase(int size);
-    QByteArray lispPackImports(QString codeStr, QString editorPath = QDir::currentPath());
+    QString reduceLispFile(QString fileData);
+    QByteArray lispPackImports(QString codeStr, QString editorPath = QDir::currentPath(), bool reduceLisp = false);
     QPair<QString, QList<QPair<QString, QByteArray> > > lispUnpackImports(QByteArray data);
     bool lispUpload(VByteArray vb);
-    bool lispUpload(QString codeStr, QString editorPath = QDir::currentPath());
-    Q_INVOKABLE bool lispUploadFromPath(QString path);
+    bool lispUpload(QString codeStr, QString editorPath = QDir::currentPath(), bool reduceLisp = false);
+    Q_INVOKABLE bool lispUploadFromPath(QString path, bool reduceLisp);
     bool lispStream(VByteArray vb, qint8 mode);
     QString lispRead(QWidget *parent, QString &lispPath);
 
@@ -58,7 +59,7 @@ public:
 
     Q_INVOKABLE void abortDownloadUpload();
 
-    bool createPackageFromDescription(QString path, VescPackage *pkgRes = nullptr);
+    bool createPackageFromDescription(QString path, VescPackage *pkgRes = nullptr, bool reduceLisp = false);
     Q_INVOKABLE bool shouldShowPackage(VescPackage pkg);
     Q_INVOKABLE static bool shouldShowPackageFromRxp(VescPackage pkg, FW_RX_PARAMS rxp, bool *runOk = nullptr);
 

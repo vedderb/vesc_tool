@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>900</width>
-    <height>551</height>
+    <height>556</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -874,7 +874,7 @@
       <attribute name="title">
        <string>Scripting</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,1">
+      <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0">
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
@@ -901,6 +901,25 @@
             </property>
             <property name="text">
              <string>Use File Content</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="toolTip">
+          <string>Remove comments, spaces and imports on upload. This saves space, but makes the code less readable when reading it back.</string>
+         </property>
+         <property name="title">
+          <string>LispBM Editor</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QCheckBox" name="reduceLispBox">
+            <property name="text">
+             <string>Reduce Code on Upload</string>
             </property>
            </widget>
           </item>

@@ -6,6 +6,7 @@
 <name>def</name>
 <name>defun</name>
 <name>defunret</name>
+<name>defmacro</name>
 <name>macro</name>
 <name>lambda</name>
 <name>fn</name>
@@ -554,5 +555,8 @@
 <name>nvs-qml-write</name>
 <name>nvs-qml-erase-key</name>
 <name>nvs-qml-list</name>
+<name>mutex-create</name>
+<name>mutex-lock</name>
+<name>mutex-unlock</name>
 </section>
 </root>

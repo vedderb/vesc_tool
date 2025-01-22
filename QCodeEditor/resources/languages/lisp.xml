@@ -318,6 +318,7 @@
 <name>canget-vin</name>
 <name>can-list-devs</name>
 <name>can-scan</name>
+<name>can-ping</name>
 <name>can-local-id</name>
 <name>can-send-sid</name>
 <name>can-send-eid</name>

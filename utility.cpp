@@ -1507,6 +1507,12 @@ FW_RX_PARAMS Utility::getFwVersionBlockingCan(VescInterface *vesc, int canId)
     return params;
 }
 
+bool Utility::pingConnectedDevice(VescInterface *vesc, int timeout)
+{
+    FW_RX_PARAMS params;
+    return getFwVersionBlocking(vesc, &params, timeout);
+}
+
 MC_VALUES Utility::getMcValuesBlocking(VescInterface *vesc)
 {
     MC_VALUES res;

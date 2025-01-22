@@ -32,8 +32,10 @@ public:
     Q_INVOKABLE QVariantMap getHardwares(FW_RX_PARAMS params, QString hw = "");
     Q_INVOKABLE QVariantMap getFirmwares(QString hw);
     Q_INVOKABLE QVariantMap getBootloaders(FW_RX_PARAMS params, QString hw);
+    Q_INVOKABLE bool uploadFirmwareV2(QString filename, VescInterface *vesc,
+                                    bool isBootloader, bool checkName, bool fwdCan, bool autoDisconnect);
     Q_INVOKABLE bool uploadFirmware(QString filename, VescInterface *vesc,
-                                    bool isBootloader, bool isIncluded, bool fwdCan);
+                                    bool isBootloader, bool checkName, bool fwdCan);
     Q_INVOKABLE bool uploadFirmwareSingleShotTimer(QString filename, VescInterface *vesc,
                                                  bool isBootloader, bool isIncluded, bool fwdCan, QString BLfilename);
     Q_INVOKABLE QVariantMap getArchiveDirs();

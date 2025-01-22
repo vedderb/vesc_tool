@@ -88,6 +88,7 @@ public:
     Q_INVOKABLE static bool isConnectedToHwVesc(VescInterface *vesc);
     Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlocking(VescInterface *vesc);
     Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlockingCan(VescInterface *vesc, int canId);
+    Q_INVOKABLE static bool pingConnectedDevice(VescInterface *vesc, int timeout);
     Q_INVOKABLE static MC_VALUES getMcValuesBlocking(VescInterface *vesc);
     static bool checkFwCompatibility(VescInterface *vesc);
     Q_INVOKABLE static QVariantList getNetworkAddresses();

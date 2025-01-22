@@ -845,6 +845,7 @@ void ConfigParams::updateParamString(QString name, QString param, QObject *src)
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
         if (p.type == CFG_T_QSTRING) {
+            param.truncate(p.maxLen);
             if (p.valString != param) {
                 p.valString = param;
                 emit paramChangedQString(src, name, param);

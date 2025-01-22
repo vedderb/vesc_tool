@@ -104,7 +104,19 @@ QString CodeLoader::reduceLispFile(QString fileData)
     auto lines = fileData.split("\n");
 
     foreach (auto line, lines) {
-        int indComment = line.indexOf(";");
+        bool insideString = false;
+        int indComment = -1;
+
+        // Find the earliest unquoted semicolon
+        for (int i = 0; i < line.length(); ++i) {
+            if (line[i] == '"') {
+                insideString = !insideString;
+            } else if (line[i] == ';' && !insideString) {
+                indComment = i;
+                break;
+            }
+        }
+
         if (indComment >= 0) {
             line.truncate(indComment);
         }
@@ -136,7 +148,7 @@ QString CodeLoader::reduceLispFile(QString fileData)
         fBefore.close();
     }
 
-    QFile fAfter(QString("lispReduceAfter/lispAfterBefore%1.lisp").arg(fileNum));
+    QFile fAfter(QString("lispReduceAfter/lispAfterReduce%1.lisp").arg(fileNum));
     if (fAfter.open(QIODevice::WriteOnly | QIODevice::Text)) {
         fAfter.write(res.toUtf8());
         fAfter.close();

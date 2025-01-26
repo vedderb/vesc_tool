@@ -1632,7 +1632,7 @@ void MainWindow::reloadPages()
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageCanAnalyzer);
-    addPageItem(tr("CAN Analyzer"),  theme + "icons/can_off.png", "", false, true);
+    addPageItem(tr("CAN Tools"),  theme + "icons/can_off.png", "", false, true);
 
     mPageDisplayTool = new PageDisplayTool(this);
     ui->pageWidget->addWidget(mPageDisplayTool);

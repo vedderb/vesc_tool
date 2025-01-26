@@ -278,6 +278,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("sleepWithEventLoop(timeMs)");
         addItem("readInternalImuType(VescIf)");
         addItem("pingConnectedDevice(VescIf, timeout)");
+        addItem("canUpdateBaudAllBlocking(VescIf, newBaud)");
         level--;
     }
 

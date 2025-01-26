@@ -164,6 +164,8 @@ signals:
     void logConfigField(int fieldInd, LOG_HEADER header);
     void logSamples(int fieldStart, QVector<double> samples);
 
+    void canUpdateBaudRx(bool ok);
+
 public slots:
     void processPacket(QByteArray data);
 
@@ -286,6 +288,8 @@ public slots:
     void fileWrite(QString path, qint32 offset, qint32 size, QByteArray data);
     void fileMkdir(QString path);
     void fileRemove(QString path);
+
+    void canUpdateBaudAll(int newBaud, int delayMs);
 
 private slots:
     void timerSlot();

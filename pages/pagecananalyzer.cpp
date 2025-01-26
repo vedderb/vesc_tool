@@ -142,3 +142,32 @@ void PageCanAnalyzer::on_clearRxButton_clicked()
 {
     ui->msgTable->setRowCount(0);
 }
+
+void PageCanAnalyzer::on_updateCanBaudButton_clicked()
+{
+    if (mVesc) {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::information(this,
+                                         tr("Update CAN Baudrate"),
+                                         tr("This is going to update the CAN-bus baudrate on all connected "
+                                            "VESC-based devices. This is only supported in firmware 6.06 or "
+                                            "later. If the update fails the CAN-bus might become unusable until "
+                                            "it is reconfigured manually. Do you want to continue?"),
+                                         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+        if (reply == QMessageBox::Yes) {
+            ui->updateCanBaudButton->setEnabled(false);
+            Utility::canUpdateBaudAllBlocking(mVesc, ui->canBaudBox->currentText().toInt());
+            ui->updateCanBaudButton->setEnabled(true);
+
+            QTimer::singleShot(1000, [this]() {
+                if (mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
+                    mVesc->commands()->getAppConf();
+                } else {
+                    mVesc->commands()->customConfigGet(0, false);
+                }
+            });
+        }
+    }
+}
+

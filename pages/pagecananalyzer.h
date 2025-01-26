@@ -44,6 +44,7 @@ private slots:
     void canFrameRx(QByteArray data, quint32 id, bool isExtended);
     void on_sendButton_clicked();
     void on_clearRxButton_clicked();
+    void on_updateCanBaudButton_clicked();
 
 private:
     Ui::PageCanAnalyzer *ui;

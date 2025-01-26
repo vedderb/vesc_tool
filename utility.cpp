@@ -410,6 +410,30 @@ void Utility::sleepWithEventLoop(int timeMs)
     QObject::disconnect(conn1);
 }
 
+bool Utility::canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud)
+{
+    bool res = false;
+    vesc->commands()->canUpdateBaudAll(newBaud, 2000);
+
+    auto conn = connect(vesc->commands(), &Commands::canUpdateBaudRx, [&res, &vesc](bool ok) {
+        res = ok;
+        if (ok) {
+            vesc->emitStatusMessage("Baud update OK!", true);
+        } else {
+            vesc->emitStatusMessage("Baud update failed", false);
+        }
+    });
+
+    bool signalRx = waitSignal(vesc->commands(), SIGNAL(canUpdateBaudRx(bool)), 4000);
+    disconnect(conn);
+
+    if (!signalRx) {
+        vesc->emitStatusMessage("Waiting for baud update timed out", false);
+    }
+
+    return res;
+}
+
 QString Utility::detectAllFoc(VescInterface *vesc,
                               bool detect_can, double max_power_loss, double min_current_in,
                               double max_current_in, double openloop_rpm, double sl_erpm)

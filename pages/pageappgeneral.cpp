@@ -19,6 +19,7 @@
 
 #include "pageappgeneral.h"
 #include "ui_pageappgeneral.h"
+#include "utility.h"
 
 PageAppGeneral::PageAppGeneral(QWidget *parent) :
     QWidget(parent),

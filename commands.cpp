@@ -1125,6 +1125,11 @@ void Commands::processPacket(QByteArray data)
         emit logSamples(fieldStart, samples);
     } break;
 
+    case COMM_CAN_UPDATE_BAUD_ALL: {
+        auto ok = vb.vbPopFrontInt8();
+        emit canUpdateBaudRx(ok);
+    } break;
+
     default:
         break;
     }
@@ -2276,6 +2281,15 @@ void Commands::fileRemove(QString path)
     VByteArray vb;
     vb.vbAppendUint8(COMM_FILE_REMOVE);
     vb.vbAppendString(path);
+    emitData(vb);
+}
+
+void Commands::canUpdateBaudAll(int newBaud, int delayMs)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_CAN_UPDATE_BAUD_ALL);
+    vb.vbAppendInt16(newBaud);
+    vb.vbAppendInt16(delayMs);
     emitData(vb);
 }
 

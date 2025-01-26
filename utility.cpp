@@ -413,7 +413,7 @@ void Utility::sleepWithEventLoop(int timeMs)
 bool Utility::canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud)
 {
     bool res = false;
-    vesc->commands()->canUpdateBaudAll(newBaud, 2000);
+    vesc->commands()->canUpdateBaudAll(newBaud, 1000);
 
     auto conn = connect(vesc->commands(), &Commands::canUpdateBaudRx, [&res, &vesc](bool ok) {
         res = ok;

@@ -320,6 +320,7 @@
 <name>can-scan</name>
 <name>can-ping</name>
 <name>can-local-id</name>
+<name>can-update-baud</name>
 <name>can-send-sid</name>
 <name>can-send-eid</name>
 <name>can-recv-sid</name>

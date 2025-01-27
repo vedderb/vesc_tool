@@ -118,6 +118,12 @@ Item {
                             mCommands.shutdown()
                         }
                     }
+                    MenuItem {
+                        text: "Restart LispBM"
+                        onTriggered: {
+                            mCommands.lispSetRunning(1)
+                        }
+                    }
                 }
             }
         }

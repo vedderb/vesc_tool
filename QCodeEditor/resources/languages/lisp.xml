@@ -146,6 +146,7 @@
 <name>mod</name>
 <name>print</name>
 <name>set-print-prefix</name>
+<name>set-fw-name</name>
 <name>puts</name>
 <name>range</name>
 <name>length</name>

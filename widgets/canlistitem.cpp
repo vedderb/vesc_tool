@@ -36,7 +36,7 @@ CANListItem::CANListItem(FW_RX_PARAMS p,
     if (ok) {
         if (p.hwType == HW_TYPE_VESC) {
             icon = theme +"icons/motor_side.png";
-            if(p.hw.contains("STORMCORE",Qt::CaseInsensitive)){
+            if(p.hw.contains("STORMCORE", Qt::CaseInsensitive)){
                 name = "<p align=\"right\"> <img src=\"" + theme + "icons/stormcore-96.png\" height = 9/> " +
                         p.hw.remove("STORMCORE_");
             }else if(p.hw.at(0).isDigit() || p.hw.contains("HD",Qt::CaseInsensitive)) {
@@ -50,7 +50,11 @@ CANListItem::CANListItem(FW_RX_PARAMS p,
             name = "BMS (" + p.hw + "):";
         } else {
             icon = theme +"icons/Electronics-96.png";
-            name = "Device (" + p.hw + "):";
+            if (p.fwName.isEmpty()) {
+                name = "Device (" + p.hw + "):";
+            } else {
+                name = "Device (" + p.hw + "-" + p.fwName + "):";
+            }
         }
     } else {
         icon = theme +"icons/Help-96.png";

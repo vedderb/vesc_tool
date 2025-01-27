@@ -159,6 +159,7 @@ private slots:
     void on_canList_currentRowChanged(int currentRow);
     void on_actionGamepadControl_triggered(bool checked);   
     void on_actionPreferences_triggered();
+    void on_actionRestartLispBM_triggered();
 
 private:
     Ui::MainWindow *ui;

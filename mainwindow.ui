@@ -83,7 +83,7 @@
         <item>
          <widget class="QSplitter" name="leftSplitter">
           <property name="orientation">
-           <enum>Qt::Vertical</enum>
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
           <property name="handleWidth">
            <number>6</number>
@@ -116,16 +116,16 @@
             </font>
            </property>
            <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
+            <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
            </property>
            <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
+            <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
            </property>
            <property name="resizeMode">
-            <enum>QListView::Adjust</enum>
+            <enum>QListView::ResizeMode::Adjust</enum>
            </property>
            <property name="viewMode">
-            <enum>QListView::ListMode</enum>
+            <enum>QListView::ViewMode::ListMode</enum>
            </property>
           </widget>
           <widget class="QWidget" name="layoutWidget">
@@ -145,7 +145,7 @@
                <string>CAN-Devices</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -163,10 +163,10 @@
                </font>
               </property>
               <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
+               <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
               </property>
               <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectRows</enum>
+               <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
               </property>
              </widget>
             </item>
@@ -566,7 +566,7 @@
     </size>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonIconOnly</enum>
+    <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
    </property>
    <property name="floatable">
     <bool>false</bool>
@@ -671,6 +671,7 @@
     <addaction name="separator"/>
     <addaction name="actionReboot"/>
     <addaction name="actionShutdown"/>
+    <addaction name="actionRestartLispBM"/>
    </widget>
    <widget class="QMenu" name="menuCommands">
     <property name="font">
@@ -961,7 +962,7 @@ p, li { white-space: pre-wrap; }
     <string>Start the Motor Setup Wizard</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="actionAppSetupWizard">
@@ -972,7 +973,7 @@ p, li { white-space: pre-wrap; }
     <string>Start the App Setup Wizard</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="actionAboutQt">
@@ -1031,7 +1032,7 @@ p, li { white-space: pre-wrap; }
     <string>Setup Motors FOC</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="actionExportConfigurationParser">
@@ -1130,7 +1131,7 @@ p, li { white-space: pre-wrap; }
     <string>Setup Motors FOC (old)</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="actionPreferences">
@@ -1149,6 +1150,11 @@ p, li { white-space: pre-wrap; }
   <action name="actionLaunchMobileTool">
    <property name="text">
     <string>Restart + Launch Mobile Tool</string>
+   </property>
+  </action>
+  <action name="actionRestartLispBM">
+   <property name="text">
+    <string>Restart LispBM</string>
    </property>
   </action>
  </widget>

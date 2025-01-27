@@ -175,6 +175,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionWriteAppconf->setIcon(Utility::getIcon("icons/app_down.png"));
     ui->actionLaunchMobileTool->setIcon(Utility::getIcon("icons/v_icon-96.png"));
     ui->actionLaunchBoardConfigurator->setIcon(Utility::getIcon("icons/v_icon-96.png"));
+    ui->actionRestartLispBM->setIcon(Utility::getIcon("icons/Refresh-96.png"));
 
     QIcon mycon = QIcon(Utility::getIcon("icons/keys_off.png"));
     mycon.addPixmap(Utility::getIcon("icons/keys_on.png"), QIcon::Normal, QIcon::On);
@@ -2171,3 +2172,9 @@ void MainWindow::on_actionGamepadControl_triggered(bool checked)
         ui->actionGamepadControl->setChecked(false);
     }
 }
+
+void MainWindow::on_actionRestartLispBM_triggered()
+{
+    mVesc->commands()->lispSetRunning(1);
+}
+

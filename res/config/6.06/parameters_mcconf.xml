@@ -2991,6 +2991,28 @@ p, li { white-space: pre-wrap; }
             <cDefine>MCCONF_FOC_SHORT_LS_ON_ZERO_DUTY</cDefine>
             <valInt>0</valInt>
         </foc_short_ls_on_zero_duty>
+        <foc_overmod_factor>
+            <longName>Overmodulation Factor</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;FOC overmodulation factor. Allows slightly higher speed at the expense of output voltage distortion. A factor of 1.15 results in a modulated hexagon, similar to trapezoidal commutation. Generally it does not make sense to go higher than 1.15.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_OVERMOD_FACTOR</cDefine>
+            <editorDecimalsDouble>3</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>1.5</maxDouble>
+            <minDouble>1</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.005</stepDouble>
+            <valDouble>1</valDouble>
+            <vTxDoubleScale>10000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>7</vTx>
+        </foc_overmod_factor>
         <sp_pid_loop_rate>
             <longName>PID Loop Rate</longName>
             <type>4</type>
@@ -4191,7 +4213,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The motor brand, e.g. Turnigy.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine></cDefine>
-            <valString>Unnamed</valString>
+            <valString></valString>
             <maxLen>0</maxLen>
         </motor_brand>
         <motor_model>
@@ -4204,7 +4226,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The motor model, e.g. 6374 168KV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine></cDefine>
-            <valString>Not Specified</valString>
+            <valString></valString>
             <maxLen>0</maxLen>
         </motor_model>
         <motor_weight>
@@ -4738,6 +4760,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_fw_q_current_factor</ser>
         <ser>foc_speed_soure</ser>
         <ser>foc_short_ls_on_zero_duty</ser>
+        <ser>foc_overmod_factor</ser>
         <ser>sp_pid_loop_rate</ser>
         <ser>s_pid_kp</ser>
         <ser>s_pid_ki</ser>
@@ -5127,6 +5150,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_observer_offset</param>
                     <param>foc_speed_soure</param>
                     <param>foc_short_ls_on_zero_duty</param>
+                    <param>foc_overmod_factor</param>
                 </subgroupParams>
             </subgroup>
         </group>

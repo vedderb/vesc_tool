@@ -389,6 +389,12 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
                         "wrong with the configuration or that the setup is pushed beyond reasonable limits.");
         }
 
+        if (mMcConfig->hasParam("foc_overmod_factor") && mMcConfig->getParamDouble("foc_overmod_factor") >= 1.16) {
+            notes += tr("<b>Overmodulation Check</b><br>"
+                        "The FOC overmodulation factor is set to more than 1.15, which causes high distortion for minimal "
+                        "gain. It is best to leave it at 1.15 or less, which is similar to BLDC commutation.");
+        }
+
         if (!notes.isEmpty()) {
             emitMessageDialog(tr("Potential Configuration Issues"), notes, false, true);
         }

@@ -36,13 +36,13 @@ CANListItem::CANListItem(FW_RX_PARAMS p,
     if (ok) {
         if (p.hwType == HW_TYPE_VESC) {
             icon = theme +"icons/motor_side.png";
-            if(p.hw.contains("STORMCORE", Qt::CaseInsensitive)){
+            if (p.hw.contains("STORMCORE", Qt::CaseInsensitive)) {
                 name = "<p align=\"right\"> <img src=\"" + theme + "icons/stormcore-96.png\" height = 9/> " +
                         p.hw.remove("STORMCORE_");
-            }else if(p.hw.at(0).isDigit() || p.hw.contains("HD",Qt::CaseInsensitive)) {
+            } else if (p.hw.at(0).isDigit() || p.hw.contains("HD",Qt::CaseInsensitive)) {
                 name = "<img src=\"" + theme + "icons/vesc-96.png\" height = 9/>"
                      + " " + p.hw.replace("_", " ");
-            }else{
+            } else {
                 name = p.hw;
             }
         } else if (p.hwType == HW_TYPE_VESC_BMS) {
@@ -51,9 +51,9 @@ CANListItem::CANListItem(FW_RX_PARAMS p,
         } else {
             icon = theme +"icons/Electronics-96.png";
             if (p.fwName.isEmpty()) {
-                name = "Device (" + p.hw + "):";
+                name = "Device (" + p.hw + ")";
             } else {
-                name = "Device (" + p.hw + "-" + p.fwName + "):";
+                name = "Device (" + p.hw + "-" + p.fwName + ")";
             }
         }
     } else {
@@ -108,13 +108,15 @@ void CANListItem::setID(int canID)
 {
     this->ID = canID;
     QFont f = mIdLabel->font();
-    if(canID == -1){
+
+    if (canID == -1) {
         mIdLabel->setText("local");
-        f.setPointSize(this->font().pointSize()*0.75);
-    }else{
+        f.setPointSize(this->font().pointSize() * 0.75);
+    } else {
         mIdLabel->setText(QString::number(canID));
-        f.setPointSize(this->font().pointSize()*0.9);
+        f.setPointSize(this->font().pointSize() * 0.9);
     }
+
     mIdLabel->setMinimumWidth(30);
     mIdLabel->setFrameStyle(QFrame::Panel);
     f.setBold(true);

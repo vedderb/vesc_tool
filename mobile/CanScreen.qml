@@ -300,13 +300,25 @@ Item {
                     name = "Unknown"
                 } else if (params.hwTypeStr() === "VESC") { //is a motor
                     devicePath = theme + "icons/motor_side.png"
-                    name = params.hw
+                    if (params.fwName.length !== 0) {
+                        name = params.hw + "-" + params.fwName
+                    } else {
+                        name = params.hw
+                    }
                 } else if (params.hwTypeStr() === "VESC BMS") { //is a bms
                     devicePath = theme + "icons/icons8-battery-100.png"
-                    name = "BMS (" + params.hw + ")"
+                    if (params.fwName.length !== 0) {
+                        name = params.hw + "-" + params.fwName
+                    } else {
+                        name = params.hw
+                    }
                 } else {
                     devicePath = theme + "icons/Electronics-96.png"
-                    name = "Device (" + params.hw + ")"
+                    if (params.fwName.length !== 0) {
+                        name = params.hw + "-" + params.fwName
+                    } else {
+                        name = params.hw
+                    }
                 }
                 name = name.replace("_", " ")
 

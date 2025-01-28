@@ -32,6 +32,7 @@ DetectBldc::DetectBldc(QWidget *parent) :
 
     ui->helpButton->setIcon(Utility::getIcon("icons/Help-96.png"));
     ui->applyButton->setIcon(Utility::getIcon("icons/apply.png"));
+    ui->runButton->setIcon(Utility::getIcon("icons/Circled Play-96.png"));
 
     layout()->setContentsMargins(0, 0, 0, 0);
     mVesc = 0;

@@ -43,7 +43,11 @@ CANListItem::CANListItem(FW_RX_PARAMS p,
                 name = "<img src=\"" + theme + "icons/vesc-96.png\" height = 9/>"
                      + " " + p.hw.replace("_", " ");
             } else {
-                name = p.hw;
+                if (p.fwName.isEmpty()) {
+                    name = p.hw;
+                } else {
+                    name = p.hw + "-" + p.fwName;
+                }
             }
         } else if (p.hwType == HW_TYPE_VESC_BMS) {
             icon = theme +"icons/icons8-battery-100.png";

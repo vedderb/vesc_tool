@@ -75,17 +75,15 @@
             (_ nil) ; Ignore other events
 )))
 
-(event-register-handler (spawn 30 event-handler))
+(event-register-handler (spawn 100 event-handler))
 (event-enable 'event-shutdown)
 
-(defun voltage-monitor () {
+(loopwhile-thd 100 t {
         (if (< (get-vin) vin-min)
             (log-stop esp-can-id)
         )
         (sleep 0.01)
 })
-
-(spawn 30 voltage-monitor)
 
 (loopwhile t {
         (log-send-f32 esp-can-id 0

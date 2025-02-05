@@ -1295,7 +1295,7 @@ void PageLogAnalysis::openLog(QString name, QByteArray data)
         foreach (auto &t, tokensLine1) {
             auto token = t.split(":");
             LOG_HEADER h;
-            for (int i = 0;i < t.size();i++) {
+            for (int i = 0;i < token.size();i++) {
                 switch (i) {
                 case 0: h.key = token.at(i);
                 case 1: h.name = token.at(i);

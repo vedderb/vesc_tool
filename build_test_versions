@@ -2,7 +2,8 @@
 
 set -e
 
-touch build/test_all/"Build Date $(date '+%Y-%m-%d')"
+#touch build/test_all/"Build Date $(date '+%Y-%m-%d')"
+rm -f build/test_all/vesc_tool_test*
 
 # Linux
 export PATH=/opt/Qt/5.15-static/bin:$PATH

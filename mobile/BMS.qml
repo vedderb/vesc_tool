@@ -230,7 +230,7 @@ Item {
         }
 
         ColumnLayout {
-            property int textRows: 12
+            property int textRows: 13
 
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -372,7 +372,8 @@ Item {
                     "Pressure     : " + parseFloat(val.pressure).toFixed(0) + " Pa\n" +
                     "SoC          : " + parseFloat(val.soc * 100).toFixed(1) + " %\n" +
                     "Ah Chg Tot   : " + parseFloat(val.ah_cnt_chg_total).toFixed(3) + " Ah\n" +
-                    "Ah Dis Tot   : " + parseFloat(val.ah_cnt_dis_total).toFixed(3) + " Ah"
+                    "Ah Dis Tot   : " + parseFloat(val.ah_cnt_dis_total).toFixed(3) + " Ah\n" +
+                    "Status       : " + val.status
 
             cellCanvas.requestPaint()
             tempCanvas.requestPaint()

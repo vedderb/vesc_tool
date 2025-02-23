@@ -149,17 +149,17 @@
          </row>
          <row>
           <property name="text">
+           <string>Temp PCB Max</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
            <string>Humidity</string>
           </property>
          </row>
          <row>
           <property name="text">
            <string>Pressure</string>
-          </property>
-         </row>
-         <row>
-          <property name="text">
-           <string>Temp Hum Sensor</string>
           </property>
          </row>
          <row>
@@ -180,6 +180,11 @@
          <row>
           <property name="text">
            <string>Wh Discharge Total</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>Status</string>
           </property>
          </row>
          <column>
@@ -283,6 +288,11 @@
           </property>
          </item>
          <item row="19" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="20" column="0">
           <property name="text">
            <string/>
           </property>

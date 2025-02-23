@@ -144,6 +144,11 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
     ui->plotTemp->xAxis->setTicker(textTicker2);
     ui->plotTemp->replotWhenVisible();
 
+    double tempPcbMax = val.temp_hum_sensor;
+    if (val.data_version == 1) {
+        tempPcbMax = fmax(val.temp_hum_sensor, fmax(val.temps.at(0), val.temps.at(3)));
+    }
+
     // Value table
     int ind = 0;
     ui->valTable->item(ind++, 0)->setText(QString("%1 V").arg(val.v_tot, 0, 'f', 2));
@@ -159,13 +164,14 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
     ui->valTable->item(ind++, 0)->setText(QString("%1 %").arg(val.soc * 100.0, 0, 'f', 0));
     ui->valTable->item(ind++, 0)->setText(QString("%1 %").arg(val.soh * 100.0, 0, 'f', 0));
     ui->valTable->item(ind++, 0)->setText(QString("%1 °C").arg(val.temp_cells_highest, 0, 'f', 2));
-    ui->valTable->item(ind++, 0)->setText(QString("%1 %").arg(val.humidity, 0, 'f', 2));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 °C").arg(tempPcbMax, 0, 'f', 2));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 % (%2 °C)").arg(val.humidity, 0, 'f', 2).arg(val.temp_hum_sensor, 0, 'f', 2));
     ui->valTable->item(ind++, 0)->setText(QString("%1 Pa").arg(val.pressure, 0, 'f', 0));
-    ui->valTable->item(ind++, 0)->setText(QString("%1 °C").arg(val.temp_hum_sensor, 0, 'f', 2));
     ui->valTable->item(ind++, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_chg_total, 0, 'f', 3));
     ui->valTable->item(ind++, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_chg_total, 0, 'f', 3));
     ui->valTable->item(ind++, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_dis_total, 0, 'f', 3));
     ui->valTable->item(ind++, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_dis_total, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(val.status);
 }
 
 void PageBms::reloadCellBars(int cells)

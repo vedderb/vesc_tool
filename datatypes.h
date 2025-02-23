@@ -694,6 +694,7 @@ struct BMS_VALUES {
     Q_PROPERTY(double ah_cnt_dis_total MEMBER ah_cnt_dis_total)
     Q_PROPERTY(double wh_cnt_dis_total MEMBER wh_cnt_dis_total)
     Q_PROPERTY(int data_version MEMBER data_version)
+    Q_PROPERTY(QString status MEMBER status)
 
 public:
     BMS_VALUES() {
@@ -755,6 +756,7 @@ public:
     double ah_cnt_dis_total;
     double wh_cnt_dis_total;
     int data_version;
+    QString status;
     qint64 updateTime;
 };
 

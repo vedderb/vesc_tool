@@ -427,6 +427,18 @@ ApplicationWindow {
         }
 
         Page {
+            id: bmsPage
+            Loader {
+                anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: BMS {
+                    anchors.fill: parent
+                }
+            }
+        }
+
+        Page {
             Loader {
                 anchors.fill: parent
                 asynchronous: true
@@ -436,18 +448,6 @@ ApplicationWindow {
                     anchors.topMargin: 5
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
-                }
-            }
-        }
-
-        Page {
-            id: bmsPage
-            Loader {
-                anchors.fill: parent
-                asynchronous: true
-                visible: status == Loader.Ready
-                sourceComponent: BMS {
-                    anchors.fill: parent
                 }
             }
         }
@@ -501,7 +501,7 @@ ApplicationWindow {
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "Profiles", "BMS", "Terminal"]
+                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal"]
 
                     TabButton {
                         text: modelData

@@ -21,5 +21,8 @@
         <file>ESP32-C3/BMS RB/bootloader.bin</file>
         <file>ESP32-C3/BMS RB/partition-table.bin</file>
         <file>ESP32-C3/BMS RB/vesc_express.bin</file>
+        <file>ESP32-C3/Express Plus/bootloader.bin</file>
+        <file>ESP32-C3/Express Plus/partition-table.bin</file>
+        <file>ESP32-C3/Express Plus/vesc_express.bin</file>
     </qresource>
 </RCC>

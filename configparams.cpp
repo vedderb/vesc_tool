@@ -1134,7 +1134,8 @@ bool ConfigParams::saveXml(QString fileName, QString configName)
     emit savingXml();
 
     QXmlStreamWriter stream(&file);
-    stream.setCodec("UTF-8");
+    //QT 6 always uses UTF-8 and this call is deprecated
+    //stream.setCodec("UTF-8");
     stream.setAutoFormatting(true);
     getXML(stream, configName);
 
@@ -1175,7 +1176,7 @@ QString ConfigParams::saveCompressed(QString configName)
 
     QByteArray data;
     QXmlStreamWriter stream(&data);
-    stream.setCodec("UTF-8");
+    //stream.setCodec("UTF-8");
     stream.setAutoFormatting(true);
     getXML(stream, configName);
 
@@ -1481,7 +1482,7 @@ bool ConfigParams::saveParamsXml(QString fileName)
     }
 
     QXmlStreamWriter stream(&file);
-    stream.setCodec("UTF-8");
+    //stream.setCodec("UTF-8");
     stream.setAutoFormatting(true);
 
     getParamsXML(stream);
@@ -1513,7 +1514,7 @@ QByteArray ConfigParams::getCompressedParamsXml()
 {
     QByteArray res;
     QXmlStreamWriter stream(&res);
-    stream.setCodec("UTF-8");
+    //stream.setCodec("UTF-8");
     stream.setAutoFormatting(true);
     getParamsXML(stream);
     return qCompress(res, 9);

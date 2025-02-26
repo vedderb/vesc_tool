@@ -29,8 +29,8 @@
 #define FW_TEST_VERSION_NUMBER		0
 
 #if !defined(HW_SOURCE) && !defined(HW_HEADER)
-#define HW_HEADER					"hw_express_plus.h"
-#define HW_SOURCE					"hw_express_plus.c"
+#define HW_HEADER					"hw_scope.h"
+#define HW_SOURCE					"hw_scope.c"
 #endif
 
 #if !defined(HW_SOURCE) && !defined(HW_SOURCE_ALT)

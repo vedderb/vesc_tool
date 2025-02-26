@@ -72,8 +72,8 @@ cp build/vesc_express.bin "$BOARD"
 cp build/partition_table/partition-table.bin "$BOARD"
 cp build/bootloader/bootloader.bin "$BOARD"
 
-# Express Plus
-BOARD="$DIR/res/firmwares_esp/ESP32-C3/Express Plus"
+# VL Scope
+BOARD="$DIR/res/firmwares_esp/ESP32-C3/VL Scope"
 cd $FWPATH
 cp "$BOARD/conf_general.h" main/
 idf.py build

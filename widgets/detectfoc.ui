@@ -62,7 +62,7 @@
          <bool>true</bool>
         </property>
         <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
         </property>
         <property name="prefix">
          <string>R: </string>
@@ -102,7 +102,7 @@
          <bool>true</bool>
         </property>
         <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
         </property>
         <property name="prefix">
          <string>Observer Gain (x1M): </string>
@@ -145,7 +145,7 @@
          <bool>true</bool>
         </property>
         <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
         </property>
         <property name="prefix">
          <string>L: </string>
@@ -241,7 +241,7 @@
          <bool>true</bool>
         </property>
         <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
         </property>
         <property name="prefix">
          <string>λ: </string>
@@ -453,7 +453,7 @@
          <bool>true</bool>
         </property>
         <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
         </property>
         <property name="prefix">
          <string>Lq-Ld: </string>
@@ -520,7 +520,7 @@
          <bool>true</bool>
         </property>
         <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
         </property>
         <property name="prefix">
          <string>KI: </string>
@@ -556,7 +556,7 @@
          <bool>true</bool>
         </property>
         <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
         </property>
         <property name="prefix">
          <string>KP: </string>
@@ -610,7 +610,7 @@
          <double>100.000000000000000</double>
         </property>
         <property name="value">
-         <double>1000.000000000000000</double>
+         <double>500.000000000000000</double>
         </property>
        </widget>
       </item>

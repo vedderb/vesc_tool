@@ -256,6 +256,7 @@
 <name>set-rpm</name>
 <name>set-pos</name>
 <name>foc-openloop</name>
+<name>foc-openloop-phase</name>
 <name>foc-beep</name>
 <name>foc-play-tone</name>
 <name>foc-play-samples</name>

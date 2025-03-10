@@ -98,6 +98,14 @@
 <name>event-shutdown</name>
 <name>event-icu-width</name>
 <name>event-icu-period</name>
+<name>event-bms-chg-allow</name>
+<name>event-bms-bal-ovr</name>
+<name>event-bms-reset-cnt</name>
+<name>event-bms-force-bal</name>
+<name>event-bms-zero-ofs</name>
+<name>event-ble-rx</name>
+<name>event-wifi-disconnect</name>
+<name>event-esp-now-rx</name>
 <name>stat-speed-avg</name>
 <name>stat-speed-max</name>
 <name>stat-power-avg</name>

@@ -113,7 +113,7 @@ void PageCustomConfig::on_saveXmlButton_clicked()
 {
     QString path;
     path = QFileDialog::getSaveFileName(this,
-                                        tr("Choose where to save the motor configuration XML file"),
+                                        tr("Choose where to save the configuration XML file"),
                                         ".",
                                         tr("Xml files (*.xml)"));
 

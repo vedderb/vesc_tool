@@ -3406,7 +3406,7 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
                 mCanDevice->writeFrame(frame);
                 mCanDevice->waitForFramesWritten(5);
-//                QThread::msleep(5);
+                QThread::msleep(1);
                 payload.clear();
             }
 

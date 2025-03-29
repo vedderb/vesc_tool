@@ -1536,6 +1536,7 @@ bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
         return false;
     }
 
+    bool ok = true;
     QTextStream out(&file);
     QFileInfo info(file);
     QString nameStr = info.fileName().toUpper().replace(".", "_") + "_";
@@ -1575,6 +1576,7 @@ bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
 
                 default:
                     qWarning() << name << ": type not supported.";
+                    ok = false;
                     break;
                 }
 
@@ -1586,6 +1588,7 @@ bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
             }
         } else {
             qWarning() << name << "not found.";
+            ok = false;
         }
     }
 
@@ -1595,7 +1598,7 @@ bool ConfigParams::saveCDefines(const QString &fileName, bool wrapIfdef)
     out.flush();
     file.close();
 
-    return true;
+    return ok;
 }
 
 /**

@@ -1211,6 +1211,7 @@ bool Utility::createParamParserC(VescInterface *vesc, QString filename)
         return false;
     }
 
+    bool ok = true;
     QTextStream outSource(&sourceFile);
     QTextStream outHeader(&headerFile);
     QFileInfo headerInfo(headerFile);
@@ -1253,14 +1254,14 @@ bool Utility::createParamParserC(VescInterface *vesc, QString filename)
     outSource << "int32_t " << prefix << "_serialize_mcconf(uint8_t *buffer, const mc_configuration *conf) {\n";
     outSource << "\t" << "int32_t ind = 0;\n\n";
     outSource << "\t" << "buffer_append_uint32(buffer, MCCONF_SIGNATURE, &ind);\n\n";
-    serialFunc(vesc->mcConfig(), outSource);
+    ok = serialFunc(vesc->mcConfig(), outSource) && ok;
     outSource << "\n\t" << "return ind;\n";
     outSource << "}\n\n";
 
     outSource << "int32_t " << prefix << "_serialize_appconf(uint8_t *buffer, const app_configuration *conf) {\n";
     outSource << "\t" << "int32_t ind = 0;\n\n";
     outSource << "\t" << "buffer_append_uint32(buffer, APPCONF_SIGNATURE, &ind);\n\n";
-    serialFunc(vesc->appConfig(), outSource);
+    ok = serialFunc(vesc->appConfig(), outSource) && ok;
     outSource << "\n\t" << "return ind;\n";
     outSource << "}\n\n";
 
@@ -1270,7 +1271,7 @@ bool Utility::createParamParserC(VescInterface *vesc, QString filename)
     outSource << "\t" << "if (signature != MCCONF_SIGNATURE) {\n";
     outSource << "\t\t" << "return false;\n";
     outSource << "\t" << "}\n\n";
-    deserialFunc(vesc->mcConfig(), outSource);
+    ok = deserialFunc(vesc->mcConfig(), outSource) && ok;
     outSource << "\n\t" << "return true;\n";
     outSource << "}\n\n";
 
@@ -1280,16 +1281,16 @@ bool Utility::createParamParserC(VescInterface *vesc, QString filename)
     outSource << "\t" << "if (signature != APPCONF_SIGNATURE) {\n";
     outSource << "\t\t" << "return false;\n";
     outSource << "\t" << "}\n\n";
-    deserialFunc(vesc->appConfig(), outSource);
+    ok = deserialFunc(vesc->appConfig(), outSource) && ok;
     outSource << "\n\t" << "return true;\n";
     outSource << "}\n\n";
 
     outSource << "void " << prefix << "_set_defaults_mcconf(mc_configuration *conf) {\n";
-    defaultFunc(vesc->mcConfig(), outSource);
+    ok = defaultFunc(vesc->mcConfig(), outSource) && ok;
     outSource << "}\n\n";
 
     outSource << "void " << prefix << "_set_defaults_appconf(app_configuration *conf) {\n";
-    defaultFunc(vesc->appConfig(), outSource);
+    ok = defaultFunc(vesc->appConfig(), outSource) && ok;
     outSource << "}\n";
 
     outHeader.flush();
@@ -1297,7 +1298,7 @@ bool Utility::createParamParserC(VescInterface *vesc, QString filename)
     headerFile.close();
     sourceFile.close();
 
-    return true;
+    return ok;
 }
 
 bool Utility::createParamParserC(ConfigParams *params, QString configName, QString filename)
@@ -1321,6 +1322,7 @@ bool Utility::createParamParserC(ConfigParams *params, QString configName, QStri
         return false;
     }
 
+    bool ok = true;
     QTextStream outSource(&sourceFile);
     QTextStream outHeader(&headerFile);
     QFileInfo headerInfo(headerFile);
@@ -1359,7 +1361,7 @@ bool Utility::createParamParserC(ConfigParams *params, QString configName, QStri
     outSource << "int32_t " << prefix << "_serialize_" << configName.toLower() << "(uint8_t *buffer, const " << configName << " *conf) {\n";
     outSource << "\t" << "int32_t ind = 0;\n\n";
     outSource << "\t" << "buffer_append_uint32(buffer, " << signatureString << ", &ind);\n\n";
-    serialFunc(params, outSource);
+    ok = serialFunc(params, outSource) && ok;
     outSource << "\n\t" << "return ind;\n";
     outSource << "}\n\n";
 
@@ -1369,12 +1371,12 @@ bool Utility::createParamParserC(ConfigParams *params, QString configName, QStri
     outSource << "\t" << "if (signature != " << signatureString << ") {\n";
     outSource << "\t\t" << "return false;\n";
     outSource << "\t" << "}\n\n";
-    deserialFunc(params, outSource);
+    ok = deserialFunc(params, outSource) && ok;
     outSource << "\n\t" << "return true;\n";
     outSource << "}\n\n";
 
     outSource << "void " << prefix << "_set_defaults_" << configName.toLower() << "(" << configName << " *conf) {\n";
-    defaultFunc(params, outSource);
+    ok = defaultFunc(params, outSource) && ok;
     outSource << "}\n\n";
 
     outHeader.flush();
@@ -1382,7 +1384,7 @@ bool Utility::createParamParserC(ConfigParams *params, QString configName, QStri
     headerFile.close();
     sourceFile.close();
 
-    return true;
+    return ok;
 }
 
 bool Utility::createCompressedConfigC(ConfigParams *params, QString configName, QString filename)
@@ -1927,9 +1929,10 @@ QVector<int> Utility::scanCanVescOnly(VescInterface *vesc)
     return res;
 }
 
-void Utility::serialFunc(ConfigParams *params, QTextStream &s) {
+bool Utility::serialFunc(ConfigParams *params, QTextStream &s) {
     QStringList serialOrder = params->getSerializeOrder();
 
+    bool ok = true;
     for (int i = 0;i < serialOrder.size();i++) {
         QString name = serialOrder.at(i);
 
@@ -1978,6 +1981,7 @@ void Utility::serialFunc(ConfigParams *params, QTextStream &s) {
 
                 default:
                     qWarning() << "Serialization type not supported";
+                    ok = false;
                     break;
                 }
                 break;
@@ -1998,6 +2002,7 @@ void Utility::serialFunc(ConfigParams *params, QTextStream &s) {
 
                 default:
                     qWarning() << "Serialization type not supported";
+                    ok = false;
                     break;
                 }
                 break;
@@ -2009,17 +2014,22 @@ void Utility::serialFunc(ConfigParams *params, QTextStream &s) {
 
             default:
                 qWarning() << name << ": type not supported.";
+                ok = false;
                 break;
             }
         } else {
             qWarning() << name << "not found.";
+            ok = false;
         }
     }
+
+    return ok;
 }
 
-void Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
+bool Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
     QStringList serialOrder = params->getSerializeOrder();
 
+    bool ok = true;
     for (int i = 0;i < serialOrder.size();i++) {
         QString name = serialOrder.at(i);
 
@@ -2071,6 +2081,7 @@ void Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
 
                 default:
                     qWarning() << "Serialization type not supported";
+                    ok = false;
                     break;
                 }
                 break;
@@ -2092,6 +2103,7 @@ void Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
 
                 default:
                     qWarning() << "Serialization type not supported";
+                    ok = false;
                     break;
                 }
                 break;
@@ -2103,17 +2115,22 @@ void Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
 
             default:
                 qWarning() << name << ": type not supported.";
+                ok = false;
                 break;
             }
         } else {
             qWarning() << name << "not found.";
+            ok = false;
         }
     }
+
+    return ok;
 }
 
-void Utility::defaultFunc(ConfigParams *params, QTextStream &s) {
+bool Utility::defaultFunc(ConfigParams *params, QTextStream &s) {
     QStringList serialOrder = params->getSerializeOrder();
 
+    bool ok = true;
     for (int i = 0;i < serialOrder.size();i++) {
         QString name = serialOrder.at(i);
 
@@ -2143,8 +2160,11 @@ void Utility::defaultFunc(ConfigParams *params, QTextStream &s) {
             }
         } else {
             qWarning() << name << "not found.";
+            ok = false;
         }
     }
+
+    return ok;
 }
 
 void Utility::setAppQColor(QString colorName, QColor color)

@@ -765,12 +765,18 @@ int main(int argc, char *argv[])
         QString pathParser = xmlCodePath + "confparser.c";
         QString pathCompressed = xmlCodePath + "confxml.c";
 
-        Utility::createCompressedConfigC(&conf, nameConfig, pathCompressed);
-        Utility::createParamParserC(&conf, nameConfig, pathParser);
-        conf.saveCDefines(pathDefines, true);
+        bool ok = true;
+        ok = Utility::createCompressedConfigC(&conf, nameConfig, pathCompressed) && ok;
+        ok = Utility::createParamParserC(&conf, nameConfig, pathParser) && ok;
+        ok = conf.saveCDefines(pathDefines, true) && ok;
 
-        qDebug() << "Done!";
-        return 0;
+        if (ok) {
+            qDebug() << "Done!";
+            return 0;
+        } else {
+            qCritical() << "Errors while generating files.";
+            return 2;
+        }
     }
 
     if (!fwPackIn.isEmpty()) {

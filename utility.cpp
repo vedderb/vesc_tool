@@ -1342,7 +1342,11 @@ bool Utility::createParamParserC(ConfigParams *params, QString configName, QStri
     outHeader << "#include <stdbool.h>\n\n";
 
     outHeader << "// Constants\n";
-    outHeader << "#define " << signatureString << "\t\t" << params->getSignature() << "\n\n";
+    outHeader << "#define " << signatureString << "\t\t" << params->getSignature() << "\n";
+
+    uint32_t serializedLength = 0;
+    ok = calculateSerializedLength(params, serializedLength) && ok;
+    outHeader << "#define SERIALIZED_CONFIG_LENGTH\t" << serializedLength << "\n\n";
 
     outHeader << "// Functions\n";
     outHeader << "int32_t " << prefix << "_serialize_" << configName.toLower() << "(uint8_t *buffer, const " << configName << " *conf);\n";
@@ -1927,6 +1931,85 @@ QVector<int> Utility::scanCanVescOnly(VescInterface *vesc)
     }
 
     return res;
+}
+
+bool Utility::calculateSerializedLength(ConfigParams *params, uint32_t &length) {
+    QStringList serialOrder = params->getSerializeOrder();
+
+    length = 4; // 4-byte signature always added at the start
+
+    bool ok = true;
+    for (int i = 0;i < serialOrder.size();i++) {
+        QString name = serialOrder.at(i);
+
+        ConfigParam *p = params->getParam(name);
+
+        if (p) {
+            switch (p->type) {
+            case CFG_T_BOOL:
+            case CFG_T_ENUM:
+            case CFG_T_BITFIELD:
+                length += 1;
+                break;
+
+            case CFG_T_INT:
+                switch (p->vTx) {
+                case VESC_TX_UINT8:
+                case VESC_TX_INT8:
+                    length += 1;
+                    break;
+
+                case VESC_TX_UINT16:
+                case VESC_TX_INT16:
+                    length += 2;
+                    break;
+
+                case VESC_TX_UINT32:
+                case VESC_TX_INT32:
+                    length += 4;
+                    break;
+
+                default:
+                    qWarning() << "Serialization type not supported";
+                    ok = false;
+                    break;
+                }
+                break;
+
+            case CFG_T_DOUBLE:
+                switch (p->vTx) {
+                case VESC_TX_DOUBLE16:
+                    length += 2;
+                    break;
+
+                case VESC_TX_DOUBLE32:
+                case VESC_TX_DOUBLE32_AUTO:
+                    length += 4;
+                    break;
+
+                default:
+                    qWarning() << "Serialization type not supported";
+                    ok = false;
+                    break;
+                }
+                break;
+
+            case CFG_T_QSTRING:
+                length += p->maxLen + 1;
+                break;
+
+            default:
+                qWarning() << name << ": type not supported.";
+                ok = false;
+                break;
+            }
+        } else {
+            qWarning() << name << "not found.";
+            ok = false;
+        }
+    }
+
+    return ok;
 }
 
 bool Utility::serialFunc(ConfigParams *params, QTextStream &s) {

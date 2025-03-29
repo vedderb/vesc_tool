@@ -159,6 +159,7 @@ signals:
 public slots:
 
 private:
+    static bool calculateSerializedLength(ConfigParams *params, uint32_t &length);
     static bool serialFunc(ConfigParams *params, QTextStream &s);
     static bool deserialFunc(ConfigParams *params, QTextStream &s);
     static bool defaultFunc(ConfigParams *params, QTextStream &s);

@@ -1977,7 +1977,7 @@ void Utility::serialFunc(ConfigParams *params, QTextStream &s) {
                     break;
 
                 default:
-                    qWarning() << "Serialization type not supporter";
+                    qWarning() << "Serialization type not supported";
                     break;
                 }
                 break;
@@ -1997,7 +1997,7 @@ void Utility::serialFunc(ConfigParams *params, QTextStream &s) {
                     break;
 
                 default:
-                    qWarning() << "Serialization type not supporter";
+                    qWarning() << "Serialization type not supported";
                     break;
                 }
                 break;
@@ -2070,7 +2070,7 @@ void Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
                     break;
 
                 default:
-                    qWarning() << "Serialization type not supporter";
+                    qWarning() << "Serialization type not supported";
                     break;
                 }
                 break;
@@ -2091,7 +2091,7 @@ void Utility::deserialFunc(ConfigParams *params, QTextStream &s) {
                     break;
 
                 default:
-                    qWarning() << "Serialization type not supporter";
+                    qWarning() << "Serialization type not supported";
                     break;
                 }
                 break;

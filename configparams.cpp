@@ -1327,6 +1327,7 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
         }
     }
 
+    bool ok = true;
     if (nameFound) {
         while (stream.readNextStartElement()) {
             QString nameFirst = stream.name().toString();
@@ -1389,12 +1390,14 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
                             p.vTxDoubleScale = stream.readElementText().toDouble();
                         } else {
                             qWarning() << "Parameter not found: " << name;
+                            ok = false;
                             stream.skipCurrentElement();
                         }
 
                         if (stream.hasError()) {
                             qWarning() << "XML ERROR :" << stream.errorString();
                             qWarning() << stream.lineNumber() << stream.columnNumber();
+                            ok = false;
                         }
                     }
 
@@ -1409,6 +1412,7 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
                         mSerializeOrder.append(stream.readElementText());
                     } else {
                         qWarning() << "Parameter not found: " << name;
+                        ok = false;
                         stream.skipCurrentElement();
                     }
                 }
@@ -1438,32 +1442,42 @@ bool ConfigParams::setParamsXML(QXmlStreamReader &stream)
                                                 addParamToSubgroup(group, subgroup, stream.readElementText());
                                             } else {
                                                 qWarning() << "Parameter not found: " << name3;
+                                                ok = false;
                                                 stream.skipCurrentElement();
                                             }
                                         }
                                     } else {
                                         qWarning() << "Parameter not found: " << name2;
+                                        ok = false;
                                         stream.skipCurrentElement();
                                     }
                                 }
                             } else {
                                 qWarning() << "Parameter not found: " << name;
+                                ok = false;
                                 stream.skipCurrentElement();
                             }
                         }
                     } else {
                         qWarning() << "Parameter not found: " << name0;
+                        ok = false;
                         stream.skipCurrentElement();
                     }
                 }
             } else {
                 qWarning() << "Parameter not found: " << nameFirst;
+                ok = false;
                 stream.skipCurrentElement();
             }
         }
 
-        mXmlStatus = tr("OK");
-        return true;
+        if (ok && !stream.hasError()) {
+            mXmlStatus = tr("OK");
+            return true;
+        } else {
+            mXmlStatus = tr("Error");
+            return false;
+        }
     } else {
         mXmlStatus = tr("tag <b>%1</b> not found").arg(configName);
         qWarning() << mXmlStatus;

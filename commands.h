@@ -86,7 +86,14 @@ public:
     Q_INVOKABLE double getFilePercentage() const;
     Q_INVOKABLE double getFileSpeed() const;
 
+    Q_INVOKABLE void samplePrintQml(int mode, int sample_len, int dec, bool raw) {
+        emit sampleDataQmlStarted(sample_len);
+        samplePrint((debug_sampling_mode)mode, sample_len, dec, raw);
+    }
+
 signals:
+    void sampleDataQmlStarted(int sample_len);
+
     void dataToSend(QByteArray &data);
 
     void fwVersionReceived(FW_RX_PARAMS params);

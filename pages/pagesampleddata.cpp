@@ -122,6 +122,11 @@ void PageSampledData::setVesc(VescInterface *vesc)
     if (mVesc) {
         connect(mVesc->commands(), SIGNAL(samplesReceived(QByteArray)),
                 this, SLOT(samplesReceived(QByteArray)));
+
+        connect(mVesc->commands(), &Commands::sampleDataQmlStarted, [this](int samples) {
+            clearBuffers();
+            mSamplesToWait = samples;
+        });
     }
 }
 

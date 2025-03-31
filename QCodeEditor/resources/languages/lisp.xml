@@ -404,6 +404,7 @@
 <name>conf-restore-mc</name>
 <name>conf-restore-app</name>
 <name>conf-dc-cal</name>
+<name>conf-dc-cal-set</name>
 <name>conf-get-limits</name>
 <name>free</name>
 <name>bufcreate</name>
@@ -532,6 +533,7 @@
 <name>qml-write</name>
 <name>shutdown-hold</name>
 <name>const-heap-erase</name>
+<name>override-speed</name>
 <name>reboot</name>
 <name>color-make</name>
 <name>color-split</name>

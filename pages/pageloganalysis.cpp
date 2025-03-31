@@ -342,7 +342,7 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
                 fieldNum++;
             }
 
-            if (fieldNum >= 0) {
+            if (fieldNum <= 0) {
                 return;
             }
 
@@ -369,8 +369,8 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
         });
 
         connect(mVesc->commands(), &Commands::logStop, [this, updatePlots] () {
-           mLogRtTimer->stop();
-           updatePlots();
+            mLogRtTimer->stop();
+            updatePlots();
         });
 
         connect(mVesc->commands(), &Commands::logConfigField, [this](int fieldInd, LOG_HEADER h) {
@@ -383,7 +383,7 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
             mLogRtHeader[fieldInd] = h;
         });
 
-        connect(mVesc->commands(), &Commands::logSamples, [this](int fieldStart, QVector<double> samples) {
+        connect(mVesc->commands(), &Commands::logSamples, [this, updatePlots](int fieldStart, QVector<double> samples) {
             if (mLogRtAppendTime) {
                 fieldStart++;
             }
@@ -393,6 +393,10 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
                 if (mLogRtSamplesNow.size() > ind) {
                     mLogRtSamplesNow[ind] = samples.at(i);
                 }
+            }
+
+            if (ui->updateRtBox->isChecked()) {
+                updatePlots();
             }
         });
 

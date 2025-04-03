@@ -554,7 +554,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
         } else {
             QString reason;
             switch (resDetect) {
-            case -1: reason = "Peristent fault, check realtime data page"; break;
+            case -1: reason = "Persistent fault, check realtime data page"; break;
             case -10: reason = "Flux linkage detection failed"; break;
             case -50: reason = "CAN detection timeout"; break;
             case -51: reason = "CAN detection failed"; break;

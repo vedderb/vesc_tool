@@ -1995,6 +1995,12 @@ bool Utility::calculateSerializedLength(ConfigParams *params, uint32_t &length) 
                 break;
 
             case CFG_T_QSTRING:
+                if (p->maxLen == 0) {
+                    qWarning() << "Serializing unlimited (max length 0) strings not supported";
+                    ok = false;
+                    break;
+                }
+
                 length += p->maxLen + 1;
                 break;
 

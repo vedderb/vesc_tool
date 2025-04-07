@@ -56,5 +56,6 @@
         <file>res/Lisp/Examples/str_find_any.lisp</file>
         <file>res/Lisp/Examples/hfi_start_analyze.lisp</file>
         <file>res/Lisp/Examples/plot_vesc_tool_current.lisp</file>
+        <file>res/Lisp/Examples/icu_pwm_encoder.lisp</file>
     </qresource>
 </RCC>

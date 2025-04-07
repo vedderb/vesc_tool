@@ -51,6 +51,9 @@ private slots:
     void on_saveButton_clicked();
     void on_loadRefreshButton_clicked();
     void on_writeButton_clicked();
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+    QString convertHtmlToMarkdown(const QString &html);
+#endif
     void on_outputRefreshButton_clicked();
     void on_dlArchiveButton_clicked();
     void on_uninstallButton_clicked();

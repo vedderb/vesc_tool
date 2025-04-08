@@ -57,7 +57,7 @@ void PageAppSettings::reloadParams()
         ConfigParam *p = mVesc->infoConfig()->getParam("app_setting_description");
         if (p != nullptr) {
             QRegExp rx("(<img src=)|( width=)");
-            QStringList htmls = p->description.split(rx);
+            QStringList htmls = p->description.split(rx.cap());
             QStringList imgs = {"app_up", "app_default" , "app_down","Upload-96","Data Backup-96","Help-96"};
             QString theme = "<img src=\"" + Utility::getThemePath() + "icons/";
             QString out;

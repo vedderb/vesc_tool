@@ -276,6 +276,9 @@ public:
     Q_INVOKABLE bool showFwUpdateAvailable() const;
     Q_INVOKABLE void setShowFwUpdateAvailable(bool set);
 
+    Q_INVOKABLE bool isBlockFwSwap() const;
+    Q_INVOKABLE void setBlockFwSwap(bool newBlockFwSwap);
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -468,6 +471,7 @@ private:
     FW_RX_PARAMS mLastFwParams;
     QMap<QString, QPair<QString, int> > mLastFwUuids;
     bool mFwSwapDone;
+    bool mBlockFwSwap;
 
     // Other settings
     bool mUseImperialUnits;

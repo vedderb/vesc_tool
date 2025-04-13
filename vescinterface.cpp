@@ -108,6 +108,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mIgnoreCustomConfigs = false;
 
     mFwSwapDone = false;
+    mBlockFwSwap = false;
 
 #ifdef Q_OS_ANDROID
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
@@ -3475,7 +3476,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
         auto pair = mLastFwUuids[mUuidStrLocal];
 
-        if (pair.second >= 0 && pair.first != mUuidStr && !mFwSwapDone) {
+        if (pair.second >= 0 && pair.first != mUuidStr && !mFwSwapDone && !mBlockFwSwap) {
             FW_RX_PARAMS pRx;
             bool ok = Utility::getFwVersionBlockingCan(this, &pRx, pair.second, 1500);
             if (ok && Utility::uuid2Str(pRx.uuid, false) == pair.first) {
@@ -4202,6 +4203,16 @@ void VescInterface::customConfigRx(int confId, QByteArray data)
                               false, false);
         }
     }
+}
+
+bool VescInterface::isBlockFwSwap() const
+{
+    return mBlockFwSwap;
+}
+
+void VescInterface::setBlockFwSwap(bool newBlockFwSwap)
+{
+    mBlockFwSwap = newBlockFwSwap;
 }
 
 bool VescInterface::showFwUpdateAvailable() const

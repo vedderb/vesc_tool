@@ -405,6 +405,7 @@
 <name>conf-restore-app</name>
 <name>conf-dc-cal</name>
 <name>conf-dc-cal-set</name>
+<name>conf-enc-sincos</name>
 <name>conf-get-limits</name>
 <name>free</name>
 <name>bufcreate</name>

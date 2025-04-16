@@ -42,6 +42,9 @@ public:
     bool lispUpload(QString codeStr, QString editorPath = QDir::currentPath(), bool reduceLisp = false);
     Q_INVOKABLE bool lispUploadFromPath(QString path, bool reduceLisp);
     bool lispStream(VByteArray vb, qint8 mode);
+    Q_INVOKABLE bool lispStreamString(QString str, qint8 mode) {
+        return lispStream(str.toUtf8(), mode);
+    }
     QString lispRead(QWidget *parent, QString &lispPath);
 
     Q_INVOKABLE bool qmlErase(int size);

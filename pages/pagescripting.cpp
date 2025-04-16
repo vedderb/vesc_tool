@@ -242,7 +242,17 @@ void PageScripting::on_runButton_clicked()
 
 void PageScripting::on_stopButton_clicked()
 {
-    ui->qmlWidget->setSource(QUrl(QLatin1String("")));
+    if (mVesc) {
+        ui->qmlWidget->deleteLater();
+        ui->qmlWidget = new QQuickWidget(this);
+        ui->splitter->addWidget(ui->qmlWidget);
+        ui->qmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+        ui->qmlWidget->setClearColor(Utility::getAppQColor("normalBackground"));
+        ui->qmlWidget->engine()->rootContext()->setContextProperty("VescIf", mVesc);
+        ui->qmlWidget->engine()->rootContext()->setContextProperty("QmlUi", this);
+        ui->qmlWidget->engine()->rootContext()->setContextProperty("Utility", &mUtil);
+    }
+
     mQmlUi.stopCustomGui();
 }
 

@@ -932,7 +932,9 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
             res = qmlUpload(qml, pkg.qmlIsFullscreen);
         }
     } else {
-        res = qmlErase(16);
+        if (mVesc && mVesc->isPortConnected() && mVesc->getLastFwRxParams().hasQmlApp) {
+            res = qmlErase(16);
+        }
     }
 
     if (res) {

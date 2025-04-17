@@ -373,9 +373,13 @@ void PageLisp::makeEditorConnections(ScriptEditor *editor)
         on_stopButton_clicked();
     });
     connect(editor->codeEditor(), &QCodeEditor::runBlockTriggered, [this](QString text) {
-        CodeLoader loader;
-        loader.setVesc(mVesc);
-        loader.lispStreamString(text, 0);
+        if (text.length() > 400) {
+            CodeLoader loader;
+            loader.setVesc(mVesc);
+            loader.lispStreamString(text, 0);
+        } else {
+            mVesc->commands()->lispSendReplCmd(text);
+        }
     });
 }
 

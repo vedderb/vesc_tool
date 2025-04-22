@@ -298,6 +298,8 @@ public slots:
 
     void canUpdateBaudAll(int newBaud, int delayMs);
 
+    void motorEstop(int stopMs);
+
 private slots:
     void timerSlot();
 

@@ -107,6 +107,7 @@ QVescCompleter::QVescCompleter(QObject *parent) :
         addItem("fileBlockRemove(path)");
         addItem("getGnss(mask)");
         addItem("lispSendReplCmd(str)");
+        addItem("motorEstop(stopMs)");
         level--;
     };
 

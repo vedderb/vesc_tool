@@ -9,6 +9,7 @@
 * Support building VESC Packages from QML description file.
 * Filter package store based on rules from QML description.
 * Added option to reduce Lisp file size by removing comments, spaces and imports.
+* Disable motor commands after using the stop button or ESC key for 5 seconds (configurable in preferences).
 
 ---
 

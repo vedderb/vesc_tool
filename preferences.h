@@ -89,6 +89,7 @@ private slots:
     void on_okButton_clicked();
     void on_useImperialBox_toggled(bool checked);
     void on_showFwUpdateBox_toggled(bool checked);
+    void on_estopTimeBox_valueChanged(int arg1);
 
 private:
     Ui::Preferences *ui;

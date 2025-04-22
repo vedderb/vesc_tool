@@ -64,6 +64,7 @@ Preferences::Preferences(QWidget *parent) :
     ui->pollImuDataBox->setValue(mSettings.value("poll_rate_imu_data", 50.0).toDouble());
     ui->pollBmsDataBox->setValue(mSettings.value("poll_rate_bms_data", 10.0).toDouble());
     ui->darkModeBox->setChecked(Utility::isDarkMode());
+    ui->estopTimeBox->setValue(mSettings.value("estop_ms", 5000).toInt());
 
 #ifdef HAS_GAMEPAD
     auto confAxis = [](QGamepad *gp, QGamepadManager::GamepadAxis axis) {
@@ -488,5 +489,11 @@ void Preferences::on_showFwUpdateBox_toggled(bool checked)
     if (mVesc) {
         mVesc->setShowFwUpdateAvailable(checked);
     }
+}
+
+void Preferences::on_estopTimeBox_valueChanged(int arg1)
+{
+    mSettings.setValue("estop_ms", arg1);
+    mSettings.sync();
 }
 

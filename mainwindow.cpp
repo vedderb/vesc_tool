@@ -1080,6 +1080,10 @@ void MainWindow::on_actionShutdown_triggered()
 void MainWindow::on_stopButton_clicked()
 {
     mVesc->commands()->setCurrent(0);
+    int estopMs = mSettings.value("estop_ms", 5000).toInt();
+    if (estopMs > 0) {
+        mVesc->commands()->motorEstop(estopMs);
+    }
     mPageExperiments->stop();
     ui->actionSendAlive->setChecked(false);
 }

@@ -2297,6 +2297,14 @@ void Commands::canUpdateBaudAll(int newBaud, int delayMs)
     emitData(vb);
 }
 
+void Commands::motorEstop(int stopMs)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_MOTOR_ESTOP);
+    vb.vbAppendUint16(stopMs);
+    emitData(vb);
+}
+
 void Commands::timerSlot()
 {
     if (mTimeoutFwVer > 0) mTimeoutFwVer--;

@@ -914,6 +914,26 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
     return pkg;
 }
 
+VescPackage CodeLoader::unpackVescPackage(QString path)
+{
+    if (path.startsWith("file:/")) {
+        path.remove(0, 6);
+    }
+
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly)) {
+        if (mVesc) {
+            mVesc->emitMessageDialog(tr("Unpack VESC Package"),
+                                     tr("Could not open package file for reading."),
+                                     false, false);
+        }
+
+        return VescPackage();
+    }
+
+    return unpackVescPackage(f.readAll());
+}
+
 bool CodeLoader::installVescPackage(VescPackage pkg)
 {
     if (!pkg.loadOk) {

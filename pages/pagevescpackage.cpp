@@ -294,7 +294,28 @@ void PageVescPackage::on_writeButton_clicked()
         }
     });
 
-    mLoader.installVescPackageFromPath(ui->loadEdit->text());
+    auto pkg = mLoader.unpackVescPackage(ui->loadEdit->text());
+
+    if (!pkg.loadOk) {
+        disconnect(conn1);
+        return;
+    }
+
+    if (mLoader.shouldShowPackage(pkg)) {
+        mLoader.installVescPackage(pkg);
+    } else {
+        QMessageBox::StandardButton reply =
+            QMessageBox::warning(this,
+                                 tr("Incompatible Package"),
+                                 tr("The selected package reports that it is not compatible with "
+                                    "the connected device. Do you want to install it anyway?"),
+                                 QMessageBox::Yes | QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Yes) {
+            mLoader.installVescPackage(pkg);
+        }
+    }
+
     disconnect(conn1);
 }
 

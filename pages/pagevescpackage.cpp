@@ -294,7 +294,7 @@ void PageVescPackage::on_writeButton_clicked()
         }
     });
 
-    auto pkg = mLoader.unpackVescPackage(ui->loadEdit->text());
+    auto pkg = mLoader.unpackVescPackageFromPath(ui->loadEdit->text());
 
     if (!pkg.loadOk) {
         disconnect(conn1);

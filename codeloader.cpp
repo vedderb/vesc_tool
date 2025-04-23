@@ -851,7 +851,7 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
     // That does not matter in practice and changing that now breaks
     // compatibility.
     if (vb.vbPopFrontString() != "VESC Packet") {
-        qWarning() << "Invalid VESC Packet";
+        qWarning() << "Invalid VESC Package";
         return pkg;
     }
 
@@ -914,7 +914,7 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
     return pkg;
 }
 
-VescPackage CodeLoader::unpackVescPackage(QString path)
+VescPackage CodeLoader::unpackVescPackageFromPath(QString path)
 {
     if (path.startsWith("file:/")) {
         path.remove(0, 6);
@@ -931,7 +931,17 @@ VescPackage CodeLoader::unpackVescPackage(QString path)
         return VescPackage();
     }
 
-    return unpackVescPackage(f.readAll());
+    auto pkg = unpackVescPackage(f.readAll());
+
+    if (!pkg.loadOk) {
+        if (mVesc) {
+            mVesc->emitMessageDialog(tr("Unpack VESC Package"),
+                                     tr("Invalid package file."),
+                                     false, false);
+        }
+    }
+
+    return pkg;
 }
 
 bool CodeLoader::installVescPackage(VescPackage pkg)

@@ -668,7 +668,6 @@ Item {
             anchors.fill: parent
             anchors.margins: 5
             anchors.bottomMargin: 50
-            dialogParent: parent
         }
     }
 }

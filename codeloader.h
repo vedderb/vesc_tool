@@ -53,7 +53,7 @@ public:
 
     QByteArray packVescPackage(VescPackage pkg);
     VescPackage unpackVescPackage(QByteArray data);
-    VescPackage unpackVescPackage(QString path);
+    Q_INVOKABLE VescPackage unpackVescPackageFromPath(QString path);
     bool installVescPackage(VescPackage pkg);
     Q_INVOKABLE bool installVescPackage(QByteArray data);
     Q_INVOKABLE bool installVescPackageFromPath(QString path);

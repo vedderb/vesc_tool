@@ -291,38 +291,27 @@ Item {
                             selectExisting: true
                             selectMultiple: false
                             onAccepted: {
-                                workaroundTimerFile.pkgPath = fileUrl.toString()
-                                close()
-                                parent.forceActiveFocus()
+                                var pkg = mLoader.unpackVescPackageFromPath(fileUrl.toString())
 
-                                disableDialog()
-                                workaroundTimerFile.start()
+                                if (!pkg.loadOk) {
+                                    return
+                                }
+
+                                var line1 = pkg.description.slice(0, pkg.description.indexOf("\n"))
+                                if (line1.toUpperCase().includes("<!DOCTYPE HTML PUBLIC")) {
+                                    installFromPathText.text = pkg.description
+                                } else {
+                                    installFromPathText.text = Utility.md2html(pkg.description)
+                                }
+
+                                installPkgCompatibleText.visible = !mLoader.shouldShowPackage(pkg)
+                                workaroundTimerFile.pkg = pkg
+                                installFromPathDialog.open()
                             }
 
                             onRejected: {
                                 close()
                                 parent.forceActiveFocus()
-                            }
-                        }
-
-                        Timer {
-                            property string pkgPath: ""
-                            id: workaroundTimerFile
-                            interval: 0
-                            repeat: false
-                            running: false
-                            onTriggered: {
-                                if (mLoader.installVescPackageFromPath(pkgPath)) {
-                                    enableDialog()
-                                    VescIf.emitMessageDialog("Install Package",
-                                                             "Installation Done!",
-                                                             true, false)
-                                } else {
-                                    enableDialog()
-                                    VescIf.emitMessageDialog("Install Package",
-                                                             "Installation failed",
-                                                             false, false)
-                                }
                             }
                         }
                     }
@@ -359,6 +348,108 @@ Item {
         ProgressBar {
             anchors.fill: parent
             indeterminate: visible
+        }
+    }
+
+    Dialog {
+        title: "Install Package"
+
+        id: installFromPathDialog
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        width: parent.width - 20 - notchLeft - notchRight
+        height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
+        x: (parent.width - width) / 2
+        y: (parent.height - height + notchTop) / 2
+        parent: dialogParent
+
+        ColumnLayout {
+            anchors.fill: parent
+
+            ScrollView {
+                id: vescDialogScroll
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                contentWidth: availableWidth
+
+                Text {
+                    id: installFromPathText
+                    color: {color = Utility.getAppHexColor("lightText")}
+                    linkColor: {linkColor = Utility.getAppHexColor("lightAccent")}
+                    verticalAlignment: Text.AlignVCenter
+                    anchors.fill: parent
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    textFormat: Text.RichText
+                    onLinkActivated: {
+                        Qt.openUrlExternally(link)
+                    }
+                }
+            }
+
+            Text {
+                id: installPkgCompatibleText
+                visible: false
+                color: {color = Utility.getAppHexColor("red")}
+                verticalAlignment: Text.AlignVCenter
+                Layout.fillWidth: true
+                font.bold: true
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                text: "Warning: This package is NOT compatble with the connected device. " +
+                      "Install it only if you know what you are doing!"
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 500
+                    text: "Install Package"
+
+                    onClicked: {
+                        disableDialog()
+                        installFromPathDialog.close()
+                        workaroundTimerFile.start()
+                    }
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 500
+                    text: "Cancel"
+
+                    onClicked: {
+                        installFromPathDialog.close()
+                    }
+                }
+            }
+
+            Timer {
+                property var pkg: []
+                id: workaroundTimerFile
+                interval: 0
+                repeat: false
+                running: false
+                onTriggered: {
+                    if (mLoader.installVescPackage(pkg.compressedData)) {
+                        enableDialog()
+                        VescIf.emitMessageDialog("Install Package",
+                                                 "Installation Done!",
+                                                 true, false)
+                    } else {
+                        enableDialog()
+                        VescIf.emitMessageDialog("Install Package",
+                                                 "Installation failed",
+                                                 false, false)
+                    }
+                }
+            }
         }
     }
 

@@ -206,8 +206,8 @@ void PageLisp::setVesc(VescInterface *vesc)
         ui->debugEdit->insertPlainText(str + "\n");
         ui->debugEdit->moveCursor(QTextCursor::End);
 
-        int maxLines = 5000;
-        int removeLines = 1000;
+        int maxLines = QSettings().value("scripting/replMaxLines", 5000).toInt();
+        int removeLines = maxLines / 5;
 
         if (ui->debugEdit->document()->lineCount() > maxLines) {
             QString txt = ui->debugEdit->toPlainText();

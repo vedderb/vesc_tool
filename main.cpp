@@ -186,8 +186,8 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("tertiary1",QColor(229, 207, 51));
         Utility::setAppQColor("tertiary2",QColor(51, 180, 229));
         Utility::setAppQColor("tertiary3",QColor(136, 51, 229));
-        Utility::setAppQColor("midAccent", QColor(0,98,153));
-        Utility::setAppQColor("darkAccent", QColor(0,69,112));
+        Utility::setAppQColor("midAccent", QColor(0,107,153));
+        Utility::setAppQColor("darkAccent", QColor(0,75,107));
         Utility::setAppQColor("pink", QColor(219,98,139));
         Utility::setAppQColor("red", QColor(200,52,52));
         Utility::setAppQColor("orange", QColor(206,125,44));
@@ -213,8 +213,8 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("tertiary1",QColor(229, 207, 51));
         Utility::setAppQColor("tertiary2",QColor(51, 180, 229));
         Utility::setAppQColor("tertiary3",QColor(136, 51, 229));
-        Utility::setAppQColor("midAccent", QColor(0,114,178));
-        Utility::setAppQColor("darkAccent", QColor(0,161,221));
+        Utility::setAppQColor("midAccent", QColor(0,107,153));
+        Utility::setAppQColor("darkAccent", QColor(0,155,222));
         Utility::setAppQColor("pink", QColor(219,98,139));
         Utility::setAppQColor("red", QColor(200,52,52));
         Utility::setAppQColor("orange", QColor(206,125,44));

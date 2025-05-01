@@ -105,7 +105,9 @@ Item {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
             Layout.bottomMargin: 0
-            source: "qrc" + Utility.getThemePath() + "/logo.png"
+            source: Qt.platform.os === "android" || Qt.platform.os === "ios"
+                    ? "qrc" + Utility.getThemePath() + "/logo.png"
+                    : "qrc" + Utility.getThemePath() + "/symbol_v_wide.png"
             DragHandler {
                 id: handler
                 target: rootItem

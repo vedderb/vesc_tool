@@ -328,5 +328,7 @@
         <file>res/+theme_light/icons/Connected-hl-96.png</file>
         <file>res/icons/glow.png</file>
         <file>res/+theme_light/icons/glow.png</file>
+        <file>res/symbol_v_wide.png</file>
+        <file>res/+theme_light/symbol_v_wide.png</file>
     </qresource>
 </RCC>

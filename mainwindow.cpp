@@ -1710,6 +1710,11 @@ void MainWindow::reloadPages()
     ui->pageList->setGridSize(QSize(0.85*width , height));
     ui->pageWidget->setCurrentIndex(0);
 
+    // Adjust palette for pageList
+    QPalette menuPalette = ui->pageList->palette();
+    menuPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("brightHighlightActive"));
+    menuPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("brightHighlightInactive"));
+    ui->pageList->setPalette(menuPalette);
 }
 
 void MainWindow::checkUdev()

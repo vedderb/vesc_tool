@@ -198,6 +198,8 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("magenta", QColor(157,127,210));
         Utility::setAppQColor("white", QColor(255,255,255));
         Utility::setAppQColor("black", QColor(0,0,0));
+        Utility::setAppQColor("brightHighlightActive", QColor(254,83,19));
+        Utility::setAppQColor("brightHighlightInactive", QColor(254,83,19));
     } else {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2.conf");
 
@@ -225,6 +227,8 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("magenta", QColor(157,127,210));
         Utility::setAppQColor("white", QColor(255,255,255));
         Utility::setAppQColor("black", QColor(0,0,0));
+        Utility::setAppQColor("brightHighlightActive", QColor(242,118,72));
+        Utility::setAppQColor("brightHighlightInactive", QColor(242,118,72));
     }
 
     // DPI settings
@@ -1590,6 +1594,7 @@ int main(int argc, char *argv[])
             lightPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
             lightPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("midAccent"));
             qApp->setPalette(lightPalette);
+            qApp->setStyleSheet("");
         }
 
         // Register this to not stop on the import statement when reusing components

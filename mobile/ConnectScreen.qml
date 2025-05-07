@@ -315,7 +315,7 @@ Item {
                             Layout.leftMargin: 10
                             Layout.fillWidth: true
                             opacity: 1.0
-                            color: preferred ? ("#55" + Utility.getAppHexColor("lightAccent").slice(1)) : (Utility.getAppHexColor("lightestBackground") )
+                            color: preferred ? (Utility.getAppHexColor("vescGreenMedium")) : (Utility.getAppHexColor("vescGreenDark") )
                             height: column.height + 10
                             radius: height / 2
 

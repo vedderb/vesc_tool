@@ -198,8 +198,13 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("magenta", QColor(157,127,210));
         Utility::setAppQColor("white", QColor(255,255,255));
         Utility::setAppQColor("black", QColor(0,0,0));
-        Utility::setAppQColor("brightHighlightActive", QColor(254,83,19));
-        Utility::setAppQColor("brightHighlightInactive", QColor(254,83,19));
+        Utility::setAppQColor("brightHighlightActive", QColor(224,89,37));
+        Utility::setAppQColor("brightHighlightInactive", QColor(224,89,37));
+        Utility::setAppQColor("vescGreen", QColor(13,177,75));
+        Utility::setAppQColor("vescGreenDark", QColor(37,86,56));
+        Utility::setAppQColor("vescGreenMedium", QColor(35,104,61));
+        Utility::setAppQColor("vescBlue", QColor(0,160,227));
+        Utility::setAppQColor("vescBlueDark", QColor(0,106,150));
     } else {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2.conf");
 
@@ -229,6 +234,10 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("black", QColor(0,0,0));
         Utility::setAppQColor("brightHighlightActive", QColor(242,118,72));
         Utility::setAppQColor("brightHighlightInactive", QColor(242,118,72));
+        Utility::setAppQColor("vescGreenDark", QColor(14,135,59));
+        Utility::setAppQColor("vescGreenMedium", QColor(24,166,77));
+        Utility::setAppQColor("vescBlue", QColor(0,160,227));
+        Utility::setAppQColor("vescBlueDark", QColor(0,106,150));
     }
 
     // DPI settings

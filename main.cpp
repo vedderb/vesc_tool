@@ -186,8 +186,8 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("tertiary1",QColor(229, 207, 51));
         Utility::setAppQColor("tertiary2",QColor(51, 180, 229));
         Utility::setAppQColor("tertiary3",QColor(136, 51, 229));
-        Utility::setAppQColor("midAccent", QColor(0,98,153));
-        Utility::setAppQColor("darkAccent", QColor(0,69,112));
+        Utility::setAppQColor("midAccent", QColor(0,107,153));
+        Utility::setAppQColor("darkAccent", QColor(0,75,107));
         Utility::setAppQColor("pink", QColor(219,98,139));
         Utility::setAppQColor("red", QColor(200,52,52));
         Utility::setAppQColor("orange", QColor(206,125,44));
@@ -198,6 +198,13 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("magenta", QColor(157,127,210));
         Utility::setAppQColor("white", QColor(255,255,255));
         Utility::setAppQColor("black", QColor(0,0,0));
+        Utility::setAppQColor("brightHighlightActive", QColor(224,89,37));
+        Utility::setAppQColor("brightHighlightInactive", QColor(224,89,37));
+        Utility::setAppQColor("vescGreen", QColor(13,177,75));
+        Utility::setAppQColor("vescGreenDark", QColor(37,86,56));
+        Utility::setAppQColor("vescGreenMedium", QColor(35,104,61));
+        Utility::setAppQColor("vescBlue", QColor(0,160,227));
+        Utility::setAppQColor("vescBlueDark", QColor(0,106,150));
     } else {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2.conf");
 
@@ -213,8 +220,8 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("tertiary1",QColor(229, 207, 51));
         Utility::setAppQColor("tertiary2",QColor(51, 180, 229));
         Utility::setAppQColor("tertiary3",QColor(136, 51, 229));
-        Utility::setAppQColor("midAccent", QColor(0,114,178));
-        Utility::setAppQColor("darkAccent", QColor(0,161,221));
+        Utility::setAppQColor("midAccent", QColor(0,107,153));
+        Utility::setAppQColor("darkAccent", QColor(0,155,222));
         Utility::setAppQColor("pink", QColor(219,98,139));
         Utility::setAppQColor("red", QColor(200,52,52));
         Utility::setAppQColor("orange", QColor(206,125,44));
@@ -225,6 +232,12 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("magenta", QColor(157,127,210));
         Utility::setAppQColor("white", QColor(255,255,255));
         Utility::setAppQColor("black", QColor(0,0,0));
+        Utility::setAppQColor("brightHighlightActive", QColor(242,118,72));
+        Utility::setAppQColor("brightHighlightInactive", QColor(242,118,72));
+        Utility::setAppQColor("vescGreenDark", QColor(14,135,59));
+        Utility::setAppQColor("vescGreenMedium", QColor(24,166,77));
+        Utility::setAppQColor("vescBlue", QColor(0,160,227));
+        Utility::setAppQColor("vescBlueDark", QColor(0,106,150));
     }
 
     // DPI settings
@@ -1590,6 +1603,7 @@ int main(int argc, char *argv[])
             lightPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("darkAccent"));
             lightPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("midAccent"));
             qApp->setPalette(lightPalette);
+            qApp->setStyleSheet("");
         }
 
         // Register this to not stop on the import statement when reusing components

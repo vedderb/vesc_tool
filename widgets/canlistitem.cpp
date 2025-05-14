@@ -82,6 +82,12 @@ CANListItem::CANListItem(FW_RX_PARAMS p,
     layout->addSpacing(4);
 
     this->setLayout(layout);
+
+    // Adjust palette for CANListItem
+    QPalette canListPalette = parent->palette();
+    canListPalette.setColor(QPalette::Active,QPalette::Highlight,Utility::getAppQColor("brightHighlightActive"));
+    canListPalette.setColor(QPalette::Inactive,QPalette::Highlight,Utility::getAppQColor("brightHighlightInactive"));
+    parent->setPalette(canListPalette);
 }
 
 void CANListItem::setName(const QString &name)

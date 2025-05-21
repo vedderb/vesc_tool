@@ -335,6 +335,7 @@ private:
     QVector<int> mTimeoutCustomConf;
     int mTimeoutBmsVal;
     int mTimeoutStats;
+    int mTimeoutLbmStats;
 
     double mFilePercentage;
     double mFileSpeed;

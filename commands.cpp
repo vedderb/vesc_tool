@@ -1010,6 +1010,7 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_LISP_GET_STATS: {
+        mTimeoutLbmStats = 0;
         LISP_STATS stats;
         stats.cpu_use = vb.vbPopFrontDouble16(1e2);
         stats.heap_use = vb.vbPopFrontDouble16(1e2);
@@ -2213,6 +2214,12 @@ void Commands::lispSetRunning(bool running)
 
 void Commands::lispGetStats(bool all)
 {
+    if (mTimeoutLbmStats > 0) {
+        return;
+    }
+
+    mTimeoutLbmStats = mTimeoutCount;
+
     VByteArray vb;
     vb.vbAppendUint8(COMM_LISP_GET_STATS);
     vb.vbAppendInt8(all);
@@ -2334,6 +2341,7 @@ void Commands::timerSlot()
 
     if (mTimeoutBmsVal > 0) mTimeoutBmsVal--;
     if (mTimeoutStats > 0) mTimeoutStats--;
+    if (mTimeoutLbmStats > 0) mTimeoutLbmStats--;
 }
 
 void Commands::emitData(QByteArray data)

@@ -306,6 +306,7 @@ Item {
             height: parent.height
             width: parent.width
             opened: true
+            fullLogo: false
 
             Component.onCompleted: {
                 VescIf.bleDevice().emitScanDone()

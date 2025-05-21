@@ -743,6 +743,7 @@ ApplicationWindow {
             height: parent.height
             width: parent.width
             opened: true
+            fullLogo: true
 
             Component.onCompleted: {
                 startBleScan()

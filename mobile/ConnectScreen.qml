@@ -34,6 +34,7 @@ Item {
     property bool opened: true
     property bool pingTcpHub: false
     property bool scanning: false
+    property bool fullLogo: true
 
     onOpenedChanged: {
         if(opened){
@@ -105,7 +106,9 @@ Item {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
             Layout.bottomMargin: 0
-            source: "qrc" + Utility.getThemePath() + "/logo.png"
+            source: fullLogo
+                    ? "qrc" + Utility.getThemePath() + "/logo.png"
+                    : "qrc" + Utility.getThemePath() + "/symbol_v_wide.png"
             DragHandler {
                 id: handler
                 target: rootItem
@@ -313,7 +316,7 @@ Item {
                             Layout.leftMargin: 10
                             Layout.fillWidth: true
                             opacity: 1.0
-                            color: preferred ? ("#55" + Utility.getAppHexColor("lightAccent").slice(1)) : (Utility.getAppHexColor("lightestBackground") )
+                            color: preferred ? (Utility.getAppHexColor("vescGreenMedium")) : (Utility.getAppHexColor("vescGreenDark") )
                             height: column.height + 10
                             radius: height / 2
 

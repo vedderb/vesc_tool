@@ -38,7 +38,7 @@ PageListItem::PageListItem(QString name,
     setGroupIcon(groupIcon);
 
     QHBoxLayout *layout = new QHBoxLayout;
-    layout->setMargin(0);
+    //layout->setMargin(0);
 
     layout->addSpacerItem(mSpaceStart);
     layout->addWidget(mIconLabel);

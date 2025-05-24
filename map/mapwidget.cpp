@@ -1694,7 +1694,8 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
     const QColor zeroAxisColor = QColor(200,52,52);
     const QColor firstAxisColor = Qt::gray;
     const QColor secondAxisColor = Qt::blue;
-    const QColor textColor = QPalette::Foreground;
+    //const QColor textColor = QPalette::Foreground;
+    const QColor textColor = QPalette::Window;
 
     // Grid boundries in mm
     const double xStart = -ceil(width / stepGrid / mScaleFactor) * stepGrid - ceil(mXOffset / stepGrid / mScaleFactor) * stepGrid;

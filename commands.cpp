@@ -51,6 +51,8 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mTimeoutDecChuk = 0;
     mTimeoutPingCan = 0;
     mTimeoutBmsVal = 0;
+    mTimeoutStats = 0;
+    mTimeoutLbmStats = 0;
 
     mFilePercentage = 0.0;
     mFileSpeed = 0.0;

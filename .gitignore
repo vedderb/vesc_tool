@@ -50,3 +50,6 @@ build_android_signed
 
 res/firmwares/*/
 /build
+
+# Nix output
+/result

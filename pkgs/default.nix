@@ -3,10 +3,17 @@
   src,
   bldcSrc,
   fwBoards ? [ ],
+
+  gcc-arm-embedded-7,
 }:
 rec {
   vesc-tool = pkgs.callPackage ./vesc-tool {
-    inherit src bldcSrc fwBoards;
+    inherit
+      src
+      bldcSrc
+      fwBoards
+      gcc-arm-embedded-7
+      ;
     kind = "original";
   };
   vesc-tool-platinum = vesc-tool.override { kind = "platinum"; };
@@ -17,7 +24,7 @@ rec {
   vesc-tool-free = vesc-tool.override { kind = "free"; };
 
   bldc-fw = pkgs.callPackage ./vesc-tool/bldc-fw.nix {
-    inherit fwBoards;
+    inherit fwBoards gcc-arm-embedded-7;
     src = bldcSrc;
   };
 }

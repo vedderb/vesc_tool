@@ -5,7 +5,11 @@
   # targets without the "fw_" prefix.
   # Can also be the string "all", which builds all standard board firmwares.
   fwBoards ? [ ],
-  pkgs,
+
+  gcc-arm-embedded-7,
+  git,
+  python3,
+  stdenv,
 }:
 
 let
@@ -17,7 +21,7 @@ let
     else
       builtins.map (board: "fw_${board}") (fwBoards ++ [ "gp" ]);
 in
-pkgs.stdenv.mkDerivation rec {
+stdenv.mkDerivation rec {
   pname = "bldc-fw";
   version = src.shortRev or src.dirtyShortRev or "unknown";
 
@@ -52,8 +56,8 @@ pkgs.stdenv.mkDerivation rec {
   '';
 
   nativeBuildInputs = [
-    pkgs.gcc-arm-embedded-7
-    pkgs.python3
-    pkgs.git
+    gcc-arm-embedded-7
+    python3
+    git
   ];
 }

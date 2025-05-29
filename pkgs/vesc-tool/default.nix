@@ -9,7 +9,14 @@
   fwBoards ? [ ],
 
   lib,
-  pkgs,
+  callPackage,
+  cmake,
+  copyDesktopItems,
+  gcc-arm-embedded-7,
+  libsForQt5,
+  makeDesktopItem,
+  stdenv,
+  tree,
 }:
 
 let
@@ -30,12 +37,12 @@ let
     }
     .${kind};
 
-  bldc-fw = pkgs.callPackage ./bldc-fw.nix {
+  bldc-fw = callPackage ./bldc-fw.nix {
+    inherit fwBoards gcc-arm-embedded-7;
     src = bldcSrc;
-    inherit fwBoards;
   };
 in
-pkgs.stdenv.mkDerivation {
+stdenv.mkDerivation {
   pname = executableName;
   version = src.shortRev or src.dirtyShortRev or src.rev or src.dirtyRev or "unknown";
 
@@ -45,7 +52,7 @@ pkgs.stdenv.mkDerivation {
   };
 
   desktopItems = [
-    (pkgs.makeDesktopItem {
+    (makeDesktopItem {
       name = "com.vesc-project.";
       exec = executableName;
       icon = "vesc_tool_${kind}.svg";
@@ -83,21 +90,21 @@ pkgs.stdenv.mkDerivation {
     runHook postInstall
   '';
 
-  buildInputs = [ pkgs.libsForQt5.qtbase ];
+  buildInputs = [ libsForQt5.qtbase ];
 
   nativeBuildInputs = [
-    pkgs.cmake
-    pkgs.libsForQt5.qtbase
-    pkgs.libsForQt5.qtquickcontrols2
-    pkgs.libsForQt5.qtgamepad
-    pkgs.libsForQt5.qtconnectivity
-    pkgs.libsForQt5.qtpositioning
-    pkgs.libsForQt5.qtserialport
-    pkgs.libsForQt5.qtgraphicaleffects
-    pkgs.libsForQt5.wrapQtAppsHook
+    cmake
+    libsForQt5.qtbase
+    libsForQt5.qtquickcontrols2
+    libsForQt5.qtgamepad
+    libsForQt5.qtconnectivity
+    libsForQt5.qtpositioning
+    libsForQt5.qtserialport
+    libsForQt5.qtgraphicaleffects
+    libsForQt5.wrapQtAppsHook
 
     # Make the desktop icon work
-    pkgs.copyDesktopItems
-    pkgs.tree
+    copyDesktopItems
+    tree
   ];
 }

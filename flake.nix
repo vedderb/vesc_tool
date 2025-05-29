@@ -25,23 +25,16 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ self.overlays.default ];
         };
         treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
+        selfPkgs = import ./pkgs {
+          inherit pkgs bldcSrc;
+          src = self;
+        };
       in
       {
-        packages = {
-          inherit (pkgs)
-            vesc-tool
-            vesc-tool-free
-            vesc-tool-copper
-            vesc-tool-bronze
-            vesc-tool-silver
-            vesc-tool-gold
-            vesc-tool-platinum
-            ;
-          bldc-fw = pkgs.callPackage ./pkgs/vesc-tool/bldc-fw.nix { src = bldcSrc; };
-          default = pkgs.vesc-tool;
+        packages = selfPkgs // {
+          default = selfPkgs.vesc-tool;
         };
 
         # For `nix fmt`

@@ -2,7 +2,11 @@
   description = "Packages VESC Tool into a flake.";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    # gcc-arm-embedded-7 has been removed from nixpkgs since 25.05 since it's
+    # old and unmaintained. However, this project still uses that version, so we
+    # include an older version of nixpkgs to access it.
+    nixpkgsOld.url = "github:nixos/nixpkgs/nixos-24.11";
     flake-utils.url = "github:numtide/flake-utils";
     treefmt-nix.url = "github:numtide/treefmt-nix";
     bldcSrc = {
@@ -16,6 +20,7 @@
     {
       self,
       nixpkgs,
+      nixpkgsOld,
       flake-utils,
       treefmt-nix,
       bldcSrc,
@@ -25,23 +30,17 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ self.overlays.default ];
         };
         treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
+        selfPkgs = import ./pkgs {
+          inherit pkgs bldcSrc;
+          src = self;
+          gcc-arm-embedded-7 = nixpkgsOld.legacyPackages.${system}.gcc-arm-embedded-7;
+        };
       in
       {
-        packages = {
-          inherit (pkgs)
-            vesc-tool
-            vesc-tool-free
-            vesc-tool-copper
-            vesc-tool-bronze
-            vesc-tool-silver
-            vesc-tool-gold
-            vesc-tool-platinum
-            ;
-          bldc-fw = pkgs.callPackage ./pkgs/vesc-tool/bldc-fw.nix { src = bldcSrc; };
-          default = pkgs.vesc-tool;
+        packages = selfPkgs // {
+          default = selfPkgs.vesc-tool;
         };
 
         # For `nix fmt`
@@ -55,7 +54,7 @@
     )
     // {
       overlays.default = (nixpkgs.lib.makeOverridable (import ./overlay.nix)) {
-        inherit bldcSrc;
+        inherit bldcSrc nixpkgsOld;
         src = self;
       };
       # For development in the nix repl

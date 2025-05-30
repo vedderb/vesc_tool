@@ -35,7 +35,6 @@
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
-#include <QDesktopWidget>
 #include <QFontDatabase>
 #include <QPixmapCache>
 

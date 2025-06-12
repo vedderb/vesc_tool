@@ -106,6 +106,7 @@
 <name>event-ble-rx</name>
 <name>event-wifi-disconnect</name>
 <name>event-esp-now-rx</name>
+<name>event-cmds-data-tx</name>
 <name>stat-speed-avg</name>
 <name>stat-speed-max</name>
 <name>stat-power-avg</name>
@@ -575,5 +576,7 @@
 <name>mutex-create</name>
 <name>mutex-lock</name>
 <name>mutex-unlock</name>
+<name>cmds-start-stop</name>
+<name>cmds-proc</name>
 </section>
 </root>

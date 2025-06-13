@@ -81,6 +81,15 @@ cp build/vesc_express.bin "$BOARD"
 cp build/partition_table/partition-table.bin "$BOARD"
 cp build/bootloader/bootloader.bin "$BOARD"
 
+# Duet
+BOARD="$DIR/res/firmwares_esp/ESP32-C3/Duet"
+cd $FWPATH
+cp "$BOARD/conf_general.h" main/
+idf.py build
+cp build/vesc_express.bin "$BOARD"
+cp build/partition_table/partition-table.bin "$BOARD"
+cp build/bootloader/bootloader.bin "$BOARD"
+
 mv $FWPATH/main/conf_general_tmp.h $FWPATH/main/conf_general.h
 rm -r $FWPATH/build
 

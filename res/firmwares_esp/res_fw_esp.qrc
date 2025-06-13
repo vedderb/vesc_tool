@@ -24,5 +24,8 @@
         <file>ESP32-C3/VL Scope/bootloader.bin</file>
         <file>ESP32-C3/VL Scope/partition-table.bin</file>
         <file>ESP32-C3/VL Scope/vesc_express.bin</file>
+        <file>ESP32-C3/Duet/bootloader.bin</file>
+        <file>ESP32-C3/Duet/partition-table.bin</file>
+        <file>ESP32-C3/Duet/vesc_express.bin</file>
     </qresource>
 </RCC>

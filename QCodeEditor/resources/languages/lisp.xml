@@ -86,6 +86,8 @@
 <name>pin-hall3</name>
 <name>pin-adc1</name>
 <name>pin-adc2</name>
+<name>pin-adc3</name>
+<name>pin-adc4</name>
 <name>pin-ppm</name>
 <name>rate-100k</name>
 <name>rate-200k</name>

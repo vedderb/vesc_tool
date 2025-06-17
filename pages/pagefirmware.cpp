@@ -264,6 +264,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         extraPath = "://res/firmwares_esp/ESP32-C3/VL Scope";
     } else if (params.hw == "Duet Expr") {
         extraPath = "://res/firmwares_esp/ESP32-C3/Duet";
+    } else if (params.hw == "VL Link") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VL Link";
     }
 
     if (!extraPath.isEmpty()) {

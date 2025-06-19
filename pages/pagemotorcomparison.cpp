@@ -314,6 +314,7 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
             QDoubleSpinBox *sb = new QDoubleSpinBox;
             sb->setSingleStep(scaleStep);
             sb->setValue(scale);
+            sb->setMaximum(9999);
             // Prevent mouse wheel focus to avoid changing the selection
             sb->setFocusPolicy(Qt::StrongFocus);
             table->setCellWidget(table->rowCount() - 1, 2, sb);

@@ -142,13 +142,13 @@ QString CodeLoader::reduceLispFile(QString fileData)
     int fileNum = QDir("lispReduceBefore").
                   entryInfoList(QDir::NoFilter, QDir::Name).size();
 
-    QFile fBefore(QString("lispReduceBefore/lispBeforeReduce%1.lisp").arg(fileNum));
+    QFile fBefore(QString("lispReduceBefore/lispBeforeReduce%1.lbm").arg(fileNum));
     if (fBefore.open(QIODevice::WriteOnly | QIODevice::Text)) {
         fBefore.write(fileData.toUtf8());
         fBefore.close();
     }
 
-    QFile fAfter(QString("lispReduceAfter/lispAfterReduce%1.lisp").arg(fileNum));
+    QFile fAfter(QString("lispReduceAfter/lispAfterReduce%1.lbm").arg(fileNum));
     if (fAfter.open(QIODevice::WriteOnly | QIODevice::Text)) {
         fAfter.write(res.toUtf8());
         fAfter.close();
@@ -270,7 +270,9 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath, bool
                                 }
                             }
                         } else {
-                            if (reduceLisp && fi.absoluteFilePath().endsWith(".lisp", Qt::CaseInsensitive)) {
+                            bool hasExtension = fi.absoluteFilePath().endsWith(".lbm", Qt::CaseInsensitive)
+                                || fi.absoluteFilePath().endsWith(".lisp", Qt::CaseInsensitive);
+                            if (reduceLisp && hasExtension) {
                                 fileData = reduceLispFile(QString::fromUtf8(fileData)).toUtf8();
                             }
                             fileData.append('\0'); // Pad with 0 in case it is a text file
@@ -597,7 +599,7 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
                     QString dirName = QFileDialog::getExistingDirectory(parent, tr("Choose Directory"));
 
                     if (!dirName.isEmpty()) {
-                        QFile fileLisp(dirName + "/From VESC.lisp");
+                        QFile fileLisp(dirName + "/From VESC.lbm");
                         if (!fileLisp.exists()) {
                             if (fileLisp.open(QIODevice::WriteOnly)) {
                                 fileLisp.write(res.toUtf8());

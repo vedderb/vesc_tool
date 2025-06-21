@@ -857,7 +857,7 @@ void PageLisp::on_infoButton_clicked()
                        "Reduction enabled   : %3<br>"
                        "<br>"
                        "The sizes include the size of all imports. All "
-                       "imports that end with .lisp are also reduced. "
+                       "imports that end with .lbm or .lisp are also reduced. "
                        "The reduction option can be enabled in the preferences."
                        ).arg(vbNoReduce.size()).
                    arg(vbReduce.size()).

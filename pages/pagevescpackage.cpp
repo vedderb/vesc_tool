@@ -137,7 +137,7 @@ void PageVescPackage::on_chooseLispButton_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Choose Lisp File"), ui->lispEdit->text(),
-                                                    tr("Lisp files (*.lisp)"));
+                                                    tr("Lisp files (*.lbm *.lisp)"));
     if (!filename.isNull()) {
         ui->lispEdit->setText(filename);
     }

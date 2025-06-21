@@ -195,7 +195,7 @@ void ScriptEditor::on_openFileButton_clicked()
 
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     tr("Open %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"), path,
-                                                    mIsModeLisp ? tr("Lisp files (*.lisp)") : tr("QML files (*.qml)"));
+                                                    mIsModeLisp ? tr("Lisp files (*.lbm *.lisp)") : tr("QML files (*.qml)"));
 
     if (!fileName.isEmpty()) {
         QFile file(fileName);
@@ -248,13 +248,20 @@ void ScriptEditor::on_saveAsButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Save %1").arg(mIsModeLisp ? "Lisp" : "Qml"), fileNow(),
-                                                    mIsModeLisp ? tr("Lisp files (*.lisp)") : tr("QML files (*.qml)"));
-
-    QString ending = mIsModeLisp ? ".lisp" : ".qml";
+                                                    mIsModeLisp ? tr("Lisp files (*.lbm *.lisp)") : tr("QML files (*.qml)"));
 
     if (!fileName.isEmpty()) {
-        if (!fileName.endsWith(ending, Qt::CaseInsensitive)) {
-            fileName.append(ending);
+        QString extension = mIsModeLisp ? ".lbm" : ".qml";
+        bool hasExtension;
+        if (mIsModeLisp) {
+            hasExtension = fileName.endsWith(".lbm", Qt::CaseInsensitive)
+                || fileName.endsWith(".lisp", Qt::CaseInsensitive);
+        } else {
+            hasExtension = fileName.endsWith(".qml", Qt::CaseInsensitive);
+        }
+
+        if (!hasExtension) {
+            fileName.append(extension);
         }
 
         QFile file(fileName);

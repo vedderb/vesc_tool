@@ -859,7 +859,8 @@ int main(int argc, char *argv[])
     }
 
     if (!lispPackIn.isEmpty()) {
-        if (!lispPackIn.endsWith(".lisp", Qt::CaseInsensitive)) {
+        if (!lispPackIn.endsWith(".lbm", Qt::CaseInsensitive)
+                && !lispPackIn.endsWith(".lisp", Qt::CaseInsensitive)) {
             qWarning() << "Warning: Unexpected file extension for a lisp-file.";
         }
 

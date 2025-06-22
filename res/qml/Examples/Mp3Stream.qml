@@ -51,7 +51,7 @@ Item {
         Text {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            text: "Sample server running. The play_mp3.lisp example should work now."
+            text: "Sample server running. The play_mp3.lbm example should work now."
             color: "white"
             wrapMode: Text.WordWrap
         }

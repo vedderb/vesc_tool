@@ -112,7 +112,7 @@ PageLisp::PageLisp(QWidget *parent) :
     updateRecentList();
 
     // Load examples
-    foreach (auto &fi, QDir("://res/Lisp/Examples/").entryInfoList(QDir::NoFilter, QDir::Name)) {
+    foreach (auto &fi, QDir("://res/LispBM/Examples/").entryInfoList(QDir::NoFilter, QDir::Name)) {
         QListWidgetItem *item = new QListWidgetItem;
         item->setText(fi.fileName());
         item->setData(Qt::UserRole, fi.filePath());

@@ -229,8 +229,8 @@ void PageLisp::setVesc(VescInterface *vesc)
 
     connect(mVesc->commands(), &Commands::lispRunningResRx, [this](bool ok) {
         if (!ok) {
-            mVesc->emitMessageDialog(tr("Start/Stop Lisp"),
-                                     tr("Start/Stop Lisp failed. Did you forget to upload the code?"), false);
+            mVesc->emitMessageDialog(tr("Start/Stop LispBM"),
+                                     tr("Start/Stop LispBM failed. Did you forget to upload the code?"), false);
         }
     });
 
@@ -511,7 +511,7 @@ void PageLisp::openExample()
         QFile file(item->data(Qt::UserRole).toString());
 
         if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Open Lisp File",
+            QMessageBox::critical(this, "Open LispBM File",
                                   "Could not open example for reading");
             return;
         }
@@ -534,7 +534,7 @@ void PageLisp::openRecentList()
         QFile file(fileName);
 
         if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Open Lisp File",
+            QMessageBox::critical(this, "Open LispBM File",
                                   "Could not open\n " + fileName + " for reading");
             return;
         }
@@ -739,13 +739,13 @@ void PageLisp::on_rescaleButton_clicked()
 
 void PageLisp::on_helpButton_clicked()
 {
-    QString html = "<b>VESC Lisp Editor</b><br><br>"
+    QString html = "<b>VESC LispBM Editor</b><br><br>"
                    ""
                    "For documentation, go to<br>"
                    "<a href=\"https://github.com/vedderb/bldc/blob/master/lispBM/README.md\">https://github.com/vedderb/bldc/blob/master/lispBM/README.md</a><br><br>"
                    ""
                    "You can also join the unofficial VESC Discord server and ask questions "
-                   "in the lisp-scripting chat at<br>"
+                   "in the lisp-and-qml-scripting chat at<br>"
                    "<a href=\"https://discord.gg/JgvV5NwYts\">https://discord.gg/JgvV5NwYts</a><br><br>"
                    "<b>Keyboard Commands</b><br>"
                    "Ctrl + '+'         : Increase font size<br>"

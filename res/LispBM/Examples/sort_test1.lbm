@@ -26,7 +26,7 @@
 (defun test () {
         (var ts (systime))
         (repeat '(sort2 < numbers) 50)
-        (print (list "Lisp" (secs-since ts)))
+        (print (list "LispBM" (secs-since ts)))
         
         (var ts (systime))
         (repeat '(sort < numbers) 50)

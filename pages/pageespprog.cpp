@@ -366,11 +366,11 @@ void PageEspProg::listAllFw()
 void PageEspProg::on_eraseLispButton_clicked()
 {
     ui->eraseLispButton->setEnabled(false);
-    ui->progWidget->setText("Erasing Lisp...");
+    ui->progWidget->setText("Erasing LispBM...");
     ui->progWidget->setValue(0.0);
     mEspFlash.eraseFlash(512 * 1024, ui->lispOffsetBox->value());
     ui->eraseLispButton->setEnabled(true);
-    ui->progWidget->setText("Done erasing Lisp!");
+    ui->progWidget->setText("Done erasing LispBM!");
 }
 
 void PageEspProg::on_eraseQmlButton_clicked()

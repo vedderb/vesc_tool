@@ -102,16 +102,16 @@ static void showHelp()
     qDebug() << "--getCustomConf [confPath] : Connect and read custom configuration 1 and store the XML to confPath.";
     qDebug() << "--setCustomConf [confPath] : Connect and write custom configuration 1 XML from confPath.";
     qDebug() << "--debugOutFile [path] : Print debug output to file with path.";
-    qDebug() << "--uploadLisp [path] : Upload lisp-script.";
+    qDebug() << "--uploadLisp [path] : Upload LispBM script.";
     qDebug() << "--reduceLisp : Reduce LispBM file size by removing comments, spaces and imports.";
-    qDebug() << "--eraseLisp : Erase lisp-script.";
+    qDebug() << "--eraseLisp : Erase LispBM script.";
     qDebug() << "--uploadFirmware [path] : Upload firmware-file from path.";
     qDebug() << "--uploadBootloaderBuiltin : Upload bootloader from generic included bootloaders.";
     qDebug() << "--queryDeviceFwParams : Connect and print out device fw parameters.";
     qDebug() << "--writeFileToSdCard [fileLocal:pathSdcard] : Write file to SD-card.";
     qDebug() << "--packFirmware [fileIn:fileOut] : Pack firmware-file for compatibility with the bootloader. ";
-    qDebug() << "--packLisp [fileIn:fileOut] : Pack lisp-file and the included imports.";
-    qDebug() << "--bridgeAppData : Send app data (such as data from send-data in lisp) to stdout.";
+    qDebug() << "--packLisp [fileIn:fileOut] : Pack LispBM file and the included imports.";
+    qDebug() << "--bridgeAppData : Send app data (such as data from send-data in LispBM) to stdout.";
     qDebug() << "--offscreen : Use offscreen QPA so that X is not required for the CLI-mode.";
     qDebug() << "--downloadPackageArchive : Download package archive to application data directory.";
 }
@@ -861,7 +861,7 @@ int main(int argc, char *argv[])
     if (!lispPackIn.isEmpty()) {
         if (!lispPackIn.endsWith(".lbm", Qt::CaseInsensitive)
                 && !lispPackIn.endsWith(".lisp", Qt::CaseInsensitive)) {
-            qWarning() << "Warning: Unexpected file extension for a lisp-file.";
+            qWarning() << "Warning: Unexpected file extension for a LispBM file.";
         }
 
         QFile fIn(lispPackIn);
@@ -943,7 +943,7 @@ int main(int argc, char *argv[])
         if (!lispPath.isEmpty()) {
             QFile f(lispPath);
             if (!f.open(QIODevice::ReadOnly)) {
-                qWarning() << "Could not open lisp file for reading.";
+                qWarning() << "Could not open LispBM file for reading.";
                 return 1;
             }
 
@@ -951,12 +951,12 @@ int main(int argc, char *argv[])
             pkg.lispData = loader.lispPackImports(f.readAll(), fi.canonicalPath(), reduceLisp);
             // Empty array means an error. Otherwise, CodeLoader.lispPackImports() always returns data.
             if (pkg.lispData.isEmpty()) {
-                qWarning() << "Errors when processing lisp imports.";
+                qWarning() << "Errors when processing LispBM imports.";
                 return 1;
             }
             f.close();
 
-            qDebug() << "Read lisp script done";
+            qDebug() << "Read LispBM script done";
         }
 
         if (!qmlPath.isEmpty()) {
@@ -1158,9 +1158,9 @@ int main(int argc, char *argv[])
 
                 if (eraseLisp) {
                     if (loader.lispErase(16)) {
-                        qDebug() << "Lisp erase OK!";
+                        qDebug() << "LispBM erase OK!";
                     } else {
-                        qWarning() << "Could not erase lisp";
+                        qWarning() << "Could not erase LispBM";
                         exitCode = -10;
                     }
                 }
@@ -1177,23 +1177,23 @@ int main(int argc, char *argv[])
                             if (ok) {
                                 ok = loader.lispUpload(lispData);
                             } else {
-                                qWarning() << "Could not erase lisp";
+                                qWarning() << "Could not erase LispBM";
                                 exitCode = -10;
                             }
                             if (ok) {
-                                qDebug() << "Lisp upload OK!";
+                                qDebug() << "LispBM upload OK!";
                                 vesc->commands()->lispSetRunning(1);
                                 Utility::sleepWithEventLoop(100);
                             } else {
-                                qWarning() << "Could not upload lisp";
+                                qWarning() << "Could not upload LispBM";
                                 exitCode = -11;
                             }
                         } else {
-                            qWarning() << "Empty or invalid lisp-file.";
+                            qWarning() << "Empty or invalid LispBM file.";
                             exitCode = -12;
                         }
                     } else {
-                        qWarning() << "Could not open lisp file for reading.";
+                        qWarning() << "Could not open LispBM file for reading.";
                         exitCode = -13;
                     }
                 }

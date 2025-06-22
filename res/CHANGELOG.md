@@ -1,14 +1,14 @@
 ### 6.06
 #### Released TBD
 * Auto-save UI-state on regular intervals.
-* Movable lisp-tabs and better tab behavior in general.
+* Movable LispBM tabs and better tab behavior in general.
 * Detect file system changes in script editor.
 * Duplicate line shortcut in script editor.
 * Use temperature convention on BMS page.
 * Show Min, Max and Diff voltage on BMS page.
 * Support building VESC Packages from QML description file.
 * Filter package store based on rules from QML description.
-* Added option to reduce Lisp file size by removing comments, spaces and imports.
+* Added option to reduce LispBM file size by removing comments, spaces and imports.
 * Disable motor commands after using the stop button or ESC key for 5 seconds (configurable in preferences).
 * Show dialog with package description in mobile UI when installing from file.
 

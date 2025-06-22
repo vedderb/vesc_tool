@@ -1,4 +1,4 @@
-; Balance robot controller written in lisp
+; Balance robot controller written in LispBM
 
 (defun #abs (x) (if (> x 0) x (- x)))
 

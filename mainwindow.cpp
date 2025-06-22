@@ -693,8 +693,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if (mPageLisp->hasUnsavedTabs()) {
         QMessageBox::StandardButton answer = QMessageBox::question(
                     this,
-                    tr("Unsaved Lisp-Tabs"),
-                    tr("There are unsaved Lisp-tabs open. Do you want to close "
+                    tr("Unsaved LispBM Tabs"),
+                    tr("There are unsaved LispBM tabs open. Do you want to close "
                        "VESC Tool without saving them?"),
                     QMessageBox::Yes | QMessageBox::Cancel
                     );

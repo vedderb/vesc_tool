@@ -194,13 +194,13 @@ void ScriptEditor::on_openFileButton_clicked()
     }
 
     QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"), path,
-                                                    mIsModeLisp ? tr("Lisp files (*.lbm *.lisp)") : tr("QML files (*.qml)"));
+                                                    tr("Open %1 File").arg(mIsModeLisp ? "LispBM" : "Qml"), path,
+                                                    mIsModeLisp ? tr("LispBM files (*.lbm *.lisp)") : tr("QML files (*.qml)"));
 
     if (!fileName.isEmpty()) {
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, tr("Open %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"),
+            QMessageBox::critical(this, tr("Open %1 File").arg(mIsModeLisp ? "LispBM" : "Qml"),
                                   "Could not open\n" + fileName + "\nfor reading");
             return;
         }
@@ -228,7 +228,7 @@ void ScriptEditor::on_saveButton_clicked()
 
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this, tr("Save %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"),
+        QMessageBox::critical(this, tr("Save %1 File").arg(mIsModeLisp ? "LispBM" : "Qml"),
                               "Could not open\n" + fileName + "\nfor writing");
         return;
     }
@@ -247,8 +247,8 @@ void ScriptEditor::on_saveButton_clicked()
 void ScriptEditor::on_saveAsButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save %1").arg(mIsModeLisp ? "Lisp" : "Qml"), fileNow(),
-                                                    mIsModeLisp ? tr("Lisp files (*.lbm *.lisp)") : tr("QML files (*.qml)"));
+                                                    tr("Save %1").arg(mIsModeLisp ? "LispBM" : "Qml"), fileNow(),
+                                                    mIsModeLisp ? tr("LispBM files (*.lbm *.lisp)") : tr("QML files (*.qml)"));
 
     if (!fileName.isEmpty()) {
         QString extension = mIsModeLisp ? ".lbm" : ".qml";
@@ -266,7 +266,7 @@ void ScriptEditor::on_saveAsButton_clicked()
 
         QFile file(fileName);
         if (!file.open(QIODevice::WriteOnly)) {
-            QMessageBox::critical(this, tr("Save %1 File").arg(mIsModeLisp ? "Lisp" : "Qml"),
+            QMessageBox::critical(this, tr("Save %1 File").arg(mIsModeLisp ? "LispBM" : "Qml"),
                                   "Could not open\n" + fileName + "\nfor writing");
             return;
         }

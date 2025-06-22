@@ -136,8 +136,8 @@ void PageVescPackage::on_chooseLoadButton_clicked()
 void PageVescPackage::on_chooseLispButton_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
-                                                    tr("Choose Lisp File"), ui->lispEdit->text(),
-                                                    tr("Lisp files (*.lbm *.lisp)"));
+                                                    tr("Choose LispBM File"), ui->lispEdit->text(),
+                                                    tr("LispBM files (*.lbm *.lisp)"));
     if (!filename.isNull()) {
         ui->lispEdit->setText(filename);
     }
@@ -213,7 +213,7 @@ void PageVescPackage::on_saveButton_clicked()
         QFile f(ui->lispEdit->text());
         if (!f.open(QIODevice::ReadOnly)) {
             mVesc->emitMessageDialog(tr("Save Package"),
-                                     tr("Could not open lisp file for reading."),
+                                     tr("Could not open LispBM file for reading."),
                                      false, false);
             return;
         }
@@ -482,7 +482,7 @@ void PageVescPackage::packageSelected(VescPackage pkg)
         ui->installButton->setToolTip("");
     } else {
         ui->installButton->setToolTip("This is a library, so it is not supposed to be installed. You can use "
-                                      "it from your own LispBM-scripts without installing it.");
+                                      "it from your own LispBM scripts without installing it.");
     }
 }
 

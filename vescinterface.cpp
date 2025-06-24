@@ -106,6 +106,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mCanTmpFwdIdLast = -1;
 
     mIgnoreCustomConfigs = false;
+    mIgnoreTestVersion = false;
 
     mFwSwapDone = false;
     mBlockFwSwap = false;
@@ -587,11 +588,13 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
 #if VT_IS_TEST_VERSION
     QTimer::singleShot(1000, [this]() {
-        emitMessageDialog("VESC Tool Test Version",
-                          "Warning: This is a test version of VESC Tool. The included firmwares are NOT compatible with "
-                          "released firmwares and should only be used with this test version. When using a release version "
-                          "of VESC Tool, the firmware must be upgraded even if the version number is the same.",
-                          false);
+        if (!mIgnoreTestVersion) {
+            emitMessageDialog("VESC Tool Test Version",
+                              "Warning: This is a test version of VESC Tool. The included firmwares are NOT compatible with "
+                              "released firmwares and should only be used with this test version. When using a release version "
+                              "of VESC Tool, the firmware must be upgraded even if the version number is the same.",
+                              false);
+        }
     });
 #endif
 }
@@ -2451,8 +2454,12 @@ bool VescInterface::connectSerial(QString port, int baudrate)
 #ifdef HAS_SERIALPORT
     bool found = false;
     for (auto ser: listSerialPorts()) {
-        if (ser.value<VSerialInfo_t>().systemPath == port) {
+        VSerialInfo_t info = ser.value<VSerialInfo_t>();
+
+        //Allow for partial matches (otherwise on WIN we must specify a strange port path, eg. '\\.\COM4')
+        if (info.systemPath.contains(port, Qt::CaseInsensitive)) {
             found = true;
+            port = info.systemPath;
             break;
         }
     }
@@ -4233,6 +4240,16 @@ bool VescInterface::ignoreCustomConfigs() const
 void VescInterface::setIgnoreCustomConfigs(bool newIgnoreCustomConfigs)
 {
     mIgnoreCustomConfigs = newIgnoreCustomConfigs;
+}
+
+bool VescInterface::ignoreTestVersion() const
+{
+    return mIgnoreTestVersion;
+}
+
+void VescInterface::setIgnoreTestVersion(bool ignore)
+{
+    mIgnoreTestVersion = ignore;
 }
 
 bool VescInterface::reconnectLastCan()

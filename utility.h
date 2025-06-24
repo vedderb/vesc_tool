@@ -52,6 +52,7 @@ public:
     Q_INVOKABLE static QString fwChangeLog();
     Q_INVOKABLE static QString vescToolChangeLog();
     Q_INVOKABLE static QString aboutText();
+    Q_INVOKABLE static QString versionText();
     Q_INVOKABLE static QString uuid2Str(QByteArray uuid, bool space);
     Q_INVOKABLE static bool requestFilePermission();
     Q_INVOKABLE static bool hasLocationPermission();

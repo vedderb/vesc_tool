@@ -267,6 +267,9 @@ public:
     bool ignoreCustomConfigs() const;
     void setIgnoreCustomConfigs(bool newIgnoreCustomConfigs);
 
+    bool ignoreTestVersion() const;
+    void setIgnoreTestVersion(bool ignore);
+
     Q_INVOKABLE bool reconnectLastCan();
     Q_INVOKABLE void setReconnectLastCan(bool set);
 
@@ -482,6 +485,7 @@ private:
     bool mSpeedGaugeUseNegativeValues;
     bool mAskQmlLoad;
     bool mIgnoreCustomConfigs;
+    bool mIgnoreTestVersion;
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);

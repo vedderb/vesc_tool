@@ -77,6 +77,8 @@ static void showHelp()
 {
     qDebug() << "Arguments";
     qDebug() << "-h, --help : Show help text";
+    qDebug() << "--about : Show about text";
+    qDebug() << "--version : Show VESC Tool version information on one line";
     qDebug() << "--tcpServer [port] : Connect to VESC and start TCP server on [port]";
     qDebug() << "--loadQml [file] : Load QML UI from file instead of the regular VESC Tool UI";
     qDebug() << "--loadQmlVesc : Load QML UI from the connected VESC instead of the regular VESC Tool UI";
@@ -364,6 +366,16 @@ int main(int argc, char *argv[])
 
         if ((dash && str.contains('h')) || str == "--help") {
             showHelp();
+            return 0;
+        }
+
+        if (str == "--about") {
+            qDebug() << Utility::aboutText();
+            return 0;
+        }
+
+        if (str == "--version") {
+            qDebug() << Utility::versionText();
             return 0;
         }
 
@@ -1025,6 +1037,8 @@ int main(int argc, char *argv[])
     QmlUi *qmlUi = nullptr;
     QString qmlStr;
 
+    bool serialAutoconnect = vescPort.isEmpty();
+
     QTimer connTimer;
     connTimer.setInterval(1000);
     QObject::connect(&connTimer, &QTimer::timeout, [&]() {
@@ -1038,7 +1052,7 @@ int main(int argc, char *argv[])
             }
 
             bool ok = false;
-            if (vescPort.isEmpty()) {
+            if (serialAutoconnect) {
                 ok = vesc->autoconnect();
             } else {
                 ok = vesc->connectSerial(vescPort);
@@ -1070,6 +1084,8 @@ int main(int argc, char *argv[])
         vesc = new VescInterface;
         vesc->setBlockFwSwap(true);
         vesc->setIgnoreCustomConfigs(!isCustomConf);
+        vesc->setShowFwUpdateAvailable(false);
+        vesc->setIgnoreTestVersion(true);
 
         vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
         Utility::configLoadLatest(vesc);
@@ -1133,7 +1149,7 @@ int main(int argc, char *argv[])
         QTimer::singleShot(10, [&]() {
             int exitCode = 0;
             bool ok = false;
-            if (vescPort.isEmpty()) {
+            if (serialAutoconnect) {
                 ok = vesc->autoconnect();
             } else {
                 ok = vesc->connectSerial(vescPort);
@@ -1151,6 +1167,14 @@ int main(int argc, char *argv[])
 
                 if (canFwd >= 0) {
                     vesc->commands()->setSendCan(true, canFwd);
+                } else if (!serialAutoconnect) {
+                    //Ensure we talk to the USB connected Vesc, if no CAN id was specified and we are not autoconnecting
+                    //If autoconnecting then we will use the last CAN id in settings
+                    vesc->commands()->setSendCan(false, 0);
+                }
+
+                if (vesc->commands()->getSendCan()) {
+                    qDebug() << "Sending to CAN ID" << vesc->commands()->getCanSendId();
                 }
 
                 CodeLoader loader;

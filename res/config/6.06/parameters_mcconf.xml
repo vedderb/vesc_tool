@@ -1180,7 +1180,7 @@ p, li { white-space: pre-wrap; }
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Compensation for dead time distortion. Makes some difference at low speed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_DT_US</cDefine>
             <editorDecimalsDouble>3</editorDecimalsDouble>
@@ -5028,6 +5028,11 @@ p, li { white-space: pre-wrap; }
                     <param>foc_current_kp</param>
                     <param>foc_current_ki</param>
                     <param>foc_observer_gain</param>
+                    <param>::sep::Encoder</param>
+                    <param>foc_sl_erpm</param>
+                    <param>foc_encoder_offset</param>
+                    <param>foc_encoder_ratio</param>
+                    <param>foc_encoder_inverted</param>
                 </subgroupParams>
             </subgroup>
             <subgroup>

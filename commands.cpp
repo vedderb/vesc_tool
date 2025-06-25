@@ -545,6 +545,14 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_DETECT_MOTOR_FLUX_LINKAGE_OPENLOOP:
         emit motorLinkageReceived(vb.vbPopFrontDouble32(1e7));
+        if (vb.size() >= 9) {
+            ENCODER_DETECT_RES res;
+            res.offset = vb.vbPopFrontDouble32(1e6);
+            res.ratio = vb.vbPopFrontDouble32(1e6);
+            res.inverted = vb.vbPopFrontInt8();
+            res.detect_rx = true;
+            emit encoderParamReceived(res);
+        }
         break;
 
     case COMM_DETECT_APPLY_ALL_FOC:

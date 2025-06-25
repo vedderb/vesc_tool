@@ -43,6 +43,7 @@ public:
 private slots:
     void motorRLReceived(double r, double l, double ld_lq_diff);
     void motorLinkageReceived(double flux_linkage);
+    void encoderParamReceived(ENCODER_DETECT_RES res);
     void paramChangedDouble(QObject *src, QString name, double newParam);
 
     void on_rlButton_clicked();
@@ -52,6 +53,7 @@ private slots:
     void on_calcKpKiButton_clicked();
     void on_calcGainButton_clicked();
     void on_calcApplyLocalButton_clicked();
+    void on_encApplyButton_clicked();
 
 private:
     Ui::DetectFoc *ui;
@@ -61,6 +63,7 @@ private:
     bool mLastOkValuesApplied;
     bool mRunning;
     double mTempMotorLast;
+    bool mEncoderValuesOk;
 
     void updateColors();
 

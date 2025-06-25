@@ -48,6 +48,7 @@ DetectFoc::DetectFoc(QWidget *parent) :
     mLastOkValuesApplied = false;
     mRunning = false;
     mTempMotorLast = -100.0;
+    mEncoderValuesOk = false;
     updateColors();
 }
 
@@ -147,6 +148,8 @@ void DetectFoc::setVesc(VescInterface *vesc)
                 this, SLOT(motorRLReceived(double,double,double)));
         connect(mVesc->commands(), SIGNAL(motorLinkageReceived(double)),
                 this, SLOT(motorLinkageReceived(double)));
+        connect(mVesc->commands(), SIGNAL(encoderParamReceived(ENCODER_DETECT_RES)),
+                this, SLOT(encoderParamReceived(ENCODER_DETECT_RES)));
         connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
                 this, SLOT(paramChangedDouble(QObject*,QString,double)));
 
@@ -220,6 +223,14 @@ void DetectFoc::motorLinkageReceived(double flux_linkage)
     updateColors();
 }
 
+void DetectFoc::encoderParamReceived(ENCODER_DETECT_RES res)
+{
+    ui->encOffsetBox->setValue(res.offset);
+    ui->encRatioBox->setValue(res.ratio);
+    ui->encInvertedBox->setCurrentIndex(res.inverted ? 1 : 0);
+    updateColors();
+}
+
 void DetectFoc::paramChangedDouble(QObject *src, QString name, double newParam)
 {
     (void)src;
@@ -279,6 +290,13 @@ void DetectFoc::on_applyAllButton_clicked()
             mVesc->mcConfig()->updateParamDouble("foc_observer_gain", ui->obsGainBox->value() * 1e6);
             mVesc->emitStatusMessage(tr("KP, KI and Observer Gain Applied"), true);
             mLastOkValuesApplied = true;
+
+            if (mEncoderValuesOk) {
+                mVesc->mcConfig()->updateParamDouble("foc_encoder_offset", ui->encOffsetBox->value());
+                mVesc->mcConfig()->updateParamDouble("foc_encoder_ratio", ui->encRatioBox->value());
+                mVesc->mcConfig()->updateParamBool("foc_encoder_inverted", ui->encInvertedBox->currentIndex() != 0);
+                mVesc->emitStatusMessage(tr("Encoder Parameters Applied"), true);
+            }
         } else {
             mVesc->emitStatusMessage(tr("Apply Parameters Failed"), false);
         }
@@ -304,6 +322,8 @@ void DetectFoc::updateColors()
     bool gain_ok = ui->obsGainBox->value() > 1e-10;
     bool kp_ok = ui->kpBox->value() > 1e-10;
     bool ki_ok = ui->kiBox->value() > 1e-10;
+    bool enc_offset_ok = ui->encOffsetBox->value() >= 0.0;
+    bool enc_ratio_ok = ui->encRatioBox->value() >= 0.0;
 
     QString style_red = "color: rgb(255, 255, 255);"
                         "background-color: rgb(140,37,37);";
@@ -326,7 +346,13 @@ void DetectFoc::updateColors()
     ui->kiBox->setStyleSheet(QString("#kiBox {%1}").
                              arg(ki_ok ? style_green : style_red));
 
+    ui->encOffsetBox->setStyleSheet(QString("#encOffsetBox {%1}").
+                             arg(enc_offset_ok ? style_green : style_red));
+    ui->encRatioBox->setStyleSheet(QString("#encRatioBox {%1}").
+                                    arg(enc_ratio_ok ? style_green : style_red));
+
     mAllValuesOk = r_ok && l_ok && lambda_ok && gain_ok && kp_ok && ki_ok;
+    mEncoderValuesOk = enc_offset_ok && enc_ratio_ok;
 }
 
 void DetectFoc::on_calcKpKiButton_clicked()
@@ -414,3 +440,20 @@ void DetectFoc::on_calcApplyLocalButton_clicked()
         mVesc->emitStatusMessage(tr("KP, KI and Observer Gain Applied"), true);
     }
 }
+
+void DetectFoc::on_encApplyButton_clicked()
+{
+    if (mEncoderValuesOk) {
+        if (mVesc) {
+            mVesc->mcConfig()->updateParamDouble("foc_encoder_offset", ui->encOffsetBox->value());
+            mVesc->mcConfig()->updateParamDouble("foc_encoder_ratio", ui->encRatioBox->value());
+            mVesc->mcConfig()->updateParamBool("foc_encoder_inverted", ui->encInvertedBox->currentIndex() != 0);
+            mVesc->emitStatusMessage(tr("Encoder Parameters Applied"), true);
+        }
+    } else {
+        QMessageBox::critical(this,
+                              tr("Apply Encoder Error"),
+                              tr("Please run flux linkage (FW 6.06+) or encoder detection first."));
+    }
+}
+

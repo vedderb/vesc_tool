@@ -1,7 +1,7 @@
 ; This is how to print a string in LispBM to the console below
 (print "Hello World!")
 
-; You can also print lisp types, such as the list (1 2 3 4 5)
+; You can also print other types, such as the list (1 2 3 4 5)
 (print (list 1 2 3 4 5))
 
 ; Here we print the index of a range loop

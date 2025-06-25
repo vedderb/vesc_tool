@@ -313,7 +313,7 @@
         <item>
          <widget class="QPushButton" name="eraseLispButton">
           <property name="text">
-           <string>Erase Lisp</string>
+           <string>Erase LispBM</string>
           </property>
          </widget>
         </item>
@@ -376,7 +376,7 @@
         <item>
          <widget class="QSpinBox" name="lispOffsetBox">
           <property name="prefix">
-           <string>Lisp: 0x</string>
+           <string>LispBM: 0x</string>
           </property>
           <property name="maximum">
            <number>9999999</number>

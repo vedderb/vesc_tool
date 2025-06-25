@@ -37,7 +37,7 @@
     "*.ttf"
     "*.md"
     "*.xml"
-    "*.lisp"
+    "*.lbm"
     "*.yml"
     "*.conf"
     "*.txt"

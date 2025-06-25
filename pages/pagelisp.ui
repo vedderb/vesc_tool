@@ -33,7 +33,7 @@
           <item>
            <widget class="QPushButton" name="eraseButton">
             <property name="toolTip">
-             <string>Erase lisp application from VESC. This will also prevent it from starting on next boot (as expected).</string>
+             <string>Erase LispBM application from VESC. This will also prevent it from starting on next boot (as expected).</string>
             </property>
             <property name="text">
              <string>Erase</string>
@@ -72,7 +72,7 @@
           <item>
            <widget class="QPushButton" name="readExistingButton">
             <property name="toolTip">
-             <string>Read lisp code from connected VESC</string>
+             <string>Read LispBM code from connected VESC</string>
             </property>
             <property name="text">
              <string>Read</string>

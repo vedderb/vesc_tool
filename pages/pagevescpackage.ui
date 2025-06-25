@@ -222,7 +222,7 @@
          <item>
           <widget class="QGroupBox" name="lispBox">
            <property name="title">
-            <string>Lisp</string>
+            <string>LispBM</string>
            </property>
            <property name="checkable">
             <bool>true</bool>

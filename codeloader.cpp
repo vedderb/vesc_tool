@@ -88,10 +88,10 @@ bool CodeLoader::lispErase(int size)
         if (erRes == -10) {
             msg = tr("Erase timed out");
         } else if (erRes == -1) {
-            msg = tr("Erasing Lisp Code failed");
+            msg = tr("Erasing LispBM Code failed");
         }
 
-        mVesc->emitMessageDialog(tr("Erase Lisp"), msg, false);
+        mVesc->emitMessageDialog(tr("Erase LispBM"), msg, false);
         return false;
     }
 
@@ -142,13 +142,13 @@ QString CodeLoader::reduceLispFile(QString fileData)
     int fileNum = QDir("lispReduceBefore").
                   entryInfoList(QDir::NoFilter, QDir::Name).size();
 
-    QFile fBefore(QString("lispReduceBefore/lispBeforeReduce%1.lisp").arg(fileNum));
+    QFile fBefore(QString("lispReduceBefore/lispBeforeReduce%1.lbm").arg(fileNum));
     if (fBefore.open(QIODevice::WriteOnly | QIODevice::Text)) {
         fBefore.write(fileData.toUtf8());
         fBefore.close();
     }
 
-    QFile fAfter(QString("lispReduceAfter/lispAfterReduce%1.lisp").arg(fileNum));
+    QFile fAfter(QString("lispReduceAfter/lispAfterReduce%1.lbm").arg(fileNum));
     if (fAfter.open(QIODevice::WriteOnly | QIODevice::Text)) {
         fAfter.write(res.toUtf8());
         fAfter.close();
@@ -270,7 +270,9 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath, bool
                                 }
                             }
                         } else {
-                            if (reduceLisp && fi.absoluteFilePath().endsWith(".lisp", Qt::CaseInsensitive)) {
+                            bool hasExtension = fi.absoluteFilePath().endsWith(".lbm", Qt::CaseInsensitive)
+                                || fi.absoluteFilePath().endsWith(".lisp", Qt::CaseInsensitive);
+                            if (reduceLisp && hasExtension) {
                                 fileData = reduceLispFile(QString::fromUtf8(fileData)).toUtf8();
                             }
                             fileData.append('\0'); // Pad with 0 in case it is a text file
@@ -365,7 +367,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
     data.vbAppendUint16(crc);
     data.append(vb);
 
-    // The ESP32 partition table has 512k space for lisp scripts. The STM32
+    // The ESP32 partition table has 512k space for LispBM scripts. The STM32
     // has one 128k flash page. Subtract 6 bytes for fw size and crc.
     auto fwParams = mVesc->getLastFwRxParams();
     int max_size = 1024 * 512 - 6;
@@ -597,7 +599,7 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
                     QString dirName = QFileDialog::getExistingDirectory(parent, tr("Choose Directory"));
 
                     if (!dirName.isEmpty()) {
-                        QFile fileLisp(dirName + "/From VESC.lisp");
+                        QFile fileLisp(dirName + "/From VESC.lbm");
                         if (!fileLisp.exists()) {
                             if (fileLisp.open(QIODevice::WriteOnly)) {
                                 fileLisp.write(res.toUtf8());
@@ -651,8 +653,8 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
         }
     }
 
-    mVesc->emitMessageDialog(tr("Get Lisp"),
-                             tr("Could not read Lisp code"),
+    mVesc->emitMessageDialog(tr("Get LispBM"),
+                             tr("Could not read LispBM code"),
                              false);
 
     disconnect(conn);
@@ -1165,15 +1167,15 @@ bool CodeLoader::createPackageFromDescription(QString path, VescPackage *pkgRes,
 
                 // Empty array means an error. Otherwise, lispPackImports() always returns data.
                 if (pkg.lispData.isEmpty()) {
-                    qWarning() << "Errors when processing lisp imports.";
+                    qWarning() << "Errors when processing LispBM imports.";
                     result = false;
                 }
 
                 f.close();
 
-                qDebug() << "Package lisp found and parsed!";
+                qDebug() << "Package LispBM found and parsed!";
             } else {
-                qWarning() << "Could not open lisp file.";
+                qWarning() << "Could not open LispBM file.";
                 result = false;
             }
         }

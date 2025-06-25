@@ -1372,6 +1372,34 @@ int main(int argc, char *argv[])
                     }
                 }
 
+                if (queryDeviceFwParams) {
+                    FW_RX_PARAMS params;
+                    Utility::getFwVersionBlocking(vesc, &params);
+
+                    QString fwStr;
+                    QString strUuid = Utility::uuid2Str(params.uuid, true);
+
+                    if (params.major >= 0) {
+                        fwStr = QString("FW: V%1.%2").arg(params.major).arg(params.minor, 2, 10, QLatin1Char('0'));
+                        if (!params.fwName.isEmpty()) {
+                            fwStr += " (" + params.fwName + ")";
+                        }
+
+                        if (!params.hw.isEmpty()) {
+                            fwStr += ", Hw: " + params.hw;
+                        }
+
+                        if (!strUuid.isEmpty()) {
+                            fwStr += ", UUID: " + strUuid;
+                        }
+
+                        fwStr += ", isTestFw: " + QString::number(params.isTestFw);
+                        fwStr += ", hwType: " + params.hwTypeStr();
+                        fwStr += ", hwConfCrc: " + QString::number(params.hwConfCrc);
+                    }
+                    qInfo() << fwStr;
+                }
+
                 if (uploadBootloaderBuiltin) {
                     FW_RX_PARAMS params = vesc->getLastFwRxParams();
                     QString path = "";
@@ -1422,33 +1450,6 @@ int main(int argc, char *argv[])
                         qWarning() << "No included bootloader found.";
                         exitCode = -30;
                     }
-                }
-
-                if (queryDeviceFwParams) {
-                    FW_RX_PARAMS params = vesc->getLastFwRxParams();
-
-                    QString fwStr;
-                    QString strUuid = Utility::uuid2Str(params.uuid, true);
-
-                    if (params.major >= 0) {
-                        fwStr = QString("FW: V%1.%2").arg(params.major).arg(params.minor, 2, 10, QLatin1Char('0'));
-                        if (!params.fwName.isEmpty()) {
-                            fwStr += " (" + params.fwName + ")";
-                        }
-
-                        if (!params.hw.isEmpty()) {
-                            fwStr += ", Hw: " + params.hw;
-                        }
-
-                        if (!strUuid.isEmpty()) {
-                            fwStr += ", UUID: " + strUuid;
-                        }
-
-                        fwStr += ", isTestFw: " + QString::number(params.isTestFw);
-                        fwStr += ", hwType: " + params.hwTypeStr();
-                        fwStr += ", hwConfCrc: " + QString::number(params.hwConfCrc);
-                    }
-                    qInfo() << fwStr;
                 }
 
                 if (!firmwarePath.isEmpty()) {

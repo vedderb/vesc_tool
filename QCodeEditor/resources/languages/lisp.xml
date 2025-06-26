@@ -411,6 +411,7 @@
 <name>conf-dc-cal-set</name>
 <name>conf-enc-sincos</name>
 <name>conf-get-limits</name>
+<name>conf-detect-lambda-enc</name>
 <name>free</name>
 <name>bufcreate</name>
 <name>array-create</name>

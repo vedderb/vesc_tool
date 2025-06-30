@@ -1317,6 +1317,11 @@ void PageLogAnalysis::openLog(QString name, QByteArray data)
         while (!in.atEnd()) {
             QStringList tokens = in.readLine().split(";");
             QVector<double> entry;
+
+            if (tokens.size() != entryLastData.size()) {
+                continue;
+            }
+
             for (int i = 0;i < tokens.size();i++) {
                 if (i >= entryLastData.size()) {
                    break;
@@ -1428,8 +1433,6 @@ void PageLogAnalysis::generateMissingEntries()
                 }
             }
         }
-
-        qDebug() << tripEmpty;
 
         if (tripEmpty) {
             double prevSampleGnss[3];

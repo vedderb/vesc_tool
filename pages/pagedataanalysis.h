@@ -21,6 +21,7 @@
 #define PAGEDATAANALYSIS_H
 
 #include <QWidget>
+#include <QRegExp>
 #include "vescinterface.h"
 
 namespace Ui {

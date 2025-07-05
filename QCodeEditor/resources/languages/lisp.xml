@@ -486,6 +486,8 @@
 <name>gnss-date-time</name>
 <name>gnss-age</name>
 <name>ublox-init</name>
+<name>nmea-parse</name>
+<name>set-pos-time</name>
 <name>crc16</name>
 <name>crc32</name>
 <name>main-init-done</name>

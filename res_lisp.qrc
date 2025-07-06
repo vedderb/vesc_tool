@@ -57,5 +57,7 @@
         <file>res/LispBM/Examples/hfi_start_analyze.lbm</file>
         <file>res/LispBM/Examples/plot_vesc_tool_current.lbm</file>
         <file>res/LispBM/Examples/icu_pwm_encoder.lbm</file>
+        <file>res/LispBM/Examples/motorcfg_ipm_sincos.lbm</file>
+        <file>res/LispBM/Examples/encoder_mt6701_conf.lbm</file>
     </qresource>
 </RCC>

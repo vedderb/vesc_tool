@@ -1,0 +1,195 @@
+(def raw-sin (get-adc 20))
+(def raw-cos (get-adc 21))
+
+(def out-sin 0.0)
+(def out-cos 0.0)
+(def out-mod 0.0)
+
+(def s-amp 1.0)
+(def c-amp 1.0)
+
+(def s-ofs 1.65)
+(def c-ofs 1.65)
+
+(defun reset-max-min () {
+        (def s-max 0.0)
+        (def s-min 5.0)
+        (def c-max 0.0)
+        (def c-min 5.0)
+})
+
+(reset-max-min)
+
+(defun calc-amp-ofs () {
+        (setq s-ofs (/ (+ s-max s-min) 2.0))
+        (setq c-ofs (/ (+ c-max c-min) 2.0))
+        (setq s-amp (/ (- s-max s-min) 2.0))
+        (setq c-amp (/ (- c-max c-min) 2.0))
+})
+
+(def filter-const 0.8)
+(defun lpf (val sample)
+    (- val (* filter-const (- val sample)))
+)
+
+(loopwhile-thd 100 t {
+        (def raw-sin (lpf raw-sin (get-adc 20)))
+        (def raw-cos (lpf raw-cos (get-adc 21)))
+
+        (if (> raw-sin s-max) (def s-max raw-sin))
+        (if (< raw-sin s-min) (def s-min raw-sin))
+        (if (> raw-cos c-max) (def c-max raw-cos))
+        (if (< raw-cos c-min) (def c-min raw-cos))
+
+        (def out-sin (/ (- raw-sin s-ofs) s-amp))
+        (def out-cos (/ (- raw-cos c-ofs) c-amp))
+        (def out-mod (sqrt (+ (* out-sin out-sin) (* out-cos out-cos))))
+
+        (if (and (> (- s-max s-min) 0.1) (> (- c-max c-min) 0.1))
+            (calc-amp-ofs)
+        )
+
+        (sleep 0.01)
+})
+
+(defun detect-apply-sincos (current) {
+        (foc-openloop current 60)
+        (sleep 0.1)
+        (reset-max-min)
+
+        (looprange i 0 60 {
+                (foc-openloop current 60)
+                (sleep 0.1)
+        })
+
+        (conf-enc-sincos s-amp c-amp s-ofs c-ofs)
+})
+
+(def conf-state nil)
+
+(defunret conf-motor (current current-detect) {
+        (setq conf-state "Begin")
+
+        ; Current controller time constant in us
+        (var tc 500.0)
+
+        (conf-set 'l-current-min (- current))
+        (conf-set 'l-current-max current)
+        (conf-set 'l-abs-current-max (* current 1.5))
+
+        (conf-set 'l-in-current-min (- current))
+        (conf-set 'l-in-current-max current)
+
+        (setq conf-state "Measure R")
+        (conf-set 'foc-motor-r (* (conf-measure-res current-detect 1000) 1.0e3))
+
+        (setq conf-state "Measure L")
+        (var ind-data (conf-measure-ind current-detect))
+
+        (conf-set 'foc-motor-l (ix ind-data 0))
+
+        ; Divide by two to make observer + MTPA perform better
+        (conf-set 'foc-motor-ld-lq-diff (* (ix ind-data 1) 0.5))
+
+        (var bw (/ 1.0 (* tc 1.0e-6)))
+        (conf-set 'foc-current-kp (* (conf-get 'foc-motor-l) 1.0e-6 bw))
+        (conf-set 'foc-current-ki (* (conf-get 'foc-motor-r) 1.0e-3 bw))
+
+        (setq conf-state "Detect Sin/Cos Encoder")
+        (detect-apply-sincos current-detect)
+
+        (setq conf-state "Measure Flux Linkage")
+        ; This will return the list
+        ; (flux-linkage flux-linkage-undriven undriven-samples enc-offset enc-ratio enc-inverted)
+        (var linkage-data (conf-detect-lambda-enc
+                current-detect ; Current
+                0.3 ; Duty
+                1500 ; ERPM per sec
+                (conf-get 'foc-motor-r) ; R in mOhm
+                (conf-get 'foc-motor-l) ; L in uH
+        ))
+
+        (if (eq linkage-data nil) {
+                (return nil)
+        })
+
+        (var flux-linkage (ix linkage-data 1)) ; Use undrived flux linkage
+
+        (conf-set 'foc-observer-type 0) ; Ortega original
+
+        ; A third of what VESC Tool calculates works well on most IPM motors
+        (conf-set 'foc-observer-gain (/ 1.0e-3 (* flux-linkage flux-linkage) 3.0))
+
+        ; Slightly lower flux linkage makes observer more stable
+        (conf-set 'foc-motor-flux-linkage (* flux-linkage 1.0e3 0.9))
+
+        ; Encoder
+        (conf-set 'foc-encoder-offset (ix linkage-data 3))
+        (conf-set 'foc-encoder-inverted (ix linkage-data 5))
+        (conf-set 'foc-encoder-ratio (ix linkage-data 4))
+        (conf-set 'foc-sensor-mode 1)
+
+        (conf-store)
+
+        (setq conf-state t)
+})
+
+(defun conf-start () {
+        (conf-set 'foc-openloop-rpm 200)
+        (conf-set 'm-sensor-port-mode 4) ; Sin/Cos
+        (conf-set 'foc-mtpa-mode 2) ; IQ Measured MTPA
+
+        (conf-set 'foc-offsets-cal-mode 4) ; Auto-cal
+        (conf-dc-cal-set nil nil nil 0 0 0 000) ; No voltage offsets
+
+        (conf-set 'm-motor-temp-sens-type 4)
+        (sleep 1.0) ; Wait for temp fault
+
+        (var current-lim 250)
+        (var current-detect 50)
+
+        (var conf-thd (spawn 150 conf-motor current-lim current-detect))
+
+        (loopwhile t {
+                (cond
+                    ((= (get-fault) 1) {
+                            (print (list "Overvoltage during" conf-state))
+                            (kill conf-thd nil)
+                            (break)
+                    })
+
+                    ((= (get-fault) 2) {
+                            (print (list "Undervoltage during" conf-state))
+                            (kill conf-thd nil)
+                            (break)
+                    })
+
+                    ((= (get-fault) 4) {
+                            (print (list "Abs overcurrent during" conf-state))
+                            (kill conf-thd nil)
+                            (break)
+                    })
+
+                    ((= (get-fault) 5) {
+                            (print (list "Overtemp MOSFET" conf-state))
+                            (kill conf-thd nil)
+                            (break)
+                    })
+
+                    ((= (get-fault) 6) {
+                            (print (list "Overtemp Motor" conf-state))
+                            (kill conf-thd nil)
+                            (break)
+                    })
+                )
+
+                (if (eq conf-state t) {
+                        (print "Configuration Done!")
+                        (break)
+                })
+
+                (sleep 0.02)
+        })
+})
+
+;(conf-start)

@@ -1,0 +1,52 @@
+; Configuration script for MT6701 encoder. It uses the hall sensor pins configured
+; for i2c to upload the configuration.
+
+; We need these set to prevent the ADC voltage divider from pulling down the
+; pull-up on the hall lines. Use trap as not all hardware has these.
+(trap {
+        (gpio-configure 'pin-adc3 'pin-mode-out)
+        (gpio-configure 'pin-adc4 'pin-mode-out)
+        (gpio-write 'pin-adc3 1)
+        (gpio-write 'pin-adc4 1)
+})
+
+(def mt6701-addr 0x06)
+(i2c-start 'rate-100k 'pin-hall1 'pin-hall2)
+
+(if (not (i2c-detect-addr mt6701-addr)) (print "No response from encoder"))
+
+(defun read-reg (reg) {
+        (var buf (bufcreate 1))
+        (i2c-tx-rx mt6701-addr (list reg) buf)
+        (bufget-u8 buf 0)
+})
+
+(defun write-reg (reg val) {
+        (i2c-tx-rx mt6701-addr (list reg val))
+})
+
+(defun store-config() {
+        (i2c-tx-rx mt6701-addr (list 0x09 0xB3))
+        (i2c-tx-rx mt6701-addr (list 0x0A 0x05))
+})
+
+;(loopwhile-thd 100 t {
+        ;(var buf (bufcreate 2))
+        ;(i2c-tx-rx mt6701-addr '(3) buf)
+        ;(def angle (bufget-u16 buf 0))
+        ;(sleep 0.1)
+;})
+
+(defun conf-pwm-abz () {
+        (write-reg 0x38 (bits-enc-int (read-reg 0x38) 5 3 2)) ; PWM Out, inverted polarity
+        (write-reg 0x31 255)
+        (sleep 1.0)
+})
+
+
+(conf-pwm-abz)
+(store-config)
+
+;(read-reg 0x30)
+;(read-reg 0x31)
+;(read-reg 0x32)

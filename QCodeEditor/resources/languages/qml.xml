@@ -130,5 +130,7 @@
         <name>TcpHub</name>
         <name>QMiniMp3</name>
         <name>CodeLoader</name>
+        <name>Esp32Flash</name>
+        <name>SysCmd</name>
     </section>
 </root>

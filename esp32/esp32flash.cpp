@@ -25,17 +25,17 @@
 #ifdef HAS_SERIALPORT
 static QSerialPort *sPort = nullptr;
 #endif
-static int64_t sTimeEnd;
+static int64_t sTimeEnd = 0;
+static int sPortCnt = 0;
 
 Esp32Flash::Esp32Flash(QObject *parent) : QObject(parent)
 {
 #ifdef HAS_SERIALPORT
-    if (sPort) {
-        sPort->deleteLater();
-        sPort = nullptr;
+    if (!sPort) {
+        sPort = new QSerialPort();
     }
 
-    sPort = new QSerialPort();
+    sPortCnt++;
 
     connect(sPort, SIGNAL(error(QSerialPort::SerialPortError)),
             this, SLOT(serialPortError(QSerialPort::SerialPortError)));
@@ -45,7 +45,9 @@ Esp32Flash::Esp32Flash(QObject *parent) : QObject(parent)
 Esp32Flash::~Esp32Flash()
 {
 #ifdef HAS_SERIALPORT
-    if (sPort) {
+    sPortCnt--;
+
+    if (sPort && sPortCnt == 0) {
         sPort->deleteLater();
         sPort = nullptr;
     }

@@ -276,21 +276,17 @@ esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, 
         return ESP_LOADER_ERROR_FAIL;
     }
 
-    sPort->write((char*)data, size);
-
+    auto tStart = QTime::currentTime().msecsSinceStartOfDay();
     qint64 written = 0;
-    auto conn = QObject::connect(sPort, &QSerialPort::bytesWritten, [&written](qint64 bytes) {
-        written += bytes;
-    });
 
-    bool ok = true;
-    while (written < size && ok) {
-        ok = Utility::waitSignal(sPort, SIGNAL(bytesWritten(qint64)), timeout);
+    while ((QTime::currentTime().msecsSinceStartOfDay() - tStart) < timeout) {
+        written += sPort->write((char*)data + written, size - written);
+        if (written >= size) {
+            break;
+        }
     }
 
-    QObject::disconnect(conn);
-
-    return ok ? ESP_LOADER_SUCCESS : ESP_LOADER_ERROR_TIMEOUT;
+    return written == size ? ESP_LOADER_SUCCESS : ESP_LOADER_ERROR_TIMEOUT;
 #else
     (void)data;(void)size;(void)timeout;
     return ESP_LOADER_ERROR_FAIL;

@@ -176,6 +176,7 @@ release_win {
 release_lin {
     # http://micro.nicholaswilson.me.uk/post/31855915892/rules-of-static-linking-libstdc-libc-libgcc
     # http://insanecoding.blogspot.se/2012/07/creating-portable-linux-binaries.html
+    CONFIG += exclude_fw
     QMAKE_LFLAGS += -static-libstdc++ -static-libgcc
     DESTDIR = build/lin
     OBJECTS_DIR = build/lin/obj

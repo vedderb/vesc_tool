@@ -31,3 +31,46 @@ If you have custom hardware and you want to add support for it in the official r
 1) Go to https://github.com/vedderb/bldc and use the github fork function.  
 2) Make your changes, test them and make a pull request to the main repository.  
 3) If the pull request gets accepted your hardware will become part of the next official release. It will show up in the binary beta typically after a few days and in the stable version the next time a stable release is made.
+
+## Development
+
+**Note:** These instructions build VESC Tool without the BLDC firmwares bundled.
+
+### Linux
+
+Make sure that the required dependencies are installed. There is some advice in the [build_lin](./build_lin) file's comments. If you have Nix installed see below.
+
+```shell
+qmake -config release "CONFIG += release_lin build_original exclude_fw"
+make -j8
+./build/lin/vesc_tool_6.06
+```
+
+### Nix
+
+The most easy way to build and run VESC Tool is to just run the provided program:
+
+```shell
+nix run
+```
+
+This will rebuild the program from scratch on each invokation. To enter a build environment with the dependencies installed for building it manually with QMake, run
+
+```shell
+nix develop
+```
+
+Then follow the normal build instructions for Linux.
+
+**Note:** The Nix flake's outputs currently only supports x86 Linux.
+
+### Starting QT Creator in Nix
+
+QT Creator allows you to easily build and run the project. It also allows you to edit the page UIs with it's graphical editor. To run it using Nix simply start QT Creator from a shell with the build dependencies:
+
+```shell
+nix develop
+nix run nixpkgs#qtcreator
+```
+
+This makes sure that QT Creator has access to the required dependencies.

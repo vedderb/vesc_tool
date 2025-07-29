@@ -226,11 +226,11 @@ void PageScripting::debugMsgRx(QtMsgType type, const QString msg)
         str = msg + "<br>";
     }
 
-    ui->debugEdit->moveCursor(QTextCursor::End);
-    ui->debugEdit->insertHtml("<font color=\"#4d7fc4\">" +
-                              QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss: ") +
-                              "</font>" + str);
-    ui->debugEdit->moveCursor(QTextCursor::End);
+    ui->debugEdit->doAtEndWithScroll([this, str](QTextCursor cursor) {
+        cursor.insertHtml("<font color=\"#4d7fc4\">" +
+                          QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss: ") +
+                          "</font>" + str);
+    });
 }
 
 void PageScripting::on_runButton_clicked()

@@ -202,29 +202,12 @@ void PageLisp::setVesc(VescInterface *vesc)
     ui->experimentPlot->setVesc(vesc);
 
     connect(mVesc->commands(), &Commands::lispPrintReceived, [this](QString str) {
-        ui->debugEdit->moveCursor(QTextCursor::End);
-        ui->debugEdit->insertPlainText(str + "\n");
-        ui->debugEdit->moveCursor(QTextCursor::End);
-
+        ui->debugEdit->doAtEndWithScroll([this, str](QTextCursor cursor) {
+            cursor.insertText(str + "\n");
+        });
+        
         int maxLines = QSettings().value("scripting/replMaxLines", 5000).toInt();
-        int removeLines = maxLines / 5;
-
-        if (ui->debugEdit->document()->lineCount() > maxLines) {
-            QString txt = ui->debugEdit->toPlainText();
-            auto lines = txt.split("\n");
-            if (lines.length() >= removeLines) {
-                QString shorter;
-                for (int i = removeLines;i < lines.length();i++) {
-                    shorter.append(lines.at(i));
-
-                    if (i != (lines.length() - 1)) {
-                        shorter.append("\n");
-                    }
-                }
-                ui->debugEdit->setText(shorter);
-                ui->debugEdit->moveCursor(QTextCursor::End);
-            }
-        }
+        ui->debugEdit->trimKeepingLastLines(maxLines);        
     });
 
     connect(mVesc->commands(), &Commands::lispRunningResRx, [this](bool ok) {

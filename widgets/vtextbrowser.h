@@ -21,6 +21,7 @@
 #define VTEXTBROWSER_H
 
 #include <QTextEdit>
+#include <QScrollBar>
 
 class VTextBrowser : public QTextEdit
 {
@@ -32,6 +33,33 @@ public:
     void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
     void mouseMoveEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
+    // Run `operation` with a cursor moved to the end of the document, making
+    // sure to scroll to the bottom if the operation changed the content's
+    // length and the view was at the bottom before.
+    // `operation` should be a callable taking a single `QTextCursor`.
+    template<typename F>
+    void doAtEndWithScroll(const F operation) {
+        // How far in pixels the scroll bar is allowed to be from the bottom
+        // while still being snapped to the bottom.
+        static const int bottom_margin = 30;
+
+        int scroll_before = verticalScrollBar()->value();
+        bool was_at_end = scroll_before >= verticalScrollBar()->maximum() - bottom_margin;
+
+        auto cursor = textCursor();
+        cursor.movePosition(QTextCursor::End);
+        operation(cursor);
+
+        if (was_at_end) {
+            verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+        } else {
+            verticalScrollBar()->setValue(scroll_before);
+        }
+    };
+    // Remove the first lines so that only the last `maxAmount` of lines remain.
+    // The scroll position is maintained so that the user doesn't perceive the
+    // change.
+    void trimKeepingLastLines(int maxAmount);
 
 private:
     QString mLastAnchor;

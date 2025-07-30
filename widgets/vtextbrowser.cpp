@@ -20,6 +20,7 @@
 #include "vtextbrowser.h"
 #include <QDesktopServices>
 #include <QMouseEvent>
+#include <QScrollBar>
 
 VTextBrowser::VTextBrowser(QWidget *parent)
     : QTextEdit(parent)
@@ -58,4 +59,22 @@ void VTextBrowser::mouseMoveEvent(QMouseEvent *e)
     }
 
     QTextEdit::mouseMoveEvent(e);
+}
+
+void VTextBrowser::trimKeepingLastLines(int maxAmount)
+{
+    int lines = document()->lineCount();
+    int lines_to_remove = lines - maxAmount;
+    if (lines_to_remove > 0) {
+        int scroll_before = verticalScrollBar()->value();
+        int scroll_max_before = verticalScrollBar()->maximum();
+
+        auto cursor = textCursor();
+        cursor.movePosition(QTextCursor::Start);
+        cursor.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor, lines_to_remove);
+        cursor.removeSelectedText();
+
+        int scroll_max_delta = scroll_max_before - verticalScrollBar()->maximum();
+        verticalScrollBar()->setValue(scroll_before - scroll_max_delta);        
+    }
 }

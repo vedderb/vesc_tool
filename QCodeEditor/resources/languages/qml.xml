@@ -132,5 +132,6 @@
         <name>CodeLoader</name>
         <name>Esp32Flash</name>
         <name>SysCmd</name>
+        <name>Flickable</name>
     </section>
 </root>

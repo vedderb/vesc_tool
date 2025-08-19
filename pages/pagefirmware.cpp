@@ -266,6 +266,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         extraPath = "://res/firmwares_esp/ESP32-C3/Duet";
     } else if (params.hw == "VL Link") {
         extraPath = "://res/firmwares_esp/ESP32-C3/VL Link";
+    } else if (params.hw == "VDisp 900") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VDisp 900";
     }
 
     if (!extraPath.isEmpty()) {

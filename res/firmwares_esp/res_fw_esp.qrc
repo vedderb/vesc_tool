@@ -30,5 +30,9 @@
         <file>ESP32-C3/VL Link/bootloader.bin</file>
         <file>ESP32-C3/VL Link/partition-table.bin</file>
         <file>ESP32-C3/VL Link/vesc_express.bin</file>
+        <file>ESP32-C3/VDisp 900/bootloader.bin</file>
+        <file>ESP32-C3/VDisp 900/conf_general.h</file>
+        <file>ESP32-C3/VDisp 900/partition-table.bin</file>
+        <file>ESP32-C3/VDisp 900/vesc_express.bin</file>
     </qresource>
 </RCC>

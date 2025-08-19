@@ -1,5 +1,5 @@
 ### 6.06
-#### Released TBD
+#### Released 2024-08-19
 * Auto-save UI-state on regular intervals.
 * Movable LispBM tabs and better tab behavior in general.
 * Detect file system changes in script editor.
@@ -11,6 +11,7 @@
 * Added option to reduce LispBM file size by removing comments, spaces and imports.
 * Disable motor commands after using the stop button or ESC key for 5 seconds (configurable in preferences).
 * Show dialog with package description in mobile UI when installing from file.
+* Better scrolling behavior in LispBM and QML console.
 
 ---
 

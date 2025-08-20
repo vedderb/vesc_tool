@@ -2547,9 +2547,52 @@ QVariantMap Utility::getSafeAreaMargins(QQuickWindow *window)
     QPlatformWindow *platformWindow = static_cast<QPlatformWindow *>(window->handle());
     QMargins margins = platformWindow->safeAreaMargins();
     QVariantMap map;
+#ifdef Q_OS_ANDROID
+    int top = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                        "topBarHeight",
+                                                        "(Landroid/content/Context;)I",
+                                                        QtAndroid::androidActivity().object());
+    int bottom = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                           "bottomBarHeight",
+                                                           "(Landroid/content/Context;)I",
+                                                           QtAndroid::androidActivity().object());
+    int right = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                          "rightBarHeight",
+                                                          "(Landroid/content/Context;)I",
+                                                          QtAndroid::androidActivity().object());
+    int left = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                         "leftBarHeight",
+                                                         "(Landroid/content/Context;)I",
+                                                         QtAndroid::androidActivity().object());
+
+    if (top > 0) {
+        map["top"] = top / window->devicePixelRatio();
+    } else {
+        map["top"] = margins.top();
+    }
+
+    if (bottom > 0) {
+        map["bottom"] = bottom / window->devicePixelRatio();
+    } else {
+        map["bottom"] = margins.bottom();
+    }
+
+    if (right > 0) {
+        map["right"] = right / window->devicePixelRatio();
+    } else {
+        map["right"] = margins.right();
+    }
+
+    if (left > 0) {
+        map["left"] = left / window->devicePixelRatio();
+    } else {
+        map["left"] = margins.left();
+    }
+#else
     map["top"] = margins.top();
-    map["right"] = margins.right();
     map["bottom"] = margins.bottom();
+    map["right"] = margins.right();
     map["left"] = margins.left();
+#endif
     return map;
 }

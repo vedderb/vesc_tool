@@ -1,5 +1,5 @@
 /*
-    Copyright 2019 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2019 - 2025 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -20,12 +20,17 @@
 package com.vedder.vesc;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.provider.Settings;
 import android.os.Build;
 import android.text.TextUtils;
 import android.provider.Settings.SettingNotFoundException;
 import android.location.LocationManager;
+import android.view.WindowInsets;
+import android.app.Activity;
+import android.view.Window;
+import android.graphics.Rect;
 
 public class Utils
 {
@@ -60,6 +65,49 @@ public class Utils
         } else {
             locationProviders = Settings.Secure.getString(ctx.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             return !TextUtils.isEmpty(locationProviders);
+        }
+    }
+
+    public static Activity getActivity(Context context) {
+        if (context == null) return null;
+        if (context instanceof Activity) return (Activity) context;
+        if (context instanceof ContextWrapper) return getActivity(((ContextWrapper)context).getBaseContext());
+        return null;
+    }
+
+    public static int topBarHeight(Context ctx) {
+        if (Build.VERSION.SDK_INT >= 35) {
+            WindowInsets windowInsets = getActivity(ctx).getWindow().getDecorView().getRootWindowInsets();
+            return windowInsets.getInsets(WindowInsets.Type.systemBars()).top;
+        } else {
+            return 0;
+        }
+    }
+
+    public static int bottomBarHeight(Context ctx) {
+        if (Build.VERSION.SDK_INT >= 35) {
+            WindowInsets windowInsets = getActivity(ctx).getWindow().getDecorView().getRootWindowInsets();
+            return windowInsets.getInsets(WindowInsets.Type.systemBars()).bottom;
+        } else {
+            return 0;
+        }
+    }
+
+    public static int rightBarHeight(Context ctx) {
+        if (Build.VERSION.SDK_INT >= 35) {
+            WindowInsets windowInsets = getActivity(ctx).getWindow().getDecorView().getRootWindowInsets();
+            return windowInsets.getInsets(WindowInsets.Type.systemBars()).right;
+        } else {
+            return 0;
+        }
+    }
+
+    public static int leftBarHeight(Context ctx) {
+        if (Build.VERSION.SDK_INT >= 35) {
+            WindowInsets windowInsets = getActivity(ctx).getWindow().getDecorView().getRootWindowInsets();
+            return windowInsets.getInsets(WindowInsets.Type.systemBars()).left;
+        } else {
+            return 0;
         }
     }
 }

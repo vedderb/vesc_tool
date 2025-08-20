@@ -56,7 +56,12 @@ ApplicationWindow {
         notchTop   = Utility.getSafeAreaMargins(appWindow)["top"]
         notchLeft  = Utility.getSafeAreaMargins(appWindow)["left"]
         notchRight = Utility.getSafeAreaMargins(appWindow)["right"]
-        notchBot = Utility.getSafeAreaMargins(appWindow)["bottom"]/2 //leaving too much room at the bottom
+        if (Qt.platform.os === "ios") {
+            // leaving too much room at the bottom
+            notchBot = Utility.getSafeAreaMargins(appWindow)["bottom"] / 2
+        } else {
+            notchBot = Utility.getSafeAreaMargins(appWindow)["bottom"]
+        }
     }
 
     Timer {

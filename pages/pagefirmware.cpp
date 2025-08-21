@@ -268,6 +268,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         extraPath = "://res/firmwares_esp/ESP32-C3/VL Link";
     } else if (params.hw == "VDisp 900") {
         extraPath = "://res/firmwares_esp/ESP32-C3/VDisp 900";
+    } else if (params.hw == "Nanolog") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/Nanolog";
     }
 
     if (!extraPath.isEmpty()) {

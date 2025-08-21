@@ -79,6 +79,8 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VL Link");
     } else if (params.hw == "VDisp 900") {
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VDisp 900");
+    } else if (params.hw == "Nanolog") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/Nanolog");
     }
 
     return hws;

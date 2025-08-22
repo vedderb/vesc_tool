@@ -59,7 +59,8 @@ void PageMotorSettings::reloadParams()
         ConfigParam *p = mVesc->infoConfig()->getParam("motor_setting_description");
         if (p != nullptr) {
             QRegExp rx("(<img src=)|( width=)");
-            QStringList htmls = p->description.split(rx);
+            QStringList htmls = p->description.split(rx.cap()); // grab the zeroth one?
+            // TODO check this out
             QStringList imgs = {"motor_up", "motor_default" , "motor_down","Upload-96","Data Backup-96","Help-96"};
             QString theme = "<img src=\"" + Utility::getThemePath() + "icons/";
             QString out;

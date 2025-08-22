@@ -708,7 +708,7 @@ void PageExperiments::on_saveCsvButton_clicked()
         }
 
         QTextStream stream(&file);
-        stream.setCodec("UTF-8");
+        //stream.setCodec("UTF-8");
 
         for (int i = 0;i < mTimeVec.size();i++) {
             stream << mTimeVec.at(i) << ";";

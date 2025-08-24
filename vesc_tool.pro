@@ -46,7 +46,7 @@ ios: {
 #CONFIG += build_mobile
 
 # Exclude built-in firmwares
-#CONFIG += exclude_fw
+CONFIG += exclude_fw
 
 ios: {
     CONFIG    += build_mobile

@@ -46,10 +46,10 @@ Item {
         modal: true
         focus: true
         width: parent.width - 10 - notchLeft - notchRight
-        height: parent.height - 10 - notchBot - notchTop
+        height: parent.height - 10
         closePolicy: Popup.NoAutoClose
-        x: 5 + (notchLeft + notchRight)/2
-        y: 5 + notchTop
+        x: 5 + (notchLeft + notchRight) / 2
+        y: 5
         parent: dialogParent
         bottomMargin: 0
         rightMargin: 0
@@ -252,7 +252,7 @@ Item {
         modal: true
         focus: true
         width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 40 - notchTop - notchBot)
+        height: Math.min(implicitHeight, parent.height - 40)
         closePolicy: Popup.CloseOnEscape
         parent: dialogParent
 

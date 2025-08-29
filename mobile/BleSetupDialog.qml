@@ -42,8 +42,8 @@ Item {
         focus: true
         width: parent.width - 20 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
-        x: (parent.width - width)/2
-        y: parent.height / 2 - height / 2 + notchTop
+        x: (parent.width - width) / 2
+        y: parent.height / 2 - height / 2
         parent: dialogParent
         padding: 10
 

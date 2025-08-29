@@ -107,10 +107,10 @@ Item {
             color: "#AA000000"
         }
 
-        width: parent.width - 20 -notchLeft - notchRight
-        height: parent.height - 20 - notchBot - notchTop
-        x: 10 + (notchLeft + notchRight)/2
-        y: 10 + notchTop
+        width: parent.width - 20 - notchLeft - notchRight
+        height: parent.height - 20
+        x: 10 + (notchLeft + notchRight) / 2
+        y: 10
         parent: dialogParent
 
         ProgressBar {
@@ -123,10 +123,10 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 10 -notchLeft - notchRight
-        height: parent.height - 10 - notchBot - notchTop
-        x: 5 + (notchLeft + notchRight)/2
-        y: 5 + notchTop
+        width: parent.width - 10 - notchLeft - notchRight
+        height: parent.height - 10
+        x: 5 + (notchLeft + notchRight) / 2
+        y: 5
         closePolicy: Popup.NoAutoClose
         parent: dialogParent
         bottomMargin: 0
@@ -641,8 +641,8 @@ Item {
         modal: true
         focus: true
 
-        width: parent.width - 20 -notchLeft - notchRight
-        x: 10 + (notchLeft + notchRight)/2
+        width: parent.width - 20 - notchLeft - notchRight
+        x: 10 + (notchLeft + notchRight) / 2
         y: dialog.y + dialog.height / 2 - height / 2
 
         closePolicy: Popup.CloseOnEscape

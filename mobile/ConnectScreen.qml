@@ -197,12 +197,9 @@ Item {
                             standardButtons: Dialog.Ok | Dialog.Cancel
                             modal: true
                             focus: true
-                            rightMargin: 10
-                            leftMargin: 10
                             closePolicy: Popup.CloseOnEscape
-                            y: 10 + parent.height / 2 - height / 2
-                            x: parent.width/2 - width/2
-                            width: parent.width - 20 - notchLeft - notchRight
+                            anchors.centerIn: parent
+                            width: parent.width - 20
                             parent: rootItem.parent
                             Overlay.modal: Rectangle {
                                 color: "#AA000000"
@@ -233,12 +230,8 @@ Item {
                             standardButtons: Dialog.Ok | Dialog.Cancel
                             modal: true
                             focus: true
-                            rightMargin: 10
-                            leftMargin: 10
                             closePolicy: Popup.CloseOnEscape
-                            y: 10 + parent.height / 2 - height / 2
-                            x: parent.width/2 - width/2
-                            width: parent.width - 20 - notchLeft - notchRight
+                            anchors.centerIn: parent
                             parent: rootItem.parent
                             Overlay.modal: Rectangle {
                                 color: "#AA000000"
@@ -323,14 +316,18 @@ Item {
                             ColumnLayout {
                                 id: column
                                 anchors.centerIn: parent
-
                                 Image {
                                     id: image
                                     fillMode: Image.PreserveAspectFit
                                     Layout.preferredWidth: 40
                                     Layout.preferredHeight: 40
                                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: "qrc" + Utility.getThemePath() + ((isSerial === 0) ? "icons/bluetooth.png" : "icons/Connected-96.png")
+                                    source: "qrc" + Utility.getThemePath() +  ({
+                                       0: "icons/bluetooth.png",
+                                       1: "icons/USB-96.png",
+                                       2: "icons/LAN-96.png",
+                                       3: "icons/Globe-96.png"
+                                   }[connectionType]) 
                                 }
 
                                 Text {
@@ -345,7 +342,7 @@ Item {
                         }
 
                         ColumnLayout {
-                            visible: isSerial === 0
+                            visible: connectionType === 0
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
@@ -386,9 +383,9 @@ Item {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
                                 Layout.preferredWidth: {
-                                    if (isSerial === 0) {
+                                    if (connectionType === 0) {
                                         nameButton.width
-                                    } else if (isSerial === 3) {
+                                    } else if (connectionType === 3) {
                                         passButton.width
                                     } else {
                                         nameButton.width
@@ -398,15 +395,15 @@ Item {
                                 text: "Connect"
 
                                 onClicked: {
-                                    if (isSerial === 1) {
+                                    if (connectionType === 1) {
                                         if (bleAddr === "") {
                                             VescIf.autoconnect()
                                         } else {
                                             VescIf.connectSerial(bleAddr, 115200)
                                         }
-                                    } else if (isSerial === 2) {
+                                    } else if (connectionType === 2) {
                                         VescIf.connectTcp(bleAddr, tcpPort)
-                                    } else if (isSerial === 3) {
+                                    } else if (connectionType === 3) {
                                         VescIf.connectTcpHubUuid(hubUuid)
                                     } else {
                                         disableDialog()
@@ -421,7 +418,7 @@ Item {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
                                 text: "Update Password"
-                                visible: isSerial === 3
+                                visible: connectionType === 3
 
                                 onClicked: {
                                     hubPassDialog.uuid = hubUuid
@@ -434,7 +431,7 @@ Item {
                                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                                 Layout.preferredHeight: 55
                                 text: "Set Name"
-                                visible: isSerial === 0
+                                visible: connectionType === 0
 
                                 onClicked: {
                                     bleNameDialog.addr = bleAddr
@@ -479,7 +476,7 @@ Item {
             var tokens = Utility.arr2str(data).split("::")
             if (tokens.length === 3) {
                 var found = false
-
+                
                 for (var i = 0; i < vescsUdp.length;i++) {
                     if (vescsUdp[i].ip === tokens[1]) {
                         vescsUdp[i].updateTime = new Date().getTime()
@@ -510,7 +507,7 @@ Item {
             var removed = false
             for (var i = 0; i < vescsUdp.length;i++) {
                 var age = new Date().getTime() - vescsUdp[i].updateTime
-                if (age > 4000) {
+                if (age > 5000) {
                     vescsUdp.splice(i, 1)
                     removed = true
                     i--;
@@ -534,167 +531,127 @@ Item {
 
     Connections {
         target: mBle
-        function onScanDone(devs, done) {
+        function formatBleDevice(name, addr){
+            var shortAddr = addr
+            if(Qt.platform.os == "ios" || Qt.platform.os == "mac") {
+                var ids = addr.split('-')
+                shortAddr = 
+                    ids[0].slice(1,3) + '-' +
+                    ids[1].slice(0,2) + '-' +
+                    ids[2].slice(0,2) + '-' +
+                    ids[3].slice(0,2) + '-' + 
+                    ids[4].slice(0,2)
+            }
+            
+            var bleName = VescIf.getBleName(addr)
+            var displayName
+            if (bleName.length > 0) {
+                displayName = bleName
+            } else {
+                displayName = name
+            }
+            displayName += "\n[" + shortAddr + "]"
+            
+            return {
+                "name": displayName,
+                "setName": bleName,
+                "preferred": VescIf.getBlePreferred(addr),
+                "bleAddr": addr,
+                "tcpPort": 0,
+                "hubUuid": "",
+                "connectionType": 0
+            }        
+        }
+        
+        function formatUDPDevice(device){
+           return {
+                "name": device.name + " (TCP)\n" + device.ip + ":" + device.port,
+                "setName": "",
+                "preferred": true,
+                "bleAddr": device.ip,
+                "tcpPort": device.port,
+                "hubUuid": "",
+                "connectionType": 2
+            }
+        }
+        
+        function formatSerialPort(port){
+            return {
+                "name": "Serial " + 
+                    (port.isVesc ? "STM32" : port.isEsp ? "ESP32" : "") + 
+                    "\n" + port.systemPath,
+                "setName": "",
+                "preferred": true,
+                "bleAddr": port.systemPath,
+                "tcpPort": 0,
+                "hubUuid": "",
+                "connectionType": 1
+            }
+        }
+        
+        function formatTcpHubDevice(tcpHubDevice){
+           return {                         
+               "name": tcpHubDevice.id + " (TCP Hub)\n" + tcpHubDevice.server,
+               "setName": "",
+               "preferred": true,
+               "bleAddr": "",
+               "tcpPort": 0,
+               "hubUuid": tcpHubDevice.uuid(),
+               "connectionType": 3
+           }
+        }
+        function isModelUpdated(array, model) {
+            if (array.length !== model.count) return true
+            for (var i = 0; i < array.length; ++i) {
+                if (JSON.stringify(model.get(i)) !== JSON.stringify(array[i])) {
+                    return true
+                }
+            }
+            return false
+        }
+        function onScanDone(bleDevices, done) {
             if (done) {
                 scanDotTimer.running = false
                 scanning = false
                 scanButton.text = qsTr("Scan...")
             }
-
-            for (var addr in devs) {
-                var name = devs[addr]
-                if(Qt.platform.os == "ios" || Qt.platform.os == "mac") {
-                    var ids = addr.split('-')
-                    var shortAddr = ids[0].slice(1,3) + '-' + ids[1].slice(0,2) + '-' +
-                            ids[2].slice(0,2) + '-' + ids[3].slice(0,2) + '-' + ids[4].slice(0,2)
-                } else {
-                    shortAddr = addr;
-                }
-                var setName = VescIf.getBleName(addr)
-                var setNameShort = setName
-                var preferred = VescIf.getBlePreferred(addr)
-                if (setName.length > 0) {
-                    setName += "\n[" + shortAddr + "]"
-                } else {
-                    setName = name + "\n[" + shortAddr + "]"
-                }
-                var addToList = true
-                var j = 0
-                var k = 0
-                for(j=0; j < bleModel.count; j++) {
-                    if(bleModel.get(j).bleAddr === addr){
-                        addToList  = false
-                    }
-                }
-
-                if (addToList) {
-                    if (preferred) {
-                        bleModel.insert(0, {"name": setName,
-                                            "setName": setNameShort,
-                                            "preferred": preferred,
-                                            "bleAddr": addr,
-                                            "tcpPort": 0,
-                                            "hubUuid": "",
-                                            "isSerial": 0})
-                    } else {
-                        bleModel.append({"name": setName,
-                                            "setName": setNameShort,
-                                            "preferred": preferred,
-                                            "bleAddr": addr,
-                                            "tcpPort": 0,
-                                            "hubUuid": "",
-                                            "isSerial": 0})
-                    }
-
-                }
+            var devices = [];
+            
+            for (var addr in bleDevices){
+                devices.push(formatBleDevice(addr, bleDevices[addr]))
             }
-
-            for (k = 0; k < vescsUdp.length;k++) {
-                addToList  = true
-                for (j = 0; j < bleModel.count; j++) {
-                    if (bleModel.get(j).bleAddr === (vescsUdp[k].ip)) {
-                        addToList  = false
-                        break
-                    }
-                }
-
-                if (addToList) {
-                    bleModel.insert(0, {"name": vescsUdp[k].name + " (TCP)\n" +
-                                        vescsUdp[k].ip + ":" + vescsUdp[k].port,
-                                        "setName": "",
-                                        "preferred": true,
-                                        "bleAddr": vescsUdp[k].ip,
-                                        "tcpPort": vescsUdp[k].port,
-                                        "hubUuid": "",
-                                        "isSerial": 2})
-                }
+            
+            for(var udpDevice of vescsUdp){
+                devices.push(formatUDPDevice(udpDevice))
             }
-
+            
             if (Utility.hasSerialport()) {
-                var ports = VescIf.listSerialPorts()
-                for (j = 0; j < ports.length; j++) {
-                    if (ports[j].isEsp) {
-                        var nameNow = "Serial ESP32\n" + ports[j].systemPath
-                        addToList = true
-                        for (k = 0; k < bleModel.count; k++) {
-                            if(bleModel.get(k).name === nameNow){
-                                addToList  = false
-                            }
-                        }
-
-                        if (addToList) {
-                            bleModel.insert(0, {"name": nameNow,
-                                                "setName": "",
-                                                "preferred": true,
-                                                "bleAddr": ports[j].systemPath,
-                                                "tcpPort": 0,
-                                                "hubUuid": "",
-                                                "isSerial": 1})
-                        }
-                    }
-
-                    if (ports[j].isVesc) {
-                        nameNow = "Serial STM32\n" + ports[j].systemPath
-                        addToList = true
-                        for (k = 0; k < bleModel.count; k++) {
-                            if (bleModel.get(k).name === nameNow){
-                                addToList  = false
-                            }
-                        }
-
-                        if (addToList) {
-                            bleModel.insert(0, {"name": nameNow,
-                                                "setName": "",
-                                                "preferred": true,
-                                                "bleAddr": ports[j].systemPath,
-                                                "tcpPort": 0,
-                                                "hubUuid": "",
-                                                "isSerial": 1})
-                        }
-                    }
-                }
-
-                // Remove ports that no longer are there
-                var removed = true
-                while (removed) {
-                    removed = false
-
-                    for (k = 0; k < bleModel.count; k++) {
-                        var found = false
-                        for (j = 0; j < ports.length; j++) {
-                            if (ports[j].systemPath === bleModel.get(k).bleAddr) {
-                                found = true
-                                break
-                            }
-                        }
-
-                        if (bleModel.get(k).isSerial === 1 && !found) {
-                            bleModel.remove(k)
-                            removed = true
-                            break
-                        }
+                for (var serialPort of VescIf.listSerialPorts()){
+                    if (serialPort.isVesc || serialPort.isEsp){
+                        devices.push(formatSerialPort(serialPort))
                     }
                 }
             }
-
-            if (pingTcpHub) {
+           
+            if (pingTcpHub){
                 pingTcpHub = false
                 disableDialog()
                 var hubDevs = VescIf.getTcpHubDevs()
-                for (j = 0; j < hubDevs.length; j++) {
-                    if (hubDevs[j].ping()) {
-                        bleModel.insert(0, {"name": hubDevs[j].id + " (TCP Hub)\n" + hubDevs[j].server,
-                                            "setName": "",
-                                            "preferred": true,
-                                            "bleAddr": "",
-                                            "tcpPort": 0,
-                                            "hubUuid": hubDevs[j].uuid(),
-                                            "isSerial": 3})
+                for (tcpHubDevice of hubDevs) {
+                    if (tcpHubDevice.ping()) {
+                        devices.push(formatTcpHubDevice(tcpHubDevice))
                     }
                 }
-
                 enableDialog()
             }
+            devices.sort((a, b) => (a.connectionType - b.connectionType) || a.name.localeCompare(b.name));
+            
+           if (isModelUpdated(devices, bleModel)){
+               bleModel.clear()
+               for (var device of devices){
+                   bleModel.append(device)
+               }
+           }
         }
 
         function onBleError(info) {
@@ -843,12 +800,8 @@ Item {
         standardButtons: Dialog.Ok
         modal: true
         focus: true
-        rightMargin: 10
-        leftMargin: 10
         closePolicy: Popup.CloseOnEscape
-        y: 10 + parent.height / 2 - height / 2
-        x: parent.width/2 - width/2
-        width: parent.width - 20 - notchLeft - notchRight
+        anchors.centerIn: parent
         parent: rootItem.parent
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -871,12 +824,11 @@ Item {
         standardButtons: Dialog.Ok | Dialog.No
         modal: true
         focus: true
-        rightMargin: 10
-        leftMargin: 10
         closePolicy: Popup.CloseOnEscape
-        y: 10 + parent.height / 2 - height / 2
-        x: parent.width/2 - width/2
-        width: parent.width - 20 - notchLeft - notchRight
+        anchors.centerIn: parent
+        //y: 10 + parent.height / 2 - height / 2
+        //x: parent.width/2 - width/2
+        //width: parent.width - 20 - notchLeft - notchRight
         parent: rootItem.parent
         Overlay.modal: Rectangle {
             color: "#AA000000"

@@ -435,7 +435,7 @@ Item {
         width: parent.width - 10 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
         x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2 + notchTop
+        y: parent.height / 2 - height / 2
         parent: mainSwipeView
 
         Overlay.modal: Rectangle {
@@ -460,7 +460,7 @@ Item {
 
         parent: mainSwipeView
         x: parent.width/2 - width/2
-        y: topItem.y + topItem.height / 2 - height / 2 + notchTop
+        y: topItem.y + topItem.height / 2 - height / 2
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -493,7 +493,7 @@ Item {
 
         parent: mainSwipeView
         x: parent.width/2 - width/2
-        y: topItem.y + topItem.height / 2 - height / 2 + notchTop
+        y: topItem.y + topItem.height / 2 - height / 2
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -537,7 +537,7 @@ Item {
 
         parent: mainSwipeView
         x: parent.width/2 - width/2
-        y: topItem.y + topItem.height / 2 - height / 2 + notchTop
+        y: topItem.y + topItem.height / 2 - height / 2
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -579,7 +579,7 @@ Item {
 
         width: parent.width - 20 - notchLeft - notchRight
         x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2 + notchTop
+        y: parent.height / 2 - height / 2
         parent: mainSwipeView
 
         Overlay.modal: Rectangle {
@@ -600,9 +600,9 @@ Item {
         focus: true
 
         width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 20 - notchBot - notchTop
+        height: parent.height - 20
         x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2 + notchTop
+        y: parent.height / 2 - height / 2
         parent: mainSwipeView
 
         Overlay.modal: Rectangle {
@@ -661,9 +661,9 @@ Item {
         focus: true
 
         width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 20 - notchBot - notchTop
+        height: parent.height - 20
         x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2 + notchTop
+        y: parent.height / 2 - height / 2
         parent: mainSwipeView
 
         Overlay.modal: Rectangle {

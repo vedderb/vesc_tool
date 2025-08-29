@@ -30,6 +30,7 @@ Item {
     property real mOffset: 0.0
     property real mRatio: 0.0
     property bool mInverted: false
+    property var dialogParent: ApplicationWindow.overlay
 
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
@@ -77,7 +78,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         ScrollView {
             anchors.fill: parent
@@ -167,7 +168,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Text {
             id: detectLambdaLabel

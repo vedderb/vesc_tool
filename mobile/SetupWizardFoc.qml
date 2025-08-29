@@ -628,7 +628,7 @@ Item {
                 DirectionSetup {
                     id: dirSetup
                     anchors.fill: parent
-                    dialogParent: topItem.dialogParent
+                    dialogParent: dialogParent
                 }
             }
         }

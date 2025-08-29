@@ -65,7 +65,7 @@ Item {
 
     ProfileEditor {
         id: editor
-        dialogParent: dialogParent
+        dialogParent: topItem.dialogParent
 
         onClosed: {
             if (ok) {
@@ -77,7 +77,7 @@ Item {
 
     ProfileEditor {
         id: editButtonEditor
-        dialogParent: dialogParent
+        dialogParent: topItem.dialogParent
         property int indexNow: 0
 
         onClosed: {
@@ -99,7 +99,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Remove profile"
         y: 10 + parent.height / 2 - height / 2
-        parent: dialogParent
+        parent: topItem.dialogParent
         width: parent.width - (rightMargin + leftMargin)
 
         Overlay.modal: Rectangle {

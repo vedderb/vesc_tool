@@ -39,22 +39,22 @@ Item {
 
     DetectBldc {
         id: detectBldc
-        dialogParent: dialogParent
+        dialogParent: confPageMotorItem.dialogParent
     }
 
     DetectFocParam {
         id: detectFocParam
-        dialogParent: dialogParent
+        dialogParent: confPageMotorItem.dialogParent
     }
 
     DetectFocHall {
         id: detectFocHall
-        dialogParent: dialogParent
+        dialogParent: confPageMotorItem.dialogParent
     }
 
     DetectFocEncoder {
         id: detectFocEncoder
-        dialogParent: dialogParent
+        dialogParent: confPageMotorItem.dialogParent
     }
 
     Dialog {
@@ -73,12 +73,12 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
-        parent: dialogParent
+        parent: confPageMotorItem.dialogParent
 
         DirectionSetup {
             id: directionSetup
             anchors.fill: parent
-            dialogParent: dialogParent
+            dialogParent: confPageMotorItem.dialogParent
         }
     }
 
@@ -93,7 +93,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
+        parent: confPageMotorItem.dialogParent
 
         Overlay.modal: Rectangle {
             color: "#AA000000"

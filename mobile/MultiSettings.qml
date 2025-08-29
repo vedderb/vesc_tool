@@ -70,10 +70,10 @@ Item {
         modal: true
         focus: true
         width: parent.width - 40 - notchLeft - notchRight
-        height: parent.height - 40 - notchBot - notchTop
+        height: parent.height - 40
         closePolicy: Popup.CloseOnEscape
-        x: 20 + (notchLeft + notchRight)/2
-        y: 10 + notchTop
+        x: 20 + (notchLeft + notchRight) / 2
+        y: 10
         topPadding: 5
         bottomPadding: 0
         leftMargin: 5

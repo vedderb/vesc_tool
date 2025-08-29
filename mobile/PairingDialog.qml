@@ -50,10 +50,10 @@ Item {
         modal: true
         focus: true
         width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 60 - notchBot - notchTop
+        height: parent.height - 60
         closePolicy: Popup.CloseOnEscape
         x: (parent.width - width)/2
-        y: 50 + notchTop
+        y: 50
         parent: dialogParent
         padding: 10
 

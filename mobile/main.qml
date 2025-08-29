@@ -95,11 +95,13 @@ ApplicationWindow {
     Controls {
         id: controls
         parentWidth: appWindow.width
-        parentHeight: appWindow.height - footer.height - headerBar.height
+        parentHeight: mainSwipeView.height
+        dialogParent: mainSwipeView
     }
 
     MultiSettings {
         id: multiSettings
+        dialogParent: mainSwipeView
     }
 
     Loader {

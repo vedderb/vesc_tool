@@ -142,8 +142,6 @@ Item {
         }
     }
 
-
-
     Dialog{
         id: dialog
         modal: true
@@ -151,10 +149,10 @@ Item {
         visible: false
         property bool isHorizontal: width > height
         width: parent.width - 10 - notchLeft - notchRight
-        height: parent.height - 10 - notchBot - notchTop
+        height: parent.height - 10
         closePolicy: Popup.NoAutoClose
         x: 5 + notchLeft
-        y: 5 + notchTop
+        y: 5
         parent: dialogParent
         bottomMargin: 0
         rightMargin: 0

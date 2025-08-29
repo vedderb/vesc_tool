@@ -29,8 +29,10 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: appPageItem
+
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
+    property var dialogParent: ApplicationWindow.overlay
 
     ParamEditors {
         id: editors
@@ -51,7 +53,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: 10
         y: (parent.height - height) / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         PpmMap {
             anchors.fill: parent
@@ -73,7 +75,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: 10
         y: parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         AdcMap {
             anchors.fill: parent
@@ -95,7 +97,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: 10
         y: parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         NrfPair {
             anchors.fill: parent

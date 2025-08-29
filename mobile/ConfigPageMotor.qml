@@ -31,6 +31,7 @@ Item {
     id: confPageMotorItem
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
+    property var dialogParent: ApplicationWindow.overlay
 
     ParamEditors {
         id: editors
@@ -38,18 +39,22 @@ Item {
 
     DetectBldc {
         id: detectBldc
+        dialogParent: dialogParent
     }
 
     DetectFocParam {
         id: detectFocParam
+        dialogParent: dialogParent
     }
 
     DetectFocHall {
         id: detectFocHall
+        dialogParent: dialogParent
     }
 
     DetectFocEncoder {
         id: detectFocEncoder
+        dialogParent: dialogParent
     }
 
     Dialog {
@@ -68,11 +73,12 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         DirectionSetup {
             id: directionSetup
             anchors.fill: parent
+            dialogParent: dialogParent
         }
     }
 
@@ -87,7 +93,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Overlay.modal: Rectangle {
             color: "#AA000000"

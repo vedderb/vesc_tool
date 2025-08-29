@@ -28,6 +28,7 @@ import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    property var dialogParent: ApplicationWindow.overlay
     property ConfigParams mAppConf: VescIf.appConfig()
     property Commands mCommands: VescIf.commands()
     property bool mSendCanAtStart: false
@@ -110,7 +111,7 @@ Item {
         height: parent.height - 20 - notchBot - notchTop
         x: 10 + (notchLeft + notchRight)/2
         y: 10 + notchTop
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         ProgressBar {
             anchors.fill: parent
@@ -127,7 +128,7 @@ Item {
         x: 5 + (notchLeft + notchRight)/2
         y: 5 + notchTop
         closePolicy: Popup.NoAutoClose
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
         bottomMargin: 0
         rightMargin: 0
         padding: 10
@@ -651,7 +652,7 @@ Item {
             color: "#AA000000"
         }
 
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Text {
             id: detectLambdaLabel

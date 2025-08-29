@@ -32,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    property var dialogParent: ApplicationWindow.overlay
 
     function openDialog() {
         dialog.open()
@@ -82,7 +83,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         ScrollView {
             anchors.fill: parent
@@ -179,7 +180,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Text {
             id: detectLambdaLabel

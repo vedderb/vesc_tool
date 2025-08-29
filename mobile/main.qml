@@ -89,6 +89,7 @@ ApplicationWindow {
 
     SetupWizardIntro {
         id: introWizard
+        dialogParent: mainSwipeView
     }
 
     Controls {
@@ -108,6 +109,7 @@ ApplicationWindow {
         visible: status == Loader.Ready
         sourceComponent: Settings {
             id: settings
+            dialogParent: mainSwipeView
         }
     }
 
@@ -132,6 +134,7 @@ ApplicationWindow {
             CanScreen {
                 id: canScreen
                 anchors.fill: parent
+                dialogParent: mainSwipeView
             }
 
             onVisibleChanged: {
@@ -261,19 +264,19 @@ ApplicationWindow {
     }
 
     SwipeView {
-        id: swipeView
+        id: mainSwipeView
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
         anchors.leftMargin: notchLeft*0.75
         anchors.rightMargin: notchRight*0.75
         clip: true
         contentItem: ListView {
-            model: swipeView.contentModel
-            interactive: swipeView.interactive
-            currentIndex: swipeView.currentIndex
+            model: mainSwipeView.contentModel
+            interactive: mainSwipeView.interactive
+            currentIndex: mainSwipeView.currentIndex
 
-            spacing: swipeView.spacing
-            orientation: swipeView.orientation
+            spacing: mainSwipeView.spacing
+            orientation: mainSwipeView.orientation
             snapMode: ListView.SnapOneItem
             boundsBehavior: Flickable.StopAtBounds
 
@@ -282,7 +285,7 @@ ApplicationWindow {
             preferredHighlightEnd: 0
             highlightMoveDuration: 250
 
-            maximumFlickVelocity: 8 * (swipeView.orientation ===
+            maximumFlickVelocity: 8 * (mainSwipeView.orientation ===
                                        Qt.Horizontal ? width : height)
         }
 
@@ -372,6 +375,7 @@ ApplicationWindow {
                         visible: status == Loader.Ready
                         sourceComponent: RtDataSetup {
                             anchors.fill: parent
+                            dialogParent: mainSwipeView
                             updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1
                         }
                     }
@@ -453,6 +457,7 @@ ApplicationWindow {
                     anchors.topMargin: 5
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
+                    dialogParent: mainSwipeView
                 }
             }
         }
@@ -485,7 +490,7 @@ ApplicationWindow {
 
             TabBar {
                 id: tabBar
-                currentIndex: swipeView.currentIndex
+                currentIndex: mainSwipeView.currentIndex
                 Layout.fillWidth: true
                 implicitWidth: 0
                 clip: true
@@ -532,7 +537,7 @@ ApplicationWindow {
             id: uiHw
             anchors.fill: parent
             property var tabBarItem: tabBar
-            property var swipeViewItem: swipeView
+            property var swipeViewItem: mainSwipeView
         }
     }
 
@@ -551,7 +556,7 @@ ApplicationWindow {
             id: uiApp
             anchors.fill: parent
             property var tabBarItem: tabBar
-            property var swipeViewItem: swipeView
+            property var swipeViewItem: mainSwipeView
         }
     }
 
@@ -586,6 +591,7 @@ ApplicationWindow {
             asynchronous: true
             sourceComponent: ConfigPageMotor {
                 anchors.fill: parent
+                dialogParent: mainSwipeView
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
             }
@@ -601,6 +607,7 @@ ApplicationWindow {
             anchors.fill: parent
             asynchronous: true
             sourceComponent: ConfigPageApp {
+                dialogParent: mainSwipeView
                 anchors.fill: parent
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
@@ -832,33 +839,33 @@ ApplicationWindow {
                     mCommands.getValuesSetup()
                     mCommands.getImuData(0xFFFF)
 
-                    if (swipeView.currentItem == bmsPage) {
+                    if (mainSwipeView.currentItem == bmsPage) {
                         mCommands.bmsGetValues()
                     }
                 } else {
-                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 0) {
+                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 0) {
                         interval = 50
                         mCommands.getValues()
                     }
 
-                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 1) {
+                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 1) {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getImuData(0x2)
                     }
 
-                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 2) {
+                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 2) {
                         interval = 20
                         mCommands.getImuData(0x1FF)
                     }
 
-                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 3) {
+                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 3) {
                         interval = 100
                         mCommands.getValuesSetupSelective(0x7E00)
                         mCommands.getStats(0xFFFFFFFF)
                     }
 
-                    if (swipeView.currentItem == bmsPage) {
+                    if (mainSwipeView.currentItem == bmsPage) {
                         interval = 100
                         mCommands.bmsGetValues()
                     }
@@ -901,7 +908,7 @@ ApplicationWindow {
         height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
         x: (parent.width - width) / 2
         y: (parent.height - height + notchTop) / 2
-        parent: ApplicationWindow.overlay
+        parent: mainSwipeView
 
         ScrollView {
             id: vescDialogScroll
@@ -938,19 +945,19 @@ ApplicationWindow {
             appUiObj = 0
         }
 
-        swipeView.interactive = true
+        mainSwipeView.interactive = true
         headerBar.visible = true
         tabBar.enabled = true
 
         if (VescIf.isPortConnected() && VescIf.qmlHwLoaded()) {
             if (VescIf.getLastFwRxParams().qmlHwFullscreen) {
-                swipeView.interactive = false
+                mainSwipeView.interactive = false
                 headerBar.visible = false
                 tabBar.enabled = false
             }
 
             hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
-            swipeView.insertItem(1, uiHwPage)
+            mainSwipeView.insertItem(1, uiHwPage)
             tabBar.insertItem(1, uiHwButton)
             uiHwPage.visible = true
 
@@ -960,8 +967,8 @@ ApplicationWindow {
             }
 
             if (VescIf.getLastFwRxParams().qmlHwFullscreen) {
-                swipeView.setCurrentIndex(0)
-                swipeView.setCurrentIndex(1)
+                mainSwipeView.setCurrentIndex(0)
+                mainSwipeView.setCurrentIndex(1)
             }
         } else {
             uiHwPage.visible = false
@@ -971,13 +978,13 @@ ApplicationWindow {
 
         if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
             if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
-                swipeView.interactive = false
+                mainSwipeView.interactive = false
                 headerBar.visible = false
                 tabBar.enabled = false
             }
 
             appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
-            swipeView.insertItem(1, uiAppPage)
+            mainSwipeView.insertItem(1, uiAppPage)
             tabBar.insertItem(1, uiAppButton)
             uiAppPage.visible = true
 
@@ -987,8 +994,8 @@ ApplicationWindow {
             }
 
             if (VescIf.getLastFwRxParams().qmlAppFullscreen) {
-                swipeView.setCurrentIndex(0)
-                swipeView.setCurrentIndex(1)
+                mainSwipeView.setCurrentIndex(0)
+                mainSwipeView.setCurrentIndex(1)
             }
         } else {
             uiAppPage.visible = false
@@ -1008,7 +1015,7 @@ ApplicationWindow {
                 stop()
 
                 if (VescIf.isPortConnected() && VescIf.customConfig(0) !== null) {
-                    swipeView.insertItem(4, confCustomPage)
+                    mainSwipeView.insertItem(4, confCustomPage)
                     tabBar.insertItem(4, confCustomButton)
                     confCustomPage.visible = true
                     confCustomLoader.item.reloadConfig()
@@ -1088,9 +1095,9 @@ ApplicationWindow {
                     confPageMotor.visible = true
                     confPageApp.visible = true
 
-                    swipeView.insertItem(4, confPageApp)
+                    mainSwipeView.insertItem(4, confPageApp)
                     tabBar.insertItem(4, confAppButton)
-                    swipeView.insertItem(4, confPageMotor)
+                    mainSwipeView.insertItem(4, confPageMotor)
                     tabBar.insertItem(4, confMotorButton)
                 } else {
                     confPageMotor.visible = false
@@ -1183,7 +1190,7 @@ ApplicationWindow {
             color: "#AA000000"
         }
 
-        parent: ApplicationWindow.overlay
+        parent: mainSwipeView
         y: parent.y + parent.height / 2 - height / 2
         width: parent.width - 20
 

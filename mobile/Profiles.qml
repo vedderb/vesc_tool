@@ -26,7 +26,6 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: topItem
-
     property var dialogParent: ApplicationWindow.overlay
 
     function updateVisibleProfiles() {
@@ -66,7 +65,7 @@ Item {
 
     ProfileEditor {
         id: editor
-        dialogParent: topItem.dialogParent
+        dialogParent: dialogParent
 
         onClosed: {
             if (ok) {
@@ -78,7 +77,7 @@ Item {
 
     ProfileEditor {
         id: editButtonEditor
-        dialogParent: topItem.dialogParent
+        dialogParent: dialogParent
         property int indexNow: 0
 
         onClosed: {

@@ -26,6 +26,7 @@ import Vedder.vesc.utility 1.0
 
 Item {
     property bool mLastDarkMode: false
+    property var dialogParent: ApplicationWindow.overlay
 
     function openDialog() {
         mLastDarkMode = Utility.isDarkMode()
@@ -48,7 +49,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         ScrollView {
             anchors.fill: parent
@@ -188,7 +189,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Text {
             id: detectRlLabel

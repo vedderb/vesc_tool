@@ -333,5 +333,8 @@
         <file>res/+theme_light/icons/glow.png</file>
         <file>res/symbol_v_wide.png</file>
         <file>res/+theme_light/symbol_v_wide.png</file>
+        <file>res/+theme_light/icons/Globe-96.png</file>
+        <file>res/+theme_light/icons/LAN-96.png</file>
+        <file>res/+theme_light/icons/USB-96.png</file>
     </qresource>
 </RCC>

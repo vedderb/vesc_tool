@@ -618,7 +618,7 @@ Item {
             var devices = [];
             
             for (var addr in bleDevices){
-                devices.push(formatBleDevice(addr, bleDevices[addr]))
+                devices.push(formatBleDevice(bleDevices[addr], addr))
             }
             
             for(var udpDevice of vescsUdp){

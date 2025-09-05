@@ -662,7 +662,7 @@ Item {
 
         width: parent.width - 20 - notchLeft - notchRight
         height: parent.height - 20
-        x: parent.width/2 - width/2
+        x: parent.width / 2 - width / 2
         y: parent.height / 2 - height / 2
         parent: mainSwipeView
 
@@ -674,6 +674,7 @@ Item {
             anchors.fill: parent
             anchors.margins: 5
             anchors.bottomMargin: 50
+            dialogParent: mainSwipeView
         }
     }
 }

@@ -281,7 +281,7 @@ Item {
         }
 
         width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 40)
+        height: Math.min(implicitHeight, parent.height - 20)
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         parent: dialogParent

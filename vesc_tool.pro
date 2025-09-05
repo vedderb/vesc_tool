@@ -38,6 +38,10 @@ ios: {
     QMAKE_CXXFLAGS_DEBUG += -Wall
 }
 
+android: {
+    QMAKE_LFLAGS += -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384
+}
+
 !win32-msvc*: { !android: {
     QMAKE_CXXFLAGS += -Wno-deprecated-copy
 }}

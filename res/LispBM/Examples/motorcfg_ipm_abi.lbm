@@ -1,81 +1,10 @@
-(def raw-sin (get-adc 20))
-(def raw-cos (get-adc 21))
-
-(def out-sin 0.0)
-(def out-cos 0.0)
-(def out-mod 0.0)
-
-(def s-amp 1.0)
-(def c-amp 1.0)
-
-(def s-ofs 1.65)
-(def c-ofs 1.65)
-
-(defun reset-max-min () {
-        (def s-max 0.0)
-        (def s-min 5.0)
-        (def c-max 0.0)
-        (def c-min 5.0)
-})
-
-(reset-max-min)
-
-(defun calc-amp-ofs () {
-        (setq s-ofs (/ (+ s-max s-min) 2.0))
-        (setq c-ofs (/ (+ c-max c-min) 2.0))
-        (setq s-amp (/ (- s-max s-min) 2.0))
-        (setq c-amp (/ (- c-max c-min) 2.0))
-})
-
-(def filter-const 0.8)
-(defun lpf (val sample)
-    (- val (* filter-const (- val sample)))
-)
-
-(loopwhile-thd 100 t {
-        (def raw-sin (lpf raw-sin (get-adc 20)))
-        (def raw-cos (lpf raw-cos (get-adc 21)))
-
-        (if (> raw-sin s-max) (def s-max raw-sin))
-        (if (< raw-sin s-min) (def s-min raw-sin))
-        (if (> raw-cos c-max) (def c-max raw-cos))
-        (if (< raw-cos c-min) (def c-min raw-cos))
-
-        (def out-sin (/ (- raw-sin s-ofs) s-amp))
-        (def out-cos (/ (- raw-cos c-ofs) c-amp))
-        (def out-mod (sqrt (+ (* out-sin out-sin) (* out-cos out-cos))))
-
-        (if (and (> (- s-max s-min) 0.1) (> (- c-max c-min) 0.1))
-            (calc-amp-ofs)
-        )
-
-        (sleep 0.01)
-})
-
-(defun detect-apply-sincos (current) {
-        (app-disable-output 100000)
-
-        (foc-openloop current 60)
-        (sleep 0.1)
-        (reset-max-min)
-
-        (looprange i 0 60 {
-                (foc-openloop current 60)
-                (sleep 0.1)
-        })
-
-        (conf-enc-sincos s-amp c-amp s-ofs c-ofs)
-
-        (app-disable-output 0)
-})
-
 (def conf-state nil)
 
 (defunret conf-motor (current current-detect) {
         (setq conf-state "Begin")
 
         ; Current controller time constant in us
-        (var tc 500.0)
+        (var tc 1000.0)
 
         (conf-set 'l-current-min (- current))
         (conf-set 'l-current-max current)
@@ -98,9 +27,6 @@
         (var bw (/ 1.0 (* tc 1.0e-6)))
         (conf-set 'foc-current-kp (* (conf-get 'foc-motor-l) 1.0e-6 bw))
         (conf-set 'foc-current-ki (* (conf-get 'foc-motor-r) 1.0e-3 bw))
-
-        (setq conf-state "Detect Sin/Cos Encoder")
-        (detect-apply-sincos current-detect)
 
         (setq conf-state "Measure Flux Linkage")
         ; This will return the list
@@ -140,18 +66,20 @@
 
 (defun conf-start () {
         (conf-set 'foc-openloop-rpm 200)
-        (conf-set 'm-sensor-port-mode 4) ; Sin/Cos
+        (conf-set 'm-sensor-port-mode 14) ; PWM + ABI
+        (conf-set 'm-encoder-counts 1024)
         (conf-set 'foc-mtpa-mode 2) ; IQ Measured MTPA
         (conf-set 'foc-sl-erpm 100000) ; Encoder only
 
         (conf-set 'foc-offsets-cal-mode 4) ; Auto-cal
-        (conf-dc-cal-set nil nil nil 0 0 0 000) ; No voltage offsets
+        (conf-dc-cal-set nil nil nil 0 0 0 0 0 0) ; No voltage offsets
 
-        (conf-set 'm-motor-temp-sens-type 4)
+        ;(conf-set 'm-motor-temp-sens-type 4)
         (sleep 1.0) ; Wait for temp fault
 
         (var current-lim 250)
         (var current-detect 100)
+        ;(conf-set 'foc-fw-current-max 100)
 
         (var conf-thd (spawn 150 conf-motor current-lim current-detect))
 

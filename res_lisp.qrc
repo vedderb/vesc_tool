@@ -59,5 +59,7 @@
         <file>res/LispBM/Examples/icu_pwm_encoder.lbm</file>
         <file>res/LispBM/Examples/motorcfg_ipm_sincos.lbm</file>
         <file>res/LispBM/Examples/encoder_mt6701_conf.lbm</file>
+        <file>res/LispBM/Examples/test_encoder.lbm</file>
+        <file>res/LispBM/Examples/motorcfg_ipm_abi.lbm</file>
     </qresource>
 </RCC>

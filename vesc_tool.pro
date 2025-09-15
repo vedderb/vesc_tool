@@ -46,7 +46,7 @@ ios: {
 #CONFIG += build_mobile
 
 # Exclude built-in firmwares
-CONFIG += exclude_fw
+# CONFIG += exclude_fw
 
 ios: {
     CONFIG    += build_mobile
@@ -134,6 +134,7 @@ android: QT += androidextras
 
 ios | macx: {
     TARGET = "VESC Tool"
+    CONFIG += sdk_no_version_check
 }else: {
     android:{
         TARGET = "vesc_tool"

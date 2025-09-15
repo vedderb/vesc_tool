@@ -178,7 +178,6 @@ Item {
 
                 Menu {
                     id: menu
-                    bottomPadding: notchBot
                     leftPadding: notchLeft
                     rightPadding: notchRight
                     parent: appPageItem
@@ -282,9 +281,9 @@ Item {
         }
 
         width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
+        height: Math.min(implicitHeight, parent.height - 20)
         x: (parent.width - width) / 2
-        y: (parent.height - height + notchTop) / 2
+        y: (parent.height - height) / 2
         parent: dialogParent
 
         ColumnLayout {

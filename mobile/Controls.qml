@@ -30,6 +30,7 @@ Item {
     property int parentWidth: 10
     property int parentHeight: 10
 
+    property var dialogParent: ApplicationWindow.overlay
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
@@ -41,11 +42,12 @@ Item {
 
     Dialog {
         id: dialog
+        parent: dialogParent
         standardButtons: Dialog.Close
         modal: false
         focus: true
         width: parentWidth - 40 - notchLeft - notchRight
-        height: parentHeight - 40 - notchBot - notchTop
+        height: parentHeight - 40
         closePolicy: Popup.CloseOnEscape
         x: (parentWidth - width)/2
         y: (parentHeight - height)/2

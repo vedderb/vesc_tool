@@ -28,6 +28,7 @@ import Vedder.vesc.utility 1.0
 
 Item {
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    property var dialogParent: ApplicationWindow.overlay
 
     function openDialog() {
         dialog.open()
@@ -45,11 +46,11 @@ Item {
         modal: true
         focus: true
         width: parent.width - 10 - notchLeft - notchRight
-        height: parent.height - 10 - notchBot - notchTop
+        height: parent.height - 10
         closePolicy: Popup.NoAutoClose
-        x: 5 + (notchLeft + notchRight)/2
-        y: 5 + notchTop
-        parent: ApplicationWindow.overlay
+        x: 5 + (notchLeft + notchRight) / 2
+        y: 5
+        parent: dialogParent
         bottomMargin: 0
         rightMargin: 0
         padding: 10
@@ -251,9 +252,9 @@ Item {
         modal: true
         focus: true
         width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 40 - notchTop - notchBot)
+        height: Math.min(implicitHeight, parent.height - 40)
         closePolicy: Popup.CloseOnEscape
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Overlay.modal: Rectangle {
             color: "#AA000000"

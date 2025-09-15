@@ -32,6 +32,7 @@ Item {
     property var hallTable: []
     property int hallRes: -4
     property bool resultReceived: false
+    property var dialogParent: ApplicationWindow.overlay
 
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
@@ -111,7 +112,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         ScrollView {
             anchors.fill: parent
@@ -233,7 +234,7 @@ Item {
 
         x: 10
         y: Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Text {
             id: detectLabel

@@ -207,6 +207,9 @@
 <name>phase-hall</name>
 <name>phase-observer</name>
 <name>observer-error</name>
+<name>phase-all</name>
+<name>enc-corr</name>
+<name>enc-corr-en</name>
 <name>set-servo</name>
 <name>get-vin</name>
 <name>select-motor</name>

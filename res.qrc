@@ -162,6 +162,9 @@
         <file>res/icons/About-96.png</file>
         <file>res/icons/3ph_sine.png</file>
         <file>res/icons/Stop Sign-96.png</file>
+        <file>res/icons/USB-96.png</file>
+        <file>res/icons/LAN-96.png</file>
+        <file>res/icons/Globe-96.png</file>
         <file>res/icons_textedit/Undo-96.png</file>
         <file>res/icons_textedit/Text Color-96.png</file>
         <file>res/icons_textedit/Strikethrough-96.png</file>
@@ -330,5 +333,8 @@
         <file>res/+theme_light/icons/glow.png</file>
         <file>res/symbol_v_wide.png</file>
         <file>res/+theme_light/symbol_v_wide.png</file>
+        <file>res/+theme_light/icons/Globe-96.png</file>
+        <file>res/+theme_light/icons/LAN-96.png</file>
+        <file>res/+theme_light/icons/USB-96.png</file>
     </qresource>
 </RCC>

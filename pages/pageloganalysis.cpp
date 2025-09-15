@@ -517,9 +517,9 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
     mLogHeader.append(LOG_HEADER("t_mosfet_2", "Temp MOSFET 2", "°C", 1));
     mLogHeader.append(LOG_HEADER("t_mosfet_3", "Temp MOSFET 3", "°C", 1));
     mLogHeader.append(LOG_HEADER("position", "Motor Pos", "°", 1));
-    mLogHeader.append(LOG_HEADER("roll", "Roll", "°", 1));
-    mLogHeader.append(LOG_HEADER("pitch", "Pitch", "°", 1));
-    mLogHeader.append(LOG_HEADER("yaw", "Yaw", "°", 1));
+    mLogHeader.append(LOG_HEADER("roll", "Roll", "rad", 3));
+    mLogHeader.append(LOG_HEADER("pitch", "Pitch", "rad", 3));
+    mLogHeader.append(LOG_HEADER("yaw", "Yaw", "rad", 3));
     mLogHeader.append(LOG_HEADER("acc_x", "Accel X", "G"));
     mLogHeader.append(LOG_HEADER("acc_y", "Accel Y", "G"));
     mLogHeader.append(LOG_HEADER("acc_z", "Accel Z", "G"));

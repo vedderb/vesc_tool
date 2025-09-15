@@ -77,7 +77,6 @@ void BleUart::startConnect(QString addr)
 
 #else
     mControl = new QLowEnergyController(QBluetoothAddress(addr));
-
 #endif
 
     mControl->setRemoteAddressType(QLowEnergyController::RandomAddress);

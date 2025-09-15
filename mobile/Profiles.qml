@@ -26,7 +26,6 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: topItem
-
     property var dialogParent: ApplicationWindow.overlay
 
     function updateVisibleProfiles() {
@@ -100,7 +99,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Remove profile"
         y: 10 + parent.height / 2 - height / 2
-        parent: dialogParent
+        parent: topItem.dialogParent
         width: parent.width - (rightMargin + leftMargin)
 
         Overlay.modal: Rectangle {

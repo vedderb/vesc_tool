@@ -1,0 +1,123 @@
+(defmacro repeat-cmd (cmd time) {
+        `(looprange i 0 (* ,time 10) {
+                ,cmd
+                (sleep 0.1)
+        })
+})
+
+;(test-encoder 3000 50)
+;(test-encoder 4000 50)
+;(test-encoder 5000 50)
+;(test-encoder 8000 50)
+
+;(appy-error-map)
+;(enc-corr-en 0)
+;(enc-corr-en 1)
+;(enc-corr-en)
+;(test-encoder 4000 5)
+;(test-encoder 6000 15)
+
+;(test-encoder 8000 5)
+
+(defun reset-samples () {
+        (def samples nil)
+        (gc)
+        (def samples (map (fn (x) (list 0 0)) (range 360)))
+        (def samp-tot 0)
+        (def iteration 0)
+})
+
+(defun get-sample (pos) {
+        (var sample (ix samples pos))
+        (var err (ix sample 0))
+        (var samp (ix sample 1))
+        (if (> samp 0) (setq err (/ err samp)))
+        err
+})
+
+(defun get-sample-filter (pos) {
+        (var sum 0.0)
+        (var num 0)
+
+        (looprange i -15 15 {
+                (var samp (+ i pos))
+                (if (< samp 0.0) (setq samp (+ samp 360.0)))
+                (if (>= samp 360.0) (setq samp (- samp 360.0)))
+                (setq sum (+ sum (get-sample samp)))
+                (setq num (+ num 1))
+        })
+
+        (/ sum num)
+})
+
+(reset-samples)
+
+(defun test-encoder (rpm iterations) {
+        (reset-samples)
+
+        (app-disable-output 100000)
+        ;(enc-corr-en 0)
+
+        (repeat-cmd (set-rpm rpm) 2)
+
+        (setq samp-tot 0)
+
+        (looprange i 0 iterations {
+                (repeat-cmd (set-rpm rpm) 0.5)
+                (set-current 0.0)
+                (sleep 0.1)
+
+                (loopwhile (> (get-rpm) (* 0.4 rpm)) {
+                        (var phases (phase-all))
+
+                        (var angle (ix phases 3))
+
+                        ;(var diff (ix phases 4)) ; observer - enc
+                        (var diff (ix phases 5)) ; bemf - enc
+                        ;(var diff (ix phases 6)) ; observer - bemf
+
+                        (var sample (ix samples angle))
+                        (setix sample 0 (+ (ix sample 0) diff))
+                        (setix sample 1 (+ (ix sample 1) 1))
+
+                        (setq samp-tot (+ samp-tot 1))
+                        (setq iteration i)
+                })
+        })
+
+        (plot-init "Angle" "Error")
+        (plot-add-graph "Encoder Error")
+        (plot-add-graph "Encoder Error Filter")
+        (plot-add-graph "Samples")
+
+        (looprange i 0 (length samples) {
+                (var sample (ix samples i))
+                (var samp (ix sample 1))
+
+                (plot-set-graph 0)
+                (plot-send-points i (get-sample i))
+                (plot-set-graph 1)
+                (plot-send-points i (get-sample-filter i))
+                (plot-set-graph 2)
+                (plot-send-points i samp)
+        })
+
+        (app-disable-output 0)
+})
+
+(defun appy-error-map () {
+        (looprange i 0 (length samples) {
+                (enc-corr i (* -1.0 (get-sample-filter i)))
+                (def error-map-pos i)
+        })
+
+        (enc-corr-en 1)
+        (conf-store)
+})
+
+(defun print-current-error-map () {
+        (looprange i 0 360 {
+                (print (enc-corr i))
+        })
+})
+

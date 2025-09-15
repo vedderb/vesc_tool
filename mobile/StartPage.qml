@@ -388,22 +388,27 @@ Item {
 
     SetupWizardFoc {
         id: wizardFoc
+        dialogParent: mainSwipeView
     }
 
     SetupWizardInput {
         id: wizardInput
+        dialogParent: mainSwipeView
     }
 
     PairingDialog {
         id: pairDialog
+        dialogParent: mainSwipeView
     }
 
     BleSetupDialog {
         id: bleSetupDialog
+        dialogParent: mainSwipeView
     }
 
     SetupWizardIMU {
         id: wizardIMU
+        dialogParent: mainSwipeView
     }
 
     Connections {
@@ -430,8 +435,8 @@ Item {
         width: parent.width - 10 - notchLeft - notchRight
         closePolicy: Popup.CloseOnEscape
         x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2 + notchTop
-        parent: ApplicationWindow.overlay
+        y: parent.height / 2 - height / 2
+        parent: mainSwipeView
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -440,6 +445,7 @@ Item {
         DirectionSetup {
             id: directionSetup
             anchors.fill: parent
+            dialogParent: topItem
         }
     }
 
@@ -452,9 +458,9 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
 
-        parent: ApplicationWindow.overlay
+        parent: mainSwipeView
         x: parent.width/2 - width/2
-        y: topItem.y + topItem.height / 2 - height / 2 + notchTop
+        y: topItem.y + topItem.height / 2 - height / 2
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -485,9 +491,9 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Backup configuration(s)"
 
-        parent: ApplicationWindow.overlay
+        parent: mainSwipeView
         x: parent.width/2 - width/2
-        y: topItem.y + topItem.height / 2 - height / 2 + notchTop
+        y: topItem.y + topItem.height / 2 - height / 2
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -529,9 +535,9 @@ Item {
         closePolicy: Popup.CloseOnEscape
         title: "Restore configuration backup(s)"
 
-        parent: ApplicationWindow.overlay
+        parent: mainSwipeView
         x: parent.width/2 - width/2
-        y: topItem.y + topItem.height / 2 - height / 2 + notchTop
+        y: topItem.y + topItem.height / 2 - height / 2
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -573,8 +579,8 @@ Item {
 
         width: parent.width - 20 - notchLeft - notchRight
         x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2 + notchTop
-        parent: ApplicationWindow.overlay
+        y: parent.height / 2 - height / 2
+        parent: mainSwipeView
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -594,10 +600,10 @@ Item {
         focus: true
 
         width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 20 - notchBot - notchTop
+        height: parent.height - 20
         x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2 + notchTop
-        parent: ApplicationWindow.overlay
+        y: parent.height / 2 - height / 2
+        parent: mainSwipeView
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -655,10 +661,10 @@ Item {
         focus: true
 
         width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 20 - notchBot - notchTop
-        x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2 + notchTop
-        parent: ApplicationWindow.overlay
+        height: parent.height - 20
+        x: parent.width / 2 - width / 2
+        y: parent.height / 2 - height / 2
+        parent: mainSwipeView
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -668,6 +674,7 @@ Item {
             anchors.fill: parent
             anchors.margins: 5
             anchors.bottomMargin: 50
+            dialogParent: mainSwipeView
         }
     }
 }

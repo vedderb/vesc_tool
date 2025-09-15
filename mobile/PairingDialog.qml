@@ -26,7 +26,9 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
-Item {   
+Item {
+    property var dialogParent: ApplicationWindow.overlay
+
     function openDialog() {
         dialog.open()
         loadUuids()
@@ -48,11 +50,11 @@ Item {
         modal: true
         focus: true
         width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 60 - notchBot - notchTop
+        height: parent.height - 60
         closePolicy: Popup.CloseOnEscape
         x: (parent.width - width)/2
-        y: 50 + notchTop
-        parent: ApplicationWindow.overlay
+        y: 50
+        parent: dialogParent
         padding: 10
 
         Overlay.modal: Rectangle {
@@ -137,7 +139,7 @@ Item {
                                     title: "Delete paired VESC"
                                     x: 10
                                     y: 10 + parent.height / 2 - height / 2
-                                    parent: ApplicationWindow.overlay
+                                    parent: dialogParent
 
                                     Overlay.modal: Rectangle {
                                         color: "#AA000000"
@@ -264,7 +266,7 @@ Item {
         title: "Pair connected VESC"
         x: (parent.width - width)/2
         y: 10 + Math.max((parent.height - height) / 2, 10)
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -305,7 +307,7 @@ Item {
         title: "Unpair connected VESC"
         x: (parent.width - width)/2
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -339,7 +341,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: (parent.width - width)/2
         y: (parent.height - height)/2
-        parent: ApplicationWindow.overlay
+        parent: dialogParent
 
         Overlay.modal: Rectangle {
             color: "#AA000000"

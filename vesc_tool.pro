@@ -15,9 +15,9 @@ VT_IS_TEST_VERSION = 0
 # GIT commit
 VT_GIT_COMMIT = $$system(git rev-parse --short=8 HEAD)
 
-VT_ANDROID_VERSION_ARMV7 = 173
-VT_ANDROID_VERSION_ARM64 = 174
-VT_ANDROID_VERSION_X86 = 175
+VT_ANDROID_VERSION_ARMV7 = 181
+VT_ANDROID_VERSION_ARM64 = 182
+VT_ANDROID_VERSION_X86 = 183
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -36,6 +36,10 @@ CONFIG += c++11
 CONFIG += resources_big
 ios: {
     QMAKE_CXXFLAGS_DEBUG += -Wall
+}
+
+android: {
+    QMAKE_LFLAGS += -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384
 }
 
 !win32-msvc*: { !android: {

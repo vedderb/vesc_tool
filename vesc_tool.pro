@@ -138,6 +138,7 @@ android: QT += androidextras
 
 ios | macx: {
     TARGET = "VESC Tool"
+    CONFIG += sdk_no_version_check
 }else: {
     android:{
         TARGET = "vesc_tool"

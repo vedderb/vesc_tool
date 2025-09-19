@@ -297,6 +297,7 @@ void DispEditor::on_loadPngButton_clicked()
         QImage img;
         img.load(filename);
         QImage img2(img.size(), QImage::Format_ARGB32);
+        img2.fill(Qt::black);
 
         QPainter p(&img2);
         p.drawImage(0, 0, img);

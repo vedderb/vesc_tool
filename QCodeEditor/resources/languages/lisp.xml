@@ -416,6 +416,7 @@
 <name>conf-enc-sincos</name>
 <name>conf-get-limits</name>
 <name>conf-detect-lambda-enc</name>
+<name>conf-detect-hall</name>
 <name>free</name>
 <name>bufcreate</name>
 <name>array-create</name>

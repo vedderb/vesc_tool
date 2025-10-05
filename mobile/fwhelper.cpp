@@ -67,10 +67,6 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/STR365");
     } else if (params.hw == "VDisp") {
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VDisp");
-    } else if (params.hw == "VDisp Dual") {
-        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VDisp Dual");
-    } else if (params.hw == "BMS RB") {
-        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/BMS RB");
     } else if (params.hw == "VL Scope") {
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VL Scope");
     } else if (params.hw == "Duet Expr") {

@@ -37,5 +37,11 @@
         <file>ESP32-C3/Nanolog/bootloader.bin</file>
         <file>ESP32-C3/Nanolog/partition-table.bin</file>
         <file>ESP32-C3/Nanolog/vesc_express.bin</file>
+        <file>ESP32-C3/Rmcore/bootloader.bin</file>
+        <file>ESP32-C3/Rmcore/partition-table.bin</file>
+        <file>ESP32-C3/Rmcore/vesc_express.bin</file>
+        <file>ESP32-C3/VBMS16/bootloader.bin</file>
+        <file>ESP32-C3/VBMS16/partition-table.bin</file>
+        <file>ESP32-C3/VBMS16/vesc_express.bin</file>
     </qresource>
 </RCC>

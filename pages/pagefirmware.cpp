@@ -270,6 +270,10 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         extraPath = "://res/firmwares_esp/ESP32-C3/VDisp 900";
     } else if (params.hw == "Nanolog") {
         extraPath = "://res/firmwares_esp/ESP32-C3/Nanolog";
+    } else if (params.hw == "VBMS16") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VBMS16";
+    } else if (params.hw == "Rmcore") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/Rmcore";
     }
 
     if (!extraPath.isEmpty()) {

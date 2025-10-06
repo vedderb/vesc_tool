@@ -29,8 +29,8 @@
 #define FW_TEST_VERSION_NUMBER		0
 
 #if !defined(HW_SOURCE) && !defined(HW_HEADER)
-#define HW_HEADER					"hw_vdisp_dual.h"
-#define HW_SOURCE					"hw_vdisp_dual.c"
+#define HW_HEADER					"hw_nanolog.h"
+#define HW_SOURCE					"hw_nanolog.c"
 #endif
 
 #if !defined(HW_SOURCE) && !defined(HW_SOURCE_ALT)

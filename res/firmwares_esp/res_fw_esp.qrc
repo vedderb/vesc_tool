@@ -15,12 +15,6 @@
         <file>ESP32-C3/VDisp/bootloader.bin</file>
         <file>ESP32-C3/VDisp/partition-table.bin</file>
         <file>ESP32-C3/VDisp/vesc_express.bin</file>
-        <file>ESP32-C3/VDisp Dual/bootloader.bin</file>
-        <file>ESP32-C3/VDisp Dual/partition-table.bin</file>
-        <file>ESP32-C3/VDisp Dual/vesc_express.bin</file>
-        <file>ESP32-C3/BMS RB/bootloader.bin</file>
-        <file>ESP32-C3/BMS RB/partition-table.bin</file>
-        <file>ESP32-C3/BMS RB/vesc_express.bin</file>
         <file>ESP32-C3/VL Scope/bootloader.bin</file>
         <file>ESP32-C3/VL Scope/partition-table.bin</file>
         <file>ESP32-C3/VL Scope/vesc_express.bin</file>
@@ -37,5 +31,11 @@
         <file>ESP32-C3/Nanolog/bootloader.bin</file>
         <file>ESP32-C3/Nanolog/partition-table.bin</file>
         <file>ESP32-C3/Nanolog/vesc_express.bin</file>
+        <file>ESP32-C3/Rmcore/bootloader.bin</file>
+        <file>ESP32-C3/Rmcore/partition-table.bin</file>
+        <file>ESP32-C3/Rmcore/vesc_express.bin</file>
+        <file>ESP32-C3/VBMS16/bootloader.bin</file>
+        <file>ESP32-C3/VBMS16/partition-table.bin</file>
+        <file>ESP32-C3/VBMS16/vesc_express.bin</file>
     </qresource>
 </RCC>

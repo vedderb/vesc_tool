@@ -54,24 +54,6 @@ cp build/vesc_express.bin "$BOARD"
 cp build/partition_table/partition-table.bin "$BOARD"
 cp build/bootloader/bootloader.bin "$BOARD"
 
-# VDisp Dual
-BOARD="$DIR/res/firmwares_esp/ESP32-C3/VDisp Dual"
-cd $FWPATH
-cp "$BOARD/conf_general.h" main/
-idf.py build
-cp build/vesc_express.bin "$BOARD"
-cp build/partition_table/partition-table.bin "$BOARD"
-cp build/bootloader/bootloader.bin "$BOARD"
-
-# BMS RB
-BOARD="$DIR/res/firmwares_esp/ESP32-C3/BMS RB"
-cd $FWPATH
-cp "$BOARD/conf_general.h" main/
-idf.py build
-cp build/vesc_express.bin "$BOARD"
-cp build/partition_table/partition-table.bin "$BOARD"
-cp build/bootloader/bootloader.bin "$BOARD"
-
 # VL Scope
 BOARD="$DIR/res/firmwares_esp/ESP32-C3/VL Scope"
 cd $FWPATH
@@ -110,6 +92,24 @@ cp build/bootloader/bootloader.bin "$BOARD"
 
 # Nanolog
 BOARD="$DIR/res/firmwares_esp/ESP32-C3/Nanolog"
+cd $FWPATH
+cp "$BOARD/conf_general.h" main/
+idf.py build
+cp build/vesc_express.bin "$BOARD"
+cp build/partition_table/partition-table.bin "$BOARD"
+cp build/bootloader/bootloader.bin "$BOARD"
+
+# VBMS16
+BOARD="$DIR/res/firmwares_esp/ESP32-C3/VBMS16"
+cd $FWPATH
+cp "$BOARD/conf_general.h" main/
+idf.py build
+cp build/vesc_express.bin "$BOARD"
+cp build/partition_table/partition-table.bin "$BOARD"
+cp build/bootloader/bootloader.bin "$BOARD"
+
+# Rmcore
+BOARD="$DIR/res/firmwares_esp/ESP32-C3/Rmcore"
 cd $FWPATH
 cp "$BOARD/conf_general.h" main/
 idf.py build

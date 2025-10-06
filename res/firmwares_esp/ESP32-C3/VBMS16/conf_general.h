@@ -29,8 +29,8 @@
 #define FW_TEST_VERSION_NUMBER		0
 
 #if !defined(HW_SOURCE) && !defined(HW_HEADER)
-#define HW_HEADER					"hw_bms_rb.h"
-#define HW_SOURCE					"hw_bms_rb.c"
+#define HW_HEADER					"hw_vbms16.h"
+#define HW_SOURCE					"hw_vbms16.c"
 #endif
 
 #if !defined(HW_SOURCE) && !defined(HW_SOURCE_ALT)

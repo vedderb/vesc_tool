@@ -1,0 +1,86 @@
+(defun apply-config () {
+        (var wheel-pulley 72.0)
+        (var motor-pulley 20.0)
+        (var wheel-diameter-mm 200.0)
+
+        (conf-restore-mc)
+        (conf-restore-app)
+
+        (conf-set 'l-current-max 80)
+        (conf-set 'l-current-min -65) ; (conf-get 'l-current-min)
+        (conf-set 'l-in-current-max 40) ; (conf-get 'l-in-current-max)
+        (conf-set 'l-in-current-min -25) ; (conf-get 'l-in-current-min)
+        (conf-set 'l-abs-current-max 190)
+
+        (conf-set 'l-battery-cut-start 61.2) ; (conf-get 'l-battery-cut-start)
+        (conf-set 'l-battery-cut-end 54.8) ; (conf-get 'l-battery-cut-end)
+
+        (conf-set 'm-fault-stop-time-ms 50)
+
+        (conf-set 'si-motor-poles 14)
+        (conf-set 'si-gear-ratio (/ wheel-pulley motor-pulley)) ; (conf-get 'si-gear-ratio)
+        (conf-set 'si-wheel-diameter (* wheel-diameter-mm 0.001)) ; (conf-get 'si-wheel-diameter)
+        (conf-set 'si-battery-cells 18)
+        (conf-set 'si-battery-ah 13.5)
+
+        (conf-set 'l-temp-motor-start 100.0)
+        (conf-set 'l-temp-motor-end 115.0)
+        (conf-set 'm-ntc-motor-beta 3950) ;(conf-get 'm-ntc-motor-beta)
+
+        (var res (* 1000.0 (conf-measure-res 30.0 200)))
+        (var (ind lq-lq-diff i-meas) (conf-measure-ind 30.0 200))
+
+        (conf-set 'foc-motor-r res) ; (conf-get 'foc-motor-r)
+        (conf-set 'foc-motor-l ind) ; (conf-get 'foc-motor-l)
+        (conf-set 'foc-motor-ld-lq-diff lq-lq-diff) ; (conf-get 'foc-motor-ld-lq-diff)
+
+        (var tc 500.0)
+        (var bw (/ 1.0 (* tc 1.0e-6)))
+        (conf-set 'foc-current-kp (* (conf-get 'foc-motor-l) 1.0e-6 bw))
+        (conf-set 'foc-current-ki (* (conf-get 'foc-motor-r) 1.0e-3 bw))
+        (conf-set 'foc-observer-gain (/ 1.0e-3 (* flux-linkage flux-linkage)))
+
+        (var (flux-linkage flux-linkage-undriven undriven-samples enc-offset enc-ratio enc-inverted)
+            (conf-detect-lambda-enc 30 0.25 2000 res ind)
+        )
+
+        (conf-set 'foc-motor-flux-linkage (* flux-linkage-undriven 1000.0)) ; (conf-get 'foc-motor-flux-linkage)
+
+        (var halls (conf-detect-hall 40))
+        (conf-set 'foc-hall-t0 (bufget-u8 halls 0))
+        (conf-set 'foc-hall-t1 (bufget-u8 halls 1))
+        (conf-set 'foc-hall-t2 (bufget-u8 halls 2))
+        (conf-set 'foc-hall-t3 (bufget-u8 halls 3))
+        (conf-set 'foc-hall-t4 (bufget-u8 halls 4))
+        (conf-set 'foc-hall-t5 (bufget-u8 halls 5))
+        (conf-set 'foc-hall-t6 (bufget-u8 halls 6))
+        (conf-set 'foc-hall-t7 (bufget-u8 halls 7))
+
+        (conf-set 'foc-sensor-mode 2)
+
+        (print "Motor Done")
+
+})
+
+(defun conf-all () {
+        (select-motor 1)
+        (apply-config)
+        (select-motor 2)
+        (apply-config)
+        (select-motor 1)
+
+        (conf-set 'app-to-use 4)
+        (conf-set 'ppm-pulse-start 1.2) ; (conf-get 'ppm-pulse-start)
+        (conf-set 'ppm-pulse-end 1.98) ; (conf-get 'ppm-pulse-end)
+        (conf-set 'ppm-pulse-center 1.52) ; (conf-get 'ppm-pulse-center)
+        (conf-set 'ppm-ramp-time-pos 0.2)
+        (conf-set 'ppm-ramp-time-neg 0.1)
+        (conf-set 'ppm-hyst 0.05)
+        (conf-set 'ppm-ctrl-type 1)
+
+        (conf-store)
+
+        (print "All Done!")
+})
+
+;(conf-all)

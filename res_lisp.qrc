@@ -61,5 +61,6 @@
         <file>res/LispBM/Examples/encoder_mt6701_conf.lbm</file>
         <file>res/LispBM/Examples/test_encoder.lbm</file>
         <file>res/LispBM/Examples/motorcfg_ipm_abi.lbm</file>
+        <file>res/LispBM/Examples/setup_motors_dual_esk8.lbm</file>
     </qresource>
 </RCC>

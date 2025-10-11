@@ -50,7 +50,7 @@ android: {
 #CONFIG += build_mobile
 
 # Exclude built-in firmwares
-#CONFIG += exclude_fw
+# CONFIG += exclude_fw
 
 ios: {
     CONFIG    += build_mobile
@@ -138,6 +138,7 @@ android: QT += androidextras
 
 ios | macx: {
     TARGET = "VESC Tool"
+    CONFIG += sdk_no_version_check
 }else: {
     android:{
         TARGET = "vesc_tool"
@@ -334,7 +335,7 @@ DISTFILES += \
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 macx-clang:contains(QMAKE_HOST.arch, arm.*): {
-   QMAKE_APPLE_DEVICE_ARCHS=arm64
+    QMAKE_APPLE_DEVICE_ARCHS=arm64
 }
 
 macx {
@@ -345,6 +346,7 @@ macx {
     QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO
     QMAKE_OBJECTIVE_CFLAGS_RELEASE = $$QMAKE_OBJECTIVE_CFLAGS_RELEASE_WITH_DEBUGINFO
     QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO
+    QMAKE_APPLE_DEVICE_ARCHS = x86_64 arm64
 }
 
 ios {

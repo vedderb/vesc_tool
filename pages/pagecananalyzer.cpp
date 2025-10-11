@@ -20,6 +20,7 @@
 #include "pagecananalyzer.h"
 #include "ui_pagecananalyzer.h"
 #include "utility.h"
+#include <QMessageBox>
 
 PageCanAnalyzer::PageCanAnalyzer(QWidget *parent) :
     QWidget(parent),

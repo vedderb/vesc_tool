@@ -47,16 +47,25 @@
         (conf-set 'foc-motor-flux-linkage (* flux-linkage-undriven 1000.0)) ; (conf-get 'foc-motor-flux-linkage)
 
         (var halls (conf-detect-hall 40))
-        (conf-set 'foc-hall-t0 (bufget-u8 halls 0))
-        (conf-set 'foc-hall-t1 (bufget-u8 halls 1))
-        (conf-set 'foc-hall-t2 (bufget-u8 halls 2))
-        (conf-set 'foc-hall-t3 (bufget-u8 halls 3))
-        (conf-set 'foc-hall-t4 (bufget-u8 halls 4))
-        (conf-set 'foc-hall-t5 (bufget-u8 halls 5))
-        (conf-set 'foc-hall-t6 (bufget-u8 halls 6))
-        (conf-set 'foc-hall-t7 (bufget-u8 halls 7))
+        (if (eq halls nil)
+            {
+                (print "Hall sensor detection failed, using HFI")
+                (conf-set 'foc-sensor-mode 6)
+            }
+            {
+                (conf-set 'foc-hall-t0 (bufget-u8 halls 0))
+                (conf-set 'foc-hall-t1 (bufget-u8 halls 1))
+                (conf-set 'foc-hall-t2 (bufget-u8 halls 2))
+                (conf-set 'foc-hall-t3 (bufget-u8 halls 3))
+                (conf-set 'foc-hall-t4 (bufget-u8 halls 4))
+                (conf-set 'foc-hall-t5 (bufget-u8 halls 5))
+                (conf-set 'foc-hall-t6 (bufget-u8 halls 6))
+                (conf-set 'foc-hall-t7 (bufget-u8 halls 7))
+                (conf-set 'foc-sensor-mode 2)
+            }
+        )
 
-        (conf-set 'foc-sensor-mode 2)
+        (conf-store)
 
         (print "Motor Done")
 

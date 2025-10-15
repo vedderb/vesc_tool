@@ -703,7 +703,9 @@ Item {
             return
         }
 
-        var msg = "You are about to upload new firmware to the connected device"
+        var msg = "CAREFUL: If you continue you will lose your package and all settings, are you sure "
+                  "you know what you're doing?\n\n" +
+                  "This will upload new firmware to the connected device"
         var msgBl = "You are about to upload a bootloader to the connected device"
 
         var msgEnd = "."

@@ -703,15 +703,17 @@ Item {
             return
         }
 
-        var msg = "You are about to upload new firmware to the connected device"
+        var msg = "CAREFUL: If you continue you will lose your package and all settings, are you sure "
+                  "you know what you're doing?\n\n" +
+                  "This will upload new firmware to the connected device"
         var msgBl = "You are about to upload a bootloader to the connected device"
 
         var msgEnd = "."
         if (fwdCan) {
-            msgEnd = ", as well as all decices found on the CAN-bus. \n\n" +
+            msgEnd = ", as well as all devices found on the CAN-bus. \n\n" +
                     "WARNING: The upload all function should ONLY be used if all " +
-                    "decices on the CAN-bus have the same hardware version. If that " +
-                    "is not the case, you must upload firmware to the decices individually."
+                    "devices on the CAN-bus have the same hardware version. If that " +
+                    "is not the case, you must upload firmware to the devices individually."
         }
 
         msg += msgEnd

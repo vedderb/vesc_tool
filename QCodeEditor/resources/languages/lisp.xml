@@ -405,6 +405,7 @@
 <name>conf-set</name>
 <name>conf-get</name>
 <name>conf-store</name>
+<name>store-backup</name>
 <name>conf-detect-foc</name>
 <name>conf-set-pid-offset</name>
 <name>conf-measure-res</name>

@@ -70,5 +70,8 @@
         <file>res/config/6.06/info.xml</file>
         <file>res/config/6.06/parameters_appconf.xml</file>
         <file>res/config/6.06/parameters_mcconf.xml</file>
+        <file>res/config/7.00/info.xml</file>
+        <file>res/config/7.00/parameters_appconf.xml</file>
+        <file>res/config/7.00/parameters_mcconf.xml</file>
     </qresource>
 </RCC>

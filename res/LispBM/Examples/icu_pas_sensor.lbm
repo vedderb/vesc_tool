@@ -1,0 +1,55 @@
+
+; PAS pulse counter
+(def pas-pulses 0)
+
+; Calculated pedal RPM
+(def pedal-rpm 0.0)
+
+; Last time a PAS-pulse was received
+(def pas-last-pulse-time 0)
+
+@const-start
+
+; PAS pulses per revolution
+(def pas-ppr 32)
+
+(defun lpf (val sample fconst)
+    (- val (* fconst (- val sample)))
+)
+
+; Called when PAS-pulses are received.
+; The timer counts at 10000 Hz
+(defun proc-icu (period) {
+        (var rpm (/ (/ 600000.0 pas-ppr) period))
+        (if (> rpm 120.0) (setq rpm 120.0))
+        (setq pedal-rpm (lpf pedal-rpm rpm 0.5))
+        (setq pas-pulses (+ pas-pulses 1))
+        (setq pas-last-pulse-time (systime))
+})
+
+(defun event-handler ()
+    (loopwhile t
+        (recv
+            ((event-icu-period . ((? width) . (? period))) (proc-icu period))
+            (_ nil)
+)))
+
+(defun main () {
+        (icu-start 10000 1)
+        (event-register-handler (spawn event-handler))
+        (event-enable 'event-icu-period)
+
+        (loopwhile-thd ("worker" 120) t {
+                ; Update PAS RPM while no new pulses are coming. From the last
+                ; pulse we can always calculate an upper bound on the RPM.
+                (var elapsed (secs-since pas-last-pulse-time))
+                (if (> elapsed 0.1) {
+                        (var rpm (/ 60.0 pas-ppr elapsed))
+                        (if (< rpm pedal-rpm) (setq pedal-rpm rpm))
+                })
+                (sleep 0.02)
+        })
+})
+
+(image-save)
+(main)

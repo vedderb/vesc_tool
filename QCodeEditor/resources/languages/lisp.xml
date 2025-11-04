@@ -208,6 +208,7 @@
 <name>phase-observer</name>
 <name>observer-error</name>
 <name>phase-all</name>
+<name>enc-sample</name>
 <name>enc-corr</name>
 <name>enc-corr-en</name>
 <name>set-servo</name>

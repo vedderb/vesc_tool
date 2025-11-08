@@ -155,6 +155,8 @@ public:
 
     static QByteArray removeFirmwareHeader(QByteArray in);
 
+    Q_INVOKABLE static QString configPath(QString subPath);
+
 signals:
 
 public slots:

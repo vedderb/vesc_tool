@@ -1087,7 +1087,7 @@ int main(int argc, char *argv[])
         vesc->setShowFwUpdateAvailable(false);
         vesc->setIgnoreTestVersion(true);
 
-        vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+        vesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
         Utility::configLoadLatest(vesc);
 
         if (bridgeAppData) {
@@ -1542,7 +1542,7 @@ int main(int argc, char *argv[])
         }
         app = new QCoreApplication(argc, argv);
         vesc = new VescInterface;
-        vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+        vesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
         Utility::configLoadLatest(vesc);
 
         QTimer::singleShot(10, [&]() {
@@ -1640,7 +1640,7 @@ int main(int argc, char *argv[])
 
         if (!loadQml.isEmpty() || loadQmlVesc) {
             vesc = new VescInterface;
-            vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+            vesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
             Utility::configLoadLatest(vesc);
 
             if (loadQmlVesc) {

@@ -184,7 +184,7 @@ QObject *QmlUi::vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngi
 
     VescInterface *vesc = new VescInterface();
     mVesc = vesc;
-    vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    vesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
     Utility::configLoadLatest(vesc);
 
     return vesc;

@@ -26,7 +26,7 @@
 
 FwHelper::FwHelper(QObject *parent) : QObject(parent)
 {
-
+    reloadLatest();
 }
 
 QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
@@ -323,4 +323,16 @@ QVariantMap FwHelper::getArchiveFirmwares(QString fwPath, FW_RX_PARAMS params)
     }
 
     return fws;
+}
+
+void FwHelper::reloadLatest()
+{
+    QString fwStr = QString::number(VT_VERSION, 'f', 2);
+
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw_" + fwStr + ".rcc";
+    QFile file(path);
+    if (file.exists()) {
+        QResource::unregisterResource(path);
+        QResource::registerResource(path);
+    }
 }

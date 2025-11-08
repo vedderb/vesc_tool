@@ -1,3 +1,6 @@
+### 7.00
+* Firmware are no longer included. They are now downloaded on demand.
+
 ### 6.06
 #### Released 2024-08-19
 * Auto-save UI-state on regular intervals.

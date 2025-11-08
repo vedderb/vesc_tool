@@ -254,7 +254,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Remove the menu with the option to hide the toolbar
     ui->mainToolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
-    mVesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    mVesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
     Utility::configLoadLatest(mVesc);
 
     QMenu *fwMenu = new QMenu(this);

@@ -1762,7 +1762,7 @@ double Utility::distLlhToLlh(double lat, double lon, double height,
 
 bool Utility::configCheckCompatibility(int fwMajor, int fwMinor)
 {
-    QDirIterator it("://res/config");
+    QDirIterator it(Utility::configPath(""));
 
     while (it.hasNext()) {
         QFileInfo fi(it.next());
@@ -1787,7 +1787,7 @@ bool Utility::configCheckCompatibility(int fwMajor, int fwMinor)
 
 bool Utility::configLoad(VescInterface *vesc, int fwMajor, int fwMinor)
 {
-    QDirIterator it("://res/config");
+    QDirIterator it(Utility::configPath(""));
 
     while (it.hasNext()) {
         QFileInfo fi(it.next());
@@ -1825,26 +1825,8 @@ bool Utility::configLoad(VescInterface *vesc, int fwMajor, int fwMinor)
 
 QPair<int, int> Utility::configLatestSupported()
 {
-    QPair<int, int> res = qMakePair(-1, -1);
-    QDirIterator it("://res/config");
-
-    while (it.hasNext()) {
-        QFileInfo fi(it.next());
-        QStringList names = fi.fileName().split("_o_");
-
-        if (fi.isDir()) {
-            foreach (auto name, names) {
-                auto parts = name.split(".");
-                if (parts.size() == 2) {
-                    QPair<int, int> ver = qMakePair(parts.at(0).toInt(), parts.at(1).toInt());
-                    if (ver > res) {
-                        res = ver;
-                    }
-                }
-            }
-        }
-    }
-
+    QStringList fwStr = QString::number(VT_VERSION, 'f', 2).split(".");
+    QPair<int, int> res = qMakePair(fwStr.first().toInt(), fwStr.at(1).toInt());
     return res;
 }
 
@@ -1863,7 +1845,7 @@ bool Utility::configLoadLatest(VescInterface *vesc)
 QVector<QPair<int, int> > Utility::configSupportedFws()
 {
     QVector<QPair<int, int>> res;
-    QDirIterator it("://res/config");
+    QDirIterator it(Utility::configPath(""));
 
     while (it.hasNext()) {
         QFileInfo fi(it.next());
@@ -2520,6 +2502,19 @@ QByteArray Utility::removeFirmwareHeader(QByteArray in)
         }
     } else {
         return in;
+    }
+}
+
+QString Utility::configPath(QString subPath)
+{
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_config.rcc";
+    QFile file(path);
+    if (file.exists()) {
+        QResource::unregisterResource(path);
+        QResource::registerResource(path);
+        return QString("://res/config_download/") + subPath;
+    } else {
+        return QString("://res/config/") + subPath;
     }
 }
 

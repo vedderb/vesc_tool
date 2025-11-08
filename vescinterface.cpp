@@ -4360,6 +4360,100 @@ bool VescInterface::downloadFwArchive()
     return res;
 }
 
+bool VescInterface::downloadFwLatest()
+{
+    bool res = false;
+
+    QString fwStr = QString::number(VT_VERSION, 'f', 2);
+    QUrl url(QString("http://home.vedder.se/vesc_fw_archive/res_fw_") + fwStr + ".rcc");
+
+    QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    QNetworkReply *reply = manager.get(request);
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if(!QDir(appDataLoc).exists()) {
+        QDir().mkpath(appDataLoc);
+    }
+    QString path = appDataLoc + "/res_fw_" + fwStr + ".rcc";
+    QFile file(path);
+    QResource::unregisterResource(path);
+    if (file.open(QIODevice::WriteOnly)) {
+        auto conn = connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this]
+                            (qint64 bytesReceived, qint64 bytesTotal) {
+                                emit fwArchiveDlProgress("Downloading...", (double)bytesReceived / (double)bytesTotal);
+                                file.write(reply->read(reply->size()));
+                            });
+
+        QEventLoop loop;
+        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        if (reply->error() == QNetworkReply::NoError) {
+            file.write(reply->readAll());
+            emit fwArchiveDlProgress("Download Done", 1.0);
+        } else {
+            emit fwArchiveDlProgress("Download Failed", 0.0);
+        }
+
+        file.close();
+        res = true;
+    } else {
+        emit fwArchiveDlProgress("Could not open local file", 0.0);
+    }
+
+    reply->abort();
+    reply->deleteLater();
+
+    return res;
+}
+
+bool VescInterface::downloadConfigs()
+{
+    bool res = false;
+    QUrl url("http://home.vedder.se/vesc_fw_archive/res_config.rcc");
+
+    QNetworkAccessManager manager;
+    QNetworkRequest request(url);
+    QNetworkReply *reply = manager.get(request);
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if(!QDir(appDataLoc).exists()) {
+        QDir().mkpath(appDataLoc);
+    }
+    QString path = appDataLoc + "/res_config.rcc";
+    QFile file(path);
+    QResource::unregisterResource(path);
+    if (file.open(QIODevice::WriteOnly)) {
+        auto conn = connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this]
+                            (qint64 bytesReceived, qint64 bytesTotal) {
+                                emit fwArchiveDlProgress("Downloading...", (double)bytesReceived / (double)bytesTotal);
+                                file.write(reply->read(reply->size()));
+                            });
+
+        QEventLoop loop;
+        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        loop.exec();
+        disconnect(conn);
+
+        if (reply->error() == QNetworkReply::NoError) {
+            file.write(reply->readAll());
+            emit fwArchiveDlProgress("Download Done", 1.0);
+        } else {
+            emit fwArchiveDlProgress("Download Failed", 0.0);
+        }
+
+        file.close();
+        res = true;
+    } else {
+        emit fwArchiveDlProgress("Could not open local file", 0.0);
+    }
+
+    reply->abort();
+    reply->deleteLater();
+
+    return res;
+}
+
 QString VescInterface::getLastTcpHubServer() const
 {
     return mLastTcpHubServer;

@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 6.06
+VT_VERSION = 7.00
 VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 4
 
@@ -50,7 +50,7 @@ android: {
 #CONFIG += build_mobile
 
 # Exclude built-in firmwares
-#CONFIG += exclude_fw
+CONFIG += exclude_fw
 
 ios: {
     CONFIG    += build_mobile
@@ -289,7 +289,7 @@ RESOURCES += res.qrc \
     res_custom_module.qrc \
     res_lisp.qrc \
     res_qml.qrc
-RESOURCES += res_config.qrc
+RESOURCES += res/config/res_config.qrc
 
 RESOURCES += res_fw_bms.qrc
 RESOURCES += res/firmwares_esp/res_fw_esp.qrc

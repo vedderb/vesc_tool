@@ -1167,7 +1167,7 @@ void PageLogAnalysis::updateTileServers()
     QString base = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
     if (ui->tilesOsmButton->isChecked()) {
-        ui->map->osmClient()->setTileServerUrl("http://tile.openstreetmap.org");
+        ui->map->osmClient()->setTileServerUrl("http://tiles.vedder.se");
         ui->map->osmClient()->setCacheDir(base + "/osm_tiles/osm");
         ui->map->osmClient()->clearCacheMemory();
     } else if (ui->tilesHiResButton->isChecked()) {

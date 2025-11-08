@@ -46,8 +46,7 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->readVersionButton->setIcon(Utility::getIcon("icons/Upload-96.png"));
     ui->dlArchiveButton->setIcon(Utility::getIcon("icons/Download-96.png"));
 
-    updateHwList(FW_RX_PARAMS());
-    updateBlList(FW_RX_PARAMS());
+    reloadLatest();
 
     mTimer = new QTimer(this);
     mTimer->start(500);
@@ -108,6 +107,8 @@ void PageFirmware::setVesc(VescInterface *vesc)
         connect(mVesc, &VescInterface::fwArchiveDlProgress, [this](QString msg, double prog) {
             ui->displayDl->setText(msg);
             ui->displayDl->setValue(100.0 * prog);
+            ui->displayDlFw->setText(msg);
+            ui->displayDlFw->setValue(100.0 * prog);
         });
     }
 }
@@ -748,6 +749,27 @@ void PageFirmware::reloadArchive()
     }
 }
 
+void PageFirmware::reloadLatest()
+{
+    QString fwStr = QString::number(VT_VERSION, 'f', 2);
+
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/res_fw_" + fwStr + ".rcc";
+    QFile file(path);
+    if (file.exists()) {
+        QResource::unregisterResource(path);
+        QResource::registerResource(path);
+
+        if (mVesc && mVesc->isPortConnected()) {
+            FW_RX_PARAMS params = mVesc->getLastFwRxParams();
+            updateHwList(params);
+            updateBlList(params);
+        } else {
+            updateHwList(FW_RX_PARAMS());
+            updateBlList(FW_RX_PARAMS());
+        }
+    }
+}
+
 void PageFirmware::on_dlArchiveButton_clicked()
 {
     ui->dlArchiveButton->setEnabled(false);
@@ -761,3 +783,23 @@ void PageFirmware::on_dlArchiveButton_clicked()
 
     ui->dlArchiveButton->setEnabled(true);
 }
+
+void PageFirmware::on_dlFwButton_clicked()
+{
+    ui->dlFwButton->setEnabled(false);
+    ui->displayDlFw->setText("Preparing download...");
+
+    if (mVesc) {
+        if (mVesc->downloadFwLatest()) {
+            reloadLatest();
+        }
+
+        if (mVesc->downloadConfigs()) {
+            auto fwPair = mVesc->getSupportedFirmwarePairs().first();
+            Utility::configLoad(mVesc, fwPair.first, fwPair.second);
+        };
+    }
+
+    ui->dlFwButton->setEnabled(true);
+}
+

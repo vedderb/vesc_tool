@@ -149,9 +149,6 @@ Item {
                             }
 
                             Component.onCompleted: {
-                                var params = VescIf.getLastFwRxParams()
-                                updateHw(params)
-                                updateBl(params)
                                 updateFwText()
                             }
 
@@ -210,6 +207,36 @@ Item {
                                             Utility.fwChangeLog(),
                                             true)
                             }
+                        }
+
+                        Button {
+                            id: latestUpdateButton
+                            text: "Download Latest"
+                            Layout.fillWidth: true
+
+                            onClicked: {
+                                latestUpdateButton.enabled = false
+                                workaroundTimerDlLatest.start()
+                            }
+
+                            Timer {
+                                id: workaroundTimerDlLatest
+                                interval: 0
+                                repeat: false
+                                running: false
+                                onTriggered: {
+                                    VescIf.downloadFwLatest()
+                                    VescIf.downloadConfigs()
+                                    fwHelper.reloadLatest()
+                                    updateFwText()
+                                    latestUpdateButton.enabled = true
+                                }
+                            }
+                        }
+
+                        ProgressBar {
+                            id: dlProgLatest
+                            Layout.fillWidth: true
                         }
 
                         Item {
@@ -887,6 +914,8 @@ Item {
         function onFwArchiveDlProgress(msg, prog) {
             dlProg.value = prog
             dlText.text = msg
+            dlProgLatest.value = prog
+            dlProgLatest.text = msg
         }
     }
 

@@ -66,15 +66,15 @@ BoardSetupWindow::BoardSetupWindow(QWidget *parent) :
         }
     }
 
-    mVesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    mVesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
     Utility::configLoadLatest(mVesc);
 
     mMcConfig_Target = new ConfigParams(this);
     mAppConfig_Target = new ConfigParams(this);
     QPair<int, int> latestSupported = Utility::configLatestSupported();
     QString FW_Ver =  QString::number(latestSupported.first) + "." + QStringLiteral("%1").arg(latestSupported.second, 2, 10, QLatin1Char('0'));
-    mMcConfig_Target->loadParamsXml("://res/config/" + FW_Ver + "/parameters_mcconf.xml");
-    mAppConfig_Target->loadParamsXml("://res/config/" + FW_Ver + "/parameters_appconf.xml");
+    mMcConfig_Target->loadParamsXml(Utility::configPath(FW_Ver + "/parameters_mcconf.xml"));
+    mAppConfig_Target->loadParamsXml(Utility::configPath(FW_Ver + "/parameters_appconf.xml"));
 
 
     QDirIterator dir(QDir::currentPath(),QStringList() << "app_settings*.xml", QDir::NoFilter ,QDirIterator::Subdirectories);

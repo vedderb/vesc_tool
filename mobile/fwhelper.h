@@ -40,11 +40,16 @@ public:
                                                  bool isBootloader, bool isIncluded, bool fwdCan, QString BLfilename);
     Q_INVOKABLE QVariantMap getArchiveDirs();
     Q_INVOKABLE QVariantMap getArchiveFirmwares(QString fwPath, FW_RX_PARAMS params);
+    Q_INVOKABLE void reloadLatest();
 
 signals:
     void fwUploadRes(bool res, bool isBootloader);
 
 public slots:
+
+private:
+
+
 };
 
 #endif // FWHELPER_H

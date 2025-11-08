@@ -61,6 +61,7 @@ private slots:
     void on_changelogButton_clicked();
     void on_uploadAllButton_clicked();
     void on_dlArchiveButton_clicked();
+    void on_dlFwButton_clicked();
 
 private:
     Ui::PageFirmware *ui;
@@ -69,6 +70,7 @@ private:
 
     void uploadFw(bool allOverCan);
     void reloadArchive();
+    void reloadLatest();
 
 };
 

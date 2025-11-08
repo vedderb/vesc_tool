@@ -263,6 +263,8 @@ public:
     }
 
     Q_INVOKABLE bool downloadFwArchive();
+    Q_INVOKABLE bool downloadFwLatest();
+    Q_INVOKABLE bool downloadConfigs();
 
     bool ignoreCustomConfigs() const;
     void setIgnoreCustomConfigs(bool newIgnoreCustomConfigs);

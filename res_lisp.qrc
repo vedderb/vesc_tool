@@ -63,5 +63,6 @@
         <file>res/LispBM/Examples/motorcfg_ipm_abi.lbm</file>
         <file>res/LispBM/Examples/setup_motors_dual_esk8.lbm</file>
         <file>res/LispBM/Examples/icu_pas_sensor.lbm</file>
+        <file>res/LispBM/Examples/filter_delay_est.lbm</file>
     </qresource>
 </RCC>

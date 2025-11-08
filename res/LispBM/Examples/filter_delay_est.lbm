@@ -1,0 +1,111 @@
+
+(defun lpf (val sample fconst)
+    (- val (* fconst (- val sample)))
+)
+
+(def time 0.0)
+(def vsin 0.0)
+(def vsin-flt 0.0)
+(def vcos 0.0)
+(def vcos-flt 0.0)
+
+(def pi (* 2.0 (acos 0.0)))
+(def fzv 30.0e3)
+(def fconst 0.5)
+(def erpm 35000.0)
+(def rad-per-sec (* erpm 2.0 pi (/ 1.0 60.0)))
+
+(defun calc-delay (erpm fconst) {
+        (var err-rad 0.0)
+        (var rps (* erpm 2.0 pi (/ 1.0 60.0)))
+        (var dt (/ 2.0 fzv))
+
+        (looprange i 0 100 {
+                (setq vsin (sin time))
+                (setq vsin-flt (lpf vsin-flt vsin fconst))
+                (setq vcos (cos time))
+                (setq vcos-flt (lpf vcos-flt vcos fconst))
+
+                (var ang1 (atan2 vsin vcos))
+                (var ang2 (atan2 vsin-flt vcos-flt))
+
+                (setq err-rad (- ang2 ang1))
+                (if (> err-rad pi) (setq err-rad (- err-rad (* 2.0 pi))))
+
+                (setq time (+ time (* rps dt)))
+        })
+
+        err-rad
+})
+
+;(plot-delay)
+
+; Test-function for coming up with latency estimator
+(defun test (erpm const) {
+        (var dt (/ 2.0 fzv))
+        (var rps (* erpm 2.0 pi (/ 1.0 60.0)))
+        (var del (calc-delay erpm const))
+        (var comp-val (/ (* (- 1.0 const) rps dt) const))
+        (print (list comp-val del (* del (/ 180.0 pi)) (* (/ 180.0 pi) (+ del comp-val))))
+})
+
+(test 15000 0.2)
+(test -17000 0.4)
+(test 50000 0.5)
+(test 5000 0.6)
+(test 100000 0.8)
+(test 10000 0.98)
+
+(defun plot-phases () {
+        (plot-init "Time" "Val")
+        (plot-add-graph "Sin")
+        (plot-add-graph "Cos")
+        (plot-add-graph "Sin-FLT")
+        (plot-add-graph "Cos-FLT")
+        (plot-add-graph "ErrDeg")
+
+        (looprange i 0 500 {
+                (setq vsin (sin time))
+                (setq vsin-flt (lpf vsin-flt vsin fconst))
+                (setq vcos (cos time))
+                (setq vcos-flt (lpf vcos-flt vcos fconst))
+
+                (var ang1 (atan2 vsin vcos))
+                (var ang2 (atan2 vsin-flt vcos-flt))
+                (var err-rad (- ang2 ang1))
+
+                (if (> err-rad pi) (setq err-rad (- err-rad (* 2.0 pi))))
+
+                (plot-set-graph 0)
+                (plot-send-points time vsin)
+                (plot-set-graph 1)
+                (plot-send-points time vcos)
+                (plot-set-graph 2)
+                (plot-send-points time vsin-flt)
+                (plot-set-graph 3)
+                (plot-send-points time vcos-flt)
+                (plot-set-graph 4)
+                (plot-send-points time (* err-rad (/ 180.0 pi)))
+
+                (var dt (/ 2.0 fzv))
+                (setq time (+ time (* rad-per-sec dt)))
+        })
+})
+
+(defun plot-delay () {
+        (plot-init "ERPM" "Delay")
+        (plot-add-graph "0.4")
+        (plot-add-graph "0.8")
+
+        (looprange i 1 100 {
+            (var erpm (* i 100.0))
+            (plot-set-graph 0)
+            (plot-send-points erpm (calc-delay erpm 0.4))
+            (plot-set-graph 1)
+            (plot-send-points erpm (calc-delay erpm 0.8))
+        })
+})
+
+;(plot-phases)
+;(plot-delay)
+;(calc-delay 1000 0.5)

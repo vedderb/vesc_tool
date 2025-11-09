@@ -1,0 +1,26 @@
+
+(defun profile () {
+        (prof-trig)
+        (sleep 0.2)
+        (var result (prof-result))
+
+        ;(length (prof-result))
+
+        (plot-init "Ticks" "Diff")
+        (plot-add-graph "run1")
+
+        (var ticks-last 0)
+        (loopforeach i result {
+                (var (line time) (list (car i) (cdr i)))
+                (var ticks (* 168000000.0 time))
+                (var ticks-diff (- ticks ticks-last))
+                (setq ticks-last ticks)
+                (print (list line ticks ticks-diff))
+
+                (plot-send-points ticks ticks-diff)
+        })
+
+        (print (list "Max FZV" (/ 1.0 (cdr (ix result -1)))))
+})
+
+(profile)

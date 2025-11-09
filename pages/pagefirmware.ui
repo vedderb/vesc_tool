@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1124</width>
-    <height>572</height>
+    <height>625</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -149,7 +149,7 @@
          <attribute name="title">
           <string>Custom File</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,1,0">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>

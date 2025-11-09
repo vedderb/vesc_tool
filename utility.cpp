@@ -209,7 +209,13 @@ void Utility::checkVersion(VescInterface *vesc)
 
 QString Utility::fwChangeLog()
 {
+    QFile cl_config("://res/config_download/CHANGELOG.md");
     QFile cl("://res/firmwares/CHANGELOG.md");
+
+    if (cl_config.exists()) {
+        cl.setFileName(cl_config.fileName());
+    }
+
     if (cl.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return QString::fromUtf8(cl.readAll());
     } else {

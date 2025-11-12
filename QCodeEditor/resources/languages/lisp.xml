@@ -199,6 +199,7 @@
 <name>get-encoder</name>
 <name>set-encoder</name>
 <name>get-encoder-error-rate</name>
+<name>encoder-index-found</name>
 <name>pos-pid-now</name>
 <name>pos-pid-set</name>
 <name>pos-pid-error</name>

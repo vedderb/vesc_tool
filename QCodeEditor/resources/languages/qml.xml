@@ -133,5 +133,6 @@
         <name>Esp32Flash</name>
         <name>SysCmd</name>
         <name>Flickable</name>
+        <name>ParamEditors</name>
     </section>
 </root>

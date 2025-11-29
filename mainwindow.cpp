@@ -563,6 +563,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->leftSplitter->setSizes(QList<int>({1000, 80}));
     mPageDebugPrint->printConsole("VESC® Tool " + mVersion + " started<br>");
+
+    setAcceptDrops(true);
 }
 
 MainWindow::~MainWindow()
@@ -718,6 +720,38 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
     } else {
         event->accept();
+    }
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    foreach (auto url, event->mimeData()->urls()) {
+        auto path = url.path();
+        if (path.endsWith(".xml", Qt::CaseInsensitive)) {
+            if (ConfigParams::testXml(path, "MCConfiguration")) {
+                mVesc->mcConfig()->loadXml(path, "MCConfiguration");
+                event->acceptProposedAction();
+            } else if (ConfigParams::testXml(path, "APPConfiguration")) {
+                mVesc->appConfig()->loadXml(path, "APPConfiguration");
+                event->acceptProposedAction();
+            }
+        } else if (path.endsWith(".lisp", Qt::CaseInsensitive) ||
+                   path.endsWith(".lbm", Qt::CaseInsensitive)) {
+            if (mPageLisp->openFileTab(path)) {
+                showPage("LispBM Scripting");
+                event->acceptProposedAction();
+            }
+        } else if (path.endsWith(".qml", Qt::CaseInsensitive)) {
+            if (mPageScripting->openFileTab(path)) {
+                showPage("QML Scripting");
+                event->acceptProposedAction();
+            }
+        }
     }
 }
 
@@ -1619,17 +1653,17 @@ void MainWindow::reloadPages()
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
-    addPageItem(tr("Terminal"),  theme + "icons/Console-96.png", "", false, true);
+    addPageItem("Terminal",  theme + "icons/Console-96.png", "", false, true);
 
     mPageScripting = new PageScripting(this);
     mPageScripting->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageScripting);
-    addPageItem(tr("QML Scripting"),  theme + "icons_textedit/Outdent-96.png", "", false, true);
+    addPageItem("QML Scripting",  theme + "icons_textedit/Outdent-96.png", "", false, true);
 
     mPageLisp = new PageLisp(this);
     mPageLisp->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageLisp);
-    addPageItem(tr("LispBM Scripting"),  theme + "icons_textedit/Outdent-96.png", "", false, true);
+    addPageItem("LispBM Scripting",  theme + "icons_textedit/Outdent-96.png", "", false, true);
 
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);

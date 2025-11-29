@@ -311,10 +311,30 @@ void PageLisp::disablePolling()
     ui->pollOffButton->setChecked(true);
 }
 
+bool PageLisp::openFileTab(QString fileName)
+{
+    QFileInfo f(fileName);
+    if (f.exists()) {
+        QFile file(fileName);
+        if (file.open(QIODevice::ReadOnly)) {
+            createEditorTab(fileName, file.readAll());
+
+            mRecentFiles.removeAll(fileName);
+            mRecentFiles.prepend(fileName);
+            updateRecentList();
+            ui->recentList->setCurrentRow(0);
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void PageLisp::updateRecentList()
 {
     ui->recentList->clear();
-    for (auto f: mRecentFiles) {
+    foreach (auto f, mRecentFiles) {
         ui->recentList->addItem(f);
     }
 

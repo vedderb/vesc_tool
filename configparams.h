@@ -147,6 +147,8 @@ public:
 
     int updateCnt() const;
 
+    Q_INVOKABLE static bool testXml(QString fileName, QString configName);
+
 signals:
     void paramChangedDouble(QObject *src, QString name, double newParam);
     void paramChangedInt(QObject *src, QString name, int newParam);

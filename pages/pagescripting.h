@@ -46,6 +46,7 @@ public:
     void setVesc(VescInterface *vesc);
     void reloadParams();
     bool hasUnsavedTabs();
+    bool openFileTab(QString fileName);
 
 signals:
     void reloadQml(QString str);

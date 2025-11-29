@@ -85,6 +85,10 @@ public:
     bool eventFilter(QObject *object, QEvent *e);
     void closeEvent(QCloseEvent *event);
 
+protected:
+    void dragEnterEvent(QDragEnterEvent* event);
+    void dropEvent(QDropEvent* event);
+
 private slots:
     void timerSlotDebugMsg();
     void timerSlot();

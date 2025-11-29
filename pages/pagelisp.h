@@ -43,6 +43,7 @@ public:
     void reloadParams();
     bool hasUnsavedTabs();
     void disablePolling();
+    bool openFileTab(QString fileName);
 
 private slots:
     void on_openRecentButton_clicked();

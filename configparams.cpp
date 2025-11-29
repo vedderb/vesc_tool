@@ -931,6 +931,32 @@ int ConfigParams::updateCnt() const
     return mUpdateCnt;
 }
 
+bool ConfigParams::testXml(QString fileName, QString configName)
+{
+    if (fileName.startsWith("file:/")) {
+        fileName.remove(0, 6);
+    }
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return false;
+    }
+
+    QXmlStreamReader stream(&file);
+    bool res = false;
+
+    while (stream.readNextStartElement()) {
+        if (stream.name() == configName) {
+            res = true;
+            break;
+        }
+    }
+
+    file.close();
+
+    return res;
+}
+
 bool ConfigParams::getStoreConfigVersion() const
 {
     return mStoreConfigVersion;

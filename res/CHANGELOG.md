@@ -1,5 +1,6 @@
 ### 7.00
-* Firmware are no longer included. They are now downloaded on demand.
+* Firmwares are no longer included. They are now downloaded on demand.
+* Drag and drop support of files from system.
 
 ### 6.06
 #### Released 2024-08-19

@@ -508,6 +508,8 @@ ApplicationWindow {
                                                     (uiHwPage.visible ? 1 : 0) +
                                                     (uiAppPage.visible ? 1 : 0) +
                                                     (confCustomButton.visible ? 1 : 0) +
+                                                    (confCustomButton1.visible ? 1 : 0) +
+                                                    (confCustomButton2.visible ? 1 : 0) +
                                                     (confPageMotor.visible ? 1 : 0) +
                                                     (confPageApp.visible ? 1 : 0)))
 
@@ -576,10 +578,24 @@ ApplicationWindow {
         width: tabBar.buttonWidth
     }
 
-    TabButton {
+        TabButton {
         id: confCustomButton
         visible: confCustomPage.visible
         text: "Custom Cfg"
+        width: tabBar.buttonWidth
+    }
+
+        TabButton {
+        id: confCustomButton1
+        visible: confCustomPage1.visible
+        text: "Custom Cfg 1"
+        width: tabBar.buttonWidth
+    }
+
+        TabButton {
+        id: confCustomButton2
+        visible: confCustomPage2.visible
+        text: "Custom Cfg 2"
         width: tabBar.buttonWidth
     }
 
@@ -629,6 +645,40 @@ ApplicationWindow {
                 anchors.fill: parent
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
+            }
+        }
+    }
+
+    Page {
+        id: confCustomPage1
+        visible: false
+
+        Loader {
+            id: confCustomLoader1
+            anchors.fill: parent
+            asynchronous: true
+            sourceComponent: ConfigPageCustom {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                confInd: 1
+            }
+        }
+    }
+
+    Page {
+        id: confCustomPage2
+        visible: false
+
+        Loader {
+            id: confCustomLoader2
+            anchors.fill: parent
+            asynchronous: true
+            sourceComponent: ConfigPageCustom {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                confInd: 2
             }
         }
     }
@@ -1028,9 +1078,41 @@ ApplicationWindow {
                     confCustomButton.parent = null
                 }
             }
+
+            if (confCustomLoader1.status == Loader.Ready) {
+                stop()
+
+                if (VescIf.isPortConnected() && VescIf.customConfig(1) !== null) {
+                    mainSwipeView.insertItem(4, confCustomPage1)
+                    tabBar.insertItem(4, confCustomButton1)
+                    confCustomPage1.visible = true
+                    confCustomLoader1.item.reloadConfig()
+                    confCustomButton1.text = VescIf.customConfig(1).getLongName("hw_name")
+                } else {
+                    confCustomPage1.visible = false
+                    confCustomPage1.parent = null
+                    confCustomButton1.parent = null
+                }
+            }
+            
+            if (confCustomLoader2.status == Loader.Ready) {
+                stop()
+
+                if (VescIf.isPortConnected() && VescIf.customConfig(2) !== null) {
+                    mainSwipeView.insertItem(4, confCustomPage2)
+                    tabBar.insertItem(4, confCustomButton2)
+                    confCustomPage2.visible = true
+                    confCustomLoader2.item.reloadConfig()
+                    confCustomButton2.text = VescIf.customConfig(2).getLongName("hw_name")
+                } else {
+                    confCustomPage2.visible = false
+                    confCustomPage2.parent = null
+                    confCustomButton2.parent = null
+                }
+            }
         }
     }
-
+        
     function updateConfCustom () {
         confCustomTimer.start()
     }

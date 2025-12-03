@@ -739,6 +739,10 @@ void MainWindow::dropEvent(QDropEvent *event)
             } else if (ConfigParams::testXml(path, "APPConfiguration")) {
                 mVesc->appConfig()->loadXml(path, "APPConfiguration");
                 event->acceptProposedAction();
+            } else if (mVesc->customConfig(0) && ConfigParams::testXml(path, "CustomConfiguration")) {
+                mVesc->customConfig(0)->loadXml(path, "CustomConfiguration");
+                showPage(mVesc->customConfig(0)->getParam("hw_name")->longName);
+                event->acceptProposedAction();
             }
         } else if (path.endsWith(".lisp", Qt::CaseInsensitive) ||
                    path.endsWith(".lbm", Qt::CaseInsensitive)) {
@@ -1576,7 +1580,7 @@ void MainWindow::reloadPages()
     mPageCustomConfig0->setVesc(mVesc);
     mPageCustomConfig0->setConfNum(0);
     ui->pageWidget->addWidget(mPageCustomConfig0);
-    addPageItem(tr("Config0"),  theme + "icons/Electronics-96.png", "", true);
+    addPageItem("Config0",  theme + "icons/Electronics-96.png", "", true);
     mPageNameIdList.insert("app_custom_config_0", ui->pageList->count() - 1);
     ui->pageList->item(ui->pageList->count() - 1)->setHidden(true);
 

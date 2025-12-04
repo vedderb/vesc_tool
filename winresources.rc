@@ -1,0 +1,37 @@
+IDI_ICON1 ICON "res/vesc.ico"
+
+#include <windows.h>
+
+#define VER_FILEVERSION             1,0,0,0
+#define VER_FILEVERSION_STR         "1.0.0.0\0"
+#define VER_PRODUCTVERSION          6,0,2
+#define VER_PRODUCTVERSION_STR      "6.0.2\0"
+#define VER_FILEDESCRIPTION_STR     "VESC Tool"
+#define VER_INTERNALNAME_STR        "VESC tool"
+#define VER_LEGALCOPYRIGHT_STR      "Copyright (C) 2016-2022, Benjamin Vedder"
+#define VER_ORIGINALFILENAME_STR    "vesc_tool_test.exe"
+#define VER_PRODUCTNAME_STR         "VESC Tool"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     VER_FILEVERSION
+PRODUCTVERSION  VER_PRODUCTVERSION
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "FileDescription",    VER_FILEDESCRIPTION_STR
+            VALUE "FileVersion",        VER_FILEVERSION_STR
+            VALUE "InternalName",       VER_INTERNALNAME_STR
+            VALUE "LegalCopyright",     VER_LEGALCOPYRIGHT_STR
+            VALUE "OriginalFilename",   VER_ORIGINALFILENAME_STR
+            VALUE "ProductName",        VER_PRODUCTNAME_STR
+            VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END

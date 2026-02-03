@@ -755,7 +755,7 @@
 * Moved sampling buffers to CCM to free some RAM.
 * Added hardware info terminal command.
 * NRF init SPI check fix.
-* Sampled data is now transmitted in floating point with scaling done at the VESC. This avoids hard-coded scaling in VESC Tool.
+* Sampled data is now transmitted in floating point with scaling done at the VESC. This avoids hard-coded scaling in ExiTool.
 
 ---
 
@@ -880,7 +880,7 @@
 ### 3.04
 #### No official release
 * HW version built into firmware.
-	* Allows VESC Tool to only list firmwares compatible with the hardware.
+	* Allows ExiTool to only list firmwares compatible with the hardware.
 
 ---
 

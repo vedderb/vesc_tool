@@ -1,14 +1,14 @@
 /*
     Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
-    This file is part of VESC Tool.
+    This file is part of ExiTool.
 
-    VESC Tool is free software: you can redistribute it and/or modify
+    ExiTool is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    VESC Tool is distributed in the hope that it will be useful,
+    ExiTool is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -81,7 +81,7 @@ AppIntroPage::AppIntroPage(VescInterface *vesc, QWidget *parent)
     : QWizardPage(parent)
 {
     mVesc = vesc;
-    setTitle(tr("VESC® Input Setup Wizard"));
+    setTitle(tr("ExiTool Input Setup Wizard"));
 
     mLabel = new QLabel(tr("This wizard will help you choose what type of input to use "
                            "for your VESC®, and set up the apps according to your input."
@@ -195,7 +195,7 @@ AppFirmwarePage::AppFirmwarePage(VescInterface *vesc, QWidget *parent)
 
     setTitle(tr("Update Firmware"));
     setSubTitle(tr("You need to update the firmware on the VESC in order "
-                   "to use it with this version of VESC Tool."));
+                   "to use it with this version of ExiTool."));
 
     mLabel = new QLabel(tr("Your VESC (or one of the VESCs on the CAN-bus) has old firmware, "
                            "and needs to be updated. After that, "

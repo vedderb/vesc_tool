@@ -1,14 +1,14 @@
 /*
     Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
 
-    This file is part of VESC Tool.
+    This file is part of ExiTool.
 
-    VESC Tool is free software: you can redistribute it and/or modify
+    ExiTool is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    VESC Tool is distributed in the hope that it will be useful,
+    ExiTool is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -547,7 +547,7 @@ void PageConnection::on_pairConnectedButton_clicked()
                 QMessageBox::StandardButton reply;
                 reply = QMessageBox::warning(this,
                                              tr("Pair connected VESC"),
-                                             tr("This is going to pair the connected VESC with this instance of VESC Tool. VESC Tool instances "
+                                             tr("This is going to pair the connected VESC with this instance of ExiTool. ExiTool instances "
                                                 "that are not paired with this VESC will not be able to connect over bluetooth any more. Continue?"),
                                              QMessageBox::Ok | QMessageBox::Cancel);
                 if (reply == QMessageBox::Ok) {
@@ -615,7 +615,7 @@ void PageConnection::on_clearPairedButton_clicked()
             QMessageBox::StandardButton reply;
             reply = QMessageBox::warning(this,
                                          tr("Clear paired VESCs"),
-                                         tr("This is going to clear the pairing list of this instance of VESC Tool. Are you sure?"),
+                                         tr("This is going to clear the pairing list of this instance of ExiTool. Are you sure?"),
                                          QMessageBox::Ok | QMessageBox::Cancel);
             if (reply == QMessageBox::Ok) {
                 mVesc->clearPairedUuids();

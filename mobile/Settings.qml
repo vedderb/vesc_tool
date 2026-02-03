@@ -1,14 +1,14 @@
 /*
     Copyright 2019 Benjamin Vedder	benjamin@vedder.se
 
-    This file is part of VESC Tool.
+    This file is part of ExiTool.
 
-    VESC Tool is free software: you can redistribute it and/or modify
+    ExiTool is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    VESC Tool is distributed in the hope that it will be useful,
+    ExiTool is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -38,7 +38,7 @@ Item {
         standardButtons: Dialog.Close
         modal: true
         focus: true
-        title: "VESC Tool Settings"
+        title: "ExiTool Settings"
 
         Overlay.modal: Rectangle {
             color: "#AA000000"
@@ -198,8 +198,8 @@ Item {
             anchors.fill: parent
             wrapMode: Text.WordWrap
             text:
-                "The theme has been changed. This requires restarting VESC Tool to take effect. " +
-                "Do you want to close VESC Tool now?"
+                "The theme has been changed. This requires restarting ExiTool to take effect. " +
+                "Do you want to close ExiTool now?"
         }
 
         onAccepted: {

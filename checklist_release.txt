@@ -7,7 +7,7 @@
  * Create release branch and switch to it
  * Set test version to 0
 
-- VESC Tool
+- ExiTool
  * Create release branch and switch to it
  * Set test version to 0
  * Update changelog release date
@@ -25,7 +25,7 @@
  
 == Next beta ==
 
-- VESC Tool
+- ExiTool
  * Switch to master
  * Sync release
  * Update version number

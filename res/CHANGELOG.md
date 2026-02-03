@@ -62,7 +62,7 @@
 * Automatically scan mobile CAN-list if empty.
 * Changelogs updated and changed to markdown.
 * Pixmap caching for faster start and config reload.
-* Firmware archive added in mobile VESC Tool.
+* Firmware archive added in mobile ExiTool.
 * Added display tool.
 * QML upload bug fixes.
 
@@ -178,7 +178,7 @@
 * Disable LZO FW compression if 3 consecutive chunks fail.
 * Added CAN-list with connected VESCs.
 * Filter pages based on selected motor and app.
-* Log setup values in desktop VESC Tool too.
+* Log setup values in desktop ExiTool too.
 * Added IMU orientation calibration widget.
 
 ---
@@ -203,14 +203,14 @@
 
 ### 2.01
 #### Released ?
-* Upadted NRF52 firmware to support NRF remotes at the same time as VESC Tool is connected.
+* Upadted NRF52 firmware to support NRF remotes at the same time as ExiTool is connected.
 * Fixed swdprog bootloader paths.
 * Added option to remove experiment plot line.
 * Disconnect port after firmware upload.
 * Support for FW 4.00, which has HFI support.
 * Try regular FW chunk write if LZO write fails.
 * Use 4 ms current controller time constant by default.
-* Added TCP server to desktop VESC Tool.
+* Added TCP server to desktop ExiTool.
 * Added CAN analyzer page.
 
 ---
@@ -528,7 +528,7 @@
 
 ### 1.00
 #### Released ?
-* First build for VESC Tool on google play.
+* First build for ExiTool on google play.
 * Added direction setup to desktop version.
 * Added direction setup to QML start tools.
 
@@ -765,7 +765,7 @@
 * Check motor paramters after writing them and show dialog if they were truncated.
 * FW 3.22 support.
 * UI scaling support.
-* New configuration page for VESC Tool.
+* New configuration page for ExiTool.
 * Updated wzards with scalable high resolution images.
 
 ---
@@ -792,7 +792,7 @@
 * Autoconnect support.
 * Autoconnect buttons in welcome and connection page.
 * Autoconnect function in wizards.
-* Check for the latest VESC Tool version online.
+* Check for the latest ExiTool version online.
 * Poll serial port in addition to waiting for the readyRead signal since readyRead is not emitted recursively. This can be a problem when e.g. showing message boxes and data comes in.
 
 ---

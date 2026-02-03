@@ -1,14 +1,14 @@
 /*
     Copyright 2017 - 2019 Benjamin Vedder	benjamin@vedder.se
 
-    This file is part of VESC Tool.
+    This file is part of ExiTool.
 
-    VESC Tool is free software: you can redistribute it and/or modify
+    ExiTool is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    VESC Tool is distributed in the hope that it will be useful,
+    ExiTool is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -41,7 +41,7 @@ ApplicationWindow {
     visible: true
     width: 500
     height: 850
-    title: qsTr("VESC Tool")
+    title: qsTr("ExiTool")
 
     // Full screen iPhone X workaround:
     property int notchLeft: 0
@@ -227,7 +227,7 @@ ApplicationWindow {
 
                 onClicked: {
                     VescIf.emitMessageDialog(
-                                "VESC Tool Changelog",
+                                "ExiTool Changelog",
                                 Utility.vescToolChangeLog(),
                                 true, false)
                 }
@@ -1207,8 +1207,8 @@ ApplicationWindow {
                 wrapMode: Text.WordWrap
                 text:
                     "The hardware you are connecting to contains code that will alter the " +
-                    "user interface of VESC Tool. This code has not been verified by the " +
-                    "authors of VESC Tool and could contain bugs and security problems. \n\n" +
+                    "user interface of ExiTool. This code has not been verified by the " +
+                    "authors of ExiTool and could contain bugs and security problems. \n\n" +
                     "Do you want to load this custom user interface?"
             }
 

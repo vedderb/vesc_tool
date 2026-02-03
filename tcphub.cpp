@@ -2,14 +2,14 @@
     Copyright 2022 Benjamin Vedder	benjamin@vedder.se
     Copyright 2022 Joel Svensson    svenssonjoel@yahoo.se
 
-    This file is part of VESC Tool.
+    This file is part of ExiTool.
 
-    VESC Tool is free software: you can redistribute it and/or modify
+    ExiTool is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    VESC Tool is distributed in the hope that it will be useful,
+    ExiTool is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -150,10 +150,10 @@ void TcpHub::newTcpHubConnection()
                     });
 
                     connect(v->vescToolSocket, &QTcpSocket::disconnected, [uuid]() {
-                        qDebug() << "VESC Tool disconnected from" << uuid;
+                        qDebug() << "ExiTool disconnected from" << uuid;
                     });
 
-                    qDebug() << "VESC Tool connected to" << uuid;
+                    qDebug() << "ExiTool connected to" << uuid;
 
                     return;
                 } else {

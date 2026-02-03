@@ -1,14 +1,14 @@
 /*
     Copyright 2017 - 2023 Benjamin Vedder	benjamin@vedder.se
 
-    This file is part of VESC Tool.
+    This file is part of ExiTool.
 
-    VESC Tool is free software: you can redistribute it and/or modify
+    ExiTool is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    VESC Tool is distributed in the hope that it will be useful,
+    ExiTool is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -752,7 +752,7 @@ Item {
             if (fwItems.rowCount() === 0) {
                 VescIf.emitMessageDialog(
                             "Upload Error",
-                            "This version of VESC Tool does not include any firmware " +
+                            "This version of ExiTool does not include any firmware " +
                             "for your hardware version. You can either " +
                             "upload a custom file or look for a later version of VESC " +
                             "Tool that might support your hardware.",
@@ -806,7 +806,7 @@ Item {
             if (blItems.rowCount() === 0) {
                 VescIf.emitMessageDialog(
                             "Upload Error",
-                            "This version of VESC Tool does not include any bootloader " +
+                            "This version of ExiTool does not include any bootloader " +
                             "for your hardware version.",
                             false)
                 return;
@@ -828,7 +828,7 @@ Item {
             if (archFwItems.rowCount() === 0) {
                 VescIf.emitMessageDialog(
                             "Upload Error",
-                            "This version of VESC Tool does not include the selected firmware " +
+                            "This version of ExiTool does not include the selected firmware " +
                             "for your hardware version. You can try to update the archive and see " +
                             "if it has been added since your last update.",
                             false)

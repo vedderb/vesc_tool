@@ -312,7 +312,7 @@
          <item>
           <widget class="QTabWidget" name="browseTabWidget">
            <property name="toolTip">
-            <string>Logs created from LispBM and sent to local VESC Tool.</string>
+            <string>Logs created from LispBM and sent to local ExiTool.</string>
            </property>
            <property name="tabPosition">
             <enum>QTabWidget::TabPosition::North</enum>

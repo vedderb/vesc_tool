@@ -1,5 +1,5 @@
 // This example attempts to reconnect when the connection is lost and upload the motor
-// configuration afterwards. It is useful during firmware development to keep VESC Tool
+// configuration afterwards. It is useful during firmware development to keep ExiTool
 // connected and the configuration updated.
 
 import QtQuick 2.5

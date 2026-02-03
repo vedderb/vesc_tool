@@ -1,14 +1,14 @@
 /*
     Copyright 2019 Benjamin Vedder	benjamin@vedder.se
 
-    This file is part of VESC Tool.
+    This file is part of ExiTool.
 
-    VESC Tool is free software: you can redistribute it and/or modify
+    ExiTool is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    VESC Tool is distributed in the hope that it will be useful,
+    ExiTool is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -68,7 +68,7 @@ Item {
                 id: text
                 Layout.fillWidth: true
                 color: Utility.getAppHexColor("lightText")
-                text: qsTr("These are the VESCs paired to this instance of VESC Tool.")
+                text: qsTr("These are the VESCs paired to this instance of ExiTool.")
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
@@ -277,7 +277,7 @@ Item {
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
-            text: "This is going to pair the connected VESC with this instance of VESC Tool. VESC Tool instances " +
+            text: "This is going to pair the connected VESC with this instance of ExiTool. ExiTool instances " +
                   "that are not paired with this VESC will not be able to connect over bluetooth any more. Continue?"
         }
 
@@ -289,7 +289,7 @@ Item {
             if (Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)) {
                 VescIf.emitMessageDialog("Pairing Successful!",
                                          "Pairing is done! Please note the UUID if this VESC (or take a screenshot) in order " +
-                                         "to add it to VESC Tool instances that are not paired in the future. The UUID is:\n" +
+                                         "to add it to ExiTool instances that are not paired in the future. The UUID is:\n" +
                                          VescIf.getConnectedUuid(),
                                          true, false)
             }

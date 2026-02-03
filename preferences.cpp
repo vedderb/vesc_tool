@@ -1,14 +1,14 @@
 /*
     Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
-    This file is part of VESC Tool.
+    This file is part of ExiTool.
 
-    VESC Tool is free software: you can redistribute it and/or modify
+    ExiTool is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    VESC Tool is distributed in the hope that it will be useful,
+    ExiTool is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -202,14 +202,14 @@ void Preferences::closeEvent(QCloseEvent *event)
 {
     if (Utility::isDarkMode() != mLastIsDark) {
         mVesc->emitMessageDialog("Theme Changed",
-                                 "Please restart VESC Tool for the theme changes to take effect.",
+                                 "Please restart ExiTool for the theme changes to take effect.",
                                  false, false);
     }
 
     if (!Utility::almostEqual(mLastScaling,
                               mSettings.value("app_scale_factor", 1.0).toDouble(), 0.001)) {
         mVesc->emitMessageDialog("Scaling Changed",
-                                 "Please restart VESC Tool for the scaling change to take effect.",
+                                 "Please restart ExiTool for the scaling change to take effect.",
                                  false, false);
     }
 

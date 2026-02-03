@@ -157,7 +157,7 @@ void BoardSetupWindow::timerSlot()
         }
     }
 
-    // Read configurations if they haven't been read since starting VESC Tool
+    // Read configurations if they haven't been read since starting ExiTool
 
 
 
@@ -439,7 +439,7 @@ bool BoardSetupWindow::tryBootloaderUpload(){
         ui->bootloaderLabel->setStyleSheet("QLabel { background-color : lightGreen; color : black; }");
     }else{
         ui->bootloaderLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-        testResultMsg = "The bootloader upload timed out. Please try the routine again, you may need to update the firmware first seperatley from the VESC tool.";
+        testResultMsg = "The bootloader upload timed out. Please try the routine again, you may need to update the firmware first seperatley from the ExiTool.";
         testResult = false;
     }
     return fwRes;
@@ -474,7 +474,7 @@ bool BoardSetupWindow::tryFirmwareUpload(){
         fwRes = mVesc->fwUpload(data, is_Bootloader, num_VESCs > 1);
         if(!fwRes){
             ui->firmwareLabel->setStyleSheet("QLabel { background-color : red; color : black; }");
-            testResultMsg = "The firmware upload timed out. Please try the routine again, you may need to update the firmware first seperatley from the VESC tool.";
+            testResultMsg = "The firmware upload timed out. Please try the routine again, you may need to update the firmware first seperatley from the ExiTool.";
             return false;
         }
     }else{

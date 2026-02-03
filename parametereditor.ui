@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>VESC Parameter Editor</string>
+   <string>ExiTool Parameter Editor</string>
   </property>
   <property name="windowIcon">
    <iconset resource="res.qrc">

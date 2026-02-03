@@ -336,10 +336,6 @@ DISTFILES += \
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
-macx-clang:contains(QMAKE_HOST.arch, arm.*): {
-    QMAKE_APPLE_DEVICE_ARCHS=arm64
-}
-
 macx {
     ICON        =  macos/appIcon.icns
     QMAKE_INFO_PLIST = macos/Info.plist
@@ -348,7 +344,20 @@ macx {
     QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO
     QMAKE_OBJECTIVE_CFLAGS_RELEASE = $$QMAKE_OBJECTIVE_CFLAGS_RELEASE_WITH_DEBUGINFO
     QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO
-    QMAKE_APPLE_DEVICE_ARCHS = x86_64 arm64
+
+    # Homebrew Qt on Apple Silicon is typically arm64-only, so building a universal
+    # binary by default will fail at link time. Default to the host arch, unless:
+    # - the user explicitly sets QMAKE_APPLE_DEVICE_ARCHS on the qmake command line, or
+    # - CONFIG += universal_macos is provided to force a universal build.
+    universal_macos {
+        QMAKE_APPLE_DEVICE_ARCHS = x86_64 arm64
+    } else:isEmpty(QMAKE_APPLE_DEVICE_ARCHS) {
+        contains(QMAKE_HOST.arch, arm.*) {
+            QMAKE_APPLE_DEVICE_ARCHS = arm64
+        } else {
+            QMAKE_APPLE_DEVICE_ARCHS = x86_64
+        }
+    }
 }
 
 ios {

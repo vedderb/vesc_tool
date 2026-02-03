@@ -41,7 +41,7 @@ StartupWizard::StartupWizard(VescInterface *vesc, QWidget *parent)
     setPixmap(QWizard::LogoPixmap, icon_logo);
     resize(800, 450);
 
-    setWindowTitle(tr("VESC Tool Introduction"));
+    setWindowTitle(tr("ExiTool Introduction"));
 
     mSideLabel = new AspectImgLabel(Qt::Vertical);
     mSideLabel->setPixmap(Utility::getIcon("logo_vertical.png"));

@@ -111,7 +111,7 @@
          <item row="0" column="1">
           <widget class="QDoubleSpinBox" name="uiScaleBox">
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale the user intefrace with this factor. Useful for high resolution monitors. VESC Tool must be restarted for this setting to take effect.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale the user interface with this factor. Useful for high resolution monitors. ExiTool must be restarted for this setting to take effect.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="minimum">
             <double>1.000000000000000</double>

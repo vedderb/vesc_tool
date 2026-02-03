@@ -15,9 +15,9 @@
     <family>Roboto</family>
    </font>
   </property>
-  <property name="windowTitle">
-   <string>VESC Tool</string>
-  </property>
+   <property name="windowTitle">
+    <string>ExiTool</string>
+   </property>
   <property name="windowIcon">
    <iconset>
     <normaloff>:/res/icon.png</normaloff>:/res/icon.png</iconset>
@@ -633,7 +633,7 @@
      <string>Help</string>
     </property>
     <addaction name="separator"/>
-    <addaction name="actionVESCProjectForums"/>
+    <!-- Removed VESC Project Forums -->
     <addaction name="separator"/>
     <addaction name="actionVESCToolChangelog"/>
     <addaction name="actionFirmwareChangelog"/>
@@ -840,7 +840,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About VESC Tool</string>
+    <string>About ExiTool</string>
    </property>
   </action>
   <action name="actionKeyboardControl">
@@ -1004,7 +1004,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionVESCToolChangelog">
    <property name="text">
-    <string>VESC Tool Changelog</string>
+    <string>Changelog</string>
    </property>
   </action>
   <action name="actionTerminalDRVResetLatchedFaults">
@@ -1012,11 +1012,7 @@ p, li { white-space: pre-wrap; }
     <string>DRV Reset Latched Faults</string>
    </property>
   </action>
-  <action name="actionVESCProjectForums">
-   <property name="text">
-    <string>VESC Project Forums</string>
-   </property>
-  </action>
+  <!-- Removed actionVESCProjectForums -->
   <action name="actionFirmwareChangelog">
    <property name="text">
     <string>Firmware Changelog</string>

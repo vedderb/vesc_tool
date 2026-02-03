@@ -1028,7 +1028,7 @@
                 </sizepolicy>
                </property>
                <property name="toolTip">
-                <string>Load selected motor configuration in VESC Tool</string>
+                <string>Load selected motor configuration in ExiTool</string>
                </property>
                <property name="text">
                 <string/>
@@ -1315,7 +1315,7 @@
                 </sizepolicy>
                </property>
                <property name="toolTip">
-                <string>Load selected motor configuration in VESC Tool</string>
+                <string>Load selected motor configuration in ExiTool</string>
                </property>
                <property name="text">
                 <string/>

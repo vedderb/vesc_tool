@@ -776,7 +776,7 @@ p, li { white-space: pre-wrap; }
             <cDefine></cDefine>
         </app_adc_mapping_help>
         <wizard_startup_intro>
-            <longName>Welcome to VESC® Tool</longName>
+            <longName>Welcome to ExiTool</longName>
             <type>0</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;

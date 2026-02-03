@@ -21,9 +21,9 @@
 int main(int argc, char *argv[])
 {
     // Settings
-    QCoreApplication::setOrganizationName("VESC");
-    QCoreApplication::setOrganizationDomain("vesc-project.com");
-    QCoreApplication::setApplicationName("VESC Application");
+    QCoreApplication::setOrganizationName("Exinous Technologies Pvt. Ltd.");
+    QCoreApplication::setOrganizationDomain("exinous.com");
+    QCoreApplication::setApplicationName("ExiTool");
 
     QApplication a(argc, argv);
     MainWindow w;

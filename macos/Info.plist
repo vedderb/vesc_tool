@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>VESC Tool uses bluetooth to connect to embedded devices</string>
+    <string>ExiTool uses bluetooth to connect to embedded devices</string>
         <key>NSBluetoothAlwaysUsageDescription</key>
-        <string>VESC Tool uses bluetooth to connect to embedded devices</string>
+        <string>ExiTool uses bluetooth to connect to embedded devices</string>
 	<key>NSDocumentsFolderUsageDescription</key>
-	<string>VESC Tool can store various logs and data files for configuration</string>
+    <string>ExiTool can store various logs and data files for configuration</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>VESC Tool uses bluetooth to connect to embedded devices</string>
+        <string>ExiTool uses bluetooth to connect to embedded devices</string>
 	<key>CFBundleExecutable</key>
-        <string>VESC Tool</string>
+        <string>ExiTool</string>
 	<key>CFBundleIconFile</key>
 	<string>appIcon.icns</string>
 	<key>CFBundleIdentifier</key>
-        <string>com.vesc.vesc-tool-3.01</string>
+        <string>com.exinous.exitool</string>
 	<key>CFBundleDisplayName</key>
-        <string>VESC Tool</string>
+        <string>ExiTool</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>

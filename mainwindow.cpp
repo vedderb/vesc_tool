@@ -153,7 +153,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionWarrantyStatement->setIcon(Utility::getIcon("icons/About-96.png"));
     ui->actionAbout->setIcon(Utility::getIcon("icons/About-96.png"));
     ui->actionLicense->setIcon(Utility::getIcon("icons/About-96.png"));
-    ui->actionVESCProjectForums->setIcon(Utility::getIcon("icons/User Group Man Man-96.png"));
     ui->actionLoadFirmwareConfigs->setIcon(Utility::getIcon("icons/Electronics-96.png"));
     ui->actionBackupConfiguration->setIcon(Utility::getIcon("icons/Save-96.png"));
     ui->actionBackupConfigurationsCAN->setIcon(Utility::getIcon("icons/Save-96.png"));
@@ -562,9 +561,7 @@ MainWindow::MainWindow(QWidget *parent) :
     updateAppToUse();
 
     ui->leftSplitter->setSizes(QList<int>({1000, 80}));
-    mPageDebugPrint->printConsole("VESC® Tool " + mVersion + " started<br>");
-
-    setAcceptDrops(true);
+    mPageDebugPrint->printConsole("ExiTool " + mVersion + " started<br>");
 }
 
 MainWindow::~MainWindow()
@@ -695,7 +692,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
                     this,
                     tr("Unsaved LispBM Tabs"),
                     tr("There are unsaved LispBM tabs open. Do you want to close "
-                       "VESC Tool without saving them?"),
+                       "ExiTool without saving them?"),
                     QMessageBox::Yes | QMessageBox::Cancel
                     );
 
@@ -709,7 +706,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
                     this,
                     tr("Unsaved Qml-Tabs"),
                     tr("There are unsaved Qml-tabs open. Do you want to close "
-                       "VESC Tool without saving them?"),
+                       "ExiTool without saving them?"),
                     QMessageBox::Yes | QMessageBox::Cancel
                     );
 
@@ -968,8 +965,8 @@ void MainWindow::timerSlot()
         if (!mSettings.value("intro_done").toBool()) {
             QMessageBox::critical(this,
                                   tr("Warning"),
-                                  tr("You have not finished the VESC Tool introduction. You must do that "
-                                     "in order to use VESC Tool."));
+                                 tr("You have not finished the ExiTool introduction. You must do that "
+                                    "in order to use ExiTool."));
             QCoreApplication::quit();
         }
 
@@ -1295,7 +1292,7 @@ void MainWindow::on_actionLaunchMobileTool_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, "VESC Tool", Utility::aboutText());
+    QMessageBox::about(this, "ExiTool", Utility::aboutText());
 }
 
 void MainWindow::on_actionLibrariesUsed_triggered()
@@ -1450,7 +1447,7 @@ void MainWindow::reloadPages()
     mPagePackage = new PageVescPackage(this);
     mPagePackage->setVesc(mVesc);
     ui->pageWidget->addWidget(mPagePackage);
-    addPageItem(tr("VESC Packages"),  theme + "icons/Package-96.png", "", true);
+    addPageItem(tr("Packages"),  theme + "icons/Package-96.png", "", true);
 
     mPageMotorSettings = new PageMotorSettings(this);
     mPageMotorSettings->setVesc(mVesc);
@@ -1553,7 +1550,7 @@ void MainWindow::reloadPages()
     mPageAppNunchuk = new PageAppNunchuk(this);
     mPageAppNunchuk->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNunchuk);
-    addPageItem(tr("VESC Remote"),  theme + "icons/icons8-fantasy-96.png",
+    addPageItem(tr("Remote"),  theme + "icons/icons8-fantasy-96.png",
                 theme + "icons/appconf.png", false, true);
     mPageNameIdList.insert("app_vescremote", ui->pageList->count() - 1);
 
@@ -1654,7 +1651,7 @@ void MainWindow::reloadPages()
         vt->setText(p->description);
     }
     ui->pageWidget->addWidget(vt);
-    addPageItem(tr("VESC Dev Tools"),  theme + "icons/v_icon-96.png", "", true);
+    addPageItem(tr("Developer Tools"),  theme + "icons/v_icon-96.png", "", true);
 
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
@@ -2017,7 +2014,7 @@ void MainWindow::on_actionWarrantyStatement_triggered()
 
 void MainWindow::on_actionVESCToolChangelog_triggered()
 {
-    HelpDialog::showHelp(this, "VESC® Tool Changelog", Utility::vescToolChangeLog());
+    HelpDialog::showHelp(this, "Changelog", Utility::vescToolChangeLog());
 }
 
 void MainWindow::on_actionFirmwareChangelog_triggered()
@@ -2025,10 +2022,7 @@ void MainWindow::on_actionFirmwareChangelog_triggered()
     HelpDialog::showHelp(this, "Firmware Changelog", Utility::fwChangeLog());
 }
 
-void MainWindow::on_actionVESCProjectForums_triggered()
-{
-    QDesktopServices::openUrl(QUrl("http://vesc-project.com/forum"));
-}
+// Removed VESC Project Forums action
 
 void MainWindow::on_actionLicense_triggered()
 {
@@ -2084,7 +2078,7 @@ void MainWindow::on_actionClearConfigurationBackups_triggered()
     reply = QMessageBox::warning(this,
                                  tr("Warning"),
                                  tr("This is going to remove all configuration backups for "
-                                    "this instance of VESC Tool. Continue?"),
+                                    "this instance of ExiTool. Continue?"),
                                  QMessageBox::Yes | QMessageBox::Cancel);
 
     if (reply == QMessageBox::Yes) {

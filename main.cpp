@@ -78,10 +78,10 @@ static void showHelp()
     qDebug() << "Arguments";
     qDebug() << "-h, --help : Show help text";
     qDebug() << "--about : Show about text";
-    qDebug() << "--version : Show VESC Tool version information on one line";
+    qDebug() << "--version : Show ExiTool version information on one line";
     qDebug() << "--tcpServer [port] : Connect to VESC and start TCP server on [port]";
-    qDebug() << "--loadQml [file] : Load QML UI from file instead of the regular VESC Tool UI";
-    qDebug() << "--loadQmlVesc : Load QML UI from the connected VESC instead of the regular VESC Tool UI";
+    qDebug() << "--loadQml [file] : Load QML UI from file instead of the regular ExiTool UI";
+    qDebug() << "--loadQmlVesc : Load QML UI from the connected device instead of the regular ExiTool UI";
     qDebug() << "--qmlAutoConn : Connect over USB before loading the QML UI";
     qDebug() << "--qmlFullscreen : Run QML UI in fullscreen mode";
     qDebug() << "--qmlOtherScreen : Run QML UI on other screen";
@@ -165,9 +165,9 @@ static void addFonts() {
 int main(int argc, char *argv[])
 {
     // Settings
-    QCoreApplication::setOrganizationName("VESC");
-    QCoreApplication::setOrganizationDomain("vesc-project.com");
-    QCoreApplication::setApplicationName("VESC Tool");
+    QCoreApplication::setOrganizationName("Exinous Technologies Pvt. Ltd.");
+    QCoreApplication::setOrganizationDomain("exinous.com");
+    QCoreApplication::setApplicationName("ExiTool");
     QSettings set;
     bool isDark = set.value("darkMode", true).toBool();
     Utility::setDarkMode(isDark);

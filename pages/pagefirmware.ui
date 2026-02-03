@@ -507,7 +507,7 @@
      <item>
       <widget class="QGroupBox" name="groupBox_2">
        <property name="title">
-        <string>VESC Firmware, Hardware and UUID</string>
+        <string>Firmware, Hardware and UUID</string>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>

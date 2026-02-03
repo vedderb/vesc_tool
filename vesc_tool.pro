@@ -139,7 +139,7 @@ contains(DEFINES, HAS_GAMEPAD) {
 android: QT += androidextras
 
 ios | macx: {
-    TARGET = "VESC Tool"
+    TARGET = "ExiTool"
     CONFIG += sdk_no_version_check
 }else: {
     android:{

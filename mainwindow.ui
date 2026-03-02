@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1054</width>
+    <width>1175</width>
     <height>652</height>
    </rect>
   </property>
@@ -603,8 +603,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1054</width>
-     <height>23</height>
+     <width>1175</width>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -634,6 +634,7 @@
     </property>
     <addaction name="separator"/>
     <addaction name="actionVESCProjectForums"/>
+    <addaction name="actionVESC_Discord"/>
     <addaction name="separator"/>
     <addaction name="actionVESCToolChangelog"/>
     <addaction name="actionFirmwareChangelog"/>
@@ -1155,6 +1156,11 @@ p, li { white-space: pre-wrap; }
   <action name="actionRestartLispBM">
    <property name="text">
     <string>Restart LispBM</string>
+   </property>
+  </action>
+  <action name="actionVESC_Discord">
+   <property name="text">
+    <string>VESC Discord</string>
    </property>
   </action>
  </widget>

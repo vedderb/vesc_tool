@@ -150,6 +150,7 @@ private slots:
     void on_actionVESCToolChangelog_triggered();
     void on_actionFirmwareChangelog_triggered();
     void on_actionVESCProjectForums_triggered();
+    void on_actionVESC_Discord_triggered();
     void on_actionLicense_triggered();
     void on_posBox_editingFinished();
     void on_posBox_valueChanged(double arg1);

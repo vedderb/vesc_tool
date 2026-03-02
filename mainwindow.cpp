@@ -154,6 +154,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionAbout->setIcon(Utility::getIcon("icons/About-96.png"));
     ui->actionLicense->setIcon(Utility::getIcon("icons/About-96.png"));
     ui->actionVESCProjectForums->setIcon(Utility::getIcon("icons/User Group Man Man-96.png"));
+    ui->actionVESC_Discord->setIcon(Utility::getIcon("icons/User Group Man Man-96.png"));
     ui->actionLoadFirmwareConfigs->setIcon(Utility::getIcon("icons/Electronics-96.png"));
     ui->actionBackupConfiguration->setIcon(Utility::getIcon("icons/Save-96.png"));
     ui->actionBackupConfigurationsCAN->setIcon(Utility::getIcon("icons/Save-96.png"));
@@ -2030,6 +2031,11 @@ void MainWindow::on_actionVESCProjectForums_triggered()
     QDesktopServices::openUrl(QUrl("http://vesc-project.com/forum"));
 }
 
+void MainWindow::on_actionVESC_Discord_triggered()
+{
+    QDesktopServices::openUrl(QUrl("https://discord.gg/JgvV5NwYts"));
+}
+
 void MainWindow::on_actionLicense_triggered()
 {
     HelpDialog::showHelp(this, mVesc->infoConfig(), "gpl_text");
@@ -2226,4 +2232,3 @@ void MainWindow::on_actionRestartLispBM_triggered()
 {
     mVesc->commands()->lispSetRunning(1);
 }
-

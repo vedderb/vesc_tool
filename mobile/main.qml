@@ -439,6 +439,8 @@ ApplicationWindow {
 
         Page {
             id: bmsPage
+            visible: false
+
             Loader {
                 anchors.fill: parent
                 asynchronous: true
@@ -513,7 +515,7 @@ ApplicationWindow {
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal"]
+                    model: ["Start", "RT Data", "Profiles", "Terminal"]
 
                     TabButton {
                         text: modelData
@@ -560,6 +562,13 @@ ApplicationWindow {
             property var tabBarItem: tabBar
             property var swipeViewItem: mainSwipeView
         }
+    }
+
+    TabButton {
+        id: bmsDataButton
+        visible: bmsPage.visible
+        text: "BMS"
+        width: tabBar.buttonWidth
     }
 
     TabButton {
@@ -1146,6 +1155,8 @@ ApplicationWindow {
 
         function onUpdated() {
             confTimer.mcConfRx = true
+            /* BMS button is visible if BMS Type != None, or if it's not an ESC */
+            bmsDataButton.visible = (mMcConf.getParamInt("bms.type") > 0) || (VescIf.getFwSupportsConfiguration() == false)
         }
     }
 

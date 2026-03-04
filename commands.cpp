@@ -1027,11 +1027,28 @@ void Commands::processPacket(QByteArray data)
         stats.mem_use = vb.vbPopFrontDouble16(1e2);
         stats.stack_use = vb.vbPopFrontDouble16(1e2);
         stats.done_ctx_r = vb.vbPopFrontString();
+
+        QVariantList globals;
         while (vb.size() > 0) {
             auto name = vb.vbPopFrontString();
             auto num = vb.vbPopFrontDouble32Auto();
             stats.number_bindings.append(qMakePair(name, num));
+
+            QVariantMap g;
+            g.insert("name", name);
+            g.insert("value", num);
+            globals.append(g);
         }
+
+        QVariantMap statsMap;
+        statsMap.insert("cpu_use", stats.cpu_use);
+        statsMap.insert("heap_use", stats.heap_use);
+        statsMap.insert("mem_use", stats.mem_use);
+        statsMap.insert("stack_use", stats.stack_use);
+        statsMap.insert("done_ctx_r", stats.done_ctx_r);
+        statsMap.insert("globals", globals);
+
+        emit lispStatsRxMap(statsMap);
         emit lispStatsRx(stats);
     } break;
 

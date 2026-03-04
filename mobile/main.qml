@@ -477,6 +477,17 @@ ApplicationWindow {
                 }
             }
         }
+
+        Page {
+            Loader {
+                anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: Lisp {
+                    anchors.fill: parent
+                }
+            }
+        }
     }
 
     header: Rectangle {
@@ -513,7 +524,7 @@ ApplicationWindow {
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal"]
+                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal", "Lisp"]
 
                     TabButton {
                         text: modelData

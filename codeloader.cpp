@@ -467,6 +467,11 @@ bool CodeLoader::lispUpload(QString codeStr, QString editorPath, bool reduceLisp
     return lispUpload(vb);
 }
 
+bool CodeLoader::lispUploadString(QString codeStr, QString editorPath, bool reduceLisp)
+{
+    return lispUpload(codeStr, editorPath, reduceLisp);
+}
+
 bool CodeLoader::lispUploadFromPath(QString path, bool reduceLisp)
 {
     QFile f(path);
@@ -672,6 +677,16 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
     disconnect(conn);
 
     return "";
+}
+
+QVariantMap CodeLoader::lispReadWithPath()
+{
+    QVariantMap res;
+    QString path = "From VESC";
+    QString code = lispRead(nullptr, path);
+    res.insert("path", path);
+    res.insert("code", code);
+    return res;
 }
 
 bool CodeLoader::qmlErase(int size)

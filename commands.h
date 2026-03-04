@@ -156,6 +156,7 @@ signals:
     void lispWriteCodeRx(bool ok, quint32 offset);
     void lispPrintReceived(QString str);
     void lispStatsRx(LISP_STATS stats);
+    void lispStatsRxMap(QVariantMap stats);
     void lispRunningResRx(bool ok);
     void lispStreamCodeRx(quint32 offset, qint16 res);
 

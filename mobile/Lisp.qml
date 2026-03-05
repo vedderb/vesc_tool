@@ -348,10 +348,154 @@ Item {
                         activeFocusOnPress: true
                     }
                 }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 8
+
+                    Button {
+                        text: "Upload"
+                        Layout.fillWidth: true
+                        onClicked: workaroundTimerUpload.start()
+                    }
+
+                    Button {
+                        text: "Read"
+                        Layout.fillWidth: true
+                        onClicked: workaroundTimerRead.start()
+                    }
+
+                    Button {
+                        text: "Erase"
+                        Layout.fillWidth: true
+                        onClicked: mLoader.lispErase(16)
+                    }
+
+                    Button {
+                        text: "Stream"
+                        Layout.fillWidth: true
+                        onClicked: workaroundTimerStream.start()
+                    }
+
+                    Button {
+                        text: "..."
+                        Layout.preferredWidth: 52
+                        onClicked: pageMenu.open()
+
+                        Menu {
+                            id: pageMenu
+                            leftPadding: notchLeft
+                            rightPadding: notchRight
+                            parent: lispPageItem
+                            y: parent.height - implicitHeight
+                            width: parent.width
+
+                            MenuItem {
+                                text: "Run"
+                                onTriggered: mCommands.lispSetRunning(1)
+                            }
+
+                            MenuItem {
+                                text: "Stop"
+                                onTriggered: mCommands.lispSetRunning(0)
+                            }
+
+                            MenuItem {
+                                text: "Open File..."
+                                onTriggered: {
+                                    if (Utility.requestFilePermission()) {
+                                        fileDialogLoad.close()
+                                        fileDialogLoad.open()
+                                    } else {
+                                        VescIf.emitMessageDialog(
+                                                    "File Permissions",
+                                                    "Unable to request file system permission.",
+                                                    false, false)
+                                    }
+                                }
+                            }
+
+                            MenuItem {
+                                text: "Open Recent..."
+                                onTriggered: {
+                                    updateRecentModel(recentFilter.text)
+                                    recentDialog.open()
+                                }
+                            }
+
+                            MenuItem {
+                                text: "Open Example..."
+                                onTriggered: {
+                                    exampleDialog.open()
+                                }
+                            }
+
+                            MenuItem {
+                                text: "Close File"
+                                enabled: currentFilePath.length > 0 || editorText.text.length > 0
+                                onTriggered: {
+                                    editorText.text = ""
+                                    currentFilePath = ""
+                                }
+                            }
+
+                            MenuItem {
+                                text: "Text Size +"
+                                onTriggered: increaseEditorFont()
+                            }
+
+                            MenuItem {
+                                text: "Text Size -"
+                                onTriggered: decreaseEditorFont()
+                            }
+
+                            MenuItem {
+                                text: "Help"
+                                onTriggered: {
+                                    VescIf.emitMessageDialog(
+                                                "VESC LispBM Editor",
+                                                "For documentation, see:<br>" +
+                                                "<a href=\"https://github.com/vedderb/bldc/blob/master/lispBM/README.md\">" +
+                                                "https://github.com/vedderb/bldc/blob/master/lispBM/README.md</a>",
+                                                true,
+                                                true)
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             // === REPL tab ===
             ColumnLayout {
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
+
+                    Label {
+                        text: "REPL Console"
+                        color: Utility.getAppHexColor("lightText")
+                    }
+                }
+
+                ScrollView {
+                    id: replScroll
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+
+                    TextArea {
+                        text: consoleText
+                        readOnly: true
+                        wrapMode: TextArea.WrapAnywhere
+                        font.family: "DejaVu Sans Mono"
+                        color: Utility.getAppHexColor("lightText")
+                    }
+                }
+
                 RowLayout {
                     Layout.fillWidth: true
 
@@ -378,40 +522,28 @@ Item {
                     }
 
                     Button {
-                        text: ":help"
-                        onClicked: mCommands.lispSendReplCmd(":help")
-                    }
-                }
+                        text: "..."
+                        Layout.preferredWidth: 52
+                        onClicked: replMenu.open()
 
-                RowLayout {
-                    Layout.fillWidth: true
+                        Menu {
+                            id: replMenu
+                            leftPadding: notchLeft
+                            rightPadding: notchRight
+                            parent: replScroll
+                            y: parent.height - implicitHeight
+                            width: parent.width
 
-                    Button {
-                        text: "Clear"
-                        onClicked: consoleText = ""
-                    }
+                            MenuItem {
+                                text: ":help"
+                                onTriggered: mCommands.lispSendReplCmd(":help")
+                            }
 
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Label {
-                        text: "REPL Console"
-                        color: Utility.getAppHexColor("lightText")
-                    }
-                }
-
-                ScrollView {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clip: true
-
-                    TextArea {
-                        text: consoleText
-                        readOnly: true
-                        wrapMode: TextArea.WrapAnywhere
-                        font.family: "DejaVu Sans Mono"
-                        color: Utility.getAppHexColor("lightText")
+                            MenuItem {
+                                text: "Clear"
+                                onTriggered: consoleText = ""
+                            }
+                        }
                     }
                 }
             }
@@ -522,127 +654,6 @@ Item {
                                 horizontalAlignment: Text.AlignLeft
                                 text: parseFloat(value).toFixed(6)
                             }
-                        }
-                    }
-                }
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.topMargin: 8
-
-            Button {
-                text: "Upload"
-                Layout.fillWidth: true
-                onClicked: workaroundTimerUpload.start()
-            }
-
-            Button {
-                text: "Read"
-                Layout.fillWidth: true
-                onClicked: workaroundTimerRead.start()
-            }
-
-            Button {
-                text: "Erase"
-                Layout.fillWidth: true
-                onClicked: mLoader.lispErase(16)
-            }
-
-            Button {
-                text: "Stream"
-                Layout.fillWidth: true
-                onClicked: workaroundTimerStream.start()
-            }
-
-            Button {
-                text: "..."
-                Layout.preferredWidth: 52
-                onClicked: pageMenu.open()
-
-                Menu {
-                    id: pageMenu
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
-                    parent: lispPageItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
-
-                    MenuItem {
-                        text: "Run"
-                        onTriggered: mCommands.lispSetRunning(1)
-                    }
-
-                    MenuItem {
-                        text: "Stop"
-                        onTriggered: mCommands.lispSetRunning(0)
-                    }
-
-                    MenuItem {
-                        text: "Open File..."
-                        onTriggered: {
-                            if (Utility.requestFilePermission()) {
-                                fileDialogLoad.close()
-                                fileDialogLoad.open()
-                            } else {
-                                VescIf.emitMessageDialog(
-                                            "File Permissions",
-                                            "Unable to request file system permission.",
-                                            false, false)
-                            }
-                        }
-                    }
-
-                    MenuItem {
-                        text: "Open Recent..."
-                        onTriggered: {
-                            updateRecentModel(recentFilter.text)
-                            recentDialog.open()
-                        }
-                    }
-
-                    MenuItem {
-                        text: "Open Example..."
-                        onTriggered: {
-                            exampleDialog.open()
-                        }
-                    }
-
-                    MenuItem {
-                        text: "Close File"
-                        enabled: currentFilePath.length > 0 || editorText.text.length > 0
-                        onTriggered: {
-                            editorText.text = ""
-                            currentFilePath = ""
-                        }
-                    }
-
-                    MenuItem {
-                        text: "Text Size +"
-                        onTriggered: increaseEditorFont()
-                    }
-
-                    MenuItem {
-                        text: "Text Size -"
-                        onTriggered: decreaseEditorFont()
-                    }
-
-                    MenuItem {
-                        text: "Clear Console"
-                        onTriggered: consoleText = ""
-                    }
-
-                    MenuItem {
-                        text: "Help"
-                        onTriggered: {
-                            VescIf.emitMessageDialog(
-                                        "VESC LispBM Editor",
-                                        "For documentation, see:<br>" +
-                                        "<a href=\"https://github.com/vedderb/bldc/blob/master/lispBM/README.md\">" +
-                                        "https://github.com/vedderb/bldc/blob/master/lispBM/README.md</a>",
-                                        true,
-                                        true)
                         }
                     }
                 }

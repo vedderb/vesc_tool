@@ -618,6 +618,7 @@ Item {
                     }
 
                     ListView {
+                        id: bindingListView
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
@@ -625,7 +626,7 @@ Item {
                         model: bindingModel
 
                         delegate: Rectangle {
-                            width: parent.width
+                            width: bindingListView.width
                             height: 26
                             color: "transparent"
 
@@ -734,13 +735,14 @@ Item {
             }
 
             ListView {
+                id: recentListView
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
                 model: recentModel
 
                 delegate: ItemDelegate {
-                    // width: parent.width
+                    width: recentListView.width
                     text: path
                     onClicked: {
                         openFilePath(path)

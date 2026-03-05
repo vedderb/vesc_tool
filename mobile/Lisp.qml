@@ -503,13 +503,26 @@ Item {
                         height: 26
                         color: "transparent"
 
-                        Label {
+                        RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 4
                             anchors.rightMargin: 4
-                            verticalAlignment: Text.AlignVCenter
-                            elide: Text.ElideRight
-                            text: name + ": " + value
+
+                            Label {
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 1500
+                                verticalAlignment: Text.AlignVCenter
+                                horizontalAlignment: Text.AlignRight
+                                text: name + ": "
+                            }
+
+                            Label {
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 1500
+                                verticalAlignment: Text.AlignVCenter
+                                horizontalAlignment: Text.AlignLeft
+                                text: parseFloat(value).toFixed(6)
+                            }
                         }
                     }
                 }
@@ -636,267 +649,6 @@ Item {
                 }
             }
         }
-
-        TabBar {
-            id: lispTabBar
-            Layout.fillWidth: true
-
-            TabButton {
-                text: "Editor"
-            }
-
-            TabButton {
-                text: "REPL"
-            }
-
-            TabButton {
-                text: "Stats"
-            }
-        }
-
-        StackLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            currentIndex: lispTabBar.currentIndex
-
-            Item {
-                ColumnLayout {
-                    anchors.fill: parent
-                    spacing: 4
-
-                    RowLayout {
-                        Layout.fillWidth: true
-
-                        CheckBox {
-                            id: autoRunBox
-                            text: "Auto Run"
-                            checked: true
-                        }
-
-                        CheckBox {
-                            id: reduceLispBox
-                            text: "Reduce"
-                            checked: false
-                        }
-
-                        Label {
-                            Layout.fillWidth: true
-                            horizontalAlignment: Text.AlignRight
-                            text: currentFilePath.length > 0 ? currentFilePath : "Unnamed"
-                            elide: Text.ElideLeft
-                        }
-                    }
-
-                    Label {
-                        text: "Code"
-                        Layout.fillWidth: true
-                    }
-
-                    ScrollView {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-
-                        TextArea {
-                            id: editorText
-                            wrapMode: TextArea.NoWrap
-                            font.family: "DejaVu Sans Mono"
-                            font.pointSize: editorFontSize
-                            selectByMouse: true
-                            persistentSelection: true
-                            color: Utility.getAppHexColor("lightText")
-                            inputMethodHints: Qt.ImhNoPredictiveText
-                            readOnly: false
-                            activeFocusOnPress: true
-                        }
-                    }
-                }
-            }
-
-            Item {
-                ColumnLayout {
-                    anchors.fill: parent
-
-                    RowLayout {
-                        Layout.fillWidth: true
-
-                        TextField {
-                            id: replInput
-                            Layout.fillWidth: true
-                            placeholderText: "REPL command"
-                            onAccepted: {
-                                if (text.length > 0) {
-                                    mCommands.lispSendReplCmd(text)
-                                    text = ""
-                                }
-                            }
-                        }
-
-                        Button {
-                            text: "Send"
-                            onClicked: {
-                                if (replInput.text.length > 0) {
-                                    mCommands.lispSendReplCmd(replInput.text)
-                                    replInput.text = ""
-                                }
-                            }
-                        }
-
-                        Button {
-                            text: ":help"
-                            onClicked: mCommands.lispSendReplCmd(":help")
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-
-                        Button {
-                            text: "Clear"
-                            onClicked: consoleText = ""
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                        }
-
-                        Label {
-                            text: "REPL Console"
-                            color: Utility.getAppHexColor("lightText")
-                        }
-                    }
-
-                    ScrollView {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-
-                        TextArea {
-                            text: consoleText
-                            readOnly: true
-                            wrapMode: TextArea.WrapAnywhere
-                            font.family: "DejaVu Sans Mono"
-                            color: Utility.getAppHexColor("lightText")
-                        }
-                    }
-                }
-            }
-
-            Item {
-                id: statsTabItem
-
-                ColumnLayout {
-                    anchors.fill: parent
-
-                    RowLayout {
-                        Layout.fillWidth: true
-
-                        CheckBox {
-                            id: pollStatsBox
-                            text: "Auto Poll"
-                            checked: true
-                        }
-
-                        Label {
-                            text: "Hz"
-                        }
-
-                        ComboBox {
-                            id: pollHzBox
-                            model: [1, 2, 5, 10]
-                            currentIndex: 1
-                            onCurrentTextChanged: {
-                                statsPollHz = parseInt(currentText)
-                            }
-                        }
-
-                        Button {
-                            text: "Refresh"
-                            onClicked: mCommands.lispGetStats(true)
-                        }
-                    }
-
-                    Label {
-                        text: "CPU: " + lispCpuUse.toFixed(1) + "%"
-                    }
-
-                    ProgressBar {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 10
-                        from: 0
-                        to: 100
-                        value: lispCpuUse
-                    }
-
-                    Label {
-                        text: "Heap: " + lispHeapUse.toFixed(1) + "%"
-                    }
-
-                    ProgressBar {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 10
-                        from: 0
-                        to: 100
-                        value: lispHeapUse
-                    }
-
-                    Label {
-                        text: "Memory: " + lispMemUse.toFixed(1) + "%"
-                    }
-
-                    ProgressBar {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 10
-                        from: 0
-                        to: 100
-                        value: lispMemUse
-                    }
-
-                    Label {
-                        text: "Global Variables"
-                        Layout.fillWidth: true
-                    }
-
-                    ListView {
-                        id: bindingListView
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-                        spacing: 1
-                        model: bindingModel
-
-                        delegate: Rectangle {
-                            width: bindingListView.width
-                            height: 26
-                            color: "transparent"
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 4
-                                anchors.rightMargin: 4
-
-                                Label {
-                                    Layout.fillWidth: true
-                                    Layout.preferredWidth: 1500
-                                    verticalAlignment: Text.AlignVCenter
-                                    horizontalAlignment: Text.AlignRight
-                                    text: name + ": "
-                                }
-
-                                Label {
-                                    Layout.fillWidth: true
-                                    Layout.preferredWidth: 1500
-                                    verticalAlignment: Text.AlignVCenter
-                                    horizontalAlignment: Text.AlignLeft
-                                    text: parseFloat(value).toFixed(6)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
     }
 
     Connections {

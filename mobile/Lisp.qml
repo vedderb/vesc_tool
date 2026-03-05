@@ -472,7 +472,7 @@ Item {
                     TextArea {
                         text: consoleText
                         readOnly: true
-                        wrapMode: TextArea.WrapAnywhere
+                        wrapMode: TextArea.NoWrap
                         font.family: "DejaVu Sans Mono"
                         color: Utility.getAppHexColor("lightText")
                     }

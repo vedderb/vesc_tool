@@ -325,11 +325,6 @@ Item {
                     }
                 }
 
-                Label {
-                    text: "Code"
-                    Layout.fillWidth: true
-                }
-
                 ScrollView {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -468,19 +463,6 @@ Item {
 
             // === REPL tab ===
             ColumnLayout {
-                RowLayout {
-                    Layout.fillWidth: true
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Label {
-                        text: "REPL Console"
-                        color: Utility.getAppHexColor("lightText")
-                    }
-                }
-
                 ScrollView {
                     id: replScroll
                     Layout.fillWidth: true
@@ -551,34 +533,6 @@ Item {
             // === Stats tab ===
             ColumnLayout {
                 id: statsTabItem
-
-                RowLayout {
-                    Layout.fillWidth: true
-
-                    CheckBox {
-                        id: pollStatsBox
-                        text: "Auto Poll"
-                        checked: true
-                    }
-
-                    Label {
-                        text: "Hz"
-                    }
-
-                    ComboBox {
-                        id: pollHzBox
-                        model: [1, 2, 5, 10]
-                        currentIndex: 1
-                        onCurrentTextChanged: {
-                            statsPollHz = parseInt(currentText)
-                        }
-                    }
-
-                    Button {
-                        text: "Refresh"
-                        onClicked: mCommands.lispGetStats(true)
-                    }
-                }
 
                 Label {
                     text: "CPU: " + lispCpuUse.toFixed(1) + "%"
@@ -655,6 +609,35 @@ Item {
                                 text: parseFloat(value).toFixed(6)
                             }
                         }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    CheckBox {
+                        id: pollStatsBox
+                        text: "Auto Poll"
+                        checked: true
+                    }
+
+                    Label {
+                        text: "Hz"
+                    }
+
+                    ComboBox {
+                        id: pollHzBox
+                        Layout.fillWidth: true
+                        model: [1, 2, 5, 10]
+                        currentIndex: 1
+                        onCurrentTextChanged: {
+                            statsPollHz = parseInt(currentText)
+                        }
+                    }
+
+                    Button {
+                        text: "Refresh"
+                        onClicked: mCommands.lispGetStats(true)
                     }
                 }
             }

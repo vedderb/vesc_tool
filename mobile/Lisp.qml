@@ -340,7 +340,7 @@ Item {
                         wrapMode: TextArea.NoWrap
                         font.family: "DejaVu Sans Mono"
                         font.pointSize: editorFontSize
-                        selectByMouse: true
+                        selectByMouse: (Qt.platform.os === "ios" || Qt.platform.os === "android") ? false : true
                         persistentSelection: true
                         color: Utility.getAppHexColor("lightText")
                         inputMethodHints: Qt.ImhNoPredictiveText

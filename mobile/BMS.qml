@@ -83,7 +83,7 @@ Item {
                             var heightBars = (height - valMetrics.height * 1.2)
                             var cellWidth = width - xOfsLeft - xOfsRight
 
-                            ctx.font = '%1pt %2'.arg(valText.font.pointSize).arg(valText.font.family)
+                            ctx.font = '%1pt \"%2\"'.arg(valText.font.pointSize).arg(valText.font.family)
 
                             var lineDivs = 6
                             var lineStep = cellWidth / lineDivs
@@ -189,7 +189,7 @@ Item {
                                 ctx.fillStyle = Utility.getAppHexColor("lightAccent")
                                 ctx.textAlign = "start";
                                 ctx.textBaseline = "middle";
-                                ctx.font = '%1pt %2'.arg(valText.font.pointSize).arg(valText.font.family)
+                                ctx.font = '%1pt \"%2\"'.arg(valText.font.pointSize).arg(valText.font.family)
 
                                 var cellW = ((temps[i] + 10) / 70) * cellWidth
                                 if (cellW > cellWidth) {

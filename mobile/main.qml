@@ -524,7 +524,7 @@ ApplicationWindow {
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal", "Lisp"]
+                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal", "LispBM"]
 
                     TabButton {
                         text: modelData

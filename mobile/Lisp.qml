@@ -630,13 +630,26 @@ Item {
                             height: 26
                             color: "transparent"
 
-                            Label {
+                            RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 4
                                 anchors.rightMargin: 4
-                                verticalAlignment: Text.AlignVCenter
-                                elide: Text.ElideRight
-                                text: name + ": " + value
+
+                                Label {
+                                    Layout.fillWidth: true
+                                    Layout.preferredWidth: 1500
+                                    verticalAlignment: Text.AlignVCenter
+                                    horizontalAlignment: Text.AlignRight
+                                    text: name + ": "
+                                }
+
+                                Label {
+                                    Layout.fillWidth: true
+                                    Layout.preferredWidth: 1500
+                                    verticalAlignment: Text.AlignVCenter
+                                    horizontalAlignment: Text.AlignLeft
+                                    text: parseFloat(value).toFixed(6)
+                                }
                             }
                         }
                     }

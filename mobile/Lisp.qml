@@ -276,17 +276,27 @@ Item {
         anchors.rightMargin: 10 + notchRight
         spacing: 0
 
-        ComboBox {
-            id: lispPageCombo
+        TabBar {
+            id: lispTabBar
             Layout.fillWidth: true
-            Layout.bottomMargin: 8
-            model: ["Editor", "REPL", "Stats"]
+
+            TabButton {
+                text: "Editor"
+            }
+
+            TabButton {
+                text: "REPL"
+            }
+
+            TabButton {
+                text: "Stats"
+            }
         }
 
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: lispPageCombo.currentIndex
+            currentIndex: lispTabBar.currentIndex
 
             // === Editor tab ===
             ColumnLayout {

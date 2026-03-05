@@ -456,7 +456,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
     return ok;
 }
 
-bool CodeLoader::lispUpload(QString codeStr, QString editorPath, bool reduceLisp)
+bool CodeLoader::lispUploadString(QString codeStr, QString editorPath, bool reduceLisp)
 {
     VByteArray vb = lispPackImports(codeStr, editorPath, reduceLisp);
 
@@ -465,11 +465,6 @@ bool CodeLoader::lispUpload(QString codeStr, QString editorPath, bool reduceLisp
     }
 
     return lispUpload(vb);
-}
-
-bool CodeLoader::lispUploadString(QString codeStr, QString editorPath, bool reduceLisp)
-{
-    return lispUpload(codeStr, editorPath, reduceLisp);
 }
 
 bool CodeLoader::lispUploadFromPath(QString path, bool reduceLisp)

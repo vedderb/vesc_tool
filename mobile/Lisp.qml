@@ -13,6 +13,7 @@ import Vedder.vesc.codeloader 1.0
 Item {
     id: lispPageItem
 
+    property var dialogParent: ApplicationWindow.overlay
     property Commands mCommands: VescIf.commands()
     property string currentFilePath: ""
     property string consoleText: ""
@@ -20,7 +21,7 @@ Item {
     property real lispHeapUse: 0
     property real lispMemUse: 0
     property int statsPollHz: 2
-    property int editorFontSize: 16
+    property int editorFontSize: 12
 
     function fileUrlToPath(url) {
         var path = decodeURIComponent(url.toString())
@@ -114,19 +115,6 @@ Item {
         }
     }
 
-    function uploadCode() {
-        var editorPath = currentFilePath.length > 0 ? pathDir(currentFilePath) : ""
-        var ok = mLoader.lispUploadString(editorText.text, editorPath, reduceLispBox.checked)
-
-        if (ok && autoRunBox.checked) {
-            mCommands.lispSetRunning(1)
-        }
-    }
-
-    function streamCode() {
-        mLoader.lispStreamString(editorText.text, 0)
-    }
-
     function increaseEditorFont() {
         editorFontSize = Math.min(36, editorFontSize + 1)
     }
@@ -135,11 +123,57 @@ Item {
         editorFontSize = Math.max(8, editorFontSize - 1)
     }
 
-    function readFromVesc() {
-        var res = mLoader.lispReadWithPath()
-        if (res.code && res.code.length > 0) {
-            editorText.text = res.code
-            currentFilePath = res.path
+    Timer {
+        id: workaroundTimerUpload
+        interval: 0
+        repeat: false
+        running: false
+        onTriggered: {
+            var editorPath = currentFilePath.length > 0 ? pathDir(currentFilePath) : ""
+
+            disableDialog()
+            dlDialog.title = "Uploading..."
+            var ok = mLoader.lispUploadString(editorText.text, editorPath, reduceLispBox.checked)
+            enableDialog()
+
+            if (ok && autoRunBox.checked) {
+                mCommands.lispSetRunning(1)
+            }
+        }
+    }
+
+    Timer {
+        id: workaroundTimerStream
+        interval: 0
+        repeat: false
+        running: false
+        onTriggered: {
+            var editorPath = currentFilePath.length > 0 ? pathDir(currentFilePath) : ""
+
+            disableDialog()
+            dlDialog.title = "Streaming..."
+            dlProgBar.indeterminate = true
+            mLoader.lispStreamString(editorText.text, 0)
+            enableDialog()
+        }
+    }
+
+    Timer {
+        id: workaroundTimerRead
+        interval: 0
+        repeat: false
+        running: false
+        onTriggered: {
+            var editorPath = currentFilePath.length > 0 ? pathDir(currentFilePath) : ""
+
+            disableDialog()
+            dlDialog.title = "Reading..."
+            var res = mLoader.lispReadWithPath()
+            if (res.code && res.code.length > 0) {
+                editorText.text = res.code
+                currentFilePath = res.path
+            }
+            enableDialog()
         }
     }
 
@@ -164,17 +198,79 @@ Item {
         }
     }
 
+    Connections {
+        target: mLoader
+
+        function onDownloadProgress (bytesReceived, bytesTotal) {
+            dlProgBar.indeterminate = false
+            dlProgBar.to = bytesTotal
+            dlProgBar.value = bytesReceived
+        }
+
+        function onLispUploadProgress (bytes, bytesTotal) {
+            dlProgBar.indeterminate = false
+            dlProgBar.to = bytesTotal
+            dlProgBar.value = bytes
+        }
+    }
+
+    Dialog {
+        id: dlDialog
+        title: "Processing..."
+        closePolicy: Popup.NoAutoClose
+        standardButtons: Dialog.Cancel
+        modal: true
+        focus: true
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        width: parent.width - 20
+        x: 10
+        y: parent.height / 2 - height / 2
+        parent: dialogParent
+
+        ProgressBar {
+            id: dlProgBar
+            anchors.fill: parent
+            indeterminate: false
+            from: 0
+            to: 1000
+            value: 100
+        }
+
+        onRejected: {
+            mLoader.abortDownloadUpload()
+        }
+    }
+
+    function disableDialog() {
+        dlDialog.open()
+        column.enabled = false
+    }
+
+    function enableDialog() {
+        dlDialog.close()
+        column.enabled = true
+    }
+
     Timer {
         id: statsPollTimer
         interval: Math.max(50, Math.round(1000 / Math.max(1, statsPollHz)))
         repeat: true
-        running: false
+        running: true
         onTriggered: {
-            mCommands.lispGetStats(true)
+            if (VescIf.isPortConnected() &&
+                    pollStatsBox.checked &&
+                    statsTabItem.visible) {
+                mCommands.lispGetStats(true)
+            }
         }
     }
 
     ColumnLayout {
+        id: column
+
         anchors.fill: parent
         anchors.leftMargin: 10 + notchLeft
         anchors.rightMargin: 10 + notchRight
@@ -187,13 +283,13 @@ Item {
             Button {
                 text: "Upload"
                 Layout.fillWidth: true
-                onClicked: uploadCode()
+                onClicked: workaroundTimerUpload.start()
             }
 
             Button {
                 text: "Read"
                 Layout.fillWidth: true
-                onClicked: readFromVesc()
+                onClicked: workaroundTimerRead.start()
             }
 
             Button {
@@ -205,7 +301,7 @@ Item {
             Button {
                 text: "Stream"
                 Layout.fillWidth: true
-                onClicked: streamCode()
+                onClicked: workaroundTimerStream.start()
             }
 
             Button {
@@ -447,6 +543,8 @@ Item {
             }
 
             Item {
+                id: statsTabItem
+
                 ColumnLayout {
                     anchors.fill: parent
 
@@ -457,9 +555,6 @@ Item {
                             id: pollStatsBox
                             text: "Auto Poll"
                             checked: true
-                            onToggled: {
-                                statsPollTimer.running = checked && lispTabBar.currentIndex === 2
-                            }
                         }
 
                         Label {
@@ -472,9 +567,6 @@ Item {
                             currentIndex: 1
                             onCurrentTextChanged: {
                                 statsPollHz = parseInt(currentText)
-                                if (lispTabBar.currentIndex === 2 && pollStatsBox.checked) {
-                                    statsPollTimer.restart()
-                                }
                             }
                         }
 
@@ -596,17 +688,6 @@ Item {
         }
     }
 
-    Connections {
-        target: lispTabBar
-        function onCurrentIndexChanged() {
-            var statsActive = lispTabBar.currentIndex === 2
-            statsPollTimer.running = pollStatsBox.checked && statsActive
-            if (statsActive) {
-                mCommands.lispGetStats(true)
-            }
-        }
-    }
-
     Dl.FileDialog {
         id: fileDialogLoad
         title: "Open LispBM File"
@@ -633,6 +714,7 @@ Item {
         focus: true
         title: "Recent Files"
         closePolicy: Popup.CloseOnEscape
+        standardButtons: Dialog.Cancel
         Overlay.modal: Rectangle { color: "#AA000000" }
         parent: lispPageItem
 
@@ -658,7 +740,7 @@ Item {
                 model: recentModel
 
                 delegate: ItemDelegate {
-                    width: parent.width
+                    // width: parent.width
                     text: path
                     onClicked: {
                         openFilePath(path)
@@ -675,6 +757,7 @@ Item {
         focus: true
         title: "Examples"
         closePolicy: Popup.CloseOnEscape
+        standardButtons: Dialog.Cancel
         Overlay.modal: Rectangle { color: "#AA000000" }
         parent: lispPageItem
 

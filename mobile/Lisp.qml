@@ -262,7 +262,7 @@ Item {
         onTriggered: {
             if (VescIf.isPortConnected() &&
                     pollStatsBox.checked &&
-                    lispPageCombo.currentIndex === 2) {
+                    statsTabItem.visible) {
                 mCommands.lispGetStats(true)
             }
         }
@@ -281,13 +281,6 @@ Item {
             Layout.fillWidth: true
             Layout.bottomMargin: 8
             model: ["Editor", "REPL", "Stats"]
-            onCurrentIndexChanged: {
-                var statsActive = currentIndex === 2
-                statsPollTimer.running = pollStatsBox.checked && statsActive
-                if (statsActive) {
-                    mCommands.lispGetStats(true)
-                }
-            }
         }
 
         StackLayout {
@@ -415,6 +408,8 @@ Item {
 
             // === Stats tab ===
             ColumnLayout {
+                id: statsTabItem
+
                 RowLayout {
                     Layout.fillWidth: true
 
@@ -422,9 +417,6 @@ Item {
                         id: pollStatsBox
                         text: "Auto Poll"
                         checked: true
-                        onToggled: {
-                            statsPollTimer.running = checked && lispPageCombo.currentIndex === 2
-                        }
                     }
 
                     Label {
@@ -437,9 +429,6 @@ Item {
                         currentIndex: 1
                         onCurrentTextChanged: {
                             statsPollHz = parseInt(currentText)
-                            if (lispPageCombo.currentIndex === 2 && pollStatsBox.checked) {
-                                statsPollTimer.restart()
-                            }
                         }
                     }
 

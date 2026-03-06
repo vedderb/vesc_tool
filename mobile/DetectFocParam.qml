@@ -134,6 +134,7 @@ Item {
             anchors.fill: parent
             clip: true
             contentWidth: parent.width
+
             ColumnLayout {
                 anchors.fill: parent
                 spacing: 0

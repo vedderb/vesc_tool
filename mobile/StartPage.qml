@@ -389,11 +389,13 @@ Item {
     SetupWizardFoc {
         id: wizardFoc
         dialogParent: mainSwipeView
+        isHorizontal: mainIsHorizontal
     }
 
     SetupWizardInput {
         id: wizardInput
         dialogParent: mainSwipeView
+        isHorizontal: mainIsHorizontal
     }
 
     PairingDialog {
@@ -617,6 +619,7 @@ Item {
             pageIndicatorVisible: false
             swipeOrientation: Qt.Horizontal
             currentPage: tabBar.currentIndex
+            isHorizontal: topItem.isHorizontal
         }
 
         header: Rectangle {

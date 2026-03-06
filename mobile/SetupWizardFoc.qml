@@ -34,6 +34,7 @@ Item {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
     property var dialogParent: ApplicationWindow.overlay
+    property bool isHorizontal: width > height
     property var canDevs: []
 
     signal dialogClosed()
@@ -93,7 +94,7 @@ Item {
         id: dialog
         modal: true
         focus: true
-        property bool isHorizontal: width > height
+        property bool isHorizontal: topItem.isHorizontal
         width: parent.width - 10 - notchLeft - notchRight
         height: parent.height - 10
         closePolicy: Popup.NoAutoClose

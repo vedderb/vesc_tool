@@ -87,7 +87,15 @@ public class Utils
     public static int bottomBarHeight(Context ctx) {
         if (Build.VERSION.SDK_INT >= 35) {
             WindowInsets windowInsets = getActivity(ctx).getWindow().getDecorView().getRootWindowInsets();
-            return windowInsets.getInsets(WindowInsets.Type.systemBars()).bottom;
+
+            int hKeyboard = windowInsets.getInsets(WindowInsets.Type.ime()).bottom;
+            int hBars = windowInsets.getInsets(WindowInsets.Type.systemBars()).bottom;
+
+            if (hKeyboard > 0) {
+                return hKeyboard;
+            } else {
+                return hBars;
+            }
         } else {
             return 0;
         }

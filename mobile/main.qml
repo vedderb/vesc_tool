@@ -48,6 +48,7 @@ ApplicationWindow {
     property int notchRight: 0
     property int notchBot: 0
     property int notchTop: 0
+    property bool mainIsHorizontal: appWindow.width > appWindow.height
 
     // https://github.com/ekke/c2gQtWS_x/blob/master/qml/main.qml
     flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
@@ -66,16 +67,16 @@ ApplicationWindow {
 
     Timer {
         id: oriTimer
-        interval: 100; running: true; repeat: false
+        interval: 100
+        running: true
+        repeat: true
+
         onTriggered: {
             updateNotch()
         }
     }
 
     Screen.orientationUpdateMask: Qt.LandscapeOrientation | Qt.PortraitOrientation
-    Screen.onPrimaryOrientationChanged: {
-        oriTimer.start()
-    }
 
     Component.onCompleted: {
         if (!VescIf.isIntroDone()) {
@@ -301,6 +302,7 @@ ApplicationWindow {
                     anchors.fill: parent
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
+                    isHorizontal: mainIsHorizontal
 
                     onRequestOpenControls: {
                         controls.openDialog()
@@ -366,6 +368,7 @@ ApplicationWindow {
                         sourceComponent: RtData {
                             anchors.fill: parent
                             updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0
+                            isHorizontal: mainIsHorizontal
                         }
                     }
                 }
@@ -379,6 +382,7 @@ ApplicationWindow {
                             anchors.fill: parent
                             dialogParent: mainSwipeView
                             updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1
+                            isHorizontal: mainIsHorizontal
                         }
                     }
                 }
@@ -431,6 +435,7 @@ ApplicationWindow {
 
                         sourceComponent: StatPage {
                             anchors.fill: parent
+                            isHorizontal: mainIsHorizontal
                         }
                     }
                 }
@@ -445,6 +450,7 @@ ApplicationWindow {
                 visible: status == Loader.Ready
                 sourceComponent: BMS {
                     anchors.fill: parent
+                    isHorizontal: mainIsHorizontal
                 }
             }
         }
@@ -607,6 +613,7 @@ ApplicationWindow {
                 dialogParent: mainSwipeView
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
+                isHorizontal: mainIsHorizontal
             }
         }
     }
@@ -624,6 +631,7 @@ ApplicationWindow {
                 anchors.fill: parent
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
+                isHorizontal: mainIsHorizontal
             }
         }
     }
@@ -640,6 +648,7 @@ ApplicationWindow {
                 anchors.fill: parent
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
+                isHorizontal: mainIsHorizontal
             }
         }
     }

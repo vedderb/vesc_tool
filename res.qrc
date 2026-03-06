@@ -187,6 +187,28 @@
         <file>res/icons_textedit/Align Center-96.png</file>
         <file>res/icons_textedit/Add Image-96.png</file>
         <file>res/logo_vertical.png</file>
+        <file>res/icons/navbar_start.png</file>
+        <file>res/icons/navbar_rtdata.png</file>
+        <file>res/icons/navbar_bms.png</file>
+        <file>res/icons/navbar_profiles.png</file>
+        <file>res/icons/navbar_terminal.png</file>
+        <file>res/icons/navbar_lispbm.png</file>
+        <file>res/icons/navbar_motorcfg.png</file>
+        <file>res/icons/navbar_appcfg.png</file>
+        <file>res/icons/navbar_customcfg.png</file>
+        <file>res/icons/navbar_hwui.png</file>
+        <file>res/icons/navbar_appui.png</file>
+        <file>res/+theme_light/icons/navbar_start.png</file>
+        <file>res/+theme_light/icons/navbar_rtdata.png</file>
+        <file>res/+theme_light/icons/navbar_bms.png</file>
+        <file>res/+theme_light/icons/navbar_profiles.png</file>
+        <file>res/+theme_light/icons/navbar_terminal.png</file>
+        <file>res/+theme_light/icons/navbar_lispbm.png</file>
+        <file>res/+theme_light/icons/navbar_motorcfg.png</file>
+        <file>res/+theme_light/icons/navbar_appcfg.png</file>
+        <file>res/+theme_light/icons/navbar_customcfg.png</file>
+        <file>res/+theme_light/icons/navbar_hwui.png</file>
+        <file>res/+theme_light/icons/navbar_appui.png</file>
         <file>res/+theme_light/icons/Wizard-96.png</file>
         <file>res/+theme_light/icons/Wii-96.png</file>
         <file>res/+theme_light/icons/Waypoint Map-96.png</file>

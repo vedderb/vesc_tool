@@ -81,6 +81,7 @@ QMap<QString, QColor> Utility::mAppColors = {
 };
 
 bool Utility::isDark = false;
+bool Utility::mIsPureBlack = false;
 
 Utility::Utility(QObject *parent) : QObject(parent)
 {
@@ -2546,6 +2547,18 @@ void Utility::setDarkMode(bool isDarkSetting)
 bool Utility::isDarkMode()
 {
     return isDark;
+}
+
+void Utility::setPureBlack(bool pureBlackSetting)
+{
+    mIsPureBlack = pureBlackSetting;
+    QSettings set;
+    set.setValue("pureBlackDarkMode", pureBlackSetting);
+}
+
+bool Utility::isPureBlack()
+{
+    return mIsPureBlack;
 }
 
 QString Utility::getThemePath()

@@ -32,6 +32,7 @@ Item {
         id: control
         anchors.fill: parent
         flat: true
+        focusPolicy: Qt.NoFocus
 
         onClicked: {
             rootItem.clicked()

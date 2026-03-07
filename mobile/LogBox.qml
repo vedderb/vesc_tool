@@ -59,6 +59,7 @@ Item {
         Button {
             text: "Reset"
             Layout.fillWidth: true
+            focusPolicy: Qt.NoFocus
 
             onClicked: {
                 rtLogFileText.text = StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
@@ -68,6 +69,7 @@ Item {
         Button {
             text: "Browse"
             Layout.fillWidth: true
+            focusPolicy: Qt.NoFocus
 
             onClicked: {
                 if (Utility.requestFilePermission()) {
@@ -142,6 +144,7 @@ Item {
             text: "Enable RT Data Logging"
             Layout.fillWidth: true
             Layout.columnSpan: 3
+            focusPolicy: Qt.NoFocus
 
             onClicked: {
                 if (checked && !VescIf.isPortConnected()) {

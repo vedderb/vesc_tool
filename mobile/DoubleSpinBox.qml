@@ -19,8 +19,8 @@
 
 // Based on https://stackoverflow.com/questions/43406830/how-to-use-float-in-a-qml-spinbox
 
-import QtQuick 2.0
-import QtQuick.Controls 2.2
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
 Item {
     height: spinbox.implicitHeight
@@ -64,6 +64,12 @@ Item {
         }
 
         valueFromText: function(text, locale) {
+            // For some reason android does not hide the keyboard
+            // when finishing the edit. Hiding it from here seems
+            // to behave as expected. TODO: Test on ios and different
+            // phones in general.
+            Qt.inputMethod.hide()
+
             return Math.round(parseFloat(text.replace(",", ".").
                                          replace(suffix, "").
                                          replace(prefix, "")) * factor)

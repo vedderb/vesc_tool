@@ -42,6 +42,7 @@ Item {
 
         CheckBox {
             id: tcpServerEnBox
+            focusPolicy: Qt.NoFocus
             text: "Activate Bridge"
             Layout.fillWidth: true
             Layout.columnSpan: 2

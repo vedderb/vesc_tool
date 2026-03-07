@@ -147,8 +147,11 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
+
                 Button {
                     id: nowButton
+                    focusPolicy: Qt.NoFocus
+
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
                     flat: true
@@ -161,6 +164,8 @@ Item {
 
                 Button {
                     id: defaultButton
+                    focusPolicy: Qt.NoFocus
+
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
                     flat: true
@@ -173,6 +178,8 @@ Item {
 
                 Button {
                     id: helpButton
+                    focusPolicy: Qt.NoFocus
+
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
                     flat: true

@@ -48,6 +48,7 @@ Item {
 
         CheckBox {
             id: enableBox
+            focusPolicy: Qt.NoFocus
             text: "Connect as Server"
             Layout.fillWidth: true
             Layout.columnSpan: 2
@@ -185,6 +186,7 @@ Item {
                 Layout.fillWidth: true
                 text: "Reset Defaults"
                 enabled: !enableBox.checked
+                focusPolicy: Qt.NoFocus
 
                 onClicked: {
                     serverText.text = "veschub.vedder.se"
@@ -198,6 +200,7 @@ Item {
                 Layout.fillWidth: true
                 text: "Connect as Client"
                 enabled: !enableBox.checked
+                focusPolicy: Qt.NoFocus
 
                 onClicked: {
                     connectToHub()

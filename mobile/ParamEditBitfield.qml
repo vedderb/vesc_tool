@@ -146,27 +146,29 @@ Item {
                 Layout.fillWidth: true;
                 columns: 2
                 CheckBox { Layout.topMargin: 0; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b0Box; text: "B0"; onCheckedChanged: updateFromBoxes(); }
+                    id: b0Box; focusPolicy: Qt.NoFocus; text: "B0"; onCheckedChanged: updateFromBoxes(); }
                 CheckBox { Layout.topMargin: 0; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b1Box; text: "B1"; onCheckedChanged: updateFromBoxes(); }
+                    id: b1Box; focusPolicy: Qt.NoFocus; text: "B1"; onCheckedChanged: updateFromBoxes(); }
                 CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b2Box; text: "B2"; onCheckedChanged: updateFromBoxes(); }
+                    id: b2Box; focusPolicy: Qt.NoFocus; text: "B2"; onCheckedChanged: updateFromBoxes(); }
                 CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b3Box; text: "B3"; onCheckedChanged: updateFromBoxes(); }
+                    id: b3Box; focusPolicy: Qt.NoFocus; text: "B3"; onCheckedChanged: updateFromBoxes(); }
                 CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b4Box; text: "B4"; onCheckedChanged: updateFromBoxes(); }
+                    id: b4Box; focusPolicy: Qt.NoFocus; text: "B4"; onCheckedChanged: updateFromBoxes(); }
                 CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b5Box; text: "B5"; onCheckedChanged: updateFromBoxes(); }
+                    id: b5Box; focusPolicy: Qt.NoFocus; text: "B5"; onCheckedChanged: updateFromBoxes(); }
                 CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b6Box; text: "B6"; onCheckedChanged: updateFromBoxes(); }
+                    id: b6Box; focusPolicy: Qt.NoFocus; text: "B6"; onCheckedChanged: updateFromBoxes(); }
                 CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b7Box; text: "B7"; onCheckedChanged: updateFromBoxes(); }
+                    id: b7Box; focusPolicy: Qt.NoFocus; text: "B7"; onCheckedChanged: updateFromBoxes(); }
             }
 
             RowLayout {
                 Layout.fillWidth: true
                 Button {
                     id: nowButton
+                    focusPolicy: Qt.NoFocus
+
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
                     flat: true
@@ -179,6 +181,8 @@ Item {
 
                 Button {
                     id: defaultButton
+                    focusPolicy: Qt.NoFocus
+
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
                     flat: true
@@ -191,6 +195,8 @@ Item {
 
                 Button {
                     id: helpButton
+                    focusPolicy: Qt.NoFocus
+
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
                     flat: true

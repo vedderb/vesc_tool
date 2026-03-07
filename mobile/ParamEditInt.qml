@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.0
-import QtQuick.Controls 2.2
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -161,6 +161,8 @@ Item {
                 Layout.fillWidth: true
                 Button {
                     id: nowButton
+                    focusPolicy: Qt.NoFocus
+
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
                     flat: true
@@ -173,6 +175,8 @@ Item {
 
                 Button {
                     id: defaultButton
+                    focusPolicy: Qt.NoFocus
+
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
                     flat: true
@@ -185,6 +189,8 @@ Item {
 
                 Button {
                     id: helpButton
+                    focusPolicy: Qt.NoFocus
+
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
                     flat: true

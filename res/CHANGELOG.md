@@ -4,6 +4,7 @@
 * Drag and drop support of files from system.
 * Added loganalysis source tab for local LBM logs and save them automatically when stopping the log.
 * Added LispBM-page to mobile UI.
+* Improved keyboard behavior on Android.
 
 ### 6.06
 #### Released 2024-08-19

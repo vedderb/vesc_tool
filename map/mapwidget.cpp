@@ -1694,7 +1694,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
     const QColor zeroAxisColor = QColor(200,52,52);
     const QColor firstAxisColor = Qt::gray;
     const QColor secondAxisColor = Qt::blue;
-    const QColor textColor = QPalette::Foreground;
+    const QColor textColor = QApplication::palette().color(QPalette::WindowText);
 
     // Grid boundries in mm
     const double xStart = -ceil(width / stepGrid / mScaleFactor) * stepGrid - ceil(mXOffset / stepGrid / mScaleFactor) * stepGrid;
@@ -2437,7 +2437,7 @@ void MapWidget::paint(QPainter &painter, int width, int height, bool highQuality
             prev = mRoutes.at(mRouteNow).at(i);
         }
 
-        txt = QString::asprintf("RP: %d", mRoutes.at(mRouteNow).size());
+        txt = QString::asprintf("RP: %lld", static_cast<long long>(mRoutes.at(mRouteNow).size()));
         painter.drawText(int(width - txtOffset), int(start_txt), txt);
         start_txt += txt_row_h;
 

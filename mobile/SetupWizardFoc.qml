@@ -17,11 +17,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
-import QtGraphicalEffects 1.0
-import QtQuick.Controls.Material 2.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+import QtQuick.Controls.Material
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -405,7 +405,7 @@ Item {
 
                             Text {
                                 visible: !overrideBox.checked
-                                color: {color = Utility.getAppHexColor("lightText")}
+                                color: Utility.getAppHexColor("lightText")
                                 font.family: "DejaVu Sans Mono"
                                 verticalAlignment: Text.AlignVCenter
                                 wrapMode: Text.WordWrap
@@ -415,7 +415,7 @@ Item {
                                       motorPolesBox.prefix + motorPolesBox.realValue + motorPolesBox.suffix
                             }
 
-                            DoubleSpinBox {
+                            VescDoubleSpinBox {
                                 visible: overrideBox.checked
                                 Layout.fillWidth: true
                                 id: maxPowerLossBox
@@ -427,7 +427,7 @@ Item {
                                 suffix: " W"
                             }
 
-                            DoubleSpinBox {
+                            VescDoubleSpinBox {
                                 visible: overrideBox.checked
                                 Layout.fillWidth: true
                                 id: openloopErpmBox
@@ -438,7 +438,7 @@ Item {
                                 prefix: "Openloop ERPM  : "
                             }
 
-                            DoubleSpinBox {
+                            VescDoubleSpinBox {
                                 visible: overrideBox.checked
                                 Layout.fillWidth: true
                                 id: sensorlessBox
@@ -449,7 +449,7 @@ Item {
                                 prefix: "Sensorless ERPM: "
                             }
 
-                            DoubleSpinBox {
+                            VescDoubleSpinBox {
                                 visible: overrideBox.checked
                                 Layout.fillWidth: true
                                 id: motorPolesBox
@@ -513,7 +513,7 @@ Item {
                             anchors.fill: parent
                             enabled: overrideBattBox.checked
 
-                            DoubleSpinBox {
+                            VescDoubleSpinBox {
                                 Layout.fillWidth: true
                                 id: currentInMinBox
                                 decimals: 1
@@ -525,7 +525,7 @@ Item {
                                 suffix: " A"
                             }
 
-                            DoubleSpinBox {
+                            VescDoubleSpinBox {
                                 Layout.fillWidth: true
                                 id: currentInMaxBox
                                 decimals: 1
@@ -567,7 +567,7 @@ Item {
                                 Layout.fillWidth: true
                                 Text {
                                     Layout.fillWidth: true
-                                    color: {color = Utility.getAppHexColor("lightText")}
+                                    color: Utility.getAppHexColor("lightText")
                                     text: qsTr("Motor Pulley")
                                 }
 
@@ -589,7 +589,7 @@ Item {
                                 Layout.fillWidth: true
                                 Text {
                                     Layout.fillWidth: true
-                                    color: {color = Utility.getAppHexColor("lightText")}
+                                    color: Utility.getAppHexColor("lightText")
                                     text: qsTr("Wheel Pulley")
                                 }
 
@@ -635,7 +635,7 @@ Item {
         }
 
         header: Rectangle {
-            color: {color = Utility.getAppHexColor("lightText")}
+            color: Utility.getAppHexColor("lightText")
             height: tabBar.implicitHeight
 
             TabBar {
@@ -647,7 +647,7 @@ Item {
 
                 background: Rectangle {
                     opacity: 1
-                    color: {color = Utility.getAppHexColor("lightBackground")}
+                    color: Utility.getAppHexColor("lightBackground")
                 }
                 property int buttons: 5
                 property int buttonWidth: 120
@@ -656,7 +656,7 @@ Item {
                     model: ["Usage", "Motor", "Battery", "Setup", "Direction"]
                     TabButton {
                         text: modelData
-                        width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                        implicitWidth: tabBar.buttonWidth
                     }
                 }
             }
@@ -734,6 +734,7 @@ Item {
         title: "Load Default Parameters"
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
+        contentWidth: availableWidth
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -741,9 +742,10 @@ Item {
         y: dialog.y + dialog.height / 2 - height / 2
 
         Text {
-            color: {color = Utility.getAppHexColor("lightText")}
+            id: loadDefaultText
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: loadDefaultDialog.availableWidth
             wrapMode: Text.WordWrap
             text: "Would you like to restore this VESC, and all VESCs on the CAN-bus (if any), " +
                   "to their default settings before proceeding?"
@@ -778,14 +780,16 @@ Item {
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
+        contentWidth: availableWidth
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
 
         Text {
-            color: {color = Utility.getAppHexColor("lightText")}
+            id: startWarningText
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: startWarningDialog.availableWidth
             wrapMode: Text.WordWrap
             text: "Warning: This selection determines the recommended max current for your motor based on heat dissipation. " +
                   "Selecting a motor here that is significantly larger than your motor is likely to destroy your motor " +
@@ -837,14 +841,16 @@ Item {
         y: 10 + parent.height / 2 - height / 2
         parent: dialogParent
         width: parent.width - (rightMargin + leftMargin)
+        contentWidth: availableWidth
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
 
         Text {
-            color: {color = Utility.getAppHexColor("lightText")}
+            id: batteryWarningText
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: batteryWarningDialog.availableWidth
             wrapMode: Text.WordWrap
             text: "Warning: You have not specified battery current limits (advanced box). This means that " +
                   "the battery current will only be limited if, the battery voltage drops so much from the " +
@@ -882,7 +888,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                color: {color = Utility.getAppHexColor("lightText")}
+                color: Utility.getAppHexColor("lightText")
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap
                 text: "WARNING: This is going to spin up all motors. Make " +
@@ -993,7 +999,7 @@ Item {
 
             Text {
                 id: resultLabel
-                color: {color = Utility.getAppHexColor("lightText")}
+                color: Utility.getAppHexColor("lightText")
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent

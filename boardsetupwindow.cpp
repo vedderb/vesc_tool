@@ -1054,7 +1054,7 @@ void BoardSetupWindow::loadAppConfXML(QString path){
         switch(mAppConfig_Target->getParamEnum("app_to_use")){
         case 4: //ppm and uart
             ui->appTab->addParamRow(mAppConfig_Target, "app_uart_baudrate");
-            [[clang::fallthrough]];
+            [[fallthrough]];
         case 1: //ppm
             ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.ctrl_type");
             ui->appTab->addParamRow(mAppConfig_Target, "app_ppm_conf.pulse_start");

@@ -42,9 +42,11 @@
 #include "heatshrink/heatshrinkif.h"
 
 #ifdef Q_OS_ANDROID
-#include <QtAndroid>
-#include <QAndroidJniObject>
-#include <QAndroidJniEnvironment>
+#include <QJniObject>
+#include <QJniEnvironment>
+#include <QCoreApplication>
+#include <QPermissions>
+#include <QNativeInterface>
 #endif
 
 QMap<QString, QColor> Utility::mAppColors = {
@@ -289,20 +291,16 @@ bool Utility::requestFilePermission()
 bool Utility::requestBleScanPermission()
 {
 #ifdef Q_OS_ANDROID
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.BLUETOOTH_SCAN");
-    if(r == QtAndroid::PermissionResult::Denied) {
-        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.BLUETOOTH_SCAN", 10000);
-        r = QtAndroid::checkPermission("android.permission.BLUETOOTH_SCAN");
-        if(r == QtAndroid::PermissionResult::Denied) {
+    QBluetoothPermission permission;
+    permission.setCommunicationModes(QBluetoothPermission::Access);
+    if (qApp->checkPermission(permission) != Qt::PermissionStatus::Granted) {
+        qApp->requestPermission(permission, [](const QPermission &) {});
+        // Re-check after request
+        if (qApp->checkPermission(permission) != Qt::PermissionStatus::Granted) {
             return false;
         }
     }
-
     return true;
-#else
-    return true;
-#endif
 #else
     return true;
 #endif
@@ -311,20 +309,15 @@ bool Utility::requestBleScanPermission()
 bool Utility::requestBleConnectPermission()
 {
 #ifdef Q_OS_ANDROID
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.BLUETOOTH_CONNECT");
-    if(r == QtAndroid::PermissionResult::Denied) {
-        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.BLUETOOTH_CONNECT", 10000);
-        r = QtAndroid::checkPermission("android.permission.BLUETOOTH_CONNECT");
-        if(r == QtAndroid::PermissionResult::Denied) {
+    QBluetoothPermission permission;
+    permission.setCommunicationModes(QBluetoothPermission::Access);
+    if (qApp->checkPermission(permission) != Qt::PermissionStatus::Granted) {
+        qApp->requestPermission(permission, [](const QPermission &) {});
+        if (qApp->checkPermission(permission) != Qt::PermissionStatus::Granted) {
             return false;
         }
     }
-
     return true;
-#else
-    return true;
-#endif
 #else
     return true;
 #endif
@@ -333,12 +326,9 @@ bool Utility::requestBleConnectPermission()
 bool Utility::hasLocationPermission()
 {
 #ifdef Q_OS_ANDROID
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.ACCESS_FINE_LOCATION");
-    if (r == QtAndroid::PermissionResult::Denied) {
-        return false;
-    } else {
-        return true;
-    }
+    QLocationPermission permission;
+    permission.setAccuracy(QLocationPermission::Precise);
+    return qApp->checkPermission(permission) == Qt::PermissionStatus::Granted;
 #else
     return true;
 #endif
@@ -350,10 +340,10 @@ void Utility::keepScreenOn(bool on)
 
 #endif
 #ifdef Q_OS_ANDROID
-    QtAndroid::runOnAndroidThread([on]{
-        QAndroidJniObject activity = QtAndroid::androidActivity();
+    QNativeInterface::QAndroidApplication::runOnAndroidMainThread([on]{
+        QJniObject activity = QNativeInterface::QAndroidApplication::context();
         if (activity.isValid()) {
-            QAndroidJniObject window =
+            QJniObject window =
                     activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
 
             if (window.isValid()) {
@@ -365,7 +355,7 @@ void Utility::keepScreenOn(bool on)
                 }
             }
         }
-        QAndroidJniEnvironment env;
+        QJniEnvironment env;
         if (env->ExceptionCheck()) {
             env->ExceptionClear();
         }
@@ -379,14 +369,14 @@ void Utility::allowScreenRotation(bool enabled)
 {
 #ifdef Q_OS_ANDROID
     if (enabled) {
-        QAndroidJniObject activity = QtAndroid::androidActivity();
+        QJniObject activity = QNativeInterface::QAndroidApplication::context();
         activity.callMethod<void>("setRequestedOrientation", "(I)V",
-                                  QAndroidJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
+                                  QJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
                                                                          "SCREEN_ORIENTATION_UNSPECIFIED"));
     } else {
-        QAndroidJniObject activity = QtAndroid::androidActivity();
+        QJniObject activity = QNativeInterface::QAndroidApplication::context();
         activity.callMethod<void>("setRequestedOrientation", "(I)V",
-                                  QAndroidJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
+                                  QJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
                                                                          "SCREEN_ORIENTATION_PORTRAIT"));
     }
 #else
@@ -1604,30 +1594,30 @@ QVariantList Utility::getNetworkAddresses()
 void Utility::startGnssForegroundService()
 {
 #ifdef Q_OS_ANDROID
-    QAndroidJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
+    QJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
                                               "startVForegroundService",
                                               "(Landroid/content/Context;)V",
-                                              QtAndroid::androidActivity().object());
+                                              QNativeInterface::QAndroidApplication::context().object());
 #endif
 }
 
 void Utility::stopGnssForegroundService()
 {
 #ifdef Q_OS_ANDROID
-    QAndroidJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
+    QJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
                                               "stopVForegroundService",
                                               "(Landroid/content/Context;)V",
-                                              QtAndroid::androidActivity().object());
+                                              QNativeInterface::QAndroidApplication::context().object());
 #endif
 }
 
 bool Utility::isBleScanEnabled()
 {
 #ifdef Q_OS_ANDROID
-    return QAndroidJniObject::callStaticMethod<jboolean>("com/vedder/vesc/Utils",
+    return QJniObject::callStaticMethod<jboolean>("com/vedder/vesc/Utils",
                                                          "checkLocationEnabled",
                                                          "(Landroid/content/Context;)Z",
-                                                         QtAndroid::androidActivity().object());
+                                                         QNativeInterface::QAndroidApplication::context().object());
 #else
     return true;
 #endif
@@ -2563,22 +2553,22 @@ QVariantMap Utility::getSafeAreaMargins(QQuickWindow *window)
     QMargins margins = platformWindow->safeAreaMargins();
     QVariantMap map;
 #ifdef Q_OS_ANDROID
-    int top = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+    int top = QJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
                                                         "topBarHeight",
                                                         "(Landroid/content/Context;)I",
-                                                        QtAndroid::androidActivity().object());
-    int bottom = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                        QNativeInterface::QAndroidApplication::context().object());
+    int bottom = QJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
                                                            "bottomBarHeight",
                                                            "(Landroid/content/Context;)I",
-                                                           QtAndroid::androidActivity().object());
-    int right = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                           QNativeInterface::QAndroidApplication::context().object());
+    int right = QJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
                                                           "rightBarHeight",
                                                           "(Landroid/content/Context;)I",
-                                                          QtAndroid::androidActivity().object());
-    int left = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                          QNativeInterface::QAndroidApplication::context().object());
+    int left = QJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
                                                          "leftBarHeight",
                                                          "(Landroid/content/Context;)I",
-                                                         QtAndroid::androidActivity().object());
+                                                         QNativeInterface::QAndroidApplication::context().object());
 
     if (top > 0) {
         map["top"] = top / window->devicePixelRatio();

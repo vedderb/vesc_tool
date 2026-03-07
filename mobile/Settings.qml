@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
@@ -195,7 +195,7 @@ Item {
             id: detectRlLabel
             color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: parent.width
             wrapMode: Text.WordWrap
             text:
                 "The theme has been changed. This requires restarting VESC Tool to take effect. " +

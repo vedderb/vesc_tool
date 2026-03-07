@@ -35,7 +35,7 @@
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
-#include <QDesktopWidget>
+// Qt6: QDesktopWidget removed, use QScreen instead
 #include <QFontDatabase>
 #include <QPixmapCache>
 
@@ -244,8 +244,7 @@ int main(int argc, char *argv[])
 
     // DPI settings
     // TODO: http://www.qcustomplot.com/index.php/support/forum/1344
-
-    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    // Qt6: High DPI scaling is always enabled, removed AA_UseHighDpiPixmaps/AA_EnableHighDpiScaling
 
 #ifdef HAS_BLUETOOTH
     qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
@@ -286,10 +285,10 @@ int main(int argc, char *argv[])
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    // Qt6: High DPI scaling is always enabled
 #endif
 #else
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    // Qt6: High DPI scaling is always enabled
 
 #ifdef Q_OS_LINUX
     signal(SIGINT, m_cleanup);

@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.0
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import Vedder.vesc.utility 1.0
 
 Item {
@@ -31,12 +31,12 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: {color = Utility.getAppHexColor("darkAccent")}
+        color: Utility.getAppHexColor("darkAccent")
         radius: 5
 
         Text {
             anchors.centerIn: parent
-            color: {color = Utility.getAppHexColor("lightText")}
+            color: Utility.getAppHexColor("lightText")
             id: name
             text: sepName
             font.bold: true

@@ -708,7 +708,7 @@ void PageExperiments::on_saveCsvButton_clicked()
         }
 
         QTextStream stream(&file);
-        stream.setCodec("UTF-8");
+        // Qt6: QTextStream uses UTF-8 by default, setCodec() removed
 
         for (int i = 0;i < mTimeVec.size();i++) {
             stream << mTimeVec.at(i) << ";";

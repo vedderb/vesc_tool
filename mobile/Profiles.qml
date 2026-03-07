@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
@@ -44,7 +44,7 @@ Item {
         }
 
         Qt.createQmlObject(
-                    'import QtQuick 2.7; import QtQuick.Layouts 1.3; Rectangle {Layout.fillHeight: true}',
+                    'import QtQuick; import QtQuick.Layouts; Rectangle {Layout.fillHeight: true}',
                     scrollCol, "spacer1")
     }
 
@@ -106,10 +106,13 @@ Item {
             color: "#AA000000"
         }
 
+        contentWidth: availableWidth
+
         Text {
-            color:{color = Utility.getAppHexColor("lightText")}
+            id: deleteDialogText
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: deleteDialog.availableWidth
             wrapMode: Text.WordWrap
             text: "This is going to delete this profile. Are you sure?"
         }
@@ -196,9 +199,9 @@ Item {
         y: column.y + column.height / 2 - height / 2
 
         Text {
-            color: {color = Utility.getAppHexColor("lightText")}
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: parent.width
             wrapMode: Text.WordWrap
             text:
                 "This is going to remove all your profiles. Are you sure?"

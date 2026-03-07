@@ -17,10 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Dialogs as Dl
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -298,7 +298,7 @@ Item {
 
                 Text {
                     id: installFromPathText
-                    color: {color = Utility.getAppHexColor("lightText")}
+                    color: Utility.getAppHexColor("lightText")
                     linkColor: {linkColor = Utility.getAppHexColor("lightAccent")}
                     verticalAlignment: Text.AlignVCenter
                     anchors.fill: parent
@@ -313,7 +313,7 @@ Item {
             Text {
                 id: installPkgCompatibleText
                 visible: false
-                color: {color = Utility.getAppHexColor("red")}
+                color: Utility.getAppHexColor("red")
                 verticalAlignment: Text.AlignVCenter
                 Layout.fillWidth: true
                 font.bold: true

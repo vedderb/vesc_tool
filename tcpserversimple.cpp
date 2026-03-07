@@ -80,8 +80,8 @@ bool TcpServerSimple::connectToHub(QString server, int port, QString id, QString
         connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
         connect(mTcpSocket, SIGNAL(disconnected()),
                 this, SLOT(tcpInputDisconnected()));
-        connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-                this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
+        connect(mTcpSocket, &QAbstractSocket::errorOccurred,
+                this, &TcpServerSimple::tcpInputError);
         emit connectionChanged(true, mTcpSocket->peerAddress().toString());
         return true;
     } else {
@@ -141,8 +141,8 @@ void TcpServerSimple::newTcpConnection()
             connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
             connect(mTcpSocket, SIGNAL(disconnected()),
                     this, SLOT(tcpInputDisconnected()));
-            connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-                    this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
+            connect(mTcpSocket, &QAbstractSocket::errorOccurred,
+                    this, &TcpServerSimple::tcpInputError);
             emit connectionChanged(true, mTcpSocket->peerAddress().toString());
         }
     }

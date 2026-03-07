@@ -748,11 +748,7 @@ bool QMarkdownTextEdit::handleBracketClosing(const QChar openingCharacter,
 
     // Auto completion for ``` pair
     if (openingCharacter == QLatin1Char('`')) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
-        if (QRegExp(QStringLiteral("[^`]*``")).exactMatch(text)) {
-#else
         if (QRegularExpression(QRegularExpression::anchoredPattern(QStringLiteral("[^`]*``"))).match(text).hasMatch()) {
-#endif
             cursor.insertText(QStringLiteral("``"));
             cursorSubtract = 3;
         }

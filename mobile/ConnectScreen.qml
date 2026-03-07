@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.bleuart 1.0
 import Vedder.vesc.commands 1.0
@@ -246,7 +246,7 @@ Item {
                             Text {
                                 color: Utility.getAppHexColor("lightText")
                                 verticalAlignment: Text.AlignVCenter
-                                anchors.fill: parent
+                                width: parent.width
                                 wrapMode: Text.WordWrap
                                 text:
                                     "This is going to clear all previous TCP hub connections. Continue?"
@@ -823,7 +823,7 @@ Item {
         Text {
             color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: parent.width
             wrapMode: Text.WordWrap
             text: "BLE scan does not seem to be possible. Make sure that the " +
                   "location service is enabled on your device."
@@ -870,7 +870,7 @@ Item {
         Text {
             color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: parent.width
             wrapMode: Text.WordWrap
             text:
                 "VESC Tool needs to access the location of your device to scan for " +

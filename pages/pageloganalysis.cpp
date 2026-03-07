@@ -182,7 +182,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
         }
 
         if (event->buttons() & Qt::LeftButton) {
-            double vx = ui->plot->xAxis->pixelToCoord(event->x());
+            double vx = ui->plot->xAxis->pixelToCoord(event->position().x());
             updateDataAndPlot(vx);
         }
     };

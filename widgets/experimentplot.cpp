@@ -315,7 +315,7 @@ void ExperimentPlot::on_experimentSaveXmlButton_clicked()
     }
 
     QXmlStreamWriter stream(&file);
-    stream.setCodec("UTF-8");
+    // Qt6: QXmlStreamWriter always uses UTF-8, setCodec() removed
     stream.setAutoFormatting(true);
     stream.writeStartDocument();
 

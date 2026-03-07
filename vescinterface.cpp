@@ -112,19 +112,19 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mBlockFwSwap = false;
 
 #ifdef Q_OS_ANDROID
-    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
-                "org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+    QJniObject activity = QJniObject::callStaticObjectMethod(
+                "org/qtproject/qt/android/QtNative", "activity", "()Landroid/app/Activity;");
 
     if (activity.isValid()) {
-        QAndroidJniObject serviceName = QAndroidJniObject::getStaticObjectField<jstring>(
+        QJniObject serviceName = QJniObject::getStaticObjectField<jstring>(
                     "android/content/Context","POWER_SERVICE");
         if (serviceName.isValid()) {
-            QAndroidJniObject powerMgr = activity.callObjectMethod(
+            QJniObject powerMgr = activity.callObjectMethod(
                         "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;",serviceName.object<jobject>());
             if (powerMgr.isValid()) {
-                jint levelAndFlags = QAndroidJniObject::getStaticField<jint>(
+                jint levelAndFlags = QJniObject::getStaticField<jint>(
                             "android/os/PowerManager","PARTIAL_WAKE_LOCK");
-                QAndroidJniObject tag = QAndroidJniObject::fromString( "VESC Tool" );
+                QJniObject tag = QJniObject::fromString( "VESC Tool" );
                 mWakeLock = powerMgr.callObjectMethod("newWakeLock",
                                                        "(ILjava/lang/String;)Landroid/os/PowerManager$WakeLock;",
                                                        levelAndFlags,tag.object<jstring>());
@@ -142,8 +142,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     connect(mSerialPort, SIGNAL(readyRead()),
             this, SLOT(serialDataAvailable()));
-    connect(mSerialPort, SIGNAL(error(QSerialPort::SerialPortError)),
-            this, SLOT(serialPortError(QSerialPort::SerialPortError)));
+    connect(mSerialPort, &QSerialPort::errorOccurred,
+            this, &VescInterface::serialPortError);
 #endif
 
     // CANbus
@@ -168,15 +168,15 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mTcpSocket, SIGNAL(connected()), this, SLOT(tcpInputConnected()));
     connect(mTcpSocket, SIGNAL(disconnected()),
             this, SLOT(tcpInputDisconnected()));
-    connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
+    connect(mTcpSocket, &QAbstractSocket::errorOccurred,
+            this, &VescInterface::tcpInputError);
 
     // UDP
     mUdpSocket = new QUdpSocket(this);
     mUdpConnected = false;
     connect(mUdpSocket, SIGNAL(readyRead()), this, SLOT(udpInputDataAvailable()));
-    connect(mUdpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this, SLOT(udpInputError(QAbstractSocket::SocketError)));
+    connect(mUdpSocket, &QAbstractSocket::errorOccurred,
+            this, &VescInterface::udpInputError);
 
     // BLE
 #ifdef HAS_BLUETOOTH
@@ -3134,7 +3134,7 @@ void VescInterface::tcpInputConnected()
         devNow.password = mLastTcpHubVescPass;
 
         bool found = false;
-        for (const auto &i: qAsConst(mTcpHubDevs)) {
+        for (const auto &i: std::as_const(mTcpHubDevs)) {
             auto dev = i.value<TCP_HUB_DEVICE>();
             if (dev.uuid() == devNow.uuid()) {
                 found = true;
@@ -4302,7 +4302,7 @@ bool VescInterface::updateTcpHubPassword(QString uuid, QString newPass)
 
 bool VescInterface::connectTcpHubUuid(QString uuid)
 {
-    for (const auto &i: qAsConst(mTcpHubDevs)) {
+    for (const auto &i: std::as_const(mTcpHubDevs)) {
         auto dev = i.value<TCP_HUB_DEVICE>();
         if (dev.uuid() == uuid) {
             connectTcpHub(dev.server, dev.port, dev.id, dev.password);

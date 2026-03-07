@@ -73,28 +73,29 @@ void BleUart::startConnect(QString addr)
     // a controller using a devices address is not supported on macOS or iOS.
     QBluetoothDeviceInfo deviceInfo = QBluetoothDeviceInfo();
     deviceInfo.setDeviceUuid(QBluetoothUuid(addr));
-    mControl = new QLowEnergyController(deviceInfo);
+    mControl = QLowEnergyController::createCentral(deviceInfo, this);
 
 #else
-    mControl = new QLowEnergyController(QBluetoothAddress(addr));
+    QBluetoothDeviceInfo deviceInfo(QBluetoothAddress(addr), QString(), 0);
+    mControl = QLowEnergyController::createCentral(deviceInfo, this);
 #endif
 
     mControl->setRemoteAddressType(QLowEnergyController::RandomAddress);
 
-    connect(mControl, SIGNAL(serviceDiscovered(QBluetoothUuid)),
-            this, SLOT(serviceDiscovered(QBluetoothUuid)));
-    connect(mControl, SIGNAL(discoveryFinished()),
-            this, SLOT(serviceScanDone()));
-    connect(mControl, SIGNAL(error(QLowEnergyController::Error)),
-            this, SLOT(controllerError(QLowEnergyController::Error)));
-    connect(mControl, SIGNAL(connected()),
-            this, SLOT(deviceConnected()));
-    connect(mControl, SIGNAL(disconnected()),
-            this, SLOT(deviceDisconnected()));
-    connect(mControl, SIGNAL(stateChanged(QLowEnergyController::ControllerState)),
-            this, SLOT(controlStateChanged(QLowEnergyController::ControllerState)));
-    connect(mControl, SIGNAL(connectionUpdated(QLowEnergyConnectionParameters)),
-            this, SLOT(connectionUpdated(QLowEnergyConnectionParameters)));
+    connect(mControl, &QLowEnergyController::serviceDiscovered,
+            this, &BleUart::serviceDiscovered);
+    connect(mControl, &QLowEnergyController::discoveryFinished,
+            this, &BleUart::serviceScanDone);
+    connect(mControl, &QLowEnergyController::errorOccurred,
+            this, &BleUart::controllerError);
+    connect(mControl, &QLowEnergyController::connected,
+            this, &BleUart::deviceConnected);
+    connect(mControl, &QLowEnergyController::disconnected,
+            this, &BleUart::deviceDisconnected);
+    connect(mControl, &QLowEnergyController::stateChanged,
+            this, &BleUart::controlStateChanged);
+    connect(mControl, &QLowEnergyController::connectionUpdated,
+            this, &BleUart::connectionUpdated);
 
     mControl->connectToDevice();
     mConnectTimeoutTimer.start(10000);
@@ -237,10 +238,10 @@ void BleUart::serviceScanDone()
         qDebug() << "Connecting to BLE UART service";
         mService = mControl->createServiceObject(QBluetoothUuid(QUuid(mServiceUuid)), this);
 
-        connect(mService, SIGNAL(stateChanged(QLowEnergyService::ServiceState)),
-                this, SLOT(serviceStateChanged(QLowEnergyService::ServiceState)));
-        connect(mService, SIGNAL(error(QLowEnergyService::ServiceError)),
-                this, SLOT(serviceError(QLowEnergyService::ServiceError)));
+        connect(mService, &QLowEnergyService::stateChanged,
+                this, &BleUart::serviceStateChanged);
+        connect(mService, &QLowEnergyService::errorOccurred,
+                this, &BleUart::serviceError);
         connect(mService, SIGNAL(characteristicChanged(QLowEnergyCharacteristic,QByteArray)),
                 this, SLOT(updateData(QLowEnergyCharacteristic,QByteArray)));
         connect(mService, SIGNAL(descriptorWritten(QLowEnergyDescriptor,QByteArray)),
@@ -283,7 +284,7 @@ void BleUart::serviceStateChanged(QLowEnergyService::ServiceState s)
         emit unintentionalDisconnect();
         break;
     }
-    case QLowEnergyService::ServiceDiscovered: {
+    case QLowEnergyService::RemoteServiceDiscovered: {
         //looking for the TX characteristic
         const QLowEnergyCharacteristic txChar = mService->characteristic(
                     QBluetoothUuid(QUuid(mTxUuid)));
@@ -304,7 +305,7 @@ void BleUart::serviceStateChanged(QLowEnergyService::ServiceState s)
         // Bluetooth LE spec Where a characteristic can be notified, a Client Characteristic Configuration descriptor
         // shall be included in that characteristic as required by the Bluetooth Core Specification
         // Tx notify is enabled
-        mNotificationDescTx = txChar.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
+        mNotificationDescTx = txChar.descriptor(QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration);
 
         if (mNotificationDescTx.isValid()) {
             // enable notification
@@ -374,11 +375,11 @@ void BleUart::init()
 
     mDeviceDiscoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
 
-    connect(mDeviceDiscoveryAgent, SIGNAL(deviceDiscovered(const QBluetoothDeviceInfo&)),
-            this, SLOT(addDevice(const QBluetoothDeviceInfo&)));
-    connect(mDeviceDiscoveryAgent, SIGNAL(error(QBluetoothDeviceDiscoveryAgent::Error)),
-            this, SLOT(deviceScanError(QBluetoothDeviceDiscoveryAgent::Error)));
-    connect(mDeviceDiscoveryAgent, SIGNAL(finished()), this, SLOT(scanFinished()));
+    connect(mDeviceDiscoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered,
+            this, &BleUart::addDevice);
+    connect(mDeviceDiscoveryAgent, &QBluetoothDeviceDiscoveryAgent::errorOccurred,
+            this, &BleUart::deviceScanError);
+    connect(mDeviceDiscoveryAgent, &QBluetoothDeviceDiscoveryAgent::finished, this, &BleUart::scanFinished);
 
     mInitDone = true;
 

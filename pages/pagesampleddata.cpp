@@ -791,7 +791,7 @@ void PageSampledData::on_saveDataButton_clicked()
                              QFileInfo(fileName).absolutePath());
 
         QTextStream stream(&file);
-        stream.setCodec("UTF-8");
+        // Qt6: QTextStream uses UTF-8 by default, setCodec() removed
 
         // Generate Time axis
         QVector<double> timeVec;

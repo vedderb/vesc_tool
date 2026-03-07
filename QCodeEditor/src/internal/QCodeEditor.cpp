@@ -829,7 +829,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
 
         // Shortcut for moving line to left
         if (m_replaceTab && e->key() == Qt::Key_Backtab) {
-            indentationLevel = std::min(indentationLevel, m_tabReplace.size());
+            indentationLevel = std::min(indentationLevel, static_cast<int>(m_tabReplace.size()));
 
             auto cursor = textCursor();
 

@@ -17,11 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.0
-import QtQuick.Layouts 1.3
-import QtQuick.Extras 1.4
-import QtGraphicalEffects 1.0
-import QtQuick.Controls.Material 2.2
+import QtQuick
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+import QtQuick.Controls.Material
 import Vedder.vesc.utility 1.0
 
 Item {
@@ -90,7 +89,7 @@ Item {
         height: outerRadius*2
         z:0
         radius:outerRadius
-        color: {color = Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")}
+        color: Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")
         property double value: parent.value
         Behavior on value {
             NumberAnimation {
@@ -105,7 +104,7 @@ Item {
             text: gauge.value.toFixed(precision)
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: outerRadius * 0.3
-            color: {color = Utility.getAppHexColor("lightText") }
+            color: Utility.getAppHexColor("lightText") 
             antialiasing: true
             font.family: "Roboto"
         }
@@ -117,7 +116,7 @@ Item {
             anchors.top: speedLabel.bottom
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: outerRadius * 0.12
-            color: {color = Utility.getAppHexColor("lightText")}
+            color: Utility.getAppHexColor("lightText")
             antialiasing: true
             font.family: "Roboto"
             font.capitalization: Font.AllUppercase
@@ -133,7 +132,7 @@ Item {
             //anchors.bottomMargin: outerRadius * 0.1
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: outerRadius * 0.12
-            color: {color = Utility.getAppHexColor("lightText")}
+            color: Utility.getAppHexColor("lightText")
             antialiasing: true
             font.family: "Roboto"
             font.capitalization: Font.AllUppercase

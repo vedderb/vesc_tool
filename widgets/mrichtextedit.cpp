@@ -39,6 +39,7 @@
 #include <QPlainTextEdit>
 #include <QMenu>
 #include <QDialog>
+#include <QRegularExpression>
 
 MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     setupUi(this);
@@ -133,15 +134,15 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
 
     // link
 
-    f_link->setShortcut(Qt::CTRL + Qt::Key_L);
+    f_link->setShortcut(Qt::CTRL | Qt::Key_L);
 
     connect(f_link, SIGNAL(clicked(bool)), this, SLOT(textLink(bool)));
 
     // bold, italic & underline
 
-    f_bold->setShortcut(Qt::CTRL + Qt::Key_B);
-    f_italic->setShortcut(Qt::CTRL + Qt::Key_I);
-    f_underline->setShortcut(Qt::CTRL + Qt::Key_U);
+    f_bold->setShortcut(Qt::CTRL | Qt::Key_B);
+    f_italic->setShortcut(Qt::CTRL | Qt::Key_I);
+    f_underline->setShortcut(Qt::CTRL | Qt::Key_U);
 
     connect(f_bold, SIGNAL(clicked()), this, SLOT(textBold()));
     connect(f_italic, SIGNAL(clicked()), this, SLOT(textItalic()));
@@ -178,16 +179,16 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
 
     // lists
 
-    f_list_bullet->setShortcut(Qt::CTRL + Qt::Key_Minus);
-    f_list_ordered->setShortcut(Qt::CTRL + Qt::Key_Equal);
+    f_list_bullet->setShortcut(Qt::CTRL | Qt::Key_Minus);
+    f_list_ordered->setShortcut(Qt::CTRL | Qt::Key_Equal);
 
     connect(f_list_bullet, SIGNAL(clicked(bool)), this, SLOT(listBullet(bool)));
     connect(f_list_ordered, SIGNAL(clicked(bool)), this, SLOT(listOrdered(bool)));
 
     // indentation
 
-    f_indent_dec->setShortcut(Qt::CTRL + Qt::Key_Comma);
-    f_indent_inc->setShortcut(Qt::CTRL + Qt::Key_Period);
+    f_indent_dec->setShortcut(Qt::CTRL | Qt::Key_Comma);
+    f_indent_inc->setShortcut(Qt::CTRL | Qt::Key_Period);
 
     connect(f_indent_inc, SIGNAL(clicked()), this, SLOT(increaseIndentation()));
     connect(f_indent_dec, SIGNAL(clicked()), this, SLOT(decreaseIndentation()));
@@ -198,8 +199,8 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     foreach(int size, db.standardSizes())
         f_fontsize->addItem(QString::number(size));
 
-    connect(f_fontsize, SIGNAL(activated(QString)),
-            this, SLOT(textSize(QString)));
+    connect(f_fontsize, &QComboBox::textActivated,
+            this, &MRichTextEdit::textSize);
     f_fontsize->setCurrentIndex(f_fontsize->findText(QString::number(QApplication::font()
                                                                      .pointSize())));
 
@@ -378,7 +379,7 @@ void MRichTextEdit::textStyle(int index) {
     }
     if (index == ParagraphMonospace) {
         fmt = cursor.charFormat();
-        fmt.setFontFamily("DejaVu Sans Mono");
+        fmt.setFontFamilies({QStringLiteral("DejaVu Sans Mono")});
         fmt.setFontStyleHint(QFont::Monospace);
         fmt.setFontFixedPitch(true);
     }
@@ -672,9 +673,9 @@ void MRichTextEdit::slotClipboardDataChanged() {
 QString MRichTextEdit::toHtml() const {
     QString s = f_textedit->toHtml();
     // convert emails to links
-    s = s.replace(QRegExp("(<[^a][^>]+>(?:<span[^>]+>)?|\\s)([a-zA-Z\\d]+@[a-zA-Z\\d]+\\.[a-zA-Z]+)"), "\\1<a href=\"mailto:\\2\">\\2</a>");
+    s = s.replace(QRegularExpression("(<[^a][^>]+>(?:<span[^>]+>)?|\\s)([a-zA-Z\\d]+@[a-zA-Z\\d]+\\.[a-zA-Z]+)"), "\\1<a href=\"mailto:\\2\">\\2</a>");
     // convert links
-    s = s.replace(QRegExp("(<[^a][^>]+>(?:<span[^>]+>)?|\\s)((?:https?|ftp|file)://[^\\s'\"<>]+)"), "\\1<a href=\"\\2\">\\2</a>");
+    s = s.replace(QRegularExpression("(<[^a][^>]+>(?:<span[^>]+>)?|\\s)((?:https?|ftp|file)://[^\\s'\"<>]+)"), "\\1<a href=\"\\2\">\\2</a>");
     return s;
 }
 

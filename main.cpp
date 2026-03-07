@@ -171,16 +171,29 @@ int main(int argc, char *argv[])
     QSettings set;
     bool isDark = set.value("darkMode", true).toBool();
     Utility::setDarkMode(isDark);
+    bool pureBlack = set.value("pureBlackDarkMode", false).toBool();
+    Utility::setPureBlack(pureBlack);
     QPixmapCache::setCacheLimit(256000);
 
     if (isDark) {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2_dark.conf");
 
-        Utility::setAppQColor("lightestBackground", QColor(80,80,80));
-        Utility::setAppQColor("lightBackground", QColor(72,72,72));
-        Utility::setAppQColor("normalBackground", QColor(48,48,48));
-        Utility::setAppQColor("darkBackground", QColor(39,39,39));
-        Utility::setAppQColor("plotBackground", QColor(39,39,39));
+        if (pureBlack) {
+            qputenv("QT_QUICK_CONTROLS_MATERIAL_BACKGROUND", "#000000");
+            qputenv("QT_QUICK_CONTROLS_MATERIAL_DIALOG_COLOR", "#000000");
+            
+            Utility::setAppQColor("lightestBackground", QColor(0,0,0));
+            Utility::setAppQColor("lightBackground", QColor(0,0,0));
+            Utility::setAppQColor("normalBackground", QColor(0,0,0));
+            Utility::setAppQColor("darkBackground", QColor(0,0,0));
+            Utility::setAppQColor("plotBackground", QColor(0,0,0));
+        } else {
+            Utility::setAppQColor("lightestBackground", QColor(80,80,80));
+            Utility::setAppQColor("lightBackground", QColor(72,72,72));
+            Utility::setAppQColor("normalBackground", QColor(48,48,48));
+            Utility::setAppQColor("darkBackground", QColor(39,39,39));
+            Utility::setAppQColor("plotBackground", QColor(39,39,39));
+        }
         Utility::setAppQColor("normalText", QColor(180,180,180));
         Utility::setAppQColor("lightText", QColor(215,215,215));
         Utility::setAppQColor("disabledText", QColor(127,127,127));

@@ -67,16 +67,19 @@ public:
     // Type-safe overload for C++ callers (avoids SIGNAL() macro)
     template<typename Sender, typename Signal>
     static bool waitSignal(Sender *sender, Signal signal, int timeoutMs) {
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(timeoutMs);
-        auto conn1 = QObject::connect(sender, signal, &loop, &QEventLoop::quit);
-        auto conn2 = QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-        QObject::disconnect(conn1);
-        QObject::disconnect(conn2);
-        return timeoutTimer.isActive();
+        bool signalFired = false;
+        auto tree = Group {
+            SignalWaitTaskItem([&](SignalWaitTask &task) {
+                task.setTimeout(timeoutMs);
+                task.connectSignal(sender, signal);
+                return SetupResult::Continue;
+            }, [&signalFired](const SignalWaitTask &, DoneWith doneWith) {
+                signalFired = (doneWith == DoneWith::Success);
+                return DoneResult::Success;
+            })
+        };
+        runTree(tree);
+        return signalFired;
     }
 
     Q_INVOKABLE static void sleepWithEventLoop(int timeMs);

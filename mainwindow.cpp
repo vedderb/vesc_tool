@@ -1845,13 +1845,16 @@ bool MainWindow::waitProcess(QProcess &process, bool block, int timeoutMs)
 
     process.waitForStarted();
 
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(timeoutMs);
-    connect(&process, &QProcess::finished, &loop, &QEventLoop::quit);
-    connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    loop.exec();
+    bool finished = false;
+    auto tree = Group {
+        SignalWaitTaskItem([&](SignalWaitTask &task) {
+            task.setTimeout(timeoutMs);
+            task.connectSignal(&process, &QProcess::finished,
+                               [&finished](int, QProcess::ExitStatus) { finished = true; });
+            return SetupResult::Continue;
+        })
+    };
+    runTree(tree);
 
     if (process.state() == QProcess::Running) {
         process.kill();

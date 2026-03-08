@@ -320,7 +320,7 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
                 return;
             }
 
-            foreach (auto e, mLogHeader) {
+            for (const auto &e : mLogHeader) {
                 addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
             }
 
@@ -554,7 +554,7 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
     mLogHeader.append(LOG_HEADER("num_vesc", "VESC num", "", 0));
 
     LOG_DATA bestPoint = log.first();
-    foreach (auto &d, log) {
+    for (auto &d : log) {
         if (d.posTime >= 0 && d.hAcc > 0.0) {
             if (d.hAcc < bestPoint.hAcc || bestPoint.hAcc <= 0.0) {
                 bestPoint = d;
@@ -574,7 +574,7 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
     bool prevSampleGnssSet = false;
     double metersGnss = 0.0;
 
-    foreach (auto &d, log) {
+    for (auto &d : log) {
         if (d.posTime >= 0 &&
             (!ui->filterOutlierBox->isChecked() ||
                                (
@@ -676,7 +676,7 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
         return;
     }
 
-    foreach (auto e, mLogHeader) {
+    for (const auto &e : mLogHeader) {
         addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
     }
 
@@ -844,7 +844,7 @@ void PageLogAnalysis::updateGraphs()
     LocPoint p, p2;
 
     double time = 0;
-    foreach (const auto &d, mLogTruncated) {
+    for (const auto &d : mLogTruncated) {
         if (mInd_t_day >= 0) {
             if (startTime < 0) {
                 startTime = d[mInd_t_day];
@@ -1206,7 +1206,7 @@ void PageLogAnalysis::logListRefresh()
 
         QDir dir(dirPath);
         if (dir.exists()) {
-            foreach (QFileInfo d, dir.entryInfoList(QDir::Dirs | QDir::NoDot, QDir::Name)) {
+            for (const QFileInfo &d : dir.entryInfoList(QDir::Dirs | QDir::NoDot, QDir::Name)) {
                 if (d.fileName() == ".." && dirPath == "/") {
                     continue;
                 }
@@ -1218,8 +1218,7 @@ void PageLogAnalysis::logListRefresh()
                 ui->logTable->setItem(ui->logTable->rowCount() - 1, 1,
                                       new QTableWidgetItem("Folder"));
             }
-            foreach (QFileInfo f, dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
-                                                QDir::Files, QDir::Name)) {
+            for (const auto &f : dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV", QDir::Files, QDir::Name)) {
                 QTableWidgetItem *itName = new QTableWidgetItem(f.fileName());
                 itName->setData(Qt::UserRole, f.absoluteFilePath());
                 ui->logTable->setRowCount(ui->logTable->rowCount() + 1);
@@ -1309,7 +1308,7 @@ void PageLogAnalysis::openLog(QString name, QByteArray data)
 
         QVector<double> entryLastData;
 
-        foreach (auto &t, tokensLine1) {
+        for (auto &t : tokensLine1) {
             auto token = t.split(":");
             LOG_HEADER h;
             for (int i = 0;i < token.size();i++) {
@@ -1360,7 +1359,7 @@ void PageLogAnalysis::openLog(QString name, QByteArray data)
             return;
         }
 
-        foreach (auto e, mLogHeader) {
+        for (const auto &e : mLogHeader) {
             addDataItem(e.name, !e.isTimeStamp, e.scaleStep, e.scaleMax);
         }
 
@@ -1437,7 +1436,7 @@ void PageLogAnalysis::generateMissingEntries()
         double haccBest = 100000.0;
         double i_llh[3] = {57.71495867, 12.89134921, 220.0};
 
-        foreach (auto &d, mLog) {
+        for (auto &d : mLog) {
             double lat = d.at(mInd_gnss_lat);
             double lon = d.at(mInd_gnss_lon);
             double alt = 0;
@@ -1567,7 +1566,7 @@ void PageLogAnalysis::storeSelection()
     mSelection.checkedY2Boxes.clear();
 
     // Selected rows
-    foreach (auto i, ui->dataTable->selectionModel()->selectedRows()) {
+    for (const auto &i : ui->dataTable->selectionModel()->selectedRows()) {
         mSelection.dataLabels.append(ui->dataTable->item(i.row(), dataTableColName)->text());
     }
 
@@ -1600,21 +1599,21 @@ void PageLogAnalysis::restoreSelection()
         bool checkedY1 = false;
         bool checkedY2 = false;
 
-        foreach (auto i, mSelection.dataLabels) {
+        for (const auto &i : mSelection.dataLabels) {
             if (rowText == i) {
                 selected = true;
                 break;
             }
         }
 
-        foreach (auto i, mSelection.checkedY1Boxes) {
+        for (const auto &i : mSelection.checkedY1Boxes) {
             if (rowText == i) {
                 checkedY1 = true;
                 break;
             }
         }
 
-        foreach (auto i, mSelection.checkedY2Boxes) {
+        for (const auto &i : mSelection.checkedY2Boxes) {
             if (rowText == i) {
                 checkedY2 = true;
                 break;
@@ -1898,7 +1897,7 @@ void PageLogAnalysis::on_vescSaveAsButton_clicked()
                 mLastSaveAsPath = path;
 
                 bool didCancel = false;
-                foreach (auto it, items) {
+                for (const auto &it : items) {
                     if (didCancel) {
                         break;
                     }
@@ -1960,7 +1959,7 @@ void PageLogAnalysis::on_vescLogDeleteButton_clicked()
     if (ret == QMessageBox::Yes) {
         ui->vescLogTab->setEnabled(false);
         int cnt = 0;
-        foreach (auto it, items) {
+        for (const auto &it : items) {
             if (it->data(Qt::UserRole).canConvert<FILE_LIST_ENTRY>()) {
                 auto fe = it->data(Qt::UserRole).value<FILE_LIST_ENTRY>();
                 bool ok = mVesc->commands()->fileBlockRemove(mVescLastPath + "/" + fe.name);
@@ -2019,8 +2018,7 @@ void PageLogAnalysis::on_logLocalRefreshButton_clicked()
 
         QDir dir(dirPath);
         if (dir.exists()) {
-            foreach (QFileInfo f, dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
-                                                    QDir::Files, QDir::Name)) {
+            for (const auto &f : dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV", QDir::Files, QDir::Name)) {
                 QTableWidgetItem *itName = new QTableWidgetItem(f.fileName());
                 itName->setData(Qt::UserRole, f.absoluteFilePath());
                 ui->logLocalTable->setRowCount(ui->logLocalTable->rowCount() + 1);
@@ -2053,7 +2051,7 @@ void PageLogAnalysis::on_logLocalDeleteButton_clicked()
                                    QMessageBox::Yes | QMessageBox::Cancel);
 
         if (ret == QMessageBox::Yes) {
-            foreach (auto file, items) {
+            for (const auto &file : items) {
                 QString fileName = file->data(Qt::UserRole).toString();
 
                 QFile fileNow(fileName);

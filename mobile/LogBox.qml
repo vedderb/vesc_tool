@@ -23,8 +23,7 @@ import QtQuick.Layouts
 import QtCore as QSettings
 import Qt.labs.platform
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 Item {
     implicitHeight: grid.implicitHeight

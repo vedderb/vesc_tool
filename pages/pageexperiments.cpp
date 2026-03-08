@@ -73,8 +73,7 @@ PageExperiments::PageExperiments(QWidget *parent) :
     mTimer->start(ui->sampleIntervalBox->value());
     mState = EXPERIMENT_OFF;
 
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &PageExperiments::timerSlot);
 
     ui->plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 
@@ -136,8 +135,7 @@ PageExperiments::PageExperiments(QWidget *parent) :
             [=]() {plotSamples(false);});
 
 #ifdef HAS_SERIALPORT
-    connect(mVictronPort, SIGNAL(readyRead()),
-            this, SLOT(victronDataAvailable()));
+    connect(mVictronPort, &QIODevice::readyRead, this, &PageExperiments::victronDataAvailable);
 #endif
 
     plotSamples(false);
@@ -158,8 +156,8 @@ void PageExperiments::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
 
-    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,uint)),
-            this, SLOT(valuesReceived(MC_VALUES,uint)));
+    connect(mVesc->commands(), &Commands::valuesReceived,
+            this, &PageExperiments::valuesReceived);
 }
 
 void PageExperiments::stop()
@@ -815,7 +813,7 @@ void PageExperiments::on_victronRefreshButton_clicked()
     ui->victronPortBox->clear();
 
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
-    foreach(const QSerialPortInfo &port, ports) {
+    for (const QSerialPortInfo &port : ports) {
         ui->victronPortBox->addItem(port.portName(), port.systemLocation());
     }
 

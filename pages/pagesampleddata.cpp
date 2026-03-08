@@ -78,29 +78,29 @@ PageSampledData::PageSampledData(QWidget *parent) :
         plots[i]->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     }
 
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
-    connect(mSampleGetTimer, SIGNAL(timeout()), this, SLOT(sampleGetTimerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &PageSampledData::timerSlot);
+    connect(mSampleGetTimer, &QTimer::timeout, this, &PageSampledData::sampleGetTimerSlot);
 
-    connect(ui->compDelayBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->currentFilterFreqBox, SIGNAL(valueChanged(double)), this, SLOT(replotAll()));
-    connect(ui->currentFilterTapBox, SIGNAL(valueChanged(int)), this, SLOT(replotAll()));
-    connect(ui->plotModeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replotAll()));
-    connect(ui->filterBox, SIGNAL(currentIndexChanged(int)), this, SLOT(replotAll()));
-    connect(ui->filterScatterBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->hammingBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showCurrent1Box, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showCurrent2Box, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showCurrent3Box, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showMcTotalCurrentBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showPh1Box, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showPh2Box, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showPh3Box, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showPosCurrentBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showPosVoltageBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showVirtualGndBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showPhaseBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->showPhaseVoltageBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
-    connect(ui->truncateBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
+    connect(ui->compDelayBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->currentFilterFreqBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &PageSampledData::replotAll);
+    connect(ui->currentFilterTapBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageSampledData::replotAll);
+    connect(ui->plotModeBox, &QComboBox::currentIndexChanged, this, &PageSampledData::replotAll);
+    connect(ui->filterBox, &QComboBox::currentIndexChanged, this, &PageSampledData::replotAll);
+    connect(ui->filterScatterBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->hammingBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showCurrent1Box, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showCurrent2Box, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showCurrent3Box, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showMcTotalCurrentBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showPh1Box, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showPh2Box, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showPh3Box, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showPosCurrentBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showPosVoltageBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showVirtualGndBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showPhaseBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->showPhaseVoltageBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
+    connect(ui->truncateBox, &QAbstractButton::toggled, this, &PageSampledData::replotAll);
 
     replotAll();
 }
@@ -120,8 +120,8 @@ void PageSampledData::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(samplesReceived(QByteArray)),
-                this, SLOT(samplesReceived(QByteArray)));
+        connect(mVesc->commands(), &Commands::samplesReceived,
+                this, &PageSampledData::samplesReceived);
 
         connect(mVesc->commands(), &Commands::sampleDataQmlStarted, [this](int samples) {
             clearBuffers();

@@ -242,10 +242,8 @@ void BleUart::serviceScanDone()
                 this, &BleUart::serviceStateChanged);
         connect(mService, &QLowEnergyService::errorOccurred,
                 this, &BleUart::serviceError);
-        connect(mService, SIGNAL(characteristicChanged(QLowEnergyCharacteristic,QByteArray)),
-                this, SLOT(updateData(QLowEnergyCharacteristic,QByteArray)));
-        connect(mService, SIGNAL(descriptorWritten(QLowEnergyDescriptor,QByteArray)),
-                this, SLOT(confirmedDescriptorWrite(QLowEnergyDescriptor,QByteArray)));
+        connect(mService, &QLowEnergyService::characteristicChanged, this, &BleUart::updateData);
+        connect(mService, &QLowEnergyService::descriptorWritten, this, &BleUart::confirmedDescriptorWrite);
 
         mService->discoverDetails();
     } else {

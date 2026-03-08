@@ -85,8 +85,8 @@ void DetectFocEncoder::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(encoderParamReceived(ENCODER_DETECT_RES)),
-                this, SLOT(encoderParamReceived(ENCODER_DETECT_RES)));
+        connect(mVesc->commands(), &Commands::encoderParamReceived,
+                this, &DetectFocEncoder::encoderParamReceived);
     }
 }
 

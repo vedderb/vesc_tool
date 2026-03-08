@@ -23,7 +23,7 @@ import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import QtQuick.Controls.Material
 
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 // CustomGaugeV2: Qt6 version - delegates to CustomGauge (Canvas-based)
 // The original used CircularGauge/CircularGaugeStyle from QtQuick.Extras

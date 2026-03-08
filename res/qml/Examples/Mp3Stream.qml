@@ -3,9 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Material
 
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.utility 1.0
-import Vedder.vesc.qminimp3 1.0
+import Vedder.vesc
 
 Item {
     id: mainItem

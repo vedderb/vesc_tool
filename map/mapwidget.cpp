@@ -209,9 +209,9 @@ MapWidget::MapWidget(QWidget *parent) : QWidget(parent)
     //    mOsm->setTileServerUrl("http://tiles.vedder.se/osm_tiles");
     //mOsm->setTileServerUrl("http://tiles.vedder.se/osm_tiles_hd");
 
-    connect(mOsm, SIGNAL(tileReady(OsmTile)), this, SLOT(tileReady(OsmTile)));
-    connect(mOsm, SIGNAL(errorGetTile(QString)), this, SLOT(errorGetTile(QString)));
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    connect(mOsm, &OsmClient::tileReady, this, &MapWidget::tileReady);
+    connect(mOsm, &OsmClient::errorGetTile, this, &MapWidget::errorGetTile);
+    connect(mTimer, &QTimer::timeout, this, &MapWidget::timerSlot);
 
     setMouseTracking(true);
 

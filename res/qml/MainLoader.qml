@@ -22,7 +22,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Material
 import QtQuick.Window
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 ApplicationWindow {
     id: mainWindow

@@ -56,8 +56,8 @@ void PageTerminal::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(printReceived(QString)),
-                this, SLOT(printReceived(QString)));
+        connect(mVesc->commands(), &Commands::printReceived,
+                this, &PageTerminal::printReceived);
     }
 }
 

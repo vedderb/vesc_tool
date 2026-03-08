@@ -57,7 +57,7 @@ Commands::Commands(QObject *parent) : QObject(parent)
     mFilePercentage = 0.0;
     mFileSpeed = 0.0;
 
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &Commands::timerSlot);
 }
 
 void Commands::setLimitedMode(bool is_limited)
@@ -1619,7 +1619,7 @@ void Commands::sendCustomHwData(QByteArray data)
     emitData(vb);
 }
 
-void Commands::setChukData(chuck_data &data)
+void Commands::setChukData(const chuck_data &data)
 {
     VByteArray vb;
     vb.vbAppendInt8(COMM_SET_CHUCK_DATA);
@@ -2438,7 +2438,7 @@ QVariantList Commands::fileBlockList(QString path)
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
 
         disconnect(conn);
@@ -2482,7 +2482,7 @@ QVariantList Commands::fileBlockList(QString path)
     });
 
     QVariantList retVal;
-    foreach (auto f, files) {
+    for (const auto &f : files) {
         retVal.append(QVariant::fromValue(f));
     }
 
@@ -2512,7 +2512,7 @@ QByteArray Commands::fileBlockRead(QString path)
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
 
         disconnect(conn);
@@ -2576,7 +2576,7 @@ bool Commands::fileBlockWrite(QString path, QByteArray data)
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
         disconnect(conn);
 
@@ -2642,7 +2642,7 @@ bool Commands::fileBlockMkdir(QString path)
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
         disconnect(conn);
 
@@ -2681,7 +2681,7 @@ bool Commands::fileBlockRemove(QString path)
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
         disconnect(conn);
 
@@ -2801,7 +2801,7 @@ QByteArray Commands::bmReadMemWait(uint32_t addr, quint16 size, int timeoutMs)
         loop.quit();
     });
 
-    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
     loop.exec();
 
     disconnect(conn);
@@ -2823,7 +2823,7 @@ int Commands::bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs)
         loop.quit();
     });
 
-    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
     loop.exec();
 
     disconnect(conn);
@@ -2833,15 +2833,15 @@ int Commands::bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs)
 void Commands::setAppConfig(ConfigParams *appConfig)
 {
     mAppConfig = appConfig;
-    connect(mAppConfig, SIGNAL(updateRequested()), this, SLOT(getAppConf()));
-    connect(mAppConfig, SIGNAL(updateRequestDefault()), this, SLOT(getAppConfDefault()));
+    connect(mAppConfig, &ConfigParams::updateRequested, this, &Commands::getAppConf);
+    connect(mAppConfig, &ConfigParams::updateRequestDefault, this, &Commands::getAppConfDefault);
 }
 
 void Commands::setMcConfig(ConfigParams *mcConfig)
 {
     mMcConfig = mcConfig;
-    connect(mMcConfig, SIGNAL(updateRequested()), this, SLOT(getMcconf()));
-    connect(mMcConfig, SIGNAL(updateRequestDefault()), this, SLOT(getMcconfDefault()));
+    connect(mMcConfig, &ConfigParams::updateRequested, this, &Commands::getMcconf);
+    connect(mMcConfig, &ConfigParams::updateRequestDefault, this, &Commands::getMcconfDefault);
 }
 
 void Commands::checkMcConfig()

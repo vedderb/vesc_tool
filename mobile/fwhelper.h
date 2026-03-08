@@ -22,11 +22,13 @@
 
 #include <QObject>
 #include <QVariantMap>
+#include <QQmlEngine>
 #include "vescinterface.h"
 
 class FwHelper : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit FwHelper(QObject *parent = nullptr);
     Q_INVOKABLE QVariantMap getHardwares(FW_RX_PARAMS params, QString hw = "");

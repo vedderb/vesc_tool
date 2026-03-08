@@ -55,8 +55,8 @@ void AdcMap::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(decodedAdcReceived(double,double,double,double)),
-                this, SLOT(decodedAdcReceived(double,double,double,double)));
+        connect(mVesc->commands(), &Commands::decodedAdcReceived,
+                this, &AdcMap::decodedAdcReceived);
     }
 }
 

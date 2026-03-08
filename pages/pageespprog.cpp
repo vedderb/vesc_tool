@@ -51,7 +51,7 @@ PageEspProg::PageEspProg(QWidget *parent) :
     }
 
     mTimer = new QTimer(this);
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &PageEspProg::timerSlot);
     mTimer->start(50);
 
     connect(&mEspFlash, &Esp32Flash::flashProgress, [this](double progress) {
@@ -131,7 +131,7 @@ void PageEspProg::on_serialRefreshButton_clicked()
     if (mVesc) {
         ui->serialPortBox->clear();
         auto ports = mVesc->listSerialPorts();
-        foreach(auto &info, ports) {
+        for (auto &info : ports) {
             auto port = info.value<VSerialInfo_t>();
             ui->serialPortBox->addItem(port.name, port.systemPath);
         }
@@ -283,7 +283,7 @@ void PageEspProg::scanChipFw(QString chipDir)
 {
     QDir dir(chipDir);
     dir.setSorting(QDir::Name);
-    foreach (auto fi, dir.entryInfoList()) {
+    for (const auto &fi : dir.entryInfoList()) {
         QFileInfo fiApp(fi.absoluteFilePath() + "/vesc_express.bin");
         QFileInfo fiBl(fi.absoluteFilePath() + "/bootloader.bin");
         QFileInfo fiPart(fi.absoluteFilePath() + "/partition-table.bin");
@@ -371,7 +371,7 @@ void PageEspProg::listAllFw()
     reloadLatest(false);
     ui->fwList->clear();
     QDir root("://res/firmwares_esp");
-    foreach (auto chipDir, root.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+    for (const auto &chipDir : root.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         scanChipFw(chipDir.absoluteFilePath());
     }
 }

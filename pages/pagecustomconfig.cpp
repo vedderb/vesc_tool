@@ -53,8 +53,7 @@ void PageCustomConfig::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc, SIGNAL(customConfigLoadDone()),
-                this, SLOT(customConfigLoadDone()));
+        connect(mVesc, &VescInterface::customConfigLoadDone, this, &PageCustomConfig::customConfigLoadDone);
     }
 }
 

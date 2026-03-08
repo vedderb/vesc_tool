@@ -53,8 +53,7 @@ void ParamEditString::setConfig(ConfigParams *config)
         }
     }
 
-    connect(mConfig, SIGNAL(paramChangedQString(QObject*,QString,QString)),
-            this, SLOT(paramChangedQString(QObject*,QString,QString)));
+    connect(mConfig, &ConfigParams::paramChangedQString, this, &ParamEditString::paramChangedQString);
 }
 
 QString ParamEditString::name() const

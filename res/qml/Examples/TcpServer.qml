@@ -2,10 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Material
-import Vedder.vesc.utility 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.tcpserversimple 1.0
+import Vedder.vesc
 
 Item {
     anchors.fill: parent

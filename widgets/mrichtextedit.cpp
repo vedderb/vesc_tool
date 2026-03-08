@@ -69,10 +69,8 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     f_align_right->setIcon(Utility::getIcon("icons_textedit/Align Right-96.png"));
     f_align_justify->setIcon(Utility::getIcon("icons_textedit/Align Justify-96.png"));
 
-    connect(f_textedit, SIGNAL(currentCharFormatChanged(QTextCharFormat)),
-            this, SLOT(slotCurrentCharFormatChanged(QTextCharFormat)));
-    connect(f_textedit, SIGNAL(cursorPositionChanged()),
-            this, SLOT(slotCursorPositionChanged()));
+    connect(f_textedit, &QTextEdit::currentCharFormatChanged, this, &MRichTextEdit::slotCurrentCharFormatChanged);
+    connect(f_textedit, &QTextEdit::cursorPositionChanged, this, &MRichTextEdit::slotCursorPositionChanged);
 
     m_fontsize_h1 = 18;
     m_fontsize_h2 = 16;
@@ -93,24 +91,23 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
                         << tr("Monospace");
     f_paragraph->addItems(m_paragraphItems);
 
-    connect(f_paragraph, SIGNAL(activated(int)),
-            this, SLOT(textStyle(int)));
+    connect(f_paragraph, qOverload<int>(&QComboBox::activated), this, &MRichTextEdit::textStyle);
 
     // undo & redo
 
     f_undo->setShortcut(QKeySequence::Undo);
     f_redo->setShortcut(QKeySequence::Redo);
 
-    connect(f_textedit->document(), SIGNAL(undoAvailable(bool)),
-            f_undo, SLOT(setEnabled(bool)));
-    connect(f_textedit->document(), SIGNAL(redoAvailable(bool)),
-            f_redo, SLOT(setEnabled(bool)));
+    connect(f_textedit->document(), &QTextDocument::undoAvailable,
+            f_undo, &QWidget::setEnabled);
+    connect(f_textedit->document(), &QTextDocument::redoAvailable,
+            f_redo, &QWidget::setEnabled);
 
     f_undo->setEnabled(f_textedit->document()->isUndoAvailable());
     f_redo->setEnabled(f_textedit->document()->isRedoAvailable());
 
-    connect(f_undo, SIGNAL(clicked()), f_textedit, SLOT(undo()));
-    connect(f_redo, SIGNAL(clicked()), f_textedit, SLOT(redo()));
+    connect(f_undo, &QAbstractButton::clicked, f_textedit, &QTextEdit::undo);
+    connect(f_redo, &QAbstractButton::clicked, f_textedit, &QTextEdit::redo);
 
     // cut, copy & paste
 
@@ -121,22 +118,22 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     f_cut->setEnabled(false);
     f_copy->setEnabled(false);
 
-    connect(f_cut, SIGNAL(clicked()), f_textedit, SLOT(cut()));
-    connect(f_copy, SIGNAL(clicked()), f_textedit, SLOT(copy()));
-    connect(f_paste, SIGNAL(clicked()), f_textedit, SLOT(paste()));
+    connect(f_cut, &QAbstractButton::clicked, f_textedit, &QTextEdit::cut);
+    connect(f_copy, &QAbstractButton::clicked, f_textedit, &QTextEdit::copy);
+    connect(f_paste, &QAbstractButton::clicked, f_textedit, &QTextEdit::paste);
 
-    connect(f_textedit, SIGNAL(copyAvailable(bool)), f_cut, SLOT(setEnabled(bool)));
-    connect(f_textedit, SIGNAL(copyAvailable(bool)), f_copy, SLOT(setEnabled(bool)));
+    connect(f_textedit, &QTextEdit::copyAvailable, f_cut, &QWidget::setEnabled);
+    connect(f_textedit, &QTextEdit::copyAvailable, f_copy, &QWidget::setEnabled);
 
 #ifndef QT_NO_CLIPBOARD
-    connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(slotClipboardDataChanged()));
+    connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &MRichTextEdit::slotClipboardDataChanged);
 #endif
 
     // link
 
     f_link->setShortcut(Qt::CTRL | Qt::Key_L);
 
-    connect(f_link, SIGNAL(clicked(bool)), this, SLOT(textLink(bool)));
+    connect(f_link, qOverload<bool>(&QAbstractButton::clicked), this, &MRichTextEdit::textLink);
 
     // bold, italic & underline
 
@@ -144,30 +141,30 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     f_italic->setShortcut(Qt::CTRL | Qt::Key_I);
     f_underline->setShortcut(Qt::CTRL | Qt::Key_U);
 
-    connect(f_bold, SIGNAL(clicked()), this, SLOT(textBold()));
-    connect(f_italic, SIGNAL(clicked()), this, SLOT(textItalic()));
-    connect(f_underline, SIGNAL(clicked()), this, SLOT(textUnderline()));
-    connect(f_strikeout, SIGNAL(clicked()), this, SLOT(textStrikeout()));
+    connect(f_bold, &QAbstractButton::clicked, this, &MRichTextEdit::textBold);
+    connect(f_italic, &QAbstractButton::clicked, this, &MRichTextEdit::textItalic);
+    connect(f_underline, &QAbstractButton::clicked, this, &MRichTextEdit::textUnderline);
+    connect(f_strikeout, &QAbstractButton::clicked, this, &MRichTextEdit::textStrikeout);
 
     f_align_left->setChecked(true);
 
-    connect(f_align_left, SIGNAL(clicked(bool)), this, SLOT(textAlignLeft()));
-    connect(f_align_center, SIGNAL(clicked(bool)), this, SLOT(textAlignCenter()));
-    connect(f_align_right, SIGNAL(clicked(bool)), this, SLOT(textAlignRight()));
-    connect(f_align_justify, SIGNAL(clicked(bool)), this, SLOT(textAlignJustify()));
+    connect(f_align_left, qOverload<bool>(&QAbstractButton::clicked), this, &MRichTextEdit::textAlignLeft);
+    connect(f_align_center, qOverload<bool>(&QAbstractButton::clicked), this, &MRichTextEdit::textAlignCenter);
+    connect(f_align_right, qOverload<bool>(&QAbstractButton::clicked), this, &MRichTextEdit::textAlignRight);
+    connect(f_align_justify, qOverload<bool>(&QAbstractButton::clicked), this, &MRichTextEdit::textAlignJustify);
 
     QAction *removeFormat = new QAction(tr("Remove character formatting"), this);
     removeFormat->setShortcut(QKeySequence("CTRL+M"));
-    connect(removeFormat, SIGNAL(triggered()), this, SLOT(textRemoveFormat()));
+    connect(removeFormat, &QAction::triggered, this, &MRichTextEdit::textRemoveFormat);
     f_textedit->addAction(removeFormat);
 
     QAction *removeAllFormat = new QAction(tr("Remove all formatting"), this);
-    connect(removeAllFormat, SIGNAL(triggered()), this, SLOT(textRemoveAllFormat()));
+    connect(removeAllFormat, &QAction::triggered, this, &MRichTextEdit::textRemoveAllFormat);
     f_textedit->addAction(removeAllFormat);
 
     QAction *textsource = new QAction(tr("Edit document source"), this);
     textsource->setShortcut(QKeySequence("CTRL+O"));
-    connect(textsource, SIGNAL(triggered()), this, SLOT(textSource()));
+    connect(textsource, &QAction::triggered, this, &MRichTextEdit::textSource);
     f_textedit->addAction(textsource);
 
     QMenu *menu = new QMenu(this);
@@ -182,21 +179,21 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     f_list_bullet->setShortcut(Qt::CTRL | Qt::Key_Minus);
     f_list_ordered->setShortcut(Qt::CTRL | Qt::Key_Equal);
 
-    connect(f_list_bullet, SIGNAL(clicked(bool)), this, SLOT(listBullet(bool)));
-    connect(f_list_ordered, SIGNAL(clicked(bool)), this, SLOT(listOrdered(bool)));
+    connect(f_list_bullet, qOverload<bool>(&QAbstractButton::clicked), this, &MRichTextEdit::listBullet);
+    connect(f_list_ordered, qOverload<bool>(&QAbstractButton::clicked), this, &MRichTextEdit::listOrdered);
 
     // indentation
 
     f_indent_dec->setShortcut(Qt::CTRL | Qt::Key_Comma);
     f_indent_inc->setShortcut(Qt::CTRL | Qt::Key_Period);
 
-    connect(f_indent_inc, SIGNAL(clicked()), this, SLOT(increaseIndentation()));
-    connect(f_indent_dec, SIGNAL(clicked()), this, SLOT(decreaseIndentation()));
+    connect(f_indent_inc, &QAbstractButton::clicked, this, &MRichTextEdit::increaseIndentation);
+    connect(f_indent_dec, &QAbstractButton::clicked, this, &MRichTextEdit::decreaseIndentation);
 
     // font size
 
     QFontDatabase db;
-    foreach(int size, db.standardSizes())
+    for (const int size : db.standardSizes())
         f_fontsize->addItem(QString::number(size));
 
     connect(f_fontsize, &QComboBox::textActivated,
@@ -209,15 +206,15 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
     QPixmap pix(16, 16);
     pix.fill(QApplication::palette().window().color());
     f_bgcolor->setIcon(pix);
-    connect(f_bgcolor, SIGNAL(clicked()), this, SLOT(textBgColor()));
+    connect(f_bgcolor, &QAbstractButton::clicked, this, &MRichTextEdit::textBgColor);
 
     QPixmap pix2(16, 16);
     pix2.fill(QApplication::palette().windowText().color());
     f_fgcolor->setIcon(pix2);
-    connect(f_fgcolor, SIGNAL(clicked()), this, SLOT(textFgColor()));
+    connect(f_fgcolor, &QAbstractButton::clicked, this, &MRichTextEdit::textFgColor);
 
     // images
-    connect(f_image, SIGNAL(clicked()), this, SLOT(insertImage()));
+    connect(f_image, &QAbstractButton::clicked, this, &MRichTextEdit::insertImage);
 }
 
 

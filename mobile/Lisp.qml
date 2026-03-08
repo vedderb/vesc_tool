@@ -5,10 +5,7 @@ import QtQuick.Dialogs as Dl
 import Qt.labs.folderlistmodel
 import QtCore as QSettings
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.utility 1.0
-import Vedder.vesc.codeloader 1.0
+import Vedder.vesc
 
 Item {
     id: lispPageItem

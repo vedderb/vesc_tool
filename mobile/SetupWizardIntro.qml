@@ -22,9 +22,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 Item {
     property ConfigParams mInfoConf: VescIf.infoConfig()

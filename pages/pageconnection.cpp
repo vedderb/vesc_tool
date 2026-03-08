@@ -34,8 +34,7 @@ PageConnection::PageConnection(QWidget *parent) :
     mVesc = nullptr;
     mTimer = new QTimer(this);
 
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &PageConnection::timerSlot);
 
     mTimer->start(20);
 
@@ -130,8 +129,8 @@ void PageConnection::setVesc(VescInterface *vesc)
     ui->tcpHubVescPasswordLineEdit->setText(mVesc->getLastTcpHubVescPass());
 
 #ifdef HAS_BLUETOOTH
-    connect(mVesc->bleDevice(), SIGNAL(scanDone(QVariantMap,bool)),
-            this, SLOT(bleScanDone(QVariantMap,bool)));
+    connect(mVesc->bleDevice(), &BleUart::scanDone,
+            this, &PageConnection::bleScanDone);
 
     QString lastBleAddr = mVesc->getLastBleAddr();
     if (lastBleAddr != "") {
@@ -167,14 +166,11 @@ void PageConnection::setVesc(VescInterface *vesc)
     ui->CANbusInterfaceBox->setCurrentIndex(0);
 #endif
 
-    connect(mVesc->commands(), SIGNAL(pingCanRx(QVector<int>,bool)),
-            this, SLOT(pingCanRx(QVector<int>,bool)));
-    connect(mVesc, SIGNAL(CANbusNewNode(int)),
-            this, SLOT(CANbusNewNode(int)));
-    connect(mVesc, SIGNAL(CANbusInterfaceListUpdated()),
-            this, SLOT(CANbusInterfaceListUpdated()));
-    connect(mVesc, SIGNAL(pairingListUpdated()),
-            this, SLOT(pairingListUpdated()));
+    connect(mVesc->commands(), &Commands::pingCanRx,
+            this, &PageConnection::pingCanRx);
+    connect(mVesc, &VescInterface::CANbusNewNode, this, &PageConnection::CANbusNewNode);
+    connect(mVesc, &VescInterface::CANbusInterfaceListUpdated, this, &PageConnection::CANbusInterfaceListUpdated);
+    connect(mVesc, &VescInterface::pairingListUpdated, this, &PageConnection::pairingListUpdated);
 
     pairingListUpdated();
     on_serialRefreshButton_clicked();
@@ -354,7 +350,7 @@ void PageConnection::on_serialRefreshButton_clicked()
     if (mVesc) {
         ui->serialPortBox->clear();
         auto ports = mVesc->listSerialPorts();
-        foreach(auto &info, ports) {
+        for (auto &info : ports) {
             auto port = info.value<VSerialInfo_t>();
             ui->serialPortBox->addItem(port.name, port.systemPath);
         }
@@ -555,7 +551,7 @@ void PageConnection::on_pairConnectedButton_clicked()
                     mVesc->storeSettings();
                     ConfigParams *ap = mVesc->appConfig();
                     mVesc->commands()->getAppConf();
-                    bool res = Utility::waitSignal(ap, SIGNAL(updated()), 1500);
+                    bool res = Utility::waitSignal(ap, &ConfigParams::updated, 1500);
 
                     if (res) {
                         mVesc->appConfig()->updateParamBool("pairing_done", true, nullptr);
@@ -659,7 +655,7 @@ void PageConnection::on_unpairButton_clicked()
                     if (reply == QMessageBox::Ok) {
                         ConfigParams *ap = mVesc->appConfig();
                         mVesc->commands()->getAppConf();
-                        bool res = Utility::waitSignal(ap, SIGNAL(updated()), 1500);
+                        bool res = Utility::waitSignal(ap, &ConfigParams::updated, 1500);
 
                         if (res) {
                             mVesc->appConfig()->updateParamBool("pairing_done", false, nullptr);

@@ -20,11 +20,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.bleuart 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.utility 1.0
-import Vedder.vesc.udpserversimple 1.0
+import Vedder.vesc
 
 Item {
     id: rootItem

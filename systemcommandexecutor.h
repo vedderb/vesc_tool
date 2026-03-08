@@ -5,10 +5,12 @@
 #include <QProcess>
 #include <QEventLoop>
 #include <QTimer>
+#include <QQmlEngine>
 
 class SystemCommandExecutor : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(SysCmd)
 public:
     explicit SystemCommandExecutor(QObject *parent = nullptr) : QObject(parent) {}
 

@@ -140,8 +140,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mLastSerialPort = mSettings.value("serial_port", "").toString();
     mLastSerialBaud = mSettings.value("serial_baud", 115200).toInt();
 
-    connect(mSerialPort, SIGNAL(readyRead()),
-            this, SLOT(serialDataAvailable()));
+    connect(mSerialPort, &QIODevice::readyRead, this, &VescInterface::serialDataAvailable);
     connect(mSerialPort, &QSerialPort::errorOccurred,
             this, &VescInterface::serialPortError);
 #endif
@@ -164,17 +163,16 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mTcpSocket = new QTcpSocket(this);
     mTcpConnected = false;
 
-    connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
-    connect(mTcpSocket, SIGNAL(connected()), this, SLOT(tcpInputConnected()));
-    connect(mTcpSocket, SIGNAL(disconnected()),
-            this, SLOT(tcpInputDisconnected()));
+    connect(mTcpSocket, &QIODevice::readyRead, this, &VescInterface::tcpInputDataAvailable);
+    connect(mTcpSocket, &QAbstractSocket::connected, this, &VescInterface::tcpInputConnected);
+    connect(mTcpSocket, &QAbstractSocket::disconnected, this, &VescInterface::tcpInputDisconnected);
     connect(mTcpSocket, &QAbstractSocket::errorOccurred,
             this, &VescInterface::tcpInputError);
 
     // UDP
     mUdpSocket = new QUdpSocket(this);
     mUdpConnected = false;
-    connect(mUdpSocket, SIGNAL(readyRead()), this, SLOT(udpInputDataAvailable()));
+    connect(mUdpSocket, &QIODevice::readyRead, this, &VescInterface::udpInputDataAvailable);
     connect(mUdpSocket, &QAbstractSocket::errorOccurred,
             this, &VescInterface::udpInputError);
 
@@ -205,22 +203,22 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         mSettings.endArray();
     }
 
-    connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
+    connect(mBleUart, &BleUart::dataRx, this, &VescInterface::bleDataRx);
     connect(mBleUart, &BleUart::connected, [this]{
         setLastConnectionType(CONN_BLE);
         mSettings.setValue("ble_addr", mLastBleAddr);
     });
-    connect(mBleUart, SIGNAL(unintentionalDisconnect()), this, SLOT(bleUnintentionalDisconnect()));
+    connect(mBleUart, &BleUart::unintentionalDisconnect, this, &VescInterface::bleUnintentionalDisconnect);
 #else
     mBleUart = new BleUartDummy(this);
 #endif
 
     mTcpServer = new TcpServerSimple(this);
     mTcpServer->setUsePacket(true);
-    connect(mTcpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
+    connect(mTcpServer->packet(), &Packet::packetReceived, [this](const QByteArray &packet) {
         mPacket->sendPacket(packet);
     });
-    connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
+    connect(mPacket, &Packet::packetReceived, [this](const QByteArray &packet) {
         mTcpServer->packet()->sendPacket(packet);
     });
 
@@ -253,10 +251,10 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     mUdpServer = new UdpServerSimple(this);
     mUdpServer->setUsePacket(true);
-    connect(mUdpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
+    connect(mUdpServer->packet(), &Packet::packetReceived, [this](const QByteArray &packet) {
         mPacket->sendPacket(packet);
     });
-    connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
+    connect(mPacket, &Packet::packetReceived, [this](const QByteArray &packet) {
         mUdpServer->packet()->sendPacket(packet);
     });
 
@@ -349,18 +347,14 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mCommands->setMcConfig(mMcConfig);
 
     // Other signals/slots
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
-    connect(mPacket, SIGNAL(dataToSend(QByteArray&)),
-            this, SLOT(packetDataToSend(QByteArray&)));
-    connect(mPacket, SIGNAL(packetReceived(QByteArray&)),
-            this, SLOT(packetReceived(QByteArray&)));
-    connect(mCommands, SIGNAL(dataToSend(QByteArray&)),
-            this, SLOT(cmdDataToSend(QByteArray&)));
-    connect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-            this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
-    connect(mCommands, SIGNAL(ackReceived(QString)), this, SLOT(ackReceived(QString)));
-    connect(mMcConfig, SIGNAL(updated()), this, SLOT(mcconfUpdated()));
-    connect(mAppConfig, SIGNAL(updated()), this, SLOT(appconfUpdated()));
+    connect(mTimer, &QTimer::timeout, this, &VescInterface::timerSlot);
+    connect(mPacket, &Packet::dataToSend, this, &VescInterface::packetDataToSend);
+    connect(mPacket, &Packet::packetReceived, this, &VescInterface::packetReceived);
+    connect(mCommands, &Commands::dataToSend, this, &VescInterface::cmdDataToSend);
+    connect(mCommands, &Commands::fwVersionReceived, this, &VescInterface::fwVersionReceived);
+    connect(mCommands, &Commands::ackReceived, this, &VescInterface::ackReceived);
+    connect(mMcConfig, &ConfigParams::updated, this, &VescInterface::mcconfUpdated);
+    connect(mAppConfig, &ConfigParams::updated, this, &VescInterface::appconfUpdated);
 
     // Sanity-check motor parameters
     connect(mCommands, &Commands::mcConfigWriteSent, [this](bool checkSet) {
@@ -572,8 +566,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
     });
 
-    connect(mCommands, SIGNAL(customConfigRx(int,QByteArray)),
-            this, SLOT(customConfigRx(int,QByteArray)));
+    connect(mCommands, &Commands::customConfigRx, this, &VescInterface::customConfigRx);
 
     connect(mCommands, &Commands::customConfigAckReceived, [this](int confId) {
         ConfigParams *custConf = customConfig(confId);
@@ -1088,7 +1081,7 @@ bool VescInterface::swdEraseFlash()
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
 
         disconnect(conn);
@@ -1144,7 +1137,7 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
 
         disconnect(conn);
@@ -1282,7 +1275,7 @@ bool VescInterface::swdReboot()
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
 
         disconnect(conn);
@@ -1326,7 +1319,7 @@ bool VescInterface::fwEraseNewApp(bool fwdCan, quint32 fwSize)
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
 
         disconnect(conn);
@@ -1371,7 +1364,7 @@ bool VescInterface::fwEraseBootloader(bool fwdCan)
             loop.quit();
         });
 
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
 
         disconnect(conn);
@@ -1438,7 +1431,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             bool ignoreBefore = mIgnoreCanChange;
             mIgnoreCanChange = true;
 
-            foreach (auto d, devs) {
+            for (const auto &d : devs) {
                 mCommands->setSendCan(true, d);
                 FW_RX_PARAMS fwParamsCan;
                 Utility::getFwVersionBlocking(this, &fwParamsCan);
@@ -1513,7 +1506,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
                 mCommands->writeNewAppData(chunk, addr, fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
             }
 
-            connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+            connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
             loop.exec();
             disconnect(conn);
 
@@ -1615,7 +1608,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         QByteArray in = newFirmware.mid(0, sz);
 
         bool hasData = false;
-        foreach (auto b, in) {
+        for (const auto &b : in) {
             if (b != (char)0xff) {
                 hasData = true;
                 break;
@@ -2333,7 +2326,7 @@ bool VescInterface::lastPortAvailable()
 #ifdef HAS_SERIALPORT
     if (mLastConnType == CONN_SERIAL) {
         auto ports = listSerialPorts();
-        foreach (auto port, ports) {
+        for (const auto &port : ports) {
             auto p = port.value<VSerialInfo_t>();
             if (p.systemPath == mLastSerialPort) {
                 res = true;
@@ -2356,8 +2349,7 @@ bool VescInterface::autoconnect()
     mAutoconnectProgress = 0.0;
 
     disconnectPort();
-    disconnect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-               this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    disconnect(mCommands, &Commands::fwVersionReceived, this, &VescInterface::fwVersionReceived);
 
     for (int i = 0;i < ports.size();i++) {
         VSerialInfo_t serial = ports[i].value<VSerialInfo_t>();
@@ -2374,8 +2366,8 @@ bool VescInterface::autoconnect()
         QTimer timeoutTimer;
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(500);
-        connect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)), &loop, SLOT(quit()));
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        connect(mCommands, &Commands::fwVersionReceived, &loop, &QEventLoop::quit);
+        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
         loop.exec();
 
         if (timeoutTimer.isActive()) {
@@ -2389,8 +2381,7 @@ bool VescInterface::autoconnect()
         }
     }
 
-    connect(mCommands, SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-            this, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    connect(mCommands, &Commands::fwVersionReceived, this, &VescInterface::fwVersionReceived);
 #endif
 
     emit autoConnectProgressUpdated(1.0, true);
@@ -2519,7 +2510,7 @@ QVariantList VescInterface::listSerialPorts()
 #ifdef HAS_SERIALPORT
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
 
-    foreach(const QSerialPortInfo &port, ports) {
+    for (const QSerialPortInfo &port : ports) {
         VSerialInfo_t info;
         info.name = port.portName();
         info.systemPath = port.systemLocation();
@@ -2587,8 +2578,8 @@ bool VescInterface::connectCANbus(QString backend, QString ifName, int bitrate)
         return false;
     }
 
-    connect(mCanDevice, SIGNAL(framesReceived()), this, SLOT(CANbusDataAvailable()));
-    connect(mCanDevice, SIGNAL(errorOccurred(QCanBusDevice::CanBusError)), this, SLOT(CANbusError(QCanBusDevice::CanBusError)));
+    connect(mCanDevice, &QCanBusDevice::framesReceived, this, &VescInterface::CANbusDataAvailable);
+    connect(mCanDevice, &QCanBusDevice::errorOccurred, this, &VescInterface::CANbusError);
 
     mCanDevice->setConfigurationParameter(QCanBusDevice::LoopbackKey, false);
     mCanDevice->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, false);
@@ -3320,7 +3311,7 @@ void VescInterface::timerSlot()
     }
 }
 
-void VescInterface::packetDataToSend(QByteArray &data)
+void VescInterface::packetDataToSend(QByteArray data)
 {
 #ifdef HAS_SERIALPORT
     if (mSerialPort->isOpen()) {
@@ -3449,12 +3440,12 @@ void VescInterface::packetDataToSend(QByteArray &data)
 #endif
 }
 
-void VescInterface::packetReceived(QByteArray &data)
+void VescInterface::packetReceived(QByteArray data)
 {
     mCommands->processPacket(data);
 }
 
-void VescInterface::cmdDataToSend(QByteArray &data)
+void VescInterface::cmdDataToSend(QByteArray data)
 {
     mPacket->sendPacket(data);
 }
@@ -3934,7 +3925,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
                 for (int j = 0;j < tries;j++) {
                     mCommands->customConfigGetChunk(i, size, offset);
-                    res = Utility::waitSignal(mCommands, SIGNAL(customConfigChunkRx(int,int,int,QByteArray)), timeout);
+                    res = Utility::waitSignal(mCommands, &Commands::customConfigChunkRx, timeout);
                     if (res) {
                         break;
                     }
@@ -4029,7 +4020,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
                 for (int j = 0;j < tries;j++) {
                     mCommands->qmlUiHwGet(size, offset);
-                    res = Utility::waitSignal(mCommands, SIGNAL(qmluiHwRx(int,int,QByteArray)), timeout);
+                    res = Utility::waitSignal(mCommands, &Commands::qmluiHwRx, timeout);
                     if (res) {
                         break;
                     }
@@ -4109,7 +4100,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
                 for (int j = 0;j < tries;j++) {
                     mCommands->qmlUiAppGet(size, offset);
-                    res = Utility::waitSignal(mCommands, SIGNAL(qmluiAppRx(int,int,QByteArray)), timeout);
+                    res = Utility::waitSignal(mCommands, &Commands::qmluiAppRx, timeout);
                     if (res) {
                         break;
                     }
@@ -4219,6 +4210,16 @@ bool VescInterface::isBlockFwSwap() const
 void VescInterface::setBlockFwSwap(bool newBlockFwSwap)
 {
     mBlockFwSwap = newBlockFwSwap;
+}
+
+void VescInterface::disconnectFwVersionReceived()
+{
+    disconnect(mCommands, &Commands::fwVersionReceived, this, &VescInterface::fwVersionReceived);
+}
+
+void VescInterface::reconnectFwVersionReceived()
+{
+    connect(mCommands, &Commands::fwVersionReceived, this, &VescInterface::fwVersionReceived);
 }
 
 bool VescInterface::showFwUpdateAvailable() const
@@ -4336,7 +4337,7 @@ bool VescInterface::downloadFwArchive()
         });
 
         QEventLoop loop;
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
         loop.exec();
         disconnect(conn);
 
@@ -4379,7 +4380,7 @@ bool VescInterface::downloadFwLatest()
                                 });
 
             QEventLoop loop;
-            connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+            connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
             loop.exec();
             disconnect(conn);
 
@@ -4444,7 +4445,7 @@ bool VescInterface::downloadConfigs()
                             });
 
         QEventLoop loop;
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
         loop.exec();
         disconnect(conn);
 
@@ -4520,14 +4521,14 @@ bool VescInterface::confStoreBackup(bool can, QString name)
         ConfigParams *pCustom = customConfig(0);
 
         commands()->getMcconf();
-        bool rxMc = Utility::waitSignal(pMc, SIGNAL(updated()), 1500);
+        bool rxMc = Utility::waitSignal(pMc, &ConfigParams::updated, 1500);
         commands()->getAppConf();
-        bool rxApp = Utility::waitSignal(pApp, SIGNAL(updated()), 1500);
+        bool rxApp = Utility::waitSignal(pApp, &ConfigParams::updated, 1500);
 
         bool rxCustom = false;
         if (pCustom != nullptr) {
             commands()->customConfigGet(0, false);
-            rxCustom = Utility::waitSignal(pCustom, SIGNAL(updated()), 1500);
+            rxCustom = Utility::waitSignal(pCustom, &ConfigParams::updated, 1500);
         }
 
         if (rxMc && rxApp) {
@@ -4571,7 +4572,7 @@ bool VescInterface::confStoreBackup(bool can, QString name)
     }
 
     if (res && can) {
-        foreach (int d, canDevs) {
+        for (const int &d : canDevs) {
             commands()->setSendCan(true, d);
 
             Utility::getFwVersionBlocking(this, &fwp);
@@ -4604,7 +4605,7 @@ bool VescInterface::confStoreBackup(bool can, QString name)
         }
 
         QString uuidsStr;
-        foreach (auto s, uuidsOk) {
+        for (const auto &s : uuidsOk) {
             uuidsStr += s + "\n";
         }
 
@@ -4642,14 +4643,14 @@ bool VescInterface::confRestoreBackup(bool can)
         ConfigParams *pCustom = customConfig(0);
 
         commands()->getMcconf();
-        bool rxMc = Utility::waitSignal(pMc, SIGNAL(updated()), 2000);
+        bool rxMc = Utility::waitSignal(pMc, &ConfigParams::updated, 2000);
         commands()->getAppConf();
-        bool rxApp = Utility::waitSignal(pApp, SIGNAL(updated()), 2000);
+        bool rxApp = Utility::waitSignal(pApp, &ConfigParams::updated, 2000);
 
         bool rxCustom = false;
         if (pCustom != nullptr) {
             commands()->customConfigGet(0, false);
-            rxCustom = Utility::waitSignal(pCustom, SIGNAL(updated()), 2000);
+            rxCustom = Utility::waitSignal(pCustom, &ConfigParams::updated, 2000);
         }
 
         if (rxMc && rxApp) {
@@ -4665,13 +4666,13 @@ bool VescInterface::confRestoreBackup(bool can)
                 bool txMc = false, txApp = false, txCustom = true;;
                 for (int i = 0;i < 2;i++) {
                     commands()->setMcconf(false);
-                    txMc = Utility::waitSignal(commands(), SIGNAL(ackReceived(QString)), 2000);
+                    txMc = Utility::waitSignal(commands(), &Commands::ackReceived, 2000);
                     commands()->setAppConf();
-                    txApp = Utility::waitSignal(commands(), SIGNAL(ackReceived(QString)), 2000);
+                    txApp = Utility::waitSignal(commands(), &Commands::ackReceived, 2000);
 
                     if (rxCustom) {
                         commands()->customConfigSet(0, pCustom);
-                        txCustom = Utility::waitSignal(commands(), SIGNAL(ackReceived(QString)), 2000);
+                        txCustom = Utility::waitSignal(commands(), &Commands::ackReceived, 2000);
                     }
 
                     if (txApp && txMc && txCustom) {
@@ -4728,7 +4729,7 @@ bool VescInterface::confRestoreBackup(bool can)
     }
 
     if (res && can) {
-        foreach (int d, canDevs) {
+        for (const int &d : canDevs) {
             commands()->setSendCan(true, d);
 
             Utility::getFwVersionBlocking(this, &fwp);
@@ -4762,7 +4763,7 @@ bool VescInterface::confRestoreBackup(bool can)
 
         if (!uuidsOk.isEmpty()) {
             QString uuidsStr;
-            foreach (auto s, uuidsOk) {
+            for (const auto &s : uuidsOk) {
                 uuidsStr += s + "\n";
             }
 
@@ -4773,7 +4774,7 @@ bool VescInterface::confRestoreBackup(bool can)
 
         if (!missingConfigs.empty()) {
             QString missing;
-            foreach (auto s, missingConfigs) {
+            for (const auto &s : missingConfigs) {
                 missing += s + "\n";
             }
 

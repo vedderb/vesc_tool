@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Vedder.vesc.udpserversimple 1.0
+import Vedder.vesc
 
 Item {
     anchors.fill: parent

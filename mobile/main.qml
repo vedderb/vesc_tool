@@ -23,11 +23,7 @@ import QtQuick.Controls.Material
 import QtQuick.Layouts
 import QtQuick.Window
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
-import Vedder.vesc.vesc3ditem 1.0
+import Vedder.vesc
 
 ApplicationWindow {
     id: appWindow

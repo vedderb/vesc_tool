@@ -48,8 +48,8 @@ StartupWizard::StartupWizard(VescInterface *vesc, QWidget *parent)
     mSideLabel->setScaledContents(true);
     setSideWidget(mSideLabel);
 
-    connect(this, SIGNAL(currentIdChanged(int)),
-            this, SLOT(idChanged(int)));
+    connect(this, &StartupWizard::currentIdChanged,
+            this, &StartupWizard::idChanged);
 }
 
 void StartupWizard::idChanged(int id)
@@ -107,10 +107,10 @@ StartupUsagePage::StartupUsagePage(VescInterface *vesc, QWidget *parent)
 
     registerField("usageAccept*", mAcceptBox);
 
-    connect(mBrowser->verticalScrollBar(), SIGNAL(valueChanged(int)),
-            this, SLOT(scrollValueChanged(int)));
-    connect(mBrowser->verticalScrollBar(), SIGNAL(rangeChanged(int,int)),
-            this, SLOT(scrollRangeChanged()));
+    connect(mBrowser->verticalScrollBar(), &QScrollBar::valueChanged,
+            this, &StartupUsagePage::scrollValueChanged);
+    connect(mBrowser->verticalScrollBar(), &QScrollBar::rangeChanged,
+            this, &StartupUsagePage::scrollRangeChanged);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mBrowser);
@@ -157,10 +157,10 @@ StartupWarrantyPage::StartupWarrantyPage(VescInterface *vesc, QWidget *parent)
 
     registerField("warrantyAccept*", mAcceptBox);
 
-    connect(mBrowser->verticalScrollBar(), SIGNAL(valueChanged(int)),
-            this, SLOT(scrollValueChanged(int)));
-    connect(mBrowser->verticalScrollBar(), SIGNAL(rangeChanged(int,int)),
-            this, SLOT(scrollRangeChanged()));
+    connect(mBrowser->verticalScrollBar(), &QScrollBar::valueChanged,
+            this, &StartupWarrantyPage::scrollValueChanged);
+    connect(mBrowser->verticalScrollBar(), &QScrollBar::rangeChanged,
+            this, &StartupWarrantyPage::scrollRangeChanged);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mBrowser);

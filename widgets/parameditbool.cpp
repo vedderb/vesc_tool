@@ -51,8 +51,7 @@ void ParamEditBool::setConfig(ConfigParams *config)
         ui->valueBox->setCurrentIndex(param->valInt ? 1 : 0);
     }
 
-    connect(mConfig, SIGNAL(paramChangedBool(QObject*,QString,bool)),
-            this, SLOT(paramChangedBool(QObject*,QString,bool)));
+    connect(mConfig, &ConfigParams::paramChangedBool, this, &ParamEditBool::paramChangedBool);
 }
 
 QString ParamEditBool::name() const

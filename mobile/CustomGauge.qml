@@ -21,7 +21,7 @@ import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import QtQuick.Controls.Material
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 Item {
     property double value: 0

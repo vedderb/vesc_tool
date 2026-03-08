@@ -246,42 +246,12 @@ int main(int argc, char *argv[])
     // TODO: http://www.qcustomplot.com/index.php/support/forum/1344
     // Qt6: High DPI scaling is always enabled, removed AA_UseHighDpiPixmaps/AA_EnableHighDpiScaling
 
-#ifdef HAS_BLUETOOTH
-    qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
-#else
-    qmlRegisterType<BleUartDummy>("Vedder.vesc.bleuart", 1, 0, "BleUart");
-#endif
-    qmlRegisterType<Commands>("Vedder.vesc.commands", 1, 0, "Commands");
-    qmlRegisterType<ConfigParams>("Vedder.vesc.configparams", 1, 0, "ConfigParams");
-    qmlRegisterType<FwHelper>("Vedder.vesc.fwhelper", 1, 0, "FwHelper");
-    qmlRegisterType<Esp32Flash>("Vedder.vesc.esp32flash", 1, 0, "Esp32Flash");
-    qmlRegisterType<TcpServerSimple>("Vedder.vesc.tcpserversimple", 1, 0, "TcpServerSimple");
-    qmlRegisterType<UdpServerSimple>("Vedder.vesc.udpserversimple", 1, 0, "UdpServerSimple");
-    qmlRegisterType<Vesc3dItem>("Vedder.vesc.vesc3ditem", 1, 0, "Vesc3dItem");
-    qmlRegisterType<LogWriter>("Vedder.vesc.logwriter", 1, 0, "LogWriter");
-    qmlRegisterType<LogReader>("Vedder.vesc.logreader", 1, 0, "LogReader");
-    qmlRegisterType<TcpHub>("Vedder.vesc.tcphub", 1, 0, "TcpHub");
-    qmlRegisterType<CodeLoader>("Vedder.vesc.codeloader", 1, 0, "CodeLoader");
-    qmlRegisterType<QMiniMp3>("Vedder.vesc.qminimp3", 1, 0, "QMiniMp3");
-#ifdef Q_OS_LINUX
-    qmlRegisterType<SystemCommandExecutor>("Vedder.vesc.syscmd", 1, 0, "SysCmd");
-#endif
+    // Qt6: QML_ELEMENT / QML_NAMED_ELEMENT macros in headers + qt_add_qml_module
+    // in CMakeLists.txt replace all the legacy qmlRegisterType calls.
+    // Types are now auto-registered under the "Vedder.vesc" module.
 
-    qRegisterMetaType<VSerialInfo_t>();
-    qRegisterMetaType<MCCONF_TEMP>();
-    qRegisterMetaType<MC_VALUES>();
-    qRegisterMetaType<BMS_VALUES>();
-    qRegisterMetaType<FW_RX_PARAMS>();
-    qRegisterMetaType<PSW_STATUS>();
-    qRegisterMetaType<IO_BOARD_VALUES>();
-    qRegisterMetaType<MotorData>();
-    qRegisterMetaType<ENCODER_DETECT_RES>();
-    qRegisterMetaType<FILE_LIST_ENTRY>();
-    qRegisterMetaType<VescPackage>();
-    qRegisterMetaType<TCP_HUB_DEVICE>();
-    qRegisterMetaType<ConfigParam>();
-    qRegisterMetaType<GNSS_DATA>();
-    qRegisterMetaType<MiniMp3Dec>();
+    // Qt6: Q_DECLARE_METATYPE auto-registers metatypes at compile time,
+    // so explicit qRegisterMetaType() calls are no longer needed.
 
 #ifdef USE_MOBILE
 #ifndef DEBUG_BUILD
@@ -1153,7 +1123,7 @@ int main(int argc, char *argv[])
             } else {
                 ok = vesc->connectSerial(vescPort);
                 if (ok) {
-                    ok = Utility::waitSignal(vesc, SIGNAL(fwRxChanged(bool, bool)), 1000);
+                    ok = Utility::waitSignal(vesc, &VescInterface::fwRxChanged, 1000);
                     if (!ok) {
                         qWarning() << "Could not read firmware version";
                     }
@@ -1245,14 +1215,14 @@ int main(int argc, char *argv[])
                 if (isMcConf || isAppConf || isCustomConf || queryDeviceFwParams) {
                     bool res = vesc->customConfigRxDone();
                     if (!res) {
-                        res = Utility::waitSignal(vesc, SIGNAL(customConfigLoadDone()), 4000);
+                        res = Utility::waitSignal(vesc, &VescInterface::customConfigLoadDone, 4000);
                     }
 
                     if (res) {
                         if (isMcConf) {
                             ConfigParams *p = vesc->mcConfig();
                             vesc->commands()->getMcconf();
-                            res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
+                            res = Utility::waitSignal(p, &ConfigParams::updated, 4000);
 
                             if (res) {
                                 if (!setMcConfPath.isEmpty()) {
@@ -1260,7 +1230,7 @@ int main(int argc, char *argv[])
 
                                     if (res) {
                                         vesc->commands()->setMcconf(false);
-                                        res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+                                        res = Utility::waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
 
                                         if (res) {
                                             qDebug() << "Wrote XML from" << setMcConfPath;
@@ -1291,7 +1261,7 @@ int main(int argc, char *argv[])
                         if (isAppConf) {
                             ConfigParams *p = vesc->appConfig();
                             vesc->commands()->getAppConf();
-                            res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
+                            res = Utility::waitSignal(p, &ConfigParams::updated, 4000);
 
                             if (res) {
                                 if (!setAppConfPath.isEmpty()) {
@@ -1299,7 +1269,7 @@ int main(int argc, char *argv[])
 
                                     if (res) {
                                         vesc->commands()->setAppConf();
-                                        res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+                                        res = Utility::waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
 
                                         if (res) {
                                             qDebug() << "Wrote XML from" << setAppConfPath;
@@ -1330,7 +1300,7 @@ int main(int argc, char *argv[])
                         if (isCustomConf) {
                             ConfigParams *p = vesc->customConfig(0);
                             vesc->commands()->customConfigGet(0, false);
-                            res = Utility::waitSignal(p, SIGNAL(updated()), 4000);
+                            res = Utility::waitSignal(p, &ConfigParams::updated, 4000);
 
                             if (res) {
                                 if (!setCustomConfPath.isEmpty()) {
@@ -1338,7 +1308,7 @@ int main(int argc, char *argv[])
 
                                     if (res) {
                                         vesc->commands()->customConfigSet(0, p);
-                                        res = Utility::waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+                                        res = Utility::waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
 
                                         if (res) {
                                             qDebug() << "Wrote XML from" << setCustomConfPath;
@@ -1491,7 +1461,7 @@ int main(int argc, char *argv[])
                     qDebug() << "== Running isCompatible with testPkgDesc tests ==";
                 }
 
-                foreach (auto str, pkgDescTests) {
+                for (const auto &str : pkgDescTests) {
                     auto args = str.split(":");
                     // hwtype:hwname:optfwname
                     if (args.size() >= 2) {
@@ -1631,11 +1601,9 @@ int main(int argc, char *argv[])
             qApp->setStyleSheet("");
         }
 
-        // Register this to not stop on the import statement when reusing components
-        // from the mobile UI. In the mobile UI these are provided as singletons, whereas
-        // in the desktop GUI they are provided as context properties.
-        qmlRegisterType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf2");
-        qmlRegisterType<Utility>("Vedder.vesc.utility", 1, 0, "Utility2");
+        // Qt6: QML_ELEMENT on C++ classes + qt_add_qml_module handles type registration.
+        // The old dummy VescIf2/Utility2 registrations are no longer needed since all types
+        // are auto-registered under "Vedder.vesc".
 
         if (!loadQml.isEmpty() || loadQmlVesc) {
             vesc = new VescInterface;

@@ -58,10 +58,10 @@ void PageAppAdc::setVesc(VescInterface *vesc)
 
         ui->adcMap->setVesc(mVesc);
 
-        connect(mVesc->appConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
-                this, SLOT(paramChangedDouble(QObject*,QString,double)));
-        connect(mVesc->appConfig(), SIGNAL(paramChangedEnum(QObject*,QString,int)),
-                this, SLOT(paramChangedEnum(QObject*,QString,int)));
+        connect(mVesc->appConfig(), &ConfigParams::paramChangedDouble,
+                this, &PageAppAdc::paramChangedDouble);
+        connect(mVesc->appConfig(), &ConfigParams::paramChangedEnum,
+                this, &PageAppAdc::paramChangedEnum);
 
         paramChangedEnum(nullptr, "app_adc_conf.throttle_exp_mode", 0);
     }

@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <QQuickWindow>
 #include <QtGui/qpa/qplatformwindow.h>
+#include <QQmlEngine>
 #include "vescinterface.h"
 #include "widgets/qcustomplot.h"
 #include "datatypes.h"
@@ -61,6 +62,22 @@ public:
     Q_INVOKABLE static void keepScreenOn(bool on);
     Q_INVOKABLE static void allowScreenRotation(bool enabled);
     Q_INVOKABLE static bool waitSignal(QObject *sender, QString signal, int timeoutMs);
+
+    // Type-safe overload for C++ callers (avoids SIGNAL() macro)
+    template<typename Sender, typename Signal>
+    static bool waitSignal(Sender *sender, Signal signal, int timeoutMs) {
+        QEventLoop loop;
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        timeoutTimer.start(timeoutMs);
+        auto conn1 = QObject::connect(sender, signal, &loop, &QEventLoop::quit);
+        auto conn2 = QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        loop.exec();
+        QObject::disconnect(conn1);
+        QObject::disconnect(conn2);
+        return timeoutTimer.isActive();
+    }
+
     Q_INVOKABLE static void sleepWithEventLoop(int timeMs);
     Q_INVOKABLE static bool canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud);
     Q_INVOKABLE static QString detectAllFoc(VescInterface *vesc,

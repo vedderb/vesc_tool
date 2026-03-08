@@ -179,7 +179,7 @@ void Utility::checkVersion(VescInterface *vesc)
     QNetworkRequest request(url);
     QNetworkReply *reply = manager.get(request);
     QEventLoop loop;
-    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     loop.exec();
 
     QString res = QString::fromUtf8(reply->readAll());
@@ -393,7 +393,7 @@ bool Utility::waitSignal(QObject *sender, QString signal, int timeoutMs)
     timeoutTimer.setSingleShot(true);
     timeoutTimer.start(timeoutMs);
     auto conn1 = QObject::connect(sender, signal.toLocal8Bit().data(), &loop, SLOT(quit()));
-    auto conn2 = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    auto conn2 = QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
     loop.exec();
 
     QObject::disconnect(conn1);
@@ -408,7 +408,7 @@ void Utility::sleepWithEventLoop(int timeMs)
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
     timeoutTimer.start(timeMs);
-    auto conn1 = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    auto conn1 = QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
     loop.exec();
     QObject::disconnect(conn1);
 }
@@ -427,7 +427,7 @@ bool Utility::canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud)
         }
     });
 
-    bool signalRx = waitSignal(vesc->commands(), SIGNAL(canUpdateBaudRx(bool)), 4000);
+    bool signalRx = waitSignal(vesc->commands(), &Commands::canUpdateBaudRx, 4000);
     disconnect(conn);
 
     if (!signalRx) {
@@ -473,7 +473,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
         }
     });
 
-    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
     loop.exec();
 
     disconnect(conn);
@@ -486,7 +486,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
 
             // MCConf should have been sent after the detection
             vesc->commands()->getAppConf();
-            waitSignal(ap, SIGNAL(updated()), 4000);
+            waitSignal(ap, &ConfigParams::updated, 4000);
 
             auto genRes = [&p, &ap]() {
                 QString sensors;
@@ -542,18 +542,18 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                 }
 
                 vesc->commands()->getMcconf();
-                waitSignal(p, SIGNAL(updated()), 4000);
+                waitSignal(p, &ConfigParams::updated, 4000);
                 vesc->commands()->getAppConf();
-                waitSignal(ap, SIGNAL(updated()), 4000);
+                waitSignal(ap, &ConfigParams::updated, 4000);
                 res += "\n\n" + genRes();
             }
 
             vesc->commands()->setSendCan(canLastFwd, canLastId);
             vesc->ignoreCanChange(false);
             vesc->commands()->getMcconf();
-            waitSignal(p, SIGNAL(updated()), 4000);
+            waitSignal(p, &ConfigParams::updated, 4000);
             vesc->commands()->getAppConf();
-            waitSignal(ap, SIGNAL(updated()), 4000);
+            waitSignal(ap, &ConfigParams::updated, 4000);
         } else {
             QString reason;
             switch (resDetect) {
@@ -627,7 +627,7 @@ QVector<double> Utility::measureRLBlocking(VescInterface *vesc)
         res.append(ld_lq_diff);
     });
 
-    waitSignal(vesc->commands(), SIGNAL(motorRLReceived(double, double, double)), 8000);
+    waitSignal(vesc->commands(), &Commands::motorRLReceived, 8000);
     disconnect(conn);
 
     return res;
@@ -644,7 +644,7 @@ double Utility::measureLinkageOpenloopBlocking(VescInterface *vesc, double curre
         res = flux_linkage;
     });
 
-    waitSignal(vesc->commands(), SIGNAL(motorLinkageReceived(double)), 12000);
+    waitSignal(vesc->commands(), &Commands::motorLinkageReceived, 12000);
     disconnect(conn);
 
     return res;
@@ -661,7 +661,7 @@ QVector<int> Utility::measureHallFocBlocking(VescInterface *vesc, double current
             resDetect.append(hall_table);
     });
 
-    bool rx = waitSignal(vesc->commands(), SIGNAL(focHallTableReceived(QVector<int>, int)), 25000);
+    bool rx = waitSignal(vesc->commands(), &Commands::focHallTableReceived, 25000);
     disconnect(conn);
 
     if (!rx) {
@@ -681,7 +681,7 @@ ENCODER_DETECT_RES Utility::measureEncoderBlocking(VescInterface *vesc, double c
             resDetect = res;
     });
 
-    waitSignal(vesc->commands(), SIGNAL(encoderParamReceived(ENCODER_DETECT_RES)), 50000);
+    waitSignal(vesc->commands(), &Commands::encoderParamReceived, 50000);
     disconnect(conn);
 
     return resDetect;
@@ -726,7 +726,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             vesc->commands()->getAppConf();
-            res = waitSignal(ap, SIGNAL(updated()), 4000);
+            res = waitSignal(ap, &ConfigParams::updated, 4000);
 
             if (!res) {
                 qWarning() << "Appconf not received";
@@ -746,7 +746,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             vesc->commands()->getAppConfDefault();
-            res = waitSignal(ap, SIGNAL(updated()), 4000);
+            res = waitSignal(ap, &ConfigParams::updated, 4000);
 
             if (!res) {
                 qWarning() << "Default appconf not received";
@@ -762,7 +762,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             vesc->commands()->setAppConf();
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+            res = waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
 
             if (!res) {
                 qWarning() << "Appconf set no ack received";
@@ -794,7 +794,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
     if (isConnectedToHwVesc(vesc)) {
         vesc->commands()->getAppConf();
         ConfigParams *ap = vesc->appConfig();
-        if (!waitSignal(ap, SIGNAL(updated()), 4000)) {
+        if (!waitSignal(ap, &ConfigParams::updated, 4000)) {
             qWarning() << "Appconf not received";
             res = false;
         }
@@ -889,7 +889,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
 
         vesc->commands()->getMcconf();
 
-        if (!waitSignal(config, SIGNAL(updated()), 4000)) {
+        if (!waitSignal(config, &ConfigParams::updated, 4000)) {
             vesc->emitMessageDialog("Read Motor Configuration",
                                     "Could not read motor configuration.",
                                     false, false);
@@ -903,7 +903,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
 
         vesc->commands()->setMcconf(false);
 
-        if (!waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000)) {
+        if (!waitSignal(vesc->commands(), &Commands::ackReceived, 4000)) {
             vesc->emitMessageDialog("Write Motor Configuration",
                                     "Could not write motor configuration.",
                                     false, false);
@@ -938,7 +938,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
     vesc->canTmpOverrideEnd();
 
     vesc->commands()->getMcconf();
-    if (!waitSignal(config, SIGNAL(updated()), 4000)) {
+    if (!waitSignal(config, &ConfigParams::updated, 4000)) {
         res = false;
 
         if (!res) {
@@ -973,18 +973,18 @@ bool Utility::setInvertDirection(VescInterface *vesc, int canId, bool inverted)
 
     if (res) {
         vesc->commands()->getMcconf();
-        res = waitSignal(p, SIGNAL(updated()), 4000);
+        res = waitSignal(p, &ConfigParams::updated, 4000);
     }
 
     if (res) {
         p->updateParamBool("m_invert_direction", inverted);
         vesc->commands()->setMcconf(false);
-        res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+        res = waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
     }
 
     vesc->commands()->setSendCan(canLastFwd, canLastId);
     vesc->commands()->getMcconf();
-    if (!waitSignal(p, SIGNAL(updated()), 4000)) {
+    if (!waitSignal(p, &ConfigParams::updated, 4000)) {
         res = false;
     }
 
@@ -1014,12 +1014,12 @@ bool Utility::getInvertDirection(VescInterface *vesc, int canId)
 
     ConfigParams *p = vesc->mcConfig();
     vesc->commands()->getMcconf();
-    waitSignal(p, SIGNAL(updated()), 4000);
+    waitSignal(p, &ConfigParams::updated, 4000);
     res = p->getParamBool("m_invert_direction");
 
     vesc->commands()->setSendCan(canLastFwd, canLastId);
     vesc->commands()->getMcconf();
-    waitSignal(p, SIGNAL(updated()), 4000);
+    waitSignal(p, &ConfigParams::updated, 4000);
 
     vesc->ignoreCanChange(false);
 
@@ -1063,7 +1063,7 @@ QString Utility::testDirection(VescInterface *vesc, int canId, double duty, int 
         }
     });
 
-    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
     loop.exec();
 
     disconnect(conn);
@@ -1118,11 +1118,11 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (mc) {
             ConfigParams *p = vesc->mcConfig();
             vesc->commands()->getMcconfDefault();
-            res = waitSignal(p, SIGNAL(updated()), 4000);
+            res = waitSignal(p, &ConfigParams::updated, 4000);
 
             if (res) {
                 vesc->commands()->setMcconf(false);
-                res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+                res = waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
             } else {
                 return false;
             }
@@ -1131,11 +1131,11 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (app) {
             ConfigParams *p = vesc->appConfig();
             vesc->commands()->getAppConfDefault();
-            res = waitSignal(p, SIGNAL(updated()), 4000);
+            res = waitSignal(p, &ConfigParams::updated, 4000);
 
             if (res) {
                 vesc->commands()->setAppConf();
-                res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+                res = waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
             } else {
                 return false;
             }
@@ -1169,7 +1169,7 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (mc) {
             ConfigParams *p = vesc->mcConfig();
             vesc->commands()->getMcconf();
-            if (!waitSignal(p, SIGNAL(updated()), 4000)) {
+            if (!waitSignal(p, &ConfigParams::updated, 4000)) {
                 res = false;
                 qWarning() << "Could not restore mc conf";
             }
@@ -1178,7 +1178,7 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (app) {
             ConfigParams *p = vesc->appConfig();
             vesc->commands()->getAppConf();
-            if (!waitSignal(p, SIGNAL(updated()), 4000)) {
+            if (!waitSignal(p, &ConfigParams::updated, 4000)) {
                 res = false;
                 qWarning() << "Could not restore app conf";
             }
@@ -1497,16 +1497,14 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params, in
         res = true;
     });
 
-    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-               vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    vesc->disconnectFwVersionReceived();
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), timeout);
+    waitSignal(vesc->commands(), &Commands::fwVersionReceived, timeout);
 
     disconnect(conn);
 
-    connect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-            vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    vesc->reconnectFwVersionReceived();
 
     return res;
 }
@@ -1557,7 +1555,7 @@ MC_VALUES Utility::getMcValuesBlocking(VescInterface *vesc)
     });
 
     vesc->commands()->getValues();
-    waitSignal(vesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 4000);
+    waitSignal(vesc->commands(), &Commands::valuesReceived, 4000);
 
     disconnect(conn);
 
@@ -1651,7 +1649,7 @@ QString Utility::readInternalImuType(VescInterface *vesc)
     });
 
     vesc->commands()->sendTerminalCmdSync("imu_type_internal");
-    waitSignal(vesc->commands(), SIGNAL(printReceived(QString)), 2000);
+    waitSignal(vesc->commands(), &Commands::printReceived, 2000);
 
     disconnect(conn);
 
@@ -1885,19 +1883,17 @@ bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
         }
     });
 
-    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-               vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    vesc->disconnectFwVersionReceived();
 
     vesc->commands()->getFwVersion();
 
-    if (!waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 4000)) {
+    if (!waitSignal(vesc->commands(), &Commands::fwVersionReceived, 4000)) {
         vesc->emitMessageDialog("Load Config", "No response when reading firmware version.", false, false);
     }
 
     disconnect(conn);
 
-    connect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-            vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    vesc->reconnectFwVersionReceived();
 
     return res;
 }
@@ -2372,7 +2368,7 @@ QString Utility::waitForLine(QTcpSocket *socket, int timeoutMs)
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
     timeoutTimer.start(timeoutMs);
-    auto conn = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    auto conn = QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
 
     QByteArray rxLine;
     auto conn2 = connect(socket, &QTcpSocket::readyRead, [&rxLine,socket,&loop]() {
@@ -2434,7 +2430,7 @@ bool Utility::downloadUrlEventloop(QString path, QString dest)
     QNetworkReply *reply = manager.get(request);
 
     QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     loop.exec();
 
     if (reply->error() == QNetworkReply::NoError) {

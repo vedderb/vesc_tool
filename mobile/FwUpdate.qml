@@ -22,11 +22,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs as Dl
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.fwhelper 1.0
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 Item {
     property alias currentPage: swipeView.currentIndex

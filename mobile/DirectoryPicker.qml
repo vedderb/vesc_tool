@@ -30,7 +30,7 @@ import QtQuick.Layouts
 import QtQuick.Window
 import Qt.labs.platform
 
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 Item {
     id:picker
     signal dirSelected(string fileName)

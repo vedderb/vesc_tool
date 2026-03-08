@@ -447,7 +447,7 @@ void PageVescPackage::reloadArchive()
     ui->applicationList->clear();
     ui->libraryList->clear();
 
-    foreach (auto p, pList) {
+    for (const auto &p : pList) {
         auto pVal = p.value<VescPackage>();
 
         if (pVal.isLibrary) {

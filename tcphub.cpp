@@ -29,7 +29,7 @@ TcpHub::TcpHub(QObject *parent)
     : QObject{parent}
 {
     mTcpHubServer = new QTcpServer(this);
-    connect(mTcpHubServer, SIGNAL(newConnection()), this, SLOT(newTcpHubConnection()));
+    connect(mTcpHubServer, &QTcpServer::newConnection, this, &TcpHub::newTcpHubConnection);
 }
 
 TcpHub::~TcpHub()
@@ -66,7 +66,7 @@ bool TcpHub::ping(QString server, int port, QString uuid)
 
     QTcpSocket socket;
     socket.connectToHost(host, port);
-    if (!Utility::waitSignal(&socket, SIGNAL(connected()), 1000)) {
+    if (!Utility::waitSignal(&socket, &QTcpSocket::connected, 1000)) {
         return false;
     }
 

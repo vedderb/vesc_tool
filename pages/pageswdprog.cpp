@@ -68,7 +68,7 @@ PageSwdProg::PageSwdProg(QWidget *parent) :
         ui->fw4Edit->setText(set.value("pageswdprog/lastcustomfile4").toString());
     }
 
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &PageSwdProg::timerSlot);
 
     // UICR tab
     ui->uicrTable->setColumnWidth(0, 200);
@@ -255,7 +255,7 @@ void PageSwdProg::on_connectButton_clicked()
     if (mVesc) {
         mVesc->commands()->bmMapPinsDefault();
         ui->connectButton->setEnabled(false);
-        Utility::waitSignal(mVesc->commands(), SIGNAL(bmMapPinsDefaultRes(bool)), 100);
+        Utility::waitSignal(mVesc->commands(), &Commands::bmMapPinsDefaultRes, 100);
         ui->connectButton->setEnabled(true);
         mVesc->commands()->bmConnect();
     }
@@ -422,10 +422,9 @@ void PageSwdProg::setVesc(VescInterface *vesc)
 {
     mVesc = vesc;
 
-    connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
-            this, SLOT(fwUploadStatus(QString,double,bool)));
-    connect(mVesc->commands(), SIGNAL(bmConnRes(int)),
-            this, SLOT(bmConnRes(int)));
+    connect(mVesc, &VescInterface::fwUploadStatus, this, &PageSwdProg::fwUploadStatus);
+    connect(mVesc->commands(), &Commands::bmConnRes,
+            this, &PageSwdProg::bmConnRes);
 
     connect(mVesc->commands(), &Commands::bmMapPinsNrf5xRes, [this](bool res) {
         if (!res) {
@@ -645,7 +644,7 @@ void PageSwdProg::on_connectNrf5xButton_clicked()
     if (mVesc) {
         mVesc->commands()->bmMapPinsNrf5x();
         ui->connectNrf5xButton->setEnabled(false);
-        Utility::waitSignal(mVesc->commands(), SIGNAL(bmMapPinsNrf5xRes(bool)), 100);
+        Utility::waitSignal(mVesc->commands(), &Commands::bmMapPinsNrf5xRes, 100);
         ui->connectNrf5xButton->setEnabled(true);
         mVesc->commands()->bmConnect();
     }

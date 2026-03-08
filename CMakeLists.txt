@@ -179,7 +179,6 @@ endif()
 # ---------------------------------------------------------------------------
 set(ROOT_SOURCES
     main.cpp
-    bleuartdummy.cpp
     codeloader.cpp
     mainwindow.cpp
     boardsetupwindow.cpp
@@ -204,7 +203,6 @@ set(ROOT_SOURCES
 
 set(ROOT_HEADERS
     mainwindow.h
-    bleuartdummy.h
     codeloader.h
     boardsetupwindow.h
     packet.h
@@ -241,6 +239,9 @@ endif()
 if(HAS_BLUETOOTH)
     list(APPEND ROOT_SOURCES bleuart.cpp)
     list(APPEND ROOT_HEADERS bleuart.h)
+else()
+    list(APPEND ROOT_SOURCES bleuartdummy.cpp)
+    list(APPEND ROOT_HEADERS bleuartdummy.h)
 endif()
 
 # ---------------------------------------------------------------------------
@@ -786,6 +787,19 @@ qt_add_executable(${APP_TARGET}
     ${ALL_HEADERS}
     ${ALL_FORMS}
     ${RESOURCE_FILES}
+)
+
+# ---------------------------------------------------------------------------
+# QML module – exposes all QML_ELEMENT-annotated C++ types under "Vedder.vesc"
+# This replaces the legacy qmlRegisterType() calls.
+# QML files import it with:  import Vedder.vesc
+# ---------------------------------------------------------------------------
+qt_add_qml_module(${APP_TARGET}
+    URI Vedder.vesc
+    VERSION 1.0
+    # No QML files in the module — they stay in .qrc resources.
+    # The C++ types are already in the target sources; QML_ELEMENT does the rest.
+    NO_RESOURCE_TARGET_PATH
 )
 
 # ---------------------------------------------------------------------------

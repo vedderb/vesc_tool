@@ -27,8 +27,7 @@ UdpServerSimple::UdpServerSimple(QObject *parent) : QObject(parent)
     mPacket = new Packet(this);
     mUsePacket = false;
 
-    connect(mPacket, SIGNAL(dataToSend(QByteArray&)),
-            this, SLOT(dataToSend(QByteArray&)));
+    connect(mPacket, &Packet::dataToSend, this, &UdpServerSimple::dataToSend);
     connect(mUdpSocket, &QUdpSocket::readyRead,
                 this, &UdpServerSimple::udpInputDataAvailable);
 }
@@ -87,7 +86,7 @@ void UdpServerSimple::udpInputDataAvailable()
     }
 }
 
-void UdpServerSimple::dataToSend(QByteArray &data)
+void UdpServerSimple::dataToSend(const QByteArray &data)
 {
     sendData(data);
 }

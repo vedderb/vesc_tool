@@ -2426,22 +2426,17 @@ QVariantList Commands::fileBlockList(QString path)
         bool res = false;
         bool more = false;
 
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1500);
-        auto conn = connect(this, &Commands::fileListRx,
-                            [&res,&loop,&filesNow,&more](bool hasMore, QList<FILE_LIST_ENTRY> files) {
-            filesNow.append(files);
-            res = true;
-            more = hasMore;
-            loop.quit();
-        });
+        runTree(Group{SignalWaitTaskItem([this, &res, &filesNow, &more](SignalWaitTask &task) {
+            task.setTimeout(1500);
+            task.connectSignal(this, &Commands::fileListRx,
+                               [&res, &filesNow, &more](bool hasMore, QList<FILE_LIST_ENTRY> files) {
+                filesNow.append(files);
+                res = true;
+                more = hasMore;
+            });
+            return SetupResult::Continue;
+        })});
 
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
         return qMakePair(res, more);
     };
 
@@ -2494,28 +2489,22 @@ QByteArray Commands::fileBlockRead(QString path)
     mFileShouldCancel = false;
 
     auto waitRes = [this](QByteArray &dataNow, qint32 offsetNow) {
-        qint32 sizeRet = -1.0;
+        qint32 sizeRet = -1;
 
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1500);
-        auto conn = connect(this, &Commands::fileReadRx,
-                            [&sizeRet,&loop,&dataNow,&offsetNow]
-                            (qint32 offset, qint32 size, QByteArray data) {
-            if (offset == offsetNow) {
-                sizeRet = size;
-                dataNow.append(data);
-            } else {
-                qWarning() << "Wrong offset";
-            }
-            loop.quit();
-        });
+        runTree(Group{SignalWaitTaskItem([this, &sizeRet, &dataNow, &offsetNow](SignalWaitTask &task) {
+            task.setTimeout(1500);
+            task.connectSignal(this, &Commands::fileReadRx,
+                               [&sizeRet, &dataNow, &offsetNow](qint32 offset, qint32 size, QByteArray data) {
+                if (offset == offsetNow) {
+                    sizeRet = size;
+                    dataNow.append(data);
+                } else {
+                    qWarning() << "Wrong offset";
+                }
+            });
+            return SetupResult::Continue;
+        })});
 
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
         return sizeRet;
     };
 
@@ -2564,21 +2553,12 @@ bool Commands::fileBlockWrite(QString path, QByteArray data)
     auto waitRes = [this]() {
         bool res = false;
 
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1500);
-        auto conn = connect(this, &Commands::fileWriteRx,
-                            [&res,&loop]
-                            (qint32 offset, bool ok) {
-            (void)offset;
-            res = ok;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(1500);
+            task.connectSignal(this, &Commands::fileWriteRx,
+                               [&res](qint32, bool ok) { res = ok; });
+            return SetupResult::Continue;
+        })});
 
         return res;
     };
@@ -2632,19 +2612,12 @@ bool Commands::fileBlockMkdir(QString path)
     auto waitRes = [this]() {
         bool res = false;
 
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1500);
-        auto conn = connect(this, &Commands::fileMkdirRx,
-                            [&res,&loop](bool ok) {
-            res = ok;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(1500);
+            task.connectSignal(this, &Commands::fileMkdirRx,
+                               [&res](bool ok) { res = ok; });
+            return SetupResult::Continue;
+        })});
 
         return res;
     };
@@ -2671,19 +2644,12 @@ bool Commands::fileBlockRemove(QString path)
     auto waitRes = [this]() {
         bool res = false;
 
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1500);
-        auto conn = connect(this, &Commands::fileRemoveRx,
-                            [&res,&loop](bool ok) {
-            res = ok;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(1500);
+            task.connectSignal(this, &Commands::fileRemoveRx,
+                               [&res](bool ok) { res = ok; });
+            return SetupResult::Continue;
+        })});
 
         return res;
     };
@@ -2790,21 +2756,16 @@ QByteArray Commands::bmReadMemWait(uint32_t addr, quint16 size, int timeoutMs)
     int res = -10;
     QByteArray resData;
 
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(timeoutMs);
-    auto conn = connect(this, &Commands::bmReadMemRes, [&res,&resData,&loop]
-                        (int rdRes, QByteArray data) {
-        res = rdRes;
-        resData = data;
-        loop.quit();
-    });
+    runTree(Group{SignalWaitTaskItem([this, &res, &resData, timeoutMs](SignalWaitTask &task) {
+        task.setTimeout(timeoutMs);
+        task.connectSignal(this, &Commands::bmReadMemRes,
+                           [&res, &resData](int rdRes, QByteArray data) {
+            res = rdRes;
+            resData = data;
+        });
+        return SetupResult::Continue;
+    })});
 
-    connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    loop.exec();
-
-    disconnect(conn);
     return resData;
 }
 
@@ -2814,19 +2775,13 @@ int Commands::bmWriteMemWait(uint32_t addr, QByteArray data, int timeoutMs)
 
     int res = -10;
 
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(timeoutMs);
-    auto conn = connect(this, &Commands::bmWriteFlashRes, [&res,&loop](int wrRes) {
-        res = wrRes;
-        loop.quit();
-    });
+    runTree(Group{SignalWaitTaskItem([this, &res, timeoutMs](SignalWaitTask &task) {
+        task.setTimeout(timeoutMs);
+        task.connectSignal(this, &Commands::bmWriteFlashRes,
+                           [&res](int wrRes) { res = wrRes; });
+        return SetupResult::Continue;
+    })});
 
-    connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    loop.exec();
-
-    disconnect(conn);
     return res;
 }
 

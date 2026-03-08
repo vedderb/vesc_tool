@@ -72,21 +72,12 @@ bool CodeLoader::lispErase(int size)
 
     auto waitEraseRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(8000);
-        auto conn = connect(mVesc->commands(), &Commands::lispEraseCodeRx,
-                            [&res,&loop](bool erRes) {
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(8000);
+            task.connectSignal(mVesc->commands(), &Commands::lispEraseCodeRx,
+                               [&res](bool erRes) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -393,22 +384,12 @@ bool CodeLoader::lispUpload(VByteArray vb)
 
     auto waitWriteRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1000);
-        auto conn = connect(mVesc->commands(), &Commands::lispWriteCodeRx,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(1000);
+            task.connectSignal(mVesc->commands(), &Commands::lispWriteCodeRx,
+                               [&res](bool erRes, quint32) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -494,22 +475,12 @@ bool CodeLoader::lispStream(VByteArray vb, qint8 mode)
 
     auto waitWriteRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(4000);
-        auto conn = connect(mVesc->commands(), &Commands::lispStreamCodeRx,
-                            [&res,&loop](qint32 offset, qint16 result) {
-            (void)offset;
-            res = result;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(4000);
+            task.connectSignal(mVesc->commands(), &Commands::lispStreamCodeRx,
+                               [&res](qint32, qint16 result) { res = result; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -696,21 +667,12 @@ bool CodeLoader::qmlErase(int size)
 
     auto waitEraseRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(6000);
-        auto conn = connect(mVesc->commands(), &Commands::eraseQmluiResReceived,
-                            [&res,&loop](bool erRes) {
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(6000);
+            task.connectSignal(mVesc->commands(), &Commands::eraseQmluiResReceived,
+                               [&res](bool erRes) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -744,22 +706,12 @@ bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
 {
     auto waitWriteRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1000);
-        auto conn = connect(mVesc->commands(), &Commands::writeQmluiResReceived,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(1000);
+            task.connectSignal(mVesc->commands(), &Commands::writeQmluiResReceived,
+                               [&res](bool erRes, quint32) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -1098,31 +1050,19 @@ bool CodeLoader::downloadPackageArchive()
     QFile file(path);
 
     if (file.open(QIODevice::WriteOnly)) {
-        QUrl url("http://home.vedder.se/vesc_pkg/vesc_pkg_all.rcc");
-        QNetworkAccessManager manager;
-        QNetworkRequest request(url);
-        QNetworkReply *reply = manager.get(request);
-
-        connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this](qint64 bytesReceived, qint64 bytesTotal) {
-            emit downloadProgress(bytesReceived, bytesTotal);
-            file.write(reply->read(reply->size()));
-        });
-
-        QEventLoop loop;
-        connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        if (reply->error() == QNetworkReply::NoError) {
-            file.write(reply->readAll());
-            res = true;
-
-            // Remove image cache
-            // QString cacheLoc = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-            // QDir(cacheLoc + "/img/").removeRecursively();
-        }
-
-        reply->abort();
-        reply->deleteLater();
+        runTree(Group{NetworkReplyTaskItem([this, &file](NetworkReplyTask &task) {
+            task.setUrl(QUrl("http://home.vedder.se/vesc_pkg/vesc_pkg_all.rcc"));
+            task.setOutputDevice(&file);
+            task.setProgressCallback([this](qint64 bytesReceived, qint64 bytesTotal) {
+                emit downloadProgress(bytesReceived, bytesTotal);
+            });
+            return SetupResult::Continue;
+        }, [&res](const NetworkReplyTask &task, DoneWith doneWith) {
+            if (doneWith == DoneWith::Success) {
+                res = true;
+            }
+            return DoneResult::Success;
+        })});
 
         file.close();
 

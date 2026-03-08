@@ -20,14 +20,13 @@
 #include "codeloader.h"
 #include "qqmlcontext.h"
 #include "utility.h"
-#include <QEventLoop>
+#include "vesctasks.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QEventLoop>
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QQuickItem>

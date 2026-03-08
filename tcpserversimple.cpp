@@ -20,8 +20,7 @@
 #include "tcpserversimple.h"
 #include <QDebug>
 #include <QHostInfo>
-#include <QEventLoop>
-#include <QTimer>
+#include "vesctasks.h"
 
 TcpServerSimple::TcpServerSimple(QObject *parent) : QObject(parent)
 {

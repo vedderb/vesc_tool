@@ -7,7 +7,6 @@
 #include <QListWidgetItem>
 #include <QScrollBar>
 #include <cmath>
-#include <QEventLoop>
 #include <QDirIterator>
 #include <QDesktopServices>
 #include <QProgressDialog>

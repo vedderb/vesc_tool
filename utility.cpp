@@ -18,12 +18,12 @@
     */
 
 #include "utility.h"
+#include "vesctasks.h"
 #ifdef Q_OS_IOS
 #include "ios/src/setIosParameters.h"
 #endif
 #include <cmath>
 #include <QProgressDialog>
-#include <QEventLoop>
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkRequest>
@@ -37,6 +37,7 @@
 #include <QNetworkInterface>
 #include <QDirIterator>
 #include <QPixmapCache>
+#include <QElapsedTimer>
 
 #include "maddy/parser.h"
 #include "heatshrink/heatshrinkif.h"

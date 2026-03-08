@@ -21,7 +21,6 @@
 #include "tcphub.h"
 #include "utility.h"
 #include <QDateTime>
-#include <QEventLoop>
 #include <QtDebug>
 #include <QHostInfo>
 

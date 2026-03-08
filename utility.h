@@ -29,6 +29,7 @@
 #include "vescinterface.h"
 #include "widgets/qcustomplot.h"
 #include "datatypes.h"
+#include "vesctasks.h"
 
 #define FE_WGS84        (1.0/298.257223563) // earth flattening (WGS84)
 #define RE_WGS84        6378137.0           // earth semimajor axis (WGS84) (m)

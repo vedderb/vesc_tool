@@ -22,7 +22,6 @@
 #include <QNetworkDatagram>
 #include <QFileInfo>
 #include <QThread>
-#include <QEventLoop>
 #include <cmath>
 #include <QRegularExpression>
 #include <QDateTime>
@@ -30,6 +29,7 @@
 #include <cmath>
 #include "lzokay/lzokay.hpp"
 #include "vescinterface.h"
+#include "vesctasks.h"
 #include "utility.h"
 #include "heatshrink/heatshrinkif.h"
 
@@ -41,7 +41,6 @@
 #include <QUrl>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QEventLoop>
 
 #ifdef HAS_CANBUS
 #include <QCanBus>

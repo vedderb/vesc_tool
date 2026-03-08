@@ -18,9 +18,9 @@
     */
 
 #include "commands.h"
+#include "vesctasks.h"
 #include "qelapsedtimer.h"
 #include <QDebug>
-#include <QEventLoop>
 
 Commands::Commands(QObject *parent) : QObject(parent)
 {

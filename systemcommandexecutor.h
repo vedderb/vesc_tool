@@ -3,9 +3,8 @@
 
 #include <QObject>
 #include <QProcess>
-#include <QEventLoop>
-#include <QTimer>
 #include <QQmlEngine>
+#include "vesctasks.h"
 
 class SystemCommandExecutor : public QObject
 {

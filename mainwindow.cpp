@@ -26,7 +26,7 @@
 #include <QProcess>
 #include <QListWidgetItem>
 #include <cmath>
-#include <QEventLoop>
+#include "vesctasks.h"
 #include <QDesktopServices>
 #include <QProgressDialog>
 #include "parametereditor.h"

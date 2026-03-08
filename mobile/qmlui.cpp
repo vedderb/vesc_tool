@@ -53,6 +53,31 @@ bool QmlUi::startQmlUi()
     return !mEngine->rootObjects().isEmpty();
 }
 
+bool QmlUi::startDesktopQmlUi()
+{
+    // Use the same Fusion style that the widget UI uses.
+    // Clear the Material conf set earlier for the mobile path.
+    qunsetenv("QT_QUICK_CONTROLS_CONF");
+    QQuickStyle::setStyle("Fusion");
+
+    if (!mEngine) {
+        mEngine = new QQmlApplicationEngine(this);
+    }
+
+    mVesc = new VescInterface();
+    mVesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
+    Utility::configLoadLatest(mVesc);
+
+    mEngine->rootContext()->setContextProperty("VescIf", mVesc);
+    mEngine->rootContext()->setContextProperty("Utility", new Utility(this));
+
+    // Add import path so desktop pages can resolve mobile components
+    mEngine->addImportPath(QStringLiteral("qrc:/"));
+
+    mEngine->load(QUrl(QLatin1String("qrc:/desktop/main.qml")));
+    return !mEngine->rootObjects().isEmpty();
+}
+
 bool QmlUi::eventFilter(QObject *object, QEvent *e)
 {
     (void)object;

@@ -198,10 +198,9 @@ Item {
                             id: fileDialogLoad
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: true
-                            selectMultiple: false
+                            fileMode: Dl.FileDialog.OpenFile
                             onAccepted: {
-                                var pkg = mLoader.unpackVescPackageFromPath(fileUrl.toString())
+                                var pkg = mLoader.unpackVescPackageFromPath(selectedFile.toString())
 
                                 if (!pkg.loadOk) {
                                     return

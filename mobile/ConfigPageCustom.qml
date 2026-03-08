@@ -180,10 +180,9 @@ Item {
                             id: fileDialogSave
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: false
-                            selectMultiple: false
+                            fileMode: Dl.FileDialog.SaveFile
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (!path.toLowerCase().endsWith(".xml")) {
                                     path += ".xml"
                                 }
@@ -221,10 +220,9 @@ Item {
                             id: fileDialogLoad
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: true
-                            selectMultiple: false
+                            fileMode: Dl.FileDialog.OpenFile
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.customConfig(confInd).loadXml(path, "CustomConfiguration")) {
                                     VescIf.emitStatusMessage("Custom Config Loaded", true)
                                 } else {

@@ -26,6 +26,7 @@
 #include <QQuickWindow>
 #include <QtGui/qpa/qplatformwindow.h>
 #include <QQmlEngine>
+#include <QRangeModel>
 #include "vescinterface.h"
 #include "widgets/qcustomplot.h"
 #include "datatypes.h"
@@ -47,8 +48,8 @@ class Utility : public QObject
 public:
     explicit Utility(QObject *parent = nullptr);
 
-    static double map(double x, double in_min, double in_max, double out_min, double out_max);
-    static float throttle_curve(float val, float curve_acc, float curve_brake, int mode);
+    Q_INVOKABLE static double map(double x, double in_min, double in_max, double out_min, double out_max);
+    Q_INVOKABLE static float throttle_curve(float val, float curve_acc, float curve_brake, int mode);
     static bool autoconnectBlockingWithProgress(VescInterface *vesc, QWidget *parent = nullptr);
     Q_INVOKABLE static void checkVersion(VescInterface *vesc = nullptr);
     Q_INVOKABLE static QString fwChangeLog();
@@ -173,10 +174,18 @@ public:
     Q_INVOKABLE static QString md2html(QString md);
 
     Q_INVOKABLE static QByteArray readAllFromFile(const QString &filePath);
+    Q_INVOKABLE static QString readTextFile(const QString &filePath);
+    Q_INVOKABLE static bool writeTextFile(const QString &filePath, const QString &content);
+
+    Q_INVOKABLE static QStringList listDirEntries(const QString &path, bool dirsOnly = false);
+    Q_INVOKABLE static bool fileExists(const QString &path);
+    Q_INVOKABLE static bool isDir(const QString &path);
+    Q_INVOKABLE static QString absoluteFilePath(const QString &dir, const QString &file);
 
     static QByteArray removeFirmwareHeader(QByteArray in);
 
     Q_INVOKABLE static QString configPath(QString subPath);
+    Q_INVOKABLE static QRangeModel *stringListModel(const QStringList &list);
 
 signals:
 

@@ -2511,6 +2511,29 @@ QList<QString> VescInterface::listCANbusInterfaces()
     return res;
 }
 
+QStringList VescInterface::listCANbusInterfaceNames()
+{
+    QStringList res;
+    for (const auto &s : listCANbusInterfaces()) {
+        res.append(s);
+    }
+    return res;
+}
+
+bool VescInterface::fwUploadFromFile(QString path, bool isBootloader, bool fwdCan)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly)) {
+        emitMessageDialog("Firmware Upload",
+                          "Could not open file: " + path,
+                          false, false);
+        return false;
+    }
+    QByteArray data = f.readAll();
+    f.close();
+    return fwUpload(data, isBootloader, fwdCan, true, !isBootloader);
+}
+
 bool VescInterface::connectCANbus(QString backend, QString ifName, int bitrate)
 {
 #ifdef HAS_CANBUS

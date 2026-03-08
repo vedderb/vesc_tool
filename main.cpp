@@ -21,7 +21,6 @@
 #include "boardsetupwindow.h"
 #include "mobile/qmlui.h"
 #include "mobile/fwhelper.h"
-#include "mobile/vesc3ditem.h"
 #include "mobile/logwriter.h"
 #include "mobile/logreader.h"
 #include "tcpserversimple.h"
@@ -164,6 +163,9 @@ static void addFonts() {
 
 int main(int argc, char *argv[])
 {
+    qputenv("QT_QPA_UPDATE_IDLE_TIME", "0");
+    qputenv("QSG_USE_SIMPLE_ANIMATION_DRIVER", "1");
+
     // Settings
     QCoreApplication::setOrganizationName("VESC");
     QCoreApplication::setOrganizationDomain("vesc-project.com");
@@ -1690,9 +1692,9 @@ int main(int argc, char *argv[])
             bw = new BoardSetupWindow;
             bw->show();
         } else {
-            QPixmapCache::setCacheLimit(256000);
-            w = new MainWindow;
-            w->show();
+            // Default: launch the desktop QML UI
+            qmlUi = new QmlUi;
+            qmlUi->startDesktopQmlUi();
         }
     }
 #endif

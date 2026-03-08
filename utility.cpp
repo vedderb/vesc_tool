@@ -2460,6 +2460,55 @@ QByteArray Utility::readAllFromFile(const QString &filePath)
     return data;
 }
 
+QString Utility::readTextFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QString();
+    }
+    QString data = QString::fromUtf8(file.readAll());
+    file.close();
+    return data;
+}
+
+bool Utility::writeTextFile(const QString &filePath, const QString &content)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return false;
+    }
+    file.write(content.toUtf8());
+    file.close();
+    return true;
+}
+
+QStringList Utility::listDirEntries(const QString &path, bool dirsOnly)
+{
+    QStringList result;
+    QDir dir(path);
+    if (!dir.exists()) return result;
+    auto flags = dirsOnly ? (QDir::Dirs | QDir::NoDotAndDotDot) : (QDir::Files | QDir::NoDotAndDotDot);
+    for (const auto &entry : dir.entryList(flags, QDir::Name)) {
+        result.append(entry);
+    }
+    return result;
+}
+
+bool Utility::fileExists(const QString &path)
+{
+    return QFileInfo::exists(path);
+}
+
+bool Utility::isDir(const QString &path)
+{
+    return QFileInfo(path).isDir();
+}
+
+QString Utility::absoluteFilePath(const QString &dir, const QString &file)
+{
+    return QDir(dir).absoluteFilePath(file);
+}
+
 QByteArray Utility::removeFirmwareHeader(QByteArray in)
 {
     if (in.size() <= 6) {
@@ -2509,6 +2558,14 @@ QString Utility::configPath(QString subPath)
     } else {
         return QString("://res/config/") + subPath;
     }
+}
+
+QRangeModel *Utility::stringListModel(const QStringList &list)
+{
+    auto *model = new QRangeModel(list);
+    model->setRoleNames({{Qt::DisplayRole, "display"}});
+    QQmlEngine::setObjectOwnership(model, QQmlEngine::JavaScriptOwnership);
+    return model;
 }
 
 void Utility::setDarkMode(bool isDarkSetting)

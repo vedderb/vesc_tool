@@ -55,6 +55,8 @@ set(QT_COMPONENTS
     OpenGLWidgets
     Core5Compat
     TaskTree
+    Graphs
+    Quick3D
 )
 
 # ---------------------------------------------------------------------------
@@ -96,7 +98,7 @@ if(HAS_BLUETOOTH)
     list(APPEND QT_COMPONENTS Bluetooth)
 endif()
 if(HAS_POS)
-    list(APPEND QT_COMPONENTS Positioning)
+    list(APPEND QT_COMPONENTS Positioning PositioningQuick Location)
 endif()
 find_package(Qt6 REQUIRED COMPONENTS ${QT_COMPONENTS})
 # We need GuiPrivate for some internals
@@ -200,6 +202,8 @@ set(ROOT_SOURCES
     utility.cpp
     tcpserversimple.cpp
     hexfile.cpp
+    motorcomparisonhelper.cpp
+    sampleddatahelper.cpp
 )
 
 set(ROOT_HEADERS
@@ -225,6 +229,8 @@ set(ROOT_HEADERS
     utility.h
     tcpserversimple.h
     hexfile.h
+    motorcomparisonhelper.h
+    sampleddatahelper.h
 )
 
 set(ROOT_FORMS
@@ -488,7 +494,6 @@ set(MOBILE_SOURCES
     mobile/logwriter.cpp
     mobile/qmlui.cpp
     mobile/fwhelper.cpp
-    mobile/vesc3ditem.cpp
 )
 
 set(MOBILE_HEADERS
@@ -496,7 +501,6 @@ set(MOBILE_HEADERS
     mobile/logwriter.h
     mobile/qmlui.h
     mobile/fwhelper.h
-    mobile/vesc3ditem.h
 )
 
 # ---------------------------------------------------------------------------
@@ -799,9 +803,59 @@ qt_add_executable(${APP_TARGET}
 qt_add_qml_module(${APP_TARGET}
     URI Vedder.vesc
     VERSION 1.0
-    # No QML files in the module — they stay in .qrc resources.
-    # The C++ types are already in the target sources; QML_ELEMENT does the rest.
     NO_RESOURCE_TARGET_PATH
+)
+
+# QTP0004: Allow QML files in subdirectories without separate qmldir files.
+qt_policy(SET QTP0004 OLD)
+
+# ---------------------------------------------------------------------------
+# Desktop QML files – compiled via qmlcachegen and embedded as resources.
+# Source paths are desktop/*.qml; PREFIX / keeps them at qrc:/desktop/*.qml.
+# ---------------------------------------------------------------------------
+qt_target_qml_sources(${APP_TARGET}
+    PREFIX /
+    QML_FILES
+        desktop/main.qml
+        desktop/ParamEditors.qml
+        desktop/ParamEditDouble.qml
+        desktop/ParamEditInt.qml
+        desktop/ParamEditEnum.qml
+        desktop/ParamEditBool.qml
+        desktop/ParamEditString.qml
+        desktop/ParamEditBitfield.qml
+        desktop/ParamEditSeparator.qml
+        desktop/Vesc3DView.qml
+        desktop/ParamGroupPage.qml
+        desktop/WelcomePage.qml
+        desktop/ConnectionPage.qml
+        desktop/FirmwarePage.qml
+        desktop/PackagesPage.qml
+        desktop/TerminalPage.qml
+        desktop/LispPage.qml
+        desktop/BmsPage.qml
+        desktop/RtDataPage.qml
+        desktop/SampledDataPage.qml
+        desktop/ExperimentPlotPage.qml
+        desktop/ImuPage.qml
+        desktop/MotorGeneralPage.qml
+        desktop/FocPage.qml
+        desktop/ControllersPage.qml
+        desktop/MotorInfoPage.qml
+        desktop/ExperimentsPage.qml
+        desktop/AppGeneralPage.qml
+        desktop/AppPpmPage.qml
+        desktop/AppAdcPage.qml
+        desktop/AppUartPage.qml
+        desktop/AppNunchukPage.qml
+        desktop/AppNrfPage.qml
+        desktop/AppPasPage.qml
+        desktop/AppImuPage.qml
+        desktop/ScriptingPage.qml
+        desktop/LogAnalysisPage.qml
+        desktop/MotorComparisonPage.qml
+        desktop/CanAnalyzerPage.qml
+        desktop/DisplayToolPage.qml
 )
 
 # ---------------------------------------------------------------------------
@@ -847,6 +901,8 @@ set(QT_LINK_LIBS
     Qt6::OpenGLWidgets
     Qt6::Core5Compat
     Qt6::TaskTree
+    Qt6::Graphs
+    Qt6::Quick3D
 )
 
 if(NOT IOS)
@@ -863,7 +919,7 @@ if(HAS_BLUETOOTH)
     list(APPEND QT_LINK_LIBS Qt6::Bluetooth)
 endif()
 if(HAS_POS)
-    list(APPEND QT_LINK_LIBS Qt6::Positioning)
+    list(APPEND QT_LINK_LIBS Qt6::Positioning Qt6::PositioningQuick Qt6::Location)
 endif()
 if(HAS_GAMEPAD)
     list(APPEND QT_LINK_LIBS Qt6::GamepadLegacy)

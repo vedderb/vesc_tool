@@ -316,10 +316,9 @@ Item {
                             id: fileDialogSave
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: false
-                            selectMultiple: false
+                            fileMode: Dl.FileDialog.SaveFile
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.mcConfig().saveXml(path, "MCConfiguration")) {
                                     VescIf.emitStatusMessage("Mcconf Saved", true)
                                 } else {
@@ -353,10 +352,9 @@ Item {
                             id: fileDialogLoad
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: true
-                            selectMultiple: false
+                            fileMode: Dl.FileDialog.OpenFile
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.mcConfig().loadXml(path, "MCConfiguration")) {
                                     VescIf.emitStatusMessage("Mcconf Loaded", true)
                                 } else {

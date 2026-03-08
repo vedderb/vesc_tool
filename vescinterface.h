@@ -133,6 +133,7 @@ public:
     bool fwEraseBootloader(bool fwdCan);
     bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true, bool autoDisconnect = true);
     Q_INVOKABLE bool fwUpdate(QByteArray newFirmware) { return fwUpload(newFirmware, false, false, true, false); }
+    Q_INVOKABLE bool fwUploadFromFile(QString path, bool isBootloader = false, bool fwdCan = false);
     Q_INVOKABLE void fwUploadCancel();
     Q_INVOKABLE double getFwUploadProgress();
     Q_INVOKABLE QString getFwUploadStatus();
@@ -191,6 +192,7 @@ public:
         return connectSerial(port, 115200);
     }
     Q_INVOKABLE QVariantList listSerialPorts();
+    Q_INVOKABLE QStringList listCANbusInterfaceNames();
     QList<QString> listCANbusInterfaces();
     Q_INVOKABLE bool connectCANbus(QString backend, QString ifName, int bitrate);
     Q_INVOKABLE bool isCANbusConnected();

@@ -308,9 +308,8 @@ Item {
                         id: fileDialog
                         title: "Choose a firmware file"
                         nameFilters: ["*"]
-                        selectedNameFilter: "*"
                         onAccepted: {
-                            customFwText.text = fileUrl
+                            customFwText.text = selectedFile
                             close()
                             parent.forceActiveFocus()
                         }

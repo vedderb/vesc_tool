@@ -179,7 +179,7 @@ signals:
 public slots:
     void processPacket(QByteArray data);
 
-    void getFwVersion();
+    Q_INVOKABLE void getFwVersion();
     void eraseNewApp(bool fwdCan, quint32 fwSize, HW_TYPE hwType, QString hwName);
     void eraseBootloader(bool fwdCan, HW_TYPE hwType, QString hwName);
     void writeNewAppData(QByteArray data, quint32 offset, bool fwdCan, HW_TYPE hwType, QString hwName);

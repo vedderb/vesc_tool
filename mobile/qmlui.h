@@ -32,6 +32,7 @@ class QmlUi : public QObject
 public:
     explicit QmlUi(QObject *parent = nullptr);
     bool startQmlUi();
+    bool startDesktopQmlUi();
     bool eventFilter(QObject *object, QEvent *e);
     void setVisible(bool visible);
 

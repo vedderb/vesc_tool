@@ -688,11 +688,10 @@ Item {
         id: fileDialogLoad
         title: "Open LispBM File"
         nameFilters: ["LispBM files (*.lbm *.lisp)", "All files (*)"]
-        selectExisting: true
-        selectMultiple: false
+        fileMode: Dl.FileDialog.OpenFile
 
         onAccepted: {
-            var path = fileUrlToPath(fileUrl)
+            var path = fileUrlToPath(selectedFile)
             openFilePath(path)
             close()
             parent.forceActiveFocus()

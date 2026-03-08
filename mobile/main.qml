@@ -413,7 +413,7 @@ ApplicationWindow {
                         }
                         z:1
                         sourceComponent:
-                            Vesc3dItem {
+                            Vesc3DView {
                             id: vesc3d
                             anchors.fill: parent
                             scale: 1.0 / Screen.devicePixelRatio

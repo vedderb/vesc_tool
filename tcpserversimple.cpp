@@ -57,24 +57,27 @@ bool TcpServerSimple::connectToHub(QString server, int port, QString id, QString
     stopServer();
 
     mTcpSocket = new QTcpSocket(this);
-    mTcpSocket->connectToHost(host, port);
 
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(3000);
-    auto conn = QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    bool connected = false;
+    auto tree = Group {
+        TcpConnectTaskItem([&](TcpConnectTask &task) {
+            task.setSocket(mTcpSocket);
+            task.setHost(host);
+            task.setPort(port);
+            task.setTimeout(3000);
+            task.setOnConnected([&id, &pass, this]() {
+                QString login = QString("VESC:%1:%2\n").arg(id).arg(pass);
+                mTcpSocket->write(login.toLocal8Bit());
+            });
+            return SetupResult::Continue;
+        }, [&connected](const TcpConnectTask &, DoneWith doneWith) {
+            connected = (doneWith == DoneWith::Success);
+            return DoneResult::Success;
+        })
+    };
+    runTree(tree);
 
-    connect(mTcpSocket, &QTcpSocket::connected, [&id, &pass, this, &loop]() {
-        QString login = QString("VESC:%1:%2\n").arg(id).arg(pass);
-        mTcpSocket->write(login.toLocal8Bit());
-        loop.quit();
-    });
-
-    loop.exec();
-    disconnect(conn);
-
-    if (timeoutTimer.isActive()) {
+    if (connected) {
         connect(mTcpSocket, &QIODevice::readyRead, this, &TcpServerSimple::tcpInputDataAvailable);
         connect(mTcpSocket, &QAbstractSocket::disconnected, this, &TcpServerSimple::tcpInputDisconnected);
         connect(mTcpSocket, &QAbstractSocket::errorOccurred,

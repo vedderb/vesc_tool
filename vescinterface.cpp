@@ -1068,28 +1068,18 @@ int VescInterface::getLastUdpPort() const
 
 bool VescInterface::swdEraseFlash()
 {
-    auto waitBmEraseRes = [this]() {
-        int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(20000);
-        auto conn = connect(mCommands, &Commands::bmEraseFlashAllRes, [&res,&loop](int erRes) {
-            res = erRes;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
-        return res;
-    };
+    int erRes = -10;
 
     mCommands->bmEraseFlashAll();
     emit fwUploadStatus("Erasing flash...", 0.0, true);
-    int erRes = waitBmEraseRes();
+
+    runTree(Group{SignalWaitTaskItem([this, &erRes](SignalWaitTask &task) {
+        task.setTimeout(20000);
+        task.connectSignal(mCommands, &Commands::bmEraseFlashAllRes,
+                           [&erRes](int r) { erRes = r; });
+        return SetupResult::Continue;
+    })});
+
     if (erRes != 1) {
         QString msg = "Unknown failure";
 
@@ -1126,20 +1116,12 @@ bool VescInterface::swdUploadFw(QByteArray newFirmware, uint32_t startAddr,
 
     auto waitBmWriteRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(3000);
-        auto conn = connect(mCommands, &Commands::bmWriteFlashRes, [&res,&loop](int wrRes) {
-            res = wrRes;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(3000);
+            task.connectSignal(mCommands, &Commands::bmWriteFlashRes,
+                               [&res](int wrRes) { res = wrRes; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -1264,20 +1246,12 @@ bool VescInterface::swdReboot()
 {
     auto waitBmReboot = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(3000);
-        auto conn = connect(mCommands, &Commands::bmRebootRes, [&res,&loop](int wrRes) {
-            res = wrRes;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(3000);
+            task.connectSignal(mCommands, &Commands::bmRebootRes,
+                               [&res](int wrRes) { res = wrRes; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -1307,21 +1281,12 @@ bool VescInterface::fwEraseNewApp(bool fwdCan, quint32 fwSize)
 {
     auto waitEraseRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(20000);
-        auto conn = connect(mCommands, &Commands::eraseNewAppResReceived,
-                            [&res,&loop](bool erRes) {
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(20000);
+            task.connectSignal(mCommands, &Commands::eraseNewAppResReceived,
+                               [&res](bool erRes) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -1352,21 +1317,12 @@ bool VescInterface::fwEraseBootloader(bool fwdCan)
 {
     auto waitEraseRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(20000);
-        auto conn = connect(mCommands, &Commands::eraseBootloaderResReceived,
-                            [&res,&loop](bool erRes) {
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(20000);
+            task.connectSignal(mCommands, &Commands::eraseBootloaderResReceived,
+                               [&res](bool erRes) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -1487,17 +1443,6 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     auto writeChunk = [this, &fwdCan](uint32_t addr, QByteArray chunk, bool fwIsLzo, quint16 decompressedLen) {
         for (int i = 0;i < 3;i++) {
             int res = -10;
-            QEventLoop loop;
-            QTimer timeoutTimer;
-            timeoutTimer.setSingleShot(true);
-            timeoutTimer.start(3000);
-            auto conn = connect(mCommands, &Commands::writeNewAppDataResReceived,
-                                [&res,&loop](bool ok, bool hasOffset, quint32 offset) {
-                (void)offset;
-                (void)hasOffset;
-                res = ok ? 1 : -1;
-                loop.quit();
-            });
 
             if (fwIsLzo) {
                 mCommands->writeNewAppDataLzo(chunk, addr, decompressedLen, fwdCan);
@@ -1505,9 +1450,12 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
                 mCommands->writeNewAppData(chunk, addr, fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
             }
 
-            connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-            loop.exec();
-            disconnect(conn);
+            runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+                task.setTimeout(3000);
+                task.connectSignal(mCommands, &Commands::writeNewAppDataResReceived,
+                                   [&res](bool ok, bool, quint32) { res = ok ? 1 : -1; });
+                return SetupResult::Continue;
+            })});
 
             if (res != 1) {
                 qDebug() << "Write chunk failed:" << res << "LZO:" << fwIsLzo << "Addr:" << addr << "Size:" << chunk.size();
@@ -2361,16 +2309,16 @@ bool VescInterface::autoconnect()
         Utility::sleepWithEventLoop(100);
         mPacket->resetState();
 
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(500);
-        connect(mCommands, &Commands::fwVersionReceived, &loop, &QEventLoop::quit);
-        connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        loop.exec();
+        bool gotFw = false;
+        runTree(Group{SignalWaitTaskItem([this, &gotFw](SignalWaitTask &task) {
+            task.setTimeout(500);
+            task.connectSignal(mCommands, &Commands::fwVersionReceived,
+                               [&gotFw](FW_RX_PARAMS) { gotFw = true; });
+            return SetupResult::Continue;
+        })});
 
-        if (timeoutTimer.isActive()) {
-            // If the timer is still running, a firmware version was received.
+        if (gotFw) {
+            // A firmware version was received.
             res = true;
             break;
         } else {
@@ -2749,23 +2697,20 @@ void VescInterface::scanCANbus()
     frame.setFlexibleDataRateFormat(false);
     frame.setBitrateSwitch(false);
 
-    QEventLoop loop;
-    QTimer pollTimer;
-    pollTimer.start(15);
     unsigned int i = 0;
-
-    auto conn = connect(&pollTimer, &QTimer::timeout,
-                        [this, &loop, &frame, &i]() {
-        frame.setFrameId(i | uint32_t(CAN_PACKET_PING << 8));
-        mCanDevice->writeFrame(frame);
-        i++;
-        if (i >= 254) {
-            loop.quit();
-        }
-    });
-
-    loop.exec();
-    disconnect(conn);
+    runTree(Group{PollTimerTaskItem([this, &frame, &i](PollTimerTask &task) {
+        task.setInterval(15);
+        task.setTimeout(0); // no external timeout — we finish from within
+        task.setOnTick([this, &frame, &i, &task]() {
+            frame.setFrameId(i | uint32_t(CAN_PACKET_PING << 8));
+            mCanDevice->writeFrame(frame);
+            i++;
+            if (i >= 254) {
+                task.finish();
+            }
+        });
+        return SetupResult::Continue;
+    })});
 #endif
     return;
 }
@@ -2780,22 +2725,20 @@ QVector<int> VescInterface::scanCan()
 
     canTmpOverride(false, 0);
 
-    QEventLoop loop;
-
-    bool timeout;
-    auto conn = connect(commands(), &Commands::pingCanRx,
-                        [&canDevs, &timeout, &loop](QVector<int> devs, bool isTimeout) {
-        for (int dev: devs) {
-            canDevs.append(dev);
-        }
-        timeout = isTimeout;
-        loop.quit();
-    });
+    bool timeout = false;
 
     commands()->pingCan();
-    loop.exec();
-
-    disconnect(conn);
+    runTree(Group{SignalWaitTaskItem([this, &canDevs, &timeout](SignalWaitTask &task) {
+        task.setTimeout(10000); // generous timeout for CAN scan
+        task.connectSignal(commands(), &Commands::pingCanRx,
+                           [&canDevs, &timeout](QVector<int> devs, bool isTimeout) {
+            for (int dev: devs) {
+                canDevs.append(dev);
+            }
+            timeout = isTimeout;
+        });
+        return SetupResult::Continue;
+    })});
 
     if (!timeout) {
         mCanDevsLast = canDevs;
@@ -4317,10 +4260,6 @@ bool VescInterface::downloadFwArchive()
 {
     bool res = false;
 
-    QUrl url("http://home.vedder.se/vesc_fw_archive/res_fw.rcc");
-    QNetworkAccessManager manager;
-    QNetworkRequest request(url);
-    QNetworkReply *reply = manager.get(request);
     QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!QDir(appDataLoc).exists()) {
         QDir().mkpath(appDataLoc);
@@ -4329,23 +4268,23 @@ bool VescInterface::downloadFwArchive()
     QFile file(path);
     QResource::unregisterResource(path);
     if (file.open(QIODevice::WriteOnly)) {
-        auto conn = connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this]
-                            (qint64 bytesReceived, qint64 bytesTotal) {
-            emit fwArchiveDlProgress("Downloading " + QFileInfo(file).fileName(), (double)bytesReceived / (double)bytesTotal);
-            file.write(reply->read(reply->size()));
-        });
-
-        QEventLoop loop;
-        connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-        loop.exec();
-        disconnect(conn);
-
-        if (reply->error() == QNetworkReply::NoError) {
-            file.write(reply->readAll());
-            emit fwArchiveDlProgress("Download Done", 1.0);
-        } else {
-            emit fwArchiveDlProgress("Download Failed", 0.0);
-        }
+        runTree(Group{NetworkReplyTaskItem([this, &file, &res](NetworkReplyTask &task) {
+            task.setUrl(QUrl("http://home.vedder.se/vesc_fw_archive/res_fw.rcc"));
+            task.setOutputDevice(&file);
+            task.setProgressCallback([this, &file](qint64 bytesReceived, qint64 bytesTotal) {
+                emit fwArchiveDlProgress("Downloading " + QFileInfo(file).fileName(),
+                                         (double)bytesReceived / (double)bytesTotal);
+            });
+            return SetupResult::Continue;
+        }, [this, &res](const NetworkReplyTask &task, DoneWith doneWith) {
+            if (doneWith == DoneWith::Success) {
+                emit fwArchiveDlProgress("Download Done", 1.0);
+                res = true;
+            } else {
+                emit fwArchiveDlProgress("Download Failed", 0.0);
+            }
+            return DoneResult::Success; // always succeed so we can clean up
+        })});
 
         file.close();
         res = true;
@@ -4353,9 +4292,6 @@ bool VescInterface::downloadFwArchive()
     } else {
         emit fwArchiveDlProgress("Could not open local file", 0.0);
     }
-
-    reply->abort();
-    reply->deleteLater();
 
     return res;
 }
@@ -4365,30 +4301,25 @@ bool VescInterface::downloadFwLatest()
     auto downloadFws = [this](QUrl url, QString path) {
         bool res = false;
 
-        QNetworkAccessManager manager;
-        QNetworkRequest request(url);
-        QNetworkReply *reply = manager.get(request);
-
         QFile file(path);
         QResource::unregisterResource(path);
         if (file.open(QIODevice::WriteOnly)) {
-            auto conn = connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this]
-                                (qint64 bytesReceived, qint64 bytesTotal) {
-                                    emit fwArchiveDlProgress("Downloading " + QFileInfo(file).fileName(), (double)bytesReceived / (double)bytesTotal);
-                                    file.write(reply->read(reply->size()));
-                                });
-
-            QEventLoop loop;
-            connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-            loop.exec();
-            disconnect(conn);
-
-            if (reply->error() == QNetworkReply::NoError) {
-                file.write(reply->readAll());
-                emit fwArchiveDlProgress("Download Done", 1.0);
-            } else {
-                emit fwArchiveDlProgress("Download Failed", 0.0);
-            }
+            runTree(Group{NetworkReplyTaskItem([this, &file, &url](NetworkReplyTask &task) {
+                task.setUrl(url);
+                task.setOutputDevice(&file);
+                task.setProgressCallback([this, &file](qint64 bytesReceived, qint64 bytesTotal) {
+                    emit fwArchiveDlProgress("Downloading " + QFileInfo(file).fileName(),
+                                             (double)bytesReceived / (double)bytesTotal);
+                });
+                return SetupResult::Continue;
+            }, [this, &res](const NetworkReplyTask &task, DoneWith doneWith) {
+                if (doneWith == DoneWith::Success) {
+                    emit fwArchiveDlProgress("Download Done", 1.0);
+                } else {
+                    emit fwArchiveDlProgress("Download Failed", 0.0);
+                }
+                return DoneResult::Success;
+            })});
 
             file.close();
             QResource::registerResource(path);
@@ -4396,9 +4327,6 @@ bool VescInterface::downloadFwLatest()
         } else {
             emit fwArchiveDlProgress("Could not open local file", 0.0);
         }
-
-        reply->abort();
-        reply->deleteLater();
 
         return res;
     };
@@ -4423,11 +4351,6 @@ bool VescInterface::downloadFwLatest()
 bool VescInterface::downloadConfigs()
 {
     bool res = false;
-    QUrl url("http://home.vedder.se/vesc_fw_archive/res_config.rcc");
-
-    QNetworkAccessManager manager;
-    QNetworkRequest request(url);
-    QNetworkReply *reply = manager.get(request);
     QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if(!QDir(appDataLoc).exists()) {
         QDir().mkpath(appDataLoc);
@@ -4437,38 +4360,33 @@ bool VescInterface::downloadConfigs()
     QResource::unregisterResource(path);
 
     if (file.open(QIODevice::WriteOnly)) {
-        auto conn = connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this]
-                            (qint64 bytesReceived, qint64 bytesTotal) {
-                                emit fwArchiveDlProgress("Downloading...", (double)bytesReceived / (double)bytesTotal);
-                                file.write(reply->read(reply->size()));
-                            });
+        runTree(Group{NetworkReplyTaskItem([this, &file](NetworkReplyTask &task) {
+            task.setUrl(QUrl("http://home.vedder.se/vesc_fw_archive/res_config.rcc"));
+            task.setOutputDevice(&file);
+            task.setProgressCallback([this](qint64 bytesReceived, qint64 bytesTotal) {
+                emit fwArchiveDlProgress("Downloading...", (double)bytesReceived / (double)bytesTotal);
+            });
+            return SetupResult::Continue;
+        }, [this, &res, &file, &path](const NetworkReplyTask &task, DoneWith doneWith) {
+            if (doneWith == DoneWith::Success) {
+                emit fwArchiveDlProgress("Download Done", 1.0);
+                file.close();
+                res = QResource::registerResource(path);
 
-        QEventLoop loop;
-        connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-        loop.exec();
-        disconnect(conn);
-
-        if (reply->error() == QNetworkReply::NoError) {
-            file.write(reply->readAll());
-            emit fwArchiveDlProgress("Download Done", 1.0);
-            file.close();
-            res = QResource::registerResource(path);
-
-            if (res) {
-                qDebug() << "Reloaded config resource successfully";
+                if (res) {
+                    qDebug() << "Reloaded config resource successfully";
+                } else {
+                    qWarning() << "Could not reload config resource";
+                }
             } else {
-                qWarning() << "Could not reload config resource";
+                emit fwArchiveDlProgress("Download Failed", 0.0);
+                file.close();
             }
-        } else {
-            emit fwArchiveDlProgress("Download Failed", 0.0);
-            file.close();
-        }
+            return DoneResult::Success;
+        })});
     } else {
         emit fwArchiveDlProgress("Could not open local file", 0.0);
     }
-
-    reply->abort();
-    reply->deleteLater();
 
     return res;
 }

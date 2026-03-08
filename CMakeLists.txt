@@ -54,6 +54,7 @@ set(QT_COMPONENTS
     OpenGL
     OpenGLWidgets
     Core5Compat
+    TaskTree
 )
 
 # ---------------------------------------------------------------------------
@@ -215,6 +216,7 @@ set(ROOT_HEADERS
     configparams.h
     configparam.h
     vescinterface.h
+    vesctasks.h
     parametereditor.h
     digitalfiltering.h
     setupwizardapp.h
@@ -844,6 +846,7 @@ set(QT_LINK_LIBS
     Qt6::OpenGL
     Qt6::OpenGLWidgets
     Qt6::Core5Compat
+    Qt6::TaskTree
 )
 
 if(NOT IOS)

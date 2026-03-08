@@ -19,6 +19,7 @@
 
 #include "configparams.h"
 #include <QDebug>
+#include <vector>
 #include "widgets/parameditdouble.h"
 #include "widgets/parameditint.h"
 #include "widgets/parameditstring.h"
@@ -1206,18 +1207,16 @@ QString ConfigParams::saveCompressed(QString configName)
     getXML(stream, configName);
 
     std::size_t outMaxSize = lzokay::compress_worst_size(data.size());
-    unsigned char *out = new unsigned char[outMaxSize];
+    std::vector<unsigned char> out(outMaxSize);
     std::size_t outLen = 0;
 
-    lzokay::EResult error = lzokay::compress((const uint8_t*)data.constData(), data.size(), out, outMaxSize, outLen);
+    lzokay::EResult error = lzokay::compress((const uint8_t*)data.constData(), data.size(), out.data(), outMaxSize, outLen);
     if (error == lzokay::EResult::Success) {
-        QByteArray data((char*)out, outLen);
+        QByteArray data((char*)out.data(), outLen);
         result = data.toBase64();
     } else {
         qWarning() << "Could not compress data.";
     }
-
-    delete[] out;
 
     return result;
 }
@@ -1229,12 +1228,11 @@ bool ConfigParams::loadCompressed(QString data, QString configName)
     QByteArray in = QByteArray::fromBase64(data.toLocal8Bit());
 
     std::size_t outMaxSize = 2 * 1024 * 1024;
-    unsigned char *out = new unsigned char[outMaxSize];
+    std::vector<unsigned char> out(outMaxSize);
     std::size_t outLen = 0;
 
-    lzokay::EResult error = lzokay::decompress((const uint8_t*)in.constData(), in.size(), out, outMaxSize, outLen);
-    QByteArray xmlData((const char*)out, outLen);
-    delete[] out;
+    lzokay::EResult error = lzokay::decompress((const uint8_t*)in.constData(), in.size(), out.data(), outMaxSize, outLen);
+    QByteArray xmlData((const char*)out.data(), outLen);
 
     if (error == lzokay::EResult::Success) {
         QXmlStreamReader stream(xmlData);

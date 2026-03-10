@@ -116,9 +116,9 @@ Item {
         TabBar {
             id: tabBar
             Layout.fillWidth: true
-            TabButton { text: "General" }
-            TabButton { text: "Mapping" }
-            TabButton { text: "Throttle Curve" }
+            TabButton { text: "General"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Mapping"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Throttle Curve"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {
@@ -220,7 +220,7 @@ Item {
                                     Layout.fillWidth: true
                                     spacing: 0
                                     ProgressBar { id: ppmToolBar; Layout.fillWidth: true; from: -1; to: 1; value: 0; Layout.preferredHeight: 25 }
-                                    Label { id: ppmToolLabel; text: "-- ms (-- %)"; font.pixelSize: 11; color: Utility.getAppHexColor("lightText") }
+                                    Label { id: ppmToolLabel; text: "-- ms (-- %)"; font.pointSize: 11; color: Utility.getAppHexColor("lightText") }
                                 }
 
                                 Label { text: "VESC Firmware" }
@@ -228,7 +228,7 @@ Item {
                                     Layout.fillWidth: true
                                     spacing: 0
                                     ProgressBar { id: ppmFwBar; Layout.fillWidth: true; from: -1; to: 1; value: 0; Layout.preferredHeight: 25 }
-                                    Label { id: ppmFwLabel; text: "-- ms (-- %)"; font.pixelSize: 11; color: Utility.getAppHexColor("lightText") }
+                                    Label { id: ppmFwLabel; text: "-- ms (-- %)"; font.pointSize: 11; color: Utility.getAppHexColor("lightText") }
                                 }
                             }
                         }

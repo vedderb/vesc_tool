@@ -31,7 +31,7 @@ Item {
                 id: terminalBrowser
                 readOnly: true
                 font.family: "DejaVu Sans Mono"
-                font.pixelSize: 12
+                font.pointSize: 12
                 wrapMode: TextEdit.NoWrap
                 color: Utility.getAppHexColor("lightText")
                 background: Rectangle {
@@ -62,7 +62,7 @@ Item {
                 Layout.fillWidth: true
                 placeholderText: "Enter command..."
                 font.family: "DejaVu Sans Mono"
-                font.pixelSize: 12
+                font.pointSize: 12
 
                 Keys.onReturnPressed: sendCommand()
                 Keys.onEnterPressed: sendCommand()

@@ -311,9 +311,9 @@ Item {
             id: tabBar
             Layout.fillWidth: true
 
-            TabButton { text: "Package Store" }
-            TabButton { text: "Load Custom" }
-            TabButton { text: "Create Package" }
+            TabButton { text: "Package Store"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Load Custom"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Create Package"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {

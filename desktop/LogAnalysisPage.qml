@@ -791,8 +791,8 @@ Item {
                         TabBar {
                             id: tableTab
                             Layout.fillWidth: true
-                            TabButton { text: "Data" }
-                            TabButton { text: "Stats" }
+                            TabButton { text: "Data"; topPadding: 9; bottomPadding: 9 }
+                            TabButton { text: "Stats"; topPadding: 9; bottomPadding: 9 }
                         }
 
                         StackLayout {
@@ -831,11 +831,11 @@ Item {
 
                                         Label {
                                             text: model.name; Layout.preferredWidth: 110; elide: Text.ElideRight
-                                            font.pixelSize: 11; color: Utility.getAppHexColor("lightText")
+                                            font.pointSize: 11; color: Utility.getAppHexColor("lightText")
                                         }
                                         Label {
                                             text: model.value; Layout.fillWidth: true; elide: Text.ElideRight
-                                            font.pixelSize: 11; color: Utility.getAppHexColor("normalText")
+                                            font.pointSize: 11; color: Utility.getAppHexColor("normalText")
                                         }
                                         CheckBox {
                                             Layout.preferredWidth: 30; checked: model.y1; visible: !model.isTS
@@ -889,8 +889,8 @@ Item {
                                     color: index % 2 === 0 ? "transparent" : Qt.rgba(0.5,0.5,0.5,0.08)
                                     RowLayout {
                                         anchors.fill: parent; anchors.leftMargin: 4; anchors.rightMargin: 4
-                                        Label { text: model.stat; Layout.fillWidth:true; font.pixelSize:12; color:Utility.getAppHexColor("lightText") }
-                                        Label { text: model.val;  Layout.fillWidth:true; font.pixelSize:12; color:Utility.getAppHexColor("normalText") }
+                                        Label { text: model.stat; Layout.fillWidth:true; font.pointSize:12; color:Utility.getAppHexColor("lightText") }
+                                        Label { text: model.val;  Layout.fillWidth:true; font.pointSize:12; color:Utility.getAppHexColor("normalText") }
                                     }
                                 }
                             }

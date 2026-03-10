@@ -304,8 +304,9 @@ Item {
                 TabBar {
                     id: ctrlTabBar
                     Layout.fillWidth: true
-                    TabButton { text: "Controls" }
-                    TabButton { text: "Load/Save" }
+
+                    TabButton { text: "Controls"; topPadding: 9; bottomPadding: 9 }
+                    TabButton { text: "Load/Save"; topPadding: 9; bottomPadding: 9 }
                 }
 
                 StackLayout {
@@ -432,9 +433,10 @@ Item {
         TabBar {
             id: mainTabBar
             Layout.fillWidth: true
-            TabButton { text: "Display" }
-            TabButton { text: "Overlay Editor" }
-            TabButton { text: "Font Editor" }
+
+            TabButton { text: "Display"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Overlay Editor"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Font Editor"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {
@@ -492,8 +494,9 @@ Item {
                         TabBar {
                             id: rightSubTabBar
                             Layout.fillWidth: true
-                            TabButton { text: "Font" }
-                            TabButton { text: "Overlay" }
+
+                            TabButton { text: "Font"; topPadding: 9; bottomPadding: 9 }
+                            TabButton { text: "Overlay"; topPadding: 9; bottomPadding: 9 }
                         }
 
                         StackLayout {

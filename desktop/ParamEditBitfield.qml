@@ -18,11 +18,11 @@ RowLayout {
 
     Label {
         id: nameLabel
-        Layout.preferredWidth: 200
-        Layout.minimumWidth: 120
+        Layout.preferredWidth: 240
+        Layout.minimumWidth: 140
         Layout.alignment: Qt.AlignTop
         elide: Text.ElideRight
-        font.pixelSize: 12
+        font.pointSize: 12
         color: Utility.getAppHexColor("lightText")
         ToolTip.text: nameLabel.text
         ToolTip.visible: nameMA.containsMouse && nameLabel.truncated
@@ -45,7 +45,7 @@ RowLayout {
                 property string bitName: ""
                 visible: bitName !== "" && bitName.toLowerCase() !== "unused"
                 text: bitName
-                font.pixelSize: 11
+                font.pointSize: 11
 
                 onToggled: {
                     if (createReady) {
@@ -66,8 +66,8 @@ RowLayout {
     ToolButton {
         Layout.alignment: Qt.AlignTop
         icon.source: "qrc" + Utility.getThemePath() + "icons/motor_up.png"
-        icon.width: 16; icon.height: 16
-        implicitWidth: 28; implicitHeight: 28
+        icon.width: 20; icon.height: 20
+        implicitWidth: 34; implicitHeight: 34
         ToolTip.text: "Read Current"; ToolTip.visible: hovered
         visible: params ? params.getParamTransmittable(paramName) : false
         onClicked: { params.setUpdateOnly(paramName); params.requestUpdate() }
@@ -76,8 +76,8 @@ RowLayout {
     ToolButton {
         Layout.alignment: Qt.AlignTop
         icon.source: "qrc" + Utility.getThemePath() + "icons/motor_default.png"
-        icon.width: 16; icon.height: 16
-        implicitWidth: 28; implicitHeight: 28
+        icon.width: 20; icon.height: 20
+        implicitWidth: 34; implicitHeight: 34
         ToolTip.text: "Read Default"; ToolTip.visible: hovered
         visible: params ? params.getParamTransmittable(paramName) : false
         onClicked: { params.setUpdateOnly(paramName); params.requestUpdateDefault() }
@@ -86,8 +86,8 @@ RowLayout {
     ToolButton {
         Layout.alignment: Qt.AlignTop
         icon.source: "qrc" + Utility.getThemePath() + "icons/Help-96.png"
-        icon.width: 16; icon.height: 16
-        implicitWidth: 28; implicitHeight: 28
+        icon.width: 20; icon.height: 20
+        implicitWidth: 34; implicitHeight: 34
         ToolTip.text: "Help"; ToolTip.visible: hovered
         onClicked: {
             VescIf.emitMessageDialog(params.getLongName(paramName),

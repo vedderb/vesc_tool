@@ -196,8 +196,8 @@ Item {
         TabBar {
             id: mainTabBar
             Layout.fillWidth: true
-            TabButton { text: "Current" }
-            TabButton { text: "BEMF" }
+            TabButton { text: "Current"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "BEMF"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {
@@ -574,13 +574,13 @@ Item {
             Button {
                 id: zoomHBtn
                 text: "⇔"; checkable: true; checked: true
-                implicitWidth: 32; implicitHeight: 28
+                implicitWidth: 34; implicitHeight: 32
                 ToolTip.text: "Enable horizontal zoom"; ToolTip.visible: hovered
             }
             Button {
                 id: zoomVBtn
                 text: "⇕"; checkable: true; checked: true
-                implicitWidth: 32; implicitHeight: 28
+                implicitWidth: 34; implicitHeight: 32
                 ToolTip.text: "Enable vertical zoom"; ToolTip.visible: hovered
             }
             Button {

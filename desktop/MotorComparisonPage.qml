@@ -323,8 +323,8 @@ Item {
                     TabBar {
                         id: settingsTabBar
                         Layout.fillWidth: true
-                        TabButton { text: "Custom" }
-                        TabButton { text: "Custom" }
+                        TabButton { text: "Custom"; topPadding: 9; bottomPadding: 9 }
+                        TabButton { text: "Custom"; topPadding: 9; bottomPadding: 9 }
                     }
 
                     StackLayout {
@@ -825,23 +825,23 @@ Item {
                         }
 
                         header: Rectangle {
-                            z: 2; width: m1TableView.width; height: 24
+                            z: 2; width: m1TableView.width; height: 28
                             color: Utility.getAppHexColor("normalBackground")
                             RowLayout {
                                 anchors.fill: parent; anchors.leftMargin: 4; anchors.rightMargin: 4; spacing: 4
-                                Label { text: "Name"; Layout.preferredWidth: 100; font.bold: true; font.pixelSize: 11 }
-                                Label { text: "Value"; Layout.fillWidth: true; font.bold: true; font.pixelSize: 11 }
+                                Label { text: "Name"; Layout.preferredWidth: 100; font.bold: true; font.pointSize: 11 }
+                                Label { text: "Value"; Layout.fillWidth: true; font.bold: true; font.pointSize: 11 }
                             }
                         }
 
                         delegate: Rectangle {
-                            width: m1TableView.width; height: 22
+                            width: m1TableView.width; height: 26
                             color: m1TableView.isSelected(index) ? Utility.getAppHexColor("lightAccent")
                                 : (index % 2 === 0 ? "transparent" : Qt.rgba(0.5, 0.5, 0.5, 0.1))
                             RowLayout {
                                 anchors.fill: parent; anchors.leftMargin: 4; anchors.rightMargin: 4; spacing: 4
-                                Label { text: model.itemName; Layout.preferredWidth: 100; font.pixelSize: 11; elide: Text.ElideRight; color: Utility.getAppHexColor("lightText") }
-                                Label { text: model.itemValue; Layout.fillWidth: true; font.pixelSize: 11; color: Utility.getAppHexColor("lightText") }
+                                Label { text: model.itemName; Layout.preferredWidth: 100; font.pointSize: 11; elide: Text.ElideRight; color: Utility.getAppHexColor("lightText") }
+                                Label { text: model.itemValue; Layout.fillWidth: true; font.pointSize: 11; color: Utility.getAppHexColor("lightText") }
                             }
                             MouseArea { anchors.fill: parent; onClicked: m1TableView.toggleSelection(index) }
                         }
@@ -975,23 +975,23 @@ Item {
                         }
 
                         header: Rectangle {
-                            z: 2; width: m2TableView.width; height: 24
+                            z: 2; width: m2TableView.width; height: 28
                             color: Utility.getAppHexColor("normalBackground")
                             RowLayout {
                                 anchors.fill: parent; anchors.leftMargin: 4; anchors.rightMargin: 4; spacing: 4
-                                Label { text: "Name"; Layout.preferredWidth: 100; font.bold: true; font.pixelSize: 11 }
-                                Label { text: "Value"; Layout.fillWidth: true; font.bold: true; font.pixelSize: 11 }
+                                Label { text: "Name"; Layout.preferredWidth: 100; font.bold: true; font.pointSize: 11 }
+                                Label { text: "Value"; Layout.fillWidth: true; font.bold: true; font.pointSize: 11 }
                             }
                         }
 
                         delegate: Rectangle {
-                            width: m2TableView.width; height: 22
+                            width: m2TableView.width; height: 26
                             color: m2TableView.isSelected(index) ? Utility.getAppHexColor("lightAccent")
                                 : (index % 2 === 0 ? "transparent" : Qt.rgba(0.5, 0.5, 0.5, 0.1))
                             RowLayout {
                                 anchors.fill: parent; anchors.leftMargin: 4; anchors.rightMargin: 4; spacing: 4
-                                Label { text: model.itemName; Layout.preferredWidth: 100; font.pixelSize: 11; elide: Text.ElideRight; color: Utility.getAppHexColor("lightText") }
-                                Label { text: model.itemValue; Layout.fillWidth: true; font.pixelSize: 11; color: Utility.getAppHexColor("lightText") }
+                                Label { text: model.itemName; Layout.preferredWidth: 100; font.pointSize: 11; elide: Text.ElideRight; color: Utility.getAppHexColor("lightText") }
+                                Label { text: model.itemValue; Layout.fillWidth: true; font.pointSize: 11; color: Utility.getAppHexColor("lightText") }
                             }
                             MouseArea { anchors.fill: parent; onClicked: m2TableView.toggleSelection(index) }
                         }

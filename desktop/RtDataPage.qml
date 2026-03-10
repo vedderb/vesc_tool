@@ -67,10 +67,10 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        TabButton { text: "Charts" }
-        TabButton { text: "Values" }
-        TabButton { text: "IMU" }
-        TabButton { text: "Statistics" }
+        TabButton { text: "Charts"; topPadding: 9; bottomPadding: 9 }
+        TabButton { text: "Values"; topPadding: 9; bottomPadding: 9 }
+        TabButton { text: "IMU"; topPadding: 9; bottomPadding: 9 }
+        TabButton { text: "Statistics"; topPadding: 9; bottomPadding: 9 }
     }
 
     StackLayout {
@@ -163,7 +163,7 @@ Item {
                         Label {
                             text: "Realtime Values"
                             font.bold: true
-                            font.pixelSize: 14
+                            font.pointSize: 14
                             Layout.bottomMargin: 4
                         }
 
@@ -195,13 +195,13 @@ Item {
                                 spacing: 8
                                 Label {
                                     text: model.label + ":"
-                                    font.pixelSize: 12
+                                    font.pointSize: 12
                                     Layout.preferredWidth: 130
                                     color: Utility.getAppHexColor("lightText")
                                 }
                                 Label {
                                     text: model.val
-                                    font.pixelSize: 12
+                                    font.pointSize: 12
                                     font.family: "DejaVu Sans Mono"
                                     Layout.fillWidth: true
                                     color: Utility.getAppHexColor("lightText")
@@ -212,7 +212,7 @@ Item {
                         Label {
                             text: "Setup Values"
                             font.bold: true
-                            font.pixelSize: 14
+                            font.pointSize: 14
                             Layout.topMargin: 12
                             Layout.bottomMargin: 4
                         }
@@ -239,13 +239,13 @@ Item {
                                 spacing: 8
                                 Label {
                                     text: model.label + ":"
-                                    font.pixelSize: 12
+                                    font.pointSize: 12
                                     Layout.preferredWidth: 130
                                     color: Utility.getAppHexColor("lightText")
                                 }
                                 Label {
                                     text: model.val
-                                    font.pixelSize: 12
+                                    font.pointSize: 12
                                     font.family: "DejaVu Sans Mono"
                                     Layout.fillWidth: true
                                     color: Utility.getAppHexColor("lightText")
@@ -376,7 +376,7 @@ Item {
                     Label {
                         text: "Statistics"
                         font.bold: true
-                        font.pixelSize: 14
+                        font.pointSize: 14
                         Layout.bottomMargin: 4
                     }
 
@@ -402,13 +402,13 @@ Item {
                             spacing: 8
                             Label {
                                 text: model.label + ":"
-                                font.pixelSize: 12
+                                font.pointSize: 12
                                 Layout.preferredWidth: 140
                                 color: Utility.getAppHexColor("lightText")
                             }
                             Label {
                                 text: model.val
-                                font.pixelSize: 12
+                                font.pointSize: 12
                                 font.family: "DejaVu Sans Mono"
                                 Layout.fillWidth: true
                                 color: Utility.getAppHexColor("lightText")

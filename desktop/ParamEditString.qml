@@ -14,14 +14,13 @@ RowLayout {
 
     spacing: 4
     Layout.fillWidth: true
-    implicitHeight: 28
 
     Label {
         id: nameLabel
-        Layout.preferredWidth: 200
-        Layout.minimumWidth: 120
+        Layout.preferredWidth: 240
+        Layout.minimumWidth: 140
         elide: Text.ElideRight
-        font.pixelSize: 12
+        font.pointSize: 12
         color: Utility.getAppHexColor("lightText")
         ToolTip.text: nameLabel.text
         ToolTip.visible: nameMA.containsMouse && nameLabel.truncated
@@ -31,8 +30,9 @@ RowLayout {
     TextField {
         id: valField
         Layout.fillWidth: true
-        Layout.minimumWidth: 100
-        font.pixelSize: 12
+        Layout.minimumWidth: 120
+        font.pointSize: 12
+        implicitHeight: 34
 
         onTextEdited: {
             if (createReady) {
@@ -43,8 +43,8 @@ RowLayout {
 
     ToolButton {
         icon.source: "qrc" + Utility.getThemePath() + "icons/motor_up.png"
-        icon.width: 16; icon.height: 16
-        implicitWidth: 28; implicitHeight: 28
+        icon.width: 20; icon.height: 20
+        implicitWidth: 34; implicitHeight: 34
         ToolTip.text: "Read Current"; ToolTip.visible: hovered
         visible: params ? params.getParamTransmittable(paramName) : false
         onClicked: { params.setUpdateOnly(paramName); params.requestUpdate() }
@@ -52,8 +52,8 @@ RowLayout {
 
     ToolButton {
         icon.source: "qrc" + Utility.getThemePath() + "icons/motor_default.png"
-        icon.width: 16; icon.height: 16
-        implicitWidth: 28; implicitHeight: 28
+        icon.width: 20; icon.height: 20
+        implicitWidth: 34; implicitHeight: 34
         ToolTip.text: "Read Default"; ToolTip.visible: hovered
         visible: params ? params.getParamTransmittable(paramName) : false
         onClicked: { params.setUpdateOnly(paramName); params.requestUpdateDefault() }
@@ -61,8 +61,8 @@ RowLayout {
 
     ToolButton {
         icon.source: "qrc" + Utility.getThemePath() + "icons/Help-96.png"
-        icon.width: 16; icon.height: 16
-        implicitWidth: 28; implicitHeight: 28
+        icon.width: 20; icon.height: 20
+        implicitWidth: 34; implicitHeight: 34
         ToolTip.text: "Help"; ToolTip.visible: hovered
         onClicked: {
             VescIf.emitMessageDialog(params.getLongName(paramName),

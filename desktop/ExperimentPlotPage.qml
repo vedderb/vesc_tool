@@ -317,32 +317,32 @@ Item {
                         // Graph toggle buttons (row 1: 1-6)
                         Button {
                             id: graph1Btn; text: "1"; checkable: true; checked: true
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Show graph 1"; ToolTip.visible: hovered
                         }
                         Button {
                             id: graph2Btn; text: "2"; checkable: true; checked: true
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Show graph 2"; ToolTip.visible: hovered
                         }
                         Button {
                             id: graph3Btn; text: "3"; checkable: true; checked: true
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Show graph 3"; ToolTip.visible: hovered
                         }
                         Button {
                             id: graph4Btn; text: "4"; checkable: true; checked: true
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Show graph 4"; ToolTip.visible: hovered
                         }
                         Button {
                             id: graph5Btn; text: "5"; checkable: true; checked: true
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Show graph 5"; ToolTip.visible: hovered
                         }
                         Button {
                             id: graph6Btn; text: "6"; checkable: true; checked: true
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Show graph 6"; ToolTip.visible: hovered
                         }
 
@@ -350,7 +350,7 @@ Item {
                         Button {
                             id: clearBtn
                             icon.source: "qrc" + Utility.getThemePath() + "icons/Delete-96.png"
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Clear data from plots"; ToolTip.visible: hovered
                             onClicked: {
                                 for (var i = 0; i < plotGraphs.length; i++) {
@@ -364,34 +364,34 @@ Item {
                         Button {
                             id: showLineBtn; checkable: true; checked: true
                             icon.source: "qrc" + Utility.getThemePath() + "icons/3ph_sine.png"
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Line Plot"; ToolTip.visible: hovered
                             onToggled: needsReplot = true
                         }
                         Button {
                             id: scatterBtn; checkable: true; checked: false
                             icon.source: "qrc" + Utility.getThemePath() + "icons/Polyline-96.png"
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Use Scatterplot"; ToolTip.visible: hovered
                             onToggled: needsReplot = true
                         }
                         Button {
                             id: autoScaleBtn; checkable: true; checked: true
                             icon.source: "qrc" + Utility.getThemePath() + "icons/size_off.png"
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Auto-Scale Plot when samples are received"; ToolTip.visible: hovered
                             onToggled: needsReplot = true
                         }
                         Button {
                             id: hZoomBtn; checkable: true; checked: true
                             icon.source: "qrc" + Utility.getThemePath() + "icons/expand_off.png"
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Enable Horizontal Zoom"; ToolTip.visible: hovered
                         }
                         Button {
                             id: vZoomBtn; checkable: true; checked: true
                             icon.source: "qrc" + Utility.getThemePath() + "icons/expand_v_off.png"
-                            implicitWidth: 25; implicitHeight: 25
+                            implicitWidth: 30; implicitHeight: 30
                             ToolTip.text: "Enable Vertical Zoom"; ToolTip.visible: hovered
                         }
                     }

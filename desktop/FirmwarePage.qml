@@ -490,7 +490,7 @@ Item {
             TextArea {
                 readOnly: true
                 text: Utility.fwChangeLog()
-                font.pixelSize: 12
+                font.pointSize: 12
                 wrapMode: Text.WordWrap
             }
         }
@@ -540,10 +540,10 @@ Item {
                 TabBar {
                     id: fwTabBar
                     Layout.fillWidth: true
-                    TabButton { text: "Included Files" }
-                    TabButton { text: "Custom File" }
-                    TabButton { text: "Bootloader" }
-                    TabButton { text: "Archive" }
+                    TabButton { text: "Included Files"; topPadding: 9; bottomPadding: 9 }
+                    TabButton { text: "Custom File"; topPadding: 9; bottomPadding: 9 }
+                    TabButton { text: "Bootloader"; topPadding: 9; bottomPadding: 9 }
+                    TabButton { text: "Archive"; topPadding: 9; bottomPadding: 9 }
                 }
 
                 StackLayout {

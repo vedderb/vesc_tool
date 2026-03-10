@@ -25,8 +25,8 @@ Item {
         TabBar {
             id: tabBar
             Layout.fillWidth: true
-            TabButton { text: "General" }
-            TabButton { text: "Tools" }
+            TabButton { text: "General"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Tools"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {

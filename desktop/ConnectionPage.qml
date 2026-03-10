@@ -179,12 +179,12 @@ Item {
             id: connTabBar
             Layout.fillWidth: true
 
-            TabButton { text: "(USB-)Serial" }
-            TabButton { text: "CAN bus" }
-            TabButton { text: "TCP" }
-            TabButton { text: "UDP" }
-            TabButton { text: "Bluetooth LE" }
-            TabButton { text: "TCP Hub" }
+            TabButton { text: "(USB-)Serial"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "CAN bus"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "TCP"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "UDP"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Bluetooth LE"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "TCP Hub"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {

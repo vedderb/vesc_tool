@@ -111,8 +111,8 @@ Item {
         TabBar {
             id: tabBar
             Layout.fillWidth: true
-            TabButton { text: "General" }
-            TabButton { text: "Throttle Curve" }
+            TabButton { text: "General"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Throttle Curve"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {
@@ -161,7 +161,7 @@ Item {
                             Label {
                                 id: chukLabel
                                 text: "-- %"
-                                font.pixelSize: 12
+                                font.pointSize: 12
                                 horizontalAlignment: Text.AlignRight
                                 Layout.preferredWidth: 80
                             }

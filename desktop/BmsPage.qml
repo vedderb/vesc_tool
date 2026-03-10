@@ -27,8 +27,8 @@ Item {
             TabBar {
                 id: bmsTabBar
                 Layout.fillWidth: true
-                TabButton { text: "Cell Voltages" }
-                TabButton { text: "Temperatures" }
+                TabButton { text: "Cell Voltages"; topPadding: 9; bottomPadding: 9 }
+                TabButton { text: "Temperatures"; topPadding: 9; bottomPadding: 9 }
             }
 
             StackLayout {
@@ -102,7 +102,7 @@ Item {
                 Label {
                     text: "BMS Values"
                     font.bold: true
-                    font.pixelSize: 14
+                    font.pointSize: 14
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                     Layout.bottomMargin: 4
@@ -140,13 +140,13 @@ Item {
                         spacing: 4
                         Label {
                             text: model.label + ":"
-                            font.pixelSize: 11
+                            font.pointSize: 11
                             Layout.preferredWidth: 100
                             color: Utility.getAppHexColor("lightText")
                         }
                         Label {
                             text: model.val
-                            font.pixelSize: 11
+                            font.pointSize: 11
                             font.family: "DejaVu Sans Mono"
                             Layout.fillWidth: true
                             color: Utility.getAppHexColor("lightText")

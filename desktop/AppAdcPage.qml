@@ -106,9 +106,9 @@ Item {
         TabBar {
             id: tabBar
             Layout.fillWidth: true
-            TabButton { text: "General" }
-            TabButton { text: "Mapping" }
-            TabButton { text: "Throttle Curve" }
+            TabButton { text: "General"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Mapping"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Throttle Curve"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {
@@ -202,7 +202,7 @@ Item {
                                     Layout.fillWidth: true
                                     spacing: 0
                                     ProgressBar { id: adc1Bar; Layout.fillWidth: true; from: -1; to: 1; value: 0; Layout.preferredHeight: 20 }
-                                    Label { id: adc1Label; text: "-- V (-- %)"; font.pixelSize: 11; color: Utility.getAppHexColor("lightText") }
+                                    Label { id: adc1Label; text: "-- V (-- %)"; font.pointSize: 11; color: Utility.getAppHexColor("lightText") }
                                 }
 
                                 // CH2 row
@@ -216,7 +216,7 @@ Item {
                                     Layout.fillWidth: true
                                     spacing: 0
                                     ProgressBar { id: adc2Bar; Layout.fillWidth: true; from: -1; to: 1; value: 0; Layout.preferredHeight: 20 }
-                                    Label { id: adc2Label; text: "-- V (-- %)"; font.pixelSize: 11; color: Utility.getAppHexColor("lightText") }
+                                    Label { id: adc2Label; text: "-- V (-- %)"; font.pointSize: 11; color: Utility.getAppHexColor("lightText") }
                                 }
                             }
                         }

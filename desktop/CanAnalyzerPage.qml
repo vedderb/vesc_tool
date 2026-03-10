@@ -189,25 +189,25 @@ Item {
                     anchors.fill: parent
                     anchors.leftMargin: 4
                     spacing: 0
-                    Label { text: "Ext"; Layout.preferredWidth: 50; font.bold: true; font.pixelSize: 11 }
-                    Label { text: "ID"; Layout.preferredWidth: 110; font.bold: true; font.pixelSize: 11 }
-                    Label { text: "Len"; Layout.preferredWidth: 40; font.bold: true; font.pixelSize: 11 }
-                    Label { text: "Data"; Layout.fillWidth: true; font.bold: true; font.pixelSize: 11 }
+                    Label { text: "Ext"; Layout.preferredWidth: 50; font.bold: true; font.pointSize: 11 }
+                    Label { text: "ID"; Layout.preferredWidth: 110; font.bold: true; font.pointSize: 11 }
+                    Label { text: "Len"; Layout.preferredWidth: 40; font.bold: true; font.pointSize: 11 }
+                    Label { text: "Data"; Layout.fillWidth: true; font.bold: true; font.pointSize: 11 }
                 }
             }
 
             delegate: Rectangle {
                 width: msgListView.width
-                height: 22
+                height: 24
                 color: index % 2 === 0 ? "transparent" : Utility.getAppHexColor("normalBackground")
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 4
                     spacing: 0
-                    Label { text: model.ext; Layout.preferredWidth: 50; font.pixelSize: 11 }
-                    Label { text: model.canId; Layout.preferredWidth: 110; font.pixelSize: 11; font.family: "monospace" }
-                    Label { text: model.len; Layout.preferredWidth: 40; font.pixelSize: 11 }
-                    Label { text: model.data; Layout.fillWidth: true; font.pixelSize: 11; font.family: "monospace" }
+                    Label { text: model.ext; Layout.preferredWidth: 50; font.pointSize: 11 }
+                    Label { text: model.canId; Layout.preferredWidth: 110; font.pointSize: 11; font.family: "monospace" }
+                    Label { text: model.len; Layout.preferredWidth: 40; font.pointSize: 11 }
+                    Label { text: model.data; Layout.fillWidth: true; font.pointSize: 11; font.family: "monospace" }
                 }
             }
 

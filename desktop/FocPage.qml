@@ -30,16 +30,16 @@ Item {
         TabBar {
             id: focTabBar
             Layout.fillWidth: true
-            TabButton { text: "General" }
-            TabButton { text: "Sensorless" }
-            TabButton { text: "Hall Sensors" }
-            TabButton { text: "Encoder" }
-            TabButton { text: "HFI" }
-            TabButton { text: "VSS" }
-            TabButton { text: "Filters" }
-            TabButton { text: "Offsets" }
-            TabButton { text: "Field Weakening" }
-            TabButton { text: "Advanced" }
+            TabButton { text: "General"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Sensorless"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Hall Sensors"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Encoder"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "HFI"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "VSS"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Filters"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Offsets"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Field Weakening"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Advanced"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {

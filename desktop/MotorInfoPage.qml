@@ -27,10 +27,10 @@ Item {
         TabBar {
             id: infoTabBar
             Layout.fillWidth: true
-            TabButton { text: "Setup" }
-            TabButton { text: "Motor General" }
-            TabButton { text: "Description" }
-            TabButton { text: "Quality" }
+            TabButton { text: "Setup"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Motor General"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Description"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Quality"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {

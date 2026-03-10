@@ -150,7 +150,10 @@ ApplicationWindow {
                         Layout.preferredWidth: 200
                         Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
                         source: "qrc" + Utility.getThemePath() + "logo.png"
+                        sourceSize.width: 220
                         fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        mipmap: true
                         antialiasing: true
                     }
 
@@ -203,7 +206,10 @@ ApplicationWindow {
                                             Layout.preferredWidth: iconSz
                                             Layout.preferredHeight: iconSz
                                             source: model.iconFile !== "" ? ("qrc" + Utility.getThemePath() + model.iconFile) : ""
+                                            sourceSize: Qt.size(iconSz, iconSz)
                                             fillMode: Image.PreserveAspectFit
+                                            smooth: true
+                                            mipmap: true
                                             visible: model.iconFile !== ""
                                         }
 
@@ -212,7 +218,7 @@ ApplicationWindow {
                                             id: nameLabel
                                             text: model.name
                                             font.bold: model.bold
-                                            font.pixelSize: 13
+                                            font.pointSize: 12
                                             color: Utility.getAppHexColor("lightText")
                                             Layout.fillWidth: true
                                             elide: Text.ElideRight
@@ -228,6 +234,8 @@ ApplicationWindow {
                                                 : badgeH
                                             source: model.groupIcon !== "" ? ("qrc" + Utility.getThemePath() + model.groupIcon) : ""
                                             fillMode: Image.PreserveAspectFit
+                                            smooth: true
+                                            mipmap: true
                                             visible: model.groupIcon !== ""
                                         }
                                     }
@@ -291,7 +299,7 @@ ApplicationWindow {
 
                                             Label {
                                                 text: model.canId < 0 ? "Local VESC" : ("ID: " + model.canId)
-                                                font.pixelSize: 12
+                                                font.pointSize: 12
                                                 font.family: "Roboto"
                                                 color: Utility.getAppHexColor("lightText")
                                                 Layout.fillWidth: true
@@ -924,7 +932,7 @@ ApplicationWindow {
     // Status bar (footer)
     // ---------------------------------------------------------------
     footer: Rectangle {
-        height: 24
+        height: 28
         color: Utility.getAppHexColor("lightBackground")
 
         RowLayout {
@@ -937,7 +945,7 @@ ApplicationWindow {
                 id: statusInfo
                 text: ""
                 color: Utility.getAppHexColor("lightText")
-                font.pixelSize: 12
+                font.pointSize: 12
                 Layout.fillWidth: true
             }
 
@@ -945,7 +953,7 @@ ApplicationWindow {
                 id: connectedLabel
                 text: VescIf.getConnectedPortName()
                 color: Utility.getAppHexColor("lightText")
-                font.pixelSize: 12
+                font.pointSize: 12
             }
         }
     }

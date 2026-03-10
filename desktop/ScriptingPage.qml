@@ -91,10 +91,12 @@ Item {
                     TabButton {
                         text: "main"
                         width: implicitWidth
+                        topPadding: 9; bottomPadding: 9
                     }
                     TabButton {
                         text: "+"
                         width: 40
+                        topPadding: 9; bottomPadding: 9
                         onClicked: addNewTab()
                     }
                 }
@@ -112,7 +114,7 @@ Item {
                         TextArea {
                             id: mainEditor
                             font.family: "DejaVu Sans Mono"
-                            font.pixelSize: 13
+                            font.pointSize: 12
                             wrapMode: TextEdit.NoWrap
                             selectByMouse: true
                             color: Utility.getAppHexColor("normalText")
@@ -141,7 +143,7 @@ Item {
                     anchors.centerIn: parent
                     text: "QML Preview"
                     color: Utility.getAppHexColor("disabledText")
-                    font.pixelSize: 14
+                    font.pointSize: 14
                 }
             }
         }
@@ -150,12 +152,11 @@ Item {
         TabBar {
             id: bottomTabBar
             SplitView.fillWidth: true
-            SplitView.preferredHeight: 30
 
-            TabButton { text: "Console" }
-            TabButton { text: "Recent" }
-            TabButton { text: "Examples" }
-            TabButton { text: "Tools" }
+            TabButton { text: "Console"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Recent"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Examples"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Tools"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {
@@ -174,7 +175,7 @@ Item {
                         id: consoleEdit
                         readOnly: true
                         font.family: "DejaVu Sans Mono"
-                        font.pixelSize: 12
+                        font.pointSize: 12
                         wrapMode: TextEdit.NoWrap
                         textFormat: TextEdit.RichText
                         color: Utility.getAppHexColor("normalText")
@@ -402,7 +403,7 @@ Item {
                                 id: uploadTextEdit
                                 readOnly: true
                                 font.family: "DejaVu Sans Mono"
-                                font.pixelSize: 12
+                                font.pointSize: 12
                                 wrapMode: TextEdit.NoWrap
                                 color: Utility.getAppHexColor("normalText")
                             }

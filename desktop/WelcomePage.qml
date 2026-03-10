@@ -25,6 +25,8 @@ Item {
                 anchors.fill: parent
                 source: "qrc:/res/bg.png"
                 fillMode: Image.PreserveAspectCrop
+                smooth: true
+                mipmap: true
                 opacity: 0.15
             }
 
@@ -170,14 +172,17 @@ Item {
                     Layout.preferredWidth: Math.min(parent.width * 0.5, 250)
                     Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
                     source: "qrc" + Utility.getThemePath() + "logo.png"
+                    sourceSize.width: 250
                     fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    mipmap: true
                     antialiasing: true
                 }
 
                 Label {
                     Layout.alignment: Qt.AlignHCenter
                     text: "VESC® Tool"
-                    font.pixelSize: 28
+                    font.pointSize: 28
                     font.bold: true
                     color: Utility.getAppHexColor("lightText")
                 }
@@ -185,7 +190,7 @@ Item {
                 Label {
                     Layout.alignment: Qt.AlignHCenter
                     text: "Version " + Utility.versionText()
-                    font.pixelSize: 14
+                    font.pointSize: 14
                     color: Utility.getAppHexColor("normalText")
                 }
 
@@ -194,7 +199,7 @@ Item {
                     horizontalAlignment: Text.AlignHCenter
                     text: "Connect your VESC using the Connection page or the toolbar buttons.\n\n" +
                           "Motor and App configuration pages will appear in the sidebar once connected."
-                    font.pixelSize: 13
+                    font.pointSize: 12
                     wrapMode: Text.WordWrap
                     color: Utility.getAppHexColor("disabledText")
                 }

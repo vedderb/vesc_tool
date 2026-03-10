@@ -26,15 +26,15 @@ Item {
         TabBar {
             id: motorTabBar
             Layout.fillWidth: true
-            TabButton { text: "General" }
-            TabButton { text: "Sensors" }
-            TabButton { text: "Current" }
-            TabButton { text: "Voltage" }
-            TabButton { text: "RPM" }
-            TabButton { text: "Wattage" }
-            TabButton { text: "Temperature" }
-            TabButton { text: "BMS" }
-            TabButton { text: "Advanced" }
+            TabButton { text: "General"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Sensors"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Current"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Voltage"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "RPM"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Wattage"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Temperature"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "BMS"; topPadding: 9; bottomPadding: 9 }
+            TabButton { text: "Advanced"; topPadding: 9; bottomPadding: 9 }
         }
 
         StackLayout {

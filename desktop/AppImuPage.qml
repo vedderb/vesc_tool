@@ -221,9 +221,9 @@ Item {
                 TabBar {
                     id: plotTabBar
                     Layout.fillWidth: true
-                    TabButton { text: "RPY" }
-                    TabButton { text: "Accel" }
-                    TabButton { text: "Gyro" }
+                    TabButton { text: "RPY"; topPadding: 9; bottomPadding: 9 }
+                    TabButton { text: "Accel"; topPadding: 9; bottomPadding: 9 }
+                    TabButton { text: "Gyro"; topPadding: 9; bottomPadding: 9 }
                 }
             }
 

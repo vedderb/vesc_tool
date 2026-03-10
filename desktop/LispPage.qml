@@ -96,7 +96,7 @@ Item {
                 TextArea {
                     id: codeEditor
                     font.family: "DejaVu Sans Mono"
-                    font.pixelSize: 12
+                    font.pointSize: 12
                     color: Utility.getAppHexColor("lightText")
                     wrapMode: TextEdit.NoWrap
                     tabStopDistance: 28
@@ -121,7 +121,7 @@ Item {
             Label {
                 text: "REPL Output"
                 font.bold: true
-                font.pixelSize: 12
+                font.pointSize: 12
                 Layout.margins: 4
             }
 
@@ -134,7 +134,7 @@ Item {
                     id: replOutput
                     readOnly: true
                     font.family: "DejaVu Sans Mono"
-                    font.pixelSize: 11
+                    font.pointSize: 11
                     color: Utility.getAppHexColor("lightText")
                     wrapMode: TextEdit.NoWrap
                     selectByMouse: true
@@ -155,7 +155,7 @@ Item {
                     id: replEdit
                     Layout.fillWidth: true
                     font.family: "DejaVu Sans Mono"
-                    font.pixelSize: 12
+                    font.pointSize: 12
                     placeholderText: "REPL command..."
 
                     Keys.onReturnPressed: sendRepl()

@@ -251,7 +251,7 @@ Item {
                     return "State: " + stateStr[expState] + " | Samples: " + sampleCount
                 }
                 color: Utility.getAppHexColor("disabledText")
-                font.pixelSize: 11
+                font.pointSize: 11
             }
             Item { Layout.fillWidth: true }
         }

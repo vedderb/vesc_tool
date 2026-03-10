@@ -16,6 +16,50 @@ Item {
     property int maxSamples: 500
     property int sampleIndex: 0
     property Commands mCommands: VescIf.commands()
+    property int autoRangeInterval: 20  // recalc Y range every N samples
+    property int autoRangeCounter: 0
+
+    // Scan all visible points in the given series list and return { yMin, yMax }
+    function calcSeriesRange(seriesList) {
+        var yMin = Number.MAX_VALUE
+        var yMax = -Number.MAX_VALUE
+        var xMin = seriesList[0] ? (sampleIndex > maxSamples ? sampleIndex - maxSamples : 0) : 0
+        for (var s = 0; s < seriesList.length; s++) {
+            var series = seriesList[s]
+            for (var i = 0; i < series.count; i++) {
+                var pt = series.at(i)
+                if (pt.x >= xMin) {
+                    if (pt.y < yMin) yMin = pt.y
+                    if (pt.y > yMax) yMax = pt.y
+                }
+            }
+        }
+        if (yMin === Number.MAX_VALUE) { yMin = -1; yMax = 1 }
+        return { yMin: yMin, yMax: yMax }
+    }
+
+    // Apply autorange to a ValueAxis given the range from calcSeriesRange
+    function autoRangeAxis(axis, range, symmetric, minSpan) {
+        var lo = range.yMin
+        var hi = range.yMax
+        var span = hi - lo
+        if (span < minSpan) {
+            var mid = (hi + lo) / 2
+            lo = mid - minSpan / 2
+            hi = mid + minSpan / 2
+            span = minSpan
+        }
+        var margin = span * 0.15
+        if (symmetric) {
+            var absMax = Math.max(Math.abs(lo), Math.abs(hi)) + margin
+            if (absMax < minSpan / 2) absMax = minSpan / 2
+            axis.min = -absMax
+            axis.max = absMax
+        } else {
+            axis.min = lo - margin
+            axis.max = hi + margin
+        }
+    }
 
     TabBar {
         id: rtTabBar
@@ -411,21 +455,20 @@ Item {
                     tempAxisXX.max = sampleIndex
                 }
 
-                // Auto-scale Y
-                var maxCurr = Math.max(Math.abs(values.current_motor), Math.abs(values.current_in), 10)
-                if (maxCurr * 1.1 > currentAxisY.max) {
-                    currentAxisY.max = maxCurr * 1.3
-                    currentAxisY.min = -maxCurr * 1.3
-                }
+                // Auto-range Y axes
+                autoRangeCounter++
+                if (autoRangeCounter >= autoRangeInterval) {
+                    autoRangeCounter = 0
 
-                var absRpm = Math.abs(values.rpm)
-                if (absRpm > rpmAxisY.max * 0.9) {
-                    rpmAxisY.max = absRpm * 1.3
-                    rpmAxisY.min = -absRpm * 1.3
-                }
+                    var currRange = calcSeriesRange([motorCurrentSeries, batteryCurrentSeries, dutySeries])
+                    autoRangeAxis(currentAxisY, currRange, true, 20)
 
-                if (values.temp_mos > tempAxisY.max * 0.9) tempAxisY.max = values.temp_mos * 1.3
-                if (values.temp_motor > tempAxisY.max * 0.9) tempAxisY.max = values.temp_motor * 1.3
+                    var rpmRange = calcSeriesRange([rpmSeries])
+                    autoRangeAxis(rpmAxisY, rpmRange, true, 1000)
+
+                    var tempRange = calcSeriesRange([tempMosfetSeries, tempMotorSeries])
+                    autoRangeAxis(tempAxisY, tempRange, false, 10)
+                }
 
                 // Trim old data
                 while (motorCurrentSeries.count > maxSamples + 100) {

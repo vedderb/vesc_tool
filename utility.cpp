@@ -600,6 +600,8 @@ QString Utility::detectAllFoc(VescInterface *vesc,
             case -100 + FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: reason = "Magnet too strong, magnet is too strong or too close to the encoder"; break;
             case -100 + FAULT_CODE_PHASE_FILTER: reason = "Phase filter fault, invalid phase filter readings"; break;
             case -100 + FAULT_CODE_ENCODER_FAULT: reason = "Encoder fault, check encoder connections and alignment"; break;
+            case -100 + FAULT_CODE_LV_OUTPUT_FAULT: reason = "Low Voltage fault"; break;
+            case -100 + FAULT_CODE_ENCODER_LOOSE_MAGNET: reason = "Magnet is loose, the observer phase and encoder phase are not in sync anymore"; break;
 
             default: reason = QString::number(resDetect); break;
             }

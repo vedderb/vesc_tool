@@ -2995,6 +2995,20 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>7</vTx>
         </foc_overmod_factor>
+        <foc_encoder_check_slip>
+            <longName>Mechanical Slip Detection</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Check for mechanical slip by comparing the FOC observer phase against the physical encoder phase.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If enabled, a fault will be triggered if the phase gap exceeds 15 degrees for more than 500ms while spinning.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_ENCODER_CHECK_SLIP</cDefine>
+            <valInt>0</valInt>
+        </foc_encoder_check_slip>
         <sp_pid_loop_rate>
             <longName>PID Loop Rate</longName>
             <type>4</type>
@@ -4822,6 +4836,7 @@ p, li { white-space: pre-wrap; }
         <ser>bms.vmax_limit_start</ser>
         <ser>bms.vmax_limit_end</ser>
         <ser>bms.fwd_can_mode</ser>
+        <ser>foc_encoder_check_slip</ser>
     </SerOrder>
     <Grouping>
         <group>
@@ -5152,6 +5167,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_speed_soure</param>
                     <param>foc_short_ls_on_zero_duty</param>
                     <param>foc_overmod_factor</param>
+                    <param>foc_encoder_check_slip</param>
                 </subgroupParams>
             </subgroup>
         </group>

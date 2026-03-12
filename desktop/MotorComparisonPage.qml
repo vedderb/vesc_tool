@@ -214,6 +214,8 @@ Item {
         }
     }
 
+    property int _legendRevision: 0
+
     function updatePlot(result) {
         // Clear all existing series
         while (graphsView.seriesList.length > 0) {
@@ -261,6 +263,8 @@ Item {
 
             graphsView.addSeries(ls)
         }
+
+        _legendRevision++
     }
 
     function updateTableAtX(x) {
@@ -626,26 +630,33 @@ Item {
                         Layout.fillHeight: true
                         spacing: 2
 
-                        GraphsView {
-                            id: graphsView
+                        ColumnLayout {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
+                            spacing: 2
 
-                            theme: GraphsTheme {
-                                colorScheme: Utility.isDarkMode() ? GraphsTheme.ColorScheme.Dark : GraphsTheme.ColorScheme.Light
-                                plotAreaBackgroundColor: Utility.getAppHexColor("plotBackground")
-                                grid.mainColor: Utility.isDarkMode() ? "#444444" : "#cccccc"
-                            }
+                            GraphsView {
+                                id: graphsView
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
 
-                            axisX: ValueAxis {
-                                id: plotAxisX
-                                min: 0; max: 100
-                                titleText: "Torque (Nm)"
+                                theme: GraphsTheme {
+                                    colorScheme: Utility.isDarkMode() ? GraphsTheme.ColorScheme.Dark : GraphsTheme.ColorScheme.Light
+                                    plotAreaBackgroundColor: Utility.getAppHexColor("plotBackground")
+                                    grid.mainColor: Utility.isDarkMode() ? "#444444" : "#cccccc"
+                                }
+
+                                axisX: ValueAxis {
+                                    id: plotAxisX
+                                    min: 0; max: 100
+                                    titleText: "Torque (Nm)"
+                                }
+                                axisY: ValueAxis {
+                                    id: plotAxisY
+                                    min: 0; max: 100
+                                }
                             }
-                            axisY: ValueAxis {
-                                id: plotAxisY
-                                min: 0; max: 100
-                            }
+                            PlotLegend { graphsView: graphsView; revision: _legendRevision }
                         }
 
                         // Vertical button strip (right of plot)

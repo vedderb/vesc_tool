@@ -242,6 +242,8 @@ Item {
             }
         }
 
+        PlotLegend { graphsView: graphsView }
+
         // Status bar
         RowLayout {
             Layout.fillWidth: true

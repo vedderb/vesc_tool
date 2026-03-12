@@ -14,7 +14,6 @@ Item {
     id: rtDataPage
 
     property int maxSamples: 500
-    property int sampleIndex: 0
     property Commands mCommands: VescIf.commands()
     property int autoRangeInterval: 20  // recalc Y range every N samples
     property int autoRangeCounter: 0
@@ -23,7 +22,8 @@ Item {
     function calcSeriesRange(seriesList) {
         var yMin = Number.MAX_VALUE
         var yMax = -Number.MAX_VALUE
-        var xMin = seriesList[0] ? (sampleIndex > maxSamples ? sampleIndex - maxSamples : 0) : 0
+        var curIdx = RtDataStore.rtSampleIndex
+        var xMin = seriesList[0] ? (curIdx > maxSamples ? curIdx - maxSamples : 0) : 0
         for (var s = 0; s < seriesList.length; s++) {
             var series = seriesList[s]
             for (var i = 0; i < series.count; i++) {
@@ -89,6 +89,7 @@ Item {
 
                 // Current chart
                 GraphsView {
+                    id: currentChart
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.minimumHeight: 100
@@ -106,9 +107,11 @@ Item {
                     LineSeries { id: batteryCurrentSeries; color: Utility.getAppHexColor("green"); width: 2; name: "Battery I" }
                     LineSeries { id: dutySeries; color: Utility.getAppHexColor("orange"); width: 1; name: "Duty×100" }
                 }
+                PlotLegend { graphsView: currentChart }
 
                 // RPM + Speed chart
                 GraphsView {
+                    id: rpmChart
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.minimumHeight: 100
@@ -124,9 +127,11 @@ Item {
 
                     LineSeries { id: rpmSeries; color: Utility.getAppHexColor("cyan"); width: 2; name: "RPM" }
                 }
+                PlotLegend { graphsView: rpmChart }
 
                 // Temperature chart
                 GraphsView {
+                    id: tempChart
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.minimumHeight: 100
@@ -143,6 +148,7 @@ Item {
                     LineSeries { id: tempMosfetSeries; color: Utility.getAppHexColor("red"); width: 2; name: "MOSFET" }
                     LineSeries { id: tempMotorSeries; color: Utility.getAppHexColor("magenta"); width: 2; name: "Motor" }
                 }
+                PlotLegend { graphsView: tempChart }
             }
         }
 
@@ -429,48 +435,69 @@ Item {
     }
 
     // ---------------------------------------------------------------
-    // Data connections
+    // Restore chart data from the persistent C++ store on page creation
+    // ---------------------------------------------------------------
+    Component.onCompleted: {
+        var names  = ["motorCurrent", "batteryCurrent", "duty", "rpm", "tempMosfet", "tempMotor"]
+        var series = [motorCurrentSeries, batteryCurrentSeries, dutySeries,
+                      rpmSeries, tempMosfetSeries, tempMotorSeries]
+        for (var s = 0; s < names.length; s++) {
+            var pts = RtDataStore.rtSeriesPoints(names[s])
+            for (var i = 0; i < pts.length; i++)
+                series[s].append(pts[i].x, pts[i].y)
+        }
+        // Restore axis state
+        var idx = RtDataStore.rtSampleIndex
+        if (idx > maxSamples) {
+            currentAxisX.min = idx - maxSamples;  currentAxisX.max = idx
+            rpmAxisX.min     = idx - maxSamples;  rpmAxisX.max     = idx
+            tempAxisXX.min   = idx - maxSamples;  tempAxisXX.max   = idx
+        }
+        // Initial auto-range
+        if (motorCurrentSeries.count > 0) {
+            var currRange = calcSeriesRange([motorCurrentSeries, batteryCurrentSeries, dutySeries])
+            autoRangeAxis(currentAxisY, currRange, true, 20)
+            var rpmRange = calcSeriesRange([rpmSeries])
+            autoRangeAxis(rpmAxisY, rpmRange, true, 1000)
+            var tempRange = calcSeriesRange([tempMosfetSeries, tempMotorSeries])
+            autoRangeAxis(tempAxisY, tempRange, false, 10)
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Incremental chart updates from the persistent store
     // ---------------------------------------------------------------
     Connections {
-        target: mCommands
+        target: RtDataStore
 
-        function onValuesReceived(values, mask) {
-            // Update charts (Tab 0)
+        function onRtDataAppended(sampleIdx, motorI, batteryI, duty, rpm, tempMos, tempMotor) {
             if (rtTabBar.currentIndex === 0) {
-                motorCurrentSeries.append(sampleIndex, values.current_motor)
-                batteryCurrentSeries.append(sampleIndex, values.current_in)
-                dutySeries.append(sampleIndex, values.duty_now * 100)
-                rpmSeries.append(sampleIndex, values.rpm)
-                tempMosfetSeries.append(sampleIndex, values.temp_mos)
-                tempMotorSeries.append(sampleIndex, values.temp_motor)
+                motorCurrentSeries.append(sampleIdx, motorI)
+                batteryCurrentSeries.append(sampleIdx, batteryI)
+                dutySeries.append(sampleIdx, duty)
+                rpmSeries.append(sampleIdx, rpm)
+                tempMosfetSeries.append(sampleIdx, tempMos)
+                tempMotorSeries.append(sampleIdx, tempMotor)
 
-                sampleIndex++
-
-                if (sampleIndex > maxSamples) {
-                    currentAxisX.min = sampleIndex - maxSamples
-                    currentAxisX.max = sampleIndex
-                    rpmAxisX.min = sampleIndex - maxSamples
-                    rpmAxisX.max = sampleIndex
-                    tempAxisXX.min = sampleIndex - maxSamples
-                    tempAxisXX.max = sampleIndex
+                if (sampleIdx + 1 > maxSamples) {
+                    var lo = sampleIdx + 1 - maxSamples
+                    currentAxisX.min = lo;  currentAxisX.max = sampleIdx + 1
+                    rpmAxisX.min     = lo;  rpmAxisX.max     = sampleIdx + 1
+                    tempAxisXX.min   = lo;  tempAxisXX.max   = sampleIdx + 1
                 }
 
-                // Auto-range Y axes
                 autoRangeCounter++
                 if (autoRangeCounter >= autoRangeInterval) {
                     autoRangeCounter = 0
-
                     var currRange = calcSeriesRange([motorCurrentSeries, batteryCurrentSeries, dutySeries])
                     autoRangeAxis(currentAxisY, currRange, true, 20)
-
                     var rpmRange = calcSeriesRange([rpmSeries])
                     autoRangeAxis(rpmAxisY, rpmRange, true, 1000)
-
                     var tempRange = calcSeriesRange([tempMosfetSeries, tempMotorSeries])
                     autoRangeAxis(tempAxisY, tempRange, false, 10)
                 }
 
-                // Trim old data
+                // Trim old QML-side data
                 while (motorCurrentSeries.count > maxSamples + 100) {
                     motorCurrentSeries.remove(0)
                     batteryCurrentSeries.remove(0)
@@ -480,7 +507,16 @@ Item {
                     tempMotorSeries.remove(0)
                 }
             }
+        }
+    }
 
+    // ---------------------------------------------------------------
+    // Values / Setup / IMU / Stats text updates (still from Commands)
+    // ---------------------------------------------------------------
+    Connections {
+        target: mCommands
+
+        function onValuesReceived(values, mask) {
             // Update values table (Tab 1)
             if (rtTabBar.currentIndex === 1) {
                 var idx = 0

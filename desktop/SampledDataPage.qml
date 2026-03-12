@@ -31,6 +31,8 @@ import Vedder.vesc
 Item {
     id: sampledPage
 
+    property int _legendRevision: 0
+
     SampledDataHelper {
         id: helper
         Component.onCompleted: setVescInterface(VescIf)
@@ -75,6 +77,8 @@ Item {
         }
 
         rescaleCurrentAxes()
+
+        _legendRevision++
     }
 
     function replotVoltage() {
@@ -102,6 +106,8 @@ Item {
         voltageAxisY.titleText = "Volts (V)"
 
         rescaleVoltageAxes()
+
+        _legendRevision++
     }
 
     function replotFilter() {
@@ -232,6 +238,7 @@ Item {
                             axisX: ValueAxis { id: currentAxisX; min: 0; max: 1; titleText: "Seconds (s)" }
                             axisY: ValueAxis { id: currentAxisY; min: -100; max: 100; titleText: "Amperes (A)" }
                         }
+                        PlotLegend { graphsView: currentChart; revision: _legendRevision }
 
                         // Trace checkboxes row
                         RowLayout {
@@ -441,6 +448,7 @@ Item {
                     axisX: ValueAxis { id: voltageAxisX; min: 0; max: 1; titleText: "Seconds (s)" }
                     axisY: ValueAxis { id: voltageAxisY; min: -100; max: 100; titleText: "Volts (V)" }
                 }
+                PlotLegend { graphsView: voltageChart; revision: _legendRevision }
 
                 RowLayout {
                     Layout.fillWidth: true

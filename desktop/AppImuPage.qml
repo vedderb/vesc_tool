@@ -27,7 +27,6 @@ Item {
     property var _gyroXVec: []; property var _gyroYVec: []; property var _gyroZVec: []
 
     property double _secondCounter: 0.0
-    property double _lastUpdateTime: 0
     property bool _updatePlots: false
 
     // Latest values for axis labels
@@ -45,38 +44,31 @@ Item {
     }
 
     Connections {
-        target: mCommands
-        function onValuesImuReceived(values, mask) {
-            var rollDeg  = values.roll  * 180.0 / Math.PI
-            var pitchDeg = values.pitch * 180.0 / Math.PI
-            var yawDeg   = values.yaw   * 180.0 / Math.PI
+        target: RtDataStore
+        function onImuDataAppended(time, roll, pitch, yaw, accX, accY, accZ, gyroX, gyroY, gyroZ) {
+            appendAndTrunc(_seconds, time)
+            appendAndTrunc(_rollVec, roll)
+            appendAndTrunc(_pitchVec, pitch)
+            appendAndTrunc(_yawVec, yaw)
+            appendAndTrunc(_accXVec, accX)
+            appendAndTrunc(_accYVec, accY)
+            appendAndTrunc(_accZVec, accZ)
+            appendAndTrunc(_gyroXVec, gyroX)
+            appendAndTrunc(_gyroYVec, gyroY)
+            appendAndTrunc(_gyroZVec, gyroZ)
 
-            // Update 3D view (radians for setRotation)
-            view3d.setRotation(values.roll, values.pitch,
-                               useYawBox.checked ? values.yaw : 0.0)
+            _secondCounter = time
 
-            appendAndTrunc(_rollVec,  rollDeg)
-            appendAndTrunc(_pitchVec, pitchDeg)
-            appendAndTrunc(_yawVec,   yawDeg)
+            // Update 3D view (convert degrees back to radians)
+            var rollRad  = roll  * Math.PI / 180.0
+            var pitchRad = pitch * Math.PI / 180.0
+            var yawRad   = yaw   * Math.PI / 180.0
+            view3d.setRotation(rollRad, pitchRad,
+                               useYawBox.checked ? yawRad : 0.0)
 
-            appendAndTrunc(_accXVec, values.accX)
-            appendAndTrunc(_accYVec, values.accY)
-            appendAndTrunc(_accZVec, values.accZ)
-
-            appendAndTrunc(_gyroXVec, values.gyroX)
-            appendAndTrunc(_gyroYVec, values.gyroY)
-            appendAndTrunc(_gyroZVec, values.gyroZ)
-
-            var tNow = Date.now()
-            var elapsed = (_lastUpdateTime > 0) ? (tNow - _lastUpdateTime) / 1000.0 : 0
-            if (elapsed > 1.0) elapsed = 1.0
-            _secondCounter += elapsed
-            appendAndTrunc(_seconds, _secondCounter)
-            _lastUpdateTime = tNow
-
-            _curRoll = rollDeg; _curPitch = pitchDeg; _curYaw = yawDeg
-            _curAccX = values.accX; _curAccY = values.accY; _curAccZ = values.accZ
-            _curGyroX = values.gyroX; _curGyroY = values.gyroY; _curGyroZ = values.gyroZ
+            _curRoll = roll; _curPitch = pitch; _curYaw = yaw
+            _curAccX = accX; _curAccY = accY; _curAccZ = accZ
+            _curGyroX = gyroX; _curGyroY = gyroY; _curGyroZ = gyroZ
 
             _updatePlots = true
         }
@@ -194,27 +186,63 @@ Item {
                     currentIndex: plotTabBar.currentIndex
 
                     // RPY Tab
-                    GraphsView {
-                        id: rpyPlot
-                        theme: root._plotTheme
-                        axisX: ValueAxis { id: rpyAxisX; min: 0; max: 1; titleText: "Seconds (s)" }
-                        axisY: ValueAxis { id: rpyAxisY; min: -180; max: 180; titleText: "Angle (Deg)" }
+                    Item {
+                        ColumnLayout {
+                            anchors.fill: parent
+                            spacing: 2
+                            GraphsView {
+                                id: rpyPlot
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                theme: root._plotTheme
+                                axisX: ValueAxis { id: rpyAxisX; min: 0; max: 1; titleText: "Seconds (s)" }
+                                axisY: ValueAxis { id: rpyAxisY; min: -180; max: 180; titleText: "Angle (Deg)" }
+                                LineSeries { id: rpySeries0; color: Utility.getAppHexColor("blue"); width: 2; name: "Roll" }
+                                LineSeries { id: rpySeries1; color: Utility.getAppHexColor("green"); width: 2; name: "Pitch" }
+                                LineSeries { id: rpySeries2; color: Utility.getAppHexColor("red"); width: 2; name: "Yaw" }
+                            }
+                            PlotLegend { graphsView: rpyPlot }
+                        }
                     }
 
                     // Accel Tab
-                    GraphsView {
-                        id: accelPlot
-                        theme: root._plotTheme
-                        axisX: ValueAxis { id: accelAxisX; min: 0; max: 1; titleText: "Seconds (s)" }
-                        axisY: ValueAxis { id: accelAxisY; min: -2; max: 2; titleText: "Acceleration (G)" }
+                    Item {
+                        ColumnLayout {
+                            anchors.fill: parent
+                            spacing: 2
+                            GraphsView {
+                                id: accelPlot
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                theme: root._plotTheme
+                                axisX: ValueAxis { id: accelAxisX; min: 0; max: 1; titleText: "Seconds (s)" }
+                                axisY: ValueAxis { id: accelAxisY; min: -2; max: 2; titleText: "Acceleration (G)" }
+                                LineSeries { id: accelSeries0; color: Utility.getAppHexColor("blue"); width: 2; name: "X" }
+                                LineSeries { id: accelSeries1; color: Utility.getAppHexColor("green"); width: 2; name: "Y" }
+                                LineSeries { id: accelSeries2; color: Utility.getAppHexColor("red"); width: 2; name: "Z" }
+                            }
+                            PlotLegend { graphsView: accelPlot }
+                        }
                     }
 
                     // Gyro Tab
-                    GraphsView {
-                        id: gyroPlot
-                        theme: root._plotTheme
-                        axisX: ValueAxis { id: gyroAxisX; min: 0; max: 1; titleText: "Seconds (s)" }
-                        axisY: ValueAxis { id: gyroAxisY; min: -500; max: 500; titleText: "Angular Velocity (Deg/s)" }
+                    Item {
+                        ColumnLayout {
+                            anchors.fill: parent
+                            spacing: 2
+                            GraphsView {
+                                id: gyroPlot
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                theme: root._plotTheme
+                                axisX: ValueAxis { id: gyroAxisX; min: 0; max: 1; titleText: "Seconds (s)" }
+                                axisY: ValueAxis { id: gyroAxisY; min: -500; max: 500; titleText: "Angular Velocity (Deg/s)" }
+                                LineSeries { id: gyroSeries0; color: Utility.getAppHexColor("blue"); width: 2; name: "X" }
+                                LineSeries { id: gyroSeries1; color: Utility.getAppHexColor("green"); width: 2; name: "Y" }
+                                LineSeries { id: gyroSeries2; color: Utility.getAppHexColor("red"); width: 2; name: "Z" }
+                            }
+                            PlotLegend { graphsView: gyroPlot }
+                        }
                     }
                 }
 
@@ -266,5 +294,23 @@ Item {
     Component.onCompleted: {
         loadSubgroup(paramCol, "general")
         view3d.setRotation(20 * Math.PI / 180, 20 * Math.PI / 180, 0)
+
+        // Restore IMU data from persistent C++ store
+        var imuNames = ["roll", "pitch", "yaw", "accX", "accY", "accZ", "gyroX", "gyroY", "gyroZ"]
+        var imuVecs  = [_rollVec, _pitchVec, _yawVec, _accXVec, _accYVec, _accZVec,
+                        _gyroXVec, _gyroYVec, _gyroZVec]
+        var rollPts  = RtDataStore.imuSeriesPoints("roll")
+        for (var i = 0; i < rollPts.length; i++)
+            _seconds.push(rollPts[i].x)
+
+        for (var n = 0; n < imuNames.length; n++) {
+            var pts = (n === 0) ? rollPts : RtDataStore.imuSeriesPoints(imuNames[n])
+            for (var j = 0; j < pts.length; j++)
+                imuVecs[n].push(pts[j].y)
+        }
+        _secondCounter = RtDataStore.imuSecondCounter
+        if (_seconds.length > 0) {
+            _updatePlots = true
+        }
     }
 }

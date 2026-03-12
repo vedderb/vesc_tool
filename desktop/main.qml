@@ -655,6 +655,7 @@ ApplicationWindow {
                     Layout.fillHeight: true
                     icon.source: "qrc" + Utility.getThemePath() + "icons/Stop Sign-96.png"
                     icon.width: 40; icon.height: 40
+                    icon.color: "transparent"
                     implicitWidth: 48
                     ToolTip.visible: hovered; ToolTip.text: qsTr("Switch off")
                     onClicked: {
@@ -1091,12 +1092,25 @@ ApplicationWindow {
         }
     }
 
-    Timer {
-        id: rtPollTimer
-        interval: 50
+    // RT data polling — driven by frame animation for smoother updates
+    FrameAnimation {
+        id: rtPollAnim
         running: true
-        repeat: true
+
+        property real _aliveAccum: 0    // accumulator for keep-alive  (~200 ms)
+        property real _confAccum: 0     // accumulator for conf read   (~1000 ms)
+        property real _uiAccum: 0       // accumulator for UI refresh  (~1000 ms)
+        property real _canScanAccum: 0  // accumulator for CAN scan    (~500 ms)
+
         onTriggered: {
+            var dt = frameTime  // seconds since last frame
+
+            _aliveAccum   += dt
+            _confAccum    += dt
+            _uiAccum      += dt
+            _canScanAccum += dt
+
+            // ---- RT data poll (every frame) ----
             if (VescIf.isPortConnected()) {
                 if (rtDataButton.checked) {
                     mCommands.getValues()
@@ -1115,72 +1129,52 @@ ApplicationWindow {
                     mCommands.bmsGetValues()
                 }
             }
-        }
-    }
 
-    Timer {
-        id: confTimer
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: {
-            if (VescIf.isPortConnected() && VescIf.getLastFwRxParams().hwTypeStr() === "VESC") {
-                if (!mcConfRead) {
-                    mCommands.getMcconf()
-                }
-                if (!appConfRead) {
-                    mCommands.getAppConf()
+            // ---- Keep-alive (~200 ms) ----
+            if (_aliveAccum >= 0.2) {
+                _aliveAccum = 0
+                if (sendAliveButton.checked && VescIf.isPortConnected()) {
+                    mCommands.sendAlive()
                 }
             }
-        }
-    }
 
-    Timer {
-        id: uiTimer
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: {
-            connectedLabel.text = VescIf.getConnectedPortName()
-
-            // Highlight reconnect when last port available
-            if (!VescIf.isPortConnected() && VescIf.lastPortAvailable()) {
-                reconnectButton.icon.source = "qrc" + Utility.getThemePath() + "icons/Connected-hl-96.png"
-            } else {
-                reconnectButton.icon.source = "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
+            // ---- Config auto-read (~1000 ms) ----
+            if (_confAccum >= 1.0) {
+                _confAccum = 0
+                if (VescIf.isPortConnected() && VescIf.getLastFwRxParams().hwTypeStr() === "VESC") {
+                    if (!mcConfRead) {
+                        mCommands.getMcconf()
+                    }
+                    if (!appConfRead) {
+                        mCommands.getAppConf()
+                    }
+                }
             }
-            reconnectButton.enabled = !VescIf.isPortConnected()
-            disconnectButton.enabled = VescIf.isPortConnected()
 
-            // Sync CAN fwd state
-            if (canFwdButton.checked !== mCommands.getSendCan()) {
-                canFwdButton.checked = mCommands.getSendCan()
+            // ---- UI refresh (~1000 ms) ----
+            if (_uiAccum >= 1.0) {
+                _uiAccum = 0
+                connectedLabel.text = VescIf.getConnectedPortName()
+
+                if (!VescIf.isPortConnected() && VescIf.lastPortAvailable()) {
+                    reconnectButton.icon.source = "qrc" + Utility.getThemePath() + "icons/Connected-hl-96.png"
+                } else {
+                    reconnectButton.icon.source = "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
+                }
+                reconnectButton.enabled = !VescIf.isPortConnected()
+                disconnectButton.enabled = VescIf.isPortConnected()
+
+                if (canFwdButton.checked !== mCommands.getSendCan()) {
+                    canFwdButton.checked = mCommands.getSendCan()
+                }
             }
-        }
-    }
 
-    // Send alive every ~200ms
-    Timer {
-        id: aliveTimer
-        interval: 200
-        running: true
-        repeat: true
-        onTriggered: {
-            if (sendAliveButton.checked && VescIf.isPortConnected()) {
-                mCommands.sendAlive()
-            }
-        }
-    }
-
-    // Auto scan CAN on connect
-    Timer {
-        id: canScanTimer
-        interval: 500
-        running: true
-        repeat: true
-        onTriggered: {
-            if (VescIf.isPortConnected() && canModel.count <= 1 && VescIf.fwRx()) {
-                mCommands.pingCan()
+            // ---- CAN scan (~500 ms) ----
+            if (_canScanAccum >= 0.5) {
+                _canScanAccum = 0
+                if (VescIf.isPortConnected() && canModel.count <= 1 && VescIf.fwRx()) {
+                    mCommands.pingCan()
+                }
             }
         }
     }

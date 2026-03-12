@@ -46,6 +46,7 @@ Item {
 
     // Dynamic LineSeries objects
     property var dynamicSeries: []
+    property int _legendRevision: 0
 
     // ── Helpers ────────────────────────────────────────────────────
     function resetInds() {
@@ -435,6 +436,8 @@ Item {
         var margin = (yMax - yMin) * 0.05
         if (margin === 0) margin = 1
         if (yMin < 1e14) { plotAxisY.min = yMin - margin; plotAxisY.max = yMax + margin }
+
+        _legendRevision++
     }
 
     // ── Stats ──────────────────────────────────────────────────────
@@ -752,10 +755,15 @@ Item {
                     orientation: Qt.Horizontal
 
                     // ── Plot ───────────────────────────────────────
-                    GraphsView {
-                        id: graphsView
+                    ColumnLayout {
                         SplitView.fillWidth: true
                         SplitView.minimumWidth: 300
+                        spacing: 2
+
+                    GraphsView {
+                        id: graphsView
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
 
                         theme: GraphsTheme {
                             colorScheme: Utility.isDarkMode() ? GraphsTheme.ColorScheme.Dark
@@ -780,6 +788,8 @@ Item {
                                 }
                             }
                         }
+                    }
+                    PlotLegend { graphsView: graphsView; revision: _legendRevision }
                     }
 
                     // ── Data / Stats tables ────────────────────────

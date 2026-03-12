@@ -41,6 +41,7 @@ Item {
     property bool needsReplot: false
     property string xLabelText: ""
     property string yLabelText: ""
+    property int _legendRevision: 0
 
     // Auto-color assignment matching original order
     readonly property var graphColors: [
@@ -96,6 +97,8 @@ Item {
         if (autoScaleBtn.checked) {
             rescaleAxes()
         }
+
+        _legendRevision++
     }
 
     function rescaleAxes() {
@@ -122,11 +125,11 @@ Item {
         }
     }
 
-    // ---- Signal handlers from VESC Commands ----
+    // ---- Signal handlers from persistent C++ store ----
     Connections {
-        target: VescIf.commands()
+        target: RtDataStore
 
-        function onPlotInitReceived(xLabel, yLabel) {
+        function onPlotInitialized(xLabel, yLabel) {
             plotGraphs = []
             currentGraphIndex = 0
             xLabelText = xLabel
@@ -134,9 +137,9 @@ Item {
             needsReplot = true
         }
 
-        function onPlotDataReceived(x, y) {
-            // Ensure graph exists
-            while (plotGraphs.length <= currentGraphIndex) {
+        function onPlotPointAdded(graphIndex, x, y) {
+            // Ensure local mirror exists
+            while (plotGraphs.length <= graphIndex) {
                 plotGraphs.push({
                     label: "Graph " + (plotGraphs.length + 1),
                     color: graphColors[Math.min(plotGraphs.length, graphColors.length - 1)],
@@ -145,11 +148,12 @@ Item {
                 })
             }
 
-            var g = plotGraphs[currentGraphIndex]
+            var g = plotGraphs[graphIndex]
             g.xData.push(x)
             g.yData.push(y)
 
-            // History cap
+            // History cap (keep in sync with store)
+            RtDataStore.setPlotHistoryMax(historyBox.value)
             var historyMax = historyBox.value
             if (g.xData.length > historyMax) {
                 var excess = g.xData.length - historyMax
@@ -157,15 +161,14 @@ Item {
                 g.yData.splice(0, excess)
             }
 
-            // Trigger reactive update
             plotGraphs = plotGraphs
             needsReplot = true
         }
 
-        function onPlotAddGraphReceived(name) {
+        function onPlotGraphAdded(index, name, color) {
             var newGraph = {
                 label: name,
-                color: graphColors[Math.min(plotGraphs.length, graphColors.length - 1)],
+                color: color,
                 xData: [],
                 yData: []
             }
@@ -175,7 +178,7 @@ Item {
             needsReplot = true
         }
 
-        function onPlotSetGraphReceived(graph) {
+        function onPlotCurrentGraphChanged(graph) {
             currentGraphIndex = graph
         }
     }
@@ -483,6 +486,12 @@ Item {
             axisX: ValueAxis { id: experimentAxisX; min: 0; max: 1; titleText: "" }
             axisY: ValueAxis { id: experimentAxisY; min: -1; max: 1; titleText: "" }
         }
+
+        PlotLegend {
+            id: expPlotLegend
+            graphsView: experimentChart
+            revision: expPage._legendRevision
+        }
     }
 
     // ---- File Dialogs ----
@@ -563,6 +572,34 @@ Item {
                 VescIf.emitStatusMessage("Saved plot as PNG (PDF not supported in QML, saved as PNG)", true)
             }, Qt.size(exportWBox.value * exportScaleBox.realScale,
                         exportHBox.value * exportScaleBox.realScale))
+        }
+    }
+
+    // Restore existing data from the persistent C++ store on page creation
+    Component.onCompleted: {
+        var count = RtDataStore.plotGraphCount
+        if (count > 0) {
+            xLabelText = RtDataStore.plotXLabel
+            yLabelText = RtDataStore.plotYLabel
+            currentGraphIndex = RtDataStore.plotCurrentGraph
+
+            var temp = []
+            for (var g = 0; g < count; g++) {
+                var pts = RtDataStore.plotGraphPoints(g)
+                var xArr = [], yArr = []
+                for (var i = 0; i < pts.length; i++) {
+                    xArr.push(pts[i].x)
+                    yArr.push(pts[i].y)
+                }
+                temp.push({
+                    label: RtDataStore.plotGraphLabel(g),
+                    color: RtDataStore.plotGraphColor(g),
+                    xData: xArr,
+                    yData: yArr
+                })
+            }
+            plotGraphs = temp
+            needsReplot = true
         }
     }
 }

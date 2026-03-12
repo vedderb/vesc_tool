@@ -204,6 +204,7 @@ set(ROOT_SOURCES
     hexfile.cpp
     motorcomparisonhelper.cpp
     sampleddatahelper.cpp
+    rtdatastore.cpp
 )
 
 set(ROOT_HEADERS
@@ -231,6 +232,7 @@ set(ROOT_HEADERS
     hexfile.h
     motorcomparisonhelper.h
     sampleddatahelper.h
+    rtdatastore.h
 )
 
 set(ROOT_FORMS
@@ -856,6 +858,7 @@ qt_target_qml_sources(${APP_TARGET}
         desktop/MotorComparisonPage.qml
         desktop/CanAnalyzerPage.qml
         desktop/DisplayToolPage.qml
+        desktop/PlotLegend.qml
 )
 
 # ---------------------------------------------------------------------------

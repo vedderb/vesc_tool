@@ -300,6 +300,7 @@
 <name>get-rpm-set</name>
 <name>get-temp-fet</name>
 <name>get-temp-mot</name>
+<name>get-temp-mot-res</name>
 <name>get-speed</name>
 <name>get-speed-set</name>
 <name>get-dist</name>

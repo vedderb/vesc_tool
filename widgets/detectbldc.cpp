@@ -109,8 +109,8 @@ void DetectBldc::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(bldcDetectReceived(bldc_detect)),
-                this, SLOT(bldcDetectReceived(bldc_detect)));
+        connect(mVesc->commands(), &Commands::bldcDetectReceived,
+                this, &DetectBldc::bldcDetectReceived);
     }
 }
 

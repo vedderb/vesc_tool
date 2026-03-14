@@ -1,9 +1,8 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.3
-import Vedder.vesc.utility 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Vedder.vesc
 
-import Vedder.vesc.commands 1.0
 
 Item {
     id: mainItem

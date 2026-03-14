@@ -47,10 +47,10 @@ void PageMotorInfo::setVesc(VescInterface *vesc)
     if (mVesc) {
         reloadParams();
 
-        connect(mVesc->mcConfig(), SIGNAL(paramChangedQString(QObject*,QString,QString)),
-                this, SLOT(paramChangedQString(QObject*,QString,QString)));
-        connect(mVesc->mcConfig(), SIGNAL(savingXml()),
-                this, SLOT(savingXml()));
+        connect(mVesc->mcConfig(), &ConfigParams::paramChangedQString,
+                this, &PageMotorInfo::paramChangedQString);
+        connect(mVesc->mcConfig(), &ConfigParams::savingXml,
+                this, &PageMotorInfo::savingXml);
     }
 }
 

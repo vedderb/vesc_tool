@@ -53,10 +53,8 @@ ParamEditInt::ParamEditInt(QWidget *parent) :
     mPercentageBox->setVisible(false);
     mDisplay->setVisible(false);
 
-    connect(mIntBox, SIGNAL(valueChanged(int)),
-            this, SLOT(intChanged(int)));
-    connect(mPercentageBox, SIGNAL(valueChanged(int)),
-            this, SLOT(percentageChanged(int)));
+    connect(mIntBox, qOverload<int>(&QSpinBox::valueChanged), this, &ParamEditInt::intChanged);
+    connect(mPercentageBox, qOverload<int>(&QSpinBox::valueChanged), this, &ParamEditInt::percentageChanged);
 }
 
 ParamEditInt::~ParamEditInt()
@@ -96,8 +94,7 @@ void ParamEditInt::setConfig(ConfigParams *config)
         }
     }
 
-    connect(mConfig, SIGNAL(paramChangedInt(QObject*,QString,int)),
-            this, SLOT(paramChangedInt(QObject*,QString,int)));
+    connect(mConfig, &ConfigParams::paramChangedInt, this, &ParamEditInt::paramChangedInt);
 }
 
 QString ParamEditInt::name() const

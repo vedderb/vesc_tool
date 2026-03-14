@@ -37,8 +37,7 @@ PageImu::PageImu(QWidget *parent) :
     mSecondCounter = 0.0;
     mLastUpdateTime = 0;
 
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &PageImu::timerSlot);
 
     QCustomPlot *plots[4] = {ui->rpyPlot, ui->accelPlot, ui->gyroPlot, ui->magPlot };
     for(int i = 0; i<4; i++)
@@ -164,8 +163,8 @@ void PageImu::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(valuesImuReceived(IMU_VALUES,uint)),
-                this, SLOT(valuesReceived(IMU_VALUES,uint)));
+        connect(mVesc->commands(), &Commands::valuesImuReceived,
+                this, &PageImu::valuesReceived);
     }
 }
 

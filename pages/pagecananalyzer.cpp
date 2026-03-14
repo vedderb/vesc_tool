@@ -51,8 +51,8 @@ void PageCanAnalyzer::setVesc(VescInterface *vesc)
 
     if (mVesc) {
         reloadParams();
-        connect(mVesc->commands(), SIGNAL(canFrameRx(QByteArray,quint32,bool)),
-                this, SLOT(canFrameRx(QByteArray,quint32,bool)));
+        connect(mVesc->commands(), &Commands::canFrameRx,
+                this, &PageCanAnalyzer::canFrameRx);
     }
 }
 

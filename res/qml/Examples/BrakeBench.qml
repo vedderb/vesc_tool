@@ -1,9 +1,8 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Layouts 1.3
-import QtQuick.Controls.Material 2.2
-import Vedder.vesc.utility 1.0
-import Vedder.vesc.commands 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Material
+import Vedder.vesc
 
 Item {
     id: mainItem
@@ -52,7 +51,7 @@ Item {
             ColumnLayout {
                 anchors.fill: parent
                 
-                DoubleSpinBox {
+                VescDoubleSpinBox {
                     id: rpmBox
                     Layout.fillWidth: true
                     decimals: 1
@@ -94,7 +93,7 @@ Item {
             ColumnLayout {
                 anchors.fill: parent
                 
-                DoubleSpinBox {
+                VescDoubleSpinBox {
                     id: canBox
                     Layout.fillWidth: true
                     decimals: 0
@@ -106,7 +105,7 @@ Item {
                     realStepSize: 1
                 }
                 
-                DoubleSpinBox {
+                VescDoubleSpinBox {
                     id: currentBox
                     Layout.fillWidth: true
                     decimals: 1

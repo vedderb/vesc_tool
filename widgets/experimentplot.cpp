@@ -192,14 +192,14 @@ void ExperimentPlot::setVesc(VescInterface *newVesc)
     mVesc = newVesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(plotInitReceived(QString,QString)),
-                this, SLOT(plotInitReceived(QString,QString)));
-        connect(mVesc->commands(), SIGNAL(plotDataReceived(double,double)),
-                this, SLOT(plotDataReceived(double,double)));
-        connect(mVesc->commands(), SIGNAL(plotAddGraphReceived(QString)),
-                this, SLOT(plotAddGraphReceived(QString)));
-        connect(mVesc->commands(), SIGNAL(plotSetGraphReceived(int)),
-                this, SLOT(plotSetGraphReceived(int)));
+        connect(mVesc->commands(), &Commands::plotInitReceived,
+                this, &ExperimentPlot::plotInitReceived);
+        connect(mVesc->commands(), &Commands::plotDataReceived,
+                this, &ExperimentPlot::plotDataReceived);
+        connect(mVesc->commands(), &Commands::plotAddGraphReceived,
+                this, &ExperimentPlot::plotAddGraphReceived);
+        connect(mVesc->commands(), &Commands::plotSetGraphReceived,
+                this, &ExperimentPlot::plotSetGraphReceived);
     }
 }
 
@@ -315,7 +315,7 @@ void ExperimentPlot::on_experimentSaveXmlButton_clicked()
     }
 
     QXmlStreamWriter stream(&file);
-    stream.setCodec("UTF-8");
+    // Qt6: QXmlStreamWriter always uses UTF-8, setCodec() removed
     stream.setAutoFormatting(true);
     stream.writeStartDocument();
 
@@ -323,7 +323,7 @@ void ExperimentPlot::on_experimentSaveXmlButton_clicked()
     stream.writeTextElement("xlabel", ui->experimentPlot->xAxis->label());
     stream.writeTextElement("ylabel", ui->experimentPlot->yAxis->label());
 
-    foreach (auto p, mExperimentPlots) {
+    for (const auto &p : mExperimentPlots) {
         stream.writeStartElement("graph");
         stream.writeTextElement("label", p.label);
         stream.writeTextElement("color", p.color.name());
@@ -408,7 +408,7 @@ void ExperimentPlot::on_experimentSaveCsvButton_clicked()
     QTextStream os(&file);
 
     int maxLen = 0;
-    foreach (auto p, mExperimentPlots) {
+    for (const auto &p : mExperimentPlots) {
         os << p.label << " x;" << p.label << " y;";
         if (p.xData.length() > maxLen) {
             maxLen = p.xData.length();
@@ -417,7 +417,7 @@ void ExperimentPlot::on_experimentSaveCsvButton_clicked()
     os << "\n";
 
     for (int i = 0;i < maxLen;i++) {
-        foreach (auto p, mExperimentPlots) {
+        for (const auto &p : mExperimentPlots) {
             if (p.xData.length() > i) {
                 os << p.xData.at(i) << ";" << p.yData.at(i) << ";";
             } else {

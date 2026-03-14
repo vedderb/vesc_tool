@@ -57,8 +57,7 @@ void ParamEditEnum::setConfig(ConfigParams *config)
         }
     }
 
-    connect(mConfig, SIGNAL(paramChangedEnum(QObject*,QString,int)),
-            this, SLOT(paramChangedEnum(QObject*,QString,int)));
+    connect(mConfig, &ConfigParams::paramChangedEnum, this, &ParamEditEnum::paramChangedEnum);
 }
 
 QString ParamEditEnum::name() const

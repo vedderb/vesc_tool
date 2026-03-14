@@ -13,7 +13,7 @@
         <file>ConfigPageMotor.qml</file>
         <file>ParamEditors.qml</file>
         <file>ConfigPageApp.qml</file>
-        <file>DoubleSpinBox.qml</file>
+        <file>VescDoubleSpinBox.qml</file>
         <file>ParamEditInt.qml</file>
         <file>ParamEditEnum.qml</file>
         <file>ParamEditBool.qml</file>

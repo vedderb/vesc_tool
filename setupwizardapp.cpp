@@ -56,10 +56,10 @@ SetupWizardApp::SetupWizardApp(VescInterface *vesc, QWidget *parent)
     mSideLabel->setScaledContents(true);
     setSideWidget(mSideLabel);
 
-    connect(this, SIGNAL(currentIdChanged(int)),
-            this, SLOT(idChanged(int)));
-    connect(this, SIGNAL(rejected()), this, SLOT(ended()));
-    connect(this, SIGNAL(accepted()), this, SLOT(ended()));
+    connect(this, &QWizard::currentIdChanged,
+            this, &SetupWizardApp::idChanged);
+    connect(this, &QWizard::rejected, this, &SetupWizardApp::ended);
+    connect(this, &QWizard::accepted, this, &SetupWizardApp::ended);
 }
 
 void SetupWizardApp::idChanged(int id)
@@ -165,8 +165,8 @@ AppConnectionPage::AppConnectionPage(VescInterface *vesc, QWidget *parent)
     mPageConnection = new PageConnection;
     mPageConnection->setVesc(mVesc);
 
-    connect(mVesc, SIGNAL(fwRxChanged(bool,bool)),
-            this, SIGNAL(completeChanged()));
+    connect(mVesc, &VescInterface::fwRxChanged,
+            this, &AppConnectionPage::completeChanged);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mPageConnection);
@@ -228,8 +228,8 @@ AppMultiPage::AppMultiPage(VescInterface *vesc, QWidget *parent)
     mCanFwdList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     registerField("CanFwd", this, "canFwd", SIGNAL(canFwdChanged));
-    connect(mCanFwdList, SIGNAL(currentRowChanged(int)),
-            this, SIGNAL(canFwdChanged()));
+    connect(mCanFwdList, &QListWidget::currentRowChanged,
+            this, &AppMultiPage::canFwdChanged);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mCanFwdList);
@@ -291,7 +291,7 @@ bool AppMultiPage::validatePage()
     }
 
     mVesc->commands()->getAppConf();
-    Utility::waitSignal(mVesc->appConfig(), SIGNAL(updated()), 2000);
+    Utility::waitSignal(mVesc->appConfig(), &ConfigParams::updated, 2000);
 
     return true;
 }
@@ -348,8 +348,8 @@ AppGeneralPage::AppGeneralPage(VescInterface *vesc, QWidget *parent)
     mInputList->setCurrentItem(nullptr);
 
     registerField("Input", this, "inputType", SIGNAL(inputTypeChanged));
-    connect(mInputList, SIGNAL(currentRowChanged(int)),
-            this, SIGNAL(inputTypeChanged()));
+    connect(mInputList, &QListWidget::currentRowChanged,
+            this, &AppGeneralPage::inputTypeChanged);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mInputList);
@@ -422,11 +422,11 @@ AppNunchukPage::AppNunchukPage(VescInterface *vesc, QWidget *parent)
     layout->addWidget(mNrfPair);
     setLayout(layout);
 
-    connect(mVesc->commands(), SIGNAL(decodedChukReceived(double)),
-            this, SLOT(decodedChukReceived(double)));
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
-    connect(mWriteButton, SIGNAL(clicked(bool)),
-            mVesc->commands(), SLOT(setAppConf()));
+    connect(mVesc->commands(), &Commands::decodedChukReceived,
+            this, &AppNunchukPage::decodedChukReceived);
+    connect(mTimer, &QTimer::timeout, this, &AppNunchukPage::timerSlot);
+    connect(mWriteButton, qOverload<bool>(&QPushButton::clicked),
+            mVesc->commands(), &Commands::setAppConf);
 }
 
 int AppNunchukPage::nextId() const
@@ -463,20 +463,20 @@ void AppNunchukPage::initializePage()
         mNrfPair->setVisible(false);        
         mVesc->appConfig()->updateParamEnum("app_to_use", 6);
         mVesc->commands()->setAppConf();
-        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+        Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
         // TODO: Figure out why setting the conf twice is required...
         mVesc->commands()->setAppConf();
-        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+        Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
     } else {
         setSubTitle(tr("Pair and configure your NRF nunchuk."));
         mNrfPair->setVisible(true);
 //        mVesc->appConfig()->updateParamEnum("app_to_use", 7);
         mVesc->appConfig()->updateParamEnum("app_to_use", 3); // Assume permanent NRF or NRF51 on UART
         mVesc->commands()->setAppConf();
-        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+        Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
         // TODO: Figure out why setting the conf twice is required...
         mVesc->commands()->setAppConf();
-        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+        Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
 
         QMessageBox::information(this,
                                  tr("NRF Pairing"),
@@ -530,9 +530,9 @@ AppPpmMapPage::AppPpmMapPage(VescInterface *vesc, QWidget *parent)
     layout->addWidget(mPpmMap);
     setLayout(layout);
 
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
-    connect(mVesc->appConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
-            this, SLOT(paramChangedDouble(QObject*,QString,double)));
+    connect(mTimer, &QTimer::timeout, this, &AppPpmMapPage::timerSlot);
+    connect(mVesc->appConfig(), &ConfigParams::paramChangedDouble,
+            this, &AppPpmMapPage::paramChangedDouble);
 }
 
 int AppPpmMapPage::nextId() const
@@ -558,10 +558,10 @@ void AppPpmMapPage::initializePage()
     mVesc->appConfig()->updateParamEnum("app_ppm_conf.ctrl_type", 0);
     mVesc->appConfig()->updateParamEnum("app_to_use", 4);
     mVesc->commands()->setAppConf();
-    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
     // TODO: Figure out why setting the conf twice is required...
     mVesc->commands()->setAppConf();
-    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
     mTimer->start(40);
 }
 
@@ -601,8 +601,8 @@ AppPpmPage::AppPpmPage(VescInterface *vesc, QWidget *parent)
     layout->addWidget(mWriteButton);
     setLayout(layout);
 
-    connect(mWriteButton, SIGNAL(clicked(bool)),
-            mVesc->commands(), SLOT(setAppConf()));
+    connect(mWriteButton, qOverload<bool>(&QPushButton::clicked),
+            mVesc->commands(), &Commands::setAppConf);
 }
 
 int AppPpmPage::nextId() const
@@ -659,11 +659,11 @@ AppAdcMapPage::AppAdcMapPage(VescInterface *vesc, QWidget *parent)
     layout->addWidget(mAdcMap);
     setLayout(layout);
 
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
-    connect(mVesc->appConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
-            this, SLOT(paramChangedDouble(QObject*,QString,double)));
-    connect(mVesc->appConfig(), SIGNAL(paramChangedBool(QObject*,QString,bool)),
-            this, SLOT(paramChangedBool(QObject*,QString,bool)));
+    connect(mTimer, &QTimer::timeout, this, &AppAdcMapPage::timerSlot);
+    connect(mVesc->appConfig(), &ConfigParams::paramChangedDouble,
+            this, &AppAdcMapPage::paramChangedDouble);
+    connect(mVesc->appConfig(), &ConfigParams::paramChangedBool,
+            this, &AppAdcMapPage::paramChangedBool);
 }
 
 int AppAdcMapPage::nextId() const
@@ -693,10 +693,10 @@ void AppAdcMapPage::initializePage()
     mVesc->appConfig()->updateParamEnum("app_to_use", 5);
     mVesc->appConfig()->updateParamEnum("app_adc_conf.ctrl_type", 0);
     mVesc->commands()->setAppConf();
-    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
     // TODO: Figure out why setting the conf twice is required...
     mVesc->commands()->setAppConf();
-    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
     mTimer->start(40);
 }
 
@@ -749,8 +749,8 @@ AppAdcPage::AppAdcPage(VescInterface *vesc, QWidget *parent)
     layout->addWidget(mWriteButton);
     setLayout(layout);
 
-    connect(mWriteButton, SIGNAL(clicked(bool)),
-            mVesc->commands(), SLOT(setAppConf()));
+    connect(mWriteButton, qOverload<bool>(&QPushButton::clicked),
+            mVesc->commands(), &Commands::setAppConf);
 }
 
 int AppAdcPage::nextId() const

@@ -17,14 +17,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
-import QtQuick.Controls.Material 2.2
-import Vedder.vesc.utility 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Material
+import Vedder.vesc
 
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.configparams 1.0
 
 Item {
     anchors.fill: parent
@@ -49,19 +47,19 @@ Item {
 
             TabButton {
                 text: qsTr("Current")
-                width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                implicitWidth: tabBar.buttonWidth
             }
             TabButton {
                 text: qsTr("Duty")
-                width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                implicitWidth: tabBar.buttonWidth
             }
             TabButton {
                 text: qsTr("RPM")
-                width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                implicitWidth: tabBar.buttonWidth
             }
             TabButton {
                 text: qsTr("Position")
-                width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                implicitWidth: tabBar.buttonWidth
             }
         }
 
@@ -77,7 +75,7 @@ Item {
                     anchors.fill: parent
                     spacing: 0
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: currentBox
                         Layout.fillWidth: true
                         decimals: 1
@@ -163,7 +161,7 @@ Item {
                     anchors.fill: parent
                     spacing: 0
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: dutyBox
                         Layout.fillWidth: true
                         prefix: "D: "
@@ -248,7 +246,7 @@ Item {
                     anchors.fill: parent
                     spacing: 0
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: speedBox
                         Layout.fillWidth: true
                         prefix: "\u03C9: "
@@ -334,7 +332,7 @@ Item {
                     anchors.fill: parent
                     spacing: 0
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: posBox
                         Layout.fillWidth: true
                         prefix: "P: "

@@ -39,12 +39,7 @@
 #include <QTimer>
 #include <utility>
 
-// We enable QStringView with Qt 5.15.1
-// #if QT_VERSION < QT_VERSION_CHECK(5, 15, 1)
-    #define MH_SUBSTR(pos, len) text.midRef(pos, len)
-// #else
-//     #define MH_SUBSTR(pos, len) QStringView(text).mid(pos, len)
-// #endif
+#define MH_SUBSTR(pos, len) QStringView(text).mid(pos, len)
 
 QHash<QString, MarkdownHighlighter::HighlighterState>
     MarkdownHighlighter::_langStringToEnum;
@@ -2482,13 +2477,9 @@ void MarkdownHighlighter::highlightEmAndStrong(const QString &text,
                                    startDelim.marker == QLatin1Char('_');
             while (k != (startDelim.pos + boldLen)) {
                 QTextCharFormat fmt = QSyntaxHighlighter::format(k);
-#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
-                fmt.setFontFamily(_formats[Bold].fontFamily());
-#else
                 const QStringList fontFamilies = _formats[Bold].fontFamilies().toStringList();
                 if (!fontFamilies.isEmpty())
                     fmt.setFontFamilies(fontFamilies);
-#endif
 
                 if (_formats[state].fontPointSize() > 0)
                     fmt.setFontPointSize(_formats[state].fontPointSize());
@@ -2532,13 +2523,9 @@ void MarkdownHighlighter::highlightEmAndStrong(const QString &text,
             while (k != (startDelim.pos + itLen)) {
                 QTextCharFormat fmt = QSyntaxHighlighter::format(k);
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
-                fmt.setFontFamily(_formats[Italic].fontFamily());
-#else
                 const QStringList fontFamilies = _formats[Italic].fontFamilies().toStringList();
                 if (!fontFamilies.isEmpty())
                     fmt.setFontFamilies(fontFamilies);
-#endif
 
                 if (_formats[state].fontPointSize() > 0)
                     fmt.setFontPointSize(_formats[state].fontPointSize());

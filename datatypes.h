@@ -214,9 +214,32 @@ public:
     }
 
     bool operator==(const MC_VALUES &other) const {
-        (void)other;
-        // compare members
-        return true;
+        return v_in == other.v_in &&
+               temp_mos == other.temp_mos &&
+               temp_mos_1 == other.temp_mos_1 &&
+               temp_mos_2 == other.temp_mos_2 &&
+               temp_mos_3 == other.temp_mos_3 &&
+               temp_motor == other.temp_motor &&
+               current_motor == other.current_motor &&
+               current_in == other.current_in &&
+               id == other.id &&
+               iq == other.iq &&
+               rpm == other.rpm &&
+               duty_now == other.duty_now &&
+               amp_hours == other.amp_hours &&
+               amp_hours_charged == other.amp_hours_charged &&
+               watt_hours == other.watt_hours &&
+               watt_hours_charged == other.watt_hours_charged &&
+               tachometer == other.tachometer &&
+               tachometer_abs == other.tachometer_abs &&
+               position == other.position &&
+               fault_code == other.fault_code &&
+               vesc_id == other.vesc_id &&
+               fault_str == other.fault_str &&
+               vd == other.vd &&
+               vq == other.vq &&
+               has_timeout == other.has_timeout &&
+               kill_sw_active == other.kill_sw_active;
     }
 
     bool operator!=(MC_VALUES const &other) const {
@@ -307,9 +330,29 @@ public:
     }
 
     bool operator==(const SETUP_VALUES &other) const {
-        (void)other;
-        // compare members
-        return true;
+        return temp_mos == other.temp_mos &&
+               temp_motor == other.temp_motor &&
+               current_motor == other.current_motor &&
+               current_in == other.current_in &&
+               duty_now == other.duty_now &&
+               rpm == other.rpm &&
+               speed == other.speed &&
+               v_in == other.v_in &&
+               battery_level == other.battery_level &&
+               amp_hours == other.amp_hours &&
+               amp_hours_charged == other.amp_hours_charged &&
+               watt_hours == other.watt_hours &&
+               watt_hours_charged == other.watt_hours_charged &&
+               tachometer == other.tachometer &&
+               tachometer_abs == other.tachometer_abs &&
+               position == other.position &&
+               fault_code == other.fault_code &&
+               vesc_id == other.vesc_id &&
+               num_vescs == other.num_vescs &&
+               battery_wh == other.battery_wh &&
+               fault_str == other.fault_str &&
+               odometer == other.odometer &&
+               uptime_ms == other.uptime_ms;
     }
 
     bool operator!=(SETUP_VALUES const &other) const {
@@ -386,9 +429,23 @@ public:
     }
 
     bool operator==(const IMU_VALUES &other) const {
-        (void)other;
-        // compare members
-        return true;
+        return roll == other.roll &&
+               pitch == other.pitch &&
+               yaw == other.yaw &&
+               accX == other.accX &&
+               accY == other.accY &&
+               accZ == other.accZ &&
+               gyroX == other.gyroX &&
+               gyroY == other.gyroY &&
+               gyroZ == other.gyroZ &&
+               magX == other.magX &&
+               magY == other.magY &&
+               magZ == other.magZ &&
+               q0 == other.q0 &&
+               q1 == other.q1 &&
+               q2 == other.q2 &&
+               q3 == other.q3 &&
+               vesc_id == other.vesc_id;
     }
 
     bool operator!=(IMU_VALUES const &other) const {
@@ -452,9 +509,17 @@ public:
     }
 
     bool operator==(const STAT_VALUES &other) const {
-        (void)other;
-        // compare members
-        return true;
+        return speed_avg == other.speed_avg &&
+               speed_max == other.speed_max &&
+               power_avg == other.power_avg &&
+               power_max == other.power_max &&
+               temp_motor_avg == other.temp_motor_avg &&
+               temp_motor_max == other.temp_motor_max &&
+               temp_mos_avg == other.temp_mos_avg &&
+               temp_mos_max == other.temp_mos_max &&
+               current_avg == other.current_avg &&
+               current_max == other.current_max &&
+               count_time == other.count_time;
     }
 
     bool operator!=(STAT_VALUES const &other) const {

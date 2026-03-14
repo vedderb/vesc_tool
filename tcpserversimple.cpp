@@ -20,8 +20,7 @@
 #include "tcpserversimple.h"
 #include <QDebug>
 #include <QHostInfo>
-#include <QEventLoop>
-#include <QTimer>
+#include "vesctasks.h"
 
 TcpServerSimple::TcpServerSimple(QObject *parent) : QObject(parent)
 {
@@ -31,9 +30,8 @@ TcpServerSimple::TcpServerSimple(QObject *parent) : QObject(parent)
     mUsePacket = false;
     mLastPort = -1;
 
-    connect(mTcpServer, SIGNAL(newConnection()), this, SLOT(newTcpConnection()));
-    connect(mPacket, SIGNAL(dataToSend(QByteArray&)),
-            this, SLOT(dataToSend(QByteArray&)));
+    connect(mTcpServer, &QTcpServer::newConnection, this, &TcpServerSimple::newTcpConnection);
+    connect(mPacket, &Packet::dataToSend, this, &TcpServerSimple::dataToSend);
 }
 
 bool TcpServerSimple::startServer(int port, QHostAddress addr)
@@ -59,29 +57,31 @@ bool TcpServerSimple::connectToHub(QString server, int port, QString id, QString
     stopServer();
 
     mTcpSocket = new QTcpSocket(this);
-    mTcpSocket->connectToHost(host, port);
 
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(3000);
-    auto conn = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    bool connected = false;
+    auto tree = Group {
+        TcpConnectTaskItem([&](TcpConnectTask &task) {
+            task.setSocket(mTcpSocket);
+            task.setHost(host);
+            task.setPort(port);
+            task.setTimeout(3000);
+            task.setOnConnected([&id, &pass, this]() {
+                QString login = QString("VESC:%1:%2\n").arg(id).arg(pass);
+                mTcpSocket->write(login.toLocal8Bit());
+            });
+            return SetupResult::Continue;
+        }, [&connected](const TcpConnectTask &, DoneWith doneWith) {
+            connected = (doneWith == DoneWith::Success);
+            return DoneResult::Success;
+        })
+    };
+    runTree(tree);
 
-    connect(mTcpSocket, &QTcpSocket::connected, [&id, &pass, this, &loop]() {
-        QString login = QString("VESC:%1:%2\n").arg(id).arg(pass);
-        mTcpSocket->write(login.toLocal8Bit());
-        loop.quit();
-    });
-
-    loop.exec();
-    disconnect(conn);
-
-    if (timeoutTimer.isActive()) {
-        connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
-        connect(mTcpSocket, SIGNAL(disconnected()),
-                this, SLOT(tcpInputDisconnected()));
-        connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-                this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
+    if (connected) {
+        connect(mTcpSocket, &QIODevice::readyRead, this, &TcpServerSimple::tcpInputDataAvailable);
+        connect(mTcpSocket, &QAbstractSocket::disconnected, this, &TcpServerSimple::tcpInputDisconnected);
+        connect(mTcpSocket, &QAbstractSocket::errorOccurred,
+                this, &TcpServerSimple::tcpInputError);
         emit connectionChanged(true, mTcpSocket->peerAddress().toString());
         return true;
     } else {
@@ -138,11 +138,10 @@ void TcpServerSimple::newTcpConnection()
         mTcpSocket = socket;
 
         if (mTcpSocket) {
-            connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
-            connect(mTcpSocket, SIGNAL(disconnected()),
-                    this, SLOT(tcpInputDisconnected()));
-            connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-                    this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
+            connect(mTcpSocket, &QIODevice::readyRead, this, &TcpServerSimple::tcpInputDataAvailable);
+            connect(mTcpSocket, &QAbstractSocket::disconnected, this, &TcpServerSimple::tcpInputDisconnected);
+            connect(mTcpSocket, &QAbstractSocket::errorOccurred,
+                    this, &TcpServerSimple::tcpInputError);
             emit connectionChanged(true, mTcpSocket->peerAddress().toString());
         }
     }
@@ -174,7 +173,7 @@ void TcpServerSimple::tcpInputError(QAbstractSocket::SocketError socketError)
     qDebug() << socketError;
 }
 
-void TcpServerSimple::dataToSend(QByteArray &data)
+void TcpServerSimple::dataToSend(const QByteArray &data)
 {
     sendData(data);
 }

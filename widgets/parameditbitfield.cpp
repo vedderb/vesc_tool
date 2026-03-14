@@ -81,8 +81,7 @@ void ParamEditBitfield::setConfig(ConfigParams *config)
         ui->b7Box->setVisible(ui->b7Box->text().toLower() != "unused");
     }
 
-    connect(mConfig, SIGNAL(paramChangedInt(QObject*,QString,int)),
-            this, SLOT(paramChangedInt(QObject*,QString,int)));
+    connect(mConfig, &ConfigParams::paramChangedInt, this, &ParamEditBitfield::paramChangedInt);
 }
 
 QString ParamEditBitfield::name() const

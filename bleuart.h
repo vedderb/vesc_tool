@@ -27,10 +27,12 @@
 #include <QLowEnergyService>
 #include <QVariantMap>
 #include <QTimer>
+#include <QQmlEngine>
 
 class BleUart : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit BleUart(QObject *parent = nullptr);
     ~BleUart();

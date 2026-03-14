@@ -39,32 +39,32 @@ PageDisplayTool::PageDisplayTool(QWidget *parent) :
     ui->fontEditor->setVisible(false);
     ui->fontEditor->setVisible(true);
 
-    connect(ui->ovCrHBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->ovCrWBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->ovCrXPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->ovCrYPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->overlayBox, SIGNAL(toggled(bool)), this, SLOT(updateOverlay()));
-    connect(ui->ovImCXPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->ovImCYPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->ovRotBox, SIGNAL(valueChanged(double)), this, SLOT(updateOverlay()));
-    connect(ui->ovScaleBox, SIGNAL(valueChanged(double)), this, SLOT(updateOverlay()));
-    connect(ui->ovRXPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->ovRYPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->ovXPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->ovYPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->ovTrBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
+    connect(ui->ovCrHBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovCrWBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovCrXPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovCrYPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->overlayBox, &QGroupBox::toggled, this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovImCXPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovImCYPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovRotBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovScaleBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovRXPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovRYPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovXPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovYPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->ovTrBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
 
-    connect(ui->fontOverlayBox, SIGNAL(toggled(bool)), this, SLOT(updateOverlay()));
-    connect(ui->fontBoldBox, SIGNAL(toggled(bool)), this, SLOT(updateOverlay()));
-    connect(ui->fontBorderBox, SIGNAL(toggled(bool)), this, SLOT(updateOverlay()));
-    connect(ui->fontAABox, SIGNAL(toggled(bool)), this, SLOT(updateOverlay()));
-    connect(ui->fontXPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->fontYPosBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->fontWBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->fontHBox, SIGNAL(valueChanged(int)), this, SLOT(updateOverlay()));
-    connect(ui->fontBox, SIGNAL(currentFontChanged(QFont)), this, SLOT(updateOverlay()));
-    connect(ui->fontSampleEdit, SIGNAL(textChanged(QString)), this, SLOT(updateOverlay()));
-    connect(ui->fontScaleBox, SIGNAL(valueChanged(double)), this, SLOT(updateOverlay()));
+    connect(ui->fontOverlayBox, &QGroupBox::toggled, this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontBoldBox, &QAbstractButton::toggled, this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontBorderBox, &QAbstractButton::toggled, this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontAABox, &QAbstractButton::toggled, this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontXPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontYPosBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontWBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontHBox, qOverload<int>(&QSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontBox, &QFontComboBox::currentFontChanged, this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontSampleEdit, &QLineEdit::textChanged, this, &PageDisplayTool::updateOverlay);
+    connect(ui->fontScaleBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &PageDisplayTool::updateOverlay);
 
     updateOverlay();
 

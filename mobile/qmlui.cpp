@@ -18,6 +18,7 @@
     */
 
 #include "qmlui.h"
+#include "rtdatastore.h"
 
 #include <QQuickStyle>
 #include <QApplication>
@@ -40,10 +41,43 @@ bool QmlUi::startQmlUi()
         mEngine = new QQmlApplicationEngine(this);
     }
 
-    qmlRegisterSingletonType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf", vescinterface_singletontype_provider);
-    qmlRegisterSingletonType<Utility>("Vedder.vesc.utility", 1, 0, "Utility", utility_singletontype_provider);
+    // Qt6: Types are auto-registered via QML_ELEMENT + qt_add_qml_module.
+    // Provide global VescIf/Utility instances as context properties.
+    mVesc = new VescInterface();
+    mVesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
+    Utility::configLoadLatest(mVesc);
+
+    mEngine->rootContext()->setContextProperty("VescIf", mVesc);
+    mEngine->rootContext()->setContextProperty("Utility", new Utility(this));
 
     mEngine->load(QUrl(QLatin1String("qrc:/mobile/main.qml")));
+    return !mEngine->rootObjects().isEmpty();
+}
+
+bool QmlUi::startDesktopQmlUi()
+{
+    // Use the same Fusion style that the widget UI uses.
+    // Clear the Material conf set earlier for the mobile path.
+    qunsetenv("QT_QUICK_CONTROLS_CONF");
+    QQuickStyle::setStyle("Fusion");
+
+    if (!mEngine) {
+        mEngine = new QQmlApplicationEngine(this);
+    }
+
+    mVesc = new VescInterface();
+    mVesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
+    Utility::configLoadLatest(mVesc);
+
+    mEngine->rootContext()->setContextProperty("VescIf", mVesc);
+    mEngine->rootContext()->setContextProperty("Utility", new Utility(this));
+    mEngine->rootContext()->setContextProperty("RtDataStore",
+        new RtDataStore(mVesc->commands(), this));
+
+    // Add import path so desktop pages can resolve mobile components
+    mEngine->addImportPath(QStringLiteral("qrc:/"));
+
+    mEngine->load(QUrl(QLatin1String("qrc:/desktop/main.qml")));
     return !mEngine->rootObjects().isEmpty();
 }
 

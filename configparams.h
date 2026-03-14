@@ -25,12 +25,14 @@
 #include <QStringList>
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
+#include <QQmlEngine>
 #include "configparam.h"
 #include "vbytearray.h"
 
 class ConfigParams : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit ConfigParams(QObject *parent = nullptr);
     Q_INVOKABLE void addParam(const QString &name, ConfigParam param);
@@ -88,8 +90,8 @@ public:
     void setSerializeOrder(const QStringList &serializeOrder);
     void clearSerializeOrder();
 
-    Q_INVOKABLE void serialize(VByteArray &vb);
-    Q_INVOKABLE bool deSerialize(VByteArray &vb);
+    void serialize(VByteArray &vb);
+    bool deSerialize(VByteArray &vb);
 
     void getXML(QXmlStreamWriter &stream, QString configName);
     bool setXML(QXmlStreamReader &stream, QString configName);

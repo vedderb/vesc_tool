@@ -37,8 +37,7 @@ Preferences::Preferences(QWidget *parent) :
 
     mTimer = new QTimer(this);
     mTimer->start(100);
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &Preferences::timerSlot);
 
     ui->setupUi(this);
 

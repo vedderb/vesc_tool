@@ -17,13 +17,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 Item {
     id: editor
@@ -77,7 +75,7 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: {color = Utility.getAppHexColor("lightBackground")}
+        color: Utility.getAppHexColor("lightBackground")
         radius: 5
         border.color:  {border.color = Utility.getAppHexColor("disabledText")}
         border.width: 2
@@ -90,7 +88,7 @@ Item {
 
             Text {
                 id: nameText
-                color: {color = Utility.getAppHexColor("lightText")}
+                color: Utility.getAppHexColor("lightText")
                 text: paramName
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true

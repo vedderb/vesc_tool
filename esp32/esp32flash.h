@@ -21,6 +21,7 @@
 #define ESP32FLASH_H
 
 #include <QObject>
+#include <QQmlEngine>
 #include "serial_io.h"
 
 #ifdef HAS_SERIALPORT
@@ -31,6 +32,7 @@
 class Esp32Flash : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit Esp32Flash(QObject *parent = nullptr);
     ~Esp32Flash();

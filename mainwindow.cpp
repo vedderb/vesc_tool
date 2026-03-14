@@ -211,8 +211,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->handbrakeButton->setIcon(Utility::getIcon("icons/Brake Warning-96.png"));
     ui->fullBrakeButton->setIcon(Utility::getIcon("icons/Anchor-96.png"));
 
-    qRegisterMetaType<QtMsgType>("QtMsgType");
-
     mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
     mPreferences = new Preferences(this);
@@ -226,26 +224,21 @@ MainWindow::MainWindow(QWidget *parent) :
     mKeyLeft = false;
     mKeyRight = false;
 
-    connect(mDebugTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlotDebugMsg()));
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
-    connect(mVesc, SIGNAL(statusMessage(QString,bool)),
-            this, SLOT(showStatusInfo(QString,bool)));
-    connect(mVesc, SIGNAL(messageDialog(QString,QString,bool,bool)),
-            this, SLOT(showMessageDialog(QString,QString,bool,bool)));
-    connect(mVesc, SIGNAL(serialPortNotWritable(QString)),
-            this, SLOT(serialPortNotWritable(QString)));
-    connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,unsigned int)),
-            this, SLOT(valuesReceived(MC_VALUES,unsigned int)));
-    connect(mVesc->commands(), SIGNAL(mcConfigCheckResult(QStringList)),
-            this, SLOT(mcConfigCheckResult(QStringList)));
-    connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
-            this, SLOT(paramChangedDouble(QObject*,QString,double)));
-    connect(ui->actionAboutQt, SIGNAL(triggered(bool)),
-            qApp, SLOT(aboutQt()));
-    connect(mVesc->commands(), SIGNAL(pingCanRx(QVector<int>,bool)),
-            this, SLOT(pingCanRx(QVector<int>,bool)));
+    connect(mDebugTimer, &QTimer::timeout, this, &MainWindow::timerSlotDebugMsg);
+    connect(mTimer, &QTimer::timeout, this, &MainWindow::timerSlot);
+    connect(mVesc, &VescInterface::statusMessage, this, &MainWindow::showStatusInfo);
+    connect(mVesc, &VescInterface::messageDialog, this, &MainWindow::showMessageDialog);
+    connect(mVesc, &VescInterface::serialPortNotWritable, this, &MainWindow::serialPortNotWritable);
+    connect(mVesc->commands(), &Commands::valuesReceived,
+            this, &MainWindow::valuesReceived);
+    connect(mVesc->commands(), &Commands::mcConfigCheckResult,
+            this, &MainWindow::mcConfigCheckResult);
+    connect(mVesc->mcConfig(), &ConfigParams::paramChangedDouble,
+            this, &MainWindow::paramChangedDouble);
+    connect(ui->actionAboutQt, qOverload<bool>(&QAction::triggered),
+            qApp, &QApplication::aboutQt);
+    connect(mVesc->commands(), &Commands::pingCanRx,
+            this, &MainWindow::pingCanRx);
 
     ui->dispDuty->setName("Duty");
     ui->dispDuty->setRange(100.0);
@@ -731,7 +724,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 
 void MainWindow::dropEvent(QDropEvent *event)
 {
-    foreach (auto url, event->mimeData()->urls()) {
+    for (const auto &url : event->mimeData()->urls()) {
         auto path = url.path();
         if (path.endsWith(".xml", Qt::CaseInsensitive)) {
             if (ConfigParams::testXml(path, "MCConfiguration")) {
@@ -1429,14 +1422,14 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageWelcome);
     QString theme = Utility::getThemePath();
     addPageItem(tr("Welcome & Wizards"),  theme + "icons/Home-96.png", "", true);
-    connect(ui->actionAutoSetupFOC, SIGNAL(triggered(bool)),
-            mPageWelcome, SLOT(startSetupWizardFocQml()));
-    connect(ui->actionMotorSetupWizard, SIGNAL(triggered(bool)),
-            mPageWelcome, SLOT(startSetupWizardMotor()));
-    connect(ui->actionAppSetupWizard, SIGNAL(triggered(bool)),
-            mPageWelcome, SLOT(startSetupWizardApp()));
-    connect(ui->actionSetupMotorsFOCQuick, SIGNAL(triggered(bool)),
-            mPageWelcome, SLOT(startSetupWizardFocSimple()));
+    connect(ui->actionAutoSetupFOC, qOverload<bool>(&QAction::triggered),
+            mPageWelcome, &PageWelcome::startSetupWizardFocQml);
+    connect(ui->actionMotorSetupWizard, qOverload<bool>(&QAction::triggered),
+            mPageWelcome, &PageWelcome::startSetupWizardMotor);
+    connect(ui->actionAppSetupWizard, qOverload<bool>(&QAction::triggered),
+            mPageWelcome, &PageWelcome::startSetupWizardApp);
+    connect(ui->actionSetupMotorsFOCQuick, qOverload<bool>(&QAction::triggered),
+            mPageWelcome, &PageWelcome::startSetupWizardFocSimple);
 
     mPageConnection = new PageConnection(this);
     mPageConnection->setVesc(mVesc);
@@ -1458,8 +1451,8 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageMotorSettings);
     addPageItem(tr("Motor Settings"),  theme + "icons/motor.png", "", true);
     mPageNameIdList.insert("motor", ui->pageList->count() - 1);
-    connect(mPageMotorSettings, SIGNAL(startFocWizard()),
-            mPageWelcome, SLOT(startSetupWizardFocQml()));
+    connect(mPageMotorSettings, &PageMotorSettings::startFocWizard,
+            mPageWelcome, &PageWelcome::startSetupWizardFocQml);
 
     mPageMotor = new PageMotor(this);
     mPageMotor->setVesc(mVesc);
@@ -1856,8 +1849,8 @@ bool MainWindow::waitProcess(QProcess &process, bool block, int timeoutMs)
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
     timeoutTimer.start(timeoutMs);
-    connect(&process, SIGNAL(finished(int)), &loop, SLOT(quit()));
-    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    connect(&process, &QProcess::finished, &loop, &QEventLoop::quit);
+    connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
     loop.exec();
 
     if (process.state() == QProcess::Running) {

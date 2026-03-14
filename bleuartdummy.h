@@ -22,10 +22,12 @@
 
 #include <QObject>
 #include <QVariantMap>
+#include <QQmlEngine>
 
 class BleUartDummy : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(BleUart)
 public:
     explicit BleUartDummy(QObject *parent = nullptr);
 

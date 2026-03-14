@@ -171,8 +171,7 @@ PageRtData::PageRtData(QWidget *parent) :
     ui->posPlot->xAxis->setLabel("Sample");
     ui->posPlot->yAxis->setLabel("Degrees");
 
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &PageRtData::timerSlot);
 }
 
 PageRtData::~PageRtData()
@@ -190,10 +189,10 @@ void PageRtData::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(valuesReceived(MC_VALUES,uint)),
-                this, SLOT(valuesReceived(MC_VALUES,uint)));
-        connect(mVesc->commands(), SIGNAL(rotorPosReceived(double)),
-                this, SLOT(rotorPosReceived(double)));
+        connect(mVesc->commands(), &Commands::valuesReceived,
+                this, &PageRtData::valuesReceived);
+        connect(mVesc->commands(), &Commands::rotorPosReceived,
+                this, &PageRtData::rotorPosReceived);
     }
 }
 

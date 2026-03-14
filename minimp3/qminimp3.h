@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QQmlEngine>
 
 struct MiniMp3Dec {
     Q_GADGET
@@ -24,6 +25,7 @@ Q_DECLARE_METATYPE(MiniMp3Dec)
 class QMiniMp3 : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit QMiniMp3(QObject *parent = nullptr);
     Q_INVOKABLE MiniMp3Dec decodeFileMono(QString path);

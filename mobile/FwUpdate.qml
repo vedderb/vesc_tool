@@ -17,16 +17,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Dialogs as Dl
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.fwhelper 1.0
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 Item {
     property alias currentPage: swipeView.currentIndex
@@ -612,7 +608,7 @@ Item {
             color: Utility.getAppHexColor("lightText")
             id: uploadDialogLabel
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: parent.width
             wrapMode: Text.WordWrap
         }
 
@@ -655,7 +651,7 @@ Item {
             color: Utility.getAppHexColor("lightText")
             text: "This is going do download a few 100 MB of old firmwares. Continue?"
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: parent.width
             wrapMode: Text.WordWrap
         }
 

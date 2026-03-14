@@ -144,14 +144,14 @@ void DetectFoc::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(motorRLReceived(double,double,double)),
-                this, SLOT(motorRLReceived(double,double,double)));
-        connect(mVesc->commands(), SIGNAL(motorLinkageReceived(double)),
-                this, SLOT(motorLinkageReceived(double)));
-        connect(mVesc->commands(), SIGNAL(encoderParamReceived(ENCODER_DETECT_RES)),
-                this, SLOT(encoderParamReceived(ENCODER_DETECT_RES)));
-        connect(mVesc->mcConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
-                this, SLOT(paramChangedDouble(QObject*,QString,double)));
+        connect(mVesc->commands(), &Commands::motorRLReceived,
+                this, &DetectFoc::motorRLReceived);
+        connect(mVesc->commands(), &Commands::motorLinkageReceived,
+                this, &DetectFoc::motorLinkageReceived);
+        connect(mVesc->commands(), &Commands::encoderParamReceived,
+                this, &DetectFoc::encoderParamReceived);
+        connect(mVesc->mcConfig(), &ConfigParams::paramChangedDouble,
+                this, &DetectFoc::paramChangedDouble);
 
         ui->currentBox->setValue(mVesc->mcConfig()->getParamDouble("l_current_max") / 3.0);
     }

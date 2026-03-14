@@ -31,9 +31,8 @@ TcpServerSimple::TcpServerSimple(QObject *parent) : QObject(parent)
     mUsePacket = false;
     mLastPort = -1;
 
-    connect(mTcpServer, SIGNAL(newConnection()), this, SLOT(newTcpConnection()));
-    connect(mPacket, SIGNAL(dataToSend(QByteArray&)),
-            this, SLOT(dataToSend(QByteArray&)));
+    connect(mTcpServer, &QTcpServer::newConnection, this, &TcpServerSimple::newTcpConnection);
+    connect(mPacket, &Packet::dataToSend, this, &TcpServerSimple::dataToSend);
 }
 
 bool TcpServerSimple::startServer(int port, QHostAddress addr)
@@ -65,7 +64,7 @@ bool TcpServerSimple::connectToHub(QString server, int port, QString id, QString
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
     timeoutTimer.start(3000);
-    auto conn = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    auto conn = QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
 
     connect(mTcpSocket, &QTcpSocket::connected, [&id, &pass, this, &loop]() {
         QString login = QString("VESC:%1:%2\n").arg(id).arg(pass);
@@ -77,11 +76,10 @@ bool TcpServerSimple::connectToHub(QString server, int port, QString id, QString
     disconnect(conn);
 
     if (timeoutTimer.isActive()) {
-        connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
-        connect(mTcpSocket, SIGNAL(disconnected()),
-                this, SLOT(tcpInputDisconnected()));
-        connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-                this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
+        connect(mTcpSocket, &QIODevice::readyRead, this, &TcpServerSimple::tcpInputDataAvailable);
+        connect(mTcpSocket, &QAbstractSocket::disconnected, this, &TcpServerSimple::tcpInputDisconnected);
+        connect(mTcpSocket, &QAbstractSocket::errorOccurred,
+                this, &TcpServerSimple::tcpInputError);
         emit connectionChanged(true, mTcpSocket->peerAddress().toString());
         return true;
     } else {
@@ -138,11 +136,10 @@ void TcpServerSimple::newTcpConnection()
         mTcpSocket = socket;
 
         if (mTcpSocket) {
-            connect(mTcpSocket, SIGNAL(readyRead()), this, SLOT(tcpInputDataAvailable()));
-            connect(mTcpSocket, SIGNAL(disconnected()),
-                    this, SLOT(tcpInputDisconnected()));
-            connect(mTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-                    this, SLOT(tcpInputError(QAbstractSocket::SocketError)));
+            connect(mTcpSocket, &QIODevice::readyRead, this, &TcpServerSimple::tcpInputDataAvailable);
+            connect(mTcpSocket, &QAbstractSocket::disconnected, this, &TcpServerSimple::tcpInputDisconnected);
+            connect(mTcpSocket, &QAbstractSocket::errorOccurred,
+                    this, &TcpServerSimple::tcpInputError);
             emit connectionChanged(true, mTcpSocket->peerAddress().toString());
         }
     }
@@ -174,7 +171,7 @@ void TcpServerSimple::tcpInputError(QAbstractSocket::SocketError socketError)
     qDebug() << socketError;
 }
 
-void TcpServerSimple::dataToSend(QByteArray &data)
+void TcpServerSimple::dataToSend(const QByteArray &data)
 {
     sendData(data);
 }

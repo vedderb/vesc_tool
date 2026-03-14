@@ -112,7 +112,7 @@ PageLisp::PageLisp(QWidget *parent) :
     updateRecentList();
 
     // Load examples
-    foreach (auto &fi, QDir("://res/LispBM/Examples/").entryInfoList(QDir::NoFilter, QDir::Name)) {
+    for (auto &fi : QDir("://res/LispBM/Examples/").entryInfoList(QDir::NoFilter, QDir::Name)) {
         QListWidgetItem *item = new QListWidgetItem;
         item->setText(fi.fileName());
         item->setData(Qt::UserRole, fi.filePath());
@@ -171,7 +171,7 @@ void PageLisp::saveStateToSettings()
         set.remove("pagelisp/recentfiles");
         set.beginWriteArray("pagelisp/recentfiles");
         int ind = 0;
-        foreach (auto f, mRecentFiles) {
+        for (const auto &f : mRecentFiles) {
             set.setArrayIndex(ind);
             set.setValue("path", f);
             ind++;
@@ -334,7 +334,7 @@ bool PageLisp::openFileTab(QString fileName)
 void PageLisp::updateRecentList()
 {
     ui->recentList->clear();
-    foreach (auto f, mRecentFiles) {
+    for (const auto &f : mRecentFiles) {
         ui->recentList->addItem(f);
     }
 

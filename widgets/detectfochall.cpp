@@ -90,8 +90,8 @@ void DetectFocHall::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(focHallTableReceived(QVector<int>,int)),
-                this, SLOT(focHallTableReceived(QVector<int>,int)));
+        connect(mVesc->commands(), &Commands::focHallTableReceived,
+                this, &DetectFocHall::focHallTableReceived);
     }
 }
 

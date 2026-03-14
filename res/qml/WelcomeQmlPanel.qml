@@ -17,13 +17,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
-import QtQuick.Controls.Material 2.2
-import QtQuick.Window 2.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Material
+import QtQuick.Window
 
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 import "qrc:/mobile"
 
@@ -158,7 +158,7 @@ Item {
 
             background: Rectangle {
                 opacity: 1
-                color: {color = Utility.getAppHexColor("lightBackground")}
+                color: Utility.getAppHexColor("lightBackground")
             }
 
             property int buttonWidth: Math.max(120,
@@ -431,9 +431,9 @@ Item {
         y: parent.y + parent.height / 2 - height / 2
 
         Text {
-            color: {color = Utility.getAppHexColor("lightText")}
+            color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
+            width: parent.width
             wrapMode: Text.WordWrap
             text:
                 "After clicking OK the VESC will be put in pairing mode for 10 seconds. Switch" +

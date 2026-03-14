@@ -178,7 +178,7 @@ void Packet::processData(QByteArray data)
         }
     }
 
-    foreach (QByteArray b, decodedPackets) {
+    for (const QByteArray &b : decodedPackets) {
         emit packetReceived(b);
     }
 }

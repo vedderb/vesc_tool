@@ -21,6 +21,7 @@
 #include "ui_pageappsettings.h"
 #include "setupwizardapp.h"
 #include "utility.h"
+#include <QRegularExpression>
 
 PageAppSettings::PageAppSettings(QWidget *parent) :
     QWidget(parent),
@@ -56,7 +57,7 @@ void PageAppSettings::reloadParams()
     if (mVesc) {
         ConfigParam *p = mVesc->infoConfig()->getParam("app_setting_description");
         if (p != nullptr) {
-            QRegExp rx("(<img src=)|( width=)");
+            QRegularExpression rx("(<img src=)|( width=)");
             QStringList htmls = p->description.split(rx);
             QStringList imgs = {"app_up", "app_default" , "app_down","Upload-96","Data Backup-96","Help-96"};
             QString theme = "<img src=\"" + Utility::getThemePath() + "icons/";

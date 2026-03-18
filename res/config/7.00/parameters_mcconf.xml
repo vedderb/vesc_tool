@@ -1288,6 +1288,9 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Coupled V0 HFI&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Same as above, but will only sample in V0.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;AB Encoder (No Index Pulse)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Encoder without index pulse. Use sensorless FOC from the start. Update the encoder offset when FOC enter the sensorless ERPM - after that it will behave as if the index pulse is found. See &lt;a href=&quot;https://github.com/vedderb/bldc/pull/894&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#9696ff;&quot;&gt;https://github.com/vedderb/bldc/pull/894&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NOTE:&lt;/span&gt; HFI and VSS only work when the FOC switching frequency is at or below 30 KHz.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NOTE2:&lt;/span&gt; Some of the HFI-methods will get a division by 0 if Ld - Lq is set to 0, which can make the CPU reboot.&lt;/p&gt;
@@ -1303,6 +1306,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>45 Deg V0 HFI</enumNames>
             <enumNames>Coupled V0V7 HFI (Silent)</enumNames>
             <enumNames>Coupled V0 HFI</enumNames>
+            <enumNames>AB Encoder (No Index Pulse)</enumNames>
         </foc_sensor_mode>
         <foc_pll_kp>
             <longName>Speed Tracker Kp</longName>

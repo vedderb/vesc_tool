@@ -35,6 +35,7 @@ Item {
     property bool pingTcpHub: false
     property bool scanning: false
     property bool fullLogo: true
+    property var dialogParent: rootItem.parent
 
     onOpenedChanged: {
         if(opened){
@@ -712,7 +713,7 @@ Item {
         width: parent.width - 20 - notchLeft - notchRight
         x: parent.width/2 - width/2
         y: parent.height / 2 - height / 2
-        parent: rootItem.parent
+        parent: rootItem.dialogParent
         ProgressBar {
             anchors.fill: parent
             indeterminate: visible
@@ -737,7 +738,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: parent.width/2 - width/2
         y: Math.max(parent.height / 4 - height / 2, 20)
-        parent: rootItem.parent
+        parent: rootItem.dialogParent
 
         Rectangle {
             anchors.fill: parent
@@ -782,7 +783,7 @@ Item {
         closePolicy: Popup.CloseOnEscape
         x: parent.width/2 - width/2
         y: Math.max(parent.height / 4 - height / 2, 20)
-        parent: rootItem.parent
+        parent: rootItem.dialogParent
 
         Rectangle {
             anchors.fill: parent
@@ -813,7 +814,7 @@ Item {
         focus: true
         closePolicy: Popup.CloseOnEscape
         anchors.centerIn: parent
-        parent: rootItem.parent
+        parent: rootItem.dialogParent
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }
@@ -837,10 +838,14 @@ Item {
         focus: true
         closePolicy: Popup.CloseOnEscape
         anchors.centerIn: parent
-        //y: 10 + parent.height / 2 - height / 2
-        //x: parent.width/2 - width/2
-        //width: parent.width - 20 - notchLeft - notchRight
-        parent: rootItem.parent
+
+        width: parent.width - 20 - notchLeft - notchRight
+        height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
+        x: (parent.width - width) / 2
+        y: (parent.height - height + notchTop) / 2
+
+        parent: rootItem.dialogParent
+
         Overlay.modal: Rectangle {
             color: "#AA000000"
         }

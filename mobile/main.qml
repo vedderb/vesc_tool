@@ -779,6 +779,8 @@ ApplicationWindow {
             opened: true
             fullLogo: true
 
+            dialogParent: mainSwipeView
+
             Component.onCompleted: {
                 startBleScan()
             }

@@ -43,14 +43,12 @@ Item {
             }
 
             nameText.text = params.getLongName(paramName)
-            valueBox.from = params.getParamMinInt(paramName) * params.getParamEditorScale(paramName)
-            valueBox.to = params.getParamMaxInt(paramName) * params.getParamEditorScale(paramName)
-            valueBox.stepSize = params.getParamStepInt(paramName)
+            valueBox.realFrom = params.getParamMinInt(paramName) * params.getParamEditorScale(paramName)
+            valueBox.realTo = params.getParamMaxInt(paramName) * params.getParamEditorScale(paramName)
+            valueBox.realStepSize = params.getParamStepInt(paramName)
             valueBox.visible = !params.getParamEditAsPercentage(paramName)
             valueBox.suffix = params.getParamSuffix(paramName)
-            // Make sure that the prefix is updated too.
-            valueBox.value = params.getParamInt(paramName) * params.getParamEditorScale(paramName) + 1
-            valueBox.value = params.getParamInt(paramName) * params.getParamEditorScale(paramName)
+            valueBox.realValue = params.getParamInt(paramName) * params.getParamEditorScale(paramName)
 
             var p = (params.getParamInt(paramName) * 100.0) / maxVal
             percentageBox.from = (100.0 * params.getParamMinInt(paramName)) / maxVal
@@ -97,17 +95,16 @@ Item {
                 font.pointSize: 12
             }
 
-            SpinBox {
+            DoubleSpinBox {
                 id: valueBox
                 Layout.fillWidth: true
-                property string suffix: ""
-                editable: true
+                decimals: 0
 
-                onValueChanged: {
+                onRealValueChanged: {
                     if (!params.getParamEditAsPercentage(paramName)) {
-                        var val = value / params.getParamEditorScale(paramName)
+                        var val = realValue / params.getParamEditorScale(paramName)
 
-                        if (params != null && createReady) {
+                        if (params !== null && createReady) {
                             if (params.getUpdateOnly() !== paramName) {
                                 params.setUpdateOnly("")
                             }
@@ -116,14 +113,6 @@ Item {
 
                         updateDisplay(val);
                     }
-                }
-
-                textFromValue: function(value, locale) {
-                    return Number(value).toLocaleString(locale, 'f', 0) + suffix
-                }
-
-                valueFromText: function(text, locale) {
-                    return Number.fromLocaleString(locale, text.replace(suffix, ""))
                 }
             }
 
@@ -211,7 +200,7 @@ Item {
 
         function onParamChangedInt(src, name, newParam) {
             if (src !== editor && name === paramName) {
-                valueBox.value = newParam * params.getParamEditorScale(paramName)
+                valueBox.realValue = newParam * params.getParamEditorScale(paramName)
                 percentageBox.value = Math.round((100.0 * newParam) / maxVal)
             }
         }

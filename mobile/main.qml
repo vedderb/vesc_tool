@@ -17,17 +17,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.10
-import QtQuick.Controls 2.10
-import QtQuick.Controls.Material 2.2
-import QtQuick.Layouts 1.3
-import QtQuick.Window 2.10
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Material
+import QtQuick.Layouts
+import QtQuick.Window
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
-import Vedder.vesc.vesc3ditem 1.0
+import Vedder.vesc
 
 ApplicationWindow {
     id: appWindow
@@ -942,7 +938,7 @@ ApplicationWindow {
 
             Text {
                 id: vescDialogLabel
-                color: {color = Utility.getAppHexColor("lightText")}
+                color: Utility.getAppHexColor("lightText")
                 linkColor: {linkColor = Utility.getAppHexColor("lightAccent")}
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent

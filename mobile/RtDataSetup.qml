@@ -17,18 +17,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.5
-import QtQml 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
-import QtQuick.Controls.Styles 1.4
-import QtGraphicalEffects 1.0
-import QtQuick.Controls.Material 2.2
+import QtQuick
+import QtQml
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+import QtQuick.Controls.Material
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.utility 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.configparams 1.0
+import Vedder.vesc
 
 Item {
     id: rtData
@@ -52,7 +48,7 @@ Item {
     // Make background slightly darker
     Rectangle {
         anchors.fill: parent
-        color: {color = Utility.getAppHexColor("darkBackground")}
+        color: Utility.getAppHexColor("darkBackground")
     }
 
     GridLayout {
@@ -210,7 +206,7 @@ Item {
                                         RowLayout {
                                             anchors.fill: parent
 
-                                            DoubleSpinBox {
+                                            VescDoubleSpinBox {
                                                 id: odometerBox
                                                 decimals: 2
                                                 realFrom: 0.0
@@ -245,7 +241,7 @@ Item {
                         }
                     }
                     background: Rectangle {
-                        color: {color = Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")}
+                        color: Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")
                         opacity: button.down ? 0 : 1
                         implicitWidth: gaugeSize2*0.28
                         implicitHeight: gaugeSize2*0.28
@@ -316,7 +312,7 @@ Item {
                     nibColor: value > 50 ? greenColor : value > 20 ? orangeColor : redColor
                     Text {
                         id: batteryLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("lightText")
                         text: "BATTERY"
                         font.pixelSize: gaugeSize2/18.0
                         verticalAlignment: Text.AlignVCenter
@@ -327,7 +323,7 @@ Item {
                     }
                     Text {
                         id: rangeValLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("lightText")
                         text: "∞"
                         font.pixelSize: text === "∞"? gaugeSize2/6.3 : gaugeSize2/8.0
                         anchors.verticalCenterOffset: text === "∞"? -0.015*gaugeSize2 : 0
@@ -338,7 +334,7 @@ Item {
                     }
                     Text {
                         id: rangeLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("lightText")
                         text: "KM RANGE"
                         font.pixelSize: gaugeSize2/20.0
                         verticalAlignment: Text.AlignVCenter
@@ -349,7 +345,7 @@ Item {
                     }
                     Text {
                         id: battValLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("lightText")
                         text: parseFloat(batteryGauge.value).toFixed(0) +"%"
                         font.pixelSize: gaugeSize2/12.0
                         verticalAlignment: Text.AlignVCenter
@@ -385,7 +381,7 @@ Item {
                     radius:2
                     anchors.centerIn: parent
                     anchors.horizontalCenterOffset: 1.25*width
-                    color: {color = Utility.getAppHexColor("disabledText")}
+                    color: Utility.getAppHexColor("disabledText")
                     transform: Rotation {
                         id:inclineTransform
                         origin.x: -1.25*incline1.width/2
@@ -405,7 +401,7 @@ Item {
                 Text {
                     id: inclineText
                     anchors.centerIn: parent
-                    color: {color = Utility.getAppHexColor("lightText")}
+                    color: Utility.getAppHexColor("lightText")
                     text: parseFloat(inclineCanvas.incline).toFixed(0) + "%"
                     font.pixelSize: gaugeSize2/12.0
                     verticalAlignment: Text.AlignVCenter
@@ -505,7 +501,7 @@ Item {
                         nibColor: value > 45.0 ? redColor : (value > 25.0 ? orangeColor: blueColor)
                         Text {
                             id: consumValLabel
-                            color: {color = Utility.getAppHexColor("lightText")}
+                            color: Utility.getAppHexColor("lightText")
                             text: "0"
                             font.pixelSize: gaugeSize2*0.15
                             anchors.verticalCenterOffset: 0.265*gaugeSize2
@@ -515,7 +511,7 @@ Item {
                             font.family:  "Roboto"
                             Text {
                                 id: avgLabel
-                                color: {color = Utility.getAppHexColor("lightText")}
+                                color: Utility.getAppHexColor("lightText")
                                 text: "AVG"
                                 font.pixelSize: gaugeSize2*0.06
                                 anchors.verticalCenterOffset: 0.135*gaugeSize2
@@ -546,7 +542,7 @@ Item {
             //Layout.columnSpan: isHorizontal ? 2 : 1
             Text {
                 id: odoLabel
-                color: {color = Utility.getAppHexColor("lightText")}
+                color: Utility.getAppHexColor("lightText")
                 text: "ODOMETER"
                 anchors.horizontalCenterOffset:  gaugeSize2*-2/3
                 font.pixelSize: gaugeSize2/18.0
@@ -558,7 +554,7 @@ Item {
             }
             Text {
                 id: timeLabel
-                color: {color = Utility.getAppHexColor("lightText")}
+                color: Utility.getAppHexColor("lightText")
                 text: "UP-TIME"
                 anchors.horizontalCenterOffset:  gaugeSize2*2/3
                 font.pixelSize: gaugeSize2/18.0
@@ -570,7 +566,7 @@ Item {
             }
             Text {
                 id: tripLabel
-                color: {color = Utility.getAppHexColor("lightText")}
+                color: Utility.getAppHexColor("lightText")
                 text: "TRIP"
                 anchors.horizontalCenterOffset:  0
                 font.pixelSize: gaugeSize2/18.0
@@ -585,14 +581,14 @@ Item {
                 width:2*gaugeSize2
                 height: rideTime.implicitHeight + gaugeSize2*0.025
                 anchors.centerIn: parent
-                color: {color = Utility.getAppHexColor("darkBackground")}
+                color: Utility.getAppHexColor("darkBackground")
                 anchors.verticalCenterOffset: gaugeSize2*0.005
                 border.color: {border.color = Utility.getAppHexColor("lightestBackground")}
                 border.width: 1
                 radius: gaugeSize2*0.03
                 Text{
                     id: rideTime
-                    color: {color = Utility.getAppHexColor("lightText")}
+                    color: Utility.getAppHexColor("lightText")
                     anchors.horizontalCenterOffset: gaugeSize2*2/3
                     text: "00:00:00"
                     font.pixelSize: gaugeSize2/10.0
@@ -611,7 +607,7 @@ Item {
                 }
                 Text{
                     id: odometer
-                    color: {color = Utility.getAppHexColor("lightText")}
+                    color: Utility.getAppHexColor("lightText")
                     anchors.horizontalCenterOffset:  gaugeSize2*-2/3
                     text: "0.0"
                     font.pixelSize: gaugeSize2/10.0
@@ -630,7 +626,7 @@ Item {
                 }
                 Text{
                     id: trip
-                    color: {color = Utility.getAppHexColor("lightText")}
+                    color: Utility.getAppHexColor("lightText")
                     anchors.horizontalCenterOffset: 0
                     text: "0.0"
                     font.pixelSize: gaugeSize2/10.0

@@ -58,13 +58,13 @@ void PageAppNunchuk::setVesc(VescInterface *vesc)
         ui->nrfPair->setVesc(mVesc);
         reloadParams();
 
-        connect(mVesc->commands(), SIGNAL(decodedChukReceived(double)),
-                this, SLOT(decodedChukReceived(double)));
+        connect(mVesc->commands(), &Commands::decodedChukReceived,
+                this, &PageAppNunchuk::decodedChukReceived);
 
-        connect(mVesc->appConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),
-                this, SLOT(paramChangedDouble(QObject*,QString,double)));
-        connect(mVesc->appConfig(), SIGNAL(paramChangedEnum(QObject*,QString,int)),
-                this, SLOT(paramChangedEnum(QObject*,QString,int)));
+        connect(mVesc->appConfig(), &ConfigParams::paramChangedDouble,
+                this, &PageAppNunchuk::paramChangedDouble);
+        connect(mVesc->appConfig(), &ConfigParams::paramChangedEnum,
+                this, &PageAppNunchuk::paramChangedEnum);
 
         paramChangedEnum(nullptr, "app_chuk_conf.throttle_exp_mode", 0);
     }

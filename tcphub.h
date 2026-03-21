@@ -26,6 +26,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QTimer>
+#include <QQmlEngine>
 
 /*
  *  - VESC connects to Server (HUB) and gets registered.
@@ -67,6 +68,7 @@ struct TcpConnectedVesc
 class TcpHub : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit TcpHub(QObject *parent = nullptr);
     ~TcpHub();

@@ -165,7 +165,7 @@ void PageScripting::saveStateToSettings()
         set.remove("pagescripting/recentfiles");
         set.beginWriteArray("pagescripting/recentfiles");
         int ind = 0;
-        foreach (auto f, mRecentFiles) {
+        for (const auto &f : mRecentFiles) {
             set.setArrayIndex(ind);
             set.setValue("path", f);
             ind++;

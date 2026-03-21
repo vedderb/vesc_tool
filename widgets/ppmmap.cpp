@@ -55,8 +55,8 @@ void PpmMap::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(decodedPpmReceived(double,double)),
-                this, SLOT(decodedPpmReceived(double,double)));
+        connect(mVesc->commands(), &Commands::decodedPpmReceived,
+                this, &PpmMap::decodedPpmReceived);
     }
 }
 

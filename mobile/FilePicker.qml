@@ -23,14 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import QtQuick 2.0
-import QtQuick.Controls 1.4 as OldControls
-import QtQuick.Controls 2.1
-import Qt.labs.folderlistmodel 2.1
-import QtQuick.Layouts 1.3
-import QtQuick.Window 2.0
-import Qt.labs.platform 1.0
-import Vedder.vesc.utility 1.0
+import QtQuick
+import QtQuick.Controls
+import Qt.labs.folderlistmodel
+import QtQuick.Layouts
+import QtQuick.Window
+import Qt.labs.platform
+import Vedder.vesc
 
 Item {
     id:picker
@@ -127,74 +126,63 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        OldControls.TableView {
-            id: view
+        Rectangle {
             Layout.fillHeight: true
             Layout.fillWidth: true
-            model: folderListModel
-            headerDelegate:headerDelegate
-            rowDelegate: Rectangle {
+            color: Utility.getAppHexColor("lightBackground")
+
+            Rectangle {
+                id: header
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
                 height: rowHeight
-                color: Utility.getAppHexColor("lightBackground")
-            }
-
-            OldControls.TableViewColumn {
-                title: qsTr("FileName")
-                role: "fileName"
-                resizable: true
-                delegate: fileDelegate
-            }
-
-            Component {
-                id: fileDelegate
-                Item {
-                    height: rowHeight
-                    Rectangle {
-                        color: Utility.getAppHexColor("normalBackground")
-                        anchors.fill: parent
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                onItemClick(fileNameText.text)
-                            }
-                        }
-                        Text {
-                            id: fileNameText
-                            color: Utility.getAppHexColor("lightText")
-                            height: width
-                            anchors.left: image.right
-                            anchors.top: parent.top
-                            anchors.bottom: parent.bottom
-                            anchors.right: parent.right
-                            text: styleData.value !== undefined ? styleData.value : ""
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        Image {
-                            id: image
-                            height: buttonHeight
-                            width: height
-                            anchors.left: parent.left
-                            anchors.leftMargin: textmargin
-                            anchors.verticalCenter: parent.verticalCenter
-                            source: isFolder(fileNameText.text) ? "qrc" + Utility.getThemePath() + "icons/ic_folder_open_black_48dp.png" :
-                                                                  "qrc" + Utility.getThemePath() + "icons/ic_insert_drive_file_black_48dp.png"
-                        }
-                    }
+                color: Utility.getAppHexColor("lightestBackground")
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    height: headerTextSize
+                    font.bold: true
+                    elide: Text.ElideMiddle
+                    color: Utility.getAppHexColor("lightText")
+                    text: qsTr("FileName")
                 }
             }
-            Component {
-                id: headerDelegate
-                Rectangle {
+
+            ListView {
+                id: view
+                anchors.top: header.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                clip: true
+                model: folderListModel
+                delegate: Rectangle {
+                    width: view.width
                     height: rowHeight
-                    color: Utility.getAppHexColor("lightestBackground")
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        height: headerTextSize
-                        font.bold: true
-                        elide: Text.ElideMiddle
-                        color: Utility.getAppHexColor("lightText")
-                        text: styleData.value !== undefined ? styleData.value : ""
+                    color: Utility.getAppHexColor("normalBackground")
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            onItemClick(fileName)
+                        }
+                    }
+                    Row {
+                        anchors.fill: parent
+                        spacing: 0
+                        Image {
+                            height: buttonHeight
+                            width: height
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: isFolder(fileName) ? "qrc" + Utility.getThemePath() + "icons/ic_folder_open_black_48dp.png" :
+                                                         "qrc" + Utility.getThemePath() + "icons/ic_insert_drive_file_black_48dp.png"
+                        }
+                        Text {
+                            color: Utility.getAppHexColor("lightText")
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: fileName
+                            verticalAlignment: Text.AlignVCenter
+                        }
                     }
                 }
             }

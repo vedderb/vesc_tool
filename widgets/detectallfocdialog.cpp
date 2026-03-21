@@ -130,10 +130,10 @@ DetectAllFocDialog::DetectAllFocDialog(VescInterface *vesc, QWidget *parent) :
     ui->paramTab->addParamRow(mVesc->mcConfig(), "si_battery_cells");
     ui->paramTab->addParamRow(mVesc->mcConfig(), "si_battery_ah");
 
-    connect(ui->pulleyMotorBox, SIGNAL(valueChanged(int)),
-            this, SLOT(updateGearRatio()));
-    connect(ui->pulleyWheelBox, SIGNAL(valueChanged(int)),
-            this, SLOT(updateGearRatio()));
+    connect(ui->pulleyMotorBox, qOverload<int>(&QSpinBox::valueChanged),
+            this, &DetectAllFocDialog::updateGearRatio);
+    connect(ui->pulleyWheelBox, qOverload<int>(&QSpinBox::valueChanged),
+            this, &DetectAllFocDialog::updateGearRatio);
 
     updateGearRatio();
 }
@@ -270,7 +270,7 @@ void DetectAllFocDialog::runDetect(bool can)
     ui->progressBar->setRange(0, 0);
 
     mVesc->commands()->setMcconf(false);
-    Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+    Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
     QVector<int> canDevs;
     if (can) {
         canDevs = Utility::scanCanVescOnly(mVesc);
@@ -281,7 +281,7 @@ void DetectAllFocDialog::runDetect(bool can)
                     mVesc->mcConfig()->getParamDouble("l_battery_cut_start"),
                     mVesc->mcConfig()->getParamDouble("l_battery_cut_end"),
                     true, true);
-        Utility::waitSignal(mVesc->commands(), SIGNAL(ackReceived(QString)), 2000);
+        Utility::waitSignal(mVesc->commands(), &Commands::ackReceived, 2000);
     } else {
         if (!Utility::setBatteryCutCan(mVesc, canDevs, 6.0, 6.0)) {
             ui->tabWidget->setEnabled(true);

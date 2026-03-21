@@ -1,0 +1,80 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 16,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default (Debug)",
+            "binaryDir": "${sourceDir}/build/default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release-linux",
+            "displayName": "Release Linux",
+            "binaryDir": "${sourceDir}/build/lin",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "STATIC_LIBCXX": "ON"
+            }
+        },
+        {
+            "name": "release-windows",
+            "displayName": "Release Windows",
+            "binaryDir": "${sourceDir}/build/win",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "release-macos",
+            "displayName": "Release macOS",
+            "binaryDir": "${sourceDir}/build/macos",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_OSX_ARCHITECTURES": "x86_64;arm64"
+            }
+        },
+        {
+            "name": "release-android-arm64",
+            "displayName": "Release Android arm64-v8a",
+            "binaryDir": "${sourceDir}/build/android-arm64",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ANDROID_ABI": "arm64-v8a"
+            }
+        },
+        {
+            "name": "release-android-armv7",
+            "displayName": "Release Android armeabi-v7a",
+            "binaryDir": "${sourceDir}/build/android-armv7",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ANDROID_ABI": "armeabi-v7a"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default"
+        },
+        {
+            "name": "release-linux",
+            "configurePreset": "release-linux"
+        },
+        {
+            "name": "release-windows",
+            "configurePreset": "release-windows"
+        },
+        {
+            "name": "release-macos",
+            "configurePreset": "release-macos"
+        }
+    ]
+}

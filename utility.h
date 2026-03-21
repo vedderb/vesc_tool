@@ -25,9 +25,11 @@
 #include <cstdint>
 #include <QQuickWindow>
 #include <QtGui/qpa/qplatformwindow.h>
+#include <QQmlEngine>
 #include "vescinterface.h"
 #include "widgets/qcustomplot.h"
 #include "datatypes.h"
+#include "vesctasks.h"
 
 #define FE_WGS84        (1.0/298.257223563) // earth flattening (WGS84)
 #define RE_WGS84        6378137.0           // earth semimajor axis (WGS84) (m)
@@ -61,6 +63,25 @@ public:
     Q_INVOKABLE static void keepScreenOn(bool on);
     Q_INVOKABLE static void allowScreenRotation(bool enabled);
     Q_INVOKABLE static bool waitSignal(QObject *sender, QString signal, int timeoutMs);
+
+    // Type-safe overload for C++ callers (avoids SIGNAL() macro)
+    template<typename Sender, typename Signal>
+    static bool waitSignal(Sender *sender, Signal signal, int timeoutMs) {
+        bool signalFired = false;
+        auto tree = Group {
+            SignalWaitTaskItem([&](SignalWaitTask &task) {
+                task.setTimeout(timeoutMs);
+                task.connectSignal(sender, signal);
+                return SetupResult::Continue;
+            }, [&signalFired](const SignalWaitTask &, DoneWith doneWith) {
+                signalFired = (doneWith == DoneWith::Success);
+                return DoneResult::Success;
+            })
+        };
+        runTree(tree);
+        return signalFired;
+    }
+
     Q_INVOKABLE static void sleepWithEventLoop(int timeMs);
     Q_INVOKABLE static bool canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud);
     Q_INVOKABLE static QString detectAllFoc(VescInterface *vesc,

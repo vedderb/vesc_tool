@@ -28,6 +28,7 @@
 class Vesc3dItem : public QQuickPaintedItem
 {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     explicit Vesc3dItem(QQuickItem *parent = nullptr);

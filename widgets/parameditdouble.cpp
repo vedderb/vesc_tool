@@ -54,10 +54,8 @@ ParamEditDouble::ParamEditDouble(QWidget *parent) :
     mPercentageBox->setVisible(false);
     mDisplay->setVisible(false);
 
-    connect(mPercentageBox, SIGNAL(valueChanged(int)),
-            this, SLOT(percentageChanged(int)));
-    connect(mDoubleBox, SIGNAL(valueChanged(double)),
-            this, SLOT(doubleChanged(double)));
+    connect(mPercentageBox, qOverload<int>(&QSpinBox::valueChanged), this, &ParamEditDouble::percentageChanged);
+    connect(mDoubleBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ParamEditDouble::doubleChanged);
 }
 
 ParamEditDouble::~ParamEditDouble()
@@ -97,8 +95,7 @@ void ParamEditDouble::setConfig(ConfigParams *config)
         }
     }
 
-    connect(mConfig, SIGNAL(paramChangedDouble(QObject*,QString,double)),
-            this, SLOT(paramChangedDouble(QObject*,QString,double)));
+    connect(mConfig, &ConfigParams::paramChangedDouble, this, &ParamEditDouble::paramChangedDouble);
 }
 
 QString ParamEditDouble::name() const

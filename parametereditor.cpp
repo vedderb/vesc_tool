@@ -85,8 +85,7 @@ ParameterEditor::ParameterEditor(QWidget *parent) :
     mTimer = new QTimer(this);
     mTimer->start(20);
 
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &ParameterEditor::timerSlot);
 
     connect(ui->groupList, &QListWidget::currentRowChanged, [this](int row) {
         (void)row;

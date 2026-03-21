@@ -292,7 +292,7 @@ PageMotorComparison::PageMotorComparison(QWidget *parent) :
 
     auto updateMouse = [this](QMouseEvent *event) {
         if (event->buttons() & Qt::RightButton) {
-            double vx = ui->plot->xAxis->pixelToCoord(event->x());
+            double vx = ui->plot->xAxis->pixelToCoord(event->position().x());
             updateDataAndPlot(vx, ui->plot->yAxis->range().lower, ui->plot->yAxis->range().upper);
         }
     };
@@ -1273,7 +1273,7 @@ PageMotorComparison::QmlParams PageMotorComparison::getQmlParam(double progress)
     QmlParams res;
 
     if (ok) {
-        ok = returnedValue.canConvert(QMetaType::QVariantList);
+        ok = returnedValue.canConvert<QVariantList>();
     }
 
     if (!ok) {
@@ -1336,41 +1336,41 @@ bool PageMotorComparison::qmlUpdateNames()
                                    Q_RETURN_ARG(QVariant, returnedValue));
 
     if (ok) {
-        ok = returnedValue.canConvert(QMetaType::QVariantList);
+        ok = returnedValue.canConvert<QVariantList>();
     }
 
     if (ok) {
         auto list = returnedValue.toList();
 
-        if (list.size() >= 1 && list.at(0).canConvert(QMetaType::QString)) {
+        if (list.size() >= 1 && list.at(0).canConvert<QString>()) {
             ui->m1PlotTable->item(18, 0)->setText(list.at(0).toString());
         }
 
-        if (list.size() >= 2 && list.at(1).canConvert(QMetaType::QString)) {
+        if (list.size() >= 2 && list.at(1).canConvert<QString>()) {
             ui->m1PlotTable->item(19, 0)->setText(list.at(1).toString());
         }
 
-        if (list.size() >= 3 && list.at(2).canConvert(QMetaType::QString)) {
+        if (list.size() >= 3 && list.at(2).canConvert<QString>()) {
             ui->m1PlotTable->item(20, 0)->setText(list.at(2).toString());
         }
 
-        if (list.size() >= 4 && list.at(3).canConvert(QMetaType::QString)) {
+        if (list.size() >= 4 && list.at(3).canConvert<QString>()) {
             ui->m1PlotTable->item(21, 0)->setText(list.at(3).toString());
         }
 
-        if (list.size() >= 5 && list.at(4).canConvert(QMetaType::QString)) {
+        if (list.size() >= 5 && list.at(4).canConvert<QString>()) {
             ui->m2PlotTable->item(18, 0)->setText(list.at(4).toString());
         }
 
-        if (list.size() >= 6 && list.at(5).canConvert(QMetaType::QString)) {
+        if (list.size() >= 6 && list.at(5).canConvert<QString>()) {
             ui->m2PlotTable->item(19, 0)->setText(list.at(5).toString());
         }
 
-        if (list.size() >= 7 && list.at(6).canConvert(QMetaType::QString)) {
+        if (list.size() >= 7 && list.at(6).canConvert<QString>()) {
             ui->m2PlotTable->item(20, 0)->setText(list.at(6).toString());
         }
 
-        if (list.size() >= 8 && list.at(7).canConvert(QMetaType::QString)) {
+        if (list.size() >= 8 && list.at(7).canConvert<QString>()) {
             ui->m2PlotTable->item(21, 0)->setText(list.at(7).toString());
         }
     }
@@ -1390,7 +1390,7 @@ QString PageMotorComparison::getQmlXName()
                                         Q_RETURN_ARG(QVariant, returnedValue));
 
     if (ok) {
-        ok = returnedValue.canConvert(QMetaType::QString);
+        ok = returnedValue.canConvert<QString>();
     }
 
     mQmlXNameOk = ok;
@@ -1414,7 +1414,7 @@ double PageMotorComparison::getQmlXMin()
                                         Q_RETURN_ARG(QVariant, returnedValue));
 
     if (ok) {
-        ok = returnedValue.canConvert(QMetaType::Double);
+        ok = returnedValue.canConvert<double>();
     }
 
     mQmlXMinOk = ok;
@@ -1438,7 +1438,7 @@ double PageMotorComparison::getQmlXMax()
                                         Q_RETURN_ARG(QVariant, returnedValue));
 
     if (ok) {
-        ok = returnedValue.canConvert(QMetaType::Double);
+        ok = returnedValue.canConvert<double>();
     }
 
     mQmlXMaxOk = ok;

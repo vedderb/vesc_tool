@@ -25,12 +25,14 @@
 #include <QMap>
 #include <QVariant>
 #include <QVariantList>
+#include <QQmlEngine>
 #include "datatypes.h"
 #include "configparams.h"
 
 class Commands : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit Commands(QObject *parent = nullptr);
 
@@ -94,7 +96,7 @@ public:
 signals:
     void sampleDataQmlStarted(int sample_len);
 
-    void dataToSend(QByteArray &data);
+    void dataToSend(QByteArray data);
 
     void fwVersionReceived(FW_RX_PARAMS params);
     void eraseNewAppResReceived(bool ok);
@@ -216,7 +218,7 @@ public slots:
     void sendCustomAppData(QByteArray data);
     void sendCustomAppData(unsigned char *data, unsigned int len);
     void sendCustomHwData(QByteArray data);
-    void setChukData(chuck_data &data);
+    void setChukData(const chuck_data &data);
     void pairNrf(int ms);
     void gpdSetFsw(float fsw);
     void getGpdBufferSizeLeft();

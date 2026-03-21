@@ -22,13 +22,14 @@
 
 #include <QObject>
 #include <QDir>
-#include "qqmlengine.h"
+#include <QQmlEngine>
 #include "vescinterface.h"
 #include "datatypes.h"
 
 class CodeLoader : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit CodeLoader(QObject *parent = nullptr);
 

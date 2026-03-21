@@ -40,8 +40,7 @@ NrfPair::NrfPair(QWidget *parent) :
     mTimer = new QTimer(this);
     mTimer->start(100);
 
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
+    connect(mTimer, &QTimer::timeout, this, &NrfPair::timerSlot);
 }
 
 NrfPair::~NrfPair()
@@ -59,8 +58,8 @@ void NrfPair::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(nrfPairingRes(int)),
-                this, SLOT(nrfPairingRes(int)));
+        connect(mVesc->commands(), &Commands::nrfPairingRes,
+                this, &NrfPair::nrfPairingRes);
     }
 }
 

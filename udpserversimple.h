@@ -22,11 +22,13 @@
 
 #include <QObject>
 #include <QUdpSocket>
+#include <QQmlEngine>
 #include "packet.h"
 
 class UdpServerSimple : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit UdpServerSimple(QObject *parent = nullptr);
     Q_INVOKABLE bool startServer(int port, QHostAddress addr = QHostAddress::Any);
@@ -47,7 +49,7 @@ signals:
 
 public slots:
     void udpInputDataAvailable();
-    void dataToSend(QByteArray &data);
+    void dataToSend(const QByteArray &data);
 
 private:
     QUdpSocket *mUdpSocket;

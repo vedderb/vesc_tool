@@ -5,11 +5,11 @@
  means that the other tabs are disabled).
  */
     
-import QtQuick 2.7
-import QtQuick.Controls 2.0
-import QtQuick.Layouts 1.3
-import QtQuick.Controls.Material 2.2
-import Vedder.vesc.utility 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Controls.Material
+import Vedder.vesc
 
 Item {
     id: mainItem

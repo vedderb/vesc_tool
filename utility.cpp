@@ -18,12 +18,12 @@
     */
 
 #include "utility.h"
+#include "vesctasks.h"
 #ifdef Q_OS_IOS
 #include "ios/src/setIosParameters.h"
 #endif
 #include <cmath>
 #include <QProgressDialog>
-#include <QEventLoop>
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkRequest>
@@ -37,14 +37,17 @@
 #include <QNetworkInterface>
 #include <QDirIterator>
 #include <QPixmapCache>
+#include <QElapsedTimer>
 
 #include "maddy/parser.h"
 #include "heatshrink/heatshrinkif.h"
 
 #ifdef Q_OS_ANDROID
-#include <QtAndroid>
-#include <QAndroidJniObject>
-#include <QAndroidJniEnvironment>
+#include <QJniObject>
+#include <QJniEnvironment>
+#include <QCoreApplication>
+#include <QPermissions>
+#include <QNativeInterface>
 #endif
 
 QMap<QString, QColor> Utility::mAppColors = {
@@ -172,15 +175,17 @@ bool Utility::autoconnectBlockingWithProgress(VescInterface *vesc, QWidget *pare
 void Utility::checkVersion(VescInterface *vesc)
 {
     QString version = QString::number(VT_VERSION);
-    QUrl url("https://vesc-project.com/vesctool-version.html");
-    QNetworkAccessManager manager;
-    QNetworkRequest request(url);
-    QNetworkReply *reply = manager.get(request);
-    QEventLoop loop;
-    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
+    QByteArray responseData;
 
-    QString res = QString::fromUtf8(reply->readAll());
+    runTree(Group{NetworkReplyTaskItem([](NetworkReplyTask &task) {
+        task.setUrl(QUrl("https://vesc-project.com/vesctool-version.html"));
+        return SetupResult::Continue;
+    }, [&responseData](const NetworkReplyTask &task, DoneWith) {
+        responseData = task.replyData();
+        return DoneResult::Success;
+    })});
+
+    QString res = QString::fromUtf8(responseData);
 
     if (res.startsWith("vesctoolversion")) {
         res.remove(0, 15);
@@ -202,9 +207,6 @@ void Utility::checkVersion(VescInterface *vesc)
     } else {
         qWarning() << res;
     }
-
-    reply->abort();
-    reply->deleteLater();
 }
 
 QString Utility::fwChangeLog()
@@ -289,20 +291,16 @@ bool Utility::requestFilePermission()
 bool Utility::requestBleScanPermission()
 {
 #ifdef Q_OS_ANDROID
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.BLUETOOTH_SCAN");
-    if(r == QtAndroid::PermissionResult::Denied) {
-        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.BLUETOOTH_SCAN", 10000);
-        r = QtAndroid::checkPermission("android.permission.BLUETOOTH_SCAN");
-        if(r == QtAndroid::PermissionResult::Denied) {
+    QBluetoothPermission permission;
+    permission.setCommunicationModes(QBluetoothPermission::Access);
+    if (qApp->checkPermission(permission) != Qt::PermissionStatus::Granted) {
+        qApp->requestPermission(permission, [](const QPermission &) {});
+        // Re-check after request
+        if (qApp->checkPermission(permission) != Qt::PermissionStatus::Granted) {
             return false;
         }
     }
-
     return true;
-#else
-    return true;
-#endif
 #else
     return true;
 #endif
@@ -311,20 +309,15 @@ bool Utility::requestBleScanPermission()
 bool Utility::requestBleConnectPermission()
 {
 #ifdef Q_OS_ANDROID
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.BLUETOOTH_CONNECT");
-    if(r == QtAndroid::PermissionResult::Denied) {
-        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.BLUETOOTH_CONNECT", 10000);
-        r = QtAndroid::checkPermission("android.permission.BLUETOOTH_CONNECT");
-        if(r == QtAndroid::PermissionResult::Denied) {
+    QBluetoothPermission permission;
+    permission.setCommunicationModes(QBluetoothPermission::Access);
+    if (qApp->checkPermission(permission) != Qt::PermissionStatus::Granted) {
+        qApp->requestPermission(permission, [](const QPermission &) {});
+        if (qApp->checkPermission(permission) != Qt::PermissionStatus::Granted) {
             return false;
         }
     }
-
     return true;
-#else
-    return true;
-#endif
 #else
     return true;
 #endif
@@ -333,12 +326,9 @@ bool Utility::requestBleConnectPermission()
 bool Utility::hasLocationPermission()
 {
 #ifdef Q_OS_ANDROID
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.ACCESS_FINE_LOCATION");
-    if (r == QtAndroid::PermissionResult::Denied) {
-        return false;
-    } else {
-        return true;
-    }
+    QLocationPermission permission;
+    permission.setAccuracy(QLocationPermission::Precise);
+    return qApp->checkPermission(permission) == Qt::PermissionStatus::Granted;
 #else
     return true;
 #endif
@@ -350,10 +340,10 @@ void Utility::keepScreenOn(bool on)
 
 #endif
 #ifdef Q_OS_ANDROID
-    QtAndroid::runOnAndroidThread([on]{
-        QAndroidJniObject activity = QtAndroid::androidActivity();
+    QNativeInterface::QAndroidApplication::runOnAndroidMainThread([on]{
+        QJniObject activity = QNativeInterface::QAndroidApplication::context();
         if (activity.isValid()) {
-            QAndroidJniObject window =
+            QJniObject window =
                     activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
 
             if (window.isValid()) {
@@ -365,7 +355,7 @@ void Utility::keepScreenOn(bool on)
                 }
             }
         }
-        QAndroidJniEnvironment env;
+        QJniEnvironment env;
         if (env->ExceptionCheck()) {
             env->ExceptionClear();
         }
@@ -379,14 +369,14 @@ void Utility::allowScreenRotation(bool enabled)
 {
 #ifdef Q_OS_ANDROID
     if (enabled) {
-        QAndroidJniObject activity = QtAndroid::androidActivity();
+        QJniObject activity = QNativeInterface::QAndroidApplication::context();
         activity.callMethod<void>("setRequestedOrientation", "(I)V",
-                                  QAndroidJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
+                                  QJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
                                                                          "SCREEN_ORIENTATION_UNSPECIFIED"));
     } else {
-        QAndroidJniObject activity = QtAndroid::androidActivity();
+        QJniObject activity = QNativeInterface::QAndroidApplication::context();
         activity.callMethod<void>("setRequestedOrientation", "(I)V",
-                                  QAndroidJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
+                                  QJniObject::getStaticField<int>("android.content.pm.ActivityInfo",
                                                                          "SCREEN_ORIENTATION_PORTRAIT"));
     }
 #else
@@ -396,31 +386,29 @@ void Utility::allowScreenRotation(bool enabled)
 
 bool Utility::waitSignal(QObject *sender, QString signal, int timeoutMs)
 {
-    // qDebug() << "LoopLevel" << QThread::currentThread()->loopLevel();
+    // String-based overload for QML callers (signal name is a runtime string).
+    bool signalFired = false;
 
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(timeoutMs);
-    auto conn1 = QObject::connect(sender, signal.toLocal8Bit().data(), &loop, SLOT(quit()));
-    auto conn2 = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-    loop.exec();
+    auto tree = Group {
+        SignalWaitTaskItem([&](SignalWaitTask &task) {
+            task.setTimeout(timeoutMs);
+            task.connectStringSignal(sender, signal.toLocal8Bit().constData());
+            return SetupResult::Continue;
+        }, [&signalFired](const SignalWaitTask &, DoneWith doneWith) {
+            signalFired = (doneWith == DoneWith::Success);
+            return DoneResult::Success;
+        })
+    };
 
-    QObject::disconnect(conn1);
-    QObject::disconnect(conn2);
-
-    return timeoutTimer.isActive();
+    runTree(tree);
+    return signalFired;
 }
 
 void Utility::sleepWithEventLoop(int timeMs)
 {
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(timeMs);
-    auto conn1 = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-    loop.exec();
-    QObject::disconnect(conn1);
+    runTree(Group {
+        timeoutTask(std::chrono::milliseconds{timeMs})
+    });
 }
 
 bool Utility::canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud)
@@ -437,7 +425,7 @@ bool Utility::canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud)
         }
     });
 
-    bool signalRx = waitSignal(vesc->commands(), SIGNAL(canUpdateBaudRx(bool)), 4000);
+    bool signalRx = waitSignal(vesc->commands(), &Commands::canUpdateBaudRx, 4000);
     disconnect(conn);
 
     if (!signalRx) {
@@ -460,43 +448,49 @@ QString Utility::detectAllFoc(VescInterface *vesc,
     vesc->commands()->detectAllFoc(detect_can, max_power_loss, min_current_in,
                                    max_current_in, openloop_rpm, sl_erpm);
 
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    QTimer pollTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(180000);
-    pollTimer.start(100);
-
     int resDetect = 0;
-    auto conn = connect(vesc->commands(), &Commands::detectAllFocReceived,
-                        [&resDetect, &loop](int result) {
-        resDetect = result;
-        loop.quit();
-    });
-
     QString pollRes;
-    auto conn2 = connect(&pollTimer, &QTimer::timeout,
-                        [&pollRes, &loop, &vesc]() {
-        if (!vesc->isPortConnected()) {
-            pollRes = "VESC disconnected during detection.";
-            loop.quit();
-        }
-    });
+    bool timedOut = false;
 
-    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-    loop.exec();
+    // Two parallel tasks:
+    // 1. SignalWaitTask: waits for detectAllFocReceived (up to 180s)
+    // 2. PollTimerTask: polls for disconnect every 100ms
+    // Group finishes when either completes.
+    auto tree = Group {
+        parallel,
+        stopOnSuccessOrError,
+        SignalWaitTaskItem([&](SignalWaitTask &task) {
+            task.setTimeout(180000);
+            task.connectSignal(vesc->commands(), &Commands::detectAllFocReceived,
+                               [&resDetect](int result) { resDetect = result; });
+            return SetupResult::Continue;
+        }, [&timedOut](const SignalWaitTask &, DoneWith doneWith) {
+            timedOut = (doneWith != DoneWith::Success);
+            return DoneResult::Success;
+        }),
+        PollTimerTaskItem([&](PollTimerTask &task) {
+            task.setInterval(100);
+            task.setTimeout(0); // no independent timeout
+            task.setOnTick([&task, &pollRes, vesc]() {
+                if (!vesc->isPortConnected()) {
+                    pollRes = "VESC disconnected during detection.";
+                    task.finish();
+                }
+            });
+            return SetupResult::Continue;
+        })
+    };
 
-    disconnect(conn);
-    disconnect(conn2);
+    runTree(tree);
 
-    if (timeoutTimer.isActive() && pollRes.isEmpty()) {
+    if (!timedOut && pollRes.isEmpty()) {
         if (resDetect >= 0) {
             ConfigParams *p = vesc->mcConfig();
             ConfigParams *ap = vesc->appConfig();
 
             // MCConf should have been sent after the detection
             vesc->commands()->getAppConf();
-            waitSignal(ap, SIGNAL(updated()), 4000);
+            waitSignal(ap, &ConfigParams::updated, 4000);
 
             auto genRes = [&p, &ap]() {
                 QString sensors;
@@ -552,18 +546,18 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                 }
 
                 vesc->commands()->getMcconf();
-                waitSignal(p, SIGNAL(updated()), 4000);
+                waitSignal(p, &ConfigParams::updated, 4000);
                 vesc->commands()->getAppConf();
-                waitSignal(ap, SIGNAL(updated()), 4000);
+                waitSignal(ap, &ConfigParams::updated, 4000);
                 res += "\n\n" + genRes();
             }
 
             vesc->commands()->setSendCan(canLastFwd, canLastId);
             vesc->ignoreCanChange(false);
             vesc->commands()->getMcconf();
-            waitSignal(p, SIGNAL(updated()), 4000);
+            waitSignal(p, &ConfigParams::updated, 4000);
             vesc->commands()->getAppConf();
-            waitSignal(ap, SIGNAL(updated()), 4000);
+            waitSignal(ap, &ConfigParams::updated, 4000);
         } else {
             QString reason;
             switch (resDetect) {
@@ -637,7 +631,7 @@ QVector<double> Utility::measureRLBlocking(VescInterface *vesc)
         res.append(ld_lq_diff);
     });
 
-    waitSignal(vesc->commands(), SIGNAL(motorRLReceived(double, double, double)), 8000);
+    waitSignal(vesc->commands(), &Commands::motorRLReceived, 8000);
     disconnect(conn);
 
     return res;
@@ -654,7 +648,7 @@ double Utility::measureLinkageOpenloopBlocking(VescInterface *vesc, double curre
         res = flux_linkage;
     });
 
-    waitSignal(vesc->commands(), SIGNAL(motorLinkageReceived(double)), 12000);
+    waitSignal(vesc->commands(), &Commands::motorLinkageReceived, 12000);
     disconnect(conn);
 
     return res;
@@ -671,7 +665,7 @@ QVector<int> Utility::measureHallFocBlocking(VescInterface *vesc, double current
             resDetect.append(hall_table);
     });
 
-    bool rx = waitSignal(vesc->commands(), SIGNAL(focHallTableReceived(QVector<int>, int)), 25000);
+    bool rx = waitSignal(vesc->commands(), &Commands::focHallTableReceived, 25000);
     disconnect(conn);
 
     if (!rx) {
@@ -691,7 +685,7 @@ ENCODER_DETECT_RES Utility::measureEncoderBlocking(VescInterface *vesc, double c
             resDetect = res;
     });
 
-    waitSignal(vesc->commands(), SIGNAL(encoderParamReceived(ENCODER_DETECT_RES)), 50000);
+    waitSignal(vesc->commands(), &Commands::encoderParamReceived, 50000);
     disconnect(conn);
 
     return resDetect;
@@ -736,7 +730,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             vesc->commands()->getAppConf();
-            res = waitSignal(ap, SIGNAL(updated()), 4000);
+            res = waitSignal(ap, &ConfigParams::updated, 4000);
 
             if (!res) {
                 qWarning() << "Appconf not received";
@@ -756,7 +750,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             vesc->commands()->getAppConfDefault();
-            res = waitSignal(ap, SIGNAL(updated()), 4000);
+            res = waitSignal(ap, &ConfigParams::updated, 4000);
 
             if (!res) {
                 qWarning() << "Default appconf not received";
@@ -772,7 +766,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
             }
 
             vesc->commands()->setAppConf();
-            res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+            res = waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
 
             if (!res) {
                 qWarning() << "Appconf set no ack received";
@@ -804,7 +798,7 @@ bool Utility::resetInputCan(VescInterface *vesc, QVector<int> canIds)
     if (isConnectedToHwVesc(vesc)) {
         vesc->commands()->getAppConf();
         ConfigParams *ap = vesc->appConfig();
-        if (!waitSignal(ap, SIGNAL(updated()), 4000)) {
+        if (!waitSignal(ap, &ConfigParams::updated, 4000)) {
             qWarning() << "Appconf not received";
             res = false;
         }
@@ -899,7 +893,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
 
         vesc->commands()->getMcconf();
 
-        if (!waitSignal(config, SIGNAL(updated()), 4000)) {
+        if (!waitSignal(config, &ConfigParams::updated, 4000)) {
             vesc->emitMessageDialog("Read Motor Configuration",
                                     "Could not read motor configuration.",
                                     false, false);
@@ -913,7 +907,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
 
         vesc->commands()->setMcconf(false);
 
-        if (!waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000)) {
+        if (!waitSignal(vesc->commands(), &Commands::ackReceived, 4000)) {
             vesc->emitMessageDialog("Write Motor Configuration",
                                     "Could not write motor configuration.",
                                     false, false);
@@ -948,7 +942,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
     vesc->canTmpOverrideEnd();
 
     vesc->commands()->getMcconf();
-    if (!waitSignal(config, SIGNAL(updated()), 4000)) {
+    if (!waitSignal(config, &ConfigParams::updated, 4000)) {
         res = false;
 
         if (!res) {
@@ -983,18 +977,18 @@ bool Utility::setInvertDirection(VescInterface *vesc, int canId, bool inverted)
 
     if (res) {
         vesc->commands()->getMcconf();
-        res = waitSignal(p, SIGNAL(updated()), 4000);
+        res = waitSignal(p, &ConfigParams::updated, 4000);
     }
 
     if (res) {
         p->updateParamBool("m_invert_direction", inverted);
         vesc->commands()->setMcconf(false);
-        res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+        res = waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
     }
 
     vesc->commands()->setSendCan(canLastFwd, canLastId);
     vesc->commands()->getMcconf();
-    if (!waitSignal(p, SIGNAL(updated()), 4000)) {
+    if (!waitSignal(p, &ConfigParams::updated, 4000)) {
         res = false;
     }
 
@@ -1024,12 +1018,12 @@ bool Utility::getInvertDirection(VescInterface *vesc, int canId)
 
     ConfigParams *p = vesc->mcConfig();
     vesc->commands()->getMcconf();
-    waitSignal(p, SIGNAL(updated()), 4000);
+    waitSignal(p, &ConfigParams::updated, 4000);
     res = p->getParamBool("m_invert_direction");
 
     vesc->commands()->setSendCan(canLastFwd, canLastId);
     vesc->commands()->getMcconf();
-    waitSignal(p, SIGNAL(updated()), 4000);
+    waitSignal(p, &ConfigParams::updated, 4000);
 
     vesc->ignoreCanChange(false);
 
@@ -1051,32 +1045,29 @@ QString Utility::testDirection(VescInterface *vesc, int canId, double duty, int 
         return "FW not up to date";
     }
 
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    QTimer pollTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(ms);
-    pollTimer.start(40);
-
     QString pollRes = "Ok";
-    auto conn = connect(&pollTimer, &QTimer::timeout,
-                        [&pollRes, &loop, &vesc, &duty, &ms, &timeoutTimer]() {
-        if (!vesc->isPortConnected()) {
-            pollRes = "VESC disconnected.";
-            loop.quit();
-        } else {
-            double d = 2.0 * duty * (double)(ms - timeoutTimer.remainingTime()) / (double)ms;
-            if (fabs(d) > fabs(duty)) {
-                d = duty;
-            }
-            vesc->commands()->setDutyCycle(d);
-        }
+    QElapsedTimer elapsed;
+    elapsed.start();
+
+    runTree(Group {
+        PollTimerTaskItem([&](PollTimerTask &task) {
+            task.setTimeout(ms);
+            task.setInterval(40);
+            task.setOnTick([&pollRes, &task, vesc, duty, ms, &elapsed]() {
+                if (!vesc->isPortConnected()) {
+                    pollRes = "VESC disconnected.";
+                    task.finish();
+                } else {
+                    double d = 2.0 * duty * (double)elapsed.elapsed() / (double)ms;
+                    if (fabs(d) > fabs(duty)) {
+                        d = duty;
+                    }
+                    vesc->commands()->setDutyCycle(d);
+                }
+            });
+            return SetupResult::Continue;
+        })
     });
-
-    connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-    loop.exec();
-
-    disconnect(conn);
     vesc->commands()->setCurrent(0.0);
     vesc->canTmpOverrideEnd();
 
@@ -1128,11 +1119,11 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (mc) {
             ConfigParams *p = vesc->mcConfig();
             vesc->commands()->getMcconfDefault();
-            res = waitSignal(p, SIGNAL(updated()), 4000);
+            res = waitSignal(p, &ConfigParams::updated, 4000);
 
             if (res) {
                 vesc->commands()->setMcconf(false);
-                res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+                res = waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
             } else {
                 return false;
             }
@@ -1141,11 +1132,11 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (app) {
             ConfigParams *p = vesc->appConfig();
             vesc->commands()->getAppConfDefault();
-            res = waitSignal(p, SIGNAL(updated()), 4000);
+            res = waitSignal(p, &ConfigParams::updated, 4000);
 
             if (res) {
                 vesc->commands()->setAppConf();
-                res = waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000);
+                res = waitSignal(vesc->commands(), &Commands::ackReceived, 4000);
             } else {
                 return false;
             }
@@ -1179,7 +1170,7 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (mc) {
             ConfigParams *p = vesc->mcConfig();
             vesc->commands()->getMcconf();
-            if (!waitSignal(p, SIGNAL(updated()), 4000)) {
+            if (!waitSignal(p, &ConfigParams::updated, 4000)) {
                 res = false;
                 qWarning() << "Could not restore mc conf";
             }
@@ -1188,7 +1179,7 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
         if (app) {
             ConfigParams *p = vesc->appConfig();
             vesc->commands()->getAppConf();
-            if (!waitSignal(p, SIGNAL(updated()), 4000)) {
+            if (!waitSignal(p, &ConfigParams::updated, 4000)) {
                 res = false;
                 qWarning() << "Could not restore app conf";
             }
@@ -1507,16 +1498,14 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params, in
         res = true;
     });
 
-    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-               vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    vesc->disconnectFwVersionReceived();
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), timeout);
+    waitSignal(vesc->commands(), &Commands::fwVersionReceived, timeout);
 
     disconnect(conn);
 
-    connect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-            vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    vesc->reconnectFwVersionReceived();
 
     return res;
 }
@@ -1567,7 +1556,7 @@ MC_VALUES Utility::getMcValuesBlocking(VescInterface *vesc)
     });
 
     vesc->commands()->getValues();
-    waitSignal(vesc->commands(), SIGNAL(valuesReceived(MC_VALUES, unsigned int)), 4000);
+    waitSignal(vesc->commands(), &Commands::valuesReceived, 4000);
 
     disconnect(conn);
 
@@ -1604,30 +1593,30 @@ QVariantList Utility::getNetworkAddresses()
 void Utility::startGnssForegroundService()
 {
 #ifdef Q_OS_ANDROID
-    QAndroidJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
+    QJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
                                               "startVForegroundService",
                                               "(Landroid/content/Context;)V",
-                                              QtAndroid::androidActivity().object());
+                                              QNativeInterface::QAndroidApplication::context().object());
 #endif
 }
 
 void Utility::stopGnssForegroundService()
 {
 #ifdef Q_OS_ANDROID
-    QAndroidJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
+    QJniObject::callStaticMethod<void>("com/vedder/vesc/Utils",
                                               "stopVForegroundService",
                                               "(Landroid/content/Context;)V",
-                                              QtAndroid::androidActivity().object());
+                                              QNativeInterface::QAndroidApplication::context().object());
 #endif
 }
 
 bool Utility::isBleScanEnabled()
 {
 #ifdef Q_OS_ANDROID
-    return QAndroidJniObject::callStaticMethod<jboolean>("com/vedder/vesc/Utils",
+    return QJniObject::callStaticMethod<jboolean>("com/vedder/vesc/Utils",
                                                          "checkLocationEnabled",
                                                          "(Landroid/content/Context;)Z",
-                                                         QtAndroid::androidActivity().object());
+                                                         QNativeInterface::QAndroidApplication::context().object());
 #else
     return true;
 #endif
@@ -1661,7 +1650,7 @@ QString Utility::readInternalImuType(VescInterface *vesc)
     });
 
     vesc->commands()->sendTerminalCmdSync("imu_type_internal");
-    waitSignal(vesc->commands(), SIGNAL(printReceived(QString)), 2000);
+    waitSignal(vesc->commands(), &Commands::printReceived, 2000);
 
     disconnect(conn);
 
@@ -1895,19 +1884,17 @@ bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
         }
     });
 
-    disconnect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-               vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    vesc->disconnectFwVersionReceived();
 
     vesc->commands()->getFwVersion();
 
-    if (!waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 4000)) {
+    if (!waitSignal(vesc->commands(), &Commands::fwVersionReceived, 4000)) {
         vesc->emitMessageDialog("Load Config", "No response when reading firmware version.", false, false);
     }
 
     disconnect(conn);
 
-    connect(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)),
-            vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
+    vesc->reconnectFwVersionReceived();
 
     return res;
 }
@@ -2378,40 +2365,23 @@ void Utility::plotSavePng(QCustomPlot *plot, int width, int height, QString titl
 
 QString Utility::waitForLine(QTcpSocket *socket, int timeoutMs)
 {
-    QEventLoop loop;
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    timeoutTimer.start(timeoutMs);
-    auto conn = QObject::connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    QString result;
 
-    QByteArray rxLine;
-    auto conn2 = connect(socket, &QTcpSocket::readyRead, [&rxLine,socket,&loop]() {
-        while (socket->bytesAvailable() > 0) {
-            QByteArray rxb = socket->read(1);
-            if (rxb.size() == 1) {
-                if (rxb[0] != '\n') {
-                    rxLine.append(rxb[0]);
-                } else {
-                    rxLine.append('\0');
-                    loop.quit();
-                }
-            } else {
-                break;
+    auto tree = Group {
+        SocketLineReaderTaskItem([&](SocketLineReaderTask &task) {
+            task.setSocket(socket);
+            task.setTimeout(timeoutMs);
+            return SetupResult::Continue;
+        }, [&result](const SocketLineReaderTask &task, DoneWith doneWith) {
+            if (doneWith == DoneWith::Success) {
+                result = task.line();
             }
-        }
-    });
+            return DoneResult::Success;
+        })
+    };
 
-    loop.exec();
-
-    disconnect(conn);
-    disconnect(conn2);
-
-    auto res = QString::fromLocal8Bit(rxLine);
-    if (!timeoutTimer.isActive()) {
-        res = "";
-    }
-
-    return res;
+    runTree(tree);
+    return result;
 }
 
 QPixmap Utility::getIcon(QString path)
@@ -2439,25 +2409,28 @@ bool Utility::downloadUrlEventloop(QString path, QString dest)
         return res;
     }
 
-    QNetworkAccessManager manager;
-    QNetworkRequest request(url);
-    QNetworkReply *reply = manager.get(request);
-
-    QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
-
-    if (reply->error() == QNetworkReply::NoError) {
-        QFile file(dest);
-        if (file.open(QIODevice::WriteOnly)) {
-            file.write(reply->readAll());
-            file.close();
-            res = true;
-        }
+    QFile file(dest);
+    if (!file.open(QIODevice::WriteOnly)) {
+        return res;
     }
 
-    reply->abort();
-    reply->deleteLater();
+    auto tree = Group {
+        NetworkReplyTaskItem([&](NetworkReplyTask &task) {
+            task.setUrl(url);
+            task.setOutputDevice(&file);
+            return SetupResult::Continue;
+        }, [&res](const NetworkReplyTask &task, DoneWith doneWith) {
+            res = (doneWith == DoneWith::Success && task.error() == QNetworkReply::NoError);
+            return DoneResult::Success;
+        })
+    };
+
+    runTree(tree);
+    file.close();
+
+    if (!res) {
+        file.remove();
+    }
 
     return res;
 }
@@ -2563,22 +2536,22 @@ QVariantMap Utility::getSafeAreaMargins(QQuickWindow *window)
     QMargins margins = platformWindow->safeAreaMargins();
     QVariantMap map;
 #ifdef Q_OS_ANDROID
-    int top = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+    int top = QJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
                                                         "topBarHeight",
                                                         "(Landroid/content/Context;)I",
-                                                        QtAndroid::androidActivity().object());
-    int bottom = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                        QNativeInterface::QAndroidApplication::context().object());
+    int bottom = QJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
                                                            "bottomBarHeight",
                                                            "(Landroid/content/Context;)I",
-                                                           QtAndroid::androidActivity().object());
-    int right = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                           QNativeInterface::QAndroidApplication::context().object());
+    int right = QJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
                                                           "rightBarHeight",
                                                           "(Landroid/content/Context;)I",
-                                                          QtAndroid::androidActivity().object());
-    int left = QAndroidJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
+                                                          QNativeInterface::QAndroidApplication::context().object());
+    int left = QJniObject::callStaticMethod<jint>("com/vedder/vesc/Utils",
                                                          "leftBarHeight",
                                                          "(Landroid/content/Context;)I",
-                                                         QtAndroid::androidActivity().object());
+                                                         QNativeInterface::QAndroidApplication::context().object());
 
     if (top > 0) {
         map["top"] = top / window->devicePixelRatio();

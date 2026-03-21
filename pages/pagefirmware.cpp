@@ -51,15 +51,15 @@ PageFirmware::PageFirmware(QWidget *parent) :
     mTimer = new QTimer(this);
     mTimer->start(500);
 
-    connect(ui->hwList, SIGNAL(currentRowChanged(int)),
-            this, SLOT(updateFwList()));
-    connect(ui->showNonDefaultBox, SIGNAL(toggled(bool)),
-            this, SLOT(updateFwList()));
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
-    connect(ui->archVersionList, SIGNAL(currentRowChanged(int)),
-            this, SLOT(updateArchFwList()));
-    connect(ui->showNonDefaultArchBox, SIGNAL(toggled(bool)),
-            this, SLOT(updateArchFwList()));
+    connect(ui->hwList, &QListWidget::currentRowChanged,
+            this, &PageFirmware::updateFwList);
+    connect(ui->showNonDefaultBox, &QAbstractButton::toggled,
+            this, &PageFirmware::updateFwList);
+    connect(mTimer, &QTimer::timeout, this, &PageFirmware::timerSlot);
+    connect(ui->archVersionList, &QListWidget::currentRowChanged,
+            this, &PageFirmware::updateArchFwList);
+    connect(ui->showNonDefaultArchBox, &QAbstractButton::toggled,
+            this, &PageFirmware::updateArchFwList);
 
     QSettings set;
     ui->fwEdit->setText(set.value("pagefirmware/lastcustomfile", "").toString());
@@ -99,10 +99,8 @@ void PageFirmware::setVesc(VescInterface *vesc)
 
         reloadParams();
 
-        connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
-                this, SLOT(fwUploadStatus(QString,double,bool)));
-        connect(mVesc, SIGNAL(fwRxChanged(bool,bool)),
-                this, SLOT(fwRxChanged(bool,bool)));
+        connect(mVesc, &VescInterface::fwUploadStatus, this, &PageFirmware::fwUploadStatus);
+        connect(mVesc, &VescInterface::fwRxChanged, this, &PageFirmware::fwRxChanged);
 
         connect(mVesc, &VescInterface::fwArchiveDlProgress, [this](QString msg, double prog) {
             ui->displayDl->setText(msg);
@@ -239,7 +237,7 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
             fwDir = "://res/firmwares_bms";
         }
 
-        foreach (const auto &fi, QDir(fwDir).entryInfoList(QDir::NoFilter, QDir::Name)) {
+        for (const auto &fi : QDir(fwDir).entryInfoList(QDir::NoFilter, QDir::Name)) {
             QStringList names = fi.fileName().split("_o_");
             if (fi.isDir() && (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
                 QListWidgetItem *item = new QListWidgetItem;

@@ -22,10 +22,12 @@
 
 #include <QObject>
 #include <QFile>
+#include <QQmlEngine>
 
 class LogReader : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit LogReader(QObject *parent = nullptr);
     ~LogReader();

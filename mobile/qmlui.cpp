@@ -40,8 +40,14 @@ bool QmlUi::startQmlUi()
         mEngine = new QQmlApplicationEngine(this);
     }
 
-    qmlRegisterSingletonType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf", vescinterface_singletontype_provider);
-    qmlRegisterSingletonType<Utility>("Vedder.vesc.utility", 1, 0, "Utility", utility_singletontype_provider);
+    // Qt6: Types are auto-registered via QML_ELEMENT + qt_add_qml_module.
+    // Provide global VescIf/Utility instances as context properties.
+    mVesc = new VescInterface();
+    mVesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
+    Utility::configLoadLatest(mVesc);
+
+    mEngine->rootContext()->setContextProperty("VescIf", mVesc);
+    mEngine->rootContext()->setContextProperty("Utility", new Utility(this));
 
     mEngine->load(QUrl(QLatin1String("qrc:/mobile/main.qml")));
     return !mEngine->rootObjects().isEmpty();

@@ -159,26 +159,8 @@ class QCPPolarGraph;
   
   It provides QMetaObject-based reflection of its enums and flags via \a QCP::staticMetaObject.
 */
-#ifndef Q_MOC_RUN
 namespace QCP {
-#else
-class QCP { // when in moc-run, make it look like a class, so we get Q_GADGET, Q_ENUMS/Q_FLAGS features in namespace
-  Q_GADGET
-  Q_ENUMS(ExportPen)
-  Q_ENUMS(ResolutionUnit)
-  Q_ENUMS(SignDomain)
-  Q_ENUMS(MarginSide)
-  Q_FLAGS(MarginSides)
-  Q_ENUMS(AntialiasedElement)
-  Q_FLAGS(AntialiasedElements)
-  Q_ENUMS(PlottingHint)
-  Q_FLAGS(PlottingHints)
-  Q_ENUMS(Interaction)
-  Q_FLAGS(Interactions)
-  Q_ENUMS(SelectionRectMode)
-  Q_ENUMS(SelectionType)
-public:
-#endif
+Q_NAMESPACE
 
 /*!
   Defines the different units in which the image resolution can be specified in the export
@@ -382,7 +364,19 @@ inline int getMarginValue(const QMargins &margins, QCP::MarginSide side)
 }
 
 
-extern const QMetaObject staticMetaObject; // in moc-run we create a static meta object for QCP "fake" object. This line is the link to it via QCP::staticMetaObject in normal operation as namespace
+Q_ENUM_NS(ExportPen)
+Q_ENUM_NS(ResolutionUnit)
+Q_ENUM_NS(SignDomain)
+Q_ENUM_NS(MarginSide)
+Q_FLAG_NS(MarginSides)
+Q_ENUM_NS(AntialiasedElement)
+Q_FLAG_NS(AntialiasedElements)
+Q_ENUM_NS(PlottingHint)
+Q_FLAG_NS(PlottingHints)
+Q_ENUM_NS(Interaction)
+Q_FLAG_NS(Interactions)
+Q_ENUM_NS(SelectionRectMode)
+Q_ENUM_NS(SelectionType)
 
 } // end of namespace QCP
 Q_DECLARE_OPERATORS_FOR_FLAGS(QCP::AntialiasedElements)

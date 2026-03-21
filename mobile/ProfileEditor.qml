@@ -17,13 +17,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 Item {
     id: editor
@@ -164,7 +162,7 @@ Item {
                     spacing: 0
 
                     Text {
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("lightText")
                         text: "Profile Name"
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -184,7 +182,7 @@ Item {
                         TextInput {
                             id: nameInput
                             text: ""
-                            color: {color = Utility.getAppHexColor("lightText")}
+                            color: Utility.getAppHexColor("lightText")
                             anchors.fill: parent
                             anchors.margins: 7
                             font.pointSize: 12
@@ -193,7 +191,7 @@ Item {
                     }
 
                     Text {
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("lightText")
                         text: "Speed Limit"
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -201,7 +199,7 @@ Item {
                         font.pointSize: 12
                     }
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: speedKmhBox
                         prefix: "Forward: "
                         realFrom: 0.0
@@ -213,7 +211,7 @@ Item {
                         }
                     }
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: speedKmhRevBox
                         prefix: "Reverse: "
                         realFrom: 0.0
@@ -227,7 +225,7 @@ Item {
                     }
 
                     Text {
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("lightText")
                         text: "Motor Current Scale"
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -235,7 +233,7 @@ Item {
                         font.pointSize: 12
                     }
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: currentBox
                         Layout.fillWidth: true
                         prefix: "Accel: "
@@ -245,7 +243,7 @@ Item {
                         realStepSize: 5
                     }
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: currentBrakeBox
                         Layout.fillWidth: true
                         Layout.bottomMargin: 20
@@ -273,14 +271,14 @@ Item {
                         }
                     }
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: powerMaxBox
                         prefix: "Output: "
                         Layout.fillWidth: true
                         visible: powerBox.checked
                     }
 
-                    DoubleSpinBox {
+                    VescDoubleSpinBox {
                         id: powerMinBox
                         prefix: "Regen: "
                         Layout.fillWidth: true

@@ -29,7 +29,7 @@ Vesc3dItem::Vesc3dItem(QQuickItem *parent) : QQuickPaintedItem(parent)
     mVesc3d.setBgColor(Utility::getAppQColor("normalBackground").redF(),
                        Utility::getAppQColor("normalBackground").greenF(),
                        Utility::getAppQColor("normalBackground").blueF(), 1.0);
-    setRenderTarget(QQuickPaintedItem::FramebufferObject);
+    setRenderTarget(QQuickPaintedItem::Image);
     setAntialiasing(true);
     setOpaquePainting(true);
 }
@@ -61,14 +61,27 @@ void Vesc3dItem::paint(QPainter *painter)
 
 void Vesc3dItem::updateImage()
 {
-    if (qApp->applicationState() == Qt::ApplicationState::ApplicationActive) {
-        double scale = 1.0;
+    if (qApp->applicationState() != Qt::ApplicationState::ApplicationActive) {
+        return;
+    }
 
-        if (mVesc3d.size() != size().toSize()) {
-            mVesc3d.resize(size().toSize() * scale);
-            mVesc3d.render(&mLastCornerImg, QPoint(), QRegion(), QWidget::RenderFlags());
-        }
+    auto sz = size().toSize();
+    if (sz.width() < 1 || sz.height() < 1) {
+        return;
+    }
 
+    if (mVesc3d.size() != sz) {
+        mVesc3d.resize(sz);
+    }
+
+    // Ensure the offscreen QOpenGLWidget has a valid GL context before
+    // attempting to grab.  On first call the context may not yet exist.
+    if (!mVesc3d.context() || !mVesc3d.context()->isValid()) {
+        // Force context creation by making the widget "current" once.
+        mVesc3d.makeCurrent();
+    }
+
+    if (mVesc3d.context() && mVesc3d.context()->isValid()) {
         mLastCornerImg = mVesc3d.grabFramebuffer();
     }
 }

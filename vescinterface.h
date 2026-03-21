@@ -31,6 +31,7 @@
 #include <QSettings>
 #include <QHash>
 #include <QFile>
+#include <QQmlEngine>
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPort>
@@ -58,9 +59,9 @@
 #endif
 
 #ifdef Q_OS_ANDROID
-#include <QtAndroid>
-#include <QAndroidJniObject>
-#include <QAndroidJniEnvironment>
+#include <QJniObject>
+#include <QJniEnvironment>
+#include <QCoreApplication>
 #endif
 
 class VescInterface : public QObject
@@ -132,6 +133,7 @@ public:
     bool fwEraseBootloader(bool fwdCan);
     bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true, bool autoDisconnect = true);
     Q_INVOKABLE bool fwUpdate(QByteArray newFirmware) { return fwUpload(newFirmware, false, false, true, false); }
+    Q_INVOKABLE bool fwUploadFromFile(QString path, bool isBootloader = false, bool fwdCan = false);
     Q_INVOKABLE void fwUploadCancel();
     Q_INVOKABLE double getFwUploadProgress();
     Q_INVOKABLE QString getFwUploadStatus();
@@ -190,6 +192,7 @@ public:
         return connectSerial(port, 115200);
     }
     Q_INVOKABLE QVariantList listSerialPorts();
+    Q_INVOKABLE QStringList listCANbusInterfaceNames();
     QList<QString> listCANbusInterfaces();
     Q_INVOKABLE bool connectCANbus(QString backend, QString ifName, int bitrate);
     Q_INVOKABLE bool isCANbusConnected();
@@ -284,6 +287,11 @@ public:
     Q_INVOKABLE bool isBlockFwSwap() const;
     Q_INVOKABLE void setBlockFwSwap(bool newBlockFwSwap);
 
+    // Helpers for temporarily disconnecting/reconnecting the
+    // Commands::fwVersionReceived → VescInterface::fwVersionReceived forwarding.
+    void disconnectFwVersionReceived();
+    void reconnectFwVersionReceived();
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -332,9 +340,9 @@ private slots:
 #endif
 
     void timerSlot();
-    void packetDataToSend(QByteArray &data);
-    void packetReceived(QByteArray &data);
-    void cmdDataToSend(QByteArray &data);
+    void packetDataToSend(QByteArray data);
+    void packetReceived(QByteArray data);
+    void cmdDataToSend(QByteArray data);
     void fwVersionReceived(FW_RX_PARAMS params);
     void appconfUpdated();
     void mcconfUpdated();
@@ -449,7 +457,7 @@ private:
 #endif
 
 #ifdef Q_OS_ANDROID
-    QAndroidJniObject mWakeLock;
+    QJniObject mWakeLock;
 #endif
     bool mWakeLockActive;
 

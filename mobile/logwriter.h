@@ -22,10 +22,12 @@
 
 #include <QObject>
 #include <QFile>
+#include <QQmlEngine>
 
 class LogWriter : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit LogWriter(QObject *parent = nullptr);
     ~LogWriter();

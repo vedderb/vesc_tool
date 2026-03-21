@@ -23,11 +23,13 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QQmlEngine>
 #include "packet.h"
 
 class TcpServerSimple : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     explicit TcpServerSimple(QObject *parent = nullptr);
     Q_INVOKABLE bool startServer(int port, QHostAddress addr = QHostAddress::Any);
@@ -52,7 +54,7 @@ public slots:
     void tcpInputDisconnected();
     void tcpInputDataAvailable();
     void tcpInputError(QAbstractSocket::SocketError socketError);
-    void dataToSend(QByteArray &data);
+    void dataToSend(const QByteArray &data);
 
 private:
     QTcpServer *mTcpServer;

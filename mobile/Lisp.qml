@@ -1,14 +1,11 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
-import Qt.labs.folderlistmodel 2.1
-import Qt.labs.settings 1.0 as QSettings
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Dialogs as Dl
+import Qt.labs.folderlistmodel
+import QtCore as QSettings
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.utility 1.0
-import Vedder.vesc.codeloader 1.0
+import Vedder.vesc
 
 Item {
     id: lispPageItem
@@ -691,11 +688,10 @@ Item {
         id: fileDialogLoad
         title: "Open LispBM File"
         nameFilters: ["LispBM files (*.lbm *.lisp)", "All files (*)"]
-        selectExisting: true
-        selectMultiple: false
+        fileMode: Dl.FileDialog.OpenFile
 
         onAccepted: {
-            var path = fileUrlToPath(fileUrl)
+            var path = fileUrlToPath(selectedFile)
             openFilePath(path)
             close()
             parent.forceActiveFocus()

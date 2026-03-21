@@ -57,8 +57,8 @@ void PageBms::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        connect(mVesc->commands(), SIGNAL(bmsValuesRx(BMS_VALUES)),
-                this, SLOT(bmsValuesRx(BMS_VALUES)));
+        connect(mVesc->commands(), &Commands::bmsValuesRx,
+                this, &PageBms::bmsValuesRx);
     }
 }
 

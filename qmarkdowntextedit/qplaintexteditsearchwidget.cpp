@@ -308,7 +308,6 @@ bool QPlainTextEditSearchWidget::doSearch(bool searchDown,
     bool found =
         searchMode == RegularExpressionMode
             ?
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 13, 0))
             _textEdit->find(
                 QRegularExpression(
                     text, caseSensitive
@@ -316,12 +315,6 @@ bool QPlainTextEditSearchWidget::doSearch(bool searchDown,
                               : QRegularExpression::CaseInsensitiveOption),
                 options)
             :
-#else
-            _textEdit->find(QRegExp(text, caseSensitive ? Qt::CaseSensitive
-                                                        : Qt::CaseInsensitive),
-                            options)
-            :
-#endif
             _textEdit->find(text, options);
 
     _textEdit->blockSignals(false);
@@ -341,7 +334,6 @@ bool QPlainTextEditSearchWidget::doSearch(bool searchDown,
         found =
             searchMode == RegularExpressionMode
                 ?
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 13, 0))
                 _textEdit->find(
                     QRegularExpression(
                         text, caseSensitive
@@ -349,13 +341,6 @@ bool QPlainTextEditSearchWidget::doSearch(bool searchDown,
                                   : QRegularExpression::CaseInsensitiveOption),
                     options)
                 :
-#else
-                _textEdit->find(
-                    QRegExp(text, caseSensitive ? Qt::CaseSensitive
-                                                : Qt::CaseInsensitive),
-                    options)
-                :
-#endif
                 _textEdit->find(text, options);
 
         if (found && updateUI) {

@@ -3,48 +3,38 @@
 
 #include <QObject>
 #include <QProcess>
-#include <QEventLoop>
-#include <QTimer>
+#include <QQmlEngine>
+#include "vesctasks.h"
 
 class SystemCommandExecutor : public QObject
 {
     Q_OBJECT
+    QML_NAMED_ELEMENT(SysCmd)
 public:
     explicit SystemCommandExecutor(QObject *parent = nullptr) : QObject(parent) {}
 
     Q_INVOKABLE int executeCommand(const QString &command) {
-        QProcess process;
-        QEventLoop loop;
+        int exitCode = -1;
 
-        process.setReadChannel(QProcess::StandardOutput);
+        auto tree = Group {
+            ProcessTaskItem([&](ProcessTask &task) {
+                task.setProgram("sh");
+                task.setArguments(QStringList() << "-c" << command);
+                task.setStdOutCallback([this](const QString &out) {
+                    emit processStandardOutput(out);
+                });
+                task.setStdErrCallback([this](const QString &err) {
+                    emit processStandardError(err);
+                });
+                return SetupResult::Continue;
+            }, [&exitCode](const ProcessTask &task, DoneWith) {
+                exitCode = task.exitCode();
+                return DoneResult::Success;
+            })
+        };
 
-        auto quitHandler = connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
-        auto errHandler = connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
-        auto stdOutHandler = connect(&process, &QProcess::readyReadStandardOutput, [&]() {
-            emit processStandardOutput(QString::fromUtf8(process.readAllStandardOutput()));
-        });
-        auto stdErrHandler = connect(&process, &QProcess::readyReadStandardError, [&]() {
-            emit processStandardError(QString::fromUtf8(process.readAllStandardError()));
-        });
-
-        process.start("sh", QStringList() << "-c" << command);
-        
-        if (!process.waitForStarted()) {
-            disconnect(quitHandler);
-            disconnect(errHandler);
-            disconnect(stdOutHandler);
-            disconnect(stdErrHandler);
-            return -1;
-        }
-
-        loop.exec();
-
-        disconnect(quitHandler);
-        disconnect(errHandler);
-        disconnect(stdOutHandler);
-        disconnect(stdErrHandler);
-
-        return process.exitCode();
+        runTree(tree);
+        return exitCode;
     }
 
 signals:

@@ -45,6 +45,9 @@ Vesc3DView::Vesc3DView(QWidget *parent) : QOpenGLWidget(parent)
     // Multisampling
     QSurfaceFormat format;
     format.setSamples(4);
+    format.setDepthBufferSize(24);
+    format.setProfile(QSurfaceFormat::CompatibilityProfile);
+    format.setVersion(2, 1);
     setFormat(format);
 }
 
@@ -107,9 +110,15 @@ void Vesc3DView::initializeGL()
 
     QOpenGLShader *vshader = new QOpenGLShader(QOpenGLShader::Vertex, this);
     const char *vsrc =
+            "#if __VERSION__ >= 130\n"
+            "in highp vec4 vertex;\n"
+            "in mediump vec4 texCoord;\n"
+            "out mediump vec4 texc;\n"
+            "#else\n"
             "attribute highp vec4 vertex;\n"
             "attribute mediump vec4 texCoord;\n"
             "varying mediump vec4 texc;\n"
+            "#endif\n"
             "uniform mediump mat4 matrix;\n"
             "void main(void)\n"
             "{\n"
@@ -120,11 +129,20 @@ void Vesc3DView::initializeGL()
 
     QOpenGLShader *fshader = new QOpenGLShader(QOpenGLShader::Fragment, this);
     const char *fsrc =
-            "uniform sampler2D texture;\n"
+            "#if __VERSION__ >= 130\n"
+            "in mediump vec4 texc;\n"
+            "out mediump vec4 fragColor;\n"
+            "#else\n"
             "varying mediump vec4 texc;\n"
+            "#endif\n"
+            "uniform sampler2D tex;\n"
             "void main(void)\n"
             "{\n"
-            "    gl_FragColor = texture2D(texture, texc.st);\n"
+            "#if __VERSION__ >= 130\n"
+            "    fragColor = texture(tex, texc.st);\n"
+            "#else\n"
+            "    gl_FragColor = texture2D(tex, texc.st);\n"
+            "#endif\n"
             "}\n";
     fshader->compileSourceCode(fsrc);
 
@@ -136,11 +154,17 @@ void Vesc3DView::initializeGL()
     mProgram->link();
 
     mProgram->bind();
-    mProgram->setUniformValue("texture", 0);
+    mProgram->setUniformValue("tex", 0);
+    mProgram->release();
+    mVbo.release();
 }
 
 void Vesc3DView::paintGL()
 {
+    if (!mProgram || !mVbo.isCreated()) {
+        return;
+    }
+
     glClearColor(mBgColor.redF(), mBgColor.greenF(), mBgColor.blueF(), mBgColor.alphaF());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -152,7 +176,6 @@ void Vesc3DView::paintGL()
     m.rotate(180, 0.0f, 0.0f, 1.0f);
 
     if (mUseQuaternions) {
-        // TODO: Test if this works...
         m.rotate(QQuaternion(mQ0, mQ1, mQ2, mQ3));
     } else {
         m.rotate(mZRot, 0.0f, 1.0f, 0.0f);
@@ -160,7 +183,12 @@ void Vesc3DView::paintGL()
         m.rotate(mXRot, 0.0f, 0.0f, 1.0f);
     }
     m.scale(1.0, 0.2, 1.0);
+
+    mProgram->bind();
+    mVbo.bind();
+
     mProgram->setUniformValue("matrix", m);
+    mProgram->setUniformValue("tex", 0);
 
     mProgram->enableAttributeArray(0);
     mProgram->enableAttributeArray(1);
@@ -168,9 +196,14 @@ void Vesc3DView::paintGL()
     mProgram->setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
     for (int i = 0; i < 6; ++i) {
-        mTextures[i]->bind();
-        glDrawArrays(GL_TRIANGLE_FAN, i * 4, 4);
+        if (mTextures[i]) {
+            mTextures[i]->bind();
+            glDrawArrays(GL_TRIANGLE_FAN, i * 4, 4);
+        }
     }
+
+    mVbo.release();
+    mProgram->release();
 }
 
 void Vesc3DView::makeObject()

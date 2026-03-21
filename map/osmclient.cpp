@@ -109,8 +109,7 @@ OsmClient::OsmClient(QObject *parent) : QObject(parent)
         mStatusPixmaps.append(pix);
     }
 
-    connect(&mWebCtrl, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(fileDownloaded(QNetworkReply*)));
+    connect(&mWebCtrl, &QNetworkAccessManager::finished, this, &OsmClient::fileDownloaded);
 }
 
 bool OsmClient::setCacheDir(QString path)

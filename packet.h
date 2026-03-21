@@ -33,8 +33,8 @@ public:
     static unsigned short crc16(const unsigned char *buf, unsigned int len);
 
 signals:
-    void dataToSend(QByteArray &data);
-    void packetReceived(QByteArray &packet);
+    void dataToSend(QByteArray data);
+    void packetReceived(QByteArray packet);
 
 public slots:
     void processData(QByteArray data);

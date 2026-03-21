@@ -17,15 +17,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Dialogs as Dl
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.commands 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 Item {
     id: confPageMotorItem
@@ -100,7 +97,7 @@ Item {
         }
 
         Text {
-            anchors.fill: parent
+            width: parent.width
             id: detectLambdaLabel
             color: Utility.getAppHexColor("lightText")
             verticalAlignment: Text.AlignVCenter
@@ -319,10 +316,9 @@ Item {
                             id: fileDialogSave
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: false
-                            selectMultiple: false
+                            fileMode: Dl.FileDialog.SaveFile
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.mcConfig().saveXml(path, "MCConfiguration")) {
                                     VescIf.emitStatusMessage("Mcconf Saved", true)
                                 } else {
@@ -356,10 +352,9 @@ Item {
                             id: fileDialogLoad
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: true
-                            selectMultiple: false
+                            fileMode: Dl.FileDialog.OpenFile
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.mcConfig().loadXml(path, "MCConfiguration")) {
                                     VescIf.emitStatusMessage("Mcconf Loaded", true)
                                 } else {

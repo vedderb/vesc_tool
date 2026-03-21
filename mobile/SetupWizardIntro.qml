@@ -17,14 +17,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
-import QtGraphicalEffects 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
+import Vedder.vesc
 
 Item {
     property ConfigParams mInfoConf: VescIf.infoConfig()
@@ -188,19 +186,19 @@ Item {
 
                 TabButton {
                     text: qsTr("Intro")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                    implicitWidth: tabBar.buttonWidth
                 }
                 TabButton {
                     text: qsTr("Usage")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                    implicitWidth: tabBar.buttonWidth
                 }
                 TabButton {
                     text: qsTr("Warranty")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                    implicitWidth: tabBar.buttonWidth
                 }
                 TabButton {
                     text: qsTr("Conclusion")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
+                    implicitWidth: tabBar.buttonWidth
                 }
             }
         }
@@ -272,7 +270,7 @@ Item {
                 id: resultLabel
                 color: Utility.getAppHexColor("lightText")
                 verticalAlignment: Text.AlignVCenter
-                anchors.fill: parent
+                width: parent.width
                 wrapMode: Text.WordWrap
                 text: "You must finish the introduction in order to use VESC Tool."
             }

@@ -52,8 +52,8 @@ SetupWizardMotor::SetupWizardMotor(VescInterface *vesc, QWidget *parent)
     mSideLabel->setScaledContents(true);
     setSideWidget(mSideLabel);
 
-    connect(this, SIGNAL(currentIdChanged(int)),
-            this, SLOT(idChanged(int)));
+    connect(this, &QWizard::currentIdChanged,
+            this, &SetupWizardMotor::idChanged);
 }
 
 void SetupWizardMotor::idChanged(int id)
@@ -139,8 +139,8 @@ ConnectionPage::ConnectionPage(VescInterface *vesc, QWidget *parent)
     mPageConnection = new PageConnection;
     mPageConnection->setVesc(mVesc);
 
-    connect(mVesc, SIGNAL(fwRxChanged(bool,bool)),
-            this, SIGNAL(completeChanged()));
+    connect(mVesc, &VescInterface::fwRxChanged,
+            this, &ConnectionPage::completeChanged);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mPageConnection);
@@ -173,8 +173,8 @@ FirmwarePage::FirmwarePage(VescInterface *vesc, QWidget *parent)
     mPageFirmware = new PageFirmware;
     mPageFirmware->setVesc(mVesc);
 
-    connect(mVesc, SIGNAL(portConnectedChanged()),
-            this, SIGNAL(completeChanged()));
+    connect(mVesc, &VescInterface::portConnectedChanged,
+            this, &FirmwarePage::completeChanged);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(mPageFirmware);
@@ -380,8 +380,8 @@ SensorsPage::SensorsPage(VescInterface *vesc, QWidget *parent)
     layout->addWidget(mParamTab);
     setLayout(layout);
 
-    connect(mSensorMode, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(indexChanged(int)));
+    connect(mSensorMode, &QComboBox::currentIndexChanged,
+            this, &SensorsPage::indexChanged);
 
     indexChanged(0);
 }

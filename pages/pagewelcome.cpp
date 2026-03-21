@@ -54,8 +54,8 @@ PageWelcome::PageWelcome(QWidget *parent) :
         QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "setupMotors");
     });
 
-    connect(ui->wizardAppButton, SIGNAL(clicked(bool)),
-            this, SLOT(startSetupWizardApp()));
+    connect(ui->wizardAppButton, qOverload<bool>(&QAbstractButton::clicked),
+            this, &PageWelcome::startSetupWizardApp);
 
     connect(ui->multiSettingButton, &QPushButton::clicked, [this]() {
         QMetaObject::invokeMethod(ui->qmlWidget->rootObject(), "openMultiSettings");

@@ -1,0 +1,43 @@
+<RCC>
+    <qresource prefix="/desktop">
+        <file>main.qml</file>
+        <file>ParamEditors.qml</file>
+        <file>ParamEditDouble.qml</file>
+        <file>ParamEditInt.qml</file>
+        <file>ParamEditEnum.qml</file>
+        <file>ParamEditBool.qml</file>
+        <file>ParamEditString.qml</file>
+        <file>ParamEditBitfield.qml</file>
+        <file>ParamEditSeparator.qml</file>
+        <file>Vesc3DView.qml</file>
+        <file>ParamGroupPage.qml</file>
+        <file>WelcomePage.qml</file>
+        <file>ConnectionPage.qml</file>
+        <file>FirmwarePage.qml</file>
+        <file>PackagesPage.qml</file>
+        <file>TerminalPage.qml</file>
+        <file>LispPage.qml</file>
+        <file>BmsPage.qml</file>
+        <file>RtDataPage.qml</file>
+        <file>SampledDataPage.qml</file>
+        <file>ImuPage.qml</file>
+        <file>MotorGeneralPage.qml</file>
+        <file>FocPage.qml</file>
+        <file>ControllersPage.qml</file>
+        <file>MotorInfoPage.qml</file>
+        <file>ExperimentsPage.qml</file>
+        <file>AppGeneralPage.qml</file>
+        <file>AppPpmPage.qml</file>
+        <file>AppAdcPage.qml</file>
+        <file>AppUartPage.qml</file>
+        <file>AppNunchukPage.qml</file>
+        <file>AppNrfPage.qml</file>
+        <file>AppPasPage.qml</file>
+        <file>AppImuPage.qml</file>
+        <file>ScriptingPage.qml</file>
+        <file>LogAnalysisPage.qml</file>
+        <file>MotorComparisonPage.qml</file>
+        <file>CanAnalyzerPage.qml</file>
+        <file>DisplayToolPage.qml</file>
+    </qresource>
+</RCC>

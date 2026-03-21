@@ -20,14 +20,13 @@
 #include "codeloader.h"
 #include "qqmlcontext.h"
 #include "utility.h"
-#include <QEventLoop>
+#include "vesctasks.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QEventLoop>
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QQuickItem>
@@ -73,21 +72,12 @@ bool CodeLoader::lispErase(int size)
 
     auto waitEraseRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(8000);
-        auto conn = connect(mVesc->commands(), &Commands::lispEraseCodeRx,
-                            [&res,&loop](bool erRes) {
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(8000);
+            task.connectSignal(mVesc->commands(), &Commands::lispEraseCodeRx,
+                               [&res](bool erRes) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -115,7 +105,7 @@ QString CodeLoader::reduceLispFile(QString fileData)
     QString res;
     auto lines = fileData.split("\n");
 
-    foreach (auto line, lines) {
+    for (auto line : lines) {
         bool insideString = false;
         int indComment = -1;
 
@@ -202,7 +192,7 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath, bool
         auto lines = codeStr.split("\n");
         int line_num = 0;
 
-        foreach (auto line, lines) {
+        for (const auto &line : lines) {
             line_num++;
 
             QString path;
@@ -263,7 +253,7 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath, bool
                                 files.append(qMakePair(tag, importData));
                             } else {
                                 bool found = false;
-                                foreach (auto i, imports.second) {
+                                for (const auto &i : imports.second) {
                                     if (i.first == pkgImportName) {
                                         auto importData = i.second;
                                         importData.append('\0'); // Pad with 0 in case it is a text file
@@ -394,22 +384,12 @@ bool CodeLoader::lispUpload(VByteArray vb)
 
     auto waitWriteRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1000);
-        auto conn = connect(mVesc->commands(), &Commands::lispWriteCodeRx,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(1000);
+            task.connectSignal(mVesc->commands(), &Commands::lispWriteCodeRx,
+                               [&res](bool erRes, quint32) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -495,22 +475,12 @@ bool CodeLoader::lispStream(VByteArray vb, qint8 mode)
 
     auto waitWriteRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(4000);
-        auto conn = connect(mVesc->commands(), &Commands::lispStreamCodeRx,
-                            [&res,&loop](qint32 offset, qint16 result) {
-            (void)offset;
-            res = result;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(4000);
+            task.connectSignal(mVesc->commands(), &Commands::lispStreamCodeRx,
+                               [&res](qint32, qint16 result) { res = result; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -558,7 +528,7 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
 
         for (int j = 0;j < tries;j++) {
             mVesc->commands()->lispReadCode(size, offset);
-            res = Utility::waitSignal(mVesc->commands(), SIGNAL(lispReadCodeRx(int,int,QByteArray)), timeout);
+            res = Utility::waitSignal(mVesc->commands(), &Commands::lispReadCodeRx, timeout);
             if (res) {
                 break;
             }
@@ -596,7 +566,7 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
                                                   QMessageBox::Yes | QMessageBox::No);
 
                 QMap<QString, QString> importPaths;
-                foreach (auto line, res.split('\n')) {
+                for (const auto &line : res.split('\n')) {
                     QString path;
                     QString tag;
                     bool isInvalid;
@@ -620,7 +590,7 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
                             }
                         }
 
-                        foreach (auto i, unpacked.second) {
+                        for (const auto &i : unpacked.second) {
                             QString fileName = dirName + "/" + i.first + ".bin";
 
                             if (importPaths.contains(i.first)) {
@@ -697,21 +667,12 @@ bool CodeLoader::qmlErase(int size)
 
     auto waitEraseRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(6000);
-        auto conn = connect(mVesc->commands(), &Commands::eraseQmluiResReceived,
-                            [&res,&loop](bool erRes) {
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(6000);
+            task.connectSignal(mVesc->commands(), &Commands::eraseQmluiResReceived,
+                               [&res](bool erRes) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -745,22 +706,12 @@ bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
 {
     auto waitWriteRes = [this]() {
         int res = -10;
-
-        QEventLoop loop;
-        QTimer timeoutTimer;
-        timeoutTimer.setSingleShot(true);
-        timeoutTimer.start(1000);
-        auto conn = connect(mVesc->commands(), &Commands::writeQmluiResReceived,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
-        });
-
-        connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-        loop.exec();
-
-        disconnect(conn);
+        runTree(Group{SignalWaitTaskItem([this, &res](SignalWaitTask &task) {
+            task.setTimeout(1000);
+            task.connectSignal(mVesc->commands(), &Commands::writeQmluiResReceived,
+                               [&res](bool erRes, quint32) { res = erRes ? 1 : -1; });
+            return SetupResult::Continue;
+        })});
         return res;
     };
 
@@ -1099,31 +1050,19 @@ bool CodeLoader::downloadPackageArchive()
     QFile file(path);
 
     if (file.open(QIODevice::WriteOnly)) {
-        QUrl url("http://home.vedder.se/vesc_pkg/vesc_pkg_all.rcc");
-        QNetworkAccessManager manager;
-        QNetworkRequest request(url);
-        QNetworkReply *reply = manager.get(request);
-
-        connect(reply, &QNetworkReply::downloadProgress, [&file, reply, this](qint64 bytesReceived, qint64 bytesTotal) {
-            emit downloadProgress(bytesReceived, bytesTotal);
-            file.write(reply->read(reply->size()));
-        });
-
-        QEventLoop loop;
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec();
-
-        if (reply->error() == QNetworkReply::NoError) {
-            file.write(reply->readAll());
-            res = true;
-
-            // Remove image cache
-            // QString cacheLoc = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-            // QDir(cacheLoc + "/img/").removeRecursively();
-        }
-
-        reply->abort();
-        reply->deleteLater();
+        runTree(Group{NetworkReplyTaskItem([this, &file](NetworkReplyTask &task) {
+            task.setUrl(QUrl("http://home.vedder.se/vesc_pkg/vesc_pkg_all.rcc"));
+            task.setOutputDevice(&file);
+            task.setProgressCallback([this](qint64 bytesReceived, qint64 bytesTotal) {
+                emit downloadProgress(bytesReceived, bytesTotal);
+            });
+            return SetupResult::Continue;
+        }, [&res](const NetworkReplyTask &task, DoneWith doneWith) {
+            if (doneWith == DoneWith::Success) {
+                res = true;
+            }
+            return DoneResult::Success;
+        })});
 
         file.close();
 

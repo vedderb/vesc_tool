@@ -31,6 +31,7 @@ public:
     ~LogWriter();
 
     Q_INVOKABLE bool openLogFile(QString fileName);
+    Q_INVOKABLE bool openLogFileFullPath(QString filePath);
     Q_INVOKABLE bool writeToLogFile(QString text);
     Q_INVOKABLE void closeLogFile();
     Q_INVOKABLE bool isLogOpen();

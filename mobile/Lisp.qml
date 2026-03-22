@@ -9,6 +9,7 @@ import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.utility 1.0
 import Vedder.vesc.codeloader 1.0
+import Vedder.vesc.logwriter 1.0
 
 Item {
     id: lispPageItem
@@ -406,6 +407,54 @@ Item {
                                                     "File Permissions",
                                                     "Unable to request file system permission.",
                                                     false, false)
+                                    }
+                                }
+                            }
+
+                            MenuItem {
+                                text: "Save File as..."
+                                onTriggered: {
+                                    if (Utility.requestFilePermission()) {
+                                        fileDialogSave.close()
+                                        fileDialogSave.open()
+                                    } else {
+                                        VescIf.emitMessageDialog(
+                                                    "File Permissions",
+                                                    "Unable to request file system permission.",
+                                                    false, false)
+                                    }
+                                }
+
+                                LogWriter {
+                                    id: mLogWriter
+                                }
+
+                                Dl.FileDialog {
+                                    id: fileDialogSave
+                                    title: "Please choose a file"
+                                    nameFilters: ["LBM files (*.lbm *.lisp)"]
+                                    selectExisting: false
+                                    selectMultiple: false
+                                    onAccepted: {
+                                        var path = fileUrl.toString()
+
+                                        var okOpen = mLogWriter.openLogFileFullPath(path)
+                                        var okWrite = mLogWriter.writeToLogFile(editorText.text)
+                                        mLogWriter.closeLogFile()
+
+                                        if (okOpen && okWrite) {
+                                            VescIf.emitStatusMessage("LBM-file Saved", true)
+                                        } else {
+                                            VescIf.emitStatusMessage("LBM-file Save Failed", false)
+                                        }
+
+                                        close()
+                                        parent.forceActiveFocus()
+                                    }
+
+                                    onRejected: {
+                                        close()
+                                        parent.forceActiveFocus()
                                     }
                                 }
                             }

@@ -56,6 +56,16 @@ bool LogWriter::openLogFile(QString fileName)
      return mLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
 }
 
+bool LogWriter::openLogFileFullPath(QString filePath)
+{
+    if (filePath.startsWith("file:/")) {
+        filePath.remove(0, 6);
+    }
+
+    mLogFile.setFileName(filePath);
+    return mLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
+}
+
 bool LogWriter::writeToLogFile(QString text)
 {
     if (!isLogOpen()) {

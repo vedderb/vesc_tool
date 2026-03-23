@@ -33,6 +33,10 @@ jobs:
           make -j"$(sysctl -n hw.ncpu)"
           rm -rf build/macos/obj
 
+      - name: Deploy Qt runtime into app bundle
+        run: |
+          macdeployqt "build/macos/VESC Tool.app" -verbose=2
+
       - name: Package build output
         run: |
           cd build/macos

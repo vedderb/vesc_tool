@@ -11,14 +11,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '5.15.2'
-          cache: true
+      - name: Install Qt 5 from Homebrew
+        run: |
+          brew install qt@5
+          echo "$(brew --prefix qt@5)/bin" >> "$GITHUB_PATH"
 
       - name: Show build environment
         run: |
+          uname -m
           which qmake
           qmake -v
           xcode-select -p
@@ -28,7 +28,7 @@ jobs:
 
       - name: Build macOS test app
         run: |
-          qmake -config release "CONFIG += release_macos build_original"
+          qmake -config release "CONFIG += release_macos build_original" QMAKE_APPLE_DEVICE_ARCHS=arm64
           make clean
           make -j"$(sysctl -n hw.ncpu)"
           rm -rf build/macos/obj

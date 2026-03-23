@@ -1,0 +1,47 @@
+name: macOS Beta Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-macos-beta:
+    runs-on: macos-15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+          cache: true
+
+      - name: Show build environment
+        run: |
+          which qmake
+          qmake -v
+          xcode-select -p
+
+      - name: Clean macOS build directory
+        run: rm -rf build/macos/*
+
+      - name: Build macOS test app
+        run: |
+          qmake -config release "CONFIG += release_macos build_original"
+          make clean
+          make -j"$(sysctl -n hw.ncpu)"
+          rm -rf build/macos/obj
+
+      - name: Package build output
+        run: |
+          cd build/macos
+          zip -r "vesc_tool_macos_test_${GITHUB_SHA::8}.zip" . -x "*.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vesc-tool-macos-test-${{ github.sha }}
+          path: build/macos/*.zip
+          if-no-files-found: error
+          retention-days: 7

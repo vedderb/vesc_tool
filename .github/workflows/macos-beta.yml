@@ -35,7 +35,7 @@ jobs:
 
       - name: Deploy Qt runtime into app bundle
         run: |
-          macdeployqt "build/macos/VESC Tool.app" -verbose=2
+          macdeployqt "build/macos/VESC Tool.app" -qmldir="$GITHUB_WORKSPACE" -verbose=2
 
       - name: Sign app bundle
         run: |

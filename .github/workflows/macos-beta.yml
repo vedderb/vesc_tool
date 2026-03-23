@@ -37,6 +37,14 @@ jobs:
         run: |
           macdeployqt "build/macos/VESC Tool.app" -verbose=2
 
+      - name: Sign app bundle
+        run: |
+          find "build/macos/VESC Tool.app/Contents/Frameworks" -type f \( -name '*.dylib' -o -path '*/Versions/5/*' \) -print0 | xargs -0 -I {} codesign --force --sign - "{}"
+          find "build/macos/VESC Tool.app/Contents/PlugIns" -type f -name '*.dylib' -print0 | xargs -0 -I {} codesign --force --sign - "{}"
+          codesign --force --sign - "build/macos/VESC Tool.app/Contents/MacOS/VESC Tool"
+          codesign --force --deep --sign - "build/macos/VESC Tool.app"
+          codesign --verify --deep --strict --verbose=2 "build/macos/VESC Tool.app"
+
       - name: Package build output
         run: |
           cd build/macos

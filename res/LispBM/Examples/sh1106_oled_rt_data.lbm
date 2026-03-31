@@ -138,15 +138,13 @@
 
 (defun send-sh1106-buffer-pages () {
     (var page 0)
+    ; tx buffer: 1 control byte + 128 data bytes
+    (var txbuf (array-create 129))
+    (bufset-u8 txbuf 0 0x40) ; data marker
     (looprange page 0 8 {
         (sh1106-set-page-and-col page)
-
-        ; tx buffer: 1 control byte + 128 data bytes
-        (var txlen 129)
-        (var txbuf (array-create txlen))
-        (bufset-u8 txbuf 0 0x40) ; data marker
-        (bufcpy txbuf 1 pixbuf (+ (* page 128)) 128) ; copy 128 bytes from pixbuf
-
+        ; copy 128 bytes from pixbuf
+        (bufcpy txbuf 1 pixbuf (+ (* page 128)) 128) 
         ; send page (I2C write)
         (i2c-tx-rx #I2C-ADDRESS txbuf)
     })

@@ -121,6 +121,8 @@ public:
     Q_INVOKABLE static QString getAppHexColor(QString colorName);
     Q_INVOKABLE static void setDarkMode(bool isDark);
     Q_INVOKABLE static bool isDarkMode();
+    Q_INVOKABLE static void setPureBlack(bool pureBlack);
+    Q_INVOKABLE static bool isPureBlack();
     Q_INVOKABLE static QString getThemePath();
     Q_INVOKABLE static QVariantMap getSafeAreaMargins(QQuickWindow *window);
 
@@ -169,6 +171,7 @@ private:
 
     static QMap<QString,QColor> mAppColors;
     static bool isDark;
+    static bool mIsPureBlack;
 };
 
 #endif // UTILITY_H

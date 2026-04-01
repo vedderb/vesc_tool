@@ -26,10 +26,12 @@ import Vedder.vesc.utility 1.0
 
 Item {
     property bool mLastDarkMode: false
+    property bool mLastPureBlack: false
     property var dialogParent: ApplicationWindow.overlay
 
     function openDialog() {
         mLastDarkMode = Utility.isDarkMode()
+        mLastPureBlack = Utility.isPureBlack()
         dialog.open()
     }
 
@@ -133,6 +135,16 @@ Item {
                         Utility.setDarkMode(checked)
                     }
                 }
+
+                CheckBox {
+                    id: pureBlackBox
+                    Layout.fillWidth: true
+                    text: "Use Pure Black for Dark Mode"
+                    checked: Utility.isPureBlack()
+                    onCheckedChanged: {
+                        Utility.setPureBlack(checked)
+                    }
+                }
             }
         }
 
@@ -166,7 +178,7 @@ Item {
                 VescIf.setWakeLock(VescIf.isPortConnected())
             }
 
-            if (Utility.isDarkMode() !== mLastDarkMode) {
+            if (Utility.isDarkMode() !== mLastDarkMode || Utility.isPureBlack() !== mLastPureBlack) {
                 darkChangedDialog.open()
             }
 

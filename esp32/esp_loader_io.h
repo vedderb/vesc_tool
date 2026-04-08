@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #pragma once
+#pragma once
 
 #include <stdint.h>
 #include "esp_loader.h"
@@ -22,13 +22,15 @@
 extern "C" {
 #endif
 
+#ifndef SERIAL_FLASHER_INTERFACE_SDIO
 /**
-  * @brief Changes baud rate of serial peripheral.
+  * @brief Changes the transmission rate of the used peripheral.
   */
-esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate);
+esp_loader_error_t loader_port_change_transmission_rate(uint32_t transmission_rate);
+#endif
 
 /**
-  * @brief Writes data to serial interface.
+  * @brief Writes data over the io interface.
   *
   * @param data[in]     Buffer with data to be written.
   * @param size[in]     Size of data in bytes.
@@ -38,10 +40,15 @@ esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate);
   *     - ESP_LOADER_SUCCESS Success
   *     - ESP_LOADER_ERROR_TIMEOUT Timeout elapsed
   */
-esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout);
+#ifndef SERIAL_FLASHER_INTERFACE_SDIO
+esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout);
+#else
+esp_loader_error_t loader_port_write(uint32_t function, uint32_t addr, const uint8_t *data,
+                                     uint16_t size, uint32_t timeout);
+#endif
 
 /**
-  * @brief Reads data from serial interface.
+  * @brief Reads data from the io interface.
   *
   * @param data[out]    Buffer into which received data will be written.
   * @param size[in]     Number of bytes to read.
@@ -51,7 +58,12 @@ esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, 
   *     - ESP_LOADER_SUCCESS Success
   *     - ESP_LOADER_ERROR_TIMEOUT Timeout elapsed
   */
-esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout);
+#ifndef SERIAL_FLASHER_INTERFACE_SDIO
+esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeout);
+#else
+esp_loader_error_t loader_port_read(uint32_t function, uint32_t addr, uint8_t *data,
+                                    uint16_t size, uint32_t timeout);
+#endif
 
 /**
   * @brief Delay in milliseconds.
@@ -99,6 +111,17 @@ void loader_port_reset_target(void);
   *
   */
 void loader_port_debug_print(const char *str);
+
+#ifdef SERIAL_FLASHER_INTERFACE_SPI
+/**
+  * @brief Sets the chip select to a defined level
+  */
+void loader_port_spi_set_cs(uint32_t level);
+#endif /* SERIAL_FLASHER_INTERFACE_SPI */
+
+#ifdef SERIAL_FLASHER_INTERFACE_SDIO
+esp_loader_error_t loader_port_sdio_card_init(void);
+#endif /* SERIAL_FLASHER_INTERFACE_SDIO */
 
 #ifdef __cplusplus
 }

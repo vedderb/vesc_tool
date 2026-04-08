@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2026 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,34 @@
  * limitations under the License.
  */
 
+// auto-generated stubs from esp-flasher-stub v0.3.0
+
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "esp_loader.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define SERIAL_FLASHER_INTERFACE_USB
+
+bool esp_stub_get_running(void);
+void esp_stub_set_running(bool stub_status);
+
+#if (defined SERIAL_FLASHER_INTERFACE_UART) || (defined SERIAL_FLASHER_INTERFACE_USB)
+
 typedef struct {
-    uint32_t cmd;
-    uint32_t usr;
-    uint32_t usr1;
-    uint32_t usr2;
-    uint32_t w0;
-    uint32_t mosi_dlen;
-    uint32_t miso_dlen;
-} target_registers_t;
+    esp_loader_bin_header_t header;
+    esp_loader_bin_segment_t segments[2];
+} esp_stub_t;
 
-esp_loader_error_t loader_detect_chip(target_chip_t *target, const target_registers_t **regs);
-esp_loader_error_t loader_read_mac(target_chip_t target_code, uint8_t *mac);
-bool encryption_in_begin_flash_cmd(target_chip_t target);
+extern const esp_stub_t esp_stub[ESP_MAX_CHIP];
 
-#ifndef SERIAL_FLASHER_INTERFACE_SDIO
-esp_loader_error_t loader_read_spi_config(target_chip_t target_chip, uint32_t *spi_config);
-target_chip_t target_from_chip_id(uint32_t chip_id);
+#endif
+
+#ifdef __cplusplus
+}
 #endif

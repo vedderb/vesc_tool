@@ -21,7 +21,7 @@
 #define ESP32FLASH_H
 
 #include <QObject>
-#include "serial_io.h"
+#include "esp_loader_io.h"
 
 #ifdef HAS_SERIALPORT
 #include <QSerialPort>

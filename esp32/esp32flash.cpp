@@ -95,7 +95,7 @@ bool Esp32Flash::connectEsp(QString port)
 
     qDebug() << "Changing baudrate to 460800";
     if (esp_loader_change_baudrate(460800) == ESP_LOADER_SUCCESS) {
-        loader_port_change_baudrate(460800);
+        esp_loader_change_baudrate(460800);
         qDebug() << "Baudrate changed!";
     }
 
@@ -287,7 +287,7 @@ void Esp32Flash::serialPortError(QSerialPort::SerialPortError error)
 }
 #endif
 
-esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
 #ifdef HAS_SERIALPORT
     if (!sPort->isOpen()) {
@@ -311,8 +311,7 @@ esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, 
 #endif
 }
 
-
-esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeout)
 {
 #ifdef HAS_SERIALPORT
     if (!sPort->isOpen()) {

@@ -519,6 +519,11 @@
 <name>as504x-init</name>
 <name>as504x-deinit</name>
 <name>as504x-angle</name>
+<name>bme280-start</name>
+<name>bme280-stop</name>
+<name>bme280-hum</name>
+<name>bme280-temp</name>
+<name>bme280-pres</name>
 <name>sleep-deep</name>
 <name>sleep-light</name>
 <name>sleep-config-wakeup-pin</name>

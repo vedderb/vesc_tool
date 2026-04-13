@@ -1577,7 +1577,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
         }
     }
 
-    if (szTot > 5000000) {
+    if (szTot > 8000000) {
         emitMessageDialog(tr("Firmware too big"),
                           tr("The firmware you are trying to upload is unreasonably "
                              "large, most likely it is an invalid file"), false);

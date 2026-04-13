@@ -593,7 +593,7 @@ void PageFirmware::uploadFw(bool allOverCan)
             }
         }
 
-        if (file.size() > 1600000 && !(file.fileName().toLower().endsWith(".hex"))) {
+        if (file.size() > 8000000 && !(file.fileName().toLower().endsWith(".hex"))) {
             QMessageBox::critical(this,
                                   tr("Upload Error"),
                                   tr("The selected file is too large to be a firmware."));

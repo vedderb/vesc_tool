@@ -843,7 +843,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (szTot > 5000000) {
+        if (szTot > 8000000) {
             qWarning() << "Firmware too big" <<
                         "The firmware you are trying to upload is unreasonably "
                         "large, most likely it is an invalid file";

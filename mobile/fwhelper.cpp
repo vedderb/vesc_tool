@@ -182,7 +182,7 @@ bool FwHelper::uploadFirmwareV2(QString filename, VescInterface *vesc, bool isBo
         return false;
     }
 
-    if (file.size() > 1600000) {
+    if (file.size() > 8000000) {
         vesc->emitMessageDialog(tr("Upload Error"),
                                 tr("The selected file is too large to be a firmware."),
                                 false);

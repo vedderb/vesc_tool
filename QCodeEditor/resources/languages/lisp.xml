@@ -84,6 +84,9 @@
 <name>pin-hall1</name>
 <name>pin-hall2</name>
 <name>pin-hall3</name>
+<name>pin-hall4</name>
+<name>pin-hall5</name>
+<name>pin-hall6</name>
 <name>pin-adc1</name>
 <name>pin-adc2</name>
 <name>pin-adc3</name>
@@ -422,6 +425,8 @@
 <name>conf-get-limits</name>
 <name>conf-detect-lambda-enc</name>
 <name>conf-detect-hall</name>
+<name>conf-remap-as504x</name>
+<name>conf-remap-hall</name>
 <name>free</name>
 <name>bufcreate</name>
 <name>array-create</name>

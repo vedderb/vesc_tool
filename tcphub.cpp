@@ -171,10 +171,10 @@ void TcpHub::newTcpHubConnection()
                 socket->flush();
             }
         } else {
-            qWarning() << "Invalid connect string";
+            qWarning() << "Invalid connect string: " << tokens;
         }
     } else {
-        qWarning() << "Invalid connect string";
+        qWarning() << "Invalid connect string, not 3 tokens: " << tokens;
     }
 
     socket->close();

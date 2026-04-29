@@ -290,6 +290,8 @@
 <name>get-iq</name>
 <name>get-id-set</name>
 <name>get-iq-set</name>
+<name>get-id-target</name>
+<name>get-iq-target</name>
 <name>get-vd</name>
 <name>get-vq</name>
 <name>get-est-lambda</name>

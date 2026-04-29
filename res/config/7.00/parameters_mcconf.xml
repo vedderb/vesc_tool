@@ -758,6 +758,36 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>7</vTx>
         </l_duty_start>
+        <l_additional_faults>
+            <longName>Additional Faults</longName>
+            <type>6</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Encoder Slip&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Check for mechanical slip by comparing the FOC observer phase against the physical encoder phase. If enabled, a fault will be triggered if the phase gap exceeds 15 degrees for more than 500ms while spinning. This check will only be performed while the ERPM is higher than the Openloop ERPM setting.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Overspeed&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Triggers a fault code if the ERPM exceeds the Max ERPM limit.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Underspeed&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Triggers a fault code if the reverse ERPM exceeds the Max ERPM Reverse limit.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Absolute Overspeed&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Triggers a fault code if absolute ERPM exceeds the highest of the Max ERPM and Max ERPM reverse limits.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_L_ADDITIONAL_FAULTS</cDefine>
+            <valInt>0</valInt>
+            <enumNames>Encoder Slip</enumNames>
+            <enumNames>Overspeed</enumNames>
+            <enumNames>Underspeed</enumNames>
+            <enumNames>Absolute Overspeed</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+            <enumNames>Unused</enumNames>
+        </l_additional_faults>
         <sl_min_erpm>
             <longName>Minimum ERPM</longName>
             <type>1</type>
@@ -4658,6 +4688,7 @@ p, li { white-space: pre-wrap; }
         <ser>l_current_max_scale</ser>
         <ser>l_current_min_scale</ser>
         <ser>l_duty_start</ser>
+        <ser>l_additional_faults</ser>
         <ser>sl_min_erpm</ser>
         <ser>sl_min_erpm_cycle_int_limit</ser>
         <ser>sl_max_fullbreak_current_dir_change</ser>
@@ -4939,6 +4970,7 @@ p, li { white-space: pre-wrap; }
                     <param>m_fault_stop_time_ms</param>
                     <param>m_out_aux_mode</param>
                     <param>l_duty_start</param>
+                    <param>l_additional_faults</param>
                 </subgroupParams>
             </subgroup>
         </group>

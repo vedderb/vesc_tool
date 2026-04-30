@@ -16,12 +16,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
-
+    
 import QtQuick 2.10
 import QtQuick.Controls 2.10
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.10
+import QtGraphicalEffects 1.0
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -48,7 +49,6 @@ ApplicationWindow {
     property int notchRight: 0
     property int notchBot: 0
     property int notchTop: 0
-    property bool mainIsHorizontal: appWindow.width > appWindow.height
 
     // https://github.com/ekke/c2gQtWS_x/blob/master/qml/main.qml
     flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
@@ -67,22 +67,28 @@ ApplicationWindow {
 
     Timer {
         id: oriTimer
-        interval: 100
-        running: true
-        repeat: true
-
+        interval: 100; running: true; repeat: false
         onTriggered: {
             updateNotch()
         }
     }
 
     Screen.orientationUpdateMask: Qt.LandscapeOrientation | Qt.PortraitOrientation
+    Screen.onPrimaryOrientationChanged: {
+        oriTimer.start()
+    }
 
     Component.onCompleted: {
         if (!VescIf.isIntroDone()) {
             introWizard.openDialog()
         }
         updateNotch()
+        mainSwipeView.insertItem(4, confPageApp)
+        tabBar.insertItem(4, confAppButton)
+        mainSwipeView.insertItem(4, confPageMotor)
+        tabBar.insertItem(4, confMotorButton)
+        confPageMotor.visible = true
+        confPageApp.visible = true
         Utility.keepScreenOn(VescIf.keepScreenOn())
         Utility.allowScreenRotation(VescIf.getAllowScreenRotation())
         Utility.stopGnssForegroundService()
@@ -302,7 +308,6 @@ ApplicationWindow {
                     anchors.fill: parent
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
-                    isHorizontal: mainIsHorizontal
 
                     onRequestOpenControls: {
                         controls.openDialog()
@@ -368,7 +373,6 @@ ApplicationWindow {
                         sourceComponent: RtData {
                             anchors.fill: parent
                             updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0
-                            isHorizontal: mainIsHorizontal
                         }
                     }
                 }
@@ -382,7 +386,6 @@ ApplicationWindow {
                             anchors.fill: parent
                             dialogParent: mainSwipeView
                             updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1
-                            isHorizontal: mainIsHorizontal
                         }
                     }
                 }
@@ -435,7 +438,6 @@ ApplicationWindow {
 
                         sourceComponent: StatPage {
                             anchors.fill: parent
-                            isHorizontal: mainIsHorizontal
                         }
                     }
                 }
@@ -450,7 +452,6 @@ ApplicationWindow {
                 visible: status == Loader.Ready
                 sourceComponent: BMS {
                     anchors.fill: parent
-                    isHorizontal: mainIsHorizontal
                 }
             }
         }
@@ -496,173 +497,17 @@ ApplicationWindow {
         }
     }
 
+    // --- HEADER: Connection status bar (moved from footer) ---
     header: Rectangle {
         id: headerBar
-        color: Utility.getAppHexColor("lightestBackground")
-        height: tabBar.implicitHeight + notchTop // iPhone X Workaround
-
-        RowLayout {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            spacing: 0
-
-            TabBar {
-                id: tabBar
-                currentIndex: mainSwipeView.currentIndex
-                Layout.fillWidth: true
-                implicitWidth: 0
-                clip: true
-
-                background: Rectangle {
-                    opacity: 1
-                    color: Utility.getAppHexColor("lightBackground")
-                }
-
-                property int buttonWidth: Math.max(120,
-                                                   tabBar.width /
-                                                   (rep.model.length +
-                                                    (uiHwPage.visible ? 1 : 0) +
-                                                    (uiAppPage.visible ? 1 : 0) +
-                                                    (confCustomButton.visible ? 1 : 0) +
-                                                    (confPageMotor.visible ? 1 : 0) +
-                                                    (confPageApp.visible ? 1 : 0)))
-
-                Repeater {
-                    id: rep
-                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal", "LispBM"]
-
-                    TabButton {
-                        text: modelData
-                        width: tabBar.buttonWidth
-                    }
-                }
-            }
-        }
-    }
-
-    TabButton {
-        id: uiHwButton
-        visible: uiHwPage.visible
-        text: "HwUi"
-        width: tabBar.buttonWidth
-    }
-
-    Page {
-        id: uiHwPage
-        visible: false
-
-        Item {
-            id: uiHw
-            anchors.fill: parent
-            property var tabBarItem: tabBar
-            property var swipeViewItem: mainSwipeView
-        }
-    }
-
-    TabButton {
-        id: uiAppButton
-        visible: uiAppPage.visible
-        text: "AppUi"
-        width: tabBar.buttonWidth
-    }
-
-    Page {
-        id: uiAppPage
-        visible: false
-
-        Item {
-            id: uiApp
-            anchors.fill: parent
-            property var tabBarItem: tabBar
-            property var swipeViewItem: mainSwipeView
-        }
-    }
-
-    TabButton {
-        id: confMotorButton
-        visible: confPageMotor.visible
-        text: "Motor Cfg"
-        width: tabBar.buttonWidth
-    }
-
-    TabButton {
-        id: confAppButton
-        visible: confPageApp.visible
-        text: "App Cfg"
-        width: tabBar.buttonWidth
-    }
-
-    TabButton {
-        id: confCustomButton
-        visible: confCustomPage.visible
-        text: "Custom Cfg"
-        width: tabBar.buttonWidth
-    }
-
-    Page {
-        id: confPageMotor
-        visible: false
-
-        Loader {
-            id: confMotorLoader
-            anchors.fill: parent
-            asynchronous: true
-            sourceComponent: ConfigPageMotor {
-                anchors.fill: parent
-                dialogParent: mainSwipeView
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                isHorizontal: mainIsHorizontal
-            }
-        }
-    }
-
-    Page {
-        id: confPageApp
-        visible: false
-
-        Loader {
-            id: confAppLoader
-            anchors.fill: parent
-            asynchronous: true
-            sourceComponent: ConfigPageApp {
-                dialogParent: mainSwipeView
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                isHorizontal: mainIsHorizontal
-            }
-        }
-    }
-
-    Page {
-        id: confCustomPage
-        visible: false
-
-        Loader {
-            id: confCustomLoader
-            anchors.fill: parent
-            asynchronous: true
-            sourceComponent: ConfigPageCustom {
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                isHorizontal: mainIsHorizontal
-            }
-        }
-    }
-
-    footer: Rectangle {
-        id: connectedRect
         clip: true
         color: Utility.getAppHexColor("lightBackground")
         width: parent.width
-        height: 35 + notchBot
+        height: 35 + notchTop
         Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top:parent.top
+            anchors.top: parent.top
             height: parent.height/2.0
             gradient: Gradient {
                     GradientStop { position: 0.0; color: "#15ffffff"}
@@ -678,17 +523,17 @@ ApplicationWindow {
             }
         }
 
-        RowLayout{
-            enabled:true
+        RowLayout {
+            enabled: true
             anchors.fill: parent
             spacing: 0
             ToolButton {
-                id:settingsButton
+                id: settingsButton
                 Layout.fillHeight: true
                 Layout.preferredWidth: 70
                 Image {
                     anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -notchBot/2
+                    anchors.verticalCenterOffset: notchTop/2
                     antialiasing: true
                     height: parent.width*0.35
                     width: height
@@ -701,7 +546,6 @@ ApplicationWindow {
                         drawer.open()
                     }
                 }
-
             }
             Rectangle{
                 Layout.fillHeight: true
@@ -717,6 +561,11 @@ ApplicationWindow {
                 spacing: 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Rectangle{
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: notchTop
+                    opacity: 0
+                }
                 Text {
                     id: connectedText
                     Layout.fillWidth: true
@@ -726,11 +575,6 @@ ApplicationWindow {
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
-                }
-                Rectangle{
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: notchBot
-                    opacity: 0
                 }
             }
             Rectangle{
@@ -748,7 +592,7 @@ ApplicationWindow {
                 Layout.preferredWidth: 70
                 Image {
                     anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -notchBot/2
+                    anchors.verticalCenterOffset: notchTop/2
                     antialiasing: true
                     height: parent.width*0.35
                     width: height
@@ -761,6 +605,301 @@ ApplicationWindow {
                         canDrawerLoader.item.open()
                     }
                 }
+            }
+        }
+    }
+
+    // --- FOOTER: Tab navigation bar (moved from header) ---
+    footer: Rectangle {
+        id: connectedRect
+        color: Utility.getAppHexColor("lightestBackground")
+        height: tabBar.implicitHeight + notchBot
+
+        RowLayout {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            spacing: 0
+
+            TabBar {
+                id: tabBar
+                currentIndex: mainSwipeView.currentIndex
+                Layout.fillWidth: true
+                implicitWidth: 0
+                implicitHeight: 48
+                clip: true
+
+                background: Rectangle {
+                    opacity: 1
+                    color: Utility.getAppHexColor("lightBackground")
+                }
+
+                // Disable touch-scrolling and all programmatic scrolling
+                contentItem: ListView {
+                    model: tabBar.contentModel
+                    interactive: false
+                    spacing: tabBar.spacing
+                    orientation: ListView.Horizontal
+                    boundsBehavior: Flickable.StopAtBounds
+                    highlightRangeMode: ListView.NoHighlightRange
+                    highlightMoveDuration: 0
+                    clip: true
+                }
+
+                property int buttonWidth: Math.max(50,
+                                                   tabBar.width /
+                                                   (rep.model.length +
+                                                    (uiHwPage.visible ? 1 : 0) +
+                                                    (uiAppPage.visible ? 1 : 0) +
+                                                    (confCustomButton.visible ? 1 : 0) +
+                                                    (confPageMotor.visible ? 1 : 0) +
+                                                    (confPageApp.visible ? 1 : 0)))
+
+                Repeater {
+                    id: rep
+                    model: [
+                        "icons/navbar_start.png",
+                        "icons/navbar_rtdata.png",
+                        "icons/navbar_bms.png",
+                        "icons/navbar_profiles.png",
+                        "icons/navbar_terminal.png",
+                        "icons/navbar_lispbm.png"
+                    ]
+
+                    TabButton {
+                        width: tabBar.buttonWidth
+                        implicitHeight: 48
+                        background: Rectangle { color: "transparent" }
+                        contentItem: Item {
+                            anchors.fill: parent
+                            Image {
+                                id: repImg
+                                anchors.centerIn: parent
+                                source: "qrc:/res/" + modelData
+                                sourceSize.width: 96
+                                sourceSize.height: 96
+                                width: 28
+                                height: 28
+                                fillMode: Image.PreserveAspectFit
+                                visible: false
+                            }
+                            ColorOverlay {
+                                anchors.fill: repImg
+                                source: repImg
+                                color: parent.parent.checked ? Material.accent : Utility.getAppHexColor("lightText")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    TabButton {
+        id: uiHwButton
+        visible: uiHwPage.visible
+        width: tabBar.buttonWidth
+        implicitHeight: 48
+        background: Rectangle { color: "transparent" }
+        contentItem: Item {
+            anchors.fill: parent
+            Image {
+                id: imgHw
+                anchors.centerIn: parent
+                source: "qrc:/res/icons/navbar_hwui.png"
+                sourceSize.width: 96
+                sourceSize.height: 96
+                width: 28
+                height: 28
+                fillMode: Image.PreserveAspectFit
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: imgHw
+                source: imgHw
+                color: parent.parent.checked ? Material.accent : Utility.getAppHexColor("lightText")
+            }
+        }
+    }
+
+    Page {
+        id: uiHwPage
+        visible: false
+
+        Item {
+            id: uiHw
+            anchors.fill: parent
+            property var tabBarItem: tabBar
+            property var swipeViewItem: mainSwipeView
+        }
+    }
+
+    TabButton {
+        id: uiAppButton
+        visible: uiAppPage.visible
+        width: tabBar.buttonWidth
+        implicitHeight: 48
+        background: Rectangle { color: "transparent" }
+        contentItem: Item {
+            anchors.fill: parent
+            Image {
+                id: imgApp
+                anchors.centerIn: parent
+                source: "qrc:/res/icons/navbar_appui.png"
+                sourceSize.width: 96
+                sourceSize.height: 96
+                width: 28
+                height: 28
+                fillMode: Image.PreserveAspectFit
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: imgApp
+                source: imgApp
+                color: parent.parent.checked ? Material.accent : Utility.getAppHexColor("lightText")
+            }
+        }
+    }
+
+    Page {
+        id: uiAppPage
+        visible: false
+
+        Item {
+            id: uiApp
+            anchors.fill: parent
+            property var tabBarItem: tabBar
+            property var swipeViewItem: mainSwipeView
+        }
+    }
+
+    TabButton {
+        id: confMotorButton
+        visible: confPageMotor.visible
+        width: tabBar.buttonWidth
+        implicitHeight: 48
+        background: Rectangle { color: "transparent" }
+        contentItem: Item {
+            anchors.fill: parent
+            Image {
+                id: imgMotor
+                anchors.centerIn: parent
+                source: "qrc:/res/icons/navbar_mcconf.png"
+                sourceSize.width: 96
+                sourceSize.height: 96
+                width: 28
+                height: 28
+                fillMode: Image.PreserveAspectFit
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: imgMotor
+                source: imgMotor
+                color: parent.parent.checked ? Material.accent : Utility.getAppHexColor("lightText")
+            }
+        }
+    }
+
+    TabButton {
+        id: confAppButton
+        visible: confPageApp.visible
+        width: tabBar.buttonWidth
+        implicitHeight: 48
+        background: Rectangle { color: "transparent" }
+        contentItem: Item {
+            anchors.fill: parent
+            Image {
+                id: imgAppConf
+                anchors.centerIn: parent
+                source: "qrc:/res/icons/navbar_appconf.png"
+                sourceSize.width: 96
+                sourceSize.height: 96
+                width: 28
+                height: 28
+                fillMode: Image.PreserveAspectFit
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: imgAppConf
+                source: imgAppConf
+                color: parent.parent.checked ? Material.accent : Utility.getAppHexColor("lightText")
+            }
+        }
+    }
+
+    TabButton {
+        id: confCustomButton
+        visible: confCustomPage.visible
+        width: tabBar.buttonWidth
+        implicitHeight: 48
+        background: Rectangle { color: "transparent" }
+        contentItem: Item {
+            anchors.fill: parent
+            Image {
+                id: imgCustom
+                anchors.centerIn: parent
+                source: "qrc:/res/icons/navbar_customconf.png"
+                sourceSize.width: 96
+                sourceSize.height: 96
+                width: 28
+                height: 28
+                fillMode: Image.PreserveAspectFit
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: imgCustom
+                source: imgCustom
+                color: parent.parent.checked ? Material.accent : Utility.getAppHexColor("lightText")
+            }
+        }
+    }
+
+    Page {
+        id: confPageMotor
+        visible: false
+
+        Loader {
+            id: confMotorLoader
+            anchors.fill: parent
+            asynchronous: true
+            sourceComponent: ConfigPageMotor {
+                anchors.fill: parent
+                dialogParent: mainSwipeView
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+            }
+        }
+    }
+
+    Page {
+        id: confPageApp
+        visible: false
+
+        Loader {
+            id: confAppLoader
+            anchors.fill: parent
+            asynchronous: true
+            sourceComponent: ConfigPageApp {
+                dialogParent: mainSwipeView
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+            }
+        }
+    }
+
+    Page {
+        id: confCustomPage
+        visible: false
+
+        Loader {
+            id: confCustomLoader
+            anchors.fill: parent
+            asynchronous: true
+            sourceComponent: ConfigPageCustom {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
             }
         }
     }
@@ -808,7 +947,7 @@ ApplicationWindow {
         repeat: false
         onTriggered: {
             connectedText.text = VescIf.getConnectedPortName()
-            connectedRect.color = Utility.getAppHexColor("lightBackground")
+            headerBar.color = Utility.getAppHexColor("lightBackground")
         }
     }
 
@@ -985,7 +1124,7 @@ ApplicationWindow {
             tabBar.insertItem(1, uiHwButton)
             uiHwPage.visible = true
 
-            uiHwButton.text = "HwUi"
+            uiHwButton.text = ""
             if (hwUiObj.tabTitle) {
                 uiHwButton.text = hwUiObj.tabTitle
             }
@@ -1012,7 +1151,7 @@ ApplicationWindow {
             tabBar.insertItem(1, uiAppButton)
             uiAppPage.visible = true
 
-            uiAppButton.text = "AppUi"
+            uiAppButton.text = ""
             if (appUiObj.tabTitle) {
                 uiAppButton.text = appUiObj.tabTitle
             }
@@ -1096,7 +1235,7 @@ ApplicationWindow {
 
         function onStatusMessage(msg, isGood) {
             connectedText.text = msg
-            connectedRect.color = isGood ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("red")
+            headerBar.color = isGood ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("red")
             statusTimer.restart()
         }
 
@@ -1115,23 +1254,6 @@ ApplicationWindow {
 
         function onFwRxChanged(rx, limited) {
             if (rx) {
-                if (VescIf.getFwSupportsConfiguration()) {
-                    confPageMotor.visible = true
-                    confPageApp.visible = true
-
-                    mainSwipeView.insertItem(4, confPageApp)
-                    tabBar.insertItem(4, confAppButton)
-                    mainSwipeView.insertItem(4, confPageMotor)
-                    tabBar.insertItem(4, confMotorButton)
-                } else {
-                    confPageMotor.visible = false
-                    confPageApp.visible = false
-                    confPageMotor.parent = null
-                    confPageApp.parent = null
-                    confMotorButton.parent = null
-                    confAppButton.parent = null
-                }
-
                 if (VescIf.getFwSupportsConfiguration()) {
                     confTimer.restart()
                     confTimer.mcConfRx = false

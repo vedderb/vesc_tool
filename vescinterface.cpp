@@ -4473,6 +4473,27 @@ bool VescInterface::downloadConfigs()
     return res;
 }
 
+bool VescInterface::removeDownloadedConfigs()
+{
+    bool res = true;
+
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString path = appDataLoc + "/res_config.rcc";
+    QFile file(path);
+
+    if (file.exists()) {
+        QResource::unregisterResource(path);
+        if (!file.remove()) {
+            res = false;
+        }
+
+        auto fwPair = getSupportedFirmwarePairs().first();
+        Utility::configLoad(this, fwPair.first, fwPair.second);
+    }
+
+    return res;
+}
+
 QString VescInterface::getLastTcpHubServer() const
 {
     return mLastTcpHubServer;

@@ -167,6 +167,7 @@ Item {
                     }
                     MenuItem {
                         text: "Save XML"
+                        // HERE save
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogSave.close()

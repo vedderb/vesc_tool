@@ -1258,6 +1258,22 @@ bool CodeLoader::createPackageFromDescription(QString path, VescPackage *pkgRes,
             file.write(packVescPackage(pkg));
             file.close();
             qDebug() << "Package saved as" << pkgOutput;
+
+            const int flashBlockSize = 128 * 1024;
+
+            if (!pkg.qmlFile.isEmpty()) {
+                int compressedQmlSize = qmlCompress(pkg.qmlFile).size();
+                qDebug().noquote() << QString("Compressed QML size : %1 / %2 bytes (%3%)")
+                            .arg(compressedQmlSize).arg(flashBlockSize)
+                            .arg(100.0 * compressedQmlSize / flashBlockSize, 0, 'f', 1);
+            }
+
+            if (!pkg.lispData.isEmpty()) {
+                int lispSize = pkg.lispData.size();
+                qDebug().noquote() << QString("Lisp data size      : %1 / %2 bytes (%3%)")
+                            .arg(lispSize).arg(flashBlockSize)
+                            .arg(100.0 * lispSize / flashBlockSize, 0, 'f', 1);
+            }
         } else {
             qWarning() << QString("Could not open %1 for writing.").arg(pkgOutput);
             result = false;

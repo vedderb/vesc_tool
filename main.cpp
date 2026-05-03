@@ -994,6 +994,22 @@ int main(int argc, char *argv[])
         file.write(loader.packVescPackage(pkg));
         file.close();
 
+        const int flashBlockSize = 128 * 1024;
+
+        if (!pkg.qmlFile.isEmpty()) {
+            int compressedQmlSize = loader.qmlCompress(pkg.qmlFile).size();
+            qDebug().noquote() << QString("Compressed QML size : %1 / %2 bytes (%3%)")
+                        .arg(compressedQmlSize).arg(flashBlockSize)
+                        .arg(100.0 * compressedQmlSize / flashBlockSize, 0, 'f', 1);
+        }
+
+        if (!pkg.lispData.isEmpty()) {
+            int lispSize = pkg.lispData.size();
+            qDebug().noquote() << QString("Lisp data size      : %1 / %2 bytes (%3%)")
+                        .arg(lispSize).arg(flashBlockSize)
+                        .arg(100.0 * lispSize / flashBlockSize, 0, 'f', 1);
+        }
+
         qDebug() << "Package Saved!";
         return 0;
     }

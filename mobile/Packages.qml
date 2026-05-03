@@ -225,6 +225,7 @@ Item {
         }
     }
 
+    // HERE install
     function openPkgDialog(pkg) {
         var line1 = pkg.description.slice(0, pkg.description.indexOf("\n"))
         if (line1.toUpperCase().includes("<!DOCTYPE HTML PUBLIC")) {

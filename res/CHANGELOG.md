@@ -1,5 +1,5 @@
 ### 7.00
-#### Released TBD
+#### 2026-05-15
 * Firmwares are no longer included. They are now downloaded on demand.
 * Drag and drop support of files from system.
 * Added loganalysis source tab for local LBM logs and save them automatically when stopping the log.

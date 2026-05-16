@@ -10,7 +10,7 @@
 ---
 
 ### 6.06
-#### Released 2024-08-19
+#### Released 2025-08-19
 * Auto-save UI-state on regular intervals.
 * Movable LispBM tabs and better tab behavior in general.
 * Detect file system changes in script editor.

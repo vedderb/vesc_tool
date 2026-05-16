@@ -386,8 +386,9 @@ Item {
         // TODO: For some reason this does not work
         function onMcConfigCheckResult(paramsNotSet) {
             if (paramsNotSet.length > 0) {
-                var notUpdated = "The following parameters were truncated because " +
-                        "they were beyond the hardware limits:\n"
+                var notUpdated = "The following parameters were truncated or not updated. That can happen because " +
+                                "they were set outside their allowed limits or because the write failed. In case the " +
+                                "write failed you can try writing them again:\n"
 
                 for (var i = 0;i < paramsNotSet.length;i++) {
                     notUpdated += mMcConf.getLongName(paramsNotSet[i]) + "\n"

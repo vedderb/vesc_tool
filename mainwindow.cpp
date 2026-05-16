@@ -1089,8 +1089,9 @@ void MainWindow::mcConfigCheckResult(QStringList paramsNotSet)
 {
     if (!paramsNotSet.isEmpty()) {
         ParamDialog::showParams(tr("Parameters truncated"),
-                                tr("The following parameters were truncated because they were set outside "
-                                   "of their allowed limits."),
+                                tr( "The following parameters were truncated or not updated. That can happen because "
+                                    "they were set outside their allowed limits or because the write failed. In case the "
+                                    "write failed you can try writing them again."),
                                 mVesc->mcConfig(),
                                 paramsNotSet,
                                 this);

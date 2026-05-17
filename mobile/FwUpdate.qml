@@ -123,92 +123,6 @@ Item {
                             }
                         }
 
-                        Item {
-                            // Spacer
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                        }
-
-                        Text {
-                            color: Utility.getAppHexColor("lightText")
-                            Layout.fillWidth: true
-                            height: 30;
-                            text: "Hardware"
-                            horizontalAlignment: Text.AlignHCenter
-                        }
-
-                        ComboBox {
-                            id: hwBox
-                            Layout.preferredHeight: 48
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-                            textRole: "key"
-                            model: ListModel {
-                                id: hwItems
-                            }
-
-                            Component.onCompleted: {
-                                updateFwText()
-                            }
-
-                            onCurrentIndexChanged: {
-                                updateFws()
-                            }
-
-                            function updateFws() {
-                                if (hwItems.rowCount() === 0) {
-                                    return
-                                }
-
-                                var fws = fwHelper.getFirmwares(hwItems.get(hwBox.currentIndex).value)
-
-                                fwItems.clear()
-
-                                for (var name in fws) {
-                                    if (name.toLowerCase().indexOf("vesc_default.bin") !== -1) {
-                                        fwItems.insert(0, { key: name, value: fws[name] })
-                                    } else {
-                                        fwItems.append({ key: name, value: fws[name] })
-                                    }
-                                }
-
-                                fwBox.currentIndex = 0
-                            }
-                        }
-
-                        Text {
-                            color: Utility.getAppHexColor("lightText")
-                            Layout.fillWidth: true
-                            height: 30;
-                            text: "Firmware"
-                            horizontalAlignment: Text.AlignHCenter
-                        }
-
-                        ComboBox {
-                            id: fwBox
-                            Layout.preferredHeight: 48
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-                            textRole: "key"
-                            model: ListModel {
-                                id: fwItems
-                            }
-                        }
-
-                        Button {
-                            text: "Show Changelog"
-                            Layout.fillWidth: true
-
-                            onClicked: {
-                                VescIf.emitMessageDialog(
-                                            "Firmware Changelog",
-                                            Utility.fwChangeLog(),
-                                            true)
-                            }
-                        }
-
                         Button {
                             id: latestUpdateButton
                             text: "Download Latest"
@@ -239,10 +153,116 @@ Item {
                             Layout.fillWidth: true
                         }
 
-                        Item {
-                            // Spacer
+                        Text {
+                            id: fwIncludedText
+                            visible: false
+
                             Layout.fillWidth: true
                             Layout.fillHeight: true
+
+                            textFormat: Text.RichText
+                            color: Utility.getAppHexColor("lightText")
+                            wrapMode: Text.WordWrap
+                        }
+
+                        ColumnLayout {
+                            id: fwIncludedColumn
+
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.margins: 0
+
+                            Item {
+                                // Spacer
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                            }
+
+                            Text {
+                                color: Utility.getAppHexColor("lightText")
+                                Layout.fillWidth: true
+                                height: 30;
+                                text: "Hardware"
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+
+                            ComboBox {
+                                id: hwBox
+                                Layout.preferredHeight: 48
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+                                textRole: "key"
+                                model: ListModel {
+                                    id: hwItems
+                                }
+
+                                Component.onCompleted: {
+                                    updateFwText()
+                                }
+
+                                onCurrentIndexChanged: {
+                                    updateFws()
+                                }
+
+                                function updateFws() {
+                                    if (hwItems.rowCount() === 0) {
+                                        return
+                                    }
+
+                                    var fws = fwHelper.getFirmwares(hwItems.get(hwBox.currentIndex).value)
+
+                                    fwItems.clear()
+
+                                    for (var name in fws) {
+                                        if (name.toLowerCase().indexOf("vesc_default.bin") !== -1) {
+                                            fwItems.insert(0, { key: name, value: fws[name] })
+                                        } else {
+                                            fwItems.append({ key: name, value: fws[name] })
+                                        }
+                                    }
+
+                                    fwBox.currentIndex = 0
+                                }
+                            }
+
+                            Text {
+                                color: Utility.getAppHexColor("lightText")
+                                Layout.fillWidth: true
+                                height: 30;
+                                text: "Firmware"
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+
+                            ComboBox {
+                                id: fwBox
+                                Layout.preferredHeight: 48
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+                                textRole: "key"
+                                model: ListModel {
+                                    id: fwItems
+                                }
+                            }
+
+                            Button {
+                                text: "Show Changelog"
+                                Layout.fillWidth: true
+
+                                onClicked: {
+                                    VescIf.emitMessageDialog(
+                                                "Firmware Changelog",
+                                                Utility.fwChangeLog(),
+                                                true)
+                                }
+                            }
+
+                            Item {
+                                // Spacer
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                            }
                         }
                     }
                 }
@@ -923,6 +943,18 @@ Item {
         var params = VescIf.getLastFwRxParams()
 
         updateHw(params)
+
+        var dlText = fwHelper.fwDlText(VescIf)
+        fwIncludedText.text = dlText
+
+        if (dlText.length > 0) {
+            fwIncludedColumn.visible = false
+            fwIncludedText.visible = true
+        } else {
+            fwIncludedText.visible = false
+            fwIncludedColumn.visible = true
+        }
+
         updateBl(params)
         updateArch()
 

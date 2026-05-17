@@ -35,6 +35,8 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->cancelButton->setEnabled(false);
     mVesc = nullptr;
 
+    ui->fwMissingText->setVisible(false);
+
     ui->changelogButton->setIcon(Utility::getIcon("icons/About-96.png"));
     ui->chooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
     ui->choose2Button->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
@@ -45,8 +47,6 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->uploadAllButton->setIcon(Utility::getIcon("icons/Download-96.png"));
     ui->readVersionButton->setIcon(Utility::getIcon("icons/Upload-96.png"));
     ui->dlArchiveButton->setIcon(Utility::getIcon("icons/Download-96.png"));
-
-    reloadLatest(false);
 
     mTimer = new QTimer(this);
     mTimer->start(500);
@@ -66,8 +66,6 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->fw2Edit->setText(set.value("pagefirmware/lastcustomfile2", "").toString());
     ui->fw3Edit->setText(set.value("pagefirmware/lastcustomfile3", "").toString());
     ui->fw4Edit->setText(set.value("pagefirmware/lastcustomfile4", "").toString());
-
-    reloadArchive(false);
 }
 
 PageFirmware::~PageFirmware()
@@ -92,7 +90,14 @@ VescInterface *PageFirmware::vesc() const
 
 void PageFirmware::setVesc(VescInterface *vesc)
 {
+    if (vesc == mVesc) {
+        return;
+    }
+
     mVesc = vesc;
+
+    reloadLatest(false);
+    reloadArchive(false);
 
     if (mVesc) {
         ui->display->setText(mVesc->getFwUploadStatus());
@@ -220,6 +225,7 @@ void PageFirmware::fwRxChanged(bool rx, bool limited)
 void PageFirmware::updateHwList(FW_RX_PARAMS params)
 {
     ui->hwList->clear();
+    bool fwdirExists = false;
 
     if (params.hwType == HW_TYPE_CUSTOM_MODULE) {
         QString path = "://res/firmwares_esp/esp32c3/" + params.hw;
@@ -228,6 +234,7 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         }
 
         if (QFileInfo::exists(path)) {
+            fwdirExists = true;
             QListWidgetItem *item = new QListWidgetItem;
             item->setText(params.hw);
             item->setData(Qt::UserRole, path);
@@ -238,6 +245,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         if (params.hwType == HW_TYPE_VESC_BMS) {
             fwDir = "://res/firmwares_bms";
         }
+
+        fwdirExists = QDir(fwDir).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() == 0;
 
         foreach (const auto &fi, QDir(fwDir).entryInfoList(QDir::NoFilter, QDir::Name)) {
             QStringList names = fi.fileName().split("_o_");
@@ -257,7 +266,19 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
     }
 
     if (ui->hwList->count() > 0) {
+        ui->fwMissingText->setVisible(false);
+        ui->fwWidget->setVisible(true);
         ui->hwList->setCurrentRow(0);
+    } else {
+        if (mVesc) {
+            ConfigParam *param = mVesc->infoConfig()->getParam(fwdirExists ? "fw_not_included" : "fw_not_downloaded");
+            if (param) {
+                ui->fwMissingText->setText(param->description);
+            }
+        }
+
+        ui->fwWidget->setVisible(false);
+        ui->fwMissingText->setVisible(true);
     }
 
     updateFwList();

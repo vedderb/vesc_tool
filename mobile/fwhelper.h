@@ -41,6 +41,7 @@ public:
     Q_INVOKABLE QVariantMap getArchiveDirs();
     Q_INVOKABLE QVariantMap getArchiveFirmwares(QString fwPath, FW_RX_PARAMS params);
     Q_INVOKABLE void reloadLatest();
+    Q_INVOKABLE QString fwDlText(VescInterface *vesc);
 
 signals:
     void fwUploadRes(bool res, bool isBootloader);
@@ -48,7 +49,13 @@ signals:
 public slots:
 
 private:
+    enum FwDlStatus {
+        FwDlNotDownloaded = 0,
+        FwDlNotFound,
+        FwDlFound
+    };
 
+    FwDlStatus mFwDlStatus;
 
 };
 

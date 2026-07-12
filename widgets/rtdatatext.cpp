@@ -82,6 +82,7 @@ void RtDataText::paintEvent(QPaintEvent *event)
                                     "T\n"
                                     "T\n"
                                     "T\n"
+                                    "T\n"
                                     "T\n");
 
     int boxh_new = br.height();
@@ -128,11 +129,13 @@ void RtDataText::paintEvent(QPaintEvent *event)
     str = QString::asprintf("T FET   : %.2f \u00B0C\n"
                 "T Motor : %.2f \u00B0C\n"
                 "Fault   : %s\n"
+                "%s"
                 "Tac     : %i\n"
                 "Tac ABS : %i\n",
                 mValues.temp_mos,
                 mValues.temp_motor,
                 mValues.fault_str.toLocal8Bit().data(),
+                mValues.motor_disabled ? "Disabled: TRUE\n" : "",
                 mValues.tachometer,
                 mValues.tachometer_abs);
 

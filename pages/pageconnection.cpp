@@ -77,6 +77,10 @@ PageConnection::PageConnection(QWidget *parent) :
     mUdpListen = new UdpServerSimple(this);
     mUdpListen->startServerBroadcast(65109);
 
+#ifndef HAS_CANBUS
+    ui->tabWidget->setTabVisible(1, false);
+#endif
+
     connect(mUdpListen, &UdpServerSimple::dataRx, [this](const QByteArray &data) {
         QString str(data);
         auto tokens = str.split("::");

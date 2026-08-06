@@ -104,6 +104,8 @@ private slots:
     void on_actionDisconnect_triggered();
     void on_actionReboot_triggered();
     void on_actionShutdown_triggered();
+    void on_actionMotorDisable_triggered();
+    void on_actionMotorEnable_triggered();
     void on_stopButton_clicked();
     void on_fullBrakeButton_clicked();
     void on_actionReadMcconf_triggered();
@@ -177,6 +179,7 @@ private:
     QTimer *mTimer;
     QLabel *mStatusLabel;
     int mStatusInfoTime;
+    bool mMotorDisabledNow;
     bool mKeyLeft;
     bool mKeyRight;
     bool mMcConfRead;

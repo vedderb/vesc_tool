@@ -447,20 +447,26 @@ void PageVescPackage::reloadArchive()
     ui->applicationList->clear();
     ui->libraryList->clear();
 
+    QString filter = ui->filterEdit->text();
+
     foreach (auto p, pList) {
         auto pVal = p.value<VescPackage>();
 
         if (pVal.isLibrary) {
-            QListWidgetItem *item = new QListWidgetItem;
-            item->setText(pVal.name);
-            item->setData(Qt::UserRole, p);
-            ui->libraryList->insertItem(ui->libraryList->count(), item);
-        } else {
-            if (mLoader.shouldShowPackage(pVal)) {
+            if (filter.isEmpty() || pVal.name.contains(filter, Qt::CaseInsensitive)) {
                 QListWidgetItem *item = new QListWidgetItem;
                 item->setText(pVal.name);
                 item->setData(Qt::UserRole, p);
-                ui->applicationList->insertItem(ui->applicationList->count(), item);
+                ui->libraryList->insertItem(ui->libraryList->count(), item);
+            }
+        } else {
+            if (filter.isEmpty() || pVal.name.contains(filter, Qt::CaseInsensitive)) {
+                if (mLoader.shouldShowPackage(pVal)) {
+                    QListWidgetItem *item = new QListWidgetItem;
+                    item->setText(pVal.name);
+                    item->setData(Qt::UserRole, p);
+                    ui->applicationList->insertItem(ui->applicationList->count(), item);
+                }
             }
         }
     }
@@ -506,3 +512,10 @@ void PageVescPackage::on_libraryList_currentItemChanged(QListWidgetItem *current
         ui->applicationList->setCurrentItem(nullptr);
     }
 }
+
+void PageVescPackage::on_filterEdit_textChanged(const QString &arg1)
+{
+    (void)arg1;
+    reloadArchive();
+}
+

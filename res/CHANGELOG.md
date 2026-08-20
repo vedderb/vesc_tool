@@ -1,5 +1,6 @@
 ### 7.01
 #### TBD
+* Added filter box to package store.
 
 ### 7.00
 #### 2026-05-15

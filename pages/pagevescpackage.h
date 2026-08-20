@@ -57,6 +57,7 @@ private slots:
     void on_installButton_clicked();
     void on_applicationList_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
     void on_libraryList_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+    void on_filterEdit_textChanged(const QString &arg1);
 
 private:
     Ui::PageVescPackage *ui;

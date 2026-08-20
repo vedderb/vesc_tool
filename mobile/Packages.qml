@@ -64,11 +64,15 @@ Item {
         pkgModel.clear()
         var pkgs = mLoader.reloadPackageArchive()
 
+        var filter = filterInput.text
+
         for (var i = 0;i < pkgs.length;i++) {
-            if (!pkgs[i].isLibrary && mLoader.shouldShowPackage(pkgs[i])) {
-                pkgModel.append({"pkgName": pkgs[i].name,
-                                    "pkgDescription": pkgs[i].description,
-                                    "pkg": pkgs[i]})
+            if (filter.length == 0  || pkgs[i].name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
+                if (!pkgs[i].isLibrary && mLoader.shouldShowPackage(pkgs[i])) {
+                    pkgModel.append({"pkgName": pkgs[i].name,
+                                        "pkgDescription": pkgs[i].description,
+                                        "pkg": pkgs[i]})
+                }
             }
         }
 
@@ -111,6 +115,40 @@ Item {
 
             model: pkgModel
             delegate: pkgDelegate
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            Text {
+                id: nameText
+                color: Utility.getAppHexColor("lightText")
+                text: "Filter"
+                horizontalAlignment: Text.AlignHCenter
+                Layout.fillWidth: false
+                font.pointSize: 12
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: filterInput.implicitHeight + 14
+                border.width: 2
+                border.color: Utility.getAppHexColor("disabledText")
+                color: Utility.getAppHexColor("normalBackground")
+                radius: 3
+                TextInput {
+                    id: filterInput
+                    color: Utility.getAppHexColor("lightText")
+                    anchors.fill: parent
+                    anchors.margins: 7
+                    font.pointSize: 12
+                    focus: true
+
+                    onTextChanged: {
+                        reloadArchive()
+                    }
+                }
+            }
         }
 
         RowLayout {

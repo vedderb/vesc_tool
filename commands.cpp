@@ -1398,8 +1398,6 @@ void Commands::getMcconf()
         return;
     }
 
-    pausePoll(100);
-
     mTimeoutMcconf = mTimeoutCount;
 
     mCheckNextMcConfig = false;
@@ -1413,8 +1411,6 @@ void Commands::getMcconfDefault()
     if (mTimeoutMcconf > 0) {
         return;
     }
-
-    pausePoll(100);
 
     mTimeoutMcconf = mTimeoutCount;
 
@@ -1432,7 +1428,6 @@ void Commands::setMcconf(bool check)
         vb.vbAppendInt8(COMM_SET_MCCONF);
         mMcConfig->serialize(vb);
 
-        pausePoll(100);
         emitData(vb);
         emitData(vb);
 
@@ -1450,8 +1445,6 @@ void Commands::getAppConf()
         return;
     }
 
-    pausePoll(100);
-
     mTimeoutAppconf = mTimeoutCount;
 
     VByteArray vb;
@@ -1464,8 +1457,6 @@ void Commands::getAppConfDefault()
     if (mTimeoutAppconf > 0) {
         return;
     }
-
-    pausePoll(100);
 
     mTimeoutAppconf = mTimeoutCount;
 
@@ -1480,8 +1471,6 @@ void Commands::setAppConf()
         VByteArray vb;
         vb.vbAppendInt8(COMM_SET_APPCONF);
 
-        pausePoll(100);
-
         mAppConfig->serialize(vb);
         emitData(vb);
         emitData(vb);
@@ -1493,8 +1482,6 @@ void Commands::setAppConfNoStore()
     if (mAppConfig) {
         VByteArray vb;
         vb.vbAppendInt8(COMM_SET_APPCONF_NO_STORE);
-
-        pausePoll(100);
 
         mAppConfig->serialize(vb);
         emitData(vb);
@@ -2420,25 +2407,6 @@ void Commands::emitData(QByteArray data)
 double Commands::getFileSpeed() const
 {
     return mFileSpeed;
-}
-
-void Commands::pausePoll(int msToPause)
-{
-    int pauseTime = msToPause / mTimer->interval();
-
-    mTimeoutFwVer = pauseTime;
-    mTimeoutMcconf = pauseTime;
-    mTimeoutAppconf = pauseTime;
-    mTimeoutValues = pauseTime;
-    mTimeoutValuesSetup = pauseTime;
-    mTimeoutImuData = pauseTime;
-    mTimeoutDecPpm = pauseTime;
-    mTimeoutDecAdc = pauseTime;
-    mTimeoutDecChuk = pauseTime;
-    //mTimeoutPingCan = pauseTime;
-    mTimeoutBmsVal = pauseTime;
-    mTimeoutStats = pauseTime;
-    mTimeoutLbmStats = pauseTime;
 }
 
 double Commands::getFilePercentage() const

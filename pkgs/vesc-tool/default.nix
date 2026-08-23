@@ -12,7 +12,6 @@
   callPackage,
   cmake,
   copyDesktopItems,
-  gcc-arm-embedded-7,
   libsForQt5,
   makeDesktopItem,
   stdenv,
@@ -25,6 +24,10 @@ let
     (lib.toUpper (builtins.substring 0 1 str)) + (builtins.substring 1 (builtins.stringLength str) str);
   kindTitleCase = firstToUpper kind;
   executableName = "vesc_tool${if kind == "original" then "" else "_${kind}"}";
+  releaseConfig = if stdenv.hostPlatform.isDarwin then "release_macos" else "release_lin";
+  qmakePlatformArgs = lib.optionalString stdenv.hostPlatform.isDarwin (
+    "-after QMAKE_APPLE_DEVICE_ARCHS=${stdenv.hostPlatform.darwinArch}"
+  );
   iconPath =
     {
       "original" = "res/version/neutral_v.svg";
@@ -38,7 +41,7 @@ let
     .${kind};
 
   bldc-fw = callPackage ./bldc-fw.nix {
-    inherit fwBoards gcc-arm-embedded-7;
+    inherit fwBoards;
     src = bldcSrc;
   };
 in
@@ -48,7 +51,7 @@ stdenv.mkDerivation {
 
   meta = with lib; {
     description = "VESC Tool ${kind}, an IDE for controlling and configuring VESC-compatible motor controllers and other devices.";
-    platforms = platforms.linux;
+    platforms = platforms.linux ++ platforms.darwin;
   };
 
   desktopItems = [
@@ -66,7 +69,7 @@ stdenv.mkDerivation {
   inherit src;
 
   configurePhase = ''
-    qmake -config release "CONFIG += release_lin build_${kind}"
+    qmake -config release "CONFIG += ${releaseConfig} build_${kind}" ${qmakePlatformArgs}
   '';
   buildPhase = ''
     mkdir -p ./res/firmwares/
@@ -76,19 +79,30 @@ stdenv.mkDerivation {
 
     make -j$NIX_BUILD_CORES
   '';
-  installPhase = ''
-    runHook preInstall
+  installPhase =
+    if stdenv.hostPlatform.isDarwin then
+      ''
+        runHook preInstall
 
-    mkdir -p \
-      $out/bin \
-      $out/share/icons/hicolor/scalable/apps
+        mkdir -p $out/Applications
+        cp -R "build/macos/VESC Tool.app" $out/Applications/
 
-    cp build/lin/vesc_tool_* $out/bin/${executableName}
-    cp ${iconPath} $out/share/icons/hicolor/scalable/apps/vesc_tool_${kind}.svg
-    echo $desktopItems
+        runHook postInstall
+      ''
+    else
+      ''
+        runHook preInstall
 
-    runHook postInstall
-  '';
+        mkdir -p \
+          $out/bin \
+          $out/share/icons/hicolor/scalable/apps
+
+        cp build/lin/vesc_tool_* $out/bin/${executableName}
+        cp ${iconPath} $out/share/icons/hicolor/scalable/apps/vesc_tool_${kind}.svg
+        echo $desktopItems
+
+        runHook postInstall
+      '';
 
   buildInputs = [ libsForQt5.qtbase ];
 

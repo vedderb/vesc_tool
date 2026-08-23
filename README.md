@@ -62,8 +62,6 @@ nix develop
 
 Then follow the normal build instructions for Linux.
 
-**Note:** The Nix flake's outputs currently only supports x86 Linux.
-
 ### Starting QT Creator in Nix
 
 QT Creator allows you to easily build and run the project. It also allows you to edit the page UIs with it's graphical editor. To run it using Nix simply start QT Creator from a shell with the build dependencies:

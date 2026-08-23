@@ -1,16 +1,14 @@
 {
   pkgs,
   src,
-  bldcSrc,
-  fwBoards ? [ ],
-}:
+  bldc-fw,
+}@inputs:
 rec {
+  bldc-fw = inputs.bldc-fw;
+
   vesc-tool = pkgs.callPackage ./vesc-tool {
-    inherit
-      src
-      bldcSrc
-      fwBoards
-      ;
+    inherit src;
+    bldc-fw = inputs.bldc-fw;
     kind = "original";
   };
   vesc-tool-platinum = vesc-tool.override { kind = "platinum"; };
@@ -19,9 +17,4 @@ rec {
   vesc-tool-bronze = vesc-tool.override { kind = "bronze"; };
   vesc-tool-copper = vesc-tool.override { kind = "copper"; };
   vesc-tool-free = vesc-tool.override { kind = "free"; };
-
-  bldc-fw = pkgs.callPackage ./vesc-tool/bldc-fw.nix {
-    inherit fwBoards;
-    src = bldcSrc;
-  };
 }

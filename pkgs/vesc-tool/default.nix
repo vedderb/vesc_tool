@@ -1,15 +1,10 @@
 {
   src,
-  bldcSrc,
+  bldc-fw,
   # One of "original", "platinum", "gold", "silver", "bronze", or "free"
   kind ? "free",
-  # List of bldc board names to be built and included, i.e. a list of bldc "fw_*"
-  # Makefile targets without the "fw_" prefix.
-  # Can also be the string "all", which builds all standard board firmwares.
-  fwBoards ? [ ],
 
   lib,
-  callPackage,
   cmake,
   copyDesktopItems,
   libsForQt5,
@@ -40,10 +35,6 @@ let
     }
     .${kind};
 
-  bldc-fw = callPackage ./bldc-fw.nix {
-    inherit fwBoards;
-    src = bldcSrc;
-  };
 in
 stdenv.mkDerivation {
   pname = executableName;

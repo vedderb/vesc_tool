@@ -6,7 +6,7 @@
   # Can also be the string "all", which builds all standard board firmwares.
   fwBoards ? [ ],
 
-  gcc-arm-embedded-7,
+  gcc-arm-embedded-14,
   git,
   python3,
   stdenv,
@@ -56,7 +56,7 @@ stdenv.mkDerivation rec {
   '';
 
   nativeBuildInputs = [
-    gcc-arm-embedded-7
+    gcc-arm-embedded-14
     python3
     git
   ];

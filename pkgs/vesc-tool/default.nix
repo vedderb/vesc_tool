@@ -12,7 +12,6 @@
   callPackage,
   cmake,
   copyDesktopItems,
-  gcc-arm-embedded-7,
   libsForQt5,
   makeDesktopItem,
   stdenv,
@@ -38,7 +37,7 @@ let
     .${kind};
 
   bldc-fw = callPackage ./bldc-fw.nix {
-    inherit fwBoards gcc-arm-embedded-7;
+    inherit fwBoards;
     src = bldcSrc;
   };
 in

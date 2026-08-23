@@ -3,16 +3,16 @@
     "bldcSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1733324381,
-        "narHash": "sha256-ui9N8QSog1G5zyK7yRrD0Xl+Y2CZhvvhBkaJuQZ2qZw=",
+        "lastModified": 1786613032,
+        "narHash": "sha256-ZnYvTR6wqEeUcalsUJmvICpqdmZIto1RTscgeaQO7Os=",
         "owner": "vedderb",
         "repo": "bldc",
-        "rev": "a0d40e2c5a42c810888d8c379307e6b0a118a125",
+        "rev": "b9d287b3b8323f4b02618b02dc55e57d54a84996",
         "type": "github"
       },
       "original": {
         "owner": "vedderb",
-        "ref": "release_6_05",
+        "ref": "master",
         "repo": "bldc",
         "type": "github"
       }
@@ -51,22 +51,6 @@
         "type": "github"
       }
     },
-    "nixpkgsOld": {
-      "locked": {
-        "lastModified": 1748037224,
-        "narHash": "sha256-92vihpZr6dwEMV6g98M5kHZIttrWahb9iRPBm1atcPk=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "f09dede81861f3a83f7f06641ead34f02f37597f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-24.11",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1770107345,
@@ -88,7 +72,6 @@
         "bldcSrc": "bldcSrc",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
-        "nixpkgsOld": "nixpkgsOld",
         "treefmt-nix": "treefmt-nix"
       }
     },

@@ -76,19 +76,30 @@ stdenv.mkDerivation {
 
     make -j$NIX_BUILD_CORES
   '';
-  installPhase = ''
-    runHook preInstall
+  installPhase =
+    if stdenv.hostPlatform.isDarwin then
+      ''
+        runHook preInstall
 
-    mkdir -p \
-      $out/bin \
-      $out/share/icons/hicolor/scalable/apps
+        mkdir -p $out/Applications
+        cp -R "build/macos/VESC Tool.app" $out/Applications/
 
-    cp build/lin/vesc_tool_* $out/bin/${executableName}
-    cp ${iconPath} $out/share/icons/hicolor/scalable/apps/vesc_tool_${kind}.svg
-    echo $desktopItems
+        runHook postInstall
+      ''
+    else
+      ''
+        runHook preInstall
 
-    runHook postInstall
-  '';
+        mkdir -p \
+          $out/bin \
+          $out/share/icons/hicolor/scalable/apps
+
+        cp build/lin/vesc_tool_* $out/bin/${executableName}
+        cp ${iconPath} $out/share/icons/hicolor/scalable/apps/vesc_tool_${kind}.svg
+        echo $desktopItems
+
+        runHook postInstall
+      '';
 
   buildInputs = [ libsForQt5.qtbase ];
 

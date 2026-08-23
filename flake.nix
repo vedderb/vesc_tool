@@ -2,7 +2,7 @@
   description = "Packages VESC Tool into a flake.";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     # gcc-arm-embedded-7 has been removed from nixpkgs since 25.05 since it's
     # old and unmaintained. However, this project still uses that version, so we
     # include an older version of nixpkgs to access it.

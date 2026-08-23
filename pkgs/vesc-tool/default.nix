@@ -24,6 +24,7 @@ let
     (lib.toUpper (builtins.substring 0 1 str)) + (builtins.substring 1 (builtins.stringLength str) str);
   kindTitleCase = firstToUpper kind;
   executableName = "vesc_tool${if kind == "original" then "" else "_${kind}"}";
+  releaseConfig = if stdenv.hostPlatform.isDarwin then "release_macos" else "release_lin";
   iconPath =
     {
       "original" = "res/version/neutral_v.svg";
@@ -65,7 +66,7 @@ stdenv.mkDerivation {
   inherit src;
 
   configurePhase = ''
-    qmake -config release "CONFIG += release_lin build_${kind}"
+    qmake -config release "CONFIG += ${releaseConfig} build_${kind}"
   '';
   buildPhase = ''
     mkdir -p ./res/firmwares/

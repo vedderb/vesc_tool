@@ -91,6 +91,8 @@ public:
         samplePrint((debug_sampling_mode)mode, sample_len, dec, raw);
     }
 
+    Q_INVOKABLE void pausePoll(int msToPause);
+
 signals:
     void sampleDataQmlStarted(int sample_len);
 

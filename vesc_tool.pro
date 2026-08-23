@@ -218,6 +218,7 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     boardsetupwindow.cpp \
     packet.cpp \
+    pollmanager.cpp \
     preferences.cpp \
     tcphub.cpp \
     udpserversimple.cpp \
@@ -240,6 +241,7 @@ HEADERS  += mainwindow.h \
     codeloader.h \
     boardsetupwindow.h \
     packet.h \
+    pollmanager.h \
     preferences.h \
     tcphub.h \
     udpserversimple.h \

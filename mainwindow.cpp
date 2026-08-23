@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2026 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -218,6 +218,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mVesc = new VescInterface(this);
     mPreferences = new Preferences(this);
     mPreferences->setVesc(mVesc);
+    mPollManager.setVesc(mVesc);
 
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
@@ -484,32 +485,32 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&mPollRtTimer, &QTimer::timeout, [this]() {
         if (ui->actionRtData->isChecked()) {
-            mVesc->commands()->getStats(0xFFFFFFFF);
-            mVesc->commands()->getValues();
-            mVesc->commands()->getValuesSetup();
+            mPollManager.pollField(COMM_GET_STATS);
+            mPollManager.pollField(COMM_GET_VALUES);
+            mPollManager.pollField(COMM_GET_VALUES_SETUP);
             mPollRtTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_rt_data", 50).toDouble()));
         }
     });
 
     connect(&mPollAppTimer, &QTimer::timeout, [this]() {
         if (ui->actionRtDataApp->isChecked()) {
-            mVesc->commands()->getDecodedAdc();
-            mVesc->commands()->getDecodedChuk();
-            mVesc->commands()->getDecodedPpm();
+            mPollManager.pollField(COMM_GET_DECODED_ADC);
+            mPollManager.pollField(COMM_GET_DECODED_CHUK);
+            mPollManager.pollField(COMM_GET_DECODED_PPM);
             mPollAppTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_app_data", 50).toDouble()));
         }
     });
 
     connect(&mPollImuTimer, &QTimer::timeout, [this]() {
         if (ui->actionIMU->isChecked()) {
-            mVesc->commands()->getImuData(0xFFFF);
+            mPollManager.pollField(COMM_GET_IMU_DATA);
             mPollImuTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_imu_data", 50).toDouble()));
         }
     });
 
     connect(&mPollBmsTimer, &QTimer::timeout, [this]() {
         if (ui->actionrtDataBms->isChecked()) {
-            mVesc->commands()->bmsGetValues();
+            mPollManager.pollField(COMM_BMS_GET_VALUES);
             mPollBmsTimer.setInterval(int(1000.0 / mSettings.value("poll_rate_bms_data", 10).toDouble()));
         }
     });

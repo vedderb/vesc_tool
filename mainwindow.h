@@ -26,6 +26,7 @@
 #include <QProcess>
 #include <QSettings>
 #include <QMap>
+#include "pollmanager.h"
 #include "vescinterface.h"
 #include "widgets/pagelistitem.h"
 #include "widgets/canlistitem.h"
@@ -192,6 +193,8 @@ private:
     QTimer mPollBmsTimer;
     QTimer mPortTimer;
     QTimer mSettingSyncTimer;
+
+    PollManager mPollManager;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;

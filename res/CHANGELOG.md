@@ -1,6 +1,8 @@
 ### 7.01
 #### TBD
 * Added filter box to package store.
+* Poll manager for more stable comminucation while polling.
+* Improved motor and app config write reliability.
 
 ### 7.00
 #### 2026-05-15

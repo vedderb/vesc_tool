@@ -51,7 +51,7 @@ stdenv.mkDerivation {
 
   meta = with lib; {
     description = "VESC Tool ${kind}, an IDE for controlling and configuring VESC-compatible motor controllers and other devices.";
-    platforms = platforms.linux;
+    platforms = platforms.linux ++ platforms.darwin;
   };
 
   desktopItems = [

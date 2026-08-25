@@ -5,9 +5,9 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     flake-utils.url = "github:numtide/flake-utils";
     treefmt-nix.url = "github:numtide/treefmt-nix";
-    bldcSrc = {
+    bldc-fw = {
       url = "github:vedderb/bldc/master";
-      flake = false;
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -18,7 +18,7 @@
       nixpkgs,
       flake-utils,
       treefmt-nix,
-      bldcSrc,
+      bldc-fw,
     }@inputs:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -28,7 +28,8 @@
         };
         treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
         selfPkgs = import ./pkgs {
-          inherit pkgs bldcSrc;
+          inherit pkgs;
+          bldc-fw = bldc-fw.packages.${system}.bldc-fw;
           src = self;
         };
       in
@@ -47,8 +48,8 @@
       }
     )
     // {
-      overlays.default = (nixpkgs.lib.makeOverridable (import ./overlay.nix)) {
-        inherit bldcSrc;
+      overlays.default = import ./overlay.nix {
+        inherit bldc-fw;
         src = self;
       };
       # For development in the nix repl

@@ -1,13 +1,11 @@
 {
   src,
-  bldcSrc,
-  fwBoards ? [ ],
-  nixpkgsOld,
+  bldc-fw,
 }:
 
 final: prev:
 import ./pkgs {
-  inherit src bldcSrc fwBoards;
-  pkgs = prev;
-  gcc-arm-embedded-7 = nixpkgsOld.legacyPackages.${prev.system}.gcc-arm-embedded-7;
+  inherit src;
+  bldc-fw = bldc-fw.packages.${prev.system}.bldc-fw;
+  pkgs = final;
 }

@@ -141,8 +141,7 @@ QString CodeLoader::reduceLispFile(QString fileData)
             line.chop(1);
         }
 
-        if (!line.startsWith("(import", Qt::CaseInsensitive) &&
-            !line.isEmpty()) {
+        if (!line.isEmpty()) {
             res.append(line + "\n");
         }
     }

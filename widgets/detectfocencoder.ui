@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>626</width>
-    <height>70</height>
+    <width>734</width>
+    <height>79</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -59,6 +59,9 @@
         <property name="suffix">
          <string> A</string>
         </property>
+        <property name="maximum">
+         <double>9999.000000000000000</double>
+        </property>
         <property name="value">
          <double>10.000000000000000</double>
         </property>
@@ -89,7 +92,7 @@
          <bool>true</bool>
         </property>
         <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
         </property>
         <property name="prefix">
          <string>Offset: </string>
@@ -117,7 +120,7 @@
          <bool>true</bool>
         </property>
         <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
         </property>
         <property name="prefix">
          <string>Ratio: </string>

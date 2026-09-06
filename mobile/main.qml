@@ -32,6 +32,7 @@ import Vedder.vesc.vesc3ditem 1.0
 ApplicationWindow {
     id: appWindow
     property Commands mCommands: VescIf.commands()
+    property bool motorDisabledNow: false
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mAppConf: VescIf.appConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
@@ -820,8 +821,12 @@ ApplicationWindow {
         running: true
         repeat: true
         onTriggered: {
-            if (!statusTimer.running && connectedText.text !== VescIf.getConnectedPortName()) {
-                connectedText.text = VescIf.getConnectedPortName()
+            var statusStr = VescIf.getConnectedPortName()
+            if (appWindow.motorDisabledNow && VescIf.isPortConnected()) {
+                statusStr += " | MOTOR DISABLED"
+            }
+            if (!statusTimer.running && connectedText.text !== statusStr) {
+                connectedText.text = statusStr
             }
         }
     }
@@ -1183,6 +1188,10 @@ ApplicationWindow {
 
     Connections {
         target: mCommands
+        function onValuesReceived(values, mask) {
+            appWindow.motorDisabledNow = values.motor_disabled
+        }
+
         function onValuesImuReceived(values, mask) {
             if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
                 vesc3dLoader.item.setRotation(values.roll, values.pitch,

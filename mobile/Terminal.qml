@@ -119,10 +119,54 @@ Item {
                         }
                     }
                     MenuItem {
+                        text: "Disable Motor"
+                        onTriggered: {
+                            motorDisableDialog.open()
+                        }
+                    }
+                    MenuItem {
+                        text: "Enable Motor"
+                        onTriggered: {
+                            mCommands.disableMotor(false)
+                        }
+                    }
+                    MenuItem {
                         text: "Restart LispBM"
                         onTriggered: {
                             mCommands.lispSetRunning(1)
                         }
+                    }
+                }
+
+                Dialog {
+                    id: motorDisableDialog
+                    standardButtons: Dialog.Yes | Dialog.Cancel
+                    modal: true
+                    focus: true
+                    width: parent.width - 20
+                    height: 200
+                    closePolicy: Popup.CloseOnEscape
+                    title: "Disable Motor"
+                    x: 10
+                    y: 10 + parent.height / 2 - height / 2
+                    parent: terminalPageItem
+
+                    Overlay.modal: Rectangle {
+                        color: "#AA000000"
+                    }
+
+                    Text {
+                        color: Utility.getAppHexColor("lightText")
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.fill: parent
+                        wrapMode: Text.WordWrap
+                        text: "This is going to disable the motor until it is enabled again, " +
+                              "even after reboot. The command is ignored while the motor is " +
+                              "spinning. Are you sure?"
+                    }
+
+                    onAccepted: {
+                        mCommands.disableMotor(true)
                     }
                 }
             }

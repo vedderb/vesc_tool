@@ -2379,6 +2379,7 @@ p, li { white-space: pre-wrap; }
             <enumNames>IMU_TYPE_EXTERNAL_ICM20948</enumNames>
             <enumNames>IMU_TYPE_EXTERNAL_BMI160</enumNames>
             <enumNames>IMU_TYPE_EXTERNAL_LSM6DS3</enumNames>
+            <enumNames>IMU_TYPE_EXTERNAL_LSM6DSV32X</enumNames>
         </imu_conf.type>
         <imu_conf.mode>
             <longName>IMU AHRS Mode</longName>

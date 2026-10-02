@@ -36,6 +36,26 @@ If you have custom hardware and you want to add support for it in the official r
 
 **Note:** These instructions build VESC Tool without the BLDC firmwares bundled.
 
+### macOS Beta Build with GitHub Actions
+
+A manual GitHub Actions workflow is available for building an arm64 macOS test build.
+
+1. Open the **Actions** tab in GitHub.
+2. Select the **macOS Beta Build** workflow.
+3. Click **Run workflow**.
+4. Wait for the workflow to finish and download the generated artifact.
+5. Unzip the artifact on a macOS machine to get `VESC Tool.app`.
+
+The workflow is defined in `.github/workflows/macos-beta.yml` and builds the `build_original` variant using the repository default test version.
+
+If macOS blocks the downloaded app because it has the quarantine attribute, remove it with:
+
+```shell
+xattr -dr com.apple.quarantine "VESC Tool.app"
+```
+
+After that, start the app again.
+
 ### Linux
 
 Make sure that the required dependencies are installed. There is some advice in the [build_lin](./build_lin) file's comments. If you have Nix installed see below.

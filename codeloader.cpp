@@ -378,10 +378,11 @@ bool CodeLoader::lispUpload(VByteArray vb)
     data.vbAppendUint16(crc);
     data.append(vb);
 
-    // The ESP32 partition table has 512k space for LispBM scripts. The STM32
+    // Some ESP32s have very large partition sizes. The STM32
     // has one 128k flash page. Subtract 6 bytes for fw size and crc.
+    // TODO: Implement a proper size check.
     auto fwParams = mVesc->getLastFwRxParams();
-    int max_size = 1024 * 512 - 6;
+    int max_size = 1024 * 1024 * 8 - 6;
     if (fwParams.hwType == HW_TYPE_VESC) {
         max_size = 1024 * 128 - 6;
     }

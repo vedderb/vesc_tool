@@ -234,7 +234,8 @@ SOURCES += main.cpp\
     startupwizard.cpp \
     utility.cpp \
     tcpserversimple.cpp \
-    hexfile.cpp
+    hexfile.cpp \
+    virtualvesc.cpp
 
 HEADERS  += mainwindow.h \
     bleuartdummy.h \
@@ -258,7 +259,8 @@ HEADERS  += mainwindow.h \
     startupwizard.h \
     utility.h \
     tcpserversimple.h \
-    hexfile.h
+    hexfile.h \
+    virtualvesc.h
 
 unix: {
 !ios: {

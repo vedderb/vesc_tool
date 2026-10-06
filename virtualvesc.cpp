@@ -213,6 +213,73 @@ void VirtualVesc::processPacket(QByteArray &data)
         sendReply(reply);
     } break;
 
+    case COMM_GET_DECODED_PPM:
+    case COMM_GET_DECODED_ADC:
+    case COMM_GET_DECODED_CHUK: {
+        int fields = id == COMM_GET_DECODED_PPM ? 2 : (id == COMM_GET_DECODED_ADC ? 4 : 1);
+        reply.append(QByteArray(4 * fields, '\0'));
+        sendReply(reply);
+    } break;
+
+    case COMM_GET_IMU_DATA:
+    case COMM_GET_STATS: {
+        // Request has a 16 bit mask, the IMU reply echoes it as 16 bits and
+        // the stats reply as 32 bits.
+        quint16 mask = vb.vbPopFrontUint16();
+        int bits = id == COMM_GET_IMU_DATA ? 16 : 11;
+
+        if (id == COMM_GET_IMU_DATA) {
+            reply.vbAppendUint16(mask);
+        } else {
+            reply.vbAppendUint32(mask);
+        }
+
+        for (int i = 0;i < bits;i++) {
+            if (mask & (1 << i)) {
+                reply.vbAppendDouble32Auto(0.0);
+            }
+        }
+
+        sendReply(reply);
+    } break;
+
+    // There is no motor, so all detections fail. Reply right away with the
+    // failure results of the firmware, so that VESC Tool does not wait for
+    // a timeout.
+    case COMM_DETECT_APPLY_ALL_FOC:
+        reply.vbAppendInt16(-100); // FAULT_CODE_NONE, failed for unknown reason
+        sendReply(reply);
+        break;
+
+    case COMM_DETECT_MOTOR_PARAM:
+        reply.append(QByteArray(4 + 4 + 8 + 1, '\0'));
+        sendReply(reply);
+        break;
+
+    case COMM_DETECT_MOTOR_R_L:
+        reply.append(QByteArray(4 + 4 + 4, '\0'));
+        sendReply(reply);
+        break;
+
+    case COMM_DETECT_MOTOR_FLUX_LINKAGE:
+    case COMM_DETECT_MOTOR_FLUX_LINKAGE_OPENLOOP:
+        reply.append(QByteArray(4, '\0'));
+        sendReply(reply);
+        break;
+
+    case COMM_DETECT_ENCODER:
+        reply.vbAppendDouble32(1001.0, 1e6); // Encoder not enabled
+        reply.vbAppendDouble32(0.0, 1e6);
+        reply.vbAppendInt8(0);
+        sendReply(reply);
+        break;
+
+    case COMM_DETECT_HALL_FOC:
+        reply.append(QByteArray(8, '\0'));
+        reply.vbAppendUint8(1); // Failed
+        sendReply(reply);
+        break;
+
     case COMM_PING_CAN:
         // No other devices on the CAN bus
         sendReply(reply);

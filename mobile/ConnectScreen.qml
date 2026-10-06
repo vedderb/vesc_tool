@@ -254,6 +254,13 @@ Item {
                             }
                         }
                     }
+
+                    MenuItem {
+                        text: "Connect Virtual VESC"
+                        onTriggered: {
+                            VescIf.connectVirtual()
+                        }
+                    }
                 }
             }
 

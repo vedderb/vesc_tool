@@ -754,3 +754,17 @@ void PageConnection::on_hubDefaultButton_clicked()
     ui->tcpHubServerEdit->setText("veschub.vedder.se");
     ui->tcpHubPortBox->setValue(65101);
 }
+
+void PageConnection::on_virtualConnectButton_clicked()
+{
+    if (mVesc) {
+        mVesc->connectVirtual();
+    }
+}
+
+void PageConnection::on_virtualDisconnectButton_clicked()
+{
+    if (mVesc) {
+        mVesc->disconnectPort();
+    }
+}

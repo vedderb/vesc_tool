@@ -81,6 +81,8 @@ private slots:
     void on_tcpHubConnectButton_clicked();
     void on_tcpHubDisconnectButton_clicked();
     void on_hubDefaultButton_clicked();
+    void on_virtualConnectButton_clicked();
+    void on_virtualDisconnectButton_clicked();
 
 private:
     Ui::PageConnection *ui;

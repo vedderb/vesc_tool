@@ -673,6 +673,10 @@
     <addaction name="separator"/>
     <addaction name="actionReboot"/>
     <addaction name="actionShutdown"/>
+    <addaction name="separator"/>
+    <addaction name="actionMotorDisable"/>
+    <addaction name="actionMotorEnable"/>
+    <addaction name="separator"/>
     <addaction name="actionRestartLispBM"/>
    </widget>
    <widget class="QMenu" name="menuCommands">
@@ -769,6 +773,22 @@
    </property>
    <property name="toolTip">
     <string>Shutdown (for controllers with auto-shutdown support only)</string>
+   </property>
+  </action>
+  <action name="actionMotorDisable">
+   <property name="text">
+    <string>Disable Motor</string>
+   </property>
+   <property name="toolTip">
+    <string>Disable the motor persistently (survives reboots). Only works while the motor is stationary.</string>
+   </property>
+  </action>
+  <action name="actionMotorEnable">
+   <property name="text">
+    <string>Enable Motor</string>
+   </property>
+   <property name="toolTip">
+    <string>Re-enable the motor after Disable Motor</string>
    </property>
   </action>
   <action name="actionCanFwd">

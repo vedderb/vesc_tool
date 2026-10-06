@@ -221,6 +221,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mPollManager.setVesc(mVesc);
 
     mStatusInfoTime = 0;
+    mMotorDisabledNow = false;
     mStatusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(mStatusLabel);
     mDebugTimer = new QTimer(this);
@@ -797,8 +798,11 @@ void MainWindow::timerSlot()
         }
     } else {
         QString str = mVesc->getConnectedPortName();
+        if (mMotorDisabledNow && mVesc->isPortConnected()) {
+            str += tr(" | MOTOR DISABLED");
+        }
         if (str != mStatusLabel->text()) {
-            mStatusLabel->setText(mVesc->getConnectedPortName());
+            mStatusLabel->setText(str);
             static QString statusLast = "";
             if (str != statusLast) {
                 mPageDebugPrint->printConsole("Status: " + str + "<br>");
@@ -1076,6 +1080,7 @@ void MainWindow::valuesReceived(MC_VALUES values, unsigned int mask)
     (void)mask;
     ui->dispCurrent->setVal(values.current_motor);
     ui->dispDuty->setVal(values.duty_now * 100.0);
+    mMotorDisabledNow = values.motor_disabled;
 }
 
 void MainWindow::paramChangedDouble(QObject *src, QString name, double newParam)
@@ -1117,6 +1122,25 @@ void MainWindow::on_actionReboot_triggered()
 void MainWindow::on_actionShutdown_triggered()
 {
     mVesc->commands()->shutdown();
+}
+
+void MainWindow::on_actionMotorDisable_triggered()
+{
+    QMessageBox::StandardButton answer = QMessageBox::question(
+                this,
+                tr("Disable Motor"),
+                tr("This will disable the motor until it is enabled again. Continue?"),
+                QMessageBox::Yes | QMessageBox::Cancel
+                );
+
+    if (answer == QMessageBox::Yes) {
+        mVesc->commands()->disableMotor(true);
+    }
+}
+
+void MainWindow::on_actionMotorEnable_triggered()
+{
+    mVesc->commands()->disableMotor(false);
 }
 
 void MainWindow::on_stopButton_clicked()

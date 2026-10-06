@@ -289,7 +289,7 @@ void VirtualVesc::processPacket(QByteArray &data)
     case COMM_TERMINAL_CMD_SYNC: {
         VByteArray print;
         print.vbAppendUint8(COMM_PRINT);
-        print.append("Virtual VESC: the terminal is not available");
+        print.append("Virtual ESC: the terminal is not available");
         sendReply(print);
     } break;
 

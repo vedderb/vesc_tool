@@ -2446,7 +2446,7 @@ QString VescInterface::getConnectedPortName()
     }
 
     if (mVirtualConnected) {
-        res = tr("Connected to Virtual VESC");
+        res = tr("Connected to Virtual ESC");
         connected = true;
     }
 

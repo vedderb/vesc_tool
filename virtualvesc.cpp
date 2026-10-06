@@ -21,8 +21,11 @@
 #include "datatypes.h"
 #include "utility.h"
 
+#include <QDir>
 #include <QDirIterator>
+#include <QFile>
 #include <QFileInfo>
+#include <QStandardPaths>
 #include <QDebug>
 
 namespace {
@@ -58,7 +61,22 @@ VirtualVesc::VirtualVesc(QObject *parent) : QObject(parent)
         emit dataToSend(data);
     });
 
+    // Code is written in many small chunks, so save shortly after the last change
+    mCodeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/virtual_vesc";
+    mSaveTimer = new QTimer(this);
+    mSaveTimer->setSingleShot(true);
+    mSaveTimer->setInterval(1000);
+    connect(mSaveTimer, &QTimer::timeout, this, &VirtualVesc::saveCode);
+
     loadMainConfigs();
+    loadCode();
+}
+
+VirtualVesc::~VirtualVesc()
+{
+    if (mSaveTimer->isActive()) {
+        saveCode();
+    }
 }
 
 void VirtualVesc::processData(const QByteArray &data)
@@ -225,6 +243,7 @@ void VirtualVesc::processPacket(QByteArray &data)
             mLispRunning = false;
             updateCustomConfig();
         }
+        mSaveTimer->start();
         reply.vbAppendUint8(1);
         sendReply(reply);
         break;
@@ -233,6 +252,7 @@ void VirtualVesc::processPacket(QByteArray &data)
     case COMM_LISP_WRITE_CODE: {
         quint32 offset = vb.vbPopFrontUint32();
         bool ok = writeCodeSlot(id == COMM_QMLUI_WRITE ? mQmlSlot : mLispSlot, offset, vb);
+        mSaveTimer->start();
         reply.vbAppendUint8(ok ? 1 : 0);
         reply.vbAppendUint32(offset);
         sendReply(reply);
@@ -380,6 +400,44 @@ void VirtualVesc::updateCustomConfig()
         mCustomConf.loadCompressedParamsXml(mCustomConfXml);
         mCustomConfDefault.loadCompressedParamsXml(mCustomConfXml);
     }
+}
+
+void VirtualVesc::loadCode()
+{
+    QFile lispFile(mCodeDir + "/lisp.bin");
+    if (lispFile.open(QIODevice::ReadOnly)) {
+        mLispSlot = lispFile.readAll();
+    }
+
+    QFile qmlFile(mCodeDir + "/qml.bin");
+    if (qmlFile.open(QIODevice::ReadOnly)) {
+        mQmlSlot = qmlFile.readAll();
+    }
+
+    // Like the firmware, start valid Lisp code on boot
+    mLispRunning = !codeSlotPayload(mLispSlot).isEmpty();
+    updateCustomConfig();
+}
+
+void VirtualVesc::saveCode()
+{
+    QDir().mkpath(mCodeDir);
+
+    auto save = [this](const QString &name, const QByteArray &slot) {
+        QString path = mCodeDir + "/" + name;
+        if (codeSlotPayload(slot).isEmpty()) {
+            QFile::remove(path);
+            return;
+        }
+
+        QFile file(path);
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(slot);
+        }
+    };
+
+    save("lisp.bin", mLispSlot);
+    save("qml.bin", mQmlSlot);
 }
 
 QByteArray VirtualVesc::codeSlotPayload(const QByteArray &slot) const

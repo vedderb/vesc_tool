@@ -178,6 +178,10 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     connect(mUdpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(udpInputError(QAbstractSocket::SocketError)));
 
+    // Virtual VESC, created on first use
+    mVirtualVesc = nullptr;
+    mVirtualConnected = false;
+
     // BLE
 #ifdef HAS_BLUETOOTH
     mBleUart = new BleUart(this);
@@ -2230,6 +2234,10 @@ bool VescInterface::isPortConnected()
         res = true;
     }
 
+    if (mVirtualConnected) {
+        res = true;
+    }
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         res = true;
@@ -2269,6 +2277,12 @@ void VescInterface::disconnectPort()
         updateFwRx(false);
     }
 
+    if (mVirtualConnected) {
+        mVirtualConnected = false;
+        mVirtualVesc->resetState();
+        updateFwRx(false);
+    }
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         mBleUart->disconnectBle();
@@ -2295,6 +2309,9 @@ bool VescInterface::reconnectLastPort()
         return true;
     } else if (mLastConnType == CONN_UDP) {
         connectUdp(mLastUdpServer.toString(), mLastUdpPort);
+        return true;
+    } else if (mLastConnType == CONN_VIRTUAL) {
+        connectVirtual();
         return true;
     } else if (mLastConnType == CONN_BLE) {
 #ifdef HAS_BLUETOOTH
@@ -2425,6 +2442,11 @@ QString VescInterface::getConnectedPortName()
 
     if (mUdpConnected) {
         res = tr("Connected (UDP) to %1:%2").arg(mLastUdpServer.toString()).arg(mLastUdpPort);
+        connected = true;
+    }
+
+    if (mVirtualConnected) {
+        res = tr("Connected to Virtual VESC");
         connected = true;
     }
 
@@ -2720,6 +2742,24 @@ void VescInterface::connectUdp(QString server, int port)
     mLastUdpServer = host;
     mLastUdpPort = port;
     setLastConnectionType(CONN_UDP);
+    updateFwRx(false);
+}
+
+void VescInterface::connectVirtual()
+{
+    if (isPortConnected()) {
+        disconnectPort();
+    }
+
+    if (!mVirtualVesc) {
+        mVirtualVesc = new VirtualVesc(this);
+        // Queued to not re-enter the packet handling from the send path
+        connect(mVirtualVesc, &VirtualVesc::dataToSend,
+                mPacket, &Packet::processData, Qt::QueuedConnection);
+    }
+
+    mVirtualConnected = true;
+    setLastConnectionType(CONN_VIRTUAL);
     updateFwRx(false);
 }
 
@@ -3440,6 +3480,10 @@ void VescInterface::packetDataToSend(QByteArray &data)
 
     if (mUdpConnected) {
         mUdpSocket->writeDatagram(data, mLastUdpServer, mLastUdpPort);
+    }
+
+    if (mVirtualConnected) {
+        mVirtualVesc->processData(data);
     }
 
 #ifdef HAS_BLUETOOTH

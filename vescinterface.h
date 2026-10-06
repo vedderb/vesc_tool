@@ -46,6 +46,7 @@
 #include "packet.h"
 #include "tcpserversimple.h"
 #include "udpserversimple.h"
+#include "virtualvesc.h"
 
 #ifdef HAS_BLUETOOTH
 #include "bleuart.h"
@@ -200,6 +201,7 @@ public:
     Q_INVOKABLE void connectTcpHub(QString server, int port, QString id, QString pass);
     Q_INVOKABLE void connectUdp(QString server, int port);
     Q_INVOKABLE void connectBle(QString address);
+    Q_INVOKABLE void connectVirtual();
     Q_INVOKABLE bool isAutoconnectOngoing() const;
     Q_INVOKABLE double getAutoconnectProgress() const;
     Q_INVOKABLE QVector<int> scanCan();
@@ -351,6 +353,7 @@ private:
         CONN_BLE,
         CONN_UDP,
         CONN_TCP_HUB,
+        CONN_VIRTUAL,
     } conn_t;
 
     QSettings mSettings;
@@ -435,6 +438,9 @@ private:
     bool mUdpConnected;
     QHostAddress mLastUdpServer;
     int mLastUdpPort;
+
+    VirtualVesc *mVirtualVesc;
+    bool mVirtualConnected;
 
 #ifdef HAS_BLUETOOTH
     BleUart *mBleUart;

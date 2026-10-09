@@ -254,6 +254,13 @@ Item {
                             }
                         }
                     }
+
+                    MenuItem {
+                        text: "Connect Virtual ESC"
+                        onTriggered: {
+                            VescIf.connectVirtual()
+                        }
+                    }
                 }
             }
 

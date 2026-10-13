@@ -180,6 +180,16 @@ release_win {
     UI_DIR = build/win/obj
 }
 
+# Executable icon and version info (Properties -> Details) for Windows.
+# qmake generates the resource script from these.
+win32 {
+    RC_ICONS = res/vesc.ico
+    VERSION = $$VT_VERSION
+    QMAKE_TARGET_PRODUCT = "VESC Tool"
+    QMAKE_TARGET_DESCRIPTION = "VESC Tool"
+    QMAKE_TARGET_COPYRIGHT = "Copyright (C) 2016 - 2026 Benjamin Vedder"
+}
+
 release_lin {
     # http://micro.nicholaswilson.me.uk/post/31855915892/rules-of-static-linking-libstdc-libc-libgcc
     # http://insanecoding.blogspot.se/2012/07/creating-portable-linux-binaries.html

@@ -3558,14 +3558,14 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     }
 #endif
 
-    auto fwPairs = getSupportedFirmwarePairs();
+    auto fwPairsLatest = getSupportedFirmwarePairs();
 
-    if (fwPairs.isEmpty()) {
+    if (fwPairsLatest.isEmpty()) {
         Utility::configLoadLatest(this);
-        fwPairs = getSupportedFirmwarePairs();
+        fwPairsLatest = getSupportedFirmwarePairs();
     }
 
-    if (fwPairs.isEmpty()) {
+    if (fwPairsLatest.isEmpty()) {
         emit messageDialog(tr("No Supported Firmwares"),
                            tr("This version of VESC Tool does not seem to have any supported "
                               "firmwares. Something is probably wrong with the motor configuration "
@@ -3788,12 +3788,16 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         mFwSupportsConfiguration = true;
     }
 
-    if (!fwPairs.contains(fw_connected)) {
-        Utility::configLoad(this, fw_connected.first, fw_connected.second);
-        fwPairs = getSupportedFirmwarePairs();
-    }
+    QPair<int, int> highest_supported = *std::max_element(fwPairsLatest.begin(), fwPairsLatest.end());
 
-    QPair<int, int> highest_supported = *std::max_element(fwPairs.begin(), fwPairs.end());
+    if (!fwPairsLatest.contains(fw_connected)) {
+        Utility::configLoad(this, fw_connected.first, fw_connected.second);
+
+        if (fw_connected > highest_supported) {
+            highest_supported = fw_connected;
+            fwPairsLatest = getSupportedFirmwarePairs();
+        }
+    }
 
     // Hack for old unity devices with a firmware fork
     if ((fw_connected >= qMakePair(3, 100) && fw_connected <= qMakePair(3, 103)) ||
@@ -3822,7 +3826,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                                                 "the connected device can be downgraded in the firmware page. "
                                                 "Until then, limited communication mode will be used."), false, false);
         }
-    } else if (!fwPairs.contains(fw_connected)) {
+    } else if (!fwPairsLatest.contains(fw_connected)) {
         if (fw_connected >= qMakePair(1, 1)) {
             mCommands->setLimitedMode(true);
             updateFwRx(true);

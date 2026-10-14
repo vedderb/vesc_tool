@@ -3347,10 +3347,6 @@ void VescInterface::timerSlot()
         mWasConnected = isPortConnected();
 
         if (!isPortConnected()) {
-            if (!getSupportedFirmwarePairs().contains(Utility::configLatestSupported())) {
-                Utility::configLoadLatest(this);
-            }
-
             mDeserialFailedMessageShown = false;
             mPacket->resetState();
             mFwSwapDone = false;
@@ -3564,8 +3560,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
     auto fwPairs = getSupportedFirmwarePairs();
 
-    // Make sure that we start from the latest firmware
-    if (!fwPairs.contains(Utility::configLatestSupported())) {
+    if (fwPairs.isEmpty()) {
         Utility::configLoadLatest(this);
         fwPairs = getSupportedFirmwarePairs();
     }
@@ -3582,7 +3577,6 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         return;
     }
 
-    QPair<int, int> highest_supported = *std::max_element(fwPairs.begin(), fwPairs.end());
     QPair<int, int> fw_connected = qMakePair(params.major, params.minor);
 
     mCommands->setLimitedSupportsFwdAllCan(fw_connected >= qMakePair(3, 45));
@@ -3783,8 +3777,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_LOG_DATA_F64));
     }
 
-    if (params.hwType == HW_TYPE_VESC &&
-            (fwPairs.contains(fw_connected) || Utility::configSupportedFws().contains(fw_connected))) {
+    if (params.hwType == HW_TYPE_VESC && Utility::configSupportedFws().contains(fw_connected)) {
         compCommands.append(int(COMM_SET_MCCONF));
         compCommands.append(int(COMM_GET_MCCONF));
         compCommands.append(int(COMM_GET_MCCONF_DEFAULT));
@@ -3792,16 +3785,15 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         compCommands.append(int(COMM_GET_APPCONF));
         compCommands.append(int(COMM_GET_APPCONF_DEFAULT));
 
-        if (!fwPairs.contains(fw_connected)) {
-            Utility::configLoad(this, fw_connected.first, fw_connected.second);
-        }
-
         mFwSupportsConfiguration = true;
     }
 
-    // Only store the config version if the loaded firmware is the latest one. This will
-    // give a warning when that config is loaded with a new firmware version.
-    mMcConfig->setStoreConfigVersion(Utility::configLatestSupported() == fw_connected);
+    if (!fwPairs.contains(fw_connected)) {
+        Utility::configLoad(this, fw_connected.first, fw_connected.second);
+        fwPairs = getSupportedFirmwarePairs();
+    }
+
+    QPair<int, int> highest_supported = *std::max_element(fwPairs.begin(), fwPairs.end());
 
     // Hack for old unity devices with a firmware fork
     if ((fw_connected >= qMakePair(3, 100) && fw_connected <= qMakePair(3, 103)) ||
@@ -4200,6 +4192,22 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     }
 
     for (int i = 0;i < mCustomConfigs.size();i++) {
+        auto confCacheDir = appDataLoc + "/conf_cache/" + Utility::uuid2Str(params.uuid, false);
+        QDir().mkpath(confCacheDir);
+
+        auto confPath = confCacheDir + "/custom_" + QString::number(i) + ".xml";
+
+        if (QFileInfo::exists(confPath)) {
+            if (mCustomConfigs.at(i)->loadXml(confPath, "CustomConfiguration")) {
+                statusMessage("Loaded Cached Custom Config", true);
+            }
+        }
+
+        connect(mCustomConfigs.at(i), &ConfigParams::updated,
+                [confPath, i, this]() {
+                    mCustomConfigs.at(i)->saveXml(confPath, "CustomConfiguration");
+                });
+
         commands()->customConfigGet(i, false);
     }
 
@@ -4210,11 +4218,23 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 void VescInterface::appconfUpdated()
 {
     emit statusMessage(tr("App config updated"), true);
+
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto confCacheDir = appDataLoc + "/conf_cache/" + Utility::uuid2Str(mLastFwParams.uuid, false);
+    QDir().mkpath(confCacheDir);
+    auto confPath = confCacheDir + "/appconf.xml";
+    mAppConfig->saveXml(confPath, "APPConfiguration");
 }
 
 void VescInterface::mcconfUpdated()
 {
     emit statusMessage(tr("Motor config updated"), true);
+
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto confCacheDir = appDataLoc + "/conf_cache/" + Utility::uuid2Str(mLastFwParams.uuid, false);
+    QDir().mkpath(confCacheDir);
+    auto confPath = confCacheDir + "/mcconf.xml";
+    mMcConfig->saveXml(confPath, "MCConfiguration");
 
     if (isPortConnected() && fwRx()) {
         QPair<int, int> fw_connected = qMakePair(mLastFwParams.major, mLastFwParams.minor);
@@ -4890,6 +4910,27 @@ QString VescInterface::confBackupName(QString uuid)
     return res;
 }
 
+bool VescInterface::loadCachedConfigs()
+{
+    if (!fwRx()) {
+        return false;
+    }
+
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto confCacheDir = appDataLoc + "/conf_cache/" + Utility::uuid2Str(mLastFwParams.uuid, false);
+    auto confPathMc = confCacheDir + "/mcconf.xml";
+    auto confPathApp = confCacheDir + "/appconf.xml";
+
+    bool res1 = mMcConfig->loadXml(confPathMc, "MCConfiguration");
+    bool res2 = mAppConfig->loadXml(confPathApp, "APPConfiguration");
+
+    if (res1 && res2) {
+        emitStatusMessage("Loaded Cached McConf and AppConf", true);
+    }
+
+    return res1 && res2;
+}
+
 bool VescInterface::deserializeFailedSinceConnected()
 {
     return mDeserialFailedMessageShown;
@@ -4953,6 +4994,10 @@ void VescInterface::updateFwRx(bool fwRx)
     bool change = mFwVersionReceived != fwRx;
     mFwVersionReceived = fwRx;
     if (change) {
+        if (mFwVersionReceived) {
+            loadCachedConfigs();
+        }
+
         emit fwRxChanged(mFwVersionReceived, mCommands->isLimitedMode());
     }
 

@@ -37,8 +37,7 @@ ConfigParams::ConfigParams(QObject *parent) : QObject(parent)
     mUpdateOnlyName.clear();
     mXmlStatus = tr("OK");
     mUpdatesEnabled = true;
-    mConfigVersion = -1;
-    mStoreConfigVersion = true;
+    mConfigVersion = VT_CONFIG_VERSION;
     mUpdateCnt = 0;
 }
 
@@ -957,16 +956,6 @@ bool ConfigParams::testXml(QString fileName, QString configName)
     return res;
 }
 
-bool ConfigParams::getStoreConfigVersion() const
-{
-    return mStoreConfigVersion;
-}
-
-void ConfigParams::setStoreConfigVersion(bool storeConfigVersion)
-{
-    mStoreConfigVersion = storeConfigVersion;
-}
-
 int ConfigParams::getConfigVersion() const
 {
     return mConfigVersion;
@@ -1025,9 +1014,7 @@ void ConfigParams::getXML(QXmlStreamWriter &stream, QString configName)
     stream.writeStartDocument();
     stream.writeStartElement(configName);
 
-    if (mStoreConfigVersion) {
-        stream.writeTextElement("ConfigVersion", QString::number(VT_CONFIG_VERSION));
-    }
+    stream.writeTextElement("ConfigVersion", QString::number(VT_CONFIG_VERSION));
 
     for (QString s: mParamList) {
         const ConfigParam p = mParams[s];

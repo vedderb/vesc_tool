@@ -236,6 +236,8 @@ public:
     Q_INVOKABLE void confClearBackups();
     Q_INVOKABLE QString confBackupName(QString uuid);
 
+    Q_INVOKABLE bool loadCachedConfigs();
+
     Q_INVOKABLE bool deserializeFailedSinceConnected();
 
     Q_INVOKABLE FW_RX_PARAMS getLastFwRxParams();

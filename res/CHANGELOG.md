@@ -3,6 +3,8 @@
 * Added filter box to package store.
 * Poll manager for more stable comminucation while polling.
 * Improved motor and app config write reliability.
+* Less UI reloads when working with old firmware.
+* Config caching to reduce the probability of accidently writing the default config.
 
 ### 7.00
 #### 2026-05-15

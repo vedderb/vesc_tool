@@ -180,7 +180,6 @@ private:
     QString mXmlStatus;
     QList<QPair<QString, QList<QPair<QString, QStringList>>>> mParamGrouping;
     int mConfigVersion;
-    bool mStoreConfigVersion;
     int mUpdateCnt;
 
     bool almostEqual(float A, float B, float eps);

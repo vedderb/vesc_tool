@@ -204,6 +204,7 @@ public slots:
     void detectMotorParam(double current, double min_rpm, double low_duty);
     void reboot();
     void shutdown();
+    void disableMotor(bool disable);
     void sendAlive();
     void getDecodedPpm();
     void getDecodedAdc();

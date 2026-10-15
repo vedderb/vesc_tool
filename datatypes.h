@@ -188,6 +188,7 @@ struct MC_VALUES {
     Q_PROPERTY(double vq MEMBER vq)
     Q_PROPERTY(bool has_timeout MEMBER has_timeout)
     Q_PROPERTY(bool kill_sw_active MEMBER kill_sw_active)
+    Q_PROPERTY(bool motor_disabled MEMBER motor_disabled)
 
 public:
     MC_VALUES() {
@@ -216,6 +217,7 @@ public:
         vq = 0.0;
         has_timeout = false;
         kill_sw_active = false;
+        motor_disabled = false;
     }
 
     bool operator==(const MC_VALUES &other) const {
@@ -254,6 +256,7 @@ public:
     double vq;
     bool has_timeout;
     bool kill_sw_active;
+    bool motor_disabled;
 };
 
 Q_DECLARE_METATYPE(MC_VALUES)
@@ -1038,6 +1041,8 @@ typedef enum {
     COMM_CAN_UPDATE_BAUD_ALL				= 158,
 
     COMM_MOTOR_ESTOP						= 159,
+
+    COMM_DISABLE							= 160,
 } COMM_PACKET_ID;
 
 // CAN commands

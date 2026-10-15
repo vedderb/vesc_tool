@@ -69,6 +69,7 @@
 <section name="Global">
 <name>little-endian</name>
 <name>big-endian</name>
+<name>dbc</name>
 <name>pin-mode-out</name>
 <name>pin-mode-od</name>
 <name>pin-mode-od-pu</name>

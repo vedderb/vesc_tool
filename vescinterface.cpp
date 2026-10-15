@@ -4920,10 +4920,18 @@ bool VescInterface::loadCachedConfigs()
         return false;
     }
 
+    if (mLastFwParams.hwType != HW_TYPE_VESC) {
+        return false;
+    }
+
     QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     auto confCacheDir = appDataLoc + "/conf_cache/" + Utility::uuid2Str(mLastFwParams.uuid, false);
     auto confPathMc = confCacheDir + "/mcconf.xml";
     auto confPathApp = confCacheDir + "/appconf.xml";
+
+    if (!QFileInfo::exists(confPathMc) || !QFileInfo::exists(confPathApp)) {
+        return false;
+    }
 
     bool res1 = mMcConfig->loadXml(confPathMc, "MCConfiguration");
     bool res2 = mAppConfig->loadXml(confPathApp, "APPConfiguration");

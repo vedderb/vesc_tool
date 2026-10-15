@@ -450,6 +450,12 @@
 <name>bufget-u24</name>
 <name>bufget-u32</name>
 <name>bufget-f32</name>
+<name>bufset-bits-u</name>
+<name>bufget-bits-i</name>
+<name>bufset-bits-u</name>
+<name>bufget-bits-i</name>
+<name>bufset-bits-f32</name>
+<name>bufget-bits-f32</name>
 <name>buflen</name>
 <name>bufclear</name>
 <name>bufcpy</name>

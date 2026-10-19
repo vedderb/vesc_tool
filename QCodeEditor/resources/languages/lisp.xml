@@ -616,5 +616,8 @@
 <name>mutex-unlock</name>
 <name>cmds-start-stop</name>
 <name>cmds-proc</name>
+<name>pkt-enc</name>
+<name>pkt-dec-alloc</name>
+<name>pkt-dec</name>
 </section>
 </root>

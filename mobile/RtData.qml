@@ -226,7 +226,8 @@ Item {
                     "Wh Draw    : " + parseFloat(values.watt_hours).toFixed(2) + " Wh\n" +
                     "Wh Charge  : " + parseFloat(values.watt_hours_charged).toFixed(2) + " Wh\n" +
                     "ABS Tacho  : " + values.tachometer_abs + " Counts\n" +
-                    "Fault      : " + values.fault_str
+                    "Fault      : " + values.fault_str +
+                    (values.motor_disabled ? "\nDisabled   : TRUE" : "")
         }
     }
 }

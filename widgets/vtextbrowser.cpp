@@ -21,10 +21,14 @@
 #include <QDesktopServices>
 #include <QMouseEvent>
 #include <QScrollBar>
+#include <QTextDocument>
 
 VTextBrowser::VTextBrowser(QWidget *parent)
     : QTextEdit(parent)
 {
+    mConsoleTimer.setInterval(50);
+    mConsoleTimer.setSingleShot(true);
+    connect(&mConsoleTimer, &QTimer::timeout, this, &VTextBrowser::flushConsole);
     setReadOnly(true);
     setTextInteractionFlags(Qt::TextSelectableByMouse |
                             Qt::LinksAccessibleByMouse |
@@ -77,4 +81,77 @@ void VTextBrowser::trimKeepingLastLines(int maxAmount)
         int scroll_max_delta = scroll_max_before - verticalScrollBar()->maximum();
         verticalScrollBar()->setValue(scroll_before - scroll_max_delta);        
     }
+}
+
+void VTextBrowser::setConsoleMaxBlocks(int blocks)
+{
+    setUndoRedoEnabled(false);
+    document()->setMaximumBlockCount(qMax(1, blocks));
+}
+
+void VTextBrowser::queueConsoleText(const QString &text, bool html)
+{
+    if (document()->maximumBlockCount() == 0) {
+        setConsoleMaxBlocks(5000);
+    }
+    // Drop whole messages when the display cannot keep up.
+    const int maxPendingChars = 16384;
+    if (text.size() > maxPendingChars ||
+            mConsolePendingChars + text.size() > maxPendingChars ||
+            mConsolePending.size() >= 256) {
+        ++mConsoleDropped;
+    } else {
+        mConsolePending.append({text, html});
+        mConsolePendingChars += text.size();
+    }
+    if (!mConsoleTimer.isActive()) {
+        mConsoleTimer.start();
+    }
+}
+
+void VTextBrowser::clear()
+{
+    mConsoleTimer.stop();
+    mConsolePending.clear();
+    mConsolePendingChars = 0;
+    mConsoleDropped = 0;
+    QTextEdit::clear();
+}
+
+void VTextBrowser::flushConsole()
+{
+    QVector<ConsoleChunk> pending;
+    pending.swap(mConsolePending);
+    mConsolePendingChars = 0;
+    const auto dropped = mConsoleDropped;
+    mConsoleDropped = 0;
+    doAtEndWithScroll([&](QTextCursor cursor) {
+        cursor.beginEditBlock();
+        QString plain;
+        for (const auto &chunk : pending) {
+            if (chunk.html) {
+                if (!plain.isEmpty()) {
+                    cursor.insertText(plain);
+                    plain.clear();
+                }
+                cursor.insertHtml(chunk.text);
+            } else {
+                plain += chunk.text;
+            }
+        }
+        cursor.insertText(plain);
+        if (dropped) {
+            cursor.insertText(QString("\n[Console overloaded: %1 messages omitted]\n").arg(dropped));
+        }
+        // Block limits alone do not bound output without newlines (including <br>).
+        const int maxDocumentChars = 262144;
+        if (document()->characterCount() > maxDocumentChars) {
+            QTextCursor trim(document());
+            trim.setPosition(0);
+            trim.setPosition(document()->characterCount() - maxDocumentChars,
+                             QTextCursor::KeepAnchor);
+            trim.removeSelectedText();
+        }
+        cursor.endEditBlock();
+    });
 }

@@ -72,9 +72,11 @@ public:
 
 QMutex myDebugMsgMutex;
 QVector<DebugMsg> myDebugMsgs;
+quint64 myDebugMsgsDropped = 0;
 
-void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &message)
 {
+    const QString msg = message.left(16384);
     QByteArray localMsg = msg.toLocal8Bit();
     QString str;
     QString typeStr;
@@ -105,7 +107,12 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
     {
         QMutexLocker locker(&myDebugMsgMutex);
-        myDebugMsgs.append(dmsg);
+        // Bound the producer queue too: QML can log faster than the GUI timer.
+        if (myDebugMsgs.size() < 256) {
+            myDebugMsgs.append(dmsg);
+        } else {
+            ++myDebugMsgsDropped;
+        }
     }
 
     printf("%s\n", str.toLocal8Bit().data());
@@ -764,11 +771,23 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::timerSlotDebugMsg()
 {
-    QMutexLocker locker(&myDebugMsgMutex);
+    QVector<DebugMsg> messages;
+    quint64 dropped;
+    {
+        QMutexLocker locker(&myDebugMsgMutex);
+        messages.swap(myDebugMsgs);
+        dropped = myDebugMsgsDropped;
+        myDebugMsgsDropped = 0;
+    }
 
-    while (!myDebugMsgs.isEmpty()) {
-        auto msg = myDebugMsgs.first();
-        myDebugMsgs.removeFirst();
+    if (dropped) {
+        const auto notice = QString("Qt console overloaded: %1 messages omitted").arg(dropped);
+        mPageDebugPrint->printConsole(notice + "<br>");
+        mPageScripting->debugMsgRx(QtWarningMsg, notice);
+    }
+
+    // Never hold the producer mutex while touching Qt widgets.
+    for (const auto &msg : messages) {
 
         if (msg.file.contains("qrc:/res/qml/myCode") ||
                 msg.file.contains("qrc:/res/qml/DynamicLoader") ||

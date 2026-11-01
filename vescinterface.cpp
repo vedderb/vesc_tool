@@ -31,6 +31,7 @@
 #include "lzokay/lzokay.hpp"
 #include "vescinterface.h"
 #include "utility.h"
+#include "qmluicache.h"
 #include "heatshrink/heatshrinkif.h"
 
 #ifdef HAS_SERIALPORT
@@ -4031,167 +4032,9 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         mCustomConfigsLoaded = readConfigsOk;
     }
 
-    // Read qmlui HW
-    if (mLoadQmlUiOnConnect && params.hasQmlHw) {
-        bool cacheLoadOk = false;
-
-        QString confCacheFile;
-        if (!confCacheDir.isEmpty()) {
-            confCacheFile = confCacheDir + "/qml_hw.bin";
-        }
-
-        if (!confCacheFile.isEmpty()) {
-            QFile f(confCacheFile);
-            if (f.exists() && f.open(QIODevice::ReadOnly)) {
-                auto qmlData = f.readAll();
-                f.close();
-
-                mQmlHw = QString::fromUtf8(qUncompress(qmlData));
-                mQmlHwLoaded = true;
-                emitStatusMessage("Got cached qmlui HW", true);
-                cacheLoadOk = true;
-            }
-        }
-
-        if (!cacheLoadOk) {
-            QByteArray qmlData;
-            int lenQmlLast = -1;
-            auto conn = connect(mCommands, &Commands::qmluiHwRx,
-                                [&](int lenQml, int ofsQml, QByteArray data) {
-                if (qmlData.size() <= ofsQml) {
-                    qmlData.append(data);
-                }
-                lenQmlLast = lenQml;
-            });
-
-            auto getQmlChunk = [&](int size, int offset, int tries, int timeout) {
-                bool res = false;
-
-                for (int j = 0;j < tries;j++) {
-                    mCommands->qmlUiHwGet(size, offset);
-                    res = Utility::waitSignal(mCommands, SIGNAL(qmluiHwRx(int,int,QByteArray)), timeout);
-                    if (res) {
-                        break;
-                    }
-                }
-                return res;
-            };
-
-            if (getQmlChunk(10, 0, 5, 1500)) {
-                while (qmlData.size() < lenQmlLast) {
-                    int dataLeft = lenQmlLast - qmlData.size();
-                    if (!getQmlChunk(dataLeft > 400 ? 400 : dataLeft, qmlData.size(), 5, 1500)) {
-                        break;
-                    }
-                }
-
-                if (qmlData.size() == lenQmlLast) {
-                    mQmlHw = QString::fromUtf8(qUncompress(qmlData));
-                    mQmlHwLoaded = true;
-                    emitStatusMessage("Got qmlui HW", true);
-
-                    if (!confCacheFile.isEmpty()) {
-                        QFile f(confCacheFile);
-                        if (f.open(QIODevice::WriteOnly)) {
-                            f.write(qmlData);
-                            f.close();
-                            emitStatusMessage(QString("Cached %1").arg(confCacheFile), true);
-                        }
-                    }
-                } else {
-                    mQmlHwLoaded = false;
-                    emitMessageDialog("Get qmlui HW",
-                                      "Could not read qmlui HW from hardware",
-                                      false, false);
-                    disconnect(conn);
-                }
-            }
-
-            disconnect(conn);
-        }
-    }
-
-    // Read qmlui APP
-    if (mLoadQmlUiOnConnect && params.hasQmlApp) {
-        bool cacheLoadOk = false;
-
-        QString confCacheFile;
-        if (!confCacheDir.isEmpty()) {
-            confCacheFile = confCacheDir + "/qml_app.bin";
-        }
-
-        if (!confCacheFile.isEmpty()) {
-            QFile f(confCacheFile);
-            if (f.exists() && f.open(QIODevice::ReadOnly)) {
-                auto qmlData = f.readAll();
-                f.close();
-
-                mQmlApp = QString::fromUtf8(qUncompress(qmlData));
-                mQmlAppLoaded = true;
-                emitStatusMessage("Got cached qmlui App", true);
-                cacheLoadOk = true;
-            }
-        }
-
-        if (!cacheLoadOk) {
-            QByteArray qmlData;
-            int lenQmlLast = -1;
-            auto conn = connect(mCommands, &Commands::qmluiAppRx,
-                                [&](int lenQml, int ofsQml, QByteArray data) {
-                if (qmlData.size() <= ofsQml) {
-                    qmlData.append(data);
-                }
-                lenQmlLast = lenQml;
-            });
-
-            auto getQmlChunk = [&](int size, int offset, int tries, int timeout) {
-                bool res = false;
-
-                for (int j = 0;j < tries;j++) {
-                    mCommands->qmlUiAppGet(size, offset);
-                    res = Utility::waitSignal(mCommands, SIGNAL(qmluiAppRx(int,int,QByteArray)), timeout);
-                    if (res) {
-                        break;
-                    }
-                }
-                return res;
-            };
-
-            if (getQmlChunk(10, 0, 5, 1500)) {
-                while (qmlData.size() < lenQmlLast) {
-                    int dataLeft = lenQmlLast - qmlData.size();
-                    if (!getQmlChunk(dataLeft > 400 ? 400 : dataLeft, qmlData.size(), 5, 1500)) {
-                        break;
-                    }
-                }
-
-                if (qmlData.size() == lenQmlLast) {
-                    mQmlApp = QString::fromUtf8(qUncompress(qmlData));
-                    mQmlAppLoaded = true;
-                    emitStatusMessage("Got qmlui App", true);
-
-                    if (!confCacheFile.isEmpty()) {
-                        QFile f(confCacheFile);
-                        if (f.open(QIODevice::WriteOnly)) {
-                            f.write(qmlData);
-                            f.close();
-                            emitStatusMessage(QString("Cached %1").arg(confCacheFile), true);
-                        }
-                    }
-                } else {
-                    mQmlAppLoaded = false;
-                    emitMessageDialog("Get qmlui App",
-                                      "Could not read qmlui App from hardware",
-                                      false, false);
-                    disconnect(conn);
-                }
-            }
-
-            disconnect(conn);
-        }
-    }
-
-    if (params.hasQmlApp || params.hasQmlHw) {
+    if (mLoadQmlUiOnConnect) {
+        loadQmlUiFromFw(params, confCacheDir);
+    } else if (params.hasQmlApp || params.hasQmlHw) {
         emit qmlLoadDone();
     }
 
@@ -4219,6 +4062,152 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     emit customConfigLoadDone();
 }
 
+bool VescInterface::loadQmlBlobFromFw(bool isApp, const QString &cacheFile)
+{
+    QString &target = isApp ? mQmlApp : mQmlHw;
+    bool &loadedFlag = isApp ? mQmlAppLoaded : mQmlHwLoaded;
+    const QString label = isApp ? "qmlui App" : "qmlui HW";
+
+    loadedFlag = false;
+    target.clear();
+
+    auto decodeQml = [isApp](const QByteArray &data) {
+#ifdef USE_MOBILE
+        const QString base = "qrc:/mobile/";
+#else
+        const QString base = "qrc:/res/qml/";
+#endif
+        return QmlUiCache::decode(data, QUrl(base + (isApp ? "AppUi" : "HwUi")));
+    };
+
+    if (!cacheFile.isEmpty()) {
+        QFile f(cacheFile);
+        if (f.exists() && f.open(QIODevice::ReadOnly)) {
+            auto qmlData = f.readAll();
+            f.close();
+            QString qml = decodeQml(qmlData);
+            if (!qml.trimmed().isEmpty()) {
+                target = qml;
+                loadedFlag = true;
+                emitStatusMessage(QString("Got cached %1").arg(label), true);
+                return true;
+            }
+
+            // Remove invalid cached data so it can be replaced from the device.
+            QFile::remove(cacheFile);
+            emitStatusMessage(QString("Invalid cached %1, reading from hardware").arg(label), false);
+        }
+    }
+
+    QByteArray qmlData;
+    int lenQmlLast = -1;
+    QMetaObject::Connection conn;
+    if (isApp) {
+        conn = connect(mCommands, &Commands::qmluiAppRx,
+                       [&](int lenQml, int ofsQml, QByteArray data) {
+            if (ofsQml == qmlData.size() && lenQml > 0
+                    && !data.isEmpty() && data.size() <= lenQml - ofsQml
+                    && (lenQmlLast < 0 || lenQmlLast == lenQml)) {
+                qmlData.append(data);
+                lenQmlLast = lenQml;
+            }
+        });
+    } else {
+        conn = connect(mCommands, &Commands::qmluiHwRx,
+                       [&](int lenQml, int ofsQml, QByteArray data) {
+            if (ofsQml == qmlData.size() && lenQml > 0
+                    && !data.isEmpty() && data.size() <= lenQml - ofsQml
+                    && (lenQmlLast < 0 || lenQmlLast == lenQml)) {
+                qmlData.append(data);
+                lenQmlLast = lenQml;
+            }
+        });
+    }
+
+    auto getQmlChunk = [&](int size, int offset, int tries, int timeout) {
+        bool res = false;
+        for (int j = 0;j < tries;j++) {
+            int previousSize = qmlData.size();
+            if (isApp) {
+                mCommands->qmlUiAppGet(size, offset);
+                res = Utility::waitSignal(mCommands, SIGNAL(qmluiAppRx(int,int,QByteArray)), timeout);
+            } else {
+                mCommands->qmlUiHwGet(size, offset);
+                res = Utility::waitSignal(mCommands, SIGNAL(qmluiHwRx(int,int,QByteArray)), timeout);
+            }
+            res = res && qmlData.size() > previousSize;
+            if (res) {
+                break;
+            }
+        }
+        return res;
+    };
+
+    const int fetchAttempts = 3;
+    for (int attempt = 0; attempt < fetchAttempts && !loadedFlag; attempt++) {
+        qmlData.clear();
+        lenQmlLast = -1;
+
+        if (!getQmlChunk(10, 0, 5, 1500)) {
+            continue; // header read failed, retry the whole fetch
+        }
+
+        while (qmlData.size() < lenQmlLast) {
+            int dataLeft = lenQmlLast - qmlData.size();
+            if (!getQmlChunk(dataLeft > 400 ? 400 : dataLeft, qmlData.size(), 5, 1500)) {
+                break;
+            }
+        }
+
+        if (qmlData.size() == lenQmlLast) {
+            QString qml = decodeQml(qmlData);
+            if (qml.trimmed().isEmpty()) {
+                continue;
+            }
+
+            target = qml;
+            loadedFlag = true;
+            emitStatusMessage(QString("Got %1").arg(label), true);
+
+            if (!cacheFile.isEmpty()) {
+                if (!QmlUiCache::store(cacheFile, qmlData)) {
+                    emitStatusMessage(QString("Could not cache %1").arg(label), false);
+                }
+            }
+        }
+    }
+
+    disconnect(conn);
+
+    if (!loadedFlag) {
+        emitMessageDialog(QString("Get %1").arg(label),
+                          "Could not read a valid, non-empty QML UI from the hardware after several attempts. "
+                          "Check the connection and that the UI is installed on the VESC, then "
+                          "disconnect and reconnect to try again.",
+                          false, false);
+    }
+
+    return loadedFlag;
+}
+
+void VescInterface::loadQmlUiFromFw(FW_RX_PARAMS params, const QString &confCacheDir)
+{
+    if (params.hasQmlHw) {
+        QString cacheFile = confCacheDir.isEmpty() ? QString() : confCacheDir + "/qml_hw.bin";
+        loadQmlBlobFromFw(false, cacheFile);
+    }
+
+    if (params.hasQmlApp) {
+        QString cacheFile = confCacheDir.isEmpty() ? QString() : confCacheDir + "/qml_app.bin";
+        loadQmlBlobFromFw(true, cacheFile);
+    }
+
+    if (params.hasQmlApp || params.hasQmlHw) {
+        emit qmlLoadDone();
+    }
+}
+
+// Replace custom config definitions, retrying failed downloads.
 void VescInterface::appconfUpdated()
 {
     emit statusMessage(tr("App config updated"), true);

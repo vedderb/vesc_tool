@@ -129,6 +129,11 @@ protected:
     void resizeEvent(QResizeEvent* e) override;
 
     /**
+     * @brief Method, that's called when the widget is shown.
+     */
+    void showEvent(QShowEvent* e) override;
+
+    /**
      * @brief Method, that's called on any key press, posted
      * into code editor widget. This method is overloaded for:
      *

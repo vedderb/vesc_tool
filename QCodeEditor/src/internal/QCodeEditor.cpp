@@ -151,6 +151,12 @@ void QCodeEditor::resizeEvent(QResizeEvent* e)
     updateLineGeometry();
 }
 
+void QCodeEditor::showEvent(QShowEvent* e)
+{
+    QTextEdit::showEvent(e);
+    updateExtraSelection();
+}
+
 void QCodeEditor::updateLineGeometry()
 {
     QRect cr = contentsRect();
@@ -192,7 +198,10 @@ void QCodeEditor::updateExtraSelection()
     highlightCurrentLine(extra);
     highlightParenthesis(extra, false);
 
-    setExtraSelections(extra);
+    // Applying selections forces text layout, even while restoring a hidden editor.
+    if (isVisible()) {
+        setExtraSelections(extra);
+    }
 }
 
 void QCodeEditor::highlightParenthesis(

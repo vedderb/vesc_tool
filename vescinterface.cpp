@@ -66,6 +66,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     // Compatible firmwares
     mFwVersionReceived = false;
+    mNoSupportedFwMessageShown = false;
     mFwRetries = 0;
     mFwPollCnt = 0;
     mFwTxt = "x.x";
@@ -3566,16 +3567,31 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     }
 
     if (fwPairsLatest.isEmpty()) {
-        emit messageDialog(tr("No Supported Firmwares"),
-                           tr("This version of VESC Tool does not seem to have any supported "
-                              "firmwares. Something is probably wrong with the motor configuration "
-                              "file."),
-                           false, false);
+        // Suppress repeated dialogs during automatic reconnect attempts.
+        if (!mNoSupportedFwMessageShown) {
+            mNoSupportedFwMessageShown = true;
+            emit messageDialog(tr("No Supported Firmwares"),
+                               tr("No configuration could be loaded for the connected firmware "
+                                  "(version %1.%2), so this VESC cannot be configured.\n\n"
+                                  "The most common cause is that the firmware/configuration files "
+                                  "for this version have not been downloaded yet, or the downloaded "
+                                  "set is out of date. On the Firmware page, use \"Download Latest\" "
+                                  "to fetch the current firmware and configuration files. If you "
+                                  "previously downloaded configurations, removing them will fall "
+                                  "back to the ones bundled with this VESC Tool build.\n\n"
+                                  "If this keeps happening after downloading, the configuration "
+                                  "files for this VESC Tool build are missing or corrupt.")
+                               .arg(params.major).arg(params.minor),
+                               false, false);
+        }
         updateFwRx(false);
         mFwRetries = 0;
         disconnectPort();
         return;
     }
+
+    // Supported versions are available again; allow future error dialogs.
+    mNoSupportedFwMessageShown = false;
 
     QPair<int, int> fw_connected = qMakePair(params.major, params.minor);
 

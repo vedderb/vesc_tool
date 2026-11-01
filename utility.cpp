@@ -1770,20 +1770,22 @@ double Utility::distLlhToLlh(double lat, double lon, double height,
 
 bool Utility::configCheckCompatibility(int fwMajor, int fwMinor)
 {
-    QDirIterator it(Utility::configPath(""));
+    foreach (const QString &root, configRoots()) {
+        QDirIterator it(root);
 
-    while (it.hasNext()) {
-        QFileInfo fi(it.next());
-        QStringList names = fi.fileName().split("_o_");
+        while (it.hasNext()) {
+            QFileInfo fi(it.next());
+            QStringList names = fi.fileName().split("_o_");
 
-        if (fi.isDir()) {
-            foreach (auto name, names) {
-                auto parts = name.split(".");
-                if (parts.size() == 2) {
-                    int major = parts.at(0).toInt();
-                    int minor = parts.at(1).toInt();
-                    if (major == fwMajor && minor == fwMinor) {
-                        return true;
+            if (fi.isDir()) {
+                foreach (auto name, names) {
+                    auto parts = name.split(".");
+                    if (parts.size() == 2) {
+                        int major = parts.at(0).toInt();
+                        int minor = parts.at(1).toInt();
+                        if (major == fwMajor && minor == fwMinor) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -1795,32 +1797,34 @@ bool Utility::configCheckCompatibility(int fwMajor, int fwMinor)
 
 bool Utility::configLoad(VescInterface *vesc, int fwMajor, int fwMinor)
 {
-    QDirIterator it(Utility::configPath(""));
+    foreach (const QString &root, configRoots()) {
+        QDirIterator it(root);
 
-    while (it.hasNext()) {
-        QFileInfo fi(it.next());
-        QStringList names = fi.fileName().split("_o_");
+        while (it.hasNext()) {
+            QFileInfo fi(it.next());
+            QStringList names = fi.fileName().split("_o_");
 
-        if (fi.isDir()) {
-            foreach (auto name, names) {
-                auto parts = name.split(".");
-                if (parts.size() == 2) {
-                    int major = parts.at(0).toInt();
-                    int minor = parts.at(1).toInt();
-                    if (major == fwMajor && minor == fwMinor) {
-                        QFileInfo fMc(Utility::configPath(it.fileName() + "/parameters_mcconf.xml"));
-                        QFileInfo fApp(Utility::configPath(it.fileName() + "/parameters_appconf.xml"));
-                        QFileInfo fInfo(Utility::configPath(it.fileName() + "/info.xml"));
+            if (fi.isDir()) {
+                foreach (auto name, names) {
+                    auto parts = name.split(".");
+                    if (parts.size() == 2) {
+                        int major = parts.at(0).toInt();
+                        int minor = parts.at(1).toInt();
+                        if (major == fwMajor && minor == fwMinor) {
+                            QString dir = fi.absoluteFilePath();
+                            QFileInfo fMc(dir + "/parameters_mcconf.xml");
+                            QFileInfo fApp(dir + "/parameters_appconf.xml");
+                            QFileInfo fInfo(dir + "/info.xml");
 
-                        if (fMc.exists() && fApp.exists() && fInfo.exists()) {
-                            vesc->mcConfig()->loadParamsXml(fMc.absoluteFilePath());
-                            vesc->appConfig()->loadParamsXml(fApp.absoluteFilePath());
-                            vesc->infoConfig()->loadParamsXml(fInfo.absoluteFilePath());
-                            vesc->emitConfigurationChanged();
-                            return true;
-                        } else {
-                            qWarning() << "Configurations not found in firmware directory" << it.path();
-                            return false;
+                            if (fMc.exists() && fApp.exists() && fInfo.exists()) {
+                                vesc->mcConfig()->loadParamsXml(fMc.absoluteFilePath());
+                                vesc->appConfig()->loadParamsXml(fApp.absoluteFilePath());
+                                vesc->infoConfig()->loadParamsXml(fInfo.absoluteFilePath());
+                                vesc->emitConfigurationChanged();
+                                return true;
+                            } else {
+                                qWarning() << "Incomplete configuration directory, trying next root:" << dir;
+                            }
                         }
                     }
                 }
@@ -1828,6 +1832,7 @@ bool Utility::configLoad(VescInterface *vesc, int fwMajor, int fwMinor)
         }
     }
 
+    qWarning() << "Configurations not found for firmware" << fwMajor << fwMinor;
     return false;
 }
 
@@ -1853,19 +1858,23 @@ bool Utility::configLoadLatest(VescInterface *vesc)
 QVector<QPair<int, int> > Utility::configSupportedFws()
 {
     QVector<QPair<int, int>> res;
-    QDirIterator it(Utility::configPath(""));
 
-    while (it.hasNext()) {
-        QFileInfo fi(it.next());
-        QStringList names = fi.fileName().split("_o_");
+    foreach (const QString &root, configRoots()) {
+        QDirIterator it(root);
 
-        if (fi.isDir()) {
-            foreach (auto name, names) {
-                auto parts = name.split(".");
-                if (parts.size() == 2) {
-                    int major = parts.at(0).toInt();
-                    int minor = parts.at(1).toInt();
-                    res.append(qMakePair(major, minor));
+        while (it.hasNext()) {
+            QFileInfo fi(it.next());
+            QStringList names = fi.fileName().split("_o_");
+
+            if (fi.isDir()) {
+                foreach (auto name, names) {
+                    auto parts = name.split(".");
+                    if (parts.size() == 2) {
+                        auto pair = qMakePair(parts.at(0).toInt(), parts.at(1).toInt());
+                        if (!res.contains(pair)) {
+                            res.append(pair);
+                        }
+                    }
                 }
             }
         }
@@ -2513,7 +2522,7 @@ QByteArray Utility::removeFirmwareHeader(QByteArray in)
     }
 }
 
-QString Utility::configPath(QString subPath)
+void Utility::ensureConfigResourcesRegistered()
 {
     // Only load the resource file on the first call. Reloading the resource
     // seems to sometimes freeze or crash on windows.
@@ -2530,29 +2539,38 @@ QString Utility::configPath(QString subPath)
 
         resourceLoaded = true;
     }
+}
+
+QStringList Utility::configRoots()
+{
+    ensureConfigResourcesRegistered();
+
+    // Prefer downloaded configs; retain bundled versions as a fallback.
+    QStringList roots;
+    if (QDir("://res/config_download/").exists()) {
+        roots << QStringLiteral("://res/config_download");
+    }
+    roots << QStringLiteral("://res/config");
+    return roots;
+}
+
+QString Utility::configPath(QString subPath)
+{
+    ensureConfigResourcesRegistered();
 
     QString path = QString("://res/config/") + subPath;
     QString pathDl = QString("://res/config_download/") + subPath;
 
-    if (QDir("://res/config_download/").exists()) {
-        QFileInfo file(path);
-        QFileInfo fileDl(pathDl);
-
-        auto date = file.lastModified();
-        auto dateDl = fileDl.lastModified();
-
-        if (date.isValid() && dateDl.isValid()) {
-            if (date > dateDl) {
-                return path;
-            } else {
-                return pathDl;
-            }
-        } else {
-            return pathDl;
-        }
-    } else {
-        return path;
+    // Fall back per file when the downloaded resource is incomplete.
+    if (!subPath.isEmpty() && QFileInfo::exists(pathDl)) {
+        return pathDl;
     }
+
+    if (subPath.isEmpty() && QDir(pathDl).exists()) {
+        return pathDl;
+    }
+
+    return path;
 }
 
 void Utility::setDarkMode(bool isDarkSetting)

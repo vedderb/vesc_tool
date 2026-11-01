@@ -388,6 +388,7 @@ private:
     Commands *mCommands;
     bool mFwVersionReceived;
     bool mDeserialFailedMessageShown;
+    bool mNoSupportedFwMessageShown;
     int mFwRetries;
     int mFwPollCnt;
     QString mFwTxt;

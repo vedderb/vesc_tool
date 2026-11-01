@@ -173,6 +173,8 @@ signals:
 public slots:
 
 private:
+    static void ensureConfigResourcesRegistered();
+    static QStringList configRoots();
     static bool calculateSerializedLength(ConfigParams *params, uint32_t &length);
     static bool serialFunc(ConfigParams *params, QTextStream &s);
     static bool deserialFunc(ConfigParams *params, QTextStream &s);

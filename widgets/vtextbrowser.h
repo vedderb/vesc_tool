@@ -22,6 +22,8 @@
 
 #include <QTextEdit>
 #include <QScrollBar>
+#include <QTimer>
+#include <QVector>
 
 class VTextBrowser : public QTextEdit
 {
@@ -61,7 +63,19 @@ public:
     // change.
     void trimKeepingLastLines(int maxAmount);
 
+    void queueConsoleText(const QString &text, bool html = false);
+    void setConsoleMaxBlocks(int blocks);
+
+public slots:
+    void clear();
+
 private:
+    void flushConsole();
+    struct ConsoleChunk { QString text; bool html; };
+    QVector<ConsoleChunk> mConsolePending;
+    QTimer mConsoleTimer;
+    int mConsolePendingChars = 0;
+    quint64 mConsoleDropped = 0;
     QString mLastAnchor;
 
 };

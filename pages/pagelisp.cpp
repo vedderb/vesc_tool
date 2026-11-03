@@ -124,6 +124,7 @@ PageLisp::PageLisp(QWidget *parent) :
 
     mPollTimer.start(1000 / ui->pollRateBox->value());
     connect(&mPollTimer, &QTimer::timeout, [this]() {
+        ui->debugEdit->setConsoleMaxBlocks(QSettings().value("scripting/replMaxLines", 5000).toInt());
         if (!ui->pollOffButton->isChecked()) {
             if (mVesc) {
                 mVesc->commands()->lispGetStats(ui->pollAllButton->isChecked());
@@ -201,13 +202,8 @@ void PageLisp::setVesc(VescInterface *vesc)
     mLoader.setVesc(vesc);
     ui->experimentPlot->setVesc(vesc);
 
-    connect(mVesc->commands(), &Commands::lispPrintReceived, [this](QString str) {
-        ui->debugEdit->doAtEndWithScroll([this, str](QTextCursor cursor) {
-            cursor.insertText(str + "\n");
-        });
-        
-        int maxLines = QSettings().value("scripting/replMaxLines", 5000).toInt();
-        ui->debugEdit->trimKeepingLastLines(maxLines);        
+    connect(mVesc->commands(), &Commands::lispPrintReceived, this, [this](QString str) {
+        ui->debugEdit->queueConsoleText(str + "\n");
     });
 
     connect(mVesc->commands(), &Commands::lispRunningResRx, [this](bool ok) {

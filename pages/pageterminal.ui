@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTextEdit" name="terminalBrowser">
+    <widget class="VTextBrowser" name="terminalBrowser">
      <property name="font">
       <font>
        <family>DejaVu Sans Mono</family>
@@ -99,6 +99,11 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>VTextBrowser</class>
+   <extends>QTextEdit</extends>
+   <header>widgets/vtextbrowser.h</header>
+  </customwidget>
   <customwidget>
    <class>HistoryLineEdit</class>
    <extends>QLineEdit</extends>

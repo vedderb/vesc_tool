@@ -36,9 +36,6 @@ PageDebugPrint::~PageDebugPrint()
 
 void PageDebugPrint::printConsole(QString str)
 {
-    ui->consoleBrowser->moveCursor(QTextCursor::End);
-    ui->consoleBrowser->insertHtml(QDateTime::currentDateTime().
-                                   toString("yyyy-MM-dd hh:mm:ss: ")
-                                   + str);
-    ui->consoleBrowser->moveCursor(QTextCursor::End);
+    ui->consoleBrowser->queueConsoleText(QDateTime::currentDateTime().
+                                        toString("yyyy-MM-dd hh:mm:ss: ") + str, true);
 }

@@ -27,6 +27,8 @@
 #include <QRegularExpression>
 #include <QDateTime>
 #include <QDir>
+#include <QQmlComponent>
+#include <QQmlEngine>
 #include <cmath>
 #include "lzokay/lzokay.hpp"
 #include "vescinterface.h"
@@ -4031,6 +4033,28 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         mCustomConfigsLoaded = readConfigsOk;
     }
 
+    auto decodeQmlCache = [](const QByteArray &data, const QString &name) {
+        const QByteArray source = qUncompress(data);
+        const QString qml = QString::fromUtf8(source);
+        if (qml.trimmed().isEmpty() || qml.contains(QChar::Null) || qml.toUtf8() != source) {
+            return QString();
+        }
+
+#ifdef USE_MOBILE
+        const QString base = "qrc:/mobile/";
+#else
+        const QString base = "qrc:/res/qml/";
+#endif
+        QQmlEngine engine;
+        QQmlComponent component(&engine);
+        component.setData(source, QUrl(base + name));
+        if (!component.isReady()) {
+            qWarning().noquote() << "Invalid cached device QML:" << component.errorString();
+            return QString();
+        }
+        return qml;
+    };
+
     // Read qmlui HW
     if (mLoadQmlUiOnConnect && params.hasQmlHw) {
         bool cacheLoadOk = false;
@@ -4046,10 +4070,12 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                 auto qmlData = f.readAll();
                 f.close();
 
-                mQmlHw = QString::fromUtf8(qUncompress(qmlData));
-                mQmlHwLoaded = true;
-                emitStatusMessage("Got cached qmlui HW", true);
-                cacheLoadOk = true;
+                mQmlHw = decodeQmlCache(qmlData, "HwUi");
+                cacheLoadOk = !mQmlHw.isEmpty();
+                mQmlHwLoaded = cacheLoadOk;
+                if (cacheLoadOk) {
+                    emitStatusMessage("Got cached qmlui HW", true);
+                }
             }
         }
 
@@ -4126,10 +4152,12 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                 auto qmlData = f.readAll();
                 f.close();
 
-                mQmlApp = QString::fromUtf8(qUncompress(qmlData));
-                mQmlAppLoaded = true;
-                emitStatusMessage("Got cached qmlui App", true);
-                cacheLoadOk = true;
+                mQmlApp = decodeQmlCache(qmlData, "AppUi");
+                cacheLoadOk = !mQmlApp.isEmpty();
+                mQmlAppLoaded = cacheLoadOk;
+                if (cacheLoadOk) {
+                    emitStatusMessage("Got cached qmlui App", true);
+                }
             }
         }
 

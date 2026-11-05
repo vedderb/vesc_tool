@@ -347,9 +347,6 @@ private slots:
     void customConfigRx(int confId, QByteArray data);
 
 private:
-    bool loadQmlBlobFromFw(bool isApp, const QString &cacheFile);
-    void loadQmlUiFromFw(FW_RX_PARAMS params, const QString &confCacheDir);
-
     typedef enum {
         CONN_NONE = 0,
         CONN_SERIAL,

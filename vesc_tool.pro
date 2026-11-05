@@ -262,7 +262,6 @@ HEADERS  += mainwindow.h \
     configparams.h \
     configparam.h \
     vescinterface.h \
-    qmluicache.h \
     parametereditor.h \
     digitalfiltering.h \
     setupwizardapp.h \

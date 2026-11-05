@@ -4037,6 +4037,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         const QByteArray source = qUncompress(data);
         const QString qml = QString::fromUtf8(source);
         if (qml.trimmed().isEmpty() || qml.contains(QChar::Null) || qml.toUtf8() != source) {
+            qWarning() << "Cached QML seems invalid, reloading...";
             return QString();
         }
 

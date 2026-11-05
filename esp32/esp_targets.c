@@ -38,6 +38,8 @@ typedef struct {
 #define ESP32C5_SPI_REG_BASE 0x60003000
 #define ESP32C6_SPI_REG_BASE 0x60003000
 #define ESP32P4_SPI_REG_BASE 0x5008d000
+#define ESP32S31_SPI_REG_BASE 0x20501000
+#define ESP32H4_SPI_REG_BASE 0x60099000
 #define ESP32xx_SPI_REG_BASE 0x60002000
 #define ESP32_SPI_REG_BASE   0x3ff42000
 
@@ -254,6 +256,86 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         .chip_id = 18,
     },
 
+    // ESP32S31: identified by GET_SECURITY_INFO, not a ROM magic register.
+    {
+        .regs = {
+            .cmd  = ESP32S31_SPI_REG_BASE + 0x00,
+            .usr  = ESP32S31_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32S31_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32S31_SPI_REG_BASE + 0x20,
+            .w0   = ESP32S31_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32S31_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32S31_SPI_REG_BASE + 0x28,
+        },
+        .efuse_base = 0x20715000,
+        .chip_magic_value = NULL,
+        .magic_values_count = 0,
+        .read_spi_config = spi_config_unsupported,
+        .mac_efuse_offset = 0x50,
+        .encryption_in_begin_flash_cmd = true,
+        .chip_id = 32,
+    },
+
+    // ESP32C61
+    {
+        .regs = {
+            .cmd  = ESP32C6_SPI_REG_BASE + 0x00,
+            .usr  = ESP32C6_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32C6_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32C6_SPI_REG_BASE + 0x20,
+            .w0   = ESP32C6_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32C6_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32C6_SPI_REG_BASE + 0x28,
+        },
+        .efuse_base = 0x600B4800,
+        .chip_magic_value = (const uint32_t[]){ 0x7211606F },
+        .magic_values_count = 1,
+        .read_spi_config = spi_config_unsupported,
+        .mac_efuse_offset = 0x44,
+        .encryption_in_begin_flash_cmd = true,
+        .chip_id = 20,
+    },
+
+    // ESP32H21
+    {
+        .regs = {
+            .cmd  = ESP32C6_SPI_REG_BASE + 0x00,
+            .usr  = ESP32C6_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32C6_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32C6_SPI_REG_BASE + 0x20,
+            .w0   = ESP32C6_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32C6_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32C6_SPI_REG_BASE + 0x28,
+        },
+        .efuse_base = 0x600B4000,
+        .chip_magic_value = NULL,
+        .magic_values_count = 0,
+        .read_spi_config = spi_config_unsupported,
+        .mac_efuse_offset = 0x44,
+        .encryption_in_begin_flash_cmd = true,
+        .chip_id = 25,
+    },
+
+    // ESP32H4
+    {
+        .regs = {
+            .cmd  = ESP32H4_SPI_REG_BASE + 0x00,
+            .usr  = ESP32H4_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32H4_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32H4_SPI_REG_BASE + 0x20,
+            .w0   = ESP32H4_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32H4_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32H4_SPI_REG_BASE + 0x28,
+        },
+        .efuse_base = 0x600B1800,
+        .chip_magic_value = NULL,
+        .magic_values_count = 0,
+        .read_spi_config = spi_config_unsupported,
+        .mac_efuse_offset = 0x44,
+        .encryption_in_begin_flash_cmd = true,
+        .chip_id = 28,
+    },
+
 };
 
 const target_registers_t *get_esp_target_data(target_chip_t chip)
@@ -269,6 +351,9 @@ esp_loader_error_t loader_detect_chip(target_chip_t *target_chip, const target_r
     esp_loader_target_security_info_t security_info;
 
     if (esp_loader_get_security_info(&security_info) == ESP_LOADER_SUCCESS) {
+        if (security_info.target_chip == ESP_UNKNOWN_CHIP) {
+            return ESP_LOADER_ERROR_INVALID_TARGET;
+        }
         *target_chip = security_info.target_chip;
         *target_data = (target_registers_t *)&esp_target[security_info.target_chip];
         return ESP_LOADER_SUCCESS;

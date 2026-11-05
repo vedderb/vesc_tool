@@ -36,9 +36,15 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
     bool fwdirExists = false;
 
     if (params.hwType == HW_TYPE_CUSTOM_MODULE) {
-        QString path = "://res/firmwares_esp/esp32c3/" + params.hw;
-        if (!QFileInfo::exists(path)) {
-            path = "://res/firmwares_esp/esp32s3/" + params.hw;
+        QString path;
+        const QDir espRoot("://res/firmwares_esp");
+        const auto chipDirs = espRoot.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+        for (const auto &chipDir : chipDirs) {
+            const QString candidate = chipDir.absoluteFilePath() + "/" + params.hw;
+            if (QFileInfo::exists(candidate)) {
+                path = candidate;
+                break;
+            }
         }
 
         if (QFileInfo::exists(path)) {

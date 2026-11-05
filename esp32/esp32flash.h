@@ -44,6 +44,8 @@ public:
     Q_INVOKABLE bool isEspConnected();
     Q_INVOKABLE target_chip_t getTarget();
     Q_INVOKABLE QString getTargetName();
+    Q_INVOKABLE quint32 getBootloaderOffset();
+    static quint32 bootloaderOffset(target_chip_t target);
 
 signals:
     void flashProgress(double prog);

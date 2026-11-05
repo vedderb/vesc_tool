@@ -1,3 +1,6 @@
+# Enable security-info chip detection in esp_targets.c as well as the protocol.
+DEFINES += SERIAL_FLASHER_INTERFACE_USB
+
 HEADERS += \
     $$PWD/esp32flash.h \
     $$PWD/esp_loader.h \

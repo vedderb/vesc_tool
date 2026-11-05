@@ -79,23 +79,15 @@ bool Esp32Flash::connectEsp(QString port)
         return false;
     }
 
-    QString targetName = "Unknown";
-    switch (esp_loader_get_target()) {
-        case ESP8266_CHIP: targetName = "ESP8266"; break;
-        case ESP32_CHIP: targetName = "ESP32"; break;
-        case ESP32S2_CHIP: targetName = "ESP32S2"; break;
-        case ESP32C3_CHIP: targetName = "ESP32C3"; break;
-        case ESP32S3_CHIP: targetName = "ESP32S3"; break;
-        case ESP32C2_CHIP: targetName = "ESP32C2"; break;
-        case ESP32H2_CHIP: targetName = "ESP32H2"; break;
-        case ESP_MAX_CHIP: targetName = "ESP_MAX"; break;
-    }
-
-    emit stateUpdate(QString("Connected to %1").arg(targetName));
+    emit stateUpdate(QString("Connected to %1").arg(getTargetName()));
 
     qDebug() << "Changing baudrate to 460800";
     if (esp_loader_change_baudrate(460800) == ESP_LOADER_SUCCESS) {
-        esp_loader_change_baudrate(460800);
+        if (loader_port_change_transmission_rate(460800) != ESP_LOADER_SUCCESS) {
+            emit stateUpdate("Cannot change serial port baudrate");
+            sPort->close();
+            return false;
+        }
         qDebug() << "Baudrate changed!";
     }
 
@@ -255,13 +247,41 @@ QString Esp32Flash::getTargetName()
         case ESP32S2_CHIP:  return "ESP32-S2";
         case ESP32C3_CHIP:  return "ESP32-C3";
         case ESP32S3_CHIP:  return "ESP32-S3";
+        case ESP32S31_CHIP: return "ESP32-S31";
         case ESP32C2_CHIP:  return "ESP32-C2";
+        case ESP32C5_CHIP:  return "ESP32-C5";
+        case ESP32C6_CHIP:  return "ESP32-C6";
+        case ESP32P4_CHIP:  return "ESP32-P4";
+        case ESP32C61_CHIP: return "ESP32-C61";
+        case ESP32H21_CHIP: return "ESP32-H21";
+        case ESP32H4_CHIP:  return "ESP32-H4";
         case ESP32H2_CHIP:  return "ESP32-H2";
         default:            return "";
     }
 #else
     return "";
 #endif
+}
+
+quint32 Esp32Flash::getBootloaderOffset()
+{
+    return bootloaderOffset(getTarget());
+}
+
+quint32 Esp32Flash::bootloaderOffset(target_chip_t target)
+{
+    switch (target) {
+    case ESP32_CHIP:
+    case ESP32S2_CHIP:
+        return 0x1000;
+    case ESP32C5_CHIP:
+    case ESP32P4_CHIP:
+    case ESP32S31_CHIP:
+    case ESP32H4_CHIP:
+        return 0x2000;
+    default:
+        return 0x0;
+    }
 }
 
 #ifdef HAS_SERIALPORT
@@ -435,14 +455,13 @@ void loader_port_debug_print(const char *str)
     qDebug() << str;
 }
 
-esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate)
+esp_loader_error_t loader_port_change_transmission_rate(uint32_t baudrate)
 {
 #ifdef HAS_SERIALPORT
     if (!sPort->isOpen()) {
         return ESP_LOADER_ERROR_FAIL;
     }
-    sPort->setBaudRate(baudrate);
-    return ESP_LOADER_SUCCESS;
+    return sPort->setBaudRate(baudrate) ? ESP_LOADER_SUCCESS : ESP_LOADER_ERROR_FAIL;
 #else
     (void)baudrate;
     return ESP_LOADER_ERROR_FAIL;

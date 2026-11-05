@@ -25,7 +25,9 @@
 extern "C" {
 #endif
 
+#ifndef SERIAL_FLASHER_INTERFACE_USB
 #define SERIAL_FLASHER_INTERFACE_USB
+#endif
 
 bool esp_stub_get_running(void);
 void esp_stub_set_running(bool stub_status);

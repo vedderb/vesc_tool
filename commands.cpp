@@ -284,6 +284,7 @@ void Commands::processPacket(QByteArray data)
                 quint8 status = vb.vbPopFrontUint8();
                 values.has_timeout = status & 1;
                 values.kill_sw_active = (status >> 1) & 1;
+                values.motor_disabled = (status >> 2) & 1;
             }
         }
 
@@ -1512,6 +1513,14 @@ void Commands::shutdown()
     vb.vbAppendInt8(COMM_SHUTDOWN);
     vb.vbAppendInt8(0);
     vb.vbAppendInt8(0);
+    emitData(vb);
+}
+
+void Commands::disableMotor(bool disable)
+{
+    VByteArray vb;
+    vb.vbAppendInt8(COMM_DISABLE);
+    vb.vbAppendInt8(disable ? 1 : 0);
     emitData(vb);
 }
 

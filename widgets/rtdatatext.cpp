@@ -82,6 +82,7 @@ void RtDataText::paintEvent(QPaintEvent *event)
                                     "T\n"
                                     "T\n"
                                     "T\n"
+                                    "T\n"
                                     "T\n");
 
     int boxh_new = br.height();
@@ -125,14 +126,20 @@ void RtDataText::paintEvent(QPaintEvent *event)
                      Qt::AlignLeft, str);
 
     // Middle info box
+    bool fault_active = mValues.fault_code != FAULT_CODE_NONE;
+
+    // The fault value and the TRUE of the disabled row are left out here and
+    // drawn separately in red below.
     str = QString::asprintf("T FET   : %.2f \u00B0C\n"
                 "T Motor : %.2f \u00B0C\n"
                 "Fault   : %s\n"
+                "%s"
                 "Tac     : %i\n"
                 "Tac ABS : %i\n",
                 mValues.temp_mos,
                 mValues.temp_motor,
-                mValues.fault_str.toLocal8Bit().data(),
+                fault_active ? "" : mValues.fault_str.toLocal8Bit().data(),
+                mValues.motor_disabled ? "Disabled: \n" : "",
                 mValues.tachometer,
                 mValues.tachometer_abs);
 
@@ -140,9 +147,30 @@ void RtDataText::paintEvent(QPaintEvent *event)
     painter.fillRect(vidw / 2.0 - bbox_w / 2.0, 0, bbox_w, bbow_h, Utility::getAppQColor("normalBackground"));
     painter.setOpacity(1.0);
 
+    const double xmid = vidw / 2.0 - bbox_w / 2.0 + mTxtOfs;
+
     painter.setPen(Utility::getAppQColor("normalText"));
-    painter.drawText(QRectF(vidw / 2.0 - bbox_w / 2.0 + mTxtOfs, mTxtOfs, mBoxW, mBoxH),
+    painter.drawText(QRectF(xmid, mTxtOfs, mBoxW, mBoxH),
                      Qt::AlignLeft, str);
+
+    if (fault_active || mValues.motor_disabled) {
+        QFontMetrics fm = painter.fontMetrics();
+        painter.setPen(Utility::getAppQColor("red"));
+
+        if (fault_active) {
+            painter.drawText(QRectF(xmid + fm.horizontalAdvance("Fault   : "),
+                                    mTxtOfs + 2 * fm.lineSpacing(), mBoxW, mBoxH),
+                             Qt::AlignLeft, mValues.fault_str);
+        }
+
+        if (mValues.motor_disabled) {
+            painter.drawText(QRectF(xmid + fm.horizontalAdvance("Disabled: "),
+                                    mTxtOfs + 3 * fm.lineSpacing(), mBoxW, mBoxH),
+                             Qt::AlignLeft, "TRUE");
+        }
+
+        painter.setPen(Utility::getAppQColor("normalText"));
+    }
 
     // Right info box
     str = QString::asprintf("Ah Draw   : %.1f mAh\n"

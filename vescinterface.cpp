@@ -224,7 +224,9 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mTcpServer = new TcpServerSimple(this);
     mTcpServer->setUsePacket(true);
     connect(mTcpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
-        mPacket->sendPacket(packet);
+        if (!mCommands->hasExclusiveOwner()) {
+            mPacket->sendPacket(packet);
+        }
     });
     connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
         mTcpServer->packet()->sendPacket(packet);
@@ -260,7 +262,9 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mUdpServer = new UdpServerSimple(this);
     mUdpServer->setUsePacket(true);
     connect(mUdpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
-        mPacket->sendPacket(packet);
+        if (!mCommands->hasExclusiveOwner()) {
+            mPacket->sendPacket(packet);
+        }
     });
     connect(mPacket, &Packet::packetReceived, [this](QByteArray &packet) {
         mUdpServer->packet()->sendPacket(packet);

@@ -1,0 +1,2 @@
+# Optional test dependency only; not used by VESC Tool at runtime.
+mcp==2.3.0

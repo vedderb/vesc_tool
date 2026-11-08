@@ -80,6 +80,9 @@ static void showHelp()
     qDebug() << "--about : Show about text";
     qDebug() << "--version : Show VESC Tool version information on one line";
     qDebug() << "--tcpServer [port] : Connect to VESC and start TCP server on [port]";
+    qDebug() << "--mcpServer [port] : Enable local read-only MCP in the desktop UI (requires VESC_MCP_TOKEN)";
+    qDebug() << "--mcpAllowEdits : Allow app-memory edits and local script/config files (no persistent controller writes)";
+    qDebug() << "--mcpAllowControllerWrites : Enable controller/config and LispBM upload tools with local UI approval";
     qDebug() << "--loadQml [file] : Load QML UI from file instead of the regular VESC Tool UI";
     qDebug() << "--loadQmlVesc : Load QML UI from the connected VESC instead of the regular VESC Tool UI";
     qDebug() << "--qmlAutoConn : Connect over USB before loading the QML UI";
@@ -305,6 +308,9 @@ int main(int argc, char *argv[])
     bool useTcp = false;
     bool retryConn = false;
     int tcpPort = 65102;
+    int mcpPort = -1;
+    bool mcpAllowEdits = false;
+    bool mcpAllowControllerWrites = false;
     QString loadQml = "";
     bool qmlAutoConn = false;
     bool qmlFullscreen = false;
@@ -386,6 +392,28 @@ int main(int argc, char *argv[])
                 useTcp = true;
                 found = true;
             }
+        }
+
+        if (str == "--mcpAllowControllerWrites") {
+            mcpAllowControllerWrites = true;
+            mcpAllowEdits = true;
+            found = true;
+        }
+        if (str == "--mcpAllowEdits") {
+            mcpAllowEdits = true;
+            found = true;
+        }
+
+        if (str == "--mcpServer") {
+            bool ok = false;
+            if ((i + 1) < args.size()) {
+                mcpPort = args.at(++i).toInt(&ok);
+            }
+            if (!ok || mcpPort < 1 || mcpPort > 65535) {
+                qCritical() << "MCP requires a port between 1 and 65535";
+                return 1;
+            }
+            found = true;
         }
 
         if (str == "--retryConn") {
@@ -761,6 +789,22 @@ int main(int argc, char *argv[])
 
             showHelp();
             return 1;
+        }
+    }
+
+    if (mcpAllowEdits && mcpPort < 0) {
+        qCritical() << "--mcpAllowEdits requires --mcpServer";
+        return 1;
+    }
+    if (mcpPort >= 0) {
+        // MCP belongs to the regular desktop app, not the CLI/device modes.
+        for (const auto &arg : args) {
+            if (arg.startsWith("--") && arg != "--mcpServer" &&
+                    arg != "--debugOutFile" && arg != "--offscreen" && arg != "--mcpAllowEdits" &&
+                    arg != "--mcpAllowControllerWrites") {
+                qCritical() << "--mcpServer can only be used with the regular desktop UI";
+                return 1;
+            }
         }
     }
 
@@ -1741,6 +1785,12 @@ int main(int argc, char *argv[])
         } else {
             QPixmapCache::setCacheLimit(256000);
             w = new MainWindow;
+            if (mcpPort >= 0 && !w->startMcpServer(quint16(mcpPort), qgetenv("VESC_MCP_TOKEN"),
+                                                mcpAllowEdits, mcpAllowControllerWrites)) {
+                delete w;
+                delete app;
+                return 1;
+            }
             w->show();
         }
     }

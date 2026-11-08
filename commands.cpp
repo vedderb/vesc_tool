@@ -72,6 +72,9 @@ bool Commands::isLimitedMode()
 
 bool Commands::setSendCan(bool sendCan, int id)
 {
+    if (mExclusiveOwner) {
+        return false;
+    }
     if (id >= 0) {
         mCanId = id;
     }
@@ -92,6 +95,9 @@ bool Commands::getSendCan()
 
 void Commands::setCanSendId(unsigned int id)
 {
+    if (mExclusiveOwner) {
+        return;
+    }
     mCanId = int(id);
 }
 
@@ -2377,7 +2383,57 @@ void Commands::timerSlot()
     if (mTimeoutLbmStats > 0) mTimeoutLbmStats--;
 }
 
+bool Commands::acquireExclusive(QObject *owner)
+{
+    if (!owner || owner->thread() != thread() || mExclusiveOwner) {
+        return false;
+    }
+    mExclusiveOwner = owner;
+    mCheckNextMcConfig = false;
+    mTimeoutMcconf = 0;
+    mTimeoutAppconf = 0;
+    return true;
+}
+
+void Commands::releaseExclusive(QObject *owner)
+{
+    if (owner && mExclusiveOwner == owner) {
+        mExclusiveOwner.clear();
+    }
+}
+
+bool Commands::hasExclusiveOwner() const
+{
+    return !mExclusiveOwner.isNull();
+}
+
+bool Commands::sendExclusive(QObject *owner, const QByteArray &data)
+{
+    if (!owner || mExclusiveOwner != owner || data.isEmpty() || mIsLimitedMode) {
+        return false;
+    }
+    emitDataImpl(data);
+    return true;
+}
+
 void Commands::emitData(QByteArray data)
+{
+    if (mExclusiveOwner && !data.isEmpty()) {
+        const auto command = static_cast<unsigned char>(data.at(0));
+        const bool stop = command == COMM_MOTOR_ESTOP ||
+                (command == COMM_SET_CURRENT && data.size() == 5 && data.mid(1) == QByteArray(4, '\0'));
+        if (stop) {
+            emit exclusiveInterrupted();
+            emitDataImpl(data);
+            return;
+        }
+    }
+    if (!mExclusiveOwner && !data.isEmpty()) {
+        emitDataImpl(data);
+    }
+}
+
+void Commands::emitDataImpl(QByteArray data)
 {
     // Only allow firmware commands in limited mode
     if (mIsLimitedMode && data.at(0) > COMM_WRITE_NEW_APP_DATA) {

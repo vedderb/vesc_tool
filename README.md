@@ -6,6 +6,11 @@ The stable binary is available for **Linux**, **Windows**, **MacOS**, **Android*
 
 All binaries can also be downloaded free-of-charge for all platforms except for iOS, which only is available via the Apple App Store as they do not allow any other distribution channel.
 
+## Experimental native MCP interface
+
+For the experimental native MCP tools for configuration, RT data and LispBM, see
+[MCP development documentation](mcp/README.md).
+
 ## Code Contribution, Distribution and Trademark Usage
 
 VESC is a registered trademark of Benjamin Vedder. Read the [trademark policies](https://vesc-project.com/trademark_policies) for more information.

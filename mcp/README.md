@@ -124,6 +124,13 @@ The VESC protocol does not correlate configuration ACKs with request UUIDs.
 Other physical CAN/UART writers cannot be excluded by a local app lock.
 Reviewing and isolating the actual controller setup remains necessary.
 
+Older supported firmware, including 6.06, can leave the GUI in limited mode
+even after VESC Tool loads its matching parameter schema. MCP accepts that
+case only with a matching loaded schema and continues to enforce Commands'
+per-command compatibility allowlist. Unsupported commands remain blocked;
+MCP never clears limited mode or updates firmware. Status reports the detected
+firmware version, hardware and whether the loaded configuration schema matches.
+
 ## RT recording and analysis
 
 - `vesc_get_rt_data`: last already-received app packet, availability, age and

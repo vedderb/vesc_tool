@@ -88,6 +88,29 @@ class TestMcpApplication : public QObject
         commands.setLimitedMode(true);
         QVERIFY(!commands.sendExclusive(&owner, QByteArray(1, char(COMM_SET_APPCONF))));
     }
+    void limitedModeHonorsCompatibilityAllowlist()
+    {
+        Commands commands;
+        QObject owner, other;
+        int packets = 0;
+        connect(&commands, &Commands::dataToSend, &commands, [&](QByteArray &) { packets++; });
+        QVERIFY(commands.acquireExclusive(&owner));
+        commands.setLimitedMode(true);
+        commands.setLimitedCompatibilityCommands(
+            {COMM_GET_VALUES, COMM_GET_APPCONF, COMM_SET_APPCONF, COMM_LISP_READ_CODE});
+        for (int command : {int(COMM_FW_VERSION), int(COMM_GET_VALUES), int(COMM_GET_APPCONF),
+                            int(COMM_SET_APPCONF), int(COMM_LISP_READ_CODE)}) {
+            QVERIFY(commands.sendExclusive(&owner, QByteArray(1, char(command))));
+        }
+        QCOMPARE(packets, 5);
+        QVERIFY(commands.isLimitedMode());
+        QVERIFY(!commands.sendExclusive(&other, QByteArray(1, char(COMM_GET_VALUES))));
+        QVERIFY(!commands.sendExclusive(&owner, QByteArray(1, char(COMM_SET_MCCONF))));
+        QVERIFY(!commands.sendExclusive(&owner, QByteArray(1, char(COMM_LISP_ERASE_CODE))));
+        QCOMPARE(packets, 5);
+        commands.setLimitedCompatibilityCommands({});
+        QVERIFY(!commands.sendExclusive(&owner, QByteArray(1, char(COMM_GET_VALUES))));
+    }
     void emergencyStopCanInterruptOwnership()
     {
         Commands commands;
@@ -132,6 +155,18 @@ class TestMcpApplication : public QObject
         QVERIFY(!device.validateChanges("app", invalid, &error));
         QVERIFY(!device.ready());
         QCOMPARE(packets, 0);
+    }
+    void firmware606SchemaIsAvailable()
+    {
+        VescInterface vesc;
+        QVERIFY(Utility::configLoad(&vesc, 6, 6));
+        QVERIFY(vesc.getSupportedFirmwarePairs().contains(qMakePair(6, 6)));
+        VescMcpDevice device(&vesc);
+        for (const auto &kind : QStringList{"motor", "app"}) {
+            QString error;
+            QVERIFY2(!device.canonicalValues(kind, &error).isEmpty(), qPrintable(error));
+        }
+        QVERIFY(!device.ready()); // Loading a schema cannot fabricate a connection.
     }
 };
 QTEST_GUILESS_MAIN(TestMcpApplication)

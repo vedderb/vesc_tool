@@ -71,9 +71,15 @@ VescMcpDevice::VescMcpDevice(VescInterface *vesc, QObject *parent) : McpDevice(p
 
 bool VescMcpDevice::ready() const
 {
-    return mVesc && mVesc->isPortConnected() && mVesc->fwRx() &&
-           !mVesc->commands()->isLimitedMode() && !mVesc->tcpServerIsRunning() &&
-           !mVesc->udpServerIsRunning() && !target().isEmpty();
+    if (!mVesc || !mVesc->isPortConnected() || !mVesc->fwRx() || mVesc->tcpServerIsRunning() ||
+        mVesc->udpServerIsRunning() || target().isEmpty()) {
+        return false;
+    }
+    const auto fw = mVesc->getLastFwRxParams();
+    // Require the actually loaded parameter schema, not merely an available
+    // archive. VESC Tool can load an older schema while retaining limited mode.
+    return fw.hwType == HW_TYPE_VESC &&
+           mVesc->getSupportedFirmwarePairs().contains(qMakePair(fw.major, fw.minor));
 }
 
 QString VescMcpDevice::target() const

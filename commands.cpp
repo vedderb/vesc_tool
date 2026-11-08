@@ -2409,7 +2409,14 @@ bool Commands::hasExclusiveOwner() const
 
 bool Commands::sendExclusive(QObject *owner, const QByteArray &data)
 {
-    if (!owner || mExclusiveOwner != owner || data.isEmpty() || mIsLimitedMode) {
+    if (!owner || mExclusiveOwner != owner || data.isEmpty()) {
+        return false;
+    }
+    // Old supported firmware uses the app's normal compatibility allowlist.
+    // Never disable limited mode merely to obtain the exclusive channel.
+    const int command = static_cast<unsigned char>(data.at(0));
+    if (mIsLimitedMode && command != COMM_FW_VERSION &&
+            !mCompatibilityCommands.contains(command)) {
         return false;
     }
     emitDataImpl(data);

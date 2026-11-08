@@ -633,15 +633,25 @@ QJsonObject VescMcpTools::call(const QString &name, const QJsonObject &arguments
         if (!arguments.isEmpty()) {
             return failure("This tool takes no arguments.");
         }
-        return result({{"connected", mVesc->isPortConnected()},
-                       {"firmwareReceived", mVesc->fwRx()},
-                       {"limitedMode", mVesc->commands()->isLimitedMode()},
-                       {"canForwarding", mVesc->commands()->getSendCan()},
-                       {"canId", mVesc->commands()->getCanSendId()},
-                       {"access", mAllowEdits ? "app_edits" : "read_only"},
-                       {"controllerWritesEnabled", mAllowControllerWrites},
-                       {"controllerBusy", mOperations->busy()},
-                       {"source", "app_memory"}});
+        const auto fw = mVesc->getLastFwRxParams();
+        const bool firmwareValid = mVesc->isPortConnected() && mVesc->fwRx();
+        return result(
+            {{"connected", mVesc->isPortConnected()},
+             {"firmwareReceived", mVesc->fwRx()},
+             {"firmwareVersion", firmwareValid ? QJsonValue(QString("%1.%2").arg(fw.major).arg(
+                                                     fw.minor, 2, 10, QLatin1Char('0')))
+                                               : QJsonValue()},
+             {"hardware", firmwareValid ? QJsonValue(fw.hw) : QJsonValue()},
+             {"configurationSchemaCompatible",
+              firmwareValid && fw.hwType == HW_TYPE_VESC &&
+                  mVesc->getSupportedFirmwarePairs().contains(qMakePair(fw.major, fw.minor))},
+             {"limitedMode", mVesc->commands()->isLimitedMode()},
+             {"canForwarding", mVesc->commands()->getSendCan()},
+             {"canId", mVesc->commands()->getCanSendId()},
+             {"access", mAllowEdits ? "app_edits" : "read_only"},
+             {"controllerWritesEnabled", mAllowControllerWrites},
+             {"controllerBusy", mOperations->busy()},
+             {"source", "app_memory"}});
     }
     if (name == "vesc_get_rt_data") {
         if (!arguments.isEmpty()) {

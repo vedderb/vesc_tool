@@ -242,6 +242,14 @@ updated. Tests used ADC-and-UART mode with the external UART disconnected and
 explicitly confirmed by the app user. These roundtrips validate transport and
 readback for this setup, not arbitrary configuration changes or program behavior.
 
+A subsequent user-operated ADC throttle test recorded 960 samples over 60
+seconds with all 33 fields present in every sample (26 RT fields, four decoded
+ADC values, ADC receipt age, derived input power and receipt timestamp). Actual
+spacing was 50–76 ms with a 62 ms median, about 16 Hz despite requesting 50 ms.
+No controller fault, timeout or kill-switch flag was observed. The client sent
+read requests only; the user operated the throttle. Completeness establishes
+the presence of transmitted values, not independent physical sensor accuracy.
+
 See [controller-write implementation](CONTROLLER-WRITES.md) for the job boundary.
 No personal paths, secrets, generated binaries or hardware backups belong in
 this contribution. VESC Tool remains GPL-3.0-or-later.

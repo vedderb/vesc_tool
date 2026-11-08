@@ -86,6 +86,10 @@ a later controller restart even though the upload does not auto-run it.
 
 Dedicated tests exercise the coordinator, fake controller jobs and actual
 Commands ownership. Native app/client tests check the MCP surface, parameter
-editing/restore, local script CRUD and permission failures. No physical
-controller upload or LispBM execution has been tested. The guard logic is
-conservative app-side protection, not a certified safety function.
+editing/restore, local script CRUD and permission failures. Physical tests on
+firmware 6.06 / hardware 410 verified unchanged motor/app uploads and a 1015-byte
+self-contained LispBM upload, including subsequent fresh reads matching the
+original data. No motor command or LispBM run was requested. These tests do not
+validate changed parameter behavior or arbitrary programs. See README.md for
+the complete validation scope. The guard logic is conservative app-side
+protection, not a certified safety function.

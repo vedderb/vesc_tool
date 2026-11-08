@@ -1,9 +1,9 @@
 # Native MCP access in VESC Tool
 
 Experimental desktop integration for review and testing. This is a contribution
-branch, not an official binary release. Persistent configuration and LispBM
-operations are implemented, but **persistent writes have not been tested on a
-physical controller**.
+branch, not an official binary release. Configuration and LispBM transfers have
+been validated with unchanged data on a physical firmware 6.06 / hardware 410
+controller. Different settings, programs and devices still need validation.
 
 The server runs inside VESC Tool and uses its existing connection and parameter
 models. It does not open a second controller connection or require a QML/Python
@@ -212,15 +212,21 @@ a startup message appears under --offscreen, also with MCP disabled.
 Validation uses Windows / Qt 5.15.2 / MinGW 8.1, fake controller responses and
 the official MCP Python SDK 2.3.0. SDK default discovery for a newer protocol
 receives HTTP 400 and falls back to initialization with 2025-11-25; --mode legacy
-tests the classic handshake directly. No physical controller write or LispBM
-execution has been performed. Simulation cannot replace device/firmware testing.
+tests the classic handshake directly. There are 103 QtTest checks across the
+four targets, including the real MainWindow idle-progress regression. Run the
+application-boundary target with the normal desktop platform.
 
-Read-only hardware validation with firmware 6.06 / hardware 410 has completed:
-fresh motor/app configuration downloads with backups, a three-second RT capture
-with saved analysis, and download/backup of an existing LispBM payload. The
-initial unchanged-configuration upload preparation rejected ADC-and-UART mode
-before issuing any write. That mode now has ADC sampling and the additional
-manual UART confirmation described above; persistent writes remain unverified.
+Hardware validation with firmware 6.06 / hardware 410 has completed:
+fresh motor/app configuration downloads with backups, three-second RT captures
+with saved analysis and neutral ADC inputs, and unchanged motor/app uploads
+with manual GUI approval, ACKs and exact readback. Subsequent fresh reads
+matched all 200 serialized motor and 119 app fields. An existing self-contained
+LispBM program was backed up, saved as an identical local draft, uploaded with
+manual approval and downloaded again byte-for-byte (1015 bytes). No LispBM run
+or motor-control command was requested, and the controller firmware was not
+updated. Tests used ADC-and-UART mode with the external UART disconnected and
+explicitly confirmed by the app user. These roundtrips validate transport and
+readback for this setup, not arbitrary configuration changes or program behavior.
 
 See [controller-write implementation](CONTROLLER-WRITES.md) for the job boundary.
 No personal paths, secrets, generated binaries or hardware backups belong in
@@ -231,4 +237,5 @@ References:
 - [MCP lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle)
 - [MCP tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)
 - [Firmware configuration and Lisp code packets](https://github.com/vedderb/bldc/blob/master/comm/commands.c)
+- [Firmware 6.06 Lisp erase/write handlers](https://github.com/vedderb/bldc/blob/release_6_06/comm/commands.c)
 - [Firmware flash code layout](https://github.com/vedderb/bldc/blob/master/flash_helper.c)

@@ -162,6 +162,8 @@ class TestMcpApplication : public QObject
         QVERIFY(Utility::configLoad(&vesc, 6, 6));
         QVERIFY(vesc.getSupportedFirmwarePairs().contains(qMakePair(6, 6)));
         VescMcpDevice device(&vesc);
+        vesc.appConfig()->updateParamEnum("app_to_use", 5);
+        QCOMPARE(device.inputMode(), QString("adc_uart"));
         for (const auto &kind : QStringList{"motor", "app"}) {
             QString error;
             QVERIFY2(!device.canonicalValues(kind, &error).isEmpty(), qPrintable(error));

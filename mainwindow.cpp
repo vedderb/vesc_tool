@@ -22,6 +22,7 @@
 #include "mcp/mcpserver.h"
 #include "mcp/vescmcptools.h"
 #include <QMessageBox>
+#include <QCheckBox>
 #include <QDebug>
 #include <QInputDialog>
 #include <QFileDialog>
@@ -625,6 +626,16 @@ bool MainWindow::startMcpServer(quint16 port, const QByteArray &token, bool allo
         dialog->setTextFormat(Qt::PlainText);
         dialog->setDetailedText(details);
         dialog->setDefaultButton(QMessageBox::No);
+        if (operations->job(id).value("unmonitoredUart").toBool()) {
+            dialog->setInformativeText(tr("ADC and UART mode is active. ADC is monitored, but UART "
+                                          "motor commands cannot be observed or locked by this app. "
+                                          "Disconnect any external UART controller before approving."));
+            auto confirmation = new QCheckBox(tr("I confirm that no external UART device can send motor commands."), dialog);
+            dialog->setCheckBox(confirmation);
+            auto yesButton = dialog->button(QMessageBox::Yes);
+            yesButton->setEnabled(false);
+            connect(confirmation, &QCheckBox::toggled, yesButton, &QAbstractButton::setEnabled);
+        }
         dialog->setWindowModality(Qt::ApplicationModal);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
         QPointer<McpDeviceOperations> owner(operations);

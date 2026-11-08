@@ -58,6 +58,7 @@ class McpDeviceOperations : public QObject
     void readLisp(const QString &phase);
     void writeLispChunk();
     void processPending();
+    QString sampledInputMode() const;
     McpWriteTransaction::Guard guard() const;
     QString save(const QString &suffix, const QByteArray &bytes);
     QString backupConfig(const QString &kind, const QString &source);

@@ -34,6 +34,7 @@ class FakeMcpDevice : public McpDevice
     bool flashBusy = false;
     int flashDelayMs = 0;
     QString identity = "fake-device";
+    QString mode = "adc";
     QPointer<QObject> owner;
     QJsonObject motor{{"limit", 10.25}, {"enabled", true}};
     QJsonObject app{{"controller_id", 2}};
@@ -90,7 +91,7 @@ class FakeMcpDevice : public McpDevice
     }
     QString inputMode() const override
     {
-        return "adc";
+        return mode;
     }
 
     bool send(QObject *value, const QByteArray &packet) override
@@ -221,6 +222,39 @@ class TestMcpDeviceOperations : public QObject
         QVERIFY(ops.job(job).value("result").toObject().value("verified").toBool());
         QVERIFY(!device.owner);
     }
+    void adcUartUploadNeedsReviewAndNeutralInput()
+    {
+        QTemporaryDir dir;
+        FakeMcpDevice device;
+        device.mode = "adc_uart";
+        McpDeviceOperations ops(&device, dir.path());
+        QSignalSpy review(&ops, &McpDeviceOperations::approvalRequested);
+        const auto job = id(ops.start("upload", {{"config", "motor"}}));
+        QTRY_COMPARE_WITH_TIMEOUT(review.count(), 1, 3000);
+        QVERIFY(ops.job(job).value("unmonitoredUart").toBool());
+        QVERIFY(ops.job(job).value("review").toObject().value("unmonitoredUart").toBool());
+        QCOMPARE(device.configWrites, 0);
+        device.inputActive = true;
+        QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 3000);
+        QCOMPARE(device.configWrites, 0);
+        QCOMPARE(ops.job(job).value("state").toString(), QString("failed"));
+    }
+    void adcUartApprovedUpload()
+    {
+        QTemporaryDir dir;
+        FakeMcpDevice device;
+        device.mode = "adc_uart";
+        McpDeviceOperations ops(&device, dir.path());
+        QSignalSpy review(&ops, &McpDeviceOperations::approvalRequested);
+        const auto job = id(ops.start("upload", {{"config", "motor"}}));
+        QTRY_COMPARE_WITH_TIMEOUT(review.count(), 1, 3000);
+        QCOMPARE(device.configWrites, 0);
+        ops.approve(job,
+                    true); // Trusted GUI boundary; the GUI additionally gates UART confirmation.
+        QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 3000);
+        QCOMPARE(device.configWrites, 1);
+        QCOMPARE(ops.job(job).value("state").toString(), QString("succeeded"));
+    }
     void deniedUploadNeverWrites()
     {
         QTemporaryDir dir;
@@ -302,12 +336,14 @@ class TestMcpDeviceOperations : public QObject
     {
         QTemporaryDir dir;
         FakeMcpDevice device;
+        device.mode = "adc_uart";
         McpDeviceOperations ops(&device, dir.path());
         const auto job = id(ops.start("capture", {{"durationMs", 250}, {"intervalMs", 50}}));
         QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 3000);
         const auto data = ops.job(job, true);
         QCOMPARE(data.value("state").toString(), QString("succeeded"));
         QVERIFY(data.value("samples").toArray().size() >= 2);
+        QVERIFY(data.value("samples").toArray().last().toObject().contains("input_adc"));
         QCOMPARE(data.value("result")
                      .toObject()
                      .value("fields")

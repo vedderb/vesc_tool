@@ -2,7 +2,8 @@
 
 Experimental desktop integration for review and testing. This is a contribution
 branch, not an official binary release. Persistent configuration and LispBM
-operations are implemented, but **have not been tested on a physical controller**.
+operations are implemented, but **persistent writes have not been tested on a
+physical controller**.
 
 The server runs inside VESC Tool and uses its existing connection and parameter
 models. It does not open a second controller connection or require a QML/Python
@@ -105,9 +106,12 @@ a separate manual confirmation with device identity and changes/source.
 The progress window's Stop motor / cancel button also sends the existing app
 stop command. API cancellation alone does not send motor-control commands.
 
-Writes currently require active input mode **No App, ADC or PPM**. ADC channels
-or PPM must be neutral and freshly decoded. Unsupported combined/UART/etc.
-modes fail closed. Telemetry/input freshness and standstill are checked before
+Writes currently support active input mode **No App, ADC, ADC and UART, or PPM**.
+ADC channels or PPM must be neutral and freshly decoded. In ADC-and-UART mode,
+the GUI additionally requires an unchecked-by-default confirmation that no
+external UART device can send motor commands; its Yes button stays disabled
+until the user confirms. UART traffic cannot be observed or locked by the app.
+Other combined/UART/etc. modes fail closed. Telemetry/input freshness and standstill are checked before
 the write and readback; flash pauses wait for fresh data within the operation
 deadline. Changing a forwarded device's CAN id is refused because readback on
 the old route would be unreliable; connect directly for that change.
@@ -210,6 +214,13 @@ the official MCP Python SDK 2.3.0. SDK default discovery for a newer protocol
 receives HTTP 400 and falls back to initialization with 2025-11-25; --mode legacy
 tests the classic handshake directly. No physical controller write or LispBM
 execution has been performed. Simulation cannot replace device/firmware testing.
+
+Read-only hardware validation with firmware 6.06 / hardware 410 has completed:
+fresh motor/app configuration downloads with backups, a three-second RT capture
+with saved analysis, and download/backup of an existing LispBM payload. The
+initial unchanged-configuration upload preparation rejected ADC-and-UART mode
+before issuing any write. That mode now has ADC sampling and the additional
+manual UART confirmation described above; persistent writes remain unverified.
 
 See [controller-write implementation](CONTROLLER-WRITES.md) for the job boundary.
 No personal paths, secrets, generated binaries or hardware backups belong in

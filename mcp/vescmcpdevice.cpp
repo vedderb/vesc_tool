@@ -210,6 +210,9 @@ QString VescMcpDevice::inputMode() const
     if (app == "ADC") {
         return "adc";
     }
+    if (app == "ADC and UART") {
+        return "adc_uart";
+    }
     if (app == "PPM") {
         return "ppm";
     }

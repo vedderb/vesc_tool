@@ -188,7 +188,9 @@ McpDeviceOperations::McpDeviceOperations(McpDevice *device, const QString &direc
                                                {"after", it.value()}});
                 }
             }
-            mJob.insert("review", QJsonObject{{"changes", changes}, {"target", mTarget}});
+            mJob.insert("review", QJsonObject{{"changes", changes},
+                                              {"target", mTarget},
+                                              {"unmonitoredUart", mJob.value("unmonitoredUart")}});
             emit approvalRequested(mId, tr("Write controller configuration"),
                                    QString::fromUtf8(QJsonDocument(mJob.value("review").toObject())
                                                          .toJson(QJsonDocument::Indented)));
@@ -414,6 +416,11 @@ void McpDeviceOperations::cancel(const QString &id)
         finish(false, "Cancelled; issued writes are not automatically rolled back.");
     }
 }
+QString McpDeviceOperations::sampledInputMode() const
+{
+    const auto mode = mDevice->inputMode();
+    return mode == "adc_uart" ? "adc" : mode;
+}
 McpWriteTransaction::Guard McpDeviceOperations::guard() const
 {
     McpWriteTransaction::Guard g;
@@ -421,7 +428,7 @@ McpWriteTransaction::Guard McpDeviceOperations::guard() const
     g.connected = mDevice->ready();
     g.firmwareCompatible = g.connected;
     g.exclusiveAccess = busy();
-    const auto mode = mDevice->inputMode();
+    const auto mode = sampledInputMode();
     g.inputNeutral = mode == "none";
     if (mode != "none" && mInput.value("type") == mode && mInput.value("value").isDouble()) {
         g.inputNeutral = std::isfinite(mInput.value("value").toDouble()) &&
@@ -433,6 +440,9 @@ McpWriteTransaction::Guard McpDeviceOperations::guard() const
         }
     }
     g.valuesAgeMs = mValuesAge.isValid() ? mValuesAge.elapsed() : -1;
+    if (mDevice->inputMode() == "adc_uart" && !mJob.value("unmonitoredUart").toBool()) {
+        g.inputNeutral = false; // A newly enabled UART must receive its own GUI review.
+    }
     g.inputAgeMs =
         mode == "none" ? g.valuesAgeMs : (mInputAge.isValid() ? mInputAge.elapsed() : -1);
     if (mValues.value("erpm").isDouble()) {
@@ -486,7 +496,7 @@ void McpDeviceOperations::tick()
     }
     if (mClock.elapsed() - mLastPoll >= (mPhase == "capturing" ? mInterval : 50)) {
         mLastPoll = mClock.elapsed();
-        const auto mode = mDevice->inputMode();
+        const auto mode = sampledInputMode();
         if (mode == "adc" && !send(COMM_GET_DECODED_ADC)) {
             return;
         }
@@ -509,8 +519,10 @@ void McpDeviceOperations::tick()
     }
     if (mPhase == "priming" || mPhase == "priming_lisp_chunks") {
         if (mDevice->inputMode() == "unsupported") {
-            finish(false, "Uploads require No App, ADC or PPM mode; other active-input modes "
-                          "cannot be verified.");
+            finish(
+                false,
+                "Uploads require No App, ADC, ADC and UART or PPM mode; other active-input modes "
+                "cannot be verified.");
             return;
         }
         auto g = guard();
@@ -543,6 +555,7 @@ void McpDeviceOperations::onConfig(const QString &kind)
         return;
     }
     if (mPhase == "reading_input_config" && kind == "app") {
+        mJob.insert("unmonitoredUart", mDevice->inputMode() == "adc_uart");
         phase("priming");
         return;
     }

@@ -148,6 +148,20 @@ Samples use app receipt timestamps. Missing selective fields are omitted, not
 filled with zeros or merged from old packets. Fresh ADC/PPM inputs are included
 when available; voltage/current packets also provide derived input power.
 ERPM is electrical speed, duty is a fraction, names otherwise carry units.
+Both cached RT reads and captures expose every parsed GET_VALUES field carried
+by the packet: temperatures, motor/input/d/q currents, duty, ERPM, voltage,
+Ah/Wh counters, signed/absolute tachometers, fault, PID position, controller id,
+three MOS temperatures, d/q voltages and timeout/kill-switch flags. Optional
+trailing fields absent from older firmware packets are omitted, not filled
+with constructor defaults. Individual selective d/q voltage packets are decoded
+independently. Fields sent as zero by firmware are still reported as zero;
+their presence does not prove a physical sensor is installed or valid.
+
+Fresh decoded ADC samples include normalized `input_adc` / `input_adc2` and
+`input_adc_voltage_v` / `input_adc2_voltage_v`, plus `input_age_ms` at the RT
+packet's receipt. ADC and RT are separate request/reply packets, not synchronous
+hardware samples. Capture `timeMs` is the app's receipt time. Requested polling
+intervals are not guaranteed sample rates; inspect actual timestamp spacing.
 The low-speed-current count is an observation, not a diagnosis of a stalled
 motor. RT capture sends read requests only, never motor-control commands.
 Completed captures save samples and analysis as local JSON and return
@@ -212,7 +226,7 @@ a startup message appears under --offscreen, also with MCP disabled.
 Validation uses Windows / Qt 5.15.2 / MinGW 8.1, fake controller responses and
 the official MCP Python SDK 2.3.0. SDK default discovery for a newer protocol
 receives HTTP 400 and falls back to initialization with 2025-11-25; --mode legacy
-tests the classic handshake directly. There are 103 QtTest checks across the
+tests the classic handshake directly. There are 104 QtTest checks across the
 four targets, including the real MainWindow idle-progress regression. Run the
 application-boundary target with the normal desktop platform.
 

@@ -199,7 +199,29 @@ void Commands::processPacket(QByteArray data)
 
         uint32_t mask = 0xFFFFFFFF;
         if (id == COMM_GET_VALUES_SELECTIVE) {
+            if (vb.size() < 4) {
+                break;
+            }
             mask = vb.vbPopFrontUint32();
+        }
+        if (id == COMM_GET_VALUES && vb.size() < 53) {
+            break; // The non-optional values through fault_code must be complete.
+        }
+        // Report only fields actually carried by this packet. Older firmware can
+        // omit optional trailing values even for a full GET_VALUES response.
+        static const int fieldBytes[] = {2, 2, 4, 4, 4, 4, 2, 4, 2, 4, 4,
+                                         4, 4, 4, 4, 1, 4, 1, 6, 4, 4, 1};
+        mask &= (uint32_t(1) << 22) - 1;
+        int remaining = vb.size();
+        for (int bit = 0; bit < 22; bit++) {
+            if (!(mask & (uint32_t(1) << bit))) {
+                continue;
+            }
+            if (remaining < fieldBytes[bit]) {
+                mask &= (uint32_t(1) << bit) - 1;
+                break;
+            }
+            remaining -= fieldBytes[bit];
         }
 
         if (mask & (uint32_t(1) << 0)) {
@@ -276,10 +298,12 @@ void Commands::processPacket(QByteArray data)
             }
         }
 
-        if (vb.size() >= 8) {
+        if (vb.size() >= 4) {
             if (mask & (uint32_t(1) << 19)) {
                 values.vd = vb.vbPopFrontDouble32(1e3);
             }
+        }
+        if (vb.size() >= 4) {
             if (mask & (uint32_t(1) << 20)) {
                 values.vq = vb.vbPopFrontDouble32(1e3);
             }

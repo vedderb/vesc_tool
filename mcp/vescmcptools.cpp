@@ -75,23 +75,7 @@ VescMcpTools::VescMcpTools(VescInterface *vesc, QObject *parent)
                 }
                 // Only fields present in this packet are exposed. No zero-filled
                 // selective fields or values from a previous CAN target are merged.
-                mValues = {};
-                auto field = [this, mask](int bit, const QString &name, double value) {
-                    if ((mask & (quint32(1) << bit)) && std::isfinite(value)) {
-                        mValues.insert(name, value);
-                    }
-                };
-                field(0, "temp_mos_c", values.temp_mos);
-                field(1, "temp_motor_c", values.temp_motor);
-                field(2, "current_motor_a", values.current_motor);
-                field(3, "current_in_a", values.current_in);
-                field(6, "duty", values.duty_now);
-                field(7, "erpm", values.rpm);
-                field(8, "voltage_v", values.v_in);
-                if (mask & (quint32(1) << 15)) {
-                    mValues.insert("fault_code", int(values.fault_code));
-                    mValues.insert("fault", values.fault_str);
-                }
+                mValues = McpDataHelpers::rtValues(values, mask);
                 mSendCan = mVesc->commands()->getSendCan();
                 mCanId = mVesc->commands()->getCanSendId();
                 mValuesAge.start();

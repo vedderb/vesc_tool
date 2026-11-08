@@ -24,11 +24,66 @@
 #include "vescinterface.h"
 #include "utility.h"
 #include "mcp/vescmcpdevice.h"
+#include "mcp/mcpdatahelpers.h"
 
 class TestMcpApplication : public QObject
 {
     Q_OBJECT
   private slots:
+    void rtPacketPresenceAndSelectiveDqVoltage()
+    {
+        Commands commands;
+        QList<QJsonObject> samples;
+        QList<quint32> masks;
+        connect(&commands, &Commands::valuesReceived, &commands,
+                [&](MC_VALUES values, unsigned int mask) {
+                    masks.append(mask);
+                    samples.append(McpDataHelpers::rtValues(values, mask));
+                });
+        VByteArray base;
+        base.vbAppendUint8(COMM_GET_VALUES);
+        base.append(QByteArray(53, '\0'));
+        commands.processPacket(base);
+        QCOMPARE(samples.size(), 1);
+        QCOMPARE(masks.last(), quint32(0xffff));
+        QVERIFY(samples.last().contains("current_d_a"));
+        QVERIFY(samples.last().contains("watt_hours_wh"));
+        QVERIFY(!samples.last().contains("pid_position_deg"));
+        QVERIFY(!samples.last().contains("controller_id"));
+        QVERIFY(!samples.last().contains("temp_mos_1_c"));
+        QVERIFY(!samples.last().contains("voltage_d_v"));
+        QVERIFY(!samples.last().contains("has_timeout"));
+        commands.processPacket(base.left(base.size() - 1));
+        QCOMPARE(samples.size(), 1); // Truncated mandatory data must not become zeros.
+        for (int bit : {19, 20}) {
+            VByteArray packet;
+            packet.vbAppendUint8(COMM_GET_VALUES_SELECTIVE);
+            packet.vbAppendUint32(quint32(1) << bit);
+            packet.vbAppendDouble32(12.345, 1e3);
+            commands.processPacket(packet);
+            QCOMPARE(masks.last(), quint32(1) << bit);
+            QCOMPARE(samples.last().size(), 1);
+            QCOMPARE(samples.last().value(bit == 19 ? "voltage_d_v" : "voltage_q_v").toDouble(),
+                     12.345);
+        }
+        VByteArray full = base;
+        full.vbAppendDouble32(123.0, 1e6);
+        full.vbAppendUint8(7);
+        full.vbAppendDouble16(21.0, 1e1);
+        full.vbAppendDouble16(22.0, 1e1);
+        full.vbAppendDouble16(23.0, 1e1);
+        full.vbAppendDouble32(-1.234, 1e3);
+        full.vbAppendDouble32(2.345, 1e3);
+        full.vbAppendUint8(3);
+        commands.processPacket(full);
+        QCOMPARE(masks.last(), (quint32(1) << 22) - 1);
+        QCOMPARE(samples.last().size(), 26);
+        QCOMPARE(samples.last().value("pid_position_deg").toDouble(), 123.0);
+        QCOMPARE(samples.last().value("controller_id").toInt(), 7);
+        QCOMPARE(samples.last().value("temp_mos_3_c").toDouble(), 23.0);
+        QVERIFY(samples.last().value("has_timeout").toBool());
+        QVERIFY(samples.last().value("kill_switch_active").toBool());
+    }
     void idleMcpServerDoesNotShowProgressDialog()
     {
         MainWindow window;

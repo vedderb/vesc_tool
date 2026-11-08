@@ -19,6 +19,7 @@
 
 #include "vescmcpdevice.h"
 #include "mcpparamvalidator.h"
+#include "mcpdatahelpers.h"
 #include <QXmlStreamWriter>
 #include <QApplication>
 #include <cmath>
@@ -40,28 +41,17 @@ VescMcpDevice::VescMcpDevice(VescInterface *vesc, QObject *parent) : McpDevice(p
         emit fault("Controller configuration signature/deserialization failed.");
     });
     connect(commands, &Commands::decodedAdcReceived, this,
-            [this](double value, double, double value2, double) {
-                emit input({{"type", "adc"}, {"value", value}, {"value2", value2}});
+            [this](double value, double voltage, double value2, double voltage2) {
+                emit input({{"type", "adc"},
+                            {"value", value},
+                            {"value2", value2},
+                            {"voltage_v", voltage},
+                            {"voltage2_v", voltage2}});
             });
     connect(commands, &Commands::decodedPpmReceived, this,
             [this](double value, double) { emit input({{"type", "ppm"}, {"value", value}}); });
     connect(commands, &Commands::valuesReceived, this, [this](MC_VALUES v, unsigned int mask) {
-        QJsonObject fields;
-        auto field = [&fields, mask](int bit, const QString &key, double value) {
-            if ((mask & (quint32(1) << bit)) && std::isfinite(value)) {
-                fields.insert(key, value);
-            }
-        };
-        field(0, "temp_mos_c", v.temp_mos);
-        field(1, "temp_motor_c", v.temp_motor);
-        field(2, "current_motor_a", v.current_motor);
-        field(3, "current_in_a", v.current_in);
-        field(6, "duty", v.duty_now);
-        field(7, "erpm", v.rpm);
-        field(8, "voltage_v", v.v_in);
-        if (mask & (quint32(1) << 15)) {
-            fields.insert("fault_code", int(v.fault_code));
-        }
+        const auto fields = McpDataHelpers::rtValues(v, mask);
         emit telemetry(fields);
     });
     connect(commands, &Commands::lispReadCodeRx, this, &McpDevice::lispCode);

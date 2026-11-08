@@ -22,9 +22,11 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QByteArray>
+struct MC_VALUES;
 class McpDataHelpers
 {
   public:
+    static QJsonObject rtValues(const MC_VALUES &values, quint32 mask);
     static QJsonObject analyze(const QJsonArray &samples);
     static QByteArray lispImage(const QString &source, QString *error);
     static QByteArray lispReadback(const QByteArray &image);

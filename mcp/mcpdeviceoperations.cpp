@@ -82,12 +82,19 @@ McpDeviceOperations::McpDeviceOperations(McpDevice *device, const QString &direc
                                                 values.value("current_in_a").toDouble());
             }
             if (mInputAge.isValid() && mInputAge.elapsed() <= 250) {
+                sample.insert("input_age_ms", double(mInputAge.elapsed()));
                 const auto type = mInput.value("type").toString();
                 if (mInput.value("value").isDouble()) {
                     sample.insert("input_" + type, mInput.value("value"));
                 }
                 if (type == "adc" && mInput.value("value2").isDouble()) {
                     sample.insert("input_adc2", mInput.value("value2"));
+                }
+                if (type == "adc" && mInput.value("voltage_v").isDouble()) {
+                    sample.insert("input_adc_voltage_v", mInput.value("voltage_v"));
+                }
+                if (type == "adc" && mInput.value("voltage2_v").isDouble()) {
+                    sample.insert("input_adc2_voltage_v", mInput.value("voltage2_v"));
                 }
             }
             mSamples.append(sample);

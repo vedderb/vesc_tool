@@ -130,7 +130,11 @@ class FakeMcpDevice : public McpDevice
                 if (flashBusy) {
                     break;
                 }
-                emit input({{"type", "adc"}, {"value", inputActive ? 0.3 : 0.0}, {"value2", 0.0}});
+                emit input({{"type", "adc"},
+                            {"value", inputActive ? 0.3 : 0.0},
+                            {"value2", 0.0},
+                            {"voltage_v", 1.1},
+                            {"voltage2_v", 0.2}});
                 break;
             case COMM_SET_MCCONF:
             case COMM_SET_APPCONF: {
@@ -363,6 +367,10 @@ class TestMcpDeviceOperations : public QObject
         QCOMPARE(data.value("state").toString(), QString("succeeded"));
         QVERIFY(data.value("samples").toArray().size() >= 2);
         QVERIFY(data.value("samples").toArray().last().toObject().contains("input_adc"));
+        const auto last = data.value("samples").toArray().last().toObject();
+        QCOMPARE(last.value("input_adc_voltage_v").toDouble(), 1.1);
+        QCOMPARE(last.value("input_adc2_voltage_v").toDouble(), 0.2);
+        QVERIFY(last.value("input_age_ms").toDouble() <= 250);
         QCOMPARE(data.value("result")
                      .toObject()
                      .value("fields")

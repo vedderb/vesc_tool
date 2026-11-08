@@ -20,10 +20,54 @@
 #include "mcpdatahelpers.h"
 #include "vbytearray.h"
 #include "packet.h"
+#include "datatypes.h"
 #include <QRegularExpression>
 #include <QSet>
 #include <cmath>
 #include <limits>
+
+QJsonObject McpDataHelpers::rtValues(const MC_VALUES &v, quint32 mask)
+{
+    QJsonObject fields;
+    auto field = [&fields, mask](int bit, const QString &key, double value) {
+        if ((mask & (quint32(1) << bit)) && std::isfinite(value)) {
+            fields.insert(key, value);
+        }
+    };
+    field(0, "temp_mos_c", v.temp_mos);
+    field(1, "temp_motor_c", v.temp_motor);
+    field(2, "current_motor_a", v.current_motor);
+    field(3, "current_in_a", v.current_in);
+    field(4, "current_d_a", v.id);
+    field(5, "current_q_a", v.iq);
+    field(6, "duty", v.duty_now);
+    field(7, "erpm", v.rpm);
+    field(8, "voltage_v", v.v_in);
+    field(9, "amp_hours_ah", v.amp_hours);
+    field(10, "amp_hours_charged_ah", v.amp_hours_charged);
+    field(11, "watt_hours_wh", v.watt_hours);
+    field(12, "watt_hours_charged_wh", v.watt_hours_charged);
+    field(13, "tachometer", v.tachometer);
+    field(14, "tachometer_abs", v.tachometer_abs);
+    if (mask & (quint32(1) << 15)) {
+        fields.insert("fault_code", int(v.fault_code));
+        if (!v.fault_str.isEmpty()) {
+            fields.insert("fault", v.fault_str);
+        }
+    }
+    field(16, "pid_position_deg", v.position);
+    field(17, "controller_id", v.vesc_id);
+    field(18, "temp_mos_1_c", v.temp_mos_1);
+    field(18, "temp_mos_2_c", v.temp_mos_2);
+    field(18, "temp_mos_3_c", v.temp_mos_3);
+    field(19, "voltage_d_v", v.vd);
+    field(20, "voltage_q_v", v.vq);
+    if (mask & (quint32(1) << 21)) {
+        fields.insert("has_timeout", v.has_timeout);
+        fields.insert("kill_switch_active", v.kill_sw_active);
+    }
+    return fields;
+}
 
 QJsonObject McpDataHelpers::analyze(const QJsonArray &samples)
 {

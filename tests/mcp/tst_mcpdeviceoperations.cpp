@@ -33,6 +33,7 @@ class FakeMcpDevice : public McpDevice
     bool inputActive = false, rejectChanges = false;
     bool flashBusy = false;
     int flashDelayMs = 0;
+    int backupDelayMs = 0;
     QString identity = "fake-device";
     QString mode = "adc";
     QPointer<QObject> owner;
@@ -80,6 +81,9 @@ class FakeMcpDevice : public McpDevice
     }
     QByteArray configXml(const QString &) const override
     {
+        if (backupDelayMs) {
+            QThread::msleep(backupDelayMs); // Model blocking backup I/O and aged measurements.
+        }
         return "<Configuration/>";
     }
     bool validateChanges(const QString &, const QJsonObject &, QString *error) const override
@@ -190,6 +194,16 @@ class TestMcpDeviceOperations : public QObject
     {
         return value.value("id").toString();
     }
+    void approveWithFreshMeasurements(FakeMcpDevice &device, McpDeviceOperations &ops,
+                                      const QString &job)
+    {
+        // Immediate fake GUI approval must not assume disk I/O finished within
+        // the 250 ms freshness window. Publish current sensor input explicitly.
+        emit device.input(
+            {{"type", "adc"}, {"value", device.inputActive ? 0.3 : 0.0}, {"value2", 0.0}});
+        emit device.telemetry({{"erpm", 0.0}, {"duty", 0.0}, {"current_motor_a", 0.0}});
+        ops.approve(job, true);
+    }
   private slots:
     void controllerDownload()
     {
@@ -214,7 +228,7 @@ class TestMcpDeviceOperations : public QObject
         const auto job = id(ops.start("upload", {{"config", "motor"}}));
         QTRY_COMPARE_WITH_TIMEOUT(review.count(), 1, 3000);
         QCOMPARE(device.configWrites, 0);
-        ops.approve(job, true);
+        approveWithFreshMeasurements(device, ops, job);
         QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 3000);
         QCOMPARE(ops.job(job).value("state").toString(), QString("succeeded"));
         QCOMPARE(device.configWrites, 1);
@@ -249,8 +263,7 @@ class TestMcpDeviceOperations : public QObject
         const auto job = id(ops.start("upload", {{"config", "motor"}}));
         QTRY_COMPARE_WITH_TIMEOUT(review.count(), 1, 3000);
         QCOMPARE(device.configWrites, 0);
-        ops.approve(job,
-                    true); // Trusted GUI boundary; the GUI additionally gates UART confirmation.
+        approveWithFreshMeasurements(device, ops, job);
         QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 3000);
         QCOMPARE(device.configWrites, 1);
         QCOMPARE(ops.job(job).value("state").toString(), QString("succeeded"));
@@ -274,9 +287,10 @@ class TestMcpDeviceOperations : public QObject
         FakeMcpDevice device;
         device.flashDelayMs = 400;
         McpDeviceOperations ops(&device, dir.path());
-        connect(
-            &ops, &McpDeviceOperations::approvalRequested, &ops,
-            [&ops](const QString &id, const QString &, const QString &) { ops.approve(id, true); });
+        connect(&ops, &McpDeviceOperations::approvalRequested, &ops,
+                [this, &device, &ops](const QString &id, const QString &, const QString &) {
+                    approveWithFreshMeasurements(device, ops, id);
+                });
         const auto job = id(ops.start("upload", {{"config", "motor"}}));
         QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 4000);
         QCOMPARE(ops.job(job).value("state").toString(), QString("succeeded"));
@@ -288,9 +302,10 @@ class TestMcpDeviceOperations : public QObject
         FakeMcpDevice device;
         device.badReadback = true;
         McpDeviceOperations ops(&device, dir.path());
-        connect(
-            &ops, &McpDeviceOperations::approvalRequested, &ops,
-            [&ops](const QString &id, const QString &, const QString &) { ops.approve(id, true); });
+        connect(&ops, &McpDeviceOperations::approvalRequested, &ops,
+                [this, &device, &ops](const QString &id, const QString &, const QString &) {
+                    approveWithFreshMeasurements(device, ops, id);
+                });
         const auto job = id(ops.start("upload", {{"config", "motor"}}));
         QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 3000);
         QVERIFY(ops.job(job).value("outcomeUnknown").toBool());
@@ -302,13 +317,17 @@ class TestMcpDeviceOperations : public QObject
         QTemporaryDir dir;
         FakeMcpDevice device;
         device.badAck = true;
+        device.backupDelayMs = 300;
         McpDeviceOperations ops(&device, dir.path());
-        connect(
-            &ops, &McpDeviceOperations::approvalRequested, &ops,
-            [&ops](const QString &id, const QString &, const QString &) { ops.approve(id, true); });
+        connect(&ops, &McpDeviceOperations::approvalRequested, &ops,
+                [this, &device, &ops](const QString &id, const QString &, const QString &) {
+                    approveWithFreshMeasurements(device, ops, id);
+                });
         const auto job = id(ops.start("upload", {{"config", "app"}}));
         QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 3000);
-        QVERIFY(ops.job(job).value("outcomeUnknown").toBool());
+        QVERIFY2(ops.job(job).value("outcomeUnknown").toBool(),
+                 qPrintable(QString::fromUtf8(QJsonDocument(ops.job(job)).toJson())));
+        QCOMPARE(device.configWrites, 1);
     }
     void changedDevice()
     {
@@ -372,9 +391,10 @@ class TestMcpDeviceOperations : public QObject
         QTemporaryDir dir;
         FakeMcpDevice device;
         McpDeviceOperations ops(&device, dir.path());
-        connect(
-            &ops, &McpDeviceOperations::approvalRequested, &ops,
-            [&ops](const QString &id, const QString &, const QString &) { ops.approve(id, true); });
+        connect(&ops, &McpDeviceOperations::approvalRequested, &ops,
+                [this, &device, &ops](const QString &id, const QString &, const QString &) {
+                    approveWithFreshMeasurements(device, ops, id);
+                });
         const QString source = "(print \"test\")\n" + QString(1500, ' ');
         const auto job = id(ops.start("lisp_upload", {{"source", source}}));
         QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 4000);
@@ -390,9 +410,10 @@ class TestMcpDeviceOperations : public QObject
         FakeMcpDevice device;
         device.failErase = true;
         McpDeviceOperations ops(&device, dir.path());
-        connect(
-            &ops, &McpDeviceOperations::approvalRequested, &ops,
-            [&ops](const QString &id, const QString &, const QString &) { ops.approve(id, true); });
+        connect(&ops, &McpDeviceOperations::approvalRequested, &ops,
+                [this, &device, &ops](const QString &id, const QString &, const QString &) {
+                    approveWithFreshMeasurements(device, ops, id);
+                });
         const auto job = id(ops.start("lisp_upload", {{"source", "(print 1)"}}));
         QTRY_VERIFY_WITH_TIMEOUT(!ops.busy(), 4000);
         QCOMPARE(device.codeWrites, 0);

@@ -18,6 +18,8 @@
     */
 
 #include <QtTest>
+#include <QProgressDialog>
+#include "mainwindow.h"
 #include "commands.h"
 #include "vescinterface.h"
 #include "utility.h"
@@ -27,6 +29,29 @@ class TestMcpApplication : public QObject
 {
     Q_OBJECT
   private slots:
+    void idleMcpServerDoesNotShowProgressDialog()
+    {
+        MainWindow window;
+        // Isolate MCP from unrelated startup wizards and network/version checks.
+        // MCP's own timers are created by startMcpServer below and remain active.
+        for (auto timer : window.findChildren<QTimer *>()) {
+            timer->stop();
+        }
+        for (auto device : window.findChildren<VescInterface *>()) {
+            device->setIgnoreTestVersion(true);
+        }
+        QVERIFY(window.startMcpServer(0, QByteArray(64, 't'), true, true));
+        window.show();
+        QTest::qWait(4500); // Includes QProgressDialog's initial four-second force-show timer.
+        int dialogs = 0;
+        for (auto dialog : window.findChildren<QProgressDialog *>()) {
+            if (dialog->labelText().contains("MCP")) {
+                dialogs++;
+                QVERIFY(!dialog->isVisible());
+            }
+        }
+        QCOMPARE(dialogs, 1);
+    }
     void exclusiveCommandsBlockOtherCallers()
     {
         Commands commands;
@@ -171,5 +196,5 @@ class TestMcpApplication : public QObject
         QVERIFY(!device.ready()); // Loading a schema cannot fabricate a connection.
     }
 };
-QTEST_GUILESS_MAIN(TestMcpApplication)
+QTEST_MAIN(TestMcpApplication)
 #include "tst_mcpapplication.moc"

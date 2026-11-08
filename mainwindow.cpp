@@ -608,6 +608,8 @@ bool MainWindow::startMcpServer(quint16 port, const QByteArray &token, bool allo
     auto progress = new QProgressDialog(tr("MCP controller operation in progress..."), tr("Stop motor / cancel"), 0, 0, this);
     progress->setWindowModality(Qt::ApplicationModal);
     progress->setMinimumDuration(0);
+    // Stop QProgressDialog's initial force-show timer; only busyChanged may show it.
+    progress->reset();
     progress->hide();
     connect(progress, &QProgressDialog::canceled, this, [this, operations]() {
         operations->cancel(operations->currentId());

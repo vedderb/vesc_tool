@@ -23,6 +23,10 @@
 #include <QDebug>
 #include <QLowEnergyConnectionParameters>
 #include <QSettings>
+#ifdef Q_OS_ANDROID
+#include <QCoreApplication>
+#include <QPermissions>
+#endif
 
 BleUart::BleUart(QObject *parent) : QObject(parent)
 {
@@ -52,11 +56,28 @@ BleUart::~BleUart() {
 
 void BleUart::startScan()
 {
+#ifdef Q_OS_ANDROID
+    QLocationPermission location;
+    location.setAccuracy(QLocationPermission::Precise);
+    if (qApp->checkPermission(location) != Qt::PermissionStatus::Granted) {
+        qApp->requestPermission(location, this, [this](const QPermission &permission) {
+            if (permission.status() == Qt::PermissionStatus::Granted) {
+                startScan();
+            } else {
+                mScanFinished = true;
+                emit scanDone(QVariantMap(), true);
+                emit bleError(tr("BLE scan requires precise location permission. "
+                                 "Allow precise location in the application settings."));
+            }
+        });
+        return;
+    }
+#endif
     init();
 
     mDevs.clear();
-    mDeviceDiscoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
     mScanFinished = false;
+    mDeviceDiscoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
 
 void BleUart::startConnect(QString addr)

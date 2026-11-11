@@ -17,11 +17,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.10
-import QtQuick.Controls 2.10
+import QtQuick
+import QtQuick.Controls
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
-import QtQuick.Window 2.10
+import QtQuick.Window
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -54,17 +54,10 @@ ApplicationWindow {
     flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
 
     function updateNotch() {
-        var margins = Utility.getSafeAreaMargins(appWindow)
-
-        notchTop   = margins["top"]
-        notchLeft  = margins["left"]
-        notchRight = margins["right"]
-        if (Qt.platform.os === "ios") {
-            // leaving too much room at the bottom
-            notchBot = margins["bottom"] / 2
-        } else {
-            notchBot = margins["bottom"]
-        }
+        notchTop = SafeArea.margins.top
+        notchLeft = SafeArea.margins.left
+        notchRight = SafeArea.margins.right
+        notchBot = SafeArea.margins.bottom
     }
 
     Timer {
@@ -766,7 +759,7 @@ ApplicationWindow {
     }
 
     Rectangle {
-        parent: ApplicationWindow.overlay
+        parent: Overlay.overlay
         anchors.fill: parent
         color: "black"
 

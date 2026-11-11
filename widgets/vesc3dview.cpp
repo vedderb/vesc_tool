@@ -145,6 +145,19 @@ void Vesc3DView::paintGL()
     glClearColor(mBgColor.redF(), mBgColor.greenF(), mBgColor.blueF(), mBgColor.alphaF());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    if (!mProgram || !mProgram->bind()) {
+        return;
+    }
+
+    if (!mVbo.bind()) {
+        mProgram->release();
+        return;
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glActiveTexture(GL_TEXTURE0);
+
     QMatrix4x4 m;
     double aspect = double(width()) / double(height() ? height() : 1);
     m.perspective(30.0 / qMin(aspect, 1.0), aspect, 0.5, 5.0);
@@ -172,6 +185,11 @@ void Vesc3DView::paintGL()
         mTextures[i]->bind();
         glDrawArrays(GL_TRIANGLE_FAN, i * 4, 4);
     }
+
+    mProgram->disableAttributeArray(0);
+    mProgram->disableAttributeArray(1);
+    mVbo.release();
+    mProgram->release();
 }
 
 void Vesc3DView::makeObject()

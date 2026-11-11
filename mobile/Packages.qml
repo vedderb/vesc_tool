@@ -67,7 +67,7 @@ Item {
         var filter = filterInput.text
 
         for (var i = 0;i < pkgs.length;i++) {
-            if (filter.length == 0  || pkgs[i].name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
+            if (filter.length === 0  || pkgs[i].name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
                 if (!pkgs[i].isLibrary && mLoader.shouldShowPackage(pkgs[i])) {
                     pkgModel.append({"pkgName": pkgs[i].name,
                                         "pkgDescription": pkgs[i].description,

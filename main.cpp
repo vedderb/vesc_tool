@@ -37,6 +37,7 @@
 #include <QSettings>
 #include <QFontDatabase>
 #include <QPixmapCache>
+#include <QQuickWindow>
 
 #include "tcphub.h"
 
@@ -1023,6 +1024,8 @@ int main(int argc, char *argv[])
     QCoreApplication *app;
 
 #ifdef USE_MOBILE
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+
     QApplication *a = new QApplication(argc, argv);
     app = a;
 
@@ -1587,6 +1590,8 @@ int main(int argc, char *argv[])
     } else if (downloadPackageArchive) {
         return 0;
     } else {
+        QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+
         QApplication *a = new QApplication(argc, argv);
         app = a;
 

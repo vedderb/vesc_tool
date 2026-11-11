@@ -30,29 +30,12 @@ Preferences::Preferences(QWidget *parent) :
 {
     mVesc = nullptr;
 
-#ifdef HAS_GAMEPAD
-    mGamepad = nullptr;
-    mUseGamepadControl = false;
-#endif
-
-    mTimer = new QTimer(this);
-    mTimer->start(100);
-    connect(mTimer, SIGNAL(timeout()),
-            this, SLOT(timerSlot()));
-
     ui->setupUi(this);
 
     ui->pollRestoreButton->setIcon(Utility::getIcon("icons/Restart-96.png"));
     ui->pathScriptInputChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
     ui->pathRtLogChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
     ui->pathScriptOutputChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
-    ui->jsConf1Button->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
-    ui->jsConf2Button->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
-    ui->jsConf3Button->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
-    ui->jsConf4Button->setIcon(Utility::getIcon("icons/Horizontal Settings Mixer-96.png"));
-    ui->jsConnectButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
-    ui->jsScanButton->setIcon(Utility::getIcon("icons/Connected-96.png"));
-    ui->jsResetConfigButton->setIcon(Utility::getIcon("icons/Restart-96.png"));
     ui->pathLocalLogChooseButton->setIcon(Utility::getIcon("icons/Open Folder-96.png"));
 
     ui->uiScaleBox->setValue(mSettings.value("app_scale_factor", 1.0).toDouble());
@@ -67,72 +50,6 @@ Preferences::Preferences(QWidget *parent) :
     ui->pollBmsDataBox->setValue(mSettings.value("poll_rate_bms_data", 10.0).toDouble());
     ui->darkModeBox->setChecked(Utility::isDarkMode());
     ui->estopTimeBox->setValue(mSettings.value("estop_ms", 5000).toInt());
-
-#ifdef HAS_GAMEPAD
-    auto confAxis = [](QGamepad *gp, QGamepadManager::GamepadAxis axis) {
-        if (gp) {
-            QGamepadManager::instance()->configureAxis(gp->deviceId(), axis);
-        }
-    };
-
-    connect(ui->jsConf1Button, &QPushButton::clicked,
-            [=]() {confAxis(mGamepad, QGamepadManager::AxisLeftX);});
-    connect(ui->jsConf2Button, &QPushButton::clicked,
-            [=]() {confAxis(mGamepad, QGamepadManager::AxisLeftY);});
-    connect(ui->jsConf3Button, &QPushButton::clicked,
-            [=]() {confAxis(mGamepad, QGamepadManager::AxisRightX);});
-    connect(ui->jsConf4Button, &QPushButton::clicked,
-            [=]() {confAxis(mGamepad, QGamepadManager::AxisRightY);});
-
-    if (mSettings.contains("js_is_configured")) {
-        ui->jsConfigOkBox->setChecked(mSettings.value("js_is_configured").toBool());
-    }
-    if (mSettings.contains("js_is_inverted")) {
-        ui->jsInvertedBox->setChecked(mSettings.value("js_is_inverted").toBool());
-    }
-    if (mSettings.contains("js_is_bidirectional")) {
-        ui->jsBidirectionalBox->setChecked(mSettings.value("js_is_bidirectional").toBool());
-    }
-    if (mSettings.contains("js_axis")) {
-        ui->jseAxisBox->setCurrentIndex(mSettings.value("js_axis").toInt());
-    }
-    if (mSettings.contains("js_control_type")) {
-        ui->jsControlTypeBox->setCurrentIndex(mSettings.value("js_control_type").toInt());
-    }
-    if (mSettings.contains("js_current_min")) {
-        ui->jsCurrentMinBox->setValue(mSettings.value("js_current_min").toDouble());
-    }
-    if (mSettings.contains("js_current_max")) {
-        ui->jsCurrentMaxBox->setValue(mSettings.value("js_current_max").toDouble());
-    }
-    if (mSettings.contains("js_erpm_min")) {
-        ui->jsErpmMinBox->setValue(mSettings.value("js_erpm_min").toDouble());
-    }
-    if (mSettings.contains("js_erpm_max")) {
-        ui->jsErpmMaxBox->setValue(mSettings.value("js_erpm_max").toDouble());
-    }
-    if (mSettings.contains("js_range_min")) {
-        ui->jsMinBox->setValue(mSettings.value("js_range_min").toDouble());
-    }
-    if (mSettings.contains("js_range_max")) {
-        ui->jsMaxBox->setValue(mSettings.value("js_range_max").toDouble());
-    }
-
-    if (mSettings.contains("js_name")) {
-        ui->jsListBox->clear();
-        auto gamepads = QGamepadManager::instance()->connectedGamepads();
-        for (auto g: gamepads) {
-            auto name = QGamepadManager::instance()->gamepadName(g);
-            ui->jsListBox->addItem(name, g);
-            if (name == mSettings.value("js_name").toString()) {
-                if (mGamepad) {
-                    mGamepad->deleteLater();
-                }
-                mGamepad = new QGamepad(g, this);
-            }
-        }
-    }
-#endif
 
     ui->uploadContentEditorButton->setChecked(mSettings.value("scripting/uploadContentEditor", true).toBool());
     ui->uploadContentFileButton->setChecked(!mSettings.value("scripting/uploadContentEditor", true).toBool());
@@ -168,36 +85,6 @@ void Preferences::setVesc(VescInterface *vesc)
     }
 }
 
-void Preferences::setUseGamepadControl(bool useControl)
-{
-#ifdef HAS_GAMEPAD
-    if (ui->jsConfigOkBox->isChecked()) {
-        if (mGamepad) {
-            mUseGamepadControl = useControl;
-        } else {
-            mVesc->emitMessageDialog("Gamepad Control",
-                                     "No recognized gamepad is connected.",
-                                     false, false);
-        }
-    } else if (mVesc) {
-        mVesc->emitMessageDialog("Gamepad Control",
-                                 "Gamepad control is not configured. Go to Settings->Gamepad to configure it.",
-                                 false, false);
-    }
-#else
-    (void)useControl;
-#endif
-}
-
-bool Preferences::isUsingGamepadControl()
-{
-#ifdef HAS_GAMEPAD
-    return mUseGamepadControl;
-#else
-    return false;
-#endif
-}
-
 void Preferences::closeEvent(QCloseEvent *event)
 {
     if (Utility::isDarkMode() != mLastIsDark) {
@@ -227,96 +114,6 @@ void Preferences::showEvent(QShowEvent *event)
     event->accept();
 }
 
-void Preferences::timerSlot()
-{
-#ifdef HAS_GAMEPAD
-    if (mGamepad) {
-        ui->jsAxis1Bar->setValue(mGamepad->axisLeftX() * 1000.0);
-        ui->jsAxis2Bar->setValue(mGamepad->axisLeftY() * 1000.0);
-        ui->jsAxis3Bar->setValue(mGamepad->axisRightX() * 1000.0);
-        ui->jsAxis4Bar->setValue(mGamepad->axisRightY() * 1000.0);
-
-        double ax = 0.0;
-        if (ui->jseAxisBox->currentIndex() == 0) {
-            ax = mGamepad->axisLeftX() * 1000.0;
-        } else if (ui->jseAxisBox->currentIndex() == 1) {
-            ax = mGamepad->axisLeftY() * 1000.0;
-        } else if (ui->jseAxisBox->currentIndex() == 2) {
-            ax = mGamepad->axisRightX() * 1000.0;
-        } else if (ui->jseAxisBox->currentIndex() == 3) {
-            ax = mGamepad->axisRightY() * 1000.0;
-        }
-
-        if (ui->jsInvertedBox->isChecked()) {
-            ax = -ax;
-        }
-
-        double input = Utility::map(ax,
-                                    ui->jsMinBox->value(), ui->jsMaxBox->value(),
-                                    ui->jsBidirectionalBox->isChecked() ? -1.0 : 0.0, 1.0);
-        double range = 0.0;
-        int decimals = 2;
-        QString name = "Undefined";
-        QString unit = "";
-        int ctrlt = ui->jsControlTypeBox->currentIndex();
-        if (ctrlt == 0 || ctrlt == 1) {
-            range = input >= 0 ? fabs(ui->jsCurrentMaxBox->value()) : fabs(ui->jsCurrentMinBox->value());
-            input *= range;
-            name = "Current";
-            unit = " A";
-
-            if (mVesc && mUseGamepadControl) {
-                if (ctrlt == 0 || input > 0) {
-                    mVesc->commands()->setCurrent(input);
-                } else {
-                    mVesc->commands()->setCurrentBrake(input);
-                }
-            }
-        } else if (ctrlt == 2) {
-            range = 1.0;
-            input *= range;
-            name = "Duty";
-            unit = "";
-
-            if (mVesc && mUseGamepadControl) {
-                mVesc->commands()->setDutyCycle(input);
-            }
-        } else if (ctrlt == 3) {
-            range = input >= 0 ? fabs(ui->jsErpmMaxBox->value()) : fabs(ui->jsErpmMinBox->value());
-            input *= range;
-            name = "Speed";
-            unit = " ERPM";
-            decimals = 0;
-
-            if (mVesc && mUseGamepadControl) {
-                mVesc->commands()->setRpm(input);
-            }
-        } else if (ctrlt == 4) {
-            range = 360.0;
-            input *= range;
-            name = "Position";
-            unit = " Degrees";
-            decimals = 1;
-
-            if (mVesc && mUseGamepadControl) {
-                mVesc->commands()->setPos(input);
-            }
-        }
-
-        ui->jsDisp->setRange(range);
-        ui->jsDisp->setUnit(unit);
-        ui->jsDisp->setName(name);
-        ui->jsDisp->setVal(input);
-        ui->jsDisp->setDecimals(decimals);
-
-        if (!mGamepad->isConnected()) {
-            mGamepad->deleteLater();
-            mGamepad = nullptr;
-        }
-    }
-#endif
-}
-
 void Preferences::on_uiScaleBox_valueChanged(double arg1)
 {
     mSettings.setValue("app_scale_factor", arg1);
@@ -325,39 +122,6 @@ void Preferences::on_uiScaleBox_valueChanged(double arg1)
 void Preferences::on_uiPlotWidthBox_valueChanged(double arg1)
 {
     mSettings.setValue("plot_line_width", arg1);
-}
-
-void Preferences::on_jsScanButton_clicked()
-{
-#ifdef HAS_GAMEPAD
-    ui->jsListBox->clear();
-    auto gamepads = QGamepadManager::instance()->connectedGamepads();
-    for (auto g: gamepads) {
-        ui->jsListBox->addItem(QGamepadManager::instance()->gamepadName(g), g);
-    }
-#endif
-}
-
-void Preferences::on_jsConnectButton_clicked()
-{
-#ifdef HAS_GAMEPAD
-    QVariant item = ui->jsListBox->currentData();
-    if (item.isValid()) {
-        if (mGamepad) {
-            mGamepad->deleteLater();
-        }
-        mGamepad = new QGamepad(item.toInt(), this);
-    }
-#endif
-}
-
-void Preferences::on_jsResetConfigButton_clicked()
-{
-#ifdef HAS_GAMEPAD
-    if (mGamepad) {
-        QGamepadManager::instance()->resetConfiguration(mGamepad->deviceId());
-    }
-#endif
 }
 
 void Preferences::on_loadQmlUiConnectBox_toggled(bool checked)
@@ -453,23 +217,6 @@ void Preferences::on_okButton_clicked(){
 
 void Preferences::saveSettingsChanged()
 {
-#ifdef HAS_GAMEPAD
-    mSettings.setValue("js_is_configured", ui->jsConfigOkBox->isChecked());
-    mSettings.setValue("js_is_inverted", ui->jsInvertedBox->isChecked());
-    mSettings.setValue("js_is_bidirectional", ui->jsBidirectionalBox->isChecked());
-    mSettings.setValue("js_axis", ui->jseAxisBox->currentIndex());
-    mSettings.setValue("js_control_type", ui->jsControlTypeBox->currentIndex());
-    mSettings.setValue("js_current_min", ui->jsCurrentMinBox->value());
-    mSettings.setValue("js_current_max", ui->jsCurrentMaxBox->value());
-    mSettings.setValue("js_erpm_min", ui->jsErpmMinBox->value());
-    mSettings.setValue("js_erpm_max", ui->jsErpmMaxBox->value());
-    mSettings.setValue("js_range_min", ui->jsMinBox->value());
-    mSettings.setValue("js_range_max", ui->jsMaxBox->value());
-    if (mGamepad) {
-        mSettings.setValue("js_name", mGamepad->name());
-    }
-#endif
-
     mLastScaling = mSettings.value("app_scale_factor", 1.0).toDouble();
     mLastIsDark = Utility::isDarkMode();
     mSettings.setValue("scripting/uploadContentEditor", ui->uploadContentEditorButton->isChecked());

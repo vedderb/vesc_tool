@@ -78,8 +78,6 @@ ApplicationWindow {
         }
     }
 
-    Screen.orientationUpdateMask: Qt.LandscapeOrientation | Qt.PortraitOrientation
-
     Component.onCompleted: {
         if (!VescIf.isIntroDone()) {
             introWizard.openDialog()

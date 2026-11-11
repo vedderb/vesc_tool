@@ -826,7 +826,7 @@ void QCodeEditor::keyPressEvent(QKeyEvent* e) {
         }
 
         // Auto indentation
-        int indentationLevel = getIndentationSpaces();
+        qsizetype indentationLevel = getIndentationSpaces();
 
 #if QT_VERSION >= 0x050A00
         int tabCounts =

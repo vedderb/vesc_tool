@@ -20,7 +20,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
+import QtQuick.Dialogs
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -328,11 +328,10 @@ Item {
                         }
                     }
 
-                    Dl.FileDialog {
+                    FileDialog {
                         id: fileDialog
                         title: "Choose a firmware file"
                         nameFilters: ["*"]
-                        selectedNameFilter: "*"
                         onAccepted: {
                             customFwText.text = fileUrl
                             close()
@@ -935,7 +934,6 @@ Item {
             dlProg.value = prog
             dlText.text = msg
             dlProgLatest.value = prog
-            dlProgLatest.text = msg
         }
     }
 

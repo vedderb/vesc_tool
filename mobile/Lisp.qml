@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
+import QtQuick.Dialogs
 import Qt.labs.folderlistmodel 2.1
 import Qt.labs.settings 1.0 as QSettings
 
@@ -429,12 +429,11 @@ Item {
                                     id: mLogWriter
                                 }
 
-                                Dl.FileDialog {
+                                FileDialog {
                                     id: fileDialogSave
                                     title: "Please choose a file"
                                     nameFilters: ["LBM files (*.lbm *.lisp)"]
-                                    selectExisting: false
-                                    selectMultiple: false
+
                                     onAccepted: {
                                         var path = fileUrl.toString()
 
@@ -736,12 +735,10 @@ Item {
         }
     }
 
-    Dl.FileDialog {
+    FileDialog {
         id: fileDialogLoad
         title: "Open LispBM File"
         nameFilters: ["LispBM files (*.lbm *.lisp)", "All files (*)"]
-        selectExisting: true
-        selectMultiple: false
 
         onAccepted: {
             var path = fileUrlToPath(fileUrl)

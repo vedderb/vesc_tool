@@ -37,7 +37,7 @@ Esp32Flash::Esp32Flash(QObject *parent) : QObject(parent)
 
     sPortCnt++;
 
-    connect(sPort, SIGNAL(error(QSerialPort::SerialPortError)),
+    connect(sPort, SIGNAL(errorOccurred(QSerialPort::SerialPortError)),
             this, SLOT(serialPortError(QSerialPort::SerialPortError)));
 #endif
 }

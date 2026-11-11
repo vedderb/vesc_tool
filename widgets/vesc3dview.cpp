@@ -18,6 +18,7 @@
     */
 
 #include "vesc3dview.h"
+#include "qquaternion.h"
 
 #include <QTimer>
 #include <QOpenGLShaderProgram>
@@ -205,7 +206,7 @@ void Vesc3DView::makeObject()
     mTextures[1] = new QOpenGLTexture(imgSq);
     mTextures[2] = new QOpenGLTexture(imgSide);
     mTextures[3] = new QOpenGLTexture(imgSide);
-    mTextures[4] = new QOpenGLTexture(QImage(QString(":/res/images/v6plus_top.png")).mirrored());
+    mTextures[4] = new QOpenGLTexture(QImage(QString(":/res/images/v6plus_top.png")).flipped());
     mTextures[5] = new QOpenGLTexture(imgSide);
 
     for (int i = 0;i < 6;i++) {

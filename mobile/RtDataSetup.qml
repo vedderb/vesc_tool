@@ -21,8 +21,7 @@ import QtQuick 2.5
 import QtQml 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
-import QtQuick.Controls.Styles 1.4
-import QtGraphicalEffects 1.0
+import Qt5Compat.GraphicalEffects
 import QtQuick.Controls.Material 2.2
 
 import Vedder.vesc.vescinterface 1.0

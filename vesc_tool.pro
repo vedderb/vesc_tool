@@ -34,12 +34,14 @@ QT_LOGGING_RULES="qt.qml.connections=false"
 
 CONFIG += c++11
 CONFIG += resources_big
+
 ios: {
     QMAKE_CXXFLAGS_DEBUG += -Wall
 }
 
 android: {
     QMAKE_LFLAGS += -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384
+    CONFIG       += build_mobile
 }
 
 !win32-msvc*: { !android: {
@@ -84,7 +86,6 @@ DEFINES += HAS_BLUETOOTH
 !android: {
     # Serial port available
     DEFINES += HAS_SERIALPORT
-    DEFINES += HAS_GAMEPAD
 }
 }
 
@@ -115,6 +116,7 @@ QT       += quickcontrols2
 QT       += quickwidgets
 QT       += svg
 QT       += gui-private
+QT       += openglwidgets
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
@@ -132,11 +134,7 @@ contains(DEFINES, HAS_POS) {
     QT       += positioning
 }
 
-contains(DEFINES, HAS_GAMEPAD) {
-    QT       += gamepad
-}
-
-android: QT += androidextras
+android: QT += core-private
 
 ios | macx: {
     TARGET = "VESC Tool"

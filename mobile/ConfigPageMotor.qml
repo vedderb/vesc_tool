@@ -20,7 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
+import QtQuick.Dialogs
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -315,12 +315,11 @@ Item {
                             }
                         }
 
-                        Dl.FileDialog {
+                        FileDialog {
                             id: fileDialogSave
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: false
-                            selectMultiple: false
+
                             onAccepted: {
                                 var path = fileUrl.toString()
                                 if (VescIf.mcConfig().saveXml(path, "MCConfiguration")) {
@@ -352,12 +351,11 @@ Item {
                             }
                         }
 
-                        Dl.FileDialog {
+                        FileDialog {
                             id: fileDialogLoad
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: true
-                            selectMultiple: false
+
                             onAccepted: {
                                 var path = fileUrl.toString()
                                 if (VescIf.mcConfig().loadXml(path, "MCConfiguration")) {

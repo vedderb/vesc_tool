@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import QtQuick 2.0
-import QtQuick.Controls 1.4 as OldControls
+import QtQuick 2.15
 import QtQuick.Controls 2.1
 import Qt.labs.folderlistmodel 2.1
 import QtQuick.Layouts 1.3
@@ -132,23 +131,12 @@ Item {
         anchors.left: parent.left
         spacing: 0
 
-        OldControls.TableView {
+        TableView {
             id: view
             Layout.fillHeight: true
             Layout.fillWidth: true
             model: folderListModel
-            headerDelegate:headerDelegate
-            rowDelegate: Rectangle {
-                height: rowHeight
-                color: Utility.getAppHexColor("disabledText")
-            }
-
-            OldControls.TableViewColumn {
-                title: qsTr("FileName")
-                role: "fileName"
-                resizable: true
-                delegate: fileDelegate
-            }
+            delegate :headerDelegate
 
             Component {
                 id: fileDelegate

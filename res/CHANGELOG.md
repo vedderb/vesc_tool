@@ -5,6 +5,8 @@
 * Improved motor and app config write reliability.
 * Less UI reloads when working with old firmware.
 * Config caching to reduce the probability of accidently writing the default config.
+* Validate Qml cache on connect and update if needed, see https://github.com/vedderb/vesc_tool/pull/475
+* Support more ESP32 targets, see https://github.com/vedderb/vesc_tool/pull/477
 
 ### 7.00
 #### 2026-05-15

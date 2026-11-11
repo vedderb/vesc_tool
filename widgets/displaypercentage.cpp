@@ -39,10 +39,7 @@ QString DisplayPercentage::text() const
 void DisplayPercentage::setText(const QString &text)
 {
     mText = text;
-
-    QTimer::singleShot(0, this, [this]() {
-        update();
-    });
+    update();
 }
 
 bool DisplayPercentage::isDual() const
@@ -53,10 +50,7 @@ bool DisplayPercentage::isDual() const
 void DisplayPercentage::setDual(bool hasNegative)
 {
     mIsDual = hasNegative;
-
-    QTimer::singleShot(0, this, [this]() {
-        update();
-    });
+    update();
 }
 
 double DisplayPercentage::value() const
@@ -67,10 +61,7 @@ double DisplayPercentage::value() const
 void DisplayPercentage::setValue(double value)
 {
     mValue = value;
-
-    QTimer::singleShot(0, this, [this]() {
-        update();
-    });
+    update();
 }
 
 void DisplayPercentage::paintEvent(QPaintEvent *event)

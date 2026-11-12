@@ -333,7 +333,7 @@ Item {
                         title: "Choose a firmware file"
                         nameFilters: ["*"]
                         onAccepted: {
-                            customFwText.text = fileUrl
+                            customFwText.text = selectedFile
                             close()
                             parent.forceActiveFocus()
                         }

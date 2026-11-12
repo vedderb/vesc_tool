@@ -33,6 +33,7 @@ Item {
     property var dialogParent: ApplicationWindow.overlay
     property ConfigParams mAppConf: VescIf.appConfig()
     property Commands mCommands: VescIf.commands()
+    property var mPkgs: []
 
     function updateArchive() {
         disableDialog()
@@ -62,16 +63,16 @@ Item {
 
     function reloadArchive() {
         pkgModel.clear()
-        var pkgs = mLoader.reloadPackageArchive()
+        mPkgs = mLoader.reloadPackageArchive()
 
         var filter = filterInput.text
 
-        for (var i = 0;i < pkgs.length;i++) {
-            if (filter.length === 0  || pkgs[i].name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
-                if (!pkgs[i].isLibrary && mLoader.shouldShowPackage(pkgs[i])) {
-                    pkgModel.append({"pkgName": pkgs[i].name,
-                                        "pkgDescription": pkgs[i].description,
-                                        "pkg": pkgs[i]})
+        for (var i = 0;i < mPkgs.length;i++) {
+            if (filter.length === 0  || mPkgs[i].name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
+                if (!mPkgs[i].isLibrary && mLoader.shouldShowPackage(mPkgs[i])) {
+                    pkgModel.append({"pkgName": mPkgs[i].name,
+                                        "pkgDescription": mPkgs[i].description,
+                                        "ind": i})
                 }
             }
         }
@@ -108,7 +109,7 @@ Item {
                     buttonText: pkgName
                     imageSrc: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
                     onClicked: {
-                        openPkgDialog(pkg)
+                        openPkgDialog(mPkgs[ind])
                     }
                 }
             }
@@ -242,7 +243,7 @@ Item {
                             nameFilters: ["*"]
 
                             onAccepted: {
-                                var pkg = mLoader.unpackVescPackageFromPath(fileUrl.toString())
+                                var pkg = mLoader.unpackVescPackageFromPath(selectedFile.toString())
 
                                 if (!pkg.loadOk) {
                                     return

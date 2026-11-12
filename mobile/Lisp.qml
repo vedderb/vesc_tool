@@ -435,7 +435,7 @@ Item {
                                     nameFilters: ["LBM files (*.lbm *.lisp)"]
 
                                     onAccepted: {
-                                        var path = fileUrl.toString()
+                                        var path = selectedFile.toString()
 
                                         var okOpen = mLogWriter.openLogFileFullPath(path)
                                         var okWrite = mLogWriter.writeToLogFile(editorText.text)
@@ -741,7 +741,7 @@ Item {
         nameFilters: ["LispBM files (*.lbm *.lisp)", "All files (*)"]
 
         onAccepted: {
-            var path = fileUrlToPath(fileUrl)
+            var path = fileUrlToPath(selectedFile)
             openFilePath(path)
             close()
             parent.forceActiveFocus()

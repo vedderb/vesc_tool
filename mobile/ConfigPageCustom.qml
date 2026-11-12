@@ -186,7 +186,7 @@ Item {
                             nameFilters: ["*"]
 
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (!path.toLowerCase().endsWith(".xml")) {
                                     path += ".xml"
                                 }
@@ -226,7 +226,7 @@ Item {
                             nameFilters: ["*"]
 
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.customConfig(confInd).loadXml(path, "CustomConfiguration")) {
                                     VescIf.emitStatusMessage("Custom Config Loaded", true)
                                 } else {

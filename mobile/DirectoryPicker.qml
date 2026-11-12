@@ -187,7 +187,7 @@ Item {
                         font.bold: true
                         elide: Text.ElideMiddle
                         color: Utility.getAppHexColor("lightText")
-                        text: styleData.value !== undefined ? styleData.value : ""
+                        // text: styleData.value !== undefined ? styleData.value : ""
                     }
                 }
             }

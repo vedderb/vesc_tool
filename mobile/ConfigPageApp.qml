@@ -273,7 +273,7 @@ Item {
                             nameFilters: ["*"]
 
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (!path.toLowerCase().endsWith(".xml")) {
                                     path += ".xml"
                                 }
@@ -313,7 +313,7 @@ Item {
                             nameFilters: ["*"]
 
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.appConfig().loadXml(path, "APPConfiguration")) {
                                     VescIf.emitStatusMessage("Appconf Loaded", true)
                                 } else {

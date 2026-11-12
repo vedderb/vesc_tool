@@ -321,7 +321,7 @@ Item {
                             nameFilters: ["*"]
 
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.mcConfig().saveXml(path, "MCConfiguration")) {
                                     VescIf.emitStatusMessage("Mcconf Saved", true)
                                 } else {
@@ -357,7 +357,7 @@ Item {
                             nameFilters: ["*"]
 
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.mcConfig().loadXml(path, "MCConfiguration")) {
                                     VescIf.emitStatusMessage("Mcconf Loaded", true)
                                 } else {

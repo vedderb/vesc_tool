@@ -70,16 +70,6 @@ ios: {
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
 
-# If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
-# sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'
-
-# Clear old bluetooth devices
-# sudo rm -rf /var/lib/bluetooth/*
-# sudo service bluetooth restart
-
-# Bluetooth available
-DEFINES += HAS_BLUETOOTH
-
 # CAN bus available
 # Adding serialbus to Qt seems to break the serial port on static builds. TODO: Figure out why.
 #DEFINES += HAS_CANBUS
@@ -87,6 +77,7 @@ DEFINES += HAS_BLUETOOTH
 # Positioning
 !win32: {
     DEFINES += HAS_POS
+    DEFINES += HAS_BLUETOOTH
 }
 
 !ios: {
@@ -125,6 +116,7 @@ QT       += quickwidgets
 QT       += svg
 QT       += gui-private
 QT       += openglwidgets
+QT       += core5compat
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
@@ -178,17 +170,15 @@ android: {
 
 TEMPLATE = app
 
-release_win {
+# Executable icon and version info (Properties -> Details) for Windows.
+# qmake generates the resource script from these.
+win32 {
     DESTDIR = build/win
     OBJECTS_DIR = build/win/obj
     MOC_DIR = build/win/obj
     RCC_DIR = build/win/obj
     UI_DIR = build/win/obj
-}
 
-# Executable icon and version info (Properties -> Details) for Windows.
-# qmake generates the resource script from these.
-win32 {
     RC_ICONS = res/vesc.ico
     VERSION = $$VT_VERSION
     QMAKE_TARGET_PRODUCT = "VESC Tool"

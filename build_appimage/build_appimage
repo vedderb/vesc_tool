@@ -1,0 +1,20 @@
+#!/bin/bash
+
+BUILD_DIR="/home/benjamin/Dokument/qt_build/vesc_tool_qt6/vesc_tool_7.01"
+APP_NAME=vesc_tool_7.01
+
+set -e
+
+rm -rf vesc_tool_appdir
+
+python linuxdeployqt6.py/linuxdeployqt6.py -force -qtdir /opt/Qt/6.12.0/gcc_64 -out-dir vesc_tool_appdir $BUILD_DIR -qmlscandir ../
+cp original_v.svg vesc_tool_appdir
+cp vesc_tool.desktop vesc_tool_appdir
+cd vesc_tool_appdir
+ln -s $APP_NAME AppRun
+cd ..
+
+ARCH=x86_64 ./appimagetool-x86_64.AppImage vesc_tool_appdir
+
+rm -rf vesc_tool_appdir
+

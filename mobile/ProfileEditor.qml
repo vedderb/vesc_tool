@@ -28,7 +28,7 @@ import Vedder.vesc.utility 1.0
 Item {
     id: editor
 
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
     property alias profileName: nameInput.text
     property double current: currentBox.realValue / 100
     property double currentBrake: currentBrakeBox.realValue / 100

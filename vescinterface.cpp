@@ -2098,7 +2098,7 @@ bool VescInterface::setWakeLock(bool lock)
 
         return true;
     } else {
-        emitMessageDialog("Wake Lock", "Could not aquire wake lock", false, false);
+        // emitMessageDialog("Wake Lock", "Could not aquire wake lock", false, false);
         return false;
     }
 #else

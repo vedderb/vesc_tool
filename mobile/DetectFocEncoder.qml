@@ -30,7 +30,7 @@ Item {
     property real mOffset: 0.0
     property real mRatio: 0.0
     property bool mInverted: false
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()

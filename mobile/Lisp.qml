@@ -14,7 +14,7 @@ import Vedder.vesc.logwriter 1.0
 Item {
     id: lispPageItem
 
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
     property Commands mCommands: VescIf.commands()
     property string currentFilePath: ""
     property string consoleText: ""
@@ -22,7 +22,7 @@ Item {
     property real lispHeapUse: 0
     property real lispMemUse: 0
     property int statsPollHz: 2
-    property int editorFontSize: 12
+    property int editorFontSize: 10
 
     function fileUrlToPath(url) {
         var path = decodeURIComponent(url.toString())
@@ -532,6 +532,8 @@ Item {
                     TextField {
                         id: replInput
                         Layout.fillWidth: true
+                        Layout.topMargin: 5
+                        Layout.bottomMargin: 5
                         placeholderText: "REPL command"
                         onAccepted: {
                             if (text.length > 0) {
@@ -553,7 +555,7 @@ Item {
 
                     Button {
                         text: "..."
-                        Layout.preferredWidth: 52
+                        Layout.preferredWidth: 60
                         onClicked: replMenu.open()
 
                         Menu {

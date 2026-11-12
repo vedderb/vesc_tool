@@ -128,21 +128,15 @@ Item {
             }
         }
 
-        Rectangle {
+        TextField {
+            id: stringInput
             Layout.fillWidth: true
-            Layout.bottomMargin: 10
-            height: stringInput.implicitHeight + 14
-            border.width: 2
-            border.color: Utility.getAppHexColor("disabledText")
-            color: "#33a8a8a8"
-            radius: 3
-            TextInput {
-                id: stringInput
-                color: Utility.getAppHexColor("lightText")
-                anchors.fill: parent
-                anchors.margins: 7
-                font.pointSize: 12
-                focus: true
+            Layout.topMargin: 5
+            Layout.bottomMargin: 5
+            placeholderText: "Terminal Command"
+            onAccepted: {
+                mCommands.sendTerminalCmd(text)
+                text = ""
             }
         }
     }

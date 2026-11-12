@@ -6,20 +6,20 @@ set -e
 rm -f build/test_all/vesc_tool_test*
 
 # Linux
-export PATH=/opt/Qt/5.15-static/bin:$PATH
-rm -rf build/lin/*
+#export PATH=/opt/Qt/5.15-static/bin:$PATH
+#rm -rf build/lin/*
 
-qmake -config release "CONFIG += release_lin build_original"
-make clean
-make -j8
-rm -rf build/lin/obj
-mv build/lin/vesc_tool* build/test_all/vesc_tool_test_linux
+#qmake -config release "CONFIG += release_lin build_original"
+#make clean
+#make -j8
+#rm -rf build/lin/obj
+#mv build/lin/vesc_tool* build/test_all/vesc_tool_test_linux
 
 # Windows
 export PATH=/opt/mxe2/usr/bin/:$PATH
 rm -rf build/win/*
 
-/opt/mxe2/usr/bin/i686-w64-mingw32.static-qmake-qt5 -config release "CONFIG += release_win build_original vt_test_version"
+/opt/mxe2/usr/bin/x86_64-w64-mingw32.shared-qt6-qmake
 make clean
 make -j8
 rm -rf build/win/obj
@@ -36,19 +36,18 @@ export ANDROID_SDK_ROOT=$ANDROID_HOME
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 export PATH=$PATH:$ANDROID_HOME/Sdk/tools:/usr/bin:$JAVA_HOME/bin
 
-rm -rf build/android/*
+#rm -rf build/android/*
 
 export PATH=/opt/Qt5/5.15.2/android/bin/:$PATH
 
 # Mobile
-#qmake -config release "CONFIG += release_android build_mobile vt_test_version" ANDROID_ABIS="armeabi-v7a" -spec android-clang
-qmake -config release "CONFIG += release_android build_mobile vt_test_version" ANDROID_ABIS="arm64-v8a" -spec android-clang
-make clean
-make -j8
-make install INSTALL_ROOT=build/android/build
-androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-vesc_tool-deployment-settings.json --android-platform android-33
-mv build/android/build/build/outputs/apk/debug/build-debug.apk build/test_all/vesc_tool_test_android.apk
-rm -rf build/android/build
-rm -rf build/android/obj
-rm -f build/android/libvesc_tool*
+#qmake -config release "CONFIG += release_android build_mobile vt_test_version" ANDROID_ABIS="arm64-v8a" -spec android-clang
+#make clean
+#make -j8
+#make install INSTALL_ROOT=build/android/build
+#androiddeployqt --gradle --no-gdbserver --output build/android/build --input android-vesc_tool-deployment-settings.json --android-platform android-33
+#mv build/android/build/build/outputs/apk/debug/build-debug.apk build/test_all/vesc_tool_test_android.apk
+#rm -rf build/android/build
+#rm -rf build/android/obj
+#rm -f build/android/libvesc_tool*
 

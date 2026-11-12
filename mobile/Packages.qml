@@ -30,7 +30,7 @@ import Vedder.vesc.codeloader 1.0
 
 Item {
     id: appPageItem
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
     property ConfigParams mAppConf: VescIf.appConfig()
     property Commands mCommands: VescIf.commands()
     property var mPkgs: []

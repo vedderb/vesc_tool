@@ -32,7 +32,7 @@ Item {
 
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     ParamEditors {
         id: editors

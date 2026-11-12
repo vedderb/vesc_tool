@@ -28,7 +28,7 @@ import Vedder.vesc.utility 1.0
 
 Item {
     implicitHeight: grid.implicitHeight
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     GridLayout {
         id: grid
@@ -73,11 +73,8 @@ Item {
 
             onClicked: {
                 if (Utility.requestFilePermission()) {
-                    logFilePicker.folder = rtLogFileText.text
-                    logFilePicker.enabled = true
-                    logFilePicker.visible = true
-//                    folderDialog.close()
-//                    folderDialog.open()
+                    folderDialog.close()
+                    folderDialog.open()
                 } else {
                     VescIf.emitMessageDialog(
                                 "File Permissions",
@@ -90,26 +87,13 @@ Item {
                 id: folderDialog
                 title: "Please choose a folder"
                 onAccepted: {
-                    rtLogFileText.text = folderDialog.folder
+                    rtLogFileText.text = folderDialog.folder.toString()
                     close()
                     parent.forceActiveFocus()
                 }
                 onRejected: {
                     close()
                     parent.forceActiveFocus()
-                }
-            }
-
-            DirectoryPicker {
-                id: logFilePicker
-                anchors.fill: parent
-                showDotAndDotDot: true
-                visible: false
-                enabled: false
-                parent: dialogParent
-
-                onDirSelected: {
-                    rtLogFileText.text = fileName
                 }
             }
         }

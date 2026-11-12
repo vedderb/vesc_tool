@@ -26,7 +26,7 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: topItem
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     function updateVisibleProfiles() {
         for(var i = scrollCol.children.length;i > 0;i--) {

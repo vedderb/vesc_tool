@@ -20,7 +20,7 @@ Item {
 
     property ConfigParams mAppConf: VescIf.appConfig()
     property Commands mCommands: VescIf.commands()
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     property bool workingIMU: false
     property int imuType: 0

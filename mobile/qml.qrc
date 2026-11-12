@@ -8,7 +8,6 @@
         <file>StartPage.qml</file>
         <file>RtData.qml</file>
         <file>FwUpdate.qml</file>
-        <file>FilePicker.qml</file>
         <file>ParamEditDouble.qml</file>
         <file>ConfigPageMotor.qml</file>
         <file>ParamEditors.qml</file>
@@ -41,7 +40,6 @@
         <file>PairingDialog.qml</file>
         <file>SetupWizardIntro.qml</file>
         <file>Vesc3DView.qml</file>
-        <file>DirectoryPicker.qml</file>
         <file>Settings.qml</file>
         <file>RtDataIMU.qml</file>
         <file>BMS.qml</file>

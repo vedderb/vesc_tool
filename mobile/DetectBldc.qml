@@ -32,7 +32,7 @@ Item {
     property var hallTable: []
     property int hallRes: -4
     property bool resultReceived: false
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()

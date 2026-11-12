@@ -60,6 +60,12 @@ ApplicationWindow {
         notchBot = SafeArea.margins.bottom
     }
 
+    // Keys.onReleased: function(event) {
+    //     if (event.key === Qt.Key_Back) {
+    //         Qt.quit()
+    //     }
+    // }
+
     Timer {
         id: oriTimer
         interval: 100
@@ -1236,6 +1242,7 @@ ApplicationWindow {
 
         onAccepted: {
             VescIf.setAskQmlLoad(!qmlDoNotAskAgainBox.checked)
+            VescIf.storeSettings()
             updateHwAppUi()
         }
 

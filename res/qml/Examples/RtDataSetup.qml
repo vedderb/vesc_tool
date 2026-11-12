@@ -30,7 +30,7 @@ import Vedder.vesc.configparams 1.0
 
 Item {
     id: rtData
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
     anchors.fill: parent
 
     property Commands mCommands: VescIf.commands()

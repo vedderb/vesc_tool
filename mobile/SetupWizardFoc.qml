@@ -33,7 +33,7 @@ Item {
 
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
     property bool isHorizontal: width > height
     property var canDevs: []
 

@@ -489,6 +489,7 @@ Item {
 
         onAccepted: {
             VescIf.setAskQmlLoad(!qmlDoNotAskAgainBox.checked)
+            VescIf.storeSettings()
             updateHwAppUi()
         }
 

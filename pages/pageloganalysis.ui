@@ -534,6 +534,12 @@
              </item>
              <item>
               <widget class="QLabel" name="pathLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -797,8 +803,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>960</width>
-                  <height>195</height>
+                  <width>978</width>
+                  <height>181</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout">

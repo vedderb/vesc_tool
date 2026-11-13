@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1056</width>
-    <height>522</height>
+    <height>531</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -135,6 +135,16 @@
               </property>
               <property name="text">
                <string>Show non-default firmwares</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="showAllHwBox">
+              <property name="toolTip">
+               <string>Show firmware for all hardwares. WARNING: Be careful to not upload the wrong firmware as that can damage the hardware!</string>
+              </property>
+              <property name="text">
+               <string>Show All Hardwares</string>
               </property>
              </widget>
             </item>
@@ -434,6 +444,16 @@
               </property>
               <property name="text">
                <string>Show non-default firmwares</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="showAllHwArchBox">
+              <property name="toolTip">
+               <string>Show firmware for all hardwares. WARNING: Be careful to not upload the wrong firmware as that can damage the hardware!</string>
+              </property>
+              <property name="text">
+               <string>Show All Hardwares</string>
               </property>
              </widget>
             </item>

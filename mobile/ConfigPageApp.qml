@@ -142,12 +142,13 @@ Item {
     ColumnLayout {
         id: column
         anchors.fill: parent
-        spacing: 0
+        spacing: 5
 
         GridLayout {
             Layout.fillWidth: true
+            Layout.topMargin: 5
             columns: isHorizontal ? 2 : 1
-            rowSpacing: -5
+
             ComboBox {
                 id: pageBox
                 Layout.fillWidth: true

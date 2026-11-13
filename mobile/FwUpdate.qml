@@ -298,10 +298,10 @@ Item {
                             Layout.fillHeight: true
                         }
 
-                        TextInput {
-                            color: Utility.getAppHexColor("lightText")
+                        TextField {
                             id: customFwText
                             Layout.fillWidth: true
+                            placeholderText: "Custom Firmware Path"
                         }
 
                         Button {

@@ -92,11 +92,12 @@ Item {
     ColumnLayout {
         id: column
         anchors.fill: parent
-        spacing: 0
+        spacing: 5
 
         ComboBox {
             id: tabBox
             Layout.fillWidth: true
+            Layout.topMargin: 5
 
             onCurrentTextChanged: {
                 updateEditors()

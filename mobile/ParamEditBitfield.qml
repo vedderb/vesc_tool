@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.0
+import QtQuick
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
@@ -122,10 +122,10 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: Utility.getAppHexColor("lightBackground")
-        radius: 5
+        color: Color.transparent(Utility.getAppHexColor("lightBackground"), 0.4)
+        radius: 10
         border.color:  Utility.getAppHexColor("disabledText")
-        border.width: 2
+        border.width: 3
 
         ColumnLayout {
             id: column

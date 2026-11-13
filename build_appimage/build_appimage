@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILD_DIR="/home/benjamin/Dokument/qt_build/vesc_tool_qt6/vesc_tool_7.01"
+BUILD_DIR="../build/lin/vesc_tool_7.01"
 APP_NAME=vesc_tool_7.01
 
 set -e

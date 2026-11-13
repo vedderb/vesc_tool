@@ -20,6 +20,7 @@
 #ifndef DISPLAYPERCENTAGE_H
 #define DISPLAYPERCENTAGE_H
 
+#include "qtimer.h"
 #include <QWidget>
 
 class DisplayPercentage : public QWidget
@@ -40,6 +41,7 @@ public:
 signals:
 
 public slots:
+    void timerSlot();
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -49,6 +51,11 @@ private:
     bool mIsDual;
     double mValue;
 
+    QString mTextLast;
+    bool mIsDualLast;
+    double mValueLast;
+
+    QTimer *mTimer;
 };
 
 #endif // DISPLAYPERCENTAGE_H

@@ -47,8 +47,9 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
             }
         }
 
+        fwdirExists = QDir(espRoot).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() > 1;
+
         if (QFileInfo::exists(path)) {
-            fwdirExists = true;
             hws.insert(params.hw, path);
         }
     } else {

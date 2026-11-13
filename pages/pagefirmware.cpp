@@ -239,8 +239,9 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
             }
         }
 
+        fwdirExists = QDir(espRoot).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() > 1;
+
         if (QFileInfo::exists(path)) {
-            fwdirExists = true;
             QListWidgetItem *item = new QListWidgetItem;
             item->setText(params.hw);
             item->setData(Qt::UserRole, path);

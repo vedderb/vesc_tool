@@ -71,8 +71,6 @@ Item {
                 title: qsTr("Configuration")
                 Layout.fillWidth: true
                 GridLayout {
-                    anchors.topMargin: -5
-                    anchors.bottomMargin: -5
                     anchors.fill: parent
                     columns: 2
                     columnSpacing: 5
@@ -207,8 +205,6 @@ Item {
                 Layout.rowSpan: isHorizontal ? 2 : 1
 
                 GridLayout {
-                    anchors.topMargin: -5
-                    anchors.bottomMargin: -5
                     anchors.fill: parent
                     columns: 2
                     columnSpacing: 5

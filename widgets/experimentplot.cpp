@@ -315,7 +315,6 @@ void ExperimentPlot::on_experimentSaveXmlButton_clicked()
     }
 
     QXmlStreamWriter stream(&file);
-    stream.setCodec("UTF-8");
     stream.setAutoFormatting(true);
     stream.writeStartDocument();
 

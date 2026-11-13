@@ -791,7 +791,6 @@ void PageSampledData::on_saveDataButton_clicked()
                              QFileInfo(fileName).absolutePath());
 
         QTextStream stream(&file);
-        stream.setCodec("UTF-8");
 
         // Generate Time axis
         QVector<double> timeVec;

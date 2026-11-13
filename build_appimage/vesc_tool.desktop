@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=VESC Tool
+Comment=VESC Tool is used to configure and develop VESC-based motor controllers and VESC peripherals.
+Exec=AppRun
+Path=./
+Icon=original_v.svg
+Terminal=false
+Type=Application
+Categories=Utility;Development;

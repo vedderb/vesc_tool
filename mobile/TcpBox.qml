@@ -29,13 +29,10 @@ Item {
 
     GridLayout {
         id: grid
-        anchors.topMargin: -5
-        anchors.bottomMargin: -5
         anchors.fill: parent
 
         clip: false
         visible: true
-        rowSpacing: -10
         columnSpacing: 5
         rows: 3
         columns: 2

@@ -29,6 +29,17 @@ DisplayPercentage::DisplayPercentage(QWidget *parent) : QWidget(parent)
     mText = "";
     mIsDual = false;
     mValue = 0.0;
+
+    mTextLast = mText;
+    mIsDualLast = mIsDual;
+    mValueLast = mValue;
+
+    mTimer = new QTimer(this);
+    mTimer->start(34);
+    connect(mTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+
+    setAttribute(Qt::WA_OpaquePaintEvent);
+    setAttribute(Qt::WA_NoSystemBackground);
 }
 
 QString DisplayPercentage::text() const
@@ -39,7 +50,6 @@ QString DisplayPercentage::text() const
 void DisplayPercentage::setText(const QString &text)
 {
     mText = text;
-    update();
 }
 
 bool DisplayPercentage::isDual() const
@@ -50,7 +60,6 @@ bool DisplayPercentage::isDual() const
 void DisplayPercentage::setDual(bool hasNegative)
 {
     mIsDual = hasNegative;
-    update();
 }
 
 double DisplayPercentage::value() const
@@ -61,7 +70,17 @@ double DisplayPercentage::value() const
 void DisplayPercentage::setValue(double value)
 {
     mValue = value;
-    update();
+}
+
+void DisplayPercentage::timerSlot()
+{
+    if (mText != mTextLast || mIsDual != mIsDualLast || mValue != mValueLast) {
+        update();
+
+        mTextLast = mText;
+        mIsDualLast = mIsDual;
+        mValueLast = mValue;
+    }
 }
 
 void DisplayPercentage::paintEvent(QPaintEvent *event)

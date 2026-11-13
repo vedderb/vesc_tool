@@ -23,6 +23,10 @@
 #include <QDebug>
 #include <QLowEnergyConnectionParameters>
 #include <QSettings>
+#ifdef Q_OS_ANDROID
+#include <QCoreApplication>
+#include <QPermissions>
+#endif
 
 BleUart::BleUart(QObject *parent) : QObject(parent)
 {
@@ -52,11 +56,28 @@ BleUart::~BleUart() {
 
 void BleUart::startScan()
 {
+#ifdef Q_OS_ANDROID
+    QLocationPermission location;
+    location.setAccuracy(QLocationPermission::Precise);
+    if (qApp->checkPermission(location) != Qt::PermissionStatus::Granted) {
+        qApp->requestPermission(location, this, [this](const QPermission &permission) {
+            if (permission.status() == Qt::PermissionStatus::Granted) {
+                startScan();
+            } else {
+                mScanFinished = true;
+                emit scanDone(QVariantMap(), true);
+                emit bleError(tr("BLE scan requires precise location permission. "
+                                 "Allow precise location in the application settings."));
+            }
+        });
+        return;
+    }
+#endif
     init();
 
     mDevs.clear();
-    mDeviceDiscoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
     mScanFinished = false;
+    mDeviceDiscoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
 
 void BleUart::startConnect(QString addr)
@@ -73,19 +94,18 @@ void BleUart::startConnect(QString addr)
     // a controller using a devices address is not supported on macOS or iOS.
     QBluetoothDeviceInfo deviceInfo = QBluetoothDeviceInfo();
     deviceInfo.setDeviceUuid(QBluetoothUuid(addr));
-    mControl = new QLowEnergyController(deviceInfo);
-
 #else
-    mControl = new QLowEnergyController(QBluetoothAddress(addr));
+    QBluetoothDeviceInfo deviceInfo = QBluetoothDeviceInfo(QBluetoothAddress(addr), "VescBLE", 0);
 #endif
 
+    mControl = QLowEnergyController::createCentral(deviceInfo);
     mControl->setRemoteAddressType(QLowEnergyController::RandomAddress);
 
     connect(mControl, SIGNAL(serviceDiscovered(QBluetoothUuid)),
             this, SLOT(serviceDiscovered(QBluetoothUuid)));
     connect(mControl, SIGNAL(discoveryFinished()),
             this, SLOT(serviceScanDone()));
-    connect(mControl, SIGNAL(error(QLowEnergyController::Error)),
+    connect(mControl, SIGNAL(errorOccurred(QLowEnergyController::Error)),
             this, SLOT(controllerError(QLowEnergyController::Error)));
     connect(mControl, SIGNAL(connected()),
             this, SLOT(deviceConnected()));
@@ -284,7 +304,7 @@ void BleUart::serviceStateChanged(QLowEnergyService::ServiceState s)
         emit unintentionalDisconnect();
         break;
     }
-    case QLowEnergyService::ServiceDiscovered: {
+    case QLowEnergyService::RemoteServiceDiscovered: {
         if (!mService) {
             qWarning() << "mService invalid";
             return;
@@ -310,7 +330,7 @@ void BleUart::serviceStateChanged(QLowEnergyService::ServiceState s)
         // Bluetooth LE spec Where a characteristic can be notified, a Client Characteristic Configuration descriptor
         // shall be included in that characteristic as required by the Bluetooth Core Specification
         // Tx notify is enabled
-        mNotificationDescTx = txChar.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
+        mNotificationDescTx = txChar.clientCharacteristicConfiguration();
 
         if (mNotificationDescTx.isValid()) {
             // enable notification
@@ -381,7 +401,7 @@ void BleUart::init()
 
     connect(mDeviceDiscoveryAgent, SIGNAL(deviceDiscovered(const QBluetoothDeviceInfo&)),
             this, SLOT(addDevice(const QBluetoothDeviceInfo&)));
-    connect(mDeviceDiscoveryAgent, SIGNAL(error(QBluetoothDeviceDiscoveryAgent::Error)),
+    connect(mDeviceDiscoveryAgent, SIGNAL(errorOccurred(QBluetoothDeviceDiscoveryAgent::Error)),
             this, SLOT(deviceScanError(QBluetoothDeviceDiscoveryAgent::Error)));
     connect(mDeviceDiscoveryAgent, SIGNAL(finished()), this, SLOT(scanFinished()));
 

@@ -17,9 +17,8 @@ VT_GIT_COMMIT = $$system(git rev-parse --short=8 HEAD)
 
 VT_ANDROID_VERSION_ARMV7 = 221
 VT_ANDROID_VERSION_ARM64 = 222
-VT_ANDROID_VERSION_X86 = 223
 
-VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
+VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_ARM64
 
 # Ubuntu 18.04 (should work on raspbian buster too)
 # sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev qtdeclarative5-dev qtconnectivity5-dev qtmultimedia5-dev qtpositioning5-dev qtpositioning5-dev libqt5gamepad5-dev qml-module-qt-labs-settings qml-module-qt-labs-platform libqt5svg5-dev
@@ -32,19 +31,29 @@ DEFINES += VT_GIT_COMMIT=$$VT_GIT_COMMIT
 QT_LOGGING_RULES="qt.qml.connections=false"
 #CONFIG += qtquickcompiler
 
-CONFIG += c++11
 CONFIG += resources_big
+
 ios: {
     QMAKE_CXXFLAGS_DEBUG += -Wall
 }
 
 android: {
+    CONFIG += gnu++11
+    ANDROID_MIN_SDK_VERSION = 28
+    ANDROID_TARGET_SDK_VERSION = 36
     QMAKE_LFLAGS += -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384
+    CONFIG       += build_mobile
+}
+
+!android: {
+    CONFIG += c++11
 }
 
 !win32-msvc*: { !android: {
     QMAKE_CXXFLAGS += -Wno-deprecated-copy
 }}
+
+QMAKE_CXXFLAGS += -Wno-deprecated
 
 # Build mobile GUI
 #CONFIG += build_mobile
@@ -60,16 +69,6 @@ ios: {
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
 
-# If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
-# sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'
-
-# Clear old bluetooth devices
-# sudo rm -rf /var/lib/bluetooth/*
-# sudo service bluetooth restart
-
-# Bluetooth available
-DEFINES += HAS_BLUETOOTH
-
 # CAN bus available
 # Adding serialbus to Qt seems to break the serial port on static builds. TODO: Figure out why.
 #DEFINES += HAS_CANBUS
@@ -77,6 +76,7 @@ DEFINES += HAS_BLUETOOTH
 # Positioning
 !win32: {
     DEFINES += HAS_POS
+    DEFINES += HAS_BLUETOOTH
 }
 
 !ios: {
@@ -84,7 +84,6 @@ DEFINES += HAS_BLUETOOTH
 !android: {
     # Serial port available
     DEFINES += HAS_SERIALPORT
-    DEFINES += HAS_GAMEPAD
 }
 }
 
@@ -115,6 +114,8 @@ QT       += quickcontrols2
 QT       += quickwidgets
 QT       += svg
 QT       += gui-private
+QT       += openglwidgets
+QT       += core5compat
 
 contains(DEFINES, HAS_SERIALPORT) {
     QT       += serialport
@@ -132,11 +133,7 @@ contains(DEFINES, HAS_POS) {
     QT       += positioning
 }
 
-contains(DEFINES, HAS_GAMEPAD) {
-    QT       += gamepad
-}
-
-android: QT += androidextras
+android: QT += core-private
 
 ios | macx: {
     TARGET = "VESC Tool"
@@ -148,12 +145,6 @@ ios | macx: {
 
         TARGET = vesc_tool_$$VT_VERSION
     }
-}
-
-ANDROID_VERSION = 1
-
-android:contains(QT_ARCH, i386) {
-    VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 }
 
 contains(ANDROID_TARGET_ARCH, arm64-v8a) {
@@ -172,14 +163,6 @@ android: {
 
 TEMPLATE = app
 
-release_win {
-    DESTDIR = build/win
-    OBJECTS_DIR = build/win/obj
-    MOC_DIR = build/win/obj
-    RCC_DIR = build/win/obj
-    UI_DIR = build/win/obj
-}
-
 # Executable icon and version info (Properties -> Details) for Windows.
 # qmake generates the resource script from these.
 win32 {
@@ -190,17 +173,6 @@ win32 {
     QMAKE_TARGET_COPYRIGHT = "Copyright (C) 2016 - 2026 Benjamin Vedder"
 }
 
-release_lin {
-    # http://micro.nicholaswilson.me.uk/post/31855915892/rules-of-static-linking-libstdc-libc-libgcc
-    # http://insanecoding.blogspot.se/2012/07/creating-portable-linux-binaries.html
-    QMAKE_LFLAGS += -static-libstdc++ -static-libgcc
-    DESTDIR = build/lin
-    OBJECTS_DIR = build/lin/obj
-    MOC_DIR = build/lin/obj
-    RCC_DIR = build/lin/obj
-    UI_DIR = build/lin/obj
-}
-
 release_macos {
     # brew install qt
     DESTDIR = build/macos
@@ -208,14 +180,6 @@ release_macos {
     MOC_DIR = build/macos/obj
     RCC_DIR = build/macos/obj
     UI_DIR = build/macos/obj
-}
-
-release_android {
-    DESTDIR = build/android
-    OBJECTS_DIR = build/android/obj
-    MOC_DIR = build/android/obj
-    RCC_DIR = build/android/obj
-    UI_DIR = build/android/obj
 }
 
 build_mobile {
@@ -338,12 +302,6 @@ build_original {
 
 DISTFILES += \
     android/AndroidManifest.xml \
-    android/gradle/wrapper/gradle-wrapper.jar \
-    android/gradlew \
-    android/gradlew.bat \
-    android/res/values/libs.xml \
-    android/build.gradle \
-    android/gradle/wrapper/gradle-wrapper.properties \
     android/src/com/vedder/vesc/VForegroundService.java \
     android/src/com/vedder/vesc/Utils.java
 
@@ -392,8 +350,3 @@ ios {
     QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1,2
 }
 CONFIG -= warn_on
-
-contains(ANDROID_TARGET_ARCH,) {
-    ANDROID_ABIS = \
-        armeabi-v7a
-}

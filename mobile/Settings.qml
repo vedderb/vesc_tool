@@ -26,7 +26,7 @@ import Vedder.vesc.utility 1.0
 
 Item {
     property bool mLastDarkMode: false
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     function openDialog() {
         mLastDarkMode = Utility.isDarkMode()

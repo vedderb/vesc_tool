@@ -29,7 +29,7 @@ import Vedder.vesc.utility 1.0
 Item {
     id: rootItem
 
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
     property int animationSpeed: 500

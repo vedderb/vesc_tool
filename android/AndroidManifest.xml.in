@@ -1,7 +1,7 @@
 <?xml version='"1.0"'?>
 <manifest package='"vedder.vesctool"' xmlns:android='"http://schemas.android.com/apk/res/android"' android:versionName='"$$VT_VERSION"' android:versionCode='"$${VT_ANDROID_VERSION}"' android:installLocation='"auto"'>
-    <application android:extractNativeLibs='"true"' android:hardwareAccelerated='"true"' android:name='"org.qtproject.qt5.android.bindings.QtApplication"' android:label='"VESC Tool"' android:icon='"@drawable/icon"' android:requestLegacyExternalStorage='"true"'>
-        <activity android:configChanges='"orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation"' android:name='"org.qtproject.qt5.android.bindings.QtActivity"' android:label='"VESC Tool"' android:exported='"true"' android:screenOrientation='"unspecified"' android:launchMode='"singleTop"'>
+    <application android:hardwareAccelerated='"true"' android:name='"org.qtproject.qt.android.bindings.QtApplication"' android:label='"VESC Tool"' android:icon='"@drawable/icon"' android:requestLegacyExternalStorage='"true"'>
+        <activity android:configChanges='"orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation"' android:name='"org.qtproject.qt.android.bindings.QtActivity"' android:label='"VESC Tool"' android:exported='"true"' android:screenOrientation='"unspecified"' android:launchMode='"singleTop"'>
             <intent-filter>
                 <action android:name='"android.intent.action.MAIN"'/>
                 <category android:name='"android.intent.category.LAUNCHER"'/>
@@ -12,22 +12,6 @@
             <!-- Application arguments -->
 
             <meta-data android:name='"android.app.lib_name"' android:value='"vesc_tool"'/>
-            <meta-data android:name='"android.app.qt_sources_resource_id"' android:resource='"@array/qt_sources"'/>
-            <meta-data android:name='"android.app.repository"' android:value='"default"'/>
-            <meta-data android:name='"android.app.qt_libs_resource_id"' android:resource='"@array/qt_libs"'/>
-            <meta-data android:name='"android.app.bundled_libs_resource_id"' android:resource='"@array/bundled_libs"'/>
-            <!-- Deploy Qt libs as part of package -->
-            <meta-data android:name='"android.app.bundle_local_qt_libs"' android:value='"-- %%BUNDLE_LOCAL_QT_LIBS%% --"'/>
-            <!-- Run with local libs -->
-            <meta-data android:name='"android.app.use_local_qt_libs"' android:value='"-- %%USE_LOCAL_QT_LIBS%% --"'/>
-            <meta-data android:name='"android.app.libs_prefix"' android:value='"/data/local/tmp/qt/"'/>
-            <meta-data android:name='"android.app.load_local_libs_resource_id"' android:resource='"@array/load_local_libs"'/>
-            <meta-data android:name='"android.app.static_init_classes"' android:value='"-- %%INSERT_INIT_CLASSES%% --"'/>
-            <!--  Messages maps -->
-            <meta-data android:value='"@string/ministro_not_found_msg"' android:name='"android.app.ministro_not_found_msg"'/>
-            <meta-data android:value='"@string/ministro_needed_msg"' android:name='"android.app.ministro_needed_msg"'/>
-            <meta-data android:value='"@string/fatal_error_msg"' android:name='"android.app.fatal_error_msg"'/>
-            <!--  Messages maps -->
 
             <!-- Splash screen -->
             <!-- meta-data android:name='"android.app.splash_screen_drawable"' android:resource='"@drawable/logo"'/ -->
@@ -54,9 +38,9 @@
                 -->
             <meta-data android:name='"android.app.extract_android_style"' android:value='"full"'/>
             <!-- extract android style -->
-            <meta-data android:name='"android.app.splash_screen_drawable"' android:resource='"@drawable/splashscreen"'/>
-            <meta-data android:name='"android.app.splash_screen_drawable_portrait"' android:resource='"@drawable/splashscreen_port"'/>
-            <meta-data android:name='"android.app.splash_screen_drawable_landscape"' android:resource='"@drawable/splashscreen_land"'/>
+            <meta-data android:name='"android.app.splash_screen_drawable"' android:resource='"@drawable/splash"'/>
+            <meta-data android:name='"android.app.splash_screen_drawable_portrait"' android:resource='"@drawable/splash_port"'/>
+            <meta-data android:name='"android.app.splash_screen_drawable_landscape"' android:resource='"@drawable/splash_land"'/>
     </activity>
     
     <service
@@ -69,7 +53,6 @@
 
     </application>
 
-    <uses-sdk android:minSdkVersion='"23"' android:targetSdkVersion='"35"'/>
     <supports-screens android:largeScreens='"true"' android:normalScreens='"true"' android:anyDensity='"true"' android:smallScreens='"true"'/>
 
     <!-- The following comment will be replaced upon deployment with default permissions based on the dependencies of the application.

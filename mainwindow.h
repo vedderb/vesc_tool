@@ -163,7 +163,6 @@ private slots:
     void on_actionRestoreConfigurationsCAN_triggered();
     void on_scanCanButton_clicked();
     void on_canList_currentRowChanged(int currentRow);
-    void on_actionGamepadControl_triggered(bool checked);   
     void on_actionPreferences_triggered();
     void on_actionRestartLispBM_triggered();
     void on_actionRemoveDownloadedConfigs_triggered();

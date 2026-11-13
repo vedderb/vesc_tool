@@ -96,7 +96,7 @@ Item {
         title: "Remove profile"
         x: 10
         y: 10 + parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
+        parent: Overlay.overlay
 
         Overlay.modal: Rectangle {
             color: "#AA000000"

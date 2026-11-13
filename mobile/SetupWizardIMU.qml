@@ -5,8 +5,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
-//import QtGraphicalEffects 1.0
-//import QtQuick.Controls.Material 2.2
+import Qt5Compat.GraphicalEffects
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -21,7 +20,7 @@ Item {
 
     property ConfigParams mAppConf: VescIf.appConfig()
     property Commands mCommands: VescIf.commands()
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     property bool workingIMU: false
     property int imuType: 0

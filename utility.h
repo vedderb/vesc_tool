@@ -133,7 +133,6 @@ public:
     Q_INVOKABLE static void setDarkMode(bool isDark);
     Q_INVOKABLE static bool isDarkMode();
     Q_INVOKABLE static QString getThemePath();
-    Q_INVOKABLE static QVariantMap getSafeAreaMargins(QQuickWindow *window);
 
     static void setPlotColors(QCustomPlot* plot);
     static void plotSavePdf(QCustomPlot* plot, int width = 1280, int height = 720, QString title = "");

@@ -35,9 +35,9 @@
 #include <QApplication>
 #include <QStyleFactory>
 #include <QSettings>
-#include <QDesktopWidget>
 #include <QFontDatabase>
 #include <QPixmapCache>
+#include <QQuickWindow>
 
 #include "tcphub.h"
 
@@ -245,8 +245,6 @@ int main(int argc, char *argv[])
     // DPI settings
     // TODO: http://www.qcustomplot.com/index.php/support/forum/1344
 
-    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-
 #ifdef HAS_BLUETOOTH
     qmlRegisterType<BleUart>("Vedder.vesc.bleuart", 1, 0, "BleUart");
 #else
@@ -289,8 +287,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 #else
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
 #ifdef Q_OS_LINUX
     signal(SIGINT, m_cleanup);
     signal(SIGTERM, m_cleanup);
@@ -1028,6 +1024,8 @@ int main(int argc, char *argv[])
     QCoreApplication *app;
 
 #ifdef USE_MOBILE
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+
     QApplication *a = new QApplication(argc, argv);
     app = a;
 
@@ -1592,6 +1590,8 @@ int main(int argc, char *argv[])
     } else if (downloadPackageArchive) {
         return 0;
     } else {
+        QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+
         QApplication *a = new QApplication(argc, argv);
         app = a;
 

@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
+import QtQuick.Dialogs
 import Qt.labs.folderlistmodel 2.1
 import Qt.labs.settings 1.0 as QSettings
 
@@ -14,7 +14,7 @@ import Vedder.vesc.logwriter 1.0
 Item {
     id: lispPageItem
 
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
     property Commands mCommands: VescIf.commands()
     property string currentFilePath: ""
     property string consoleText: ""
@@ -22,7 +22,7 @@ Item {
     property real lispHeapUse: 0
     property real lispMemUse: 0
     property int statsPollHz: 2
-    property int editorFontSize: 12
+    property int editorFontSize: 10
 
     function fileUrlToPath(url) {
         var path = decodeURIComponent(url.toString())
@@ -429,14 +429,13 @@ Item {
                                     id: mLogWriter
                                 }
 
-                                Dl.FileDialog {
+                                FileDialog {
                                     id: fileDialogSave
                                     title: "Please choose a file"
                                     nameFilters: ["LBM files (*.lbm *.lisp)"]
-                                    selectExisting: false
-                                    selectMultiple: false
+
                                     onAccepted: {
-                                        var path = fileUrl.toString()
+                                        var path = selectedFile.toString()
 
                                         var okOpen = mLogWriter.openLogFileFullPath(path)
                                         var okWrite = mLogWriter.writeToLogFile(editorText.text)
@@ -533,6 +532,8 @@ Item {
                     TextField {
                         id: replInput
                         Layout.fillWidth: true
+                        Layout.topMargin: 5
+                        Layout.bottomMargin: 5
                         placeholderText: "REPL command"
                         onAccepted: {
                             if (text.length > 0) {
@@ -554,7 +555,7 @@ Item {
 
                     Button {
                         text: "..."
-                        Layout.preferredWidth: 52
+                        Layout.preferredWidth: 60
                         onClicked: replMenu.open()
 
                         Menu {
@@ -736,15 +737,13 @@ Item {
         }
     }
 
-    Dl.FileDialog {
+    FileDialog {
         id: fileDialogLoad
         title: "Open LispBM File"
         nameFilters: ["LispBM files (*.lbm *.lisp)", "All files (*)"]
-        selectExisting: true
-        selectMultiple: false
 
         onAccepted: {
-            var path = fileUrlToPath(fileUrl)
+            var path = fileUrlToPath(selectedFile)
             openFilePath(path)
             close()
             parent.forceActiveFocus()

@@ -39,12 +39,7 @@
 #include <QTimer>
 #include <utility>
 
-// We enable QStringView with Qt 5.15.1
-// #if QT_VERSION < QT_VERSION_CHECK(5, 15, 1)
-    #define MH_SUBSTR(pos, len) text.midRef(pos, len)
-// #else
-//     #define MH_SUBSTR(pos, len) QStringView(text).mid(pos, len)
-// #endif
+#define MH_SUBSTR(pos, len) QStringView(text).mid(pos, len)
 
 QHash<QString, MarkdownHighlighter::HighlighterState>
     MarkdownHighlighter::_langStringToEnum;

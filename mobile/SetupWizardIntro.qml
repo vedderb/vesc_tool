@@ -20,7 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
-import QtGraphicalEffects 1.0
+import Qt5Compat.GraphicalEffects
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.configparams 1.0
@@ -28,7 +28,7 @@ import Vedder.vesc.utility 1.0
 
 Item {
     property ConfigParams mInfoConf: VescIf.infoConfig()
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     function openDialog() {
         dialog.open()

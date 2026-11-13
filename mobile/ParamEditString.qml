@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.0
+import QtQuick
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
@@ -56,7 +56,7 @@ Item {
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: Utility.getAppHexColor("lightBackground")
+        color: Color.transparent(Utility.getAppHexColor("lightBackground"), 0.4)
         radius: 10
         border.color: Utility.getAppHexColor("disabledText")
         border.width: 3
@@ -75,28 +75,19 @@ Item {
                 font.pointSize: 12
             }
 
-            Rectangle {
+            TextField {
+                id: stringInput
                 Layout.fillWidth: true
-                height: stringInput.implicitHeight + 14
-                border.width: 2
-                border.color: Utility.getAppHexColor("disabledText")
-                color: Utility.getAppHexColor("normalBackground")
-                radius: 3
-                TextInput {
-                    id: stringInput
-                    color: Utility.getAppHexColor("lightText")
-                    anchors.fill: parent
-                    anchors.margins: 7
-                    font.pointSize: 12
-                    focus: true
+                Layout.topMargin: 5
+                Layout.bottomMargin: 5
+                focus: true
 
-                    onTextChanged: {
-                        if (params != null) {
-                            if (params.getUpdateOnly() !== paramName) {
-                                params.setUpdateOnly("")
-                            }
-                            params.updateParamString(paramName, text, editor);
+                onTextChanged: {
+                    if (params != null) {
+                        if (params.getUpdateOnly() !== paramName) {
+                            params.setUpdateOnly("")
                         }
+                        params.updateParamString(paramName, text, editor);
                     }
                 }
             }

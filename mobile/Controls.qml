@@ -30,7 +30,7 @@ Item {
     property int parentWidth: 10
     property int parentHeight: 10
 
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()

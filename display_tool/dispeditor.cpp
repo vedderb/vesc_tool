@@ -505,7 +505,7 @@ void DispEditor::updatePalette()
     QGridLayout *l = new QGridLayout;
     l->setVerticalSpacing(1);
     l->setHorizontalSpacing(1);
-    l->setMargin(1);
+    l->setContentsMargins(1, 1, 1, 1);
 
     int colors = 0;
     if (ui->formatBox->currentIndex() == 0) {

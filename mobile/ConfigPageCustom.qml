@@ -20,7 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
+import QtQuick.Dialogs
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -68,7 +68,7 @@ Item {
     }
 
     function updateEditors() {
-        if (tabBox.currentText == "") {
+        if (tabBox.currentText === "") {
             return
         }
 
@@ -92,11 +92,12 @@ Item {
     ColumnLayout {
         id: column
         anchors.fill: parent
-        spacing: 0
+        spacing: 5
 
         ComboBox {
             id: tabBox
             Layout.fillWidth: true
+            Layout.topMargin: 5
 
             onCurrentTextChanged: {
                 updateEditors()
@@ -180,14 +181,13 @@ Item {
                             }
                         }
 
-                        Dl.FileDialog {
+                        FileDialog {
                             id: fileDialogSave
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: false
-                            selectMultiple: false
+
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (!path.toLowerCase().endsWith(".xml")) {
                                     path += ".xml"
                                 }
@@ -221,14 +221,13 @@ Item {
                             }
                         }
 
-                        Dl.FileDialog {
+                        FileDialog {
                             id: fileDialogLoad
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: true
-                            selectMultiple: false
+
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.customConfig(confInd).loadXml(path, "CustomConfiguration")) {
                                     VescIf.emitStatusMessage("Custom Config Loaded", true)
                                 } else {

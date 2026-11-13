@@ -62,6 +62,8 @@ private slots:
     void on_uploadAllButton_clicked();
     void on_dlArchiveButton_clicked();
     void on_dlFwButton_clicked();
+    void on_showAllHwBox_checkStateChanged(const Qt::CheckState &arg1);
+    void on_showAllHwArchBox_checkStateChanged(const Qt::CheckState &arg1);
 
 private:
     Ui::PageFirmware *ui;

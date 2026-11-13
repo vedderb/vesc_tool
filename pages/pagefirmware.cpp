@@ -239,8 +239,9 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
             }
         }
 
+        fwdirExists = QDir(espRoot).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() > 1;
+
         if (QFileInfo::exists(path)) {
-            fwdirExists = true;
             QListWidgetItem *item = new QListWidgetItem;
             item->setText(params.hw);
             item->setData(Qt::UserRole, path);
@@ -256,7 +257,7 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
 
         foreach (const auto &fi, QDir(fwDir).entryInfoList(QDir::NoFilter, QDir::Name)) {
             QStringList names = fi.fileName().split("_o_");
-            if (fi.isDir() && (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
+            if (fi.isDir() && (ui->showAllHwBox->isChecked() || params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
                 QListWidgetItem *item = new QListWidgetItem;
 
                 QString name = names.at(0);
@@ -335,7 +336,8 @@ void PageFirmware::updateArchFwList()
                 auto params = mVesc->getLastFwRxParams();
 
                 if (!mVesc->isPortConnected() || params.hw.isEmpty() ||
-                        names.contains(params.hw, Qt::CaseInsensitive)) {
+                        names.contains(params.hw, Qt::CaseInsensitive) ||
+                        ui->showAllHwArchBox->isChecked()) {
 
                     if (ui->showNonDefaultArchBox->isChecked() ||
                             fi2.fileName().toLower() == "vesc_default.bin") {
@@ -799,5 +801,17 @@ void PageFirmware::on_dlFwButton_clicked()
     }
 
     ui->dlFwButton->setEnabled(true);
+}
+
+
+void PageFirmware::on_showAllHwBox_checkStateChanged(const Qt::CheckState &arg1)
+{
+    reloadLatest(false);
+}
+
+
+void PageFirmware::on_showAllHwArchBox_checkStateChanged(const Qt::CheckState &arg1)
+{
+    reloadArchive(false);
 }
 

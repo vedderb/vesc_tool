@@ -20,7 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.3 as Dl
+import QtQuick.Dialogs
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -31,7 +31,7 @@ Item {
     id: confPageMotorItem
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     ParamEditors {
         id: editors
@@ -166,12 +166,12 @@ Item {
     ColumnLayout {
         id: column
         anchors.fill: parent
-        spacing: 0
+        spacing: 5
 
         GridLayout {
             Layout.fillWidth: true
+            Layout.topMargin: 5
             columns: isHorizontal ? 2 : 1
-            rowSpacing: -5
             ComboBox {
                 id: pageBox
                 Layout.fillWidth: true
@@ -315,14 +315,13 @@ Item {
                             }
                         }
 
-                        Dl.FileDialog {
+                        FileDialog {
                             id: fileDialogSave
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: false
-                            selectMultiple: false
+
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.mcConfig().saveXml(path, "MCConfiguration")) {
                                     VescIf.emitStatusMessage("Mcconf Saved", true)
                                 } else {
@@ -352,14 +351,13 @@ Item {
                             }
                         }
 
-                        Dl.FileDialog {
+                        FileDialog {
                             id: fileDialogLoad
                             title: "Please choose a file"
                             nameFilters: ["*"]
-                            selectExisting: true
-                            selectMultiple: false
+
                             onAccepted: {
-                                var path = fileUrl.toString()
+                                var path = selectedFile.toString()
                                 if (VescIf.mcConfig().loadXml(path, "MCConfiguration")) {
                                     VescIf.emitStatusMessage("Mcconf Loaded", true)
                                 } else {

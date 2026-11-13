@@ -59,9 +59,8 @@
 #endif
 
 #ifdef Q_OS_ANDROID
-#include <QtAndroid>
-#include <QAndroidJniObject>
-#include <QAndroidJniEnvironment>
+#include <QJniObject>
+#include <QJniEnvironment>
 #endif
 
 class VescInterface : public QObject
@@ -458,7 +457,7 @@ private:
 #endif
 
 #ifdef Q_OS_ANDROID
-    QAndroidJniObject mWakeLock;
+    QJniObject mWakeLock;
 #endif
     bool mWakeLockActive;
 

@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0 as QSettings
 import Qt.labs.platform 1.1
@@ -28,18 +28,15 @@ import Vedder.vesc.utility 1.0
 
 Item {
     implicitHeight: grid.implicitHeight
-    property var dialogParent: ApplicationWindow.overlay
+    property var dialogParent: Overlay.overlay
 
     GridLayout {
         id: grid
 
         anchors.fill: parent
-        anchors.topMargin: -5
-        anchors.bottomMargin: -5
 
         clip: false
         visible: true
-        rowSpacing: -10
         columnSpacing: 5
         rows: 3
         columns: 3
@@ -73,11 +70,8 @@ Item {
 
             onClicked: {
                 if (Utility.requestFilePermission()) {
-                    logFilePicker.folder = rtLogFileText.text
-                    logFilePicker.enabled = true
-                    logFilePicker.visible = true
-//                    folderDialog.close()
-//                    folderDialog.open()
+                    folderDialog.close()
+                    folderDialog.open()
                 } else {
                     VescIf.emitMessageDialog(
                                 "File Permissions",
@@ -90,7 +84,7 @@ Item {
                 id: folderDialog
                 title: "Please choose a folder"
                 onAccepted: {
-                    rtLogFileText.text = folderDialog.folder
+                    rtLogFileText.text = folderDialog.folder.toString()
                     close()
                     parent.forceActiveFocus()
                 }
@@ -99,43 +93,17 @@ Item {
                     parent.forceActiveFocus()
                 }
             }
-
-            DirectoryPicker {
-                id: logFilePicker
-                anchors.fill: parent
-                showDotAndDotDot: true
-                visible: false
-                enabled: false
-                parent: dialogParent
-
-                onDirSelected: {
-                    rtLogFileText.text = fileName
-                }
-            }
         }
 
-        Rectangle {
+        TextField {
+            id: rtLogFileText
             Layout.fillWidth: true
             Layout.columnSpan: 3
-            Layout.topMargin: 6
-            Layout.bottomMargin: 6
-            height: rtLogFileText.implicitHeight + 14
-            border.width: 2
-            border.color: Utility.getAppHexColor("disabledText")
-            color: Utility.getAppHexColor("normalBackground")
-            radius: 3
-
-            TextInput {
-                color: Utility.getAppHexColor("lightText")
-                id: rtLogFileText
-                anchors.fill: parent
-                anchors.margins: 7
-                font.pointSize: 12
-                text: StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
-                clip: true
-                QSettings.Settings {
-                    property alias path_rt_log: rtLogFileText.text
-                }
+            placeholderText: "File Path"
+            text: ""
+            clip: true
+            QSettings.Settings {
+                property alias path_rt_log: rtLogFileText.text
             }
         }
 
@@ -144,6 +112,7 @@ Item {
             text: "Enable RT Data Logging"
             Layout.fillWidth: true
             Layout.columnSpan: 3
+
             focusPolicy: Qt.NoFocus
 
             onClicked: {

@@ -115,7 +115,7 @@ cd "$BUILD_ROOT/arm64"
 # Note that the aab is not used for the test versions
 cd "$PROJECT_DIR"
 #cp "$STAGING_DIR/build/outputs/bundle/release/android-build-release.aab" "build/test_all/android.aab"
-cp "$STAGING_DIR/build/outputs/apk/release/android-build-release-signed.apk" "build/test_all/android.apk"
+cp "$STAGING_DIR/build/outputs/apk/release/android-build-release-signed.apk" "build/test_all/vesc_tool_test_android.apk"
 
 rm -rf "$BUILD_ROOT"
 

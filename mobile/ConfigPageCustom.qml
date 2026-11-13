@@ -183,6 +183,7 @@ Item {
 
                         FileDialog {
                             id: fileDialogSave
+                            fileMode: FileDialog.SaveFile
                             title: "Please choose a file"
                             nameFilters: ["*"]
 
@@ -225,6 +226,7 @@ Item {
                             id: fileDialogLoad
                             title: "Please choose a file"
                             nameFilters: ["*"]
+                            fileMode: FileDialog.OpenFile
 
                             onAccepted: {
                                 var path = selectedFile.toString()

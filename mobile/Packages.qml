@@ -240,6 +240,7 @@ Item {
                         FileDialog {
                             id: fileDialogLoad
                             title: "Please choose a file"
+                            fileMode: FileDialog.OpenFile
                             nameFilters: ["*"]
 
                             onAccepted: {

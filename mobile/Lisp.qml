@@ -432,6 +432,7 @@ Item {
                                 FileDialog {
                                     id: fileDialogSave
                                     title: "Please choose a file"
+                                    fileMode: FileDialog.SaveFile
                                     nameFilters: ["LBM files (*.lbm *.lisp)"]
 
                                     onAccepted: {
@@ -740,6 +741,7 @@ Item {
     FileDialog {
         id: fileDialogLoad
         title: "Open LispBM File"
+        fileMode: FileDialog.OpenFile
         nameFilters: ["LispBM files (*.lbm *.lisp)", "All files (*)"]
 
         onAccepted: {

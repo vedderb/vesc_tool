@@ -318,6 +318,7 @@ Item {
                         FileDialog {
                             id: fileDialogSave
                             title: "Please choose a file"
+                            fileMode: FileDialog.SaveFile
                             nameFilters: ["*"]
 
                             onAccepted: {
@@ -354,6 +355,7 @@ Item {
                         FileDialog {
                             id: fileDialogLoad
                             title: "Please choose a file"
+                            fileMode: FileDialog.OpenFile
                             nameFilters: ["*"]
 
                             onAccepted: {

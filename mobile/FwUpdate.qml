@@ -331,6 +331,7 @@ Item {
                     FileDialog {
                         id: fileDialog
                         title: "Choose a firmware file"
+                        fileMode: FileDialog.OpenFile
                         nameFilters: ["*"]
                         onAccepted: {
                             customFwText.text = selectedFile

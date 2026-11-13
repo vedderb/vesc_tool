@@ -270,6 +270,7 @@ Item {
 
                         FileDialog {
                             id: fileDialogSave
+                            fileMode: FileDialog.SaveFile
                             title: "Please choose a file"
                             nameFilters: ["*"]
 
@@ -310,6 +311,7 @@ Item {
 
                         FileDialog {
                             id: fileDialogLoad
+                            fileMode: FileDialog.OpenFile
                             title: "Please choose a file"
                             nameFilters: ["*"]
 

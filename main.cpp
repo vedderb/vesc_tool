@@ -37,7 +37,6 @@
 #include <QSettings>
 #include <QFontDatabase>
 #include <QPixmapCache>
-#include <QQuickWindow>
 
 #include "tcphub.h"
 
@@ -283,9 +282,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<MiniMp3Dec>();
 
 #ifdef USE_MOBILE
-#ifndef DEBUG_BUILD
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
 #else
 #ifdef Q_OS_LINUX
     signal(SIGINT, m_cleanup);
@@ -1016,7 +1013,7 @@ int main(int argc, char *argv[])
     scale = 1.0;
 #endif
 
-    if (scale > 1.01) {
+    if (scale > 1.01 || scale < 0.99) {
         qputenv("QT_SCALE_FACTOR", QString::number(scale).toLocal8Bit());
     }
 #endif
@@ -1024,8 +1021,6 @@ int main(int argc, char *argv[])
     QCoreApplication *app;
 
 #ifdef USE_MOBILE
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
-
     QApplication *a = new QApplication(argc, argv);
     app = a;
 
@@ -1590,8 +1585,6 @@ int main(int argc, char *argv[])
     } else if (downloadPackageArchive) {
         return 0;
     } else {
-        QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
-
         QApplication *a = new QApplication(argc, argv);
         app = a;
 

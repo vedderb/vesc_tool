@@ -114,7 +114,7 @@
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale the user intefrace with this factor. Useful for high resolution monitors. VESC Tool must be restarted for this setting to take effect.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="minimum">
-            <double>1.000000000000000</double>
+            <double>0.500000000000000</double>
            </property>
            <property name="maximum">
             <double>3.000000000000000</double>

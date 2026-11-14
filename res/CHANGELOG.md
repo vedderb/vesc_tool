@@ -9,6 +9,7 @@
 * Support more ESP32 targets, see https://github.com/vedderb/vesc_tool/pull/477
 * Moved to Qt 6.12.
 * Added option to show firmware for all hardware version.
+* Support for UI scale less than 1.
 
 ---
 

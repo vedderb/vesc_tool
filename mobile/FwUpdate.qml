@@ -64,7 +64,7 @@ Item {
 
                 PageIndicator {
                     id: indicator
-                    count: swipeView.count
+                    count: visible ? swipeView.count : 0
                     currentIndex: swipeView.currentIndex
                     anchors.centerIn: parent
                     rotation: 90

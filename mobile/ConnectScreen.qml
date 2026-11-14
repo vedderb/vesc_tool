@@ -476,6 +476,7 @@ Item {
     property var vescsUdp: []
 
     UdpServerSimple {
+        id: udpDiscovery
         Component.onCompleted: {
             startServerBroadcast(65109)
         }
@@ -502,6 +503,16 @@ Item {
                     }
                     mBle.emitScanDone()
                 }
+            }
+        }
+    }
+
+    Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.platform.os == "ios" && Qt.application.state == Qt.ApplicationActive) {
+                udpDiscovery.startServerBroadcast(65109)
             }
         }
     }

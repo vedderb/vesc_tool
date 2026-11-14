@@ -2537,6 +2537,12 @@ QString Utility::configPath(QString subPath)
         QFileInfo file(path);
         QFileInfo fileDl(pathDl);
 
+        if (!fileDl.exists() ||
+                (subPath.isEmpty() &&
+                 !QFileInfo(pathDl + QString::number(VT_VERSION, 'f', 2) + "/info.xml").exists())) {
+            return path;
+        }
+
         auto date = file.lastModified();
         auto dateDl = fileDl.lastModified();
 

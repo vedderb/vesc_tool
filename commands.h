@@ -25,6 +25,7 @@
 #include <QMap>
 #include <QVariant>
 #include <QVariantList>
+#include <QPointer>
 #include "datatypes.h"
 #include "configparams.h"
 
@@ -33,6 +34,11 @@ class Commands : public QObject
     Q_OBJECT
 public:
     explicit Commands(QObject *parent = nullptr);
+    // Exclusive app-side transaction channel. Deliberately not Q_INVOKABLE.
+    bool acquireExclusive(QObject *owner);
+    void releaseExclusive(QObject *owner);
+    bool hasExclusiveOwner() const;
+    bool sendExclusive(QObject *owner, const QByteArray &data);
 
     void setLimitedMode(bool is_limited);
     Q_INVOKABLE bool isLimitedMode();
@@ -92,6 +98,7 @@ public:
     }
 
 signals:
+    void exclusiveInterrupted();
     void sampleDataQmlStarted(int sample_len);
 
     void dataToSend(QByteArray &data);
@@ -306,6 +313,8 @@ private slots:
 
 private:
     void emitData(QByteArray data);
+    void emitDataImpl(QByteArray data);
+    QPointer<QObject> mExclusiveOwner;
 
     QTimer *mTimer;
     bool mSendCan;

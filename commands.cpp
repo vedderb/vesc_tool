@@ -72,6 +72,9 @@ bool Commands::isLimitedMode()
 
 bool Commands::setSendCan(bool sendCan, int id)
 {
+    if (mExclusiveOwner) {
+        return false;
+    }
     if (id >= 0) {
         mCanId = id;
     }
@@ -92,6 +95,9 @@ bool Commands::getSendCan()
 
 void Commands::setCanSendId(unsigned int id)
 {
+    if (mExclusiveOwner) {
+        return;
+    }
     mCanId = int(id);
 }
 
@@ -193,7 +199,29 @@ void Commands::processPacket(QByteArray data)
 
         uint32_t mask = 0xFFFFFFFF;
         if (id == COMM_GET_VALUES_SELECTIVE) {
+            if (vb.size() < 4) {
+                break;
+            }
             mask = vb.vbPopFrontUint32();
+        }
+        if (id == COMM_GET_VALUES && vb.size() < 53) {
+            break; // The non-optional values through fault_code must be complete.
+        }
+        // Report only fields actually carried by this packet. Older firmware can
+        // omit optional trailing values even for a full GET_VALUES response.
+        static const int fieldBytes[] = {2, 2, 4, 4, 4, 4, 2, 4, 2, 4, 4,
+                                         4, 4, 4, 4, 1, 4, 1, 6, 4, 4, 1};
+        mask &= (uint32_t(1) << 22) - 1;
+        int remaining = vb.size();
+        for (int bit = 0; bit < 22; bit++) {
+            if (!(mask & (uint32_t(1) << bit))) {
+                continue;
+            }
+            if (remaining < fieldBytes[bit]) {
+                mask &= (uint32_t(1) << bit) - 1;
+                break;
+            }
+            remaining -= fieldBytes[bit];
         }
 
         if (mask & (uint32_t(1) << 0)) {
@@ -270,10 +298,12 @@ void Commands::processPacket(QByteArray data)
             }
         }
 
-        if (vb.size() >= 8) {
+        if (vb.size() >= 4) {
             if (mask & (uint32_t(1) << 19)) {
                 values.vd = vb.vbPopFrontDouble32(1e3);
             }
+        }
+        if (vb.size() >= 4) {
             if (mask & (uint32_t(1) << 20)) {
                 values.vq = vb.vbPopFrontDouble32(1e3);
             }
@@ -2377,7 +2407,64 @@ void Commands::timerSlot()
     if (mTimeoutLbmStats > 0) mTimeoutLbmStats--;
 }
 
+bool Commands::acquireExclusive(QObject *owner)
+{
+    if (!owner || owner->thread() != thread() || mExclusiveOwner) {
+        return false;
+    }
+    mExclusiveOwner = owner;
+    mCheckNextMcConfig = false;
+    mTimeoutMcconf = 0;
+    mTimeoutAppconf = 0;
+    return true;
+}
+
+void Commands::releaseExclusive(QObject *owner)
+{
+    if (owner && mExclusiveOwner == owner) {
+        mExclusiveOwner.clear();
+    }
+}
+
+bool Commands::hasExclusiveOwner() const
+{
+    return !mExclusiveOwner.isNull();
+}
+
+bool Commands::sendExclusive(QObject *owner, const QByteArray &data)
+{
+    if (!owner || mExclusiveOwner != owner || data.isEmpty()) {
+        return false;
+    }
+    // Old supported firmware uses the app's normal compatibility allowlist.
+    // Never disable limited mode merely to obtain the exclusive channel.
+    const int command = static_cast<unsigned char>(data.at(0));
+    if (mIsLimitedMode && command != COMM_FW_VERSION &&
+            !mCompatibilityCommands.contains(command)) {
+        return false;
+    }
+    emitDataImpl(data);
+    return true;
+}
+
 void Commands::emitData(QByteArray data)
+{
+    if (mExclusiveOwner && !data.isEmpty()) {
+        const auto command = static_cast<unsigned char>(data.at(0));
+        const bool stop = command == COMM_MOTOR_ESTOP ||
+                (command == COMM_SET_CURRENT && data.size() == 5 && data.mid(1) == QByteArray(4, '\0'));
+        if (stop) {
+            emit exclusiveInterrupted();
+            emitDataImpl(data);
+            return;
+        }
+    }
+    if (!mExclusiveOwner && !data.isEmpty()) {
+        emitDataImpl(data);
+    }
+}
+
+void Commands::emitDataImpl(QByteArray data)
 {
     // Only allow firmware commands in limited mode
     if (mIsLimitedMode && data.at(0) > COMM_WRITE_NEW_APP_DATA) {

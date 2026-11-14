@@ -1,0 +1,9 @@
+QT += core testlib
+QT -= gui
+CONFIG += console testcase c++11
+CONFIG -= app_bundle
+TEMPLATE = app
+TARGET = tst_mcpwritetransaction
+INCLUDEPATH += ../../mcp
+SOURCES += tst_mcpwritetransaction.cpp ../../mcp/mcpwritetransaction.cpp
+HEADERS += ../../mcp/mcpwritetransaction.h

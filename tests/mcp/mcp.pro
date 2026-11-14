@@ -1,0 +1,11 @@
+QT += core gui network testlib
+CONFIG += console testcase c++11
+CONFIG -= app_bundle
+TEMPLATE = app
+TARGET = tst_mcpserver
+INCLUDEPATH += ../../mcp
+SOURCES += tst_mcpserver.cpp ../../mcp/mcpserver.cpp
+HEADERS += ../../mcp/mcpserver.h
+SOURCES += ../../mcp/mcpparamvalidator.cpp ../../configparam.cpp
+HEADERS += ../../mcp/mcpparamvalidator.h ../../configparam.h
+INCLUDEPATH += ../..

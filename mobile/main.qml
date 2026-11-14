@@ -866,23 +866,23 @@ ApplicationWindow {
                         mCommands.bmsGetValues()
                     }
                 } else {
-                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 0) {
+                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex === 0) {
                         interval = 50
                         mCommands.getValues()
                     }
 
-                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 1) {
+                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex === 1) {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getImuData(0x2)
                     }
 
-                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 2) {
+                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex === 2) {
                         interval = 20
                         mCommands.getImuData(0x1FF)
                     }
 
-                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 3) {
+                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex === 3) {
                         interval = 100
                         mCommands.getValuesSetupSelective(0x7E00)
                         mCommands.getStats(0xFFFFFFFF)

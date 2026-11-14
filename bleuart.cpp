@@ -257,7 +257,7 @@ void BleUart::serviceScanDone()
 
         connect(mService, SIGNAL(stateChanged(QLowEnergyService::ServiceState)),
                 this, SLOT(serviceStateChanged(QLowEnergyService::ServiceState)));
-        connect(mService, SIGNAL(error(QLowEnergyService::ServiceError)),
+        connect(mService, SIGNAL(errorOccurred(QLowEnergyService::ServiceError)),
                 this, SLOT(serviceError(QLowEnergyService::ServiceError)));
         connect(mService, SIGNAL(characteristicChanged(QLowEnergyCharacteristic,QByteArray)),
                 this, SLOT(updateData(QLowEnergyCharacteristic,QByteArray)));

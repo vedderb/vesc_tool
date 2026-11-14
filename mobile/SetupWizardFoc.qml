@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
+import QtQuick
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import Qt5Compat.GraphicalEffects
 import QtQuick.Controls.Material 2.2
@@ -69,9 +69,9 @@ Item {
     }
 
     function updateUsageListParams() {
-        mMcConf.updateParamDouble("l_duty_start", usageList.currentItem.modelData.duty_start, null)
-        mMcConf.updateParamInt("m_fault_stop_time_ms", usageList.currentItem.modelData.fault_stop_ms, null)
-        mMcConf.updateParamInt("bms.limit_mode", usageList.currentItem.modelData.bms_limit_mode, null)
+        mMcConf.updateParamDouble("l_duty_start", usageModel.get(usageList.currentIndex).duty_start, null)
+        mMcConf.updateParamInt("m_fault_stop_time_ms", usageModel.get(usageList.currentIndex).fault_stop_ms, null)
+        mMcConf.updateParamInt("bms.limit_mode", usageModel.get(usageList.currentIndex).bms_limit_mode, null)
     }
 
     Component.onCompleted: {
@@ -371,10 +371,10 @@ Item {
                         delegate: motorDelegate
 
                         onCurrentIndexChanged: {
-                            maxPowerLossBox.realValue = motorList.currentItem.modelData.maxLosses
-                            openloopErpmBox.realValue = motorList.currentItem.modelData.openloopErpm
-                            sensorlessBox.realValue = motorList.currentItem.modelData.sensorlessErpm
-                            motorPolesBox.realValue = motorList.currentItem.modelData.poles
+                            maxPowerLossBox.realValue = motorModel.get(motorList.currentIndex).maxLosses
+                            openloopErpmBox.realValue = motorModel.get(motorList.currentIndex).openloopErpm
+                            sensorlessBox.realValue = motorModel.get(motorList.currentIndex).sensorlessErpm
+                            motorPolesBox.realValue = motorModel.get(motorList.currentIndex).poles
                         }
                     }
 
@@ -392,10 +392,10 @@ Item {
 
                             onToggled: {
                                 if (!checked) {
-                                    maxPowerLossBox.realValue = motorList.currentItem.modelData.maxLosses
-                                    openloopErpmBox.realValue = motorList.currentItem.modelData.openloopErpm
-                                    sensorlessBox.realValue = motorList.currentItem.modelData.sensorlessErpm
-                                    motorPolesBox.realValue = motorList.currentItem.modelData.poles
+                                    maxPowerLossBox.realValue = motorModel.get(motorList.currentIndex).maxLosses
+                                    openloopErpmBox.realValue = motorModel.get(motorList.currentIndex).openloopErpm
+                                    sensorlessBox.realValue = motorModel.get(motorList.currentIndex).sensorlessErpm
+                                    motorPolesBox.realValue = motorModel.get(motorList.currentIndex).poles
                                 }
                             }
                         }
@@ -931,7 +931,7 @@ Item {
                 if (res.startsWith("Success!")) {
                     resDetect = true
 
-                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs, usageList.currentItem.modelData.batt_cut_cautious)
+                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs, usageModel.get(usageList.currentIndex).batt_cut_cautious)
 
                     var updateAllParams = ["l_duty_start"]
 
@@ -948,8 +948,8 @@ Item {
                     // and the motor and application suggest it.
                     if (mMcConf.getParamEnumNames("foc_sensor_mode").length >= 5 &&
                             mMcConf.getParamEnum("foc_sensor_mode") === 0 &&
-                            usageList.currentItem.modelData.hfi_start &&
-                            motorList.currentItem.modelData.hfi_start) {
+                            usageModel.get(usageList.currentIndex).hfi_start &&
+                            motorModel.get(motorList.currentIndex).hfi_start) {
                         mMcConf.updateParamEnum("foc_sensor_mode", 4, null)
                         updateAllParams.push("foc_sensor_mode")
                     }

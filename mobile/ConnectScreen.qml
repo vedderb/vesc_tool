@@ -480,7 +480,7 @@ Item {
             startServerBroadcast(65109)
         }
 
-        onDataRx: {
+        function onDataRx(data) {
             var tokens = Utility.arr2str(data).split("::")
             if (tokens.length === 3) {
                 var found = false

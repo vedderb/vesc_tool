@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
+import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts 1.3
 import Qt5Compat.GraphicalEffects
 
@@ -454,17 +454,17 @@ Item {
                 flat: true
 
                 onClicked: {
-                    if (stackLayout.currentIndex == 0) {
+                    if (stackLayout.currentIndex === 0) {
                         closeWizard(false)
                     } else {
                         stackLayout.currentIndex--
 
-                        if (stackLayout.currentIndex == 2 &&
+                        if (stackLayout.currentIndex === 2 &&
                                 !ppmMap.visible && !adcMap.visible) {
                             stackLayout.currentIndex--
                         }
 
-                        if (stackLayout.currentIndex == 2) {
+                        if (stackLayout.currentIndex === 2) {
                             mAppConf.updateParamEnum("app_ppm_conf.ctrl_type", 0, null)
                             mAppConf.updateParamEnum("app_adc_conf.ctrl_type", 0, null)
                             mCommands.setAppConf()
@@ -492,15 +492,15 @@ Item {
                     running: false
                     onTriggered: {
                         if (stackLayout.currentIndex < (stackLayout.count - 1)) {
-                            var apptype = inputList.currentItem.modelData.apptype
+                            var apptype = inputModel.get(inputList.currentIndex).apptype
                             var ppmMap_wasVisible = ppmMap.visible
 
                             stackLayout.currentIndex++
 
-                            if (stackLayout.currentIndex == 1) {
+                            if (stackLayout.currentIndex === 1) {
                                 // Type page
-                                mCommands.setSendCan(canIdList.currentItem.modelData.isCan,
-                                                     canIdList.currentItem.modelData.canId)
+                                mCommands.setSendCan(canIdModel.get(canIdList.currentIndex).isCan,
+                                                     canIdModel.get(canIdList.currentIndex).canId)
 
                                 disableDialog()
                                 var res = Utility.resetInputCan(VescIf, VescIf.getCanDevsLast())
@@ -509,7 +509,7 @@ Item {
                                 if (!res) {
                                     closeWizard(false)
                                 }
-                            } else if (stackLayout.currentIndex == 2) {
+                            } else if (stackLayout.currentIndex === 2) {
                                 // Map page
                                 adcMap.visible = false
                                 ppmMap.visible = false

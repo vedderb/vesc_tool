@@ -39,6 +39,7 @@ ApplicationWindow {
     property int notchTop: 0
 
     property string lastFile: ""
+    property string pendingQml: ""
     property bool wasFullscreen: false
 
     onClosing: {
@@ -55,6 +56,13 @@ ApplicationWindow {
         Loader {
             id: loader
             anchors.fill: parent
+            onLoaded: {
+                if (pendingQml.length > 0) {
+                    var str = pendingQml
+                    pendingQml = ""
+                    QmlUi.reloadQml(str)
+                }
+            }
         }
     }
 
@@ -62,10 +70,17 @@ ApplicationWindow {
         target: QmlUi
 
         function onReloadFile(fileName) {
+            pendingQml = ""
             loader.source = ""
             QmlUi.clearQmlCache()
             loadTimer.start()
             lastFile = fileName
+        }
+
+        function onReloadQml(str) {
+            if (loader.status !== Loader.Ready) {
+                pendingQml = str
+            }
         }
 
         function onToggleFullscreen() {

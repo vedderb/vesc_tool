@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDisplayName</key>
 	<string>Vesc Tool</string>
 	<key>CFBundleExecutable</key>
@@ -11,17 +13,17 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.vesc-project.vesc-tool</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.06.2</string>
+	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>VESC Tool</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>6.06.2</string>
+	<string>7.01</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>6.06.2</string>
+	<string>7.01</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationCategoryType</key>
@@ -40,6 +42,8 @@
 	<string>VESC Tool searches Bluetooth LE Devices (WaiterLock, Barcode Scanner, eGK)</string>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>Saves log files here</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>VESC Tool connects to controllers on your local network.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Used for Ride Tracking</string>
 	<key>NSLocationAlwaysUsageDescription</key>

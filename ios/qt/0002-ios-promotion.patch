@@ -1,0 +1,21 @@
+Subject: [PATCH] iOS: Request high refresh rates when enabled by the app
+
+Local Qt patch; related issue: https://qt-project.atlassian.net/browse/QTBUG-117756
+Requires CADisableMinimumFrameDurationOnPhone=true in the app's Info.plist.
+
+diff --git a/src/plugins/platforms/ios/qiosscreen.mm b/src/plugins/platforms/ios/qiosscreen.mm
+index 7bd4f734eae9..75e3803f4b78 100644
+--- a/src/plugins/platforms/ios/qiosscreen.mm
++++ b/src/plugins/platforms/ios/qiosscreen.mm
+@@ -195,3 +195,11 @@
+     m_displayLink = [m_uiScreen displayLinkWithBlock:^(CADisplayLink *) { deliverUpdateRequests(); }];
++    if (@available(iOS 15.0, *)) {
++        const float maximumFrameRate = m_uiScreen.maximumFramesPerSecond;
++        if (maximumFrameRate > 60
++            && [[NSBundle.mainBundle objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"] boolValue]) {
++            m_displayLink.preferredFrameRateRange = CAFrameRateRangeMake(
++                    qMin(80.0f, maximumFrameRate), maximumFrameRate, maximumFrameRate);
++        }
++    }
+     m_displayLink.paused = YES; // Enabled when clients call QWindow::requestUpdate()
+     [m_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];

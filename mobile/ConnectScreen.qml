@@ -458,7 +458,7 @@ Item {
             footer: BusyIndicator {
                 Layout.alignment: Qt.AlignCenter
                 Layout.fillHeight: true
-                running: scanning
+                running: scanning && rootItem.opened
                 width: parent.width
                 height: BusyIndicator.implicitHeight*1.5
 
@@ -476,6 +476,7 @@ Item {
     property var vescsUdp: []
 
     UdpServerSimple {
+        id: udpDiscovery
         Component.onCompleted: {
             startServerBroadcast(65109)
         }
@@ -501,6 +502,20 @@ Item {
                         "updateTime" : new Date().getTime()
                     }
                     mBle.emitScanDone()
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.platform.os == "ios") {
+                if (Qt.application.state == Qt.ApplicationActive) {
+                    udpDiscovery.startServerBroadcast(65109)
+                } else {
+                    udpDiscovery.stopServer()
                 }
             }
         }

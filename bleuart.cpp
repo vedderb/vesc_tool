@@ -23,7 +23,7 @@
 #include <QDebug>
 #include <QLowEnergyConnectionParameters>
 #include <QSettings>
-#ifdef Q_OS_ANDROID
+#if defined(Q_OS_ANDROID) || defined(Q_OS_MACOS) || defined(Q_OS_IOS)
 #include <QCoreApplication>
 #include <QPermissions>
 #endif
@@ -56,6 +56,22 @@ BleUart::~BleUart() {
 
 void BleUart::startScan()
 {
+#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
+    QBluetoothPermission bluetooth;
+    if (qApp->checkPermission(bluetooth) != Qt::PermissionStatus::Granted) {
+        qApp->requestPermission(bluetooth, this, [this](const QPermission &permission) {
+            if (permission.status() == Qt::PermissionStatus::Granted) {
+                startScan();
+            } else {
+                mScanFinished = true;
+                emit scanDone(QVariantMap(), true);
+                emit bleError(tr("Bluetooth permission is required. "
+                                 "Allow Bluetooth in the application settings."));
+            }
+        });
+        return;
+    }
+#endif
 #ifdef Q_OS_ANDROID
     QLocationPermission location;
     location.setAccuracy(QLocationPermission::Precise);
@@ -82,6 +98,20 @@ void BleUart::startScan()
 
 void BleUart::startConnect(QString addr)
 {
+#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
+    QBluetoothPermission bluetooth;
+    if (qApp->checkPermission(bluetooth) != Qt::PermissionStatus::Granted) {
+        qApp->requestPermission(bluetooth, this, [this, addr](const QPermission &permission) {
+            if (permission.status() == Qt::PermissionStatus::Granted) {
+                startConnect(addr);
+            } else {
+                emit bleError(tr("Bluetooth permission is required. "
+                                 "Allow Bluetooth in the application settings."));
+            }
+        });
+        return;
+    }
+#endif
     init();
 
     disconnectBle();

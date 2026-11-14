@@ -1,0 +1,14 @@
+Subject: [PATCH] iOS: Avoid truncating event timestamp
+
+Fixes: QTBUG-150292
+Upstream: https://github.com/qt/qtbase/commit/5e294dfb4794a70595535acfa17ada00e52bcbc5
+
+diff --git a/src/plugins/platforms/ios/quiview.mm b/src/plugins/platforms/ios/quiview.mm
+index b3fa4b8ae220..5f6976b6c10f 100644
+--- a/src/plugins/platforms/ios/quiview.mm
++++ b/src/plugins/platforms/ios/quiview.mm
+@@ -55,3 +55,3 @@ inline ulong getTimeStamp(UIEvent *event)
+-    return ulong(useEvent ? event.timestamp : NSProcessInfo.processInfo.systemUptime) * 1000;
++    return ulong((useEvent ? event.timestamp : NSProcessInfo.processInfo.systemUptime) * 1000);
+ }
+ }

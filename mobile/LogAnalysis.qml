@@ -288,10 +288,12 @@ Item {
         title: "Save Local CSV Backup"
         fileMode: FileDialog.SaveFile
         currentFile: root.loadedFileName
-        nameFilters: ["CSV files (*.csv)", "All files (*)"]
+        nameFilters: Qt.platform.os === "android"
+                     ? ["All files (*)"]
+                     : ["CSV files (*.csv)", "All files (*)"]
         onAccepted: {
             if (Utility.writeTextFile(selectedFile.toString(), root.loadedCsvText)) {
-                root.statusText = "Saved backup: " + selectedFile.toString().split("/").pop()
+                root.statusText = "Saved backup: " + decodeURIComponent(selectedFile.toString()).split("/").pop()
             } else {
                 root.statusText = "Failed to save local backup."
             }
@@ -633,7 +635,9 @@ Item {
     FileDialog {
         id: csvDialog
         title: "Select VESC CSV Log"
-        nameFilters: ["CSV files (*.csv)", "All files (*)"]
+        nameFilters: Qt.platform.os === "android"
+                     ? ["All files (*)"]
+                     : ["CSV files (*.csv)", "All files (*)"]
         onAccepted: root.loadCsv(selectedFile)
     }
     Plugin {
@@ -732,6 +736,30 @@ Item {
                               var geo = mapView.map.toCoordinate(eventPoint.position)
                               root.jumpToNearestCoord(geo)
                           }
+            }
+            PinchHandler {
+                id: mapPinch
+                target: null
+                grabPermissions: PointerHandler.CanTakeOverFromAnything
+                property real startZoom: 13
+                property var startGeo: QtPositioning.coordinate(0, 0)
+
+                onActiveChanged: {
+                    if (active) {
+                        startZoom = mapView.map.zoomLevel
+                        startGeo = mapView.map.toCoordinate(centroid.position, false)
+                    }
+                }
+
+                onScaleChanged: (delta) => {
+                                    if (!active || scale <= 0) return
+                                    var targetZoom = startZoom + Math.log2(scale)
+                                    targetZoom = Math.max(mapView.map.minimumZoomLevel,
+                                                          Math.min(mapView.map.maximumZoomLevel, targetZoom))
+                                    mapView.map.zoomLevel = targetZoom
+                                    // Keep the geographic point under the two fingers anchored while zooming
+                                    mapView.map.alignCoordinateToPoint(startGeo, centroid.position)
+                                }
             }
         }
         MapPolyline { id: routeLine; visible: root.hasGps; line.width: 4; line.color: "#00aaff" }

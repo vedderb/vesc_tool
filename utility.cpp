@@ -2486,6 +2486,21 @@ QByteArray Utility::readAllFromFile(const QString &filePath)
     return data;
 }
 
+QString Utility::readTextFile(QString path)
+{
+    if (path.startsWith("file:")) {
+        path = QUrl(path).toLocalFile();
+    }
+    // Note: Keep "content://..." URIs untouched — Qt on Android opens them directly via QFile!
+
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QString();
+    }
+
+    return QString::fromUtf8(f.readAll());
+}
+
 bool Utility::writeTextFile(QString path, QString content)
 {
     if (path.startsWith("file:")) {
@@ -2568,20 +2583,6 @@ QString Utility::configPath(QString subPath)
     } else {
         return path;
     }
-}
-
-QString Utility::readTextFile(QString path)
-{
-    if (path.startsWith("file:")) {
-        path = QUrl(path).toLocalFile();
-    }
-
-    QFile f(path);
-    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        return QString();
-    }
-
-    return QString::fromUtf8(f.readAll());
 }
 
 void Utility::setDarkMode(bool isDarkSetting)

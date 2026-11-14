@@ -511,8 +511,12 @@ Item {
         target: Qt.application
 
         function onStateChanged() {
-            if (Qt.platform.os == "ios" && Qt.application.state == Qt.ApplicationActive) {
-                udpDiscovery.startServerBroadcast(65109)
+            if (Qt.platform.os == "ios") {
+                if (Qt.application.state == Qt.ApplicationActive) {
+                    udpDiscovery.startServerBroadcast(65109)
+                } else {
+                    udpDiscovery.stopServer()
+                }
             }
         }
     }

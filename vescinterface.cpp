@@ -1747,7 +1747,7 @@ bool VescInterface::isCurrentFwBootloader()
 bool VescInterface::openRtLogFile(QString outDirectory)
 {
     if (outDirectory.startsWith("file:/")) {
-        outDirectory.remove(0, 6);
+        outDirectory = QUrl(outDirectory).toLocalFile();
     }
 
     if (!QDir(outDirectory).exists()) {

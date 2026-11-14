@@ -28,6 +28,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
+#include <QUrl>
 #include <cmath>
 #include "utility.h"
 #include "lzokay/lzokay.hpp"
@@ -1134,7 +1135,7 @@ bool ConfigParams::setXML(QXmlStreamReader &stream, QString configName)
 bool ConfigParams::saveXml(QString fileName, QString configName)
 {
     if (fileName.startsWith("file:/")) {
-        fileName.remove(0, 6);
+        fileName = QUrl(fileName).toLocalFile();
     }
 
     QFile file(fileName);
@@ -1159,7 +1160,7 @@ bool ConfigParams::saveXml(QString fileName, QString configName)
 bool ConfigParams::loadXml(QString fileName, QString configName)
 {
     if (fileName.startsWith("file:/")) {
-        fileName.remove(0, 6);
+        fileName = QUrl(fileName).toLocalFile();
     }
 
     QFile file(fileName);

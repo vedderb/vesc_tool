@@ -58,9 +58,6 @@ QMAKE_CXXFLAGS += -Wno-deprecated
 # Build mobile GUI
 #CONFIG += build_mobile
 
-# Exclude built-in firmwares
-CONFIG += exclude_fw
-
 ios: {
     CONFIG    += build_mobile
     DEFINES   += QT_NO_PRINTER
@@ -272,10 +269,6 @@ RESOURCES += res.qrc \
 RESOURCES += res/config/res_config.qrc
 
 RESOURCES += res_fw_bms.qrc
-
-!exclude_fw {
-    RESOURCES += res/firmwares/res_fw.qrc
-}
 
 build_original {
     RESOURCES += res_original.qrc

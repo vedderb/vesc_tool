@@ -20,7 +20,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.0 as QSettings
+import QtCore
 import Qt.labs.platform 1.1
 
 import Vedder.vesc.vescinterface 1.0
@@ -102,7 +102,7 @@ Item {
             placeholderText: "File Path"
             text: ""
             clip: true
-            QSettings.Settings {
+            Settings {
                 property alias path_rt_log: rtLogFileText.text
             }
         }

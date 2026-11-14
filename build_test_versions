@@ -2,30 +2,43 @@
 
 set -e
 
+if [[ -n "$1" && "$1" != "linux" && "$1" != "windows" && "$1" != "android" ]]; then
+  echo "Invalid option: $1. Use 'linux', 'windows', 'android', or leave blank."
+  exit 1
+fi
+
 PROJECT_DIR="$(dirname "$(readlink -f "$0")")"
 
-rm -f build/test_all/vesc_tool_test*
+# No argument, so build all. Remove old versions first
+if [[ -z "$1" ]]; then
+  echo "Removing old builds"
+  rm -f build/test_all/vesc_tool_test*
+else
+  echo "Not removing old builds as only" $1 is built
+fi
 
 # Linux
-export PATH=/opt/Qt/6.12.0/gcc_64/bin:$PATH
+if [[ "$1" == "linux" || -z "$1" ]]; then
+  export PATH=/opt/Qt/6.12.0/gcc_64/bin:$PATH
 
-rm -rf build/lin/*
-mkdir -p build/lin
+  rm -rf build/lin/*
+  mkdir -p build/lin
 
-cd build/lin
-qmake "$PROJECT_DIR/vesc_tool.pro" \
-  "CONFIG+=release" \
-  "CONFIG-=qml_debug" \
-  "CONFIG+=qtquickcompiler" \
-  "CONFIG-=separate_debug_info"
-make -j$(nproc)
+  cd build/lin
+  qmake "$PROJECT_DIR/vesc_tool.pro" \
+    "CONFIG+=release" \
+    "CONFIG-=qml_debug" \
+    "CONFIG+=qtquickcompiler" \
+    "CONFIG-=separate_debug_info"
+  make -j$(nproc)
 
-cd "$PROJECT_DIR/build_appimage"
-./build_appimage
+  cd "$PROJECT_DIR/build_appimage"
+  ./build_appimage
 
-cd "$PROJECT_DIR/"
-mv build_appimage/VESC_Tool-x86_64.AppImage build/test_all/vesc_tool_test_linux
-rm -rf build/lin/*
+  cd "$PROJECT_DIR/"
+  mv build_appimage/VESC_Tool-x86_64.AppImage build/test_all/vesc_tool_test_linux
+  rm -rf build/lin/*
+fi
 
 # Windows
 
@@ -37,85 +50,89 @@ rm -rf build/lin/*
 # cd mxe2
 # make MXE_TARGETS="x86_64-w64-mingw32.static" qt6
 
-export PATH=/opt/mxe2/usr/bin/:$PATH
+if [[ "$1" == "windows" || -z "$1" ]]; then
+  export PATH=/opt/mxe2/usr/bin/:$PATH
 
-rm -rf build/win/*
-mkdir -p build/win
+  rm -rf build/win/*
+  mkdir -p build/win
 
-cd build/win
+  cd build/win
 
-/opt/mxe2/usr/bin/x86_64-w64-mingw32.static-qt6-qmake "$PROJECT_DIR/vesc_tool.pro" \
-  "CONFIG+=release" \
-  "CONFIG-=qml_debug" \
-  "CONFIG+=qtquickcompiler" \
-  "CONFIG-=separate_debug_info"
-make -j8
+  /opt/mxe2/usr/bin/x86_64-w64-mingw32.static-qt6-qmake "$PROJECT_DIR/vesc_tool.pro" \
+    "CONFIG+=release" \
+    "CONFIG-=qml_debug" \
+    "CONFIG+=qtquickcompiler" \
+    "CONFIG-=separate_debug_info"
+  make -j8
 
-cd "$PROJECT_DIR/"
-mv build/win/release/vesc_tool*.exe build/test_all/vesc_tool_test_windows.exe
-rm -rf build/win/*
+  cd "$PROJECT_DIR/"
+  mv build/win/release/vesc_tool*.exe build/test_all/vesc_tool_test_windows.exe
+  rm -rf build/win/*
+fi
 
 # Android
-export ANDROID_HOME=~/Android/Sdk
-export ANDROID_NDK_HOST=linux-x86_64
-export ANDROID_NDK_PLATFORM=android-28
-export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/27.2.12479018
-export ANDROID_SDK_ROOT=$ANDROID_HOME
-export JAVA_HOME=/usr/lib/jvm/java-1.21.0-openjdk-amd64
+if [[ "$1" == "android" || -z "$1" ]]; then
+  export ANDROID_HOME=~/Android/Sdk
+  export ANDROID_NDK_HOST=linux-x86_64
+  export ANDROID_NDK_PLATFORM=android-28
+  export ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/27.2.12479018
+  export ANDROID_SDK_ROOT=$ANDROID_HOME
+  export JAVA_HOME=/usr/lib/jvm/java-1.21.0-openjdk-amd64
 
-export JAVA_HOME=/usr/lib/jvm/java-1.21.0-openjdk-amd64
-export PATH=$PATH:$ANDROID_HOME/Sdk/tools:/usr/bin:$JAVA_HOME/bin
+  export JAVA_HOME=/usr/lib/jvm/java-1.21.0-openjdk-amd64
+  export PATH=$PATH:$ANDROID_HOME/Sdk/tools:/usr/bin:$JAVA_HOME/bin
 
-BUILD_ROOT="$PROJECT_DIR/build/android"
-STAGING_DIR="$BUILD_ROOT/android-build"
-JSON_FILE="$BUILD_ROOT/arm64/android-vesc_tool-deployment-settings.json"
+  BUILD_ROOT="$PROJECT_DIR/build/android"
+  STAGING_DIR="$BUILD_ROOT/android-build"
+  JSON_FILE="$BUILD_ROOT/arm64/android-vesc_tool-deployment-settings.json"
 
-rm -rf "$BUILD_ROOT"
-mkdir -p "$BUILD_ROOT/arm64" "$BUILD_ROOT/armv7" "$STAGING_DIR"
+  rm -rf "$BUILD_ROOT"
+  mkdir -p "$BUILD_ROOT/arm64" "$BUILD_ROOT/armv7" "$STAGING_DIR"
 
-# 1. Build arm64-v8a
-cd "$BUILD_ROOT/arm64"
-/opt/Qt/6.12.0/android_arm64_v8a/bin/qmake "$PROJECT_DIR/vesc_tool.pro" \
-  "CONFIG+=release" \
-  "CONFIG-=qml_debug" \
-  "CONFIG+=qtquickcompiler" \
-  "CONFIG-=separate_debug_info" \
-  "ANDROID_ABIS=arm64-v8a" \
-  "ANDROID_ABIS+=armeabi-v7a"
-make -j$(nproc)
-make install INSTALL_ROOT="$STAGING_DIR"
+  # 1. Build arm64-v8a
+  cd "$BUILD_ROOT/arm64"
+  /opt/Qt/6.12.0/android_arm64_v8a/bin/qmake "$PROJECT_DIR/vesc_tool.pro" \
+    "CONFIG+=release" \
+    "CONFIG-=qml_debug" \
+    "CONFIG+=qtquickcompiler" \
+    "CONFIG-=separate_debug_info" \
+    "ANDROID_ABIS=arm64-v8a" \
+    "ANDROID_ABIS+=armeabi-v7a"
+  make -j$(nproc)
+  make install INSTALL_ROOT="$STAGING_DIR"
 
-# 2. Build armeabi-v7a
-cd "$BUILD_ROOT/armv7"
-/opt/Qt/6.12.0/android_armv7/bin/qmake "$PROJECT_DIR/vesc_tool.pro" \
-  "CONFIG+=release" \
-  "CONFIG-=qml_debug" \
-  "CONFIG+=qtquickcompiler" \
-  "CONFIG-=separate_debug_info" \
-  "ANDROID_ABIS=armeabi-v7a"
-make -j$(nproc)
-make install INSTALL_ROOT="$STAGING_DIR"
+  # 2. Build armeabi-v7a
+  cd "$BUILD_ROOT/armv7"
+  /opt/Qt/6.12.0/android_armv7/bin/qmake "$PROJECT_DIR/vesc_tool.pro" \
+    "CONFIG+=release" \
+    "CONFIG-=qml_debug" \
+    "CONFIG+=qtquickcompiler" \
+    "CONFIG-=separate_debug_info" \
+    "ANDROID_ABIS=armeabi-v7a"
+  make -j$(nproc)
+  make install INSTALL_ROOT="$STAGING_DIR"
 
-# 3. Map per-ABI Qt paths in the deployment JSON
-sed -i 's|"qt": "/opt/Qt/6.12.0/android_arm64_v8a"|"qt": {"arm64-v8a": "/opt/Qt/6.12.0/android_arm64_v8a", "armeabi-v7a": "/opt/Qt/6.12.0/android_armv7"}|' "$JSON_FILE"
+  # 3. Map per-ABI Qt paths in the deployment JSON
+  sed -i 's|"qt": "/opt/Qt/6.12.0/android_arm64_v8a"|"qt": {"arm64-v8a": "/opt/Qt/6.12.0/android_arm64_v8a", "armeabi-v7a": "/opt/Qt/6.12.0/android_armv7"}|' "$JSON_FILE"
 
-# 4. Package both ABIs into a single unsigned apk and .aab
-# Latest android requires a signed apk to install, so we use
-# the dummy key in the repository.
-cd "$BUILD_ROOT/arm64"
-/opt/Qt/6.12.0/gcc_64/bin/androiddeployqt \
-  --input "$JSON_FILE" \
-  --output "$STAGING_DIR" \
-  --gradle \
-  --release \
-  --aab \
-  --sign "$PROJECT_DIR/vesc_not_play_key.keystore" vesc_key2 \
-  --storepass abc123456
+  # 4. Package both ABIs into a single unsigned apk and .aab
+  # Latest android requires a signed apk to install, so we use
+  # the dummy key in the repository.
+  cd "$BUILD_ROOT/arm64"
+  /opt/Qt/6.12.0/gcc_64/bin/androiddeployqt \
+    --input "$JSON_FILE" \
+    --output "$STAGING_DIR" \
+    --gradle \
+    --release \
+    --aab \
+    --sign "$PROJECT_DIR/vesc_not_play_key.keystore" vesc_key2 \
+    --storepass abc123456
 
-# Note that the aab is not used for the test versions
-cd "$PROJECT_DIR"
-#cp "$STAGING_DIR/build/outputs/bundle/release/android-build-release.aab" "build/test_all/android.aab"
-cp "$STAGING_DIR/build/outputs/apk/release/android-build-release-signed.apk" "build/test_all/vesc_tool_test_android.apk"
+  # Note that the aab is not used for the test versions
+  cd "$PROJECT_DIR"
+  #cp "$STAGING_DIR/build/outputs/bundle/release/android-build-release.aab" "build/test_all/android.aab"
+  cp "$STAGING_DIR/build/outputs/apk/release/android-build-release-signed.apk" "build/test_all/vesc_tool_test_android.apk"
 
-rm -rf "$BUILD_ROOT"
+  rm -rf "$BUILD_ROOT"
+fi
 

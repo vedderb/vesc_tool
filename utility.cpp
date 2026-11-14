@@ -2486,6 +2486,22 @@ QByteArray Utility::readAllFromFile(const QString &filePath)
     return data;
 }
 
+bool Utility::writeTextFile(QString path, QString content)
+{
+    if (path.startsWith("file:")) {
+        path = QUrl(path).toLocalFile();
+    }
+
+    QFile f(path);
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        return false;
+    }
+
+    QByteArray utf8 = content.toUtf8();
+    return f.write(utf8) == utf8.size();
+}
+
+
 QByteArray Utility::removeFirmwareHeader(QByteArray in)
 {
     if (in.size() <= 6) {
@@ -2552,6 +2568,20 @@ QString Utility::configPath(QString subPath)
     } else {
         return path;
     }
+}
+
+QString Utility::readTextFile(QString path)
+{
+    if (path.startsWith("file:")) {
+        path = QUrl(path).toLocalFile();
+    }
+
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QString();
+    }
+
+    return QString::fromUtf8(f.readAll());
 }
 
 void Utility::setDarkMode(bool isDarkSetting)

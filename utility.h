@@ -162,10 +162,13 @@ public:
     Q_INVOKABLE static QString md2html(QString md);
 
     Q_INVOKABLE static QByteArray readAllFromFile(const QString &filePath);
+    Q_INVOKABLE static bool writeTextFile(QString path, QString content);
 
     static QByteArray removeFirmwareHeader(QByteArray in);
 
     Q_INVOKABLE static QString configPath(QString subPath);
+
+    Q_INVOKABLE static QString readTextFile(QString path);
 
 signals:
 

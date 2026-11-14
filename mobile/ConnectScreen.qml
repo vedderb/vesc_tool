@@ -458,7 +458,7 @@ Item {
             footer: BusyIndicator {
                 Layout.alignment: Qt.AlignCenter
                 Layout.fillHeight: true
-                running: scanning
+                running: scanning && rootItem.opened
                 width: parent.width
                 height: BusyIndicator.implicitHeight*1.5
 

@@ -100,8 +100,13 @@ Item {
             Layout.fillWidth: true
             Layout.columnSpan: 3
             placeholderText: "File Path"
-            text: ""
+            text: StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
             clip: true
+            Component.onCompleted: {
+                if (text.length === 0) {
+                    text = StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
+                }
+            }
             QSettings.Settings {
                 property alias path_rt_log: rtLogFileText.text
             }

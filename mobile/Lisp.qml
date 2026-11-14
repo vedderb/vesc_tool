@@ -3,7 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs
 import Qt.labs.folderlistmodel 2.1
-import Qt.labs.settings 1.0 as QSettings
+import QtCore
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -178,7 +178,7 @@ Item {
         }
     }
 
-    QSettings.Settings {
+    Settings {
         id: recentSettings
         property string recentFiles: "[]"
     }
@@ -710,6 +710,34 @@ Item {
             }
         }
 
+        function syncBindings(newData) {
+            // 1. Build a lookup map of incoming data by name
+            var incomingMap = {};
+            for (var i = 0; i < newData.length; i++) {
+                incomingMap[newData[i].name] = newData[i].value;
+            }
+
+            // 2. Update existing items & remove deleted ones (iterate backwards when removing)
+            for (var j = bindingModel.count - 1; j >= 0; j--) {
+                var item = bindingModel.get(j);
+                if (incomingMap.hasOwnProperty(item.name)) {
+                    if (item.value !== incomingMap[item.name]) {
+                        bindingModel.setProperty(j, "value", incomingMap[item.name]);
+                    }
+                    delete incomingMap[item.name]; // Mark as handled
+                } else {
+                    bindingModel.remove(j, 1);
+                }
+            }
+
+            // 3. Append any brand-new items left in the map
+            for (var k = 0; k < newData.length; k++) {
+                if (incomingMap.hasOwnProperty(newData[k].name)) {
+                    bindingModel.append({ "name": newData[k].name, "value": newData[k].value });
+                }
+            }
+        }
+
         function onLispStatsRxMap(stats) {
             if (stats.cpu_use !== undefined) {
                 lispCpuUse = stats.cpu_use
@@ -723,18 +751,11 @@ Item {
                 lispMemUse = stats.mem_use
             }
 
-            bindingModel.clear()
-
-            if (stats.globals === undefined || stats.globals === null || !Array.isArray(stats.globals)) {
+            if (stats.globals === undefined || stats.globals === null) {
                 return
             }
 
-            for (var i = 0; i < stats.globals.length; i++) {
-                var g = stats.globals[i]
-                if (g.name !== undefined && g.value !== undefined) {
-                    bindingModel.append({"name": g.name, "value": g.value})
-                }
-            }
+            syncBindings(stats.globals)
         }
     }
 

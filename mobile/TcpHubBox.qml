@@ -20,7 +20,7 @@
 import QtQuick
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.0 as QSettings
+import QtCore
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
@@ -76,7 +76,7 @@ Item {
             placeholderText: "Server"
             text: "veschub.vedder.se"
             clip: true
-            QSettings.Settings {
+            Settings {
                 property alias tcp_hub_server: serverText.text
             }
         }
@@ -109,7 +109,7 @@ Item {
             placeholderText: "VESC ID"
             text: ""
             clip: true
-            QSettings.Settings {
+            Settings {
                 property alias tcp_hub_vesc_id: idText.text
             }
         }
@@ -126,7 +126,7 @@ Item {
             placeholderText: "Password"
             text: ""
             clip: true
-                QSettings.Settings {
+                Settings {
                     property alias tcp_hub_vesc_pass: passText.text
                 }
         }

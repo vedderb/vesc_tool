@@ -493,6 +493,17 @@ ApplicationWindow {
                 }
             }
         }
+
+        Page {
+            Loader {
+                anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: LogAnalysis {
+                    anchors.fill: parent
+                }
+            }
+        }
     }
 
     header: Rectangle {
@@ -529,7 +540,7 @@ ApplicationWindow {
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal", "LispBM"]
+                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal", "LispBM", "LogView"]
 
                     TabButton {
                         text: modelData

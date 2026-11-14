@@ -167,6 +167,10 @@ public:
 
     Q_INVOKABLE static QString configPath(QString subPath);
 
+    Q_INVOKABLE static QString readTextFile(QString path);
+    Q_INVOKABLE static bool writeTextFile(QString path, QString content);
+
+
 signals:
 
 public slots:

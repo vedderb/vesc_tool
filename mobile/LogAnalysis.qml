@@ -560,11 +560,11 @@ Item {
         if (visibleCoords.length === 0) visibleCoords = trackCoords
         if (visibleCoords.length === 0) return
         if (visibleCoords.length === 1) {
-            mapView.map.center = visibleCoords.slice(0, 1).pop()
-            mapView.map.zoomLevel = 16
+            map.center = visibleCoords.slice(0, 1).pop()
+            map.zoomLevel = 16
             return
         }
-        mapView.map.fitViewportToGeoShape(QtPositioning.rectangle(visibleCoords), Qt.size(40, 40))
+        map.fitViewportToGeoShape(QtPositioning.rectangle(visibleCoords), Qt.size(40, 40))
     }
 
     function applyZoomWindow(startIdx, endIdx, fitMap) {
@@ -723,7 +723,7 @@ Item {
         timeColIdx = findColIdx(meta.cols, ["t_day", "esc uptime", "jet uptime", "time"])
 
         var coords = [], rows = []
-        var distance = 0.0, prevCoord = null
+        var distance = 0.0, prevCoord = null, skippedLast = false
         for (var i = 0; i < lines.length; i++) {
             if (lines[i].trim().length === 0) continue
             var parts = lines[i].split(meta.delim)
@@ -740,17 +740,30 @@ Item {
             var coord = null
             if (latIdx !== -1 && lonIdx !== -1 && vals[latIdx] !== null && vals[lonIdx] !== null) {
                 if (vals[latIdx] !== 0 || vals[lonIdx] !== 0) {
-                    coord = QtPositioning.coordinate(vals[latIdx], vals[lonIdx])
-                    coords.push(coord)
+                    var candidate = QtPositioning.coordinate(vals[latIdx], vals[lonIdx])
+                    if (prevCoord !== null) {
+                        var stepM = prevCoord.distanceTo(candidate)
+                        if (stepM < 100) {
+                            distance += stepM
+                            coord = candidate
+                            prevCoord = coord
+                            skippedLast = false
+                        } else if (!skippedLast) {
+                            skippedLast = true
+                        } else {
+                            coord = candidate
+                            prevCoord = coord
+                            skippedLast = false
+                        }
+                    } else {
+                        coord = candidate
+                        prevCoord = coord
+                        skippedLast = false
+                    }
                 }
             }
-            if (coord !== null) {
-                if (prevCoord !== null) {
-                    var stepM = prevCoord.distanceTo(coord)
-                    if (stepM < 100) distance += stepM
-                }
-                prevCoord = coord
-            }
+
+            if (coord !== null) coords.push(coord)
             rows.push({ coord: coord, vals: vals, distance: distance })
         }
 
@@ -805,7 +818,7 @@ Item {
         if (followMap && hasGps && rawRows.length > 0) {
             var c = currentMapCoord
             if (c.isValid && (c.latitude !== 0 || c.longitude !== 0)) {
-                mapView.map.center = c
+                map.center = c
             }
         }
     }
@@ -884,7 +897,7 @@ Item {
                 onToggled: {
                     root.followMap = checked
                     if (checked && root.currentMapCoord.isValid) {
-                        mapView.map.center = root.currentMapCoord
+                        map.center = root.currentMapCoord
                     }
                 }
             }
@@ -897,68 +910,101 @@ Item {
             }
         }
 
-        MapView {
-            id: mapView
+        Map {
+            id: map
             Layout.fillWidth: true
             Layout.fillHeight: true
-            map.plugin: mapPlugin
-            map.center: QtPositioning.coordinate(57.49, 13.11)
-            map.zoomLevel: 13
+            plugin: mapPlugin
+            center: QtPositioning.coordinate(57.49, 13.11)
+            zoomLevel: 13
             enabled: !root.comboOpen
 
-            Connections {
-                target: mapView.map
-                function onSupportedMapTypesChanged() {
-                    var types = mapView.map.supportedMapTypes
-                    if (types && types.length > 0) {
-                        mapView.map.activeMapType = types[types.length - 1]
-                    }
+            onSupportedMapTypesChanged: {
+                if (supportedMapTypes.length > 0) {
+                    activeMapType = supportedMapTypes[supportedMapTypes.length - 1]
                 }
             }
 
             Component.onCompleted: {
-                var types = mapView.map.supportedMapTypes
-                if (types && types.length > 0) {
-                    mapView.map.activeMapType = types[types.length - 1]
+                if (supportedMapTypes.length > 0) {
+                    activeMapType = supportedMapTypes[supportedMapTypes.length - 1]
                 }
-                mapView.map.addMapItem(routeLine)
-                mapView.map.addMapItem(startMarker)
-                mapView.map.addMapItem(endMarker)
-                mapView.map.addMapItem(currentMarker)
+                addMapItem(routeLine)
+                addMapItem(startMarker)
+                addMapItem(endMarker)
+                addMapItem(currentMarker)
             }
+
             TapHandler {
                 enabled: root.hasGps
                 onTapped: (eventPoint) => {
-                              var geo = mapView.map.toCoordinate(eventPoint.position)
-                              root.jumpToNearestCoord(geo)
+                              root.jumpToNearestCoord(map.toCoordinate(eventPoint.position))
                           }
             }
+
+            DragHandler {
+                id: mapDrag
+                target: null
+                grabPermissions: PointerHandler.CanTakeOverFromAnything
+                property var lastPos: Qt.point(0, 0)
+
+                onActiveChanged: {
+                    if (active) {
+                        lastPos = centroid.position
+                        root.followMap = false
+                    }
+                }
+                onCentroidChanged: {
+                    if (active && !mapPinch.active) {
+                        var dx = centroid.position.x - lastPos.x
+                        var dy = centroid.position.y - lastPos.y
+                        lastPos = centroid.position
+                        map.pan(-dx, -dy)
+                    }
+                }
+            }
+
             PinchHandler {
                 id: mapPinch
                 target: null
                 grabPermissions: PointerHandler.CanTakeOverFromAnything
-                property real startZoom: 13
-                property var startGeo: QtPositioning.coordinate(0, 0)
-                enabled: !root.comboOpen
+                property var anchorGeo: QtPositioning.coordinate(0, 0)
 
                 onActiveChanged: {
                     if (active) {
-                        startZoom = mapView.map.zoomLevel
-                        startGeo = mapView.map.toCoordinate(centroid.position, false)
+                        root.followMap = false
+                        anchorGeo = map.toCoordinate(centroid.position, false)
+                    } else if (mapDrag.active) {
+                        mapDrag.lastPos = mapDrag.centroid.position
                     }
                 }
 
                 onScaleChanged: (delta) => {
-                                    if (!active || scale <= 0) return
-                                    var targetZoom = startZoom + Math.log2(scale)
-                                    targetZoom = Math.max(mapView.map.minimumZoomLevel,
-                                                          Math.min(mapView.map.maximumZoomLevel, targetZoom))
-                                    mapView.map.zoomLevel = targetZoom
-                                    // Keep the geographic point under the two fingers anchored while zooming
-                                    mapView.map.alignCoordinateToPoint(startGeo, centroid.position)
+                                    if (!active || delta <= 0) return
+                                    map.zoomLevel = Math.max(map.minimumZoomLevel,
+                                                             Math.min(map.maximumZoomLevel, map.zoomLevel + Math.log2(delta)))
+                                    if (anchorGeo.isValid) {
+                                        map.alignCoordinateToPoint(anchorGeo, centroid.position)
+                                    }
                                 }
+
+                onCentroidChanged: {
+                    if (active && anchorGeo.isValid) {
+                        map.alignCoordinateToPoint(anchorGeo, centroid.position)
+                    }
+                }
+            }
+
+            WheelHandler {
+                onWheel: (event) => {
+                             var pt = Qt.point(event.x, event.y)
+                             var geo = map.toCoordinate(pt, false)
+                             map.zoomLevel += (event.angleDelta.y > 0 ? 0.5 : -0.5)
+                             if (geo.isValid) map.alignCoordinateToPoint(geo, pt)
+                         }
             }
         }
+
         MapPolyline { id: routeLine; visible: root.hasGps; line.width: 4; line.color: "#00aaff" }
         MapQuickItem {
             id: startMarker

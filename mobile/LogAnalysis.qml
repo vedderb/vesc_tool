@@ -404,10 +404,10 @@ Item {
                      ? ["All files (*)"]
                      : ["CSV files (*.csv)", "All files (*)"]
         onAccepted: {
-            if (Utility.writeTextFile(selectedFile.toString(), root.loadedCsvText)) {
-                root.statusText = "Saved backup: " + decodeURIComponent(selectedFile.toString()).split("/").pop()
+            if (Utility.writeTextFile(selectedFile.toString(), root.pendingSaveText)) {
+                root.statusText = "Saved: " + decodeURIComponent(selectedFile.toString()).split("/").pop()
             } else {
-                root.statusText = "Failed to save local backup."
+                root.statusText = "Failed to save CSV."
             }
         }
     }
@@ -427,9 +427,26 @@ Item {
             statusText = "No log loaded to save."
             return
         }
+        pendingSaveText = loadedCsvText
         saveCsvDialog.currentFile = loadedFileName
         saveCsvDialog.open()
     }
+
+    function saveZoomedLogLocally() {
+        if (loadedDataLines.length === 0) {
+            statusText = "No log loaded to save."
+            return
+        }
+        var s = Math.max(0, Math.min(viewStart, loadedDataLines.length - 1))
+        var e = Math.max(s, Math.min(viewEnd, loadedDataLines.length - 1))
+        var sliced = loadedDataLines.slice(s, e + 1)
+        pendingSaveText = loadedHeaderLine + "\n" + sliced.join("\n") + "\n"
+
+        var baseName = loadedFileName.replace(/\.csv$/i, "")
+        saveCsvDialog.currentFile = baseName + "_zoomed.csv"
+        saveCsvDialog.open()
+    }
+
 
     function backupDeviceCsv(fileName) {
         var base = deviceCurrentDir.endsWith("/") ? deviceCurrentDir : (deviceCurrentDir + "/")
@@ -472,6 +489,10 @@ Item {
     property string statusText: "Click 'Open CSV Log' to load a VESC log file."
     property bool comboOpen: false
     property bool followMap: true
+
+    property string loadedHeaderLine: ""
+    property var loadedDataLines: []
+    property string pendingSaveText: ""
 
     property var slotEnabled: [true, true, true, true]
     property var slotColIdx: [-1, -1, -1, -1]
@@ -718,6 +739,16 @@ Item {
         if (lines.length < 2) { statusText = "CSV file has no data rows."; return }
 
         var meta = parseHeaderMeta(lines.shift())
+
+        // Re-extract header + non-empty data lines aligned 1:1 with rawRows
+        var allLines = text.trim().split(/\r?\n/)
+        loadedHeaderLine = allLines.shift()
+        var cleanLines = []
+        for (var j = 0; j < allLines.length; j++) {
+            if (allLines[j].trim().length > 0) cleanLines.push(allLines[j])
+        }
+        loadedDataLines = cleanLines
+
         var latIdx = findColIdx(meta.cols, ["gnss_lat", "lat", "latitude"])
         var lonIdx = findColIdx(meta.cols, ["gnss_lon", "lon", "lng", "longitude"])
         timeColIdx = findColIdx(meta.cols, ["t_day", "esc uptime", "jet uptime", "time"])
@@ -879,6 +910,12 @@ Item {
                         text: "Save Local Backup..."
                         enabled: root.loadedCsvText.length > 0
                         onTriggered: root.saveLoadedLogLocally()
+                    }
+                    MenuItem {
+                        text: "Save Zoomed CSV..."
+                        enabled: root.loadedDataLines.length > 0 &&
+                                 (root.viewStart > 0 || root.viewEnd < root.loadedDataLines.length - 1)
+                        onTriggered: root.saveZoomedLogLocally()
                     }
                 }
             }

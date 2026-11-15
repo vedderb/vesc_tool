@@ -494,6 +494,9 @@ Item {
     property var loadedDataLines: []
     property string pendingSaveText: ""
 
+    property bool filterOutliers: true
+    property real outlierThresholdM: 20.0
+
     property var slotEnabled: [true, true, true, true]
     property var slotColIdx: [-1, -1, -1, -1]
     property var rangeCache: ({})
@@ -731,17 +734,29 @@ Item {
         parseCsvText(text)
     }
 
+    function reparseWithFilter() {
+        if (loadedCsvText.length === 0) return
+        var prevViewStart = viewStart
+        var prevViewEnd = viewEnd
+        var prevCur = currentIndex
+        var prevSlots = slotColIdx.slice()
+
+        parseCsvText(loadedCsvText)
+
+        // Preserve active columns & zoom range when toggling/tuning the filter
+        slotColIdx = prevSlots
+        refreshRanges()
+        applyZoomWindow(prevViewStart, prevViewEnd, false)
+        currentIndex = Math.max(viewStart, Math.min(viewEnd, prevCur))
+    }
+
     function parseCsvText(text) {
         if (!text || text.length === 0) { statusText = "Failed to read file."; return }
         loadedCsvText = text
 
-        var lines = text.trim().split(/\r?\n/)
-        if (lines.length < 2) { statusText = "CSV file has no data rows."; return }
-
-        var meta = parseHeaderMeta(lines.shift())
-
-        // Re-extract header + non-empty data lines aligned 1:1 with rawRows
         var allLines = text.trim().split(/\r?\n/)
+        if (allLines.length < 2) { statusText = "CSV file has no data rows."; return }
+
         loadedHeaderLine = allLines.shift()
         var cleanLines = []
         for (var j = 0; j < allLines.length; j++) {
@@ -749,15 +764,17 @@ Item {
         }
         loadedDataLines = cleanLines
 
+        var meta = parseHeaderMeta(loadedHeaderLine)
         var latIdx = findColIdx(meta.cols, ["gnss_lat", "lat", "latitude"])
         var lonIdx = findColIdx(meta.cols, ["gnss_lon", "lon", "lng", "longitude"])
-        timeColIdx = findColIdx(meta.cols, ["t_day", "esc uptime", "jet uptime", "time"])
 
-        var coords = [], rows = []
-        var distance = 0.0, prevCoord = null, skippedLast = false
-        for (var i = 0; i < lines.length; i++) {
-            if (lines[i].trim().length === 0) continue
-            var parts = lines[i].split(meta.delim)
+        // Pass 1: Parse values and collect unique GPS fixes (collapsing repeated coordinates)
+        var rawParsed = []
+        var uniqueGps = []
+        var lastRawLat = null, lastRawLon = null
+
+        for (var i = 0; i < cleanLines.length; i++) {
+            var parts = cleanLines[i].split(meta.delim)
             var vals = new Array(meta.cols.length)
             for (var c = 0; c < meta.cols.length; c++) {
                 if (c < parts.length && parts[c].trim().length > 0) {
@@ -768,34 +785,74 @@ Item {
                 }
             }
 
-            var coord = null
+            var uniqueIdx = -1
             if (latIdx !== -1 && lonIdx !== -1 && vals[latIdx] !== null && vals[lonIdx] !== null) {
-                if (vals[latIdx] !== 0 || vals[lonIdx] !== 0) {
-                    var candidate = QtPositioning.coordinate(vals[latIdx], vals[lonIdx])
-                    if (prevCoord !== null) {
-                        var stepM = prevCoord.distanceTo(candidate)
-                        if (stepM < 100) {
-                            distance += stepM
-                            coord = candidate
-                            prevCoord = coord
-                            skippedLast = false
-                        } else if (!skippedLast) {
-                            skippedLast = true
-                        } else {
-                            coord = candidate
-                            prevCoord = coord
-                            skippedLast = false
-                        }
+                var lat = vals[latIdx], lon = vals[lonIdx]
+                if ((lat !== 0 || lon !== 0) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+                    if (lat !== lastRawLat || lon !== lastRawLon) {
+                        uniqueGps.push(QtPositioning.coordinate(lat, lon))
+                        lastRawLat = lat
+                        lastRawLon = lon
+                    }
+                    uniqueIdx = uniqueGps.length - 1
+                }
+            }
+            rawParsed.push({ uniqueIdx: uniqueIdx, vals: vals })
+        }
+
+        // Pass 2: Optional distance-only outlier filter across unique GPS fixes
+        var uniqueValid = new Array(uniqueGps.length)
+        var anchorCoord = null
+        var thresh = outlierThresholdM
+
+        for (var u = 0; u < uniqueGps.length; u++) {
+            var cand = uniqueGps[u]
+            if (!filterOutliers) {
+                uniqueValid[u] = cand
+            } else if (anchorCoord === null) {
+                var closeCount = 0
+                for (var k = u + 1; k < Math.min(uniqueGps.length, u + 5); k++) {
+                    if (cand.distanceTo(uniqueGps[k]) < thresh) closeCount++
+                }
+                if (closeCount >= 2 || uniqueGps.length <= 3) {
+                    uniqueValid[u] = cand
+                    anchorCoord = cand
+                } else {
+                    uniqueValid[u] = null
+                }
+            } else {
+                var step = anchorCoord.distanceTo(cand)
+                if (step < thresh) {
+                    uniqueValid[u] = cand
+                    anchorCoord = cand
+                } else {
+                    var ok1 = (u + 1 < uniqueGps.length) && (cand.distanceTo(uniqueGps[u + 1]) < thresh)
+                    var ok2 = (u + 2 < uniqueGps.length) && (cand.distanceTo(uniqueGps[u + 2]) < thresh)
+                    if (ok1 && ok2) {
+                        uniqueValid[u] = cand
+                        anchorCoord = cand
                     } else {
-                        coord = candidate
-                        prevCoord = coord
-                        skippedLast = false
+                        uniqueValid[u] = null
                     }
                 }
             }
+        }
 
-            if (coord !== null) coords.push(coord)
-            rows.push({ coord: coord, vals: vals, distance: distance })
+        // Pass 3: Map filtered coordinates back to all rows & accumulate distance
+        var coords = [], rows = []
+        var distance = 0.0, prevCoord = null
+        for (var r = 0; r < rawParsed.length; r++) {
+            var uIdx = rawParsed[r].uniqueIdx
+            var coord = (uIdx >= 0) ? uniqueValid[uIdx] : null
+            if (coord !== null) {
+                coords.push(coord)
+                if (prevCoord !== null) {
+                    var d = prevCoord.distanceTo(coord)
+                    if (d < 100) distance += d
+                }
+                prevCoord = coord
+            }
+            rows.push({ coord: coord, vals: rawParsed[r].vals, distance: distance })
         }
 
         if (rows.length === 0) { statusText = "No valid rows found."; return }
@@ -944,6 +1001,54 @@ Item {
                 text: root.statusText
                 elide: Text.ElideMiddle
                 color: palette.text
+            }
+        }
+
+        // Compact GPS Outlier Filter Row (between File bar and Map)
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+
+            CheckBox {
+                id: filterCheck
+                text: "Filter outliers"
+                checked: root.filterOutliers
+                implicitHeight: 26
+                padding: 0
+                font.pixelSize: 12
+                onToggled: {
+                    root.filterOutliers = checked
+                    root.reparseWithFilter()
+                }
+            }
+
+            Item { Layout.fillWidth: true }
+
+            Label {
+                text: "Threshold:"
+                font.pixelSize: 12
+                color: "#9ca3af"
+                enabled: root.filterOutliers
+            }
+
+            SpinBox {
+                id: threshSpin
+                from: 10
+                to: 2000
+                stepSize: 10
+                value: Math.round(root.outlierThresholdM)
+                implicitHeight: 26
+                implicitWidth: 118
+                font.pixelSize: 12
+                textFromValue: function(val) { return val + " m" }
+                valueFromText: function(txt) { return parseInt(txt) || 100 }
+                onValueModified: {
+                    root.outlierThresholdM = value
+
+                    if (filterCheck.checked) {
+                        root.reparseWithFilter()
+                    }
+                }
             }
         }
 
@@ -1235,7 +1340,7 @@ Item {
                     }
                     MouseArea {
                         anchors.fill: parent
-                        enabled: oot.rawRows.length > 1 && !root.comboOpen && !chartPinch.active
+                        enabled: root.rawRows.length > 1 && !root.comboOpen && !chartPinch.active
 
                         function scrub(mx) {
                             var span = Math.max(1, root.viewEnd - root.viewStart)
@@ -1278,22 +1383,22 @@ Item {
                         }
 
                         onScaleChanged: (delta) => {
-                            if (!active || delta <= 0) return
-                            var maxIdx = root.rawRows.length - 1
-                            var curSpan = Math.max(10, root.viewEnd - root.viewStart)
-                            var newSpan = Math.max(10, Math.min(maxIdx, Math.round(curSpan / delta)))
+                                            if (!active || delta <= 0) return
+                                            var maxIdx = root.rawRows.length - 1
+                                            var curSpan = Math.max(10, root.viewEnd - root.viewStart)
+                                            var newSpan = Math.max(10, Math.min(maxIdx, Math.round(curSpan / delta)))
 
-                            var curRatio = Math.max(0, Math.min(1, centroid.position.x / parent.width))
-                            var anchorIdx = root.viewStart + lastRatio * curSpan
-                            var newStart = Math.round(anchorIdx - curRatio * newSpan)
-                            var newEnd = newStart + newSpan
+                                            var curRatio = Math.max(0, Math.min(1, centroid.position.x / parent.width))
+                                            var anchorIdx = root.viewStart + lastRatio * curSpan
+                                            var newStart = Math.round(anchorIdx - curRatio * newSpan)
+                                            var newEnd = newStart + newSpan
 
-                            if (newStart < 0) { newEnd = Math.min(maxIdx, newEnd - newStart); newStart = 0 }
-                            if (newEnd > maxIdx) { newStart = Math.max(0, newStart - (newEnd - maxIdx)); newEnd = maxIdx }
+                                            if (newStart < 0) { newEnd = Math.min(maxIdx, newEnd - newStart); newStart = 0 }
+                                            if (newEnd > maxIdx) { newStart = Math.max(0, newStart - (newEnd - maxIdx)); newEnd = maxIdx }
 
-                            lastRatio = curRatio
-                            root.applyZoomWindow(newStart, newEnd, false)
-                        }
+                                            lastRatio = curRatio
+                                            root.applyZoomWindow(newStart, newEnd, false)
+                                        }
 
                         onCentroidChanged: {
                             if (!active) return
@@ -1313,22 +1418,29 @@ Item {
                 }
             }
         }
+
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            Layout.preferredHeight: 22
+            spacing: 6
+
             Label {
                 color: "#9ca3af"
                 font.pixelSize: 11
                 text: "Zoom:"
             }
+
             RangeSlider {
                 id: zoomRange
                 Layout.fillWidth: true
+                implicitHeight: 22
+                padding: 0
                 enabled: root.rawRows.length > 1
                 from: 0; to: Math.max(0, root.rawRows.length - 1); stepSize: 1
                 first.onMoved: root.applyZoomWindow(first.value, second.value, false)
                 second.onMoved: root.applyZoomWindow(first.value, second.value, false)
             }
+
             Label {
                 color: "#9ca3af"
                 font.family: "Monospace"

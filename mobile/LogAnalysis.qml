@@ -473,6 +473,7 @@ Item {
 
     property var slotEnabled: [true, true, true, true]
     property var slotColIdx: [-1, -1, -1, -1]
+    property var rangeCache: ({})
     property var slotRanges: [
         { min: 0, max: 1, rawMin: null, rawMax: null },
         { min: 0, max: 1, rawMin: null, rawMax: null },
@@ -490,27 +491,36 @@ Item {
     }
 
     function updateStatusSummary() {
-        if (rawRows.length === 0) return
-        var s = Math.max(0, Math.min(viewStart, rawRows.length - 1))
-        var e = Math.max(s, Math.min(viewEnd, rawRows.length - 1))
+        var data = rawRows
+        var timeIdx = timeColIdx
+        if (data.length === 0) return
+        var s = Math.max(0, Math.min(viewStart, data.length - 1))
+        var e = Math.max(s, Math.min(viewEnd, data.length - 1))
 
         var distM = 0.0
-        var prevCoord = null
         var firstTime = null
         var lastTime = null
 
-        for (var i = s; i <= e; i++) {
-            var row = rawRows[i]
-            if (row.coord !== null) {
-                if (prevCoord !== null) {
-                    var stepM = prevCoord.distanceTo(row.coord)
-                    if (stepM < 100) distM += stepM
+        if (hasGps) {
+            for (var i = s; i <= e; i++) {
+                if (data[i].coord !== null) {
+                    distM = data[e].distance - data[i].distance
+                    break
                 }
-                prevCoord = row.coord
             }
-            if (timeColIdx !== -1 && row.vals[timeColIdx] !== null) {
-                if (firstTime === null) firstTime = row.vals[timeColIdx]
-                lastTime = row.vals[timeColIdx]
+        }
+        if (timeIdx !== -1) {
+            for (var i = s; i <= e; i++) {
+                if (data[i].vals[timeIdx] !== null) {
+                    firstTime = data[i].vals[timeIdx]
+                    break
+                }
+            }
+            for (var i = e; i >= s; i--) {
+                if (data[i].vals[timeIdx] !== null) {
+                    lastTime = data[i].vals[timeIdx]
+                    break
+                }
             }
         }
 
@@ -603,14 +613,38 @@ Item {
     }
 
     function computeColRange(colIdx) {
-        if (colIdx < 0 || rawRows.length === 0) return { min: 0, max: 1, rawMin: null, rawMax: null }
+        var data = rawRows
+        if (colIdx < 0 || data.length === 0) return { min: 0, max: 1, rawMin: null, rawMax: null }
+        var blocks = rangeCache[colIdx]
+        if (blocks === undefined) { blocks = []; rangeCache[colIdx] = blocks }
+        var blockSize = 256
         var minV = Infinity, maxV = -Infinity
-        var s = Math.max(0, viewStart), e = Math.min(rawRows.length - 1, viewEnd)
-        for (var i = s; i <= e; i++) {
-            var v = rawRows[i].vals[colIdx]
-            if (v !== null && !isNaN(v)) {
-                if (v < minV) minV = v
-                if (v > maxV) maxV = v
+        var s = Math.max(0, viewStart), e = Math.min(data.length - 1, viewEnd)
+        for (var i = s; i <= e;) {
+            if (i % blockSize === 0 && i + blockSize - 1 <= e) {
+                var b = i / blockSize
+                var block = blocks[b]
+                if (block === undefined) {
+                    block = { min: Infinity, max: -Infinity }
+                    for (var j = i; j < i + blockSize; j++) {
+                        var v = data[j].vals[colIdx]
+                        if (v !== null && !isNaN(v)) {
+                            if (v < block.min) block.min = v
+                            if (v > block.max) block.max = v
+                        }
+                    }
+                    blocks[b] = block
+                }
+                if (block.min < minV) minV = block.min
+                if (block.max > maxV) maxV = block.max
+                i += blockSize
+            } else {
+                var v = data[i].vals[colIdx]
+                if (v !== null && !isNaN(v)) {
+                    if (v < minV) minV = v
+                    if (v > maxV) maxV = v
+                }
+                i++
             }
         }
         if (minV === Infinity) return { min: 0, max: 1, rawMin: null, rawMax: null }
@@ -687,6 +721,7 @@ Item {
         timeColIdx = findColIdx(meta.cols, ["t_day", "esc uptime", "jet uptime", "time"])
 
         var coords = [], rows = []
+        var distance = 0.0, prevCoord = null
         for (var i = 0; i < lines.length; i++) {
             if (lines[i].trim().length === 0) continue
             var parts = lines[i].split(meta.delim)
@@ -707,7 +742,14 @@ Item {
                     coords.push(coord)
                 }
             }
-            rows.push({ coord: coord, vals: vals })
+            if (coord !== null) {
+                if (prevCoord !== null) {
+                    var stepM = prevCoord.distanceTo(coord)
+                    if (stepM < 100) distance += stepM
+                }
+                prevCoord = coord
+            }
+            rows.push({ coord: coord, vals: vals, distance: distance })
         }
 
         if (rows.length === 0) { statusText = "No valid rows found."; return }
@@ -753,6 +795,7 @@ Item {
         if (!r || r.rawMin === null || r.rawMax === null) return "Min: -  Max: -"
         return "Min: " + r.rawMin.toFixed(1) + "  Max: " + r.rawMax.toFixed(1)
     }
+    onRawRowsChanged: rangeCache = ({})
     onCurrentIndexChanged: chartCursor.requestPaint()
     FileDialog {
         id: csvDialog

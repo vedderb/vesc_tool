@@ -67,6 +67,7 @@ public:
     Q_INVOKABLE static QString uuid2Str(QByteArray uuid, bool space);
     Q_INVOKABLE static bool requestFilePermission();
     Q_INVOKABLE static bool hasLocationPermission();
+    Q_INVOKABLE static bool requestNotificationPermission();
     Q_INVOKABLE static bool requestBleScanPermission();
     Q_INVOKABLE static bool requestBleConnectPermission();
     Q_INVOKABLE static void keepScreenOn(bool on);
@@ -169,7 +170,9 @@ public:
 
     Q_INVOKABLE static QString readTextFile(QString path);
     Q_INVOKABLE static bool writeTextFile(QString path, QString content);
-
+    Q_INVOKABLE static QVariantList listFilesInDir(QString dirPath);
+    Q_INVOKABLE static bool removeFile(QString path);
+    Q_INVOKABLE static QVariant getSetting(QString key, QVariant defaultValue);
 
 signals:
 

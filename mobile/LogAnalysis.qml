@@ -25,6 +25,8 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 import QtLocation
 import QtPositioning
+import QtCore
+
 import Vedder.vesc.utility
 import Vedder.vesc.vescinterface
 
@@ -46,21 +48,10 @@ Item {
 
     function promptDeleteDeviceFile(fileName) {
         var base = deviceCurrentDir.endsWith("/") ? deviceCurrentDir : (deviceCurrentDir + "/")
+        pendingDeleteIsLocal = false
         pendingDeleteName = fileName
         pendingDeletePath = base + fileName
         confirmDeleteDialog.open()
-    }
-
-    function executeDeleteDeviceFile() {
-        if (pendingDeletePath.length === 0) return
-        if (mCommands.fileBlockRemove(pendingDeletePath)) {
-            statusText = "Deleted " + pendingDeleteName + " from device."
-            refreshDeviceDir(deviceCurrentDir)
-        } else {
-            statusText = "Failed to delete " + pendingDeleteName + "."
-        }
-        pendingDeletePath = ""
-        pendingDeleteName = ""
     }
 
     // Live progress timer while fileBlockRead() runs its internal event loop
@@ -167,7 +158,7 @@ Item {
             text: "Delete '" + root.pendingDeleteName + "' permanently from the connected device?"
         }
 
-        onAccepted: root.executeDeleteDeviceFile()
+        onAccepted: root.executeDeleteFile()
     }
 
     Dialog {
@@ -283,6 +274,127 @@ Item {
         standardButtons: Dialog.Close
     }
 
+    function rtLogFolderUrl(dir) {
+        if (!dir || dir.length === 0) return ""
+        if (dir.startsWith("file://") || dir.startsWith("content://")) return dir
+        return dir.startsWith("/") ? ("file://" + dir) : ("file:///" + dir)
+    }
+
+    property var rtLogEntries: []
+    property bool pendingDeleteIsLocal: false
+    property string currentRtLogDir: ""
+
+    function promptDeleteLocalFile(fileName, fullPath) {
+        pendingDeleteIsLocal = true
+        pendingDeleteName = fileName
+        pendingDeletePath = fullPath
+        confirmDeleteDialog.open()
+    }
+
+    function executeDeleteFile() {
+        if (pendingDeletePath.length === 0) return
+        if (pendingDeleteIsLocal) {
+            if (Utility.removeFile(pendingDeletePath)) {
+                statusText = "Deleted " + pendingDeleteName + "."
+                rtLogEntries = Utility.listFilesInDir(root.currentRtLogDir)
+            } else {
+                statusText = "Failed to delete " + pendingDeleteName + "."
+            }
+        } else {
+            if (mCommands.fileBlockRemove(pendingDeletePath)) {
+                statusText = "Deleted " + pendingDeleteName + " from device."
+                refreshDeviceDir(deviceCurrentDir)
+            } else {
+                statusText = "Failed to delete " + pendingDeleteName + "."
+            }
+        }
+        pendingDeletePath = ""
+        pendingDeleteName = ""
+    }
+
+    function openRtLogBrowser() {
+        var dir = Utility.getSetting("path_rt_log", "").toString()
+        if (!dir || dir.length === 0) {
+            statusText = "RT log directory (path_rt_log) is not set."
+            return
+        }
+
+        currentRtLogDir = dir
+
+        if (dir.startsWith("content://")) {
+            rtLogDialog.currentFolder = dir
+            rtLogDialog.open()
+        } else {
+            rtLogEntries = Utility.listFilesInDir(dir)
+            rtLogListDialog.open()
+        }
+    }
+
+    Dialog {
+        id: rtLogListDialog
+        title: "RT Logs (" + root.currentRtLogDir + ")"
+        modal: true
+        closePolicy: Popup.NoAutoClose
+        anchors.centerIn: parent
+        width: Math.min(parent.width * 0.92, 460)
+        height: Math.min(parent.height * 0.80, 520)
+        standardButtons: Dialog.Close
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 6
+
+            Label {
+                visible: root.rtLogEntries.length === 0
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: "No .csv logs found in:\n" + Utility.getSetting("path_rt_log", "").toString()
+                color: "#9ca3af"
+            }
+
+            ListView {
+                id: rtLogListView
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                model: root.rtLogEntries
+
+                delegate: Item {
+                    width: rtLogListView.width
+                    height: rtRow.implicitHeight
+
+                    RowLayout {
+                        id: rtRow
+                        anchors.fill: parent
+                        spacing: 4
+
+                        ItemDelegate {
+                            Layout.fillWidth: true
+                            text: modelData.name + "  (" + (modelData.size / 1024).toFixed(1) + " KB · " + modelData.modified + ")"
+                            onClicked: {
+                                var text = Utility.readTextFile(modelData.path)
+                                if (text && text.length > 0) {
+                                    root.loadedFileName = modelData.name
+                                    root.parseCsvText(text)
+                                    rtLogListDialog.close()
+                                } else {
+                                    root.statusText = "Failed to read: " + modelData.name
+                                }
+                            }
+                        }
+
+                        ToolButton {
+                            text: "Delete"
+                            font.pixelSize: 11
+                            palette.buttonText: "#ff5555"
+                            onClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     FileDialog {
         id: saveCsvDialog
         title: "Save Local CSV Backup"
@@ -298,6 +410,16 @@ Item {
                 root.statusText = "Failed to save local backup."
             }
         }
+    }
+
+    FileDialog {
+        id: rtLogDialog
+        title: "Select VESC RT Log"
+        currentFolder: root.rtLogFolderUrl()
+        nameFilters: Qt.platform.os === "android"
+                     ? ["All files (*)"]
+                     : ["CSV files (*.csv)", "All files (*)"]
+        onAccepted: root.loadCsv(selectedFile)
     }
 
     function saveLoadedLogLocally() {
@@ -671,6 +793,10 @@ Item {
                     id: fileMenu
                     y: fileMenuBtn.height
 
+                    MenuItem {
+                        text: "Open RT Log..."
+                        onTriggered: root.openRtLogBrowser()
+                    }
                     MenuItem {
                         text: "Open Local CSV..."
                         onTriggered: csvDialog.open()

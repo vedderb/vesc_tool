@@ -134,6 +134,7 @@ Item {
                 if (checked) {
                     if (VescIf.openRtLogFile(rtLogFileText.text)) {
                         VescIf.emitStatusMessage("Logging Started", true)
+                        Utility.requestNotificationPermission()
                         Utility.startGnssForegroundService()
                         VescIf.setWakeLock(true)
 

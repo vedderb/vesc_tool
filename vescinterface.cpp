@@ -114,8 +114,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mBlockFwSwap = false;
 
 #ifdef Q_OS_ANDROID
-    QJniObject activity = QJniObject::callStaticObjectMethod(
-                "org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+    QJniObject activity = QNativeInterface::QAndroidApplication::context();
 
     if (activity.isValid()) {
         QJniObject serviceName = QJniObject::getStaticObjectField<jstring>(
@@ -1750,26 +1749,81 @@ bool VescInterface::openRtLogFile(QString outDirectory)
         outDirectory = QUrl(outDirectory).toLocalFile();
     }
 
-    if (!QDir(outDirectory).exists()) {
-        QDir().mkpath(outDirectory);
+    QDir dir(outDirectory);
+    if (!dir.exists()) {
+        dir.mkpath(".");
     }
 
-    if (!QDir(outDirectory).exists()) {
+    if (!dir.exists()) {
         emitMessageDialog("Log to file",
                           "Output directory does not exist",
                           false, false);
         return false;
     }
 
-    QDateTime d = QDateTime::currentDateTime();
-    mRtLogFile.setFileName(QString("%1/%2-%3-%4_%5-%6-%7.csv").
+#ifdef Q_OS_ANDROID
+    if (outDirectory.startsWith("content://")) {
+        QDateTime d = QDateTime::currentDateTime();
+        QString fileName = QString("%1-%2-%3_%4-%5-%6.csv").
+                           arg(d.date().year(), 2, 10, QChar('0')).
+                           arg(d.date().month(), 2, 10, QChar('0')).
+                           arg(d.date().day(), 2, 10, QChar('0')).
+                           arg(d.time().hour(), 2, 10, QChar('0')).
+                           arg(d.time().minute(), 2, 10, QChar('0')).
+                           arg(d.time().second(), 2, 10, QChar('0'));
+
+        QJniObject context = QNativeInterface::QAndroidApplication::context();
+        QJniObject treeUri = QJniObject::callStaticObjectMethod(
+            "android/net/Uri", "parse",
+            "(Ljava/lang/String;)Landroid/net/Uri;",
+            QJniObject::fromString(outDirectory).object<jstring>());
+
+        // Build the document URI for the tree root: DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri))
+        QJniObject treeDocId = QJniObject::callStaticObjectMethod(
+            "android/provider/DocumentsContract", "getTreeDocumentId",
+            "(Landroid/net/Uri;)Ljava/lang/String;",
+            treeUri.object<jobject>());
+
+        QJniObject parentDocUri = QJniObject::callStaticObjectMethod(
+            "android/provider/DocumentsContract", "buildDocumentUriUsingTree",
+            "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;",
+            treeUri.object<jobject>(), treeDocId.object<jstring>());
+
+        QJniObject resolver = context.callObjectMethod(
+            "getContentResolver", "()Landroid/content/ContentResolver;");
+
+        QJniObject newFileUri = QJniObject::callStaticObjectMethod(
+            "android/provider/DocumentsContract", "createDocument",
+            "(Landroid/content/ContentResolver;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;)Landroid/net/Uri;",
+            resolver.object<jobject>(),
+            parentDocUri.object<jobject>(),
+            QJniObject::fromString("text/csv").object<jstring>(),
+            QJniObject::fromString(fileName).object<jstring>());
+
+        if (newFileUri.isValid()) {
+            mRtLogFile.setFileName(newFileUri.toString());
+        } else {
+            emitMessageDialog("Log to file",
+                              "Could not create file in selected Android folder (check folder permissions).",
+                              false, false);
+            return false;
+        }
+    } else {
+#endif
+        QDateTime d = QDateTime::currentDateTime();
+        QString fileName = QString("%1/%2-%3-%4_%5-%6-%7.csv").
                            arg(outDirectory).
                            arg(d.date().year(), 2, 10, QChar('0')).
                            arg(d.date().month(), 2, 10, QChar('0')).
                            arg(d.date().day(), 2, 10, QChar('0')).
                            arg(d.time().hour(), 2, 10, QChar('0')).
                            arg(d.time().minute(), 2, 10, QChar('0')).
-                           arg(d.time().second(), 2, 10, QChar('0')));
+                           arg(d.time().second(), 2, 10, QChar('0'));
+
+        mRtLogFile.setFileName(dir.filePath(fileName));
+#ifdef Q_OS_ANDROID
+    }
+#endif
 
     bool res = mRtLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
 
@@ -4399,7 +4453,7 @@ bool VescInterface::updateTcpHubPassword(QString uuid, QString newPass)
 
 bool VescInterface::connectTcpHubUuid(QString uuid)
 {
-    for (const auto &i: qAsConst(mTcpHubDevs)) {
+    for (const auto &i: std::as_const(mTcpHubDevs)) {
         auto dev = i.value<TCP_HUB_DEVICE>();
         if (dev.uuid() == uuid) {
             connectTcpHub(dev.server, dev.port, dev.id, dev.password);

@@ -37,7 +37,11 @@ public class Utils
     public static void startVForegroundService(Context ctx) {
         Intent intent = new Intent(ctx, VForegroundService.class);
         intent.setAction(VForegroundService.ACTION_START_FOREGROUND_SERVICE);
-        ctx.startService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ctx.startForegroundService(intent);
+        } else {
+            ctx.startService(intent);
+        }
     }
 
     public static void stopVForegroundService(Context ctx) {

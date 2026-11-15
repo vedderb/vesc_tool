@@ -310,7 +310,6 @@ bool Utility::requestBleScanPermission()
 bool Utility::requestBleConnectPermission()
 {
 #ifdef Q_OS_ANDROID
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     QtAndroidPrivate::PermissionResult r = QtAndroidPrivate::checkPermission("android.permission.BLUETOOTH_CONNECT").result();
     if(r == QtAndroidPrivate::PermissionResult::Denied) {
         r = QtAndroidPrivate::requestPermission("android.permission.BLUETOOTH_CONNECT").result();
@@ -320,9 +319,6 @@ bool Utility::requestBleConnectPermission()
     }
 
     return true;
-#else
-    return true;
-#endif
 #else
     return true;
 #endif
@@ -337,6 +333,24 @@ bool Utility::hasLocationPermission()
     } else {
         return true;
     }
+#else
+    return true;
+#endif
+}
+
+bool Utility::requestNotificationPermission()
+{
+#ifdef Q_OS_ANDROID
+    if (QNativeInterface::QAndroidApplication::sdkVersion() >= 33) {
+        QtAndroidPrivate::PermissionResult r = QtAndroidPrivate::checkPermission("android.permission.POST_NOTIFICATIONS").result();
+        if (r == QtAndroidPrivate::PermissionResult::Denied) {
+            r = QtAndroidPrivate::requestPermission("android.permission.POST_NOTIFICATIONS").result();
+            if (r == QtAndroidPrivate::PermissionResult::Denied) {
+                return false;
+            }
+        }
+    }
+    return true;
 #else
     return true;
 #endif
@@ -2516,6 +2530,46 @@ bool Utility::writeTextFile(QString path, QString content)
     return f.write(utf8) == utf8.size();
 }
 
+QVariantList Utility::listFilesInDir(QString dirPath)
+{
+    if (dirPath.startsWith("file:")) {
+        dirPath = QUrl(dirPath).toLocalFile();
+    }
+
+    QVariantList result;
+    QDir dir(dirPath);
+    if (!dir.exists()) {
+        return result;
+    }
+
+    QFileInfoList entries = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
+    for (const QFileInfo &fi : entries) {
+        if (fi.suffix().compare("csv", Qt::CaseInsensitive) == 0) {
+            QVariantMap map;
+            map["name"] = fi.fileName();
+            map["path"] = fi.absoluteFilePath();
+            map["size"] = fi.size();
+            map["modified"] = fi.lastModified().toString("yyyy-MM-dd HH:mm");
+            result.append(map);
+        }
+    }
+    return result;
+}
+
+bool Utility::removeFile(QString path)
+{
+    if (path.startsWith("file:")) {
+        path = QUrl(path).toLocalFile();
+    }
+
+    return QFile::remove(path);
+}
+
+QVariant Utility::getSetting(QString key, QVariant defaultValue)
+{
+    QSettings set;
+    return set.value(key, defaultValue);
+}
 
 QByteArray Utility::removeFirmwareHeader(QByteArray in)
 {

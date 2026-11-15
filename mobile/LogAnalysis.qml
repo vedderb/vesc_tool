@@ -1198,8 +1198,7 @@ Item {
                     }
                     MouseArea {
                         anchors.fill: parent
-                        enabled: root.rawRows.length > 1 && !root.comboOpen
-                        preventStealing: true
+                        enabled: oot.rawRows.length > 1 && !root.comboOpen && !chartPinch.active
 
                         function scrub(mx) {
                             var span = Math.max(1, root.viewEnd - root.viewStart)
@@ -1213,17 +1212,64 @@ Item {
                                      else if (w.angleDelta.y < 0) root.zoomAroundCursor(1.33)
                                  }
                     }
-
                     // Extra touch-drag claim so parent SwipeView never steals horizontal drags
                     DragHandler {
                         target: null
-                        enabled: root.rawRows.length > 1 && !root.comboOpen
+                        enabled: root.rawRows.length > 1 && !root.comboOpen && !chartPinch.active
                         grabPermissions: PointerHandler.CanTakeOverFromAnything
                         onCentroidChanged: {
                             if (active) {
                                 var span = Math.max(1, root.viewEnd - root.viewStart)
                                 var ratio = Math.max(0, Math.min(1, centroid.position.x / parent.width))
                                 root.currentIndex = root.viewStart + Math.round(ratio * span)
+                            }
+                        }
+                    }
+
+                    PinchHandler {
+                        id: chartPinch
+                        target: null
+                        enabled: root.rawRows.length > 2 && !root.comboOpen
+                        grabPermissions: PointerHandler.CanTakeOverFromAnything
+
+                        property real lastRatio: 0.5
+
+                        onActiveChanged: {
+                            if (active) {
+                                lastRatio = Math.max(0, Math.min(1, centroid.position.x / parent.width))
+                            }
+                        }
+
+                        onScaleChanged: (delta) => {
+                            if (!active || delta <= 0) return
+                            var maxIdx = root.rawRows.length - 1
+                            var curSpan = Math.max(10, root.viewEnd - root.viewStart)
+                            var newSpan = Math.max(10, Math.min(maxIdx, Math.round(curSpan / delta)))
+
+                            var curRatio = Math.max(0, Math.min(1, centroid.position.x / parent.width))
+                            var anchorIdx = root.viewStart + lastRatio * curSpan
+                            var newStart = Math.round(anchorIdx - curRatio * newSpan)
+                            var newEnd = newStart + newSpan
+
+                            if (newStart < 0) { newEnd = Math.min(maxIdx, newEnd - newStart); newStart = 0 }
+                            if (newEnd > maxIdx) { newStart = Math.max(0, newStart - (newEnd - maxIdx)); newEnd = maxIdx }
+
+                            lastRatio = curRatio
+                            root.applyZoomWindow(newStart, newEnd, false)
+                        }
+
+                        onCentroidChanged: {
+                            if (!active) return
+                            var maxIdx = root.rawRows.length - 1
+                            var curSpan = root.viewEnd - root.viewStart
+                            if (curSpan >= maxIdx) return
+
+                            var curRatio = Math.max(0, Math.min(1, centroid.position.x / parent.width))
+                            var shift = Math.round((lastRatio - curRatio) * curSpan)
+                            if (shift !== 0) {
+                                var newStart = Math.max(0, Math.min(maxIdx - curSpan, root.viewStart + shift))
+                                lastRatio = curRatio
+                                root.applyZoomWindow(newStart, newStart + curSpan, false)
                             }
                         }
                     }

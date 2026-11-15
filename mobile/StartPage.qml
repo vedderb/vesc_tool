@@ -168,7 +168,7 @@ Item {
                         Layout.preferredHeight: 80
 
                         buttonText: "Setup\nIMU"
-                        imageSrc: "qrc" + Utility.getThemePath() + "icons/imu_off.png"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Gyroscope-96"
 
                         onClicked: {
                             if (!VescIf.isPortConnected()) {

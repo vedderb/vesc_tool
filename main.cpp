@@ -175,11 +175,11 @@ int main(int argc, char *argv[])
     if (isDark) {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2_dark.conf");
 
-        Utility::setAppQColor("lightestBackground", QColor(80,80,80));
-        Utility::setAppQColor("lightBackground", QColor(72,72,72));
-        Utility::setAppQColor("normalBackground", QColor(48,48,48));
-        Utility::setAppQColor("darkBackground", QColor(39,39,39));
-        Utility::setAppQColor("plotBackground", QColor(39,39,39));
+        Utility::setAppQColor("lightestBackground", QColor(65,65,65));
+        Utility::setAppQColor("lightBackground", QColor(50,50,50));
+        Utility::setAppQColor("normalBackground", QColor(35,35,35));
+        Utility::setAppQColor("darkBackground", QColor(28,27,31));
+        Utility::setAppQColor("plotBackground", QColor(28,27,31));
         Utility::setAppQColor("normalText", QColor(180,180,180));
         Utility::setAppQColor("lightText", QColor(215,215,215));
         Utility::setAppQColor("disabledText", QColor(127,127,127));

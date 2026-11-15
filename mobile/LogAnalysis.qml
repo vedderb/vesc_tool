@@ -470,6 +470,8 @@ Item {
     property int viewStart: 0
     property int viewEnd: 0
     property string statusText: "Click 'Open CSV Log' to load a VESC log file."
+    property bool comboOpen: false
+    property bool followMap: true
 
     property var slotEnabled: [true, true, true, true]
     property var slotColIdx: [-1, -1, -1, -1]
@@ -795,8 +797,19 @@ Item {
         if (!r || r.rawMin === null || r.rawMax === null) return "Min: -  Max: -"
         return "Min: " + r.rawMin.toFixed(1) + "  Max: " + r.rawMax.toFixed(1)
     }
+
     onRawRowsChanged: rangeCache = ({})
-    onCurrentIndexChanged: chartCursor.requestPaint()
+
+    onCurrentIndexChanged: {
+        chartCursor.requestPaint()
+        if (followMap && hasGps && rawRows.length > 0) {
+            var c = currentMapCoord
+            if (c.isValid && (c.latitude !== 0 || c.longitude !== 0)) {
+                mapView.map.center = c
+            }
+        }
+    }
+
     FileDialog {
         id: csvDialog
         title: "Select VESC CSV Log"
@@ -863,6 +876,19 @@ Item {
                 onClicked: root.fitRouteBounds()
             }
 
+            Button {
+                text: "Follow"
+                checkable: true
+                checked: root.followMap
+                enabled: root.hasGps
+                onToggled: {
+                    root.followMap = checked
+                    if (checked && root.currentMapCoord.isValid) {
+                        mapView.map.center = root.currentMapCoord
+                    }
+                }
+            }
+
             Label {
                 Layout.fillWidth: true
                 text: root.statusText
@@ -878,6 +904,7 @@ Item {
             map.plugin: mapPlugin
             map.center: QtPositioning.coordinate(57.49, 13.11)
             map.zoomLevel: 13
+            enabled: !root.comboOpen
 
             Connections {
                 target: mapView.map
@@ -912,6 +939,7 @@ Item {
                 grabPermissions: PointerHandler.CanTakeOverFromAnything
                 property real startZoom: 13
                 property var startGeo: QtPositioning.coordinate(0, 0)
+                enabled: !root.comboOpen
 
                 onActiveChanged: {
                     if (active) {
@@ -1002,7 +1030,13 @@ Item {
                                     model: root.columnNames
                                     currentIndex: root.slotColIdx[index]
                                     onActivated: (idx) => root.setSlotColumn(index, idx)
+
                                     popup.width: Math.max(width, 240)
+                                    popup.modal: true
+                                    popup.dim: false
+                                    popup.onOpened: root.comboOpen = true
+                                    popup.onClosed: root.comboOpen = false
+
 
                                     indicator: Text {
                                         anchors.right: parent.right
@@ -1118,7 +1152,7 @@ Item {
                     }
                     MouseArea {
                         anchors.fill: parent
-                        enabled: root.rawRows.length > 1
+                        enabled: root.rawRows.length > 1 && !root.comboOpen
                         preventStealing: true
 
                         function scrub(mx) {
@@ -1137,7 +1171,7 @@ Item {
                     // Extra touch-drag claim so parent SwipeView never steals horizontal drags
                     DragHandler {
                         target: null
-                        enabled: root.rawRows.length > 1
+                        enabled: root.rawRows.length > 1 && !root.comboOpen
                         grabPermissions: PointerHandler.CanTakeOverFromAnything
                         onCentroidChanged: {
                             if (active) {

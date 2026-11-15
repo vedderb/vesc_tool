@@ -92,6 +92,17 @@ ApplicationWindow {
         dialogParent: mainSwipeView
     }
 
+    readonly property var rideSession: rideDisplay.item ? rideDisplay.item.session : null
+
+    Loader {
+        id: rideDisplay
+        active: Qt.platform.os === "ios"
+        source: "RideDisplay.qml"
+        onLoaded: item.connected = Qt.binding(function() {
+            return appWindow.connected && appWindow.fwReadCorrectly
+        })
+    }
+
     Controls {
         id: controls
         parentWidth: appWindow.width
@@ -195,6 +206,17 @@ ApplicationWindow {
                 // Spacer
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+            }
+
+            Button {
+                Layout.fillWidth: true
+                visible: rideSession ? rideSession.supported : false
+                text: rideSession && rideSession.active ? qsTr("Ride in progress") : qsTr("Ride display")
+                flat: true
+                onClicked: {
+                    drawer.close()
+                    rideDisplay.item.open()
+                }
             }
 
             Button {
@@ -895,7 +917,11 @@ ApplicationWindow {
 
                     if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex === 3) {
                         interval = 100
-                        mCommands.getValuesSetupSelective(0x7E00)
+                        if (rideSession && rideSession.active) {
+                            mCommands.getValuesSetup()
+                        } else {
+                            mCommands.getValuesSetupSelective(0x7E00)
+                        }
                         mCommands.getStats(0xFFFFFFFF)
                     }
 

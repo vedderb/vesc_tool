@@ -19,6 +19,10 @@
 
 #include "qmlui.h"
 
+#ifdef Q_OS_IOS
+#include "ios/src/ridesession.h"
+#endif
+
 #include <QQuickStyle>
 #include <QApplication>
 #include <QQuickWindow>
@@ -42,6 +46,11 @@ bool QmlUi::startQmlUi()
 
     qmlRegisterSingletonType<VescInterface>("Vedder.vesc.vescinterface", 1, 0, "VescIf", vescinterface_singletontype_provider);
     qmlRegisterSingletonType<Utility>("Vedder.vesc.utility", 1, 0, "Utility", utility_singletontype_provider);
+#ifdef Q_OS_IOS
+    auto *vesc = mEngine->singletonInstance<VescInterface *>(
+                qmlTypeId("Vedder.vesc.vescinterface", 1, 0, "VescIf"));
+    mEngine->rootContext()->setContextProperty("RideSession", new RideSession(vesc, mEngine));
+#endif
 
     mEngine->load(QUrl(QLatin1String("qrc:/mobile/main.qml")));
     return !mEngine->rootObjects().isEmpty();

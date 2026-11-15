@@ -316,6 +316,7 @@ macx {
 }
 
 ios {
+    include(ios/live_activity.pri)
     QMAKE_INFO_PLIST = ios/Info.plist
     HEADERS += ios/src/setIosParameters.h
     SOURCES += ios/src/setIosParameters.mm

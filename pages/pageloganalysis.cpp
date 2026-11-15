@@ -226,7 +226,7 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
         }
 
         if (event->buttons() & Qt::LeftButton) {
-            double vx = ui->plot->xAxis->pixelToCoord(event->x());
+            double vx = ui->plot->xAxis->pixelToCoord(event->position().x());
             updateDataAndPlot(vx);
         }
     };
@@ -781,13 +781,24 @@ void PageLogAnalysis::on_openCsvButton_clicked()
 {
     if (mVesc) {
         QString dirPath = QSettings().value("pageloganalysis/lastdir", "").toString();
+
+        bool dirReset = false;
+        if (dirPath.length() > 0 && !QDir(dirPath).exists()) {
+            dirPath = "";
+            dirReset = true;
+        }
+
         QString fileName = QFileDialog::getOpenFileName(this,
                                                         tr("Load CSV File"), dirPath,
                                                         tr("CSV files (*.csv)"));
 
         if (!fileName.isEmpty()) {
             QSettings().setValue("pageloganalysis/lastdir",
-                         QFileInfo(fileName).absolutePath());
+                                 QFileInfo(fileName).absolutePath());
+
+            if (dirReset) {
+                logListRefresh();
+            }
 
             QFile inFile(fileName);
             if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -2516,3 +2527,4 @@ void PageLogAnalysis::on_showLegendBox_toggled(bool checked)
     ui->plot->legend->setVisible(checked);
     updateGraphs();
 }
+

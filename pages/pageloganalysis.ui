@@ -583,7 +583,7 @@
                <item>
                 <widget class="QPushButton" name="logListOpenButton">
                  <property name="text">
-                  <string>Open Selected</string>
+                  <string>Open</string>
                  </property>
                  <property name="icon">
                   <iconset resource="../res.qrc">
@@ -803,7 +803,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>978</width>
+                  <width>964</width>
                   <height>181</height>
                  </rect>
                 </property>

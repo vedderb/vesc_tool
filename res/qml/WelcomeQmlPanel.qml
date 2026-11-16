@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
+import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
 import QtQuick.Window 2.2
@@ -29,7 +29,7 @@ import "qrc:/mobile"
 
 Item {
     id: container
-    width: 100   
+    width: 100
 
     // Full screen iPhone X workaround:
     property int notchLeft: 0
@@ -151,21 +151,26 @@ Item {
 
         TabBar {
             id: tabBar
-            currentIndex: swipeView.currentIndex
             Layout.fillWidth: true
             implicitWidth: 0
             clip: true
 
+            onCurrentIndexChanged: {
+                if (swipeView.currentIndex !== currentIndex) {
+                    swipeView.setCurrentIndex(currentIndex)
+                }
+            }
+
             background: Rectangle {
                 opacity: 1
-                color: {color = Utility.getAppHexColor("lightBackground")}
+                color: Utility.getAppHexColor("lightBackground")
             }
 
             property int buttonWidth: Math.max(120,
                                                tabBar.width /
                                                (rep.model.length +
                                                 (uiHwPage.visible ? 1 : 0) +
-                                               (uiAppPage.visible ? 1 : 0)))
+                                                (uiAppPage.visible ? 1 : 0)))
 
             Repeater {
                 id: rep
@@ -218,20 +223,56 @@ Item {
 
         SwipeView {
             id: swipeView
-            currentIndex: tabBar.currentIndex
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
+            interactive: false
+
+            onCurrentIndexChanged: {
+                if (tabBar.currentIndex !== currentIndex) {
+                    tabBar.setCurrentIndex(currentIndex)
+                }
+            }
+
+            DragHandler {
+                id: horizDrag
+                enabled: !connScreen.opened
+                target: null
+                xAxis.enabled: true
+                yAxis.enabled: false
+                dragThreshold: 12
+                grabPermissions: PointerHandler.CanTakeOverFromItems | PointerHandler.CanTakeOverFromAnything
+
+                property real startX: 0
+                onActiveChanged: {
+                    if (active) {
+                        startX = centroid.position.x
+                    } else {
+                        var dx = centroid.position.x - startX
+                        if (dx < -40 && swipeView.currentIndex < swipeView.count - 1) {
+                            swipeView.incrementCurrentIndex()
+                        } else if (dx > 40 && swipeView.currentIndex > 0) {
+                            swipeView.decrementCurrentIndex()
+                        }
+                    }
+                }
+            }
 
             Page {
                 PageIndicator {
                     count: rtSwipeView.count
                     currentIndex: rtSwipeView.currentIndex
+                    interactive: true
+                    onCurrentIndexChanged: {
+                        if (rtSwipeView.currentIndex !== currentIndex) {
+                            rtSwipeView.setCurrentIndex(currentIndex)
+                        }
+                    }
                     anchors.left: parent.left
-                    width:25
+                    anchors.leftMargin: 4
                     anchors.verticalCenter: parent.verticalCenter
                     rotation: 90
-                    z:2
+                    z: 2
                 }
 
                 SwipeView {
@@ -241,6 +282,42 @@ Item {
                     currentIndex: 0
                     anchors.fill: parent
                     orientation: Qt.Vertical
+                    interactive: false
+
+                    DragHandler {
+                        id: vertDrag
+                        enabled: !connScreen.opened
+                        target: null
+                        xAxis.enabled: false
+                        yAxis.enabled: true
+                        dragThreshold: 12
+                        grabPermissions: PointerHandler.CanTakeOverFromItems | PointerHandler.CanTakeOverFromAnything
+
+                        property real startY: 0
+                        onActiveChanged: {
+                            if (active) {
+                                startY = centroid.position.y
+                            } else {
+                                var dy = centroid.position.y - startY
+                                if (dy < -40 && rtSwipeView.currentIndex < rtSwipeView.count - 1) {
+                                    rtSwipeView.incrementCurrentIndex()
+                                } else if (dy > 40 && rtSwipeView.currentIndex > 0) {
+                                    rtSwipeView.decrementCurrentIndex()
+                                }
+                            }
+                        }
+                    }
+
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse
+                        onWheel: (event) => {
+                                     if (event.angleDelta.y < 0 && rtSwipeView.currentIndex < rtSwipeView.count - 1) {
+                                         rtSwipeView.incrementCurrentIndex()
+                                     } else if (event.angleDelta.y > 0 && rtSwipeView.currentIndex > 0) {
+                                         rtSwipeView.decrementCurrentIndex()
+                                     }
+                                 }
+                    }
 
                     Page {
                         RtDataSetup {

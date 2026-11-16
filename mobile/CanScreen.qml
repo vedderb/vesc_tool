@@ -76,6 +76,8 @@ Item {
                 canList.currentIndex = 0;
                 canModel.clear()
                 scanButton.enabled = false
+                lastScan = 0
+                lastScanText = ""
             } else {
                 selectDeviceInList()
             }
@@ -84,7 +86,8 @@ Item {
                 lastScanText = qsTr("Last scan %1").arg(timeAgo(lastScan))
             }
 
-            if (VescIf.scanCanOnConnect() &&
+            // Once per connection, as a scan that is still filling the list also leaves it empty
+            if (VescIf.scanCanOnConnect() && lastScan === 0 &&
                     scanButton.enabled && canList.count == 0 &&
                     VescIf.isPortConnected() &&
                     VescIf.fwRx() && VescIf.customConfigRxDone()) {

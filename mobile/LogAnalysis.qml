@@ -1197,7 +1197,7 @@ Item {
             items.push({ label: "Max Speed", value: maxSpdKmh.toFixed(1) + " km/h" })
         }
 
-        // 5. Energy Consumed (Wh used minus Wh charged, or Wh used)
+        // 5. Energy Consumed (Wh net on one row, Regen on its own row when present)
         var whUsedIdx = findColKeyIdx(["watt_hours_used", "watt_hours_setup", "cnt_wh", "watt hours", "wh_used"])
         var whChgIdx  = findColKeyIdx(["watt_hours_charged", "watt_hours_charged_setup", "cnt_wh_chg", "wh chg", "wh_charged"])
         if (whUsedIdx !== -1 && rStart.vals[whUsedIdx] !== null && rEnd.vals[whUsedIdx] !== null) {
@@ -1207,9 +1207,14 @@ Item {
             var netWh = whUsed - whChg
             items.push({
                            label: "Energy",
-                           value: whChg > 0.05 ? (netWh.toFixed(1) + " Wh (" + whChg.toFixed(1) + " regen)")
-                                               : (whUsed.toFixed(1) + " Wh")
+                           value: netWh.toFixed(1) + " Wh"
                        })
+            if (whChg > 0.05) {
+                items.push({
+                               label: "Regen",
+                               value: whChg.toFixed(1) + " Wh"
+                           })
+            }
             if (distM >= 50) {
                 items.push({
                                label: "Efficiency",
@@ -1536,21 +1541,20 @@ Item {
                          }
             }
 
-            // Floating, movable stats card for the zoomed range
+            // Floating, movable stats card (auto-sized to widest row)
             Rectangle {
                 id: statsCard
                 visible: root.showMapStats && root.zoomedStats.length > 0
                 z: 10
                 x: 10
                 y: 10
-                width: Math.min(map.width - 20, 210)
-                height: statsCol.implicitHeight + 12
+                width: Math.min(map.width - 20, Math.max(120, statsCol.implicitWidth + 10))
+                height: statsCol.implicitHeight + 10
                 radius: 6
                 color: "#d91a1d24"
                 border.color: "#333a45"
                 border.width: 1
 
-                // Keep card inside map bounds if window/orientation resizes
                 onXChanged: {
                     var maxX = Math.max(4, map.width - width - 4)
                     if (x < 4) x = 4
@@ -1577,20 +1581,21 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.margins: 6
+                    anchors.margins: 5
                     spacing: 2
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: 4
+                        spacing: 6
 
                         Label {
-                            Layout.fillWidth: true
-                            text: "Stats"
+                            text: "⋮⋮ Stats"
                             font.pixelSize: 11
                             font.bold: true
                             color: "#ffffff"
                         }
+
+                        Item { Layout.fillWidth: true }
 
                         ToolButton {
                             text: "×"
@@ -1613,15 +1618,15 @@ Item {
                         model: root.zoomedStats
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: 6
+                            spacing: 8
 
                             Label {
-                                Layout.fillWidth: true
                                 text: modelData.label + ":"
                                 font.pixelSize: 11
                                 color: "#9ca3af"
-                                elide: Text.ElideRight
                             }
+
+                            Item { Layout.fillWidth: true }
 
                             Label {
                                 text: modelData.value

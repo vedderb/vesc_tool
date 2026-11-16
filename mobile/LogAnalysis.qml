@@ -155,7 +155,7 @@ Item {
         Label {
             width: parent.width
             wrapMode: Text.WordWrap
-            text: "Delete '" + root.pendingDeleteName + "' permanently from the connected device?"
+            text: "Delete '" + root.pendingDeleteName + "' permanently?"
         }
 
         onAccepted: root.executeDeleteFile()
@@ -296,7 +296,12 @@ Item {
         if (pendingDeleteIsLocal) {
             if (Utility.removeFile(pendingDeletePath)) {
                 statusText = "Deleted " + pendingDeleteName + "."
-                rtLogEntries = Utility.listFilesInDir(root.currentRtLogDir)
+                if (rtLogListDialog.visible) {
+                    rtLogEntries = Utility.listFilesInDir(root.currentRtLogDir)
+                }
+                if (recentLogsDialog.visible) {
+                    openRecentLogsDialog()
+                }
             } else {
                 statusText = "Failed to delete " + pendingDeleteName + "."
             }
@@ -376,6 +381,7 @@ Item {
                                 if (text && text.length > 0) {
                                     root.loadedFileName = modelData.name
                                     root.parseCsvText(text)
+                                    recordRecentLocalLog(modelData.path)
                                     rtLogListDialog.close()
                                 } else {
                                     root.statusText = "Failed to read: " + modelData.name
@@ -406,6 +412,7 @@ Item {
         onAccepted: {
             if (Utility.writeTextFile(selectedFile.toString(), root.pendingSaveText)) {
                 root.statusText = "Saved: " + decodeURIComponent(selectedFile.toString()).split("/").pop()
+                recordRecentLocalLog(selectedFile)
             } else {
                 root.statusText = "Failed to save CSV."
             }
@@ -475,6 +482,199 @@ Item {
         loadedFileName = fileName
         saveCsvDialog.currentFile = fileName
         saveCsvDialog.open()
+    }
+
+    property var recentLogEntries: []
+
+    function toJsArray(seq) {
+        var out = []
+        if (!seq || typeof seq === "string" || seq.length === undefined) return out
+        for (var i = 0; i < seq.length; i++) {
+            out.push(seq[i])
+        }
+        return out
+    }
+
+    function recordRecentLocalLog(filePathOrUrl) {
+        var cleanPath = filePathOrUrl.toString()
+        if (!cleanPath.startsWith("content://") && cleanPath.startsWith("file://")) {
+            cleanPath = decodeURIComponent(cleanPath.replace(/^file:\/\//, ""))
+        }
+
+        var list = toJsArray(Utility.getSetting("recent_local_logs", []))
+        list = list.filter(function(p) { return p !== cleanPath })
+        list.unshift(cleanPath)
+        if (list.length > 15) list = list.slice(0, 15)
+
+        Utility.setSetting("recent_local_logs", list)
+    }
+
+    function openRecentLogsDialog() {
+        var combined = []
+        var seenPaths = {}
+
+        // Build lookup map of RT logs in path_rt_log so we know which files can be deleted
+        var rtMap = {}
+        var rtList = []
+        var rtDir = Utility.getSetting("path_rt_log", "").toString()
+        if (rtDir.length > 0 && !rtDir.startsWith("content://")) {
+            var rtFiles = Utility.listFilesInDir(rtDir)
+            for (var i = 0; i < rtFiles.length; i++) {
+                var item = rtFiles[i]
+                item.source = "RT Log"
+                item.canDelete = true
+                rtMap[item.path] = item
+                rtList.push(item)
+            }
+        }
+
+        // 1. First add recently opened logs in exact "most recently opened" order
+        var recentPaths = toJsArray(Utility.getSetting("recent_local_logs", []))
+        for (var j = 0; j < recentPaths.length; j++) {
+            var p = recentPaths[j]
+            if (!p || seenPaths[p]) continue
+
+            if (rtMap[p]) {
+                combined.push(rtMap[p])
+                seenPaths[p] = true
+            } else if (p.startsWith("content://")) {
+                var fname = decodeURIComponent(p).split("/").pop()
+                combined.push({
+                                  name: fname,
+                                  path: p,
+                                  size: 0,
+                                  modified: "",
+                                  source: "Local",
+                                  canDelete: false
+                              })
+                seenPaths[p] = true
+            } else {
+                var info = Utility.getFileInfo(p)
+                if (info && info.path) {
+                    info.source = "Local"
+                    info.canDelete = false
+                    combined.push(info)
+                    seenPaths[info.path] = true
+                }
+            }
+        }
+
+        // 2. Then append remaining unopened RT logs (already sorted newest-first by QDir::Time)
+        for (var k = 0; k < rtList.length; k++) {
+            var rtItem = rtList[k]
+            if (!seenPaths[rtItem.path]) {
+                combined.push(rtItem)
+                seenPaths[rtItem.path] = true
+            }
+        }
+
+        recentLogEntries = combined
+        recentLogsDialog.open()
+    }
+
+    function clearRecentLogsHistory() {
+        Utility.setSetting("recent_local_logs", [])
+        openRecentLogsDialog()
+        statusText = "Cleared recent log history."
+    }
+
+    Dialog {
+        id: recentLogsDialog
+        title: "Recent Logs (Local & RT)"
+        modal: true
+        closePolicy: Popup.NoAutoClose
+        anchors.centerIn: parent
+        width: Math.min(parent.width * 0.92, 500)
+        height: Math.min(parent.height * 0.80, 540)
+
+        footer: DialogButtonBox {
+            Button {
+                text: "Clear History"
+                DialogButtonBox.buttonRole: DialogButtonBox.ResetRole
+                enabled: root.toJsArray(Utility.getSetting("recent_local_logs", [])).length > 0
+                onClicked: root.clearRecentLogsHistory()
+            }
+            Button {
+                text: "Close"
+                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+                onClicked: recentLogsDialog.close()
+            }
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 6
+
+            Label {
+                visible: root.recentLogEntries.length === 0
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: "#9ca3af"
+                text: "No recent local or RT logs found."
+            }
+
+            ListView {
+                id: recentLogsListView
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                model: root.recentLogEntries
+
+                delegate: Item {
+                    width: recentLogsListView.width
+                    height: recentRow.implicitHeight
+
+                    RowLayout {
+                        id: recentRow
+                        anchors.fill: parent
+                        spacing: 6
+
+                        Rectangle {
+                            radius: 4
+                            color: modelData.source === "RT Log" ? "#1d4ed8" : "#374151"
+                            implicitWidth: badgeLbl.implicitWidth + 10
+                            implicitHeight: badgeLbl.implicitHeight + 4
+
+                            Label {
+                                id: badgeLbl
+                                anchors.centerIn: parent
+                                text: modelData.source
+                                color: "#ffffff"
+                                font.pixelSize: 10
+                                font.bold: true
+                            }
+                        }
+
+                        ItemDelegate {
+                            Layout.fillWidth: true
+                            text: modelData.name + (modelData.size > 0
+                                                    ? ("  (" + (modelData.size / 1024).toFixed(1) + " KB" +
+                                                       (modelData.modified ? (" · " + modelData.modified) : "") + ")")
+                                                    : "")
+                            onClicked: {
+                                var text = Utility.readTextFile(modelData.path)
+                                if (text && text.length > 0) {
+                                    root.loadedFileName = modelData.name
+                                    root.parseCsvText(text)
+                                    root.recordRecentLocalLog(modelData.path)
+                                    recentLogsDialog.close()
+                                } else {
+                                    root.statusText = "Failed to read: " + modelData.name
+                                }
+                            }
+                        }
+
+                        ToolButton {
+                            visible: modelData.canDelete
+                            text: "Delete"
+                            font.pixelSize: 11
+                            palette.buttonText: "#ff5555"
+                            onClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     property var trackCoords: []
@@ -730,6 +930,7 @@ Item {
     function loadCsv(fileUrl) {
         var text = Utility.readTextFile(fileUrl.toString())
         if (!text || text.length === 0) { statusText = "Failed to read file."; return }
+        recordRecentLocalLog(fileUrl)
         loadedFileName = decodeURIComponent(fileUrl.toString()).split("/").pop() || "vesc_log.csv"
         parseCsvText(text)
     }
@@ -883,6 +1084,7 @@ Item {
         updateStatusSummary()
         if (hasGps) fitRouteBounds()
     }
+
     function latestSlotVal(slot) {
         var colIdx = slotColIdx[slot]
         if (colIdx < 0 || rawRows.length === 0 || colIdx >= columnMeta.length) return ""
@@ -893,6 +1095,7 @@ Item {
         }
         return "N/A"
     }
+
     function slotMinMaxText(slot) {
         var r = slotRanges[slot]
         if (!r || r.rawMin === null || r.rawMax === null) return "Min: -  Max: -"
@@ -961,6 +1164,10 @@ Item {
                     MenuItem {
                         text: "Open Device CSV..."
                         onTriggered: root.openDeviceBrowser()
+                    }
+                    MenuItem {
+                        text: "Recent Logs..."
+                        onTriggered: root.openRecentLogsDialog()
                     }
                     MenuSeparator {}
                     MenuItem {

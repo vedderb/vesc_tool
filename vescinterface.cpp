@@ -591,6 +591,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         emit ackReceived(tr("%1 write OK").arg(name));
     });
 
+#ifndef DEBUG_BUILD
 #if VT_IS_TEST_VERSION
     QTimer::singleShot(1000, [this]() {
         if (!mIgnoreTestVersion) {
@@ -601,6 +602,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
                               false);
         }
     });
+#endif
 #endif
 }
 

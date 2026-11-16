@@ -366,7 +366,7 @@ ApplicationWindow {
                         visible: status == Loader.Ready
                         sourceComponent: RtData {
                             anchors.fill: parent
-                            updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0
+                            updateData: tabBar.currentIndex === (1 + indexOffset()) && rtSwipeView.currentIndex === 0
                             isHorizontal: mainIsHorizontal
                         }
                     }
@@ -380,7 +380,7 @@ ApplicationWindow {
                         sourceComponent: RtDataSetup {
                             anchors.fill: parent
                             dialogParent: mainSwipeView
-                            updateData: tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1
+                            updateData: tabBar.currentIndex === (1 + indexOffset()) && rtSwipeView.currentIndex === 1
                             isHorizontal: mainIsHorizontal
                         }
                     }
@@ -1192,7 +1192,7 @@ ApplicationWindow {
     Connections {
         target: mCommands
         function onValuesImuReceived(values, mask) {
-            if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
+            if (tabBar.currentIndex === (1 + indexOffset()) && rtSwipeView.currentIndex === 2) {
                 vesc3dLoader.item.setRotation(values.roll, values.pitch,
                                               useYawBox.checked ? values.yaw : 0)
                 rtIMU.updateText(values)

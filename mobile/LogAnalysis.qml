@@ -21,6 +21,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts
 import QtQuick.Dialogs
 import QtLocation
@@ -235,7 +236,7 @@ Item {
                             visible: !modelData.isDir
                             text: "Delete"
                             font.pixelSize: 11
-                            palette.buttonText: "#ff5555"
+                            Material.foreground: Utility.getAppHexColor("danger")
                             onClicked: root.promptDeleteDeviceFile(modelData.name)
                         }
                     }
@@ -255,7 +256,7 @@ Item {
                     value: root.downloadProgress
                 }
                 Label {
-                    font.family: "Monospace"
+                    font.features: { "tnum": 1 }
                     text: root.downloadProgress.toFixed(0) + "% (" + root.downloadSpeedKBps.toFixed(1) + " KB/s)"
                 }
                 Button {
@@ -342,7 +343,7 @@ Item {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
                 text: "No .csv logs found in:\n" + displayPath(root.currentRtLogDir)
-                color: "#9ca3af"
+                color: Utility.getAppHexColor("normalText")
             }
 
             ListView {
@@ -371,6 +372,8 @@ Item {
                                 }
 
                                 Label {
+                                    width: parent.width
+                                    elide: Text.ElideRight
                                     text: (modelData.size / 1024).toFixed(1) + " KB · " + modelData.modified
                                     font.pointSize: 10
                                     color: Utility.getAppHexColor("disabledText")
@@ -392,7 +395,7 @@ Item {
                         ToolButton {
                             text: "Delete"
                             font.pixelSize: 11
-                            palette.buttonText: "#ff5555"
+                            Material.foreground: Utility.getAppHexColor("danger")
                             onClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
                         }
                     }
@@ -578,28 +581,11 @@ Item {
         statusText = "Cleared recent log history."
     }
 
-    Dialog {
+    SheetDialog {
         id: recentLogsDialog
         title: "Recent Logs (Local & RT)"
-        modal: true
         closePolicy: Popup.NoAutoClose
-        anchors.centerIn: parent
-        width: Math.min(parent.width * 0.92, 500)
-        height: Math.min(parent.height * 0.80, 540)
-
-        footer: DialogButtonBox {
-            Button {
-                text: "Clear History"
-                DialogButtonBox.buttonRole: DialogButtonBox.ResetRole
-                enabled: root.toJsArray(Utility.getSetting("recent_local_logs", [])).length > 0
-                onClicked: root.clearRecentLogsHistory()
-            }
-            Button {
-                text: "Close"
-                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-                onClicked: recentLogsDialog.close()
-            }
-        }
+        fullHeight: true
 
         ColumnLayout {
             anchors.fill: parent
@@ -609,7 +595,7 @@ Item {
                 visible: root.recentLogEntries.length === 0
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                color: "#9ca3af"
+                color: Utility.getAppHexColor("normalText")
                 text: "No recent local or RT logs found."
             }
 
@@ -629,28 +615,25 @@ Item {
                         anchors.fill: parent
                         spacing: 6
 
-                        Rectangle {
-                            radius: 4
-                            color: modelData.source === "RT Log" ? "#1d4ed8" : "#374151"
-                            implicitWidth: badgeLbl.implicitWidth + 10
-                            implicitHeight: badgeLbl.implicitHeight + 4
-
-                            Label {
-                                id: badgeLbl
-                                anchors.centerIn: parent
-                                text: modelData.source
-                                color: "#ffffff"
-                                font.pixelSize: 10
-                                font.bold: true
-                            }
-                        }
-
                         ItemDelegate {
                             Layout.fillWidth: true
-                            text: modelData.name + (modelData.size > 0
-                                                    ? ("  (" + (modelData.size / 1024).toFixed(1) + " KB" +
-                                                       (modelData.modified ? (" · " + modelData.modified) : "") + ")")
-                                                    : "")
+                            contentItem: Column {
+                                Label {
+                                    width: parent.width
+                                    text: modelData.name
+                                    elide: Text.ElideMiddle
+                                }
+
+                                Label {
+                                    width: parent.width
+                                    elide: Text.ElideRight
+                                    text: modelData.source +
+                                          (modelData.size > 0 ? " · " + (modelData.size / 1024).toFixed(1) + " KB" : "") +
+                                          (modelData.modified ? " · " + modelData.modified : "")
+                                    font.pointSize: 10
+                                    color: Utility.getAppHexColor("disabledText")
+                                }
+                            }
                             onClicked: {
                                 var text = Utility.readTextFile(modelData.path)
                                 if (text && text.length > 0) {
@@ -668,11 +651,19 @@ Item {
                             visible: modelData.canDelete
                             text: "Delete"
                             font.pixelSize: 11
-                            palette.buttonText: "#ff5555"
+                            Material.foreground: Utility.getAppHexColor("danger")
                             onClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
                         }
                     }
                 }
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: "Clear History"
+                flat: true
+                enabled: root.toJsArray(Utility.getSetting("recent_local_logs", [])).length > 0
+                onClicked: root.clearRecentLogsHistory()
             }
         }
     }
@@ -706,7 +697,9 @@ Item {
         { min: 0, max: 1, rawMin: null, rawMax: null },
         { min: 0, max: 1, rawMin: null, rawMax: null }
     ]
-    readonly property var slotColors: ["#00d4ff", "#ff9900", "#ff4d6d", "#4ade80"]
+    // Darker series colours on the light card
+    readonly property var slotColors: Utility.isDarkMode() ? ["#00d4ff", "#ff9900", "#ff4d6d", "#4ade80"] :
+                                                             ["#0079a8", "#b85f00", "#d42a4c", "#1c8a4a"]
 
     property var currentMapCoord: {
         if (!hasGps || rawRows.length === 0) return QtPositioning.coordinate(0, 0)
@@ -1291,30 +1284,32 @@ Item {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 8
-        spacing: 6
+        spacing: 8
 
         // Unified Top Header Card (matches chartBox styling)
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: headerCol.implicitHeight + 10
-            color: "#1a1d24"
-            radius: 6
-            border.color: "#333a45"
+            implicitHeight: headerCol.implicitHeight + 12
+            color: Utility.getAppHexColor("cardBackground")
+            radius: 12
+            border.color: Utility.getAppHexColor("raisedBackground")
 
             ColumnLayout {
                 id: headerCol
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: 5
-                spacing: 4
+                anchors.margins: 6
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                spacing: 0
 
                 // Row 1: Evenly spaced action buttons
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 6
 
-                    Button {
+                    Chip {
                         id: fileMenuBtn
                         Layout.fillWidth: true
                         text: "File ▾"
@@ -1355,22 +1350,24 @@ Item {
                         }
                     }
 
-                    Button {
+                    Chip {
                         Layout.fillWidth: true
                         text: "Fit Route"
                         enabled: root.hasGps
+                        opacity: enabled ? 1 : 0.4
                         onClicked: {
                             root.followMap = false
                             root.fitRouteBounds()
                         }
                     }
 
-                    Button {
+                    Chip {
                         Layout.fillWidth: true
                         text: "Follow"
                         checkable: true
                         checked: root.followMap
                         enabled: root.hasGps
+                        opacity: enabled ? 1 : 0.4
                         onToggled: {
                             root.followMap = checked
                             if (checked && root.currentMapCoord.isValid) {
@@ -1379,12 +1376,13 @@ Item {
                         }
                     }
 
-                    Button {
+                    Chip {
                         Layout.fillWidth: true
                         text: "Stats"
                         checkable: true
                         checked: root.showMapStats
                         enabled: root.rawRows.length > 0
+                        opacity: enabled ? 1 : 0.4
                         onToggled: root.showMapStats = checked
                     }
                 }
@@ -1397,26 +1395,21 @@ Item {
                     Label {
                         Layout.fillWidth: true
                         Layout.minimumWidth: 60
-                        leftPadding: 4
                         text: root.loadedFileName.length > 0
                               ? (root.loadedFileName + (root.statusText.length > 0 ? (" · " + root.statusText) : ""))
                               : root.statusText
-                        font.pixelSize: 11
-                        color: "#9ca3af"
-                        elide: Text.ElideMiddle
+                        font.pixelSize: 12
+                        color: Utility.getAppHexColor("normalText")
+                        wrapMode: Text.Wrap
+                        maximumLineCount: 2
+                        elide: Text.ElideRight
                     }
 
-                    Button {
+                    Chip {
                         id: filterBtn
                         text: "Filter"
                         checkable: true
                         checked: root.filterOutliers
-                        implicitHeight: 32
-                        topInset: 0
-                        bottomInset: 0
-                        leftPadding: 12
-                        rightPadding: 12
-                        font.pixelSize: 12
                         onToggled: {
                             root.filterOutliers = checked
                             root.reparseWithFilter()
@@ -1542,6 +1535,17 @@ Item {
                          }
             }
 
+            // Rounds the corners of the map by covering them with the page colour
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: -6
+                z: 5
+                radius: 18
+                color: "transparent"
+                border.width: 6
+                border.color: Utility.getAppHexColor("darkBackground")
+            }
+
             // Floating, movable stats card (translucent with outlined text for readability)
             Rectangle {
                 id: statsCard
@@ -1549,11 +1553,11 @@ Item {
                 z: 10
                 x: 10
                 y: 10
-                width: Math.min(map.width - 20, Math.max(120, statsCol.implicitWidth + 10))
-                height: statsCol.implicitHeight + 10
-                radius: 6
-                color: "#8c14171d"
-                border.color: "#66333a45"
+                width: Math.min(map.width - 20, Math.max(120, statsCol.implicitWidth + 16))
+                height: statsCol.implicitHeight + 16
+                radius: 12
+                color: Qt.alpha(Utility.getAppHexColor("cardBackground"), 0.55)
+                border.color: Qt.alpha(Utility.getAppHexColor("raisedBackground"), 0.4)
                 border.width: 1
 
                 onXChanged: {
@@ -1582,7 +1586,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.margins: 5
+                    anchors.margins: 8
                     spacing: 2
 
                     RowLayout {
@@ -1593,9 +1597,9 @@ Item {
                             text: "⋮⋮ Stats"
                             font.pixelSize: 11
                             font.bold: true
-                            color: "#ffffff"
+                            color: Utility.getAppHexColor("titleText")
                             style: Text.Outline
-                            styleColor: "#cc000000"
+                            styleColor: Qt.alpha(Utility.getAppHexColor("darkBackground"), 0.8)
                         }
 
                         Item { Layout.fillWidth: true }
@@ -1606,7 +1610,7 @@ Item {
                             implicitHeight: 20
                             padding: 0
                             font.pixelSize: 13
-                            palette.buttonText: "#d1d5db"
+                            Material.foreground: Utility.getAppHexColor("lightText")
                             onClicked: root.showMapStats = false
                         }
                     }
@@ -1614,7 +1618,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         height: 1
-                        color: "#55ffffff"
+                        color: Qt.alpha(Utility.getAppHexColor("lightText"), 0.33)
                     }
 
                     Repeater {
@@ -1626,21 +1630,21 @@ Item {
                             Label {
                                 text: modelData.label + ":"
                                 font.pixelSize: 11
-                                color: "#e5e7eb"
+                                color: Utility.getAppHexColor("lightText")
                                 style: Text.Outline
-                                styleColor: "#cc000000"
+                                styleColor: Qt.alpha(Utility.getAppHexColor("darkBackground"), 0.8)
                             }
 
                             Item { Layout.fillWidth: true }
 
                             Label {
                                 text: modelData.value
-                                font.family: "Monospace"
+                                font.features: { "tnum": 1 }
                                 font.pixelSize: 11
                                 font.bold: true
-                                color: "#ffffff"
+                                color: Utility.getAppHexColor("titleText")
                                 style: Text.Outline
-                                styleColor: "#cc000000"
+                                styleColor: Qt.alpha(Utility.getAppHexColor("darkBackground"), 0.8)
                             }
                         }
                     }
@@ -1674,10 +1678,10 @@ Item {
             id: chartBox
             readonly property bool compactMode: root.width < 750
             Layout.fillWidth: true
-            Layout.preferredHeight: compactMode ? 275 : 230
-            color: "#1a1d24"; radius: 6; border.color: "#333a45"
+            Layout.preferredHeight: compactMode ? 305 : 260
+            color: Utility.getAppHexColor("cardBackground"); radius: 12; border.color: Utility.getAppHexColor("raisedBackground")
             ColumnLayout {
-                anchors.fill: parent; anchors.margins: 6; spacing: 4
+                anchors.fill: parent; anchors.margins: 8; spacing: 6
                 GridLayout {
                     Layout.fillWidth: true
                     columns: chartBox.compactMode ? 2 : 4
@@ -1696,23 +1700,26 @@ Item {
                                 spacing: 3
 
                                 CheckBox {
+                                    id: slotCheck
                                     checked: root.slotEnabled[index]
                                     onToggled: root.toggleSlot(index, checked)
                                     padding: 0
-                                    // Color dot overlaid neatly or tinting the checkbox
-                                    Rectangle {
-                                        anchors.right: parent.right
-                                        anchors.bottom: parent.bottom
-                                        width: 7; height: 7; radius: 3.5
-                                        color: root.slotColors[index]
-                                        border.color: "#1a1d24"; border.width: 1
+                                    implicitWidth: 28
+                                    implicitHeight: 32
+                                    // Swatch in the colour of the series
+                                    indicator: Rectangle {
+                                        anchors.centerIn: parent
+                                        width: 18; height: 18; radius: 6
+                                        color: slotCheck.checked ? root.slotColors[index] : "transparent"
+                                        border.color: root.slotColors[index]; border.width: 2
                                     }
                                 }
                                 ComboBox {
                                     id: colCombo
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 40
-                                    implicitHeight: 28
+                                    implicitHeight: 32
+                                    background: InputBackground {}
                                     leftPadding: 4
                                     rightPadding: 18
                                     enabled: root.columnNames.length > 0
@@ -1732,7 +1739,7 @@ Item {
                                         anchors.rightMargin: 5
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: "▾"
-                                        color: "#9ca3af"
+                                        color: Utility.getAppHexColor("normalText")
                                         font.pixelSize: 11
                                     }
 
@@ -1748,7 +1755,7 @@ Item {
                                 }
                                 Label {
                                     color: root.slotColors[index]
-                                    font.family: "Monospace"
+                                    font.features: { "tnum": 1 }
                                     font.bold: true
                                     font.pixelSize: 11
                                     text: root.rawRows.length > 0 ? root.latestSlotVal(index) : ""
@@ -1757,9 +1764,9 @@ Item {
 
                             Label {
                                 Layout.fillWidth: true
-                                leftPadding: 28
-                                color: "#9ca3af"
-                                font.family: "Monospace"
+                                leftPadding: 31
+                                color: Utility.getAppHexColor("normalText")
+                                font.features: { "tnum": 1 }
                                 font.pixelSize: 10
                                 elide: Text.ElideRight
                                 text: root.rawRows.length > 0 ? root.slotMinMaxText(index) : ""
@@ -1796,7 +1803,7 @@ Item {
                         onPaint: {
                             var ctx = getContext("2d")
                             ctx.clearRect(0, 0, width, height)
-                            ctx.strokeStyle = "#2a303c"; ctx.lineWidth = 1
+                            ctx.strokeStyle = Utility.getAppHexColor("raisedBackground"); ctx.lineWidth = 1
                             for (var g = 1; g <= 3; g++) {
                                 var gy = (height / 4) * g
                                 ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(width, gy); ctx.stroke()
@@ -1822,7 +1829,7 @@ Item {
                             if (n < 2) return
                             var clampedCur = Math.max(sIdx, Math.min(eIdx, root.currentIndex))
                             var x = ((clampedCur - sIdx) / (n - 1)) * width
-                            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.5
+                            ctx.strokeStyle = Utility.getAppHexColor("titleText"); ctx.lineWidth = 1.5
                             ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke()
                             var pt = root.rawRows[clampedCur]
                             for (var s = 0; s < 4; s++) {
@@ -1917,36 +1924,36 @@ Item {
                         }
                     }
                 }
-            }
-        }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 22
-            spacing: 6
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 22
+                    spacing: 6
 
-            Label {
-                color: "#9ca3af"
-                font.pixelSize: 11
-                text: "Zoom:"
-            }
+                    Label {
+                        color: Utility.getAppHexColor("normalText")
+                        font.pixelSize: 11
+                        text: "Zoom:"
+                    }
 
-            RangeSlider {
-                id: zoomRange
-                Layout.fillWidth: true
-                implicitHeight: 22
-                padding: 0
-                enabled: root.rawRows.length > 1
-                from: 0; to: Math.max(0, root.rawRows.length - 1); stepSize: 1
-                first.onMoved: root.applyZoomWindow(first.value, second.value, false)
-                second.onMoved: root.applyZoomWindow(first.value, second.value, false)
-            }
+                    RangeSlider {
+                        id: zoomRange
+                        Layout.fillWidth: true
+                        implicitHeight: 22
+                        padding: 0
+                        enabled: root.rawRows.length > 1
+                        from: 0; to: Math.max(0, root.rawRows.length - 1); stepSize: 1
+                        first.onMoved: root.applyZoomWindow(first.value, second.value, false)
+                        second.onMoved: root.applyZoomWindow(first.value, second.value, false)
+                    }
 
-            Label {
-                color: "#9ca3af"
-                font.family: "Monospace"
-                font.pixelSize: 11
-                text: root.rawRows.length > 0 ? (root.viewStart + 1) + "-" + (root.viewEnd + 1) : ""
+                    Label {
+                        color: Utility.getAppHexColor("normalText")
+                        font.features: { "tnum": 1 }
+                        font.pixelSize: 11
+                        text: root.rawRows.length > 0 ? (root.viewStart + 1) + "-" + (root.viewEnd + 1) : ""
+                    }
+                }
             }
         }
     }

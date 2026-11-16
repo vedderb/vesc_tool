@@ -2550,6 +2550,7 @@ QVariantList Utility::listFilesInDir(QString dirPath)
             map["path"] = fi.absoluteFilePath();
             map["size"] = fi.size();
             map["modified"] = fi.lastModified().toString("yyyy-MM-dd HH:mm");
+            map["timestamp"] = fi.lastModified().toMSecsSinceEpoch();
             result.append(map);
         }
     }
@@ -2565,10 +2566,36 @@ bool Utility::removeFile(QString path)
     return QFile::remove(path);
 }
 
+QVariantMap Utility::getFileInfo(QString path)
+{
+    if (path.startsWith("file:")) {
+        path = QUrl(path).toLocalFile();
+    }
+
+    QVariantMap map;
+    QFileInfo fi(path);
+    if (!fi.exists() || !fi.isFile()) {
+        return map;
+    }
+
+    map["name"] = fi.fileName();
+    map["path"] = fi.absoluteFilePath();
+    map["size"] = fi.size();
+    map["modified"] = fi.lastModified().toString("yyyy-MM-dd HH:mm");
+    map["timestamp"] = fi.lastModified().toMSecsSinceEpoch();
+    return map;
+}
+
 QVariant Utility::getSetting(QString key, QVariant defaultValue)
 {
     QSettings set;
     return set.value(key, defaultValue);
+}
+
+void Utility::setSetting(QString key, QVariant value)
+{
+    QSettings set;
+    set.setValue(key, value);
 }
 
 QByteArray Utility::removeFirmwareHeader(QByteArray in)

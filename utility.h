@@ -172,7 +172,10 @@ public:
     Q_INVOKABLE static bool writeTextFile(QString path, QString content);
     Q_INVOKABLE static QVariantList listFilesInDir(QString dirPath);
     Q_INVOKABLE static bool removeFile(QString path);
+    Q_INVOKABLE static QVariantMap getFileInfo(QString path);
+
     Q_INVOKABLE static QVariant getSetting(QString key, QVariant defaultValue);
+    Q_INVOKABLE static void setSetting(QString key, QVariant value);
 
 signals:
 

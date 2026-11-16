@@ -152,7 +152,7 @@ Item {
         Label {
             width: parent.width
             wrapMode: Text.WordWrap
-            text: "Delete '" + root.pendingDeleteName + "' permanently from the connected device?"
+            text: "Delete '" + root.pendingDeleteName + "' permanently?"
         }
 
         onAccepted: root.executeDeleteFile()
@@ -288,7 +288,12 @@ Item {
         if (pendingDeleteIsLocal) {
             if (Utility.removeFile(pendingDeletePath)) {
                 statusText = "Deleted " + pendingDeleteName + "."
-                rtLogEntries = Utility.listFilesInDir(root.currentRtLogDir)
+                if (rtLogListDialog.visible) {
+                    rtLogEntries = Utility.listFilesInDir(root.currentRtLogDir)
+                }
+                if (recentLogsDialog.visible) {
+                    openRecentLogsDialog()
+                }
             } else {
                 statusText = "Failed to delete " + pendingDeleteName + "."
             }
@@ -376,6 +381,7 @@ Item {
                                 if (text && text.length > 0) {
                                     root.loadedFileName = modelData.name
                                     root.parseCsvText(text)
+                                    recordRecentLocalLog(modelData.path)
                                     rtLogListDialog.close()
                                 } else {
                                     root.statusText = "Failed to read: " + modelData.name
@@ -406,6 +412,7 @@ Item {
         onAccepted: {
             if (Utility.writeTextFile(selectedFile.toString(), root.pendingSaveText)) {
                 root.statusText = "Saved: " + decodeURIComponent(selectedFile.toString()).split("/").pop()
+                recordRecentLocalLog(selectedFile)
             } else {
                 root.statusText = "Failed to save CSV."
             }
@@ -475,6 +482,199 @@ Item {
         loadedFileName = fileName
         saveCsvDialog.currentFile = fileName
         saveCsvDialog.open()
+    }
+
+    property var recentLogEntries: []
+
+    function toJsArray(seq) {
+        var out = []
+        if (!seq || typeof seq === "string" || seq.length === undefined) return out
+        for (var i = 0; i < seq.length; i++) {
+            out.push(seq[i])
+        }
+        return out
+    }
+
+    function recordRecentLocalLog(filePathOrUrl) {
+        var cleanPath = filePathOrUrl.toString()
+        if (!cleanPath.startsWith("content://") && cleanPath.startsWith("file://")) {
+            cleanPath = decodeURIComponent(cleanPath.replace(/^file:\/\//, ""))
+        }
+
+        var list = toJsArray(Utility.getSetting("recent_local_logs", []))
+        list = list.filter(function(p) { return p !== cleanPath })
+        list.unshift(cleanPath)
+        if (list.length > 15) list = list.slice(0, 15)
+
+        Utility.setSetting("recent_local_logs", list)
+    }
+
+    function openRecentLogsDialog() {
+        var combined = []
+        var seenPaths = {}
+
+        // Build lookup map of RT logs in path_rt_log so we know which files can be deleted
+        var rtMap = {}
+        var rtList = []
+        var rtDir = Utility.getSetting("path_rt_log", "").toString()
+        if (rtDir.length > 0 && !rtDir.startsWith("content://")) {
+            var rtFiles = Utility.listFilesInDir(rtDir)
+            for (var i = 0; i < rtFiles.length; i++) {
+                var item = rtFiles[i]
+                item.source = "RT Log"
+                item.canDelete = true
+                rtMap[item.path] = item
+                rtList.push(item)
+            }
+        }
+
+        // 1. First add recently opened logs in exact "most recently opened" order
+        var recentPaths = toJsArray(Utility.getSetting("recent_local_logs", []))
+        for (var j = 0; j < recentPaths.length; j++) {
+            var p = recentPaths[j]
+            if (!p || seenPaths[p]) continue
+
+            if (rtMap[p]) {
+                combined.push(rtMap[p])
+                seenPaths[p] = true
+            } else if (p.startsWith("content://")) {
+                var fname = decodeURIComponent(p).split("/").pop()
+                combined.push({
+                                  name: fname,
+                                  path: p,
+                                  size: 0,
+                                  modified: "",
+                                  source: "Local",
+                                  canDelete: false
+                              })
+                seenPaths[p] = true
+            } else {
+                var info = Utility.getFileInfo(p)
+                if (info && info.path) {
+                    info.source = "Local"
+                    info.canDelete = false
+                    combined.push(info)
+                    seenPaths[info.path] = true
+                }
+            }
+        }
+
+        // 2. Then append remaining unopened RT logs (already sorted newest-first by QDir::Time)
+        for (var k = 0; k < rtList.length; k++) {
+            var rtItem = rtList[k]
+            if (!seenPaths[rtItem.path]) {
+                combined.push(rtItem)
+                seenPaths[rtItem.path] = true
+            }
+        }
+
+        recentLogEntries = combined
+        recentLogsDialog.open()
+    }
+
+    function clearRecentLogsHistory() {
+        Utility.setSetting("recent_local_logs", [])
+        openRecentLogsDialog()
+        statusText = "Cleared recent log history."
+    }
+
+    Dialog {
+        id: recentLogsDialog
+        title: "Recent Logs (Local & RT)"
+        modal: true
+        closePolicy: Popup.NoAutoClose
+        anchors.centerIn: parent
+        width: Math.min(parent.width * 0.92, 500)
+        height: Math.min(parent.height * 0.80, 540)
+
+        footer: DialogButtonBox {
+            Button {
+                text: "Clear History"
+                DialogButtonBox.buttonRole: DialogButtonBox.ResetRole
+                enabled: root.toJsArray(Utility.getSetting("recent_local_logs", [])).length > 0
+                onClicked: root.clearRecentLogsHistory()
+            }
+            Button {
+                text: "Close"
+                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+                onClicked: recentLogsDialog.close()
+            }
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 6
+
+            Label {
+                visible: root.recentLogEntries.length === 0
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: "#9ca3af"
+                text: "No recent local or RT logs found."
+            }
+
+            ListView {
+                id: recentLogsListView
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                model: root.recentLogEntries
+
+                delegate: Item {
+                    width: recentLogsListView.width
+                    height: recentRow.implicitHeight
+
+                    RowLayout {
+                        id: recentRow
+                        anchors.fill: parent
+                        spacing: 6
+
+                        Rectangle {
+                            radius: 4
+                            color: modelData.source === "RT Log" ? "#1d4ed8" : "#374151"
+                            implicitWidth: badgeLbl.implicitWidth + 10
+                            implicitHeight: badgeLbl.implicitHeight + 4
+
+                            Label {
+                                id: badgeLbl
+                                anchors.centerIn: parent
+                                text: modelData.source
+                                color: "#ffffff"
+                                font.pixelSize: 10
+                                font.bold: true
+                            }
+                        }
+
+                        ItemDelegate {
+                            Layout.fillWidth: true
+                            text: modelData.name + (modelData.size > 0
+                                                    ? ("  (" + (modelData.size / 1024).toFixed(1) + " KB" +
+                                                       (modelData.modified ? (" · " + modelData.modified) : "") + ")")
+                                                    : "")
+                            onClicked: {
+                                var text = Utility.readTextFile(modelData.path)
+                                if (text && text.length > 0) {
+                                    root.loadedFileName = modelData.name
+                                    root.parseCsvText(text)
+                                    root.recordRecentLocalLog(modelData.path)
+                                    recentLogsDialog.close()
+                                } else {
+                                    root.statusText = "Failed to read: " + modelData.name
+                                }
+                            }
+                        }
+
+                        ToolButton {
+                            visible: modelData.canDelete
+                            text: "Delete"
+                            font.pixelSize: 11
+                            palette.buttonText: "#ff5555"
+                            onClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     property var trackCoords: []
@@ -608,6 +808,7 @@ Item {
         refreshRanges()
         updateStatusSummary()
         if (fitMap && hasGps) fitRouteBounds()
+        computeZoomedStats()
     }
 
     function zoomAroundCursor(factor) {
@@ -717,11 +918,23 @@ Item {
         return { delim: delim, cols: cols, names: names }
     }
 
-    function findColIdx(cols, candidates) {
+    function findColKeyIdx(colsOrCandidates, maybeCandidates) {
+        var cols = maybeCandidates ? colsOrCandidates : columnMeta
+        var candidates = maybeCandidates ? maybeCandidates : colsOrCandidates
+        if (!cols || !candidates) return -1
+
         for (var c = 0; c < candidates.length; c++) {
-            var t = candidates[c].toLowerCase()
+            var target = String(candidates[c]).toLowerCase()
             for (var i = 0; i < cols.length; i++) {
-                if (cols[i].key === t || cols[i].label.toLowerCase() === t) return i
+                var item = cols[i]
+                if (!item) continue
+                if (typeof item === "string") {
+                    if (item.toLowerCase() === target) return i
+                } else {
+                    var k = (typeof item.key === "string") ? item.key.toLowerCase() : ""
+                    var lbl = (typeof item.label === "string") ? item.label.toLowerCase() : ""
+                    if (k === target || lbl === target) return i
+                }
             }
         }
         return -1
@@ -730,6 +943,7 @@ Item {
     function loadCsv(fileUrl) {
         var text = Utility.readTextFile(fileUrl.toString())
         if (!text || text.length === 0) { statusText = "Failed to read file."; return }
+        recordRecentLocalLog(fileUrl)
         loadedFileName = decodeURIComponent(fileUrl.toString()).split("/").pop() || "vesc_log.csv"
         parseCsvText(text)
     }
@@ -765,8 +979,8 @@ Item {
         loadedDataLines = cleanLines
 
         var meta = parseHeaderMeta(loadedHeaderLine)
-        var latIdx = findColIdx(meta.cols, ["gnss_lat", "lat", "latitude"])
-        var lonIdx = findColIdx(meta.cols, ["gnss_lon", "lon", "lng", "longitude"])
+        var latIdx = findColKeyIdx(meta.cols, ["gnss_lat", "lat", "latitude"])
+        var lonIdx = findColKeyIdx(meta.cols, ["gnss_lon", "lon", "lng", "longitude"])
 
         // Pass 1: Parse values and collect unique GPS fixes (collapsing repeated coordinates)
         var rawParsed = []
@@ -868,10 +1082,10 @@ Item {
         zoomRange.first.value = 0
         zoomRange.second.value = rows.length - 1
         updateVisibleRoute()
-        var d0 = findColIdx(meta.cols, ["gnss_h_vel", "speed_meters_per_sec", "impeller rpm", "m1 erpm"])
-        var d1 = findColIdx(meta.cols, ["bms current in", "m1 current in", "current_in", "impeller power"])
-        var d2 = findColIdx(meta.cols, ["m1 current", "current_motor", "jet temp gearbox"])
-        var d3 = findColIdx(meta.cols, ["voltage in", "input_voltage", "bms soc"])
+        var d0 = findColKeyIdx(meta.cols, ["gnss_h_vel", "speed_meters_per_sec", "impeller rpm", "m1 erpm"])
+        var d1 = findColKeyIdx(meta.cols, ["bms current in", "m1 current in", "current_in", "impeller power"])
+        var d2 = findColKeyIdx(meta.cols, ["m1 current", "current_motor", "jet temp gearbox"])
+        var d3 = findColKeyIdx(meta.cols, ["voltage in", "input_voltage", "bms soc"])
         var maxIdx = Math.max(0, meta.cols.length - 1)
         slotColIdx = [
                     d0 !== -1 ? d0 : 0,
@@ -882,7 +1096,9 @@ Item {
         refreshRanges()
         updateStatusSummary()
         if (hasGps) fitRouteBounds()
+        computeZoomedStats()
     }
+
     function latestSlotVal(slot) {
         var colIdx = slotColIdx[slot]
         if (colIdx < 0 || rawRows.length === 0 || colIdx >= columnMeta.length) return ""
@@ -893,11 +1109,151 @@ Item {
         }
         return "N/A"
     }
+
     function slotMinMaxText(slot) {
         var r = slotRanges[slot]
         if (!r || r.rawMin === null || r.rawMax === null) return "Min: -  Max: -"
         return "Min: " + r.rawMin.toFixed(1) + "  Max: " + r.rawMax.toFixed(1)
     }
+
+    property var zoomedStats: []
+    property bool showMapStats: true
+
+    function computeZoomedStats() {
+        if (rawRows.length === 0) {
+            zoomedStats = []
+            return
+        }
+
+        var s = Math.max(0, Math.min(viewStart, rawRows.length - 1))
+        var e = Math.max(s, Math.min(viewEnd, rawRows.length - 1))
+        var rStart = rawRows[s]
+        var rEnd = rawRows[e]
+        var items = []
+
+        // 1. Samples
+        items.push({ label: "Samples", value: (e - s + 1) + " / " + rawRows.length })
+
+        // 2. Distance (GPS cumulative distance, tacho_meters, or trip_vesc)
+        var gpsDistM = (rEnd.distance || 0) - (rStart.distance || 0)
+        var tachoIdx = findColKeyIdx(["tacho_meters", "tacho_abs_meters", "trip_vesc", "trip_vesc_abs"])
+        var distM = gpsDistM
+        if (distM <= 0 && tachoIdx !== -1 && rStart.vals[tachoIdx] !== null && rEnd.vals[tachoIdx] !== null) {
+            distM = Math.max(0, rEnd.vals[tachoIdx] - rStart.vals[tachoIdx])
+        }
+        if (distM > 0) {
+            items.push({
+                           label: "Distance",
+                           value: distM >= 1000 ? ((distM / 1000).toFixed(2) + " km") : (Math.round(distM) + " m")
+                       })
+        }
+
+        // 3. Duration (supports ms_today in ms, or t_day / uptime in seconds)
+        var tIdx = findColKeyIdx(["ms_today", "t_day", "esc uptime", "jet uptime", "time"])
+        var dtSec = 0
+        if (tIdx !== -1 && tIdx < columnMeta.length && rStart.vals[tIdx] !== null && rEnd.vals[tIdx] !== null) {
+            var tMeta = columnMeta[tIdx]
+            var tKey = (typeof tMeta.key === "string") ? tMeta.key.toLowerCase() : ""
+            var rawDt = rEnd.vals[tIdx] - rStart.vals[tIdx]
+            if (rawDt < 0 && tKey.indexOf("ms_today") !== -1) {
+                rawDt += 86400000 // Midnight rollover
+            }
+            dtSec = (tKey.indexOf("ms_") === 0) ? (rawDt / 1000.0) : rawDt
+            if (dtSec > 0) {
+                var mins = Math.floor(dtSec / 60)
+                var secs = Math.floor(dtSec % 60)
+                items.push({
+                               label: "Duration",
+                               value: mins > 0 ? (mins + "m " + secs + "s") : (dtSec.toFixed(1) + "s")
+                           })
+            }
+        }
+
+        // 4. Average & Max Speed (auto-detects m/s vs km/h from column unit or key)
+        var spdIdx = findColKeyIdx(["speed_meters_per_sec", "gnss_gvel", "gnss_h_vel", "kmh_vesc", "speed vesc", "speed"])
+        var maxSpdKmh = 0, sumSpdKmh = 0, spdCount = 0
+        if (spdIdx !== -1) {
+            var sMeta = columnMeta[spdIdx]
+            var sUnit = (typeof sMeta.unit === "string") ? sMeta.unit.toLowerCase() : ""
+            var sKey  = (typeof sMeta.key === "string") ? sMeta.key.toLowerCase() : ""
+            var toKmh = (sUnit === "km/h" || sUnit === "kmh" || sKey.indexOf("kmh") !== -1) ? 1.0 : 3.6
+
+            for (var i = s; i <= e; i++) {
+                var sv = rawRows[i].vals[spdIdx]
+                if (sv !== null && !isNaN(sv)) {
+                    var kmh = Math.abs(sv) * toKmh
+                    sumSpdKmh += kmh
+                    spdCount++
+                    if (kmh > maxSpdKmh) maxSpdKmh = kmh
+                }
+            }
+        }
+        var avgSpdKmh = spdCount > 0 ? (sumSpdKmh / spdCount)
+                                     : ((distM > 0 && dtSec > 0) ? ((distM / dtSec) * 3.6) : 0)
+        if (avgSpdKmh > 0) {
+            items.push({ label: "Avg Speed", value: avgSpdKmh.toFixed(1) + " km/h" })
+        }
+        if (maxSpdKmh > 0) {
+            items.push({ label: "Max Speed", value: maxSpdKmh.toFixed(1) + " km/h" })
+        }
+
+        // 5. Energy Consumed (Wh net on one row, Regen on its own row when present)
+        var whUsedIdx = findColKeyIdx(["watt_hours_used", "watt_hours_setup", "cnt_wh", "watt hours", "wh_used"])
+        var whChgIdx  = findColKeyIdx(["watt_hours_charged", "watt_hours_charged_setup", "cnt_wh_chg", "wh chg", "wh_charged"])
+        if (whUsedIdx !== -1 && rStart.vals[whUsedIdx] !== null && rEnd.vals[whUsedIdx] !== null) {
+            var whUsed = Math.max(0, rEnd.vals[whUsedIdx] - rStart.vals[whUsedIdx])
+            var whChg = (whChgIdx !== -1 && rStart.vals[whChgIdx] !== null && rEnd.vals[whChgIdx] !== null)
+                    ? Math.max(0, rEnd.vals[whChgIdx] - rStart.vals[whChgIdx]) : 0
+            var netWh = whUsed - whChg
+            items.push({
+                           label: "Energy",
+                           value: netWh.toFixed(1) + " Wh"
+                       })
+            if (whChg > 0.05) {
+                items.push({
+                               label: "Regen",
+                               value: whChg.toFixed(1) + " Wh"
+                           })
+            }
+            if (distM >= 50) {
+                items.push({
+                               label: "Efficiency",
+                               value: (netWh / (distM / 1000.0)).toFixed(1) + " Wh/km"
+                           })
+            }
+        }
+
+        // 6. Capacity Consumed (Ah)
+        var ahUsedIdx = findColKeyIdx(["amp_hours_used", "amp_hours_setup", "cnt_ah", "amp hours", "ah_used"])
+        var ahChgIdx  = findColKeyIdx(["amp_hours_charged", "amp_hours_charged_setup", "cnt_ah_chg", "ah chg", "ah_charged"])
+        if (ahUsedIdx !== -1 && rStart.vals[ahUsedIdx] !== null && rEnd.vals[ahUsedIdx] !== null) {
+            var ahUsed = Math.max(0, rEnd.vals[ahUsedIdx] - rStart.vals[ahUsedIdx])
+            var ahChg = (ahChgIdx !== -1 && rStart.vals[ahChgIdx] !== null && rEnd.vals[ahChgIdx] !== null)
+                    ? Math.max(0, rEnd.vals[ahChgIdx] - rStart.vals[ahChgIdx]) : 0
+            items.push({ label: "Capacity", value: (ahUsed - ahChg).toFixed(2) + " Ah" })
+        }
+
+        // 7. Peak Electrical Power (V * I_in)
+        var vIdx = findColKeyIdx(["input_voltage", "input voltage", "bms_v_tot", "v_in"])
+        var iIdx = findColKeyIdx(["current_in", "current in", "current_in_setup", "bms_i_in_ic", "i_in"])
+        if (vIdx !== -1 && iIdx !== -1) {
+            var maxW = 0
+            for (var p = s; p <= e; p++) {
+                var vv = rawRows[p].vals[vIdx]
+                var ii = rawRows[p].vals[iIdx]
+                if (vv !== null && ii !== null) {
+                    var w = vv * ii
+                    if (w > maxW) maxW = w
+                }
+            }
+            if (maxW > 0) {
+                items.push({ label: "Peak Power", value: Math.round(maxW) + " W" })
+            }
+        }
+
+        zoomedStats = items
+    }
+
 
     onRawRowsChanged: rangeCache = ({})
 
@@ -936,118 +1292,157 @@ Item {
         anchors.fill: parent
         anchors.margins: 8
         spacing: 6
-        RowLayout {
+
+        // Unified Top Header Card (matches chartBox styling)
+        Rectangle {
             Layout.fillWidth: true
-            spacing: 8
+            implicitHeight: headerCol.implicitHeight + 10
+            color: "#1a1d24"
+            radius: 6
+            border.color: "#333a45"
 
-            Button {
-                id: fileMenuBtn
-                text: "File ▾"
-                highlighted: true
-                onClicked: fileMenu.open()
+            ColumnLayout {
+                id: headerCol
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 5
+                spacing: 4
 
-                PopupMenu {
-                    id: fileMenu
-                    y: fileMenuBtn.height
+                // Row 1: Evenly spaced action buttons
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
 
-                    MenuItem {
-                        text: "Open RT Log..."
-                        onTriggered: root.openRtLogBrowser()
+                    Button {
+                        id: fileMenuBtn
+                        Layout.fillWidth: true
+                        text: "File ▾"
+                        onClicked: fileMenu.open()
+
+                        PopupMenu {
+                            id: fileMenu
+                            y: fileMenuBtn.height
+
+                            MenuItem {
+                                text: "Open RT Log..."
+                                onTriggered: root.openRtLogBrowser()
+                            }
+                            MenuItem {
+                                text: "Open Local CSV..."
+                                onTriggered: csvDialog.open()
+                            }
+                            MenuItem {
+                                text: "Open Device CSV..."
+                                onTriggered: root.openDeviceBrowser()
+                            }
+                            MenuItem {
+                                text: "Recent Logs..."
+                                onTriggered: root.openRecentLogsDialog()
+                            }
+                            MenuSeparator {}
+                            MenuItem {
+                                text: "Save Local Backup..."
+                                enabled: root.loadedCsvText.length > 0
+                                onTriggered: root.saveLoadedLogLocally()
+                            }
+                            MenuItem {
+                                text: "Save Zoomed CSV..."
+                                enabled: root.loadedDataLines.length > 0 &&
+                                         (root.viewStart > 0 || root.viewEnd < root.loadedDataLines.length - 1)
+                                onTriggered: root.saveZoomedLogLocally()
+                            }
+                        }
                     }
-                    MenuItem {
-                        text: "Open Local CSV..."
-                        onTriggered: csvDialog.open()
+
+                    Button {
+                        Layout.fillWidth: true
+                        text: "Fit Route"
+                        enabled: root.hasGps
+                        onClicked: {
+                            root.followMap = false
+                            root.fitRouteBounds()
+                        }
                     }
-                    MenuItem {
-                        text: "Open Device CSV..."
-                        onTriggered: root.openDeviceBrowser()
+
+                    Button {
+                        Layout.fillWidth: true
+                        text: "Follow"
+                        checkable: true
+                        checked: root.followMap
+                        enabled: root.hasGps
+                        onToggled: {
+                            root.followMap = checked
+                            if (checked && root.currentMapCoord.isValid) {
+                                map.center = root.currentMapCoord
+                            }
+                        }
                     }
-                    MenuSeparator {}
-                    MenuItem {
-                        text: "Save Local Backup..."
-                        enabled: root.loadedCsvText.length > 0
-                        onTriggered: root.saveLoadedLogLocally()
-                    }
-                    MenuItem {
-                        text: "Save Zoomed CSV..."
-                        enabled: root.loadedDataLines.length > 0 &&
-                                 (root.viewStart > 0 || root.viewEnd < root.loadedDataLines.length - 1)
-                        onTriggered: root.saveZoomedLogLocally()
+
+                    Button {
+                        Layout.fillWidth: true
+                        text: "Stats"
+                        checkable: true
+                        checked: root.showMapStats
+                        enabled: root.rawRows.length > 0
+                        onToggled: root.showMapStats = checked
                     }
                 }
-            }
 
-            Button {
-                text: "Fit Route"
-                enabled: root.hasGps
-                onClicked: root.fitRouteBounds()
-            }
+                // Row 2: Status text + Filter toggle + Threshold stepper
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
 
-            Button {
-                text: "Follow"
-                checkable: true
-                checked: root.followMap
-                enabled: root.hasGps
-                onToggled: {
-                    root.followMap = checked
-                    if (checked && root.currentMapCoord.isValid) {
-                        map.center = root.currentMapCoord
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 60
+                        leftPadding: 4
+                        text: root.loadedFileName.length > 0
+                              ? (root.loadedFileName + (root.statusText.length > 0 ? (" · " + root.statusText) : ""))
+                              : root.statusText
+                        font.pixelSize: 11
+                        color: "#9ca3af"
+                        elide: Text.ElideMiddle
                     }
-                }
-            }
 
-            Label {
-                Layout.fillWidth: true
-                text: root.statusText
-                elide: Text.ElideMiddle
-                color: palette.text
-            }
-        }
+                    Button {
+                        id: filterBtn
+                        text: "Filter"
+                        checkable: true
+                        checked: root.filterOutliers
+                        implicitHeight: 32
+                        topInset: 0
+                        bottomInset: 0
+                        leftPadding: 12
+                        rightPadding: 12
+                        font.pixelSize: 12
+                        onToggled: {
+                            root.filterOutliers = checked
+                            root.reparseWithFilter()
+                        }
+                    }
 
-        // Compact GPS Outlier Filter Row (between File bar and Map)
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 6
-
-            CheckBox {
-                id: filterCheck
-                text: "Filter outliers"
-                checked: root.filterOutliers
-                implicitHeight: 26
-                padding: 0
-                font.pixelSize: 12
-                onToggled: {
-                    root.filterOutliers = checked
-                    root.reparseWithFilter()
-                }
-            }
-
-            Item { Layout.fillWidth: true }
-
-            Label {
-                text: "Threshold:"
-                font.pixelSize: 12
-                color: "#9ca3af"
-                enabled: root.filterOutliers
-            }
-
-            SpinBox {
-                id: threshSpin
-                background: InputBackground {}
-                from: 10
-                to: 2000
-                stepSize: 10
-                value: Math.round(root.outlierThresholdM)
-                implicitHeight: 26
-                implicitWidth: 118
-                font.pixelSize: 12
-                textFromValue: function(val) { return val + " m" }
-                valueFromText: function(txt) { return parseInt(txt) || 100 }
-                onValueModified: {
-                    root.outlierThresholdM = value
-
-                    if (filterCheck.checked) {
-                        root.reparseWithFilter()
+                    SpinBox {
+                        id: threshSpin
+                        background: InputBackground {}
+                        from: 10
+                        to: 2000
+                        stepSize: 10
+                        value: Math.round(root.outlierThresholdM)
+                        implicitHeight: 32
+                        implicitWidth: 112
+                        topInset: 0
+                        bottomInset: 0
+                        font.pixelSize: 12
+                        textFromValue: function(val) { return val + " m" }
+                        valueFromText: function(txt) { return parseInt(txt) || 100 }
+                        onValueModified: {
+                            root.outlierThresholdM = value
+                            if (root.filterOutliers) {
+                                root.reparseWithFilter()
+                            }
+                        }
                     }
                 }
             }
@@ -1145,6 +1540,111 @@ Item {
                              map.zoomLevel += (event.angleDelta.y > 0 ? 0.5 : -0.5)
                              if (geo.isValid) map.alignCoordinateToPoint(geo, pt)
                          }
+            }
+
+            // Floating, movable stats card (translucent with outlined text for readability)
+            Rectangle {
+                id: statsCard
+                visible: root.showMapStats && root.zoomedStats.length > 0
+                z: 10
+                x: 10
+                y: 10
+                width: Math.min(map.width - 20, Math.max(120, statsCol.implicitWidth + 10))
+                height: statsCol.implicitHeight + 10
+                radius: 6
+                color: "#8c14171d"
+                border.color: "#66333a45"
+                border.width: 1
+
+                onXChanged: {
+                    var maxX = Math.max(4, map.width - width - 4)
+                    if (x < 4) x = 4
+                    else if (x > maxX) x = maxX
+                }
+                onYChanged: {
+                    var maxY = Math.max(4, map.height - height - 4)
+                    if (y < 4) y = 4
+                    else if (y > maxY) y = maxY
+                }
+
+                DragHandler {
+                    id: statsDrag
+                    target: statsCard
+                    grabPermissions: PointerHandler.CanTakeOverFromAnything
+                    xAxis.minimum: 4
+                    xAxis.maximum: Math.max(4, map.width - statsCard.width - 4)
+                    yAxis.minimum: 4
+                    yAxis.maximum: Math.max(4, map.height - statsCard.height - 4)
+                }
+
+                ColumnLayout {
+                    id: statsCol
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 5
+                    spacing: 2
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+
+                        Label {
+                            text: "⋮⋮ Stats"
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: "#ffffff"
+                            style: Text.Outline
+                            styleColor: "#cc000000"
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        ToolButton {
+                            text: "×"
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            padding: 0
+                            font.pixelSize: 13
+                            palette.buttonText: "#d1d5db"
+                            onClicked: root.showMapStats = false
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: "#55ffffff"
+                    }
+
+                    Repeater {
+                        model: root.zoomedStats
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            Label {
+                                text: modelData.label + ":"
+                                font.pixelSize: 11
+                                color: "#e5e7eb"
+                                style: Text.Outline
+                                styleColor: "#cc000000"
+                            }
+
+                            Item { Layout.fillWidth: true }
+
+                            Label {
+                                text: modelData.value
+                                font.family: "Monospace"
+                                font.pixelSize: 11
+                                font.bold: true
+                                color: "#ffffff"
+                                style: Text.Outline
+                                styleColor: "#cc000000"
+                            }
+                        }
+                    }
+                }
             }
         }
 

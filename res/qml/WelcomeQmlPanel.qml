@@ -228,6 +228,11 @@ Item {
             clip: true
             interactive: false
 
+            Component.onCompleted: {
+                contentItem.interactive = false
+                contentItem.highlightMoveDuration = 200
+            }
+
             onCurrentIndexChanged: {
                 if (tabBar.currentIndex !== currentIndex) {
                     tabBar.setCurrentIndex(currentIndex)
@@ -241,7 +246,7 @@ Item {
                 xAxis.enabled: true
                 yAxis.enabled: false
                 dragThreshold: 12
-                grabPermissions: PointerHandler.CanTakeOverFromItems | PointerHandler.CanTakeOverFromAnything
+                grabPermissions: PointerHandler.CanTakeOverFromItems
 
                 property real startX: 0
                 onActiveChanged: {
@@ -284,6 +289,11 @@ Item {
                     orientation: Qt.Vertical
                     interactive: false
 
+                    Component.onCompleted: {
+                        contentItem.interactive = false
+                        contentItem.highlightMoveDuration = 200
+                    }
+
                     DragHandler {
                         id: vertDrag
                         enabled: !connScreen.opened
@@ -291,7 +301,7 @@ Item {
                         xAxis.enabled: false
                         yAxis.enabled: true
                         dragThreshold: 12
-                        grabPermissions: PointerHandler.CanTakeOverFromItems | PointerHandler.CanTakeOverFromAnything
+                        grabPermissions: PointerHandler.CanTakeOverFromItems
 
                         property real startY: 0
                         onActiveChanged: {

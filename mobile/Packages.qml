@@ -96,6 +96,16 @@ Item {
             Layout.fillHeight: true
             focus: true
             clip: true
+
+            Text {
+                anchors.centerIn: parent
+                width: parent.width - 40
+                visible: pkgModel.count === 0
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                text: qsTr("No packages loaded. Update the archive to download the package list.")
+                color: Utility.getAppHexColor("disabledText")
+            }
             spacing: 5
 
             Component {
@@ -123,20 +133,18 @@ Item {
 
             Text {
                 id: nameText
-                color: Utility.getAppHexColor("lightText")
+                color: Utility.getAppHexColor("normalText")
                 text: "Filter"
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: false
-                font.pointSize: 12
             }
 
             Rectangle {
                 Layout.fillWidth: true
-                height: filterInput.implicitHeight + 14
-                border.width: 2
-                border.color: Utility.getAppHexColor("disabledText")
-                color: Utility.getAppHexColor("normalBackground")
-                radius: 3
+                height: filterInput.implicitHeight + 18
+                border.color: Utility.getAppHexColor("raisedBackground")
+                color: Utility.getAppHexColor("cardBackground")
+                radius: 12
                 TextInput {
                     id: filterInput
                     color: Utility.getAppHexColor("lightText")
@@ -210,18 +218,13 @@ Item {
             }
 
             Button {
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
                     parent: appPageItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
                     MenuItem {
                         text: "Install from file..."
@@ -288,43 +291,16 @@ Item {
         column.enabled = true
     }
 
-    Dialog {
+    BusyDialog {
         id: dlDialog
         title: "Processing..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 
-    Dialog {
+    SheetDialog {
         title: "Install Package"
 
         id: installFromPathDialog
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 20)
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        parent: dialogParent
+        rejectText: ""
 
         ColumnLayout {
             anchors.fill: parent

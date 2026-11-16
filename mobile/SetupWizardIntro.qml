@@ -55,8 +55,13 @@ Item {
         rightMargin: 0
         padding: 10
 
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
+            radius: 16
+        }
+
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: scrimColor
         }
 
         StackLayout {
@@ -68,7 +73,7 @@ Item {
                     id: introText
                     color: Utility.getAppHexColor("lightText")
                     linkColor: "lightblue"
-                    verticalAlignment: Text.AlignVCenter
+                    verticalAlignment: Text.AlignTop
                     anchors.fill: parent
                     wrapMode: Text.WordWrap
                     textFormat: Text.RichText
@@ -155,7 +160,7 @@ Item {
                     id: conclusionText
                     color: Utility.getAppHexColor("lightText")
                     linkColor: "lightblue"
-                    verticalAlignment: Text.AlignVCenter
+                    verticalAlignment: Text.AlignTop
                     anchors.fill: parent
                     wrapMode: Text.WordWrap
                     textFormat: Text.RichText
@@ -166,49 +171,19 @@ Item {
             }
         }
 
-        header: Rectangle {
-            color: Utility.getAppHexColor("lightText")
-            height: tabBar.height
-
-            TabBar {
-                id: tabBar
-                currentIndex: stackLayout.currentIndex
-                anchors.fill: parent
-                implicitWidth: 0
-                clip: true
-                enabled: false
-
-                background: Rectangle {
-                    opacity: 1
-                    color: Utility.getAppHexColor("lightBackground")
-                }
-
-                property int buttons: 3
-                property int buttonWidth: 120
-
-                TabButton {
-                    text: qsTr("Intro")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Usage")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Warranty")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Conclusion")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-            }
+        header: WizardHeader {
+            title: qsTr("Welcome to VESC Tool")
+            steps: [qsTr("Intro"), qsTr("Usage"), qsTr("Warranty"), qsTr("Conclusion")]
+            currentIndex: stackLayout.currentIndex
         }
 
         footer: RowLayout {
             spacing: 0
+
             Button {
                 id: prevButton
+                Layout.margins: 10
+                Layout.rightMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Cancel"
@@ -227,10 +202,12 @@ Item {
 
             Button {
                 id: nextButton
+                Layout.margins: 10
+                Layout.leftMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Next"
-                flat: true
+                highlighted: true
 
                 onClicked: {
                     if (stackLayout.currentIndex == (stackLayout.count - 1)) {
@@ -246,22 +223,10 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: cancelDialog
-        standardButtons: Dialog.Ok | Dialog.Close
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 40)
-        closePolicy: Popup.CloseOnEscape
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+        acceptText: qsTr("Continue setup")
+        rejectText: qsTr("Quit")
 
         ScrollView {
             anchors.fill: parent

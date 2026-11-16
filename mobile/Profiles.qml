@@ -42,10 +42,6 @@ Item {
             disp.deleteRequested.connect(handleProfileDelete)
             disp.checkActive()
         }
-
-        Qt.createQmlObject(
-                    'import QtQuick 2.7; import QtQuick.Layouts 1.3; Rectangle {Layout.fillHeight: true}',
-                    scrollCol, "spacer1")
     }
 
     function handleProfileEdit(index) {
@@ -88,23 +84,12 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: deleteDialog
         property int indexNow: 0
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        rightMargin: 10
-        leftMargin: 10
-        closePolicy: Popup.CloseOnEscape
         title: "Remove profile"
-        y: 10 + parent.height / 2 - height / 2
+        acceptText: qsTr("Remove")
         parent: topItem.dialogParent
-        width: parent.width - (rightMargin + leftMargin)
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
 
         Text {
             color:{color = Utility.getAppHexColor("lightText")}
@@ -129,21 +114,53 @@ Item {
             id: scroll
             Layout.fillWidth: true
             Layout.fillHeight: true
-            contentWidth: column.width
+            contentWidth: availableWidth
             clip: true
 
             ColumnLayout {
-                id: scrollCol
-                anchors.fill: parent
-                anchors.topMargin: 5
+                width: scroll.availableWidth
+                spacing: 8
+
+                ColumnLayout {
+                    id: scrollCol
+                    Layout.fillWidth: true
+                    Layout.topMargin: 10
+                    spacing: 8
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.bottomMargin: 10
+                    implicitHeight: hintText.implicitHeight + 32
+                    radius: 12
+                    color: "transparent"
+                    border.color: Utility.getAppHexColor("lightestBackground")
+                    border.width: 1.5
+
+                    Text {
+                        id: hintText
+                        anchors.centerIn: parent
+                        width: parent.width - 32
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                        font.pointSize: 10
+                        color: Utility.getAppHexColor("normalText")
+                        text: qsTr("Profiles switch speed, current and power limits in one tap. " +
+                                   "New profiles start from the current motor configuration.")
+                    }
+                }
             }
         }
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.topMargin: 8
+            Layout.bottomMargin: 8
+
             Button {
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
+                highlighted: true
                 text: "Add Profile"
 
                 onClicked: {
@@ -154,19 +171,13 @@ Item {
             }
 
             Button {
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    bottomPadding: notchBot
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
                     parent: topItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
                     MenuItem {
                         text: "Remove All Profiles"
@@ -179,21 +190,10 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: clearDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        rightMargin: 10
-        leftMargin: 10
-        closePolicy: Popup.CloseOnEscape
         title: "Remove all profiles"
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        y: column.y + column.height / 2 - height / 2
+        acceptText: qsTr("Remove all")
 
         Text {
             color: {color = Utility.getAppHexColor("lightText")}

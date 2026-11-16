@@ -104,8 +104,9 @@ Item {
 
                     width: canIdList.width
                     height: 130
-                    color: Utility.getAppHexColor("darkBackground")
-                    radius: 5
+                    color: Utility.getAppHexColor("cardBackground")
+                    border.color: Utility.getAppHexColor("raisedBackground")
+                    radius: 14
 
                     RowLayout {
                         anchors.fill: parent
@@ -115,9 +116,9 @@ Item {
                             Layout.leftMargin: 5
                             Layout.fillWidth: true
 
-                            color: Utility.getAppHexColor("lightAccent")
-                            height: column.height
-                            radius: height / 2
+                            color: Utility.getAppHexColor("raisedBackground")
+                            height: column.height + 16
+                            radius: 12
 
                             ColumnLayout {
                                 id: column
@@ -241,24 +242,8 @@ Item {
         column.enabled = true
     }
 
-    Dialog {
+    BusyDialog {
         id: commDialog
         title: "Communicating..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true        
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 }

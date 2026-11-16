@@ -42,7 +42,6 @@ Item {
     function openDialog() {
         dialog.open()
         openTimer.start()
-        tabBar.currentIndex = 0
     }
 
     Timer {
@@ -105,13 +104,17 @@ Item {
         rightMargin: 0
         padding: 10
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: scrimColor
+        }
+
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
+            radius: 16
         }
 
         StackLayout {
             id: stackLayout
             anchors.fill: parent
-            onCurrentIndexChanged: {tabBar.currentIndex = currentIndex}
 
             Item {
                 ListModel {
@@ -138,68 +141,97 @@ Item {
                     anchors.fill: parent
                     columns: dialog.isHorizontal ? 2 : 1
                     rows: dialog.isHorizontal ? 1 : 2
-                    ListView {
+                    GridView {
                         id: usageList
                         focus: true
                         clip: true
-                        spacing: 5
                         Layout.row: 0
                         Layout.fillHeight: true
                         Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
                         Layout.column: dialog.isHorizontal ? 1 : 0
+                        currentIndex: 0
+                        cellWidth: width / 2
+                        cellHeight: 170
 
                         Component {
                             id: usageDelegate
 
-                            Rectangle {
-                                id: imgRect2
-                                property variant modelData: model
+                            Item {
+                                property bool selected: GridView.isCurrentItem
+                                width: usageList.cellWidth
+                                height: usageList.cellHeight
 
-                                width: usageList.width
-                                height: 90
-                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
-                                radius: 5
-                                RowLayout {
+                                Rectangle {
+                                    id: card
                                     anchors.fill: parent
-                                    spacing: 10
+                                    anchors.margins: 5
+                                    radius: 14
+                                    color: Utility.getAppHexColor("cardBackground")
+                                    border.color: Utility.getAppHexColor("raisedBackground")
 
-                                    Item {
-                                        Layout.preferredWidth: 80
-                                        Layout.preferredHeight: 80
-                                        Layout.leftMargin: 5
-                                        opacity: imgRect2.ListView.isCurrentItem ? 1.0 : 0.5
+                                    Rectangle {
+                                        id: imgContent
+                                        width: parent.width
+                                        height: 116
+                                        visible: false
+                                        color: Utility.getAppHexColor("raisedBackground")
 
                                         Image {
-                                            id: image2
-                                            fillMode: Image.PreserveAspectFit
+                                            anchors.fill: parent
+                                            anchors.margins: usageImg.endsWith(".jpg") ? 0 : 26
+                                            fillMode: usageImg.endsWith(".jpg") ? Image.PreserveAspectCrop : Image.PreserveAspectFit
                                             source: usageImg
-                                            width: 80
-                                            height: 80
                                             smooth: true
-                                            mipmap: false
-                                            visible: false
-                                        }
-
-                                        Rectangle {
-                                            id: mask2
-                                            width: 80
-                                            height: 80
-                                            radius: 40
-                                            visible: false
-                                        }
-
-                                        OpacityMask {
-                                            anchors.fill: image2
-                                            source: image2
-                                            maskSource: mask2
                                         }
                                     }
 
+                                    Rectangle {
+                                        id: imgMask
+                                        anchors.fill: imgContent
+                                        topLeftRadius: card.radius
+                                        topRightRadius: card.radius
+                                        visible: false
+                                    }
+
+                                    OpacityMask {
+                                        anchors.fill: imgContent
+                                        source: imgContent
+                                        maskSource: imgMask
+                                    }
+
                                     Text {
-                                        Layout.fillWidth: true
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.bottom: parent.bottom
+                                        anchors.margins: 12
                                         text: name
+                                        elide: Text.ElideRight
                                         color: Utility.getAppHexColor("lightText")
-                                        wrapMode: Text.WordWrap
+                                    }
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: card.radius
+                                        color: "transparent"
+                                        border.width: 2
+                                        border.color: Material.accent
+                                        visible: selected
+
+                                        Rectangle {
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+                                            anchors.margins: 8
+                                            width: 24
+                                            height: 24
+                                            radius: 12
+                                            color: Material.accent
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: "\u2713"
+                                                color: Utility.getAppHexColor("white")
+                                            }
+                                        }
                                     }
                                 }
 
@@ -221,16 +253,16 @@ Item {
                         }
                     }
 
-                    GroupBox {
-                        Layout.preferredHeight: dialog.isHorizontal ? implicitHeight : parent.height * 0.5
+                    ColumnLayout {
+                        Layout.preferredHeight: overrideUsageBox.checked && !dialog.isHorizontal ? parent.height * 0.5 : implicitHeight
                         Layout.fillWidth: true
                         Layout.column: 0
                         Layout.row: dialog.isHorizontal ? 0 : 1
                         Layout.alignment: Qt.AlignTop
-                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
 
-                        label: CheckBox {
+                        CheckBox {
                             id: overrideUsageBox
+                            Layout.fillWidth: true
                             checked: false
                             text: qsTr("Override (Advanced)")
 
@@ -243,7 +275,9 @@ Item {
                         }
 
                         ScrollView {
-                            anchors.fill: parent
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            visible: overrideUsageBox.checked
                             clip: true
 
                             ParamList {
@@ -311,8 +345,10 @@ Item {
 
                                 width: motorList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
-                                radius: 5
+                                color: Utility.getAppHexColor("cardBackground")
+                                border.width: ListView.isCurrentItem ? 2 : 1
+                                border.color: ListView.isCurrentItem ? Material.accent : Utility.getAppHexColor("raisedBackground")
+                                radius: 14
                                 RowLayout {
                                     anchors.fill: parent
                                     spacing: 10
@@ -325,7 +361,7 @@ Item {
 
                                         Image {
                                             id: image
-                                            fillMode: Image.PreserveAspectFit
+                                            fillMode: Image.PreserveAspectCrop
                                             source: motorImg
                                             width: 80
                                             height: 80
@@ -338,7 +374,7 @@ Item {
                                             id: mask
                                             width: 80
                                             height: 80
-                                            radius: 40
+                                            radius: 12
                                             visible: false
                                         }
 
@@ -405,8 +441,7 @@ Item {
 
                             Text {
                                 visible: !overrideBox.checked
-                                color: {color = Utility.getAppHexColor("lightText")}
-                                font.family: "DejaVu Sans Mono"
+                                color: {color = Utility.getAppHexColor("normalText")}
                                 verticalAlignment: Text.AlignVCenter
                                 wrapMode: Text.WordWrap
                                 text: maxPowerLossBox.prefix + maxPowerLossBox.realValue + maxPowerLossBox.suffix + "\n" +
@@ -634,38 +669,19 @@ Item {
             }
         }
 
-        header: Rectangle {
-            color: {color = Utility.getAppHexColor("lightText")}
-            height: tabBar.implicitHeight
-
-            TabBar {
-                id: tabBar
-                currentIndex: 0
-                anchors.fill: parent
-                clip: true
-                enabled: false
-
-                background: Rectangle {
-                    opacity: 1
-                    color: {color = Utility.getAppHexColor("lightBackground")}
-                }
-                property int buttons: 5
-                property int buttonWidth: 120
-
-                Repeater {
-                    model: ["Usage", "Motor", "Battery", "Setup", "Direction"]
-                    TabButton {
-                        text: modelData
-                        width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                    }
-                }
-            }
+        header: WizardHeader {
+            title: qsTr("Setup Motors")
+            steps: ["Usage", "Motor", "Battery", "Setup", "Direction"]
+            currentIndex: stackLayout.currentIndex
         }
 
         footer: RowLayout {
             spacing: 0
+
             Button {
                 id: prevButton
+                Layout.margins: 10
+                Layout.rightMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Cancel"
@@ -685,10 +701,12 @@ Item {
 
             Button {
                 id: nextButton
+                Layout.margins: 10
+                Layout.leftMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Next"
-                flat: true
+                highlighted: true
 
                 onClicked: {
                     if (stackLayout.currentIndex == 0) {
@@ -723,22 +741,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: loadDefaultDialog
-        standardButtons: Dialog.Yes | Dialog.No
-        modal: true
-        focus: true
-        rightMargin: 10 + notchRight
-        leftMargin: 10 + notchLeft
-        closePolicy: Popup.CloseOnEscape
+        acceptText: qsTr("Restore defaults")
+        rejectText: qsTr("Keep current")
         title: "Load Default Parameters"
-        parent: dialogParent
-        width: parent.width - (rightMargin + leftMargin)
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        y: dialog.y + dialog.height / 2 - height / 2
 
         Text {
             color: {color = Utility.getAppHexColor("lightText")}
@@ -765,22 +772,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: startWarningDialog
+        acceptText: qsTr("Continue")
         property int indexNow: 0
-        standardButtons: Dialog.Yes | Dialog.Cancel
-        modal: true
-        focus: true
-        rightMargin: 10 + notchRight
-        leftMargin: 10 + notchLeft
-        closePolicy: Popup.CloseOnEscape
         title: "Motor Selection"
-        y: 10 + parent.height / 2 - height / 2
-        parent: dialogParent
-        width: parent.width - (rightMargin + leftMargin)
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
 
         Text {
             color: {color = Utility.getAppHexColor("lightText")}
@@ -824,22 +820,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: batteryWarningDialog
+        acceptText: qsTr("Continue")
         property int indexNow: 0
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        rightMargin: 10 + notchRight
-        leftMargin: 10 + notchLeft
-        closePolicy: Popup.CloseOnEscape
         title: "Battery Settings"
-        y: 10 + parent.height / 2 - height / 2
-        parent: dialogParent
-        width: parent.width - (rightMargin + leftMargin)
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
 
         Text {
             color: {color = Utility.getAppHexColor("lightText")}
@@ -859,23 +844,10 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: detectDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        rightMargin: 10 + notchRight
-        leftMargin: 10 + notchLeft
-        closePolicy: Popup.CloseOnEscape
+        acceptText: qsTr("Run detection")
         title: "Detect FOC Parameters"
-        parent: dialogParent
-        width: parent.width - (rightMargin + leftMargin)
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        y: dialog.y + dialog.height / 2 - height / 2
 
         ColumnLayout {
             anchors.fill: parent
@@ -970,21 +942,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: resultDialog
-        standardButtons: Dialog.Ok
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 40
-        closePolicy: Popup.CloseOnEscape
-        parent: dialogParent
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+        acceptText: qsTr("OK")
+        rejectText: ""
+        height: parent.height - notchTop - 40
 
         ScrollView {
             anchors.fill: parent
@@ -1049,25 +1011,8 @@ Item {
         nextButton.enabled = true
     }
 
-    Dialog {
+    BusyDialog {
         id: commDialog
         title: "Processing..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20 - notchLeft - notchRight
-        x: parent.width / 2 - width / 2
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 }

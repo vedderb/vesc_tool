@@ -123,6 +123,11 @@
         <file>res/icons/Speed-96.png</file>
         <file>res/icons/Shutdown-96.png</file>
         <file>res/icons/Settings-96.png</file>
+        <file>res/icons/Search-96.png</file>
+        <file>res/icons/Star-96.png</file>
+        <file>res/icons/Star Outline-96.png</file>
+        <file>res/icons/Lock-96.png</file>
+        <file>res/icons/Grid-96.png</file>
         <file>res/icons/Send File-96.png</file>
         <file>res/icons/Save-96.png</file>
         <file>res/icons/Save as-96.png</file>
@@ -202,6 +207,11 @@
         <file>res/+theme_light/icons/size_off.png</file>
         <file>res/+theme_light/icons/Shutdown-96.png</file>
         <file>res/+theme_light/icons/Settings-96.png</file>
+        <file>res/+theme_light/icons/Search-96.png</file>
+        <file>res/+theme_light/icons/Star-96.png</file>
+        <file>res/+theme_light/icons/Star Outline-96.png</file>
+        <file>res/+theme_light/icons/Lock-96.png</file>
+        <file>res/+theme_light/icons/Grid-96.png</file>
         <file>res/+theme_light/icons/Send File-96.png</file>
         <file>res/+theme_light/icons/Save-96.png</file>
         <file>res/+theme_light/icons/Save as-96.png</file>

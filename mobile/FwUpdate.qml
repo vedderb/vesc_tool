@@ -19,6 +19,7 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Controls.Material
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs
 
@@ -29,137 +30,148 @@ import Vedder.vesc.fwhelper 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
-    property alias currentPage: swipeView.currentIndex
-    property alias swipeOrientation: swipeView.orientation
-    property alias pageIndicatorVisible: indicator.visible
-
     property Commands mCommands: VescIf.commands()
     property ConfigParams mInfoConf: VescIf.infoConfig()
-    property bool isHorizontal: width > height
     property bool showUploadAllButton: true
+    property int uploadStep: -1
+    property real uploadStart: 0
+    property real uploadStartProgress: 0
+    property real etaUpdated: 0
     anchors.fill: parent
 
     FwHelper {
         id: fwHelper
     }
 
-    GridLayout {
+    component FieldLabel: Text {
+        Layout.topMargin: 4
+        color: Utility.getAppHexColor("normalText")
+        font.pointSize: 9
+        font.letterSpacing: 0.5
+        font.capitalization: Font.AllUppercase
+    }
+
+    component Note: Text {
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
+        color: Utility.getAppHexColor("normalText")
+    }
+
+    component Card: Rectangle {
+        default property alias content: cardColumn.data
+
+        Layout.fillWidth: true
+        implicitHeight: cardColumn.implicitHeight + 28
+        radius: 14
+        color: Utility.getAppHexColor("cardBackground")
+        border.color: Utility.getAppHexColor("raisedBackground")
+
+        ColumnLayout {
+            id: cardColumn
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 6
+        }
+    }
+
+    ColumnLayout {
         anchors.fill: parent
-        columns: isHorizontal ? 2 : 1
-        rows: isHorizontal ? 1 : 2
+        spacing: 0
 
-        RowLayout {
-            Layout.fillHeight: true
+        ScrollView {
+            id: scroll
             Layout.fillWidth: true
-            Layout.column: isHorizontal ? 1 : 0
-            Layout.row: 0
-            Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
-            spacing: 0
+            Layout.fillHeight: true
+            contentWidth: availableWidth
+            clip: true
 
-            Rectangle {
-                color: Utility.getAppHexColor("normalBackground")
-                width: 16
-                Layout.fillHeight: true
-                Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
+            ColumnLayout {
+                x: 14
+                width: scroll.availableWidth - 28
+                spacing: 10
 
-                PageIndicator {
-                    id: indicator
-                    count: visible ? swipeView.count : 0
-                    currentIndex: swipeView.currentIndex
-                    anchors.centerIn: parent
-                    rotation: 90
-                }
-            }
+                // Installed and available firmware
+                Card {
+                    Layout.topMargin: 12
 
-            SwipeView {
-                id: swipeView
-                enabled: true
-                clip: true
-
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                orientation: Qt.Vertical
-
-                contentItem: ListView {
-                    model: swipeView.contentModel
-                    interactive: swipeView.interactive
-                    currentIndex: swipeView.currentIndex
-
-                    spacing: swipeView.spacing
-                    orientation: swipeView.orientation
-                    snapMode: ListView.SnapOneItem
-                    boundsBehavior: Flickable.StopAtBounds
-
-                    highlightRangeMode: ListView.StrictlyEnforceRange
-                    preferredHighlightBegin: 0
-                    preferredHighlightEnd: 0
-                    highlightMoveDuration: 250
-
-                    maximumFlickVelocity: 8 * (swipeView.orientation ===
-                                               Qt.Horizontal ? width : height)
-                }
-
-                Page {
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        anchors.topMargin: 10
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
 
                         Rectangle {
-                            Layout.fillWidth: true
-                            height: 30;
-                            border.width: 0
-                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
-                            border.color: Utility.getAppHexColor("lightestBackground")
+                            width: 44
+                            height: 44
+                            radius: 12
+                            color: Utility.getAppHexColor("raisedBackground")
 
-                            Text {
+                            Image {
                                 anchors.centerIn: parent
-                                color: Utility.getAppHexColor("lightText")
-                                text: "Included Files"
-                                font.bold: true
-                                verticalAlignment: Text.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
+                                width: 26
+                                height: 26
+                                source: "qrc" + Utility.getThemePath() + "icons/Electronics-96.png"
                             }
                         }
 
-                        Button {
-                            id: latestUpdateButton
-                            text: "Download Latest"
-                            Layout.fillWidth: true
+                        Repeater {
+                            model: [[qsTr("Installed"), fwVersion !== "" ? fwVersion : "-"], [qsTr("Available"), fwLatest]]
 
-                            onClicked: {
-                                latestUpdateButton.enabled = false
-                                workaroundTimerDlLatest.start()
-                            }
+                            ColumnLayout {
+                                visible: index === 0 || fwUpdateAvailable
+                                spacing: 0
 
-                            Timer {
-                                id: workaroundTimerDlLatest
-                                interval: 0
-                                repeat: false
-                                running: false
-                                onTriggered: {
-                                    VescIf.downloadFwLatest()
-                                    VescIf.downloadConfigs()
-                                    fwHelper.reloadLatest()
-                                    updateFwText()
-                                    latestUpdateButton.enabled = true
+                                FieldLabel {
+                                    Layout.topMargin: 0
+                                    text: modelData[0]
+                                }
+
+                                Text {
+                                    text: modelData[1]
+                                    font.pointSize: 20
+                                    font.weight: Font.Medium
+                                    color: Utility.getAppHexColor(index === 0 ? "titleText" : "accentText")
                                 }
                             }
                         }
 
-                        ProgressBar {
-                            id: dlProgLatest
+                        Item {
                             Layout.fillWidth: true
                         }
 
+                        Chip {
+                            text: fwUpdateAvailable ? qsTr("What's new") : qsTr("Changelog")
+                            tinted: fwUpdateAvailable
+                            onClicked: VescIf.emitMessageDialog("Firmware Changelog", Utility.fwChangeLog(), true)
+                        }
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        id: versionText
+                        visible: text !== ""
+                        color: Utility.getAppHexColor("normalText")
+                        font.pointSize: 9
+                        elide: Text.ElideRight
+                    }
+                }
+
+                SegmentedBar {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 4
+                    model: [qsTr("Included"), qsTr("Custom"), qsTr("Bootloader"), qsTr("Archive")]
+                    currentIndex: swipeView.currentIndex
+                    onActivated: function(index) { swipeView.currentIndex = index }
+                }
+
+                StackLayout {
+                    id: swipeView
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: children[currentIndex].implicitHeight
+
+                    Card {
                         Text {
                             id: fwIncludedText
                             visible: false
-
                             Layout.fillWidth: true
-                            Layout.fillHeight: true
-
                             textFormat: Text.RichText
                             color: Utility.getAppHexColor("lightText")
                             wrapMode: Text.WordWrap
@@ -167,30 +179,16 @@ Item {
 
                         ColumnLayout {
                             id: fwIncludedColumn
-
                             Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Layout.margins: 0
+                            spacing: 6
 
-                            Item {
-                                // Spacer
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                            }
-
-                            Text {
-                                color: Utility.getAppHexColor("lightText")
-                                Layout.fillWidth: true
-                                height: 30;
+                            FieldLabel {
                                 text: "Hardware"
-                                horizontalAlignment: Text.AlignHCenter
                             }
 
                             ComboBox {
                                 id: hwBox
-                                Layout.preferredHeight: 48
                                 Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
                                 textRole: "key"
                                 model: ListModel {
@@ -226,76 +224,62 @@ Item {
                                 }
                             }
 
-                            Text {
-                                color: Utility.getAppHexColor("lightText")
-                                Layout.fillWidth: true
-                                height: 30;
+                            FieldLabel {
                                 text: "Firmware"
-                                horizontalAlignment: Text.AlignHCenter
                             }
 
                             ComboBox {
                                 id: fwBox
-                                Layout.preferredHeight: 48
                                 Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
                                 textRole: "key"
                                 model: ListModel {
                                     id: fwItems
                                 }
                             }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 4
 
                             Button {
-                                text: "Show Changelog"
-                                Layout.fillWidth: true
+                                id: latestUpdateButton
+                                text: "Download Latest"
+                                icon.source: "qrc" + Utility.getThemePath() + "icons/Download-96.png"
 
                                 onClicked: {
-                                    VescIf.emitMessageDialog(
-                                                "Firmware Changelog",
-                                                Utility.fwChangeLog(),
-                                                true)
+                                    latestUpdateButton.enabled = false
+                                    workaroundTimerDlLatest.start()
+                                }
+
+                                Timer {
+                                    id: workaroundTimerDlLatest
+                                    interval: 0
+                                    repeat: false
+                                    running: false
+                                    onTriggered: {
+                                        VescIf.downloadFwLatest()
+                                        VescIf.downloadConfigs()
+                                        fwHelper.reloadLatest()
+                                        updateFwText()
+                                        latestUpdateButton.enabled = true
+                                    }
                                 }
                             }
 
-                            Item {
-                                // Spacer
+                            ProgressBar {
+                                id: dlProgLatest
                                 Layout.fillWidth: true
-                                Layout.fillHeight: true
+                                visible: value > 0 && value < 1
                             }
                         }
                     }
-                }
 
-                Page {
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        anchors.topMargin: 10
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            height: 30;
-                            border.width: 0
-                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
-
-                            border.color: "#00000000"
-
-                            Text {
-                                anchors.centerIn: parent
-                                color: Utility.getAppHexColor("lightText")
-                                text: "Custom File"
-                                font.bold: true
-                                verticalAlignment: Text.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
-                            }
-                        }
-
-                        Item {
-                            // Spacer
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
+                    Card {
+                        FieldLabel {
+                            Layout.topMargin: 0
+                            text: "Custom File"
                         }
 
                         TextField {
@@ -306,7 +290,7 @@ Item {
 
                         Button {
                             text: "Choose File..."
-                            Layout.fillWidth: true
+                            icon.source: "qrc" + Utility.getThemePath() + "icons/Open Folder-96.png"
 
                             onClicked: {
                                 if (Utility.requestFilePermission()) {
@@ -321,73 +305,39 @@ Item {
                             }
                         }
 
-                        Item {
-                            // Spacer
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                        }
-                    }
-
-                    FileDialog {
-                        id: fileDialog
-                        title: "Choose a firmware file"
-                        fileMode: FileDialog.OpenFile
-                        nameFilters: ["*"]
-                        onAccepted: {
-                            customFwText.text = selectedFile
-                            close()
-                            parent.forceActiveFocus()
-                        }
-                        onRejected: {
-                            close()
-                            parent.forceActiveFocus()
-                        }
-                    }
-                }
-
-                Page {
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        anchors.topMargin: 10
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            height: 30;
-                            border.width: 0
-                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
-                            border.color: "#00000000"
-
-                            Text {
-                                anchors.centerIn: parent
-                                color: Utility.getAppHexColor("lightText")
-                                text: "Bootloader"
-                                font.bold: true
-                                verticalAlignment: Text.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
+                        FileDialog {
+                            id: fileDialog
+                            title: "Choose a firmware file"
+                            fileMode: FileDialog.OpenFile
+                            nameFilters: ["*"]
+                            onAccepted: {
+                                customFwText.text = selectedFile
+                                close()
+                                parent.forceActiveFocus()
+                            }
+                            onRejected: {
+                                close()
+                                parent.forceActiveFocus()
                             }
                         }
+                    }
 
-                        Item {
-                            // Spacer
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
+                    Card {
+                        Note {
+                            visible: blItems.count === 0
+                            text: qsTr("There is no bootloader for this hardware.")
                         }
 
-                        Text {
-                            color: Utility.getAppHexColor("lightText")
-                            Layout.fillWidth: true
-                            height: 30;
+                        FieldLabel {
+                            Layout.topMargin: 0
+                            visible: blItems.count > 0
                             text: "Hardware"
-                            horizontalAlignment: Text.AlignHCenter
                         }
 
                         ComboBox {
                             id: blBox
-                            Layout.preferredHeight: 48
                             Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                            visible: blItems.count > 0
 
                             textRole: "key"
                             model: ListModel {
@@ -398,60 +348,24 @@ Item {
                                 updateBl(VescIf.getLastFwRxParams())
                             }
                         }
-
-                        Item {
-                            // Spacer
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                        }
                     }
-                }
 
-                Page {
-                    id: pageArchive
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        anchors.topMargin: 10
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            height: 30;
-                            border.width: 0
-                            color: "#55" + Utility.getAppHexColor("darkAccent").slice(1)
-                            border.color: Utility.getAppHexColor("lightestBackground")
-
-                            Text {
-                                anchors.centerIn: parent
-                                color: Utility.getAppHexColor("lightText")
-                                text: "Firmware Archive"
-                                font.bold: true
-                                verticalAlignment: Text.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
-                            }
+                    Card {
+                        Note {
+                            visible: archVerItems.count === 0
+                            text: qsTr("The firmware archive is not downloaded. It contains older firmware versions for most hardware.")
                         }
 
-                        Item {
-                            // Spacer
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                        }
-
-                        Text {
-                            color: Utility.getAppHexColor("lightText")
-                            Layout.fillWidth: true
-                            height: 30;
+                        FieldLabel {
+                            Layout.topMargin: 0
+                            visible: archVerItems.count > 0
                             text: "Firmware Version"
-                            horizontalAlignment: Text.AlignHCenter
                         }
 
                         ComboBox {
                             id: archVerBox
-                            Layout.preferredHeight: 48
                             Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                            visible: archVerItems.count > 0
                             popup.bottomMargin: 100
 
                             textRole: "key"
@@ -481,19 +395,15 @@ Item {
                             }
                         }
 
-                        Text {
-                            color: Utility.getAppHexColor("lightText")
-                            Layout.fillWidth: true
-                            height: 30;
+                        FieldLabel {
+                            visible: archVerItems.count > 0
                             text: "File"
-                            horizontalAlignment: Text.AlignHCenter
                         }
 
                         ComboBox {
                             id: archFwBox
-                            Layout.preferredHeight: 48
                             Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                            visible: archVerItems.count > 0
                             popup.bottomMargin: 100
 
                             textRole: "key"
@@ -502,131 +412,179 @@ Item {
                             }
                         }
 
-                        Button {
-                            id: archUpdateButton
-                            text: "Update Archive"
+                        RowLayout {
                             Layout.fillWidth: true
+                            Layout.topMargin: 4
 
-                            onClicked: {
-                                dlArchiveDialog.open()
+                            Button {
+                                id: archUpdateButton
+                                text: "Update Archive"
+                                icon.source: "qrc" + Utility.getThemePath() + "icons/Download-96.png"
+
+                                onClicked: {
+                                    dlArchiveDialog.open()
+                                }
                             }
-                        }
 
-                        ProgressBar {
-                            id: dlProg
-                            Layout.fillWidth: true
+                            ProgressBar {
+                                id: dlProg
+                                Layout.fillWidth: true
+                                visible: value > 0 && value < 1
+                            }
                         }
 
                         Text {
                             id: dlText
                             Layout.fillWidth: true
-                            color: Utility.getAppHexColor("lightText")
+                            visible: text !== ""
+                            wrapMode: Text.WordWrap
+                            font.pointSize: 9
+                            color: Utility.getAppHexColor("normalText")
+                        }
+                    }
+                }
+
+                Card {
+                    visible: showUploadAllButton
+
+                    RowLayout {
+                        Layout.fillWidth: true
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            Text {
+                                text: qsTr("Include CAN devices")
+                                color: Utility.getAppHexColor("titleText")
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: qsTr("All devices must have the same hardware version")
+                                wrapMode: Text.WordWrap
+                                font.pointSize: 9
+                                color: Utility.getAppHexColor("normalText")
+                            }
                         }
 
-                        Item {
-                            // Spacer
+                        Switch {
+                            id: uploadAllButton
+                        }
+                    }
+                }
+
+                Card {
+                    visible: uploadText.text !== qsTr("Not Uploading")
+
+                    RowLayout {
+                        spacing: 6
+
+                        Repeater {
+                            model: [qsTr("Erase"), qsTr("Upload"), qsTr("Reboot")]
+
+                            Chip {
+                                enabled: false
+                                checked: index === uploadStep
+                                text: (index < uploadStep ? "\u2713 " : "") + modelData
+                            }
+                        }
+                    }
+
+                    ProgressBar {
+                        id: uploadProgress
+                        Layout.fillWidth: true
+                        Layout.topMargin: 4
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+
+                        Text {
                             Layout.fillWidth: true
-                            Layout.fillHeight: true
+                            color: Utility.getAppHexColor("lightText")
+                            id: uploadText
+                            elide: Text.ElideRight
+                            text: qsTr("Not Uploading")
+                        }
+
+                        Text {
+                            id: etaText
+                            color: Utility.getAppHexColor("normalText")
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.bottomMargin: 12
+                    implicitHeight: warnRow.implicitHeight + 20
+                    visible: cancelButton.enabled
+                    radius: 12
+                    color: Qt.alpha(Utility.getAppHexColor("warning"), 0.15)
+                    border.color: Qt.alpha(Utility.getAppHexColor("warningText"), 0.33)
+
+                    RowLayout {
+                        id: warnRow
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        spacing: 10
+
+                        Image {
+                            Layout.preferredWidth: 20
+                            Layout.preferredHeight: 20
+                            source: "qrc" + Utility.getThemePath() + "icons/Brake Warning-96.png"
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            color: Utility.getAppHexColor("warningText")
+                            text: qsTr("Keep the app open and the board powered.")
                         }
                     }
                 }
             }
         }
 
-        Rectangle {
+        RowLayout {
             Layout.fillWidth: true
-            Layout.fillHeight: isHorizontal ? true : false
-            Layout.preferredWidth: isHorizontal ? parent.width / 2 : parent.width
-            Layout.column:0
-            Layout.row: isHorizontal ? 0 : 1
-            Layout.preferredHeight: asd.implicitHeight + asd.anchors.margins * 2
-            color: Utility.getAppHexColor("lightBackground")
+            Layout.margins: 14
+            Layout.topMargin: 8
 
-            ColumnLayout {
-                id: asd
-                anchors.fill: parent
-                anchors.margins: 10
-                Text {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignBottom
-                    color: Utility.getAppHexColor("lightText")
-                    id: uploadText
-                    text: qsTr("Not Uploading")
+            Button {
+                id: cancelButton
+                text: qsTr("Cancel upload")
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                visible: enabled
+                flat: true
+                enabled: false
+
+                onClicked: {
+                    VescIf.fwUploadCancel()
                 }
+            }
 
-                ProgressBar {
-                    id: uploadProgress
-                    Layout.fillWidth: true
-                }
+            Button {
+                id: uploadButton
+                text: uploadAllButton.checked && uploadAllButton.enabled ?
+                          qsTr("Upload to %1 devices").arg(VescIf.getCanDevsLast().length + 1) : qsTr("Upload")
+                Layout.fillWidth: true
+                Layout.preferredWidth: 2
+                highlighted: true
 
-                RowLayout {
-                    Layout.fillWidth: true
-
-                    Button {
-                        id: uploadButton
-                        text: qsTr("Upload")
-                        Layout.fillWidth: true
-
-                        onClicked: {
-                            uploadFw(false)
-                        }
-                    }
-
-                    Button {
-                        id: uploadAllButton
-                        text: qsTr("Upload All")
-                        Layout.fillWidth: true
-                        visible: showUploadAllButton
-
-                        onClicked: {
-                            uploadFw(true)
-                        }
-                    }
-
-                    Button {
-                        id: cancelButton
-                        text: qsTr("Cancel")
-                        Layout.fillWidth: true
-                        enabled: false
-
-                        onClicked: {
-                            VescIf.fwUploadCancel()
-                        }
-                    }
-                }
-
-                Text {
-                    Layout.fillWidth: true
-                    id: versionText
-                    color: Utility.getAppHexColor("lightText")
-                    text:
-                        "FW   : \n" +
-                        "HW   : \n" +
-                        "UUID : "
-                    font.family: "DejaVu Sans Mono"
-                    verticalAlignment: Text.AlignVCenter
+                onClicked: {
+                    uploadFw(uploadAllButton.checked && uploadAllButton.enabled)
                 }
             }
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: uploadDialog
+        acceptText: qsTr("Upload")
         property bool fwdCan: false
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        width: parent.width - 20
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -655,21 +613,10 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: dlArchiveDialog
+        acceptText: qsTr("Download")
         property bool fwdCan: false
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        width: parent.width - 20
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -877,10 +824,7 @@ Item {
                     !mCommands.getSendCan() && VescIf.getFwUploadProgress() < 0
 
             if (!VescIf.isPortConnected()) {
-                versionText.text =
-                        "FW   : \n" +
-                        "HW   : \n" +
-                        "UUID : "
+                versionText.text = ""
             }
         }
     }
@@ -893,6 +837,30 @@ Item {
                 uploadText.text = status + " (" + parseFloat(progress * 100.0).toFixed(2) + " %)"
             } else {
                 uploadText.text = status
+            }
+
+            if (status.startsWith("Uploading")) {
+                if (uploadStep !== 1) {
+                    uploadStart = Date.now()
+                    uploadStartProgress = progress
+                }
+                uploadStep = 1
+            } else if (status === "Upload done") {
+                uploadStep = 2
+            } else if (isOngoing) {
+                uploadStep = 0
+            } else if (status !== "Erase done") {
+                uploadStep = -1
+            }
+
+            // Coarse and at most once per second, so the estimate reads calmly
+            if (uploadStep !== 1) {
+                etaText.text = ""
+            } else if (progress > uploadStartProgress + 0.02 && Date.now() - etaUpdated > 1000) {
+                var left = (Date.now() - uploadStart) * (1 - progress) / (progress - uploadStartProgress) / 1000
+                etaText.text = left > 60 ? qsTr("\u2248 %1 min left").arg(Math.ceil(left / 60)) :
+                                           qsTr("\u2248 %1 s left").arg(Math.ceil(left / 5) * 5)
+                etaUpdated = Date.now()
             }
 
             uploadProgress.value = progress
@@ -969,8 +937,7 @@ Item {
         }
 
         versionText.text =
-                "FW   : v" + params.major + "." + (1e5 + params.minor + '').slice(-2) + fwNameStr + testFwStr + "\n" +
-                "HW   : " + params.hw + "\n" +
-                "UUID : " + Utility.uuid2Str(params.uuid, false)
+                "FW v" + params.major + "." + (1e5 + params.minor + '').slice(-2) + fwNameStr + testFwStr +
+                " · HW " + params.hw + " · UUID " + Utility.uuid2Str(params.uuid, false)
     }
 }

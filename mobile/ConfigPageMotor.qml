@@ -57,23 +57,10 @@ Item {
         dialogParent: confPageMotorItem.dialogParent
     }
 
-    Dialog {
+    SheetDialog {
         id: directionSetupDialog
+        rejectText: qsTr("Close")
         title: "Direction Setup"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-        padding: 10
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 10 - notchLeft - notchRight
-        closePolicy: Popup.CloseOnEscape
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        parent: confPageMotorItem.dialogParent
 
         DirectionSetup {
             id: directionSetup
@@ -82,22 +69,10 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: measureOffsetDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
         title: "Measure Offsets"
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: confPageMotorItem.dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        acceptText: qsTr("Measure")
 
         Text {
             anchors.fill: parent
@@ -149,6 +124,12 @@ Item {
         e.Layout.fillsWidth = true
     }
 
+    function jumpTo(group, subgroup, name) {
+        pageBox.currentIndex = pageBox.find(group)
+        tabBox.currentIndex = tabBox.model.indexOf(subgroup)
+        editors.showParam(scroll, scrollCol, name)
+    }
+
     function updateEditors() {
         destroyEditors()
 
@@ -172,28 +153,42 @@ Item {
             Layout.fillWidth: true
             Layout.topMargin: 5
             columns: isHorizontal ? 2 : 1
-            ComboBox {
-                id: pageBox
+            RowLayout {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
 
-                model: VescIf.mcConfig().getParamGroups()
+                ComboBox {
+                    id: pageBox
+                    Layout.fillWidth: true
 
-                onCurrentTextChanged: {
-                    var tabTextOld = tabBox.currentText
-                    var subgroups = VescIf.mcConfig().getParamSubgroups(currentText)
+                    model: VescIf.mcConfig().getParamGroups()
 
-                    tabBox.model = subgroups
-                    tabBox.visible = subgroups.length > 1
+                    onCurrentTextChanged: {
+                        var tabTextOld = tabBox.currentText
+                        var subgroups = VescIf.mcConfig().getParamSubgroups(currentText)
 
-                    if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
-                        updateEditors()
+                        tabBox.model = subgroups
+                        tabBox.visible = subgroups.length > 1
+
+                        if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
+                            updateEditors()
+                        }
                     }
                 }
+
+                ToolButton {
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Search-96.png"
+                    Accessible.name: qsTr("Search parameters")
+                    onClicked: paramSearch.open()
+                }
             }
-            
-            ComboBox {
+
+            SubgroupBar {
                 id: tabBox
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                tracker: mcTracker
+                group: pageBox.currentText
                 
                 onCurrentTextChanged: {
                     updateEditors()
@@ -212,18 +207,19 @@ Item {
             GridLayout {
                 id: scrollCol
                 width: column.width
-                columns: isHorizontal ? 2 : 1
+                columns: Math.max(1, Math.floor(width / 380))
             }
         }
 
         RowLayout {
             Layout.fillWidth: true
-            Button {
+            WriteButton {
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
-                text: "Write"
+                tracker: mcTracker
+                ackText: "Motor config write OK"
 
-                onClicked: {
+                onWriteRequested: {
                     mCommands.setMcconf(true)
                 }
             }
@@ -240,19 +236,13 @@ Item {
 
             Button {
                 id: menuButton
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    bottomPadding: notchBot
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
                     parent: confPageMotorItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
                     MenuItem {
                         text: "Read Default Settings"
@@ -386,15 +376,8 @@ Item {
         // TODO: For some reason this does not work
         function onMcConfigCheckResult(paramsNotSet) {
             if (paramsNotSet.length > 0) {
-                var notUpdated = "The following parameters were truncated or not updated. That can happen because " +
-                                "they were set outside their allowed limits or because the write failed. In case the " +
-                                "write failed you can try writing them again:\n"
-
-                for (var i = 0;i < paramsNotSet.length;i++) {
-                    notUpdated += mMcConf.getLongName(paramsNotSet[i]) + "\n"
-                }
-
-                VescIf.emitMessageDialog("Parameters truncated", notUpdated, false, false)
+                addMessage(qsTr("Truncated or not written: %1").arg(
+                               paramsNotSet.map(function(p) { return mMcConf.getLongName(p) }).join(", ")), false)
             }
         }
     }

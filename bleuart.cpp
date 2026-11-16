@@ -92,6 +92,7 @@ void BleUart::startScan()
     init();
 
     mDevs.clear();
+    mRssi.clear();
     mScanFinished = false;
     mDeviceDiscoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
@@ -181,6 +182,11 @@ void BleUart::emitScanDone()
     emit scanDone(mDevs, mScanFinished);
 }
 
+int BleUart::getRssi(QString addr)
+{
+    return mRssi.value(addr);
+}
+
 void BleUart::writeData(QByteArray data)
 {
     if (isConnected() && mService) {
@@ -234,6 +240,7 @@ void BleUart::addDevice(const QBluetoothDeviceInfo &dev)
         }
 #endif
 
+        mRssi.insert(addr, dev.rssi());
         mConnectTimeoutTimer.stop();
         emit scanDone(mDevs, false);
     }

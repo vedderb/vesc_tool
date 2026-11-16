@@ -46,7 +46,7 @@ Item {
     property string tickmarkSuffix: ""
     property double tickmarkScale: 1
     property color nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
-    property color traceColor: Qt.lighter(nibColor,1.5)
+    property color traceColor: Utility.isDarkMode() ? Qt.lighter(nibColor,1.5) : nibColor
     property double precision: 0
 
     property color coveredColor: {coveredColor = Utility.getAppHexColor("lightText")}

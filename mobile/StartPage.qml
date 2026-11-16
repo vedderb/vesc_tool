@@ -38,7 +38,6 @@ Item {
         anchors.fill: parent
         contentWidth: parent.width
         contentHeight: grid.height + 30
-        property int gridItemPreferredWidth: isHorizontal ? parent.width/2.0 - 15 : parent.width - 10
         clip: true
 
         GridLayout {
@@ -51,133 +50,159 @@ Item {
             anchors.bottomMargin: 15
             columnSpacing: 10
             rowSpacing: 5
-            Item {
-                Layout.columnSpan: 1
+
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                implicitHeight: image.height
+                Layout.alignment: Qt.AlignTop
+                spacing: 10
+
                 Image {
-                    id: image
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width * 0.8, 0.4 * sourceSize.width * wizardBox.height/sourceSize.height)
-                    height: (sourceSize.height * width) / sourceSize.width
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Math.min(parent.width * (connected ? 0.45 : 0.7), 400)
+                    Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
+                    Layout.bottomMargin: connected ? 0 : 8
                     source: "qrc" + Utility.getThemePath() + "/logo.png"
                     antialiasing: true
                 }
-            }
 
-            GroupBox {
-                id: wizardBox
-                title: qsTr("Configuration")
-                Layout.fillWidth: true
-                GridLayout {
-                    anchors.fill: parent
-                    columns: 2
-                    columnSpacing: 5
-                    rowSpacing: 5
+                DeviceCard {
+                    Layout.fillWidth: true
+                    visible: connected
+                    onDisconnectClicked: requestDisconnect()
+                    onCanClicked: canDrawerLoader.item.open()
+                    onUpdateClicked: firmwareDialog.open()
+                    onChangesClicked: mainSwipeView.setCurrentIndex((mcTracker.changedParams.length > 0 ? confPageMotor : confPageApp).SwipeView.index)
+                }
 
-                    ImageButton {
-                        id: connectButton
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 52
+                    visible: !connected
+                    text: qsTr("Connect")
+                    highlighted: true
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
+                    onClicked: topItem.requestConnect()
+                }
 
-                        buttonText: "Connect"
-                        imageSrc: "qrc" + Utility.getThemePath() + (VescIf.isPortConnected() ? "icons/Disconnected-96.png" : "icons/Connected-96.png")
-                        onClicked: {
-                            if (VescIf.isPortConnected()) {
-                                VescIf.disconnectPort()
-                            } else {
-                                topItem.requestConnect()
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 52
+                    radius: 12
+                    visible: !connected && lastDeviceName !== ""
+                    color: Utility.getAppHexColor("cardBackground")
+                    border.color: Utility.getAppHexColor("raisedBackground")
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 14
+                        spacing: 10
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 1
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: lastDeviceName
+                                elide: Text.ElideRight
+                                font.weight: Font.Medium
+                                color: Utility.getAppHexColor("titleText")
+                            }
+
+                            Text {
+                                text: qsTr("Last connected · %1").arg(timeAgo(lastDeviceTime))
+                                font.pointSize: 9
+                                color: Utility.getAppHexColor("normalText")
                             }
                         }
+
+                        Button {
+                            Layout.rightMargin: 10
+                            text: qsTr("Reconnect")
+                            onClicked: VescIf.reconnectLastPort()
+                        }
                     }
+                }
+            }
+
+            ColumnLayout {
+                id: wizardBox
+                Layout.fillWidth: true
+
+                SectionHeader {
+                    text: qsTr("Configuration")
+                }
+
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: 2
+                    columnSpacing: 8
+                    rowSpacing: 8
 
                     ImageButton {
                         id: nrfPairButton
                         visible: !nrfPair.visible
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "VESC\nRemote\nQuick Pair"
+                        buttonText: "VESC Remote Quick Pair"
+                        hintText: qsTr("NRF remotes")
+                        locked: !connected
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/icons8-fantasy-96.png"
 
                         onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("Quick Pair",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to quick pair an NRF-based remote.", false, false)
-                            } else {
-                                nrfPairStartDialog.open()
-                            }
+                            nrfPairStartDialog.open()
                         }
                     }
 
                     ImageButton {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Setup\nMotors"
+                        buttonText: "Setup Motors"
+                        hintText: qsTr("FOC wizard")
+                        locked: !connected
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/motor.png"
 
                         onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("FOC Setup Wizard",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to run this wizard.", false, false)
-                            } else {
-                                wizardFoc.openDialog()
-                            }
+                            wizardFoc.openDialog()
                         }
                     }
 
                     ImageButton {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Setup\nInput"
+                        buttonText: "Setup Input"
+                        hintText: qsTr("PPM · ADC · Remote")
+                        locked: !connected
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Wizard-96.png"
 
                         onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("Input Setup Wizard",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to run this wizard.", false, false)
-                            } else {
-                                // Something in the opendialog function causes a weird glitch, probably
-                                // caused by the eventloop in the can scan function. Disabling the button
-                                // seems to help. TODO: figure out what the actual problem is.
-                                enabled = false
-                                wizardInput.openDialog()
-                                enabled = true
-                            }
+                            // Something in the opendialog function causes a weird glitch, probably
+                            // caused by the eventloop in the can scan function. Disabling the button
+                            // seems to help. TODO: figure out what the actual problem is.
+                            enabled = false
+                            wizardInput.openDialog()
+                            enabled = true
                         }
                     }
 
                     ImageButton {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Setup\nIMU"
-                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Gyroscope-96"
+                        buttonText: "Setup IMU"
+                        hintText: qsTr("Orientation · calibration")
+                        locked: !connected
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Gyroscope-96.png"
 
                         onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("IMU Setup Wizard",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to run this wizard.", false, false)
-                            } else {
-                                wizardIMU.openDialog()
-                            }
+                            wizardIMU.openDialog()
                         }
                     }
 
@@ -189,34 +214,32 @@ Item {
                         visible: false
                         hideAfterPair: true
                     }
-
-                    Item {
-                        visible: isHorizontal
-                        Layout.fillHeight: true
-                    }
                 }
             }
 
-            GroupBox {
+            ColumnLayout {
                 id: toolsBox
-                title: qsTr("Tools and Operations")
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                Layout.alignment: Qt.AlignTop
                 Layout.rowSpan: isHorizontal ? 2 : 1
 
+                SectionHeader {
+                    text: qsTr("Tools and Operations")
+                }
+
                 GridLayout {
-                    anchors.fill: parent
+                    Layout.fillWidth: true
                     columns: 2
-                    columnSpacing: 5
-                    rowSpacing: 5
+                    columnSpacing: 8
+                    rowSpacing: 8
 
                     ImageButton {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
                         buttonText: "Controls"
+                        hintText: qsTr("Manual drive")
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Controller-96.png"
 
                         onClicked: {
@@ -226,35 +249,31 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Invert\nMotor\nDirections"
+                        buttonText: "Invert Motor Directions"
+                        hintText: qsTr("All CAN devices")
+                        locked: !connected
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Process-96.png"
 
                         onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("Directions",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to map directions.", false, false)
-                            } else {
-                                enabled = false
-                                directionSetupDialog.open()
-                                directionSetup.scanCan()
-                                enabled = true
-                            }
+                            enabled = false
+                            directionSetupDialog.open()
+                            directionSetup.scanCan()
+                            enabled = true
                         }
                     }
 
                     ImageButton {
                         id: backupConfButton
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Backup\nConfigs"
+                        buttonText: "Backup Configs"
+                        hintText: qsTr("Local and CAN")
+                        locked: !connected
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Save-96.png"
 
                         onClicked: {
@@ -265,11 +284,12 @@ Item {
                     ImageButton {
                         id: restoreConfButton
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Restore\nConfigs"
+                        buttonText: "Restore Configs"
+                        hintText: qsTr("By UUID")
+                        locked: !connected
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Open Folder-96.png"
 
                         onClicked: {
@@ -279,11 +299,11 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Setup\nBluetooth\nModule"
+                        buttonText: "Setup Bluetooth Module"
+                        hintText: qsTr("Name · PIN")
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/bluetooth.png"
 
                         onClicked: {
@@ -298,11 +318,12 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Multi\nSettings"
+                        buttonText: "Multi Settings"
+                        hintText: qsTr("Write to all")
+                        locked: !connected
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
 
                         onClicked: {
@@ -312,11 +333,12 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Update\nFirmware"
+                        buttonText: "Update Firmware"
+                        hintText: badge ? "%1 → %2".arg(fwVersion).arg(fwLatest) : qsTr("Firmware and bootloader")
+                        badge: connected && fwUpdateAvailable
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Electronics-96.png"
 
                         onClicked: {
@@ -326,11 +348,11 @@ Item {
 
                     ImageButton {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         Layout.preferredWidth: 500
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 62
 
-                        buttonText: "Package\nStore"
+                        buttonText: "Package Store"
+                        hintText: qsTr("Packages and apps")
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
 
                         onClicked: {
@@ -347,37 +369,90 @@ Item {
                     onTriggered: {
                         restoreConfButton.enabled = VescIf.customConfigRxDone()
                         backupConfButton.enabled = VescIf.customConfigRxDone()
+                        logSection.status = VescIf.isRtLogOpen() ? qsTr("On") : qsTr("Off")
+                        tcpSection.status = !VescIf.tcpServerIsRunning() ? qsTr("Off") :
+                                            VescIf.tcpServerIsClientConnected() ? VescIf.tcpServerClientIp() : qsTr("On")
                     }
                 }
             }
 
-            GroupBox {
+            CollapsibleSection {
+                id: logSection
                 title: qsTr("Realtime Data Logging")
-                Layout.fillWidth: true
+                iconSource: "qrc" + Utility.getThemePath() + "icons/Line Chart-96.png"
 
                 LogBox {
-                    anchors.fill: parent
+                    Layout.fillWidth: true
                     dialogParent: topItem
                 }
             }
 
-            GroupBox {
+            CollapsibleSection {
+                id: tcpSection
                 title: qsTr("Wireless Bridge to Computer (TCP)")
-                Layout.fillWidth: true
+                iconSource: "qrc" + Utility.getThemePath() + "icons/LAN-96.png"
 
                 TcpBox {
-                    anchors.fill: parent
+                    Layout.fillWidth: true
                 }
             }
 
-            GroupBox {
+            CollapsibleSection {
                 title: qsTr("TCP Hub (Internet Bridge)")
+                iconSource: "qrc" + Utility.getThemePath() + "icons/Globe-96.png"
                 Layout.bottomMargin: isHorizontal ? 0 : 10
-                Layout.fillWidth: true
 
                 TcpHubBox {
-                    anchors.fill: parent
+                    Layout.fillWidth: true
                 }
+            }
+        }
+    }
+
+    // Card that shows a status line and expands to show its content
+    component CollapsibleSection: Rectangle {
+        id: section
+        property string title: ""
+        property string status: ""
+        property string iconSource: ""
+        property bool open: false
+        default property alias content: body.data
+
+        Layout.fillWidth: true
+        Layout.topMargin: 3
+        implicitHeight: sectionColumn.implicitHeight
+        radius: 12
+        color: Utility.getAppHexColor("cardBackground")
+        border.color: Utility.getAppHexColor("raisedBackground")
+
+        ColumnLayout {
+            id: sectionColumn
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: 0
+
+            ItemDelegate {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 52
+                icon.source: section.iconSource
+                text: section.title
+                onClicked: section.open = !section.open
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.rightMargin: 14
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: section.status + (section.open ? "  ▴" : "  ▾")
+                    color: Utility.getAppHexColor("normalText")
+                }
+            }
+
+            ColumnLayout {
+                id: body
+                Layout.fillWidth: true
+                Layout.margins: 12
+                Layout.topMargin: 0
+                visible: section.open
             }
         }
     }
@@ -409,36 +484,10 @@ Item {
         dialogParent: mainSwipeView
     }
 
-    Connections {
-        target: VescIf
-        function onPortConnectedChanged() {
-            if (VescIf.isPortConnected()) {
-                connectButton.buttonText = "Disconnect"
-                connectButton.imageSrc = "qrc" + Utility.getThemePath() + "icons/Disconnected-96.png"
-            } else {
-                connectButton.buttonText = "Connect"
-                connectButton.imageSrc = "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
-            }
-        }
-    }
-
-    Dialog {
+    SheetDialog {
         id: directionSetupDialog
+        rejectText: qsTr("Close")
         title: "Direction Setup"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-        padding: 10
-
-        width: parent.width - 10 - notchLeft - notchRight
-        closePolicy: Popup.CloseOnEscape
-        x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2
-        parent: mainSwipeView
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
 
         DirectionSetup {
             id: directionSetup
@@ -447,22 +496,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: nrfPairStartDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
-
-        parent: mainSwipeView
-        x: parent.width/2 - width/2
-        y: topItem.y + topItem.height / 2 - height / 2
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        iconSource: "qrc" + Utility.getThemePath() + "icons/icons8-fantasy-96.png"
+        acceptText: qsTr("Start pairing")
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -470,7 +508,7 @@ Item {
             anchors.fill: parent
             wrapMode: Text.WordWrap
             text:
-                "After clicking OK the VESC will be put in pairing mode for 10 seconds. Switch" +
+                "The VESC will be put in pairing mode for 10 seconds. Switch " +
                 "on your remote during this time to complete the pairing process."
         }
 
@@ -480,33 +518,37 @@ Item {
         }
     }
 
-    Dialog {
-        // HERE Backup
+    SheetDialog {
         id: backupConfigDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        closePolicy: Popup.CloseOnEscape
-        title: "Backup configuration(s)"
+        property var canDevs: []
 
-        parent: mainSwipeView
-        x: parent.width/2 - width/2
-        y: topItem.y + topItem.height / 2 - height / 2
+        title: "Back up configurations"
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Save-96.png"
+        acceptText: canDevs.length > 0 ? qsTr("Back up %1 VESCs").arg(canDevs.length + 1) : qsTr("Back up")
+        onAboutToShow: canDevs = VescIf.getCanDevsLast()
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        Text {
-            color: Utility.getAppHexColor("lightText")
-            verticalAlignment: Text.AlignVCenter
+        ColumnLayout {
             anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "This will backup the configuration of the connected VESC, as well as for the VESCs " +
-                "connected over CAN-bus. The configurations are stored by VESC UUID. If a backup for a " +
-                "VESC UUID already exists it will be overwritten. Continue?"
+            spacing: 6
+
+            Repeater {
+                model: [qsTr("This VESC · ID %1").arg(VescIf.appConfig().getParamInt("controller_id"))].concat(
+                           backupConfigDialog.canDevs.map(function(id) { return qsTr("CAN bus · ID %1").arg(id) }))
+
+                Text {
+                    text: "✓  " + modelData
+                    color: Utility.getAppHexColor("lightText")
+                }
+            }
+
+            Text {
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+                text: "Stored per VESC UUID. Replaces the previous backup."
+                wrapMode: Text.WordWrap
+                font.pointSize: 10
+                color: Utility.getAppHexColor("normalText")
+            }
         }
 
         onAccepted: {
@@ -525,22 +567,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: restoreConfigDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        closePolicy: Popup.CloseOnEscape
-        title: "Restore configuration backup(s)"
-
-        parent: mainSwipeView
-        x: parent.width/2 - width/2
-        y: topItem.y + topItem.height / 2 - height / 2
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        title: "Restore configurations"
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Open Folder-96.png"
+        acceptText: qsTr("Restore")
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -569,111 +600,52 @@ Item {
         }
     }
 
-    Dialog {
+    BusyDialog {
         id: progDialog
         title: "Processing..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true
-
-        width: parent.width - 20 - notchLeft - notchRight
-        x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2
-        parent: mainSwipeView
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 
     Dialog {
         id: firmwareDialog
-        standardButtons: Dialog.Close
         closePolicy: Popup.CloseOnEscape
         modal: true
         focus: true
+        title: qsTr("Update Firmware")
 
-        width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 20
-        x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2
+        width: parent.width
+        height: parent.height
         parent: mainSwipeView
 
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: scrimColor
+        }
+
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
         }
 
         contentItem: FwUpdate {
             id: fwUpdate
             anchors.fill: parent
-            anchors.bottomMargin: 50
-            anchors.topMargin: tabBar.implicitHeight
-            pageIndicatorVisible: false
-            swipeOrientation: Qt.Horizontal
-            currentPage: tabBar.currentIndex
-            isHorizontal: topItem.isHorizontal
+            anchors.topMargin: firmwareDialog.header.height
+            anchors.leftMargin: notchLeft
+            anchors.rightMargin: notchRight
         }
 
-        header: Rectangle {
-            color: Utility.getAppHexColor("lightText")
-            height: tabBar.implicitHeight
-
-            TabBar {
-                id: tabBar
-                currentIndex: fwUpdate.currentPage
-                anchors.fill: parent
-                clip: true
-
-                background: Rectangle {
-                    opacity: 1
-                    color: Utility.getAppHexColor("lightestBackground")
-                }
-
-                property int buttonWidth: Math.max(120, tabBar.width / (rep.model.length))
-
-                Repeater {
-                    id: rep
-                    model: ["Included", "Custom", "Bootloader", "Archive"]
-
-                    TabButton {
-                        text: modelData
-                        width: tabBar.buttonWidth
-                    }
-                }
-
-                Component.onCompleted: {
-                    tabBar.setCurrentIndex(0)
-                }
-            }
+        header: PageHeader {
+            title: firmwareDialog.title
+            onCloseClicked: firmwareDialog.close()
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: packageDialog
-        standardButtons: Dialog.Close
-        closePolicy: Popup.CloseOnEscape
-        modal: true
-        focus: true
+        title: qsTr("Package Store")
+        rejectText: qsTr("Close")
+        height: parent.height - notchTop - 40
 
-        width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 20
-        x: parent.width / 2 - width / 2
-        y: parent.height / 2 - height / 2
-        parent: mainSwipeView
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        contentItem: Packages {
+        Packages {
             anchors.fill: parent
-            anchors.margins: 5
-            anchors.bottomMargin: 50
             dialogParent: mainSwipeView
         }
     }

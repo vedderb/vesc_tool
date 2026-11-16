@@ -94,7 +94,7 @@ Item {
         anchors.fill: parent
         spacing: 5
 
-        ComboBox {
+        SubgroupBar {
             id: tabBox
             Layout.fillWidth: true
             Layout.topMargin: 5
@@ -146,19 +146,13 @@ Item {
             }
 
             Button {
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    bottomPadding: notchBot
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
                     parent: appPageItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
                     MenuItem {
                         text: "Read Default Settings"

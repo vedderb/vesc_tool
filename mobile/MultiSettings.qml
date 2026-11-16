@@ -79,8 +79,13 @@ Item {
         leftMargin: 5
         rightMargin: 5
 
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
+            radius: 16
+        }
+
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: scrimColor
         }
 
         Component.onCompleted: {
@@ -137,7 +142,7 @@ Item {
             anchors.fill: parent
             spacing: 0
             anchors.margins: 10
-            anchors.topMargin: tabBar.height + 10
+            anchors.topMargin: dialog.header.height + 10
             anchors.bottomMargin: 5
 
             SwipeView {
@@ -401,33 +406,26 @@ Item {
             }
         }
 
-        header: Rectangle {
-            color: {color = Utility.getAppHexColor("lightText")}
-            height: tabBar.height
+        header: ColumnLayout {
+            spacing: 10
 
-            TabBar {
+            Label {
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                text: qsTr("Multi Settings")
+                font.pointSize: 15
+                font.weight: Font.Medium
+                color: Utility.getAppHexColor("titleText")
+            }
+
+            SegmentedBar {
                 id: tabBar
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 currentIndex: swipeView.currentIndex
-                anchors.fill: parent
-                implicitWidth: 0
-                clip: true
-
-                background: Rectangle {
-                    opacity: 1
-                    color: { color = Utility.getAppHexColor("lightestBackground") }
-                }
-
-                property int buttonWidth: Math.max(120, tabBar.width / (rep.model.length))
-
-                Repeater {
-                    id: rep
-                    model: ["General", "Limits", "FOC", "BMS"]
-
-                    TabButton {
-                        text: modelData
-                        width: tabBar.buttonWidth
-                    }
-                }
+                model: ["General", "Limits", "FOC", "BMS"]
+                onActivated: function(index) { swipeView.currentIndex = index }
             }
         }
     }
@@ -443,25 +441,8 @@ Item {
         dialog.enabled = true
     }
 
-    Dialog {
+    BusyDialog {
         id: commDialog
         title: "Communicating..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20 - notchLeft - notchRight
-        x: 10 + (notchLeft + notchRight)/2
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 }

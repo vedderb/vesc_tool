@@ -21,16 +21,8 @@ import QtQuick
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
-
-Item {
+ParamEditFrame {
     id: editor
-    property string paramName: ""
-    property ConfigParams params: null
-    height: 140
-    Layout.fillWidth: true
     property real maxVal: 1.0
     property bool createReady: false
 
@@ -42,7 +34,6 @@ Item {
                 maxVal = Math.abs(params.getParamMinDouble(paramName))
             }
 
-            nameText.text = params.getLongName(paramName)
             valueBox.decimals = params.getParamDecimalsDouble(paramName)
             valueBox.realFrom = params.getParamMinDouble(paramName) * params.getParamEditorScale(paramName)
             valueBox.realTo = params.getParamMaxDouble(paramName) * params.getParamEditorScale(paramName)
@@ -57,14 +48,6 @@ Item {
             percentageBox.visible = params.getParamEditAsPercentage(paramName)
             percentageBox.value = p
 
-            if (params.getParamTransmittable(paramName)) {
-                nowButton.visible = true
-                defaultButton.visible = true
-            } else {
-                nowButton.visible = false
-                defaultButton.visible = false
-            }
-
             createReady = true
         }
     }
@@ -73,129 +56,56 @@ Item {
         // TODO: No display for now...
     }
 
-    Rectangle {
-        id: rect
-        anchors.fill: parent
-        color: Color.transparent(Utility.getAppHexColor("lightBackground"), 0.4)
-        radius: 10
-        border.color: {border.color = Utility.getAppHexColor("disabledText")}
-        border.width: 3
+    DoubleSpinBox {
+        id: valueBox
+        Layout.fillWidth: true
+        Layout.leftMargin: 5
+        Layout.rightMargin: 5
 
-        ColumnLayout {
-            id: column
-            anchors.fill: parent
-            anchors.topMargin: 10
-            anchors.margins: 5
+        onRealValueChanged: {
+            if (!params.getParamEditAsPercentage(paramName)) {
+                var val = realValue / params.getParamEditorScale(paramName)
 
-            Text {
-                id: nameText
-                color: {color = Utility.getAppHexColor("lightText")}
-                text: paramName
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: true
-                font.pointSize: 12
+                if (params !== null && createReady) {
+                    if (params.getUpdateOnly() !== paramName) {
+                        params.setUpdateOnly("")
+                    }
+                    params.updateParamDouble(paramName, val, editor);
+                }
+
+                updateDisplay(val);
             }
+        }
+    }
 
-            DoubleSpinBox {
-                id: valueBox
-                Layout.fillWidth: true
-                Layout.leftMargin: 5
-                Layout.rightMargin: 5
+    SpinBox {
+        id: percentageBox
+        Layout.fillWidth: true
+        Layout.leftMargin: 5
+        Layout.rightMargin: 5
+        editable: true
 
-                onRealValueChanged: {
-                    if (!params.getParamEditAsPercentage(paramName)) {
-                        var val = realValue / params.getParamEditorScale(paramName)
+        onValueChanged: {
+            if (params.getParamEditAsPercentage(paramName)) {
+                var val = (value / 100.0) * maxVal
 
-                        if (params !== null && createReady) {
-                            if (params.getUpdateOnly() !== paramName) {
-                                params.setUpdateOnly("")
-                            }
-                            params.updateParamDouble(paramName, val, editor);
-                        }
-
-                        updateDisplay(val);
+                if (params !== null && createReady) {
+                    if (params.getUpdateOnly() !== paramName) {
+                        params.setUpdateOnly("")
                     }
+                    params.updateParamDouble(paramName, val, editor);
                 }
+
+                updateDisplay(val);
             }
+        }
 
-            SpinBox {
-                id: percentageBox
-                Layout.fillWidth: true
-                Layout.leftMargin: 5
-                Layout.rightMargin: 5
-                editable: true
+        textFromValue: function(value, locale) {
+            return Number(value).toLocaleString(locale, 'f', 0) + " %"
+        }
 
-                onValueChanged: {
-                    if (params.getParamEditAsPercentage(paramName)) {
-                        var val = (value / 100.0) * maxVal
-
-                        if (params !== null && createReady) {
-                            if (params.getUpdateOnly() !== paramName) {
-                                params.setUpdateOnly("")
-                            }
-                            params.updateParamDouble(paramName, val, editor);
-                        }
-
-                        updateDisplay(val);
-                    }
-                }
-
-                textFromValue: function(value, locale) {
-                    return Number(value).toLocaleString(locale, 'f', 0) + " %"
-                }
-
-                valueFromText: function(text, locale) {
-                    return Number.fromLocaleString(locale, text.replace("%", ""))
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-
-                Button {
-                    id: nowButton
-                    focusPolicy: Qt.NoFocus
-
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Current"
-                    onClicked: {
-                        params.setUpdateOnly(paramName)
-                        params.requestUpdate()
-                    }
-                }
-
-                Button {
-                    id: defaultButton
-                    focusPolicy: Qt.NoFocus
-
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Default"
-                    onClicked: {
-                        params.setUpdateOnly(paramName)
-                        params.requestUpdateDefault()
-                    }
-                }
-
-                Button {
-                    id: helpButton
-                    focusPolicy: Qt.NoFocus
-
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Help"
-                    onClicked: {
-                        VescIf.emitMessageDialog(
-                                    params.getLongName(paramName),
-                                    params.getDescription(paramName),
-                                    true, true)
-                    }
-                }
-            }
+        valueFromText: function(text, locale) {
+            return Number.fromLocaleString(locale, text.replace("%", ""))
         }
     }
 

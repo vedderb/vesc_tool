@@ -19,6 +19,7 @@
 
 import QtQuick 2.0
 import QtQuick.Controls 2.10
+import QtQuick.Controls.Material
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -32,6 +33,8 @@ Item {
     property ConfigParams mMcConf: VescIf.mcConfig()
     property Commands mCommands: VescIf.commands()
     property int index: 0
+    property bool active: false
+    property var stats: []
     signal editRequested(int index)
     signal deleteRequested(int index)
 
@@ -43,177 +46,169 @@ Item {
 
         var useImperial = VescIf.useImperialUnits()
         var impFact = useImperial ? 0.621371192 : 1.0
-        var speedUnit = useImperial ? "mph\n" : "km/h\n"
+        var speedUnit = useImperial ? "mph" : "km/h"
+        var powerLimited = cfg.watt_max < 1400000 || cfg.watt_min > -1400000
 
-        infoText.text =
-                "Speed Forward   : " + parseFloat(cfg.erpm_or_speed_max * 3.6 * impFact).toFixed(1) + speedUnit +
-                "Speed Reverse   : " + parseFloat(-cfg.erpm_or_speed_min * 3.6 * impFact).toFixed(1) + speedUnit +
-                "Current Accel   : " + parseFloat(cfg.current_max_scale * 100).toFixed(0) + " %\n" +
-                "Current Brake   : " + parseFloat(cfg.current_min_scale * 100).toFixed(0) + " %"
-
-        if (cfg.watt_max < 1400000 || cfg.watt_min > -1400000) {
-            infoText.text += "\n" +
-                    "Max Power Out   : " + parseFloat(cfg.watt_max).toFixed(1) + " W\n" +
-                    "Max Power Regen : " + parseFloat(cfg.watt_min).toFixed(1) + " W"
-        }
+        stats = [["Speed Fwd / Rev", parseFloat(cfg.erpm_or_speed_max * 3.6 * impFact).toFixed(1) + " / " +
+                  parseFloat(-cfg.erpm_or_speed_min * 3.6 * impFact).toFixed(1), speedUnit],
+                 ["Accel / Brake", parseFloat(cfg.current_max_scale * 100).toFixed(0) + " / " +
+                  parseFloat(cfg.current_min_scale * 100).toFixed(0), "%"],
+                 ["Power Out / Regen", powerLimited ? parseFloat(cfg.watt_max / 1000).toFixed(1) + " / " +
+                                                     parseFloat(cfg.watt_min / 1000).toFixed(1) : "-", powerLimited ? "kW" : ""]]
     }
 
     function checkActive() {
-        if (VescIf.isProfileInUse(index)) {
-            rect.border.color = Utility.getAppHexColor("lightText")
-            rect.border.width = 3
-        } else {
-            rect.border.color =  Utility.getAppHexColor("lightestBackground")
-            rect.border.width = 2
-        }
+        active = VescIf.isProfileInUse(index)
     }
 
     Rectangle {
         id: rect
         anchors.fill: parent
-        color: "#4c606060"
-        radius: 5
-        border.color:  Utility.getAppHexColor("lightestBackground")
-        border.width: 2
+        color: active ? Qt.alpha(Material.accent, 0.08) : Utility.getAppHexColor("cardBackground")
+        radius: 12
+        border.color: active ? Material.accent : Utility.getAppHexColor("raisedBackground")
+        border.width: active ? 1.5 : 1
 
         ColumnLayout {
             id: column
             anchors.fill: parent
-            anchors.margins: 5
+            anchors.margins: 12
+            spacing: 10
 
-            Text {
-                id: nameText
-                color: Utility.getAppHexColor("lightText")
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: true
-                font.pointSize: 12
-            }
+            RowLayout {
+                spacing: 12
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: "lightgray"
-            }
-
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                id: infoText
-                color: Utility.getAppHexColor("lightText")
-                font.family: "DejaVu Sans Mono"
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: "lightgray"
-            }
-
-            GridLayout {
-                Layout.topMargin: -5
-                Layout.bottomMargin: -5
-                Layout.fillWidth: true
-                columns: 3
-                rowSpacing: -8
-                columnSpacing: 5
-
-                Button {
-                    id: upButton
-                    flat: true
-                    text: "UP"
-                    onClicked: {
-                        VescIf.moveProfileUp(index)
-                        VescIf.storeSettings()
-                    }
+                Image {
+                    Layout.preferredWidth: 28
+                    Layout.preferredHeight: 28
+                    source: "qrc" + Utility.getThemePath() + "icons/Speed-96.png"
                 }
 
-                Button {
-                    id: tempButton
+                ColumnLayout {
                     Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Use until reboot"
-                    onClicked: {
-                        mCommands.setMcconfTemp(VescIf.getProfile(index),
-                                                true, false, true, false, true)
-                        VescIf.updateMcconfFromProfile(VescIf.getProfile(index))
+                    spacing: 1
+
+                    Text {
+                        id: nameText
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 13
+                    }
+
+                    Text {
+                        text: active ? qsTr("Active") : qsTr("Not in use")
+                        font.pointSize: 9
+                        color: active ? Utility.getAppHexColor("accentText") : Utility.getAppHexColor("normalText")
                     }
                 }
 
                 Button {
-                    id: editButton
-                    flat: true
-                    text: "Edit"
-                    onClicked: {
-                        editRequested(index)
-                    }
-                }
+                    text: qsTr("Apply")
+                    onClicked: applyMenu.open()
 
-                Button {
-                    id: downButton
-                    flat: true
-                    text: "DOWN"
-                    onClicked: {
-                        VescIf.moveProfileDown(index)
-                        VescIf.storeSettings()
-                    }
-                }
+                    PopupMenu {
+                        id: applyMenu
 
-                Button {
-                    id: permanentButton
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Use permanently"
-                    onClicked: {
-                        permanentDialog.open()
-                    }
-
-                    Dialog {
-                        id: permanentDialog
-                        property int indexNow: 0
-                        standardButtons: Dialog.Yes | Dialog.Cancel
-                        modal: true
-                        focus: true
-                        width: parent.width - 20
-                        height: 200
-                        closePolicy: Popup.CloseOnEscape
-                        title: "Use Profile Permanently"
-                        x: 10
-                        y: 10 + parent.height / 2 - height / 2
-                        parent: dialogParent
-                        implicitHeight: 0
-
-                        Overlay.modal: Rectangle {
-                            color: "#AA000000"
+                        MenuItem {
+                            text: "Use until reboot"
+                            onTriggered: {
+                                mCommands.setMcconfTemp(VescIf.getProfile(index),
+                                                        true, false, true, false, true)
+                                VescIf.updateMcconfFromProfile(VescIf.getProfile(index))
+                            }
                         }
 
-                        Text {
-                            color: Utility.getAppHexColor("lightText")
-                            verticalAlignment: Text.AlignVCenter
-                            anchors.fill: parent
-                            wrapMode: Text.WordWrap
-                            text: "This is going to apply this profile permanently, even after reboot. Are " +
-                                  "you sure?"
-                        }
-
-                        onAccepted: {
-                            mCommands.setMcconfTemp(VescIf.getProfile(index),
-                                                    true, true, true, false, true)
-                            VescIf.updateMcconfFromProfile(VescIf.getProfile(index))
+                        MenuItem {
+                            text: "Use permanently"
+                            onTriggered: {
+                                permanentDialog.open()
+                            }
                         }
                     }
                 }
 
-                Button {
-                    id: deleteButton
-                    flat: true
-                    text: "Delete"
-                    onClicked: {
-                        deleteRequested(index)
+                ToolButton {
+                    icon.source: "qrc" + Utility.getThemePath() + "icons_textedit/Menu 2-96.png"
+                    Accessible.name: qsTr("Profile options")
+                    onClicked: profileMenu.open()
+
+                    PopupMenu {
+                        id: profileMenu
+
+                        MenuItem {
+                            text: "Edit"
+                            onTriggered: {
+                                editRequested(index)
+                            }
+                        }
+
+                        MenuItem {
+                            text: "Move Up"
+                            onTriggered: {
+                                VescIf.moveProfileUp(index)
+                                VescIf.storeSettings()
+                            }
+                        }
+
+                        MenuItem {
+                            text: "Move Down"
+                            onTriggered: {
+                                VescIf.moveProfileDown(index)
+                                VescIf.storeSettings()
+                            }
+                        }
+
+                        MenuItem {
+                            text: "Delete"
+                            onTriggered: {
+                                deleteRequested(index)
+                            }
+                        }
                     }
                 }
             }
+
+            RowLayout {
+                spacing: 6
+
+                Repeater {
+                    model: stats
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        color: Utility.getAppHexColor("normalBackground")
+                        border.width: 0
+                        title: modelData[0]
+                        value: modelData[1]
+                        unit: modelData[2]
+                    }
+                }
+            }
+        }
+    }
+
+    SheetDialog {
+        id: permanentDialog
+        title: "Use Profile Permanently"
+        acceptText: qsTr("Use permanently")
+        parent: dialogParent
+
+        Text {
+            color: Utility.getAppHexColor("lightText")
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+            text: "This is going to apply this profile permanently, even after reboot. Are " +
+                  "you sure?"
+        }
+
+        onAccepted: {
+            mCommands.setMcconfTemp(VescIf.getProfile(index),
+                                    true, true, true, false, true)
+            VescIf.updateMcconfFromProfile(VescIf.getProfile(index))
         }
     }
 

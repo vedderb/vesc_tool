@@ -34,22 +34,11 @@ Item {
         dialog.open()
     }
 
-    Dialog {
+    SheetDialog {
         title: "BLE Module Setup"
 
         id: dialog
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        closePolicy: Popup.CloseOnEscape
-        x: (parent.width - width) / 2
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-        padding: 10
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        rejectText: ""
 
         ColumnLayout {
             anchors.fill: parent

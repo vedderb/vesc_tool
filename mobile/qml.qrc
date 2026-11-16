@@ -59,5 +59,22 @@
         <file>SetupWizardIMU.qml</file>
         <file>Lisp.qml</file>
         <file>LogAnalysis.qml</file>
+        <file>ParamEditFrame.qml</file>
+        <file>SheetDialog.qml</file>
+        <file>SectionHeader.qml</file>
+        <file>Chip.qml</file>
+        <file>SegmentedBar.qml</file>
+        <file>ValueTile.qml</file>
+        <file>SubgroupBar.qml</file>
+        <file>WriteButton.qml</file>
+        <file>ParamFormat.js</file>
+        <file>ChangeTracker.qml</file>
+        <file>ParamSearch.qml</file>
+        <file>DeviceCard.qml</file>
+        <file>WizardHeader.qml</file>
+        <file>BottomMenu.qml</file>
+        <file>PopupMenu.qml</file>
+        <file>PageHeader.qml</file>
+        <file>BusyDialog.qml</file>
     </qresource>
 </RCC>

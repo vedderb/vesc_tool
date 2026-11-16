@@ -143,13 +143,10 @@ Item {
         parseCsvText(text)
     }
 
-    Dialog {
+    SheetDialog {
         id: confirmDeleteDialog
+        acceptText: qsTr("Delete")
         title: "Delete Device Log?"
-        modal: true
-        anchors.centerIn: parent
-        width: Math.min(parent.width * 0.85, 360)
-        standardButtons: Dialog.Yes | Dialog.No
         closePolicy: Popup.NoAutoClose
 
         Label {
@@ -161,13 +158,11 @@ Item {
         onAccepted: root.executeDeleteFile()
     }
 
-    Dialog {
+    SheetDialog {
         id: deviceFileDialog
+        rejectText: qsTr("Close")
         title: "Device Logs (" + root.deviceCurrentDir + ")"
-        modal: true
-        anchors.centerIn: parent
-        width: Math.min(parent.width * 0.92, 460)
-        height: Math.min(parent.height * 0.80, 520)
+        height: parent.height - notchTop - 40
         closePolicy: Popup.NoAutoClose
 
         ColumnLayout {
@@ -271,7 +266,6 @@ Item {
             }
         }
 
-        standardButtons: Dialog.Close
     }
 
     function rtLogFolderUrl(dir) {
@@ -330,15 +324,12 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: rtLogListDialog
+        rejectText: qsTr("Close")
         title: "RT Logs (" + root.currentRtLogDir + ")"
-        modal: true
         closePolicy: Popup.NoAutoClose
-        anchors.centerIn: parent
-        width: Math.min(parent.width * 0.92, 460)
-        height: Math.min(parent.height * 0.80, 520)
-        standardButtons: Dialog.Close
+        height: parent.height - notchTop - 40
 
         ColumnLayout {
             anchors.fill: parent
@@ -946,7 +937,7 @@ Item {
                 highlighted: true
                 onClicked: fileMenu.open()
 
-                Menu {
+                PopupMenu {
                     id: fileMenu
                     y: fileMenuBtn.height
 

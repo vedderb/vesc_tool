@@ -22,6 +22,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Material 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Window
+import QtCore as Core
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -30,6 +31,7 @@ import Vedder.vesc.utility 1.0
 import Vedder.vesc.vesc3ditem 1.0
 
 ApplicationWindow {
+    Material.background: Utility.getAppHexColor("darkBackground")
     id: appWindow
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
@@ -50,6 +52,28 @@ ApplicationWindow {
     property int notchTop: 0
     property bool mainIsHorizontal: appWindow.width > appWindow.height
 
+    // Connection status shown in the footer, the drawer and on the start page
+    property string connName: ""
+    property string connLink: ""
+    property string hwName: ""
+    property string hwType: ""
+    property string fwVersion: ""
+    property string fwLatest: ""
+    readonly property bool fwUpdateAvailable: Number(fwLatest) > Number(fwVersion)
+    property real rtVin: 0
+    property real rtBattery: -1
+    property real rtTempMos: 0
+    property real rtTempMotor: 0
+    property string faultText: ""
+    property string statusFlash: ""
+    readonly property color scrimColor: Utility.isDarkMode() ? "#AA000000" : "#55000000"
+    property var warnings: []
+    property int canCount: 0
+    property int changedCount: mcTracker.changedParams.length + appTracker.changedParams.length
+    property alias lastDeviceName: lastDevice.name
+    property alias lastDeviceTime: lastDevice.time
+    property var lastPage: null
+
     // https://github.com/ekke/c2gQtWS_x/blob/master/qml/main.qml
     flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
 
@@ -58,6 +82,74 @@ ApplicationWindow {
         notchLeft = SafeArea.margins.left
         notchRight = SafeArea.margins.right
         notchBot = SafeArea.margins.bottom
+    }
+
+    // Prefers the user's BLE name, then the hardware name, over the port address
+    function updateConnectionInfo() {
+        var m = VescIf.getConnectedPortName().match(/^Connected (?:\((.*)\) )?to (.*?)(, limited mode)?$/)
+        var bleName = m && m[1] === "BLE" ? VescIf.getBleName(VescIf.getLastBleAddr()) : ""
+        connLink = m ? [m[1], m[3] ? qsTr("limited mode") : ""].filter(Boolean).join(" · ") : ""
+        connName = bleName !== "" ? bleName : m && m[1] && hwName !== "" ? hwName.replace(/_/g, " ") : m ? m[2] : ""
+    }
+
+    // Routine messages flash in the status pill, problems keep it in a warning state until viewed
+    function addMessage(msg, isGood) {
+        messageModel.insert(0, {"msg": msg, "good": isGood, "time": new Date().toLocaleTimeString(Qt.locale(), Locale.ShortFormat)})
+        if (messageModel.count > 50) {
+            messageModel.remove(50)
+        }
+
+        if (isGood) {
+            statusFlash = msg
+            statusFlashTimer.restart()
+        } else {
+            warnings = warnings.concat([msg])
+        }
+    }
+
+    function showToast(text, detail, kind, actionText, action) {
+        toastText.text = text
+        toastDetail.text = detail
+        toast.kind = kind
+        toastButton.text = actionText ? actionText : ""
+        toast.action = action ? action : null
+        toast.open()
+        toastTimer.restart()
+    }
+
+    function fwString(params) {
+        return params.major + "." + ("0" + params.minor).slice(-2)
+    }
+
+    function requestDisconnect() {
+        if (changedCount > 0) {
+            disconnectSheet.open()
+        } else {
+            VescIf.disconnectPort()
+        }
+    }
+
+    function timeAgo(time) {
+        var minutes = Math.round((Date.now() - time) / 60000)
+        return minutes < 2 ? qsTr("just now") :
+               minutes < 60 ? qsTr("%1 min ago").arg(minutes) :
+               minutes < 2880 ? qsTr("%1 h ago").arg(Math.round(minutes / 60)) :
+                                qsTr("%1 days ago").arg(Math.round(minutes / 1440))
+    }
+
+    function tabIcon(title) {
+        var icons = {
+            "Start": "icons/Home-96.png",
+            "RT Data": "icons/rt_off.png",
+            "BMS": "icons/bms_off.png",
+            "Profiles": "icons/Speed-96.png",
+            "Motor Cfg": "icons/motor.png",
+            "App Cfg": "icons/Outgoing Data-96.png",
+            "Terminal": "icons/Console-96.png",
+            "LispBM": "icons_textedit/Outdent-96.png",
+            "LogView": "icons/Waypoint Map-96.png"
+        }
+        return "qrc" + Utility.getThemePath() + (icons[title] ? icons[title] : "icons/Electronics-96.png")
     }
 
     // Keys.onReleased: function(event) {
@@ -94,8 +186,6 @@ ApplicationWindow {
 
     Controls {
         id: controls
-        parentWidth: appWindow.width
-        parentHeight: mainSwipeView.height
         dialogParent: mainSwipeView
     }
 
@@ -123,14 +213,20 @@ ApplicationWindow {
         sourceComponent: Drawer {
             id: canDrawer
             edge: Qt.RightEdge
-            width: Math.min(0.6 * appWindow.width, 0.8 * appWindow.height)
+            width: Math.min(300, 0.8 * appWindow.width)
             height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
             y: appWindow.height > appWindow.width ?  headerBar.height : 0
             dragMargin: 20
             interactive: false
 
             Overlay.modal: Rectangle {
-                color: "#AA000000"
+                color: scrimColor
+            }
+
+            background: Rectangle {
+                color: Utility.getAppHexColor("cardBackground")
+                topLeftRadius: 18
+                bottomLeftRadius: 18
             }
 
             CanScreen {
@@ -149,45 +245,92 @@ ApplicationWindow {
 
     Drawer {
         id: drawer
-        width: Math.min(0.5 *appWindow.width, 0.75 *appWindow.height)
+        width: Math.min(296, 0.8 * appWindow.width)
         height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
         y: appWindow.height > appWindow.width ?  headerBar.height : 0
         dragMargin: 20
         interactive: false
 
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: scrimColor
+        }
+
+        background: Rectangle {
+            color: Utility.getAppHexColor("cardBackground")
+            topRightRadius: 18
+            bottomRightRadius: 18
         }
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 10
+            anchors.margins: 14
             spacing: 0
 
             Image {
                 id: image
-                Layout.preferredWidth: Math.min(parent.width, parent.height)*0.8
+                Layout.preferredWidth: parent.width * 0.6
                 Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
-                Layout.margins: Math.min(parent.width, parent.height)*0.1
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                Layout.margins: 6
+                Layout.bottomMargin: 18
                 source: "qrc" + Utility.getThemePath() + "/logo.png"
                 antialiasing: true
-
             }
 
-            Button {
-                id: reconnectButton
+            Rectangle {
                 Layout.fillWidth: true
-                text: connected ? "Disconnect" : "Connect"
-                flat: true
-                onClicked: {
-                    if (connected) {
-                        VescIf.disconnectPort()
-                    } else {
-                        connScreen.opened = true
+                implicitHeight: connColumn.implicitHeight + 24
+                radius: 12
+                color: Utility.getAppHexColor("normalBackground")
+
+                ColumnLayout {
+                    id: connColumn
+                    anchors.fill: parent
+                    anchors.margins: 12
+                    spacing: 2
+
+                    RowLayout {
+                        spacing: 8
+
+                        Rectangle {
+                            width: 9
+                            height: 9
+                            radius: 4.5
+                            color: connected ? Utility.getAppHexColor("positive") : Utility.getAppHexColor("disabledText")
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: connected ? connName : qsTr("Not connected")
+                            elide: Text.ElideRight
+                            font.weight: Font.Medium
+                            color: Utility.getAppHexColor("titleText")
+                        }
                     }
 
-                    drawer.close()
+                    Text {
+                        Layout.leftMargin: 17
+                        visible: connected
+                        text: [connLink, "FW " + fwVersion].filter(Boolean).join(" · ")
+                        font.pointSize: 9
+                        color: Utility.getAppHexColor("normalText")
+                    }
+
+                    Button {
+                        id: reconnectButton
+                        Layout.fillWidth: true
+                        Layout.topMargin: 8
+                        text: connected ? "Disconnect" : "Connect"
+                        highlighted: !connected
+                        onClicked: {
+                            if (connected) {
+                                requestDisconnect()
+                            } else {
+                                connScreen.opened = true
+                            }
+
+                            drawer.close()
+                        }
+                    }
                 }
             }
 
@@ -197,10 +340,10 @@ ApplicationWindow {
                 Layout.fillHeight: true
             }
 
-            Button {
+            ItemDelegate {
                 Layout.fillWidth: true
                 text: "Settings"
-                flat: true
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
 
                 onClicked: {
                     drawer.close()
@@ -208,10 +351,10 @@ ApplicationWindow {
                 }
             }
 
-            Button {
+            ItemDelegate {
                 Layout.fillWidth: true
                 text: "About"
-                flat: true
+                icon.source: "qrc" + Utility.getThemePath() + "icons/About-96.png"
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 "About",
@@ -220,10 +363,10 @@ ApplicationWindow {
                 }
             }
 
-            Button {
+            ItemDelegate {
                 Layout.fillWidth: true
                 text: "Changelog"
-                flat: true
+                icon.source: "qrc" + Utility.getThemePath() + "icons_textedit/Numbered List-96.png"
 
                 onClicked: {
                     VescIf.emitMessageDialog(
@@ -233,10 +376,10 @@ ApplicationWindow {
                 }
             }
 
-            Button {
+            ItemDelegate {
                 Layout.fillWidth: true
                 text: "License"
-                flat: true
+                icon.source: "qrc" + Utility.getThemePath() + "icons_textedit/Paste-96.png"
 
                 onClicked: {
                     if (Qt.platform.os == "ios"){
@@ -253,10 +396,10 @@ ApplicationWindow {
                 }
             }
 
-            Button {
+            ItemDelegate {
                 Layout.fillWidth: true
                 text: "Privacy Policy"
-                flat: true
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Globe-96.png"
 
                 onClicked: {
                     Qt.openUrlExternally("https://vesc-project.com/privacy_policies")
@@ -321,15 +464,18 @@ ApplicationWindow {
         Page {
             id: rtDataPage
 
-            PageIndicator {
-                count: rtSwipeView.count
-                currentIndex: rtSwipeView.currentIndex
-                anchors.right: parent.right
-                width:25
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.verticalCenterOffset: parent.height*0.4
-                rotation: 90
-                z:2
+            header: Item {
+                implicitHeight: 44
+
+                SegmentedBar {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    anchors.topMargin: 8
+                    model: [qsTr("Gauges"), qsTr("Dashboard"), qsTr("IMU"), qsTr("Statistics")]
+                    currentIndex: rtSwipeView.currentIndex
+                    onActivated: function(index) { rtSwipeView.setCurrentIndex(index) }
+                }
             }
 
             SwipeView {
@@ -508,8 +654,28 @@ ApplicationWindow {
 
     header: Rectangle {
         id: headerBar
-        color: Utility.getAppHexColor("lightestBackground")
+        color: Utility.getAppHexColor("barBackground")
         height: tabBar.implicitHeight + notchTop // iPhone X Workaround
+
+        // Fade out the tabs at an edge when more tabs are available beyond it
+        Repeater {
+            model: 2
+
+            Rectangle {
+                parent: tabBar
+                x: index === 0 ? 0 : parent.width - width
+                width: 40
+                height: parent.height - 3
+                z: 1
+                visible: index === 0 ? tabBar.contentItem.contentX > 1 :
+                                       tabBar.contentItem.contentX + tabBar.width < tabBar.contentWidth - 1
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0.0; color: index === 0 ? Utility.getAppHexColor("barBackground") : "transparent" }
+                    GradientStop { position: 1.0; color: index === 0 ? "transparent" : Utility.getAppHexColor("barBackground") }
+                }
+            }
+        }
 
         RowLayout {
             anchors.left: parent.left
@@ -526,36 +692,72 @@ ApplicationWindow {
 
                 background: Rectangle {
                     opacity: 1
-                    color: Utility.getAppHexColor("lightBackground")
+                    color: Utility.getAppHexColor("barBackground")
                 }
-
-                property int buttonWidth: Math.max(120,
-                                                   tabBar.width /
-                                                   (rep.model.length +
-                                                    (uiHwPage.visible ? 1 : 0) +
-                                                    (uiAppPage.visible ? 1 : 0) +
-                                                    (confCustomButton.visible ? 1 : 0) +
-                                                    (confPageMotor.visible ? 1 : 0) +
-                                                    (confPageApp.visible ? 1 : 0)))
 
                 Repeater {
                     id: rep
                     model: ["Start", "RT Data", "BMS", "Profiles", "Terminal", "LispBM", "LogView"]
 
-                    TabButton {
+                    MainTabButton {
                         text: modelData
-                        width: tabBar.buttonWidth
                     }
+                }
+            }
+
+            ToolButton {
+                Layout.fillHeight: true
+                Layout.preferredWidth: 48
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Grid-96.png"
+                Accessible.name: qsTr("All pages")
+                onClicked: allPagesPopup.open()
+
+                background: Rectangle {
+                    color: allPagesPopup.visible ? Qt.alpha(Material.accent, 0.2) : Utility.getAppHexColor("barBackground")
                 }
             }
         }
     }
 
-    TabButton {
+    component MainTabButton: TabButton {
+        id: mainTabButton
+        property bool dot: false
+
+        width: Math.max(implicitWidth, tabBar.width / tabBar.count)
+        leftPadding: 14
+        rightPadding: 14
+
+        contentItem: Item {
+            implicitWidth: tabRow.implicitWidth
+            implicitHeight: tabRow.implicitHeight
+
+            Row {
+                id: tabRow
+                anchors.centerIn: parent
+                spacing: 5
+
+                Text {
+                    text: mainTabButton.text
+                    font: mainTabButton.font
+                    color: mainTabButton.checked ? Utility.getAppHexColor("accentText") : Utility.getAppHexColor("lightText")
+                }
+
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 7
+                    height: 7
+                    radius: 3.5
+                    visible: mainTabButton.dot
+                    color: Material.accent
+                }
+            }
+        }
+    }
+
+    MainTabButton {
         id: uiHwButton
         visible: uiHwPage.visible
         text: "HwUi"
-        width: tabBar.buttonWidth
     }
 
     Page {
@@ -570,11 +772,10 @@ ApplicationWindow {
         }
     }
 
-    TabButton {
+    MainTabButton {
         id: uiAppButton
         visible: uiAppPage.visible
         text: "AppUi"
-        width: tabBar.buttonWidth
     }
 
     Page {
@@ -589,25 +790,24 @@ ApplicationWindow {
         }
     }
 
-    TabButton {
+    MainTabButton {
         id: confMotorButton
         visible: confPageMotor.visible
         text: "Motor Cfg"
-        width: tabBar.buttonWidth
+        dot: mcTracker.changedParams.length > 0
     }
 
-    TabButton {
+    MainTabButton {
         id: confAppButton
         visible: confPageApp.visible
         text: "App Cfg"
-        width: tabBar.buttonWidth
+        dot: appTracker.changedParams.length > 0
     }
 
-    TabButton {
+    MainTabButton {
         id: confCustomButton
         visible: confCustomPage.visible
         text: "Custom Cfg"
-        width: tabBar.buttonWidth
     }
 
     Page {
@@ -665,45 +865,25 @@ ApplicationWindow {
 
     footer: Rectangle {
         id: connectedRect
-        clip: true
-        color: Utility.getAppHexColor("lightBackground")
+        color: Utility.getAppHexColor("barBackground")
         width: parent.width
-        height: 35 + notchBot
-        Rectangle {
+        height: 52 + notchBot
+
+        RowLayout {
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top:parent.top
-            height: parent.height/2.0
-            gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#15ffffff"}
-                    GradientStop { position: 0.3; color: "#04ffffff"}
-                    GradientStop { position: 1.0; color: "transparent" }
-            }
-        }
-        Behavior on color {
-            ColorAnimation {
-                duration: 200;
-                easing.type: Easing.OutBounce
-                easing.overshoot: 3
-            }
-        }
-
-        RowLayout{
-            enabled:true
-            anchors.fill: parent
+            anchors.top: parent.top
+            height: 52
             spacing: 0
+
             ToolButton {
-                id:settingsButton
+                id: settingsButton
                 Layout.fillHeight: true
-                Layout.preferredWidth: 70
-                Image {
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -notchBot/2
-                    antialiasing: true
-                    height: parent.width*0.35
-                    width: height
-                    source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
-                }
+                Layout.preferredWidth: 58
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
+                icon.width: 26
+                icon.height: 26
+                Accessible.name: qsTr("Menu")
                 onClicked: {
                     if (drawer.visible) {
                         drawer.close()
@@ -711,64 +891,119 @@ ApplicationWindow {
                         drawer.open()
                     }
                 }
+            }
 
-            }
-            Rectangle{
-                Layout.fillHeight: true
-                Layout.preferredWidth: 1
-                color: "#33000000"
-            }
-            Rectangle{
-                Layout.fillHeight: true
-                Layout.preferredWidth: 1
-                color:  "#33ffffff"
-            }
-            ColumnLayout{
-                spacing: 0
+            // Status pill: connection state, device and live values
+            Rectangle {
+                id: statusPill
+                readonly property bool linkLost: bleDisconnectTimer.running
+                readonly property bool warning: warnings.length > 0 && !linkLost && !(connected && faultText !== "")
+                readonly property color dotColor: linkLost ? Utility.getAppHexColor("warning") :
+                                                  connected && faultText !== "" ? Utility.getAppHexColor("danger") :
+                                                  warning ? Utility.getAppHexColor("warning") :
+                                                  !connected ? Utility.getAppHexColor("disabledText") :
+                                                  !fwReadCorrectly ? Utility.getAppHexColor("lightAccent") :
+                                                  changedCount > 0 ? Material.accent : Utility.getAppHexColor("positive")
+
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                Text {
-                    id: connectedText
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    color: Utility.getAppHexColor("lightText")
-                    text: VescIf.getConnectedPortName()
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode: Text.Wrap
+                Layout.preferredHeight: 36
+                radius: height / 2
+                color: Utility.getAppHexColor("lightBackground")
+                border.color: warning ? Qt.alpha(Utility.getAppHexColor("warning"), 0.6) : "transparent"
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 12
+                    spacing: 8
+
+                    Rectangle {
+                        width: 9
+                        height: 9
+                        radius: 4.5
+                        color: statusPill.dotColor
+                    }
+
+                    Text {
+                        Layout.maximumWidth: statusPill.width * 0.5
+                        elide: Text.ElideRight
+                        font.weight: Font.Medium
+                        color: faultText !== "" && connected ? Utility.getAppHexColor("dangerText") :
+                               statusPill.warning ? Utility.getAppHexColor("warningText") : Utility.getAppHexColor("lightText")
+                        text: statusPill.linkLost ? qsTr("Link lost") :
+                              connected && faultText !== "" ? qsTr("FAULT") :
+                              statusPill.warning ? (warnings.length > 1 ? qsTr("%1 warnings").arg(warnings.length) : qsTr("Warning")) :
+                              !connected ? qsTr("Not connected") :
+                              !fwReadCorrectly ? qsTr("Connecting…") : connName
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        font.pointSize: 10
+                        color: statusPill.warning ? Utility.getAppHexColor("lightText") :
+                               statusFlash !== "" && connected ? Utility.getAppHexColor("positiveText") :
+                               changedCount > 0 && connected && faultText === "" ? Utility.getAppHexColor("accentText") :
+                                                                                     Utility.getAppHexColor("normalText")
+                        text: statusPill.linkLost ? qsTr("Reconnecting %1 / 5").arg(6 - bleDisconnectTimer.trysLeft) :
+                              connected && faultText !== "" ? faultText :
+                              statusPill.warning ? warnings[warnings.length - 1] :
+                              !connected ? qsTr("Tap to connect") :
+                              statusFlash !== "" ? statusFlash :
+                              !fwReadCorrectly ? connName :
+                              changedCount > 0 ? qsTr("%1 unwritten").arg(changedCount) :
+                              [connLink,
+                               rtVin > 0 ? rtVin.toFixed(1) + " V" : "",
+                               rtVin > 0 ? rtTempMos.toFixed(0) + " °C" : ""].filter(Boolean).join(" · ")
+                    }
                 }
-                Rectangle{
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: notchBot
-                    opacity: 0
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        if (statusPill.warning) {
+                            messageLog.open()
+                        } else if (connected) {
+                            connectionSheet.open()
+                        } else {
+                            connScreen.opened = true
+                        }
+                    }
+                    onPressAndHold: messageLog.open()
                 }
             }
-            Rectangle{
-                Layout.fillHeight: true
-                Layout.preferredWidth: 1
-                color: "#33000000"
-            }
-            Rectangle{
-                Layout.fillHeight: true
-                Layout.preferredWidth: 1
-                color: "#33ffffff"
-            }
+
             ToolButton {
                 Layout.fillHeight: true
-                Layout.preferredWidth: 70
-                Image {
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -notchBot/2
-                    antialiasing: true
-                    height: parent.width*0.35
-                    width: height
-                    source: "qrc" + Utility.getThemePath() + "icons/can_off.png"
-                }
+                Layout.preferredWidth: 58
+                icon.source: "qrc" + Utility.getThemePath() + "icons/can_off.png"
+                icon.width: 26
+                icon.height: 26
+                Accessible.name: qsTr("CAN devices")
                 onClicked: {
                     if (canDrawerLoader.item.visible) {
                         canDrawerLoader.item.close()
                     } else {
                         canDrawerLoader.item.open()
+                    }
+                }
+
+                Rectangle {
+                    x: parent.width / 2 + 6
+                    y: 9
+                    width: Math.max(height, canCountText.implicitWidth + 8)
+                    height: 16
+                    radius: 8
+                    visible: connected && canCount > 0
+                    color: Material.accent
+
+                    Text {
+                        id: canCountText
+                        anchors.centerIn: parent
+                        text: canCount
+                        font.pointSize: 8
+                        font.weight: Font.Bold
+                        color: Utility.getAppHexColor("white")
                     }
                 }
             }
@@ -812,25 +1047,13 @@ ApplicationWindow {
     }
 
     Timer {
-        id: statusTimer
-        interval: 1600
-        running: false
-        repeat: false
-        onTriggered: {
-            connectedText.text = VescIf.getConnectedPortName()
-            connectedRect.color = Utility.getAppHexColor("lightBackground")
-        }
-    }
-
-    Timer {
         id: uiTimer
         interval: 1000
         running: true
         repeat: true
         onTriggered: {
-            if (!statusTimer.running && connectedText.text !== VescIf.getConnectedPortName()) {
-                connectedText.text = VescIf.getConnectedPortName()
-            }
+            updateConnectionInfo()
+            canCount = VescIf.getCanDevsLast().length
         }
     }
 
@@ -903,6 +1126,13 @@ ApplicationWindow {
                         interval = 100
                         mCommands.bmsGetValues()
                     }
+
+                    // Slow update of the values shown in the footer and on the start page
+                    if (mainSwipeView.currentItem != rtDataPage && mainSwipeView.currentItem != bmsPage &&
+                            hwType === "VESC" && VescIf.getFwUploadProgress() < 0) {
+                        interval = 1000
+                        mCommands.getValuesSetupSelective(0x10183)
+                    }
                 }
             }
         }
@@ -928,21 +1158,10 @@ ApplicationWindow {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: vescDialog
-        standardButtons: Dialog.Ok
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
-        x: (parent.width - width) / 2
-        y: (parent.height - height + notchTop) / 2
-        parent: mainSwipeView
+        acceptText: qsTr("OK")
+        rejectText: ""
 
         ScrollView {
             id: vescDialogScroll
@@ -1081,12 +1300,17 @@ ApplicationWindow {
     Connections {
         target: VescIf
         function onPortConnectedChanged() {
-            connectedText.text = VescIf.getConnectedPortName()
+            updateConnectionInfo()
             if (!VescIf.isPortConnected()) {
                 confTimer.mcConfRx = false
                 confTimer.appConfRx = false
                 connected = false
                 fwReadCorrectly = false
+                hwName = ""
+                hwType = ""
+                rtVin = 0
+                rtBattery = -1
+                faultText = ""
             } else {
                 connected = true
             }
@@ -1105,9 +1329,7 @@ ApplicationWindow {
         }
 
         function onStatusMessage(msg, isGood) {
-            connectedText.text = msg
-            connectedRect.color = isGood ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("red")
-            statusTimer.restart()
+            addMessage(msg, isGood)
         }
 
         function onMessageDialog(title, msg, isGood, richText) {
@@ -1153,6 +1375,16 @@ ApplicationWindow {
 
                 fwReadCorrectly = true
                 bleDisconnectTimer.stop()
+
+                var p = VescIf.getLastFwRxParams()
+                var fws = VescIf.getSupportedFirmwares()
+                hwName = p.hw
+                hwType = p.hwTypeStr()
+                fwVersion = fwString(p)
+                fwLatest = fws.reduce(function(a, b) { return Number(b) > Number(a) ? b : a }, fwVersion)
+                updateConnectionInfo()
+                lastDevice.name = connName
+                lastDevice.time = Date.now()
             } else {
                 updateConfCustom()
             }
@@ -1191,6 +1423,29 @@ ApplicationWindow {
 
     Connections {
         target: mCommands
+
+        function onValuesReceived(values, mask) {
+            if (mask & (1 << 0)) rtTempMos = values.temp_mos
+            if (mask & (1 << 1)) rtTempMotor = values.temp_motor
+            if (mask & (1 << 8)) rtVin = values.v_in
+            if (mask & (1 << 15)) faultText = values.fault_code !== 0 ? values.fault_str : ""
+        }
+
+        function onValuesSetupReceived(values, mask) {
+            if (mask & (1 << 0)) rtTempMos = values.temp_mos
+            if (mask & (1 << 1)) rtTempMotor = values.temp_motor
+            if (mask & (1 << 7)) rtVin = values.v_in
+            if (mask & (1 << 8)) rtBattery = values.battery_level
+            if (mask & (1 << 16)) faultText = values.fault_code !== 0 ? values.fault_str : ""
+        }
+
+        function onAckReceived(ackType) {
+            if (disconnectTimer.running && changedCount === 0) {
+                disconnectTimer.stop()
+                VescIf.disconnectPort()
+            }
+        }
+
         function onValuesImuReceived(values, mask) {
             if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
                 vesc3dLoader.item.setRotation(values.roll, values.pitch,
@@ -1210,23 +1465,402 @@ ApplicationWindow {
         }
     }
 
-    Dialog {
-        id: qmlLoadDialog
-        standardButtons: Dialog.Yes | Dialog.Cancel
-        modal: true
-        focus: true
-        rightMargin: 10
-        leftMargin: 10
-        closePolicy: Popup.CloseOnEscape
-        title: "Load Custom User Interface"
+    ChangeTracker {
+        id: mcTracker
+        params: mMcConf
+    }
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
+    ChangeTracker {
+        id: appTracker
+        params: mAppConf
+    }
+
+    // Remind about unwritten changes when leaving a configuration page
+    Connections {
+        target: mainSwipeView
+
+        function onCurrentItemChanged() {
+            var page = lastPage
+            var count = page === confPageMotor ? mcTracker.changedParams.length :
+                        page === confPageApp ? appTracker.changedParams.length : 0
+
+            if (count > 0) {
+                showToast(qsTr("%1 unwritten changes in %2").arg(count).arg(page === confPageMotor ? "Motor Cfg" : "App Cfg"),
+                          "", "warn", qsTr("Review"), function() {
+                              mainSwipeView.setCurrentIndex(page.SwipeView.index)
+                          })
+            }
+
+            lastPage = mainSwipeView.currentItem
+        }
+    }
+
+    Core.Settings {
+        id: lastDevice
+        category: "lastDevice"
+        property string name: ""
+        property real time: 0
+    }
+
+    ListModel {
+        id: messageModel
+    }
+
+    TextEdit {
+        id: clipboardHelper
+        visible: false
+    }
+
+    Popup {
+        id: toast
+        property string kind: "ok"
+        property var action: null
+
+        parent: Overlay.overlay
+        x: 12 + notchLeft
+        y: parent.height - footer.height - height - 10
+        width: parent.width - 24 - notchLeft - notchRight
+        padding: 0
+        closePolicy: Popup.NoAutoClose
+
+        background: Rectangle {
+            radius: 12
+            color: Utility.getAppHexColor("raisedBackground")
+            border.color: Utility.getAppHexColor("lightestBackground")
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.leftMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
+                width: 4
+                height: parent.height - 16
+                radius: 2
+                color: toast.kind === "warn" ? Utility.getAppHexColor("warning") :
+                       toast.kind === "info" ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("positive")
+            }
         }
 
-        parent: mainSwipeView
-        y: parent.y + parent.height / 2 - height / 2
-        width: parent.width - 20
+        contentItem: RowLayout {
+            spacing: 10
+
+            Image {
+                Layout.leftMargin: 22
+                Layout.preferredWidth: 22
+                Layout.preferredHeight: 22
+                source: "qrc" + Utility.getThemePath() + (toast.kind === "warn" ? "icons/Brake Warning-96.png" :
+                                                          toast.kind === "info" ? "icons/About-96.png" : "icons/Ok-96.png")
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                Layout.bottomMargin: 10
+                spacing: 1
+
+                Text {
+                    id: toastText
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    font.weight: Font.Medium
+                    color: Utility.getAppHexColor("lightText")
+                }
+
+                Text {
+                    id: toastDetail
+                    Layout.fillWidth: true
+                    visible: text !== ""
+                    elide: Text.ElideRight
+                    font.pointSize: 9
+                    color: Utility.getAppHexColor("normalText")
+                }
+            }
+
+            Button {
+                id: toastButton
+                visible: text !== ""
+                flat: true
+                Material.foreground: Utility.getAppHexColor("accentText")
+                onClicked: {
+                    toast.close()
+                    toast.action()
+                }
+            }
+        }
+
+        TapHandler {
+            onTapped: toast.close()
+        }
+
+        Timer {
+            id: toastTimer
+            interval: 3000
+            onTriggered: toast.close()
+        }
+    }
+
+    Timer {
+        id: statusFlashTimer
+        interval: 3000
+        onTriggered: statusFlash = ""
+    }
+
+    SheetDialog {
+        id: messageLog
+        title: qsTr("Messages")
+        rejectText: qsTr("Close")
+        onOpened: warnings = []
+
+        ListView {
+            anchors.fill: parent
+            implicitHeight: Math.max(contentHeight, 60)
+            clip: true
+            model: messageModel
+
+            delegate: RowLayout {
+                width: ListView.view.width
+                height: 40
+                spacing: 10
+
+                Rectangle {
+                    width: 8
+                    height: 8
+                    radius: 4
+                    color: good ? Utility.getAppHexColor("positiveText") : Utility.getAppHexColor("dangerText")
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: msg
+                    elide: Text.ElideRight
+                    color: Utility.getAppHexColor("lightText")
+                }
+
+                Text {
+                    text: time
+                    font.pointSize: 9
+                    color: Utility.getAppHexColor("normalText")
+                }
+            }
+        }
+    }
+
+    SheetDialog {
+        id: connectionSheet
+        property string fault: ""
+
+        title: connName
+        iconSource: "qrc" + Utility.getThemePath() + "icons/v_icon-96.png"
+        acceptText: qsTr("Disconnect")
+        rejectText: qsTr("Close")
+        onAccepted: requestDisconnect()
+        onAboutToShow: {
+            fault = faultText
+            faultText = ""
+        }
+
+        function diagnostics() {
+            return [qsTr("Connection: %1").arg(VescIf.getConnectedPortName()),
+                    qsTr("Hardware: %1").arg(hwName),
+                    qsTr("Firmware: %1").arg(fwVersion),
+                    qsTr("UUID: %1").arg(VescIf.getConnectedUuid()),
+                    qsTr("Battery: %1 V").arg(rtVin.toFixed(1)),
+                    qsTr("Fault: %1").arg(fault !== "" ? fault : "FAULT_CODE_NONE")].join("\n")
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 8
+
+            Text {
+                Layout.fillWidth: true
+                text: connectionSheet.visible ? connectionSheet.diagnostics() : ""
+                wrapMode: Text.WrapAnywhere
+                lineHeight: 1.3
+                font.family: "DejaVu Sans Mono"
+                font.pointSize: 10
+                color: Utility.getAppHexColor("lightText")
+            }
+
+            Text {
+                Layout.fillWidth: true
+                visible: canCount > 0
+                text: qsTr("CAN devices: %1").arg(VescIf.getCanDevsLast().join(", "))
+                color: Utility.getAppHexColor("normalText")
+            }
+
+            Button {
+                Layout.alignment: Qt.AlignLeft
+                flat: true
+                text: qsTr("Copy diagnostics")
+                icon.source: "qrc" + Utility.getThemePath() + "icons_textedit/Copy-96.png"
+                onClicked: {
+                    clipboardHelper.text = connectionSheet.diagnostics()
+                    clipboardHelper.selectAll()
+                    clipboardHelper.copy()
+                    showToast(qsTr("Diagnostics copied"), "", "info")
+                }
+            }
+        }
+    }
+
+    SheetDialog {
+        id: disconnectSheet
+        title: qsTr("Write %1 changes before disconnecting?").arg(changedCount)
+        acceptText: qsTr("Write")
+        rejectText: qsTr("Discard")
+        closePolicy: Popup.NoAutoClose
+
+        onAccepted: {
+            if (mcTracker.changedParams.length > 0) {
+                mCommands.setMcconf(false)
+            }
+
+            if (appTracker.changedParams.length > 0) {
+                mCommands.setAppConf()
+            }
+
+            disconnectTimer.restart()
+        }
+
+        onRejected: VescIf.disconnectPort()
+
+        Text {
+            anchors.fill: parent
+            text: qsTr("Motor Cfg or App Cfg has values that are not written to the VESC.")
+            wrapMode: Text.WordWrap
+            color: Utility.getAppHexColor("lightText")
+        }
+    }
+
+    Timer {
+        id: disconnectTimer
+        interval: 3000
+        onTriggered: VescIf.disconnectPort()
+    }
+
+    Popup {
+        id: allPagesPopup
+        parent: Overlay.overlay
+        Overlay.modal: Rectangle {
+            color: scrimColor
+        }
+        x: 10 + notchLeft
+        y: headerBar.height + 6
+        width: parent.width - 20 - notchLeft - notchRight
+        modal: true
+        padding: 12
+
+        background: Rectangle {
+            radius: 18
+            color: Utility.getAppHexColor("cardBackground")
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 10
+
+            Text {
+                text: qsTr("All pages")
+                font.pointSize: 13
+                font.weight: Font.Medium
+                color: Utility.getAppHexColor("lightText")
+            }
+
+            GridLayout {
+                Layout.fillWidth: true
+                columns: 3
+                rowSpacing: 8
+                columnSpacing: 8
+
+                Repeater {
+                    model: allPagesPopup.visible ? tabBar.count : 0
+
+                    AbstractButton {
+                        id: pageTile
+                        readonly property Item tab: tabBar.itemAt(index)
+                        readonly property bool current: index === tabBar.currentIndex
+
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        Layout.preferredHeight: 76
+                        onClicked: {
+                            mainSwipeView.setCurrentIndex(index)
+                            allPagesPopup.close()
+                        }
+
+                        background: Rectangle {
+                            radius: 12
+                            color: pageTile.current ? Qt.alpha(Material.accent, 0.12) : Utility.getAppHexColor("normalBackground")
+                            border.width: pageTile.current ? 1.5 : 0
+                            border.color: Material.accent
+
+                            Rectangle {
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.margins: 8
+                                width: 8
+                                height: 8
+                                radius: 4
+                                visible: pageTile.tab.dot
+                                color: Material.accent
+                            }
+                        }
+
+                        contentItem: ColumnLayout {
+                            spacing: 6
+
+                            Image {
+                                Layout.alignment: Qt.AlignHCenter
+                                Layout.preferredWidth: 30
+                                Layout.preferredHeight: 30
+                                source: tabIcon(pageTile.tab.text)
+                            }
+
+                            Text {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: pageTile.tab.text
+                                font.pointSize: 11
+                                color: pageTile.current ? Utility.getAppHexColor("accentText") : Utility.getAppHexColor("lightText")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ParamSearch {
+        id: paramSearch
+
+        onParamSelected: function(isApp, group, subgroup, name) {
+            var page = isApp ? confPageApp : confPageMotor
+            var loader = isApp ? confAppLoader : confMotorLoader
+            mainSwipeView.setCurrentIndex(page.SwipeView.index)
+            loader.item.jumpTo(group, subgroup, name)
+        }
+
+        onPageSelected: function(title) {
+            if (title === "Controls") {
+                controls.openDialog()
+            } else if (title === "Multi Settings") {
+                multiSettings.openDialog()
+            } else if (title === "Settings") {
+                settingsLoader.item.openDialog()
+            } else {
+                for (var i = 0;i < tabBar.count;i++) {
+                    if (tabBar.itemAt(i).text === title) {
+                        mainSwipeView.setCurrentIndex(i)
+                    }
+                }
+            }
+        }
+    }
+
+    SheetDialog {
+        id: qmlLoadDialog
+        rejectText: "Cancel"
+        acceptText: "Load"
+        closePolicy: Popup.CloseOnEscape
+        title: "Load Custom User Interface"
 
         ColumnLayout {
             anchors.fill: parent

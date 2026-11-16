@@ -9,83 +9,34 @@ import Vedder.vesc.utility 1.0
 
 Item {
     id: root
-    height: rect.height
+    property var tileValues: []
+    height: grid.implicitHeight + 16
+
     function updateText(values) {
-        valText1.text =
-                "Roll   : " + (values.roll * 57.2958).toFixed(3) + "\n" +
-                "Acc X  : " + values.accX.toFixed(3) + "\n" +
-                "Gyro X : " + values.gyroX.toFixed(3)
-
-        valText2.text =
-                "Pitch  : " + (values.pitch * 57.2958).toFixed(3) + "\n" +
-                "Acc Y  : " + values.accY.toFixed(3) + "\n" +
-                "Gyro Y : " + values.gyroY.toFixed(3)
-
-        valText3.text =
-                "yaw    : " + (values.yaw * 57.2958).toFixed(3) + "\n" +
-                "Acc Z  : " + values.accZ.toFixed(3) + "\n" +
-                "Gyro Z : " + values.gyroZ.toFixed(3)
+        tileValues = [(values.roll * 57.2958).toFixed(3), (values.pitch * 57.2958).toFixed(3),
+                      (values.yaw * 57.2958).toFixed(3), values.accX.toFixed(3), values.accY.toFixed(3),
+                      values.accZ.toFixed(3), values.gyroX.toFixed(3), values.gyroY.toFixed(3), values.gyroZ.toFixed(3)]
     }
 
-    Rectangle {
-        id: rect
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height: valMetrics.height * 3 + 12
-        color: Utility.getAppHexColor("darkBackground")
+    GridLayout {
+        id: grid
+        anchors.fill: parent
+        anchors.margins: 8
+        columns: 3
+        rowSpacing: 6
+        columnSpacing: 6
 
-        GridLayout {
-            anchors.fill: parent
-            Layout.alignment: Qt.AlignHCenter
-            columns: 3
+        Repeater {
+            model: ["Roll", "Pitch", "Yaw", "Acc X", "Acc Y", "Acc Z", "Gyro X", "Gyro Y", "Gyro Z"]
 
-            Text {
-                id: valText1
-                color: Utility.getAppHexColor("lightText")
-                font.family: "DejaVu Sans Mono"
-                Layout.margins: 0
-                Layout.leftMargin: 5
-                Layout.preferredWidth: parent.width/3
-                text: "Roll   : 0.00\n" +
-                      "Acc X  : 0.00\n" +
-                      "Gyro X : 0.00"
-            }
-
-            Text {
-                id: valText2
-                color: Utility.getAppHexColor("lightText")
-                font.family: "DejaVu Sans Mono"
-                Layout.margins: 0
-                Layout.preferredWidth: parent.width/3
-                text: "Pitch  : 0.00\n" +
-                      "Acc Y  : 0.00\n" +
-                      "Gyro Y : 0.00"
-            }
-
-            Text {
-                id: valText3
-                color: Utility.getAppHexColor("lightText")
-                font.family: "DejaVu Sans Mono"
-                Layout.margins: 0
-                Layout.preferredWidth: parent.width/3
-                text: "Yaw    : 0.00\n" +
-                      "Acc Z  : 0.00\n" +
-                      "Gyro Z : 0.00"
-            }
-
-            Rectangle {
+            ValueTile {
                 Layout.fillWidth: true
-                height: 2
-                color: Utility.getAppHexColor("lightAccent")
-                Layout.columnSpan: 3
-                Layout.margins: 0
+                Layout.preferredWidth: 1
+                implicitHeight: 46
+                title: modelData
+                value: tileValues[index] || "0.000"
+                unit: index < 3 ? "\u00B0" : index < 6 ? "g" : "\u00B0/s"
             }
         }
-    }
-
-    TextMetrics {
-        id: valMetrics
-        font: valText1.font
-        text: valText1.text
     }
 }

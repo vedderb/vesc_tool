@@ -33,104 +33,183 @@ Item {
         dialog.open()
     }
 
+    component SettingSwitch: SwitchDelegate {
+        id: control
+        property string hint: ""
+
+        Layout.fillWidth: true
+
+        contentItem: Item {
+            implicitHeight: labels.implicitHeight
+
+            Column {
+                id: labels
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width - control.indicator.width - control.spacing
+                spacing: 2
+
+                Text {
+                    width: parent.width
+                    text: control.text
+                    color: Utility.getAppHexColor("titleText")
+                    wrapMode: Text.WordWrap
+                }
+
+                Text {
+                    width: parent.width
+                    visible: control.hint !== ""
+                    text: control.hint
+                    font.pointSize: 9
+                    color: Utility.getAppHexColor("normalText")
+                    wrapMode: Text.WordWrap
+                }
+            }
+        }
+    }
+
+    component SettingGroup: Rectangle {
+        default property alias content: groupColumn.data
+
+        Layout.fillWidth: true
+        implicitHeight: groupColumn.implicitHeight
+        radius: 14
+        color: Utility.getAppHexColor("rowBackground")
+        border.color: Utility.getAppHexColor("lightBackground")
+
+        ColumnLayout {
+            id: groupColumn
+            width: parent.width
+            spacing: 0
+        }
+    }
+
     Dialog {
         id: dialog
-        standardButtons: Dialog.Close
         modal: true
         focus: true
         title: "VESC Tool Settings"
 
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: scrimColor
         }
 
-        width: parent.width - 20
+        width: parent.width
+        height: parent.height
         closePolicy: Popup.CloseOnEscape
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
         parent: dialogParent
+        leftPadding: 14 + notchLeft
+        rightPadding: 14 + notchRight
+        topPadding: 0
+
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
+        }
+
+        header: PageHeader {
+            title: dialog.title
+            onCloseClicked: dialog.close()
+        }
 
         ScrollView {
             anchors.fill: parent
+            contentWidth: availableWidth
 
             ColumnLayout {
-                anchors.fill: parent
+                width: parent.width
+                spacing: 8
 
-                CheckBox {
-                    id: imperialBox
-                    Layout.fillWidth: true
-                    text: "Use Imperial Units"
-                    checked: VescIf.useImperialUnits()
+                SectionHeader {
+                    text: "Units"
                 }
 
-                CheckBox {
-                    id: negativeSpeedBox
-                    Layout.fillWidth: true
-                    text: "Use Negative Speed"
-                    checked: VescIf.speedGaugeUseNegativeValues()
+                SettingGroup {
+                    SettingSwitch {
+                        id: imperialBox
+                        text: "Use Imperial Units"
+                        hint: qsTr("Speed and distance in mph and miles")
+                        checked: VescIf.useImperialUnits()
+                    }
+
+                    SettingSwitch {
+                        id: negativeSpeedBox
+                        text: "Use Negative Speed"
+                        hint: qsTr("Show reverse as negative speed")
+                        checked: VescIf.speedGaugeUseNegativeValues()
+                    }
                 }
 
-                CheckBox {
-                    id: screenOnBox
-                    Layout.fillWidth: true
-                    text: "Keep Screen On"
-                    checked: VescIf.keepScreenOn()
-                    visible: Qt.platform.os !== "ios"
-                    enabled: Qt.platform.os !== "ios"
+                SectionHeader {
+                    text: "Display"
                 }
 
-                CheckBox {
-                    id: screenRotBox
-                    Layout.fillWidth: true
-                    text: "Allow Screen Rotation"
-                    checked: VescIf.getAllowScreenRotation()
-                    visible: Qt.platform.os !== "ios"
-                    enabled: Qt.platform.os !== "ios"
+                SettingGroup {
+                    SettingSwitch {
+                        id: darkModeBox
+                        text: "Use Dark Mode"
+                        hint: qsTr("Applies after restart")
+                        checked: Utility.isDarkMode()
+                        onCheckedChanged: {
+                            Utility.setDarkMode(checked)
+                        }
+                    }
+
+                    SettingSwitch {
+                        id: screenOnBox
+                        text: "Keep Screen On"
+                        checked: VescIf.keepScreenOn()
+                        visible: Qt.platform.os !== "ios"
+                        enabled: Qt.platform.os !== "ios"
+                    }
+
+                    SettingSwitch {
+                        id: screenRotBox
+                        text: "Allow Screen Rotation"
+                        checked: VescIf.getAllowScreenRotation()
+                        visible: Qt.platform.os !== "ios"
+                        enabled: Qt.platform.os !== "ios"
+                    }
                 }
 
-                CheckBox {
-                    id: qmlUiBox
-                    Layout.fillWidth: true
-                    text: "Load QML UI on Connect"
-                    checked: VescIf.getLoadQmlUiOnConnect()
+                SectionHeader {
+                    text: "Connection"
                 }
 
-                CheckBox {
-                    id: qmlUiAskBox
-                    Layout.fillWidth: true
-                    text: "Ask before loading QML UI"
-                    checked: VescIf.askQmlLoad()
+                SettingGroup {
+                    SettingSwitch {
+                        id: reconnectLastCanBox
+                        text: "Reconnect CAN on connect"
+                        checked: VescIf.reconnectLastCan()
+                    }
+
+                    SettingSwitch {
+                        id: scanCanConnectBox
+                        text: "Scan CAN on connect"
+                        checked: VescIf.scanCanOnConnect()
+                    }
                 }
 
-                CheckBox {
-                    id: reconnectLastCanBox
-                    Layout.fillWidth: true
-                    text: "Reconnect CAN on connect"
-                    checked: VescIf.reconnectLastCan()
+                SectionHeader {
+                    text: "Custom UI & Notifications"
                 }
 
-                CheckBox {
-                    id: scanCanConnectBox
-                    Layout.fillWidth: true
-                    text: "Scan CAN on connect"
-                    checked: VescIf.scanCanOnConnect()
-                }
+                SettingGroup {
+                    SettingSwitch {
+                        id: qmlUiBox
+                        text: "Load QML UI on Connect"
+                        checked: VescIf.getLoadQmlUiOnConnect()
+                    }
 
-                CheckBox {
-                    id: fwUpdateAvailableBox
-                    Layout.fillWidth: true
-                    text: "Show firmware update message"
-                    checked: VescIf.showFwUpdateAvailable()
-                }
+                    SettingSwitch {
+                        id: qmlUiAskBox
+                        text: "Ask before loading QML UI"
+                        hint: qsTr("Code from the device is not verified")
+                        checked: VescIf.askQmlLoad()
+                    }
 
-                CheckBox {
-                    id: darkModeBox
-                    Layout.fillWidth: true
-                    text: "Use Dark Mode"
-                    checked: Utility.isDarkMode()
-                    onCheckedChanged: {
-                        Utility.setDarkMode(checked)
+                    SettingSwitch {
+                        id: fwUpdateAvailableBox
+                        text: "Show firmware update message"
+                        checked: VescIf.showFwUpdateAvailable()
                     }
                 }
             }
@@ -174,22 +253,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: darkChangedDialog
-        standardButtons: Dialog.Yes | Dialog.No
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
+        acceptText: qsTr("Quit now")
+        rejectText: qsTr("Later")
         title: "Theme Changed"
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
 
         Text {
             id: detectRlLabel

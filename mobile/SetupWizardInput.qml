@@ -19,6 +19,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts 1.3
 import Qt5Compat.GraphicalEffects
 
@@ -96,27 +97,9 @@ Item {
         commDialog.close()
     }
 
-    Dialog {
+    BusyDialog {
         id: commDialog
         title: "Communicating..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 20
-        x: 10 + (notchLeft + notchRight) / 2
-        y: 10
-        parent: dialogParent
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 
     Dialog {
@@ -133,8 +116,13 @@ Item {
         rightMargin: 0
         padding: 10
 
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
+            radius: 16
+        }
+
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: scrimColor
         }
 
         StackLayout {
@@ -174,8 +162,10 @@ Item {
 
                                 width: canIdList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
-                                radius: 5
+                                color: Utility.getAppHexColor("cardBackground")
+                                border.width: ListView.isCurrentItem ? 2 : 1
+                                border.color: ListView.isCurrentItem ? Material.accent : Utility.getAppHexColor("raisedBackground")
+                                radius: 14
                                 RowLayout {
                                     anchors.fill: parent
                                     spacing: 10
@@ -215,6 +205,7 @@ Item {
                     ProgressBar {
                         id: canScanBar
                         Layout.fillWidth: true
+                        visible: value > 0 && value < 100
                         from: 0
                         to: 100
                         value: 0
@@ -280,8 +271,10 @@ Item {
 
                                 width: inputList.width
                                 height: 90
-                                color: ListView.isCurrentItem ? Utility.getAppHexColor("lightAccent") : Utility.getAppHexColor("normalBackground")
-                                radius: 5
+                                color: Utility.getAppHexColor("cardBackground")
+                                border.width: ListView.isCurrentItem ? 2 : 1
+                                border.color: ListView.isCurrentItem ? Material.accent : Utility.getAppHexColor("raisedBackground")
+                                radius: 14
                                 RowLayout {
                                     anchors.fill: parent
                                     spacing: 10
@@ -305,7 +298,7 @@ Item {
                                             id: mask
                                             width: 80
                                             height: 80
-                                            radius: 40
+                                            radius: 12
                                             visible: false
                                         }
 
@@ -405,49 +398,19 @@ Item {
             }
         }
 
-        header: Rectangle {
-            color: Utility.getAppHexColor("lightText")
-            height: tabBar.height
-
-            TabBar {
-                id: tabBar
-                currentIndex: stackLayout.currentIndex
-                anchors.fill: parent
-                implicitWidth: 0
-                clip: true
-                enabled: false
-
-                background: Rectangle {
-                    opacity: 1
-                    color: Utility.getAppHexColor("lightBackground")
-                }
-
-                property int buttons: 4
-                property int buttonWidth: 120
-
-                TabButton {
-                    text: qsTr("Connection")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Type")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Mapping")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Setup")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-            }
+        header: WizardHeader {
+            title: qsTr("Setup Input")
+            steps: [qsTr("Connection"), qsTr("Type"), qsTr("Mapping"), qsTr("Setup")]
+            currentIndex: stackLayout.currentIndex
         }
 
         footer: RowLayout {
             spacing: 0
+
             Button {
                 id: prevButton
+                Layout.margins: 10
+                Layout.rightMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Cancel"
@@ -477,10 +440,12 @@ Item {
 
             Button {
                 id: nextButton
+                Layout.margins: 10
+                Layout.leftMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Next"
-                flat: true
+                highlighted: true
 
                 onClicked: {
                     workaroundTimerNext.start()
@@ -635,24 +600,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: nrfPairStartDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
+        acceptText: qsTr("Start pairing")
 
-        width: parent.width - 20 - notchLeft - notchRight
-        x: 10 + (notchLeft + notchRight) / 2
-        y: dialog.y + dialog.height / 2 - height / 2
-
-        closePolicy: Popup.CloseOnEscape
         title: "NRF Pairing"
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        parent: dialogParent
 
         Text {
             id: detectLambdaLabel

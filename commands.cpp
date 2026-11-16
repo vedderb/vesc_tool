@@ -315,6 +315,10 @@ void Commands::processPacket(QByteArray data)
         mTimeoutMcconf = 0;
         if (mMcConfig) {
             if (mMcConfig->deSerialize(vb)) {
+                if (id == COMM_GET_MCCONF) {
+                    mMcConfig->storeReference();
+                }
+
                 mMcConfig->updateDone();
 
                 if (mCheckNextMcConfig) {
@@ -351,6 +355,10 @@ void Commands::processPacket(QByteArray data)
         mTimeoutAppconf = 0;
         if (mAppConfig) {
             if (mAppConfig->deSerialize(vb)) {
+                if (id == COMM_GET_APPCONF) {
+                    mAppConfig->storeReference();
+                }
+
                 mAppConfig->updateDone();
             } else {
                 emit deserializeConfigFailed(false, true);
@@ -423,14 +431,23 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_SET_MCCONF:
+        if (mMcConfig) {
+            mMcConfig->storeReference();
+        }
         emit ackReceived("Motor config write OK");
         break;
 
     case COMM_SET_APPCONF:
+        if (mAppConfig) {
+            mAppConfig->storeReference();
+        }
         emit ackReceived("App config write OK");
         break;
 
     case COMM_SET_APPCONF_NO_STORE:
+        if (mAppConfig) {
+            mAppConfig->storeReference();
+        }
         emit ackReceived("App config set OK");
         break;
 
@@ -536,10 +553,16 @@ void Commands::processPacket(QByteArray data)
     } break;
 
     case COMM_SET_MCCONF_TEMP:
+        if (mMcConfig) {
+            mMcConfig->storeReference();
+        }
         emit ackReceived("COMM_SET_MCCONF_TEMP Write OK");
         break;
 
     case COMM_SET_MCCONF_TEMP_SETUP:
+        if (mMcConfig) {
+            mMcConfig->storeReference();
+        }
         emit ackReceived("COMM_SET_MCCONF_TEMP_SETUP Write OK");
         break;
 

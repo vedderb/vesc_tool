@@ -77,6 +77,9 @@ public:
     Q_INVOKABLE bool getParamTransmittable(const QString &name);
 
     Q_INVOKABLE QStringList getParamOrder() const;
+    Q_INVOKABLE QStringList getChangedParams();
+    Q_INVOKABLE ConfigParams *getReference();
+    void storeReference();
     void setParamOrder(const QStringList &order);
 
     QWidget *getEditor(const QString &name, QWidget *parent = nullptr);
@@ -159,6 +162,7 @@ signals:
     void updateRequestDefault();
     void updated();
     void savingXml();
+    void referenceStored();
 
 public slots:
     void updateParamDouble(QString name, double param, QObject *src = nullptr);
@@ -181,6 +185,7 @@ private:
     QList<QPair<QString, QList<QPair<QString, QStringList>>>> mParamGrouping;
     int mConfigVersion;
     int mUpdateCnt;
+    ConfigParams *mReference;
 
     bool almostEqual(float A, float B, float eps);
 

@@ -157,9 +157,14 @@ Item {
         parent: dialogParent
         bottomMargin: 0
         rightMargin: 0
-        padding: 10
+        padding: 16
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: scrimColor
+        }
+
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
+            radius: 16
         }
 
         StackLayout {
@@ -175,22 +180,20 @@ Item {
                 ColumnLayout {
                     width: parent.width
                     height: parent.height
+                    spacing: 10
+
                     Text {
                         id: welcomeText1
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "IMU Wizard"
                     }// Text
                     Text {
                         id: welcomeText2
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         font.pointSize: 12
                         Layout.preferredWidth: parent.width
@@ -200,16 +203,16 @@ Item {
                     Text {
                         id: welcomeText3
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         font.pointSize: 12
                         Layout.preferredWidth: parent.width
                         visible: !workingIMU
-                        text: "We have detected that your IMU is <font color=\"#FF0000\">not working</font>. The IMU Configurator can help set it up."
+                        text: "We have detected that your IMU is <font color=\"" + Utility.getAppHexColor("dangerText") + "\">not working</font>. The IMU Configurator can help set it up."
                     }
                     Button {
                         id: configuratorButton
                         Layout.fillWidth: true
+                        Layout.preferredHeight: 52
                         Layout.preferredWidth: 500
                         text: "IMU Configurator"
                         flat: false
@@ -233,6 +236,7 @@ Item {
                     Button {
                         id: gyroCalibrationButton
                         Layout.fillWidth: true
+                        Layout.preferredHeight: 52
                         Layout.preferredWidth: 500
                         text: "Gyroscope Calibration"
                         flat: false
@@ -244,6 +248,7 @@ Item {
                     Button {
                         id: accelerometerCalibrationButton
                         Layout.fillWidth: true
+                        Layout.preferredHeight: 52
                         Layout.preferredWidth: 500
                         text: "Accelerometer Calibration"
                         flat: false
@@ -258,6 +263,7 @@ Item {
                     Button {
                         id: orientationCalibrationButton
                         Layout.fillWidth: true
+                        Layout.preferredHeight: 52
                         Layout.preferredWidth: 500
                         text: "Orientation Calibration"
                         flat: false
@@ -284,6 +290,10 @@ Item {
                             stackLayout.currentIndex = pages.orientationRoll
                         }
                     }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
                 }//Column Layout
             }//Item (Welcome Screen)
 
@@ -296,20 +306,16 @@ Item {
                     height: parent.height
                     Text {
                         id: gyroText1
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "Gyroscope calibration"
                     }// Text
                     Text {
                         id: gyroText2
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         font.pointSize: 12
                         Layout.preferredWidth: parent.width
@@ -321,7 +327,6 @@ Item {
                     Text {
                         id: gyroText3
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text:"X Offset: " + filteredIMUValues.gyroX.toFixed(2) +
@@ -340,20 +345,16 @@ Item {
                     height: parent.height
                     Text {
                         id: accelXText1
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "Accel X calibration"
                     }// Text
                     Text {
                         id: accelXText2
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         font.pointSize: 12
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
@@ -366,7 +367,6 @@ Item {
                     Text {
                         id: accelXText3
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "X:\t" + filteredIMUValues.accX.toFixed(3) +
@@ -413,20 +413,16 @@ Item {
                     height: parent.height
                     Text {
                         id: accelYText1
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "Accel Y calibration"
                     }// Text
                     Text {
                         id: accelYText2
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         font.pointSize: 12
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
@@ -439,7 +435,6 @@ Item {
                     Text {
                         id: accelYText3
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Y:\t" + filteredIMUValues.accY.toFixed(3) +
@@ -486,20 +481,16 @@ Item {
                     height: parent.height
                     Text {
                         id: accelZText1
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "Accel Z calibration"
                     }// Text
                     Text {
                         id: accelZText2
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         font.pointSize: 12
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
@@ -512,7 +503,6 @@ Item {
                     Text {
                         id: accelZText3
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Z:\t" + filteredIMUValues.accZ.toFixed(3) +
@@ -559,20 +549,16 @@ Item {
                     height: parent.height
                     Text {
                         id: rollText1
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "Roll Angle Calibration"
                     }// Text
                     Text {
                         id: rollText2
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         font.pointSize: 12
                         Layout.preferredWidth: parent.width
@@ -584,7 +570,6 @@ Item {
                     Text {
                         id: rollText3
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Roll Offset: " + ((-filteredIMUValues.roll * 180.0/pi) - orientationRestore.rot_roll).toFixed(2)
@@ -613,20 +598,16 @@ Item {
                     height: parent.height
                     Text {
                         id: pitchText1
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "Pitch Angle Calibration"
                     }// Text
                     Text {
                         id: pitchText2
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         font.pointSize: 12
                         Layout.preferredWidth: parent.width
@@ -638,7 +619,6 @@ Item {
                     Text {
                         id: pitchText3
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Pitch Offset: " + ((filteredIMUValues.pitch * 180.0/pi) - orientationRestore.rot_pitch).toFixed(2)
@@ -666,32 +646,27 @@ Item {
                     height: parent.height
                     Text {
                         id: yawText1
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "Yaw Angle Calibration"
                     }// Text
                     Text {
                         id: yawText2
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         font.pointSize: 12
                         Layout.preferredWidth: parent.width
                         text: "To calculate the yaw orientation, " +
                         "place the IMU on a stable surface, " +
-                        "with roll angle leveled out, and the <b>pitch angle raised to roughly <font color=\"#FF0000\">45 degrees</font></b>.<br><br>" +
+                        "with roll angle leveled out, and the <b>pitch angle raised to roughly <font color=\"" + Utility.getAppHexColor("warningText") + "\">45 degrees</font></b>.<br><br>" +
                         "Wait for the offset to stabilize then hit 'SAVE'."
                     }// Text
                     Text {
                         id: yawText3
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Yaw Offset: " + ((-calculatedYawOffset * 180.0/pi) - orientationRestore.rot_yaw).toFixed(2)
@@ -719,29 +694,24 @@ Item {
                     height: parent.height
                     Text {
                         id: configuratorText1
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "IMU Detector"
                     }// Text
                     Text {
                         id: configuratorText2
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
-                        text: "IMU Detected: " + (workingIMU ? "<font color=\"#00FF00\">True</font>" : "<font color=\"#FF0000\">False</font>") + "<br>" +
+                        text: "IMU Detected: " + (workingIMU ? "<font color=\"" + Utility.getAppHexColor("positiveText") + "\">True</font>" : "<font color=\"" + Utility.getAppHexColor("dangerText") + "\">False</font>") + "<br>" +
                         "IMU Type: " + imuString
                     }// Text
                     Text {
                         id: configuratorText3
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         font.pointSize: 10
                         Layout.preferredWidth: parent.width
@@ -835,13 +805,10 @@ Item {
                     }
                     Text {
                         id: configuratorText4
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        font.bold: true
-                        font.underline: true
-                        font.pointSize: 20
+                        color: Utility.getAppHexColor("titleText")
+                        font.weight: Font.Medium
+                        font.pointSize: 15
                         wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: parent.width
                         text: "IMU Profile Selector"
                     }// Text
@@ -924,7 +891,6 @@ Item {
 
                         id: configuratorText5
                         color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: getText()
@@ -947,8 +913,11 @@ Item {
 
         footer: RowLayout {
             spacing: 0
+
             Button {
                 id: prevButton
+                Layout.margins: 10
+                Layout.rightMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: (stackLayout.currentIndex != 0) ? "Cancel" : "Close"
@@ -990,10 +959,12 @@ Item {
 
             Button {
                 id: nextButton
+                Layout.margins: 10
+                Layout.leftMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Save"
-                flat: true
+                highlighted: true
                 visible: (stackLayout.currentIndex != 0) ? true : false
 
                 onClicked: {

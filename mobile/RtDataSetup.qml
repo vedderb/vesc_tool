@@ -162,22 +162,9 @@ Item {
                         settingsDialog.open()
                     }
 
-                    Dialog {
+                    SheetDialog {
                         id: settingsDialog
-                        modal: true
-                        focus: true
-                        width: parent.width - 20
-                        height: Math.min(implicitHeight, parent.height - 60)
-                        closePolicy: Popup.CloseOnEscape
-
-                        Overlay.modal: Rectangle {
-                            color: "#AA000000"
-                        }
-
-                        x: 10
-                        y: Math.max((parent.height - height) / 2, 10)
-                        parent: dialogParent
-                        standardButtons: Dialog.Ok | Dialog.Cancel
+                        acceptText: qsTr("Apply")
 
                         onOpened: {
                             negSpeedBox.checked = VescIf.speedGaugeUseNegativeValues()

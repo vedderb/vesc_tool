@@ -113,22 +113,10 @@ Item {
         updateDisplay()
     }
 
-    Dialog {
+    SheetDialog {
         id: dialog
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-        width: parent.width - 20
-        height: column.height - 40
-        closePolicy: Popup.CloseOnEscape
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
+        rejectText: qsTr("Close")
+        height: parent.height - notchTop - 40
 
         ScrollView {
             anchors.fill: parent
@@ -292,22 +280,10 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: detectRlDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
+        acceptText: qsTr("Measure")
         title: "Measure R & L"
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
 
         Text {
             id: detectRlLabel
@@ -326,22 +302,10 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: detectLambdaDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
+        acceptText: qsTr("Measure")
         title: "Warning"
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
 
         Text {
             anchors.fill: parent

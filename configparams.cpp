@@ -40,6 +40,7 @@ ConfigParams::ConfigParams(QObject *parent) : QObject(parent)
     mUpdatesEnabled = true;
     mConfigVersion = VT_CONFIG_VERSION;
     mUpdateCnt = 0;
+    mReference = nullptr;
 }
 
 void ConfigParams::addParam(const QString &name, ConfigParam param)
@@ -551,6 +552,39 @@ bool ConfigParams::getParamTransmittable(const QString &name)
 QStringList ConfigParams::getParamOrder() const
 {
     return mParamList;
+}
+
+/**
+ * @brief ConfigParams::getChangedParams
+ * Get the parameters that differ from the reference, which is the state of
+ * the connected device after the last read or write.
+ *
+ * @return
+ * List with the names of the changed parameters.
+ */
+QStringList ConfigParams::getChangedParams()
+{
+    return mReference ? checkDifference(mReference) : QStringList();
+}
+
+ConfigParams *ConfigParams::getReference()
+{
+    return mReference;
+}
+
+void ConfigParams::storeReference()
+{
+    if (!mReference) {
+        mReference = new ConfigParams(this);
+    }
+
+    if (mUpdateOnlyName.isEmpty()) {
+        *mReference = *this;
+    } else if (mParams.contains(mUpdateOnlyName)) {
+        mReference->updateParamFromOther(mUpdateOnlyName, mParams[mUpdateOnlyName], nullptr);
+    }
+
+    emit referenceStored();
 }
 
 void ConfigParams::setParamOrder(const QStringList &order)

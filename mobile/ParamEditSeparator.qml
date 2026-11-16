@@ -17,33 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.0
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
-import Vedder.vesc.utility 1.0
+import QtQuick
 
-Item {
-    Layout.fillWidth: true
-    height: 25
-
+SectionHeader {
     property string sepName: ""
-
-    Rectangle {
-        id: rect
-        anchors.fill: parent
-        color: {color = Utility.getAppHexColor("darkAccent")}
-        radius: 5
-
-        Text {
-            anchors.centerIn: parent
-            color: {color = Utility.getAppHexColor("lightText")}
-            id: name
-            text: sepName
-            font.bold: true
-            font.pointSize: 12
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-        }
-    }
-
+    text: sepName
 }

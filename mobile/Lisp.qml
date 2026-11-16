@@ -215,25 +215,15 @@ Item {
         }
     }
 
-    Dialog {
+    BusyDialog {
         id: dlDialog
         title: "Processing..."
-        closePolicy: Popup.NoAutoClose
-        standardButtons: Dialog.Cancel
-        modal: true
-        focus: true
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
+        spinner: false
+        cancelText: qsTr("Cancel")
 
         ProgressBar {
             id: dlProgBar
-            anchors.fill: parent
+            Layout.fillWidth: true
             indeterminate: false
             from: 0
             to: 1000
@@ -378,13 +368,9 @@ Item {
                         Layout.preferredWidth: 52
                         onClicked: pageMenu.open()
 
-                        Menu {
+                        BottomMenu {
                             id: pageMenu
-                            leftPadding: notchLeft
-                            rightPadding: notchRight
                             parent: lispPageItem
-                            y: parent.height - implicitHeight
-                            width: parent.width
 
                             MenuItem {
                                 text: "Run"
@@ -559,13 +545,9 @@ Item {
                         Layout.preferredWidth: 60
                         onClicked: replMenu.open()
 
-                        Menu {
+                        BottomMenu {
                             id: replMenu
-                            leftPadding: notchLeft
-                            rightPadding: notchRight
                             parent: replScroll
-                            y: parent.height - implicitHeight
-                            width: parent.width
 
                             MenuItem {
                                 text: ":help"
@@ -778,20 +760,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: recentDialog
-        modal: true
-        focus: true
         title: "Recent Files"
-        closePolicy: Popup.CloseOnEscape
-        standardButtons: Dialog.Cancel
-        Overlay.modal: Rectangle { color: "#AA000000" }
-        parent: lispPageItem
 
-        width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(parent.height - 40, 450)
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+        height: parent.height - notchTop - 40
 
         ColumnLayout {
             anchors.fill: parent
@@ -822,20 +795,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: exampleDialog
-        modal: true
-        focus: true
         title: "Examples"
-        closePolicy: Popup.CloseOnEscape
-        standardButtons: Dialog.Cancel
-        Overlay.modal: Rectangle { color: "#AA000000" }
-        parent: lispPageItem
 
-        width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(parent.height - 40, 500)
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+        height: parent.height - notchTop - 40
 
         ColumnLayout {
             anchors.fill: parent

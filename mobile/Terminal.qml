@@ -29,29 +29,150 @@ import Vedder.vesc.utility 1.0
 Item {
     id:terminalPageItem
     property Commands mCommands: VescIf.commands()
+    property var history: []
+    property int historyIndex: -1
+
+    // Dims the key of "key : value" lines and shows firmware fault codes in red
+    function formatLine(html) {
+        var kv = html.match(/^(\s*[A-Za-z][\w .()\/-]{0,40}?\s*:)(\s.*)?$/)
+        if (kv) {
+            html = "<font color='" + Utility.getAppHexColor("normalText") + "'>" + kv[1] + "</font>" + (kv[2] || "")
+        }
+
+        return html.replace(/FAULT_CODE_(?!NONE\b)\w+/g, function(code) {
+            return "<font color='" + Utility.getAppHexColor("dangerText") + "'>" + code + "</font>"
+        })
+    }
+
+    function appendOutput(str, color) {
+        for (var line of str.split("\n")) {
+            var html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            terminalText.append("<pre style='margin:0; white-space:pre-wrap'>" + (color ? "<font color='" + color + "'>" + html + "</font>" :
+                                                                     formatLine(html)) + "</pre>")
+        }
+    }
+
+    function send(cmd) {
+        if (cmd === "") {
+            return
+        }
+
+        appendOutput("\u203A " + cmd, Utility.getAppHexColor("infoText"))
+        mCommands.sendTerminalCmd(cmd)
+        history = [cmd].concat(history.filter(h => h !== cmd))
+        historyIndex = -1
+    }
 
     ColumnLayout {
         id: column
         anchors.fill: parent
-        spacing: 0
+        anchors.margins: 10
+        anchors.leftMargin: 10 + notchLeft
+        anchors.rightMargin: 10 + notchRight
+        spacing: 8
 
-        ScrollView {
-            id: scroll
+        Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            contentWidth: terminalText.width
-            clip: true
+            radius: 12
+            color: Utility.getAppHexColor("consoleBackground")
+            border.color: Utility.getAppHexColor("lightBackground")
 
-            TextArea {
-                id: terminalText
+            ScrollView {
+                id: scroll
                 anchors.fill: parent
-                readOnly: true
+                anchors.margins: 4
+                contentWidth: availableWidth
+                clip: true
+
+                TextArea {
+                    id: terminalText
+                    width: parent.width
+                    readOnly: true
+                    wrapMode: TextEdit.Wrap
+                    textFormat: TextEdit.RichText
+                    font.family: "DejaVu Sans Mono"
+                    font.pointSize: 10
+                    background: null
+                }
+            }
+
+            RoundButton {
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: 4
+                icon.source: "qrc" + Utility.getThemePath() + "icons_textedit/Copy-96.png"
+                Accessible.name: qsTr("Copy")
+                visible: terminalText.length > 0
+                onClicked: {
+                    terminalText.selectAll()
+                    terminalText.copy()
+                    terminalText.deselect()
+                    showToast(qsTr("Terminal output copied"), "", "info")
+                }
+            }
+        }
+
+        ListView {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 32
+            orientation: ListView.Horizontal
+            spacing: 6
+            clip: true
+            model: ["faults", "threads", "help", "hw_status"]
+
+            delegate: Chip {
+                text: modelData
                 font.family: "DejaVu Sans Mono"
+                onClicked: send(modelData)
             }
         }
 
         RowLayout {
             Layout.fillWidth: true
+
+            TextField {
+                id: stringInput
+                Layout.fillWidth: true
+                placeholderText: "Terminal Command"
+                font.family: "DejaVu Sans Mono"
+                inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+                onAccepted: {
+                    send(text)
+                    text = ""
+                }
+                Keys.onUpPressed: {
+                    if (historyButton.enabled) {
+                        historyButton.clicked()
+                    }
+                }
+            }
+
+            ToolButton {
+                id: historyButton
+                text: "\u2191"
+                font.pointSize: 16
+                enabled: history.length > 0
+                Accessible.name: qsTr("Previous command")
+                onClicked: {
+                    historyIndex = (historyIndex + 1) % history.length
+                    stringInput.text = history[historyIndex]
+                }
+            }
+
+            Button {
+                text: "Send"
+                highlighted: true
+                onClicked: {
+                    send(stringInput.text)
+                    stringInput.clear()
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+
             Button {
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
@@ -65,53 +186,22 @@ Item {
             Button {
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
-                text: "Send"
+                text: "Reboot"
 
                 onClicked: {
-                    mCommands.sendTerminalCmd(stringInput.text)
-                    stringInput.clear()
+                    mCommands.reboot()
                 }
             }
 
             Button {
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    bottomPadding: notchBot
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
                     parent: terminalPageItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
-                    MenuItem {
-                        text: "Print Faults"
-                        onTriggered: {
-                            mCommands.sendTerminalCmd("faults")
-                        }
-                    }
-                    MenuItem {
-                        text: "Print Threads"
-                        onTriggered: {
-                            mCommands.sendTerminalCmd("threads")
-                        }
-                    }
-                    MenuItem {
-                        text: "Show Help"
-                        onTriggered: {
-                            mCommands.sendTerminalCmd("help")
-                        }
-                    }
-                    MenuItem {
-                        text: "Reboot"
-                        onTriggered: {
-                            mCommands.reboot()
-                        }
-                    }
                     MenuItem {
                         text: "Shutdown"
                         onTriggered: {
@@ -127,25 +217,13 @@ Item {
                 }
             }
         }
-
-        TextField {
-            id: stringInput
-            Layout.fillWidth: true
-            Layout.topMargin: 5
-            Layout.bottomMargin: 5
-            placeholderText: "Terminal Command"
-            onAccepted: {
-                mCommands.sendTerminalCmd(text)
-                text = ""
-            }
-        }
     }
 
     Connections {
         target: mCommands
 
         function onPrintReceived(str) {
-            terminalText.text += "\n" + str
+            appendOutput(str)
         }
     }
 }

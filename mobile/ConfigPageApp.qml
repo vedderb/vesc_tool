@@ -38,66 +38,30 @@ Item {
         id: editors
     }
 
-    Dialog {
+    SheetDialog {
         id: ppmMap
+        rejectText: qsTr("Close")
         title: "PPM Mapping"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: (parent.height - height) / 2
-        parent: dialogParent
 
         PpmMap {
             anchors.fill: parent
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: adcMap
+        rejectText: qsTr("Close")
         title: "ADC Mapping"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
 
         AdcMap {
             anchors.fill: parent
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: nrfPair
+        rejectText: qsTr("Close")
         title: "NRF Pairing"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
 
         NrfPair {
             anchors.fill: parent
@@ -125,6 +89,12 @@ Item {
         e.Layout.fillsWidth = true
     }
 
+    function jumpTo(group, subgroup, name) {
+        pageBox.currentIndex = pageBox.find(group)
+        tabBox.currentIndex = tabBox.model.indexOf(subgroup)
+        editors.showParam(scroll, scrollCol, name)
+    }
+
     function updateEditors() {
         destroyEditors()
 
@@ -149,28 +119,42 @@ Item {
             Layout.topMargin: 5
             columns: isHorizontal ? 2 : 1
 
-            ComboBox {
-                id: pageBox
+            RowLayout {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
 
-                model: VescIf.appConfig().getParamGroups()
+                ComboBox {
+                    id: pageBox
+                    Layout.fillWidth: true
 
-                onCurrentTextChanged: {
-                    var tabTextOld = tabBox.currentText
-                    var subgroups = VescIf.appConfig().getParamSubgroups(currentText)
+                    model: VescIf.appConfig().getParamGroups()
 
-                    tabBox.model = subgroups
-                    tabBox.visible = subgroups.length > 1
+                    onCurrentTextChanged: {
+                        var tabTextOld = tabBox.currentText
+                        var subgroups = VescIf.appConfig().getParamSubgroups(currentText)
 
-                    if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
-                        updateEditors()
+                        tabBox.model = subgroups
+                        tabBox.visible = subgroups.length > 1
+
+                        if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
+                            updateEditors()
+                        }
                     }
+                }
+
+                ToolButton {
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Search-96.png"
+                    Accessible.name: qsTr("Search parameters")
+                    onClicked: paramSearch.open()
                 }
             }
 
-            ComboBox {
+            SubgroupBar {
                 id: tabBox
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                tracker: appTracker
+                group: pageBox.currentText
 
                 onCurrentTextChanged: {
                     updateEditors()
@@ -189,18 +173,19 @@ Item {
             GridLayout {
                 id: scrollCol
                 width: column.width
-                columns: isHorizontal ? 2 : 1
+                columns: Math.max(1, Math.floor(width / 380))
             }
         }
 
         RowLayout {
             Layout.fillWidth: true
-            Button {
+            WriteButton {
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
-                text: "Write"
+                tracker: appTracker
+                ackText: "App config write OK"
 
-                onClicked: {
+                onWriteRequested: {
                     mCommands.setAppConf()
                 }
             }
@@ -216,19 +201,13 @@ Item {
             }
 
             Button {
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    bottomPadding: notchBot
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
                     parent: appPageItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
                     MenuItem {
                         text: "Read Default Settings"

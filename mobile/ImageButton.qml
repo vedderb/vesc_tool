@@ -19,6 +19,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts 1.3
 import Vedder.vesc.utility 1.0
 
@@ -26,11 +27,15 @@ Item {
     id: rootItem
     property string imageSrc: ""
     property string buttonText: ""
+    property string hintText: ""
+    property bool locked: false
+    property bool badge: false
     signal clicked()
 
     Button {
         id: control
         anchors.fill: parent
+        enabled: !rootItem.locked
         flat: true
         focusPolicy: Qt.NoFocus
 
@@ -40,13 +45,14 @@ Item {
 
         background: Rectangle {
             anchors.fill: parent
-            radius: height/2
+            radius: 12
             property color hoveredColor: {hoveredColor = Utility.getAppHexColor("lightBackground")}
             property color pressedColor: {pressedColor = Utility.getAppHexColor("darkAccent")}
-            property color normalColor: {normalColor = Utility.getAppHexColor("normalBackground")}
+            property color normalColor: {normalColor = Utility.getAppHexColor("cardBackground")}
             color: control.pressed ? pressedColor: control.hovered ? hoveredColor : normalColor
-            border.color: {border.color = Utility.getAppHexColor("disabledText")}
+            border.color: {border.color = Utility.getAppHexColor("raisedBackground")}
             border.width: control.activeFocus ? 2 : 1
+            opacity: rootItem.locked ? 0.45 : 1
             Behavior on color {
                 ColorAnimation {
                     duration: 200;
@@ -56,24 +62,66 @@ Item {
 
             RowLayout {
                 anchors.fill: parent
+                anchors.leftMargin: 11
+                anchors.rightMargin: 14
+                spacing: 11
 
-                Image {
-                    id: img
-                    Layout.preferredHeight: rootItem.height * 0.7
+                Rectangle {
+                    Layout.preferredHeight: 38
                     Layout.preferredWidth: height
-                    Layout.leftMargin: rootItem.width * 0.1
-                    fillMode: Image.PreserveAspectFit
-                    horizontalAlignment: Image.AlignLeft
-                    source: imageSrc
-                    smooth: true
+                    radius: 10
+                    color: Utility.getAppHexColor("raisedBackground")
+
+                    Image {
+                        id: img
+                        anchors.centerIn: parent
+                        width: parent.width * 0.68
+                        height: width
+                        fillMode: Image.PreserveAspectFit
+                        source: imageSrc
+                        smooth: true
+                    }
+
+                    Rectangle {
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        width: 12
+                        height: 12
+                        radius: 6
+                        visible: rootItem.badge
+                        color: Material.accent
+                        border.width: 2
+                        border.color: Utility.getAppHexColor("cardBackground")
+                    }
                 }
 
-                Text {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    text: buttonText
-                    color: Utility.getAppHexColor("lightText")
-                    verticalAlignment: Text.AlignVCenter
+                    spacing: 1
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: buttonText
+                        wrapMode: Text.WordWrap
+                        font.weight: Font.Medium
+                        color: Utility.getAppHexColor("lightText")
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        visible: text !== ""
+                        text: rootItem.locked ? qsTr("Connect to use") : hintText
+                        elide: Text.ElideRight
+                        font.pointSize: 9
+                        color: Utility.getAppHexColor("normalText")
+                    }
+                }
+
+                Image {
+                    Layout.preferredWidth: 14
+                    Layout.preferredHeight: 14
+                    visible: rootItem.locked
+                    source: "qrc" + Utility.getThemePath() + "icons/Lock-96.png"
                 }
             }
         }

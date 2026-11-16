@@ -198,7 +198,7 @@ Item {
             powerGauge.value = (values.current_in * values.v_in)
 
             tileValues = [
-                        [parseFloat(values.v_in).toFixed(2), "V", rtBattery],
+                        [parseFloat(values.v_in).toFixed(2), "V", -1],
                         [parseFloat(values.current_in).toFixed(2), "A", -1],
                         [parseFloat(values.temp_mos).toFixed(1), "\u00B0C",
                          values.temp_mos / mMcConf.getParamDouble("l_temp_fet_end")],

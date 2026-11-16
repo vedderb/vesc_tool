@@ -316,9 +316,11 @@ Item {
                     }
                 }
 
+                // At least as wide as the view, so short text leaves sideways swipes to the page swiper
                 ScrollView {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    contentWidth: Math.max(editorText.implicitWidth, availableWidth)
                     clip: true
 
                     TextArea {
@@ -502,12 +504,15 @@ Item {
                     id: replScroll
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    contentWidth: Math.max(replText.implicitWidth, availableWidth)
                     clip: true
 
                     TextArea {
+                        id: replText
                         text: consoleText
                         readOnly: true
                         wrapMode: TextArea.NoWrap
+                        selectByMouse: Qt.platform.os !== "ios" && Qt.platform.os !== "android"
                         font.family: "DejaVu Sans Mono"
                         color: Utility.getAppHexColor("lightText")
                     }
@@ -764,7 +769,7 @@ Item {
         id: recentDialog
         title: "Recent Files"
 
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         ColumnLayout {
             anchors.fill: parent
@@ -798,8 +803,7 @@ Item {
     SheetDialog {
         id: exampleDialog
         title: "Examples"
-
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         ColumnLayout {
             anchors.fill: parent

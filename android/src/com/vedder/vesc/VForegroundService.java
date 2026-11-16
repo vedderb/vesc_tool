@@ -94,7 +94,7 @@ public class VForegroundService extends Service {
         builder.setContentText("VESC Tool is logging position and motor data.");
 
         builder.setWhen(System.currentTimeMillis());
-        builder.setSmallIcon(R.drawable.icon);
+        builder.setSmallIcon(R.drawable.ic_notification);
 
 //        builder.setFullScreenIntent(pendingIntent, true);
 

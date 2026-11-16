@@ -34,7 +34,9 @@ QtObject {
 
     function changed(name) {
         paramChanged(name)
-        Qt.callLater(update)
+        if (trackChanges) {
+            Qt.callLater(update)
+        }
     }
 
     // Name and reference value of every changed parameter, used to revert them
@@ -52,6 +54,10 @@ QtObject {
         function onParamChangedEnum(src, name, newParam) { tracker.changed(name) }
         function onParamChangedQString(src, name, newParam) { tracker.changed(name) }
         function onParamChangedBool(src, name, newParam) { tracker.changed(name) }
-        function onReferenceStored() { Qt.callLater(tracker.update) }
+        function onReferenceStored() {
+            if (tracker.trackChanges) {
+                Qt.callLater(tracker.update)
+            }
+        }
     }
 }

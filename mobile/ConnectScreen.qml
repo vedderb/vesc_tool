@@ -841,7 +841,7 @@ Item {
         acceptText: qsTr("Save")
         title: "Set BLE Device Name"
 
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         Rectangle {
             anchors.fill: parent
@@ -875,7 +875,7 @@ Item {
         acceptText: qsTr("Save")
         title: "Set TCP Hub Password"
 
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         Rectangle {
             anchors.fill: parent

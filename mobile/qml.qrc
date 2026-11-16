@@ -76,5 +76,6 @@
         <file>PopupMenu.qml</file>
         <file>PageHeader.qml</file>
         <file>BusyDialog.qml</file>
+        <file>RideDisplay.qml</file>
     </qresource>
 </RCC>

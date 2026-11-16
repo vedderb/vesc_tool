@@ -486,7 +486,6 @@ Item {
 
     SheetDialog {
         id: directionSetupDialog
-        rejectText: qsTr("Close")
         title: "Direction Setup"
 
         DirectionSetup {
@@ -641,8 +640,7 @@ Item {
     SheetDialog {
         id: packageDialog
         title: qsTr("Package Store")
-        rejectText: qsTr("Close")
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         Packages {
             anchors.fill: parent

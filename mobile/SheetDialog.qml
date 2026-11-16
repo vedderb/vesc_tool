@@ -27,14 +27,15 @@ Dialog {
     id: sheet
     property string iconSource: ""
     property string acceptText: ""
-    property string rejectText: qsTr("Cancel")
+    property string rejectText: acceptText === "" ? qsTr("Close") : qsTr("Cancel")
+    property bool fullHeight: false
 
     parent: Overlay.overlay
     modal: true
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     width: Math.min(parent.width, 640)
-    height: Math.min(implicitHeight, parent.height - notchTop - 40)
+    height: fullHeight ? parent.height - notchTop - 40 : Math.min(implicitHeight, parent.height - notchTop - 40)
     x: (parent.width - width) / 2
     y: parent.height - height
     leftPadding: 16 + notchLeft

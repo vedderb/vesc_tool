@@ -283,7 +283,6 @@ private struct RideTimer: View {
         Text(timerInterval: startedAt...Date.distantFuture, countsDown: false)
             .monospacedDigit()
             .multilineTextAlignment(.trailing)
-            .fixedSize()
             .accessibilityLabel("Ride elapsed time")
     }
 }

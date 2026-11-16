@@ -1,10 +1,3 @@
-HEADERS += $$PWD/src/ridesession.h $$PWD/LiveActivity/LiveActivityBridge.h
-SOURCES += $$PWD/src/ridesession.cpp
-ride_display.files = $$PWD/../mobile/RideDisplay.qml
-ride_display.prefix = /mobile
-ride_display.base = $$PWD/../mobile
-RESOURCES += ride_display
-
 # Mark Swift inputs as compilable sources for qmake's Xcode generator.
 RIDE_SWIFT_SOURCES = $$PWD/LiveActivity/LiveActivityBridge.swift $$PWD/LiveActivity/RideActivityAttributes.swift
 ride_swift.input = RIDE_SWIFT_SOURCES

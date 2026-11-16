@@ -327,6 +327,7 @@ Item {
                     Text {
                         id: gyroText3
                         color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text:"X Offset: " + filteredIMUValues.gyroX.toFixed(2) +
@@ -367,6 +368,7 @@ Item {
                     Text {
                         id: accelXText3
                         color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "X:\t" + filteredIMUValues.accX.toFixed(3) +
@@ -435,6 +437,7 @@ Item {
                     Text {
                         id: accelYText3
                         color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Y:\t" + filteredIMUValues.accY.toFixed(3) +
@@ -503,6 +506,7 @@ Item {
                     Text {
                         id: accelZText3
                         color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Z:\t" + filteredIMUValues.accZ.toFixed(3) +
@@ -570,6 +574,7 @@ Item {
                     Text {
                         id: rollText3
                         color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Roll Offset: " + ((-filteredIMUValues.roll * 180.0/pi) - orientationRestore.rot_roll).toFixed(2)
@@ -619,6 +624,7 @@ Item {
                     Text {
                         id: pitchText3
                         color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Pitch Offset: " + ((filteredIMUValues.pitch * 180.0/pi) - orientationRestore.rot_pitch).toFixed(2)
@@ -667,6 +673,7 @@ Item {
                     Text {
                         id: yawText3
                         color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: "Yaw Offset: " + ((-calculatedYawOffset * 180.0/pi) - orientationRestore.rot_yaw).toFixed(2)
@@ -891,6 +898,7 @@ Item {
 
                         id: configuratorText5
                         color: Utility.getAppHexColor("lightText")
+                        font.family: "DejaVu Sans Mono"
                         wrapMode: Text.Wrap
                         Layout.preferredWidth: parent.width
                         text: getText()

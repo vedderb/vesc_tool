@@ -222,13 +222,13 @@ Item {
                         textFormat: Text.RichText
                         font.pointSize: 10
                         color: Utility.getAppHexColor("normalText")
+                        linkColor: Utility.getAppHexColor("lightAccent")
+                        onLinkActivated: function(link) { Qt.openUrlExternally(link) }
 
                         FontMetrics {
                             id: helpMetrics
                             font: helpText.font
                         }
-                        linkColor: Utility.getAppHexColor("lightAccent")
-                        onLinkActivated: function(link) { Qt.openUrlExternally(link) }
                     }
 
                     RowLayout {

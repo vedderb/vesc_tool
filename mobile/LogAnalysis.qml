@@ -160,9 +160,8 @@ Item {
 
     SheetDialog {
         id: deviceFileDialog
-        rejectText: qsTr("Close")
         title: "Device Logs (" + root.deviceCurrentDir + ")"
-        height: parent.height - notchTop - 40
+        fullHeight: true
         closePolicy: Popup.NoAutoClose
 
         ColumnLayout {
@@ -265,7 +264,6 @@ Item {
                 }
             }
         }
-
     }
 
     function rtLogFolderUrl(dir) {
@@ -326,10 +324,9 @@ Item {
 
     SheetDialog {
         id: rtLogListDialog
-        rejectText: qsTr("Close")
         title: "RT Logs (" + root.currentRtLogDir + ")"
         closePolicy: Popup.NoAutoClose
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         ColumnLayout {
             anchors.fill: parent

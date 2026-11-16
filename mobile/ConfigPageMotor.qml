@@ -59,7 +59,6 @@ Item {
 
     SheetDialog {
         id: directionSetupDialog
-        rejectText: qsTr("Close")
         title: "Direction Setup"
 
         DirectionSetup {
@@ -109,7 +108,7 @@ Item {
 
     function addSeparator(text) {
         var e = editors.createSeparator(scrollCol, text)
-        e.Layout.columnSpan = isHorizontal ? 2 : 1
+        e.Layout.columnSpan = Qt.binding(function() { return scrollCol.columns })
     }
 
     function destroyEditors() {
@@ -376,8 +375,15 @@ Item {
         // TODO: For some reason this does not work
         function onMcConfigCheckResult(paramsNotSet) {
             if (paramsNotSet.length > 0) {
-                addMessage(qsTr("Truncated or not written: %1").arg(
-                               paramsNotSet.map(function(p) { return mMcConf.getLongName(p) }).join(", ")), false)
+                var notUpdated = "The following parameters were truncated or not updated. That can happen because " +
+                                "they were set outside their allowed limits or because the write failed. In case the " +
+                                "write failed you can try writing them again:\n"
+
+                for (var i = 0;i < paramsNotSet.length;i++) {
+                    notUpdated += mMcConf.getLongName(paramsNotSet[i]) + "\n"
+                }
+
+                VescIf.emitMessageDialog("Parameters truncated", notUpdated, false, false)
             }
         }
     }

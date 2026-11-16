@@ -1,16 +1,37 @@
-/* SPDX-License-Identifier: GPL-3.0-or-later */
+/*
+    Copyright 2026 Benjamin Vedder	benjamin@vedder.se
+
+    This file is part of VESC Tool.
+
+    VESC Tool is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    VESC Tool is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    */
+
 #include "ridesession.h"
-#include "../../vescinterface.h"
-#include "../LiveActivity/LiveActivityBridge.h"
+#include "../vescinterface.h"
+#include "ridebridge.h"
+#include "../utility.h"
 
 #include <QDateTime>
 #include <QGuiApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSettings>
 #include <cmath>
 
 namespace {
 const qint64 FreshnessMs = 5000;
+const int DisconnectGraceMs = 15000;
 
 double epochSeconds()
 {
@@ -41,10 +62,34 @@ RideSession::RideSession(VescInterface *vesc, QObject *parent)
     : QObject(parent), mVesc(vesc)
 {
     mClock.start();
+    mAutoStart = QSettings().value("rideDisplayOnConnect", true).toBool();
     mTimer.setInterval(1000);
     connect(&mTimer, &QTimer::timeout, this, [this]() { refresh(true); });
+    // Short link drops and auto reconnects keep the ride, and an ended ride stays ended
+    mEndTimer.setSingleShot(true);
+    mEndTimer.setInterval(DisconnectGraceMs);
+    connect(&mEndTimer, &QTimer::timeout, this, [this]() {
+        mEndedByUser = false;
+        mCanMotor = -1;
+        finish();
+    });
     connect(mVesc->commands(), &Commands::valuesSetupReceived, this, &RideSession::receiveValues);
-    connect(mVesc, &VescInterface::portConnectedChanged, this, [this]() { refresh(); });
+    connect(mVesc, &VescInterface::portConnectedChanged, this, [this]() {
+        if (mVesc->isPortConnected()) {
+            mEndTimer.stop();
+        } else {
+            mEndTimer.start();
+        }
+        refresh();
+    });
+    connect(mVesc, &VescInterface::fwRxChanged, this, [this](bool rx) {
+        if (rx) {
+            if (mActive) {
+                checkController();
+            }
+            startOnConnect();
+        }
+    });
     connect(mVesc, &VescInterface::useImperialUnitsChanged, this, [this]() {
         publish();
         emit changed();
@@ -53,6 +98,11 @@ RideSession::RideSession(VescInterface *vesc, QObject *parent)
     connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
         if (state == Qt::ApplicationActive) {
             refreshAvailability();
+            // Starting can fail while the app is in the background. Not retried while
+            // disabled, as returning from the permission prompt also activates the app.
+            if (mEnabled) {
+                startOnConnect();
+            }
         }
     });
     refreshAvailability();
@@ -85,6 +135,44 @@ int RideSession::elapsedSeconds() const
     return mActive ? int((mClock.elapsed() - mStartedMs) / 1000) : mElapsedAtEnd;
 }
 
+void RideSession::setAutoStart(bool autoStart)
+{
+    if (autoStart != mAutoStart) {
+        mAutoStart = autoStart;
+        QSettings().setValue("rideDisplayOnConnect", autoStart);
+        emit autoStartChanged();
+        startOnConnect();
+    }
+}
+
+void RideSession::startOnConnect()
+{
+    if (mAutoStart && !mActive && !mEndedByUser && mVesc->isPortConnected() && mVesc->fwRx() &&
+            (mCanMotor >= 0 || mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC)) {
+        start();
+    }
+}
+
+// Without a motor controller on the port, ride data comes from one on the CAN bus
+void RideSession::canMotorFound(int canId)
+{
+    if (mVesc->fwRx() && mVesc->getLastFwRxParams().hwType != HW_TYPE_VESC) {
+        mCanMotor = canId;
+        startOnConnect();
+    }
+}
+
+void RideSession::requestValues()
+{
+    if (mCanMotor >= 0) {
+        mVesc->canTmpOverride(true, mCanMotor);
+        mVesc->commands()->getValuesSetup();
+        mVesc->canTmpOverrideEnd();
+    } else {
+        mVesc->commands()->getValuesSetup();
+    }
+}
+
 void RideSession::refreshAvailability()
 {
     const bool enabled = vesc_live_activity_enabled();
@@ -100,12 +188,19 @@ bool RideSession::start()
     if (mActive) {
         return true;
     }
+#ifdef Q_OS_ANDROID
+    Utility::requestNotificationPermission();
+#endif
     refreshAvailability();
     mError.clear();
     if (!supported()) {
         mError = tr("The ride display requires iOS 18 or later.");
     } else if (!mEnabled) {
+#ifdef Q_OS_ANDROID
+        mError = tr("Allow notifications for VESC Tool in Android Settings.");
+#else
         mError = tr("Enable Live Activities for VESC Tool in iPhone Settings.");
+#endif
     } else if (!mVesc || !mVesc->isPortConnected() || !mVesc->fwRx()) {
         mError = tr("Connect to a VESC before starting a ride.");
     }
@@ -132,13 +227,14 @@ bool RideSession::start()
     mLastPayload = json;
     mTimer.start();
     // Keep sampling independently of the selected QML page or logging state.
-    mVesc->commands()->getValuesSetup();
+    requestValues();
     emit changed();
     return true;
 }
 
 void RideSession::end()
 {
+    mEndedByUser = true;
     finish();
 }
 
@@ -208,7 +304,8 @@ void RideSession::refresh(bool poll)
         return;
     }
     if (!vesc_live_activity_is_active()) {
-        finish(tr("The Live Activity was ended or dismissed."), false);
+        mEndedByUser = true;
+        finish(tr("The ride display was ended or dismissed."), false);
         return;
     }
     mConnected = mVesc && mVesc->isPortConnected();
@@ -220,7 +317,7 @@ void RideSession::refresh(bool poll)
             return;
         }
         if (poll) {
-            mVesc->commands()->getValuesSetup();
+            requestValues();
         }
     }
     publish();

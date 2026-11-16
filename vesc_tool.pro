@@ -156,6 +156,8 @@ android: {
     manifest.input = $$PWD/android/AndroidManifest.xml.in
     manifest.output = $$PWD/android/AndroidManifest.xml
     QMAKE_SUBSTITUTES += manifest
+
+    SOURCES += android/ridebridge.cpp
 }
 
 TEMPLATE = app
@@ -296,6 +298,7 @@ build_original {
 DISTFILES += \
     android/AndroidManifest.xml \
     android/src/com/vedder/vesc/VForegroundService.java \
+    android/src/com/vedder/vesc/RideService.java \
     android/src/com/vedder/vesc/Utils.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

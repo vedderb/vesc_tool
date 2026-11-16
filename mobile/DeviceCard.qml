@@ -29,7 +29,7 @@ Rectangle {
     signal canClicked()
     signal updateClicked()
     signal changesClicked()
-    readonly property bool hasMotorData: hwType === "VESC"
+    readonly property bool hasMotorData: hwType === "VESC" || canMotorId >= 0
 
     implicitHeight: column.implicitHeight + 28
     radius: 16
@@ -111,7 +111,8 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    text: [hwName.replace(/_/g, " ") !== connName ? "HW " + hwName : "", "FW " + fwVersion, connLink].filter(Boolean).join(" · ")
+                    text: [hwName.replace(/_/g, " ") !== connName ? "HW " + hwName : "", "FW " + fwVersion, connLink,
+                           hwType !== "VESC" && canMotorId >= 0 ? qsTr("motor on CAN %1").arg(canMotorId) : ""].filter(Boolean).join(" · ")
                     elide: Text.ElideRight
                     font.pointSize: 10
                     color: Utility.getAppHexColor("normalText")

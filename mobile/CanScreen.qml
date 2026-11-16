@@ -334,10 +334,12 @@ Item {
                                     "fw": fwString(params),
                                     "deviceIconPath": devicePath,
                                     "logoIconPath": logoPath})
+                var canMotor = -1
                 for (var i = 0;i < devs.length;i++) {
                     params = Utility.getFwVersionBlockingCan(VescIf, devs[i])
                     name = params.hw
                     if (params.hwTypeStr() === "VESC") { //is a motor
+                        canMotor = canMotor < 0 ? devs[i] : canMotor
                         devicePath = theme + "icons/motor_side.png"
                         if (params.fwName.length !== 0) {
                             name = params.hw + "-" + params.fwName
@@ -368,6 +370,8 @@ Item {
                 }
 
                 canList.currentIndex = 0
+
+                canMotorId = canMotor
 
                 if (!isTimeout) {
                     VescIf.emitStatusMessage("CAN Scan Finished", true)

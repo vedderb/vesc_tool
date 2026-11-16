@@ -32,7 +32,7 @@ SheetDialog {
 
     title: qsTr("Search")
     rejectText: ""
-    height: parent.height - notchTop - 40
+    fullHeight: true
     onOpened: field.forceActiveFocus()
     onClosed: field.text = ""
 

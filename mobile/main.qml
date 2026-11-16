@@ -31,8 +31,8 @@ import Vedder.vesc.utility 1.0
 import Vedder.vesc.vesc3ditem 1.0
 
 ApplicationWindow {
-    Material.background: Utility.getAppHexColor("darkBackground")
     id: appWindow
+    Material.background: Utility.getAppHexColor("darkBackground")
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mAppConf: VescIf.appConfig()
@@ -57,6 +57,8 @@ ApplicationWindow {
     property string connLink: ""
     property string hwName: ""
     property string hwType: ""
+    // First motor controller on CAN when the connected device is not one, from the CAN scan
+    property int canMotorId: -1
     property string fwVersion: ""
     property string fwLatest: ""
     readonly property bool fwUpdateAvailable: Number(fwLatest) > Number(fwVersion)
@@ -89,7 +91,7 @@ ApplicationWindow {
         var m = VescIf.getConnectedPortName().match(/^Connected (?:\((.*)\) )?to (.*?)(, limited mode)?$/)
         var bleName = m && m[1] === "BLE" ? VescIf.getBleName(VescIf.getLastBleAddr()) : ""
         connLink = m ? [m[1], m[3] ? qsTr("limited mode") : ""].filter(Boolean).join(" · ") : ""
-        connName = bleName !== "" ? bleName : m && m[1] && hwName !== "" ? hwName.replace(/_/g, " ") : m ? m[2] : ""
+        connName = bleName !== "" ? bleName : m && m[1] && hwName !== "" ? hwName.replace(/_/g, " ") : m ? m[2] : VescIf.getConnectedPortName()
     }
 
     // Routine messages flash in the status pill, problems keep it in a warning state until viewed
@@ -186,9 +188,15 @@ ApplicationWindow {
 
     readonly property var rideSession: rideDisplay.item ? rideDisplay.item.session : null
 
+    onCanMotorIdChanged: {
+        if (rideSession && canMotorId >= 0) {
+            rideSession.canMotorFound(canMotorId)
+        }
+    }
+
     Loader {
         id: rideDisplay
-        active: Qt.platform.os === "ios"
+        active: Qt.platform.os === "ios" || Qt.platform.os === "android"
         source: "RideDisplay.qml"
         onLoaded: item.connected = Qt.binding(function() {
             return appWindow.connected && appWindow.fwReadCorrectly
@@ -355,14 +363,14 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 visible: rideSession ? rideSession.supported : false
                 text: rideSession && rideSession.active ? qsTr("Ride in progress") : qsTr("Ride display")
-                flat: true
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Speed-96.png"
                 onClicked: {
                     drawer.close()
                     rideDisplay.item.open()
                 }
             }
 
-            Button {
+            ItemDelegate {
                 Layout.fillWidth: true
                 text: "Settings"
                 icon.source: "qrc" + Utility.getThemePath() + "icons/Settings-96.png"
@@ -1140,11 +1148,7 @@ ApplicationWindow {
 
                     if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex === 3) {
                         interval = 100
-                        if (rideSession && rideSession.active) {
-                            mCommands.getValuesSetup()
-                        } else {
-                            mCommands.getValuesSetupSelective(0x7E00)
-                        }
+                        mCommands.getValuesSetupSelective(0x7E00)
                         mCommands.getStats(0xFFFFFFFF)
                     }
 
@@ -1155,9 +1159,15 @@ ApplicationWindow {
 
                     // Slow update of the values shown in the footer and on the start page
                     if (mainSwipeView.currentItem != rtDataPage && mainSwipeView.currentItem != bmsPage &&
-                            hwType === "VESC" && VescIf.getFwUploadProgress() < 0) {
+                            (hwType === "VESC" || canMotorId >= 0) && VescIf.getFwUploadProgress() < 0) {
                         interval = 1000
-                        mCommands.getValuesSetupSelective(0x10183)
+                        if (hwType === "VESC") {
+                            mCommands.getValuesSetupSelective(0x10183)
+                        } else {
+                            VescIf.canTmpOverride(true, canMotorId)
+                            mCommands.getValuesSetupSelective(0x10183)
+                            VescIf.canTmpOverrideEnd()
+                        }
                     }
                 }
             }
@@ -1334,6 +1344,7 @@ ApplicationWindow {
                 fwReadCorrectly = false
                 hwName = ""
                 hwType = ""
+                canMotorId = -1
                 rtVin = 0
                 rtBattery = -1
                 faultText = ""
@@ -1633,7 +1644,6 @@ ApplicationWindow {
     SheetDialog {
         id: messageLog
         title: qsTr("Messages")
-        rejectText: qsTr("Close")
         onOpened: warnings = []
 
         ListView {
@@ -1883,7 +1893,6 @@ ApplicationWindow {
 
     SheetDialog {
         id: qmlLoadDialog
-        rejectText: "Cancel"
         acceptText: "Load"
         closePolicy: Popup.CloseOnEscape
         title: "Load Custom User Interface"

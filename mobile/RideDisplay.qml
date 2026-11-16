@@ -1,215 +1,120 @@
+/*
+    Copyright 2026 Benjamin Vedder	benjamin@vedder.se
+
+    This file is part of VESC Tool.
+
+    VESC Tool is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    VESC Tool is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    */
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
 import Vedder.vesc.utility 1.0
 
-Dialog {
+// Live ride data in the app, mirrored by the Live Activity (iOS) or the ride notification (Android)
+SheetDialog {
     id: dialog
-    parent: Overlay.overlay
     readonly property var session: RideSession
     property bool connected: false
     readonly property real distanceFactor: RideSession.useImperial ? 0.000621371192 : 0.001
-    readonly property string distanceUnit: RideSession.useImperial ? " mi" : " km"
+    readonly property string distanceUnit: RideSession.useImperial ? "mi" : "km"
     readonly property real speedFactor: RideSession.useImperial ? 2.236936292 : 3.6
-    readonly property color muted: Utility.getAppHexColor("normalText")
-    readonly property color ink: Utility.getAppHexColor("lightText")
     readonly property bool showRange: RideSession.active && RideSession.fresh && RideSession.estimatedRangeMeters >= 0
-    readonly property string elapsed: Math.floor(RideSession.elapsedSeconds / 3600).toString().padStart(2, "0") + ":" +
-                                      Math.floor((RideSession.elapsedSeconds % 3600) / 60).toString().padStart(2, "0") + ":" +
-                                      Math.floor(RideSession.elapsedSeconds % 60).toString().padStart(2, "0")
-    readonly property string notice: !RideSession.enabled ? qsTr("Allow Live Activities in Settings") :
+    readonly property string notice: !RideSession.enabled ? (Qt.platform.os === "android" ?
+                                                                 qsTr("Allow notifications for VESC Tool in Settings") :
+                                                                 qsTr("Allow Live Activities in Settings")) :
                                      RideSession.active && !RideSession.fresh ? qsTr("Waiting for connection") :
                                      RideSession.distanceIncomplete ? qsTr("Distance may be incomplete") :
                                      !RideSession.active && !connected ? qsTr("Connect to start") : ""
 
-    modal: true
-    focus: true
-    padding: 0
-    width: Math.min(parent ? parent.width - 32 : 360, 380)
-    height: Math.min(implicitHeight, parent ? parent.height - 32 : implicitHeight)
-    x: parent ? (parent.width - width) / 2 : 0
-    y: parent ? (parent.height - height) / 2 : 0
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    header: null
-    footer: null
-    background: Rectangle { radius: 8; color: "transparent" }
+    title: qsTr("Ride")
+    acceptText: RideSession.active ? qsTr("End ride") : connected && RideSession.enabled ? qsTr("Start ride") : ""
+    rejectText: qsTr("Close")
     onOpened: RideSession.refreshAvailability()
-    Overlay.modal: Rectangle { color: "#AA000000" }
+    onAccepted: {
+        if (RideSession.active) {
+            RideSession.end()
+        } else {
+            // Stay open to show the ride, or why it could not start
+            RideSession.start()
+            open()
+        }
+    }
 
-    contentItem: Rectangle {
-        implicitHeight: panel.implicitHeight + 40
-        color: Utility.getAppHexColor("darkBackground")
-        radius: 8
-        border.color: Utility.getAppHexColor("lightBackground")
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 12
 
-        ScrollView {
-            id: scroll
-            anchors.fill: parent
-            anchors.margins: 20
-            contentWidth: availableWidth
-            clip: true
+        Text {
+            Layout.alignment: Qt.AlignRight
+            text: new Date(RideSession.elapsedSeconds * 1000).toISOString().substr(11, 8)
+            font.features: { "tnum": 1 }
+            color: Utility.getAppHexColor("normalText")
+        }
 
-            ColumnLayout {
-                id: panel
-                width: scroll.availableWidth
-                spacing: 18
+        Text {
+            Layout.fillWidth: true
+            text: RideSession.active && RideSession.fresh ?
+                      (RideSession.speedMps * dialog.speedFactor).toFixed(0) : "\u2014"
+            horizontalAlignment: Text.AlignHCenter
+            font.pointSize: 54
+            font.weight: Font.Medium
+            font.features: { "tnum": 1 }
+            color: Utility.getAppHexColor(RideSession.fresh ? "titleText" : "normalText")
+            Accessible.name: qsTr("Speed") + ": " + text
+        }
 
-                RowLayout {
+        Text {
+            Layout.fillWidth: true
+            Layout.topMargin: -12
+            text: RideSession.useImperial ? "mph" : "km/h"
+            horizontalAlignment: Text.AlignHCenter
+            font.capitalization: Font.AllUppercase
+            color: Utility.getAppHexColor("normalText")
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+
+            Repeater {
+                model: [[qsTr("Trip"), (RideSession.distanceIncomplete ? "\u2265 " : "") +
+                         (RideSession.distanceMeters * dialog.distanceFactor).toFixed(2), dialog.distanceUnit],
+                        [qsTr("Battery"), RideSession.fresh && RideSession.batteryLevel >= 0 ?
+                             Math.round(RideSession.batteryLevel * 100) : "\u2014", "%"],
+                        [qsTr("Est. Range"), (RideSession.estimatedRangeMeters * dialog.distanceFactor).toFixed(1),
+                         dialog.distanceUnit]]
+
+                ValueTile {
                     Layout.fillWidth: true
-                    spacing: 8
-                    Image {
-                        Layout.preferredWidth: 18
-                        Layout.preferredHeight: 18
-                        source: "../res/icons/v_icon-256.png"
-                        fillMode: Image.PreserveAspectFit
-                        opacity: 0.86
-                    }
-                    Label {
-                        text: qsTr("RIDE")
-                        font.pixelSize: 13
-                        font.bold: true
-                        font.letterSpacing: 2
-                        color: dialog.ink
-                    }
-                    Item { Layout.fillWidth: true }
-                    Label {
-                        text: dialog.elapsed
-                        font.pixelSize: 13
-                        color: dialog.muted
-                    }
-                    ToolButton {
-                        text: "×"
-                        implicitWidth: 36
-                        implicitHeight: 36
-                        font.pixelSize: 24
-                        Accessible.name: qsTr("Close ride panel")
-                        onClicked: dialog.close()
-                        contentItem: Label {
-                            text: parent.text
-                            font: parent.font
-                            color: dialog.muted
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        background: Item {}
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: -4
-                    Label {
-                        Layout.fillWidth: true
-                        text: RideSession.active && RideSession.fresh ?
-                                  (Math.abs(RideSession.speedMps) * dialog.speedFactor).toFixed(0) : "—"
-                        font.pixelSize: 76
-                        font.family: "Roboto"
-                        font.weight: Font.Normal
-                        color: RideSession.fresh ? dialog.ink : dialog.muted
-                        horizontalAlignment: Text.AlignHCenter
-                        Accessible.name: qsTr("Speed") + ": " + text
-                    }
-                    Label {
-                        Layout.fillWidth: true
-                        text: RideSession.useImperial ? "mph" : "km/h"
-                        font.pixelSize: 14
-                        font.family: "Roboto"
-                        font.capitalization: Font.AllUppercase
-                        color: dialog.muted
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: 1
-                    color: Utility.getAppHexColor("lightBackground")
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 16
-                    Repeater {
-                        model: [
-                            {label: qsTr("TRIP"), value: (RideSession.distanceIncomplete ? "≥ " : "") +
-                                (RideSession.distanceMeters * dialog.distanceFactor).toFixed(2) + dialog.distanceUnit},
-                            {label: qsTr("BATTERY"), value: RideSession.fresh && RideSession.batteryLevel >= 0 ?
-                                Math.round(RideSession.batteryLevel * 100) + "%" : "—"},
-                            {label: qsTr("EST. RANGE"), value:
-                                (RideSession.estimatedRangeMeters * dialog.distanceFactor).toFixed(1) + dialog.distanceUnit}
-                        ]
-                        delegate: ColumnLayout {
-                            visible: index < 2 || dialog.showRange
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 1
-                            Layout.minimumWidth: 0
-                            spacing: 4
-                            property int alignment: index === 0 ? Text.AlignLeft :
-                                                    index === 1 && dialog.showRange ? Text.AlignHCenter : Text.AlignRight
-                            Label {
-                                Layout.fillWidth: true
-                                horizontalAlignment: parent.alignment
-                                text: modelData.label
-                                font.pixelSize: 10
-                                font.letterSpacing: 1
-                                color: dialog.muted
-                            }
-                            Label {
-                                Layout.fillWidth: true
-                                horizontalAlignment: parent.alignment
-                                text: modelData.value
-                                font.pixelSize: dialog.showRange ? 20 : 22
-                                fontSizeMode: Text.Fit
-                                minimumPixelSize: 14
-                                color: dialog.ink
-                            }
-                        }
-                    }
-                }
-
-                Label {
-                    Layout.fillWidth: true
-                    text: dialog.notice
-                    visible: text.length > 0
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: 12
-                    color: dialog.muted
-                    horizontalAlignment: Text.AlignHCenter
-                }
-
-                Label {
-                    Layout.fillWidth: true
-                    text: RideSession.error
-                    visible: text.length > 0
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: 12
-                    color: dialog.ink
-                }
-
-                Button {
-                    id: rideButton
-                    Layout.fillWidth: true
-                    implicitHeight: 46
-                    text: RideSession.active ? qsTr("End Ride") : qsTr("Start Ride")
-                    enabled: RideSession.active || (dialog.connected && RideSession.enabled)
-                    onClicked: RideSession.active ? RideSession.end() : RideSession.start()
-                    contentItem: Label {
-                        text: rideButton.text
-                        color: rideButton.enabled ? dialog.ink : dialog.muted
-                        font.pixelSize: 15
-                        font.weight: Font.Medium
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                    background: Rectangle {
-                        radius: 4
-                        color: rideButton.down ? Utility.getAppHexColor("lightestBackground") :
-                               RideSession.active || !rideButton.enabled ? Utility.getAppHexColor("lightBackground") :
-                               Utility.getAppHexColor("darkAccent")
-                    }
+                    Layout.preferredWidth: 1
+                    visible: index < 2 || dialog.showRange
+                    title: modelData[0]
+                    value: modelData[1]
+                    unit: modelData[2]
                 }
             }
+        }
+
+        Text {
+            Layout.fillWidth: true
+            visible: text !== ""
+            text: RideSession.error !== "" ? RideSession.error : dialog.notice
+            wrapMode: Text.WordWrap
+            horizontalAlignment: Text.AlignHCenter
+            color: Utility.getAppHexColor(RideSession.error !== "" ? "dangerText" : "normalText")
         }
     }
 }

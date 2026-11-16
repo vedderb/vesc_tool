@@ -946,7 +946,7 @@ Item {
         id: resultDialog
         acceptText: qsTr("OK")
         rejectText: ""
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         ScrollView {
             anchors.fill: parent

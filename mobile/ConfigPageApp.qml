@@ -40,7 +40,6 @@ Item {
 
     SheetDialog {
         id: ppmMap
-        rejectText: qsTr("Close")
         title: "PPM Mapping"
 
         PpmMap {
@@ -50,7 +49,6 @@ Item {
 
     SheetDialog {
         id: adcMap
-        rejectText: qsTr("Close")
         title: "ADC Mapping"
 
         AdcMap {
@@ -60,7 +58,6 @@ Item {
 
     SheetDialog {
         id: nrfPair
-        rejectText: qsTr("Close")
         title: "NRF Pairing"
 
         NrfPair {
@@ -74,7 +71,7 @@ Item {
 
     function addSeparator(text) {
         var e = editors.createSeparator(scrollCol, text)
-        e.Layout.columnSpan = isHorizontal ? 2 : 1
+        e.Layout.columnSpan = Qt.binding(function() { return scrollCol.columns })
     }
 
     function destroyEditors() {

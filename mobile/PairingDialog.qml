@@ -49,7 +49,7 @@ Item {
         id: dialog
         title: qsTr("Paired VESCs")
         rejectText: ""
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         ColumnLayout {
             anchors.fill: parent
@@ -73,13 +73,14 @@ Item {
                 focus: true
                 clip: true
 
+                spacing: 5
+
                 Text {
                     anchors.centerIn: parent
                     visible: pairModel.count === 0
                     text: qsTr("No paired VESCs")
                     color: Utility.getAppHexColor("disabledText")
                 }
-                spacing: 5
 
                 Component {
                     id: pairDelegate
@@ -297,7 +298,7 @@ Item {
         acceptText: qsTr("Add")
         title: "Add UUID"
 
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         Rectangle {
             anchors.fill: parent

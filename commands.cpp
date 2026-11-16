@@ -553,16 +553,10 @@ void Commands::processPacket(QByteArray data)
     } break;
 
     case COMM_SET_MCCONF_TEMP:
-        if (mMcConfig) {
-            mMcConfig->storeReference();
-        }
         emit ackReceived("COMM_SET_MCCONF_TEMP Write OK");
         break;
 
     case COMM_SET_MCCONF_TEMP_SETUP:
-        if (mMcConfig) {
-            mMcConfig->storeReference();
-        }
         emit ackReceived("COMM_SET_MCCONF_TEMP_SETUP Write OK");
         break;
 

@@ -47,7 +47,7 @@ Item {
     function appendOutput(str, color) {
         for (var line of str.split("\n")) {
             var html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-            terminalText.append("<pre style='margin:0; white-space:pre-wrap'>" + (color ? "<font color='" + color + "'>" + html + "</font>" :
+            terminalText.append("<pre style='margin:0'>" + (color ? "<font color='" + color + "'>" + html + "</font>" :
                                                                      formatLine(html)) + "</pre>")
         }
     }
@@ -82,14 +82,16 @@ Item {
                 id: scroll
                 anchors.fill: parent
                 anchors.margins: 4
-                contentWidth: availableWidth
+                // At least as wide as the view, so short output leaves sideways swipes to the page swiper
+                contentWidth: Math.max(terminalText.implicitWidth, availableWidth)
                 clip: true
 
                 TextArea {
                     id: terminalText
                     width: parent.width
                     readOnly: true
-                    wrapMode: TextEdit.Wrap
+                    selectByMouse: Qt.platform.os !== "ios" && Qt.platform.os !== "android"
+                    rightPadding: 48
                     textFormat: TextEdit.RichText
                     font.family: "DejaVu Sans Mono"
                     font.pointSize: 10

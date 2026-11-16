@@ -97,6 +97,8 @@ Item {
             focus: true
             clip: true
 
+            spacing: 5
+
             Text {
                 anchors.centerIn: parent
                 width: parent.width - 40
@@ -106,7 +108,6 @@ Item {
                 text: qsTr("No packages loaded. Update the archive to download the package list.")
                 color: Utility.getAppHexColor("disabledText")
             }
-            spacing: 5
 
             Component {
                 id: pkgDelegate

@@ -115,8 +115,7 @@ Item {
 
     SheetDialog {
         id: dialog
-        rejectText: qsTr("Close")
-        height: parent.height - notchTop - 40
+        fullHeight: true
 
         ScrollView {
             anchors.fill: parent

@@ -73,7 +73,6 @@ Item {
         id: dialog
         parent: dialogParent
         title: "Controls"
-        rejectText: qsTr("Close")
         modal: false
         closePolicy: Popup.CloseOnEscape
         background.opacity: opacitySlider.value
@@ -225,7 +224,7 @@ Item {
                     Button {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 100
-                    Layout.preferredHeight: 56
+                        Layout.preferredHeight: 56
                         visible: mode.brake !== ""
                         text: mode.brake
                         onPressedChanged: hold(pressed, () => mode.stop(value))
@@ -234,7 +233,7 @@ Item {
                     Button {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 100
-                    Layout.preferredHeight: 56
+                        Layout.preferredHeight: 56
                         text: "Release"
                         Material.background: Qt.darker(Utility.getAppHexColor("danger"), 1.2)
                         Material.foreground: Utility.getAppHexColor("white")

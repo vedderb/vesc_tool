@@ -536,6 +536,17 @@ Item {
             footer: ColumnLayout {
                 width: bleList.width
 
+                Text {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 6
+                    visible: bleList.count > 0
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                    font.pointSize: 9
+                    color: Utility.getAppHexColor("normalText")
+                    text: qsTr("Long-press a device to Set Name (Bluetooth) or Update Password (TCP hub)")
+                }
+
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.topMargin: 10

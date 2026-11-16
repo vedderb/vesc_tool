@@ -46,6 +46,10 @@ Button {
         writeRequested()
     }
 
+    function review() {
+        reviewSheet.open()
+    }
+
     function revert(list) {
         for (var i = 0;i < list.length;i++) {
             params.updateParamFromOther(list[i][0], list[i][1], null)

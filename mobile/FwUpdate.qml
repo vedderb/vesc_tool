@@ -460,7 +460,7 @@ Item {
                             spacing: 2
 
                             Text {
-                                text: qsTr("Include CAN devices")
+                                text: qsTr("Upload All: include CAN devices")
                                 color: Utility.getAppHexColor("titleText")
                             }
 
@@ -570,6 +570,16 @@ Item {
                 onClicked: {
                     VescIf.fwUploadCancel()
                 }
+            }
+
+            Button {
+                text: qsTr("Back up configs")
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                visible: !cancelButton.visible
+                enabled: connected && backupConfButton.enabled
+                flat: true
+                onClicked: backupConfigDialog.open()
             }
 
             Button {
@@ -703,7 +713,7 @@ Item {
             return
         }
 
-        var msg = "CAREFUL: If you continue you will lose your package and all settings, are you sure "
+        var msg = "CAREFUL: If you continue you will lose your package and all settings, are you sure " +
                   "you know what you're doing?\n\n" +
                   "This will upload new firmware to the connected device"
         var msgBl = "You are about to upload a bootloader to the connected device"
@@ -714,6 +724,8 @@ Item {
                     "WARNING: The upload all function should ONLY be used if all " +
                     "devices on the CAN-bus have the same hardware version. If that " +
                     "is not the case, you must upload firmware to the devices individually."
+        } else if (VescIf.getCanDevsLast().length > 0) {
+            msgEnd = ". The other devices on the CAN-bus are not included."
         }
 
         msg += msgEnd
@@ -739,8 +751,8 @@ Item {
                 if (VescIf.getFwSupportsConfiguration()) {
                     msg += "\n\n" +
                             "Uploading new firmware will clear all settings in the VESC firmware. You can make " +
-                            "a backup of the settings from the connection page and restore them after the " +
-                            "update if you'd like (if you haven't done the backup already). " +
+                            "a backup of the settings with Back up configs and restore them from the start page " +
+                            "after the update if you'd like (if you haven't done the backup already). " +
                             "Do you want to continue with the update, or cancel and do the backup first?"
                 } else {
                     msg += "\n\n" +

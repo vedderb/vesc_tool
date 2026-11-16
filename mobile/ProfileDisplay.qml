@@ -105,26 +105,13 @@ Item {
 
                 Button {
                     text: qsTr("Apply")
-                    onClicked: applyMenu.open()
-
-                    PopupMenu {
-                        id: applyMenu
-
-                        MenuItem {
-                            text: "Use until reboot"
-                            onTriggered: {
-                                mCommands.setMcconfTemp(VescIf.getProfile(index),
-                                                        true, false, true, false, true)
-                                VescIf.updateMcconfFromProfile(VescIf.getProfile(index))
-                            }
-                        }
-
-                        MenuItem {
-                            text: "Use permanently"
-                            onTriggered: {
-                                permanentDialog.open()
-                            }
-                        }
+                    onClicked: {
+                        mCommands.setMcconfTemp(VescIf.getProfile(index),
+                                                true, false, true, false, true)
+                        VescIf.updateMcconfFromProfile(VescIf.getProfile(index))
+                        showToast(qsTr("Applied until reboot"), name, "ok", qsTr("Use permanently"), function() {
+                            permanentDialog.open()
+                        })
                     }
                 }
 
@@ -135,6 +122,13 @@ Item {
 
                     PopupMenu {
                         id: profileMenu
+
+                        MenuItem {
+                            text: "Use permanently"
+                            onTriggered: {
+                                permanentDialog.open()
+                            }
+                        }
 
                         MenuItem {
                             text: "Edit"

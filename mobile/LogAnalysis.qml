@@ -474,7 +474,7 @@ Item {
     property int currentIndex: 0
     property int viewStart: 0
     property int viewEnd: 0
-    property string statusText: "Click 'Open CSV Log' to load a VESC log file."
+    property string statusText: "Open a log from the File menu."
     property bool comboOpen: false
     property bool followMap: true
 

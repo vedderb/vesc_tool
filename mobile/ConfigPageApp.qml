@@ -86,6 +86,10 @@ Item {
         e.Layout.fillsWidth = true
     }
 
+    function review() {
+        writeButton.review()
+    }
+
     function jumpTo(group, subgroup, name) {
         pageBox.currentIndex = pageBox.find(group)
         tabBox.currentIndex = tabBox.model.indexOf(subgroup)
@@ -178,6 +182,7 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             WriteButton {
+                id: writeButton
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
                 tracker: appTracker

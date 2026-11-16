@@ -118,7 +118,7 @@ Item {
             id: rtLogEnBox
             text: "Enable RT Data Logging"
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: 2
 
             focusPolicy: Qt.NoFocus
 
@@ -141,7 +141,7 @@ Item {
                         VescIf.emitMessageDialog("Logging Started",
                                                  "Motor data together with your location is now being logged to:\n\n" +
                                                  VescIf.rtLogFilePath() + "\n\n" +
-                                                 "You can connect your device to a computer and transfer the file to it for " +
+                                                 "You can open it in LogView, or transfer the file to a computer for " +
                                                  "analysis in the desktop version of VESC Tool (under Data Analysis->Log Analysis).",
                                                  true, false)
                     } else {
@@ -174,6 +174,18 @@ Item {
 
                     rtLogEnBox.checked = VescIf.isRtLogOpen()
                 }
+            }
+        }
+
+        Button {
+            text: qsTr("Open in LogView")
+            Layout.fillWidth: true
+            flat: true
+            focusPolicy: Qt.NoFocus
+
+            onClicked: {
+                mainSwipeView.setCurrentIndex(logViewPage.SwipeView.index)
+                logViewLoader.item.openRtLogBrowser()
             }
         }
     }

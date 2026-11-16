@@ -162,15 +162,6 @@ Item {
                     }
 
                     SettingSwitch {
-                        visible: rideSession !== null && rideSession.supported
-                        text: qsTr("Ride display on connect")
-                        hint: Qt.platform.os === "android" ? qsTr("Notification with speed, battery and trip") :
-                                                             qsTr("Live Activity with speed, battery and trip")
-                        checked: rideSession !== null && rideSession.autoStart
-                        onToggled: rideSession.autoStart = checked
-                    }
-
-                    SettingSwitch {
                         id: screenRotBox
                         text: "Allow Screen Rotation"
                         checked: VescIf.getAllowScreenRotation()
@@ -194,6 +185,15 @@ Item {
                         id: scanCanConnectBox
                         text: "Scan CAN on connect"
                         checked: VescIf.scanCanOnConnect()
+                    }
+
+                    SettingSwitch {
+                        visible: rideSession !== null && rideSession.supported
+                        text: qsTr("Ride display on connect")
+                        hint: Qt.platform.os === "android" ? qsTr("Notification with speed, battery and trip") :
+                                                             qsTr("Live Activity with speed, battery and trip")
+                        checked: rideSession !== null && rideSession.autoStart
+                        onToggled: rideSession.autoStart = checked
                     }
                 }
 

@@ -96,7 +96,8 @@ ApplicationWindow {
     function updateConnectionInfo() {
         var m = VescIf.getConnectedPortName().match(/^Connected (?:\((.*)\) )?to (.*?)(, limited mode)?$/)
         var bleName = m && m[1] === "BLE" ? VescIf.getBleName(VescIf.getLastBleAddr()) : ""
-        connLink = m ? [m[1], m[3] ? qsTr("limited mode") : ""].filter(Boolean).join(" · ") : ""
+        connLink = m ? [m[1], mCommands.getSendCan() ? "CAN " + mCommands.getCanSendId() : "",
+                        m[3] ? qsTr("limited mode") : ""].filter(Boolean).join(" · ") : ""
         connName = bleName !== "" ? bleName : m && m[1] && hwName !== "" ? hwName.replace(/_/g, " ") : m ? m[2] : VescIf.getConnectedPortName()
     }
 
@@ -135,6 +136,12 @@ ApplicationWindow {
         } else {
             VescIf.disconnectPort()
         }
+    }
+
+    function reviewChanges(page) {
+        var loader = page === confPageMotor ? confMotorLoader : confAppLoader
+        mainSwipeView.setCurrentIndex(page.SwipeView.index)
+        loader.item.review()
     }
 
     function timeAgo(time) {
@@ -192,21 +199,13 @@ ApplicationWindow {
         dialogParent: mainSwipeView
     }
 
-    readonly property var rideSession: rideDisplay.item ? rideDisplay.item.session : null
+    // Feeds the Live Activity (iOS) or the ride notification (Android)
+    readonly property var rideSession: Qt.platform.os === "ios" || Qt.platform.os === "android" ? RideSession : null
 
     onCanMotorIdChanged: {
         if (rideSession && canMotorId >= 0) {
             rideSession.canMotorFound(canMotorId)
         }
-    }
-
-    Loader {
-        id: rideDisplay
-        active: Qt.platform.os === "ios" || Qt.platform.os === "android"
-        source: "RideDisplay.qml"
-        onLoaded: item.connected = Qt.binding(function() {
-            return appWindow.connected && appWindow.fwReadCorrectly
-        })
     }
 
     Controls {
@@ -367,12 +366,11 @@ ApplicationWindow {
 
             ItemDelegate {
                 Layout.fillWidth: true
-                visible: rideSession ? rideSession.supported : false
-                text: rideSession && rideSession.active ? qsTr("Ride in progress") : qsTr("Ride display")
-                icon.source: "qrc" + Utility.getThemePath() + "icons/Speed-96.png"
+                text: qsTr("Messages")
+                icon.source: "qrc" + Utility.getThemePath() + "icons_textedit/Bulleted List-96.png"
                 onClicked: {
                     drawer.close()
-                    rideDisplay.item.open()
+                    messageLog.open()
                 }
             }
 
@@ -640,7 +638,9 @@ ApplicationWindow {
         }
 
         Page {
+            id: terminalPage
             Loader {
+                id: terminalLoader
                 anchors.fill: parent
                 asynchronous: true
                 visible: status == Loader.Ready
@@ -665,7 +665,9 @@ ApplicationWindow {
         }
 
         Page {
+            id: logViewPage
             Loader {
+                id: logViewLoader
                 anchors.fill: parent
                 asynchronous: true
                 visible: status == Loader.Ready
@@ -1608,7 +1610,7 @@ ApplicationWindow {
             if (count > 0) {
                 showToast(qsTr("%1 unwritten in %2").arg(count).arg(page === confPageMotor ? "Motor Cfg" : "App Cfg"),
                           "", "warn", qsTr("Review"), function() {
-                              mainSwipeView.setCurrentIndex(page.SwipeView.index)
+                              reviewChanges(page)
                           })
             }
 
@@ -1810,16 +1812,29 @@ ApplicationWindow {
                 color: Utility.getAppHexColor("normalText")
             }
 
-            Button {
-                Layout.alignment: Qt.AlignLeft
-                flat: true
-                text: qsTr("Copy diagnostics")
-                icon.source: "qrc" + Utility.getThemePath() + "icons_textedit/Copy-96.png"
-                onClicked: {
-                    clipboardHelper.text = connectionSheet.diagnostics()
-                    clipboardHelper.selectAll()
-                    clipboardHelper.copy()
-                    showToast(qsTr("Diagnostics copied"), "", "info")
+            RowLayout {
+                Button {
+                    flat: true
+                    text: qsTr("Copy diagnostics")
+                    icon.source: "qrc" + Utility.getThemePath() + "icons_textedit/Copy-96.png"
+                    onClicked: {
+                        clipboardHelper.text = connectionSheet.diagnostics()
+                        clipboardHelper.selectAll()
+                        clipboardHelper.copy()
+                        showToast(qsTr("Diagnostics copied"), "", "info")
+                    }
+                }
+
+                Button {
+                    flat: true
+                    visible: tabBar.enabled
+                    text: qsTr("Fault log")
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Console-96.png"
+                    onClicked: {
+                        connectionSheet.close()
+                        mainSwipeView.setCurrentIndex(terminalPage.SwipeView.index)
+                        terminalLoader.item.send("faults")
+                    }
                 }
             }
         }

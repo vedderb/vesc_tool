@@ -38,6 +38,10 @@ Item {
     property int notchTop: 0
     property string lastDeviceAddr: ""
 
+    function showToast(text, detail) {
+        VescIf.emitStatusMessage(text + ": " + detail, true)
+    }
+
     function setupMotors() {
         if (!VescIf.isPortConnected()) {
             VescIf.emitMessageDialog("Setup motors FOC",

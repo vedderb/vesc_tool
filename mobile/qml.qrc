@@ -76,7 +76,6 @@
         <file>PopupMenu.qml</file>
         <file>PageHeader.qml</file>
         <file>BusyDialog.qml</file>
-        <file>RideDisplay.qml</file>
         <file>InputBackground.qml</file>
         <file>InputField.qml</file>
     </qresource>

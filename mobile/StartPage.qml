@@ -20,6 +20,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import QtCore as Core
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.bleuart 1.0
@@ -71,7 +72,7 @@ Item {
                     onDisconnectClicked: requestDisconnect()
                     onCanClicked: canDrawerLoader.item.open()
                     onUpdateClicked: firmwareDialog.open()
-                    onChangesClicked: mainSwipeView.setCurrentIndex((mcTracker.changedParams.length > 0 ? confPageMotor : confPageApp).SwipeView.index)
+                    onChangesClicked: reviewChanges(mcTracker.changedParams.length > 0 ? confPageMotor : confPageApp)
                 }
 
                 Button {
@@ -140,23 +141,6 @@ Item {
                     rowSpacing: 8
 
                     ImageButton {
-                        id: nrfPairButton
-                        visible: !nrfPair.visible
-                        Layout.fillWidth: true
-                        Layout.preferredWidth: 500
-                        Layout.preferredHeight: 62
-
-                        buttonText: "VESC Remote Quick Pair"
-                        hintText: qsTr("NRF remotes")
-                        locked: !connected
-                        imageSrc: "qrc" + Utility.getThemePath() + "icons/icons8-fantasy-96.png"
-
-                        onClicked: {
-                            nrfPairStartDialog.open()
-                        }
-                    }
-
-                    ImageButton {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 500
                         Layout.preferredHeight: 62
@@ -203,6 +187,23 @@ Item {
 
                         onClicked: {
                             wizardIMU.openDialog()
+                        }
+                    }
+
+                    ImageButton {
+                        id: nrfPairButton
+                        visible: !nrfPair.visible
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 500
+                        Layout.preferredHeight: 62
+
+                        buttonText: "VESC Remote Quick Pair"
+                        hintText: qsTr("NRF remotes")
+                        locked: !connected
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/icons8-fantasy-96.png"
+
+                        onClicked: {
+                            nrfPairStartDialog.open()
                         }
                     }
 
@@ -398,6 +399,7 @@ Item {
             }
 
             CollapsibleSection {
+                id: hubSection
                 title: qsTr("TCP Hub (Internet Bridge)")
                 iconSource: "qrc" + Utility.getThemePath() + "icons/Globe-96.png"
                 Layout.bottomMargin: isHorizontal ? 0 : 10
@@ -407,6 +409,13 @@ Item {
                 }
             }
         }
+    }
+
+    Core.Settings {
+        category: "startPage"
+        property alias logOpen: logSection.open
+        property alias tcpOpen: tcpSection.open
+        property alias hubOpen: hubSection.open
     }
 
     // Card that shows a status line and expands to show its content
@@ -486,7 +495,7 @@ Item {
 
     SheetDialog {
         id: directionSetupDialog
-        title: "Direction Setup"
+        title: "Invert Motor Directions"
 
         DirectionSetup {
             id: directionSetup

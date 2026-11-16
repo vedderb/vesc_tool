@@ -59,7 +59,7 @@ Item {
 
     SheetDialog {
         id: directionSetupDialog
-        title: "Direction Setup"
+        title: "Invert Motor Directions"
 
         DirectionSetup {
             id: directionSetup
@@ -121,6 +121,10 @@ Item {
         var e = editors.createEditorMc(scrollCol, param)
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
+    }
+
+    function review() {
+        writeButton.review()
     }
 
     function jumpTo(group, subgroup, name) {
@@ -214,6 +218,7 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             WriteButton {
+                id: writeButton
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
                 tracker: mcTracker
@@ -285,10 +290,22 @@ Item {
                         }
                     }
                     MenuItem {
-                        text: "Setup Motor Directions..."
+                        text: "Invert Motor Directions..."
                         onTriggered: {
                             directionSetupDialog.open()
                             directionSetup.scanCan()
+                        }
+                    }
+                    MenuItem {
+                        text: "Multi Settings..."
+                        onTriggered: {
+                            multiSettings.openDialog()
+                        }
+                    }
+                    MenuItem {
+                        text: "Controls..."
+                        onTriggered: {
+                            controls.openDialog()
                         }
                     }
                     MenuItem {

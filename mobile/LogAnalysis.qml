@@ -808,6 +808,7 @@ Item {
         refreshRanges()
         updateStatusSummary()
         if (fitMap && hasGps) fitRouteBounds()
+        computeZoomedStats()
     }
 
     function zoomAroundCursor(factor) {
@@ -917,11 +918,23 @@ Item {
         return { delim: delim, cols: cols, names: names }
     }
 
-    function findColIdx(cols, candidates) {
+    function findColKeyIdx(colsOrCandidates, maybeCandidates) {
+        var cols = maybeCandidates ? colsOrCandidates : columnMeta
+        var candidates = maybeCandidates ? maybeCandidates : colsOrCandidates
+        if (!cols || !candidates) return -1
+
         for (var c = 0; c < candidates.length; c++) {
-            var t = candidates[c].toLowerCase()
+            var target = String(candidates[c]).toLowerCase()
             for (var i = 0; i < cols.length; i++) {
-                if (cols[i].key === t || cols[i].label.toLowerCase() === t) return i
+                var item = cols[i]
+                if (!item) continue
+                if (typeof item === "string") {
+                    if (item.toLowerCase() === target) return i
+                } else {
+                    var k = (typeof item.key === "string") ? item.key.toLowerCase() : ""
+                    var lbl = (typeof item.label === "string") ? item.label.toLowerCase() : ""
+                    if (k === target || lbl === target) return i
+                }
             }
         }
         return -1
@@ -966,8 +979,8 @@ Item {
         loadedDataLines = cleanLines
 
         var meta = parseHeaderMeta(loadedHeaderLine)
-        var latIdx = findColIdx(meta.cols, ["gnss_lat", "lat", "latitude"])
-        var lonIdx = findColIdx(meta.cols, ["gnss_lon", "lon", "lng", "longitude"])
+        var latIdx = findColKeyIdx(meta.cols, ["gnss_lat", "lat", "latitude"])
+        var lonIdx = findColKeyIdx(meta.cols, ["gnss_lon", "lon", "lng", "longitude"])
 
         // Pass 1: Parse values and collect unique GPS fixes (collapsing repeated coordinates)
         var rawParsed = []
@@ -1069,10 +1082,10 @@ Item {
         zoomRange.first.value = 0
         zoomRange.second.value = rows.length - 1
         updateVisibleRoute()
-        var d0 = findColIdx(meta.cols, ["gnss_h_vel", "speed_meters_per_sec", "impeller rpm", "m1 erpm"])
-        var d1 = findColIdx(meta.cols, ["bms current in", "m1 current in", "current_in", "impeller power"])
-        var d2 = findColIdx(meta.cols, ["m1 current", "current_motor", "jet temp gearbox"])
-        var d3 = findColIdx(meta.cols, ["voltage in", "input_voltage", "bms soc"])
+        var d0 = findColKeyIdx(meta.cols, ["gnss_h_vel", "speed_meters_per_sec", "impeller rpm", "m1 erpm"])
+        var d1 = findColKeyIdx(meta.cols, ["bms current in", "m1 current in", "current_in", "impeller power"])
+        var d2 = findColKeyIdx(meta.cols, ["m1 current", "current_motor", "jet temp gearbox"])
+        var d3 = findColKeyIdx(meta.cols, ["voltage in", "input_voltage", "bms soc"])
         var maxIdx = Math.max(0, meta.cols.length - 1)
         slotColIdx = [
                     d0 !== -1 ? d0 : 0,
@@ -1083,6 +1096,7 @@ Item {
         refreshRanges()
         updateStatusSummary()
         if (hasGps) fitRouteBounds()
+        computeZoomedStats()
     }
 
     function latestSlotVal(slot) {
@@ -1101,6 +1115,140 @@ Item {
         if (!r || r.rawMin === null || r.rawMax === null) return "Min: -  Max: -"
         return "Min: " + r.rawMin.toFixed(1) + "  Max: " + r.rawMax.toFixed(1)
     }
+
+    property var zoomedStats: []
+    property bool showMapStats: true
+
+    function computeZoomedStats() {
+        if (rawRows.length === 0) {
+            zoomedStats = []
+            return
+        }
+
+        var s = Math.max(0, Math.min(viewStart, rawRows.length - 1))
+        var e = Math.max(s, Math.min(viewEnd, rawRows.length - 1))
+        var rStart = rawRows[s]
+        var rEnd = rawRows[e]
+        var items = []
+
+        // 1. Samples
+        items.push({ label: "Samples", value: (e - s + 1) + " / " + rawRows.length })
+
+        // 2. Distance (GPS cumulative distance, tacho_meters, or trip_vesc)
+        var gpsDistM = (rEnd.distance || 0) - (rStart.distance || 0)
+        var tachoIdx = findColKeyIdx(["tacho_meters", "tacho_abs_meters", "trip_vesc", "trip_vesc_abs"])
+        var distM = gpsDistM
+        if (distM <= 0 && tachoIdx !== -1 && rStart.vals[tachoIdx] !== null && rEnd.vals[tachoIdx] !== null) {
+            distM = Math.max(0, rEnd.vals[tachoIdx] - rStart.vals[tachoIdx])
+        }
+        if (distM > 0) {
+            items.push({
+                           label: "Distance",
+                           value: distM >= 1000 ? ((distM / 1000).toFixed(2) + " km") : (Math.round(distM) + " m")
+                       })
+        }
+
+        // 3. Duration (supports ms_today in ms, or t_day / uptime in seconds)
+        var tIdx = findColKeyIdx(["ms_today", "t_day", "esc uptime", "jet uptime", "time"])
+        var dtSec = 0
+        if (tIdx !== -1 && tIdx < columnMeta.length && rStart.vals[tIdx] !== null && rEnd.vals[tIdx] !== null) {
+            var tMeta = columnMeta[tIdx]
+            var tKey = (typeof tMeta.key === "string") ? tMeta.key.toLowerCase() : ""
+            var rawDt = rEnd.vals[tIdx] - rStart.vals[tIdx]
+            if (rawDt < 0 && tKey.indexOf("ms_today") !== -1) {
+                rawDt += 86400000 // Midnight rollover
+            }
+            dtSec = (tKey.indexOf("ms_") === 0) ? (rawDt / 1000.0) : rawDt
+            if (dtSec > 0) {
+                var mins = Math.floor(dtSec / 60)
+                var secs = Math.floor(dtSec % 60)
+                items.push({
+                               label: "Duration",
+                               value: mins > 0 ? (mins + "m " + secs + "s") : (dtSec.toFixed(1) + "s")
+                           })
+            }
+        }
+
+        // 4. Average & Max Speed (auto-detects m/s vs km/h from column unit or key)
+        var spdIdx = findColKeyIdx(["speed_meters_per_sec", "gnss_gvel", "gnss_h_vel", "kmh_vesc", "speed vesc", "speed"])
+        var maxSpdKmh = 0, sumSpdKmh = 0, spdCount = 0
+        if (spdIdx !== -1) {
+            var sMeta = columnMeta[spdIdx]
+            var sUnit = (typeof sMeta.unit === "string") ? sMeta.unit.toLowerCase() : ""
+            var sKey  = (typeof sMeta.key === "string") ? sMeta.key.toLowerCase() : ""
+            var toKmh = (sUnit === "km/h" || sUnit === "kmh" || sKey.indexOf("kmh") !== -1) ? 1.0 : 3.6
+
+            for (var i = s; i <= e; i++) {
+                var sv = rawRows[i].vals[spdIdx]
+                if (sv !== null && !isNaN(sv)) {
+                    var kmh = Math.abs(sv) * toKmh
+                    sumSpdKmh += kmh
+                    spdCount++
+                    if (kmh > maxSpdKmh) maxSpdKmh = kmh
+                }
+            }
+        }
+        var avgSpdKmh = spdCount > 0 ? (sumSpdKmh / spdCount)
+                                     : ((distM > 0 && dtSec > 0) ? ((distM / dtSec) * 3.6) : 0)
+        if (avgSpdKmh > 0) {
+            items.push({ label: "Avg Speed", value: avgSpdKmh.toFixed(1) + " km/h" })
+        }
+        if (maxSpdKmh > 0) {
+            items.push({ label: "Max Speed", value: maxSpdKmh.toFixed(1) + " km/h" })
+        }
+
+        // 5. Energy Consumed (Wh used minus Wh charged, or Wh used)
+        var whUsedIdx = findColKeyIdx(["watt_hours_used", "watt_hours_setup", "cnt_wh", "watt hours", "wh_used"])
+        var whChgIdx  = findColKeyIdx(["watt_hours_charged", "watt_hours_charged_setup", "cnt_wh_chg", "wh chg", "wh_charged"])
+        if (whUsedIdx !== -1 && rStart.vals[whUsedIdx] !== null && rEnd.vals[whUsedIdx] !== null) {
+            var whUsed = Math.max(0, rEnd.vals[whUsedIdx] - rStart.vals[whUsedIdx])
+            var whChg = (whChgIdx !== -1 && rStart.vals[whChgIdx] !== null && rEnd.vals[whChgIdx] !== null)
+                    ? Math.max(0, rEnd.vals[whChgIdx] - rStart.vals[whChgIdx]) : 0
+            var netWh = whUsed - whChg
+            items.push({
+                           label: "Energy",
+                           value: whChg > 0.05 ? (netWh.toFixed(1) + " Wh (" + whChg.toFixed(1) + " regen)")
+                                               : (whUsed.toFixed(1) + " Wh")
+                       })
+            if (distM >= 50) {
+                items.push({
+                               label: "Efficiency",
+                               value: (netWh / (distM / 1000.0)).toFixed(1) + " Wh/km"
+                           })
+            }
+        }
+
+        // 6. Capacity Consumed (Ah)
+        var ahUsedIdx = findColKeyIdx(["amp_hours_used", "amp_hours_setup", "cnt_ah", "amp hours", "ah_used"])
+        var ahChgIdx  = findColKeyIdx(["amp_hours_charged", "amp_hours_charged_setup", "cnt_ah_chg", "ah chg", "ah_charged"])
+        if (ahUsedIdx !== -1 && rStart.vals[ahUsedIdx] !== null && rEnd.vals[ahUsedIdx] !== null) {
+            var ahUsed = Math.max(0, rEnd.vals[ahUsedIdx] - rStart.vals[ahUsedIdx])
+            var ahChg = (ahChgIdx !== -1 && rStart.vals[ahChgIdx] !== null && rEnd.vals[ahChgIdx] !== null)
+                    ? Math.max(0, rEnd.vals[ahChgIdx] - rStart.vals[ahChgIdx]) : 0
+            items.push({ label: "Capacity", value: (ahUsed - ahChg).toFixed(2) + " Ah" })
+        }
+
+        // 7. Peak Electrical Power (V * I_in)
+        var vIdx = findColKeyIdx(["input_voltage", "input voltage", "bms_v_tot", "v_in"])
+        var iIdx = findColKeyIdx(["current_in", "current in", "current_in_setup", "bms_i_in_ic", "i_in"])
+        if (vIdx !== -1 && iIdx !== -1) {
+            var maxW = 0
+            for (var p = s; p <= e; p++) {
+                var vv = rawRows[p].vals[vIdx]
+                var ii = rawRows[p].vals[iIdx]
+                if (vv !== null && ii !== null) {
+                    var w = vv * ii
+                    if (w > maxW) maxW = w
+                }
+            }
+            if (maxW > 0) {
+                items.push({ label: "Peak Power", value: Math.round(maxW) + " W" })
+            }
+        }
+
+        zoomedStats = items
+    }
+
 
     onRawRowsChanged: rangeCache = ({})
 
@@ -1139,121 +1287,156 @@ Item {
         anchors.fill: parent
         anchors.margins: 8
         spacing: 6
-        RowLayout {
+
+        // Unified Top Header Card (matches chartBox styling)
+        Rectangle {
             Layout.fillWidth: true
-            spacing: 8
+            implicitHeight: headerCol.implicitHeight + 10
+            color: "#1a1d24"
+            radius: 6
+            border.color: "#333a45"
 
-            Button {
-                id: fileMenuBtn
-                text: "File ▾"
-                highlighted: true
-                onClicked: fileMenu.open()
+            ColumnLayout {
+                id: headerCol
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 5
+                spacing: 4
 
-                Menu {
-                    id: fileMenu
-                    y: fileMenuBtn.height
+                // Row 1: Evenly spaced action buttons
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
 
-                    MenuItem {
-                        text: "Open RT Log..."
-                        onTriggered: root.openRtLogBrowser()
+                    Button {
+                        id: fileMenuBtn
+                        Layout.fillWidth: true
+                        text: "File ▾"
+                        onClicked: fileMenu.open()
+
+                        Menu {
+                            id: fileMenu
+                            y: fileMenuBtn.height
+
+                            MenuItem {
+                                text: "Open RT Log..."
+                                onTriggered: root.openRtLogBrowser()
+                            }
+                            MenuItem {
+                                text: "Open Local CSV..."
+                                onTriggered: csvDialog.open()
+                            }
+                            MenuItem {
+                                text: "Open Device CSV..."
+                                onTriggered: root.openDeviceBrowser()
+                            }
+                            MenuItem {
+                                text: "Recent Logs..."
+                                onTriggered: root.openRecentLogsDialog()
+                            }
+                            MenuSeparator {}
+                            MenuItem {
+                                text: "Save Local Backup..."
+                                enabled: root.loadedCsvText.length > 0
+                                onTriggered: root.saveLoadedLogLocally()
+                            }
+                            MenuItem {
+                                text: "Save Zoomed CSV..."
+                                enabled: root.loadedDataLines.length > 0 &&
+                                         (root.viewStart > 0 || root.viewEnd < root.loadedDataLines.length - 1)
+                                onTriggered: root.saveZoomedLogLocally()
+                            }
+                        }
                     }
-                    MenuItem {
-                        text: "Open Local CSV..."
-                        onTriggered: csvDialog.open()
+
+                    Button {
+                        Layout.fillWidth: true
+                        text: "Fit Route"
+                        enabled: root.hasGps
+                        onClicked: {
+                            root.followMap = false
+                            root.fitRouteBounds()
+                        }
                     }
-                    MenuItem {
-                        text: "Open Device CSV..."
-                        onTriggered: root.openDeviceBrowser()
+
+                    Button {
+                        Layout.fillWidth: true
+                        text: "Follow"
+                        checkable: true
+                        checked: root.followMap
+                        enabled: root.hasGps
+                        onToggled: {
+                            root.followMap = checked
+                            if (checked && root.currentMapCoord.isValid) {
+                                map.center = root.currentMapCoord
+                            }
+                        }
                     }
-                    MenuItem {
-                        text: "Recent Logs..."
-                        onTriggered: root.openRecentLogsDialog()
-                    }
-                    MenuSeparator {}
-                    MenuItem {
-                        text: "Save Local Backup..."
-                        enabled: root.loadedCsvText.length > 0
-                        onTriggered: root.saveLoadedLogLocally()
-                    }
-                    MenuItem {
-                        text: "Save Zoomed CSV..."
-                        enabled: root.loadedDataLines.length > 0 &&
-                                 (root.viewStart > 0 || root.viewEnd < root.loadedDataLines.length - 1)
-                        onTriggered: root.saveZoomedLogLocally()
+
+                    Button {
+                        Layout.fillWidth: true
+                        text: "Stats"
+                        checkable: true
+                        checked: root.showMapStats
+                        enabled: root.rawRows.length > 0
+                        onToggled: root.showMapStats = checked
                     }
                 }
-            }
 
-            Button {
-                text: "Fit Route"
-                enabled: root.hasGps
-                onClicked: root.fitRouteBounds()
-            }
+                // Row 2: Status text + Filter toggle + Threshold stepper
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
 
-            Button {
-                text: "Follow"
-                checkable: true
-                checked: root.followMap
-                enabled: root.hasGps
-                onToggled: {
-                    root.followMap = checked
-                    if (checked && root.currentMapCoord.isValid) {
-                        map.center = root.currentMapCoord
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 60
+                        leftPadding: 4
+                        text: root.loadedFileName.length > 0
+                              ? (root.loadedFileName + (root.statusText.length > 0 ? (" · " + root.statusText) : ""))
+                              : root.statusText
+                        font.pixelSize: 11
+                        color: "#9ca3af"
+                        elide: Text.ElideMiddle
                     }
-                }
-            }
 
-            Label {
-                Layout.fillWidth: true
-                text: root.statusText
-                elide: Text.ElideMiddle
-                color: palette.text
-            }
-        }
+                    Button {
+                        id: filterBtn
+                        text: "Filter"
+                        checkable: true
+                        checked: root.filterOutliers
+                        implicitHeight: 32
+                        topInset: 0
+                        bottomInset: 0
+                        leftPadding: 12
+                        rightPadding: 12
+                        font.pixelSize: 12
+                        onToggled: {
+                            root.filterOutliers = checked
+                            root.reparseWithFilter()
+                        }
+                    }
 
-        // Compact GPS Outlier Filter Row (between File bar and Map)
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 6
-
-            CheckBox {
-                id: filterCheck
-                text: "Filter outliers"
-                checked: root.filterOutliers
-                implicitHeight: 26
-                padding: 0
-                font.pixelSize: 12
-                onToggled: {
-                    root.filterOutliers = checked
-                    root.reparseWithFilter()
-                }
-            }
-
-            Item { Layout.fillWidth: true }
-
-            Label {
-                text: "Threshold:"
-                font.pixelSize: 12
-                color: "#9ca3af"
-                enabled: root.filterOutliers
-            }
-
-            SpinBox {
-                id: threshSpin
-                from: 10
-                to: 2000
-                stepSize: 10
-                value: Math.round(root.outlierThresholdM)
-                implicitHeight: 26
-                implicitWidth: 118
-                font.pixelSize: 12
-                textFromValue: function(val) { return val + " m" }
-                valueFromText: function(txt) { return parseInt(txt) || 100 }
-                onValueModified: {
-                    root.outlierThresholdM = value
-
-                    if (filterCheck.checked) {
-                        root.reparseWithFilter()
+                    SpinBox {
+                        id: threshSpin
+                        from: 10
+                        to: 2000
+                        stepSize: 10
+                        value: Math.round(root.outlierThresholdM)
+                        implicitHeight: 32
+                        implicitWidth: 112
+                        topInset: 0
+                        bottomInset: 0
+                        font.pixelSize: 12
+                        textFromValue: function(val) { return val + " m" }
+                        valueFromText: function(txt) { return parseInt(txt) || 100 }
+                        onValueModified: {
+                            root.outlierThresholdM = value
+                            if (root.filterOutliers) {
+                                root.reparseWithFilter()
+                            }
+                        }
                     }
                 }
             }
@@ -1351,6 +1534,105 @@ Item {
                              map.zoomLevel += (event.angleDelta.y > 0 ? 0.5 : -0.5)
                              if (geo.isValid) map.alignCoordinateToPoint(geo, pt)
                          }
+            }
+
+            // Floating, movable stats card for the zoomed range
+            Rectangle {
+                id: statsCard
+                visible: root.showMapStats && root.zoomedStats.length > 0
+                z: 10
+                x: 10
+                y: 10
+                width: Math.min(map.width - 20, 210)
+                height: statsCol.implicitHeight + 12
+                radius: 6
+                color: "#d91a1d24"
+                border.color: "#333a45"
+                border.width: 1
+
+                // Keep card inside map bounds if window/orientation resizes
+                onXChanged: {
+                    var maxX = Math.max(4, map.width - width - 4)
+                    if (x < 4) x = 4
+                    else if (x > maxX) x = maxX
+                }
+                onYChanged: {
+                    var maxY = Math.max(4, map.height - height - 4)
+                    if (y < 4) y = 4
+                    else if (y > maxY) y = maxY
+                }
+
+                DragHandler {
+                    id: statsDrag
+                    target: statsCard
+                    grabPermissions: PointerHandler.CanTakeOverFromAnything
+                    xAxis.minimum: 4
+                    xAxis.maximum: Math.max(4, map.width - statsCard.width - 4)
+                    yAxis.minimum: 4
+                    yAxis.maximum: Math.max(4, map.height - statsCard.height - 4)
+                }
+
+                ColumnLayout {
+                    id: statsCol
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 6
+                    spacing: 2
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: "Stats"
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: "#ffffff"
+                        }
+
+                        ToolButton {
+                            text: "×"
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            padding: 0
+                            font.pixelSize: 13
+                            palette.buttonText: "#9ca3af"
+                            onClicked: root.showMapStats = false
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: "#333a45"
+                    }
+
+                    Repeater {
+                        model: root.zoomedStats
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 6
+
+                            Label {
+                                Layout.fillWidth: true
+                                text: modelData.label + ":"
+                                font.pixelSize: 11
+                                color: "#9ca3af"
+                                elide: Text.ElideRight
+                            }
+
+                            Label {
+                                text: modelData.value
+                                font.family: "Monospace"
+                                font.pixelSize: 11
+                                font.bold: true
+                                color: "#ffffff"
+                            }
+                        }
+                    }
+                }
             }
         }
 

@@ -30,6 +30,8 @@ Rectangle {
     signal updateClicked()
     signal changesClicked()
     readonly property bool hasMotorData: hwType === "VESC" || canMotorId >= 0
+    // Battery values from a BMS, shown when there is no motor controller
+    readonly property var bms: hasMotorData ? null : bmsValues
 
     implicitHeight: column.implicitHeight + 28
     radius: 12
@@ -49,9 +51,9 @@ Rectangle {
             // Battery ring in the style of the gauges
             Canvas {
                 id: ring
-                property real level: rtBattery
+                property real level: card.bms ? card.bms.soc : rtBattery
 
-                visible: card.hasMotorData
+                visible: card.hasMotorData || card.bms !== null
                 Layout.preferredWidth: 88
                 Layout.preferredHeight: 88
                 onLevelChanged: requestPaint()
@@ -81,7 +83,7 @@ Rectangle {
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: rtBattery >= 0 ? Math.round(rtBattery * 100) + "%" : "–"
+                        text: ring.level >= 0 ? Math.round(ring.level * 100) + "%" : "–"
                         font.pointSize: 18
                         font.weight: Font.Medium
                         color: Utility.getAppHexColor("lightText")
@@ -89,7 +91,7 @@ Rectangle {
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: rtVin.toFixed(1) + " V"
+                        text: (card.bms ? card.bms.v_tot : rtVin).toFixed(1) + " V"
                         font.pointSize: 9
                         color: Utility.getAppHexColor("normalText")
                     }
@@ -128,7 +130,7 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
-            visible: hwType !== "" && !card.hasMotorData
+            visible: hwType !== "" && !card.hasMotorData && card.bms === null
             spacing: 10
 
             Text {
@@ -175,6 +177,27 @@ Rectangle {
                 title: qsTr("Faults")
                 value: faultText !== "" ? qsTr("Fault") : qsTr("None")
                 valueColor: faultText !== "" ? Utility.getAppHexColor("dangerText") : Utility.getAppHexColor("positiveText")
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            visible: card.bms !== null
+            spacing: 8
+
+            Repeater {
+                model: card.bms ? [[qsTr("Current"), card.bms.i_in_ic.toFixed(1), "A"],
+                                   [qsTr("Min-Max"), ((Math.max(...card.bms.v_cells) - Math.min(...card.bms.v_cells)) * 1000).toFixed(0), "mV"],
+                                   [qsTr("Cell Temp"), card.bms.temp_cells_highest.toFixed(0), "°C"]] : []
+
+                ValueTile {
+                    Layout.fillWidth: true
+                    color: Utility.getAppHexColor("darkBackground")
+                    border.width: 0
+                    title: modelData[0]
+                    value: modelData[1]
+                    unit: modelData[2]
+                }
             }
         }
 

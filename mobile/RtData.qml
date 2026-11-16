@@ -178,7 +178,7 @@ Item {
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var rpmMaxRound = (Math.ceil(rpmMax / 5000.0) * 5000.0) / 1000
 
-            if (rpmMaxRound > rpmGauge.maximumValue || rpmMaxRound < (rpmGauge.maximumValue * 0.6)) {
+            if (rpmMaxRound > 0 && (rpmMaxRound > rpmGauge.maximumValue || rpmMaxRound < (rpmGauge.maximumValue * 0.6))) {
                 rpmGauge.maximumValue = rpmMaxRound
                 rpmGauge.minimumValue = -rpmMaxRound
             }
@@ -190,7 +190,7 @@ Item {
                                     mMcConf.getParamDouble("l_watt_max"))
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
-            if (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6)) {
+            if (powerMaxRound > 0 && (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6))) {
                 powerGauge.maximumValue = powerMaxRound
                 powerGauge.minimumValue = -powerMaxRound
             }

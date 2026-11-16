@@ -651,12 +651,13 @@ Item {
             var currentMaxRound = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
             var currentMinRound = Math.floor(mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
 
-            if (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7)) {
+            if (currentMaxRound > currentMinRound &&
+                    (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7))) {
                 currentGauge.maximumValue = currentMaxRound
                 currentGauge.minimumValue = currentMinRound
+                currentGauge.labelStep = Math.ceil((currentMaxRound - currentMinRound) / 40) * 5
             }
 
-            currentGauge.labelStep = Math.ceil((currentMaxRound - currentMinRound) / 40) * 5
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
             batteryGauge.value = values.battery_level * 100.0
@@ -682,8 +683,8 @@ Item {
             var wh_consume = values.watt_hours - values.watt_hours_charged
             var wh_km_total = wh_consume / Math.max(dist , 1e-10)
 
-            if (speedMaxRound > speedGauge.maximumValue || speedMaxRound < (speedGauge.maximumValue * 0.6) ||
-                    useNegativeSpeedValues !== speedGauge.minimumValue < 0) {
+            if (speedMaxRound > 0 && (speedMaxRound > speedGauge.maximumValue || speedMaxRound < (speedGauge.maximumValue * 0.6) ||
+                    useNegativeSpeedValues !== speedGauge.minimumValue < 0)) {
                 var labelStep = Math.ceil(speedMaxRound / 100) * 10
 
                 if ((speedMaxRound / labelStep) > 30) {
@@ -709,13 +710,14 @@ Item {
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
             var powerMinRound = (Math.floor(powerMin / 1000.0) * 1000.0)
 
-            if (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6)) {
+            if (powerMaxRound > powerMinRound &&
+                    (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6))) {
                 powerGauge.maximumValue = powerMaxRound
                 powerGauge.minimumValue = powerMinRound
+                powerGauge.labelStep = Math.ceil((powerMaxRound - powerMinRound)/5000.0) * 1000.0
             }
 
             powerGauge.value = (values.current_in * values.v_in)
-            powerGauge.labelStep = Math.ceil((powerMaxRound - powerMinRound)/5000.0) * 1000.0
             var alpha = 0.05
             var efficiencyNow = Math.max( Math.min(values.current_in * values.v_in/Math.max(Math.abs(values.speed * 3.6 * impFact), 1e-6) , 60) , -60)
             efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow

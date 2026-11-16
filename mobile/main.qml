@@ -64,6 +64,8 @@ ApplicationWindow {
     readonly property bool fwUpdateAvailable: Number(fwLatest) > Number(fwVersion)
     property real rtVin: 0
     property real rtBattery: -1
+    // Last BMS values with cell voltages, null while no BMS reports them
+    property var bmsValues: null
     property real rtTempMos: 0
     property real rtTempMotor: 0
     property string faultText: ""
@@ -622,19 +624,7 @@ ApplicationWindow {
         }
 
         Page {
-            id: bmsPage
-            Loader {
-                anchors.fill: parent
-                asynchronous: true
-                visible: status == Loader.Ready
-                sourceComponent: BMS {
-                    anchors.fill: parent
-                    isHorizontal: mainIsHorizontal
-                }
-            }
-        }
-
-        Page {
+            id: profilesPage
             Loader {
                 anchors.fill: parent
                 asynchronous: true
@@ -740,7 +730,7 @@ ApplicationWindow {
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "BMS", "Profiles", "Terminal", "LispBM", "LogView"]
+                    model: ["Start", "RT Data", "Profiles", "Terminal", "LispBM", "LogView"]
 
                     MainTabButton {
                         text: modelData
@@ -830,6 +820,27 @@ ApplicationWindow {
             anchors.fill: parent
             property var tabBarItem: tabBar
             property var swipeViewItem: mainSwipeView
+        }
+    }
+
+    MainTabButton {
+        id: bmsButton
+        visible: bmsPage.visible
+        text: "BMS"
+    }
+
+    Page {
+        id: bmsPage
+        visible: false
+
+        Loader {
+            anchors.fill: parent
+            asynchronous: true
+            visible: status == Loader.Ready
+            sourceComponent: BMS {
+                anchors.fill: parent
+                isHorizontal: mainIsHorizontal
+            }
         }
     }
 
@@ -1193,6 +1204,25 @@ ApplicationWindow {
         }
     }
 
+    // Polls the BMS at 1 Hz. Its page hides after 4 polls without cell voltages.
+    Timer {
+        id: bmsTimer
+        interval: 1000
+        running: fwReadCorrectly
+        repeat: true
+        property int misses: 0
+
+        onTriggered: {
+            if (++misses > 4) {
+                setBmsPageVisible(false)
+            }
+
+            if (VescIf.getFwUploadProgress() < 0) {
+                mCommands.bmsGetValues()
+            }
+        }
+    }
+
     Timer {
         id: bleDisconnectTimer
         interval: 1000
@@ -1323,8 +1353,8 @@ ApplicationWindow {
                 stop()
 
                 if (VescIf.isPortConnected() && VescIf.customConfig(0) !== null) {
-                    mainSwipeView.insertItem(4, confCustomPage)
-                    tabBar.insertItem(4, confCustomButton)
+                    mainSwipeView.insertItem(profilesPage.SwipeView.index + 1, confCustomPage)
+                    tabBar.insertItem(profilesPage.SwipeView.index + 1, confCustomButton)
                     confCustomPage.visible = true
                     confCustomLoader.item.reloadConfig()
                     confCustomButton.text = VescIf.customConfig(0).getLongName("hw_name")
@@ -1339,6 +1369,22 @@ ApplicationWindow {
 
     function updateConfCustom () {
         confCustomTimer.start()
+    }
+
+    function setBmsPageVisible(show) {
+        if (show === bmsPage.visible) {
+            return
+        }
+
+        bmsPage.visible = show
+        if (show) {
+            mainSwipeView.insertItem(rtDataPage.SwipeView.index + 1, bmsPage)
+            tabBar.insertItem(rtDataPage.SwipeView.index + 1, bmsButton)
+        } else {
+            bmsValues = null
+            bmsPage.parent = null
+            bmsButton.parent = null
+        }
     }
 
     function indexOffset() {
@@ -1367,6 +1413,7 @@ ApplicationWindow {
                 rtVin = 0
                 rtBattery = -1
                 faultText = ""
+                setBmsPageVisible(false)
             } else {
                 connected = true
             }
@@ -1407,10 +1454,11 @@ ApplicationWindow {
                     confPageMotor.visible = true
                     confPageApp.visible = true
 
-                    mainSwipeView.insertItem(4, confPageApp)
-                    tabBar.insertItem(4, confAppButton)
-                    mainSwipeView.insertItem(4, confPageMotor)
-                    tabBar.insertItem(4, confMotorButton)
+                    var ind = profilesPage.SwipeView.index + 1
+                    mainSwipeView.insertItem(ind, confPageApp)
+                    tabBar.insertItem(ind, confAppButton)
+                    mainSwipeView.insertItem(ind, confPageMotor)
+                    tabBar.insertItem(ind, confMotorButton)
                 } else {
                     confPageMotor.visible = false
                     confPageApp.visible = false
@@ -1502,6 +1550,14 @@ ApplicationWindow {
             if (mask & (1 << 7)) rtVin = values.v_in
             if (mask & (1 << 8)) rtBattery = values.battery_level
             if (mask & (1 << 16)) faultText = values.fault_code !== 0 ? values.fault_str : ""
+        }
+
+        function onBmsValuesRx(val) {
+            if (val.v_cells.length > 0) {
+                bmsTimer.misses = 0
+                bmsValues = val
+                setBmsPageVisible(true)
+            }
         }
 
         function onAckReceived(ackType) {

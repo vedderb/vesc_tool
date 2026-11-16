@@ -1541,7 +1541,7 @@ Item {
                          }
             }
 
-            // Floating, movable stats card (auto-sized to widest row)
+            // Floating, movable stats card (translucent with outlined text for readability)
             Rectangle {
                 id: statsCard
                 visible: root.showMapStats && root.zoomedStats.length > 0
@@ -1551,8 +1551,8 @@ Item {
                 width: Math.min(map.width - 20, Math.max(120, statsCol.implicitWidth + 10))
                 height: statsCol.implicitHeight + 10
                 radius: 6
-                color: "#d91a1d24"
-                border.color: "#333a45"
+                color: "#8c14171d"
+                border.color: "#66333a45"
                 border.width: 1
 
                 onXChanged: {
@@ -1593,6 +1593,8 @@ Item {
                             font.pixelSize: 11
                             font.bold: true
                             color: "#ffffff"
+                            style: Text.Outline
+                            styleColor: "#cc000000"
                         }
 
                         Item { Layout.fillWidth: true }
@@ -1603,7 +1605,7 @@ Item {
                             implicitHeight: 20
                             padding: 0
                             font.pixelSize: 13
-                            palette.buttonText: "#9ca3af"
+                            palette.buttonText: "#d1d5db"
                             onClicked: root.showMapStats = false
                         }
                     }
@@ -1611,7 +1613,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         height: 1
-                        color: "#333a45"
+                        color: "#55ffffff"
                     }
 
                     Repeater {
@@ -1623,7 +1625,9 @@ Item {
                             Label {
                                 text: modelData.label + ":"
                                 font.pixelSize: 11
-                                color: "#9ca3af"
+                                color: "#e5e7eb"
+                                style: Text.Outline
+                                styleColor: "#cc000000"
                             }
 
                             Item { Layout.fillWidth: true }
@@ -1634,6 +1638,8 @@ Item {
                                 font.pixelSize: 11
                                 font.bold: true
                                 color: "#ffffff"
+                                style: Text.Outline
+                                styleColor: "#cc000000"
                             }
                         }
                     }

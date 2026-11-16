@@ -27,6 +27,8 @@
 #include <QRegularExpression>
 #include <QDateTime>
 #include <QDir>
+#include <QCoreApplication>
+#include <QPermissions>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <cmath>
@@ -1914,7 +1916,15 @@ bool VescInterface::openRtLogFile(QString outDirectory)
                 mLastPosTime = QDateTime::currentDateTimeUtc();
             });
             mPosSource->setUpdateInterval(5);
-            mPosSource->startUpdates();
+
+            // The position source does not ask for the permission itself
+            QLocationPermission location;
+            location.setAccuracy(QLocationPermission::Precise);
+            qApp->requestPermission(location, mPosSource, [this](const QPermission &permission) {
+                if (permission.status() == Qt::PermissionStatus::Granted) {
+                    mPosSource->startUpdates();
+                }
+            });
         } else {
             emitMessageDialog("Postioning",
                               "Could not get Positioning Working.",
@@ -1931,6 +1941,12 @@ void VescInterface::closeRtLogFile()
     if (mRtLogFile.isOpen()) {
         mRtLogFile.close();
     }
+
+#ifdef HAS_POS
+    if (mPosSource) {
+        mPosSource->stopUpdates();
+    }
+#endif
 }
 
 bool VescInterface::isRtLogOpen()

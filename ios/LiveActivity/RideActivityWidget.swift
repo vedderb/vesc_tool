@@ -1,4 +1,5 @@
 import ActivityKit
+import AppIntents
 import SwiftUI
 import WidgetKit
 import UIKit
@@ -43,15 +44,16 @@ private func rideActivityConfiguration() -> ActivityConfiguration<RideActivityAt
             }
             DynamicIslandExpandedRegion(.trailing) {
                 VStack(alignment: .trailing, spacing: 3) {
+                    BatteryValue(values: values).font(.headline)
                     Text("Trip: " + values.distance + " " + values.distanceUnit)
                         .accessibilityLabel(values.distanceAccessibility)
-                        .font(.headline).monospacedDigit()
-                    BatteryValue(values: values).font(.caption)
+                        .font(.caption).monospacedDigit()
                     EstimatedRangeValue(values: values).font(.caption2)
                 }
             }
             DynamicIslandExpandedRegion(.bottom) {
                 HStack {
+                    LogButton(logging: context.state.logging)
                     if !values.isCurrent { RideStatus(values: values) }
                     Spacer()
                     RideTimer(startedAt: context.attributes.startedAt)
@@ -66,7 +68,8 @@ private func rideActivityConfiguration() -> ActivityConfiguration<RideActivityAt
             .foregroundStyle(values.isCurrent ? RidePalette.text : RidePalette.secondary)
             .accessibilityLabel(values.speedAccessibility)
         } compactTrailing: {
-            Text(values.speedUnit.uppercased()).font(.custom("Roboto-Regular", fixedSize: 9))
+            Text(values.battery).font(.custom("Roboto-Regular", fixedSize: 15)).monospacedDigit()
+                .accessibilityLabel("Battery \(values.battery)")
         } minimal: {
             Text(values.speed).font(.custom("Roboto-Regular", fixedSize: 15)).monospacedDigit()
                 .foregroundStyle(values.isCurrent ? RidePalette.text : RidePalette.secondary)
@@ -85,7 +88,8 @@ private struct RideActivityRoot: View {
         case .small:
             RideWatchView(values: RideDisplayValues(context))
         default:
-            RideLockScreenView(values: RideDisplayValues(context), startedAt: context.attributes.startedAt)
+            RideLockScreenView(values: RideDisplayValues(context), startedAt: context.attributes.startedAt,
+                               logging: context.state.logging)
         }
     }
 }
@@ -93,11 +97,13 @@ private struct RideActivityRoot: View {
 struct RideLockScreenView: View {
     let values: RideDisplayValues
     let startedAt: Date
+    let logging: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 VESCMark(size: 19)
+                LogButton(logging: logging).font(.caption)
                 Spacer()
                 RideTimer(startedAt: startedAt).font(.caption)
             }
@@ -114,10 +120,10 @@ struct RideLockScreenView: View {
                 .accessibilityLabel(values.speedAccessibility)
                 Spacer(minLength: 0)
                 VStack(alignment: .trailing, spacing: 3) {
+                    BatteryValue(values: values).font(.title3.weight(.semibold))
                     Text("Trip: " + values.distance + " " + values.distanceUnit)
                         .accessibilityLabel(values.distanceAccessibility)
-                        .font(.title3.weight(.semibold)).monospacedDigit()
-                    BatteryValue(values: values).font(.caption).foregroundStyle(RidePalette.secondary)
+                        .font(.caption).monospacedDigit().foregroundStyle(RidePalette.secondary)
                     EstimatedRangeValue(values: values).font(.caption)
                 }
             }
@@ -240,6 +246,19 @@ private struct VESCMark: View {
                 .foregroundStyle(RidePalette.text)
                 .accessibilityHidden(true)
         }
+    }
+}
+
+private struct LogButton: View {
+    let logging: Bool
+
+    var body: some View {
+        Button(intent: RideLogToggleIntent()) {
+            Label(logging ? "Stop RT Data Logging" : "Start RT Data Logging", systemImage: logging ? "stop.circle.fill" : "record.circle")
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.mini)
+        .tint(logging ? .red : RidePalette.accent)
     }
 }
 

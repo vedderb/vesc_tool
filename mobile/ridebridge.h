@@ -37,6 +37,8 @@ int vesc_live_activity_start(const char *json);
 void vesc_live_activity_update(const char *json);
 void vesc_live_activity_end(void);
 int vesc_live_activity_is_active(void);
+// 1 once after the logging button on the ride display was pressed
+int vesc_live_activity_take_log_toggle(void);
 const char *vesc_live_activity_last_error(void);
 
 #ifdef __cplusplus

@@ -12,6 +12,7 @@ private struct RideSnapshot: Decodable {
     let connected: Bool
     let fresh: Bool
     let useImperial: Bool
+    let logging: Bool
 
     func validate() throws {
         guard estimatedRangeMeters.isFinite, estimatedRangeMeters >= -1,
@@ -29,7 +30,7 @@ private struct RideSnapshot: Decodable {
             speedMps: abs(speedMps), distanceMeters: distanceMeters,
             distanceIncomplete: distanceIncomplete,
             batteryLevel: batteryLevel, estimatedRangeMeters: estimatedRangeMeters,
-            connected: connected, fresh: fresh, useImperial: useImperial)
+            connected: connected, fresh: fresh, useImperial: useImperial, logging: logging)
         // The system marks the view stale even if the phone stops executing.
         let expiry = connected && fresh ? sampledDate.addingTimeInterval(5) : Date()
         return ActivityContent(state: state, staleDate: expiry)
@@ -183,6 +184,7 @@ public func vescLiveActivityStart(_ json: UnsafePointer<CChar>?) -> Int32 {
             if #available(iOS 18.0, *) {
                 let snapshot = try decodeSnapshot(json)
                 try RideActivityController.shared.start(snapshot)
+                RideLogToggleIntent.pending = false
                 setError("")
                 return 1
             }
@@ -218,6 +220,17 @@ public func vescLiveActivityEnd() {
 public func vescLiveActivityIsActive() -> Int32 {
     onMain {
         if #available(iOS 18.0, *) { return RideActivityController.shared.isActive ? 1 : 0 }
+        return 0
+    }
+}
+
+@_cdecl("vesc_live_activity_take_log_toggle")
+public func vescLiveActivityTakeLogToggle() -> Int32 {
+    onMain {
+        if #available(iOS 17.0, *), RideLogToggleIntent.pending {
+            RideLogToggleIntent.pending = false
+            return 1
+        }
         return 0
     }
 }

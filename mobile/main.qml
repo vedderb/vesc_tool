@@ -144,6 +144,15 @@ ApplicationWindow {
         loader.item.review()
     }
 
+    // The app folder is shown as Vesc Tool in the Files app on iOS
+    function displayPath(path) {
+        var ind = path.indexOf("/Documents/")
+        if (Qt.platform.os !== "ios" || ind < 0) {
+            return path
+        }
+        return "Files › Vesc Tool › " + path.slice(ind + 11).split("/").join(" › ")
+    }
+
     function timeAgo(time) {
         var minutes = Math.round((Date.now() - time) / 60000)
         return minutes < 2 ? qsTr("just now") :

@@ -42,10 +42,12 @@ import vedder.vesctool.R;
 public class RideService extends Service {
     private static final String CHANNEL_ID = "VESC_RIDE";
     private static final String ACTION_DISMISSED = "com.vedder.vesc.RIDE_DISMISSED";
+    private static final String ACTION_TOGGLE_LOG = "com.vedder.vesc.RIDE_TOGGLE_LOG";
     private static final int NOTIFICATION_ID = 2;
 
     private static volatile boolean sActive = false;
     private static volatile String sJson = "{}";
+    private static volatile boolean sLogToggle = false;
 
     public static boolean enabled(Context ctx) {
         return ctx.getSystemService(NotificationManager.class).areNotificationsEnabled();
@@ -61,6 +63,7 @@ public class RideService extends Service {
         }
 
         sActive = true;
+        sLogToggle = false;
         return true;
     }
 
@@ -80,9 +83,21 @@ public class RideService extends Service {
         return sActive;
     }
 
+    // True once after the logging action was pressed, RideSession polls this
+    public static boolean takeLogToggle() {
+        boolean res = sLogToggle;
+        sLogToggle = false;
+        return res;
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && ACTION_DISMISSED.equals(intent.getAction())) {
+        if (intent != null && ACTION_TOGGLE_LOG.equals(intent.getAction()) && sActive) {
+            sLogToggle = true;
+            return START_NOT_STICKY;
+        }
+
+        if (intent != null && intent.getAction() != null) {
             sActive = false;
             stopSelf();
             return START_NOT_STICKY;
@@ -111,6 +126,7 @@ public class RideService extends Service {
 
         boolean imperial = o.optBoolean("useImperial");
         boolean fresh = o.optBoolean("fresh");
+        boolean logging = o.optBoolean("logging");
         double distFactor = imperial ? 0.000621371192 : 0.001;
         String distUnit = imperial ? "mi" : "km";
         String speed = String.format(Locale.getDefault(), "%.0f %s",
@@ -120,11 +136,17 @@ public class RideService extends Service {
 
         StringBuilder text = new StringBuilder(String.format(Locale.getDefault(), "%s%.2f %s",
                 o.optBoolean("distanceIncomplete") ? "≥ " : "", o.optDouble("distanceMeters", 0) * distFactor, distUnit));
-        if (fresh && battery >= 0) {
-            text.append(String.format(Locale.getDefault(), " · Battery %d%%", Math.round(battery * 100)));
-        }
         if (fresh && range >= 0) {
             text.append(String.format(Locale.getDefault(), " · Range %.1f %s", range * distFactor, distUnit));
+        }
+
+        if (logging) {
+            text.append(" · RT Data Logging");
+        }
+
+        String title = fresh ? speed : o.optBoolean("connected") ? "Waiting for data" : "Disconnected";
+        if (fresh && battery >= 0) {
+            title = String.format(Locale.getDefault(), "Battery %d%% · %s", Math.round(battery * 100), speed);
         }
 
         NotificationManager nm = ctx.getSystemService(NotificationManager.class);
@@ -137,9 +159,10 @@ public class RideService extends Service {
 
         Intent open = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
         Intent dismissed = new Intent(ctx, RideService.class).setAction(ACTION_DISMISSED);
+        Intent toggleLog = new Intent(ctx, RideService.class).setAction(ACTION_TOGGLE_LOG);
 
         builder.setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(fresh ? speed : o.optBoolean("connected") ? "Waiting for data" : "Disconnected")
+                .setContentTitle(title)
                 .setContentText(text)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
@@ -148,7 +171,9 @@ public class RideService extends Service {
                 .setUsesChronometer(true)
                 .setShowWhen(true)
                 .setContentIntent(PendingIntent.getActivity(ctx, 0, open, PendingIntent.FLAG_IMMUTABLE))
-                .setDeleteIntent(PendingIntent.getService(ctx, 1, dismissed, PendingIntent.FLAG_IMMUTABLE));
+                .setDeleteIntent(PendingIntent.getService(ctx, 1, dismissed, PendingIntent.FLAG_IMMUTABLE))
+                .addAction(new Notification.Action.Builder(null, logging ? "Stop RT Data Logging" : "Start RT Data Logging",
+                        PendingIntent.getService(ctx, 2, toggleLog, PendingIntent.FLAG_IMMUTABLE)).build());
 
         if (fresh && battery >= 0) {
             builder.setProgress(100, (int) Math.round(battery * 100), false);

@@ -324,7 +324,7 @@ Item {
 
     SheetDialog {
         id: rtLogListDialog
-        title: "RT Logs (" + root.currentRtLogDir + ")"
+        title: "RT Logs"
         closePolicy: Popup.NoAutoClose
         fullHeight: true
 
@@ -336,7 +336,7 @@ Item {
                 visible: root.rtLogEntries.length === 0
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: "No .csv logs found in:\n" + Utility.getSetting("path_rt_log", "").toString()
+                text: "No .csv logs found in:\n" + displayPath(root.currentRtLogDir)
                 color: "#9ca3af"
             }
 
@@ -358,7 +358,19 @@ Item {
 
                         ItemDelegate {
                             Layout.fillWidth: true
-                            text: modelData.name + "  (" + (modelData.size / 1024).toFixed(1) + " KB · " + modelData.modified + ")"
+                            contentItem: Column {
+                                Label {
+                                    width: parent.width
+                                    text: modelData.name
+                                    elide: Text.ElideMiddle
+                                }
+
+                                Label {
+                                    text: (modelData.size / 1024).toFixed(1) + " KB · " + modelData.modified
+                                    font.pointSize: 10
+                                    color: Utility.getAppHexColor("disabledText")
+                                }
+                            }
                             onClicked: {
                                 var text = Utility.readTextFile(modelData.path)
                                 if (text && text.length > 0) {

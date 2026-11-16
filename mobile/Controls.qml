@@ -55,9 +55,11 @@ Item {
 
     function setValue(v) {
         if (!isNaN(v)) {
-            values[modeBar.currentIndex] = Math.min(Math.max(v, 0.0), mode.to)
+            // Assigning the same array does not update the bindings
+            var newValues = values.slice()
+            newValues[modeBar.currentIndex] = Math.min(Math.max(v, 0.0), mode.to)
+            values = newValues
         }
-        values = values
     }
 
     // Runs the action while pressed and releases the motor afterwards unless told to continue
@@ -127,7 +129,11 @@ Item {
                             TextInput {
                                 Layout.preferredWidth: 170
                                 horizontalAlignment: TextInput.AlignHCenter
-                                text: parseFloat(value).toFixed(mode.decimals) + mode.suffix
+                                // Editing replaces the text binding
+                                property string valueText: parseFloat(value).toFixed(mode.decimals) + mode.suffix
+                                text: valueText
+                                onValueTextChanged: text = valueText
+                                onActiveFocusChanged: if (activeFocus) selectAll()
                                 font.pointSize: 26
                                 font.weight: Font.Medium
                                 font.features: { "tnum": 1 }
@@ -136,6 +142,8 @@ Item {
                                 onEditingFinished: {
                                     Qt.inputMethod.hide()
                                     setValue(parseFloat(text.replace(",", ".")))
+                                    text = valueText
+                                    focus = false
                                 }
                             }
 

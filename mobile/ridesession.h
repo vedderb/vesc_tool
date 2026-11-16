@@ -75,6 +75,7 @@ signals:
     void changed();
     void availabilityChanged();
     void autoStartChanged();
+    void logToggleRequested();
 
 private:
     void startOnConnect();

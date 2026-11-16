@@ -70,6 +70,11 @@ int vesc_live_activity_is_active(void)
     return QJniObject::callStaticMethod<jboolean>(ServiceClass, "isActive", "()Z");
 }
 
+int vesc_live_activity_take_log_toggle(void)
+{
+    return QJniObject::callStaticMethod<jboolean>(ServiceClass, "takeLogToggle", "()Z");
+}
+
 const char *vesc_live_activity_last_error(void)
 {
     return LastError;

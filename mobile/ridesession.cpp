@@ -308,6 +308,9 @@ void RideSession::refresh(bool poll)
         finish(tr("The ride display was ended or dismissed."), false);
         return;
     }
+    if (vesc_live_activity_take_log_toggle()) {
+        emit logToggleRequested();
+    }
     mConnected = mVesc && mVesc->isPortConnected();
     if (!mConnected) {
         mDistanceIncomplete = mDistanceIncomplete || mHasBaseline;
@@ -331,7 +334,8 @@ QByteArray RideSession::payload() const
         {"distanceIncomplete", mDistanceIncomplete}, {"batteryLevel", mBattery},
         {"estimatedRangeMeters", estimatedRangeMeters()}, {"startedAt", mStartedAt},
         {"sampledAt", mSampledAt}, {"connected", mConnected},
-        {"fresh", fresh()}, {"useImperial", useImperial()}
+        {"fresh", fresh()}, {"useImperial", useImperial()},
+        {"logging", mVesc && mVesc->isRtLogOpen()}
     };
     return QJsonDocument(object).toJson(QJsonDocument::Compact);
 }

@@ -63,6 +63,7 @@ ColumnLayout {
 
         delegate: Chip {
             enabled: false
+            topInset: 0
             checked: index === wizardHeader.currentIndex
             text: (index < wizardHeader.currentIndex ? "✓ " : "") + modelData
         }

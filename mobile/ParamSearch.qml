@@ -100,7 +100,7 @@ SheetDialog {
         anchors.fill: parent
         spacing: 8
 
-        TextField {
+        InputField {
             id: field
             Layout.fillWidth: true
             placeholderText: qsTr("Search parameters and pages")

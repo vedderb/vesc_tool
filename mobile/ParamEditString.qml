@@ -18,7 +18,6 @@
     */
 
 import QtQuick
-import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
 ParamEditFrame {
@@ -36,7 +35,7 @@ ParamEditFrame {
         }
     }
 
-    TextField {
+    InputField {
         id: stringInput
         Layout.fillWidth: true
         Layout.topMargin: 5

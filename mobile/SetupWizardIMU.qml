@@ -164,7 +164,7 @@ Item {
 
         background: Rectangle {
             color: Utility.getAppHexColor("darkBackground")
-            radius: 16
+            radius: 20
         }
 
         StackLayout {

@@ -107,7 +107,7 @@ Item {
                 Layout.fillWidth: true
                 color: Utility.getAppHexColor("titleText")
                 text: qsTr("CAN Devices")
-                font.pointSize: 14
+                font.pointSize: 15
                 font.weight: Font.Medium
             }
 

@@ -18,6 +18,7 @@
     */
 
 import QtQuick
+import QtQuick.Layouts
 
 // Horizontal chips for the subgroups of a parameter group. A dot marks
 // subgroups with unwritten changes.
@@ -28,7 +29,10 @@ ListView {
     readonly property var changedParams: tracker ? tracker.changedParams : []
     readonly property string currentText: currentIndex >= 0 && currentIndex < count ? model[currentIndex] : ""
 
-    implicitHeight: 32
+    implicitHeight: 44
+    // Keeps the pills in place, the chips reach 6 above and below them
+    Layout.topMargin: -6
+    Layout.bottomMargin: -6
     orientation: ListView.Horizontal
     spacing: 6
     clip: true

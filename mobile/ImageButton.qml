@@ -69,7 +69,7 @@ Item {
                 Rectangle {
                     Layout.preferredHeight: 38
                     Layout.preferredWidth: height
-                    radius: 10
+                    radius: 12
                     color: Utility.getAppHexColor("raisedBackground")
 
                     Image {

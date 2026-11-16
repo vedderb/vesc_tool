@@ -39,6 +39,7 @@ Item {
     property var dialogParent: rootItem.parent
     property int filterType: -1
     property var typeCounts: [0, 0, 0, 0]
+    property var foundAddrs: []
     readonly property int deviceCount: typeCounts.reduce((a, b) => a + b)
 
     onOpenedChanged: {
@@ -272,7 +273,9 @@ Item {
 
         ListView {
             Layout.fillWidth: true
-            Layout.preferredHeight: 34
+            Layout.preferredHeight: 44
+            Layout.topMargin: -6
+            Layout.bottomMargin: -4
             orientation: ListView.Horizontal
             spacing: 6
             clip: true
@@ -316,7 +319,8 @@ Item {
 
             header: ColumnLayout {
                 width: bleList.width
-                visible: lastDeviceName !== ""
+                // Only when the last device is in range
+                visible: lastDeviceAddr !== "" && foundAddrs.indexOf(lastDeviceAddr) >= 0
                 height: visible ? implicitHeight + 4 : 0
 
                 SectionHeader {
@@ -326,9 +330,9 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     implicitHeight: 70
-                    radius: 14
+                    radius: 12
                     color: Utility.getAppHexColor("cardBackground")
-                    border.color: Utility.getAppHexColor("lightestBackground")
+                    border.color: Utility.getAppHexColor("raisedBackground")
 
                     RowLayout {
                         anchors.fill: parent
@@ -347,7 +351,7 @@ Item {
                                 anchors.centerIn: parent
                                 width: 26
                                 height: 26
-                                source: "qrc" + Utility.getThemePath() + "icons/bluetooth.png"
+                                source: "qrc" + Utility.getThemePath() + lastDeviceIcon
                             }
                         }
 
@@ -359,7 +363,7 @@ Item {
                                 Layout.fillWidth: true
                                 text: lastDeviceName
                                 elide: Text.ElideRight
-                                font.pointSize: 14
+                                font.pointSize: 15
                                 font.weight: Font.Medium
                                 color: Utility.getAppHexColor("titleText")
                             }
@@ -388,7 +392,7 @@ Item {
 
                 width: bleList.width
                 height: 62
-                radius: 14
+                radius: 12
                 color: Utility.getAppHexColor("cardBackground")
                 border.color: Utility.getAppHexColor("raisedBackground")
 
@@ -786,6 +790,7 @@ Item {
                          })
             
             typeCounts = [0, 1, 2, 3].map(t => devices.filter(d => d.connectionType === t).length)
+            foundAddrs = devices.map(d => d.bleAddr)
             devices = devices.filter(d => filterType < 0 || d.connectionType === filterType)
 
            if (isModelUpdated(devices, bleModel)){

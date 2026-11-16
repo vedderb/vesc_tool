@@ -318,7 +318,7 @@ Item {
                     color: {color = Utility.getAppHexColor("lightText")}
                     linkColor: {linkColor = Utility.getAppHexColor("lightAccent")}
                     verticalAlignment: Text.AlignVCenter
-                    anchors.fill: parent
+                    width: vescDialogScroll.availableWidth
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     textFormat: Text.RichText
                     onLinkActivated: {

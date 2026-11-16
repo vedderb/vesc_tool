@@ -30,10 +30,10 @@ Rectangle {
 
     implicitWidth: 150
     implicitHeight: 54
-    radius: 10
+    radius: 12
     clip: true
-    color: Utility.getAppHexColor("rowBackground")
-    border.color: Utility.getAppHexColor("lightBackground")
+    color: Utility.getAppHexColor("cardBackground")
+    border.color: Utility.getAppHexColor("raisedBackground")
 
     Column {
         anchors.left: parent.left
@@ -57,6 +57,10 @@ Rectangle {
 
             Text {
                 id: valueText
+                // Shrinks instead of pushing the unit out of the tile
+                width: Math.min(implicitWidth, titleText.width - unitText.width - parent.spacing)
+                fontSizeMode: Text.HorizontalFit
+                minimumPointSize: 9
                 color: Utility.getAppHexColor("titleText")
                 font.pointSize: 15
                 font.weight: Font.Medium

@@ -57,7 +57,7 @@ Item {
 
         background: Rectangle {
             color: Utility.getAppHexColor("darkBackground")
-            radius: 16
+            radius: 20
         }
 
         Overlay.modal: Rectangle {
@@ -227,6 +227,7 @@ Item {
         id: cancelDialog
         acceptText: qsTr("Continue setup")
         rejectText: qsTr("Quit")
+        closePolicy: Popup.NoAutoClose
 
         ScrollView {
             anchors.fill: parent
@@ -237,7 +238,7 @@ Item {
                 id: resultLabel
                 color: Utility.getAppHexColor("lightText")
                 verticalAlignment: Text.AlignVCenter
-                anchors.fill: parent
+                width: parent.parent.width - 20
                 wrapMode: Text.WordWrap
                 text: "You must finish the introduction in order to use VESC Tool."
             }

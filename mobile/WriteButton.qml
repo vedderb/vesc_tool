@@ -100,7 +100,7 @@ Button {
 
     SheetDialog {
         id: reviewSheet
-        title: qsTr("Review %1 changes").arg(writeButton.changedParams.length)
+        title: qsTr("Review changes")
         rejectText: qsTr("Keep editing")
         acceptText: qsTr("Write")
         onAccepted: writeButton.write()

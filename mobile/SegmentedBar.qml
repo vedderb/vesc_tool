@@ -30,7 +30,7 @@ Rectangle {
 
     implicitHeight: 36
     radius: height / 2
-    color: Utility.getAppHexColor("cardBackground")
+    color: Utility.getAppHexColor("darkBackground")
     border.color: Utility.getAppHexColor("raisedBackground")
 
     RowLayout {
@@ -50,7 +50,7 @@ Rectangle {
 
                 background: Rectangle {
                     radius: height / 2
-                    color: index === bar.currentIndex ? Utility.getAppHexColor("selectedBackground") : "transparent"
+                    color: index === bar.currentIndex ? Utility.getAppHexColor("raisedBackground") : "transparent"
                 }
 
                 contentItem: Text {

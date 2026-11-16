@@ -42,7 +42,7 @@ Dialog {
     }
 
     background: Rectangle {
-        radius: 16
+        radius: 20
         color: Utility.getAppHexColor("cardBackground")
         border.color: Utility.getAppHexColor("raisedBackground")
     }

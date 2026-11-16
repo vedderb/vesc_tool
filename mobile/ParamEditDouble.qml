@@ -80,6 +80,7 @@ ParamEditFrame {
 
     SpinBox {
         id: percentageBox
+        background: InputBackground {}
         Layout.fillWidth: true
         Layout.leftMargin: 5
         Layout.rightMargin: 5

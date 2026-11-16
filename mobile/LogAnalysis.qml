@@ -170,7 +170,7 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
-                TextField {
+                InputField {
                     id: dirInput
                     Layout.fillWidth: true
                     text: root.deviceCurrentDir
@@ -1021,6 +1021,7 @@ Item {
 
             SpinBox {
                 id: threshSpin
+                background: InputBackground {}
                 from: 10
                 to: 2000
                 stepSize: 10

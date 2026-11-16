@@ -44,6 +44,7 @@ Item {
 
     SpinBox {
         id: spinbox
+        background: InputBackground {}
         anchors.fill: parent
         editable: true
 //        wheelEnabled: true

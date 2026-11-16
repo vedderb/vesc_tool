@@ -32,7 +32,6 @@ RowLayout {
         id: label
         color: Utility.getAppHexColor("lightAccent")
         font.family: "Exan"
-        font.pointSize: 11
         font.letterSpacing: 1.5
         font.capitalization: Font.AllUppercase
     }

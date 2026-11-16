@@ -66,17 +66,14 @@ Item {
     ColumnLayout {
         id: column
         anchors.fill: parent
-        anchors.margins: 10
-        anchors.leftMargin: 10 + notchLeft
-        anchors.rightMargin: 10 + notchRight
         spacing: 8
 
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: 12
-            color: Utility.getAppHexColor("consoleBackground")
-            border.color: Utility.getAppHexColor("lightBackground")
+            color: Utility.getAppHexColor("darkBackground")
+            border.color: Utility.getAppHexColor("raisedBackground")
 
             ScrollView {
                 id: scroll
@@ -117,7 +114,9 @@ Item {
 
         ListView {
             Layout.fillWidth: true
-            Layout.preferredHeight: 32
+            Layout.preferredHeight: 44
+            Layout.topMargin: -6
+            Layout.bottomMargin: -6
             orientation: ListView.Horizontal
             spacing: 6
             clip: true
@@ -133,7 +132,7 @@ Item {
         RowLayout {
             Layout.fillWidth: true
 
-            TextField {
+            InputField {
                 id: stringInput
                 Layout.fillWidth: true
                 placeholderText: "Terminal Command"
@@ -153,7 +152,7 @@ Item {
             ToolButton {
                 id: historyButton
                 text: "\u2191"
-                font.pointSize: 16
+                font.pointSize: 18
                 enabled: history.length > 0
                 Accessible.name: qsTr("Previous command")
                 onClicked: {
@@ -191,7 +190,21 @@ Item {
                 text: "Reboot"
 
                 onClicked: {
-                    mCommands.reboot()
+                    rebootDialog.open()
+                }
+
+                SheetDialog {
+                    id: rebootDialog
+                    title: "Reboot"
+                    acceptText: qsTr("Reboot")
+                    onAccepted: mCommands.reboot()
+
+                    Text {
+                        anchors.fill: parent
+                        color: Utility.getAppHexColor("lightText")
+                        wrapMode: Text.WordWrap
+                        text: "This is going to reboot the VESC. Continue?"
+                    }
                 }
             }
 

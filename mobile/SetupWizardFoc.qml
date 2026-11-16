@@ -109,7 +109,7 @@ Item {
 
         background: Rectangle {
             color: Utility.getAppHexColor("darkBackground")
-            radius: 16
+            radius: 20
         }
 
         StackLayout {
@@ -165,7 +165,7 @@ Item {
                                     id: card
                                     anchors.fill: parent
                                     anchors.margins: 5
-                                    radius: 14
+                                    radius: 12
                                     color: Utility.getAppHexColor("cardBackground")
                                     border.color: Utility.getAppHexColor("raisedBackground")
 
@@ -348,7 +348,7 @@ Item {
                                 color: Utility.getAppHexColor("cardBackground")
                                 border.width: ListView.isCurrentItem ? 2 : 1
                                 border.color: ListView.isCurrentItem ? Material.accent : Utility.getAppHexColor("raisedBackground")
-                                radius: 14
+                                radius: 12
                                 RowLayout {
                                     anchors.fill: parent
                                     spacing: 10
@@ -609,6 +609,7 @@ Item {
                                 SpinBox {
                                     enabled: !directDriveBox.checked
                                     id: motorPulleyBox
+                                    background: InputBackground {}
                                     from: 1
                                     to: 999
                                     value: 13
@@ -631,6 +632,7 @@ Item {
                                 SpinBox {
                                     enabled: !directDriveBox.checked
                                     id: wheelPulleyBox
+                                    background: InputBackground {}
                                     from: 1
                                     to: 999
                                     value: 36
@@ -958,7 +960,7 @@ Item {
                 color: {color = Utility.getAppHexColor("lightText")}
                 font.family: "DejaVu Sans Mono"
                 verticalAlignment: Text.AlignVCenter
-                anchors.fill: parent
+                width: parent.parent.width
                 wrapMode: Text.WordWrap
             }
         }

@@ -31,7 +31,10 @@ AbstractButton {
     property bool tinted: false
     readonly property bool colored: checked || tinted
 
-    implicitHeight: 32
+    // 44 pt touch target around the 32 pt pill, label chips set topInset to 0
+    topInset: 6
+    bottomInset: topInset
+    implicitHeight: 32 + topInset + bottomInset
     implicitWidth: row.implicitWidth + 24
     focusPolicy: Qt.NoFocus
 

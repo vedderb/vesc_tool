@@ -99,8 +99,8 @@ Item {
                         implicitHeight: cellCanvas.height + 16
                         visible: hasCells
                         radius: 12
-                        color: Utility.getAppHexColor("normalBackground")
-                        border.color: Utility.getAppHexColor("lightBackground")
+                        color: Utility.getAppHexColor("cardBackground")
+                        border.color: Utility.getAppHexColor("raisedBackground")
 
                         Canvas {
                             id: cellCanvas
@@ -136,7 +136,7 @@ Item {
                                     ctx.lineTo(xOfsLeft + lineStep * i, heightBars)
                                 }
 
-                                ctx.strokeStyle = Utility.getAppHexColor("lightBackground")
+                                ctx.strokeStyle = Utility.getAppHexColor("raisedBackground")
                                 ctx.lineWidth = 1
                                 ctx.stroke()
 
@@ -149,7 +149,7 @@ Item {
 
                                 for (i = 0;i < vCells.length;i++) {
                                     var y = i * rowHeight + rowHeight / 2
-                                    var isMin = vCells[i] === cvMin && cvMax > cvMin
+                                    var isMin = i === vCells.indexOf(cvMin) && Math.round((cvMax - cvMin) * 1000) >= 50
                                     var tagColor = Utility.getAppHexColor(isBal[i] ? "infoText" : "warningText")
                                     var cellW = Math.max(Math.min(((vCells[i] - 3.0) / 1.2) * cellWidth, cellWidth), 1.2)
 
@@ -203,9 +203,9 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         implicitHeight: rows.implicitHeight + 8
-                        radius: 14
-                        color: Utility.getAppHexColor("rowBackground")
-                        border.color: Utility.getAppHexColor("lightBackground")
+                        radius: 12
+                        color: Utility.getAppHexColor("cardBackground")
+                        border.color: Utility.getAppHexColor("raisedBackground")
 
                         Column {
                             id: rows
@@ -254,6 +254,7 @@ Item {
                                 readonly property var labels: mVal.data_version === 1 ?
                                                                   ["IC", "Cell Min", "Cell Max", "Mosfet", "Ambient"] : []
                                 enabled: false
+                                topInset: 0
                                 text: (index < labels.length ? labels[index] : "T" + (index + 1 - labels.length)) + " " +
                                       (modelData <= -280.0 ? "N/A" : parseFloat(modelData).toFixed(1) + " \u00B0C")
                             }
@@ -261,6 +262,7 @@ Item {
 
                         Chip {
                             enabled: false
+                            topInset: 0
                             text: mValSet ? "Hum " + parseFloat(mVal.humidity).toFixed(1) + " % (" +
                                             parseFloat(mVal.temp_hum_sensor).toFixed(1) + " \u00B0C)" : ""
                         }

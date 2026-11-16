@@ -62,7 +62,7 @@ Item {
 
         Layout.fillWidth: true
         implicitHeight: cardColumn.implicitHeight + 28
-        radius: 14
+        radius: 12
         color: Utility.getAppHexColor("cardBackground")
         border.color: Utility.getAppHexColor("raisedBackground")
 
@@ -126,7 +126,7 @@ Item {
 
                                 Text {
                                     text: modelData[1]
-                                    font.pointSize: 20
+                                    font.pointSize: 18
                                     font.weight: Font.Medium
                                     color: Utility.getAppHexColor(index === 0 ? "titleText" : "accentText")
                                 }
@@ -188,6 +188,7 @@ Item {
 
                             ComboBox {
                                 id: hwBox
+                                background: InputBackground {}
                                 Layout.fillWidth: true
 
                                 textRole: "key"
@@ -230,6 +231,7 @@ Item {
 
                             ComboBox {
                                 id: fwBox
+                                background: InputBackground {}
                                 Layout.fillWidth: true
 
                                 textRole: "key"
@@ -282,7 +284,7 @@ Item {
                             text: "Custom File"
                         }
 
-                        TextField {
+                        InputField {
                             id: customFwText
                             Layout.fillWidth: true
                             placeholderText: "Custom Firmware Path"
@@ -336,6 +338,7 @@ Item {
 
                         ComboBox {
                             id: blBox
+                            background: InputBackground {}
                             Layout.fillWidth: true
                             visible: blItems.count > 0
 
@@ -364,6 +367,7 @@ Item {
 
                         ComboBox {
                             id: archVerBox
+                            background: InputBackground {}
                             Layout.fillWidth: true
                             visible: archVerItems.count > 0
                             popup.bottomMargin: 100
@@ -402,6 +406,7 @@ Item {
 
                         ComboBox {
                             id: archFwBox
+                            background: InputBackground {}
                             Layout.fillWidth: true
                             visible: archVerItems.count > 0
                             popup.bottomMargin: 100
@@ -485,6 +490,7 @@ Item {
 
                             Chip {
                                 enabled: false
+                                topInset: 0
                                 checked: index === uploadStep
                                 text: (index < uploadStep ? "\u2713 " : "") + modelData
                             }
@@ -568,7 +574,7 @@ Item {
 
             Button {
                 id: uploadButton
-                text: uploadAllButton.checked && uploadAllButton.enabled ?
+                text: uploadAllButton.checked && uploadAllButton.enabled && VescIf.getCanDevsLast().length > 0 ?
                           qsTr("Upload to %1 devices").arg(VescIf.getCanDevsLast().length + 1) : qsTr("Upload")
                 Layout.fillWidth: true
                 Layout.preferredWidth: 2

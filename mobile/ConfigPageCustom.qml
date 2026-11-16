@@ -97,7 +97,7 @@ Item {
         SubgroupBar {
             id: tabBox
             Layout.fillWidth: true
-            Layout.topMargin: 5
+            Layout.topMargin: -1
 
             onCurrentTextChanged: {
                 updateEditors()

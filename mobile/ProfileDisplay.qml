@@ -94,7 +94,6 @@ Item {
                         elide: Text.ElideRight
                         color: Utility.getAppHexColor("titleText")
                         font.weight: Font.Medium
-                        font.pointSize: 13
                     }
 
                     Text {
@@ -179,7 +178,7 @@ Item {
                     ValueTile {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
-                        color: Utility.getAppHexColor("normalBackground")
+                        color: Utility.getAppHexColor("darkBackground")
                         border.width: 0
                         title: modelData[0]
                         value: modelData[1]

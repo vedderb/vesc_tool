@@ -36,6 +36,7 @@ Item {
     property int notchRight: 0
     property int notchBot: 0
     property int notchTop: 0
+    property string lastDeviceAddr: ""
 
     function setupMotors() {
         if (!VescIf.isPortConnected()) {

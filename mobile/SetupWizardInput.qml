@@ -118,7 +118,7 @@ Item {
 
         background: Rectangle {
             color: Utility.getAppHexColor("darkBackground")
-            radius: 16
+            radius: 20
         }
 
         Overlay.modal: Rectangle {
@@ -165,7 +165,7 @@ Item {
                                 color: Utility.getAppHexColor("cardBackground")
                                 border.width: ListView.isCurrentItem ? 2 : 1
                                 border.color: ListView.isCurrentItem ? Material.accent : Utility.getAppHexColor("raisedBackground")
-                                radius: 14
+                                radius: 12
                                 RowLayout {
                                     anchors.fill: parent
                                     spacing: 10
@@ -274,7 +274,7 @@ Item {
                                 color: Utility.getAppHexColor("cardBackground")
                                 border.width: ListView.isCurrentItem ? 2 : 1
                                 border.color: ListView.isCurrentItem ? Material.accent : Utility.getAppHexColor("raisedBackground")
-                                radius: 14
+                                radius: 12
                                 RowLayout {
                                     anchors.fill: parent
                                     spacing: 10

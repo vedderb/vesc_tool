@@ -521,7 +521,7 @@ Item {
                 RowLayout {
                     Layout.fillWidth: true
 
-                    TextField {
+                    InputField {
                         id: replInput
                         Layout.fillWidth: true
                         Layout.topMargin: 5
@@ -665,6 +665,7 @@ Item {
 
                     ComboBox {
                         id: pollHzBox
+                        background: InputBackground {}
                         Layout.fillWidth: true
                         model: [1, 2, 5, 10]
                         currentIndex: 1
@@ -774,7 +775,7 @@ Item {
         ColumnLayout {
             anchors.fill: parent
 
-            TextField {
+            InputField {
                 id: recentFilter
                 Layout.fillWidth: true
                 placeholderText: "Filter"
@@ -808,7 +809,7 @@ Item {
         ColumnLayout {
             anchors.fill: parent
 
-            TextField {
+            InputField {
                 id: exampleFilter
                 Layout.fillWidth: true
                 placeholderText: "Filter"

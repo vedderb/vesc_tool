@@ -72,9 +72,9 @@ Item {
 
         Layout.fillWidth: true
         implicitHeight: groupColumn.implicitHeight
-        radius: 14
-        color: Utility.getAppHexColor("rowBackground")
-        border.color: Utility.getAppHexColor("lightBackground")
+        radius: 12
+        color: Utility.getAppHexColor("cardBackground")
+        border.color: Utility.getAppHexColor("raisedBackground")
 
         ColumnLayout {
             id: groupColumn

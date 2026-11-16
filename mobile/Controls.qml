@@ -96,7 +96,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     implicitHeight: setpoint.implicitHeight + 28
-                    radius: 14
+                    radius: 12
                     color: Utility.getAppHexColor("cardBackground")
                     border.color: Utility.getAppHexColor("raisedBackground")
 
@@ -156,6 +156,7 @@ Item {
 
                                 Chip {
                                     enabled: false
+                                    topInset: 0
                                     text: modelData
                                 }
                             }

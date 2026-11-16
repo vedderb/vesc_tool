@@ -106,7 +106,7 @@ Item {
                     height: 130
                     color: Utility.getAppHexColor("cardBackground")
                     border.color: Utility.getAppHexColor("raisedBackground")
-                    radius: 14
+                    radius: 12
 
                     RowLayout {
                         anchors.fill: parent

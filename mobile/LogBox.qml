@@ -95,7 +95,7 @@ Item {
             }
         }
 
-        TextField {
+        InputField {
             id: rtLogFileText
             Layout.fillWidth: true
             Layout.columnSpan: 3

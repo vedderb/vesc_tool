@@ -151,7 +151,7 @@ static void addFonts() {
 
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Regular.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Medium.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bolf.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bold.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
     QFontDatabase::addApplicationFont(":/res/fonts/Roboto/RobotoMono-VariableFont_wght.ttf");
@@ -206,11 +206,8 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("vescGreenMedium", QColor(35,104,61));
         Utility::setAppQColor("vescBlue", QColor(0,160,227));
         Utility::setAppQColor("vescBlueDark", QColor(0,106,150));
-        Utility::setAppQColor("barBackground", QColor(66,66,68));
-        Utility::setAppQColor("cardBackground", QColor(43,43,46));
-        Utility::setAppQColor("rowBackground", QColor(40,40,43));
-        Utility::setAppQColor("raisedBackground", QColor(56,56,60));
-        Utility::setAppQColor("selectedBackground", QColor(74,74,78));
+        Utility::setAppQColor("cardBackground", QColor(43,42,46));
+        Utility::setAppQColor("raisedBackground", QColor(56,55,59));
         Utility::setAppQColor("titleText", QColor(242,242,242));
         Utility::setAppQColor("accentText", QColor(255,138,92));
         Utility::setAppQColor("positive", QColor(13,177,75));
@@ -221,7 +218,6 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("warningText", QColor(242,181,74));
         Utility::setAppQColor("danger", QColor(224,72,72));
         Utility::setAppQColor("dangerText", QColor(255,122,122));
-        Utility::setAppQColor("consoleBackground", QColor(20,20,22));
     } else {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2.conf");
 
@@ -255,11 +251,8 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("vescGreenMedium", QColor(24,166,77));
         Utility::setAppQColor("vescBlue", QColor(0,160,227));
         Utility::setAppQColor("vescBlueDark", QColor(0,106,150));
-        Utility::setAppQColor("barBackground", QColor(232,232,235));
-        Utility::setAppQColor("cardBackground", QColor(246,246,248));
-        Utility::setAppQColor("rowBackground", QColor(242,242,245));
-        Utility::setAppQColor("raisedBackground", QColor(228,228,232));
-        Utility::setAppQColor("selectedBackground", QColor(210,210,215));
+        Utility::setAppQColor("cardBackground", QColor(245,245,245));
+        Utility::setAppQColor("raisedBackground", QColor(228,228,228));
         Utility::setAppQColor("titleText", QColor(17,17,17));
         Utility::setAppQColor("accentText", QColor(178,58,10));
         Utility::setAppQColor("positive", QColor(13,150,65));
@@ -270,7 +263,6 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("warningText", QColor(138,83,0));
         Utility::setAppQColor("danger", QColor(200,52,52));
         Utility::setAppQColor("dangerText", QColor(185,35,35));
-        Utility::setAppQColor("consoleBackground", QColor(250,250,251));
     }
 
     // DPI settings

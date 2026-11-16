@@ -158,6 +158,7 @@ Item {
 
                 ComboBox {
                     id: pageBox
+                    background: InputBackground {}
                     Layout.fillWidth: true
 
                     model: VescIf.mcConfig().getParamGroups()

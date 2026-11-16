@@ -32,9 +32,9 @@ Rectangle {
     readonly property bool hasMotorData: hwType === "VESC" || canMotorId >= 0
 
     implicitHeight: column.implicitHeight + 28
-    radius: 16
+    radius: 12
     color: Utility.getAppHexColor("cardBackground")
-    border.color: Utility.getAppHexColor("lightestBackground")
+    border.color: Utility.getAppHexColor("raisedBackground")
 
     ColumnLayout {
         id: column
@@ -82,7 +82,7 @@ Rectangle {
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: rtBattery >= 0 ? Math.round(rtBattery * 100) + "%" : "–"
-                        font.pointSize: 17
+                        font.pointSize: 18
                         font.weight: Font.Medium
                         color: Utility.getAppHexColor("lightText")
                     }
@@ -104,7 +104,7 @@ Rectangle {
                     Layout.fillWidth: true
                     text: connName
                     elide: Text.ElideRight
-                    font.pointSize: 16
+                    font.pointSize: 15
                     font.weight: Font.Medium
                     color: Utility.getAppHexColor("titleText")
                 }
@@ -152,7 +152,7 @@ Rectangle {
 
             ValueTile {
                 Layout.fillWidth: true
-                color: Utility.getAppHexColor("normalBackground")
+                color: Utility.getAppHexColor("darkBackground")
                 border.width: 0
                 title: qsTr("MOSFET")
                 value: rtTempMos.toFixed(0)
@@ -161,7 +161,7 @@ Rectangle {
 
             ValueTile {
                 Layout.fillWidth: true
-                color: Utility.getAppHexColor("normalBackground")
+                color: Utility.getAppHexColor("darkBackground")
                 border.width: 0
                 title: qsTr("Motor")
                 value: rtTempMotor.toFixed(0)
@@ -170,7 +170,7 @@ Rectangle {
 
             ValueTile {
                 Layout.fillWidth: true
-                color: Utility.getAppHexColor("normalBackground")
+                color: Utility.getAppHexColor("darkBackground")
                 border.width: 0
                 title: qsTr("Faults")
                 value: faultText !== "" ? qsTr("Fault") : qsTr("None")
@@ -180,6 +180,8 @@ Rectangle {
 
         Flow {
             Layout.fillWidth: true
+            Layout.topMargin: -6
+            Layout.bottomMargin: -6
             spacing: 6
             visible: canCount > 0 || fwUpdateAvailable || changedCount > 0
 

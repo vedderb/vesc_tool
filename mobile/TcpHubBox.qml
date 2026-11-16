@@ -70,7 +70,7 @@ Item {
             Layout.fillWidth: false
         }
 
-        TextField {
+        InputField {
             id: serverText
             Layout.fillWidth: true
             placeholderText: "Server"
@@ -89,6 +89,7 @@ Item {
 
         SpinBox {
             id: portBox
+            background: InputBackground {}
             from: 0
             to: 65535
             value: 65101
@@ -103,7 +104,7 @@ Item {
             Layout.fillWidth: false
         }
 
-        TextField {
+        InputField {
             id: idText
             Layout.fillWidth: true
             placeholderText: "VESC ID"
@@ -120,7 +121,7 @@ Item {
             Layout.fillWidth: false
         }
 
-        TextField {
+        InputField {
             id: passText
             Layout.fillWidth: true
             placeholderText: "Password"

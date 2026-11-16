@@ -42,8 +42,16 @@ Item {
     property string valueText: ""
     property string referenceText: ""
     default property alias content: editorColumn.data
+    // Rows above and below. In a single column they are drawn as one card.
+    property Item prev: null
+    property Item next: null
+    readonly property bool first: !prev || parent.columns !== 1
+    readonly property bool last: !next || parent.columns !== 1
 
     Layout.fillWidth: true
+    // Close the gap and share the border line with the row above
+    Layout.topMargin: first ? 0 : -parent.rowSpacing - 1
+    z: changed ? 1 : 0
     implicitHeight: card.implicitHeight
 
     function closeSheet() {
@@ -75,6 +83,12 @@ Item {
             defaultButton.visible = params.getParamTransmittable(paramName)
             refresh()
         }
+
+        var e = parent.children[parent.children.indexOf(frame) - 1]
+        if (e instanceof ParamEditFrame) {
+            prev = e
+            e.next = frame
+        }
     }
 
     onChangedChanged: refresh()
@@ -93,10 +107,14 @@ Item {
         id: card
         anchors.fill: parent
         implicitHeight: column.implicitHeight
-        radius: 11
-        color: frame.changed ? Qt.alpha(Material.accent, 0.08) : Utility.getAppHexColor("rowBackground")
+        radius: 12
+        topLeftRadius: frame.first ? radius : 0
+        topRightRadius: topLeftRadius
+        bottomLeftRadius: frame.last ? radius : 0
+        bottomRightRadius: bottomLeftRadius
+        color: frame.changed ? Qt.alpha(Material.accent, 0.08) : Utility.getAppHexColor("cardBackground")
         border.width: 1
-        border.color: frame.changed ? Qt.alpha(Material.accent, 0.3) : Utility.getAppHexColor("lightBackground")
+        border.color: frame.changed ? Qt.alpha(Material.accent, 0.3) : Utility.getAppHexColor("raisedBackground")
 
         Rectangle {
             anchors.left: parent.left
@@ -215,7 +233,7 @@ Item {
                     Text {
                         id: helpText
                         Layout.fillWidth: true
-                        Layout.preferredHeight: helpArea.full ? implicitHeight : Math.min(implicitHeight, helpMetrics.lineSpacing * 3)
+                        Layout.preferredHeight: helpArea.full ? implicitHeight : Math.min(implicitHeight, Math.ceil(helpMetrics.lineSpacing) * 3)
                         visible: text !== ""
                         clip: true
                         wrapMode: Text.WordWrap
@@ -261,6 +279,7 @@ Item {
 
                         Button {
                             Layout.fillWidth: true
+                            visible: helpText.implicitHeight > Math.ceil(helpMetrics.lineSpacing) * 3
                             flat: true
                             focusPolicy: Qt.NoFocus
                             text: qsTr("Help")

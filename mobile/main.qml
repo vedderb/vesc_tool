@@ -74,16 +74,20 @@ ApplicationWindow {
     property int changedCount: mcTracker.changedParams.length + appTracker.changedParams.length
     property alias lastDeviceName: lastDevice.name
     property alias lastDeviceTime: lastDevice.time
+    property alias lastDeviceIcon: lastDevice.icon
+    property alias lastDeviceAddr: lastDevice.addr
     property var lastPage: null
 
     // https://github.com/ekke/c2gQtWS_x/blob/master/qml/main.qml
     flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
 
     function updateNotch() {
-        notchTop = SafeArea.margins.top
+        // The iOS safe area is taller than the status bar and the home indicator need
+        var ios = Qt.platform.os === "ios"
+        notchTop = SafeArea.margins.top * (ios ? 0.85 : 1)
         notchLeft = SafeArea.margins.left
         notchRight = SafeArea.margins.right
-        notchBot = SafeArea.margins.bottom
+        notchBot = SafeArea.margins.bottom * (ios ? 0.6 : 1)
     }
 
     // Prefers the user's BLE name, then the hardware name, over the port address
@@ -244,8 +248,8 @@ ApplicationWindow {
 
             background: Rectangle {
                 color: Utility.getAppHexColor("cardBackground")
-                topLeftRadius: 18
-                bottomLeftRadius: 18
+                topLeftRadius: 20
+                bottomLeftRadius: 20
             }
 
             CanScreen {
@@ -276,8 +280,8 @@ ApplicationWindow {
 
         background: Rectangle {
             color: Utility.getAppHexColor("cardBackground")
-            topRightRadius: 18
-            bottomRightRadius: 18
+            topRightRadius: 20
+            bottomRightRadius: 20
         }
 
         ColumnLayout {
@@ -299,7 +303,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 implicitHeight: connColumn.implicitHeight + 24
                 radius: 12
-                color: Utility.getAppHexColor("normalBackground")
+                color: Utility.getAppHexColor("darkBackground")
 
                 ColumnLayout {
                     id: connColumn
@@ -684,11 +688,11 @@ ApplicationWindow {
 
     header: Rectangle {
         id: headerBar
-        color: Utility.getAppHexColor("barBackground")
+        color: Utility.getAppHexColor("darkBackground")
         height: tabBar.implicitHeight + notchTop // iPhone X Workaround
 
         // Fade out the tabs at an edge when more tabs are available beyond it
-        Repeater {
+        Instantiator {
             model: 2
 
             Rectangle {
@@ -701,10 +705,17 @@ ApplicationWindow {
                                        tabBar.contentItem.contentX + tabBar.width < tabBar.contentWidth - 1
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: index === 0 ? Utility.getAppHexColor("barBackground") : "transparent" }
-                    GradientStop { position: 1.0; color: index === 0 ? "transparent" : Utility.getAppHexColor("barBackground") }
+                    GradientStop { position: 0.0; color: index === 0 ? headerBar.color : "transparent" }
+                    GradientStop { position: 1.0; color: index === 0 ? "transparent" : headerBar.color }
                 }
             }
+        }
+
+        Rectangle {
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: 1
+            color: Utility.getAppHexColor("raisedBackground")
         }
 
         RowLayout {
@@ -719,10 +730,12 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 implicitWidth: 0
                 clip: true
+                // The stock snap scrolls a narrow first tab partly out of view
+                Component.onCompleted: contentItem.snapMode = ListView.NoSnap
 
                 background: Rectangle {
                     opacity: 1
-                    color: Utility.getAppHexColor("barBackground")
+                    color: "transparent"
                 }
 
                 Repeater {
@@ -743,7 +756,7 @@ ApplicationWindow {
                 onClicked: allPagesPopup.open()
 
                 background: Rectangle {
-                    color: allPagesPopup.visible ? Qt.alpha(Material.accent, 0.2) : Utility.getAppHexColor("barBackground")
+                    color: allPagesPopup.visible ? Qt.alpha(Material.accent, 0.2) : "transparent"
                 }
             }
         }
@@ -895,9 +908,15 @@ ApplicationWindow {
 
     footer: Rectangle {
         id: connectedRect
-        color: Utility.getAppHexColor("barBackground")
+        color: Utility.getAppHexColor("darkBackground")
         width: parent.width
         height: 52 + notchBot
+
+        Rectangle {
+            width: parent.width
+            height: 1
+            color: Utility.getAppHexColor("raisedBackground")
+        }
 
         RowLayout {
             anchors.left: parent.left
@@ -1031,7 +1050,7 @@ ApplicationWindow {
                         id: canCountText
                         anchors.centerIn: parent
                         text: canCount
-                        font.pointSize: 8
+                        font.pointSize: 9
                         font.weight: Font.Bold
                         color: Utility.getAppHexColor("white")
                     }
@@ -1210,7 +1229,7 @@ ApplicationWindow {
                 color: {color = Utility.getAppHexColor("lightText")}
                 linkColor: {linkColor = Utility.getAppHexColor("lightAccent")}
                 verticalAlignment: Text.AlignVCenter
-                anchors.fill: parent
+                width: vescDialogScroll.availableWidth
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 textFormat: Text.RichText
                 onLinkActivated: {
@@ -1422,6 +1441,15 @@ ApplicationWindow {
                 updateConnectionInfo()
                 lastDevice.name = connName
                 lastDevice.time = Date.now()
+                // connectTcp() clears the hub ID, so it tells a hub link from plain TCP
+                var tcp = connLink.startsWith("TCP") && VescIf.getLastTcpHubVescID() === ""
+                lastDevice.icon = connLink.startsWith("BLE") ? "icons/bluetooth.png" :
+                                  connLink.startsWith("serial") ? "icons/USB-96.png" :
+                                  tcp ? "icons/LAN-96.png" :
+                                  connLink.startsWith("TCP") ? "icons/Globe-96.png" : "icons/Connected-96.png"
+                // Address in the scan list, for the devices that a scan can find
+                lastDevice.addr = connLink.startsWith("BLE") ? VescIf.getLastBleAddr() :
+                                  tcp ? VescIf.getLastTcpServer() : ""
             } else {
                 updateConfCustom()
             }
@@ -1522,7 +1550,7 @@ ApplicationWindow {
                         page === confPageApp ? appTracker.changedParams.length : 0
 
             if (count > 0) {
-                showToast(qsTr("%1 unwritten changes in %2").arg(count).arg(page === confPageMotor ? "Motor Cfg" : "App Cfg"),
+                showToast(qsTr("%1 unwritten in %2").arg(count).arg(page === confPageMotor ? "Motor Cfg" : "App Cfg"),
                           "", "warn", qsTr("Review"), function() {
                               mainSwipeView.setCurrentIndex(page.SwipeView.index)
                           })
@@ -1537,6 +1565,8 @@ ApplicationWindow {
         category: "lastDevice"
         property string name: ""
         property real time: 0
+        property string icon: "icons/Connected-96.png"
+        property string addr: ""
     }
 
     ListModel {
@@ -1741,7 +1771,7 @@ ApplicationWindow {
 
     SheetDialog {
         id: disconnectSheet
-        title: qsTr("Write %1 changes before disconnecting?").arg(changedCount)
+        title: qsTr("Write changes before disconnecting?")
         acceptText: qsTr("Write")
         rejectText: qsTr("Discard")
         closePolicy: Popup.NoAutoClose
@@ -1787,7 +1817,7 @@ ApplicationWindow {
         padding: 12
 
         background: Rectangle {
-            radius: 18
+            radius: 20
             color: Utility.getAppHexColor("cardBackground")
         }
 
@@ -1796,7 +1826,6 @@ ApplicationWindow {
 
             Text {
                 text: qsTr("All pages")
-                font.pointSize: 13
                 font.weight: Font.Medium
                 color: Utility.getAppHexColor("lightText")
             }
@@ -1825,7 +1854,7 @@ ApplicationWindow {
 
                         background: Rectangle {
                             radius: 12
-                            color: pageTile.current ? Qt.alpha(Material.accent, 0.12) : Utility.getAppHexColor("normalBackground")
+                            color: pageTile.current ? Qt.alpha(Material.accent, 0.12) : Utility.getAppHexColor("darkBackground")
                             border.width: pageTile.current ? 1.5 : 0
                             border.color: Material.accent
 
@@ -1854,7 +1883,6 @@ ApplicationWindow {
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
                                 text: pageTile.tab.text
-                                font.pointSize: 11
                                 color: pageTile.current ? Utility.getAppHexColor("accentText") : Utility.getAppHexColor("lightText")
                             }
                         }

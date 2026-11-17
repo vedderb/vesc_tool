@@ -546,7 +546,7 @@ Item {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
                             color: Utility.getAppHexColor("warningText")
-                            text: qsTr("Keep the app open and the board powered.")
+                            text: qsTr("Keep the app open and the VESC device powered on.")
                         }
                     }
                 }

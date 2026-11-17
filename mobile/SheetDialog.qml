@@ -31,15 +31,19 @@ Dialog {
     property bool fullHeight: false
     // Moves the sheet down. Animated and dragged instead of y so that the y binding stays in effect
     property real slide: 0
+    // The on-screen keyboard covers the bottom of the window on iOS, the sheet sits on top of it
+    readonly property real keyboardHeight: Qt.platform.os === "ios" && Qt.inputMethod.visible ?
+        Math.max(0, parent.height - parent.mapFromItem(null, 0, Qt.inputMethod.keyboardRectangle.y).y) : 0
+    readonly property real maxHeight: parent.height - notchTop - 40 - keyboardHeight
 
     parent: Overlay.overlay
     modal: true
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     width: Math.min(parent.width, 640)
-    height: fullHeight ? parent.height - notchTop - 40 : Math.min(implicitHeight, parent.height - notchTop - 40)
+    height: fullHeight ? maxHeight : Math.min(implicitHeight, maxHeight)
     x: (parent.width - width) / 2
-    y: parent.height - height + slide
+    y: parent.height - height - keyboardHeight + slide
     leftPadding: 16 + notchLeft
     rightPadding: 16 + notchRight
     topPadding: 4

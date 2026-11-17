@@ -22,6 +22,7 @@
 #include "ios/src/setIosParameters.h"
 #endif
 #include <cmath>
+#include <QtMath>
 #include <QProgressDialog>
 #include <QEventLoop>
 #include <QNetworkAccessManager>
@@ -2590,6 +2591,66 @@ QVariant Utility::getSetting(QString key, QVariant defaultValue)
 {
     QSettings set;
     return set.value(key, defaultValue);
+}
+
+// Distance in meters of a csv log, from the logged positions and else from the tachometer.
+// Negative if the log has neither.
+double Utility::logDistance(QString path)
+{
+    if (path.startsWith("file:")) {
+        path = QUrl(path).toLocalFile();
+    }
+
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return -1.0;
+    }
+
+    const QList<QByteArray> header = file.readLine().trimmed().split(';');
+    const int latInd = header.indexOf("gnss_lat");
+    const int lonInd = header.indexOf("gnss_lon");
+    const int tachoInd = header.indexOf("tacho_meters");
+
+    double dist = 0.0, lat = 0.0, lon = 0.0, tachoFirst = 0.0, tachoLast = 0.0;
+    bool hasPos = false, hasTacho = false;
+
+    while (!file.atEnd()) {
+        const QList<QByteArray> cols = file.readLine().split(';');
+
+        if (latInd >= 0 && lonInd >= 0 && cols.size() > qMax(latInd, lonInd)) {
+            const double latNow = cols.at(latInd).toDouble();
+            const double lonNow = cols.at(lonInd).toDouble();
+
+            if (latNow != 0.0 || lonNow != 0.0) {
+                if (hasPos) {
+                    const double dLat = qDegreesToRadians(latNow - lat);
+                    const double dLon = qDegreesToRadians(lonNow - lon);
+                    const double a = pow(sin(dLat / 2.0), 2.0) + cos(qDegreesToRadians(lat)) *
+                            cos(qDegreesToRadians(latNow)) * pow(sin(dLon / 2.0), 2.0);
+                    const double step = 2.0 * 6371007.2 * asin(sqrt(a));
+
+                    // Larger steps are skipped as in the log viewer
+                    if (step < 100.0) {
+                        dist += step;
+                    }
+                }
+
+                lat = latNow;
+                lon = lonNow;
+                hasPos = true;
+            }
+        }
+
+        if (tachoInd >= 0 && cols.size() > tachoInd) {
+            tachoLast = cols.at(tachoInd).toDouble();
+            if (!hasTacho) {
+                tachoFirst = tachoLast;
+                hasTacho = true;
+            }
+        }
+    }
+
+    return dist > 0.0 ? dist : hasTacho ? qMax(0.0, tachoLast - tachoFirst) : -1.0;
 }
 
 void Utility::setSetting(QString key, QVariant value)

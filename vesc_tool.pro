@@ -130,6 +130,9 @@ contains(DEFINES, HAS_POS) {
     QT       += positioning
 }
 
+# Links the map plugin for the log viewer, static builds do not get it from the QML import
+ios: QT += location
+
 android: QT += core-private
 
 ios | macx: {

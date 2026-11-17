@@ -23,6 +23,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
+import QtQuick.Shapes
 import QtQuick.Dialogs
 import QtLocation
 import QtPositioning
@@ -144,6 +145,132 @@ Item {
         parseCsvText(text)
     }
 
+    function sizeText(bytes) {
+        return bytes < 1048576 ? (bytes / 1024).toFixed(1) + " KB" : (bytes / 1048576).toFixed(1) + " MB"
+    }
+
+    // Distance of a log file in km or miles, kept as reading the file takes a while
+    property var logDistances: ({})
+    function logDistanceText(path, size) {
+        var key = path + size
+        if (logDistances[key] === undefined) {
+            logDistances[key] = Utility.logDistance(path)
+        }
+        var m = logDistances[key]
+        return m < 0 ? "" : VescIf.useImperialUnits() ? (m / 1609.344).toFixed(2) + " mi" : (m / 1000).toFixed(2) + " km"
+    }
+
+    // Row of the log lists: name, details, a value and actions above a divider
+    component LogRow: Item {
+        id: logRow
+        property string name: ""
+        property string details: ""
+        property string value: ""
+        property bool canSave: false
+        property bool canDelete: false
+        signal clicked()
+        signal saveClicked()
+        signal deleteClicked()
+
+        implicitHeight: rowLayout.implicitHeight
+
+        RowLayout {
+            id: rowLayout
+            anchors.fill: parent
+            spacing: 0
+
+            ItemDelegate {
+                Layout.fillWidth: true
+                onClicked: logRow.clicked()
+
+                contentItem: RowLayout {
+                    spacing: 10
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 1
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: logRow.name
+                            elide: Text.ElideMiddle
+                            color: Utility.getAppHexColor("lightText")
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            visible: text !== ""
+                            text: logRow.details
+                            elide: Text.ElideRight
+                            font.pointSize: 9
+                            font.features: { "tnum": 1 }
+                            color: Utility.getAppHexColor("normalText")
+                        }
+                    }
+
+                    Text {
+                        visible: text !== ""
+                        text: logRow.value
+                        font.weight: Font.Medium
+                        font.features: { "tnum": 1 }
+                        color: Utility.getAppHexColor("lightText")
+                    }
+                }
+            }
+
+            ToolButton {
+                visible: logRow.canSave
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Save-96.png"
+                Accessible.name: qsTr("Save")
+                onClicked: logRow.saveClicked()
+            }
+
+            ToolButton {
+                visible: logRow.canDelete
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Delete-96.png"
+                icon.width: 20
+                icon.height: 20
+                icon.color: Utility.getAppHexColor("danger")
+                Accessible.name: qsTr("Delete")
+                onClicked: logRow.deleteClicked()
+            }
+        }
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: 1
+            color: Utility.getAppHexColor("lightestBackground")
+        }
+    }
+
+    // Shown in place of an empty log list
+    component EmptyLogs: ColumnLayout {
+        property alias text: emptyLabel.text
+        spacing: 12
+
+        Item { Layout.fillHeight: true }
+
+        Image {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: 48
+            Layout.preferredHeight: 48
+            source: "qrc" + Utility.getThemePath() + "icons/Line Chart-96.png"
+            opacity: 0.35
+        }
+
+        Label {
+            id: emptyLabel
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+            color: Utility.getAppHexColor("normalText")
+        }
+
+        Item { Layout.fillHeight: true }
+    }
+
     SheetDialog {
         id: confirmDeleteDialog
         acceptText: qsTr("Delete")
@@ -192,54 +319,32 @@ Item {
                 enabled: !root.downloadingFromDevice
                 model: root.deviceFileEntries
 
-                delegate: Item {
+                delegate: LogRow {
                     width: deviceListView.width
-                    height: rowDelegate.implicitHeight
-
-                    RowLayout {
-                        id: rowDelegate
-                        anchors.fill: parent
-                        spacing: 4
-
-                        ItemDelegate {
-                            Layout.fillWidth: true
-                            text: (modelData.isDir ? "[DIR] " : "") + modelData.name +
-                                  (!modelData.isDir && modelData.size > 0 ? " (" + (modelData.size / 1024).toFixed(1) + " KB)" : "")
-                            onClicked: {
-                                if (modelData.isDir) {
-                                    if (modelData.name === "..") {
-                                        var parts = root.deviceCurrentDir.replace(/\/+$/, "").split("/")
-                                        parts.pop()
-                                        var up = parts.join("/")
-                                        root.refreshDeviceDir(up.length === 0 ? "/" : up)
-                                    } else {
-                                        var next = (root.deviceCurrentDir === "/" ? "/" : root.deviceCurrentDir + "/") + modelData.name
-                                        root.refreshDeviceDir(next)
-                                    }
-                                } else {
-                                    root.loadDeviceCsv(modelData.name)
-                                    if (!root.mCommands.fileBlockDidCancel()) {
-                                        deviceFileDialog.close()
-                                    }
-                                }
+                    name: (modelData.isDir ? "[DIR] " : "") + modelData.name
+                    details: !modelData.isDir && modelData.size > 0 ? root.sizeText(modelData.size) : ""
+                    canSave: !modelData.isDir
+                    canDelete: !modelData.isDir
+                    onClicked: {
+                        if (modelData.isDir) {
+                            if (modelData.name === "..") {
+                                var parts = root.deviceCurrentDir.replace(/\/+$/, "").split("/")
+                                parts.pop()
+                                var up = parts.join("/")
+                                root.refreshDeviceDir(up.length === 0 ? "/" : up)
+                            } else {
+                                var next = (root.deviceCurrentDir === "/" ? "/" : root.deviceCurrentDir + "/") + modelData.name
+                                root.refreshDeviceDir(next)
+                            }
+                        } else {
+                            root.loadDeviceCsv(modelData.name)
+                            if (!root.mCommands.fileBlockDidCancel()) {
+                                deviceFileDialog.close()
                             }
                         }
-
-                        ToolButton {
-                            visible: !modelData.isDir
-                            text: "Save"
-                            font.pixelSize: 11
-                            onClicked: root.backupDeviceCsv(modelData.name)
-                        }
-
-                        ToolButton {
-                            visible: !modelData.isDir
-                            text: "Delete"
-                            font.pixelSize: 11
-                            Material.foreground: Utility.getAppHexColor("danger")
-                            onClicked: root.promptDeleteDeviceFile(modelData.name)
-                        }
                     }
+                    onSaveClicked: root.backupDeviceCsv(modelData.name)
+                    onDeleteClicked: root.promptDeleteDeviceFile(modelData.name)
                 }
 
             }
@@ -331,74 +436,58 @@ Item {
     SheetDialog {
         id: rtLogListDialog
         title: "RT Logs"
-        closePolicy: Popup.NoAutoClose
+        acceptText: qsTr("Close")
+        rejectText: ""
         fullHeight: true
 
         ColumnLayout {
             anchors.fill: parent
-            spacing: 6
+            spacing: 8
 
-            Label {
+            EmptyLogs {
                 visible: root.rtLogEntries.length === 0
                 Layout.fillWidth: true
-                wrapMode: Text.WordWrap
+                Layout.fillHeight: true
                 text: "No .csv logs found in:\n" + displayPath(root.currentRtLogDir)
+            }
+
+            Label {
+                visible: root.rtLogEntries.length > 0
+                Layout.fillWidth: true
+                elide: Text.ElideMiddle
+                text: qsTr("%1 logs · %2 · %3").arg(root.rtLogEntries.length).
+                      arg(root.sizeText(root.rtLogEntries.reduce((sum, e) => sum + e.size, 0))).
+                      arg(displayPath(root.currentRtLogDir))
+                font.pointSize: 10
                 color: Utility.getAppHexColor("normalText")
             }
 
             ListView {
                 id: rtLogListView
+                visible: root.rtLogEntries.length > 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
                 model: root.rtLogEntries
 
-                delegate: Item {
+                delegate: LogRow {
                     width: rtLogListView.width
-                    height: rtRow.implicitHeight
-
-                    RowLayout {
-                        id: rtRow
-                        anchors.fill: parent
-                        spacing: 4
-
-                        ItemDelegate {
-                            Layout.fillWidth: true
-                            contentItem: Column {
-                                Label {
-                                    width: parent.width
-                                    text: modelData.name
-                                    elide: Text.ElideMiddle
-                                }
-
-                                Label {
-                                    width: parent.width
-                                    elide: Text.ElideRight
-                                    text: (modelData.size / 1024).toFixed(1) + " KB · " + modelData.modified
-                                    font.pointSize: 10
-                                    color: Utility.getAppHexColor("disabledText")
-                                }
-                            }
-                            onClicked: {
-                                var text = Utility.readTextFile(modelData.path)
-                                if (text && text.length > 0) {
-                                    root.loadedFileName = modelData.name
-                                    root.parseCsvText(text)
-                                    recordRecentLocalLog(modelData.path)
-                                    rtLogListDialog.close()
-                                } else {
-                                    root.statusText = "Failed to read: " + modelData.name
-                                }
-                            }
-                        }
-
-                        ToolButton {
-                            text: "Delete"
-                            font.pixelSize: 11
-                            Material.foreground: Utility.getAppHexColor("danger")
-                            onClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
+                    name: modelData.name
+                    details: root.sizeText(modelData.size) + " · " + modelData.modified
+                    value: root.logDistanceText(modelData.path, modelData.size)
+                    canDelete: true
+                    onClicked: {
+                        var text = Utility.readTextFile(modelData.path)
+                        if (text && text.length > 0) {
+                            root.loadedFileName = modelData.name
+                            root.parseCsvText(text)
+                            recordRecentLocalLog(modelData.path)
+                            rtLogListDialog.close()
+                        } else {
+                            root.statusText = "Failed to read: " + modelData.name
                         }
                     }
+                    onDeleteClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
                 }
             }
         }
@@ -584,77 +673,48 @@ Item {
     SheetDialog {
         id: recentLogsDialog
         title: "Recent Logs (Local & RT)"
-        closePolicy: Popup.NoAutoClose
+        acceptText: qsTr("Close")
+        rejectText: ""
         fullHeight: true
 
         ColumnLayout {
             anchors.fill: parent
-            spacing: 6
+            spacing: 8
 
-            Label {
+            EmptyLogs {
                 visible: root.recentLogEntries.length === 0
                 Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                color: Utility.getAppHexColor("normalText")
+                Layout.fillHeight: true
                 text: "No recent local or RT logs found."
             }
 
             ListView {
                 id: recentLogsListView
+                visible: root.recentLogEntries.length > 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
                 model: root.recentLogEntries
 
-                delegate: Item {
+                delegate: LogRow {
                     width: recentLogsListView.width
-                    height: recentRow.implicitHeight
-
-                    RowLayout {
-                        id: recentRow
-                        anchors.fill: parent
-                        spacing: 6
-
-                        ItemDelegate {
-                            Layout.fillWidth: true
-                            contentItem: Column {
-                                Label {
-                                    width: parent.width
-                                    text: modelData.name
-                                    elide: Text.ElideMiddle
-                                }
-
-                                Label {
-                                    width: parent.width
-                                    elide: Text.ElideRight
-                                    text: modelData.source +
-                                          (modelData.size > 0 ? " · " + (modelData.size / 1024).toFixed(1) + " KB" : "") +
-                                          (modelData.modified ? " · " + modelData.modified : "")
-                                    font.pointSize: 10
-                                    color: Utility.getAppHexColor("disabledText")
-                                }
-                            }
-                            onClicked: {
-                                var text = Utility.readTextFile(modelData.path)
-                                if (text && text.length > 0) {
-                                    root.loadedFileName = modelData.name
-                                    root.parseCsvText(text)
-                                    root.recordRecentLocalLog(modelData.path)
-                                    recentLogsDialog.close()
-                                } else {
-                                    root.statusText = "Failed to read: " + modelData.name
-                                }
-                            }
-                        }
-
-                        ToolButton {
-                            visible: modelData.canDelete
-                            text: "Delete"
-                            font.pixelSize: 11
-                            Material.foreground: Utility.getAppHexColor("danger")
-                            onClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
+                    name: modelData.name
+                    details: modelData.source + (modelData.size > 0 ? " · " + root.sizeText(modelData.size) : "") +
+                             (modelData.modified ? " · " + modelData.modified : "")
+                    value: modelData.size > 0 ? root.logDistanceText(modelData.path, modelData.size) : ""
+                    canDelete: modelData.canDelete
+                    onClicked: {
+                        var text = Utility.readTextFile(modelData.path)
+                        if (text && text.length > 0) {
+                            root.loadedFileName = modelData.name
+                            root.parseCsvText(text)
+                            root.recordRecentLocalLog(modelData.path)
+                            recentLogsDialog.close()
+                        } else {
+                            root.statusText = "Failed to read: " + modelData.name
                         }
                     }
+                    onDeleteClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
                 }
             }
 
@@ -701,12 +761,51 @@ Item {
     readonly property var slotColors: Utility.isDarkMode() ? ["#00d4ff", "#ff9900", "#ff4d6d", "#4ade80"] :
                                                              ["#0079a8", "#b85f00", "#d42a4c", "#1c8a4a"]
 
-    property var currentMapCoord: {
-        if (!hasGps || rawRows.length === 0) return QtPositioning.coordinate(0, 0)
-        for (var i = currentIndex; i >= 0; i--) {
-            if (rawRows[i].coord !== null) return rawRows[i].coord
+    // The marker eases after the cursor through the rows in between, so that it stays on the track
+    property real markerIndex: currentIndex
+    Behavior on markerIndex {
+        NumberAnimation { duration: 80; easing.type: Easing.OutQuad }
+    }
+
+    // Position on the track at a fractional row, between the position logged before and after it
+    function trackCoordAt(index) {
+        var n = rawRows.length
+        var i = Math.min(Math.floor(index), n - 1)
+        while (i >= 0 && rawRows[i].coord === null) i--
+        if (i < 0) return trackCoords.length > 0 ? trackCoords[0] : QtPositioning.coordinate(0, 0)
+
+        var a = rawRows[i].coord
+        var same = (c) => c === null || (c.latitude === a.latitude && c.longitude === a.longitude)
+        var start = i
+        while (start > 0 && same(rawRows[start - 1].coord)) start--
+        var next = i + 1
+        while (next < n && same(rawRows[next].coord)) next++
+        if (next >= n) return a
+
+        var b = rawRows[next].coord
+        var t = Math.min(1, (index - start) / (next - start))
+        return QtPositioning.coordinate(a.latitude + (b.latitude - a.latitude) * t,
+                                        a.longitude + (b.longitude - a.longitude) * t)
+    }
+
+    property var currentMapCoord: hasGps && rawRows.length > 0 ? trackCoordAt(markerIndex) :
+                                                                 QtPositioning.coordinate(0, 0)
+
+    // Direction of travel at the marker in degrees from north, towards the next logged position.
+    // Positions closer than 5 m are skipped as their direction is mostly GPS noise.
+    property real currentHeading: {
+        if (!hasGps || rawRows.length === 0) return 0
+        var cur = currentMapCoord
+        var row = Math.min(Math.floor(markerIndex), rawRows.length - 1)
+        for (var i = row + 1; i < rawRows.length; i++) {
+            var next = rawRows[i].coord
+            if (next !== null && cur.distanceTo(next) > 5) return cur.azimuthTo(next)
         }
-        return trackCoords.length > 0 ? trackCoords.slice(0, 1).pop() : QtPositioning.coordinate(0, 0)
+        for (var j = row; j >= 0; j--) {
+            var prev = rawRows[j].coord
+            if (prev !== null && prev.distanceTo(cur) > 5) return prev.azimuthTo(cur)
+        }
+        return 0
     }
 
     function updateStatusSummary() {
@@ -1250,8 +1349,9 @@ Item {
 
     onRawRowsChanged: rangeCache = ({})
 
-    onCurrentIndexChanged: {
-        chartCursor.requestPaint()
+    onCurrentIndexChanged: chartCursor.requestPaint()
+
+    onCurrentMapCoordChanged: {
         if (followMap && hasGps && rawRows.length > 0) {
             var c = currentMapCoord
             if (c.isValid && (c.latitude !== 0 || c.longitude !== 0)) {
@@ -1671,8 +1771,38 @@ Item {
             id: currentMarker
             visible: root.hasGps
             coordinate: root.currentMapCoord
-            anchorPoint: Qt.point(8, 8)
-            sourceItem: Rectangle { width: 16; height: 16; radius: 8; color: "#ff3333"; border.color: "white"; border.width: 2 }
+            anchorPoint: Qt.point(12, 12)
+            sourceItem: Item {
+                width: 24
+                height: 24
+
+                Shape {
+                    anchors.fill: parent
+                    // Unwrapped so that it turns the short way. A smoothed animation keeps
+                    // turning while the direction changes, other animations restart on each change.
+                    property real heading: 0
+                    readonly property real target: root.currentHeading - map.bearing
+                    onTargetChanged: heading += ((target - heading) % 360 + 540) % 360 - 180
+                    rotation: heading
+                    preferredRendererType: Shape.CurveRenderer
+
+                    Behavior on heading {
+                        SmoothedAnimation { velocity: 1800 }
+                    }
+
+                    ShapePath {
+                        fillColor: "#ff3333"
+                        strokeColor: "white"
+                        strokeWidth: 2
+                        joinStyle: ShapePath.RoundJoin
+                        startX: 12; startY: 2
+                        PathLine { x: 21; y: 21 }
+                        PathLine { x: 12; y: 16 }
+                        PathLine { x: 3; y: 21 }
+                        PathLine { x: 12; y: 2 }
+                    }
+                }
+            }
         }
         Rectangle {
             id: chartBox

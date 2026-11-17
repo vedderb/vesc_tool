@@ -572,7 +572,7 @@ Item {
                             wrapMode: Text.WordWrap
                             font.pointSize: 10
                             color: Utility.getAppHexColor("normalText")
-                            text: qsTr("Can't find your VESC? Check that Bluetooth and location access are enabled and that the board is powered.")
+                            text: qsTr("Can't find your VESC? Check that Bluetooth and location access are enabled and that the VESC device is powered on.")
                         }
 
                         Button {
@@ -857,23 +857,12 @@ Item {
         acceptText: qsTr("Save")
         title: "Set BLE Device Name"
 
-        fullHeight: true
-
-        Rectangle {
-            anchors.fill: parent
-            height: stringInput.implicitHeight + 14
-            border.width: 2
-            border.color: Utility.getAppHexColor("lightestBackground")
-            color: Utility.getAppHexColor("normalBackground")
-            radius: 3
-            TextInput {
-                id: stringInput
-                color: Utility.getAppHexColor("lightText")
-                anchors.fill: parent
-                anchors.margins: 7
-                font.pointSize: 12
-                focus: true
-            }
+        InputField {
+            id: stringInput
+            width: parent.width
+            placeholderText: qsTr("Name")
+            focus: true
+            onAccepted: bleNameDialog.accept()
         }
 
         onAccepted: {
@@ -891,23 +880,12 @@ Item {
         acceptText: qsTr("Save")
         title: "Set TCP Hub Password"
 
-        fullHeight: true
-
-        Rectangle {
-            anchors.fill: parent
-            height: hubPassInput.implicitHeight + 14
-            border.width: 2
-            border.color: Utility.getAppHexColor("lightestBackground")
-            color: Utility.getAppHexColor("normalBackground")
-            radius: 3
-            TextInput {
-                id: hubPassInput
-                color: Utility.getAppHexColor("lightText")
-                anchors.fill: parent
-                anchors.margins: 7
-                font.pointSize: 12
-                focus: true
-            }
+        InputField {
+            id: hubPassInput
+            width: parent.width
+            placeholderText: qsTr("Password")
+            focus: true
+            onAccepted: hubPassDialog.accept()
         }
 
         onAccepted: {

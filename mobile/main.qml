@@ -647,6 +647,19 @@ ApplicationWindow {
         }
 
         Page {
+            id: logViewPage
+            Loader {
+                id: logViewLoader
+                anchors.fill: parent
+                asynchronous: true
+                visible: status == Loader.Ready
+                sourceComponent: LogAnalysis {
+                    anchors.fill: parent
+                }
+            }
+        }
+
+        Page {
             id: terminalPage
             Loader {
                 id: terminalLoader
@@ -668,19 +681,6 @@ ApplicationWindow {
                 asynchronous: true
                 visible: status == Loader.Ready
                 sourceComponent: Lisp {
-                    anchors.fill: parent
-                }
-            }
-        }
-
-        Page {
-            id: logViewPage
-            Loader {
-                id: logViewLoader
-                anchors.fill: parent
-                asynchronous: true
-                visible: status == Loader.Ready
-                sourceComponent: LogAnalysis {
                     anchors.fill: parent
                 }
             }
@@ -741,7 +741,7 @@ ApplicationWindow {
 
                 Repeater {
                     id: rep
-                    model: ["Start", "RT Data", "Profiles", "Terminal", "LispBM", "LogView"]
+                    model: ["Start", "RT Data", "Profiles", "LogView", "Terminal", "LispBM"]
 
                     MainTabButton {
                         text: modelData

@@ -201,6 +201,16 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         mSettings.endArray();
     }
 
+    connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
+    connect(mBleUart, &BleUart::connected, [this]{
+        setLastConnectionType(CONN_BLE);
+        mSettings.setValue("ble_addr", mLastBleAddr);
+    });
+    connect(mBleUart, SIGNAL(unintentionalDisconnect()), this, SLOT(bleUnintentionalDisconnect()));
+#else
+    mBleUart = new BleUartDummy(this);
+#endif
+
     {
         int size = mSettings.beginReadArray("blePreferred");
         for (int i = 0; i < size; ++i) {
@@ -211,16 +221,6 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
         mSettings.endArray();
     }
-
-    connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
-    connect(mBleUart, &BleUart::connected, [this]{
-        setLastConnectionType(CONN_BLE);
-        mSettings.setValue("ble_addr", mLastBleAddr);
-    });
-    connect(mBleUart, SIGNAL(unintentionalDisconnect()), this, SLOT(bleUnintentionalDisconnect()));
-#else
-    mBleUart = new BleUartDummy(this);
-#endif
 
     mTcpServer = new TcpServerSimple(this);
     mTcpServer->setUsePacket(true);
@@ -2268,6 +2268,7 @@ QString VescInterface::getLastBleAddr() const
 {
     return mLastBleAddr;
 }
+#endif
 
 void VescInterface::storeBlePreferred(QString address, bool preferred)
 {
@@ -2282,7 +2283,6 @@ bool VescInterface::getBlePreferred(QString address)
     }
     return res;
 }
-#endif
 
 bool VescInterface::isPortConnected()
 {

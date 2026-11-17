@@ -487,26 +487,20 @@ Item {
                     }
 
                     ToolButton {
-                        visible: connectionType === 0
                         icon.source: "qrc" + Utility.getThemePath() + (preferred ? "icons/Star-96.png" : "icons/Star Outline-96.png")
                         icon.color: "transparent"
                         Accessible.name: qsTr("Preferred")
                         onClicked: {
-                            VescIf.storeBlePreferred(bleAddr, !preferred)
-                            bleModel.clear()
-                            mBle.emitScanDone()
+                            VescIf.storeBlePreferred(connectionType === 3 ? hubUuid : bleAddr, !preferred)
+                            VescIf.storeSettings()
+                            if (connectionType === 3) {
+                                // Rebuilding the list would drop the TCP hub devices
+                                bleModel.setProperty(index, "preferred", !preferred)
+                            } else {
+                                bleModel.clear()
+                                mBle.emitScanDone()
+                            }
                         }
-                    }
-
-                    Chip {
-                        visible: connectionType !== 0
-                        enabled: false
-                        tinted: true
-                        tint: connectionType === 1 ? Material.accent : transportColor
-                        tintText: connectionType === 1 ? Utility.getAppHexColor("accentText") :
-                                  connectionType === 2 ? Utility.getAppHexColor("infoText") :
-                                  Utility.isDarkMode() ? Qt.lighter(transportColor, 1.2) : Qt.darker(transportColor, 1.6)
-                        text: ["", "USB", "Wi-Fi", "Hub"][connectionType]
                     }
 
                     Button {
@@ -705,7 +699,7 @@ Item {
            return {
                 "name": device.name + "\n" + device.ip + ":" + device.port,
                 "setName": "",
-                "preferred": true,
+                "preferred": VescIf.getBlePreferred(device.ip),
                 "bleAddr": device.ip,
                 "tcpPort": device.port,
                 "hubUuid": "",
@@ -720,7 +714,7 @@ Item {
                     (port.isVesc ? "STM32" : port.isEsp ? "ESP32" : "") + 
                     "\n" + port.systemPath,
                 "setName": "",
-                "preferred": true,
+                "preferred": VescIf.getBlePreferred(port.systemPath),
                 "bleAddr": port.systemPath,
                 "tcpPort": 0,
                 "hubUuid": "",
@@ -733,7 +727,7 @@ Item {
            return {                         
                "name": tcpHubDevice.id + "\n" + tcpHubDevice.server,
                "setName": "",
-               "preferred": true,
+               "preferred": VescIf.getBlePreferred(tcpHubDevice.uuid()),
                "bleAddr": "",
                "tcpPort": 0,
                "hubUuid": tcpHubDevice.uuid(),
@@ -794,7 +788,8 @@ Item {
                                      return a.name.localeCompare(b.name)
                                  }
 
-                                 return a.connectionType - b.connectionType
+                                 // Bluetooth devices after the others
+                                 return (a.connectionType === 0) - (b.connectionType === 0) || a.connectionType - b.connectionType
                              } else {
                                 return a.preferred ? -1 : 1
                              }

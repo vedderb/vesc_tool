@@ -55,9 +55,20 @@ AbstractButton {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
+                // As wide as the checked label, so checking does not move the chips after it
+                width: Math.max(implicitWidth, Math.ceil(checkedMetrics.advanceWidth))
+                horizontalAlignment: Text.AlignHCenter
                 text: chip.text
                 color: chip.colored ? chip.tintText : Utility.getAppHexColor("lightText")
+                font.family: chip.font.family
                 font.weight: chip.checked ? Font.Medium : Font.Normal
+
+                TextMetrics {
+                    id: checkedMetrics
+                    font.family: chip.font.family
+                    font.weight: Font.Medium
+                    text: chip.text
+                }
             }
 
             Rectangle {

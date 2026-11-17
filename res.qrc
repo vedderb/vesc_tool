@@ -87,6 +87,7 @@
         <file>res/icons/imu_on.png</file>
         <file>res/icons/imu_off.png</file>
         <file>res/icons/icons8-target-96.png</file>
+        <file>res/icons/Fit to Screen-96.png</file>
         <file>res/icons/icons8-fantasy-96.png</file>
         <file>res/icons/icons8-edit-96.png</file>
         <file>res/icons/ic_insert_drive_file_black_48dp.png</file>
@@ -247,6 +248,7 @@
         <file>res/+theme_light/icons/imu_on.png</file>
         <file>res/+theme_light/icons/imu_off.png</file>
         <file>res/+theme_light/icons/icons8-target-96.png</file>
+        <file>res/+theme_light/icons/Fit to Screen-96.png</file>
         <file>res/+theme_light/icons/icons8-fantasy-96.png</file>
         <file>res/+theme_light/icons/icons8-edit-96.png</file>
         <file>res/+theme_light/icons/icons8-battery-100.png</file>

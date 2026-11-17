@@ -771,6 +771,9 @@ ApplicationWindow {
         leftPadding: 14
         rightPadding: 14
 
+        // A tab removed while checked would still look selected when added back
+        onParentChanged: if (!parent) checked = false
+
         contentItem: Item {
             implicitWidth: tabRow.implicitWidth
             implicitHeight: tabRow.implicitHeight
@@ -1306,8 +1309,7 @@ ApplicationWindow {
             }
 
             hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
-            mainSwipeView.insertItem(1, uiHwPage)
-            tabBar.insertItem(1, uiHwButton)
+            setPageShown(uiHwPage, uiHwButton, true, 1)
             uiHwPage.visible = true
 
             uiHwButton.text = "HwUi"
@@ -1321,8 +1323,7 @@ ApplicationWindow {
             }
         } else {
             uiHwPage.visible = false
-            uiHwPage.parent = null
-            uiHwButton.parent = null
+            setPageShown(uiHwPage, uiHwButton, false)
         }
 
         if (VescIf.isPortConnected() && VescIf.qmlAppLoaded()) {
@@ -1333,8 +1334,7 @@ ApplicationWindow {
             }
 
             appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
-            mainSwipeView.insertItem(1, uiAppPage)
-            tabBar.insertItem(1, uiAppButton)
+            setPageShown(uiAppPage, uiAppButton, true, 1)
             uiAppPage.visible = true
 
             uiAppButton.text = "AppUi"
@@ -1348,8 +1348,7 @@ ApplicationWindow {
             }
         } else {
             uiAppPage.visible = false
-            uiAppPage.parent = null
-            uiAppButton.parent = null
+            setPageShown(uiAppPage, uiAppButton, false)
         }
     }
 
@@ -1364,15 +1363,13 @@ ApplicationWindow {
                 stop()
 
                 if (VescIf.isPortConnected() && VescIf.customConfig(0) !== null) {
-                    mainSwipeView.insertItem(profilesPage.SwipeView.index + 1, confCustomPage)
-                    tabBar.insertItem(profilesPage.SwipeView.index + 1, confCustomButton)
+                    setPageShown(confCustomPage, confCustomButton, true, profilesPage.SwipeView.index + 1)
                     confCustomPage.visible = true
                     confCustomLoader.item.reloadConfig()
                     confCustomButton.text = VescIf.customConfig(0).getLongName("hw_name")
                 } else {
                     confCustomPage.visible = false
-                    confCustomPage.parent = null
-                    confCustomButton.parent = null
+                    setPageShown(confCustomPage, confCustomButton, false)
                 }
             }
         }
@@ -1382,6 +1379,28 @@ ApplicationWindow {
         confCustomTimer.start()
     }
 
+    // Adds or removes a page and its tab, keeping the shown page, or lastPage once it is back.
+    // The reminder is paused so that lastPage stays the page the user picked.
+    function setPageShown(page, button, show, index) {
+        var shown = mainSwipeView.currentItem
+        pageReminder.enabled = false
+        if (show) {
+            mainSwipeView.insertItem(index, page)
+            tabBar.insertItem(index, button)
+        } else {
+            page.parent = null
+            button.parent = null
+        }
+
+        if (shown !== null && shown.SwipeView.index >= 0) {
+            mainSwipeView.setCurrentIndex(shown.SwipeView.index)
+        }
+        if (lastPage !== null && lastPage.SwipeView.index >= 0) {
+            mainSwipeView.setCurrentIndex(lastPage.SwipeView.index)
+        }
+        pageReminder.enabled = true
+    }
+
     function setBmsPageVisible(show) {
         if (show === bmsPage.visible) {
             return
@@ -1389,12 +1408,10 @@ ApplicationWindow {
 
         bmsPage.visible = show
         if (show) {
-            mainSwipeView.insertItem(rtDataPage.SwipeView.index + 1, bmsPage)
-            tabBar.insertItem(rtDataPage.SwipeView.index + 1, bmsButton)
+            setPageShown(bmsPage, bmsButton, true, rtDataPage.SwipeView.index + 1)
         } else {
             bmsValues = null
-            bmsPage.parent = null
-            bmsButton.parent = null
+            setPageShown(bmsPage, bmsButton, false)
         }
     }
 
@@ -1466,17 +1483,13 @@ ApplicationWindow {
                     confPageApp.visible = true
 
                     var ind = profilesPage.SwipeView.index + 1
-                    mainSwipeView.insertItem(ind, confPageApp)
-                    tabBar.insertItem(ind, confAppButton)
-                    mainSwipeView.insertItem(ind, confPageMotor)
-                    tabBar.insertItem(ind, confMotorButton)
+                    setPageShown(confPageApp, confAppButton, true, ind)
+                    setPageShown(confPageMotor, confMotorButton, true, ind)
                 } else {
                     confPageMotor.visible = false
                     confPageApp.visible = false
-                    confPageMotor.parent = null
-                    confPageApp.parent = null
-                    confMotorButton.parent = null
-                    confAppButton.parent = null
+                    setPageShown(confPageMotor, confMotorButton, false)
+                    setPageShown(confPageApp, confAppButton, false)
                 }
 
                 if (VescIf.getFwSupportsConfiguration()) {
@@ -1609,6 +1622,7 @@ ApplicationWindow {
 
     // Remind about unwritten changes when leaving a configuration page
     Connections {
+        id: pageReminder
         target: mainSwipeView
 
         function onCurrentItemChanged() {
@@ -1616,7 +1630,7 @@ ApplicationWindow {
             var count = page === confPageMotor ? mcTracker.changedParams.length :
                         page === confPageApp ? appTracker.changedParams.length : 0
 
-            if (count > 0) {
+            if (count > 0 && page.SwipeView.index >= 0) {
                 showToast(qsTr("%1 unwritten in %2").arg(count).arg(page === confPageMotor ? "Motor Cfg" : "App Cfg"),
                           "", "warn", qsTr("Review"), function() {
                               reviewChanges(page)

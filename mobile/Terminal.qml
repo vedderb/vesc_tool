@@ -47,8 +47,8 @@ Item {
     function appendOutput(str, color) {
         for (var line of str.split("\n")) {
             var html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-            terminalText.append("<pre style='margin:0'>" + (color ? "<font color='" + color + "'>" + html + "</font>" :
-                                                                     formatLine(html)) + "</pre>")
+            terminalText.append("<div style='white-space:pre'>" + (color ? "<font color='" + color + "'>" + html + "</font>" :
+                                                                            formatLine(html)) + "</div>")
         }
     }
 

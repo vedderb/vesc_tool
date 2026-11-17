@@ -1,0 +1,2 @@
+module QtGraphicalEffects
+import Qt5Compat.GraphicalEffects auto

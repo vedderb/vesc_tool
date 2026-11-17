@@ -229,17 +229,18 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         mTcpServer->packet()->sendPacket(packet);
     });
 
+    mBroadcastSocket = new QUdpSocket(this);
+
     mTimerBroadcast = new QTimer(this);
     mTimerBroadcast->setInterval(1000);
     mTimerBroadcast->start();
     connect(mTimerBroadcast, &QTimer::timeout, [this]() {
         if (mTcpServer->isServerRunning() && isPortConnected()) {
-            QUdpSocket *udp = new QUdpSocket(this);
             QString dgram = QString("%1::%2::%3").
                     arg(getLastFwRxParams().hw).
                     arg(Utility::getNetworkAddresses().first().toString()).
                     arg(mTcpServer->lastPort());
-            udp->writeDatagram(dgram.toLocal8Bit().data(), dgram.size(), QHostAddress::Broadcast, 65109);
+            mBroadcastSocket->writeDatagram(dgram.toLocal8Bit().data(), dgram.size(), QHostAddress::Broadcast, 65109);
         }
     });
 

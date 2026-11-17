@@ -365,6 +365,7 @@ private:
     QStringList mPairedUuids;
     TcpServerSimple *mTcpServer;
     UdpServerSimple *mUdpServer;
+    QUdpSocket *mBroadcastSocket;
     QTimer *mTimerBroadcast;
     QTimer *mTimerConfigUpdate;
     QVariantList mTcpHubDevs;

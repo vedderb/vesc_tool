@@ -861,9 +861,11 @@ Item {
             id: stringInput
             width: parent.width
             placeholderText: qsTr("Name")
-            focus: true
             onAccepted: bleNameDialog.accept()
         }
+
+        // Qt moves the window up by the height of the keyboard on iOS when it covers the field
+        onOpened: stringInput.forceActiveFocus()
 
         onAccepted: {
             VescIf.storeBleName(addr, stringInput.text)
@@ -884,9 +886,10 @@ Item {
             id: hubPassInput
             width: parent.width
             placeholderText: qsTr("Password")
-            focus: true
             onAccepted: hubPassDialog.accept()
         }
+
+        onOpened: hubPassInput.forceActiveFocus()
 
         onAccepted: {
             VescIf.updateTcpHubPassword(uuid, hubPassInput.text)

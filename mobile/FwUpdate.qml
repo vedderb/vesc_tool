@@ -37,6 +37,9 @@ Item {
     property real uploadStart: 0
     property real uploadStartProgress: 0
     property real etaUpdated: 0
+    // Configs of this VESC backed up since it connected. Restoring them is then offered when it is back after the update
+    property bool backedUp: false
+    property string restoreUuid: ""
     readonly property bool wide: mainIsTablet && width >= 900
     anchors.fill: parent
 
@@ -591,13 +594,16 @@ Item {
                 }
             }
 
+            // The step to take next is highlighted: back up first, then upload
             Button {
-                text: qsTr("Back up configs")
+                id: backupButton
+                text: backedUp ? "✓ " + qsTr("Backed up") : qsTr("Back up configs")
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 visible: !cancelButton.visible
-                enabled: connected && backupConfButton.enabled
-                flat: true
+                enabled: connected && backupConfButton.enabled && VescIf.getFwSupportsConfiguration()
+                flat: backedUp
+                highlighted: !backedUp
                 onClicked: backupConfigDialog.open()
             }
 
@@ -606,8 +612,8 @@ Item {
                 text: uploadAllButton.checked && uploadAllButton.enabled && VescIf.getCanDevsLast().length > 0 ?
                           qsTr("Upload to %1 devices").arg(VescIf.getCanDevsLast().length + 1) : qsTr("Upload")
                 Layout.fillWidth: true
-                Layout.preferredWidth: 2
-                highlighted: true
+                Layout.preferredWidth: 1
+                highlighted: backedUp || !backupButton.enabled
 
                 onClicked: {
                     uploadFw(uploadAllButton.checked && uploadAllButton.enabled)
@@ -664,6 +670,38 @@ Item {
         onAccepted: {
             archUpdateButton.enabled = false
             workaroundTimerDl.start()
+        }
+    }
+
+    SheetDialog {
+        id: restoreDialog
+        property bool can: false
+        title: qsTr("Restore configuration")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Open Folder-96.png"
+        acceptText: qsTr("Restore")
+        rejectText: qsTr("Not now")
+
+        Text {
+            color: Utility.getAppHexColor("lightText")
+            text: qsTr("The firmware update cleared the settings of this VESC. Restore the backup you made before the update?") +
+                  (restoreDialog.can ? " " + qsTr("The VESCs on the CAN bus are restored as well.") : "")
+            verticalAlignment: Text.AlignVCenter
+            anchors.fill: parent
+            wrapMode: Text.WordWrap
+        }
+
+        onAccepted: {
+            progDialog.open()
+            restoreTimer.start()
+        }
+
+        Timer {
+            id: restoreTimer
+            interval: 0
+            onTriggered: {
+                VescIf.confRestoreBackup(restoreDialog.can)
+                progDialog.close()
+            }
         }
     }
 
@@ -769,10 +807,10 @@ Item {
 
                 if (VescIf.getFwSupportsConfiguration()) {
                     msg += "\n\n" +
-                            "Uploading new firmware will clear all settings in the VESC firmware. You can make " +
-                            "a backup of the settings with Back up configs and restore them from the start page " +
-                            "after the update if you'd like (if you haven't done the backup already). " +
-                            "Do you want to continue with the update, or cancel and do the backup first?"
+                            "Uploading new firmware will clear all settings in the VESC firmware. " +
+                            (backedUp ? "They are backed up, and you can restore them when you reconnect after the update." :
+                                        "Cancel and use Back up configs first to keep them. You can then restore " +
+                                        "them when you reconnect after the update.")
                 } else {
                     msg += "\n\n" +
                             "Uploading new firmware will clear all settings on your device " +
@@ -916,11 +954,13 @@ Item {
                                              "Bootloader upload is done.",
                                              true, false)
                 } else {
+                    restoreUuid = backedUp ? uuid() : ""
+                    restoreDialog.can = uploadDialog.fwdCan
                     VescIf.disconnectPort()
                     VescIf.emitMessageDialog("Warning",
                                              "The firmware upload is done. The device should reboot automatically within 10 seconds. Do " +
                                              "NOT remove power before the reboot is done as that can brick the CPU and requires a programmer " +
-                                             "to fix.",
+                                             "to fix." + (backedUp ? "\n\nReconnect when it is back to restore the configuration backup." : ""),
                                              true, false)
                 }
             }
@@ -932,7 +972,22 @@ Item {
 
         function onFwRxChanged(rx, limited) {
             if (rx) {
+                backedUp = false
                 updateFwText()
+            }
+        }
+
+        function onConfigurationBackupsChanged() {
+            backedUp = VescIf.confListBackups().indexOf(uuid()) >= 0
+        }
+
+        // Last step of reading a VESC after it connects, so the restore can read all its configs
+        function onCustomConfigLoadDone() {
+            if (restoreUuid !== "" && restoreUuid === uuid()) {
+                restoreUuid = ""
+                if (VescIf.getFwSupportsConfiguration()) {
+                    restoreDialog.open()
+                }
             }
         }
 
@@ -941,6 +996,10 @@ Item {
             dlText.text = msg
             dlProgLatest.value = prog
         }
+    }
+
+    function uuid() {
+        return Utility.uuid2Str(VescIf.getLastFwRxParams().uuid, false)
     }
 
     function updateFwText() {

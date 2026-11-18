@@ -64,7 +64,7 @@ Item {
 
             var t = str.trim().split(/\s+/)
             if ((t.length === 6 && !isNaN(t[1])) ||
-                    (t.length === 2 && ["scenario", "throttle", "fault", "can"].includes(t[0]))) {
+                    (t.length === 2 && ["scenario", "throttle", "fault", "can", "imu"].includes(t[0]))) {
                 var v = Object.assign({}, values)
                 v[t[0]] = t
                 values = v
@@ -233,6 +233,14 @@ Item {
                     property var line: root.values.can
                     onLineChanged: checked = line[1] === "on"
                     onToggled: root.sim("can " + (checked ? "on" : "off"))
+                }
+
+                Switch {
+                    text: "Use phone IMU"
+                    visible: root.value("imu", "none") !== "none"
+                    property var line: root.values.imu
+                    onLineChanged: checked = line[1] === "phone"
+                    onToggled: root.sim("imu " + (checked ? "phone" : "model"))
                 }
             }
 

@@ -20,6 +20,7 @@
 #include "virtualvesc.h"
 #include "commands.h"
 #include "utility.h"
+#include "phoneimu.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -71,6 +72,7 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
     mPacket = new Packet(this);
     mLispRunning = false;
     mCanOn = true;
+    mPhoneImu = false;
     mSimTimer = nullptr;
     mSimSteps = 0;
     mDispPosMode = DISP_POS_MODE_NONE;
@@ -139,6 +141,7 @@ void VirtualVesc::processData(const QByteArray &data)
 {
     if (mSimTimer && !mSimTimer->isActive()) {
         mSimTimer->start();
+        PhoneImu::setActive(mPhoneImu);
     }
 
     mPacket->processData(data);
@@ -148,6 +151,7 @@ void VirtualVesc::resetState()
 {
     if (mSimTimer) {
         mSimTimer->stop();
+        PhoneImu::setActive(false);
     }
 
     mPacket->resetState();
@@ -415,20 +419,41 @@ void VirtualVesc::processPacket(QByteArray &data)
     } break;
 
     case COMM_GET_IMU_DATA: {
-        // Leaning in the turn of the circle, pitch from slope and acceleration
+        // Angles as in the firmware: roll positive with the left side down,
+        // pitch negative nose up and yaw clockwise. The model leans in the
+        // turn of the circle and pitches with slope and acceleration.
         double latAcc = p->speed * p->speed / VirtualPlant::gnssRadius;
         double roll = atan(latAcc / 9.81);
-        double pitch = p->slope + 0.02 * p->accel;
-        double yaw = p->heading;
+        double pitch = -(p->slope + 0.02 * p->accel);
+        double yaw = -p->heading;
         auto noise = []() { return (QRandomGenerator::global()->generateDouble() - 0.5) * 0.2; };
-        double cr = cos(roll / 2), sr = sin(roll / 2), cp = cos(pitch / 2);
-        double sp = sin(pitch / 2), cy = cos(yaw / 2), sy = sin(yaw / 2);
+        double acc[3] = {p->accel / 9.81, latAcc / 9.81, 1.0};
+        double gyro[3] = {noise(), noise(), p->speed / VirtualPlant::gnssRadius * 180.0 / M_PI + noise()};
+        double mag[3] = {cos(p->heading), -sin(p->heading), 0.4};
 
+        // Or the IMU of the phone, with the top of the phone as forward
+        PhoneImu::Reading r;
+        if (root()->mPhoneImu && PhoneImu::read(r)) {
+            auto toVesc = [](const double *v, double *res) {
+                res[0] = v[1];
+                res[1] = -v[0];
+                res[2] = v[2];
+            };
+            double g[3];
+            toVesc(r.gravity, g);
+            toVesc(r.acc, acc);
+            toVesc(r.gyro, gyro);
+            toVesc(r.mag, mag);
+            roll = -atan2(g[1], g[2]);
+            pitch = atan2(-g[0], sqrt(g[1] * g[1] + g[2] * g[2]));
+            yaw = -r.yaw;
+        }
+
+        // The quaternion uses the standard angles, the firmware negates roll and yaw
+        double cr = cos(-roll / 2), sr = sin(-roll / 2), cp = cos(pitch / 2);
+        double sp = sin(pitch / 2), cy = cos(-yaw / 2), sy = sin(-yaw / 2);
         double values[16] = {
-            roll, pitch, yaw,
-            p->accel / 9.81, latAcc / 9.81, 1.0,
-            noise(), noise(), p->speed / VirtualPlant::gnssRadius * 180.0 / M_PI + noise(),
-            cos(yaw), -sin(yaw), 0.4,
+            roll, pitch, yaw, acc[0], acc[1], acc[2], gyro[0], gyro[1], gyro[2], mag[0], mag[1], mag[2],
             cr * cp * cy + sr * sp * sy, sr * cp * cy - cr * sp * sy,
             cr * sp * cy + sr * cp * sy, cr * cp * sy - sr * sp * cy
         };
@@ -938,6 +963,7 @@ void VirtualVesc::terminalCmd(const QString &cmd)
               "sim fault [code]\n  Set a fault code, 0 clears it\n"
               "sim cell [cell] [voltage | off]\n  Override the voltage of a cell, starting at 1\n"
               "sim can [on | off]\n  Connect or disconnect the CAN-bus\n"
+              "sim imu [phone | model]\n  Report the IMU of the phone (mobile only) or of the model\n"
               "sim set [name] [value]\n  Change the motor, battery or vehicle, see sim get\n"
               "sim get\n  Print name, value, unit, min, max and decimals of all values\n"
               "sim reset\n  Restore all values");
@@ -982,12 +1008,17 @@ void VirtualVesc::terminalCmd(const QString &cmd)
             p->cellOverride[val.toInt() - 1] = args.at(3) == "off" ? NAN : number;
         } else if (sub == "can" && (val == "on" || val == "off")) {
             root->mCanOn = val == "on";
+        } else if (sub == "imu" && ((val == "phone" && PhoneImu::available()) || val == "model")) {
+            root->mPhoneImu = val == "phone";
+            PhoneImu::setActive(root->mPhoneImu);
         } else if (sub == "set" && param && ok) {
             double scale = pow(10.0, param->decimals);
             p->*param->value = round(qBound(param->min, number, param->max) * scale) / scale * param->scale;
         } else if (sub == "reset") {
             p->resetParams();
             root->mCanOn = true;
+            root->mPhoneImu = false;
+            PhoneImu::setActive(false);
         } else if (sub == "get") {
             // One line per value, also read by the Sim page
             for (const auto &par: VirtualPlant::params) {
@@ -999,6 +1030,7 @@ void VirtualVesc::terminalCmd(const QString &cmd)
             print("throttle " + throttle());
             print(QString("fault %1").arg(p->faultForced));
             print(QString("can %1").arg(root->mCanOn ? "on" : "off"));
+            print(QString("imu %1").arg(!PhoneImu::available() ? "none" : (root->mPhoneImu ? "phone" : "model")));
             return;
         } else if (!sub.isEmpty()) {
             print("Invalid argument, type help to list all available commands");

@@ -212,7 +212,8 @@ SOURCES += main.cpp\
     tcpserversimple.cpp \
     hexfile.cpp \
     virtualvesc.cpp \
-    virtualplant.cpp
+    virtualplant.cpp \
+    phoneimu.cpp
 
 HEADERS  += mainwindow.h \
     bleuartdummy.h \
@@ -238,7 +239,8 @@ HEADERS  += mainwindow.h \
     tcpserversimple.h \
     hexfile.h \
     virtualvesc.h \
-    virtualplant.h
+    virtualplant.h \
+    phoneimu.h
 
 unix: {
 !ios: {
@@ -304,7 +306,8 @@ DISTFILES += \
     android/AndroidManifest.xml \
     android/src/com/vedder/vesc/VForegroundService.java \
     android/src/com/vedder/vesc/RideService.java \
-    android/src/com/vedder/vesc/Utils.java
+    android/src/com/vedder/vesc/Utils.java \
+    android/src/com/vedder/vesc/PhoneImu.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
@@ -327,7 +330,9 @@ ios {
     include(ios/live_activity.pri)
     QMAKE_INFO_PLIST = ios/Info.plist
     HEADERS += ios/src/setIosParameters.h
-    SOURCES += ios/src/setIosParameters.mm
+    SOURCES += ios/src/setIosParameters.mm \
+               ios/src/phoneImu.mm
+    LIBS += -framework CoreMotion
     DISTFILES += ios/Info.plist \
                  ios/*.storyboard
     QMAKE_ASSET_CATALOGS = $$PWD/ios/Images.xcassets

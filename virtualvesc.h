@@ -119,6 +119,7 @@ private:
     QByteArray mUuid;
     QList<VirtualVesc*> mCanNodes;
     bool mCanOn;
+    bool mPhoneImu;
 
     VirtualPlant *mPlant;
     QTimer *mSimTimer;

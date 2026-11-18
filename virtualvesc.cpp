@@ -72,7 +72,8 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
     mPacket = new Packet(this);
     mLispRunning = false;
     mCanOn = true;
-    mPhoneImu = false;
+    // The phone IMU when there is one, so that tilting the phone moves the IMU views
+    mPhoneImu = PhoneImu::available();
     mSimTimer = nullptr;
     mSimSteps = 0;
     mDispPosMode = DISP_POS_MODE_NONE;
@@ -1020,8 +1021,8 @@ void VirtualVesc::terminalCmd(const QString &cmd)
         } else if (sub == "reset") {
             p->resetParams();
             root->mCanOn = true;
-            root->mPhoneImu = false;
-            PhoneImu::setActive(false);
+            root->mPhoneImu = PhoneImu::available();
+            PhoneImu::setActive(root->mPhoneImu);
         } else if (sub == "get") {
             // One line per value, also read by the Sim page
             for (const auto &par: VirtualPlant::params) {

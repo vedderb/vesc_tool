@@ -29,6 +29,8 @@ Dialog {
     property string acceptText: ""
     property string rejectText: acceptText === "" ? qsTr("Close") : qsTr("Cancel")
     property bool fullHeight: false
+    // Above 0 the sheet is a full height panel right of the parent. The parent has to leave room for it
+    property real dockWidth: 0
     // Moves the sheet down. Animated and dragged instead of y so that the y binding stays in effect
     property real slide: 0
 
@@ -36,9 +38,9 @@ Dialog {
     modal: true
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    width: Math.min(parent.width, 640)
-    height: fullHeight ? parent.height - notchTop - 40 : Math.min(implicitHeight, parent.height - notchTop - 40)
-    x: (parent.width - width) / 2
+    width: dockWidth > 0 ? dockWidth : Math.min(parent.width, 640)
+    height: dockWidth > 0 ? parent.height : fullHeight ? parent.height - notchTop - 40 : Math.min(implicitHeight, parent.height - notchTop - 40)
+    x: dockWidth > 0 ? parent.width : (parent.width - width) / 2
     y: parent.height - height + slide
     leftPadding: 16 + notchLeft
     rightPadding: 16 + notchRight
@@ -71,8 +73,8 @@ Dialog {
     background: Rectangle {
         color: Utility.getAppHexColor("cardBackground")
         border.color: Utility.getAppHexColor("raisedBackground")
-        topLeftRadius: 20
-        topRightRadius: 20
+        topLeftRadius: sheet.dockWidth > 0 ? 0 : 20
+        topRightRadius: sheet.dockWidth > 0 ? 0 : 20
     }
 
     header: ColumnLayout {
@@ -83,7 +85,7 @@ Dialog {
             id: closeDrag
             target: null
             margin: 15
-            enabled: sheet.closePolicy & Popup.CloseOnEscape
+            enabled: sheet.dockWidth === 0 && (sheet.closePolicy & Popup.CloseOnEscape)
             onActiveTranslationChanged: sheet.slide = Math.max(activeTranslation.y, 0)
             onActiveChanged: {
                 if (!active && sheet.opened) {

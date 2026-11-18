@@ -41,6 +41,7 @@ Item {
     property SheetDialog sheet: null
     property string valueText: ""
     property string referenceText: ""
+    property bool showReference: true
     default property alias content: editorColumn.data
     // Rows above and below. In a single column they are drawn as one card.
     property Item prev: null
@@ -175,7 +176,7 @@ Item {
                     Text {
                         Layout.fillWidth: true
                         visible: text !== ""
-                        text: frame.changed ? qsTr("was %1").arg(frame.referenceText) :
+                        text: frame.changed && frame.showReference ? qsTr("was %1").arg(frame.referenceText) :
                                               frame.expanded ? ParamFormat.rangeString(params, paramName) : ""
                         elide: Text.ElideRight
                         font.pointSize: 9

@@ -19,7 +19,7 @@
 
 import QtQuick 2.7
 import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
@@ -121,11 +121,14 @@ Item {
                 width: scroll.availableWidth
                 spacing: 8
 
-                ColumnLayout {
+                GridLayout {
                     id: scrollCol
                     Layout.fillWidth: true
                     Layout.topMargin: 10
-                    spacing: 8
+                    columns: mainIsTablet ? 2 : 1
+                    uniformCellWidths: true
+                    columnSpacing: 8
+                    rowSpacing: 8
                 }
 
                 Rectangle {

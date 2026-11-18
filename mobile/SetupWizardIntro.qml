@@ -45,10 +45,10 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 10 - notchLeft - notchRight
+        width: mainIsTablet ? 640 : parent.width - 10 - notchLeft - notchRight
         height: parent.height - 10
         closePolicy: Popup.NoAutoClose
-        x: 5 + (notchLeft + notchRight) / 2
+        x: mainIsTablet ? (parent.width - width) / 2 : 5 + (notchLeft + notchRight) / 2
         y: 5
         parent: dialogParent
         bottomMargin: 0

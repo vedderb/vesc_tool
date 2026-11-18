@@ -67,7 +67,9 @@
         <file>Chip.qml</file>
         <file>SegmentedBar.qml</file>
         <file>ValueTile.qml</file>
+        <file>WarningBanner.qml</file>
         <file>SubgroupBar.qml</file>
+        <file>ParamGroupList.qml</file>
         <file>WriteButton.qml</file>
         <file>ParamFormat.js</file>
         <file>ChangeTracker.qml</file>

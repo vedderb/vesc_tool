@@ -19,7 +19,7 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.3
+import QtQuick.Layouts
 import QtCore as Core
 
 import Vedder.vesc.vescinterface 1.0
@@ -31,6 +31,7 @@ Item {
     id: topItem
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
+    readonly property int cols: mainIsTablet && width >= 1040 ? 3 : isHorizontal || mainIsTablet ? 2 : 1
     signal requestOpenControls()
     signal requestConnect()
     signal requestOpenMultiSettings()
@@ -46,7 +47,8 @@ Item {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            columns: isHorizontal ? 2 : 1
+            columns: cols
+            uniformCellWidths: mainIsTablet
             anchors.topMargin: 15
             anchors.bottomMargin: 15
             columnSpacing: 10
@@ -129,6 +131,7 @@ Item {
             ColumnLayout {
                 id: wizardBox
                 Layout.fillWidth: true
+                Layout.alignment: cols > 2 ? Qt.AlignTop : 0
 
                 SectionHeader {
                     text: qsTr("Configuration")
@@ -222,7 +225,7 @@ Item {
                 id: toolsBox
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                Layout.rowSpan: isHorizontal ? 2 : 1
+                Layout.rowSpan: cols === 2 ? 2 : 1
 
                 SectionHeader {
                     text: qsTr("Tools and Operations")
@@ -379,6 +382,7 @@ Item {
 
             CollapsibleSection {
                 id: logSection
+                Layout.alignment: cols > 2 ? Qt.AlignTop : 0
                 title: qsTr("Realtime Data Logging")
                 iconSource: "qrc" + Utility.getThemePath() + "icons/Line Chart-96.png"
 
@@ -390,6 +394,7 @@ Item {
 
             CollapsibleSection {
                 id: tcpSection
+                Layout.alignment: cols > 2 ? Qt.AlignTop : 0
                 title: qsTr("Wireless Bridge to Computer (TCP)")
                 iconSource: "qrc" + Utility.getThemePath() + "icons/LAN-96.png"
 
@@ -400,6 +405,7 @@ Item {
 
             CollapsibleSection {
                 id: hubSection
+                Layout.alignment: cols > 2 ? Qt.AlignTop : 0
                 title: qsTr("TCP Hub (Internet Bridge)")
                 iconSource: "qrc" + Utility.getThemePath() + "icons/Globe-96.png"
                 Layout.bottomMargin: isHorizontal ? 0 : 10
@@ -649,7 +655,9 @@ Item {
     SheetDialog {
         id: packageDialog
         title: qsTr("Package Store")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
         fullHeight: true
+        width: Math.min(parent.width, mainIsTablet ? 1000 : 640)
 
         Packages {
             anchors.fill: parent

@@ -51,6 +51,7 @@ Item {
         var e = editors.createEditorMc(scrollCol, param)
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
+        e.showReference = false
         editorsVisible.push(e)
         paramNames.push(param)
     }
@@ -59,6 +60,7 @@ Item {
         var e = editors.createEditorApp(scrollCol, param)
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
+        e.showReference = false
         editorsVisible.push(e)
         paramNames.push(param)
     }

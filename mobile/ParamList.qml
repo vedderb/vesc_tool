@@ -27,7 +27,7 @@ Item {
     property var editorsVisible: []
     property var paramNames: []
     property var paramNamesAll: []
-    property bool isHorizontal: Screen.width > Screen.height & parent.width > Screen.width/2
+    property bool isHorizontal: (Screen.width > Screen.height || mainIsTablet) & parent.width > Screen.width/2
 
     onIsHorizontalChanged: {
         updateEditors()
@@ -59,6 +59,7 @@ Item {
 
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
+        e.showReference = false
         editorsVisible.push(e)
         paramNames.push(param)
         paramNamesAll.push(param)
@@ -73,6 +74,7 @@ Item {
 
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
+        e.showReference = false
         editorsVisible.push(e)
         paramNames.push(param)
         paramNamesAll.push(param)
@@ -87,6 +89,7 @@ Item {
 
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
+        e.showReference = false
         editorsVisible.push(e)
         paramNames.push(param)
         paramNamesAll.push(param)

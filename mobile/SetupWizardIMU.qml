@@ -5,12 +5,14 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
+import QtQuick.Window
 import Qt5Compat.GraphicalEffects
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
+import Vedder.vesc.vesc3ditem 1.0
 
 Item {
     id: topItem
@@ -168,8 +170,8 @@ Item {
         }
 
         StackLayout {
-            width: parent.width
-            height: parent.height
+            width: mainIsTablet && dialog.isHorizontal ? (parent.width - 12) / 2 : parent.width
+            height: mainIsTablet && !dialog.isHorizontal ? (parent.height - 12) / 2 : parent.height
             id: stackLayout
             currentIndex: 0
 
@@ -909,6 +911,45 @@ Item {
                 }// Column Layout
             }// Item (configurator)
 
+        }
+
+        // Live IMU values and 3D view beside the steps, below them in portrait
+        Loader {
+            active: dialog.visible && mainIsTablet
+            asynchronous: true
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            width: stackLayout.width
+            height: stackLayout.height
+
+            sourceComponent: Rectangle {
+                radius: 12
+                color: Utility.getAppHexColor("normalBackground")
+
+                Connections {
+                    target: mCommands
+
+                    function onValuesImuReceived(values) {
+                        imuTiles.updateText(values)
+                        imu3d.setRotation(values.roll, values.pitch, 0)
+                    }
+                }
+
+                RtDataIMU {
+                    id: imuTiles
+                    anchors.top: parent.top
+                    width: parent.width
+                }
+
+                Vesc3dItem {
+                    id: imu3d
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: imuTiles.height / 2
+                    width: Math.min(parent.width - 16, parent.height - imuTiles.height - 16) * Screen.devicePixelRatio
+                    height: width
+                    scale: 1.0 / Screen.devicePixelRatio
+                }
+            }
         }
 
 //        header: Rectangle {

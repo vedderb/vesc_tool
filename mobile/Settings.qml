@@ -19,7 +19,7 @@
 
 import QtQuick 2.7
 import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
@@ -71,6 +71,7 @@ Item {
         default property alias content: groupColumn.data
 
         Layout.fillWidth: true
+        Layout.alignment: Qt.AlignTop
         implicitHeight: groupColumn.implicitHeight
         radius: 12
         color: Utility.getAppHexColor("cardBackground")
@@ -114,9 +115,14 @@ Item {
             anchors.fill: parent
             contentWidth: availableWidth
 
-            ColumnLayout {
+            GridLayout {
                 width: parent.width
-                spacing: 8
+                flow: GridLayout.TopToBottom
+                // Four header and group pairs, two pairs per column on tablets
+                rows: mainIsTablet ? 4 : 8
+                uniformCellWidths: true
+                columnSpacing: 14
+                rowSpacing: 8
 
                 SectionHeader {
                     text: "Units"

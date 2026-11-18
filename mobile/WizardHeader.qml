@@ -28,6 +28,10 @@ ColumnLayout {
     property string title: ""
     property var steps: []
     property int currentIndex: 0
+    // Optional text per step, finished steps then show it and can be clicked
+    property var summaries: []
+
+    signal stepClicked(int index)
 
     spacing: 10
 
@@ -60,12 +64,19 @@ ColumnLayout {
         spacing: 6
         clip: true
         model: wizardHeader.steps
+        currentIndex: wizardHeader.summaries.length > 0 ? wizardHeader.currentIndex : -1
 
         delegate: Chip {
-            enabled: false
+            property bool done: index < wizardHeader.currentIndex && wizardHeader.summaries.length > 0
+
+            enabled: done
+            tinted: done
             topInset: 0
             checked: index === wizardHeader.currentIndex
-            text: (index < wizardHeader.currentIndex ? "✓ " : "") + modelData
+            text: (index < wizardHeader.currentIndex ? "✓ " : "") + modelData +
+                  (done && wizardHeader.summaries[index] ? ": " + wizardHeader.summaries[index] : "")
+
+            onClicked: wizardHeader.stepClicked(index)
         }
     }
 

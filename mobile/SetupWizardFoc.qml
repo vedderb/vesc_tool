@@ -36,6 +36,7 @@ Item {
     property var dialogParent: Overlay.overlay
     property bool isHorizontal: width > height
     property var canDevs: []
+    property int battCells: mMcConf.getParamInt("si_battery_cells")
 
     signal dialogClosed()
 
@@ -71,6 +72,28 @@ Item {
         mMcConf.updateParamDouble("l_duty_start", usageModel.get(usageList.currentIndex).duty_start, null)
         mMcConf.updateParamInt("m_fault_stop_time_ms", usageModel.get(usageList.currentIndex).fault_stop_ms, null)
         mMcConf.updateParamInt("bms.limit_mode", usageModel.get(usageList.currentIndex).bms_limit_mode, null)
+    }
+
+    function stepSummaries() {
+        return [usageModel.get(usageList.currentIndex).name,
+                motorModel.get(motorList.currentIndex).name + (overrideBox.checked ? qsTr(" (custom)") : ""),
+                battCells + "S " + mMcConf.getParamDouble("si_battery_ah").toFixed(1) + " Ah",
+                (directDriveBox.checked ? qsTr("Direct") : motorPulleyBox.value + ":" + wheelPulleyBox.value) + ", " +
+                (mMcConf.getParamDouble("si_wheel_diameter") * 1000).toFixed(0) + " mm"]
+    }
+
+    Connections {
+        target: mMcConf
+
+        function onParamChangedInt(src, name, newParam) {
+            if (name === "si_battery_cells") {
+                battCells = newParam
+            }
+        }
+
+        function onUpdated() {
+            battCells = mMcConf.getParamInt("si_battery_cells")
+        }
     }
 
     Component.onCompleted: {
@@ -326,11 +349,13 @@ Item {
                     columns: dialog.isHorizontal ? 2 : 1
                     rows: dialog.isHorizontal ? 1 : 2
 
-                    ListView {
+                    GridView {
                         id: motorList
+                        property int cols: mainIsTablet && dialog.isHorizontal ? 2 : 1
                         focus: true
                         clip: true
-                        spacing: 5
+                        cellWidth: width / cols
+                        cellHeight: 95
                         Layout.row: 0
                         Layout.fillHeight: true
                         Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
@@ -343,11 +368,11 @@ Item {
                                 id: imgRect
                                 property variant modelData: model
 
-                                width: motorList.width
+                                width: motorList.cellWidth - (motorList.cols > 1 ? 5 : 0)
                                 height: 90
                                 color: Utility.getAppHexColor("cardBackground")
-                                border.width: ListView.isCurrentItem ? 2 : 1
-                                border.color: ListView.isCurrentItem ? Material.accent : Utility.getAppHexColor("raisedBackground")
+                                border.width: GridView.isCurrentItem ? 2 : 1
+                                border.color: GridView.isCurrentItem ? Material.accent : Utility.getAppHexColor("raisedBackground")
                                 radius: 12
                                 RowLayout {
                                     anchors.fill: parent
@@ -357,7 +382,7 @@ Item {
                                         Layout.preferredWidth: 80
                                         Layout.preferredHeight: 80
                                         Layout.leftMargin: 5
-                                        opacity: imgRect.ListView.isCurrentItem ? 1.0 : 0.5
+                                        opacity: imgRect.GridView.isCurrentItem ? 1.0 : 0.5
 
                                         Image {
                                             id: image
@@ -518,9 +543,22 @@ Item {
                         contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
                         clip: true
 
-                        ParamList {
-                            id: paramListBatt
+                        ColumnLayout {
                             anchors.fill: parent
+
+                            ParamList {
+                                id: paramListBatt
+                                Layout.fillWidth: true
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                visible: mainIsTablet && rtVin > 0 && battCells > 0
+                                color: Utility.getAppHexColor("lightText")
+                                wrapMode: Text.WordWrap
+                                text: qsTr("Input %1 V = %2 V per cell at %3S").arg(rtVin.toFixed(1))
+                                      .arg((rtVin / battCells).toFixed(2)).arg(battCells)
+                            }
                         }
                     }
 
@@ -663,10 +701,35 @@ Item {
             }
 
             Item {
-                DirectionSetup {
-                    id: dirSetup
+                GridLayout {
                     anchors.fill: parent
-                    dialogParent: topItem.dialogParent
+                    columns: mainIsTablet && dialog.isHorizontal ? 2 : 1
+
+                    DirectionSetup {
+                        id: dirSetup
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        dialogParent: topItem.dialogParent
+                    }
+
+                    // Detection result, stays visible while testing directions
+                    ScrollView {
+                        visible: mainIsTablet
+                        Layout.preferredWidth: dialog.isHorizontal ? 360 : -1
+                        Layout.preferredHeight: dialog.isHorizontal ? -1 : Math.min(implicitHeight, parent.height * 0.4)
+                        Layout.fillWidth: !dialog.isHorizontal
+                        Layout.fillHeight: dialog.isHorizontal
+                        contentWidth: availableWidth
+                        clip: true
+
+                        Text {
+                            width: parent.parent.width
+                            color: Utility.getAppHexColor("lightText")
+                            font.family: "DejaVu Sans Mono"
+                            wrapMode: Text.WordWrap
+                            text: resultLabel.text
+                        }
+                    }
                 }
             }
         }
@@ -675,6 +738,12 @@ Item {
             title: qsTr("Setup Motors")
             steps: ["Usage", "Motor", "Battery", "Setup", "Direction"]
             currentIndex: stackLayout.currentIndex
+            summaries: mainIsTablet && stackLayout.currentIndex > 0 ? stepSummaries() : []
+
+            onStepClicked: (index) => {
+                stackLayout.currentIndex = index
+                updateButtonText()
+            }
         }
 
         footer: RowLayout {

@@ -409,13 +409,30 @@ Item {
         header: ColumnLayout {
             spacing: 10
 
-            Label {
+            RowLayout {
+                Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
-                text: qsTr("Multi Settings")
-                font.pointSize: 15
-                font.weight: Font.Medium
-                color: Utility.getAppHexColor("titleText")
+                Layout.rightMargin: 16
+                spacing: 10
+
+                Label {
+                    text: qsTr("Multi Settings")
+                    font.pointSize: 15
+                    font.weight: Font.Medium
+                    color: Utility.getAppHexColor("titleText")
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    visible: mainIsTablet
+                    text: canDevs.length > 0 ? qsTr("Writes to this controller and CAN ID %1").arg(canDevs.join(", ")) :
+                                               qsTr("Writes to this controller only")
+                    font.pointSize: 10
+                    color: Utility.getAppHexColor("normalText")
+                    horizontalAlignment: Text.AlignRight
+                    elide: Text.ElideRight
+                }
             }
 
             SegmentedBar {

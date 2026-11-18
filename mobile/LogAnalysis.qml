@@ -34,6 +34,8 @@ import Vedder.vesc.vescinterface
 
 Item {
     id: root
+    // Map and graphs side by side on tablets in landscape
+    readonly property bool wide: mainIsTablet && mainIsHorizontal
     anchors.fill: parent
 
     property var mCommands: VescIf.commands()
@@ -1626,14 +1628,17 @@ Item {
         }
     }
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
         anchors.margins: 8
-        spacing: 8
+        columns: root.wide ? 2 : 1
+        rowSpacing: 8
+        columnSpacing: 8
 
         // Unified Top Header Card (matches chartBox styling)
         Rectangle {
             Layout.fillWidth: true
+            Layout.columnSpan: parent.columns
             implicitHeight: headerCol.implicitHeight + 12
             color: Utility.getAppHexColor("cardBackground")
             radius: 12
@@ -1746,6 +1751,7 @@ Item {
             id: map
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.preferredWidth: 2
             plugin: mapPlugin
             center: QtPositioning.coordinate(57.49, 13.11)
             zoomLevel: 13
@@ -2064,25 +2070,28 @@ Item {
         }
         Rectangle {
             id: chartBox
-            readonly property bool compactMode: root.width < 750
+            readonly property bool compactMode: root.wide || root.width < 750
             property bool collapsed: false
-            property real expansion: collapsed ? 0 : 1
+            property real expansion: collapsed && !root.wide ? 0 : 1
             Behavior on expansion {
                 NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
             }
             Layout.fillWidth: true
+            Layout.fillHeight: root.wide
+            Layout.preferredWidth: 3
             // Expanded it takes half the page on tall screens, as it collapses with one tap, and leaves room
             // for the map on short ones
             Layout.preferredHeight: Math.round(110 + expansion * (Math.min(Math.max(compactMode ? 305 : 260, root.height / 2),
                                                                            root.height - 140) - 110))
             color: Utility.getAppHexColor("cardBackground"); radius: 12; border.color: Utility.getAppHexColor("raisedBackground")
             ColumnLayout {
-                anchors.fill: parent; anchors.margins: 8; anchors.topMargin: 0; spacing: 6
+                anchors.fill: parent; anchors.margins: 8; anchors.topMargin: root.wide ? 8 : 0; spacing: 6
 
                 // Tap or drag the grabber to shrink the graphs to a strip that still scrubs
                 Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 16
+                    visible: !root.wide
 
                     Rectangle {
                         anchors.centerIn: parent

@@ -147,9 +147,16 @@ Item {
         }
     }
 
+    ParamGroupList {
+        id: groupList
+        box: pageBox
+        tracker: mcTracker
+    }
+
     ColumnLayout {
         id: column
         anchors.fill: parent
+        anchors.leftMargin: groupList.visible ? groupList.width + 10 : 0
         spacing: 5
 
         GridLayout {
@@ -159,6 +166,7 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
+                visible: !groupList.visible
 
                 ComboBox {
                     id: pageBox
@@ -172,7 +180,6 @@ Item {
                         var subgroups = VescIf.mcConfig().getParamSubgroups(currentText)
 
                         tabBox.model = subgroups
-                        tabBox.visible = subgroups.length > 1
 
                         if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
                             updateEditors()
@@ -189,6 +196,7 @@ Item {
 
             SubgroupBar {
                 id: tabBox
+                visible: count > 1 || groupList.visible
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 tracker: mcTracker
@@ -415,7 +423,6 @@ Item {
             var subgroups = VescIf.mcConfig().getParamSubgroups(pageBox.currentText)
 
             tabBox.model = subgroups
-            tabBox.visible = subgroups.length > 1
 
             updateEditors()
         }

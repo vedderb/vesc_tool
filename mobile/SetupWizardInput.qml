@@ -128,6 +128,7 @@ Item {
         StackLayout {
             id: stackLayout
             anchors.fill: parent
+            anchors.rightMargin: sideMaps.visible ? sideMaps.width + 10 : 0
 
             Item {
                 ColumnLayout {
@@ -334,6 +335,7 @@ Item {
 
             Item {
                 ColumnLayout {
+                    id: mapPage
                     anchors.fill: parent
 
                     Text {
@@ -353,12 +355,14 @@ Item {
 
                     PpmMap {
                         id: ppmMap
+                        parent: sideMaps.visible ? sideMaps : mapPage
                         Layout.fillWidth: true
                         visible: false
                     }
 
                     AdcMap {
                         id: adcMap
+                        parent: sideMaps.visible ? sideMaps : mapPage
                         Layout.fillWidth: true
                         visible: false
                     }
@@ -396,6 +400,17 @@ Item {
                     }
                 }
             }
+        }
+
+        // The live input stays beside the setup page, read-only
+        ColumnLayout {
+            id: sideMaps
+            anchors.top: parent.top
+            anchors.right: parent.right
+            width: 360
+            enabled: false
+            visible: mainIsTablet && isHorizontal && stackLayout.currentIndex === 3 && stackLayout.enabled &&
+                     [4, 5].includes(inputModel.get(inputList.currentIndex).apptype)
         }
 
         header: WizardHeader {

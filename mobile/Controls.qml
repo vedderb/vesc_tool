@@ -32,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    readonly property real dockWidth: dialog.visible ? dialog.dockWidth : 0
 
     property var modes: [
         {label: "Motor current", suffix: " A", decimals: 1, to: 500.0, step: 1.0, brake: "Brake",
@@ -77,7 +78,8 @@ Item {
         title: "Controls"
         modal: false
         closePolicy: Popup.CloseOnEscape
-        background.opacity: opacitySlider.value
+        dockWidth: mainIsTablet && mainIsHorizontal && appWindow.width - canDockWidth >= 1080 ? 380 : 0
+        background.opacity: dockWidth > 0 ? 1 : opacitySlider.value
 
         ScrollView {
             anchors.fill: parent
@@ -255,6 +257,7 @@ Item {
 
                 RowLayout {
                     Layout.fillWidth: true
+                    visible: dialog.dockWidth === 0
 
                     Text {
                         color: Utility.getAppHexColor("lightText")

@@ -32,10 +32,12 @@ Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property bool isHorizontal: rtData.width > rtData.height
+    property bool sideBySide: mainIsTablet && mainIsHorizontal && width >= 700
     // Space left above the value tiles, including their margins and the layout spacing
-    property int gaugeSize: Math.min(width / 2 - 15,
-                                     (height - valueGrid.implicitHeight - 50) /
-                                     (isHorizontal ? 1 : 2) - 5)
+    property int gaugeSize: sideBySide ? Math.min((width - 340) / 2, height / 2) / 1.12 - 15 :
+                                         Math.min(width / 2 - 15,
+                                                  (height - valueGrid.implicitHeight - 50) /
+                                                  (isHorizontal ? 1 : 2) - 5)
     property var tileValues: []
 
     Component.onCompleted: {
@@ -44,15 +46,19 @@ Item {
         mCommands.emitEmptyValues()
     }
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
         anchors.topMargin: 5
+        columns: sideBySide ? 2 : 1
 
         GridLayout {
             Layout.alignment: Qt.AlignHCenter
-            Layout.fillHeight: true
-            columns: isHorizontal ? 4 : 2
-            Layout.leftMargin: 5
+            Layout.fillHeight: !sideBySide
+            columns: isHorizontal && !sideBySide ? 4 : 2
+            // Room for the gauge rims, which reach past the gauges
+            columnSpacing: sideBySide ? gaugeSize / 8 : 5
+            rowSpacing: columnSpacing
+            Layout.leftMargin: sideBySide ? gaugeSize / 16 + 5 : 5
             Layout.rightMargin: 5
             Layout.topMargin: 5
             Layout.bottomMargin: 5
@@ -127,13 +133,14 @@ Item {
             id: valueGrid
             Layout.fillWidth: true
             Layout.margins: 10
-            columns: isHorizontal ? 5 : 2
+            columns: isHorizontal && !sideBySide ? 5 : 2
             rowSpacing: 6
             columnSpacing: 6
 
             Repeater {
                 model: ["Battery", "I Battery", "Temp MOS", "Temp Motor", "Ah Draw",
-                    "Ah Charge", "Wh Draw", "Wh Charge", "ABS Tacho", "Fault"]
+                    "Ah Charge", "Wh Draw", "Wh Charge", "ABS Tacho", "Fault"].concat(
+                    sideBySide ? ["Id", "Iq", "Vd", "Vq", "Tacho", "Position"] : [])
 
                 ValueTile {
                     readonly property var entry: tileValues[index] || ["", "", -1]
@@ -209,7 +216,13 @@ Item {
                         [parseFloat(values.watt_hours).toFixed(2), "Wh", -1],
                         [parseFloat(values.watt_hours_charged).toFixed(2), "Wh", -1],
                         [values.tachometer_abs, "Counts", -1],
-                        [values.fault_code === 0 ? "None" : values.fault_str.replace("FAULT_CODE_", ""), "", -1]
+                        [values.fault_code === 0 ? "None" : values.fault_str.replace("FAULT_CODE_", ""), "", -1],
+                        [parseFloat(values.id).toFixed(2), "A", -1],
+                        [parseFloat(values.iq).toFixed(2), "A", -1],
+                        [parseFloat(values.vd).toFixed(2), "V", -1],
+                        [parseFloat(values.vq).toFixed(2), "V", -1],
+                        [values.tachometer, "Counts", -1],
+                        [parseFloat(values.position).toFixed(1), "\u00B0", -1]
                     ]
         }
     }

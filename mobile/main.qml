@@ -51,6 +51,8 @@ ApplicationWindow {
     property int notchBot: 0
     property int notchTop: 0
     property bool mainIsHorizontal: appWindow.width > appWindow.height
+    property bool mainIsTablet: appWindow.width >= 700 && Math.min(Screen.width, Screen.height) >= 600
+    readonly property real canDockWidth: canDrawerLoader.item && canDrawerLoader.item.docked && canDrawerLoader.item.visible ? canDrawerLoader.item.width : 0
 
     // Connection status shown in the footer, the drawer and on the start page
     property string connName: ""
@@ -245,12 +247,18 @@ ApplicationWindow {
         visible: status == Loader.Ready
         sourceComponent: Drawer {
             id: canDrawer
+            property bool allowDrag: false
+            // Stays open beside the page on landscape tablets
+            readonly property bool docked: mainIsTablet && mainIsHorizontal
             edge: Qt.RightEdge
-            width: Math.min(300, 0.8 * appWindow.width)
-            height: appWindow.height > appWindow.width ?  appWindow.height - footer.height - headerBar.height : appWindow.height
-            y: appWindow.height > appWindow.width ?  headerBar.height : 0
+            width: docked ? 280 : Math.min(300, 0.8 * appWindow.width)
+            height: appWindow.height > appWindow.width || docked ?  appWindow.height - footer.height - headerBar.height : appWindow.height
+            y: appWindow.height > appWindow.width || docked ?  headerBar.height : 0
             dragMargin: 20
-            interactive: false
+            modal: !docked
+            closePolicy: docked ? Popup.NoAutoClose : Popup.CloseOnEscape | Popup.CloseOnReleaseOutside
+            interactive: allowDrag && !docked
+            onDockedChanged: if (!docked) close()
 
             Overlay.modal: Rectangle {
                 color: scrimColor
@@ -456,7 +464,7 @@ ApplicationWindow {
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
         anchors.leftMargin: notchLeft*0.75
-        anchors.rightMargin: notchRight*0.75
+        anchors.rightMargin: notchRight*0.75 + controls.dockWidth + canDockWidth
         clip: true
         contentItem: ListView {
             model: mainSwipeView.contentModel
@@ -910,6 +918,7 @@ ApplicationWindow {
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
                 isHorizontal: mainIsHorizontal
+                active: confPageApp.SwipeView.isCurrentItem
             }
         }
     }
@@ -1025,10 +1034,12 @@ ApplicationWindow {
                               !connected ? qsTr("Tap to connect") :
                               statusFlash !== "" ? statusFlash :
                               !fwReadCorrectly ? connName :
-                              changedCount > 0 ? qsTr("%1 unwritten").arg(changedCount) :
-                              [connLink,
+                              changedCount > 0 && !mainIsTablet ? qsTr("%1 unwritten").arg(changedCount) :
+                              [changedCount > 0 ? qsTr("%1 unwritten").arg(changedCount) : "", connLink,
                                rtVin > 0 ? rtVin.toFixed(1) + " V" : "",
-                               rtVin > 0 ? rtTempMos.toFixed(0) + " °C" : ""].filter(Boolean).join(" · ")
+                               mainIsTablet && rtVin > 0 && rtBattery >= 0 ? Math.round(rtBattery * 100) + " %" : "",
+                               rtVin > 0 ? (mainIsTablet ? qsTr("FET %1 °C") : "%1 °C").arg(rtTempMos.toFixed(0)) : "",
+                               mainIsTablet && rtVin > 0 ? qsTr("Motor %1 °C").arg(rtTempMotor.toFixed(0)) : ""].filter(Boolean).join(" · ")
                     }
                 }
 
@@ -1109,12 +1120,12 @@ ApplicationWindow {
 
                 if (opened) {
                     drawer.interactive = false
-                    canDrawerLoader.item.interactive = false
+                    canDrawerLoader.item.allowDrag = false
                     drawer.close()
                     canDrawerLoader.item.close()
                 } else {
                     drawer.interactive = true
-                    canDrawerLoader.item.interactive = true
+                    canDrawerLoader.item.allowDrag = true
                 }
             }
         }

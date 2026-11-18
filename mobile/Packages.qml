@@ -19,6 +19,7 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Controls.Material
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs
 
@@ -34,6 +35,11 @@ Item {
     property ConfigParams mAppConf: VescIf.appConfig()
     property Commands mCommands: VescIf.commands()
     property var mPkgs: []
+    // Wide enough to show the selected package beside the list
+    readonly property bool split: mainIsTablet && width >= 700
+    property int selectedInd: -1
+
+    onSplitChanged: installFromPathDialog.close()
 
     function updateArchive() {
         disableDialog()
@@ -71,23 +77,54 @@ Item {
             if (filter.length === 0  || mPkgs[i].name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
                 if (!mPkgs[i].isLibrary && mLoader.shouldShowPackage(mPkgs[i])) {
                     pkgModel.append({"pkgName": mPkgs[i].name,
-                                        "pkgDescription": mPkgs[i].description,
+                                        "pkgDescription": descriptionLine(mPkgs[i]),
                                         "ind": i})
                 }
+            }
+        }
+
+        // Refresh the detail pane for the new archive or device
+        if (split && selectedInd >= 0) {
+            selectedInd = mPkgs.findIndex(p => p.name === workaroundTimerInstall.pkg.name)
+            if (selectedInd >= 0) {
+                openPkgDialog(mPkgs[selectedInd], selectedInd)
+            } else {
+                workaroundTimerInstall.pkg = []
             }
         }
 
         enableDialog()
     }
 
+    // First text line of the description, shown under the package name
+    function descriptionLine(pkg) {
+        var desc = pkg.description_md !== "" ? pkg.description_md : pkg.description
+        if (desc.toUpperCase().includes("<!DOCTYPE HTML")) {
+            return ""
+        }
+
+        // Skips headings, HTML, images, links and code on their own line
+        var line = desc.split("\n").map(l => l.trim()).find(l => /^[^#<!\[`]/.test(l))
+        return line ? line.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[*`]/g, "") : ""
+    }
+
     ColumnLayout {
         id: column
         anchors.fill: parent
         anchors.leftMargin: notchLeft
-        anchors.rightMargin: notchRight
+        anchors.rightMargin: split ? parent.width - notchLeft - 320 : notchRight
+        spacing: 8
 
         ListModel {
             id: pkgModel
+        }
+
+        InputField {
+            id: filterInput
+            Layout.fillWidth: true
+            placeholderText: qsTr("Search packages")
+            inputMethodHints: Qt.ImhNoPredictiveText
+            onTextChanged: reloadArchive()
         }
 
         ListView {
@@ -96,8 +133,6 @@ Item {
             Layout.fillHeight: true
             focus: true
             clip: true
-
-            spacing: 5
 
             Text {
                 anchors.centerIn: parent
@@ -112,15 +147,66 @@ Item {
             Component {
                 id: pkgDelegate
 
-                ImageButton {
-                    id: connectButton
+                ItemDelegate {
                     width: pkgList.width
-                    height: 80
-
-                    buttonText: pkgName
-                    imageSrc: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
+                    highlighted: split && ind === selectedInd
                     onClicked: {
-                        openPkgDialog(mPkgs[ind])
+                        openPkgDialog(mPkgs[ind], ind)
+                    }
+
+                    background: Rectangle {
+                        radius: 10
+                        color: highlighted ? Qt.alpha(Material.accent, 0.12) :
+                               down ? Qt.alpha(Material.foreground, 0.08) : "transparent"
+                    }
+
+                    contentItem: RowLayout {
+                        spacing: 11
+
+                        Rectangle {
+                            Layout.preferredWidth: 40
+                            Layout.preferredHeight: 40
+                            radius: 12
+                            color: Utility.getAppHexColor("raisedBackground")
+
+                            Image {
+                                anchors.centerIn: parent
+                                width: 24
+                                height: 24
+                                source: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
+                                smooth: true
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 1
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: pkgName
+                                elide: Text.ElideRight
+                                color: Utility.getAppHexColor(highlighted ? "accentText" : "lightText")
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                visible: text !== ""
+                                text: pkgDescription
+                                textFormat: Text.PlainText
+                                elide: Text.ElideRight
+                                font.pointSize: 9
+                                color: Utility.getAppHexColor("normalText")
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: 1
+                        color: Utility.getAppHexColor("lightestBackground")
                     }
                 }
             }
@@ -132,41 +218,10 @@ Item {
         RowLayout {
             Layout.fillWidth: true
 
-            Text {
-                id: nameText
-                color: Utility.getAppHexColor("normalText")
-                text: "Filter"
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: false
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: filterInput.implicitHeight + 18
-                border.color: Utility.getAppHexColor("raisedBackground")
-                color: Utility.getAppHexColor("cardBackground")
-                radius: 12
-                TextInput {
-                    id: filterInput
-                    color: Utility.getAppHexColor("lightText")
-                    anchors.fill: parent
-                    anchors.margins: 7
-                    font.pointSize: 12
-                    focus: true
-
-                    onTextChanged: {
-                        reloadArchive()
-                    }
-                }
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-
             Button {
                 text: "Update Archive"
                 Layout.fillWidth: true
+                highlighted: true
                 onClicked: {
                     disableDialog()
                     workaroundTimerArchive.start()
@@ -188,6 +243,7 @@ Item {
             Button {
                 text: "Uninstall Current"
                 Layout.fillWidth: true
+                flat: true
                 onClicked: {
                     disableDialog()
                     workaroundTimerUninstall.start()
@@ -225,7 +281,7 @@ Item {
 
                 BottomMenu {
                     id: menu
-                    parent: appPageItem
+                    parent: split ? column : appPageItem
 
                     MenuItem {
                         text: "Install from file..."
@@ -268,8 +324,26 @@ Item {
         }
     }
 
+    Item {
+        id: detailPane
+        anchors.left: column.right
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: notchRight
+        visible: split
+
+        Text {
+            anchors.centerIn: parent
+            visible: !installContent.visible
+            text: qsTr("Select a package")
+            color: Utility.getAppHexColor("disabledText")
+        }
+    }
+
     // HERE install
-    function openPkgDialog(pkg) {
+    function openPkgDialog(pkg, ind) {
         var line1 = pkg.description.slice(0, pkg.description.indexOf("\n"))
         if (line1.toUpperCase().includes("<!DOCTYPE HTML PUBLIC")) {
             installFromPathText.text = pkg.description
@@ -279,7 +353,16 @@ Item {
 
         installPkgCompatibleText.visible = !mLoader.shouldShowPackage(pkg)
         workaroundTimerInstall.pkg = pkg
-        installFromPathDialog.open()
+
+        if (split && ind !== selectedInd) {
+            vescDialogScroll.contentItem.contentY = 0
+        }
+
+        selectedInd = ind ?? -1
+
+        if (!split) {
+            installFromPathDialog.open()
+        }
     }
 
     function disableDialog() {
@@ -301,10 +384,14 @@ Item {
         title: "Install Package"
 
         id: installFromPathDialog
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
         rejectText: ""
 
         ColumnLayout {
+            id: installContent
+            parent: split ? detailPane : installFromPathDialog.contentItem
             anchors.fill: parent
+            visible: !split || workaroundTimerInstall.pkg.compressedData !== undefined
 
             ScrollView {
                 id: vescDialogScroll
@@ -327,16 +414,12 @@ Item {
                 }
             }
 
-            Text {
+            WarningBanner {
                 id: installPkgCompatibleText
                 visible: false
-                color: {color = Utility.getAppHexColor("red")}
-                verticalAlignment: Text.AlignVCenter
                 Layout.fillWidth: true
-                font.bold: true
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                text: "Warning: This package is NOT compatble with the connected device. " +
-                      "Install it only if you know what you are doing!"
+                text: qsTr("This package is NOT compatible with the connected device. " +
+                           "Install it only if you know what you are doing!")
             }
 
             RowLayout {
@@ -345,6 +428,7 @@ Item {
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
+                    highlighted: true
                     text: "Install Package"
 
                     onClicked: {
@@ -357,6 +441,8 @@ Item {
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
+                    visible: !split
+                    flat: true
                     text: "Cancel"
 
                     onClicked: {

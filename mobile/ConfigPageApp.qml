@@ -33,6 +33,9 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
     property var dialogParent: Overlay.overlay
+    property bool active: false
+    // Group shown while this is the current page, to keep the live input idle otherwise
+    readonly property string mapGroup: groupList.visible && active ? pageBox.currentText : ""
 
     ParamEditors {
         id: editors
@@ -110,9 +113,38 @@ Item {
         }
     }
 
+    ParamGroupList {
+        id: groupList
+        box: pageBox
+        tracker: appTracker
+    }
+
+    ColumnLayout {
+        id: liveInput
+        anchors.right: parent.right
+        y: scroll.y
+        width: 340
+        visible: mapGroup === "PPM" || mapGroup === "ADC"
+
+        SectionHeader {
+            text: qsTr("Live input")
+        }
+
+        PpmMap {
+            Layout.fillWidth: true
+            visible: mapGroup === "PPM"
+        }
+
+        AdcMap {
+            Layout.fillWidth: true
+            visible: mapGroup === "ADC"
+        }
+    }
+
     ColumnLayout {
         id: column
         anchors.fill: parent
+        anchors.leftMargin: groupList.visible ? groupList.width + 10 : 0
         spacing: 5
 
         GridLayout {
@@ -123,6 +155,7 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
+                visible: !groupList.visible
 
                 ComboBox {
                     id: pageBox
@@ -136,7 +169,6 @@ Item {
                         var subgroups = VescIf.appConfig().getParamSubgroups(currentText)
 
                         tabBox.model = subgroups
-                        tabBox.visible = subgroups.length > 1
 
                         if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
                             updateEditors()
@@ -153,6 +185,7 @@ Item {
 
             SubgroupBar {
                 id: tabBox
+                visible: count > 1 || groupList.visible
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 tracker: appTracker
@@ -168,13 +201,14 @@ Item {
             id: scroll
             Layout.fillWidth: true
             Layout.fillHeight: true
-            contentWidth: column.width
+            Layout.rightMargin: liveInput.visible ? liveInput.width + 10 : 0
+            contentWidth: availableWidth
             contentHeight: scrollCol.preferredHeight
             clip: true
 
             GridLayout {
                 id: scrollCol
-                width: column.width
+                width: scroll.availableWidth
                 columns: Math.max(1, Math.floor(width / 380))
             }
         }
@@ -220,15 +254,11 @@ Item {
                     }
                     MenuItem {
                         text: "PPM Mapping..."
-                        onTriggered: {
-                            ppmMap.open()
-                        }
+                        onTriggered: groupList.visible ? jumpTo("PPM", "Mapping", "") : ppmMap.open()
                     }
                     MenuItem {
                         text: "ADC Mapping..."
-                        onTriggered: {
-                            adcMap.open()
-                        }
+                        onTriggered: groupList.visible ? jumpTo("ADC", "Mapping", "") : adcMap.open()
                     }
                     MenuItem {
                         text: "Pair NRF..."
@@ -328,7 +358,6 @@ Item {
             var subgroups = VescIf.appConfig().getParamSubgroups(pageBox.currentText)
 
             tabBox.model = subgroups
-            tabBox.visible = subgroups.length > 1
 
             updateEditors()
         }

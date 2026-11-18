@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import QtQuick.Window
 import QtQuick.Dialogs
 import Qt.labs.folderlistmodel 2.1
 import QtCore
@@ -284,13 +285,18 @@ Item {
             }
         }
 
-        StackLayout {
+        GridLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: lispTabBar.currentIndex
+            // Screen, so that the keyboard does not change it
+            columns: Screen.width > Screen.height ? 2 : 1
+            columnSpacing: 10
 
             // === Editor tab ===
             ColumnLayout {
+                visible: mainIsTablet || lispTabBar.currentIndex === 0
+                Layout.preferredWidth: parent.width * 0.6
+                Layout.preferredHeight: parent.height * 0.6
                 spacing: 4
 
                 RowLayout {
@@ -500,6 +506,9 @@ Item {
 
             // === REPL tab ===
             ColumnLayout {
+                visible: lispTabBar.currentIndex === 1
+                Layout.preferredWidth: parent.width * 0.4
+                Layout.preferredHeight: parent.height * 0.4
                 ScrollView {
                     id: replScroll
                     Layout.fillWidth: true
@@ -571,6 +580,9 @@ Item {
             // === Stats tab ===
             ColumnLayout {
                 id: statsTabItem
+                visible: lispTabBar.currentIndex === 2
+                Layout.preferredWidth: parent.width * 0.4
+                Layout.preferredHeight: parent.height * 0.4
 
                 Label {
                     text: "CPU: " + lispCpuUse.toFixed(1) + "%"

@@ -37,6 +37,7 @@ Item {
     property real uploadStart: 0
     property real uploadStartProgress: 0
     property real etaUpdated: 0
+    readonly property bool wide: mainIsTablet && width >= 900
     anchors.fill: parent
 
     FwHelper {
@@ -74,14 +75,17 @@ Item {
         }
     }
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
-        spacing: 0
+        rowSpacing: 0
+        columnSpacing: 0
+        columns: wide ? 2 : 1
 
         ScrollView {
             id: scroll
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.fillWidth: !wide
+            Layout.fillHeight: wide || !mainIsTablet
+            Layout.preferredWidth: 520
             contentWidth: availableWidth
             clip: true
 
@@ -138,6 +142,7 @@ Item {
                         }
 
                         Chip {
+                            visible: !mainIsTablet
                             text: fwUpdateAvailable ? qsTr("What's new") : qsTr("Changelog")
                             tinted: fwUpdateAvailable
                             onClicked: VescIf.emitMessageDialog("Firmware Changelog", Utility.fwChangeLog(), true)
@@ -265,6 +270,7 @@ Item {
                                         VescIf.downloadConfigs()
                                         fwHelper.reloadLatest()
                                         updateFwText()
+                                        changelogText.text = Utility.fwChangeLog()
                                         latestUpdateButton.enabled = true
                                     }
                                 }
@@ -521,40 +527,53 @@ Item {
                     }
                 }
 
-                Rectangle {
+                WarningBanner {
                     Layout.fillWidth: true
                     Layout.bottomMargin: 12
-                    implicitHeight: warnRow.implicitHeight + 20
                     visible: cancelButton.enabled
-                    radius: 12
-                    color: Qt.alpha(Utility.getAppHexColor("warning"), 0.15)
-                    border.color: Qt.alpha(Utility.getAppHexColor("warningText"), 0.33)
+                    text: qsTr("Keep the app open and the VESC device powered on.")
+                }
+            }
+        }
 
-                    RowLayout {
-                        id: warnRow
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 10
+        // Changelog beside the form, or below it in portrait
+        Card {
+            visible: mainIsTablet
+            Layout.rowSpan: wide ? 2 : 1
+            Layout.fillHeight: true
+            // Not the height of the whole changelog, the form goes first
+            Layout.preferredHeight: 200
+            Layout.margins: 14
+            Layout.topMargin: 12
+            Layout.leftMargin: wide ? 0 : 14
 
-                        Image {
-                            Layout.preferredWidth: 20
-                            Layout.preferredHeight: 20
-                            source: "qrc" + Utility.getThemePath() + "icons/Brake Warning-96.png"
-                        }
+            FieldLabel {
+                text: qsTr("Changelog")
+            }
 
-                        Text {
-                            Layout.fillWidth: true
-                            wrapMode: Text.WordWrap
-                            color: Utility.getAppHexColor("warningText")
-                            text: qsTr("Keep the app open and the VESC device powered on.")
-                        }
-                    }
+            ScrollView {
+                id: changelogScroll
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentWidth: availableWidth
+                clip: true
+
+                Text {
+                    id: changelogText
+                    width: changelogScroll.availableWidth
+                    wrapMode: Text.Wrap
+                    textFormat: Text.MarkdownText
+                    color: Utility.getAppHexColor("lightText")
+                    linkColor: Utility.getAppHexColor("lightAccent")
+                    text: visible ? Utility.fwChangeLog() : ""
+                    onLinkActivated: Qt.openUrlExternally(link)
                 }
             }
         }
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.maximumWidth: wide ? scroll.Layout.preferredWidth - 28 : -1
             Layout.margins: 14
             Layout.topMargin: 8
 

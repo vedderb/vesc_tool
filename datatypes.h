@@ -1222,11 +1222,14 @@ public:
     Q_PROPERTY(QString description_md MEMBER description_md)
     Q_PROPERTY(QByteArray lispData MEMBER lispData)
     Q_PROPERTY(QString qmlFile MEMBER qmlFile)
+    Q_PROPERTY(QString qmlFileQt6 MEMBER qmlFileQt6)
     Q_PROPERTY(QString pkgDescQml MEMBER pkgDescQml)
     Q_PROPERTY(bool qmlIsFullscreen MEMBER qmlIsFullscreen)
     Q_PROPERTY(bool isLibrary MEMBER isLibrary)
     Q_PROPERTY(bool loadOk MEMBER loadOk)
     Q_PROPERTY(QByteArray compressedData MEMBER compressedData)
+    Q_PROPERTY(QByteArray icon MEMBER icon)
+    Q_PROPERTY(QByteArray iconLight MEMBER icon)
 
     VescPackage () {
         name = "VESC Package Name";
@@ -1235,17 +1238,21 @@ public:
         loadOk = false;
     }
 
+    Q_INVOKABLE QString iconSrc();
+
     QByteArray compressedData;
     QString name;
     QString description;
     QString description_md;
     QByteArray lispData;
     QString qmlFile;
+    QString qmlFileQt6;
     QString pkgDescQml;
+    QByteArray icon;
+    QByteArray iconLight;
     bool qmlIsFullscreen;
     bool isLibrary;
     bool loadOk;
-
 };
 
 Q_DECLARE_METATYPE(VescPackage)

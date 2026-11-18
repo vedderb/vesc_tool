@@ -191,6 +191,7 @@ build_mobile {
 SOURCES += main.cpp\
     bleuartdummy.cpp \
     codeloader.cpp \
+    datatypes.cpp \
     mainwindow.cpp \
     boardsetupwindow.cpp \
     packet.cpp \

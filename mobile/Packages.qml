@@ -179,7 +179,8 @@ Item {
                                 anchors.centerIn: parent
                                 width: 24
                                 height: 24
-                                source: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
+                                source: typeof mPkgs[ind] !== "undefined" ? mPkgs[ind].iconSrc() :
+                                                                            "qrc" + Utility.getThemePath() + "icons/Package-96.png"
                                 smooth: true
                             }
                         }

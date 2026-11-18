@@ -2837,6 +2837,11 @@ void VescInterface::connectVirtual()
     updateFwRx(false);
 }
 
+bool VescInterface::isVirtualConnected() const
+{
+    return mVirtualConnected;
+}
+
 void VescInterface::connectBle(QString address)
 {
 #ifdef HAS_BLUETOOTH

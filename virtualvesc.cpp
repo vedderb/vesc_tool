@@ -49,6 +49,13 @@ double measured(double value)
 {
     return value * (1.0 + (QRandomGenerator::global()->generateDouble() - 0.5) * 0.02);
 }
+
+// The Sim page, loaded like the QML UI of a hardware
+QByteArray simPage()
+{
+    QFile file(":/res/virtual_vesc/SimPage.qml");
+    return file.open(QIODevice::ReadOnly) ? qCompress(file.readAll(), 9) : QByteArray();
+}
 }
 
 VirtualVesc::VirtualVesc(QObject *parent) :
@@ -100,6 +107,10 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
     loadCode();
 
     mPlant = new VirtualPlant(&mMcConf, &mAppConf);
+    mMcConf.updateParamDouble("foc_motor_r", mPlant->motorR);
+    mMcConf.updateParamDouble("foc_motor_l", mPlant->motorL);
+    mMcConf.updateParamDouble("foc_motor_ld_lq_diff", mPlant->motorLdLqDiff);
+    mMcConf.updateParamDouble("foc_motor_flux_linkage", mPlant->motorLambda);
     mSimTimer = new QTimer(this);
     mSimTimer->setInterval(10);
     connect(mSimTimer, &QTimer::timeout, this, &VirtualVesc::simStep);
@@ -212,7 +223,7 @@ void VirtualVesc::processPacket(QByteArray &data)
         reply.vbAppendUint8(mHwType);
         reply.vbAppendUint8((mLispRunning && !mCustomConfXml.isEmpty()) ? 1 : 0);
         reply.vbAppendUint8(0); // Phase filters
-        reply.vbAppendUint8(0); // QML HW
+        reply.vbAppendUint8(mHwType == HW_TYPE_VESC ? 1 : 0); // QML HW, the Sim page
         reply.vbAppendUint8(qmlFlags); // QML APP
         reply.vbAppendUint8(0); // NRF flags
         reply.vbAppendString(VIRTUAL_FW_NAME);
@@ -272,7 +283,7 @@ void VirtualVesc::processPacket(QByteArray &data)
         auto has = [mask](int bit) { return mask & (quint32(1) << bit); };
         if (has(0)) { reply.vbAppendDouble16(p->tempFet, 1e1); }
         if (has(1)) { reply.vbAppendDouble16(p->tempMotor, 1e1); }
-        if (has(2)) { reply.vbAppendDouble32(p->iq, 1e2); }
+        if (has(2)) { reply.vbAppendDouble32(p->iMotor(), 1e2); }
         if (has(3)) { reply.vbAppendDouble32(p->iIn, 1e2); }
         if (has(4)) { reply.vbAppendDouble32(0.0, 1e2); } // id
         if (has(5)) { reply.vbAppendDouble32(p->iq, 1e2); }
@@ -307,13 +318,13 @@ void VirtualVesc::processPacket(QByteArray &data)
             reply.vbAppendUint32(mask);
         }
 
-        const int n = VirtualPlant::motorCount;
+        const int n = root()->mCanOn ? VirtualPlant::motorCount : 1;
         double whLeft = p->soc * mMcConf.getParamInt("si_battery_cells") * 3.7 * mMcConf.getParamDouble("si_battery_ah");
 
         auto has = [mask](int bit) { return mask & (quint32(1) << bit); };
         if (has(0)) { reply.vbAppendDouble16(p->tempFet, 1e1); }
         if (has(1)) { reply.vbAppendDouble16(p->tempMotor, 1e1); }
-        if (has(2)) { reply.vbAppendDouble32(p->iq * n, 1e2); }
+        if (has(2)) { reply.vbAppendDouble32(p->iMotor() * n, 1e2); }
         if (has(3)) { reply.vbAppendDouble32(p->iIn * n, 1e2); }
         if (has(4)) { reply.vbAppendDouble16(p->duty, 1e3); }
         if (has(5)) { reply.vbAppendDouble32(p->erpm, 1e0); }
@@ -367,7 +378,7 @@ void VirtualVesc::processPacket(QByteArray &data)
     } break;
 
     case COMM_SET_DETECT:
-        mDispPosMode = vb.vbPopFrontInt8();
+        root()->mDispPosMode = vb.vbPopFrontInt8();
         break;
 
     case COMM_GET_DECODED_PPM:
@@ -485,8 +496,8 @@ void VirtualVesc::processPacket(QByteArray &data)
     } break;
 
     case COMM_BMS_GET_VALUES: {
-        const int n = VirtualPlant::motorCount;
-        const int cells = VirtualPlant::packCells;
+        const int n = root()->mCanOn ? VirtualPlant::motorCount : 1;
+        const int cells = int(p->packCells);
         double vMin = 10.0;
         for (int i = 0;i < cells;i++) {
             vMin = qMin(vMin, p->cellVoltage(i));
@@ -508,7 +519,7 @@ void VirtualVesc::processPacket(QByteArray &data)
         }
 
         // The pack warms up a bit with the electronics
-        double tempPack = 24.0 + (p->tempFet - 22.0) * 0.3;
+        double tempPack = p->packTemp + (p->tempFet - 22.0) * 0.3;
         reply.vbAppendUint8(4);
         for (int i = 0;i < 4;i++) {
             reply.vbAppendDouble16(tempPack + 0.4 * i, 1e2);
@@ -519,7 +530,7 @@ void VirtualVesc::processPacket(QByteArray &data)
         reply.vbAppendDouble16(41.0, 1e2); // Humidity
         reply.vbAppendDouble16(tempPack + 1.2, 1e2); // Hottest cell
         reply.vbAppendDouble16(p->soc, 1e3);
-        reply.vbAppendDouble16(0.97, 1e3); // SoH
+        reply.vbAppendDouble16(p->soh, 1e3);
         reply.vbAppendUint8(BMS_CAN_ID);
         reply.vbAppendDouble32Auto(52.3); // Totals
         reply.vbAppendDouble32Auto(2010.0);
@@ -529,8 +540,8 @@ void VirtualVesc::processPacket(QByteArray &data)
     } break;
 
     case COMM_PING_CAN:
-        if ((mMain ? mMain : this)->mCanOn) {
-            for (auto node: (mMain ? mMain : this)->mCanNodes) {
+        if (root()->mCanOn) {
+            for (auto node: root()->mCanNodes) {
                 reply.vbAppendUint8(node->mCanId);
             }
         }
@@ -549,14 +560,14 @@ void VirtualVesc::processPacket(QByteArray &data)
     // Detection measures the true motor of the plant. It takes a few seconds,
     // like on real hardware.
     case COMM_DETECT_MOTOR_R_L:
-        reply.vbAppendDouble32(measured(VirtualPlant::motorR), 1e6);
-        reply.vbAppendDouble32(measured(VirtualPlant::motorL * 1e6), 1e3);
-        reply.vbAppendDouble32(measured(VirtualPlant::motorLdLqDiff * 1e6), 1e3);
+        reply.vbAppendDouble32(measured(p->motorR), 1e6);
+        reply.vbAppendDouble32(measured(p->motorL * 1e6), 1e3);
+        reply.vbAppendDouble32(measured(p->motorLdLqDiff * 1e6), 1e3);
         sendLater(2000, reply);
         break;
 
     case COMM_DETECT_MOTOR_FLUX_LINKAGE:
-        reply.vbAppendDouble32(measured(VirtualPlant::motorLambda), 1e7);
+        reply.vbAppendDouble32(measured(p->motorLambda), 1e7);
         sendLater(4000, reply);
         break;
 
@@ -569,9 +580,9 @@ void VirtualVesc::processPacket(QByteArray &data)
         double ratio = mMcConf.getParamInt("si_motor_poles") / 2.0;
 
         if (openLoop) {
-            reply.vbAppendDouble32(measured(VirtualPlant::motorLambda), 1e7);
+            reply.vbAppendDouble32(measured(p->motorLambda), 1e7);
         }
-        reply.vbAppendDouble32(encoder ? VirtualPlant::encOffset : (openLoop ? -1.0 : 1001.0), 1e6);
+        reply.vbAppendDouble32(encoder ? p->encOffset : (openLoop ? -1.0 : 1001.0), 1e6);
         reply.vbAppendDouble32(encoder ? ratio : (openLoop ? -1.0 : 0.0), 1e6);
         reply.vbAppendInt8(0);
         sendLater(4000, reply);
@@ -580,7 +591,7 @@ void VirtualVesc::processPacket(QByteArray &data)
     case COMM_DETECT_HALL_FOC: {
         bool hall = mMcConf.getParamEnum("m_sensor_port_mode") == 0;
         for (int i = 0;i < 8;i++) {
-            reply.vbAppendUint8(hall ? VirtualPlant::hallTable[i] : 255);
+            reply.vbAppendUint8(hall ? p->hallAngle(i) : 255);
         }
         reply.vbAppendUint8(hall ? 0 : 1);
         sendLater(3000, reply);
@@ -603,28 +614,43 @@ void VirtualVesc::processPacket(QByteArray &data)
         double maxLoss = vb.vbPopFrontDouble32(1e3);
         double minCurrIn = vb.vbPopFrontDouble32(1e3);
         double maxCurrIn = vb.vbPopFrontDouble32(1e3);
-        double iMax = qMin(sqrt(maxLoss / VirtualPlant::motorR), 150.0);
+        double openloopRpm = vb.vbPopFrontDouble32(1e3);
+        double slErpm = vb.vbPopFrontDouble32(1e3);
+        double iMax = qMin(sqrt(maxLoss / p->motorR), 150.0);
 
-        // Applied like the firmware, the plant has hall sensors
+        // Applied like the firmware, the plant has hall sensors. The current
+        // controller and observer gains are calculated for 1000 us.
         auto apply = [&](ConfigParams &mc) {
+            double r = measured(p->motorR);
+            double l = measured(p->motorL);
+            double lambda = measured(p->motorLambda);
             mc.updateParamEnum("motor_type", 2);
-            mc.updateParamDouble("foc_motor_r", measured(VirtualPlant::motorR));
-            mc.updateParamDouble("foc_motor_l", measured(VirtualPlant::motorL));
-            mc.updateParamDouble("foc_motor_ld_lq_diff", measured(VirtualPlant::motorLdLqDiff));
-            mc.updateParamDouble("foc_motor_flux_linkage", measured(VirtualPlant::motorLambda));
+            mc.updateParamDouble("foc_motor_r", r);
+            mc.updateParamDouble("foc_motor_l", l);
+            mc.updateParamDouble("foc_motor_ld_lq_diff", measured(p->motorLdLqDiff));
+            mc.updateParamDouble("foc_motor_flux_linkage", lambda);
+            mc.updateParamDouble("foc_current_kp", l * 1e3);
+            mc.updateParamDouble("foc_current_ki", r * 1e3);
+            mc.updateParamDouble("foc_observer_gain", 1e-3 / (lambda * lambda) * 1e6);
             mc.updateParamDouble("l_current_max", iMax);
             mc.updateParamDouble("l_current_min", -iMax);
             mc.updateParamDouble("l_abs_current_max", iMax * 1.5);
             mc.updateParamEnum("m_sensor_port_mode", 0);
             mc.updateParamEnum("foc_sensor_mode", 2);
             for (int i = 0;i < 8;i++) {
-                mc.updateParamInt(QString("foc_hall_table__%1").arg(i), VirtualPlant::hallTable[i]);
+                mc.updateParamInt(QString("foc_hall_table__%1").arg(i), p->hallAngle(i));
             }
             if (fabs(minCurrIn) > 0.001) {
                 mc.updateParamDouble("l_in_current_min", minCurrIn);
             }
             if (fabs(maxCurrIn) > 0.001) {
                 mc.updateParamDouble("l_in_current_max", maxCurrIn);
+            }
+            if (fabs(openloopRpm) > 0.001) {
+                mc.updateParamDouble("foc_openloop_rpm", openloopRpm);
+            }
+            if (fabs(slErpm) > 0.001) {
+                mc.updateParamDouble("foc_sl_erpm", slErpm);
             }
         };
 
@@ -743,11 +769,13 @@ void VirtualVesc::processPacket(QByteArray &data)
         sendReply(reply);
     } break;
 
+    case COMM_GET_QML_UI_HW:
     case COMM_GET_QML_UI_APP:
     case COMM_LISP_READ_CODE: {
         qint32 len = vb.vbPopFrontInt32();
         qint32 offset = vb.vbPopFrontInt32();
-        QByteArray code = codeSlotPayload(id == COMM_GET_QML_UI_APP ? mQmlSlot : mLispSlot);
+        QByteArray code = id == COMM_GET_QML_UI_HW ? simPage() :
+                codeSlotPayload(id == COMM_GET_QML_UI_APP ? mQmlSlot : mLispSlot);
 
         if (code.isEmpty()) {
             reply.vbAppendInt32(0);
@@ -830,7 +858,7 @@ void VirtualVesc::processPacket(QByteArray &data)
 void VirtualVesc::sendReply(const VByteArray &vb)
 {
     // Delayed replies are dropped after disconnecting
-    if (!(mMain ? mMain : this)->mSimTimer->isActive()) {
+    if (!root()->mSimTimer->isActive()) {
         return;
     }
 
@@ -855,6 +883,7 @@ void VirtualVesc::print(const QString &str)
 void VirtualVesc::simStep()
 {
     int faultLast = mPlant->fault;
+    double currentLast = mPlant->iMotor();
     mPlant->step(mSimTimer->interval() / 1000.0);
 
     if (mPlant->fault != faultLast && mPlant->fault != FAULT_CODE_NONE) {
@@ -864,7 +893,7 @@ void VirtualVesc::simStep()
                                  "Duty             : %4\n"
                                  "RPM              : %5").
                          arg(Commands::faultToStr(mc_fault_code(mPlant->fault))).
-                         arg(mPlant->iq, 0, 'f', 1).arg(mPlant->vBus, 0, 'f', 2).
+                         arg(currentLast, 0, 'f', 1).arg(mPlant->vBus, 0, 'f', 2).
                          arg(mPlant->duty, 0, 'f', 3).arg(mPlant->erpm, 0, 'f', 1));
         if (mFaultLog.size() > FAULT_LOG_LEN) {
             mFaultLog.removeFirst();
@@ -882,7 +911,7 @@ void VirtualVesc::simStep()
 
 void VirtualVesc::terminalCmd(const QString &cmd)
 {
-    VirtualVesc *root = mMain ? mMain : this;
+    VirtualVesc *root = this->root();
     VirtualPlant *p = mPlant;
     QStringList args = cmd.split(" ", Qt::SkipEmptyParts);
     QString sub = args.value(1);
@@ -892,8 +921,11 @@ void VirtualVesc::terminalCmd(const QString &cmd)
     print(QString("-> %1 \n").arg(cmd));
 
     if (args.isEmpty()) {
+        print("No command received\n");
         return;
     }
+
+    args[0] = args.at(0).toLower();
 
     if (args.at(0) == "help") {
         print("Valid commands are:\n"
@@ -905,43 +937,78 @@ void VirtualVesc::terminalCmd(const QString &cmd)
               "sim scenario [cruise | hill | stopgo | idle]\n  What the rider does\n"
               "sim fault [code]\n  Set a fault code, 0 clears it\n"
               "sim cell [cell] [voltage | off]\n  Override the voltage of a cell, starting at 1\n"
-              "sim soc [percent]\n  Set the state of charge of the battery\n"
-              "sim can [on | off]\n  Connect or disconnect the CAN-bus");
+              "sim can [on | off]\n  Connect or disconnect the CAN-bus\n"
+              "sim set [name] [value]\n  Change the motor, battery or vehicle, see sim get\n"
+              "sim get\n  Print name, value, unit, min, max and decimals of all values\n"
+              "sim reset\n  Restore all values");
     } else if (args.at(0) == "fault") {
-        print(Commands::faultToStr(mc_fault_code(p->fault)));
+        print(Commands::faultToStr(mc_fault_code(p->fault)) + "\n");
     } else if (args.at(0) == "faults") {
         if (root->mFaultLog.isEmpty()) {
-            print("No faults registered since startup");
+            print("No faults registered since startup\n");
         } else {
-            print("Active fault: " + Commands::faultToStr(mc_fault_code(p->fault)));
-            print("The following faults were registered since start:");
+            print("Active fault: " + Commands::faultToStr(mc_fault_code(p->fault)) + "\n");
+            print("The following faults were registered since start:\n");
             for (const auto &f: root->mFaultLog) {
                 print(f + "\n");
             }
         }
     } else if (args.at(0) == "sim") {
-        if (sub == "throttle" && !val.isEmpty()) {
-            p->throttleOverride = val == "auto" ? NAN : qBound(-1.0, val.toDouble(), 1.0);
+        const VirtualPlant::Param *param = nullptr;
+        for (const auto &par: VirtualPlant::params) {
+            if (val == par.name) {
+                param = &par;
+            }
+        }
+        bool valOk = false;
+        double valNumber = val.toDouble(&valOk);
+        valOk = valOk && std::isfinite(valNumber);
+        bool ok = false;
+        double number = args.value(3).toDouble(&ok);
+        ok = ok && std::isfinite(number);
+        auto throttle = [p]() {
+            return std::isfinite(p->throttleOverride) ? QString::number(p->throttleOverride) : QString("auto");
+        };
+
+        if (sub == "throttle" && (val == "auto" || valOk)) {
+            p->throttleOverride = val == "auto" ? NAN : qBound(-1.0, valNumber, 1.0);
         } else if (sub == "scenario" && scenarios.contains(val)) {
             p->scenario = VirtualPlant::Scenario(scenarios.indexOf(val));
-        } else if (sub == "fault" && !val.isEmpty()) {
-            p->faultForced = val.toInt();
+        } else if (sub == "fault" && valOk && valNumber >= 0 && valNumber <= 255) {
+            p->faultForced = int(valNumber);
         } else if (sub == "cell" && args.size() == 4 && val.toInt() >= 1 &&
-                   val.toInt() <= p->cellOverride.size()) {
-            p->cellOverride[val.toInt() - 1] = args.at(3) == "off" ? NAN : args.at(3).toDouble();
-        } else if (sub == "soc" && !val.isEmpty()) {
-            p->soc = qBound(0.0, val.toDouble() / 100.0, 1.0);
+                   val.toInt() <= p->cellOverride.size() &&
+                   (args.at(3) == "off" || (ok && number >= 0.0 && number <= 5.0))) {
+            p->cellOverride[val.toInt() - 1] = args.at(3) == "off" ? NAN : number;
         } else if (sub == "can" && (val == "on" || val == "off")) {
             root->mCanOn = val == "on";
+        } else if (sub == "set" && param && ok) {
+            double scale = pow(10.0, param->decimals);
+            p->*param->value = round(qBound(param->min, number, param->max) * scale) / scale * param->scale;
+        } else if (sub == "reset") {
+            p->resetParams();
+            root->mCanOn = true;
+        } else if (sub == "get") {
+            // One line per value, also read by the Sim page
+            for (const auto &par: VirtualPlant::params) {
+                print(QString("%1 %2 %3 %4 %5 %6").arg(par.name).
+                      arg(p->*par.value / par.scale, 0, 'f', par.decimals).
+                      arg(par.unit).arg(par.min).arg(par.max).arg(par.decimals));
+            }
+            print(QString("scenario %1").arg(scenarios.at(p->scenario)));
+            print("throttle " + throttle());
+            print(QString("fault %1").arg(p->faultForced));
+            print(QString("can %1").arg(root->mCanOn ? "on" : "off"));
+            return;
         } else if (!sub.isEmpty()) {
             print("Invalid argument, type help to list all available commands");
             return;
         }
 
         print(QString("Scenario: %1, throttle: %2").arg(scenarios.at(p->scenario)).
-              arg(std::isfinite(p->throttleOverride) ? QString::number(p->throttleOverride) : "auto"));
+              arg(throttle()));
         print(QString("Speed: %1 km/h, motor current: %2 A, battery: %3 V, %4 %").
-              arg(p->speed * 3.6, 0, 'f', 1).arg(p->iq, 0, 'f', 1).
+              arg(p->speed * 3.6, 0, 'f', 1).arg(p->iMotor(), 0, 'f', 1).
               arg(p->vBus, 0, 'f', 1).arg(p->soc * 100.0, 0, 'f', 0));
         print(QString("Fault: %1, CAN-bus: %2").
               arg(Commands::faultToStr(mc_fault_code(p->fault))).arg(root->mCanOn ? "on" : "off"));
@@ -1039,7 +1106,7 @@ void VirtualVesc::generateLog()
     }
 
     QDateTime start = QDateTime::currentDateTime().addSecs(-3600);
-    QFile file(dir + "/" + start.toString("yyyy-MM-dd_HH-mm-ss") + ".csv");
+    QFile file(dir + "/log_001_" + start.toString("yyyy-MM-dd_HH-mm-ss") + ".csv");
     if (!file.open(QIODevice::WriteOnly)) {
         return;
     }
@@ -1053,8 +1120,7 @@ void VirtualVesc::generateLog()
            "t_day_pos:Time GNSS:s:3:0:1;gnss_lat:Latitude:deg:7:0:0;gnss_lon:Longitude:deg:7:0:0\n";
 
     // Five minutes at 10 Hz, from the same model with the current configuration
-    VirtualVesc *root = mMain ? mMain : this;
-    VirtualPlant p(&root->mMcConf, &root->mAppConf);
+    VirtualPlant p(&root()->mMcConf, &root()->mAppConf);
     const int n = VirtualPlant::motorCount;
     double t0 = start.time().msecsSinceStartOfDay() / 1000.0;
 
@@ -1066,7 +1132,7 @@ void VirtualVesc::generateLog()
         double t = fmod(t0 + p.timeS, 86400.0);
         out << QString::asprintf("%.3f;%.2f;%.2f;%.2f;%.2f;%.0f;%.0f;%.1f;%.1f;%.1f;%.1f;"
                                  "%.3f;%.3f;%.3f;%.3f;%.7f;%.7f\n",
-                                 t, p.speed * 3.6, p.vBus, p.iq * n, p.iIn * n,
+                                 t, p.speed * 3.6, p.vBus, p.iMotor() * n, p.iIn * n,
                                  p.iIn * n * p.vBus, p.erpm, p.duty * 100.0, p.soc * 100.0,
                                  p.tempFet, p.tempMotor, p.ah * n, p.wh * n, p.distAbs,
                                  t, p.lat, p.lon);
@@ -1102,10 +1168,6 @@ void VirtualVesc::loadMainConfigs()
                 mMcConf.updateParamDouble("si_battery_ah", 10.0);
                 mMcConf.updateParamDouble("l_battery_cut_start", 37.2);
                 mMcConf.updateParamDouble("l_battery_cut_end", 36.0);
-                mMcConf.updateParamDouble("foc_motor_r", VirtualPlant::motorR);
-                mMcConf.updateParamDouble("foc_motor_l", VirtualPlant::motorL);
-                mMcConf.updateParamDouble("foc_motor_ld_lq_diff", VirtualPlant::motorLdLqDiff);
-                mMcConf.updateParamDouble("foc_motor_flux_linkage", VirtualPlant::motorLambda);
                 return;
             }
         }

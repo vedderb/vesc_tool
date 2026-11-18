@@ -202,6 +202,7 @@ public:
     Q_INVOKABLE void connectUdp(QString server, int port);
     Q_INVOKABLE void connectBle(QString address);
     Q_INVOKABLE void connectVirtual();
+    Q_INVOKABLE bool isVirtualConnected() const;
     Q_INVOKABLE bool isAutoconnectOngoing() const;
     Q_INVOKABLE double getAutoconnectProgress() const;
     Q_INVOKABLE QVector<int> scanCan();

@@ -511,7 +511,8 @@ Item {
         }
 
         function onQmlLoadDone() {
-            if (VescIf.askQmlLoad()) {
+            // The QML on the Virtual ESC is from VESC Tool or uploaded by the user
+            if (VescIf.askQmlLoad() && !VescIf.isVirtualConnected()) {
                 qmlLoadDialog.open()
             } else {
                 updateHwAppUi()

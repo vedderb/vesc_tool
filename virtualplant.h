@@ -1,5 +1,5 @@
 /*
-    Copyright 2026 Dado Mista
+    Copyright 2026 Jeffrey M. Friesen
 
     This file is part of VESC Tool.
 
@@ -26,9 +26,10 @@
 /*
  * The hardware behind the Virtual ESC: a dual motor vehicle with a battery,
  * hall sensors and a rider with a remote. The motor, battery and hall
- * sensors have fixed "true" values that detection measures. The motor and
- * app configurations act as the controller, so limits, input mappings and
- * a wrong hall table behave like on real hardware.
+ * sensors have "true" values that detection measures, adjustable with the
+ * sim terminal command. The motor and app configurations act as the
+ * controller, so limits, input mappings and a wrong hall table behave like
+ * on real hardware.
  *
  * Simplifications: the current controller is ideal up to the voltage limit,
  * id is 0 and both motors share the state of motor 1.
@@ -40,15 +41,29 @@ public:
 
     void step(double dt);
 
-    // True motor, as measured by detection
-    static constexpr double motorR = 0.0213;
-    static constexpr double motorL = 17.6e-6;
-    static constexpr double motorLdLqDiff = 3.1e-6;
-    static constexpr double motorLambda = 0.00411;
-    static const int hallTable[8];
-    static constexpr double encOffset = 123.4;
+    // True vehicle, as measured by detection and the BMS. The pack does not
+    // follow si_battery_cells, so the wizards can measure it.
+    double motorR, motorL, motorLdLqDiff, motorLambda, encOffset, hallOffset;
+    double packCells, cellRes, soc, soh, packTemp, mass;
+    int hallAngle(int state) const;
+
+    // Adjustable with sim set, in the units shown to the user. resetParams
+    // also restores the rider, the forced fault and the cell overrides.
+    struct Param {
+        const char *name;
+        const char *unit;
+        double scale; // To SI units
+        double def;
+        double min;
+        double max;
+        int decimals;
+        double VirtualPlant::*value;
+    };
+    static const QVector<Param> params;
+    void resetParams();
+
     static constexpr int motorCount = 2;
-    static constexpr int packCells = 12; // The pack does not follow si_battery_cells, so the wizards can measure it
+    static constexpr int maxCells = 32;
     static constexpr double gnssRadius = 150.0;
 
     // Rider and remote
@@ -66,7 +81,6 @@ public:
     int fault; // mc_fault_code, the motor is off when set
     int faultForced;
     QVector<double> cellOverride; // NAN when not overridden
-    double soc;
 
     // State
     double timeS, speed, erpm, iq, vd, vq, duty, vBus, iIn;
@@ -81,6 +95,7 @@ public:
     void resetStats();
 
     double cellVoltage(int cell) const;
+    double iMotor() const { return vq < 0.0 ? -iq : iq; } // As reported by the firmware
 
 private:
     ConfigParams *mMc;
@@ -90,6 +105,7 @@ private:
     double mControlAgeS;
     double mRpmInt;
     double mSweepStartS;
+    double mVBusFilt;
 
     double erpmPerSpeed() const;
     double hallTorqueFactor() const;

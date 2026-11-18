@@ -71,6 +71,7 @@ private:
 
     void processPacket(QByteArray &data);
     void sendReply(const VByteArray &vb);
+    VirtualVesc *root() { return mMain ? mMain : this; }
     void sendLater(int ms, const VByteArray &vb);
     void print(const QString &str);
     void simStep();

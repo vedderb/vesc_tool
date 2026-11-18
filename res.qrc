@@ -29,6 +29,7 @@
         <file>res/images/motors/outrunner_small.jpg</file>
         <file>res/images/v6plus_top.png</file>
         <file>res/3d/maxim.bin</file>
+        <file>res/virtual_vesc/SimPage.qml</file>
         <file>res/3d/maxim_top.png</file>
         <file>res/other_fw/nrf51_remote_mt_32k_32m.bin</file>
         <file>res/other_fw/nrf51_vesc_ble_16k_16m_rx1_tx2_led3.bin</file>

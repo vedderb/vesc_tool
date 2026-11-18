@@ -70,7 +70,7 @@ SheetDialog {
 
     function updateResults() {
         resultModel.clear()
-        var query = field.text.trim().toLowerCase()
+        var query = field.displayText.trim().toLowerCase()
 
         if (query.length < 2) {
             return
@@ -105,7 +105,7 @@ SheetDialog {
             Layout.fillWidth: true
             placeholderText: qsTr("Search parameters and pages")
             inputMethodHints: Qt.ImhNoPredictiveText
-            onTextChanged: updateResults()
+            onDisplayTextChanged: updateResults()
         }
 
         ListView {

@@ -479,7 +479,7 @@ Item {
                                 text: "Open Recent..."
                                 iconFile: "History-96.png"
                                 onTriggered: {
-                                    updateRecentModel(recentFilter.text)
+                                    updateRecentModel(recentFilter.displayText)
                                     recentDialog.open()
                                 }
                             }
@@ -551,6 +551,8 @@ Item {
                         text: consoleText
                         readOnly: true
                         wrapMode: TextArea.NoWrap
+                        // Keeps the newest output in view
+                        onTextChanged: cursorPosition = length
                         selectByMouse: Qt.platform.os !== "ios" && Qt.platform.os !== "android"
                         font.family: "DejaVu Sans Mono"
                         color: Utility.getAppHexColor("lightText")
@@ -822,7 +824,7 @@ Item {
                 id: recentFilter
                 Layout.fillWidth: true
                 placeholderText: "Filter"
-                onTextChanged: updateRecentModel(text)
+                onDisplayTextChanged: updateRecentModel(displayText)
             }
 
             ListView {
@@ -871,8 +873,8 @@ Item {
                 }
 
                 delegate: ItemDelegate {
-                    visible: exampleFilter.text.length === 0 ||
-                             fileName.toLowerCase().indexOf(exampleFilter.text.toLowerCase()) >= 0
+                    visible: exampleFilter.displayText.length === 0 ||
+                             fileName.toLowerCase().indexOf(exampleFilter.displayText.toLowerCase()) >= 0
                     height: visible ? implicitHeight : 0
                     text: fileName
                     onClicked: {

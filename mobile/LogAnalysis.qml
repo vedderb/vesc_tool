@@ -315,7 +315,7 @@ Item {
     // gets 240 pt, as in landscape and on tablets.
     component LogSearch: ColumnLayout {
         id: logSearch
-        property alias text: searchField.text
+        property alias text: searchField.displayText
         property alias sorts: sortRepeater.model
         property string sortBy: "Date"
         property bool ascending: false
@@ -325,7 +325,7 @@ Item {
         // If s has all searched words, ignoring case
         function matches(s) {
             var t = s.toLowerCase()
-            return searchField.text.toLowerCase().split(" ").every(w => t.indexOf(w) >= 0)
+            return searchField.displayText.toLowerCase().split(" ").every(w => t.indexOf(w) >= 0)
         }
 
         // Ascending comparison d in the picked direction
@@ -919,7 +919,7 @@ Item {
         }
         // Columns in the picked group or kind that have all searched words, in group order when grouped
         readonly property var rows: {
-            var terms = columnField.text.toLowerCase().split(" ")
+            var terms = columnField.displayText.toLowerCase().split(" ")
             return shown.filter(c => (group === "" || c.tags.indexOf(group) >= 0) &&
                                 terms.every(t => [c.label, c.key, c.unit].concat(c.tags).join(" ").toLowerCase().indexOf(t) >= 0))
                 .sort((a, b) => (grouped ? root.columnGroups.indexOf(a.group) - root.columnGroups.indexOf(b.group) : 0) || a.index - b.index)
@@ -2251,7 +2251,7 @@ Item {
             property bool collapsed: false
             property real expansion: collapsed && !root.wide ? 0 : 1
             Behavior on expansion {
-                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                NumberAnimation { id: expandAnim; duration: 200; easing.type: Easing.OutCubic }
             }
             Layout.fillWidth: true
             Layout.fillHeight: root.wide
@@ -2379,8 +2379,13 @@ Item {
                     Layout.fillWidth: true; Layout.fillHeight: true
                     Canvas {
                         id: chartLines
-                        anchors.fill: parent
-                        onWidthChanged: requestPaint(); onHeightChanged: requestPaint()
+                        // Keeps its size and is stretched while the graphs grow or shrink, as large logs take
+                        // too long to paint every frame. It paints at the new size when they stop
+                        width: parent.width
+                        height: expandAnim.running ? paintedHeight : parent.height
+                        property real paintedHeight
+                        transform: Scale { yScale: chartLines.parent.height / Math.max(1, chartLines.height) }
+                        onWidthChanged: requestPaint(); onHeightChanged: { paintedHeight = height; requestPaint() }
                         function drawColSeries(ctx, colIdx, color, range) {
                             var data = root.rawRows
                             var s = Math.max(0, root.viewStart)
@@ -2391,12 +2396,17 @@ Item {
                             var step = Math.max(1, Math.floor(n / Math.max(1, width * 2)))
                             ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath()
                             var started = false
+                            var px = 0, py = 0
                             for (var i = s; i <= e; i += step) {
                                 var v = data[i].vals[colIdx]
                                 if (v === null || isNaN(v)) continue
                                 var x = ((i - s) / (n - 1)) * width
                                 var y = height - (((v - range.min) / span) * (height - 10) + 5)
-                                if (!started) { ctx.moveTo(x, y); started = true } else ctx.lineTo(x, y)
+                                if (!started) { ctx.moveTo(x, y); px = x; py = y; started = true } else ctx.lineTo(x, y)
+                                // Short paths stroke much faster than one long path that zigzags over itself. Each
+                                // starts a point back, so that the lines still join
+                                if ((i - s) % (16 * step) === 0) { ctx.stroke(); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y) }
+                                px = x; py = y
                             }
                             ctx.stroke()
                         }

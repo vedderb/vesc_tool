@@ -71,7 +71,7 @@ Item {
         pkgModel.clear()
         mPkgs = mLoader.reloadPackageArchive()
 
-        var filter = filterInput.text
+        var filter = filterInput.displayText
 
         for (var i = 0;i < mPkgs.length;i++) {
             if (filter.length === 0  || mPkgs[i].name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
@@ -127,7 +127,7 @@ Item {
             Layout.fillWidth: true
             placeholderText: qsTr("Search packages")
             inputMethodHints: Qt.ImhNoPredictiveText
-            onTextChanged: reloadArchive()
+            onDisplayTextChanged: reloadArchive()
         }
 
         ListView {

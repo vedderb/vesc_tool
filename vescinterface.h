@@ -344,7 +344,7 @@ private slots:
     void appconfUpdated();
     void mcconfUpdated();
     void ackReceived(QString ackType);
-    void customConfigRx(int confId, QByteArray data);
+    void customConfigRx(int confId, QByteArray data, bool isDefault);
 
 private:
     typedef enum {

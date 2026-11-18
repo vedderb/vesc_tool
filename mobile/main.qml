@@ -76,10 +76,9 @@ ApplicationWindow {
     property real rtTempMotor: 0
     property string faultText: ""
     property string statusFlash: ""
-    readonly property color scrimColor: Utility.isDarkMode() ? "#AA000000" : "#55000000"
     property var warnings: []
     property int canCount: 0
-    property int changedCount: mcTracker.changedParams.length + appTracker.changedParams.length
+    property int changedCount: mMcConf.changedParams.length + mAppConf.changedParams.length
     property alias lastDeviceName: lastDevice.name
     property alias lastDeviceTime: lastDevice.time
     property alias lastDeviceIcon: lastDevice.icon
@@ -267,7 +266,7 @@ ApplicationWindow {
             onDockedChanged: if (!docked) close()
 
             Overlay.modal: Rectangle {
-                color: scrimColor
+                color: Utility.getAppHexColor("overlay")
             }
 
             background: Rectangle {
@@ -299,7 +298,7 @@ ApplicationWindow {
         interactive: false
 
         Overlay.modal: Rectangle {
-            color: scrimColor
+            color: Utility.getAppHexColor("overlay")
         }
 
         background: Rectangle {
@@ -894,14 +893,14 @@ ApplicationWindow {
         id: confMotorButton
         visible: confPageMotor.visible
         text: "Motor Cfg"
-        dot: mcTracker.changedParams.length > 0
+        dot: mMcConf.changedParams.length > 0
     }
 
     MainTabButton {
         id: confAppButton
         visible: confPageApp.visible
         text: "App Cfg"
-        dot: appTracker.changedParams.length > 0
+        dot: mAppConf.changedParams.length > 0
     }
 
     MainTabButton {
@@ -1648,16 +1647,6 @@ ApplicationWindow {
         }
     }
 
-    ChangeTracker {
-        id: mcTracker
-        params: mMcConf
-    }
-
-    ChangeTracker {
-        id: appTracker
-        params: mAppConf
-    }
-
     // Remind about unwritten changes when leaving a configuration page
     Connections {
         id: pageReminder
@@ -1665,8 +1654,8 @@ ApplicationWindow {
 
         function onCurrentItemChanged() {
             var page = lastPage
-            var count = page === confPageMotor ? mcTracker.changedParams.length :
-                        page === confPageApp ? appTracker.changedParams.length : 0
+            var count = page === confPageMotor ? mMcConf.changedParams.length :
+                        page === confPageApp ? mAppConf.changedParams.length : 0
 
             if (count > 0 && page.SwipeView.index >= 0) {
                 showToast(qsTr("%1 unwritten in %2").arg(count).arg(page === confPageMotor ? "Motor Cfg" : "App Cfg"),
@@ -1909,11 +1898,11 @@ ApplicationWindow {
         closePolicy: Popup.NoAutoClose
 
         onAccepted: {
-            if (mcTracker.changedParams.length > 0) {
+            if (mMcConf.changedParams.length > 0) {
                 mCommands.setMcconf(false)
             }
 
-            if (appTracker.changedParams.length > 0) {
+            if (mAppConf.changedParams.length > 0) {
                 mCommands.setAppConf()
             }
 
@@ -1940,7 +1929,7 @@ ApplicationWindow {
         id: allPagesPopup
         parent: Overlay.overlay
         Overlay.modal: Rectangle {
-            color: scrimColor
+            color: Utility.getAppHexColor("overlay")
         }
         // Landscape phones: a full height column under the button, in reach of the right thumb
         x: phoneLandscape ? parent.width - width - 10 - notchRight : 10 + notchLeft

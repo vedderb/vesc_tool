@@ -21,6 +21,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
+import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 // Side list for the parameter groups of a configuration page, as a second view of
@@ -28,8 +29,8 @@ import Vedder.vesc.utility 1.0
 ListView {
     id: list
     property ComboBox box
-    property ChangeTracker tracker: null
-    readonly property var changedParams: tracker ? tracker.changedParams : []
+    property ConfigParams params: null
+    readonly property var changedParams: params ? params.changedParams : []
 
     y: 5
     width: phoneLandscape ? 150 : 180
@@ -40,8 +41,8 @@ ListView {
     boundsBehavior: Flickable.StopAtBounds
 
     function hasChanges(group) {
-        return tracker.params.getParamSubgroups(group).some(function(subgroup) {
-            var names = tracker.params.getParamsFromSubgroup(group, subgroup)
+        return params.getParamSubgroups(group).some(function(subgroup) {
+            var names = params.getParamsFromSubgroup(group, subgroup)
             return changedParams.some(function(p) { return names.indexOf(p) >= 0 })
         })
     }

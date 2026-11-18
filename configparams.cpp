@@ -41,6 +41,18 @@ ConfigParams::ConfigParams(QObject *parent) : QObject(parent)
     mConfigVersion = VT_CONFIG_VERSION;
     mUpdateCnt = 0;
     mReference = nullptr;
+    mChangedUpdatePending = false;
+
+    auto onChange = [this](QObject *src, QString name) {
+        emit paramChanged(src, name);
+        scheduleChangedUpdate();
+    };
+    connect(this, &ConfigParams::paramChangedDouble, this, onChange);
+    connect(this, &ConfigParams::paramChangedInt, this, onChange);
+    connect(this, &ConfigParams::paramChangedEnum, this, onChange);
+    connect(this, &ConfigParams::paramChangedQString, this, onChange);
+    connect(this, &ConfigParams::paramChangedBool, this, onChange);
+    connect(this, &ConfigParams::referenceStored, this, &ConfigParams::scheduleChangedUpdate);
 }
 
 void ConfigParams::addParam(const QString &name, ConfigParam param)
@@ -564,7 +576,55 @@ QStringList ConfigParams::getParamOrder() const
  */
 QStringList ConfigParams::getChangedParams()
 {
-    return mReference ? checkDifference(mReference) : QStringList();
+    // Fresh while an update is pending, the cached list is replaced and notified with it
+    return mChangedUpdatePending ? checkDifference(mReference) : mChangedParams;
+}
+
+/**
+ * @brief ConfigParams::getParamValueString
+ * Format the value of a parameter the way the editors show it, e.g. "60.00 A" or "UART".
+ */
+QString ConfigParams::getParamValueString(const QString &name)
+{
+    if (!mParams.contains(name)) {
+        return "";
+    }
+
+    const ConfigParam &p = mParams[name];
+
+    switch (p.type) {
+    case CFG_T_DOUBLE:
+        if (p.editAsPercentage) {
+            return QString("%1 %").arg(qRound(100.0 * p.valDouble / qMax(qAbs(p.maxDouble), qAbs(p.minDouble))));
+        }
+        return QString::number(p.valDouble * p.editorScale, 'f', p.editorDecimalsDouble) + p.suffix;
+    case CFG_T_INT:
+        if (p.editAsPercentage) {
+            return QString("%1 %").arg(qRound(100.0 * p.valInt / qMax(qAbs(p.maxInt), qAbs(p.minInt))));
+        }
+        return QString::number(qRound(p.valInt * p.editorScale)) + p.suffix;
+    case CFG_T_ENUM:
+        return enumLabel(p.enumNames.value(p.valInt));
+    case CFG_T_BOOL:
+        return p.valInt ? tr("On") : tr("Off");
+    case CFG_T_BITFIELD:
+        return tr("%1 selected").arg(qPopulationCount(quint8(p.valInt)));
+    case CFG_T_QSTRING:
+        return p.valString;
+    default:
+        return "";
+    }
+}
+
+// Readable names for enum values that the firmware only names as C constants
+QString ConfigParams::enumLabel(const QString &enumName)
+{
+    static const QHash<QString, QString> labels = {
+        {"BATTERY_TYPE_LIION_3_0__4_2", tr("Li-ion (3.0 \u2013 4.2 V)")},
+        {"BATTERY_TYPE_LIIRON_2_6__3_6", tr("LiFePO4 (2.6 \u2013 3.6 V)")},
+        {"BATTERY_TYPE_LEAD_ACID", tr("Lead acid")}
+    };
+    return labels.value(enumName, enumName);
 }
 
 ConfigParams *ConfigParams::getReference()
@@ -585,6 +645,25 @@ void ConfigParams::storeReference()
     }
 
     emit referenceStored();
+}
+
+// Many parameters change at once on reads, so the difference is checked once afterwards
+void ConfigParams::scheduleChangedUpdate()
+{
+    if (mReference && !mChangedUpdatePending) {
+        mChangedUpdatePending = true;
+        QMetaObject::invokeMethod(this, &ConfigParams::updateChangedParams, Qt::QueuedConnection);
+    }
+}
+
+void ConfigParams::updateChangedParams()
+{
+    mChangedUpdatePending = false;
+    QStringList changed = checkDifference(mReference);
+    if (changed != mChangedParams) {
+        mChangedParams = changed;
+        emit changedParamsChanged();
+    }
 }
 
 void ConfigParams::setParamOrder(const QStringList &order)

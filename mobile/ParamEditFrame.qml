@@ -35,9 +35,7 @@ Item {
     property Item headerControl: null
     property bool useSheet: false
     property bool expanded: false
-    readonly property ChangeTracker tracker: params === VescIf.mcConfig() ? mcTracker :
-                                             params === VescIf.appConfig() ? appTracker : null
-    readonly property bool changed: tracker !== null && tracker.changedParams.indexOf(paramName) >= 0
+    readonly property bool changed: params !== null && params.changedParams.indexOf(paramName) >= 0
     property SheetDialog sheet: null
     property string valueText: ""
     property string referenceText: ""
@@ -68,8 +66,8 @@ Item {
     }
 
     function refresh() {
-        valueText = ParamFormat.valueString(params, paramName)
-        referenceText = changed ? ParamFormat.valueString(params.getReference(), paramName) : ""
+        valueText = params ? params.getParamValueString(paramName) : ""
+        referenceText = changed ? params.getReference().getParamValueString(paramName) : ""
     }
 
     onHeaderControlChanged: headerControl.parent = headerHolder
@@ -132,10 +130,10 @@ Item {
 
     onChangedChanged: refresh()
 
-    ChangeTracker {
-        params: frame.params
-        trackChanges: false
-        onParamChanged: function(name) {
+    Connections {
+        target: frame.params
+
+        function onParamChanged(src, name) {
             if (name === paramName) {
                 refresh()
             }

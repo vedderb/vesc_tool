@@ -579,13 +579,13 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
     });
 
-    connect(mCommands, SIGNAL(customConfigRx(int,QByteArray)),
-            this, SLOT(customConfigRx(int,QByteArray)));
+    connect(mCommands, &Commands::customConfigRx, this, &VescInterface::customConfigRx);
 
     connect(mCommands, &Commands::customConfigAckReceived, [this](int confId) {
         ConfigParams *custConf = customConfig(confId);
         QString name;
         if (custConf) {
+            custConf->storeReference();
             name = custConf->getLongName("hw_name");
         } else {
             name = tr("Custom config %1").arg(confId);
@@ -4364,12 +4364,16 @@ void VescInterface::ackReceived(QString ackType)
     emit statusMessage(ackType, true);
 }
 
-void VescInterface::customConfigRx(int confId, QByteArray data)
+void VescInterface::customConfigRx(int confId, QByteArray data, bool isDefault)
 {
     ConfigParams *params = customConfig(confId);
     if (params) {
         auto vb = VByteArray(data);
         if (params->deSerialize(vb)) {
+            if (!isDefault) {
+                params->storeReference();
+            }
+
             params->updateDone();
             emitStatusMessage(tr("%1 updated").arg(params->getLongName("hw_name")), true);
         } else {

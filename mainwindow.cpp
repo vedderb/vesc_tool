@@ -35,6 +35,7 @@
 #include "widgets/helpdialog.h"
 #include "utility.h"
 #include "widgets/paramdialog.h"
+#include "widgets/paramtable.h"
 
 namespace {
 void stepTowards(double &value, double goal, double step) {
@@ -307,6 +308,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     reloadPages();
 
+    connect(mVesc->mcConfig(), &ConfigParams::changedParamsChanged, this, &MainWindow::updateConfigChanges);
+    connect(mVesc->appConfig(), &ConfigParams::changedParamsChanged, this, &MainWindow::updateConfigChanges);
+
     mMcConfRead = false;
     mAppConfRead = false;
 
@@ -476,6 +480,12 @@ MainWindow::MainWindow(QWidget *parent) :
             PageListItem *widget = dynamic_cast<PageListItem*>(ui->pageList->itemWidget(item));
             widget->setName(mVesc->customConfig(2)->getParam("hw_name")->longName);
         }
+
+        for (int i = 0;i < mVesc->customConfigNum();i++) {
+            connect(mVesc->customConfig(i), &ConfigParams::changedParamsChanged,
+                    this, &MainWindow::updateConfigChanges, Qt::UniqueConnection);
+        }
+        updateConfigChanges();
     });
 
     qApp->installEventFilter(this);
@@ -1421,6 +1431,37 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
         showMessageDialog(tr("Save header"),
                           tr("Could not save header"),
                           false, false);
+    }
+}
+
+// Marks the write buttons and the pages that have parameters not written to the VESC
+void MainWindow::updateConfigChanges()
+{
+    int mcChanges = mVesc->mcConfig()->getChangedParams().size();
+    int appChanges = mVesc->appConfig()->getChangedParams().size();
+
+    ui->actionWriteMcconf->setIcon(mcChanges > 0 ? Utility::getIconWithDot("icons/motor_down.png") :
+                                                   Utility::getIcon("icons/motor_down.png"));
+    ui->actionWriteMcconf->setToolTip(mcChanges > 0 ? tr("Write motor configuration (%n unwritten change(s))", "", mcChanges) :
+                                                      tr("Write motor configuration"));
+    ui->actionWriteAppconf->setIcon(appChanges > 0 ? Utility::getIconWithDot("icons/app_down.png") :
+                                                     Utility::getIcon("icons/app_down.png"));
+    ui->actionWriteAppconf->setToolTip(appChanges > 0 ? tr("Write app configuration (%n unwritten change(s))", "", appChanges) :
+                                                        tr("Write app configuration"));
+
+    for (int i = 0;i < ui->pageList->count();i++) {
+        PageListItem *item = dynamic_cast<PageListItem*>(ui->pageList->itemWidget(ui->pageList->item(i)));
+        QWidget *page = ui->pageWidget->widget(i);
+        if (!item || !page) {
+            continue;
+        }
+
+        bool changed = (i == mPageNameIdList.value("motor", -1) && mcChanges > 0) ||
+                       (i == mPageNameIdList.value("app", -1) && appChanges > 0);
+        for (ParamTable *t: page->findChildren<ParamTable*>()) {
+            changed = changed || t->hasChanges();
+        }
+        item->setChanged(changed);
     }
 }
 

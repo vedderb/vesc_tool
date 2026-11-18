@@ -144,7 +144,7 @@ Item {
     ParamGroupList {
         id: groupList
         box: pageBox
-        tracker: mcTracker
+        params: VescIf.mcConfig()
     }
 
     GridLayout {
@@ -195,7 +195,7 @@ Item {
                 visible: count > 1 || groupList.visible
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
-                tracker: mcTracker
+                params: VescIf.mcConfig()
                 group: pageBox.currentText
                 
                 onCurrentTextChanged: {
@@ -227,7 +227,7 @@ Item {
                 id: writeButton
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
-                tracker: mcTracker
+                params: VescIf.mcConfig()
                 ackText: "Motor config write OK"
 
                 onWriteRequested: {

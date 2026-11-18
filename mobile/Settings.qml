@@ -91,7 +91,7 @@ Item {
         title: "VESC Tool Settings"
 
         Overlay.modal: Rectangle {
-            color: scrimColor
+            color: Utility.getAppHexColor("overlay")
         }
 
         // Landscape phones: over the app bars too, only inside the safe area

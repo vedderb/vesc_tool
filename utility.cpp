@@ -38,6 +38,7 @@
 #include <QNetworkInterface>
 #include <QDirIterator>
 #include <QPixmapCache>
+#include <QPainter>
 
 #include "maddy/parser.h"
 #include "heatshrink/heatshrinkif.h"
@@ -2286,7 +2287,8 @@ QColor Utility::getAppQColor(QString colorName)
 
 QString Utility::getAppHexColor(QString colorName)
 {
-    return getAppQColor(colorName).name();
+    QColor c = getAppQColor(colorName);
+    return c.name(c.alpha() < 255 ? QColor::HexArgb : QColor::HexRgb);
 }
 
 void Utility::setPlotColors(QCustomPlot* plot)
@@ -2426,6 +2428,33 @@ QString Utility::waitForLine(QTcpSocket *socket, int timeoutMs)
     }
 
     return res;
+}
+
+// Icon with an accent dot in the top right corner, e.g. for unwritten changes
+QPixmap Utility::getIconWithDot(QString path)
+{
+    QPixmap pm = getIcon(path);
+    QPainter p(&pm);
+    p.setRenderHint(QPainter::Antialiasing);
+    qreal r = pm.width() * 0.17;
+    QPointF c(pm.width() - r - 1, r + 1);
+    p.setPen(QPen(getAppQColor("darkBackground"), r * 0.5));
+    p.setBrush(getAppQColor("accentText"));
+    p.drawEllipse(c, r, r);
+    return pm;
+}
+
+// Small accent dot that marks pages and tabs with unwritten changes
+QPixmap Utility::getChangedDot()
+{
+    QPixmap pm(12, 12);
+    pm.fill(Qt::transparent);
+    QPainter p(&pm);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::NoPen);
+    p.setBrush(getAppQColor("accentText"));
+    p.drawEllipse(QPointF(6, 6), 3.5, 3.5);
+    return pm;
 }
 
 QPixmap Utility::getIcon(QString path)

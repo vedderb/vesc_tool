@@ -172,7 +172,7 @@ Item {
         rightMargin: 0
         padding: 16
         Overlay.modal: Rectangle {
-            color: scrimColor
+            color: Utility.getAppHexColor("overlay")
         }
 
         background: Rectangle {

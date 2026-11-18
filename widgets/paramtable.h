@@ -22,16 +22,29 @@
 
 #include <QWidget>
 #include <QTableWidget>
+#include <QPointer>
 #include "configparams.h"
 
 class ParamTable : public QTableWidget
 {
+    Q_OBJECT
 public:
     ParamTable(QWidget *parent = nullptr);
     bool addParamRow(ConfigParams *params, QString paramName);
     void addRowSeparator(QString text);
     void addParamSubgroup(ConfigParams *params, QString groupName, QString subgroupName);
     void clearParams();
+    bool hasChanges();
+
+private:
+    // Parameter shown in each row, empty for separators
+    QVector<QPair<QPointer<ConfigParams>, QString>> mRows;
+
+    bool rowChanged(int row);
+    QString referenceString(int row);
+    void updateChanged();
+    void showContextMenu(const QPoint &pos);
+    void revertRow(int row);
 
 };
 

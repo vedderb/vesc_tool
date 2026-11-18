@@ -31,6 +31,7 @@
 class ConfigParams : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QStringList changedParams READ getChangedParams NOTIFY changedParamsChanged)
 public:
     explicit ConfigParams(QObject *parent = nullptr);
     Q_INVOKABLE void addParam(const QString &name, ConfigParam param);
@@ -78,6 +79,8 @@ public:
 
     Q_INVOKABLE QStringList getParamOrder() const;
     Q_INVOKABLE QStringList getChangedParams();
+    Q_INVOKABLE QString getParamValueString(const QString &name);
+    Q_INVOKABLE QString enumLabel(const QString &enumName);
     Q_INVOKABLE ConfigParams *getReference();
     void storeReference();
     void setParamOrder(const QStringList &order);
@@ -163,6 +166,8 @@ signals:
     void updated();
     void savingXml();
     void referenceStored();
+    void paramChanged(QObject *src, QString name);
+    void changedParamsChanged();
 
 public slots:
     void updateParamDouble(QString name, double param, QObject *src = nullptr);
@@ -186,6 +191,11 @@ private:
     int mConfigVersion;
     int mUpdateCnt;
     ConfigParams *mReference;
+    QStringList mChangedParams;
+    bool mChangedUpdatePending;
+
+    void scheduleChangedUpdate();
+    void updateChangedParams();
 
     bool almostEqual(float A, float B, float eps);
 

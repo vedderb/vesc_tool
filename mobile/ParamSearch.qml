@@ -22,7 +22,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
-import "ParamFormat.js" as ParamFormat
 
 // Search for parameters by name, path or description, and for pages and tools
 SheetDialog {
@@ -155,7 +154,7 @@ SheetDialog {
 
                     Text {
                         visible: param !== ""
-                        text: param !== "" ? ParamFormat.valueString(isApp ? VescIf.appConfig() : VescIf.mcConfig(), param) : ""
+                        text: param !== "" ? (isApp ? VescIf.appConfig() : VescIf.mcConfig()).getParamValueString(param) : ""
                         font.weight: Font.Medium
                         color: Utility.getAppHexColor("lightText")
                     }

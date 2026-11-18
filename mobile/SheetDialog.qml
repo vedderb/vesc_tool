@@ -54,7 +54,7 @@ Dialog {
     bottomPadding: footer.visible ? 0 : 16 + notchBot
 
     Overlay.modal: Rectangle {
-        color: scrimColor
+        color: Utility.getAppHexColor("overlay")
     }
 
     // iOS keeps the keyboard and the view offset otherwise

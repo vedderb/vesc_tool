@@ -801,7 +801,7 @@ void Commands::processPacket(QByteArray data)
             mTimeoutCustomConf[confInd] = 0;
         }
 
-        emit customConfigRx(confInd, vb);
+        emit customConfigRx(confInd, vb, id == COMM_GET_CUSTOM_CONFIG_DEFAULT);
     } break;
 
     case COMM_GET_CUSTOM_CONFIG_XML: {

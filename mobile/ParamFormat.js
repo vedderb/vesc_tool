@@ -19,58 +19,6 @@
 
 .pragma library
 
-// Readable names for enum values that the firmware only names as C constants
-var enumLabels = {
-    "BATTERY_TYPE_LIION_3_0__4_2": qsTr("Li-ion (3.0 \u2013 4.2 V)"),
-    "BATTERY_TYPE_LIIRON_2_6__3_6": qsTr("LiFePO4 (2.6 \u2013 3.6 V)"),
-    "BATTERY_TYPE_LEAD_ACID": qsTr("Lead acid")
-}
-
-function enumLabel(name) {
-    return enumLabels[name] || name
-}
-
-// Formats the value of a parameter for display, e.g. "60.00 A" or "UART"
-function valueString(conf, name) {
-    if (conf === null || !conf.hasParam(name)) {
-        return ""
-    }
-
-    if (conf.isParamDouble(name) || conf.isParamInt(name)) {
-        var isDouble = conf.isParamDouble(name)
-        var val = isDouble ? conf.getParamDouble(name) : conf.getParamInt(name)
-
-        if (conf.getParamEditAsPercentage(name)) {
-            var maxAbs = isDouble ?
-                        Math.max(Math.abs(conf.getParamMaxDouble(name)), Math.abs(conf.getParamMinDouble(name))) :
-                        Math.max(Math.abs(conf.getParamMaxInt(name)), Math.abs(conf.getParamMinInt(name)))
-            return Math.round(100 * val / maxAbs) + " %"
-        }
-
-        return (val * conf.getParamEditorScale(name)).toFixed(
-                    isDouble ? conf.getParamDecimalsDouble(name) : 0) + conf.getParamSuffix(name)
-    }
-
-    if (conf.isParamEnum(name)) {
-        return enumLabel(conf.getParamEnumNames(name)[conf.getParamEnum(name)])
-    }
-
-    if (conf.isParamBool(name)) {
-        return conf.getParamBool(name) ? qsTr("On") : qsTr("Off")
-    }
-
-    if (conf.isParamBitfield(name)) {
-        var bits = conf.getParamInt(name)
-        var selected = 0
-        for (var i = 0;i < 8;i++) {
-            selected += (bits >> i) & 1
-        }
-        return qsTr("%1 selected").arg(selected)
-    }
-
-    return conf.getParamQString(name)
-}
-
 // Formats the allowed range of a numeric parameter, e.g. "Range 0.00 … 5000.00 A"
 function rangeString(conf, name) {
     if (conf.getParamEditAsPercentage(name)) {

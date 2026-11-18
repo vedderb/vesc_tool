@@ -157,6 +157,8 @@ public:
     static QString waitForLine(QTcpSocket *socket, int timeoutMs);
 
     static QPixmap getIcon(QString path);
+    static QPixmap getIconWithDot(QString path);
+    static QPixmap getChangedDot();
 
     Q_INVOKABLE static bool downloadUrlEventloop(QString path, QString dest);
 

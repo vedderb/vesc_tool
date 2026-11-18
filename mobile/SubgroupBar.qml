@@ -19,14 +19,15 @@
 
 import QtQuick
 import QtQuick.Layouts
+import Vedder.vesc.configparams 1.0
 
 // Horizontal chips for the subgroups of a parameter group. A dot marks
 // subgroups with unwritten changes.
 ListView {
     id: bar
-    property ChangeTracker tracker: null
+    property ConfigParams params: null
     property string group: ""
-    readonly property var changedParams: tracker ? tracker.changedParams : []
+    readonly property var changedParams: params ? params.changedParams : []
     readonly property string currentText: currentIndex >= 0 && currentIndex < count ? model[currentIndex] : ""
 
     implicitHeight: 44
@@ -40,7 +41,7 @@ ListView {
     highlightMoveDuration: 200
 
     function hasChanges(subgroup) {
-        var names = tracker.params.getParamsFromSubgroup(group, subgroup)
+        var names = params.getParamsFromSubgroup(group, subgroup)
         return changedParams.some(function(p) { return names.indexOf(p) >= 0 })
     }
 

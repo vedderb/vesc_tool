@@ -218,6 +218,7 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("warningText", QColor(242,181,74));
         Utility::setAppQColor("danger", QColor(224,72,72));
         Utility::setAppQColor("dangerText", QColor(255,122,122));
+        Utility::setAppQColor("overlay", QColor(0,0,0,170));
     } else {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2.conf");
 
@@ -263,6 +264,7 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("warningText", QColor(138,83,0));
         Utility::setAppQColor("danger", QColor(200,52,52));
         Utility::setAppQColor("dangerText", QColor(185,35,35));
+        Utility::setAppQColor("overlay", QColor(0,0,0,85));
     }
 
     // DPI settings

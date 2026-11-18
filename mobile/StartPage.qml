@@ -76,7 +76,7 @@ Item {
                     onDisconnectClicked: requestDisconnect()
                     onCanClicked: canDrawerLoader.item.open()
                     onUpdateClicked: firmwareDialog.open()
-                    onChangesClicked: reviewChanges(mcTracker.changedParams.length > 0 ? confPageMotor : confPageApp)
+                    onChangesClicked: reviewChanges(mMcConf.changedParams.length > 0 ? confPageMotor : confPageApp)
                 }
 
                 Button {
@@ -642,7 +642,7 @@ Item {
         bottomInset: fullWindow ? -notchBot : 0
 
         Overlay.modal: Rectangle {
-            color: scrimColor
+            color: Utility.getAppHexColor("overlay")
         }
 
         background: Rectangle {

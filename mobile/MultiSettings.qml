@@ -87,7 +87,7 @@ Item {
         }
 
         Overlay.modal: Rectangle {
-            color: scrimColor
+            color: Utility.getAppHexColor("overlay")
         }
 
         Component.onCompleted: {

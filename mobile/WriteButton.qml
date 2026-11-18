@@ -24,16 +24,14 @@ import QtQuick.Layouts
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
-import "ParamFormat.js" as ParamFormat
 
 // Write button with a count of unwritten changes. Tapping the count opens a
 // review of the changes, and a successful write can be undone.
 Button {
     id: writeButton
-    property ChangeTracker tracker: null
-    readonly property ConfigParams params: tracker.params
+    property ConfigParams params: null
     property string ackText: ""
-    readonly property var changedParams: tracker.changedParams
+    readonly property var changedParams: params ? params.changedParams : []
     property var undoParams: []
     signal writeRequested()
 
@@ -41,8 +39,13 @@ Button {
     highlighted: changedParams.length > 0
     rightPadding: changedParams.length > 0 ? badge.width + 20 : leftPadding
 
+    // Name and device value of every changed parameter, used to revert them
+    function referenceValues() {
+        return changedParams.map(function(p) { return [p, params.getReference().getParamCopy(p)] })
+    }
+
     function write() {
-        undoParams = tracker.referenceValues()
+        undoParams = referenceValues()
         writeRequested()
     }
 
@@ -58,14 +61,15 @@ Button {
 
     onClicked: write()
 
+    // Write acknowledgements, including the ones for custom configs, end up as status messages
     Connections {
-        target: VescIf.commands()
+        target: VescIf
 
-        function onAckReceived(ackType) {
-            if (ackType === ackText && undoParams.length > 0) {
+        function onStatusMessage(msg, isGood) {
+            if (msg === ackText && undoParams.length > 0) {
                 var undo = undoParams
                 undoParams = []
-                showToast(ackType, qsTr("%1 changed").arg(undo.length === 1 ?
+                showToast(msg, qsTr("%1 changed").arg(undo.length === 1 ?
                                                               params.getLongName(undo[0][0]) :
                                                               qsTr("%1 parameters").arg(undo.length)),
                           "ok", qsTr("Undo"), function() {
@@ -140,7 +144,7 @@ Button {
                             }
 
                             Text {
-                                text: ParamFormat.valueString(writeButton.params.getReference(), modelData)
+                                text: writeButton.params.getReference().getParamValueString(modelData)
                                 font.strikeout: true
                                 color: Utility.getAppHexColor("disabledText")
                             }
@@ -151,7 +155,7 @@ Button {
                             }
 
                             Text {
-                                text: ParamFormat.valueString(writeButton.params, modelData)
+                                text: writeButton.params.getParamValueString(modelData)
                                 font.weight: Font.Medium
                                 color: Utility.getAppHexColor("accentText")
                             }
@@ -170,7 +174,7 @@ Button {
                 Material.foreground: Utility.getAppHexColor("dangerText")
                 text: qsTr("Discard changes")
                 onClicked: {
-                    revert(tracker.referenceValues())
+                    revert(referenceValues())
                     reviewSheet.close()
                 }
             }

@@ -32,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
     property int confInd: 0
+    property ConfigParams conf: null
 
     ParamEditors {
         id: editors
@@ -42,7 +43,8 @@ Item {
     }
 
     function reloadConfig() {
-        if (VescIf.customConfig(confInd) === null) {
+        conf = VescIf.customConfig(confInd)
+        if (conf === null) {
             return
         }
 
@@ -97,6 +99,8 @@ Item {
 
         SubgroupBar {
             id: tabBox
+            params: conf
+            group: "General"
             Layout.columnSpan: column.columns
             Layout.fillWidth: true
             Layout.topMargin: -1
@@ -125,17 +129,16 @@ Item {
             columns: phoneLandscape ? 1 : 3
             Layout.fillWidth: !phoneLandscape
             Layout.alignment: Qt.AlignTop
-            Button {
+            WriteButton {
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
-                text: "Write"
+                params: conf
+                ackText: conf ? qsTr("%1 write OK").arg(conf.getLongName("hw_name")) : ""
 
-                onClicked: {
-                    if (VescIf.customConfig(confInd) === null) {
-                        return
+                onWriteRequested: {
+                    if (conf !== null) {
+                        mCommands.customConfigSet(confInd, conf)
                     }
-
-                    mCommands.customConfigSet(confInd, VescIf.customConfig(confInd))
                 }
             }
 

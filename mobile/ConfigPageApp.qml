@@ -137,7 +137,7 @@ Item {
     ParamGroupList {
         id: groupList
         box: pageBox
-        tracker: appTracker
+        params: VescIf.appConfig()
     }
 
     ColumnLayout {
@@ -211,7 +211,7 @@ Item {
                 visible: count > 1 || groupList.visible
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
-                tracker: appTracker
+                params: VescIf.appConfig()
                 group: pageBox.currentText
 
                 onCurrentTextChanged: {
@@ -244,7 +244,7 @@ Item {
                 id: writeButton
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
-                tracker: appTracker
+                params: VescIf.appConfig()
                 ackText: "App config write OK"
 
                 onWriteRequested: {

@@ -72,7 +72,6 @@
         <file>ParamGroupList.qml</file>
         <file>WriteButton.qml</file>
         <file>ParamFormat.js</file>
-        <file>ChangeTracker.qml</file>
         <file>ParamSearch.qml</file>
         <file>DeviceCard.qml</file>
         <file>WizardHeader.qml</file>

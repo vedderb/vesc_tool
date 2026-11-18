@@ -36,7 +36,21 @@ Item {
     property int notchRight: 0
     property int notchBot: 0
     property int notchTop: 0
+
+    // Globals that the mobile components expect from mobile/main.qml
+    property bool mainIsHorizontal: container.width > container.height
+    property bool mainIsTablet: container.width >= 700 && Math.min(Screen.width, Screen.height) >= 600
+    readonly property bool phoneLandscape: mainIsHorizontal && !mainIsTablet
+    readonly property var rideSession: null
+    property real rtVin: 0
     property string lastDeviceAddr: ""
+    property string lastDeviceName: ""
+    property string lastDeviceIcon: "icons/Connected-96.png"
+    property real lastDeviceTime: 0
+
+    function timeAgo(time) {
+        return ""
+    }
 
     function showToast(text, detail) {
         VescIf.emitStatusMessage(text + ": " + detail, true)

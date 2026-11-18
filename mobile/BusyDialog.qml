@@ -38,7 +38,7 @@ Dialog {
     header: null
 
     Overlay.modal: Rectangle {
-        color: scrimColor
+        color: Utility.getAppHexColor("overlay")
     }
 
     background: Rectangle {

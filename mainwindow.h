@@ -245,6 +245,7 @@ private:
     void saveParamFileDialog(QString conf, bool wrapIfdef);
     void showPage(const QString &name);
     void reloadPages();
+    void updateConfigChanges();
     void checkUdev();
 #ifdef Q_OS_LINUX
     bool waitProcess(QProcess &process, bool block = true, int timeoutMs = 300000);

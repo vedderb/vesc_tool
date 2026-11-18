@@ -44,7 +44,7 @@ Menu {
     y: parent.height - height - (side ? 10 + notchBot : 0) + slide
 
     Overlay.modal: Rectangle {
-        color: scrimColor
+        color: Utility.getAppHexColor("overlay")
     }
 
     enter: Transition {

@@ -344,7 +344,7 @@ Item {
                                         Layout.preferredWidth: 80
                                         Layout.preferredHeight: 80
                                         Layout.leftMargin: 5
-                                        opacity: imgRect.GridView.isCurrentItem ? 1.0 : 0.5
+                                        opacity: inputList.currentIndex < 0 || imgRect.GridView.isCurrentItem ? 1.0 : 0.5
 
                                         Image {
                                             id: image

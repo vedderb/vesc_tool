@@ -1,3 +1,36 @@
+### 8.00
+#### TBD
+* Redesigned mobile UI with new card, sheet, input and menu styles. Sheets can be closed by dragging them down.
+* New mobile start page with a device summary card and shortcuts to common tasks.
+* Restyled mobile gauges with metal rims and lit needles, plus a battery gauge on the dashboard.
+* Ride display as a Live Activity on iOS and a notification on Android, with speed, distance, battery, range, ride time and a logging button.
+* Option to start the ride display on connect.
+* Mobile connect screen shows BLE signal strength and the last connected device. Any device type can be marked as preferred.
+* Track unwritten config changes in the mobile UI, with a change count, review, revert and undo.
+* Reminder about unwritten changes when leaving a configuration page or disconnecting.
+* Mobile UI highlights the config backup before a firmware update and offers to restore it if the update cleared the settings.
+* Parameter search in the mobile UI covering parameters, pages and tools.
+* Compact parameter rows and a group side list on mobile configuration pages.
+* Status pill in the mobile UI showing connection state, device and live values.
+* Restyled motor detection and setup wizards in the mobile UI, with step headers and hints.
+* Tablet layouts and landscape fixes in the mobile UI. The side menu stays open on landscape tablets.
+* Mobile log viewer has its own tab and a map with direction arrow on iOS.
+* Value picker with groups and search, units and Trip GNSS in the mobile log viewer.
+* Log list in the mobile UI shows the distance of each log and can be sorted in either direction.
+* Clearer RT logging card in the mobile UI.
+* Fixed the RT log folder on iOS and ask for location permission before logging with position.
+* BMS summary on the mobile start page when there is no motor controller.
+* BMS page in the mobile UI shows and hides automatically.
+* Restyled package store in the mobile UI with search.
+* Mobile UI keeps the selected page when switching device.
+* Messages, fault log and copy diagnostics in the mobile menu.
+* New PPM and ADC mapping views in the mobile UI.
+* IMU view uses the VESC Maxim 3D model.
+* Only scan CAN once per connection in the mobile UI.
+* Fixed the Roboto Bold font not loading.
+
+---
+
 ### 7.01
 #### TBD
 * Added filter box to package store.

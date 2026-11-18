@@ -73,6 +73,42 @@ Item {
     }
 
     onHeaderControlChanged: headerControl.parent = headerHolder
+    // Keeps a row that just opened in place while open rows above it close
+    property Flickable flick: null
+    property real holdY: -1
+
+    onYChanged: {
+        if (flick && holdY >= 0) {
+            flick.contentY = Math.max(0, flick.contentY + y - holdY)
+            holdY = y
+        }
+    }
+
+    Timer {
+        id: holdTimer
+        interval: 250
+        onTriggered: frame.holdY = -1
+    }
+
+    // One row open at a time
+    onExpandedChanged: {
+        if (expanded && parent) {
+            for (var p = parent;p && !flick;p = p.parent) {
+                if (p instanceof Flickable) {
+                    flick = p
+                }
+            }
+            holdY = y
+            holdTimer.restart()
+
+            for (var i = 0;i < parent.children.length;i++) {
+                var e = parent.children[i]
+                if (e !== frame && e instanceof ParamEditFrame) {
+                    e.expanded = false
+                }
+            }
+        }
+    }
 
     Component.onCompleted: {
         if (useSheet) {
@@ -151,7 +187,7 @@ Item {
             id: column
             anchors.left: parent.left
             anchors.right: parent.right
-            spacing: 6
+            spacing: 0
 
             RowLayout {
                 Layout.fillWidth: true
@@ -210,83 +246,98 @@ Item {
                 }
             }
 
-            ColumnLayout {
-                id: inlineArea
+            // Slides open and closed
+            Item {
                 Layout.fillWidth: true
-                Layout.leftMargin: 14
-                Layout.rightMargin: 12
-                Layout.bottomMargin: 6
-                visible: frame.expanded
-                spacing: 8
+                Layout.preferredHeight: frame.expanded ? inlineArea.implicitHeight + 12 : 0
+                // A hidden layout is not measured, so it shows as soon as it opens
+                visible: frame.expanded || height > 0
+                clip: true
+                // Opened again with the short help, reset once closed so the slide does not jump
+                onVisibleChanged: if (!visible && !frame.expanded) helpArea.full = false
 
-                ColumnLayout {
-                    id: editorColumn
-                    parent: frame.sheet ? frame.sheet.column : inlineArea
-                    Layout.fillWidth: true
+                Behavior on Layout.preferredHeight {
+                    NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
                 }
 
                 ColumnLayout {
-                    id: helpArea
-                    property bool full: false
+                    id: inlineArea
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 12
+                    y: 6
+                    spacing: 8
 
-                    parent: frame.sheet ? frame.sheet.column : inlineArea
-                    Layout.fillWidth: true
-                    spacing: 2
-
-                    Text {
-                        id: helpText
+                    ColumnLayout {
+                        id: editorColumn
+                        parent: frame.sheet ? frame.sheet.column : inlineArea
                         Layout.fillWidth: true
-                        Layout.preferredHeight: helpArea.full ? implicitHeight : Math.min(implicitHeight, Math.ceil(helpMetrics.lineSpacing) * 3)
-                        visible: text !== ""
-                        clip: true
-                        wrapMode: Text.WordWrap
-                        textFormat: Text.RichText
-                        font.pointSize: 10
-                        color: Utility.getAppHexColor("normalText")
-                        linkColor: Utility.getAppHexColor("lightAccent")
-                        onLinkActivated: function(link) { Qt.openUrlExternally(link) }
-
-                        FontMetrics {
-                            id: helpMetrics
-                            font: helpText.font
-                        }
                     }
 
-                    RowLayout {
+                    ColumnLayout {
+                        id: helpArea
+                        property bool full: false
+
+                        parent: frame.sheet ? frame.sheet.column : inlineArea
                         Layout.fillWidth: true
-                        Material.foreground: Utility.getAppHexColor("accentText")
+                        spacing: 2
 
-                        Button {
-                            id: nowButton
+                        Text {
+                            id: helpText
                             Layout.fillWidth: true
-                            flat: true
-                            focusPolicy: Qt.NoFocus
-                            text: qsTr("Current")
-                            onClicked: {
-                                params.setUpdateOnly(paramName)
-                                params.requestUpdate()
+                            Layout.preferredHeight: helpArea.full ? implicitHeight : Math.min(implicitHeight, Math.ceil(helpMetrics.lineSpacing) * 3)
+                            visible: text !== ""
+                            clip: true
+                            wrapMode: Text.WordWrap
+                            textFormat: Text.RichText
+                            font.pointSize: 10
+                            color: Utility.getAppHexColor("normalText")
+                            linkColor: Utility.getAppHexColor("lightAccent")
+                            onLinkActivated: function(link) { Qt.openUrlExternally(link) }
+
+                            FontMetrics {
+                                id: helpMetrics
+                                font: helpText.font
                             }
                         }
 
-                        Button {
-                            id: defaultButton
+                        RowLayout {
                             Layout.fillWidth: true
-                            flat: true
-                            focusPolicy: Qt.NoFocus
-                            text: qsTr("Default")
-                            onClicked: {
-                                params.setUpdateOnly(paramName)
-                                params.requestUpdateDefault()
-                            }
-                        }
+                            Material.foreground: Utility.getAppHexColor("accentText")
 
-                        Button {
-                            Layout.fillWidth: true
-                            visible: helpText.implicitHeight > Math.ceil(helpMetrics.lineSpacing) * 3
-                            flat: true
-                            focusPolicy: Qt.NoFocus
-                            text: qsTr("Help")
-                            onClicked: helpArea.full = !helpArea.full
+                            Button {
+                                id: nowButton
+                                Layout.fillWidth: true
+                                flat: true
+                                focusPolicy: Qt.NoFocus
+                                text: qsTr("Current")
+                                onClicked: {
+                                    params.setUpdateOnly(paramName)
+                                    params.requestUpdate()
+                                }
+                            }
+
+                            Button {
+                                id: defaultButton
+                                Layout.fillWidth: true
+                                flat: true
+                                focusPolicy: Qt.NoFocus
+                                text: qsTr("Default")
+                                onClicked: {
+                                    params.setUpdateOnly(paramName)
+                                    params.requestUpdateDefault()
+                                }
+                            }
+
+                            Button {
+                                Layout.fillWidth: true
+                                visible: helpText.implicitHeight > Math.ceil(helpMetrics.lineSpacing) * 3
+                                flat: true
+                                focusPolicy: Qt.NoFocus
+                                text: qsTr("Help") + (helpArea.full ? " ▴" : " ▾")
+                                onClicked: helpArea.full = !helpArea.full
+                            }
                         }
                     }
                 }

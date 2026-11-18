@@ -32,6 +32,8 @@
         <file>ProfileDisplay.qml</file>
         <file>RtDataSetup.qml</file>
         <file>CustomGauge.qml</file>
+        <file>BatteryGauge.qml</file>
+        <file>GaugeStyle.js</file>
         <file>SetupWizardFoc.qml</file>
         <file>SetupWizardInput.qml</file>
         <file>ParamList.qml</file>

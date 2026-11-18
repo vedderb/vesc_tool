@@ -28,6 +28,7 @@ import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import "GaugeStyle.js" as Style
 
 Item {
     id: rtData
@@ -41,7 +42,7 @@ Item {
     property double efficiency_lpf: 0
     property bool isHorizontal: rtData.width > rtData.height
 
-    property int gaugeSize: (isHorizontal ? Math.min((height)/1.25, width / 2.5 - 20) :
+    property int gaugeSize: (isHorizontal ? Math.min((height)/1.25, width / 2.6 - 20) :
                                             Math.min(width / 1.37, (height) / 2.4 - 10 ))
     property int gaugeSize2: gaugeSize * 0.55
     Component.onCompleted: {
@@ -231,7 +232,7 @@ Item {
                         }
                     }
                     background: Rectangle {
-                        color: {color = Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")}
+                        color: speedGauge.style.face0
                         opacity: button.down ? 0 : 1
                         implicitWidth: gaugeSize2*0.28
                         implicitHeight: gaugeSize2*0.28
@@ -246,105 +247,30 @@ Item {
                         }
                         Canvas {
                             anchors.fill: parent
-                            Component.onCompleted: requestPaint()
-                            property real outerRadius: parent.width/2.0;
-                            property real borderWidth: outerRadius*0.1;
-                            property color lightBG: {lightBG = Utility.getAppHexColor("lightestBackground")}
-                            property color darkBG: {darkBG = Utility.getAppHexColor("darkBackground")}
+                            onVisibleChanged: requestPaint()
                             onPaint: {
-                                var ctx = getContext("2d");
-                                //create outer gauge metal bezel effect
-                                ctx.beginPath();
-                                var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                                // Add three color stops
-                                gradient2.addColorStop(1, lightBG);
-                                gradient2.addColorStop(0.7, darkBG);
-                                gradient2.addColorStop(0.1, lightBG);
-                                ctx.strokeStyle = gradient2;
-                                ctx.lineWidth = borderWidth;
-                                ctx.arc(outerRadius,
-                                        outerRadius,
-                                        outerRadius - borderWidth/2,
-                                        0, 2 * Math.PI);
-                                ctx.stroke();
-                                ctx.beginPath();
-                                var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                                // Add three color stops
-                                gradient3.addColorStop(1, darkBG);
-                                gradient3.addColorStop(0.8, lightBG);
-                                gradient3.addColorStop(0, darkBG);
-                                ctx.strokeStyle = gradient3;
-                                ctx.lineWidth = borderWidth;
-                                ctx.arc(outerRadius,
-                                        outerRadius,
-                                        outerRadius - 3*borderWidth/2,
-                                        0, 2 * Math.PI);
-                                ctx.stroke();
+                                var ctx = getContext("2d")
+                                var r = width / 2
+                                ctx.reset()
+                                ctx.strokeStyle = Style.metal(ctx, r, r, Math.PI * 0.75, speedGauge.style)
+                                ctx.lineWidth = r * 0.12
+                                ctx.arc(r, r, r * 0.94, 0, 2 * Math.PI)
+                                ctx.stroke()
                             }
                         }
                     }
                 }
-                CustomGauge {
+                BatteryGauge {
                     id: batteryGauge
-                    width: gaugeSize2
-                    height: gaugeSize2
-                    anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: parent.width/4 + width/2
-                    minAngle: -225
-                    maxAngle: 45
-                    minimumValue: 0
-                    maximumValue: 100
-                    value: 0
-                    centerTextVisible: false
-                    property color greenColor: {greenColor = "green"}
+                    z: -1
+                    x: parent.width - width * 0.18
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: gaugeSize2 * 0.44
+                    height: gaugeSize * 0.7
+                    property color greenColor: {greenColor = Utility.getAppHexColor("positive")}
                     property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
                     property color redColor: {redColor = "red"}
                     nibColor: value > 50 ? greenColor : value > 20 ? orangeColor : redColor
-                    Text {
-                        id: batteryLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
-                        text: "BATTERY"
-                        font.pixelSize: gaugeSize2/18.0
-                        verticalAlignment: Text.AlignVCenter
-                        anchors.centerIn: parent
-                        anchors.verticalCenterOffset: - gaugeSize2*0.12
-                        anchors.margins: 10
-                        font.family:  "Roboto"
-                    }
-                    Text {
-                        id: rangeValLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
-                        text: "∞"
-                        font.pixelSize: text === "∞"? gaugeSize2/6.3 : gaugeSize2/8.0
-                        anchors.verticalCenterOffset: text === "∞"? -0.015*gaugeSize2 : 0
-                        verticalAlignment: Text.AlignVCenter
-                        anchors.centerIn: parent
-                        anchors.margins: 10
-                        font.family:  "Roboto"
-                    }
-                    Text {
-                        id: rangeLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
-                        text: "KM RANGE"
-                        font.pixelSize: gaugeSize2/20.0
-                        verticalAlignment: Text.AlignVCenter
-                        anchors.centerIn: parent
-                        anchors.horizontalCenterOffset: gaugeSize2*0.3
-                        anchors.margins: 10
-                        font.family:  "Roboto"
-                    }
-                    Text {
-                        id: battValLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
-                        text: parseFloat(batteryGauge.value).toFixed(0) +"%"
-                        font.pixelSize: gaugeSize2/12.0
-                        verticalAlignment: Text.AlignVCenter
-                        anchors.centerIn: parent
-                        anchors.verticalCenterOffset: gaugeSize2*0.15
-                        //anchors.horizontalCenterOffset: (width -parent.width)/2
-                        anchors.margins: 10
-                        font.family:  "Roboto"
-                    }
                     Behavior on nibColor {
                         ColorAnimation {
                             duration: 1000;
@@ -526,10 +452,25 @@ Item {
             id: textRect
             color: "transparent"
             Layout.fillWidth: true
-            Layout.preferredHeight:  gaugeSize2*0.26
+            Layout.preferredHeight:  gaugeSize2*0.32
             Layout.alignment: Qt.AlignBottom
             Layout.rowSpan: 1
             //Layout.columnSpan: isHorizontal ? 2 : 1
+            // Housing around the labels and the readouts
+            Canvas {
+                property real m: 16
+                width: gaugeSize2*2.3 + 2*m
+                height: gaugeSize2*0.3 + 2*m
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: -gaugeSize2*0.045
+                onVisibleChanged: requestPaint()
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    ctx.translate(m, m)
+                    Style.frame(ctx, width - 2*m, height - 2*m, gaugeSize2*0.08, gaugeSize2*0.02, speedGauge.style)
+                }
+            }
             Text {
                 id: odoLabel
                 color: {color = Utility.getAppHexColor("lightText")}
@@ -571,11 +512,8 @@ Item {
                 width:2*gaugeSize2
                 height: rideTime.implicitHeight + gaugeSize2*0.025
                 anchors.centerIn: parent
-                color: {color = Utility.getAppHexColor("darkBackground")}
+                color: "transparent"
                 anchors.verticalCenterOffset: gaugeSize2*0.005
-                border.color: {border.color = Utility.getAppHexColor("lightestBackground")}
-                border.width: 1
-                radius: gaugeSize2*0.03
                 Text{
                     id: rideTime
                     color: {color = Utility.getAppHexColor("lightText")}
@@ -730,12 +668,11 @@ Item {
             }
 
             odometerValue = values.odometer
-            batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) + "%"
-            rangeLabel.text = useImperial ? "MI\nRANGE" : "KM\nRANGE"
+            batteryGauge.rangeUnit = useImperial ? "mi" : "km"
             if( values.battery_wh / (wh_km_total / impFact) < 999.0) {
-                rangeValLabel.text = parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(1)
+                batteryGauge.rangeText = parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(1)
             } else {
-                rangeValLabel.text = "∞"
+                batteryGauge.rangeText = "∞"
             }
             rideTime.text = new Date(values.uptime_ms).toISOString().substr(11, 8)
             odometer.text = parseFloat((values.odometer * impFact) / 1000.0).toFixed(1)

@@ -2257,15 +2257,16 @@ Item {
             Layout.fillHeight: root.wide
             Layout.rowSpan: root.headerOverMap ? 2 : 1
             Layout.preferredWidth: 3
-            // Expanded it takes half the page on tall screens, as it collapses with one tap, and leaves room
-            // for the map on short ones
-            Layout.preferredHeight: Math.round(110 + expansion * (Math.min(Math.max(compactMode ? 305 : 260, root.height / 2),
-                                                                           root.height - 140) - 110))
+            // Collapsed it keeps the series and a strip of the graphs. Expanded it takes half the page on tall
+            // screens, as it collapses with one tap, and leaves room for the map on short ones
+            readonly property real collapsedHeight: 116 + seriesGrid.implicitHeight
+            Layout.preferredHeight: Math.round(collapsedHeight + expansion * Math.max(0, Math.min(Math.max(compactMode ? 305 : 260, root.height / 2),
+                                                                                                root.height - 140) - collapsedHeight))
             color: Utility.getAppHexColor("cardBackground"); radius: 12; border.color: Utility.getAppHexColor("raisedBackground")
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 8; anchors.topMargin: root.wide ? 8 : 0; spacing: 6
 
-                // Tap or drag the grabber to shrink the graphs to a strip that still scrubs
+                // Tap or drag the grabber to shrink the graphs to a strip that still scrubs, below the series
                 Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 16
@@ -2291,11 +2292,8 @@ Item {
                 }
 
                 GridLayout {
+                    id: seriesGrid
                     Layout.fillWidth: true
-                    Layout.maximumHeight: Math.round(implicitHeight * chartBox.expansion)
-                    visible: chartBox.expansion > 0
-                    opacity: chartBox.expansion
-                    clip: true
                     columns: chartBox.compactMode ? 2 : 4
                     columnSpacing: 8
                     rowSpacing: 4
@@ -2379,8 +2377,6 @@ Item {
                 }
                 Item {
                     Layout.fillWidth: true; Layout.fillHeight: true
-                    // Takes back the series grid's spacing as it shrinks, until it is hidden
-                    Layout.topMargin: chartBox.expansion > 0 ? (chartBox.expansion - 1) * 6 : 0
                     Canvas {
                         id: chartLines
                         anchors.fill: parent

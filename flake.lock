@@ -58,6 +58,29 @@
         "type": "github"
       }
     },
+    "nixgl": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793798159,
+        "narHash": "sha256-c263mBFrDLv2/sguzQeKL99aJ4PkCdcUzcAuA5Cpzjo=",
+        "owner": "nix-community",
+        "repo": "nixGL",
+        "rev": "4306ae1d15adf3d386f1462b330d4f2648404711",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nixGL",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1787204541,
@@ -94,6 +117,7 @@
       "inputs": {
         "bldc-fw": "bldc-fw",
         "flake-utils": "flake-utils_2",
+        "nixgl": "nixgl",
         "nixpkgs": "nixpkgs",
         "treefmt-nix": "treefmt-nix"
       }

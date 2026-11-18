@@ -186,7 +186,6 @@ void Vesc3DView::paintGL()
 
     QMatrix4x4 m;
     m.translate(0.0f, 0.0f, -1.2f);
-    m.rotate(30, 1.0f, 0.0f, 0.0f);
     m.rotate(180, 0.0f, 1.0f, 0.0f);
     m.rotate(180, 0.0f, 0.0f, 1.0f);
 

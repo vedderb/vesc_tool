@@ -107,7 +107,8 @@ Item {
                     height: 80
 
                     buttonText: pkgName
-                    imageSrc: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
+                    imageSrc: typeof mPkgs[ind] !== "undefined" ? mPkgs[ind].iconSrc() : "qrc" + Utility.getThemePath() + "icons/Package-96.png"
+
                     onClicked: {
                         openPkgDialog(mPkgs[ind])
                     }

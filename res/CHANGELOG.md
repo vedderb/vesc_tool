@@ -3,29 +3,31 @@
 * Redesigned mobile UI with new card, sheet, input and menu styles. Sheets can be closed by dragging them down.
 * New mobile start page with a device summary card and shortcuts to common tasks.
 * Restyled mobile gauges with metal rims and lit needles, plus a battery gauge on the dashboard.
-* Ride display as a Live Activity on iOS and a notification on Android, with speed, distance, battery, range, ride time and a logging button.
-* Option to start the ride display on connect.
+* Ride display as a Live Activity on iOS and a notification on Android, with speed, distance, battery, range, ride time and a logging button. On Android 16 it shows as a Live Update.
+* The ride display starts on connect and can be turned off in the settings.
 * Mobile connect screen shows BLE signal strength and the last connected device. Any device type can be marked as preferred.
-* Track unwritten config changes in the mobile UI, with a change count, review, revert and undo.
+* Track unwritten config changes in the mobile UI, including custom configs, with a change count, review, revert and undo.
+* Changed parameters are highlighted in VESC Tool parameter tables, with the value on the VESC as tooltip and revert in the right-click menu. Tabs, the page list and the write buttons mark unwritten changes.
 * Reminder about unwritten changes when leaving a configuration page or disconnecting.
-* Mobile UI highlights the config backup before a firmware update and offers to restore it if the update cleared the settings.
+* Mobile UI highlights the config backup before a firmware update and offers to restore it when the VESC reconnects after the update.
 * Parameter search in the mobile UI covering parameters, pages and tools.
-* Compact parameter rows and a group side list on mobile configuration pages.
-* Status pill in the mobile UI showing connection state, device and live values.
+* Compact parameter rows on mobile configuration pages, with a group side list on tablets and in landscape.
+* Status pill in the mobile UI showing connection state, device and live values. Tapping it shows connection details, copy diagnostics and the fault log.
+* Message log in the mobile menu.
 * Restyled motor detection and setup wizards in the mobile UI, with step headers and hints.
-* Tablet layouts and landscape fixes in the mobile UI. The side menu stays open on landscape tablets.
-* Mobile log viewer has its own tab and a map with direction arrow on iOS.
+* Tablet layouts and landscape fixes in the mobile UI. On landscape tablets the CAN device list docks beside the page.
+* Mobile log viewer shows the map on iOS, with a direction arrow at the current position.
 * Value picker with groups and search, units and Trip GNSS in the mobile log viewer.
-* Log list in the mobile UI shows the distance of each log and can be sorted in either direction.
+* Log lists in the mobile UI can be searched, show the distance of each log and sort by date, distance or size in either direction.
 * Clearer RT logging card in the mobile UI.
 * Fixed the RT log folder on iOS and ask for location permission before logging with position.
+* Mobile terminal keeps a command history and colors fault codes.
 * BMS summary on the mobile start page when there is no motor controller.
-* BMS page in the mobile UI shows and hides automatically.
-* Restyled package store in the mobile UI with search.
+* BMS tab in the mobile UI only shows while a BMS reports cell voltages.
+* Restyled package store in the mobile UI.
 * Mobile UI keeps the selected page when switching device.
-* Messages, fault log and copy diagnostics in the mobile menu.
-* New PPM and ADC mapping views in the mobile UI.
-* IMU view uses the VESC Maxim 3D model.
+* Redesigned PPM and ADC mapping in the mobile UI with a live input bar, the captured range and the mapped output.
+* IMU view in VESC Tool and the mobile UI uses the VESC Maxim 3D model.
 * Only scan CAN once per connection in the mobile UI.
 * Fixed the Roboto Bold font not loading.
 

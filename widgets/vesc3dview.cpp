@@ -24,7 +24,8 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <cmath>
-#include <QPainter>
+#include <QFile>
+#include <QtEndian>
 
 Vesc3DView::Vesc3DView(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -40,12 +41,14 @@ Vesc3DView::Vesc3DView(QWidget *parent) : QOpenGLWidget(parent)
 
     mBgColor = palette().color(QPalette::Window);
 
-    memset(mTextures, 0, sizeof(mTextures));
+    mTexture = nullptr;
     mProgram = nullptr;
+    mVertexCount = 0;
 
     // Multisampling
     QSurfaceFormat format;
     format.setSamples(4);
+    format.setAlphaBufferSize(8);
     setFormat(format);
 }
 
@@ -53,9 +56,7 @@ Vesc3DView::~Vesc3DView()
 {
     makeCurrent();
     mVbo.destroy();
-    for (int i = 0; i < 6; ++i) {
-        delete mTextures[i];
-    }
+    delete mTexture;
     delete mProgram;
     doneCurrent();
 }
@@ -109,23 +110,41 @@ void Vesc3DView::initializeGL()
     QOpenGLShader *vshader = new QOpenGLShader(QOpenGLShader::Vertex, this);
     const char *vsrc =
             "attribute highp vec4 vertex;\n"
-            "attribute mediump vec4 texCoord;\n"
-            "varying mediump vec4 texc;\n"
-            "uniform mediump mat4 matrix;\n"
+            "attribute mediump vec3 normal;\n"
+            "attribute mediump vec3 smoothNormal;\n"
+            "attribute mediump vec4 color;\n"
+            "uniform highp mat4 matrix;\n"
+            "uniform mediump mat3 normalMatrix;\n"
+            "uniform mediump vec2 outline;\n"
+            "varying mediump vec3 n;\n"
+            "varying mediump vec4 c;\n"
+            "varying mediump vec2 texc;\n"
             "void main(void)\n"
             "{\n"
             "    gl_Position = matrix * vertex;\n"
-            "    texc = texCoord;\n"
+            "    gl_Position.xy += normalize(normalMatrix * smoothNormal).xy * outline * gl_Position.w;\n"
+            "    gl_Position.z += (outline.x > 0.0 ? 0.002 : 0.0) * gl_Position.w;\n"
+            "    n = normalMatrix * normal;\n"
+            "    c = color;\n"
+            "    texc = vec2((vertex.x + 54.5) / 109.0, (58.75 - vertex.z) / 117.5);\n"
             "}\n";
     vshader->compileSourceCode(vsrc);
 
     QOpenGLShader *fshader = new QOpenGLShader(QOpenGLShader::Fragment, this);
     const char *fsrc =
             "uniform sampler2D texture;\n"
-            "varying mediump vec4 texc;\n"
+            "uniform mediump vec2 outline;\n"
+            "varying mediump vec3 n;\n"
+            "varying mediump vec4 c;\n"
+            "varying mediump vec2 texc;\n"
             "void main(void)\n"
             "{\n"
-            "    gl_FragColor = texture2D(texture, texc.st);\n"
+            "    mediump vec3 norm = normalize(n);\n"
+            "    mediump float d = dot(norm, normalize(vec3(-0.35, 0.75, 0.55)));\n"
+            "    mediump float k = d > 0.55 ? 1.0 : (d > 0.1 ? 0.8 : 0.62);\n"
+            "    mediump float rim = 1.0 - abs(norm.z);\n"
+            "    mediump vec3 col = mix(c.rgb, texture2D(texture, texc).rgb, c.a) * k + 0.05 * k * k + 0.09 * rim * rim * rim;\n"
+            "    gl_FragColor = outline.x > 0.0 ? vec4(0.02, 0.02, 0.025, 1.0) : vec4(col, 1.0);\n"
             "}\n";
     fshader->compileSourceCode(fsrc);
 
@@ -133,7 +152,9 @@ void Vesc3DView::initializeGL()
     mProgram->addShader(vshader);
     mProgram->addShader(fshader);
     mProgram->bindAttributeLocation("vertex", 0);
-    mProgram->bindAttributeLocation("texCoord", 1);
+    mProgram->bindAttributeLocation("normal", 1);
+    mProgram->bindAttributeLocation("smoothNormal", 2);
+    mProgram->bindAttributeLocation("color", 3);
     mProgram->link();
 
     mProgram->bind();
@@ -157,11 +178,15 @@ void Vesc3DView::paintGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glActiveTexture(GL_TEXTURE0);
+    mTexture->bind();
+
+    QMatrix4x4 p;
+    double aspect = double(width()) / double(height() ? height() : 1);
+    p.perspective(30.0 / qMin(aspect, 1.0), aspect, 0.5, 5.0);
 
     QMatrix4x4 m;
-    double aspect = double(width()) / double(height() ? height() : 1);
-    m.perspective(30.0 / qMin(aspect, 1.0), aspect, 0.5, 5.0);
     m.translate(0.0f, 0.0f, -1.2f);
+    m.rotate(30, 1.0f, 0.0f, 0.0f);
     m.rotate(180, 0.0f, 1.0f, 0.0f);
     m.rotate(180, 0.0f, 0.0f, 1.0f);
 
@@ -173,77 +198,86 @@ void Vesc3DView::paintGL()
         m.rotate(mYRot, 1.0f, 0.0f, 0.0f);
         m.rotate(mXRot, 0.0f, 0.0f, 1.0f);
     }
-    m.scale(1.0, 0.2, 1.0);
-    mProgram->setUniformValue("matrix", m);
+    mProgram->setUniformValue("normalMatrix", m.normalMatrix());
+    m.scale(0.2f / 62.8f);
+    mProgram->setUniformValue("matrix", p * m);
 
-    mProgram->enableAttributeArray(0);
-    mProgram->enableAttributeArray(1);
-    mProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3, 5 * sizeof(GLfloat));
-    mProgram->setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
-
-    for (int i = 0; i < 6; ++i) {
-        mTextures[i]->bind();
-        glDrawArrays(GL_TRIANGLE_FAN, i * 4, 4);
+    for (int i = 0; i < 4; ++i) {
+        mProgram->enableAttributeArray(i);
     }
+    mProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3, 13 * sizeof(GLfloat));
+    mProgram->setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(GLfloat), 3, 13 * sizeof(GLfloat));
+    mProgram->setAttributeBuffer(2, GL_FLOAT, 6 * sizeof(GLfloat), 3, 13 * sizeof(GLfloat));
+    mProgram->setAttributeBuffer(3, GL_FLOAT, 9 * sizeof(GLfloat), 4, 13 * sizeof(GLfloat));
 
-    mProgram->disableAttributeArray(0);
-    mProgram->disableAttributeArray(1);
+    // Outline: back faces pushed out along the smoothed normals and slightly back
+    float outline = qMin(width(), height()) / 100.0f;
+    glCullFace(GL_FRONT);
+    mProgram->setUniformValue("outline", QVector2D(outline / width(), outline / height()));
+    glDrawArrays(GL_TRIANGLES, 0, mVertexCount);
+
+    glCullFace(GL_BACK);
+    mProgram->setUniformValue("outline", QVector2D());
+    glDrawArrays(GL_TRIANGLES, 0, mVertexCount);
+
+    for (int i = 0; i < 4; ++i) {
+        mProgram->disableAttributeArray(i);
+    }
     mVbo.release();
     mProgram->release();
 }
 
 void Vesc3DView::makeObject()
 {
-    static const int coords[6][4][3] = {
-        { { +1, -1, -1 }, { -1, -1, -1 }, { -1, +1, -1 }, { +1, +1, -1 } },
-        { { +1, +1, -1 }, { -1, +1, -1 }, { -1, +1, +1 }, { +1, +1, +1 } },
-        { { +1, -1, +1 }, { +1, -1, -1 }, { +1, +1, -1 }, { +1, +1, +1 } },
-        { { -1, -1, -1 }, { -1, -1, +1 }, { -1, +1, +1 }, { -1, +1, -1 } },
-        { { +1, -1, +1 }, { -1, -1, +1 }, { -1, -1, -1 }, { +1, -1, -1 } },
-        { { -1, -1, +1 }, { +1, -1, +1 }, { +1, +1, +1 }, { -1, +1, +1 } }
+    // VESC Maxim, baked from the case CAD. res/3d/maxim.bin is qCompress'd:
+    // "VMX1", vertex count, triangle count, vertices (int16 xyz in 0.0025 mm,
+    // int8 smoothed normal, pad), uint32 indices, uint8 material per triangle.
+    static const float colors[][4] = { // rgb, a = top texture
+        {0.17f, 0.17f, 0.18f, 0.0f}, // Case
+        {0.13f, 0.13f, 0.14f, 0.0f}, // Heatsink
+        {0.08f, 0.08f, 0.09f, 1.0f}, // Lid top
+        {0.10f, 0.10f, 0.11f, 0.0f}, // Lid edge
+        {0.11f, 0.11f, 0.12f, 0.0f}, // Capacitor
+        {0.70f, 0.71f, 0.73f, 0.0f}, // Capacitor top
+        {0.12f, 0.12f, 0.13f, 0.0f}, // Connector
+        {0.68f, 0.70f, 0.72f, 0.0f}, // Screw
+        {0.78f, 0.66f, 0.42f, 0.0f}, // Terminal
     };
 
-    QImage imgSq(512, 512, QImage::Format_RGB32);
-    imgSq.fill(Qt::darkGray);
-    QPainter *p = new QPainter(&imgSq);
-    QPen pen;
-    pen.setWidth(6);
-    pen.setColor(QColor(1, 1, 1));
-    p->setPen(pen);
-    p->drawRect(0, 0, 512, 512);
-    delete p;
-
-    QImage imgSide(512, 102, QImage::Format_RGB32);
-    imgSide.fill(Qt::darkGray);
-    p = new QPainter(&imgSide);
-    p->setPen(pen);
-    p->drawRect(0, 0, 512, 102);
-    delete p;
-
-    mTextures[0] = new QOpenGLTexture(imgSide);
-    mTextures[1] = new QOpenGLTexture(imgSq);
-    mTextures[2] = new QOpenGLTexture(imgSide);
-    mTextures[3] = new QOpenGLTexture(imgSide);
-    mTextures[4] = new QOpenGLTexture(QImage(QString(":/res/images/v6plus_top.png")).flipped());
-    mTextures[5] = new QOpenGLTexture(imgSide);
-
-    for (int i = 0;i < 6;i++) {
-        mTextures[i]->setMinificationFilter(QOpenGLTexture::Linear);
-        mTextures[i]->setMagnificationFilter(QOpenGLTexture::Linear);
-    }
+    QFile file(":/res/3d/maxim.bin");
+    file.open(QIODevice::ReadOnly);
+    QByteArray data = qUncompress(file.readAll());
+    quint32 vertNum = qFromLittleEndian<quint32>(data.constData() + 4);
+    quint32 triNum = qFromLittleEndian<quint32>(data.constData() + 8);
+    const char *verts = data.constData() + 12;
+    const char *inds = verts + vertNum * 10;
+    const char *mats = inds + triNum * 12;
 
     QVector<GLfloat> vertData;
-    for (int i = 0; i < 6; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            // vertex position
-            vertData.append(0.2 * coords[i][j][0]);
-            vertData.append(0.2 * coords[i][j][1]);
-            vertData.append(0.2 * coords[i][j][2]);
-            // texture coordinate
-            vertData.append(j == 0 || j == 3);
-            vertData.append(j == 0 || j == 1);
+    vertData.reserve(triNum * 3 * 13);
+    for (quint32 i = 0; i < triNum; i++) {
+        QVector3D pos[3], norm[3];
+        for (int j = 0; j < 3; j++) {
+            const char *v = verts + 10 * qFromLittleEndian<quint32>(inds + 12 * i + 4 * j);
+            pos[j] = QVector3D(qFromLittleEndian<qint16>(v), qFromLittleEndian<qint16>(v + 2),
+                               qFromLittleEndian<qint16>(v + 4)) * 0.0025f;
+            norm[j] = QVector3D(qint8(v[6]), qint8(v[7]), qint8(v[8])) / 127.0f;
+        }
+
+        QVector3D faceNorm = QVector3D::normal(pos[0], pos[1], pos[2]);
+        const float *c = colors[quint8(mats[i])];
+        for (int j = 0; j < 3; j++) {
+            vertData << pos[j].x() << pos[j].y() << pos[j].z()
+                     << faceNorm.x() << faceNorm.y() << faceNorm.z()
+                     << norm[j].x() << norm[j].y() << norm[j].z()
+                     << c[0] << c[1] << c[2] << c[3];
         }
     }
+    mVertexCount = triNum * 3;
+
+    mTexture = new QOpenGLTexture(QImage(":/res/3d/maxim_top.png"));
+    mTexture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+    mTexture->setMagnificationFilter(QOpenGLTexture::Linear);
 
     mVbo.create();
     mVbo.bind();

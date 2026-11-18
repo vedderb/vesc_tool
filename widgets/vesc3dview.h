@@ -56,9 +56,10 @@ private:
     QPoint mLastPos;
     QColor mBgColor;
 
-    QOpenGLTexture *mTextures[6];
+    QOpenGLTexture *mTexture;
     QOpenGLShaderProgram *mProgram;
     QOpenGLBuffer mVbo;
+    int mVertexCount;
 
     void makeObject();
     void updateUsingTimer();

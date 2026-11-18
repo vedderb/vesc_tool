@@ -211,7 +211,8 @@ SOURCES += main.cpp\
     utility.cpp \
     tcpserversimple.cpp \
     hexfile.cpp \
-    virtualvesc.cpp
+    virtualvesc.cpp \
+    virtualplant.cpp
 
 HEADERS  += mainwindow.h \
     bleuartdummy.h \
@@ -236,7 +237,8 @@ HEADERS  += mainwindow.h \
     utility.h \
     tcpserversimple.h \
     hexfile.h \
-    virtualvesc.h
+    virtualvesc.h \
+    virtualplant.h
 
 unix: {
 !ios: {

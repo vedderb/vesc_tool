@@ -26,11 +26,19 @@
 #include "packet.h"
 #include "configparams.h"
 #include "vbytearray.h"
+#include "datatypes.h"
+#include "virtualplant.h"
 
 /*
  * A simulated VESC that speaks the regular packet protocol. It stores
- * configurations and code (Lisp and QML) like the firmware does, but has
- * no motor control or other hardware behavior: all realtime values are 0.
+ * configurations and code (Lisp and QML) like the firmware does. Realtime
+ * data, detection and the input apps come from VirtualPlant, a simple model
+ * of a dual motor vehicle with a rider.
+ *
+ * A second motor controller, a BMS and an Express are on the CAN-bus. The
+ * main VESC and the Express use virtual_vesc/sd in the app data as SD card,
+ * with a generated log.
+ * The simulation is controlled with the "sim" terminal command.
  *
  * Custom configs from packages (e.g. Refloat) are normally registered at
  * runtime by native code. The XML they serve is a static qCompress-blob
@@ -57,8 +65,19 @@ signals:
     void dataToSend(QByteArray data);
 
 private:
+    // CAN node, shares the plant and SD card of the main VESC
+    VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QString &hwName,
+                const QByteArray &uuid, QObject *parent);
+
     void processPacket(QByteArray &data);
     void sendReply(const VByteArray &vb);
+    void sendLater(int ms, const VByteArray &vb);
+    void print(const QString &str);
+    void simStep();
+    void terminalCmd(const QString &cmd);
+    void processFileCmd(COMM_PACKET_ID id, VByteArray &vb, VByteArray &reply);
+    QString sdPath(const QString &path) const;
+    void generateLog();
     void loadMainConfigs();
     void updateCustomConfig();
     void loadCode();
@@ -91,6 +110,21 @@ private:
     ConfigParams mCustomConfDefault;
     QByteArray mCustomConfXml;
     QByteArray mCustomConfSource;
+
+    VirtualVesc *mMain; // nullptr on the main VESC
+    int mCanId; // -1 on the main VESC, which uses controller_id
+    HW_TYPE mHwType;
+    QString mHwName;
+    QByteArray mUuid;
+    QList<VirtualVesc*> mCanNodes;
+    bool mCanOn;
+
+    VirtualPlant *mPlant;
+    QTimer *mSimTimer;
+    int mSimSteps;
+    int mDispPosMode;
+    QStringList mFaultLog;
+    QVector<VByteArray> mSamples;
 
 };
 

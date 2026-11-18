@@ -61,6 +61,7 @@ Rectangle {
                 width: Math.min(implicitWidth, titleText.width - unitText.width - parent.spacing)
                 fontSizeMode: Text.HorizontalFit
                 minimumPointSize: 9
+                elide: Text.ElideRight
                 color: Utility.getAppHexColor("titleText")
                 font.pointSize: 15
                 font.weight: Font.Medium

@@ -520,14 +520,14 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                 case 1: sensors = "Encoder"; break;
                 case 2: sensors = "Hall Sensors"; break;
                 default: break; }
-                return QString("VESC ID            : %1\n"
-                               "Motor current      : %2 A\n"
-                               "Motor R            : %3 mΩ\n"
-                               "Motor L            : %4 µH\n"
-                               "Motor Lq-Ld        : %5 µH\n"
-                               "Motor Flux Linkage : %6 mWb\n"
-                               "Temp Comp          : %7\n"
-                               "Sensors            : %8").
+                QString text = QString("VESC ID            : %1\n"
+                                       "Motor current      : %2 A\n"
+                                       "Motor R            : %3 mΩ\n"
+                                       "Motor L            : %4 µH\n"
+                                       "Motor Lq-Ld        : %5 µH\n"
+                                       "Motor Flux Linkage : %6 mWb\n"
+                                       "Temp Comp          : %7\n"
+                                       "Sensors            : %8").
                         arg(ap->getParamInt("controller_id")).
                         arg(p->getParamDouble("l_current_max"), 0, 'f', 2).
                         arg(p->getParamDouble("foc_motor_r") * 1e3, 0, 'f', 2).
@@ -536,6 +536,16 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                         arg(p->getParamDouble("foc_motor_flux_linkage") * 1e3, 0, 'f', 2).
                         arg(p->getParamBool("foc_temp_comp") ? "True" : "False").
                         arg(sensors);
+
+                if (p->getParamEnum("foc_sensor_mode") == 2) {
+                    QStringList table;
+                    for (int i = 0;i < 8;i++) {
+                        table.append(QString::number(p->getParamInt(QString("foc_hall_table__%1").arg(i))));
+                    }
+                    text += "\nHall Table         : " + table.join(", ");
+                }
+
+                return text;
             };
 
             QVector<int> canDevs;
@@ -1671,12 +1681,20 @@ QString Utility::strCrc32(QString str)
 QString Utility::readInternalImuType(VescInterface *vesc)
 {
     QString res = "Timeout";
+    QEventLoop loop;
+    // The firmware echoes the command before the answer
     auto conn = connect(vesc->commands(), &Commands::printReceived, [&](QString str) {
+        if (!str.startsWith("-> ")) {
             res = str;
+            loop.quit();
+        }
     });
 
+    QTimer::singleShot(2000, &loop, &QEventLoop::quit);
     vesc->commands()->sendTerminalCmdSync("imu_type_internal");
-    waitSignal(vesc->commands(), SIGNAL(printReceived(QString)), 2000);
+    if (res == "Timeout") {
+        loop.exec();
+    }
 
     disconnect(conn);
 

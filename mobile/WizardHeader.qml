@@ -83,6 +83,9 @@ GridLayout {
             tinted: done
             topInset: 0
             checked: index === wizardHeader.currentIndex
+            // Steps still to come cannot be opened yet
+            opacity: index > wizardHeader.currentIndex ? 0.45 : 1.0
+            Behavior on opacity { NumberAnimation { duration: 250 } }
             text: (index < wizardHeader.currentIndex ? "✓ " : "") + modelData +
                   (done && wizardHeader.summaries[index] ? ": " + wizardHeader.summaries[index] : "")
 

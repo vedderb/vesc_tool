@@ -1142,6 +1142,7 @@ Item {
         id: resultView
         property string result
         readonly property bool success: result.startsWith("Success!")
+        readonly property var devs: success ? devices() : []
         readonly property var names: ({"Motor current": qsTr("Max current"), "Motor R": qsTr("Resistance"),
                                          "Motor L": qsTr("Inductance"), "Motor Lq-Ld": qsTr("Lq - Ld"),
                                          "Motor Flux Linkage": qsTr("Flux linkage"), "Temp Comp": qsTr("Temp comp")})
@@ -1195,36 +1196,107 @@ Item {
             }
         }
 
-        Repeater {
-            model: resultView.success ? resultView.devices() : []
+        // Two cards per row when there is room, as in landscape
+        GridLayout {
+            Layout.fillWidth: true
+            columns: resultView.devs.length > 1 && resultView.width >= 700 ? 2 : 1
+            columnSpacing: 12
+            rowSpacing: 12
+            uniformCellWidths: true
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 8
+            Repeater {
+                model: resultView.devs
 
-                SectionHeader {
-                    Layout.topMargin: 0
-                    text: (modelData.can ? qsTr("VESC %1 on CAN") : qsTr("VESC %1")).arg(modelData.id)
-                }
+                // One card per motor: the sensor type in the header, the measured values and
+                // the hall states beside them, below them when the card is narrow
+                Rectangle {
+                    id: motorCard
+                    readonly property var values: modelData.rows.filter(r => r[0] !== "Sensors" && r[0] !== "Hall Table" &&
+                                                                         (r[0] !== "Temp Comp" || r[1] === "True"))
+                    readonly property var sensors: (modelData.rows.find(r => r[0] === "Sensors") || ["", ""])[1]
+                    readonly property var hallTable: (modelData.rows.find(r => r[0] === "Hall Table") || ["", ""])[1]
+                                                     .split(",").filter(v => v !== "").map(Number)
+                    readonly property bool plotBeside: hallTable.length === 8 && width >= 440
 
-                GridLayout {
                     Layout.fillWidth: true
-                    columns: 3
-                    columnSpacing: 8
-                    rowSpacing: 8
-                    uniformCellWidths: true
+                    Layout.fillHeight: true
+                    implicitHeight: cardColumn.implicitHeight + 24
+                    radius: 12
+                    color: Utility.getAppHexColor("cardBackground")
+                    border.color: Utility.getAppHexColor("raisedBackground")
 
-                    Repeater {
-                        model: modelData.rows
+                    ColumnLayout {
+                        id: cardColumn
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: 12
+                        spacing: 6
 
-                        ValueTile {
-                            // Number and unit, otherwise text such as the sensor type
-                            readonly property var number: modelData[1].match(/^(-?[\d.]+) (.+)$/)
+                        RowLayout {
                             Layout.fillWidth: true
-                            title: resultView.names[modelData[0]] || modelData[0]
-                            value: number ? number[1] : modelData[1] === "True" ? qsTr("On") :
-                                   modelData[1] === "False" ? qsTr("Off") : modelData[1]
-                            unit: number ? number[2] : ""
+                            spacing: 8
+
+                            Text {
+                                text: qsTr("VESC %1").arg(modelData.id)
+                                color: Utility.getAppHexColor("titleText")
+                                font.weight: Font.Medium
+                                font.pointSize: 13
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                visible: modelData.can
+                                text: qsTr("on CAN")
+                                color: Utility.getAppHexColor("normalText")
+                                font.pointSize: 11
+                            }
+                            Item { Layout.fillWidth: !modelData.can }
+                            Chip {
+                                visible: motorCard.sensors !== ""
+                                enabled: false
+                                topInset: 0
+                                text: motorCard.sensors
+                            }
+                        }
+
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: motorCard.plotBeside ? 2 : 1
+                            columnSpacing: 8
+                            rowSpacing: 4
+
+                            GridLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignTop
+                                columns: motorCard.plotBeside && motorCard.width < 600 ? 2 : 3
+                                columnSpacing: 0
+                                rowSpacing: 0
+                                uniformCellWidths: true
+
+                                Repeater {
+                                    model: motorCard.values
+
+                                    ValueTile {
+                                        // Number and unit, otherwise text such as On
+                                        readonly property var number: modelData[1].match(/^(-?[\d.]+) (.+)$/)
+                                        Layout.fillWidth: true
+                                        color: "transparent"
+                                        border.width: 0
+                                        title: resultView.names[modelData[0]] || modelData[0]
+                                        value: number ? number[1] : modelData[1] === "True" ? qsTr("On") : modelData[1]
+                                        unit: number ? number[2] : ""
+                                    }
+                                }
+                            }
+
+                            HallPlot {
+                                visible: motorCard.hallTable.length === 8
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                                Layout.minimumWidth: 150
+                                Layout.preferredWidth: 150
+                                Layout.preferredHeight: 150
+                                table: motorCard.hallTable
+                            }
                         }
                     }
                 }

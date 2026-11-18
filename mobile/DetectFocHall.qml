@@ -27,6 +27,7 @@ import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    id: hallDetect
     property var table: []
 
     property Commands mCommands: VescIf.commands()
@@ -129,65 +130,11 @@ Item {
                     Layout.fillWidth: true
                     spacing: 10
 
-                    // The hall states at their angles on one electrical revolution. Well placed
-                    // sensors give six states 60° apart
-                    Item {
-                        id: hallPlot
-                        readonly property real radius: width / 2 - 16
-
+                    HallPlot {
                         Layout.minimumWidth: 170
                         Layout.preferredWidth: 170
                         Layout.preferredHeight: 170
-
-                        Rectangle {
-                            anchors.fill: parent
-                            anchors.margins: 16
-                            radius: width / 2
-                            color: "transparent"
-                            border.width: 2
-                            border.color: Utility.getAppHexColor("raisedBackground")
-                        }
-
-                        Repeater {
-                            model: table.length == 8 ? table : []
-
-                            Item {
-                                // 0 - 200 is one revolution, 255 marks a state that cannot occur
-                                readonly property real angle: modelData * 1.8 - 90
-
-                                anchors.fill: parent
-                                visible: modelData !== 255
-
-                                Rectangle {
-                                    x: parent.width / 2
-                                    y: parent.height / 2 - 1
-                                    width: hallPlot.radius
-                                    height: 2
-                                    transformOrigin: Item.Left
-                                    rotation: parent.angle
-                                    color: Utility.getAppHexColor("lightAccent")
-                                    opacity: 0.4
-                                }
-
-                                Rectangle {
-                                    x: parent.width / 2 + hallPlot.radius * Math.cos(parent.angle * Math.PI / 180) - width / 2
-                                    y: parent.height / 2 + hallPlot.radius * Math.sin(parent.angle * Math.PI / 180) - height / 2
-                                    width: 28
-                                    height: 28
-                                    radius: 14
-                                    color: Utility.getAppHexColor("cardBackground")
-                                    border.width: 2
-                                    border.color: Utility.getAppHexColor("lightAccent")
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: index
-                                        color: Utility.getAppHexColor("lightText")
-                                        font.weight: Font.Medium
-                                    }
-                                }
-                            }
-                        }
+                        table: hallDetect.table
                     }
 
                     GridLayout {

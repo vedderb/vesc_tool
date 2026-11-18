@@ -51,13 +51,46 @@ Item {
     property var pages: {
         'menu': 0,
         'gyro': 1,
-        'accelerometerX': 2,
-        'accelerometerY': 3,
-        'accelerometerZ': 4,
-        'orientationRoll': 5,
-        'orientationPitch': 6,
-        'orientationYaw': 7,
-        'configurator': 8
+        'accelerometer': 2,
+        'orientation': 3,
+        'configurator': 4
+    }
+
+    // The axis the open calibration is on, and what was saved for the ones before it
+    property int calAxis: 0
+    property var calResults: []
+
+    // Moves on to the next axis, or back to the menu after the last one
+    function nextAxis(result) {
+        var r = calResults.slice()
+        r[calAxis] = result
+        calResults = r
+        if (calAxis < 2) {
+            calAxis++
+        } else {
+            stackLayout.currentIndex = pages.menu
+        }
+    }
+
+    // Offset in degrees that saving the roll, pitch or yaw step applies. Only the asked axis is
+    // read, so bindings on roll do not update with the yaw search
+    function orientationOffset(axis) {
+        if (axis === 0) {
+            return -filteredIMUValues.roll * 180.0/pi - orientationRestore.rot_roll
+        } else if (axis === 1) {
+            return filteredIMUValues.pitch * 180.0/pi - orientationRestore.rot_pitch
+        }
+        return -calculatedYawOffset * 180.0/pi - orientationRestore.rot_yaw
+    }
+
+    function applyOrientationOffset(axis, offset) {
+        if (axis === 0) {
+            applyRollOffset(offset)
+        } else if (axis === 1) {
+            applyPitchOffset(offset)
+        } else {
+            applyYawOffset(offset)
+        }
     }
 
     function openDialog() {
@@ -274,7 +307,9 @@ Item {
                             maxAccelValues.x = -10
                             maxAccelValues.y = -10
                             maxAccelValues.z = -10
-                            stackLayout.currentIndex = pages.accelerometerX
+                            calAxis = 0
+                            calResults = []
+                            stackLayout.currentIndex = pages.accelerometer
                         }
                     }
                     ImageButton {
@@ -304,7 +339,9 @@ Item {
                             applyRotationToCalibrationConfig(0, -orientationRestore.rot_pitch * pi/180, 0)
                             applyRotationToCalibrationConfig(-orientationRestore.rot_roll * pi/180, 0, 0)
                             mCommands.setAppConfNoStore()
-                            stackLayout.currentIndex = pages.orientationRoll
+                            calAxis = 0
+                            calResults = []
+                            stackLayout.currentIndex = pages.orientation
                         }
                     }
 
@@ -318,16 +355,22 @@ Item {
                 width: parent.width
                 height: parent.height
 
-                ColumnLayout {
+                // The plot beside the offsets on landscape phones
+                GridLayout {
                     width: parent.width
-                    spacing: 10
+                    columns: phoneLandscape ? 2 : 1
+                    rowSpacing: 10
+                    columnSpacing: 8
+                    uniformCellWidths: true
                     TaskIntro {
+                        Layout.columnSpan: phoneLandscape ? 2 : 1
                         title: "Gyroscope Calibration"
                         instruction: "Leave the IMU completely still"
                         hint: "Any orientation works, but avoid vibration. Save once the offsets have settled."
                     }
                     GridLayout {
                         Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
                         columns: 3
                         columnSpacing: 8
                         uniformCellWidths: true
@@ -351,50 +394,33 @@ Item {
                             unit: "\u00B0/s"
                         }
                     }
-                    RowLayout {
-                        spacing: 8
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
 
-                        Rectangle {
-                            implicitWidth: 10
-                            implicitHeight: 10
-                            radius: 5
-                            color: Utility.getAppHexColor(gyroSettle.stable ? "positiveText" : "warningText")
+                        GyroDriftPlot {
+                            id: gyroPlot
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: implicitHeight
+                            running: dialog.visible && stackLayout.currentIndex === pages.gyro && workingIMU
+                            gyroX: filteredIMUValues.gyroX
+                            gyroY: filteredIMUValues.gyroY
+                            gyroZ: filteredIMUValues.gyroZ
                         }
                         Text {
-                            text: !workingIMU ? "No IMU data, check the IMU Configurator"
-                                  : gyroSettle.stable ? "Settled, ready to save" : "Settling, keep the IMU still..."
-                            color: Utility.getAppHexColor(gyroSettle.stable ? "positiveText" : "warningText")
+                            visible: !workingIMU
+                            text: "No IMU data, check the IMU Configurator"
+                            color: Utility.getAppHexColor("warningText")
                         }
                     }
-                }// Column Layout
-
-                // Settled when no offset moved more than 0.02 deg/s in the last second. The filter only removes
-                // ~40% of the remaining error per second, so a looser limit turns green long before convergence.
-                Timer {
-                    id: gyroSettle
-                    property bool stable: false
-                    property var last: [NaN, NaN, NaN]
-
-                    interval: 1000
-                    repeat: true
-                    running: dialog.visible && stackLayout.currentIndex === pages.gyro
-                    onRunningChanged: {
-                        gyroSettle.stable = false
-                        gyroSettle.last = [NaN, NaN, NaN]
-                    }
-                    onTriggered: {
-                        var now = [filteredIMUValues.gyroX, filteredIMUValues.gyroY, filteredIMUValues.gyroZ]
-                        gyroSettle.stable = workingIMU && now.every(function(v, i) { return Math.abs(v - gyroSettle.last[i]) < 0.02 })
-                        gyroSettle.last = now
-                    }
-                }
+                }// Grid Layout
             }// Item (Gyro Calibration)
 
-            Item{// Accel X Calibration #2
+            Item{// Accel Calibration #2
                 width: parent.width
                 height: parent.height
 
-                // Clear Max and Skip beside the tiles on landscape phones
+                // Clear Max and Skip beside the axes on landscape phones
                 GridLayout {
                     width: parent.width
                     columns: phoneLandscape ? 2 : 1
@@ -403,67 +429,63 @@ Item {
                     uniformCellWidths: true
                     TaskIntro {
                         Layout.columnSpan: phoneLandscape ? 2 : 1
-                        title: "Accel X Calibration"
-                        step: "Step 1 of 3"
-                        instruction: "Slowly tilt the IMU until Max X stops rising"
+                        title: "Accelerometer Calibration"
+                        step: "Step " + (calAxis + 1) + " of 3"
                         hint: accelHint
                     }
-                    GridLayout {
-                        Layout.fillWidth: true
-                        columns: 2
-                        columnSpacing: 8
-                        uniformCellWidths: true
-
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "Accel X"
-                            value: filteredIMUValues.accX.toFixed(3)
-                            unit: "g"
-                            level: filteredIMUValues.accX
-                        }
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "Max X"
-                            value: maxAccelValues.x.toFixed(3)
-                            unit: "g"
-                        }
+                    AxisSteps {
+                        current: calAxis
+                        titles: ["Accel X", "Accel Y", "Accel Z"]
+                        values: [filteredIMUValues.accX, filteredIMUValues.accY, filteredIMUValues.accZ].map(v => v.toFixed(3) + " g")
+                        results: calResults
+                        instructions: ["X", "Y", "Z"].map(a => "Point +" + a + " straight up and hold it until Max stops rising")
                     }
-                    RowLayout {
+                    ColumnLayout {
                         Layout.fillWidth: true
+                        spacing: 6
 
-                        Button {
-                            id: clearAccelXButton
+                        AccelLevel {
                             Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-                            text: "Clear Max"
-                            flat: true
-
-                            onClicked: {
-                                // Scale down filtered value so it looks like something happened
-                                filteredIMUValues.accX = filteredIMUValues.accX * .9
-                                maxAccelValues.x = -10.0
-                            }
-                        }// Button clear
-                        Button {
-                            id: skipAccelXButton
+                            Layout.preferredHeight: implicitHeight
+                            running: dialog.visible && stackLayout.currentIndex === pages.accelerometer
+                            axis: calAxis
+                            acc: [filteredIMUValues.accX, filteredIMUValues.accY, filteredIMUValues.accZ]
+                            max: maxAccelValues["xyz"[calAxis]]
+                        }
+                        RowLayout {
                             Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-                            text: "Skip"
-                            flat: true
 
-                            onClicked: {
-                                stackLayout.currentIndex = pages.accelerometerY
-                            }
-                        }// Button
+                            Button {
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 500
+                                text: "Clear Max"
+                                flat: true
+
+                                onClicked: {
+                                    // Scale down filtered value so it looks like something happened
+                                    var a = "XYZ"[calAxis]
+                                    filteredIMUValues["acc" + a] = filteredIMUValues["acc" + a] * .9
+                                    maxAccelValues[a.toLowerCase()] = -10.0
+                                }
+                            }// Button clear
+                            Button {
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 500
+                                text: "Skip"
+                                flat: true
+
+                                onClicked: nextAxis("Skipped")
+                            }// Button
+                        }
                     }
                 }// Grid Layout
-            }// Item (Accel X Calibration)
+            }// Item (Accel Calibration)
 
-            Item{// Accel Y Calibration #3
+            Item{// Orientation Calibration #3
                 width: parent.width
                 height: parent.height
 
-                // Clear Max and Skip beside the tiles on landscape phones
+                // Skip beside the axes on landscape phones
                 GridLayout {
                     width: parent.width
                     columns: phoneLandscape ? 2 : 1
@@ -472,247 +494,60 @@ Item {
                     uniformCellWidths: true
                     TaskIntro {
                         Layout.columnSpan: phoneLandscape ? 2 : 1
-                        title: "Accel Y Calibration"
-                        step: "Step 2 of 3"
-                        instruction: "Slowly tilt the IMU until Max Y stops rising"
-                        hint: accelHint
+                        title: "Orientation Calibration"
+                        step: "Step " + (calAxis + 1) + " of 3"
+                        hint: calAxis < 2 ? "Both pitch and roll should be level. Save once the offset has settled." :
+                                                    "Keep the IMU stable. Save once the offset has settled."
                     }
-                    GridLayout {
-                        Layout.fillWidth: true
-                        columns: 2
-                        columnSpacing: 8
-                        uniformCellWidths: true
-
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "Accel Y"
-                            value: filteredIMUValues.accY.toFixed(3)
-                            unit: "g"
-                            level: filteredIMUValues.accY
-                        }
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "Max Y"
-                            value: maxAccelValues.y.toFixed(3)
-                            unit: "g"
-                        }
+                    AxisSteps {
+                        current: calAxis
+                        titles: ["Roll offset", "Pitch offset", "Yaw offset"]
+                        // Only the open row shows a live value, so the others do not follow the yaw search
+                        values: [0, 1, 2].map(i => i === calAxis ? orientationOffset(i).toFixed(2) + "\u00B0" : "")
+                        results: calResults
+                        instructions: ["Place the IMU level on a flat, stable surface",
+                            "Keep the IMU level on a flat, stable surface",
+                            "Raise the pitch to roughly <font color=\"" + Utility.getAppHexColor("warningText") + "\">45 degrees</font>, roll still level"]
                     }
-                    RowLayout {
+                    ColumnLayout {
                         Layout.fillWidth: true
+                        spacing: 6
 
-                        Button {
-                            id: clearAccelYButton
+                        LevelTrace {
                             Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-                            text: "Clear Max"
-                            flat: true
-
-                            onClicked: {
-                                // Scale down filtered value so it looks like something happened
-                                filteredIMUValues.accY = filteredIMUValues.accY * .9
-                                maxAccelValues.y = -10.0
-                            }
-                        }// Button clear
-                        Button {
-                            id: skipAccelYButton
+                            Layout.preferredHeight: implicitHeight
+                            visible: calAxis < 2
+                            running: dialog.visible && stackLayout.currentIndex === pages.orientation && calAxis < 2
+                            axis: calAxis
+                            // The offsets Save stores, as in the rows. Once roll is saved the IMU reports
+                            // the new mounting, so the roll strip shows what is left of it
+                            roll: orientationOffset(0) + (calAxis > 0 ? orientationRestore.rot_roll : 0)
+                            pitch: orientationOffset(1)
+                        }
+                        YawLiftView {
                             Layout.fillWidth: true
-                            Layout.preferredWidth: 500
+                            Layout.preferredHeight: implicitHeight
+                            visible: calAxis === 2
+                            roll: filteredIMUValues.roll * 180 / pi
+                            pitch: filteredIMUValues.pitch * 180 / pi
+                            yawOffset: -calculatedYawOffset * 180 / pi
+                        }
+                        Button {
+                            Layout.fillWidth: true
                             text: "Skip"
                             flat: true
 
                             onClicked: {
-                                stackLayout.currentIndex = pages.accelerometerZ
+                                var restore = [orientationRestore.rot_roll, orientationRestore.rot_pitch, orientationRestore.rot_yaw][calAxis] * pi/180
+                                applyOrientationOffset(calAxis, restore)
+                                nextAxis("Skipped")
                             }
                         }// Button
                     }
                 }// Grid Layout
-            }// Item (Accel Y Calibration)
+            }// Item (Orientation Calibration)
 
-            Item{// Accel Z Calibration #4
-                width: parent.width
-                height: parent.height
-
-                // Clear Max and Skip beside the tiles on landscape phones
-                GridLayout {
-                    width: parent.width
-                    columns: phoneLandscape ? 2 : 1
-                    rowSpacing: 10
-                    columnSpacing: 8
-                    uniformCellWidths: true
-                    TaskIntro {
-                        Layout.columnSpan: phoneLandscape ? 2 : 1
-                        title: "Accel Z Calibration"
-                        step: "Step 3 of 3"
-                        instruction: "Slowly tilt the IMU until Max Z stops rising"
-                        hint: accelHint
-                    }
-                    GridLayout {
-                        Layout.fillWidth: true
-                        columns: 2
-                        columnSpacing: 8
-                        uniformCellWidths: true
-
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "Accel Z"
-                            value: filteredIMUValues.accZ.toFixed(3)
-                            unit: "g"
-                            level: filteredIMUValues.accZ
-                        }
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "Max Z"
-                            value: maxAccelValues.z.toFixed(3)
-                            unit: "g"
-                        }
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-
-                        Button {
-                            id: clearAccelZButton
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-                            text: "Clear Max"
-                            flat: true
-
-                            onClicked: {
-                                // Scale down filtered value so it looks like something happened
-                                filteredIMUValues.accZ = filteredIMUValues.accZ * .9
-                                maxAccelValues.z = -10.0
-                            }
-                        }// Button clear
-                        Button {
-                            id: skipAccelZButton
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-                            text: "Skip"
-                            flat: true
-
-                            onClicked: {
-                                stackLayout.currentIndex = pages.menu
-                            }
-                        }// Button
-                    }
-                }// Grid Layout
-            }// Item (Accel Z Calibration)
-
-            Item{// roll Callibration #5
-                width: parent.width
-                height: parent.height
-
-                // Skip beside the offset on landscape phones
-                GridLayout {
-                    width: parent.width
-                    columns: phoneLandscape ? 2 : 1
-                    rowSpacing: 10
-                    columnSpacing: 8
-                    TaskIntro {
-                        Layout.columnSpan: phoneLandscape ? 2 : 1
-                        title: "Roll Angle Calibration"
-                        step: "Step 1 of 3"
-                        instruction: "Place the IMU level on a flat, stable surface"
-                        hint: "Both pitch and roll should be level. Save once the offset has settled."
-                    }
-                    ValueTile {
-                        id: rollText3
-                        Layout.fillWidth: true
-                        title: "Roll offset"
-                        value: ((-filteredIMUValues.roll * 180.0/pi) - orientationRestore.rot_roll).toFixed(2)
-                        unit: "\u00B0"
-                    }
-
-                    Button {
-                        id: skipRollButton
-                        Layout.fillWidth: !phoneLandscape
-                        text: "Skip"
-                        flat: true
-
-                        onClicked: {
-                            applyRollOffset(orientationRestore.rot_roll * pi/180)
-                            stackLayout.currentIndex = pages.orientationPitch
-                        }
-                    }// Button
-                }// Grid Layout
-            }// Item (roll Calibration)
-
-            Item{// pitch Callibration #6
-                width: parent.width
-                height: parent.height
-
-                // Skip beside the offset on landscape phones
-                GridLayout {
-                    width: parent.width
-                    columns: phoneLandscape ? 2 : 1
-                    rowSpacing: 10
-                    columnSpacing: 8
-                    TaskIntro {
-                        Layout.columnSpan: phoneLandscape ? 2 : 1
-                        title: "Pitch Angle Calibration"
-                        step: "Step 2 of 3"
-                        instruction: "Keep the IMU level on a flat, stable surface"
-                        hint: "Both pitch and roll should be level. Save once the offset has settled."
-                    }
-                    ValueTile {
-                        id: pitchText3
-                        Layout.fillWidth: true
-                        title: "Pitch offset"
-                        value: ((filteredIMUValues.pitch * 180.0/pi) - orientationRestore.rot_pitch).toFixed(2)
-                        unit: "\u00B0"
-                    }
-                    Button {
-                        id: skipPitchButton
-                        Layout.fillWidth: !phoneLandscape
-                        text: "Skip"
-                        flat: true
-
-                        onClicked: {
-                            applyPitchOffset(orientationRestore.rot_pitch * pi/180)
-                            stackLayout.currentIndex = pages.orientationYaw
-                        }
-                    }// Button
-                }// Grid Layout
-            }// Item (pitch Calibration)
-
-            Item{// yaw Callibration #7
-                width: parent.width
-                height: parent.height
-
-                // Skip beside the offset on landscape phones
-                GridLayout {
-                    width: parent.width
-                    columns: phoneLandscape ? 2 : 1
-                    rowSpacing: 10
-                    columnSpacing: 8
-                    TaskIntro {
-                        Layout.columnSpan: phoneLandscape ? 2 : 1
-                        title: "Yaw Angle Calibration"
-                        step: "Step 3 of 3"
-                        instruction: "Raise the pitch to roughly <font color=\"" + Utility.getAppHexColor("warningText") + "\">45 degrees</font>, roll still level"
-                        hint: "Keep the IMU stable. Save once the offset has settled."
-                    }
-                    ValueTile {
-                        id: yawText3
-                        Layout.fillWidth: true
-                        title: "Yaw offset"
-                        value: ((-calculatedYawOffset * 180.0/pi) - orientationRestore.rot_yaw).toFixed(2)
-                        unit: "\u00B0"
-                    }
-                    Button {
-                        id: skipYawButton
-                        Layout.fillWidth: !phoneLandscape
-                        text: "Skip"
-                        flat: true
-
-                        onClicked: {
-                            applyYawOffset(orientationRestore.rot_yaw * pi/180)
-                            stackLayout.currentIndex = pages.menu
-                        }
-                    }// Button
-                }// Grid Layout
-            }// Item (yaw Calibration)
-
-            Item{// configurator #8
+            Item{// configurator #4
                 width: parent.width
                 height: parent.height
 
@@ -1025,9 +860,7 @@ Item {
                         mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", configuratorRestore.gyro_lowpass_filter)
                         mCommands.setAppConfNoStore()
                         stackLayout.currentIndex = pages.menu
-                    } else if(stackLayout.currentIndex === pages.orientationRoll ||
-                              stackLayout.currentIndex === pages.orientationPitch ||
-                              stackLayout.currentIndex === pages.orientationYaw){
+                    } else if(stackLayout.currentIndex === pages.orientation){
                         mAppConf.updateParamDouble("imu_conf.rot_roll", orientationRestore.rot_roll, null)
                         mAppConf.updateParamDouble("imu_conf.rot_pitch", orientationRestore.rot_pitch, null)
                         mAppConf.updateParamDouble("imu_conf.rot_yaw", orientationRestore.rot_yaw, null)
@@ -1052,7 +885,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Save"
-                highlighted: stackLayout.currentIndex !== pages.gyro || gyroSettle.stable
+                highlighted: stackLayout.currentIndex !== pages.gyro || (gyroPlot.settled && workingIMU)
                 visible: (stackLayout.currentIndex != 0) ? true : false
 
                 onClicked: {
@@ -1077,42 +910,17 @@ Item {
                         mCommands.setAppConf()
                         stackLayout.currentIndex = pages.menu
 
-                    }else if(stackLayout.currentIndex === pages.accelerometerX){
+                    }else if(stackLayout.currentIndex === pages.accelerometer){
                         // Save Accelerometer Offset
-                        mAppConf.updateParamDouble(
-                        "imu_conf.accel_offsets__0",
-                        (mAppConf.getParamDouble("imu_conf.accel_offsets__0") + maxAccelValues.x -1),
-                        null
-                        )
+                        var key = "imu_conf.accel_offsets__" + calAxis
+                        var max = maxAccelValues["xyz"[calAxis]]
+                        mAppConf.updateParamDouble(key, mAppConf.getParamDouble(key) + max - 1, null)
                         mCommands.setAppConf()
-                        stackLayout.currentIndex = pages.accelerometerY
-                    }else if(stackLayout.currentIndex === pages.accelerometerY){
-                        // Save Accelerometer Offset
-                        mAppConf.updateParamDouble(
-                        "imu_conf.accel_offsets__1",
-                        (mAppConf.getParamDouble("imu_conf.accel_offsets__1") + maxAccelValues.y -1),
-                        null
-                        )
-                        mCommands.setAppConf()
-                        stackLayout.currentIndex = pages.accelerometerZ
-                    }else if(stackLayout.currentIndex === pages.accelerometerZ){
-                        // Save Accelerometer Offset
-                        mAppConf.updateParamDouble(
-                        "imu_conf.accel_offsets__2",
-                        (mAppConf.getParamDouble("imu_conf.accel_offsets__2") + maxAccelValues.z -1),
-                        null
-                        )
-                        mCommands.setAppConf()
-                        stackLayout.currentIndex = pages.menu
-                    }else if(stackLayout.currentIndex === pages.orientationRoll){
-                        applyRollOffset(-filteredIMUValues.roll)
-                        stackLayout.currentIndex = pages.orientationPitch
-                    }else if(stackLayout.currentIndex === pages.orientationPitch){
-                        applyPitchOffset(filteredIMUValues.pitch)
-                        stackLayout.currentIndex = pages.orientationYaw
-                    }else if(stackLayout.currentIndex === pages.orientationYaw){
-                        applyYawOffset(-calculatedYawOffset)
-                        stackLayout.currentIndex = pages.menu
+                        nextAxis(max.toFixed(3) + " g")
+                    }else if(stackLayout.currentIndex === pages.orientation){
+                        var offset = orientationOffset(calAxis).toFixed(2) + "\u00B0"
+                        applyOrientationOffset(calAxis, [-filteredIMUValues.roll, filteredIMUValues.pitch, -calculatedYawOffset][calAxis])
+                        nextAxis(offset)
                     }else if(stackLayout.currentIndex === pages.configurator){
                         mCommands.setAppConf()
                         stackLayout.currentIndex = pages.menu
@@ -1159,6 +967,7 @@ Item {
         }
         Text {
             Layout.fillWidth: true
+            visible: text !== ""
             text: intro.instruction
             color: Utility.getAppHexColor("lightText")
             font.weight: Font.Bold
@@ -1171,6 +980,95 @@ Item {
             color: Utility.getAppHexColor("normalText")
             font.pointSize: 11
             wrapMode: Text.Wrap
+        }
+    }
+
+    // One row per axis. Rows that are done show what was saved, the current one opens with its
+    // instruction and live value, and the ones after it wait greyed out
+    component AxisSteps: ColumnLayout {
+        id: axisSteps
+        property int current: 0
+        property var titles: []
+        property var values: []
+        property var results: []
+        property var instructions: []
+
+        Layout.fillWidth: true
+        spacing: 8
+
+        Repeater {
+            model: axisSteps.titles
+
+            Rectangle {
+                id: axisRow
+                readonly property bool done: index < axisSteps.current
+                readonly property bool active: index === axisSteps.current
+                readonly property bool skipped: done && axisSteps.results[index] === "Skipped"
+
+                Layout.fillWidth: true
+                implicitHeight: axisCol.implicitHeight + 20
+                Behavior on implicitHeight { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+                radius: 12
+                clip: true
+                color: Utility.getAppHexColor("cardBackground")
+                border.width: active ? 2 : 1
+                border.color: Utility.getAppHexColor(active ? "lightAccent" : "raisedBackground")
+                opacity: active || done ? 1.0 : 0.45
+                Behavior on opacity { NumberAnimation { duration: 250 } }
+
+                ColumnLayout {
+                    id: axisCol
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 10
+                    spacing: 6
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        Rectangle {
+                            implicitWidth: 26
+                            implicitHeight: 26
+                            radius: 13
+                            color: Utility.getAppHexColor(axisRow.skipped ? "raisedBackground" : axisRow.done ? "positiveText" :
+                                                          axisRow.active ? "lightAccent" : "raisedBackground")
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: axisRow.skipped ? "\u2013" : axisRow.done ? "\u2713" : index + 1
+                                color: Utility.getAppHexColor(axisRow.skipped ? "normalText" : axisRow.done || axisRow.active ? "darkBackground" : "normalText")
+                                font.weight: Font.Bold
+                                font.pointSize: 11
+                            }
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            text: modelData
+                            elide: Text.ElideRight
+                            color: Utility.getAppHexColor(axisRow.active ? "titleText" : "normalText")
+                            font.weight: Font.Medium
+                            font.pointSize: 12
+                        }
+                        Text {
+                            text: axisRow.done ? (axisSteps.results[index] || "") : axisRow.active ? axisSteps.values[index] : ""
+                            color: Utility.getAppHexColor(axisRow.skipped ? "normalText" : axisRow.done ? "positiveText" : "titleText")
+                            font.pointSize: axisRow.active ? 15 : 12
+                            font.features: { "tnum": 1 }
+                        }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 36
+                        visible: axisRow.active
+                        text: axisSteps.instructions[index]
+                        color: Utility.getAppHexColor("lightText")
+                        font.pointSize: 11
+                        wrapMode: Text.Wrap
+                    }
+                }
+            }
         }
     }
 
@@ -1316,7 +1214,7 @@ Item {
                 imuType = 4
             }else if(internalTypeString === "LSM6DS3"){
                 imuType = 5
-            }else if(internalTypeString === "-> imu_type_internal \n"){
+            }else if(internalTypeString === "Timeout"){
                 imuString = "Internal: Read error, redo search."
                 imuType = 1
             }

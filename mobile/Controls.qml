@@ -82,7 +82,9 @@ Item {
         modal: false
         closePolicy: Popup.CloseOnEscape
         dockWidth: mainIsTablet && mainIsHorizontal && appWindow.width - canDockWidth >= 1080 ? 380 : 0
-        background.opacity: dockWidth > 0 ? 1 : opacitySlider.value
+        // The cards fade with the sheet, so that the page shows through, while the controls stay solid
+        readonly property real fade: dockWidth > 0 ? 1 : opacitySlider.value
+        background.opacity: fade
 
         ScrollView {
             anchors.fill: parent
@@ -102,6 +104,8 @@ Item {
                     id: modeBar
                     Layout.fillWidth: true
                     model: ["Current", "Duty", "RPM", "Position"]
+                    color: Qt.alpha(Utility.getAppHexColor("darkBackground"), dialog.fade)
+                    border.color: Qt.alpha(Utility.getAppHexColor("raisedBackground"), dialog.fade)
                     onActivated: function(index) { currentIndex = index }
                 }
 
@@ -111,8 +115,8 @@ Item {
                     Layout.rowSpan: phoneLandscape ? 3 : 1
                     implicitHeight: setpoint.implicitHeight + 28
                     radius: 12
-                    color: Utility.getAppHexColor("cardBackground")
-                    border.color: Utility.getAppHexColor("raisedBackground")
+                    color: Qt.alpha(Utility.getAppHexColor("cardBackground"), dialog.fade)
+                    border.color: Qt.alpha(Utility.getAppHexColor("raisedBackground"), dialog.fade)
 
                     ColumnLayout {
                         id: setpoint

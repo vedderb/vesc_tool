@@ -20,6 +20,11 @@
         <file>ParamEditSeparator.qml</file>
         <file>DetectFocParam.qml</file>
         <file>DetectFocHall.qml</file>
+        <file>HallPlot.qml</file>
+        <file>GyroDriftPlot.qml</file>
+        <file>AccelLevel.qml</file>
+        <file>LevelTrace.qml</file>
+        <file>YawLiftView.qml</file>
         <file>DetectFocEncoder.qml</file>
         <file>DetectBldc.qml</file>
         <file>PpmMap.qml</file>

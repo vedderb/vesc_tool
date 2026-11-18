@@ -957,6 +957,7 @@ void VirtualVesc::terminalCmd(const QString &cmd)
               "help\n  Show this help\n"
               "fault\n  Prints the current fault code\n"
               "faults\n  Prints all stored fault codes and conditions when they arrived\n"
+              "imu_type_internal\n  Prints the type of the internal IMU\n"
               "sim\n  Show the state of the simulation\n"
               "sim throttle [-1.0 - 1.0 | auto]\n  Hold the throttle of the remote, or let the rider ride\n"
               "sim scenario [cruise | hill | stopgo | idle]\n  What the rider does\n"
@@ -979,6 +980,8 @@ void VirtualVesc::terminalCmd(const QString &cmd)
                 print(f + "\n");
             }
         }
+    } else if (args.at(0) == "imu_type_internal") {
+        print("BMI160");
     } else if (args.at(0) == "sim") {
         const VirtualPlant::Param *param = nullptr;
         for (const auto &par: VirtualPlant::params) {

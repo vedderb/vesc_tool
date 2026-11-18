@@ -308,7 +308,7 @@ void VirtualVesc::processPacket(QByteArray &data)
         }
 
         const int n = VirtualPlant::motorCount;
-        double whLeft = p->soc * p->cells() * 3.7 * mMcConf.getParamDouble("si_battery_ah");
+        double whLeft = p->soc * mMcConf.getParamInt("si_battery_cells") * 3.7 * mMcConf.getParamDouble("si_battery_ah");
 
         auto has = [mask](int bit) { return mask & (quint32(1) << bit); };
         if (has(0)) { reply.vbAppendDouble16(p->tempFet, 1e1); }
@@ -486,7 +486,7 @@ void VirtualVesc::processPacket(QByteArray &data)
 
     case COMM_BMS_GET_VALUES: {
         const int n = VirtualPlant::motorCount;
-        int cells = p->cells();
+        const int cells = VirtualPlant::packCells;
         double vMin = 10.0;
         for (int i = 0;i < cells;i++) {
             vMin = qMin(vMin, p->cellVoltage(i));

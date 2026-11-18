@@ -48,6 +48,7 @@ public:
     static const int hallTable[8];
     static constexpr double encOffset = 123.4;
     static constexpr int motorCount = 2;
+    static constexpr int packCells = 12; // The pack does not follow si_battery_cells, so the wizards can measure it
     static constexpr double gnssRadius = 150.0;
 
     // Rider and remote
@@ -80,7 +81,6 @@ public:
     void resetStats();
 
     double cellVoltage(int cell) const;
-    int cells() const;
 
 private:
     ConfigParams *mMc;
@@ -89,6 +89,7 @@ private:
     double mControlValue;
     double mControlAgeS;
     double mRpmInt;
+    double mSweepStartS;
 
     double erpmPerSpeed() const;
     double hallTorqueFactor() const;

@@ -91,7 +91,7 @@ VirtualPlant::VirtualPlant(ConfigParams *mcConf, ConfigParams *appConf) :
     appDisabledS = 0.0;
     fault = FAULT_CODE_NONE;
     faultForced = FAULT_CODE_NONE;
-    cellOverride.fill(NAN, 32);
+    cellOverride.fill(NAN, packCells);
     soc = 0.85;
 
     timeS = speed = erpm = iq = vd = vq = duty = iIn = 0.0;
@@ -102,13 +102,14 @@ VirtualPlant::VirtualPlant(ConfigParams *mcConf, ConfigParams *appConf) :
     tempMotor = AMBIENT + 1.0;
     lat = GNSS_LAT;
     lon = GNSS_LON;
-    vBus = cells() * cellOcv(soc);
+    vBus = packCells * cellOcv(soc);
     resetStats();
 
     mControl = CTRL_NONE;
     mControlValue = 0.0;
     mControlAgeS = 10.0;
     mRpmInt = 0.0;
+    mSweepStartS = 0.0;
 
     updateInputs();
 }
@@ -124,11 +125,6 @@ void VirtualPlant::resetStats()
 {
     statTime = statSpeedSum = statSpeedMax = statPowerSum = statPowerMax = 0.0;
     statCurrSum = statCurrMax = statFetSum = statFetMax = statMotorSum = statMotorMax = 0.0;
-}
-
-int VirtualPlant::cells() const
-{
-    return qBound(1, mMc->getParamInt("si_battery_cells"), int(cellOverride.size()));
 }
 
 double VirtualPlant::cellVoltage(int cell) const
@@ -180,9 +176,12 @@ void VirtualPlant::updateRider(double dt)
     double cmd = scenario == IDLE ? 0.0 : qBound(-1.0, 0.35 * (target - speed), 1.0);
 
     // Something shows the input mapping: sweep 0, 1, 0, -1, 0 over 8 seconds
+    // and rest in the center for 8 seconds, so the wizards can finish
     if ((timeS - inputPolledS) < 1.5) {
-        double p = fmod(timeS, 8.0) / 2.0;
-        cmd = p < 1.0 ? p : (p < 3.0 ? 2.0 - p : p - 4.0);
+        double p = fmod(timeS - mSweepStartS, 16.0) / 2.0;
+        cmd = p < 1.0 ? p : (p < 3.0 ? 2.0 - p : (p < 4.0 ? p - 4.0 : 0.0));
+    } else {
+        mSweepStartS = timeS;
     }
 
     if (std::isfinite(throttleOverride)) {
@@ -410,7 +409,7 @@ void VirtualPlant::step(double dt)
     double cap = qMax(0.1, mMc->getParamDouble("si_battery_ah"));
     soc = qBound(0.0, soc - iIn * motorCount * dt / 3600.0 / cap, 1.0);
     double v = 0.0;
-    for (int i = 0;i < cells();i++) {
+    for (int i = 0;i < packCells;i++) {
         v += cellVoltage(i);
     }
     vBus = qMax(1.0, v);

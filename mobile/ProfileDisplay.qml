@@ -123,38 +123,43 @@ Item {
                     PopupMenu {
                         id: profileMenu
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Use permanently"
+                            iconFile: "Ok-96.png"
                             onTriggered: {
                                 permanentDialog.open()
                             }
                         }
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Edit"
+                            iconFile: "icons8-edit-96.png"
                             onTriggered: {
                                 editRequested(index)
                             }
                         }
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Move Up"
+                            iconFile: "Up-96.png"
                             onTriggered: {
                                 VescIf.moveProfileUp(index)
                                 VescIf.storeSettings()
                             }
                         }
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Move Down"
+                            iconFile: "Down-96.png"
                             onTriggered: {
                                 VescIf.moveProfileDown(index)
                                 VescIf.storeSettings()
                             }
                         }
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Delete"
+                            iconFile: "Delete-96.png"
                             onTriggered: {
                                 deleteRequested(index)
                             }

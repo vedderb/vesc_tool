@@ -66,14 +66,16 @@ Item {
 
     Dialog {
         id: dialog
-        parent: dialogParent
+        // Covers the app bars on landscape phones
+        readonly property bool fullWindow: mainIsHorizontal && !mainIsTablet
+        parent: fullWindow ? Overlay.overlay : dialogParent
         modal: true
         focus: true
         width: parent.width - 40 - notchLeft - notchRight
-        height: parent.height - 40
+        height: parent.height - (fullWindow ? 10 + notchTop + notchBot : 40)
         closePolicy: Popup.CloseOnEscape
-        x: 20 + (notchLeft + notchRight) / 2
-        y: 10
+        x: 20 + notchLeft
+        y: fullWindow ? 5 + notchTop : 10
         topPadding: 5
         bottomPadding: 0
         leftMargin: 5
@@ -406,11 +408,13 @@ Item {
             }
         }
 
-        header: ColumnLayout {
-            spacing: 10
+        // Title and tabs share one row on landscape phones
+        header: GridLayout {
+            columns: dialog.fullWindow ? 2 : 1
+            rowSpacing: 10
 
             RowLayout {
-                Layout.fillWidth: true
+                Layout.fillWidth: !dialog.fullWindow
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -438,7 +442,8 @@ Item {
             SegmentedBar {
                 id: tabBar
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
+                Layout.topMargin: dialog.fullWindow ? 16 : 0
+                Layout.leftMargin: dialog.fullWindow ? 0 : 16
                 Layout.rightMargin: 16
                 currentIndex: swipeView.currentIndex
                 model: ["General", "Limits", "FOC", "BMS"]

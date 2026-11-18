@@ -24,11 +24,14 @@ import Vedder.vesc.utility 1.0
 // Drop-down menu styled like the cards
 Menu {
     margins: 16
+    leftMargin: 16 + notchLeft
+    rightMargin: 16 + notchRight
+    horizontalPadding: 6
 
     background: Rectangle {
-        implicitWidth: 200
+        implicitWidth: 240
         color: Utility.getAppHexColor("cardBackground")
         border.color: Utility.getAppHexColor("raisedBackground")
-        radius: 12
+        radius: 16
     }
 }

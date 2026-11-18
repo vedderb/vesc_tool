@@ -48,9 +48,9 @@ Item {
 
             GridLayout {
                 id: grid
-                x: 10 + notchLeft
+                x: 10
                 y: 10
-                width: parent.width - 20 - notchLeft - notchRight
+                width: parent.width - 20
                 columns: isHorizontal ? 2 : 1
                 columnSpacing: 16
                 rowSpacing: 10
@@ -273,8 +273,6 @@ Item {
 
         RowLayout {
             Layout.margins: 10
-            Layout.leftMargin: 10 + notchLeft
-            Layout.rightMargin: 10 + notchRight
             Layout.fillWidth: true
 
             Button {
@@ -285,16 +283,17 @@ Item {
 
                 BottomMenu {
                     id: balanceMenu
-                    parent: bmsPageItem
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Balance On"
+                        iconFile: "Balance On-96.png"
                         onTriggered: {
                             mCommands.bmsForceBalance(true)
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Balance Off"
+                        iconFile: "Balance Off-96.png"
                         onTriggered: {
                             mCommands.bmsForceBalance(false)
                         }
@@ -310,16 +309,17 @@ Item {
 
                 BottomMenu {
                     id: chargeMenu
-                    parent: bmsPageItem
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Allow Charging"
+                        iconFile: "Charge On-96.png"
                         onTriggered: {
                             mCommands.bmsSetChargeAllowed(true)
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Disable Charging"
+                        iconFile: "Charge Off-96.png"
                         onTriggered: {
                             mCommands.bmsSetChargeAllowed(false)
                         }
@@ -335,22 +335,24 @@ Item {
 
                 BottomMenu {
                     id: menu
-                    parent: bmsPageItem
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Reset Ah Counter"
+                        iconFile: "Reset Counter-96.png"
                         onTriggered: {
                             mCommands.bmsResetCounters(true, false)
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Reset Wh Counter"
+                        iconFile: "Reset Counter-96.png"
                         onTriggered: {
                             mCommands.bmsResetCounters(false, true)
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Zero Current Offset"
+                        iconFile: "Offset-96.png"
                         onTriggered: {
                             mCommands.bmsZeroCurrentOffset()
                         }

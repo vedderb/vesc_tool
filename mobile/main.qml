@@ -43,6 +43,9 @@ ApplicationWindow {
     visible: true
     width: 500
     height: 850
+    // Instead of the full safe area, see updateNotch()
+    leftPadding: notchLeft
+    rightPadding: notchRight
     title: qsTr("VESC Tool")
 
     // Full screen iPhone X workaround:
@@ -52,6 +55,7 @@ ApplicationWindow {
     property int notchTop: 0
     property bool mainIsHorizontal: appWindow.width > appWindow.height
     property bool mainIsTablet: appWindow.width >= 700 && Math.min(Screen.width, Screen.height) >= 600
+    readonly property bool phoneLandscape: mainIsHorizontal && !mainIsTablet
     readonly property real canDockWidth: canDrawerLoader.item && canDrawerLoader.item.docked && canDrawerLoader.item.visible ? canDrawerLoader.item.width : 0
 
     // Connection status shown in the footer, the drawer and on the start page
@@ -86,11 +90,13 @@ ApplicationWindow {
     flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.MaximizeUsingFullscreenGeometryHint) : Qt.Window
 
     function updateNotch() {
-        // The iOS safe area is taller than the status bar and the home indicator need
+        // The iOS safe area is taller than the status bar and the home indicator need. In landscape it
+        // is as wide on both sides, while only the side with the camera needs it
         var ios = Qt.platform.os === "ios"
+        var cameraLeft = Screen.orientation === Qt.InvertedLandscapeOrientation
         notchTop = SafeArea.margins.top * (ios ? 0.85 : 1)
-        notchLeft = SafeArea.margins.left
-        notchRight = SafeArea.margins.right
+        notchLeft = SafeArea.margins.left * (ios && !cameraLeft ? 0.3 : 1)
+        notchRight = SafeArea.margins.right * (ios && cameraLeft ? 0.3 : 1)
         notchBot = SafeArea.margins.bottom * (ios ? 0.6 : 1)
     }
 
@@ -302,9 +308,22 @@ ApplicationWindow {
             bottomRightRadius: 20
         }
 
-        ColumnLayout {
+        // Scrolls on landscape phones, where the menu is taller than the screen
+        Flickable {
+            id: drawerFlick
             anchors.fill: parent
-            anchors.margins: 14
+            contentHeight: drawerColumn.implicitHeight + 28
+            boundsBehavior: Flickable.StopAtBounds
+            clip: true
+        }
+
+        ColumnLayout {
+            id: drawerColumn
+            parent: drawerFlick.contentItem
+            x: 14
+            y: 14
+            width: drawerFlick.width - 28
+            height: Math.max(implicitHeight, drawerFlick.height - 28)
             spacing: 0
 
             Image {
@@ -463,8 +482,8 @@ ApplicationWindow {
         id: mainSwipeView
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
-        anchors.leftMargin: notchLeft*0.75
-        anchors.rightMargin: notchRight*0.75 + controls.dockWidth + canDockWidth
+        // The window already pads its content by the safe area
+        anchors.rightMargin: controls.dockWidth + canDockWidth
         clip: true
         contentItem: ListView {
             model: mainSwipeView.contentModel
@@ -516,13 +535,13 @@ ApplicationWindow {
             id: rtDataPage
 
             header: Item {
-                implicitHeight: 44
+                implicitHeight: phoneLandscape ? 40 : 44
 
                 SegmentedBar {
                     anchors.fill: parent
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
-                    anchors.topMargin: 8
+                    anchors.topMargin: phoneLandscape ? 4 : 8
                     model: [qsTr("Gauges"), qsTr("Dashboard"), qsTr("IMU"), qsTr("Statistics")]
                     currentIndex: rtSwipeView.currentIndex
                     onActivated: function(index) { rtSwipeView.setCurrentIndex(index) }
@@ -583,11 +602,12 @@ ApplicationWindow {
                     }
                 }
 
+                // The model is beside the tiles on landscape phones and below them otherwise
                 Page {
                     RtDataIMU {
                         id: rtIMU
                         anchors.top: parent.top
-                        width: parent.width
+                        width: phoneLandscape ? parent.width * 0.6 : parent.width
                         Layout.fillWidth: true
                         z:2
                     }
@@ -604,8 +624,10 @@ ApplicationWindow {
                         asynchronous: true
                         visible: status == Loader.Ready
                         anchors.centerIn: parent
-                        anchors.verticalCenterOffset: rtIMU.height/2
-                        width:  Math.min(parent.width*Screen.devicePixelRatio, (parent.height - rtIMU.height)*Screen.devicePixelRatio)
+                        anchors.horizontalCenterOffset: phoneLandscape ? parent.width * 0.3 : 0
+                        anchors.verticalCenterOffset: phoneLandscape ? 0 : rtIMU.height/2
+                        width: (phoneLandscape ? Math.min(parent.width * 0.4, parent.height) :
+                                                 Math.min(parent.width, parent.height - rtIMU.height)) * Screen.devicePixelRatio
                         antialiasing: true
                         height: width
                         onLoaded: {
@@ -731,6 +753,8 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
+            anchors.leftMargin: notchLeft
+            anchors.rightMargin: notchRight
             spacing: 0
 
             TabBar {
@@ -944,7 +968,7 @@ ApplicationWindow {
         id: connectedRect
         color: Utility.getAppHexColor("darkBackground")
         width: parent.width
-        height: 52 + notchBot
+        height: footerRow.height + notchBot
 
         Rectangle {
             width: parent.width
@@ -953,10 +977,13 @@ ApplicationWindow {
         }
 
         RowLayout {
+            id: footerRow
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            height: 52
+            anchors.leftMargin: notchLeft
+            anchors.rightMargin: notchRight
+            height: phoneLandscape ? 44 : 52
             spacing: 0
 
             ToolButton {
@@ -1915,9 +1942,11 @@ ApplicationWindow {
         Overlay.modal: Rectangle {
             color: scrimColor
         }
-        x: 10 + notchLeft
+        // Landscape phones: a full height column under the button, in reach of the right thumb
+        x: phoneLandscape ? parent.width - width - 10 - notchRight : 10 + notchLeft
         y: headerBar.height + 6
-        width: parent.width - 20 - notchLeft - notchRight
+        width: phoneLandscape ? 380 : parent.width - 20 - notchLeft - notchRight
+        height: phoneLandscape ? parent.height - y - 10 - notchBot : implicitHeight
         modal: true
         padding: 12
 
@@ -1937,6 +1966,7 @@ ApplicationWindow {
 
             GridLayout {
                 Layout.fillWidth: true
+                Layout.fillHeight: true
                 columns: 3
                 rowSpacing: 8
                 columnSpacing: 8
@@ -1951,7 +1981,8 @@ ApplicationWindow {
 
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
-                        Layout.preferredHeight: 76
+                        Layout.preferredHeight: phoneLandscape ? 56 : 76
+                        Layout.fillHeight: phoneLandscape
                         onClicked: {
                             mainSwipeView.setCurrentIndex(index)
                             allPagesPopup.close()

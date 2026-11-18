@@ -25,6 +25,13 @@ Item {
     property int statsPollHz: 2
     property int editorFontSize: 10
 
+    // Same box as the Terminal output
+    component TextBoxBackground: Rectangle {
+        radius: 12
+        color: Utility.getAppHexColor("darkBackground")
+        border.color: Utility.getAppHexColor("raisedBackground")
+    }
+
     function fileUrlToPath(url) {
         var path = decodeURIComponent(url.toString())
         if (path.startsWith("file://")) {
@@ -264,8 +271,8 @@ Item {
         id: column
 
         anchors.fill: parent
-        anchors.leftMargin: 10 + notchLeft
-        anchors.rightMargin: 10 + notchRight
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
         spacing: 0
 
         TabBar {
@@ -293,11 +300,16 @@ Item {
             columnSpacing: 10
 
             // === Editor tab ===
-            ColumnLayout {
+            GridLayout {
+                id: editorTab
+                // On phones in landscape the options and the buttons share the top row
+                readonly property bool oneRow: phoneLandscape
                 visible: mainIsTablet || lispTabBar.currentIndex === 0
                 Layout.preferredWidth: parent.width * 0.6
                 Layout.preferredHeight: parent.height * 0.6
-                spacing: 4
+                flow: GridLayout.TopToBottom
+                rows: oneRow ? 2 : 3
+                rowSpacing: 4
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -316,6 +328,8 @@ Item {
 
                     Label {
                         Layout.fillWidth: true
+                        // In one row a long path must not squeeze the buttons
+                        Layout.preferredWidth: editorTab.oneRow ? 0 : -1
                         horizontalAlignment: Text.AlignRight
                         text: currentFilePath.length > 0 ? currentFilePath : "Unnamed"
                         elide: Text.ElideLeft
@@ -326,11 +340,16 @@ Item {
                 ScrollView {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    Layout.columnSpan: editorTab.oneRow ? 2 : 1
+                    Layout.preferredWidth: editorTab.oneRow ? 0 : -1
                     contentWidth: Math.max(editorText.implicitWidth, availableWidth)
                     clip: true
+                    padding: 4
+                    background: TextBoxBackground {}
 
                     TextArea {
                         id: editorText
+                        background: null
                         wrapMode: TextArea.NoWrap
                         font.family: "DejaVu Sans Mono"
                         font.pointSize: editorFontSize
@@ -345,7 +364,7 @@ Item {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.topMargin: 8
+                    Layout.topMargin: editorTab.oneRow ? 0 : 8
 
                     Button {
                         text: "Upload"
@@ -378,20 +397,22 @@ Item {
 
                         BottomMenu {
                             id: pageMenu
-                            parent: lispPageItem
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Run"
+                                iconFile: "Circled Play-96.png"
                                 onTriggered: mCommands.lispSetRunning(1)
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Stop"
+                                iconFile: "Stop-96.png"
                                 onTriggered: mCommands.lispSetRunning(0)
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Open File..."
+                                iconFile: "Open Folder-96.png"
                                 onTriggered: {
                                     if (Utility.requestFilePermission()) {
                                         fileDialogLoad.close()
@@ -405,8 +426,9 @@ Item {
                                 }
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Save File as..."
+                                iconFile: "Save as-96.png"
                                 onTriggered: {
                                     if (Utility.requestFilePermission()) {
                                         fileDialogSave.close()
@@ -453,23 +475,26 @@ Item {
                                 }
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Open Recent..."
+                                iconFile: "History-96.png"
                                 onTriggered: {
                                     updateRecentModel(recentFilter.text)
                                     recentDialog.open()
                                 }
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Open Example..."
+                                iconFile: "Console-96.png"
                                 onTriggered: {
                                     exampleDialog.open()
                                 }
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Close File"
+                                iconFile: "Cancel-96.png"
                                 enabled: currentFilePath.length > 0 || editorText.text.length > 0
                                 onTriggered: {
                                     editorText.text = ""
@@ -477,18 +502,21 @@ Item {
                                 }
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Text Size +"
+                                iconFile: "Text Larger-96.png"
                                 onTriggered: increaseEditorFont()
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Text Size -"
+                                iconFile: "Text Smaller-96.png"
                                 onTriggered: decreaseEditorFont()
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Help"
+                                iconFile: "Help-96.png"
                                 onTriggered: {
                                     VescIf.emitMessageDialog(
                                                 "VESC LispBM Editor",
@@ -510,14 +538,16 @@ Item {
                 Layout.preferredWidth: parent.width * 0.4
                 Layout.preferredHeight: parent.height * 0.4
                 ScrollView {
-                    id: replScroll
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     contentWidth: Math.max(replText.implicitWidth, availableWidth)
                     clip: true
+                    padding: 4
+                    background: TextBoxBackground {}
 
                     TextArea {
                         id: replText
+                        background: null
                         text: consoleText
                         readOnly: true
                         wrapMode: TextArea.NoWrap
@@ -561,15 +591,16 @@ Item {
 
                         BottomMenu {
                             id: replMenu
-                            parent: replScroll
 
-                            MenuItem {
+                            MenuEntry {
                                 text: ":help"
+                                iconFile: "Help-96.png"
                                 onTriggered: mCommands.lispSendReplCmd(":help")
                             }
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Clear"
+                                iconFile: "Cancel-96.png"
                                 onTriggered: consoleText = ""
                             }
                         }

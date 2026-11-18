@@ -48,7 +48,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             columns: cols
-            uniformCellWidths: mainIsTablet
+            uniformCellWidths: cols > 1
             anchors.topMargin: 15
             anchors.bottomMargin: 15
             columnSpacing: 10
@@ -60,6 +60,8 @@ Item {
                 spacing: 10
 
                 Image {
+                    // No room for the logo next to the device card on a phone in landscape
+                    visible: !connected || !phoneLandscape
                     Layout.alignment: Qt.AlignHCenter
                     Layout.preferredWidth: Math.min(parent.width * (connected ? 0.45 : 0.7), 400)
                     Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
@@ -225,7 +227,8 @@ Item {
                 id: toolsBox
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                Layout.rowSpan: cols === 2 ? 2 : 1
+                Layout.rowSpan: cols === 2 && !phoneLandscape ? 2 : 1
+                Layout.columnSpan: phoneLandscape ? 2 : 1
 
                 SectionHeader {
                     text: qsTr("Tools and Operations")
@@ -233,7 +236,7 @@ Item {
 
                 GridLayout {
                     Layout.fillWidth: true
-                    columns: 2
+                    columns: phoneLandscape ? 4 : 2
                     columnSpacing: 8
                     rowSpacing: 8
 
@@ -382,7 +385,7 @@ Item {
 
             CollapsibleSection {
                 id: logSection
-                Layout.alignment: cols > 2 ? Qt.AlignTop : 0
+                Layout.alignment: cols > 2 || phoneLandscape ? Qt.AlignTop : 0
                 title: qsTr("Realtime Data Logging")
                 iconSource: "qrc" + Utility.getThemePath() + "icons/Line Chart-96.png"
 
@@ -394,7 +397,7 @@ Item {
 
             CollapsibleSection {
                 id: tcpSection
-                Layout.alignment: cols > 2 ? Qt.AlignTop : 0
+                Layout.alignment: cols > 2 || phoneLandscape ? Qt.AlignTop : 0
                 title: qsTr("Wireless Bridge to Computer (TCP)")
                 iconSource: "qrc" + Utility.getThemePath() + "icons/LAN-96.png"
 
@@ -626,9 +629,17 @@ Item {
         focus: true
         title: qsTr("Update Firmware")
 
-        width: parent.width
-        height: parent.height
-        parent: mainSwipeView
+        // Landscape phones: over the app bars too, only inside the safe area
+        readonly property bool fullWindow: phoneLandscape
+        parent: fullWindow ? Overlay.overlay : mainSwipeView
+        x: fullWindow ? notchLeft : 0
+        y: fullWindow ? notchTop : 0
+        width: parent.width - (fullWindow ? notchLeft + notchRight : 0)
+        height: parent.height - (fullWindow ? notchTop + notchBot : 0)
+        leftInset: fullWindow ? -notchLeft : 0
+        rightInset: fullWindow ? -notchRight : 0
+        topInset: fullWindow ? -notchTop : 0
+        bottomInset: fullWindow ? -notchBot : 0
 
         Overlay.modal: Rectangle {
             color: scrimColor
@@ -642,8 +653,6 @@ Item {
             id: fwUpdate
             anchors.fill: parent
             anchors.topMargin: firmwareDialog.header.height
-            anchors.leftMargin: notchLeft
-            anchors.rightMargin: notchRight
         }
 
         header: PageHeader {
@@ -654,10 +663,10 @@ Item {
 
     SheetDialog {
         id: packageDialog
-        title: qsTr("Package Store")
+        title: phoneLandscape ? "" : qsTr("Package Store")
         iconSource: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
         fullHeight: true
-        width: Math.min(parent.width, mainIsTablet ? 1000 : 640)
+        sheetWidth: Math.min(parent.width, mainIsTablet ? 1000 : 640)
 
         Packages {
             anchors.fill: parent

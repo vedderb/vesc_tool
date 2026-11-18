@@ -21,6 +21,7 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import Vedder.vesc.utility 1.0
 
 Item {
     height: spinbox.implicitHeight
@@ -33,20 +34,13 @@ Item {
     property string suffix: ""
     property string prefix: ""
 
-    onPrefixChanged: forceUpdate()
-    onSuffixChanged: forceUpdate()
-
-    function forceUpdate() {
-        var old = realValue
-        realValue += realStepSize
-        realValue = old
-    }
-
     SpinBox {
         id: spinbox
         background: InputBackground {}
         anchors.fill: parent
         editable: true
+        // The iOS number pads have no return key, so there would be no way to finish the edit
+        inputMethodHints: Qt.platform.os === "ios" ? Qt.ImhPreferNumbers | Qt.ImhNoPredictiveText : Qt.ImhFormattedNumbersOnly
 //        wheelEnabled: true
 
         property real factor: Math.pow(10, decimals)
@@ -61,7 +55,7 @@ Item {
         }
 
         textFromValue: function(value, locale) {
-            return prefix + parseFloat(value * 1.0 / factor).toFixed(decimals) + suffix;
+            return parseFloat(value * 1.0 / factor).toFixed(decimals);
         }
 
         valueFromText: function(text, locale) {
@@ -71,9 +65,35 @@ Item {
             // phones in general.
             Qt.inputMethod.hide()
 
-            return Math.round(parseFloat(text.replace(",", ".").
-                                         replace(suffix, "").
-                                         replace(prefix, "")) * factor)
+            return Math.round(parseFloat(text.replace(",", ".")) * factor)
+        }
+
+        // Prefix and suffix are labels around the number, so only the number is edited
+        Binding { target: spinbox.contentItem; property: "leftPadding"; value: prefixText.width }
+        Binding { target: spinbox.contentItem; property: "rightPadding"; value: suffixText.width }
+
+        Row {
+            parent: spinbox.contentItem
+            anchors.centerIn: parent
+
+            Text {
+                id: prefixText
+                text: prefix
+                font: spinbox.font
+                color: Utility.getAppHexColor("disabledText")
+            }
+
+            Item {
+                width: spinbox.contentItem.contentWidth
+                height: 1
+            }
+
+            Text {
+                id: suffixText
+                text: suffix
+                font: spinbox.font
+                color: Utility.getAppHexColor("disabledText")
+            }
         }
 
         onValueChanged: {

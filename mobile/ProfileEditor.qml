@@ -283,6 +283,8 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
+                // Keeps its height on landscape phones, the settings above scroll instead
+                Layout.minimumHeight: implicitHeight
                 Button {
                     Layout.preferredWidth: 50
                     Layout.fillWidth: true
@@ -293,8 +295,9 @@ Item {
                         id: menu
                         width: 500
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Read current configuration"
+                            iconFile: "Download-96.png"
                             onTriggered: {
                                 readCurrentConfig()
                             }

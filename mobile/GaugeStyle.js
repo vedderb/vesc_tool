@@ -53,13 +53,11 @@ function frame(ctx, w, h, r, b, p) {
     b = Math.max(2.5, b)
     shadow(ctx, 0, 0, w, h, r, b * 1.6, p)
     var s = Math.min(w, h)
-    var g = ctx.createLinearGradient(0, 0, s * 0.5, h)
-    g.addColorStop(0, p.hi); g.addColorStop(0.3, p.mid); g.addColorStop(0.7, p.lo); g.addColorStop(1, p.mid)
     ctx.beginPath()
-    ctx.fillStyle = g
+    ctx.fillStyle = metal(ctx, w / 2, h / 2, Math.PI * 0.75, p)
     ctx.roundedRect(0, 0, w, h, r, r)
     ctx.fill()
-    g = ctx.createLinearGradient(0, 0, s * 0.5, h)
+    var g = ctx.createLinearGradient(0, 0, s * 0.5, h)
     g.addColorStop(0, p.lo); g.addColorStop(0.6, p.lo); g.addColorStop(1, p.hi2)
     ctx.beginPath()
     ctx.fillStyle = g

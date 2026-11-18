@@ -2,9 +2,9 @@
 * IMU Calibration Wizard
 */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import QtQuick.Window
 import Qt5Compat.GraphicalEffects
 
@@ -46,6 +46,7 @@ Item {
         'x': -10.0, 'y': -10.0, 'z': -10.0
     }
     property real calculatedYawOffset: 0.0
+    readonly property string accelHint: "Avoid sharp movements and bumps. If the reading overshoots, tap Clear Max. Save once the max is stable."
 
     property var pages: {
         'menu': 0,
@@ -110,13 +111,11 @@ Item {
             filteredIMUValues.gyroX = (filteredIMUValues.gyroX * .99) + (values.gyroX * .01)
             filteredIMUValues.gyroY = (filteredIMUValues.gyroY * .99) + (values.gyroY * .01)
             filteredIMUValues.gyroZ = (filteredIMUValues.gyroZ * .99) + (values.gyroZ * .01)
-            filteredIMUValues = filteredIMUValues // Spam UI refreshes lol
 
             // Update peak accel values
             maxAccelValues.x = Math.max(maxAccelValues.x, filteredIMUValues.accX)
             maxAccelValues.y = Math.max(maxAccelValues.y, filteredIMUValues.accY)
             maxAccelValues.z = Math.max(maxAccelValues.z, filteredIMUValues.accZ)
-            maxAccelValues = maxAccelValues
 
             // Search for reccomended yaw offset
             var currentMaxPitch = getPitchForYawOffset(calculatedYawOffset)
@@ -140,8 +139,18 @@ Item {
             } else {
                 workingIMU = true
             }
+        }
+    }
 
+    // The values above update at the 50 Hz poll rate, the pages only need to redraw at 10 Hz
+    Timer {
+        interval: 100
+        repeat: true
+        running: dialog.visible
+
+        onTriggered: {
             filteredIMUValuesChanged()
+            maxAccelValuesChanged()
         }
     }
 
@@ -151,12 +160,14 @@ Item {
         focus: true
         visible: false
         property bool isHorizontal: width > height
+        // Covers the app bars on landscape phones
+        readonly property bool fullWindow: phoneLandscape
         width: parent.width - 10 - notchLeft - notchRight
-        height: parent.height - 10
+        height: parent.height - 10 - (fullWindow ? notchTop + notchBot : 0)
         closePolicy: Popup.NoAutoClose
         x: 5 + notchLeft
-        y: 5
-        parent: dialogParent
+        y: 5 + (fullWindow ? notchTop : 0)
+        parent: fullWindow ? Overlay.overlay : dialogParent
         bottomMargin: 0
         rightMargin: 0
         padding: 16
@@ -169,55 +180,59 @@ Item {
             radius: 20
         }
 
-        StackLayout {
+        // The steps scroll when they do not fit
+        Flickable {
+            id: stepFlick
             width: mainIsTablet && dialog.isHorizontal ? (parent.width - 12) / 2 : parent.width
             height: mainIsTablet && !dialog.isHorizontal ? (parent.height - 12) / 2 : parent.height
+            contentWidth: width
+            contentHeight: Math.max(height, stackLayout.children[stackLayout.currentIndex].children[0].implicitHeight)
+            boundsBehavior: Flickable.StopAtBounds
+            clip: true
+        }
+
+        StackLayout {
+            parent: stepFlick.contentItem
+            width: parent.width
+            height: parent.height
             id: stackLayout
             currentIndex: 0
+            onCurrentIndexChanged: stepFlick.contentY = 0
 
             Item{// Welcome Screen #0
                 width: parent.width
                 height: parent.height
 
-                ColumnLayout {
+                // The tasks as a 2x2 grid on landscape phones
+                GridLayout {
                     width: parent.width
                     height: parent.height
-                    spacing: 10
+                    columns: phoneLandscape ? 2 : 1
+                    rowSpacing: 10
+                    columnSpacing: 10
+                    uniformCellWidths: true
 
-                    Text {
-                        id: welcomeText1
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "IMU Wizard"
-                    }// Text
-                    Text {
-                        id: welcomeText2
-                        color: Utility.getAppHexColor("lightText")
-                        wrapMode: Text.Wrap
-                        font.pointSize: 12
-                        Layout.preferredWidth: parent.width
-                        text: "Welcome to the IMU Wizard. This tool is split into tasks which help simplify IMU config and calibration. " +
-                              "They are intented to be ran sequentially, but can be run as one offs and in any order."
+                    TaskIntro {
+                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        title: "IMU Wizard"
+                        instruction: "Run the tasks in order the first time"
+                        hint: "Each task can also be run on its own later, in any order."
                     }
-                    Text {
+                    WarningBanner {
                         id: welcomeText3
-                        color: Utility.getAppHexColor("lightText")
-                        wrapMode: Text.Wrap
-                        font.pointSize: 12
-                        Layout.preferredWidth: parent.width
+                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        Layout.fillWidth: true
                         visible: !workingIMU
-                        text: "We have detected that your IMU is <font color=\"" + Utility.getAppHexColor("dangerText") + "\">not working</font>. The IMU Configurator can help set it up."
+                        text: "We have detected that your IMU is not working. The IMU Configurator can help set it up."
                     }
-                    Button {
+                    ImageButton {
                         id: configuratorButton
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 52
-                        Layout.preferredWidth: 500
-                        text: "IMU Configurator"
-                        flat: false
+                        Layout.preferredHeight: 62
+                        buttonText: "1. IMU Configurator"
+                        hintText: "Find the IMU and choose a profile"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Search-96.png"
+                        badge: !workingIMU
 
                         onClicked: {
                             configuratorRestore = {
@@ -235,25 +250,25 @@ Item {
                             stackLayout.currentIndex = pages.configurator
                         }
                     }
-                    Button {
+                    ImageButton {
                         id: gyroCalibrationButton
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 52
-                        Layout.preferredWidth: 500
-                        text: "Gyroscope Calibration"
-                        flat: false
+                        Layout.preferredHeight: 62
+                        buttonText: "2. Gyroscope Calibration"
+                        hintText: "Measure the gyro offsets at rest"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Gyroscope-96.png"
 
                         onClicked: {
                             stackLayout.currentIndex = pages.gyro
                         }
                     }
-                    Button {
+                    ImageButton {
                         id: accelerometerCalibrationButton
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 52
-                        Layout.preferredWidth: 500
-                        text: "Accelerometer Calibration"
-                        flat: false
+                        Layout.preferredHeight: 62
+                        buttonText: "3. Accelerometer Calibration"
+                        hintText: "Find the peak reading on each axis"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/Offset-96.png"
 
                         onClicked: {
                             maxAccelValues.x = -10
@@ -262,13 +277,13 @@ Item {
                             stackLayout.currentIndex = pages.accelerometerX
                         }
                     }
-                    Button {
+                    ImageButton {
                         id: orientationCalibrationButton
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 52
-                        Layout.preferredWidth: 500
-                        text: "Orientation Calibration"
-                        flat: false
+                        Layout.preferredHeight: 62
+                        buttonText: "4. Orientation Calibration"
+                        hintText: "Level roll and pitch, then set yaw"
+                        imageSrc: "qrc" + Utility.getThemePath() + "icons/icons8-target-96.png"
 
                         onClicked: {
                             orientationRestore = {
@@ -296,7 +311,7 @@ Item {
                     Item {
                         Layout.fillHeight: true
                     }
-                }//Column Layout
+                }//Grid Layout
             }//Item (Welcome Screen)
 
             Item{// Gyro Calibration #1
@@ -305,80 +320,116 @@ Item {
 
                 ColumnLayout {
                     width: parent.width
-                    height: parent.height
-                    Text {
-                        id: gyroText1
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Gyroscope calibration"
-                    }// Text
-                    Text {
-                        id: gyroText2
-                        color: Utility.getAppHexColor("lightText")
-                        wrapMode: Text.Wrap
-                        font.pointSize: 12
-                        Layout.preferredWidth: parent.width
-                        text: "To find the gyroscope offsets, " +
-                        "the IMU must be left in a stable position without any vibration. " +
-                        "However any orientation is acceptable.\n\n" +
-                        "Wait for the offsets to stabilize then hit 'SAVE'."
-                    }// Text
-                    Text {
-                        id: gyroText3
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text:"X Offset: " + filteredIMUValues.gyroX.toFixed(2) +
-                        "\nY Offset: " + filteredIMUValues.gyroY.toFixed(2) +
-                        "\nZ Offset: " + filteredIMUValues.gyroZ.toFixed(2)
-                    }// Text
+                    spacing: 10
+                    TaskIntro {
+                        title: "Gyroscope Calibration"
+                        instruction: "Leave the IMU completely still"
+                        hint: "Any orientation works, but avoid vibration. Save once the offsets have settled."
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 3
+                        columnSpacing: 8
+                        uniformCellWidths: true
+
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "X offset"
+                            value: filteredIMUValues.gyroX.toFixed(2)
+                            unit: "\u00B0/s"
+                        }
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "Y offset"
+                            value: filteredIMUValues.gyroY.toFixed(2)
+                            unit: "\u00B0/s"
+                        }
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "Z offset"
+                            value: filteredIMUValues.gyroZ.toFixed(2)
+                            unit: "\u00B0/s"
+                        }
+                    }
+                    RowLayout {
+                        spacing: 8
+
+                        Rectangle {
+                            implicitWidth: 10
+                            implicitHeight: 10
+                            radius: 5
+                            color: Utility.getAppHexColor(gyroSettle.stable ? "positiveText" : "warningText")
+                        }
+                        Text {
+                            text: !workingIMU ? "No IMU data, check the IMU Configurator"
+                                  : gyroSettle.stable ? "Settled, ready to save" : "Settling, keep the IMU still..."
+                            color: Utility.getAppHexColor(gyroSettle.stable ? "positiveText" : "warningText")
+                        }
+                    }
                 }// Column Layout
+
+                // Settled when no offset moved more than 0.02 deg/s in the last second. The filter only removes
+                // ~40% of the remaining error per second, so a looser limit turns green long before convergence.
+                Timer {
+                    id: gyroSettle
+                    property bool stable: false
+                    property var last: [NaN, NaN, NaN]
+
+                    interval: 1000
+                    repeat: true
+                    running: dialog.visible && stackLayout.currentIndex === pages.gyro
+                    onRunningChanged: {
+                        gyroSettle.stable = false
+                        gyroSettle.last = [NaN, NaN, NaN]
+                    }
+                    onTriggered: {
+                        var now = [filteredIMUValues.gyroX, filteredIMUValues.gyroY, filteredIMUValues.gyroZ]
+                        gyroSettle.stable = workingIMU && now.every(function(v, i) { return Math.abs(v - gyroSettle.last[i]) < 0.02 })
+                        gyroSettle.last = now
+                    }
+                }
             }// Item (Gyro Calibration)
 
             Item{// Accel X Calibration #2
                 width: parent.width
                 height: parent.height
 
-                ColumnLayout {
+                // Clear Max and Skip beside the tiles on landscape phones
+                GridLayout {
                     width: parent.width
-                    height: parent.height
-                    Text {
-                        id: accelXText1
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Accel X calibration"
-                    }// Text
-                    Text {
-                        id: accelXText2
-                        color: Utility.getAppHexColor("lightText")
-                        font.pointSize: 12
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "To find the accelerometer offsets, " +
-                        "the IMU must be rotated to the max value for all 3 axes. " +
-                        "Avoid sharp movements & bumping the IMU to keep the reading stable. " +
-                        "If you've overshot the reading, hit the 'Clear Max' button to reset the reading. " +
-                        "\n\nAfter finding a stable max X value, hit 'SAVE' to continue.\n"
-                    }// Text
-                    Text {
-                        id: accelXText3
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "X:\t" + filteredIMUValues.accX.toFixed(3) +
-                        "\nMax X:\t" + maxAccelValues.x.toFixed(3)
-                    }// Text
+                    columns: phoneLandscape ? 2 : 1
+                    rowSpacing: 10
+                    columnSpacing: 8
+                    uniformCellWidths: true
+                    TaskIntro {
+                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        title: "Accel X Calibration"
+                        step: "Step 1 of 3"
+                        instruction: "Slowly tilt the IMU until Max X stops rising"
+                        hint: accelHint
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: 8
+                        uniformCellWidths: true
+
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "Accel X"
+                            value: filteredIMUValues.accX.toFixed(3)
+                            unit: "g"
+                            level: filteredIMUValues.accX
+                        }
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "Max X"
+                            value: maxAccelValues.x.toFixed(3)
+                            unit: "g"
+                        }
+                    }
                     RowLayout {
-                        width: parent.width
-                        height: parent.height
+                        Layout.fillWidth: true
 
                         Button {
                             id: clearAccelXButton
@@ -405,49 +456,49 @@ Item {
                             }
                         }// Button
                     }
-                }// Column Layout
+                }// Grid Layout
             }// Item (Accel X Calibration)
 
             Item{// Accel Y Calibration #3
                 width: parent.width
                 height: parent.height
 
-                ColumnLayout {
+                // Clear Max and Skip beside the tiles on landscape phones
+                GridLayout {
                     width: parent.width
-                    height: parent.height
-                    Text {
-                        id: accelYText1
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Accel Y calibration"
-                    }// Text
-                    Text {
-                        id: accelYText2
-                        color: Utility.getAppHexColor("lightText")
-                        font.pointSize: 12
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "To find the accelerometer offsets, " +
-                        "the IMU must be rotated to the max value for all 3 axes. " +
-                        "Avoid sharp movements & bumping the IMU to keep the reading stable. " +
-                        "If you've overshot the reading, hit the 'Clear Max' button to reset the reading. " +
-                        "\n\nAfter finding a stable max Y value, hit 'SAVE' to continue.\n"
-                    }// Text
-                    Text {
-                        id: accelYText3
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Y:\t" + filteredIMUValues.accY.toFixed(3) +
-                        "\nMax Y:\t" + maxAccelValues.y.toFixed(3)
-                    }// Text
+                    columns: phoneLandscape ? 2 : 1
+                    rowSpacing: 10
+                    columnSpacing: 8
+                    uniformCellWidths: true
+                    TaskIntro {
+                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        title: "Accel Y Calibration"
+                        step: "Step 2 of 3"
+                        instruction: "Slowly tilt the IMU until Max Y stops rising"
+                        hint: accelHint
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: 8
+                        uniformCellWidths: true
+
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "Accel Y"
+                            value: filteredIMUValues.accY.toFixed(3)
+                            unit: "g"
+                            level: filteredIMUValues.accY
+                        }
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "Max Y"
+                            value: maxAccelValues.y.toFixed(3)
+                            unit: "g"
+                        }
+                    }
                     RowLayout {
-                        width: parent.width
-                        height: parent.height
+                        Layout.fillWidth: true
 
                         Button {
                             id: clearAccelYButton
@@ -474,49 +525,49 @@ Item {
                             }
                         }// Button
                     }
-                }// Column Layout
+                }// Grid Layout
             }// Item (Accel Y Calibration)
 
             Item{// Accel Z Calibration #4
                 width: parent.width
                 height: parent.height
 
-                ColumnLayout {
+                // Clear Max and Skip beside the tiles on landscape phones
+                GridLayout {
                     width: parent.width
-                    height: parent.height
-                    Text {
-                        id: accelZText1
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Accel Z calibration"
-                    }// Text
-                    Text {
-                        id: accelZText2
-                        color: Utility.getAppHexColor("lightText")
-                        font.pointSize: 12
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "To find the accelerometer offsets, " +
-                        "the IMU must be rotated to the max value for all 3 axes. " +
-                        "Avoid sharp movements & bumping the IMU to keep the reading stable. " +
-                        "If you've overshot the reading, hit the 'Clear Max' button to reset the reading. " +
-                        "\n\nAfter finding a stable max Z value, hit 'SAVE' to continue.\n"
-                    }// Text
-                    Text {
-                        id: accelZText3
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Z:\t" + filteredIMUValues.accZ.toFixed(3) +
-                        "\nMax Z:\t" + maxAccelValues.z.toFixed(3)
-                    }// Text
+                    columns: phoneLandscape ? 2 : 1
+                    rowSpacing: 10
+                    columnSpacing: 8
+                    uniformCellWidths: true
+                    TaskIntro {
+                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        title: "Accel Z Calibration"
+                        step: "Step 3 of 3"
+                        instruction: "Slowly tilt the IMU until Max Z stops rising"
+                        hint: accelHint
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: 8
+                        uniformCellWidths: true
+
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "Accel Z"
+                            value: filteredIMUValues.accZ.toFixed(3)
+                            unit: "g"
+                            level: filteredIMUValues.accZ
+                        }
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "Max Z"
+                            value: maxAccelValues.z.toFixed(3)
+                            unit: "g"
+                        }
+                    }
                     RowLayout {
-                        width: parent.width
-                        height: parent.height
+                        Layout.fillWidth: true
 
                         Button {
                             id: clearAccelZButton
@@ -543,48 +594,37 @@ Item {
                             }
                         }// Button
                     }
-                }// Column Layout
+                }// Grid Layout
             }// Item (Accel Z Calibration)
 
             Item{// roll Callibration #5
                 width: parent.width
                 height: parent.height
 
-                ColumnLayout {
+                // Skip beside the offset on landscape phones
+                GridLayout {
                     width: parent.width
-                    height: parent.height
-                    Text {
-                        id: rollText1
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Roll Angle Calibration"
-                    }// Text
-                    Text {
-                        id: rollText2
-                        color: Utility.getAppHexColor("lightText")
-                        wrapMode: Text.Wrap
-                        font.pointSize: 12
-                        Layout.preferredWidth: parent.width
-                        text: "To calibrate the roll angle, " +
-                        "place the IMU on a flat stable surface, " +
-                        "with both the pitch & roll angles leveled out.\n\n" +
-                        "Wait for the offset to stabilize then hit 'SAVE'."
-                    }// Text
-                    Text {
+                    columns: phoneLandscape ? 2 : 1
+                    rowSpacing: 10
+                    columnSpacing: 8
+                    TaskIntro {
+                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        title: "Roll Angle Calibration"
+                        step: "Step 1 of 3"
+                        instruction: "Place the IMU level on a flat, stable surface"
+                        hint: "Both pitch and roll should be level. Save once the offset has settled."
+                    }
+                    ValueTile {
                         id: rollText3
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Roll Offset: " + ((-filteredIMUValues.roll * 180.0/pi) - orientationRestore.rot_roll).toFixed(2)
-                    }// Text
+                        Layout.fillWidth: true
+                        title: "Roll offset"
+                        value: ((-filteredIMUValues.roll * 180.0/pi) - orientationRestore.rot_roll).toFixed(2)
+                        unit: "\u00B0"
+                    }
 
                     Button {
                         id: skipRollButton
-                        Layout.fillWidth: true
+                        Layout.fillWidth: !phoneLandscape
                         text: "Skip"
                         flat: true
 
@@ -593,47 +633,36 @@ Item {
                             stackLayout.currentIndex = pages.orientationPitch
                         }
                     }// Button
-                }// Column Layout
+                }// Grid Layout
             }// Item (roll Calibration)
 
             Item{// pitch Callibration #6
                 width: parent.width
                 height: parent.height
 
-                ColumnLayout {
+                // Skip beside the offset on landscape phones
+                GridLayout {
                     width: parent.width
-                    height: parent.height
-                    Text {
-                        id: pitchText1
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Pitch Angle Calibration"
-                    }// Text
-                    Text {
-                        id: pitchText2
-                        color: Utility.getAppHexColor("lightText")
-                        wrapMode: Text.Wrap
-                        font.pointSize: 12
-                        Layout.preferredWidth: parent.width
-                        text: "To calibrate the pitch angle, " +
-                        "place the IMU on a flat stable surface, " +
-                        "with both the pitch & roll angles leveled out.\n\n" +
-                        "Wait for the offset to stabilize then hit 'SAVE'."
-                    }// Text
-                    Text {
+                    columns: phoneLandscape ? 2 : 1
+                    rowSpacing: 10
+                    columnSpacing: 8
+                    TaskIntro {
+                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        title: "Pitch Angle Calibration"
+                        step: "Step 2 of 3"
+                        instruction: "Keep the IMU level on a flat, stable surface"
+                        hint: "Both pitch and roll should be level. Save once the offset has settled."
+                    }
+                    ValueTile {
                         id: pitchText3
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Pitch Offset: " + ((filteredIMUValues.pitch * 180.0/pi) - orientationRestore.rot_pitch).toFixed(2)
-                    }// Text
+                        Layout.fillWidth: true
+                        title: "Pitch offset"
+                        value: ((filteredIMUValues.pitch * 180.0/pi) - orientationRestore.rot_pitch).toFixed(2)
+                        unit: "\u00B0"
+                    }
                     Button {
                         id: skipPitchButton
-                        Layout.fillWidth: true
+                        Layout.fillWidth: !phoneLandscape
                         text: "Skip"
                         flat: true
 
@@ -642,47 +671,36 @@ Item {
                             stackLayout.currentIndex = pages.orientationYaw
                         }
                     }// Button
-                }// Column Layout
+                }// Grid Layout
             }// Item (pitch Calibration)
 
             Item{// yaw Callibration #7
                 width: parent.width
                 height: parent.height
 
-                ColumnLayout {
+                // Skip beside the offset on landscape phones
+                GridLayout {
                     width: parent.width
-                    height: parent.height
-                    Text {
-                        id: yawText1
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Yaw Angle Calibration"
-                    }// Text
-                    Text {
-                        id: yawText2
-                        color: Utility.getAppHexColor("lightText")
-                        wrapMode: Text.Wrap
-                        font.pointSize: 12
-                        Layout.preferredWidth: parent.width
-                        text: "To calculate the yaw orientation, " +
-                        "place the IMU on a stable surface, " +
-                        "with roll angle leveled out, and the <b>pitch angle raised to roughly <font color=\"" + Utility.getAppHexColor("warningText") + "\">45 degrees</font></b>.<br><br>" +
-                        "Wait for the offset to stabilize then hit 'SAVE'."
-                    }// Text
-                    Text {
+                    columns: phoneLandscape ? 2 : 1
+                    rowSpacing: 10
+                    columnSpacing: 8
+                    TaskIntro {
+                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        title: "Yaw Angle Calibration"
+                        step: "Step 3 of 3"
+                        instruction: "Raise the pitch to roughly <font color=\"" + Utility.getAppHexColor("warningText") + "\">45 degrees</font>, roll still level"
+                        hint: "Keep the IMU stable. Save once the offset has settled."
+                    }
+                    ValueTile {
                         id: yawText3
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "Yaw Offset: " + ((-calculatedYawOffset * 180.0/pi) - orientationRestore.rot_yaw).toFixed(2)
-                    }// Text
+                        Layout.fillWidth: true
+                        title: "Yaw offset"
+                        value: ((-calculatedYawOffset * 180.0/pi) - orientationRestore.rot_yaw).toFixed(2)
+                        unit: "\u00B0"
+                    }
                     Button {
                         id: skipYawButton
-                        Layout.fillWidth: true
+                        Layout.fillWidth: !phoneLandscape
                         text: "Skip"
                         flat: true
 
@@ -691,39 +709,54 @@ Item {
                             stackLayout.currentIndex = pages.menu
                         }
                     }// Button
-                }// Column Layout
+                }// Grid Layout
             }// Item (yaw Calibration)
 
             Item{// configurator #8
                 width: parent.width
                 height: parent.height
 
-                ColumnLayout {
+                // Detection on the left and the profile on the right on landscape phones
+                GridLayout {
                     width: parent.width
-                    height: parent.height
-                    Text {
-                        id: configuratorText1
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "IMU Detector"
-                    }// Text
-                    Text {
-                        id: configuratorText2
-                        color: Utility.getAppHexColor("lightText")
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "IMU Detected: " + (workingIMU ? "<font color=\"" + Utility.getAppHexColor("positiveText") + "\">True</font>" : "<font color=\"" + Utility.getAppHexColor("dangerText") + "\">False</font>") + "<br>" +
-                        "IMU Type: " + imuString
-                    }// Text
+                    flow: GridLayout.TopToBottom
+                    rows: phoneLandscape ? 5 : -1
+                    rowSpacing: 10
+                    columnSpacing: 16
+                    uniformCellWidths: true
+                    TaskIntro {
+                        title: "IMU Configurator"
+                        instruction: "Search for the IMU, then pick a profile"
+                        hint: "Save writes the IMU type and profile, Cancel restores the previous settings."
+                    }
+                    SectionHeader {
+                        Layout.topMargin: 0
+                        text: "Detection"
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: 8
+                        uniformCellWidths: true
+
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "IMU detected"
+                            value: workingIMU ? "True" : "False"
+                            valueColor: Utility.getAppHexColor(workingIMU ? "positiveText" : "dangerText")
+                        }
+                        ValueTile {
+                            Layout.fillWidth: true
+                            title: "IMU type"
+                            value: imuString
+                        }
+                    }
                     Text {
                         id: configuratorText3
-                        color: Utility.getAppHexColor("lightText")
+                        color: Utility.getAppHexColor("normalText")
                         wrapMode: Text.Wrap
-                        font.pointSize: 10
-                        Layout.preferredWidth: parent.width
+                        font.pointSize: 11
+                        Layout.fillWidth: true
                         text: "After searching, IMU Type of \"Off\" indicates your IMU is not connected (properly). " +
                         "If IMU Detected is \"true\" but changes to \"false\" after searching, the configured app has a conflicting comm port use."
                     }// Text
@@ -732,6 +765,7 @@ Item {
                         Layout.fillWidth: true
                         text: "Search for IMU"
                         flat: false
+                        highlighted: !workingIMU
 
                         function onIMUSearchCompleted(previousApp) {
                             searchIMUButton.enabled = true
@@ -808,107 +842,112 @@ Item {
                             })
                         }
                     }// Button
-                    ToolSeparator {
-                        Layout.preferredWidth: parent.width
-                        orientation: Qt.Horizontal
-                    }
-                    Text {
-                        id: configuratorText4
-                        color: Utility.getAppHexColor("titleText")
-                        font.weight: Font.Medium
-                        font.pointSize: 15
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: "IMU Profile Selector"
-                    }// Text
-                    GridLayout {
-                        columns: 2
-                        RadioButton {
-                            id: configuratorRadioDefault
-                            text: "Default"
-                            onClicked: {
-                                mAppConf.updateParamInt("imu_conf.sample_rate_hz", 200)
-                                mAppConf.updateParamEnum("imu_conf.mode", 0)
-                                mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
-                                mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.3)
-                                mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
-                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
-                                configuratorText5.text = configuratorText5.getText()
-                            }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.rowSpan: phoneLandscape ? 5 : 1
+                        Layout.alignment: Qt.AlignTop
+                        spacing: 10
+
+                        SectionHeader {
+                            text: "Profile"
                         }
-                        RadioButton {
-                            id: configuratorRadioLogs
-                            text: "Logs"
-                            onClicked: {
-                                mAppConf.updateParamInt("imu_conf.sample_rate_hz", 200)
-                                mAppConf.updateParamEnum("imu_conf.mode", 1)
-                                mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
-                                mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.3)
-                                mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
-                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
-                                configuratorText5.text = configuratorText5.getText()
-                            }
-                        }
-                        RadioButton {
-                            id: configuratorRadioBUni
-                            text: "Balance Unicycle"
-                            onClicked: {
-                                if(imuType == 4){
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 800)
-                                }else if(imuType == 5){
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 833)
-                                }else{
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 1000)
+                        GridLayout {
+                            columns: 2
+                            RadioButton {
+                                id: configuratorRadioDefault
+                                text: "Default"
+                                onClicked: {
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 200)
+                                    mAppConf.updateParamEnum("imu_conf.mode", 0)
+                                    mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
+                                    mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.3)
+                                    mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
+                                    mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
+                                    profileTiles.model = profileTiles.getModel()
                                 }
-                                mAppConf.updateParamEnum("imu_conf.mode", 1)
-                                mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
-                                mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.2)
-                                mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
-                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
-                                configuratorText5.text = configuratorText5.getText()
+                            }
+                            RadioButton {
+                                id: configuratorRadioLogs
+                                text: "Logs"
+                                onClicked: {
+                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 200)
+                                    mAppConf.updateParamEnum("imu_conf.mode", 1)
+                                    mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
+                                    mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.3)
+                                    mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
+                                    mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
+                                    profileTiles.model = profileTiles.getModel()
+                                }
+                            }
+                            RadioButton {
+                                id: configuratorRadioBUni
+                                text: "Balance Unicycle"
+                                onClicked: {
+                                    if(imuType == 4){
+                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 800)
+                                    }else if(imuType == 5){
+                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 833)
+                                    }else{
+                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 1000)
+                                    }
+                                    mAppConf.updateParamEnum("imu_conf.mode", 1)
+                                    mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
+                                    mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.2)
+                                    mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
+                                    mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
+                                    profileTiles.model = profileTiles.getModel()
+                                }
+                            }
+                            RadioButton {
+                                id: configuratorRadioBSkate
+                                text: "Balance Skateboard"
+                                onClicked: {
+                                    if(imuType == 4){
+                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 800)
+                                    }else if(imuType == 5){
+                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 832)
+                                    }else{
+                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 1000)
+                                    }
+                                    mAppConf.updateParamEnum("imu_conf.mode", 1)
+                                    mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 0.02)
+                                    mAppConf.updateParamDouble("imu_conf.mahony_kp", 2.0)
+                                    mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 1.0)
+                                    mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
+                                    profileTiles.model = profileTiles.getModel()
+                                }
                             }
                         }
-                        RadioButton {
-                            id: configuratorRadioBSkate
-                            text: "Balance Skateboard"
-                            onClicked: {
-                                if(imuType == 4){
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 800)
-                                }else if(imuType == 5){
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 832)
-                                }else{
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 1000)
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: 3
+                            columnSpacing: 8
+                            rowSpacing: 8
+                            uniformCellWidths: true
+
+                            Repeater {
+                                function getModel(){
+                                    return [["Frequency", mAppConf.getParamInt("imu_conf.sample_rate_hz"), "Hz"],
+                                            ["AHRS", getAHRS(), ""],
+                                            ["Acc decay", mAppConf.getParamDouble("imu_conf.accel_confidence_decay").toFixed(3), ""],
+                                            ["Mahony KP", mAppConf.getParamDouble("imu_conf.mahony_kp").toFixed(3), ""],
+                                            ["Accel Z filter", mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z").toFixed(1), ""],
+                                            ["Gyro filter", mAppConf.getParamDouble("imu_conf.gyro_lowpass_filter").toFixed(1), ""]]
                                 }
-                                mAppConf.updateParamEnum("imu_conf.mode", 1)
-                                mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 0.02)
-                                mAppConf.updateParamDouble("imu_conf.mahony_kp", 2.0)
-                                mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 1.0)
-                                mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
-                                configuratorText5.text = configuratorText5.getText()
+
+                                id: profileTiles
+                                model: getModel()
+
+                                ValueTile {
+                                    Layout.fillWidth: true
+                                    title: modelData[0]
+                                    value: modelData[1]
+                                    unit: modelData[2]
+                                }
                             }
                         }
                     }
-                    Text {
-                        function getText(){
-                            return "Frequency: " + mAppConf.getParamInt("imu_conf.sample_rate_hz") + "\n" +
-                                "AHRS: " + getAHRS() + "\n" +
-                                "Acc Decay: " + mAppConf.getParamDouble("imu_conf.accel_confidence_decay").toFixed(3) + "\n" +
-                                "Mahony kp: " + mAppConf.getParamDouble("imu_conf.mahony_kp").toFixed(3) + "\n" +
-                                "Accel Z Filter: " + mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z").toFixed(1) + "\n" +
-                                "Gyro Filter: " + mAppConf.getParamDouble("imu_conf.gyro_lowpass_filter").toFixed(1)
-                        }
-
-                        id: configuratorText5
-                        color: Utility.getAppHexColor("lightText")
-                        font.family: "DejaVu Sans Mono"
-                        wrapMode: Text.Wrap
-                        Layout.preferredWidth: parent.width
-                        text: getText()
-                    }// Text
-
-
-
-                }// Column Layout
+                }// Grid Layout
             }// Item (configurator)
 
         }
@@ -919,8 +958,8 @@ Item {
             asynchronous: true
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            width: stackLayout.width
-            height: stackLayout.height
+            width: stepFlick.width
+            height: stepFlick.height
 
             sourceComponent: Rectangle {
                 radius: 12
@@ -1013,7 +1052,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Save"
-                highlighted: true
+                highlighted: stackLayout.currentIndex !== pages.gyro || gyroSettle.stable
                 visible: (stackLayout.currentIndex != 0) ? true : false
 
                 onClicked: {
@@ -1087,6 +1126,53 @@ Item {
 
 
     }//Dialog
+
+    // Title, step count and instruction at the top of each task
+    component TaskIntro: ColumnLayout {
+        id: intro
+        property string title
+        property string step
+        property string instruction
+        property string hint
+
+        Layout.fillWidth: true
+        spacing: 4
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.bottomMargin: 6
+
+            Text {
+                Layout.fillWidth: true
+                text: intro.title
+                color: Utility.getAppHexColor("titleText")
+                font.weight: Font.Medium
+                font.pointSize: 15
+                wrapMode: Text.Wrap
+            }
+            Text {
+                visible: text !== ""
+                text: intro.step
+                color: Utility.getAppHexColor("normalText")
+                font.pointSize: 10
+            }
+        }
+        Text {
+            Layout.fillWidth: true
+            text: intro.instruction
+            color: Utility.getAppHexColor("lightText")
+            font.weight: Font.Bold
+            font.pointSize: 12
+            wrapMode: Text.Wrap
+        }
+        Text {
+            Layout.fillWidth: true
+            text: intro.hint
+            color: Utility.getAppHexColor("normalText")
+            font.pointSize: 11
+            wrapMode: Text.Wrap
+        }
+    }
 
     function constrainDegrees(degrees){
         if(degrees > 360){

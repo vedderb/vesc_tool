@@ -20,6 +20,7 @@
 import QtQuick
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import "ParamFormat.js" as ParamFormat
 
 ParamEditFrame {
     id: editor
@@ -50,7 +51,7 @@ ParamEditFrame {
 
         RadioDelegate {
             Layout.fillWidth: true
-            text: modelData
+            text: ParamFormat.enumLabel(modelData)
             checked: index === editor.currentIndex
             onClicked: {
                 editor.currentIndex = index

@@ -124,6 +124,20 @@
         <file>res/icons/Toggle Off-96_2.png</file>
         <file>res/icons/Stop-96.png</file>
         <file>res/icons/Speed-96.png</file>
+        <file>res/icons/Balance Off-96.png</file>
+        <file>res/icons/Balance On-96.png</file>
+        <file>res/icons/Charge Off-96.png</file>
+        <file>res/icons/Charge On-96.png</file>
+        <file>res/icons/Detect BLDC-96.png</file>
+        <file>res/icons/Detect FOC-96.png</file>
+        <file>res/icons/Encoder-96.png</file>
+        <file>res/icons/Hall Sensors-96.png</file>
+        <file>res/icons/History-96.png</file>
+        <file>res/icons/Offset-96.png</file>
+        <file>res/icons/Pulse Width-96.png</file>
+        <file>res/icons/Reset Counter-96.png</file>
+        <file>res/icons/Text Larger-96.png</file>
+        <file>res/icons/Text Smaller-96.png</file>
         <file>res/icons/Shutdown-96.png</file>
         <file>res/icons/Settings-96.png</file>
         <file>res/icons/Search-96.png</file>
@@ -206,6 +220,20 @@
         <file>res/+theme_light/icons/Stop-96.png</file>
         <file>res/+theme_light/icons/Stop Sign-96.png</file>
         <file>res/+theme_light/icons/Speed-96.png</file>
+        <file>res/+theme_light/icons/Balance Off-96.png</file>
+        <file>res/+theme_light/icons/Balance On-96.png</file>
+        <file>res/+theme_light/icons/Charge Off-96.png</file>
+        <file>res/+theme_light/icons/Charge On-96.png</file>
+        <file>res/+theme_light/icons/Detect BLDC-96.png</file>
+        <file>res/+theme_light/icons/Detect FOC-96.png</file>
+        <file>res/+theme_light/icons/Encoder-96.png</file>
+        <file>res/+theme_light/icons/Hall Sensors-96.png</file>
+        <file>res/+theme_light/icons/History-96.png</file>
+        <file>res/+theme_light/icons/Offset-96.png</file>
+        <file>res/+theme_light/icons/Pulse Width-96.png</file>
+        <file>res/+theme_light/icons/Reset Counter-96.png</file>
+        <file>res/+theme_light/icons/Text Larger-96.png</file>
+        <file>res/+theme_light/icons/Text Smaller-96.png</file>
         <file>res/+theme_light/icons/size_on.png</file>
         <file>res/+theme_light/icons/size_off.png</file>
         <file>res/+theme_light/icons/Shutdown-96.png</file>

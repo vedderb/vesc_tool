@@ -50,6 +50,8 @@ Item {
     readonly property bool last: !next || parent.columns !== 1
 
     Layout.fillWidth: true
+    // In several columns a taller card next to it must not centre this one
+    Layout.alignment: Qt.AlignTop
     // Close the gap and share the border line with the row above
     Layout.topMargin: first ? 0 : -parent.rowSpacing - 1
     z: changed ? 1 : 0

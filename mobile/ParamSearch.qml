@@ -30,7 +30,8 @@ SheetDialog {
     signal paramSelected(bool isApp, string group, string subgroup, string name)
     signal pageSelected(string title)
 
-    title: qsTr("Search")
+    // No title on landscape phones, which leaves room for results above the keyboard
+    title: phoneLandscape ? "" : qsTr("Search")
     rejectText: ""
     fullHeight: true
     onOpened: field.forceActiveFocus()

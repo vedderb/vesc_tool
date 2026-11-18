@@ -94,12 +94,20 @@ Item {
             color: scrimColor
         }
 
-        width: parent.width
-        height: parent.height
+        // Landscape phones: over the app bars too, only inside the safe area
+        readonly property bool fullWindow: phoneLandscape
+        parent: fullWindow ? Overlay.overlay : dialogParent
+        x: fullWindow ? notchLeft : 0
+        y: fullWindow ? notchTop : 0
+        width: parent.width - (fullWindow ? notchLeft + notchRight : 0)
+        height: parent.height - (fullWindow ? notchTop + notchBot : 0)
+        leftInset: fullWindow ? -notchLeft : 0
+        rightInset: fullWindow ? -notchRight : 0
+        topInset: fullWindow ? -notchTop : 0
+        bottomInset: fullWindow ? -notchBot : 0
         closePolicy: Popup.CloseOnEscape
-        parent: dialogParent
-        leftPadding: 14 + notchLeft
-        rightPadding: 14 + notchRight
+        leftPadding: 14
+        rightPadding: 14
         topPadding: 0
 
         background: Rectangle {
@@ -118,8 +126,8 @@ Item {
             GridLayout {
                 width: parent.width
                 flow: GridLayout.TopToBottom
-                // Four header and group pairs, two pairs per column on tablets
-                rows: mainIsTablet ? 4 : 8
+                // Four header and group pairs, two pairs per column on tablets and in landscape
+                rows: mainIsTablet || mainIsHorizontal ? 4 : 8
                 uniformCellWidths: true
                 columnSpacing: 14
                 rowSpacing: 8

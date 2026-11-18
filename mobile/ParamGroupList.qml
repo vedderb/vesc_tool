@@ -32,9 +32,9 @@ ListView {
     readonly property var changedParams: tracker ? tracker.changedParams : []
 
     y: 5
-    width: 180
+    width: phoneLandscape ? 150 : 180
     height: parent.height - y
-    visible: mainIsTablet && parent.width >= 900
+    visible: mainIsTablet && parent.width >= 900 || phoneLandscape
     model: visible ? box.model : null
     clip: true
     boundsBehavior: Flickable.StopAtBounds
@@ -55,7 +55,7 @@ ListView {
 
     delegate: ItemDelegate {
         width: list.width
-        height: 44
+        height: phoneLandscape ? 40 : 44
         highlighted: index === list.box.currentIndex
         onClicked: list.box.currentIndex = index
 

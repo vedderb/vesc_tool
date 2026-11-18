@@ -20,7 +20,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Controls.Material
-import QtQuick.Layouts 1.3
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -74,8 +74,11 @@ Item {
 
     SheetDialog {
         id: dialog
-        parent: dialogParent
-        title: "Controls"
+        parent: phoneLandscape ? Overlay.overlay : dialogParent
+        sheetWidth: phoneLandscape ? parent.width : Math.min(parent.width, 640)
+        insetLeft: phoneLandscape ? notchLeft : 0
+        insetRight: phoneLandscape ? notchRight : 0
+        title: phoneLandscape ? "" : "Controls"
         modal: false
         closePolicy: Popup.CloseOnEscape
         dockWidth: mainIsTablet && mainIsHorizontal && appWindow.width - canDockWidth >= 1080 ? 380 : 0
@@ -86,9 +89,14 @@ Item {
             contentWidth: availableWidth
             clip: true
 
-            ColumnLayout {
+            // Mode and setpoint left of the buttons on landscape phones
+            GridLayout {
                 width: parent.width
-                spacing: 10
+                flow: GridLayout.TopToBottom
+                rows: phoneLandscape ? 4 : 7
+                rowSpacing: 10
+                columnSpacing: 16
+                uniformCellWidths: true
 
                 SegmentedBar {
                     id: modeBar
@@ -99,6 +107,8 @@ Item {
 
                 Rectangle {
                     Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.rowSpan: phoneLandscape ? 3 : 1
                     implicitHeight: setpoint.implicitHeight + 28
                     radius: 12
                     color: Utility.getAppHexColor("cardBackground")
@@ -140,7 +150,8 @@ Item {
                                 font.weight: Font.Medium
                                 font.features: { "tnum": 1 }
                                 color: Utility.getAppHexColor("titleText")
-                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                // The iOS number pads have no return key
+                                inputMethodHints: Qt.platform.os === "ios" ? Qt.ImhPreferNumbers | Qt.ImhNoPredictiveText : Qt.ImhFormattedNumbersOnly
                                 onEditingFinished: {
                                     Qt.inputMethod.hide()
                                     setValue(parseFloat(text.replace(",", ".")))

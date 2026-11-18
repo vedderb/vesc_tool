@@ -104,6 +104,8 @@ Item {
                     titles: ["Distance", "Efficiency", "Energy", "Ah", "Speed Avg / Max",
                         "Power Avg / Max", "T Mot Avg / Max", "T FET Avg / Max", "I Avg / Max"]
                     values: tripValues
+                    // Three rows like Since Start on landscape phones, which are short
+                    columns: phoneLandscape ? 3 : 2
                 }
 
                 Button {

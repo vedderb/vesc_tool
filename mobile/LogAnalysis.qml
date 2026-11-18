@@ -34,13 +34,16 @@ import Vedder.vesc.vescinterface
 
 Item {
     id: root
-    // Map and graphs side by side on tablets in landscape
-    readonly property bool wide: mainIsTablet && mainIsHorizontal
+    // Map and graphs side by side in landscape. On phones the header only spans the map, so the
+    // graphs get the full height.
+    readonly property bool wide: mainIsHorizontal
+    readonly property bool headerOverMap: phoneLandscape
     anchors.fill: parent
 
     property var mCommands: VescIf.commands()
     property string deviceCurrentDir: "/"
     property var deviceFileEntries: []
+    property bool deviceLoading: false
     property bool downloadingFromDevice: false
     property real downloadProgress: 0.0
     property real downloadSpeedKBps: 0.0
@@ -80,11 +83,18 @@ Item {
 
     function refreshDeviceDir(dirPath) {
         deviceCurrentDir = dirPath
+        deviceFileEntries = []
+        deviceLoading = true
+        // Later, so that the sheet shows that it is loading while the listing blocks
+        Qt.callLater(listDeviceDir, dirPath)
+    }
+
+    function listDeviceDir(dirPath) {
         var rawList = mCommands.fileBlockList(dirPath)
         var items = []
 
         if (dirPath !== "/" && dirPath.length > 0) {
-            items.push({ name: "..", isDir: true, size: 0 })
+            items.push({ name: "..", isDir: true, size: 0, timestamp: 0 })
         }
 
         for (var i = 0; i < rawList.length; i++) {
@@ -105,19 +115,18 @@ Item {
 
             // Show directories and .csv files
             if (isDir || name.toLowerCase().endsWith(".csv")) {
-                items.push({ name: name, isDir: isDir, size: size })
+                items.push({ name: name, isDir: isDir, size: size, timestamp: nameTime(name) })
             }
         }
 
-        // Sort folders first, then newest/alphabetical filenames
-        items.sort(function(a, b) {
-            if (a.name === "..") return -1
-            if (b.name === "..") return 1
-            if (a.isDir !== b.isDir) return a.isDir ? -1 : 1
-            return b.name.localeCompare(a.name)
-        })
-
         deviceFileEntries = items
+        deviceLoading = false
+    }
+
+    // Time in the name of a log, like 2026-11-16_16-05-55.csv, or 0
+    function nameTime(name) {
+        var m = name.match(/(\d{4})-(\d\d)-(\d\d)_(\d\d)-(\d\d)-(\d\d)/)
+        return m ? new Date(m[1], m[2] - 1, m[3], m[4], m[5], m[6]).getTime() : 0
     }
 
     function loadDeviceCsv(fileName) {
@@ -151,14 +160,29 @@ Item {
         return bytes < 1048576 ? (bytes / 1024).toFixed(1) + " KB" : (bytes / 1048576).toFixed(1) + " MB"
     }
 
-    // Distance of a log file in km or miles, kept as reading the file takes a while
+    // Like Nov 17, 2026 · 4:05 PM, with the time in the format of the locale
+    function dateText(ms) {
+        return Qt.formatDateTime(new Date(ms), "MMM d, yyyy · " + Qt.locale().timeFormat(Locale.ShortFormat))
+    }
+
+    // Like 2 of 6 logs · 2.0 MB · /log
+    function logCountText(shown, logs, path) {
+        return qsTr("%1 logs · %2 · %3").arg((shown < logs.length ? shown + " of " : "") + logs.length).
+                arg(sizeText(logs.reduce((sum, e) => sum + e.size, 0))).arg(path)
+    }
+
+    // Distance of a log file in meters, kept as reading the file takes a while
     property var logDistances: ({})
-    function logDistanceText(path, size) {
+    function logMeters(path, size) {
         var key = path + size
         if (logDistances[key] === undefined) {
             logDistances[key] = Utility.logDistance(path)
         }
-        var m = logDistances[key]
+        return logDistances[key]
+    }
+
+    function logDistanceText(path, size) {
+        var m = logMeters(path, size)
         return m < 0 ? "" : distanceText(m)
     }
 
@@ -167,9 +191,10 @@ Item {
                                            m < 1000 ? Math.round(m) + " m" : (m / 1000).toFixed(2) + " km"
     }
 
-    // Row of the log lists: name, details, a value and actions above a divider
+    // Row of the log lists: icon, name, details, a value and actions above a divider
     component LogRow: Item {
         id: logRow
+        property string iconSource: ""
         property string name: ""
         property string details: ""
         property string value: ""
@@ -192,6 +217,14 @@ Item {
 
                 contentItem: RowLayout {
                     spacing: 10
+
+                    Image {
+                        visible: logRow.iconSource !== ""
+                        Layout.preferredWidth: 24
+                        Layout.preferredHeight: 24
+                        source: logRow.iconSource
+                        mipmap: true
+                    }
 
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -278,6 +311,88 @@ Item {
         Item { Layout.fillHeight: true }
     }
 
+    // Search field and sort chips above the count of logs. The chips go next to the field when it
+    // gets 240 pt, as in landscape and on tablets.
+    component LogSearch: ColumnLayout {
+        id: logSearch
+        property alias text: searchField.text
+        property alias sorts: sortRepeater.model
+        property string sortBy: "Date"
+        property bool ascending: false
+        property alias count: countLabel.text
+        spacing: 8
+
+        // If s has all searched words, ignoring case
+        function matches(s) {
+            var t = s.toLowerCase()
+            return searchField.text.toLowerCase().split(" ").every(w => t.indexOf(w) >= 0)
+        }
+
+        // Ascending comparison d in the picked direction
+        function order(d) {
+            return ascending ? d : -d
+        }
+
+        function clear() {
+            searchField.text = ""
+            // Or the field takes the focus and the keyboard on the next open
+            searchField.focus = false
+        }
+
+        GridLayout {
+            Layout.fillWidth: true
+            columns: width > sortChips.implicitWidth + 240 ? 2 : 1
+            rowSpacing: 0
+            columnSpacing: 8
+
+            InputField {
+                id: searchField
+                Layout.fillWidth: true
+                placeholderText: qsTr("Search logs")
+                inputMethodHints: Qt.ImhNoPredictiveText
+            }
+
+            Row {
+                id: sortChips
+                spacing: 6
+
+                Repeater {
+                    id: sortRepeater
+
+                    // The picked sort shows its direction, tapping it again flips it. Name starts
+                    // A-Z, the others newest, longest or largest first.
+                    Chip {
+                        id: sortChip
+                        text: modelData + (checked ? (logSearch.ascending ? " ↑" : " ↓") : "")
+                        // Room for the arrow on every chip, so picking one does not move the others
+                        implicitWidth: Math.ceil(arrowMetrics.advanceWidth) + 24
+                        checked: logSearch.sortBy === modelData
+                        onClicked: {
+                            Qt.inputMethod.hide()
+                            logSearch.ascending = checked ? !logSearch.ascending : modelData === "Name"
+                            logSearch.sortBy = modelData
+                        }
+
+                        TextMetrics {
+                            id: arrowMetrics
+                            font.family: sortChip.font.family
+                            font.weight: Font.Medium
+                            text: modelData + " ↓"
+                        }
+                    }
+                }
+            }
+        }
+
+        Label {
+            id: countLabel
+            Layout.fillWidth: true
+            elide: Text.ElideMiddle
+            font.pointSize: 10
+            color: Utility.getAppHexColor("normalText")
+        }
+    }
+
     SheetDialog {
         id: confirmDeleteDialog
         acceptText: qsTr("Delete")
@@ -295,9 +410,19 @@ Item {
 
     SheetDialog {
         id: deviceFileDialog
-        title: "Device Logs (" + root.deviceCurrentDir + ")"
+        // Up, the folders and then the logs with all searched words in their name, in the picked order
+        readonly property var shownFiles: root.deviceFileEntries.filter(e => e.name === ".." || deviceSearch.matches(e.name))
+            .sort((a, b) => (b.name === "..") - (a.name === "..") || b.isDir - a.isDir ||
+                            deviceSearch.order((deviceSearch.sortBy === "Date" ? a.timestamp - b.timestamp :
+                                                deviceSearch.sortBy === "Size" ? a.size - b.size : 0) || a.name.localeCompare(b.name)))
+        readonly property var logs: root.deviceFileEntries.filter(e => !e.isDir)
+
+        // Landscape phones have the height for a few rows only, the path is in the count line there
+        title: phoneLandscape ? "" : "Device Logs"
         fullHeight: true
         closePolicy: Popup.NoAutoClose
+        // Cleared on open, as clearing on Close mid-download rebuilds the row that is downloading
+        onAboutToShow: deviceSearch.clear()
 
         ColumnLayout {
             anchors.fill: parent
@@ -305,6 +430,8 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
+                visible: !phoneLandscape
+                enabled: !root.deviceLoading && !root.downloadingFromDevice
                 InputField {
                     id: dirInput
                     Layout.fillWidth: true
@@ -318,18 +445,32 @@ Item {
                 }
             }
 
+            LogSearch {
+                id: deviceSearch
+                Layout.fillWidth: true
+                enabled: !root.downloadingFromDevice
+                sorts: ["Date", "Name", "Size"]
+                count: root.logCountText(deviceFileDialog.shownFiles.filter(e => !e.isDir).length,
+                                         deviceFileDialog.logs, root.deviceCurrentDir)
+            }
+
             ListView {
                 id: deviceListView
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                // Only as tall as the Up row above the empty text
+                Layout.fillHeight: !deviceEmpty.visible
+                Layout.preferredHeight: deviceEmpty.visible ? contentHeight : 0
                 clip: true
                 enabled: !root.downloadingFromDevice
-                model: root.deviceFileEntries
+                model: deviceFileDialog.shownFiles
 
                 delegate: LogRow {
                     width: deviceListView.width
-                    name: (modelData.isDir ? "[DIR] " : "") + modelData.name
-                    details: !modelData.isDir && modelData.size > 0 ? root.sizeText(modelData.size) : ""
+                    iconSource: modelData.isDir ? "qrc" + Utility.getThemePath() + "icons/" +
+                                                  (modelData.name === ".." ? "Up-96.png" : "Open Folder-96.png") : ""
+                    name: modelData.name === ".." ? qsTr("Up") : modelData.name
+                    details: modelData.name === ".." ? "" : modelData.isDir ? qsTr("Folder") :
+                             root.sizeText(modelData.size) + (modelData.timestamp ? " · " + root.dateText(modelData.timestamp) : "")
                     canSave: !modelData.isDir
                     canDelete: !modelData.isDir
                     onClicked: {
@@ -354,6 +495,16 @@ Item {
                     onDeleteClicked: root.promptDeleteDeviceFile(modelData.name)
                 }
 
+            }
+
+            EmptyLogs {
+                id: deviceEmpty
+                visible: deviceFileDialog.shownFiles.every(e => e.name === "..")
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                text: root.deviceLoading ? qsTr("Loading…") :
+                      deviceFileDialog.shownFiles.length < root.deviceFileEntries.length ?
+                          "No logs match \"" + deviceSearch.text + "\"" : "No .csv logs found in:\n" + root.deviceCurrentDir
             }
 
             // Download progress bar & cancel button
@@ -442,45 +593,63 @@ Item {
 
     SheetDialog {
         id: rtLogListDialog
+        // Logs with all searched words in their name or date, in the picked order
+        readonly property var shownLogs: root.rtLogEntries.filter(e => rtLogSearch.matches(e.name + " " + e.modified + " " + root.dateText(e.timestamp)))
+            .sort((a, b) => rtLogSearch.order(rtLogSearch.sortBy === "Distance" ? root.logMeters(a.path, a.size) - root.logMeters(b.path, b.size) :
+                                              rtLogSearch.sortBy === "Size" ? a.size - b.size : a.timestamp - b.timestamp))
+
         title: "RT Logs"
         acceptText: qsTr("Close")
         rejectText: ""
         fullHeight: true
+        onOpened: distanceTimer.next = 0
+        onClosed: rtLogSearch.clear()
+
+        // Reads the distances one log at a time while the sheet is open, so that sorting by them is quick
+        Timer {
+            id: distanceTimer
+            property int next: 0
+            interval: 50
+            repeat: true
+            running: rtLogListDialog.opened && next < root.rtLogEntries.length
+            onTriggered: {
+                var e = root.rtLogEntries[next++]
+                root.logMeters(e.path, e.size)
+            }
+        }
 
         ColumnLayout {
             anchors.fill: parent
             spacing: 8
 
-            EmptyLogs {
-                visible: root.rtLogEntries.length === 0
+            LogSearch {
+                id: rtLogSearch
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                text: "No .csv logs found in:\n" + displayPath(root.currentRtLogDir)
+                visible: root.rtLogEntries.length > 0
+                sorts: ["Date", "Distance", "Size"]
+                count: root.logCountText(rtLogListDialog.shownLogs.length, root.rtLogEntries, displayPath(root.currentRtLogDir))
             }
 
-            Label {
-                visible: root.rtLogEntries.length > 0
+            EmptyLogs {
+                visible: rtLogListDialog.shownLogs.length === 0
                 Layout.fillWidth: true
-                elide: Text.ElideMiddle
-                text: qsTr("%1 logs · %2 · %3").arg(root.rtLogEntries.length).
-                      arg(root.sizeText(root.rtLogEntries.reduce((sum, e) => sum + e.size, 0))).
-                      arg(displayPath(root.currentRtLogDir))
-                font.pointSize: 10
-                color: Utility.getAppHexColor("normalText")
+                Layout.fillHeight: true
+                text: root.rtLogEntries.length === 0 ? "No .csv logs found in:\n" + displayPath(root.currentRtLogDir) :
+                                                       "No logs match \"" + rtLogSearch.text + "\""
             }
 
             ListView {
                 id: rtLogListView
-                visible: root.rtLogEntries.length > 0
+                visible: rtLogListDialog.shownLogs.length > 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                model: root.rtLogEntries
+                model: rtLogListDialog.shownLogs
 
                 delegate: LogRow {
                     width: rtLogListView.width
                     name: modelData.name
-                    details: root.sizeText(modelData.size) + " · " + modelData.modified
+                    details: root.sizeText(modelData.size) + " · " + root.dateText(modelData.timestamp)
                     value: root.logDistanceText(modelData.path, modelData.size)
                     canDelete: true
                     onClicked: {
@@ -642,7 +811,6 @@ Item {
                                   name: fname,
                                   path: p,
                                   size: 0,
-                                  modified: "",
                                   source: "Local",
                                   canDelete: false
                               })
@@ -707,7 +875,7 @@ Item {
                     width: recentLogsListView.width
                     name: modelData.name
                     details: modelData.source + (modelData.size > 0 ? " · " + root.sizeText(modelData.size) : "") +
-                             (modelData.modified ? " · " + modelData.modified : "")
+                             (modelData.timestamp ? " · " + root.dateText(modelData.timestamp) : "")
                     value: modelData.size > 0 ? root.logDistanceText(modelData.path, modelData.size) : ""
                     canDelete: modelData.canDelete
                     onClicked: {
@@ -1632,13 +1800,15 @@ Item {
         anchors.fill: parent
         anchors.margins: 8
         columns: root.wide ? 2 : 1
+        rows: 2
+        flow: root.headerOverMap ? GridLayout.TopToBottom : GridLayout.LeftToRight
         rowSpacing: 8
         columnSpacing: 8
 
         // Unified Top Header Card (matches chartBox styling)
         Rectangle {
             Layout.fillWidth: true
-            Layout.columnSpan: parent.columns
+            Layout.columnSpan: root.headerOverMap ? 1 : parent.columns
             implicitHeight: headerCol.implicitHeight + 12
             color: Utility.getAppHexColor("cardBackground")
             radius: 12
@@ -1669,30 +1839,36 @@ Item {
                             id: fileMenu
                             y: fileMenuBtn.height
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Open RT Log..."
+                                iconFile: "Line Chart-96.png"
                                 onTriggered: root.openRtLogBrowser()
                             }
-                            MenuItem {
+                            MenuEntry {
                                 text: "Open Local CSV..."
+                                iconFile: "Open Folder-96.png"
                                 onTriggered: csvDialog.open()
                             }
-                            MenuItem {
+                            MenuEntry {
                                 text: "Open Device CSV..."
+                                iconFile: "Download-96.png"
                                 onTriggered: root.openDeviceBrowser()
                             }
-                            MenuItem {
+                            MenuEntry {
                                 text: "Recent Logs..."
+                                iconFile: "History-96.png"
                                 onTriggered: root.openRecentLogsDialog()
                             }
                             MenuSeparator {}
-                            MenuItem {
+                            MenuEntry {
                                 text: "Save Local Backup..."
+                                iconFile: "Save-96.png"
                                 enabled: root.loadedCsvText.length > 0
                                 onTriggered: root.saveLoadedLogLocally()
                             }
-                            MenuItem {
+                            MenuEntry {
                                 text: "Save Zoomed CSV..."
+                                iconFile: "Fit to Screen-96.png"
                                 enabled: root.loadedDataLines.length > 0 &&
                                          (root.viewStart > 0 || root.viewEnd < root.loadedDataLines.length - 1)
                                 onTriggered: root.saveZoomedLogLocally()
@@ -1751,7 +1927,8 @@ Item {
             id: map
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: 2
+            // Half the page on phones, so that the header fits above it
+            Layout.preferredWidth: root.headerOverMap ? 3 : 2
             plugin: mapPlugin
             center: QtPositioning.coordinate(57.49, 13.11)
             zoomLevel: 13
@@ -2078,6 +2255,7 @@ Item {
             }
             Layout.fillWidth: true
             Layout.fillHeight: root.wide
+            Layout.rowSpan: root.headerOverMap ? 2 : 1
             Layout.preferredWidth: 3
             // Expanded it takes half the page on tall screens, as it collapses with one tap, and leaves room
             // for the map on short ones

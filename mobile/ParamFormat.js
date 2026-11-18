@@ -19,6 +19,17 @@
 
 .pragma library
 
+// Readable names for enum values that the firmware only names as C constants
+var enumLabels = {
+    "BATTERY_TYPE_LIION_3_0__4_2": qsTr("Li-ion (3.0 \u2013 4.2 V)"),
+    "BATTERY_TYPE_LIIRON_2_6__3_6": qsTr("LiFePO4 (2.6 \u2013 3.6 V)"),
+    "BATTERY_TYPE_LEAD_ACID": qsTr("Lead acid")
+}
+
+function enumLabel(name) {
+    return enumLabels[name] || name
+}
+
 // Formats the value of a parameter for display, e.g. "60.00 A" or "UART"
 function valueString(conf, name) {
     if (conf === null || !conf.hasParam(name)) {
@@ -41,7 +52,7 @@ function valueString(conf, name) {
     }
 
     if (conf.isParamEnum(name)) {
-        return conf.getParamEnumNames(name)[conf.getParamEnum(name)]
+        return enumLabel(conf.getParamEnumNames(name)[conf.getParamEnum(name)])
     }
 
     if (conf.isParamBool(name)) {

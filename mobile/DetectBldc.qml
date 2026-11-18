@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -42,43 +42,15 @@ Item {
         dialog.open()
     }
 
-    function updateDisplay() {
-        var txt = ""
-        var i = 0
-
-        txt +=
-                "Integrator limit : " + parseFloat(intLim).toFixed(2) + "\n" +
-                "BEMF Coupling    : " + parseFloat(coupling).toFixed(2) + "\n"
-
-        if (hallRes == 0) {
-            txt += "Detected hall sensor table:\n"
-            for (i = 0;i < hallTable.length;i++) {
-                txt += "" + hallTable[i]
-
-                if (i != hallTable.length - 1) {
-                    txt += ", "
-                }
-            }
-        } else if (hallRes == -1) {
-            txt += "Hall sensor detection failed:\n"
-            for (i = 0;i < hallTable.length;i++) {
-                txt += "" + hallTable[i]
-
-                if (i != hallTable.length - 1) {
-                    txt += ", "
-                }
-            }
-        } else if (hallRes == -2) {
-            txt += "WS2811 enabled. Hall sensors cannot be used."
-        } else if (hallRes == -3) {
-            txt += "Encoder enabled. Hall sensors cannot be used."
-        } else if (hallRes == -4) {
-            txt += "Detected hall sensor table:"
-        } else {
-            txt += "Unknown hall error: " + hallRes
+    function hallText() {
+        switch (hallRes) {
+        case 0: return hallTable.join(", ")
+        case -1: return qsTr("Failed: %1").arg(hallTable.join(", "))
+        case -2: return qsTr("WS2811 enabled, cannot use hall sensors")
+        case -3: return qsTr("Encoder enabled, cannot use hall sensors")
+        case -4: return "\u2013"
+        default: return qsTr("Unknown error: %1").arg(hallRes)
         }
-
-        resultArea.text = txt
     }
 
     function testConnected() {
@@ -93,115 +65,146 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        updateDisplay()
-    }
-
     SheetDialog {
         id: dialog
         fullHeight: true
+        title: qsTr("BLDC Detection")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Detect BLDC-96.png"
+        acceptText: qsTr("Apply")
+        acceptEnabled: resultReceived
+
+        onAccepted: {
+            mMcConf.updateParamDouble("sl_bemf_coupling_k", coupling)
+            mMcConf.updateParamDouble("sl_cycle_int_limit", intLim)
+
+            if (hallRes == 0) {
+                for(var i = 0;i < 7;i++) {
+                    mMcConf.updateParamInt("hall_table__" + i, hallTable[i])
+                }
+            }
+        }
 
         ScrollView {
+            id: scroll
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width
+            contentWidth: availableWidth
 
             ColumnLayout {
-                anchors.fill: parent
-                spacing: 0
+                width: scroll.availableWidth
+                spacing: 12
 
-                DoubleSpinBox {
-                    id: currentBox
-                    Layout.fillWidth: true
-                    decimals: 2
-                    realValue: 5.0
-                    realFrom: 0.0
-                    realTo: 200.0
-                    prefix: "I: "
-                    suffix: " A"
+                SectionHeader {
+                    Layout.topMargin: 0
+                    text: qsTr("Measurement")
                 }
 
-                DoubleSpinBox {
-                    id: dutyBox
+                GridLayout {
                     Layout.fillWidth: true
-                    decimals: 2
-                    realValue: 0.05
-                    realFrom: 0.0
-                    realTo: 1.0
-                    realStepSize: 0.01
-                    prefix: "D: "
-                }
+                    columns: 2
+                    columnSpacing: 10
+                    rowSpacing: 10
+                    uniformCellWidths: true
 
-                DoubleSpinBox {
-                    id: erpmBox
-                    Layout.fillWidth: true
-                    decimals: 1
-                    realValue: 450.0
-                    realFrom: 0.0
-                    realTo: 20000.0
-                    realStepSize: 10.0
-                    prefix: "\u03C9: "
-                    suffix: " ERPM"
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Button {
-                        text: "Help"
+                    LabeledSpinBox {
+                        id: currentBox
                         Layout.fillWidth: true
-                        Layout.preferredWidth: 50
-                        onClicked: {
-                            VescIf.emitMessageDialog(
-                                        mInfoConf.getLongName("help_bldc_detect"),
-                                        mInfoConf.getDescription("help_bldc_detect"),
-                                        true, true)
-                        }
+                        label: qsTr("Current")
+                        decimals: 2
+                        realValue: 5.0
+                        realFrom: 0.0
+                        realTo: 200.0
+                        suffix: " A"
                     }
 
-                    Button {
-                        text: "Detect"
-                        Layout.preferredWidth: 50
+                    LabeledSpinBox {
+                        id: dutyBox
                         Layout.fillWidth: true
-                        onClicked: {
-                            if (!testConnected()) {
-                                return
-                            }
+                        label: qsTr("Duty cycle")
+                        decimals: 2
+                        realValue: 0.05
+                        realFrom: 0.0
+                        realTo: 1.0
+                        realStepSize: 0.01
+                    }
 
+                    LabeledSpinBox {
+                        id: erpmBox
+                        Layout.fillWidth: true
+                        label: qsTr("Min ERPM")
+                        decimals: 1
+                        realValue: 450.0
+                        realFrom: 0.0
+                        realTo: 20000.0
+                        realStepSize: 10.0
+                    }
+                }
+
+                Button {
+                    Layout.alignment: Qt.AlignLeft
+                    text: qsTr("How detection works")
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Help-96.png"
+                    flat: true
+                    onClicked: {
+                        VescIf.emitMessageDialog(
+                                    mInfoConf.getLongName("help_bldc_detect"),
+                                    mInfoConf.getDescription("help_bldc_detect"),
+                                    true, true)
+                    }
+                }
+
+                SectionHeader {
+                    text: qsTr("Detect")
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    text: qsTr("Run detection")
+                    highlighted: !resultReceived
+                    onClicked: {
+                        if (testConnected()) {
                             detectDialog.open()
                         }
                     }
                 }
 
-                TextArea {
-                    id: resultArea
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 180
-                    readOnly: true
-                    font.family: "DejaVu Sans Mono"
+                SectionHeader {
+                    text: qsTr("Results")
                 }
 
-                Button {
-                    text: "Apply & Close"
+                GridLayout {
                     Layout.fillWidth: true
-                    onClicked: {
-                        if (!resultReceived) {
-                            VescIf.emitMessageDialog("Apply Detection Result",
-                                                     "Detection result not received. Make sure to run the detection first.",
-                                                     false, false)
-                            return
-                        }
+                    columns: 2
+                    columnSpacing: 8
+                    rowSpacing: 8
+                    uniformCellWidths: true
 
-                        mMcConf.updateParamDouble("sl_bemf_coupling_k", coupling)
-                        mMcConf.updateParamDouble("sl_cycle_int_limit", intLim)
-
-                        if (hallRes == 0) {
-                            for(var i = 0;i < 7;i++) {
-                                mMcConf.updateParamInt("hall_table__" + i, hallTable[i])
-                            }
-                        }
-
-                        dialog.close()
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Integrator limit")
+                        value: resultReceived ? intLim.toFixed(2) : "\u2013"
                     }
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("BEMF coupling")
+                        value: resultReceived ? coupling.toFixed(2) : "\u2013"
+                    }
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        Layout.columnSpan: 2
+                        title: qsTr("Hall sensor table")
+                        value: hallText()
+                    }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    color: Utility.getAppHexColor("normalText")
+                    font.pointSize: 11
+                    text: qsTr("Apply puts the results in the motor configuration. Write it to save them on the VESC.")
                 }
             }
         }
@@ -210,17 +213,12 @@ Item {
     SheetDialog {
         id: detectDialog
         acceptText: qsTr("Start")
-        title: "Detect BLDC Parameters"
+        title: qsTr("Detect BLDC Parameters")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Detect BLDC-96.png"
 
-        Text {
-            id: detectLabel
-            color: Utility.getAppHexColor("lightText")
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "This is going to spin up the motor. Make " +
-                "sure that nothing is in the way."
+        WarningBanner {
+            width: parent.width
+            text: qsTr("This spins up the motor. Make sure that nothing is in the way.")
         }
 
         onAccepted: {
@@ -244,8 +242,6 @@ Item {
                 hallTable = param.hall_table
                 hallRes = param.hall_res
                 resultReceived = true
-
-                updateDisplay()
             }
         }
     }

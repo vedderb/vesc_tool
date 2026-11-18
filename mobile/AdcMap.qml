@@ -17,45 +17,50 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
 
 Item {
+    id: root
     implicitHeight: column.implicitHeight
 
     property real vMin: 0.0
     property real vMax: 0.0
     property real vCenter: 0.0
     property real vNow: 0.0
-    property real valueNow: 0.5
+    property real valueNow: 0.0
     property real vMin2: 0.0
     property real vMax2: 0.0
     property real vNow2: 0.0
-    property real valueNow2: 0.5
+    property real valueNow2: 0.0
     property bool resetDone: true
+    // Off where the host applies the mapping, like the setup wizard
+    property bool showApply: true
 
     property Commands mCommands: VescIf.commands()
     property ConfigParams mAppConf: VescIf.appConfig()
-    property ConfigParams mInfoConf: VescIf.infoConfig()
 
     function openDialog() {
         dialog.open()
     }
 
-    function updateDisplay() {
-        resultArea.text =
-                "Val: " + parseFloat(valueNow).toFixed(2) + "    Val2: " + parseFloat(valueNow2).toFixed(2) + "\n" +
-                "Now: " + parseFloat(vNow).toFixed(2) +     " V  Now2: " + parseFloat(vNow2).toFixed(2) +     " V\n" +
-                "Min: " + parseFloat(vMin).toFixed(2) +     " V  Min2: " + parseFloat(vMin2).toFixed(2) +     " V\n" +
-                "Max: " + parseFloat(vMax).toFixed(2) +     " V  Max2: " + parseFloat(vMax2).toFixed(2) +     " V\n" +
-                "Ctr: " + parseFloat(vCenter).toFixed(2) +  " V"
-        valueBar.value = valueNow
-        valueBar2.value = valueNow2
+    function isValid() {
+        return (vMax - vMin) > 0.3
+    }
+
+    function applyMapping() {
+        mAppConf.updateParamDouble("app_adc_conf.voltage_start", vMin)
+        mAppConf.updateParamDouble("app_adc_conf.voltage_end", vMax)
+        mAppConf.updateParamDouble("app_adc_conf.voltage_center", vCenter)
+        mAppConf.updateParamDouble("app_adc_conf.voltage2_start", vMin2)
+        mAppConf.updateParamDouble("app_adc_conf.voltage2_end", vMax2)
+        VescIf.emitStatusMessage("Start, End and Center ADC Voltages Applied", true)
+        mCommands.setAppConf()
     }
 
     function reset() {
@@ -65,82 +70,49 @@ Item {
         vMin2 = 0.0
         vMax2 = 0.0
         resetDone = true
-        updateDisplay()
-    }
-
-    Component.onCompleted: {
-        updateDisplay()
     }
 
     ColumnLayout {
         id: column
-        anchors.fill: parent
-        spacing: 0
+        anchors.left: parent.left
+        anchors.right: parent.right
+        spacing: 12
 
-        TextArea {
-            id: resultArea
-            Layout.fillWidth: true
-            readOnly: true
-            wrapMode: TextEdit.WordWrap
-            font.family: "DejaVu Sans Mono"
+        PpmMap.MapChannel {
+            title: qsTr("ADC 1")
+            unit: "V"
+            // Grows when the input goes above 3.3 V
+            to: Math.max(3.3, vMax)
+            now: vNow
+            start: vMin
+            end: vMax
+            center: vCenter
+            output: valueNow
         }
 
-        ProgressBar {
-            id: valueBar
-            Layout.fillWidth: true
-            Layout.bottomMargin: 5
-            from: 0.0
-            to: 1.0
-            value: 0.0
+        PpmMap.MapChannel {
+            title: qsTr("ADC 2")
+            unit: "V"
+            to: Math.max(3.3, vMax2)
+            now: vNow2
+            start: vMin2
+            end: vMax2
+            output: valueNow2
         }
 
-        ProgressBar {
-            id: valueBar2
-            Layout.fillWidth: true
-            from: 0.0
-            to: 1.0
-            value: 0.0
+        PpmMap.MapStatus {
+            valid: isValid()
+            text: !isValid() ? qsTr("Move the throttle and brake through their full travel") :
+                               showApply ? qsTr("Release the throttle, then apply") :
+                                           qsTr("Release the throttle")
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Button {
-                text: "Help"
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
-                flat: true
-                onClicked: {
-                    VescIf.emitMessageDialog(
-                                mInfoConf.getLongName("app_adc_mapping_help"),
-                                mInfoConf.getDescription("app_adc_mapping_help"),
-                                true, true)
-                }
-            }
-
-            Button {
-                text: "Reset"
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
-                flat: true
-                onClicked: {
-                    reset()
-                }
-            }
-        }
-
-        Button {
-            text: "Apply and Write"
-            Layout.fillWidth: true
-            flat: true
-            onClicked: {
-                mAppConf.updateParamDouble("app_adc_conf.voltage_start", vMin)
-                mAppConf.updateParamDouble("app_adc_conf.voltage_end", vMax)
-                mAppConf.updateParamDouble("app_adc_conf.voltage_center", vCenter)
-                mAppConf.updateParamDouble("app_adc_conf.voltage2_start", vMin2)
-                mAppConf.updateParamDouble("app_adc_conf.voltage2_end", vMax2)
-                VescIf.emitStatusMessage("Start, End and Center ADC Voltages Applied", true)
-                mCommands.setAppConf()
-            }
+        PpmMap.MapButtons {
+            helpName: "app_adc_mapping_help"
+            showApply: root.showApply
+            canApply: isValid()
+            onReset: root.reset()
+            onApply: applyMapping()
         }
     }
 
@@ -198,8 +170,6 @@ Item {
             if (vNow2 > vMax2) {
                 vMax2 = vNow2
             }
-
-            updateDisplay()
         }
     }
 }

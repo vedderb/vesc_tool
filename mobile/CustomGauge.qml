@@ -47,7 +47,7 @@ Item {
     property string typeText: ""
     property string tickmarkSuffix: ""
     property double tickmarkScale: 1
-    property color nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
+    property color nibColor: {nibColor = Utility.getAppHexColor("lightAccent")}
     property color traceColor: nibColor
     property double precision: 0
 
@@ -349,10 +349,10 @@ Item {
 
                     // Most layers sit close to the blade, so the light falls off quickly
                     ctx.lineCap = "round"
-                    ctx.strokeStyle = Qt.rgba(c.r, c.g, c.b, dark ? 0.04 : 0.025)
+                    ctx.strokeStyle = Qt.rgba(c.r, c.g, c.b, dark ? 0.026 : 0.016)
                     for (var i = 26; i >= 1; i--) {
                         ctx.beginPath()
-                        ctx.lineWidth = a * (1.1 + 4.2 * Math.pow(i / 26, 2.4))
+                        ctx.lineWidth = a * (1.1 + 3.4 * Math.pow(i / 26, 2.4))
                         ctx.moveTo(cx, y0 + h * 0.1)
                         ctx.lineTo(cx, y0 + h * 0.72)
                         ctx.stroke()

@@ -17,13 +17,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import Vedder.vesc.utility 1.0
 
 Item {
     implicitHeight: column.implicitHeight
@@ -33,8 +34,6 @@ Item {
     function startPairing() {
         mCommands.pairNrf(timeBox.realValue * 1000.0)
         pairCnt = timeBox.realValue
-        cntBar.value = 1
-        startButton.enabled = false
         pairOngoing = true
         afterPairTimer.stop()
     }
@@ -45,54 +44,64 @@ Item {
 
     ColumnLayout {
         id: column
-        anchors.fill: parent
-        spacing: 0
+        anchors.left: parent.left
+        anchors.right: parent.right
+        spacing: 12
 
-        DoubleSpinBox {
-            id: timeBox
+        GridLayout {
             Layout.fillWidth: true
-            realFrom: 1.0
-            realTo: 30.0
-            realValue: 10.0
-            decimals: 1
-            prefix: "Time: "
-            suffix: " s"
+            columns: 2
+            columnSpacing: 10
+            uniformCellWidths: true
+
+            LabeledSpinBox {
+                id: timeBox
+                Layout.fillWidth: true
+                enabled: pairCnt <= 0
+                label: qsTr("Pairing time")
+                decimals: 1
+                realFrom: 1.0
+                realTo: 30.0
+                realValue: 10.0
+                suffix: " s"
+            }
+
+            Button {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignBottom
+                text: qsTr("Start pairing")
+                enabled: pairCnt <= 0
+                highlighted: true
+                onClicked: startPairing()
+            }
         }
 
         ProgressBar {
-            id: cntBar
             Layout.fillWidth: true
-            Layout.bottomMargin: 5
-            from: 0.0
-            to: 1.0
-            value: 0.0
+            value: pairCnt / timeBox.realValue
         }
 
         RowLayout {
             Layout.fillWidth: true
-            Button {
-                text: "Help"
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
-                flat: true
+            spacing: 8
 
+            Text {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: Utility.getAppHexColor("lightText")
+                font.pointSize: 11
+                text: pairCnt > 0 ? qsTr("Switch on the remote now, %1 s left").arg(Math.ceil(pairCnt)) :
+                                    qsTr("Switch on the remote while the VESC is in pairing mode")
+            }
+
+            ToolButton {
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Help-96.png"
+                Accessible.name: qsTr("Help")
                 onClicked: {
                     VescIf.emitMessageDialog(
                                 mInfoConf.getLongName("help_nrf_pair"),
                                 mInfoConf.getDescription("help_nrf_pair"),
                                 true, true)
-                }
-            }
-
-            Button {
-                id: startButton
-                text: "Start"
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
-                flat: true
-
-                onClicked: {
-                    startPairing()
                 }
             }
         }
@@ -109,11 +118,8 @@ Item {
                 pairCnt -= 0.1
 
                 if (pairCnt <= 0.01) {
-                    startButton.enabled = true
                     pairCnt = 0.0
                 }
-
-                cntBar.value = pairCnt / timeBox.realValue
             } else {
                 if (visible) {
                     afterPairTimer.start()
@@ -155,9 +161,7 @@ Item {
 
             switch (res) {
             case 1:
-                startButton.enabled = true
                 pairCnt = 0.0
-                cntBar.value = 0
                 pairOngoing = false
                 VescIf.emitStatusMessage("Pairing Sucessful", true)
                 VescIf.emitMessageDialog(
@@ -167,9 +171,7 @@ Item {
                 break;
 
             case 2:
-                startButton.enabled = true
                 pairCnt = 0.0
-                cntBar.value = 0
                 pairOngoing = false
                 VescIf.emitStatusMessage("Pairing NRF Timed Out", false)
                 VescIf.emitMessageDialog(

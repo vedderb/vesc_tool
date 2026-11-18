@@ -78,7 +78,7 @@ Item {
                 maximumValue: 60
                 value: 0
                 labelStep: maximumValue > 60 ? 20 : 10
-                nibColor: {nibColor = Utility.getAppHexColor("tertiary1")}
+                nibColor: {nibColor = Utility.getAppHexColor("warning")}
                 unitText: "A"
                 typeText: "Current"
                 minAngle: -210
@@ -97,7 +97,7 @@ Item {
                     value: 0
                     unitText: "%"
                     typeText: "Duty"
-                    nibColor: {nibColor = Utility.getAppHexColor("tertiary3")}
+                    nibColor: {nibColor = Utility.getAppHexColor("blue")}
                     CustomGauge {
                         id: powerGauge
                         width: gaugeSize2*1.05
@@ -113,7 +113,7 @@ Item {
                         value: 0
                         unitText: "W"
                         typeText: "Power"
-                        nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
+                        nibColor: {nibColor = Utility.getAppHexColor("lightAccent")}
                     }
                 }
             }
@@ -268,8 +268,8 @@ Item {
                     width: gaugeSize2 * 0.44
                     height: gaugeSize * 0.7
                     property color greenColor: {greenColor = Utility.getAppHexColor("positive")}
-                    property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
-                    property color redColor: {redColor = "red"}
+                    property color orangeColor: {orangeColor = Utility.getAppHexColor("warning")}
+                    property color redColor: {redColor = Utility.getAppHexColor("danger")}
                     nibColor: value > 50 ? greenColor : value > 20 ? orangeColor : redColor
                     Behavior on nibColor {
                         ColorAnimation {
@@ -355,9 +355,9 @@ Item {
                 value: 0
                 labelStep: 20
                 property real throttleStartValue: 70
-                property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
-                property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
-                property color redColor: {redColor = "red"}
+                property color blueColor: {blueColor = Utility.getAppHexColor("lightAccent")}
+                property color orangeColor: {orangeColor = Utility.getAppHexColor("warning")}
+                property color redColor: {redColor = Utility.getAppHexColor("danger")}
                 nibColor: value > throttleStartValue ? redColor : (value > 40 ? orangeColor: blueColor)
                 Behavior on nibColor {
                     ColorAnimation {
@@ -385,9 +385,9 @@ Item {
                     unitText: "°C"
                     typeText: "TEMP\nMOTOR"
                     property real throttleStartValue: 70
-                    property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
-                    property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
-                    property color redColor: {redColor = "red"}
+                    property color blueColor: {blueColor = Utility.getAppHexColor("lightAccent")}
+                    property color orangeColor: {orangeColor = Utility.getAppHexColor("warning")}
+                    property color redColor: {redColor = Utility.getAppHexColor("danger")}
                     nibColor: value > throttleStartValue ? redColor : (value > 40 ? orangeColor: blueColor)
                     Behavior on nibColor {
                         ColorAnimation {
@@ -411,9 +411,9 @@ Item {
                         value: 0
                         unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
                         typeText: "Consump."
-                        property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
-                        property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
-                        property color redColor: {redColor = "red"}
+                        property color blueColor: {blueColor = Utility.getAppHexColor("lightAccent")}
+                        property color orangeColor: {orangeColor = Utility.getAppHexColor("warning")}
+                        property color redColor: {redColor = Utility.getAppHexColor("danger")}
                         nibColor: value > 45.0 ? redColor : (value > 25.0 ? orangeColor: blueColor)
                         Text {
                             id: consumValLabel

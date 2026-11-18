@@ -18,8 +18,8 @@
     */
 
 import QtQuick
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.3
+import QtQuick.Controls
+import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import QtQuick.Controls.Material 2.2
 
@@ -37,6 +37,20 @@ Item {
     property bool isHorizontal: width > height
     property var canDevs: []
     property int battCells: mMcConf.getParamInt("si_battery_cells")
+    property string detectResult: ""
+    property bool detecting: false
+    // Title and hint per step, the direction step has its hint in DirectionSetup
+    readonly property var stepHints: [
+        [qsTr("What will the motor drive?"),
+         qsTr("Tunes fault handling, battery limits and other defaults for the application.")],
+        [qsTr("Pick the motor closest in size to yours"),
+         qsTr("Its size sets the current limits. Picking a much larger motor can damage yours during detection.")],
+        [qsTr("Describe your battery"),
+         qsTr("Used for the voltage cutoffs. The cell count is estimated from the measured voltage, check that it matches your pack.")],
+        [qsTr("Describe the drivetrain"),
+         qsTr("Used for speed and distance. Run Detection then measures the motors.")],
+        [qsTr("Check the motor direction"), ""]
+    ]
 
     signal dialogClosed()
 
@@ -117,12 +131,14 @@ Item {
         modal: true
         focus: true
         property bool isHorizontal: topItem.isHorizontal
+        // Covers the app bars on landscape phones
+        readonly property bool fullWindow: phoneLandscape
         width: parent.width - 10 - notchLeft - notchRight
-        height: parent.height - 10
+        height: parent.height - 10 - (fullWindow ? notchTop + notchBot : 0)
         closePolicy: Popup.NoAutoClose
         x: 5 + notchLeft
-        y: 5
-        parent: dialogParent
+        y: 5 + (fullWindow ? notchTop : 0)
+        parent: fullWindow ? Overlay.overlay : dialogParent
         bottomMargin: 0
         rightMargin: 0
         padding: 10
@@ -174,7 +190,8 @@ Item {
                         Layout.column: dialog.isHorizontal ? 1 : 0
                         currentIndex: 0
                         cellWidth: width / 2
-                        cellHeight: 170
+                        // All four fit beside the options on landscape phones
+                        cellHeight: phoneLandscape ? height / 2 : 170
 
                         Component {
                             id: usageDelegate
@@ -195,13 +212,13 @@ Item {
                                     Rectangle {
                                         id: imgContent
                                         width: parent.width
-                                        height: 116
+                                        height: parent.height - 44
                                         visible: false
                                         color: Utility.getAppHexColor("raisedBackground")
 
                                         Image {
                                             anchors.fill: parent
-                                            anchors.margins: usageImg.endsWith(".jpg") ? 0 : 26
+                                            anchors.margins: usageImg.endsWith(".jpg") ? 0 : phoneLandscape ? 10 : 26
                                             fillMode: usageImg.endsWith(".jpg") ? Image.PreserveAspectCrop : Image.PreserveAspectFit
                                             source: usageImg
                                             smooth: true
@@ -278,10 +295,18 @@ Item {
 
                     ColumnLayout {
                         Layout.preferredHeight: overrideUsageBox.checked && !dialog.isHorizontal ? parent.height * 0.5 : implicitHeight
+                        Layout.fillHeight: phoneLandscape && overrideUsageBox.checked
                         Layout.fillWidth: true
                         Layout.column: 0
                         Layout.row: dialog.isHorizontal ? 0 : 1
                         Layout.alignment: Qt.AlignTop
+
+                        StepHint {
+                            Layout.fillWidth: true
+                            visible: phoneLandscape
+                            title: stepHints[0][0]
+                            hint: stepHints[0][1]
+                        }
 
                         CheckBox {
                             id: overrideUsageBox
@@ -300,6 +325,8 @@ Item {
                         ScrollView {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
+                            // Only the height left under the hint on landscape phones
+                            Layout.preferredHeight: phoneLandscape ? 0 : -1
                             visible: overrideUsageBox.checked
                             clip: true
 
@@ -355,7 +382,7 @@ Item {
                         focus: true
                         clip: true
                         cellWidth: width / cols
-                        cellHeight: 95
+                        cellHeight: phoneLandscape ? 70 : 95
                         Layout.row: 0
                         Layout.fillHeight: true
                         Layout.preferredWidth:  dialog.isHorizontal ? parent.width/2 : parent.width
@@ -367,9 +394,10 @@ Item {
                             Rectangle {
                                 id: imgRect
                                 property variant modelData: model
+                                readonly property int imgSize: height - 10
 
                                 width: motorList.cellWidth - (motorList.cols > 1 ? 5 : 0)
-                                height: 90
+                                height: motorList.cellHeight - 5
                                 color: Utility.getAppHexColor("cardBackground")
                                 border.width: GridView.isCurrentItem ? 2 : 1
                                 border.color: GridView.isCurrentItem ? Material.accent : Utility.getAppHexColor("raisedBackground")
@@ -379,8 +407,8 @@ Item {
                                     spacing: 10
 
                                     Item {
-                                        Layout.preferredWidth: 80
-                                        Layout.preferredHeight: 80
+                                        Layout.preferredWidth: imgRect.imgSize
+                                        Layout.preferredHeight: imgRect.imgSize
                                         Layout.leftMargin: 5
                                         opacity: imgRect.GridView.isCurrentItem ? 1.0 : 0.5
 
@@ -388,8 +416,8 @@ Item {
                                             id: image
                                             fillMode: Image.PreserveAspectCrop
                                             source: motorImg
-                                            width: 80
-                                            height: 80
+                                            width: imgRect.imgSize
+                                            height: imgRect.imgSize
                                             smooth: true
                                             mipmap: false
                                             visible: false
@@ -397,8 +425,8 @@ Item {
 
                                         Rectangle {
                                             id: mask
-                                            width: 80
-                                            height: 80
+                                            width: imgRect.imgSize
+                                            height: imgRect.imgSize
                                             radius: 12
                                             visible: false
                                         }
@@ -439,14 +467,13 @@ Item {
                         }
                     }
 
-                    GroupBox {
-                        Layout.preferredHeight: implicitHeight
-                        Layout.fillWidth: true
+                    SidePane {
                         Layout.column: 0
                         Layout.row: dialog.isHorizontal ? 0 : 1
-                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
+                        title: stepHints[1][0]
+                        hint: stepHints[1][1]
 
-                        label: CheckBox {
+                        CheckBox {
                             id: overrideBox
                             checked: false
                             text: qsTr("Override (Advanced)")
@@ -461,64 +488,87 @@ Item {
                             }
                         }
 
-                        ColumnLayout {
-                            anchors.fill: parent
+                        // Tiles show the values from the selected motor, the boxes replace them when overriding
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: 2
+                            columnSpacing: 8
+                            rowSpacing: 8
+                            uniformCellWidths: true
 
-                            Text {
+                            ValueTile {
+                                Layout.fillWidth: true
                                 visible: !overrideBox.checked
-                                color: {color = Utility.getAppHexColor("normalText")}
-                                verticalAlignment: Text.AlignVCenter
-                                wrapMode: Text.WordWrap
-                                text: maxPowerLossBox.prefix + maxPowerLossBox.realValue + maxPowerLossBox.suffix + "\n" +
-                                      openloopErpmBox.prefix + openloopErpmBox.realValue + openloopErpmBox.suffix + "\n" +
-                                      sensorlessBox.prefix + sensorlessBox.realValue + sensorlessBox.suffix + "\n" +
-                                      motorPolesBox.prefix + motorPolesBox.realValue + motorPolesBox.suffix
+                                title: qsTr("Max power loss")
+                                value: maxPowerLossBox.realValue.toFixed(0)
+                                unit: "W"
                             }
 
-                            DoubleSpinBox {
-                                visible: overrideBox.checked
+                            ValueTile {
                                 Layout.fillWidth: true
+                                visible: !overrideBox.checked
+                                title: qsTr("Openloop ERPM")
+                                value: openloopErpmBox.realValue.toFixed(0)
+                            }
+
+                            ValueTile {
+                                Layout.fillWidth: true
+                                visible: !overrideBox.checked
+                                title: qsTr("Sensorless ERPM")
+                                value: sensorlessBox.realValue.toFixed(0)
+                            }
+
+                            ValueTile {
+                                Layout.fillWidth: true
+                                visible: !overrideBox.checked
+                                title: qsTr("Motor poles")
+                                value: motorPolesBox.realValue.toFixed(0)
+                            }
+
+                            LabeledSpinBox {
                                 id: maxPowerLossBox
+                                Layout.fillWidth: true
+                                visible: overrideBox.checked
+                                label: qsTr("Max power loss")
                                 decimals: 1
                                 realFrom: 0
                                 realTo: 5000
                                 realValue: 10
-                                prefix: "Max Power Loss : "
                                 suffix: " W"
                             }
 
-                            DoubleSpinBox {
-                                visible: overrideBox.checked
-                                Layout.fillWidth: true
+                            LabeledSpinBox {
                                 id: openloopErpmBox
+                                Layout.fillWidth: true
+                                visible: overrideBox.checked
+                                label: qsTr("Openloop ERPM")
                                 decimals: 0
                                 realFrom: 0
                                 realTo: 50000
                                 realValue: 500
-                                prefix: "Openloop ERPM  : "
                             }
 
-                            DoubleSpinBox {
-                                visible: overrideBox.checked
-                                Layout.fillWidth: true
+                            LabeledSpinBox {
                                 id: sensorlessBox
+                                Layout.fillWidth: true
+                                visible: overrideBox.checked
+                                label: qsTr("Sensorless ERPM")
                                 decimals: 0
                                 realFrom: 0
                                 realTo: 50000
                                 realValue: 1500
-                                prefix: "Sensorless ERPM: "
                             }
 
-                            DoubleSpinBox {
-                                visible: overrideBox.checked
-                                Layout.fillWidth: true
+                            LabeledSpinBox {
                                 id: motorPolesBox
+                                Layout.fillWidth: true
+                                visible: overrideBox.checked
+                                label: qsTr("Motor poles")
                                 decimals: 0
                                 realFrom: 2
                                 realTo: 512
                                 realValue: 2
                                 realStepSize: 2
-                                prefix: "Motor Poles    : "
 
                                 onRealValueChanged: {
                                     mMcConf.updateParamInt("si_motor_poles", realValue, null)
@@ -553,8 +603,9 @@ Item {
 
                             Text {
                                 Layout.fillWidth: true
-                                visible: mainIsTablet && rtVin > 0 && battCells > 0
-                                color: Utility.getAppHexColor("lightText")
+                                visible: rtVin > 0 && battCells > 0
+                                color: Utility.getAppHexColor("normalText")
+                                font.pointSize: 11
                                 wrapMode: Text.WordWrap
                                 text: qsTr("Input %1 V = %2 V per cell at %3S").arg(rtVin.toFixed(1))
                                       .arg((rtVin / battCells).toFixed(2)).arg(battCells)
@@ -562,14 +613,13 @@ Item {
                         }
                     }
 
-                    GroupBox {
-                        Layout.preferredHeight: implicitHeight
-                        Layout.fillWidth: true
+                    SidePane {
                         Layout.column: 0
                         Layout.row: dialog.isHorizontal ? 0 : 1
-                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
+                        title: stepHints[2][0]
+                        hint: stepHints[2][1]
 
-                        label: CheckBox {
+                        CheckBox {
                             id: overrideBattBox
                             checked: false
                             text: qsTr("Advanced (0 = defaults)")
@@ -582,31 +632,35 @@ Item {
                             }
                         }
 
-                        ColumnLayout {
-                            anchors.fill: parent
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: 2
+                            columnSpacing: 10
+                            rowSpacing: 10
+                            uniformCellWidths: true
                             enabled: overrideBattBox.checked
 
-                            DoubleSpinBox {
-                                Layout.fillWidth: true
+                            LabeledSpinBox {
                                 id: currentInMinBox
+                                Layout.fillWidth: true
+                                label: qsTr("Battery current regen")
                                 decimals: 1
                                 realStepSize: 5
                                 realFrom: 0
                                 realTo: -9999
                                 realValue: 0
-                                prefix: "Battery Current Regen: "
                                 suffix: " A"
                             }
 
-                            DoubleSpinBox {
-                                Layout.fillWidth: true
+                            LabeledSpinBox {
                                 id: currentInMaxBox
+                                Layout.fillWidth: true
+                                label: qsTr("Battery current max")
                                 decimals: 1
                                 realStepSize: 5
                                 realFrom: 0
                                 realTo: 9999
                                 realValue: 0
-                                prefix: "Battery Current Max: "
                                 suffix: " A"
                             }
                         }
@@ -618,35 +672,48 @@ Item {
                 GridLayout {
                     anchors.fill: parent
                     columns: dialog.isHorizontal ? 2 : 1
-                    GroupBox {
-                        id: gearRatioBox
-                        title: qsTr("Gear Ratio")
-                        Layout.preferredHeight: implicitHeight
-                        Layout.fillWidth: true
+                    SidePane {
+                        Layout.preferredWidth: parent.width / 2
                         Layout.column: 0
                         Layout.row: 0
-                        contentWidth: dialog.isHorizontal ? parent.width/2 : parent.width
+                        title: stepHints[3][0]
+                        hint: stepHints[3][1]
 
-                        ColumnLayout {
-                            anchors.fill: parent
+                        SectionHeader {
+                            Layout.topMargin: 0
+                            text: qsTr("Gear ratio") + "  " + (directDriveBox.checked ? 1 :
+                                  wheelPulleyBox.value / motorPulleyBox.value).toFixed(2) + " : 1"
+                        }
 
-                            CheckBox {
-                                id: directDriveBox
-                                text: "Direct Drive"
+                        CheckBox {
+                            id: directDriveBox
+                            text: "Direct Drive"
+                            Layout.fillWidth: true
+                        }
+
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: 2
+                            columnSpacing: 10
+                            rowSpacing: 10
+                            uniformCellWidths: true
+
+                            ColumnLayout {
                                 Layout.fillWidth: true
-                            }
+                                spacing: 4
 
-                            RowLayout {
-                                Layout.fillWidth: true
                                 Text {
                                     Layout.fillWidth: true
-                                    color: {color = Utility.getAppHexColor("lightText")}
-                                    text: qsTr("Motor Pulley")
+                                    elide: Text.ElideRight
+                                    color: Utility.getAppHexColor("normalText")
+                                    font.pointSize: 11
+                                    text: qsTr("Motor pulley")
                                 }
 
                                 SpinBox {
                                     enabled: !directDriveBox.checked
                                     id: motorPulleyBox
+                                    Layout.fillWidth: true
                                     background: InputBackground {}
                                     from: 1
                                     to: 999
@@ -659,17 +726,22 @@ Item {
                                 }
                             }
 
-                            RowLayout {
+                            ColumnLayout {
                                 Layout.fillWidth: true
+                                spacing: 4
+
                                 Text {
                                     Layout.fillWidth: true
-                                    color: {color = Utility.getAppHexColor("lightText")}
-                                    text: qsTr("Wheel Pulley")
+                                    elide: Text.ElideRight
+                                    color: Utility.getAppHexColor("normalText")
+                                    font.pointSize: 11
+                                    text: qsTr("Wheel pulley")
                                 }
 
                                 SpinBox {
                                     enabled: !directDriveBox.checked
                                     id: wheelPulleyBox
+                                    Layout.fillWidth: true
                                     background: InputBackground {}
                                     from: 1
                                     to: 999
@@ -710,10 +782,12 @@ Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         dialogParent: topItem.dialogParent
+                        title: stepHints[4][0]
                     }
 
                     // Detection result, stays visible while testing directions
                     ScrollView {
+                        id: resultPane
                         visible: mainIsTablet
                         Layout.preferredWidth: dialog.isHorizontal ? 360 : -1
                         Layout.preferredHeight: dialog.isHorizontal ? -1 : Math.min(implicitHeight, parent.height * 0.4)
@@ -721,28 +795,47 @@ Item {
                         Layout.fillHeight: dialog.isHorizontal
                         contentWidth: availableWidth
                         clip: true
+                        padding: 12
 
-                        Text {
-                            width: parent.parent.width
-                            color: Utility.getAppHexColor("lightText")
-                            font.family: "DejaVu Sans Mono"
-                            wrapMode: Text.WordWrap
-                            text: resultLabel.text
+                        background: Rectangle {
+                            radius: 12
+                            color: Utility.getAppHexColor("cardBackground")
+                            border.color: Utility.getAppHexColor("raisedBackground")
+                        }
+
+                        DetectResultView {
+                            width: resultPane.availableWidth
+                            result: detectResult
                         }
                     }
                 }
             }
         }
 
-        header: WizardHeader {
-            title: qsTr("Setup Motors")
-            steps: ["Usage", "Motor", "Battery", "Setup", "Direction"]
-            currentIndex: stackLayout.currentIndex
-            summaries: mainIsTablet && stackLayout.currentIndex > 0 ? stepSummaries() : []
+        header: ColumnLayout {
+            spacing: 0
 
-            onStepClicked: (index) => {
-                stackLayout.currentIndex = index
-                updateButtonText()
+            WizardHeader {
+                Layout.fillWidth: true
+                title: qsTr("Setup Motors")
+                steps: ["Usage", "Motor", "Battery", "Setup", "Direction"]
+                currentIndex: stackLayout.currentIndex
+                summaries: mainIsTablet && stackLayout.currentIndex > 0 ? stepSummaries() : []
+
+                onStepClicked: (index) => {
+                    stackLayout.currentIndex = index
+                    updateButtonText()
+                }
+            }
+
+            // Landscape phones lack the height, the steps show it beside their content there
+            StepHint {
+                Layout.fillWidth: true
+                Layout.margins: 14
+                Layout.bottomMargin: 0
+                visible: !phoneLandscape
+                title: stepHints[stackLayout.currentIndex][0]
+                hint: stepHints[stackLayout.currentIndex][1]
             }
         }
 
@@ -783,7 +876,14 @@ Item {
                     if (stackLayout.currentIndex == 0) {
                         stackLayout.currentIndex++
                     } else if (stackLayout.currentIndex == 1) {
-                        startWarningDialog.open()
+                        // Nothing is selected until a motor is tapped, detection would use the limits of no motor
+                        if (motorList.currentIndex < 0 && !overrideBox.checked) {
+                            VescIf.emitMessageDialog(qsTr("Select a Motor"),
+                                                     qsTr("Pick the motor closest in size to yours first."),
+                                                     false, false)
+                        } else {
+                            startWarningDialog.open()
+                        }
                     } else if (stackLayout.currentIndex == 2) {
                         if (overrideBattBox.checked) {
                             stackLayout.currentIndex++
@@ -849,12 +949,9 @@ Item {
         property int indexNow: 0
         title: "Motor Selection"
 
-        Text {
-            color: {color = Utility.getAppHexColor("lightText")}
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text: "Warning: This selection determines the recommended max current for your motor based on heat dissipation. " +
+        WarningBanner {
+            width: parent.width
+            text: "This selection determines the recommended max current for your motor based on heat dissipation. " +
                   "Selecting a motor here that is significantly larger than your motor is likely to destroy your motor " +
                   "during detection. It is important to choose a motor size similar to the motor you are using. " +
                   "Are you sure that your motor selection is within range?"
@@ -897,12 +994,9 @@ Item {
         property int indexNow: 0
         title: "Battery Settings"
 
-        Text {
-            color: {color = Utility.getAppHexColor("lightText")}
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text: "Warning: You have not specified battery current limits (advanced box). This means that " +
+        WarningBanner {
+            width: parent.width
+            text: "You have not specified battery current limits (advanced box). This means that " +
                   "the battery current will only be limited if, the battery voltage drops so much from the " +
                   "internal resistance of the battery that it falls below the battery cutoff voltage. " +
                   "This is fine in most cases, but check with your battery and BMS specification to be safe. " +
@@ -919,16 +1013,14 @@ Item {
         id: detectDialog
         acceptText: qsTr("Run detection")
         title: "Detect FOC Parameters"
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Detect FOC-96.png"
 
         ColumnLayout {
             anchors.fill: parent
 
-            Text {
+            WarningBanner {
                 Layout.fillWidth: true
-                color: {color = Utility.getAppHexColor("lightText")}
-                verticalAlignment: Text.AlignVCenter
-                wrapMode: Text.WordWrap
-                text: "WARNING: This is going to spin up all motors. Make " +
+                text: "This is going to spin up all motors. Make " +
                       "sure that nothing is in the way."
             }
 
@@ -963,12 +1055,14 @@ Item {
 
                 Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, ["m_motor_temp_sens_type", "m_ntc_motor_beta"])
 
+                detecting = true
                 var res  = Utility.detectAllFoc(VescIf, detectCanBox.checked,
                                                 maxPowerLossBox.realValue,
                                                 currentInMinBox.realValue,
                                                 currentInMaxBox.realValue,
                                                 openloopErpmBox.realValue,
                                                 sensorlessBox.realValue)
+                detecting = false
 
                 var resDetect = false
                 if (res.startsWith("Success!")) {
@@ -1007,8 +1101,133 @@ Item {
                 }
 
                 resultDialog.title = "Detection Result"
-                resultLabel.text = res
+                detectResult = res
                 resultDialog.open()
+            }
+        }
+    }
+
+    // Options of a step. Beside the list on landscape phones, with the step hint and scrolling when taller than the dialog
+    component SidePane: Flickable {
+        id: pane
+        default property alias content: paneColumn.data
+        property alias title: paneHint.title
+        property alias hint: paneHint.hint
+
+        Layout.fillWidth: true
+        Layout.fillHeight: phoneLandscape
+        Layout.preferredHeight: contentHeight
+        Layout.alignment: Qt.AlignTop
+        contentHeight: paneColumn.implicitHeight
+        interactive: contentHeight > height
+        boundsBehavior: Flickable.StopAtBounds
+        clip: true
+        ScrollIndicator.vertical: ScrollIndicator {}
+
+        ColumnLayout {
+            id: paneColumn
+            width: pane.width
+            spacing: 8
+
+            StepHint {
+                id: paneHint
+                Layout.fillWidth: true
+                visible: phoneLandscape
+            }
+        }
+    }
+
+    // Utility.detectAllFoc returns text: a status line, then one block of "name : value" lines per VESC
+    component DetectResultView: ColumnLayout {
+        id: resultView
+        property string result
+        readonly property bool success: result.startsWith("Success!")
+        readonly property var names: ({"Motor current": qsTr("Max current"), "Motor R": qsTr("Resistance"),
+                                         "Motor L": qsTr("Inductance"), "Motor Lq-Ld": qsTr("Lq - Ld"),
+                                         "Motor Flux Linkage": qsTr("Flux linkage"), "Temp Comp": qsTr("Temp comp")})
+
+        function devices() {
+            var devs = []
+            var can = false
+            result.split("\n\n").forEach(function(block) {
+                if (block.startsWith("VESCs on CAN-bus")) {
+                    can = true
+                } else if (block.startsWith("VESC ID")) {
+                    var rows = block.split("\n").map(function(line) {
+                        var sep = line.indexOf(":")
+                        return [line.slice(0, sep).trim(), line.slice(sep + 1).trim()]
+                    })
+                    devs.push({id: rows[0][1], can: can, rows: rows.slice(1)})
+                }
+            })
+            return devs
+        }
+
+        spacing: 12
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: statusColumn.implicitHeight + 20
+            radius: 12
+            color: Qt.alpha(Utility.getAppHexColor(resultView.success ? "positive" : "danger"), 0.15)
+            border.color: Qt.alpha(Utility.getAppHexColor(resultView.success ? "positiveText" : "dangerText"), 0.33)
+
+            ColumnLayout {
+                id: statusColumn
+                anchors.fill: parent
+                anchors.margins: 10
+                spacing: 4
+
+                Text {
+                    Layout.fillWidth: true
+                    font.weight: Font.Medium
+                    color: Utility.getAppHexColor(resultView.success ? "positiveText" : "dangerText")
+                    text: resultView.success ? qsTr("Detection successful") : qsTr("Detection failed")
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    visible: !resultView.success
+                    wrapMode: Text.WordWrap
+                    color: Utility.getAppHexColor("lightText")
+                    text: resultView.result.substring(resultView.result.indexOf("\n") + 1)
+                }
+            }
+        }
+
+        Repeater {
+            model: resultView.success ? resultView.devices() : []
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                SectionHeader {
+                    Layout.topMargin: 0
+                    text: (modelData.can ? qsTr("VESC %1 on CAN") : qsTr("VESC %1")).arg(modelData.id)
+                }
+
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: 3
+                    columnSpacing: 8
+                    rowSpacing: 8
+                    uniformCellWidths: true
+
+                    Repeater {
+                        model: modelData.rows
+
+                        ValueTile {
+                            // Number and unit, otherwise text such as the sensor type
+                            readonly property var number: modelData[1].match(/^(-?[\d.]+) (.+)$/)
+                            Layout.fillWidth: true
+                            title: resultView.names[modelData[0]] || modelData[0]
+                            value: number ? number[1] : modelData[1] === "True" ? qsTr("On") :
+                                   modelData[1] === "False" ? qsTr("Off") : modelData[1]
+                            unit: number ? number[2] : ""
+                        }
+                    }
+                }
             }
         }
     }
@@ -1017,20 +1236,31 @@ Item {
         id: resultDialog
         acceptText: qsTr("OK")
         rejectText: ""
-        fullHeight: true
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Detect FOC-96.png"
 
         ScrollView {
+            id: resultScroll
             anchors.fill: parent
             clip: true
             contentWidth: availableWidth
 
-            Text {
-                id: resultLabel
-                color: {color = Utility.getAppHexColor("lightText")}
-                font.family: "DejaVu Sans Mono"
-                verticalAlignment: Text.AlignVCenter
-                width: parent.parent.width
-                wrapMode: Text.WordWrap
+            ColumnLayout {
+                width: resultScroll.availableWidth
+                spacing: 12
+
+                DetectResultView {
+                    Layout.fillWidth: true
+                    result: detectResult
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    visible: detectResult.startsWith("Success!")
+                    wrapMode: Text.WordWrap
+                    color: Utility.getAppHexColor("normalText")
+                    font.pointSize: 11
+                    text: qsTr("Next, check that each motor spins the right way.")
+                }
             }
         }
 
@@ -1084,6 +1314,16 @@ Item {
 
     BusyDialog {
         id: commDialog
-        title: "Processing..."
+        title: detecting ? qsTr("Detecting motors...") : "Processing..."
+
+        Text {
+            Layout.fillWidth: true
+            visible: detecting
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+            color: Utility.getAppHexColor("normalText")
+            font.pointSize: 11
+            text: qsTr("The motors make some noise and then spin. This can take a minute or two.")
+        }
     }
 }

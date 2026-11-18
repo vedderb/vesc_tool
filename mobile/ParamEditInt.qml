@@ -42,10 +42,10 @@ ParamEditFrame {
             valueBox.realValue = params.getParamInt(paramName) * params.getParamEditorScale(paramName)
 
             var p = (params.getParamInt(paramName) * 100.0) / maxVal
-            percentageBox.from = (100.0 * params.getParamMinInt(paramName)) / maxVal
-            percentageBox.to = (100.0 * params.getParamMaxInt(paramName)) / maxVal
+            percentageBox.realFrom = (100.0 * params.getParamMinInt(paramName)) / maxVal
+            percentageBox.realTo = (100.0 * params.getParamMaxInt(paramName)) / maxVal
             percentageBox.visible = params.getParamEditAsPercentage(paramName)
-            percentageBox.value = p
+            percentageBox.realValue = Math.round(p)
 
             createReady = true
         }
@@ -78,18 +78,18 @@ ParamEditFrame {
         }
     }
 
-    SpinBox {
+    DoubleSpinBox {
         id: percentageBox
-        background: InputBackground {}
         Layout.fillWidth: true
         Layout.leftMargin: 5
         Layout.rightMargin: 5
-        editable: true
+        decimals: 0
+        suffix: " %"
         visible: false
 
-        onValueChanged: {
+        onRealValueChanged: {
             if (params.getParamEditAsPercentage(paramName)) {
-                var val = (value / 100.0) * maxVal
+                var val = (realValue / 100.0) * maxVal
 
                 if (params != null && createReady) {
                     if (params.getUpdateOnly() !== paramName) {
@@ -101,14 +101,6 @@ ParamEditFrame {
                 updateDisplay(val);
             }
         }
-
-        textFromValue: function(value, locale) {
-            return Number(value).toLocaleString(locale, 'f', 0) + " %"
-        }
-
-        valueFromText: function(text, locale) {
-            return Number.fromLocaleString(locale, text.replace("%", ""))
-        }
     }
 
     Connections {
@@ -117,7 +109,7 @@ ParamEditFrame {
         function onParamChangedInt(src, name, newParam) {
             if (src !== editor && name === paramName) {
                 valueBox.realValue = newParam * params.getParamEditorScale(paramName)
-                percentageBox.value = Math.round((100.0 * newParam) / maxVal)
+                percentageBox.realValue = Math.round((100.0 * newParam) / maxVal)
             }
         }
     }

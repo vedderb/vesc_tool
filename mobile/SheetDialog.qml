@@ -28,22 +28,28 @@ Dialog {
     property string iconSource: ""
     property string acceptText: ""
     property string rejectText: acceptText === "" ? qsTr("Close") : qsTr("Cancel")
+    property bool acceptEnabled: true
     property bool fullHeight: false
     // Above 0 the sheet is a full height panel right of the parent. The parent has to leave room for it
     property real dockWidth: 0
     // Moves the sheet down. Animated and dragged instead of y so that the y binding stays in effect
     property real slide: 0
+    // Safe area under the sheet, none when docked or when a centred sheet is clear of it
+    // (from sheetWidth, as reading width gives a binding loop through the padding)
+    property real sheetWidth: Math.min(parent.width, 640)
+    property real insetLeft: dockWidth > 0 ? 0 : Math.max(0, notchLeft - (parent.width - sheetWidth) / 2)
+    property real insetRight: dockWidth > 0 ? 0 : Math.max(0, notchRight - (parent.width - sheetWidth) / 2)
 
     parent: Overlay.overlay
     modal: true
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    width: dockWidth > 0 ? dockWidth : Math.min(parent.width, 640)
+    width: dockWidth > 0 ? dockWidth : sheetWidth
     height: dockWidth > 0 ? parent.height : fullHeight ? parent.height - notchTop - 40 : Math.min(implicitHeight, parent.height - notchTop - 40)
     x: dockWidth > 0 ? parent.width : (parent.width - width) / 2
     y: parent.height - height + slide
-    leftPadding: 16 + notchLeft
-    rightPadding: 16 + notchRight
+    leftPadding: 16 + sheet.insetLeft
+    rightPadding: 16 + sheet.insetRight
     topPadding: 4
     bottomPadding: footer.visible ? 0 : 16 + notchBot
 
@@ -110,7 +116,7 @@ Dialog {
 
         RowLayout {
             Layout.margins: 16
-            Layout.leftMargin: 16 + notchLeft
+            Layout.leftMargin: 16 + sheet.insetLeft
             Layout.bottomMargin: 8
             spacing: 12
             visible: sheet.title !== ""
@@ -148,8 +154,8 @@ Dialog {
 
         Button {
             Layout.fillWidth: true
-            Layout.leftMargin: 16 + notchLeft
-            Layout.rightMargin: sheet.acceptText === "" ? 16 + notchRight : 0
+            Layout.leftMargin: 16 + sheet.insetLeft
+            Layout.rightMargin: sheet.acceptText === "" ? 16 + sheet.insetRight : 0
             Layout.topMargin: 12
             Layout.bottomMargin: 12 + notchBot
             visible: text !== ""
@@ -160,11 +166,12 @@ Dialog {
 
         Button {
             Layout.fillWidth: true
-            Layout.rightMargin: 16 + notchRight
-            Layout.leftMargin: sheet.rejectText === "" ? 16 + notchLeft : 0
+            Layout.rightMargin: 16 + sheet.insetRight
+            Layout.leftMargin: sheet.rejectText === "" ? 16 + sheet.insetLeft : 0
             Layout.topMargin: 12
             Layout.bottomMargin: 12 + notchBot
             visible: text !== ""
+            enabled: sheet.acceptEnabled
             text: sheet.acceptText
             highlighted: true
             onClicked: sheet.accept()

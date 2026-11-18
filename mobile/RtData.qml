@@ -36,7 +36,7 @@ Item {
     // Space left above the value tiles, including their margins and the layout spacing
     property int gaugeSize: sideBySide ? Math.min((width - 340) / 2, height / 2) / 1.12 - 15 :
                                          Math.min(width / 2 - 15,
-                                                  (height - valueGrid.implicitHeight - 50) /
+                                                  (height - valueGrid.implicitHeight - (phoneLandscape ? 35 : 50)) /
                                                   (isHorizontal ? 1 : 2) - 5)
     property var tileValues: []
 
@@ -56,7 +56,7 @@ Item {
             Layout.fillHeight: !sideBySide
             columns: isHorizontal && !sideBySide ? 4 : 2
             // Room for the gauge rims, which reach past the gauges
-            columnSpacing: sideBySide ? gaugeSize / 8 : 5
+            columnSpacing: sideBySide || phoneLandscape ? gaugeSize / 8 : 5
             rowSpacing: columnSpacing
             Layout.leftMargin: sideBySide ? gaugeSize / 16 + 5 : 5
             Layout.rightMargin: 5

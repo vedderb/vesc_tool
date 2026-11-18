@@ -108,12 +108,13 @@ Item {
         return line ? line.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[*`]/g, "") : ""
     }
 
-    ColumnLayout {
+    // Phone landscape: the buttons beside the search field, to leave the height to the list
+    GridLayout {
         id: column
         anchors.fill: parent
-        anchors.leftMargin: notchLeft
-        anchors.rightMargin: split ? parent.width - notchLeft - 320 : notchRight
-        spacing: 8
+        anchors.rightMargin: split ? parent.width - 320 : 0
+        rowSpacing: 8
+        columnSpacing: 8
 
         ListModel {
             id: pkgModel
@@ -121,6 +122,8 @@ Item {
 
         InputField {
             id: filterInput
+            Layout.row: 0
+            Layout.column: 0
             Layout.fillWidth: true
             placeholderText: qsTr("Search packages")
             inputMethodHints: Qt.ImhNoPredictiveText
@@ -129,6 +132,9 @@ Item {
 
         ListView {
             id: pkgList
+            Layout.row: 1
+            Layout.column: 0
+            Layout.columnSpan: phoneLandscape ? 2 : 1
             Layout.fillWidth: true
             Layout.fillHeight: true
             focus: true
@@ -216,6 +222,8 @@ Item {
         }
 
         RowLayout {
+            Layout.row: phoneLandscape ? 0 : 2
+            Layout.column: phoneLandscape ? 1 : 0
             Layout.fillWidth: true
 
             Button {
@@ -281,10 +289,10 @@ Item {
 
                 BottomMenu {
                     id: menu
-                    parent: split ? column : appPageItem
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Install from file..."
+                        iconFile: "Open Folder-96.png"
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogLoad.close()
@@ -331,7 +339,6 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.leftMargin: 16
-        anchors.rightMargin: notchRight
         visible: split
 
         Text {

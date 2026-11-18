@@ -63,14 +63,17 @@ Item {
         historyIndex = -1
     }
 
-    ColumnLayout {
+    GridLayout {
         id: column
         anchors.fill: parent
-        spacing: 8
+        // On phones in landscape the buttons share the row with the command line
+        columns: phoneLandscape ? 2 : 1
+        rowSpacing: 8
 
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.columnSpan: column.columns
             radius: 12
             color: Utility.getAppHexColor("darkBackground")
             border.color: Utility.getAppHexColor("raisedBackground")
@@ -114,6 +117,7 @@ Item {
 
         ListView {
             Layout.fillWidth: true
+            Layout.columnSpan: column.columns
             Layout.preferredHeight: 44
             Layout.topMargin: -6
             Layout.bottomMargin: -6
@@ -172,7 +176,7 @@ Item {
         }
 
         RowLayout {
-            Layout.fillWidth: true
+            Layout.fillWidth: column.columns === 1
 
             Button {
                 Layout.preferredWidth: 100
@@ -215,16 +219,17 @@ Item {
 
                 BottomMenu {
                     id: menu
-                    parent: terminalPageItem
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Shutdown"
+                        iconFile: "Shutdown-96.png"
                         onTriggered: {
                             mCommands.shutdown()
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Restart LispBM"
+                        iconFile: "Restart-96.png"
                         onTriggered: {
                             mCommands.lispSetRunning(1)
                         }

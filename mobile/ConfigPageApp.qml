@@ -35,7 +35,7 @@ Item {
     property var dialogParent: Overlay.overlay
     property bool active: false
     // Group shown while this is the current page, to keep the live input idle otherwise
-    readonly property string mapGroup: groupList.visible && active ? pageBox.currentText : ""
+    readonly property string mapGroup: mainIsTablet && groupList.visible && active ? pageBox.currentText : ""
 
     ParamEditors {
         id: editors
@@ -43,28 +43,49 @@ Item {
 
     SheetDialog {
         id: ppmMap
-        title: "PPM Mapping"
+        title: qsTr("PPM Mapping")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Pulse Width-96.png"
 
-        PpmMap {
+        ScrollView {
             anchors.fill: parent
+            contentWidth: availableWidth
+            clip: true
+
+            PpmMap {
+                width: parent.width
+            }
         }
     }
 
     SheetDialog {
         id: adcMap
-        title: "ADC Mapping"
+        title: qsTr("ADC Mapping")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Potentiometer-96.png"
 
-        AdcMap {
+        ScrollView {
             anchors.fill: parent
+            contentWidth: availableWidth
+            clip: true
+
+            AdcMap {
+                width: parent.width
+            }
         }
     }
 
     SheetDialog {
         id: nrfPair
-        title: "NRF Pairing"
+        title: qsTr("NRF Pairing")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/icons8-fantasy-96.png"
 
-        NrfPair {
+        ScrollView {
             anchors.fill: parent
+            contentWidth: availableWidth
+            clip: true
+
+            NrfPair {
+                width: parent.width
+            }
         }
     }
 
@@ -141,13 +162,15 @@ Item {
         }
     }
 
-    ColumnLayout {
+    GridLayout {
         id: column
         anchors.fill: parent
         anchors.leftMargin: groupList.visible ? groupList.width + 10 : 0
-        spacing: 5
+        // Phone landscape: buttons stacked right of the parameters
+        columns: phoneLandscape ? 2 : 1
 
         GridLayout {
+            Layout.columnSpan: column.columns
             Layout.fillWidth: true
             Layout.topMargin: 5
             columns: isHorizontal ? 2 : 1
@@ -213,8 +236,10 @@ Item {
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
+        GridLayout {
+            columns: phoneLandscape ? 1 : 3
+            Layout.fillWidth: !phoneLandscape
+            Layout.alignment: Qt.AlignTop
             WriteButton {
                 id: writeButton
                 Layout.preferredWidth: 100
@@ -239,35 +264,42 @@ Item {
 
             Button {
                 Layout.preferredWidth: 56
+                Layout.fillWidth: phoneLandscape
                 text: "..."
                 onClicked: menu.open()
 
                 BottomMenu {
                     id: menu
-                    parent: appPageItem
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Read Default Settings"
+                        iconFile: "Restart-96.png"
                         onTriggered: {
                             mCommands.getAppConfDefault()
                         }
                     }
-                    MenuItem {
+                    MenuSeparator {}
+                    MenuEntry {
                         text: "PPM Mapping..."
-                        onTriggered: groupList.visible ? jumpTo("PPM", "Mapping", "") : ppmMap.open()
+                        iconFile: "Pulse Width-96.png"
+                        onTriggered: mainIsTablet && groupList.visible ? jumpTo("PPM", "Mapping", "") : ppmMap.open()
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "ADC Mapping..."
-                        onTriggered: groupList.visible ? jumpTo("ADC", "Mapping", "") : adcMap.open()
+                        iconFile: "Potentiometer-96.png"
+                        onTriggered: mainIsTablet && groupList.visible ? jumpTo("ADC", "Mapping", "") : adcMap.open()
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Pair NRF..."
+                        iconFile: "icons8-fantasy-96.png"
                         onTriggered: {
                             nrfPair.open()
                         }
                     }
-                    MenuItem {
+                    MenuSeparator {}
+                    MenuEntry {
                         text: "Save XML"
+                        iconFile: "Save as-96.png"
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogSave.close()
@@ -307,8 +339,9 @@ Item {
                             }
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Load XML"
+                        iconFile: "Open Folder-96.png"
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogLoad.close()

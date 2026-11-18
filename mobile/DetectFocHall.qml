@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -38,20 +38,6 @@ Item {
         dialog.open()
     }
 
-    function updateDisplay() {
-        var txt = "Hall Table:\n"
-
-        for (var i = 0;i < table.length;i++) {
-            txt += "" + table[i]
-
-            if (i != table.length - 1) {
-                txt += ", "
-            }
-        }
-
-        resultArea.text = txt
-    }
-
     function testConnected() {
         if (VescIf.isPortConnected()) {
             return true
@@ -64,90 +50,171 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        updateDisplay()
-    }
-
     SheetDialog {
         id: dialog
         fullHeight: true
+        title: qsTr("Hall Sensor Detection")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Hall Sensors-96.png"
+        acceptText: qsTr("Apply")
+        acceptEnabled: table.length == 8
+
+        onAccepted: {
+            for(var i = 0;i < 7;i++) {
+                mMcConf.updateParamInt("foc_hall_table__" + i, table[i])
+            }
+
+            VescIf.emitStatusMessage("Hall Sensor Parameters Applied", true)
+        }
 
         ScrollView {
+            id: scroll
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width
+            contentWidth: availableWidth
 
             ColumnLayout {
-                anchors.fill: parent
-                spacing: 0
+                width: scroll.availableWidth
+                spacing: 12
 
-                DoubleSpinBox {
+                SectionHeader {
+                    Layout.topMargin: 0
+                    text: qsTr("Measurement")
+                }
+
+                LabeledSpinBox {
                     id: currentBox
-                    Layout.fillWidth: true
+                    // As wide as a cell of the two column grids in the other detection sheets
+                    Layout.preferredWidth: (scroll.availableWidth - 10) / 2
+                    label: qsTr("Current")
                     decimals: 2
                     realValue: 10.0
                     realFrom: 0.0
                     realTo: 200.0
-                    prefix: "I: "
                     suffix: " A"
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Button {
-                        text: "Help"
-                        Layout.preferredWidth: 50
-                        Layout.fillWidth: true
-                        onClicked: {
-                            VescIf.emitMessageDialog(
-                                        mInfoConf.getLongName("help_foc_hall_detect"),
-                                        mInfoConf.getDescription("help_foc_hall_detect"),
-                                        true, true)
-                        }
+                Button {
+                    Layout.alignment: Qt.AlignLeft
+                    text: qsTr("How detection works")
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Help-96.png"
+                    flat: true
+                    onClicked: {
+                        VescIf.emitMessageDialog(
+                                    mInfoConf.getLongName("help_foc_hall_detect"),
+                                    mInfoConf.getDescription("help_foc_hall_detect"),
+                                    true, true)
                     }
+                }
 
-                    Button {
-                        text: "Detect"
-                        Layout.preferredWidth: 50
-                        Layout.fillWidth: true
-                        onClicked: {
-                            if (!testConnected()) {
-                                return
-                            }
+                SectionHeader {
+                    text: qsTr("Detect")
+                }
 
+                Button {
+                    Layout.fillWidth: true
+                    text: qsTr("Run detection")
+                    highlighted: table.length != 8
+                    onClicked: {
+                        if (testConnected()) {
                             detectDialog.open()
                         }
                     }
                 }
 
-                TextArea {
-                    id: resultArea
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 200
-                    readOnly: true
-                    wrapMode: TextEdit.WordWrap
-                    font.family: "DejaVuSansMono"
+                SectionHeader {
+                    text: qsTr("Results")
                 }
 
-                Button {
-                    text: "Apply & Close"
+                RowLayout {
                     Layout.fillWidth: true
-                    onClicked: {
-                        if (table.length != 8) {
-                            VescIf.emitMessageDialog("Apply Error",
-                                                     "Hall table is empty.",
-                                                     false, false)
-                            return
+                    spacing: 10
+
+                    // The hall states at their angles on one electrical revolution. Well placed
+                    // sensors give six states 60° apart
+                    Item {
+                        id: hallPlot
+                        readonly property real radius: width / 2 - 16
+
+                        Layout.minimumWidth: 170
+                        Layout.preferredWidth: 170
+                        Layout.preferredHeight: 170
+
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: 16
+                            radius: width / 2
+                            color: "transparent"
+                            border.width: 2
+                            border.color: Utility.getAppHexColor("raisedBackground")
                         }
 
-                        for(var i = 0;i < 7;i++) {
-                            mMcConf.updateParamInt("foc_hall_table__" + i, table[i])
+                        Repeater {
+                            model: table.length == 8 ? table : []
+
+                            Item {
+                                // 0 - 200 is one revolution, 255 marks a state that cannot occur
+                                readonly property real angle: modelData * 1.8 - 90
+
+                                anchors.fill: parent
+                                visible: modelData !== 255
+
+                                Rectangle {
+                                    x: parent.width / 2
+                                    y: parent.height / 2 - 1
+                                    width: hallPlot.radius
+                                    height: 2
+                                    transformOrigin: Item.Left
+                                    rotation: parent.angle
+                                    color: Utility.getAppHexColor("lightAccent")
+                                    opacity: 0.4
+                                }
+
+                                Rectangle {
+                                    x: parent.width / 2 + hallPlot.radius * Math.cos(parent.angle * Math.PI / 180) - width / 2
+                                    y: parent.height / 2 + hallPlot.radius * Math.sin(parent.angle * Math.PI / 180) - height / 2
+                                    width: 28
+                                    height: 28
+                                    radius: 14
+                                    color: Utility.getAppHexColor("cardBackground")
+                                    border.width: 2
+                                    border.color: Utility.getAppHexColor("lightAccent")
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: index
+                                        color: Utility.getAppHexColor("lightText")
+                                        font.weight: Font.Medium
+                                    }
+                                }
+                            }
                         }
-
-                        VescIf.emitStatusMessage("Hall Sensor Parameters Applied", true)
-
-                        dialog.close()
                     }
+
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: 8
+                        rowSpacing: 8
+                        uniformCellWidths: true
+
+                        Repeater {
+                            model: 8
+
+                            ValueTile {
+                                Layout.fillWidth: true
+                                title: qsTr("Hall %1").arg(index)
+                                value: table.length == 8 ? "" + table[index] : "\u2013"
+                            }
+                        }
+                    }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    color: Utility.getAppHexColor("normalText")
+                    font.pointSize: 11
+                    text: qsTr("Apply puts the table in the motor configuration. Write it to save it on the VESC.")
                 }
             }
         }
@@ -156,17 +223,12 @@ Item {
     SheetDialog {
         id: detectDialog
         acceptText: qsTr("Start")
-        title: "Detect FOC Hall Sensor Parameters"
+        title: qsTr("Detect Hall Sensors")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Hall Sensors-96.png"
 
-        Text {
-            id: detectLambdaLabel
-            color: Utility.getAppHexColor("lightText")
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "This is going to turn the motor slowly. Make " +
-                "sure that nothing is in the way."
+        WarningBanner {
+            width: parent.width
+            text: qsTr("This turns the motor slowly. Make sure that nothing is in the way.")
         }
 
         onAccepted: {
@@ -186,7 +248,6 @@ Item {
                                          false, false)
             } else {
                 table = hall_table
-                updateDisplay()
             }
         }
     }

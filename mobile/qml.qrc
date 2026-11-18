@@ -76,8 +76,11 @@
         <file>ParamSearch.qml</file>
         <file>DeviceCard.qml</file>
         <file>WizardHeader.qml</file>
+        <file>StepHint.qml</file>
         <file>BottomMenu.qml</file>
         <file>PopupMenu.qml</file>
+        <file>MenuEntry.qml</file>
+        <file>LabeledSpinBox.qml</file>
         <file>PageHeader.qml</file>
         <file>BusyDialog.qml</file>
         <file>InputBackground.qml</file>

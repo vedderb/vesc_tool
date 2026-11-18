@@ -82,13 +82,14 @@ Item {
         anchors.fill: parent
         rowSpacing: 0
         columnSpacing: 0
-        columns: wide ? 2 : 1
+        columns: wide || phoneLandscape ? 2 : 1
 
         ScrollView {
             id: scroll
-            Layout.fillWidth: !wide
+            Layout.fillWidth: !wide && !phoneLandscape
             Layout.fillHeight: wide || !mainIsTablet
-            Layout.preferredWidth: 520
+            Layout.preferredWidth: phoneLandscape ? parent.width / 2 : 520
+            Layout.rowSpan: phoneLandscape ? 2 : 1
             contentWidth: availableWidth
             clip: true
 
@@ -170,8 +171,16 @@ Item {
                     onActivated: function(index) { swipeView.currentIndex = index }
                 }
 
+                // The selected tab goes here, or beside the form in phone landscape
+                ColumnLayout {
+                    id: tabSlot
+                    visible: !phoneLandscape
+                    Layout.fillWidth: true
+                }
+
                 StackLayout {
                     id: swipeView
+                    parent: phoneLandscape ? tabColumn : tabSlot
                     Layout.fillWidth: true
                     Layout.preferredHeight: children[currentIndex].implicitHeight
 
@@ -574,10 +583,28 @@ Item {
             }
         }
 
+        // Phone landscape: the selected tab beside the form, above the buttons
+        ScrollView {
+            id: tabScroll
+            visible: phoneLandscape
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            contentWidth: availableWidth
+            contentHeight: tabColumn.implicitHeight + 12
+            clip: true
+
+            ColumnLayout {
+                id: tabColumn
+                y: 12
+                width: tabScroll.availableWidth - 14
+            }
+        }
+
         RowLayout {
             Layout.fillWidth: true
             Layout.maximumWidth: wide ? scroll.Layout.preferredWidth - 28 : -1
             Layout.margins: 14
+            Layout.leftMargin: phoneLandscape ? 0 : 14
             Layout.topMargin: 8
 
             Button {

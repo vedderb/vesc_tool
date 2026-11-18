@@ -22,7 +22,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Vedder.vesc.utility 1.0
 
-// Title and Close button for full-page dialogs
+// Title and Close button for full-page dialogs, which cover the pages inside the safe area
 RowLayout {
     property alias title: label.text
     signal closeClicked()
@@ -31,14 +31,13 @@ RowLayout {
         id: label
         Layout.fillWidth: true
         Layout.margins: 16
-        Layout.leftMargin: 16 + notchLeft
         font.pointSize: 15
         font.weight: Font.Medium
         color: Utility.getAppHexColor("titleText")
     }
 
     Button {
-        Layout.rightMargin: 8 + notchRight
+        Layout.rightMargin: 8
         text: qsTr("Close")
         flat: true
         onClicked: closeClicked()

@@ -53,6 +53,9 @@ Item {
             ctx.roundedRect(battery.width / 2 - cellWidth * 0.24, cellTop - cellWidth * 0.32,
                             cellWidth * 0.48, cellWidth * 0.16, cellWidth * 0.05, cellWidth * 0.05)
             ctx.fill()
+            ctx.lineWidth = Math.max(1, u * 0.012)
+            ctx.strokeStyle = style.hi2
+            ctx.stroke()
         }
     }
 

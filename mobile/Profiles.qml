@@ -125,7 +125,7 @@ Item {
                     id: scrollCol
                     Layout.fillWidth: true
                     Layout.topMargin: 10
-                    columns: mainIsTablet ? 2 : 1
+                    columns: mainIsTablet || scroll.availableWidth >= 700 ? 2 : 1
                     uniformCellWidths: true
                     columnSpacing: 8
                     rowSpacing: 8
@@ -180,10 +180,10 @@ Item {
 
                 BottomMenu {
                     id: menu
-                    parent: topItem
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Remove All Profiles"
+                        iconFile: "Delete-96.png"
                         onTriggered: {
                             clearDialog.open()
                         }

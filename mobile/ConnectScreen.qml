@@ -110,7 +110,8 @@ Item {
             Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
             Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
-            Layout.bottomMargin: 0
+            // Between the buttons of the row below on landscape phones
+            Layout.bottomMargin: phoneLandscape ? -(Layout.preferredHeight + buttonRow.implicitHeight) / 2 - column.spacing : 0
             source: fullLogo
                     ? "qrc" + Utility.getThemePath() + "/logo.png"
                     : "qrc" + Utility.getThemePath() + "/symbol_v_wide.png"
@@ -140,6 +141,7 @@ Item {
         }
 
         RowLayout {
+            id: buttonRow
             Layout.fillWidth: true
 
             Button {
@@ -171,16 +173,18 @@ Item {
                 PopupMenu {
                     id: scanMenu
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Scan BLE"
+                        iconFile: "bluetooth.png"
                         enabled: !scanning
                         onTriggered: {
                             startBleScan()
                         }
                     }
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Ping TCP hub"
+                        iconFile: "Globe-96.png"
                         onTriggered: {
                             bleModel.clear()
                             pingTcpHub = true
@@ -188,8 +192,9 @@ Item {
                         }
                     }
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Connect TCP Hub..."
+                        iconFile: "LAN-96.png"
                         onTriggered: {
                             tcpHubConnDialog.open()
                         }
@@ -212,8 +217,9 @@ Item {
                         }
                     }
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Clear TCP hub devs"
+                        iconFile: "Delete-96.png"
                         onTriggered: {
                             tcpHubClearDialog.open()
                         }
@@ -235,8 +241,9 @@ Item {
                         }
                     }
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Connect Virtual ESC"
+                        iconFile: "Electronics-96.png"
                         onTriggered: {
                             VescIf.connectVirtual()
                         }

@@ -23,42 +23,52 @@ import QtQuick.Layouts
 import Vedder.vesc.utility 1.0
 
 // Title, step chips and progress for the setup wizards
-ColumnLayout {
+GridLayout {
     id: wizardHeader
     property string title: ""
     property var steps: []
     property int currentIndex: 0
     // Optional text per step, finished steps then show it and can be clicked
     property var summaries: []
+    // Title, chips and step count share one row on landscape phones
+    readonly property bool compact: phoneLandscape
 
     signal stepClicked(int index)
 
-    spacing: 10
+    columns: compact ? 3 : 2
+    rowSpacing: 10
+    columnSpacing: compact ? 16 : 5
 
-    RowLayout {
+    Label {
+        Layout.row: 0
+        Layout.column: 0
+        Layout.fillWidth: !wizardHeader.compact
         Layout.topMargin: 14
         Layout.leftMargin: 14
+        text: wizardHeader.title
+        font.pointSize: 15
+        font.weight: Font.Medium
+        color: Utility.getAppHexColor("titleText")
+    }
+
+    Text {
+        Layout.row: 0
+        Layout.column: wizardHeader.compact ? 2 : 1
+        Layout.topMargin: 14
         Layout.rightMargin: 14
-
-        Label {
-            Layout.fillWidth: true
-            text: wizardHeader.title
-            font.pointSize: 15
-            font.weight: Font.Medium
-            color: Utility.getAppHexColor("titleText")
-        }
-
-        Text {
-            text: qsTr("Step %1 of %2").arg(wizardHeader.currentIndex + 1).arg(wizardHeader.steps.length)
-            font.pointSize: 10
-            color: Utility.getAppHexColor("normalText")
-        }
+        text: qsTr("Step %1 of %2").arg(wizardHeader.currentIndex + 1).arg(wizardHeader.steps.length)
+        font.pointSize: 10
+        color: Utility.getAppHexColor("normalText")
     }
 
     ListView {
+        Layout.row: wizardHeader.compact ? 0 : 1
+        Layout.column: wizardHeader.compact ? 1 : 0
+        Layout.columnSpan: wizardHeader.compact ? 1 : 2
         Layout.fillWidth: true
-        Layout.leftMargin: 14
-        Layout.rightMargin: 14
+        Layout.topMargin: wizardHeader.compact ? 14 : 0
+        Layout.leftMargin: wizardHeader.compact ? 0 : 14
+        Layout.rightMargin: wizardHeader.compact ? 0 : 14
         Layout.preferredHeight: 32
         orientation: ListView.Horizontal
         spacing: 6
@@ -81,6 +91,9 @@ ColumnLayout {
     }
 
     ProgressBar {
+        Layout.row: wizardHeader.compact ? 1 : 2
+        Layout.column: 0
+        Layout.columnSpan: wizardHeader.columns
         Layout.fillWidth: true
         Layout.leftMargin: 14
         Layout.rightMargin: 14

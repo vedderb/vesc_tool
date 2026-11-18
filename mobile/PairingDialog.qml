@@ -166,8 +166,9 @@ Item {
                         id: menu
                         width: 500
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Add current without pairing"
+                            iconFile: "Plus Math-96.png"
                             onTriggered: {
                                 if (VescIf.isPortConnected()) {
                                     VescIf.addPairedUuid(VescIf.getConnectedUuid());
@@ -180,15 +181,17 @@ Item {
                             }
                         }
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Add from UUID"
+                            iconFile: "icons8-edit-96.png"
                             onTriggered: {
                                 uuidEnter.open()
                             }
                         }
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Unpair connected"
+                            iconFile: "Delete-96.png"
                             onTriggered: {
                                 if (VescIf.isPortConnected()) {
                                     if (mCommands.isLimitedMode()) {

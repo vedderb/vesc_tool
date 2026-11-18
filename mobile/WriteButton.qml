@@ -163,6 +163,8 @@ Button {
             Button {
                 Layout.alignment: Qt.AlignLeft
                 Layout.bottomMargin: 8
+                // Keeps its height on landscape phones, the list above scrolls instead
+                Layout.minimumHeight: implicitHeight
                 leftPadding: 0
                 flat: true
                 Material.foreground: Utility.getAppHexColor("dangerText")

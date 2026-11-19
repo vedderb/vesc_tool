@@ -31,6 +31,7 @@
 #include "utility.h"
 #include "heatshrink/heatshrinkif.h"
 #include "minimp3/qminimp3.h"
+#include "virtualvesc.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -287,6 +288,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<TcpHub>("Vedder.vesc.tcphub", 1, 0, "TcpHub");
     qmlRegisterType<CodeLoader>("Vedder.vesc.codeloader", 1, 0, "CodeLoader");
     qmlRegisterType<QMiniMp3>("Vedder.vesc.qminimp3", 1, 0, "QMiniMp3");
+    qmlRegisterType<VirtualDisplay>("Vedder.vesc.virtualdisplay", 1, 0, "VirtualDisplay");
 #ifdef Q_OS_LINUX
     qmlRegisterType<SystemCommandExecutor>("Vedder.vesc.syscmd", 1, 0, "SysCmd");
 #endif

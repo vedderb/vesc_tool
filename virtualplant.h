@@ -95,6 +95,7 @@ public:
     void resetStats();
 
     double cellVoltage(int cell) const;
+    double packTempNow() const { return packTemp + (tempFet - 22.0) * 0.3; } // Warms up a bit with the electronics
     double iMotor() const { return vq < 0.0 ? -iq : iq; } // As reported by the firmware
 
 private:

@@ -23,11 +23,16 @@
 #include <QObject>
 #include <QByteArray>
 #include <QTimer>
+#include <QThread>
+#include <QMutex>
+#include <QImage>
+#include <QQuickPaintedItem>
 #include "packet.h"
 #include "configparams.h"
 #include "vbytearray.h"
 #include "datatypes.h"
 #include "virtualplant.h"
+#include "lispBM/vl_api.h"
 
 /*
  * A simulated VESC that speaks the regular packet protocol. It stores
@@ -35,11 +40,14 @@
  * data, detection and the input apps come from VirtualPlant, a simple model
  * of a dual motor vehicle with a rider.
  *
- * A second motor controller, a BMS and an Express are on the CAN-bus. The
- * main VESC and the Express use virtual_vesc/sd in the app data as SD card,
- * with a generated log. The second VESC stores its code in virtual_vesc/can1.
- * The simulation is controlled with the "sim" terminal command, and the Sim
- * page of the main VESC.
+ * A second motor controller, a BMS, an Express and a Dash 35B are on the
+ * CAN-bus. The main VESC and the Express use virtual_vesc/sd in the app data
+ * as SD card, with a generated log. The CAN devices store their code in
+ * virtual_vesc/can<id>. The simulation is controlled with the "sim" terminal
+ * command, and the Sim page of the main VESC.
+ *
+ * All devices run their Lisp code in LispBM, with the firmware extensions in
+ * lispBM/vl_node.c. Native libraries do not run.
  *
  * Custom configs from packages (e.g. Refloat) are normally registered at
  * runtime by native code. The XML they serve is a static qCompress-blob
@@ -62,10 +70,15 @@ public:
 
     static QByteArray findConfigXml(const QByteArray &data);
 
+    // The displays drawn by Lisp, by CAN-ID
+    static QImage display(int canId, int *frame = nullptr);
+
 signals:
     void dataToSend(QByteArray data);
 
 private:
+    static const int BMS_CAN_ID = 10;
+
     // CAN node, shares the plant and SD card of the main VESC
     VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QString &hwName,
                 const QByteArray &uuid, QObject *parent);
@@ -85,7 +98,24 @@ private:
     void loadCode();
     void saveCode();
 
+    int codeSlotMaxSize() const;
     QByteArray codeSlotPayload(const QByteArray &slot) const;
+
+    // LispBM, in virtualvesclisp.cpp
+    bool processLisp(COMM_PACKET_ID id, VByteArray &vb);
+    QList<VirtualVesc*> devices();
+    void lispPrint(const QString &str);
+    void lispStart(bool loadCode);
+    void lispStop();
+    void lispMock();
+    VirtualVesc *vescOnBus(int canId);
+    static void hostPrint(void *host, const char *str);
+    static void hostSend(void *host, const char *what, int id, int arg, const uint8_t *data, int len);
+    static double hostGet(void *host, const char *what, int id);
+    static void hostSet(void *host, const char *what, int id, double value);
+    static bool hostConf(void *host, const char *name, double *value, bool set, bool def);
+    static bool hostEeprom(void *host, int addr, uint32_t *value, bool store);
+    static void hostDisplay(void *host, int x, int y, int w, int h, const uint32_t *rgb, uint32_t color);
     bool writeCodeSlot(QByteArray &slot, quint32 offset, const QByteArray &data);
 
     Packet *mPacket;
@@ -103,6 +133,15 @@ private:
     QByteArray mLispSlot;
     QByteArray mQmlSlot;
     bool mLispRunning;
+
+    const vl_api_t *mLbm; // nullptr when not running
+    QThread *mLbmThread;
+    QByteArray mLbmCode; // LispBM reads the imports from it
+    QByteArray mLbmStream;
+    QMap<int, quint32> mEeprom;
+    QHash<QString, double> mOtherConf; // Without motor configuration, e.g. wifi_mode on the Dash
+    QMutex mLock; // Main VESC: the plant and configurations, also used by LispBM
+    int mButtons; // Main VESC: the buttons of the Dash
 
     // The code slots are kept on disk, like the flash of a real VESC
     QString mCodeDir;
@@ -129,6 +168,20 @@ private:
     QStringList mFaultLog;
     QVector<VByteArray> mSamples;
 
+};
+
+// The display of a CAN device, for the Sim page
+class VirtualDisplay : public QQuickPaintedItem
+{
+    Q_OBJECT
+    Q_PROPERTY(int canId MEMBER mCanId)
+public:
+    explicit VirtualDisplay(QQuickItem *parent = nullptr);
+    void paint(QPainter *painter) override;
+
+private:
+    int mCanId;
+    int mFrame;
 };
 
 #endif // VIRTUALVESC_H

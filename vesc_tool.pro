@@ -213,6 +213,7 @@ SOURCES += main.cpp\
     tcpserversimple.cpp \
     hexfile.cpp \
     virtualvesc.cpp \
+    virtualvesclisp.cpp \
     virtualplant.cpp \
     phoneimu.cpp
 
@@ -265,6 +266,7 @@ include(mobile/mobile.pri)
 include(map/map.pri)
 include(lzokay/lzokay.pri)
 include(heatshrink/heatshrink.pri)
+include(lispBM/lispbm.pri)
 include(QCodeEditor/qcodeeditor.pri)
 include(esp32/esp32.pri)
 include(display_tool/display_tool.pri)

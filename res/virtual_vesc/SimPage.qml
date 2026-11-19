@@ -26,6 +26,7 @@ import QtQuick.Layouts
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.utility 1.0
+import Vedder.vesc.virtualdisplay 1.0
 import "qrc:/mobile"
 
 Item {
@@ -293,6 +294,39 @@ Item {
                     Button {
                         text: "Clear"
                         onClicked: root.sim("cell " + cellBox.realValue + " off")
+                    }
+                }
+
+                SectionHeader { text: "Dash 35B" }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: Utility.getAppHexColor("disabledText")
+                    wrapMode: Text.WordWrap
+                    text: "On CAN ID 4. The display shows what its Lisp code draws, e.g. the Dash 35B package."
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: width * 2 / 3
+                    color: "black"
+
+                    VirtualDisplay {
+                        anchors.fill: parent
+                        canId: 4
+                    }
+                }
+
+                RowLayout {
+                    Repeater {
+                        model: 4
+                        Button {
+                            Layout.fillWidth: true
+                            text: "Button " + index
+                            onPressed: root.sim("button " + index + " on")
+                            onReleased: root.sim("button " + index + " off")
+                            onCanceled: root.sim("button " + index + " off")
+                        }
                     }
                 }
 

@@ -29,6 +29,7 @@
 #include <QStandardPaths>
 #include <QDateTime>
 #include <QTextStream>
+#include <QDataStream>
 #include <QRandomGenerator>
 #include <QDebug>
 #include <cmath>
@@ -40,10 +41,10 @@ const char VIRTUAL_UUID[12] = {'V', 'I', 'R', 'T', 'U', 'A', 'L', 'V', 'E', 'S',
 
 // Same limits as the firmware
 const int CODE_SLOT_MAX_SIZE = 1024 * 128;
+const int CODE_SLOT_MAX_SIZE_ESP32 = 1024 * 1024; // The partitions are larger, e.g. for the fonts of the Dash
 const int PACKET_MAX_PL_LEN = 512;
 const int SAMPLE_MAX_LEN = 1000;
 const int FAULT_LOG_LEN = 25;
-const int BMS_CAN_ID = 10;
 
 // Detection results have a bit of measurement noise
 double measured(double value)
@@ -71,6 +72,9 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
 {
     mPacket = new Packet(this);
     mLispRunning = false;
+    mLbm = nullptr;
+    mLbmThread = nullptr;
+    mButtons = 0;
     mCanOn = true;
     // The phone IMU when there is one, so that tilting the phone moves the IMU views
     mPhoneImu = PhoneImu::available();
@@ -101,11 +105,11 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
             mAppConf = mMain->mAppConf;
             mAppConfDefault = mMain->mAppConfDefault;
             mAppConf.updateParamInt("controller_id", mCanId);
-
-            // Its own packages, so that their UI can be tested without the Sim page
-            mCodeDir = mMain->mCodeDir + "/can" + QString::number(mCanId);
-            loadCode();
         }
+
+        // Its own packages, so that their UI can be tested without the Sim page
+        mCodeDir = mMain->mCodeDir + "/can" + QString::number(mCanId);
+        loadCode();
         return;
     }
 
@@ -125,6 +129,7 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
     // The rest of the vehicle, on the CAN-bus
     mCanNodes.append(new VirtualVesc(this, 1, HW_TYPE_VESC, VIRTUAL_HW_NAME, "VIRTUALVESC2", this));
     mCanNodes.append(new VirtualVesc(this, 2, HW_TYPE_CUSTOM_MODULE, "Express", "VIRTUALEXPR1", this));
+    mCanNodes.append(new VirtualVesc(this, 4, HW_TYPE_CUSTOM_MODULE, "VDisp 900", "VIRTUALDASH1", this)); // Dash 35B
     mCanNodes.append(new VirtualVesc(this, BMS_CAN_ID, HW_TYPE_VESC_BMS, "BMS", "VIRTUALBMS01", this));
     for (auto node: mCanNodes) {
         connect(node, &VirtualVesc::dataToSend, this, &VirtualVesc::dataToSend);
@@ -133,6 +138,10 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
 
 VirtualVesc::~VirtualVesc()
 {
+    // The CAN devices and their evaluators use the plant and the lock of the main VESC
+    lispStop();
+    qDeleteAll(mCanNodes);
+
     if (mSaveTimer->isActive()) {
         saveCode();
     }
@@ -144,9 +153,15 @@ VirtualVesc::~VirtualVesc()
 
 void VirtualVesc::processData(const QByteArray &data)
 {
+    // Connecting powers on the vehicle
     if (mSimTimer && !mSimTimer->isActive()) {
         mSimTimer->start();
         PhoneImu::setActive(mPhoneImu);
+        for (auto v: devices()) {
+            if (v->mLispRunning) {
+                v->lispStart(true);
+            }
+        }
     }
 
     mPacket->processData(data);
@@ -157,6 +172,9 @@ void VirtualVesc::resetState()
     if (mSimTimer) {
         mSimTimer->stop();
         PhoneImu::setActive(false);
+        for (auto v: devices()) {
+            v->lispStop();
+        }
     }
 
     mPacket->resetState();
@@ -199,15 +217,35 @@ void VirtualVesc::processPacket(QByteArray &data)
     VByteArray reply;
     reply.vbAppendUint8(id);
 
+    if (id == COMM_FORWARD_CAN) {
+        int target = vb.vbPopFrontUint8();
+        for (auto node: mCanNodes) {
+            if (mCanOn && node->mCanId == target) {
+                node->processPacket(vb);
+            }
+        }
+        return;
+    }
+
     VirtualPlant *p = mPlant;
     int ownId = mMain ? mCanId : mAppConf.getParamInt("controller_id");
     bool fileCmd = id >= COMM_FILE_LIST && id <= COMM_FILE_REMOVE;
+    bool codeCmd = (id >= COMM_LISP_READ_CODE && id <= COMM_LISP_STREAM_CODE &&
+                    id != COMM_BMS_SET_BATT_TYPE && id != COMM_BMS_GET_BATT_TYPE) ||
+            id == COMM_QMLUI_ERASE || id == COMM_QMLUI_WRITE || id == COMM_GET_QML_UI_APP ||
+            id == COMM_CUSTOM_APP_DATA;
 
-    // The BMS and the Express only answer what they have
-    if ((mHwType == HW_TYPE_VESC_BMS && id != COMM_FW_VERSION && id != COMM_BMS_GET_VALUES) ||
-            (mHwType == HW_TYPE_CUSTOM_MODULE && id != COMM_FW_VERSION && !fileCmd)) {
+    // The BMS, the Express and the Dash only answer what they have
+    if ((mHwType == HW_TYPE_VESC_BMS && id != COMM_FW_VERSION && id != COMM_BMS_GET_VALUES && !codeCmd) ||
+            (mHwType == HW_TYPE_CUSTOM_MODULE && id != COMM_FW_VERSION && !fileCmd && !codeCmd)) {
         return;
     }
+
+    if (processLisp(id, vb)) {
+        return;
+    }
+
+    QMutexLocker locker(&root()->mLock);
 
     if (fileCmd && (!mMain || mHwType == HW_TYPE_CUSTOM_MODULE)) {
         processFileCmd(id, vb, reply);
@@ -548,8 +586,7 @@ void VirtualVesc::processPacket(QByteArray &data)
             reply.vbAppendUint8(p->cellVoltage(i) > (vMin + 0.005));
         }
 
-        // The pack warms up a bit with the electronics
-        double tempPack = p->packTemp + (p->tempFet - 22.0) * 0.3;
+        double tempPack = p->packTempNow();
         reply.vbAppendUint8(4);
         for (int i = 0;i < 4;i++) {
             reply.vbAppendDouble16(tempPack + 0.4 * i, 1e2);
@@ -577,15 +614,6 @@ void VirtualVesc::processPacket(QByteArray &data)
         }
         sendReply(reply);
         break;
-
-    case COMM_FORWARD_CAN: {
-        int target = vb.vbPopFrontUint8();
-        for (auto node: mCanNodes) {
-            if (mCanOn && node->mCanId == target) {
-                node->processPacket(vb);
-            }
-        }
-    } break;
 
     // Detection measures the true motor of the plant. It takes a few seconds,
     // like on real hardware.
@@ -825,22 +853,6 @@ void VirtualVesc::processPacket(QByteArray &data)
         sendReply(reply);
     } break;
 
-    case COMM_LISP_SET_RUNNING:
-        mLispRunning = vb.vbPopFrontUint8();
-        updateCustomConfig();
-        reply.vbAppendUint8(1);
-        sendReply(reply);
-        break;
-
-    case COMM_LISP_GET_STATS:
-        reply.vbAppendDouble16(0.0, 1e2); // CPU
-        reply.vbAppendDouble16(0.0, 1e2); // Heap
-        reply.vbAppendDouble16(0.0, 1e2); // Memory
-        reply.vbAppendDouble16(0.0, 1e2); // Stack
-        reply.vbAppendString(""); // Result
-        sendReply(reply);
-        break;
-
     case COMM_GET_CUSTOM_CONFIG:
     case COMM_GET_CUSTOM_CONFIG_DEFAULT: {
         int confInd = vb.vbPopFrontUint8();
@@ -912,9 +924,11 @@ void VirtualVesc::print(const QString &str)
 
 void VirtualVesc::simStep()
 {
+    QMutexLocker locker(&mLock);
     int faultLast = mPlant->fault;
     double currentLast = mPlant->iMotor();
     mPlant->step(mSimTimer->interval() / 1000.0);
+    lispMock();
 
     if (mPlant->fault != faultLast && mPlant->fault != FAULT_CODE_NONE) {
         mFaultLog.append(QString("Fault            : %1\n"
@@ -970,6 +984,7 @@ void VirtualVesc::terminalCmd(const QString &cmd)
               "sim cell [cell] [voltage | off]\n  Override the voltage of a cell, starting at 1\n"
               "sim can [on | off]\n  Connect or disconnect the CAN-bus\n"
               "sim imu [phone | model]\n  Report the IMU of the phone (mobile only) or of the model\n"
+              "sim button [0 - 3] [on | off]\n  Press or release a button of the Dash 35B\n"
               "sim set [name] [value]\n  Change the motor, battery or vehicle, see sim get\n"
               "sim get\n  Print name, value, unit, min, max and decimals of all values\n"
               "sim reset\n  Restore all values");
@@ -1014,6 +1029,11 @@ void VirtualVesc::terminalCmd(const QString &cmd)
                    val.toInt() <= p->cellOverride.size() &&
                    (args.at(3) == "off" || (ok && number >= 0.0 && number <= 5.0))) {
             p->cellOverride[val.toInt() - 1] = args.at(3) == "off" ? NAN : number;
+        } else if (sub == "button" && args.size() == 4 && valOk && valNumber >= 0 && valNumber <= 3 &&
+                   (args.at(3) == "on" || args.at(3) == "off")) {
+            int bit = 1 << int(valNumber);
+            root->mButtons = args.at(3) == "on" ? (root->mButtons | bit) : (root->mButtons & ~bit);
+            return;
         } else if (sub == "can" && (val == "on" || val == "off")) {
             root->mCanOn = val == "on";
         } else if (sub == "imu" && ((val == "phone" && PhoneImu::available()) || val == "model")) {
@@ -1252,6 +1272,12 @@ void VirtualVesc::loadCode()
         mQmlSlot = qmlFile.readAll();
     }
 
+    QFile eepromFile(mCodeDir + "/eeprom.bin");
+    if (eepromFile.open(QIODevice::ReadOnly)) {
+        QDataStream in(&eepromFile);
+        in >> mEeprom;
+    }
+
     // Like the firmware, start valid Lisp code on boot
     mLispRunning = !codeSlotPayload(mLispSlot).isEmpty();
     updateCustomConfig();
@@ -1259,11 +1285,6 @@ void VirtualVesc::loadCode()
 
 void VirtualVesc::saveCode()
 {
-    // The BMS and the Express have no code
-    if (mCodeDir.isEmpty()) {
-        return;
-    }
-
     QDir().mkpath(mCodeDir);
 
     auto save = [this](const QString &name, const QByteArray &slot) {
@@ -1281,6 +1302,18 @@ void VirtualVesc::saveCode()
 
     save("lisp.bin", mLispSlot);
     save("qml.bin", mQmlSlot);
+
+    QMutexLocker locker(&root()->mLock);
+    QFile eepromFile(mCodeDir + "/eeprom.bin");
+    if (!mEeprom.isEmpty() && eepromFile.open(QIODevice::WriteOnly)) {
+        QDataStream out(&eepromFile);
+        out << mEeprom;
+    }
+}
+
+int VirtualVesc::codeSlotMaxSize() const
+{
+    return mHwType == HW_TYPE_CUSTOM_MODULE ? CODE_SLOT_MAX_SIZE_ESP32 : CODE_SLOT_MAX_SIZE;
 }
 
 QByteArray VirtualVesc::codeSlotPayload(const QByteArray &slot) const
@@ -1293,7 +1326,7 @@ QByteArray VirtualVesc::codeSlotPayload(const QByteArray &slot) const
     quint32 len = header.vbPopFrontUint32();
     quint16 crc = header.vbPopFrontUint16();
 
-    if (len > quint32(CODE_SLOT_MAX_SIZE) || int(len) + 8 > slot.size()) {
+    if (len > quint32(codeSlotMaxSize()) || int(len) + 8 > slot.size()) {
         return QByteArray();
     }
 
@@ -1307,7 +1340,7 @@ QByteArray VirtualVesc::codeSlotPayload(const QByteArray &slot) const
 
 bool VirtualVesc::writeCodeSlot(QByteArray &slot, quint32 offset, const QByteArray &data)
 {
-    if (offset + quint32(data.size()) > quint32(CODE_SLOT_MAX_SIZE)) {
+    if (offset + quint32(data.size()) > quint32(codeSlotMaxSize())) {
         return false;
     }
 

@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "repl/vesc_mock.h"
+#include "lispBM/repl/vesc_mock.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -54,6 +54,7 @@
     "*.icns"
     "**/HUFFCODE"
     "QCodeEditor/include/**"
+    "lispBM/lispBM/**"
     "*.in"
     "*.gradle"
     "*.java"

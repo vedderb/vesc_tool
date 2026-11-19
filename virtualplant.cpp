@@ -158,6 +158,16 @@ void VirtualPlant::resetStats()
     statCurrSum = statCurrMax = statFetSum = statFetMax = statMotorSum = statMotorMax = 0.0;
 }
 
+// The cells above the lowest one are balanced
+bool VirtualPlant::cellBalancing(int cell) const
+{
+    double vMin = 10.0;
+    for (int i = 0;i < int(packCells);i++) {
+        vMin = qMin(vMin, cellVoltage(i));
+    }
+    return cellVoltage(cell) > vMin + 0.005;
+}
+
 double VirtualPlant::cellVoltage(int cell) const
 {
     if (std::isfinite(cellOverride.at(cell))) {

@@ -29,10 +29,11 @@
 #include <cmath>
 
 extern "C" {
+uint64_t vl_time_us(void);
+
 uint32_t lbm_timestamp(void)
 {
-    static QElapsedTimer timer = [] { QElapsedTimer t; t.start(); return t; }();
-    return uint32_t(timer.nsecsElapsed() / 1000);
+    return uint32_t(vl_time_us());
 }
 
 void vl_sleep_us(uint32_t us)
@@ -41,22 +42,19 @@ void vl_sleep_us(uint32_t us)
 }
 }
 
-namespace {
-const vl_api_t *const lbmApis[] = {&vl0_api, &vl1_api, &vl2_api, &vl3_api, &vl4_api};
-VirtualVesc *lbmOwners[5];
-
-QMutex displayLock;
-QHash<int, QImage> displays;
-int displayFrame = 0;
+extern "C" uint64_t vl_time_us(void)
+{
+    static QElapsedTimer timer = [] { QElapsedTimer t; t.start(); return t; }();
+    return uint64_t(timer.nsecsElapsed() / 1000);
 }
 
-QImage VirtualVesc::display(int canId, int *frame)
-{
-    QMutexLocker locker(&displayLock);
-    if (frame) {
-        *frame = displayFrame;
-    }
-    return displays.value(canId);
+namespace {
+// One per device, in the order of devices()
+const vl_api_t *const lbmApis[] = {&vl0_api, &vl1_api, &vl2_api, &vl3_api, &vl4_api};
+
+QMutex displayLock;
+QHash<int, QImage> displays; // By CAN-ID
+int displayFrame = 0;
 }
 
 QList<VirtualVesc*> VirtualVesc::devices()
@@ -66,23 +64,19 @@ QList<VirtualVesc*> VirtualVesc::devices()
     return res;
 }
 
+int VirtualVesc::canId()
+{
+    return mMain ? mCanId : mAppConf.getParamInt("controller_id");
+}
+
 VirtualVesc *VirtualVesc::vescOnBus(int canId)
 {
     for (auto v: devices()) {
-        int id = v->mMain ? v->mCanId : v->mAppConf.getParamInt("controller_id");
-        if (v != this && root()->mCanOn && v->mHwType == HW_TYPE_VESC && id == canId) {
+        if (v != this && root()->mCanOn && v->mHwType == HW_TYPE_VESC && v->canId() == canId) {
             return v;
         }
     }
     return nullptr;
-}
-
-void VirtualVesc::lispPrint(const QString &str)
-{
-    VByteArray vb;
-    vb.vbAppendUint8(COMM_LISP_PRINT);
-    vb.append(str.toLatin1());
-    sendReply(vb);
 }
 
 void VirtualVesc::lispStart(bool loadCode)
@@ -91,15 +85,9 @@ void VirtualVesc::lispStart(bool loadCode)
 
     lispStop();
 
-    for (int i = 0;i < 5 && !mLbm;i++) {
-        if (!lbmOwners[i]) {
-            lbmOwners[i] = this;
-            mLbm = lbmApis[i];
-        }
-    }
-
-    if (!mLbm || !mLbm->init(&fns, this)) {
-        lispStop();
+    mLbm = lbmApis[devices().indexOf(this)];
+    if (!mLbm->init(&fns, this)) {
+        mLbm = nullptr;
         return;
     }
 
@@ -119,12 +107,6 @@ void VirtualVesc::lispStop()
         mLbmThread->wait();
         delete mLbmThread;
         mLbmThread = nullptr;
-    }
-
-    for (auto &owner: lbmOwners) {
-        if (owner == this) {
-            owner = nullptr;
-        }
     }
     mLbm = nullptr;
 
@@ -243,9 +225,9 @@ bool VirtualVesc::processLisp(COMM_PACKET_ID id, VByteArray &vb)
             lispStart(false);
         }
         if (vb.startsWith(':')) {
-            lispPrint("The special commands are not available in the Virtual ESC");
+            print("The special commands are not available in the Virtual ESC", COMM_LISP_PRINT);
         } else if (vb.size() <= 1) {
-            lispPrint(">");
+            print(">", COMM_LISP_PRINT);
         } else if (mLbm) {
             mLbm->eval(vb.constData(), false);
         }
@@ -269,7 +251,7 @@ bool VirtualVesc::processLisp(COMM_PACKET_ID id, VByteArray &vb)
         sendReply(reply);
 
         if (mLbm && mLbmStream.size() >= totLen) {
-            lispPrint("Stream done, starting...");
+            print("Stream done, starting...", COMM_LISP_PRINT);
             mLbm->eval(mLbmStream.constData(), true);
         }
     } return true;
@@ -285,18 +267,36 @@ bool VirtualVesc::processLisp(COMM_PACKET_ID id, VByteArray &vb)
     }
 }
 
+// Like a full link, prints and sends are dropped when the Qt thread falls behind
+static bool lbmQueue(QAtomicInt &pending)
+{
+    if (pending.fetchAndAddRelaxed(1) >= 500) {
+        pending.fetchAndAddRelaxed(-1);
+        return false;
+    }
+    return true;
+}
+
 void VirtualVesc::hostPrint(void *host, const char *str)
 {
     auto v = static_cast<VirtualVesc*>(host);
+    if (!lbmQueue(v->mLbmPending)) {
+        return;
+    }
     QMetaObject::invokeMethod(v, [v, s = QString::fromLatin1(str)]() {
-        v->lispPrint(s);
+        v->mLbmPending.fetchAndAddRelaxed(-1);
+        v->print(s, COMM_LISP_PRINT);
     }, Qt::QueuedConnection);
 }
 
 void VirtualVesc::hostSend(void *host, const char *what, int id, int arg, const uint8_t *data, int len)
 {
     auto v = static_cast<VirtualVesc*>(host);
+    if (!lbmQueue(v->mLbmPending)) {
+        return;
+    }
     QMetaObject::invokeMethod(v, [v, w = QString(what), id, arg, d = QByteArray((const char*)data, len)]() {
+        v->mLbmPending.fetchAndAddRelaxed(-1);
         if (w == "send-data") {
             VByteArray vb;
             vb.vbAppendUint8(COMM_CUSTOM_APP_DATA);
@@ -305,14 +305,14 @@ void VirtualVesc::hostSend(void *host, const char *what, int id, int arg, const 
             return;
         }
 
+        QMutexLocker locker(&v->root()->mLock);
         for (auto t: v->devices()) {
-            int tId = t->mMain ? t->mCanId : t->mAppConf.getParamInt("controller_id");
             if (t == v || !t->mLbm || !v->root()->mCanOn) {
                 continue;
             }
 
             auto data = reinterpret_cast<const uint8_t*>(d.constData());
-            if (w == "canmsg-send" && tId == id) {
+            if (w == "canmsg-send" && t->canId() == id) {
                 t->mLbm->event("rmsg", id, arg, data, d.size());
             } else if (w.startsWith("can-send-")) {
                 t->mLbm->event(w.endsWith("eid") ? "can-eid" : "can-sid", id, 0, data, d.size());
@@ -343,31 +343,51 @@ double VirtualVesc::hostGet(void *host, const char *what, int id)
         return 3.3;
     }
 
+    if (w == "systime-hz") {
+        return v->mHwType == HW_TYPE_CUSTOM_MODULE ? 1000 : 10000;
+    } else if (w == "can-local-id") {
+        return v->canId();
+    } else if (w == "fault") {
+        return p->fault;
+    } else if (w == "odometer") {
+        return p->odometer;
+    } else if (w == "fw-major" || w == "fw-minor") {
+        return w == "fw-major" ? v->mFwMajor : v->mFwMinor;
+    } else if (w == "bms-msg-age") {
+        return root->mCanOn ? 0.1 : 1000.0;
+    }
+
     // Same values as COMM_BMS_GET_VALUES
     if (w.startsWith("bms-")) {
+        const int n = VirtualPlant::motorCount;
+        const int cells = int(p->packCells);
         if (!root->mCanOn) {
             return NAN;
+        } else if (w == "bms-v-cell" || w == "bms-bal-state") {
+            return id >= 0 && id < cells ? (w == "bms-v-cell" ? p->cellVoltage(id) : p->cellBalancing(id)) : NAN;
+        } else if (w == "bms-temps-adc") {
+            return id >= 0 && id < 4 ? p->packTempNow() + 0.4 * id : NAN;
         }
-        const int n = VirtualPlant::motorCount;
         const QHash<QString, double> bms = {
             {"bms-v-tot", p->vBus}, {"bms-v-charge", 0.0}, {"bms-i-in", p->iIn * n},
             {"bms-i-in-ic", p->iIn * n}, {"bms-ah-cnt", p->ah * n}, {"bms-wh-cnt", p->wh * n},
-            {"bms-cell-num", p->packCells}, {"bms-v-cell", p->cellVoltage(id)}, {"bms-bal-state", 0.0},
-            {"bms-temp-adc-num", 4}, {"bms-temps-adc", p->packTempNow() + 0.4 * id},
-            {"bms-temp-ic", p->packTempNow() + 4.0}, {"bms-temp-hum", 24.0}, {"bms-hum", 41.0},
-            {"bms-temp-cell-max", p->packTempNow() + 1.2}, {"bms-soc", p->soc}, {"bms-soh", p->soh},
-            {"bms-can-id", BMS_CAN_ID}};
+            {"bms-cell-num", cells}, {"bms-temp-adc-num", 4}, {"bms-temp-ic", p->packTempNow() + 4.0},
+            {"bms-temp-hum", 24.0}, {"bms-hum", 41.0}, {"bms-temp-cell-max", p->packTempNow() + 1.2},
+            {"bms-soc", p->soc}, {"bms-soh", p->soh}, {"bms-can-id", BMS_CAN_ID}};
         return bms.value(w, NAN);
     }
 
-    // canget-* and the status messages of the motor controllers
+    // canget-* and the status messages of the motor controllers. The Express
+    // reports speed and distance unconverted, as ERPM and tachometer counts.
     if (!v->vescOnBus(id)) {
         return NAN;
     }
+    bool raw = v->mHwType == HW_TYPE_CUSTOM_MODULE;
     const QHash<QString, double> status = {
         {"can-msg-age", 0.01}, {"rpm", p->erpm}, {"current", p->iMotor()}, {"current-dir", p->iMotor()},
         {"current-in", p->iIn}, {"duty", p->duty}, {"temp-fet", p->tempFet}, {"temp-motor", p->tempMotor},
-        {"vin", p->vBus}, {"speed", p->speed}, {"dist", p->dist}, {"ppm", p->decodedPpm}, {"adc", p->adc1}};
+        {"vin", p->vBus}, {"speed", raw ? p->erpm : p->speed}, {"dist", raw ? p->tacho : p->dist},
+        {"ppm", p->decodedPpm}, {"adc", p->adc1}};
     return status.value(w, NAN);
 }
 
@@ -415,8 +435,9 @@ bool VirtualVesc::hostConf(void *host, const char *name, double *value, bool set
 
         ConfigParams *src = !def ? c : (c == &v->mMcConf ? &v->mMcConfDefault : &v->mAppConfDefault);
         ConfigParam *p = src->getParam(n);
+        bool isInt = p->type != CFG_T_DOUBLE;
         if (!set) {
-            *value = p->type == CFG_T_DOUBLE ? p->valDouble : p->valInt;
+            *value = isInt ? p->valInt : p->valDouble;
         } else if (p->type == CFG_T_DOUBLE) {
             c->updateParamDouble(n, *value);
         } else if (p->type == CFG_T_ENUM) {
@@ -426,7 +447,7 @@ bool VirtualVesc::hostConf(void *host, const char *name, double *value, bool set
         } else {
             c->updateParamInt(n, int(*value));
         }
-        return true;
+        return isInt;
     }
 
     if (set) {
@@ -434,13 +455,13 @@ bool VirtualVesc::hostConf(void *host, const char *name, double *value, bool set
     } else {
         *value = v->mOtherConf.value(n);
     }
-    return true;
+    return false;
 }
 
 bool VirtualVesc::hostEeprom(void *host, int addr, uint32_t *value, bool store)
 {
     auto v = static_cast<VirtualVesc*>(host);
-    if (addr < 0 || addr >= 128) {
+    if (addr < 0 || addr >= (v->mHwType == HW_TYPE_CUSTOM_MODULE ? 512 : 256)) {
         return false;
     }
 
@@ -450,6 +471,8 @@ bool VirtualVesc::hostEeprom(void *host, int addr, uint32_t *value, bool store)
         QMetaObject::invokeMethod(v->mSaveTimer, "start", Qt::QueuedConnection);
     } else if (v->mEeprom.contains(addr)) {
         *value = v->mEeprom.value(addr);
+    } else if (v->mHwType == HW_TYPE_CUSTOM_MODULE) {
+        *value = 0xFFFFFFFF; // Erased flash on the Express, -1 or NaN
     } else {
         return false;
     }
@@ -485,10 +508,9 @@ VirtualDisplay::VirtualDisplay(QQuickItem *parent) :
 {
     auto timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [this]() {
-        int frame;
-        VirtualVesc::display(mCanId, &frame);
-        if (frame != mFrame) {
-            mFrame = frame;
+        QMutexLocker locker(&displayLock);
+        if (displayFrame != mFrame) {
+            mFrame = displayFrame;
             update();
         }
     });
@@ -497,7 +519,9 @@ VirtualDisplay::VirtualDisplay(QQuickItem *parent) :
 
 void VirtualDisplay::paint(QPainter *painter)
 {
-    QImage img = VirtualVesc::display(mCanId);
+    QMutexLocker locker(&displayLock);
+    QImage img = displays.value(mCanId);
+    locker.unlock();
     if (!img.isNull()) {
         painter->drawImage(boundingRect(), img);
     }

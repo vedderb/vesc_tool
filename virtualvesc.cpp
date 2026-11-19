@@ -139,8 +139,11 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
 VirtualVesc::~VirtualVesc()
 {
     // The CAN devices and their evaluators use the plant and the lock of the main VESC
-    lispStop();
+    for (auto v: mMain ? QList<VirtualVesc*>({this}) : devices()) {
+        v->lispStop();
+    }
     qDeleteAll(mCanNodes);
+    mCanNodes.clear();
 
     if (mSaveTimer->isActive()) {
         saveCode();
@@ -158,6 +161,8 @@ void VirtualVesc::processData(const QByteArray &data)
         mSimTimer->start();
         PhoneImu::setActive(mPhoneImu);
         for (auto v: devices()) {
+            v->mLispRunning = !v->codeSlotPayload(v->mLispSlot).isEmpty();
+            v->updateCustomConfig();
             if (v->mLispRunning) {
                 v->lispStart(true);
             }
@@ -228,7 +233,7 @@ void VirtualVesc::processPacket(QByteArray &data)
     }
 
     VirtualPlant *p = mPlant;
-    int ownId = mMain ? mCanId : mAppConf.getParamInt("controller_id");
+    int ownId = canId();
     bool fileCmd = id >= COMM_FILE_LIST && id <= COMM_FILE_REMOVE;
     bool codeCmd = (id >= COMM_LISP_READ_CODE && id <= COMM_LISP_STREAM_CODE &&
                     id != COMM_BMS_SET_BATT_TYPE && id != COMM_BMS_GET_BATT_TYPE) ||
@@ -566,10 +571,6 @@ void VirtualVesc::processPacket(QByteArray &data)
     case COMM_BMS_GET_VALUES: {
         const int n = root()->mCanOn ? VirtualPlant::motorCount : 1;
         const int cells = int(p->packCells);
-        double vMin = 10.0;
-        for (int i = 0;i < cells;i++) {
-            vMin = qMin(vMin, p->cellVoltage(i));
-        }
 
         reply.vbAppendDouble32(p->vBus, 1e6);
         reply.vbAppendDouble32(0.0, 1e6); // Charge input
@@ -583,7 +584,7 @@ void VirtualVesc::processPacket(QByteArray &data)
             reply.vbAppendDouble16(p->cellVoltage(i), 1e3);
         }
         for (int i = 0;i < cells;i++) {
-            reply.vbAppendUint8(p->cellVoltage(i) > (vMin + 0.005));
+            reply.vbAppendUint8(p->cellBalancing(i));
         }
 
         double tempPack = p->packTempNow();
@@ -899,8 +900,8 @@ void VirtualVesc::processPacket(QByteArray &data)
 
 void VirtualVesc::sendReply(const VByteArray &vb)
 {
-    // Delayed replies are dropped after disconnecting
-    if (!root()->mSimTimer->isActive()) {
+    // Delayed replies are dropped after disconnecting, and the CAN devices cannot reply without the bus
+    if (!root()->mSimTimer->isActive() || (mMain && !root()->mCanOn)) {
         return;
     }
 
@@ -914,10 +915,10 @@ void VirtualVesc::sendLater(int ms, const VByteArray &vb)
     });
 }
 
-void VirtualVesc::print(const QString &str)
+void VirtualVesc::print(const QString &str, COMM_PACKET_ID id)
 {
     VByteArray vb;
-    vb.vbAppendUint8(COMM_PRINT);
+    vb.vbAppendUint8(id);
     vb.append(str.toLatin1());
     sendReply(vb);
 }

@@ -44,6 +44,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#ifndef _WIN32
+#include <locale.h>
+#ifdef __APPLE__
+#include <xlocale.h>
+#endif
+#endif
 
 #define VL_CAT2(a, b) a##_##b
 #define VL_CAT(a, b) VL_CAT2(a, b)
@@ -112,6 +118,7 @@
 
 // Shared by all runtimes
 extern void vl_sleep_us(uint32_t us);
+extern uint64_t vl_time_us(void);
 
 static const vl_host_t *fns;
 static void *host;
@@ -122,14 +129,24 @@ static lbm_uint vl_bitmap[LBM_MEMORY_BITMAP_SIZE(MEM_BLOCKS)];
 static uint32_t vl_image[IMAGE_WORDS];
 static lbm_extension_t vl_extensions[EXT_MAX];
 
-static lbm_string_channel_state_t tok_state;
-static lbm_char_channel_t tok;
-static char *eval_buf;
+// The code, the REPL and streamed code each have their own reader, like in the firmware
+static lbm_string_channel_state_t tok_state, repl_state, stream_state;
+static lbm_char_channel_t tok, repl_tok, stream_tok;
+static char *repl_buf, *stream_buf;
 static volatile lbm_cid repl_cid = -1;
-static volatile lbm_cid rmsg_cid[RMSG_SLOTS];
-static volatile bool ev_can_sid, ev_can_eid, ev_data_rx;
+
+// canmsg-recv, the start and timeout tell late replies apart
+static lbm_mutex_t rmsg_mutex;
+static lbm_cid rmsg_cid[RMSG_SLOTS];
+static uint32_t rmsg_start[RMSG_SLOTS], rmsg_timeout[RMSG_SLOTS];
+
+// Enabled events, 0 when off. Looked up here as the symbol list is not thread safe.
+static volatile lbm_uint sym_can_sid, sym_can_eid, sym_data_rx;
+
 static char print_prefix[50];
 static int ads_channel;
+static uint32_t systime_hz;
+static uint64_t boot_us;
 
 static int print_cb(const char *fmt, ...) {
     char buf[400];
@@ -162,10 +179,16 @@ static bool vl_image_write(uint32_t w, int32_t ix, bool const_heap) {
 
 static bool pause_eval(void) {
     lbm_pause_eval();
-    for (int i = 0;i < 2000 && lbm_get_eval_state() != EVAL_CPS_STATE_PAUSED;i++) {
-        vl_sleep_us(1000);
+    uint32_t start = lbm_timestamp();
+    while (lbm_get_eval_state() != EVAL_CPS_STATE_PAUSED && lbm_timestamp() - start < 2000000) {
+        vl_sleep_us(10);
     }
     return lbm_get_eval_state() == EVAL_CPS_STATE_PAUSED;
+}
+
+// The evaluator sleeps 200 us when idle, which wakes the phone too often
+static void eval_sleep(uint32_t us) {
+    vl_sleep_us(us < 1000 ? 1000 : us);
 }
 
 // Byte arrays and lists of numbers
@@ -193,6 +216,15 @@ static lbm_value vx_print(lbm_value *args, lbm_uint argn) {
     return ENC_SYM_TRUE;
 }
 
+static lbm_value vx_puts(lbm_value *args, lbm_uint argn) {
+    LBM_CHECK_ARGN(1);
+    if (!lbm_is_array_r(args[0])) {
+        return ENC_SYM_TERROR;
+    }
+    print_cb("%s", lbm_dec_str(args[0]));
+    return ENC_SYM_TRUE;
+}
+
 static lbm_value vx_set_print_prefix(lbm_value *args, lbm_uint argn) {
     LBM_CHECK_ARGN(1);
     if (!lbm_is_array_r(args[0])) {
@@ -202,15 +234,19 @@ static lbm_value vx_set_print_prefix(lbm_value *args, lbm_uint argn) {
     return ENC_SYM_TRUE;
 }
 
-// 10 kHz ticks, like the motor controller
+// Ticks since boot, 10 kHz on the motor controllers and 1 kHz on the Express
+static uint32_t systime(void) {
+    return (uint32_t)((vl_time_us() - boot_us) * systime_hz / 1000000);
+}
+
 static lbm_value vx_systime(lbm_value *args, lbm_uint argn) {
     (void)args; (void)argn;
-    return lbm_enc_u32(lbm_timestamp() / 100);
+    return lbm_enc_u32(systime());
 }
 
 static lbm_value vx_secs_since(lbm_value *args, lbm_uint argn) {
     LBM_CHECK_ARGN_NUMBER(1);
-    return lbm_enc_float((float)(uint32_t)(lbm_timestamp() / 100 - lbm_dec_as_u32(args[0])) / 10000.0f);
+    return lbm_enc_float((float)(uint32_t)(systime() - lbm_dec_as_u32(args[0])) / (float)systime_hz);
 }
 
 static lbm_value enc_bits(uint32_t v) {
@@ -238,40 +274,40 @@ static lbm_value vx_event_enable(lbm_value *args, lbm_uint argn) {
     if ((argn != 1 && argn != 2) || !lbm_is_symbol(args[0])) {
         return ENC_SYM_EERROR;
     }
-    bool en = argn == 1 || lbm_dec_as_i32(args[1]);
+    lbm_uint sym = (argn == 1 || lbm_dec_as_i32(args[1])) ? lbm_dec_sym(args[0]) : 0;
     const char *name = lbm_get_name_by_symbol(lbm_dec_sym(args[0]));
     if (strcmp(name, "event-can-sid") == 0) {
-        ev_can_sid = en;
+        sym_can_sid = sym;
     } else if (strcmp(name, "event-can-eid") == 0) {
-        ev_can_eid = en;
+        sym_can_eid = sym;
     } else if (strcmp(name, "event-data-rx") == 0) {
-        ev_data_rx = en;
+        sym_data_rx = sym;
     }
     return ENC_SYM_TRUE;
 }
 
-// (send-data data) and (can-send-sid/eid id data)
-static lbm_value vl_send(const char *what, int id, int arg, lbm_value data) {
+// (send-data data), (can-send-sid/eid id data) and (canmsg-send id slot data)
+static lbm_value vl_send(const char *what, int id, int arg, lbm_value data, int max) {
     uint8_t buf[500];
-    fns->send(host, what, id, arg, buf, to_bytes(data, buf, sizeof(buf)));
+    fns->send(host, what, id, arg, buf, to_bytes(data, buf, max));
     return ENC_SYM_TRUE;
 }
 
 static lbm_value vx_send_data(lbm_value *args, lbm_uint argn) {
-    return argn >= 1 ? vl_send("send-data", 0, 0, args[0]) : ENC_SYM_TERROR;
+    return argn >= 1 ? vl_send("send-data", 0, 0, args[0], 500) : ENC_SYM_TERROR;
 }
 
 static lbm_value vx_can_send_sid(lbm_value *args, lbm_uint argn) {
-    return argn == 2 ? vl_send("can-send-sid", lbm_dec_as_i32(args[0]), 0, args[1]) : ENC_SYM_TERROR;
+    return argn == 2 ? vl_send("can-send-sid", lbm_dec_as_i32(args[0]), 0, args[1], 8) : ENC_SYM_TERROR;
 }
 
 static lbm_value vx_can_send_eid(lbm_value *args, lbm_uint argn) {
-    return argn == 2 ? vl_send("can-send-eid", lbm_dec_as_i32(args[0]), 0, args[1]) : ENC_SYM_TERROR;
+    return argn == 2 ? vl_send("can-send-eid", lbm_dec_as_i32(args[0]), 0, args[1], 8) : ENC_SYM_TERROR;
 }
 
 static lbm_value vx_canmsg_send(lbm_value *args, lbm_uint argn) {
     LBM_CHECK_ARGN(3);
-    return vl_send("canmsg-send", lbm_dec_as_i32(args[0]), lbm_dec_as_i32(args[1]), args[2]);
+    return vl_send("canmsg-send", lbm_dec_as_i32(args[0]), lbm_dec_as_i32(args[1]), args[2], 500);
 }
 
 // (canmsg-recv slot timeout), blocks until canmsg-send to the slot or the timeout
@@ -282,13 +318,22 @@ static lbm_value vx_canmsg_recv(lbm_value *args, lbm_uint argn) {
     if (slot < 0 || slot >= RMSG_SLOTS) {
         return ENC_SYM_TERROR;
     }
+    lbm_mutex_lock(&rmsg_mutex);
     rmsg_cid[slot] = lbm_get_current_cid();
+    rmsg_start[slot] = lbm_timestamp();
+    rmsg_timeout[slot] = timeout > 0.0f ? (uint32_t)(timeout * 1e6f) : 0;
+    lbm_mutex_unlock(&rmsg_mutex);
     if (timeout > 0.0f) {
         lbm_block_ctx_from_extension_timeout(timeout);
     } else {
         lbm_block_ctx_from_extension();
     }
     return ENC_SYM_TRUE;
+}
+
+static lbm_value vx_can_local_id(lbm_value *args, lbm_uint argn) {
+    (void)args; (void)argn;
+    return lbm_enc_i((lbm_int)fns->get(host, "can-local-id", 0));
 }
 
 static lbm_value vx_can_list_devs(lbm_value *args, lbm_uint argn) {
@@ -314,7 +359,7 @@ static lbm_value vl_get(const char *what, int id) {
     X(duty, "duty") X(temp_fet, "temp-fet") X(temp_motor, "temp-motor") X(vin, "vin") \
     X(speed, "speed") X(dist, "dist") X(ppm, "ppm") X(adc, "adc")
 #define X(n, name) static lbm_value vx_canget_##n(lbm_value *args, lbm_uint argn) { \
-    LBM_CHECK_ARGN_NUMBER(1); return vl_get(name, lbm_dec_as_i32(args[0])); }
+    return argn >= 1 && lbm_is_number(args[0]) ? vl_get(name, lbm_dec_as_i32(args[0])) : ENC_SYM_TERROR; }
 CANGET_LIST
 #undef X
 
@@ -331,12 +376,13 @@ static lbm_value vx_get_bms_val(lbm_value *args, lbm_uint argn) {
     return vl_get(lbm_get_name_by_symbol(lbm_dec_sym(args[0])), argn > 1 ? lbm_dec_as_i32(args[1]) : 0);
 }
 
-// (set-current val) and (canset-current id val), the rest of the motor commands alike
-static lbm_value vl_set(const char *what, lbm_value *args, lbm_uint argn) {
-    if (argn > 2 || !lbm_is_number(args[argn - 1])) {
+// (set-current val) and (canset-current id val), the rest of the motor commands
+// alike. Further arguments, e.g. the off delay of set-current, are ignored.
+static lbm_value vl_set(const char *what, int id, lbm_value val) {
+    if (!lbm_is_number(val)) {
         return ENC_SYM_TERROR;
     }
-    fns->set(host, what, argn == 2 ? lbm_dec_as_i32(args[0]) : -1, lbm_dec_as_double(args[argn - 1]));
+    fns->set(host, what, id, lbm_dec_as_double(val));
     return ENC_SYM_TRUE;
 }
 
@@ -345,11 +391,32 @@ static lbm_value vl_set(const char *what, lbm_value *args, lbm_uint argn) {
     X(duty, "duty") X(rpm, "rpm")
 #define X(n, name) \
     static lbm_value vx_set_##n(lbm_value *args, lbm_uint argn) { \
-    return argn == 1 ? vl_set(name, args, argn) : ENC_SYM_TERROR; } \
+    return argn >= 1 ? vl_set(name, -1, args[0]) : ENC_SYM_TERROR; } \
     static lbm_value vx_canset_##n(lbm_value *args, lbm_uint argn) { \
-    return argn == 2 ? vl_set(name, args, argn) : ENC_SYM_TERROR; }
+    return argn >= 2 && lbm_is_number(args[0]) ? vl_set(name, lbm_dec_as_i32(args[0]), args[1]) : ENC_SYM_TERROR; }
 SET_LIST
 #undef X
+
+// (sysinfo 'odometer) and (sysinfo 'fw-ver), the others are nil
+static lbm_value vx_sysinfo(lbm_value *args, lbm_uint argn) {
+    if (argn != 1 || !lbm_is_symbol(args[0])) {
+        return ENC_SYM_TERROR;
+    }
+    const char *name = lbm_get_name_by_symbol(lbm_dec_sym(args[0]));
+    if (strcmp(name, "odometer") == 0) {
+        return lbm_enc_u32((uint32_t)fns->get(host, "odometer", 0));
+    } else if (strcmp(name, "fw-ver") == 0) {
+        return lbm_cons(lbm_enc_i((lbm_int)fns->get(host, "fw-major", 0)),
+                        lbm_cons(lbm_enc_i((lbm_int)fns->get(host, "fw-minor", 0)), lbm_cons(lbm_enc_i(0), ENC_SYM_NIL)));
+    }
+    return ENC_SYM_NIL;
+}
+
+// The fault code, the stub returns its name
+static lbm_value vx_get_fault(lbm_value *args, lbm_uint argn) {
+    (void)args; (void)argn;
+    return lbm_enc_i((lbm_int)fns->get(host, "fault", 0));
+}
 
 static lbm_value vx_timeout_reset(lbm_value *args, lbm_uint argn) {
     (void)args; (void)argn;
@@ -378,10 +445,8 @@ static lbm_value vl_conf(lbm_value *args, lbm_uint argn, bool set) {
 
     double val = set ? lbm_dec_as_double(args[1]) : 0.0;
     bool def = !set && argn == 2 && lbm_dec_as_i32(args[1]);
-    if (!fns->conf(host, name, &val, set, def)) {
-        return ENC_SYM_EERROR;
-    }
-    return set ? ENC_SYM_TRUE : lbm_enc_float((float)val);
+    bool isInt = fns->conf(host, name, &val, set, def);
+    return set ? ENC_SYM_TRUE : (isInt ? lbm_enc_i((lbm_int)val) : lbm_enc_float((float)val));
 }
 
 static lbm_value vx_conf_get(lbm_value *args, lbm_uint argn) {
@@ -460,19 +525,10 @@ static bool render_image(image_buffer_t *img, uint16_t x, uint16_t y, color_t *c
 
     for (int j = 0;j < img->height;j++) {
         for (int i = 0;i < img->width;i++) {
+            // RGB formats are RGB888 already, indexed ones use the colors
             uint32_t c = getpixel(img, i, j);
-            switch (img->fmt) {
-            case indexed2: case indexed4: case indexed16:
+            if (img->fmt == indexed2 || img->fmt == indexed4 || img->fmt == indexed16) {
                 c = COLOR_TO_RGB888(colors[c], i, j);
-                break;
-            case rgb332:
-                c = ((c & 0xE0) << 16) | ((c & 0x1C) << 11) | ((c & 0x03) << 6);
-                break;
-            case rgb565:
-                c = ((c & 0xF800) << 8) | ((c & 0x07E0) << 5) | ((c & 0x001F) << 3);
-                break;
-            default:
-                break;
             }
             rgb[j * img->width + i] = c;
         }
@@ -498,11 +554,17 @@ static bool dyn_load(const char *str, const char **code) {
 static bool vl_init(const vl_host_t *f, void *h) {
     fns = f;
     host = h;
-    free(eval_buf);
-    eval_buf = NULL;
+    free(repl_buf);
+    free(stream_buf);
+    repl_buf = stream_buf = NULL;
     repl_cid = -1;
-    ev_can_sid = ev_can_eid = ev_data_rx = false;
+    sym_can_sid = sym_can_eid = sym_data_rx = 0;
     print_prefix[0] = 0;
+    boot_us = vl_time_us();
+    systime_hz = (uint32_t)fns->get(host, "systime-hz", 0);
+    if (!rmsg_mutex.handle) {
+        lbm_mutex_init(&rmsg_mutex);
+    }
     for (int i = 0;i < RMSG_SLOTS;i++) {
         rmsg_cid[i] = -1;
     }
@@ -512,7 +574,7 @@ static bool vl_init(const vl_host_t *f, void *h) {
         return false;
     }
 
-    lbm_set_usleep_callback(vl_sleep_us);
+    lbm_set_usleep_callback(eval_sleep);
     lbm_set_printf_callback(print_cb);
     lbm_set_ctx_done_callback(done_cb);
     lbm_set_dynamic_load_callback(dyn_load);
@@ -539,6 +601,7 @@ static bool vl_init(const vl_host_t *f, void *h) {
 
     load_vesc_extension_stubs();
     lbm_add_extension("print", vx_print);
+    lbm_add_extension("puts", vx_puts);
     lbm_add_extension("set-print-prefix", vx_set_print_prefix);
     lbm_add_extension("systime", vx_systime);
     lbm_add_extension("secs-since", vx_secs_since);
@@ -550,9 +613,12 @@ static bool vl_init(const vl_host_t *f, void *h) {
     lbm_add_extension("can-send-eid", vx_can_send_eid);
     lbm_add_extension("canmsg-send", vx_canmsg_send);
     lbm_add_extension("canmsg-recv", vx_canmsg_recv);
+    lbm_add_extension("can-local-id", vx_can_local_id);
     lbm_add_extension("can-list-devs", vx_can_list_devs);
     lbm_add_extension("can-msg-age", vx_can_msg_age);
     lbm_add_extension("get-bms-val", vx_get_bms_val);
+    lbm_add_extension("get-fault", vx_get_fault);
+    lbm_add_extension("sysinfo", vx_sysinfo);
     lbm_add_extension("timeout-reset", vx_timeout_reset);
     lbm_add_extension("reboot", vx_reboot);
     lbm_add_extension("conf-get", vx_conf_get);
@@ -572,8 +638,7 @@ static bool vl_init(const vl_host_t *f, void *h) {
 
     // The display driver and hardware of the Dash, which only need to succeed
     const char *ok[] = {"import", "conf-store", "image-save", "disp-load-sh8501b", "disp-load-ili9341",
-                        "disp-load-st7789", "disp-load-ssd1306", "disp-load-icna3306", "disp-reset",
-                        "disp-orientation", "disp-set-bl", "btn-pull-en", "i2c-start"};
+                        "disp-load-st7789", "disp-load-ssd1306", "disp-load-icna3306", "disp-orientation", "disp-set-bl", "btn-pull-en", "i2c-start"};
     for (unsigned int i = 0;i < sizeof(ok) / sizeof(ok[0]);i++) {
         lbm_add_extension(ok[i], vx_true);
     }
@@ -582,6 +647,17 @@ static bool vl_init(const vl_host_t *f, void *h) {
 }
 
 static void vl_run(void) {
+    // The reader and printer use strtod and printf, which follow the locale of
+    // the app. Qt applies the locale of the user on Unix (not on Windows), so
+    // numbers in the code would be read as 0 where the decimal separator is a
+    // comma.
+#ifndef _WIN32
+    static locale_t c_locale;
+    if (!c_locale) {
+        c_locale = newlocale(LC_NUMERIC_MASK, "C", (locale_t)0);
+    }
+    uselocale(c_locale);
+#endif
     lbm_run_eval();
 }
 
@@ -619,7 +695,8 @@ static bool vl_load(const char *code, int len) {
 }
 
 static bool vl_eval(const char *str, bool program) {
-    if (!program && repl_cid >= 0) {
+    // The last REPL command or stream is still being read
+    if ((!program && repl_cid >= 0) || (program && stream_buf && !lbm_channel_is_empty(&stream_tok))) {
         return false;
     }
 
@@ -627,13 +704,18 @@ static bool vl_eval(const char *str, bool program) {
         return false;
     }
 
-    free(eval_buf);
-    eval_buf = strdup(str);
-    lbm_create_string_char_channel(&tok_state, &tok, eval_buf);
-    lbm_cid cid = program ? lbm_load_and_eval_program_incremental(&tok, "main-s") :
-                            lbm_load_and_eval_expression(&tok);
-    if (!program) {
-        repl_cid = cid;
+    // Streamed code is read before it runs, so the REPL can be used while it runs
+    lbm_cid cid;
+    if (program) {
+        free(stream_buf);
+        stream_buf = strdup(str);
+        lbm_create_string_char_channel(&stream_state, &stream_tok, stream_buf);
+        cid = lbm_load_and_eval_program(&stream_tok, "main-s");
+    } else {
+        free(repl_buf);
+        repl_buf = strdup(str);
+        lbm_create_string_char_channel(&repl_state, &repl_tok, repl_buf);
+        cid = repl_cid = lbm_load_and_eval_expression(&repl_tok);
     }
     lbm_continue_eval();
     return cid > 0;
@@ -666,44 +748,47 @@ static void vl_mock(const vesc_mock_state_t *state) {
 
 // Same values as lispif_process_can, lispif_process_custom_app_data and lispif_process_rmsg
 static void vl_event(const char *what, int id, int arg, const uint8_t *data, int len) {
-    bool rmsg = strcmp(what, "rmsg") == 0;
-    bool sid = strcmp(what, "can-sid") == 0;
-    bool eid = strcmp(what, "can-eid") == 0;
-    bool rx = strcmp(what, "data-rx") == 0;
-
-    if ((rmsg && (arg < 0 || arg >= RMSG_SLOTS || rmsg_cid[arg] < 0)) ||
-            (sid && !ev_can_sid) || (eid && !ev_can_eid) || (rx && !ev_data_rx)) {
-        return;
-    }
-
-    lbm_uint sym;
-    char name[20];
-    snprintf(name, sizeof(name), "event-%s", what);
-    if (!rmsg && !lbm_get_symbol_by_name(name, &sym)) {
-        return;
-    }
-
     lbm_flat_value_t v;
-    if (!lbm_start_flatten(&v, 50 + len)) {
+
+    if (strcmp(what, "rmsg") == 0) {
+        if (arg < 0 || arg >= RMSG_SLOTS) {
+            return;
+        }
+
+        lbm_mutex_lock(&rmsg_mutex);
+        // A reply after the timeout of canmsg-recv is not for that call
+        if (rmsg_timeout[arg] > 0 && lbm_timestamp() - rmsg_start[arg] > rmsg_timeout[arg]) {
+            rmsg_cid[arg] = -1;
+        }
+        if (rmsg_cid[arg] >= 0 && lbm_start_flatten(&v, 10 + len)) {
+            f_lbm_array(&v, len, (uint8_t*)data);
+            lbm_finish_flatten(&v);
+            if (lbm_unblock_ctx(rmsg_cid[arg], &v)) {
+                rmsg_cid[arg] = -1;
+            } else {
+                lbm_free(v.buf);
+            }
+        }
+        lbm_mutex_unlock(&rmsg_mutex);
         return;
     }
 
-    if (!rmsg) {
+    bool rx = strcmp(what, "data-rx") == 0;
+    lbm_uint sym = rx ? sym_data_rx : (strcmp(what, "can-sid") == 0 ? sym_can_sid : sym_can_eid);
+    if (sym == 0 || !lbm_start_flatten(&v, 50 + len)) {
+        return;
+    }
+
+    f_cons(&v);
+    f_sym(&v, sym);
+    if (!rx) {
         f_cons(&v);
-        f_sym(&v, sym);
-        if (!rx) {
-            f_cons(&v);
-            f_i32(&v, id);
-        }
+        f_i32(&v, id);
     }
     f_lbm_array(&v, len, (uint8_t*)data);
     lbm_finish_flatten(&v);
 
-    bool ok = rmsg ? lbm_unblock_ctx(rmsg_cid[arg], &v) : lbm_event(&v);
-    if (rmsg && ok) {
-        rmsg_cid[arg] = -1;
-    }
-    if (!ok) {
+    if (!lbm_event(&v)) {
         lbm_free(v.buf);
     }
 }

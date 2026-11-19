@@ -33,10 +33,11 @@ typedef struct {
     void (*print)(void *host, const char *str);
     // send-data, can-send-sid, can-send-eid and canmsg-send. arg is the slot of canmsg-send.
     void (*send)(void *host, const char *what, int id, int arg, const uint8_t *data, int len);
-    // canget-*, can-msg-age, can-list-devs, bms-* and ads-volts, NAN when not available
+    // canget-*, can-msg-age, can-local-id, bms-*, ads-volts and systime-hz, NAN when not available
     double (*get)(void *host, const char *what, int id);
     // set-*, canset-*, timeout-reset and reboot. id is -1 for the own motor.
     void (*set)(void *host, const char *what, int id, double value);
+    // Returns true when the value is an integer
     bool (*conf)(void *host, const char *name, double *value, bool set, bool def);
     bool (*eeprom)(void *host, int addr, uint32_t *value, bool store);
     // An image in RGB888, or the display cleared to color when rgb is NULL

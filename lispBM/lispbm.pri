@@ -2,9 +2,10 @@
 # paths are for C only, so that the LispBM headers do not shadow others,
 # except the platform headers that platform_mutex.cpp needs.
 L = $$PWD/lispBM
-QMAKE_CFLAGS += -I$$L/include -I$$L/include/extensions -I$$L/src/extensions \
-    -I$$L/utils -I$$L/platform/qt5/include -I$$L/repl
-QMAKE_CXXFLAGS += -I$$L/platform/qt5/include
+QMAKE_CFLAGS += -I$$shell_quote($$L/include) -I$$shell_quote($$L/include/extensions) \
+    -I$$shell_quote($$L/src/extensions) -I$$shell_quote($$L/utils) \
+    -I$$shell_quote($$L/platform/qt5/include) -I$$shell_quote($$L/repl)
+QMAKE_CXXFLAGS += -I$$shell_quote($$L/platform/qt5/include)
 
 SOURCES += \
     $$PWD/vl_node0.c \

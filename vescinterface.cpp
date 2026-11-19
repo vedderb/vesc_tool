@@ -3601,7 +3601,8 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
         auto pair = mLastFwUuids[mUuidStrLocal];
 
-        if (pair.second >= 0 && pair.first != mUuidStr && !mFwSwapDone && !mBlockFwSwap) {
+        // The Virtual ESC opens on the main VESC, which has the Sim page
+        if (pair.second >= 0 && pair.first != mUuidStr && !mFwSwapDone && !mBlockFwSwap && !mVirtualConnected) {
             FW_RX_PARAMS pRx;
             bool ok = Utility::getFwVersionBlockingCan(this, &pRx, pair.second, 1500);
             if (ok && Utility::uuid2Str(pRx.uuid, false) == pair.first) {

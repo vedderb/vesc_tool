@@ -37,8 +37,9 @@
  *
  * A second motor controller, a BMS and an Express are on the CAN-bus. The
  * main VESC and the Express use virtual_vesc/sd in the app data as SD card,
- * with a generated log.
- * The simulation is controlled with the "sim" terminal command.
+ * with a generated log. The second VESC stores its code in virtual_vesc/can1.
+ * The simulation is controlled with the "sim" terminal command, and the Sim
+ * page of the main VESC.
  *
  * Custom configs from packages (e.g. Refloat) are normally registered at
  * runtime by native code. The XML they serve is a static qCompress-blob

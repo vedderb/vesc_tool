@@ -101,6 +101,10 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
             mAppConf = mMain->mAppConf;
             mAppConfDefault = mMain->mAppConfDefault;
             mAppConf.updateParamInt("controller_id", mCanId);
+
+            // Its own packages, so that their UI can be tested without the Sim page
+            mCodeDir = mMain->mCodeDir + "/can" + QString::number(mCanId);
+            loadCode();
         }
         return;
     }
@@ -228,7 +232,7 @@ void VirtualVesc::processPacket(QByteArray &data)
         reply.vbAppendUint8(mHwType);
         reply.vbAppendUint8((mLispRunning && !mCustomConfXml.isEmpty()) ? 1 : 0);
         reply.vbAppendUint8(0); // Phase filters
-        reply.vbAppendUint8(mHwType == HW_TYPE_VESC ? 1 : 0); // QML HW, the Sim page
+        reply.vbAppendUint8(mMain ? 0 : 1); // QML HW, the Sim page on the main VESC
         reply.vbAppendUint8(qmlFlags); // QML APP
         reply.vbAppendUint8(0); // NRF flags
         reply.vbAppendString(VIRTUAL_FW_NAME);
@@ -800,7 +804,7 @@ void VirtualVesc::processPacket(QByteArray &data)
     case COMM_LISP_READ_CODE: {
         qint32 len = vb.vbPopFrontInt32();
         qint32 offset = vb.vbPopFrontInt32();
-        QByteArray code = id == COMM_GET_QML_UI_HW ? simPage() :
+        QByteArray code = id == COMM_GET_QML_UI_HW ? (mMain ? QByteArray() : simPage()) :
                 codeSlotPayload(id == COMM_GET_QML_UI_APP ? mQmlSlot : mLispSlot);
 
         if (code.isEmpty()) {
@@ -1255,7 +1259,7 @@ void VirtualVesc::loadCode()
 
 void VirtualVesc::saveCode()
 {
-    // The code of the CAN nodes is not stored
+    // The BMS and the Express have no code
     if (mCodeDir.isEmpty()) {
         return;
     }

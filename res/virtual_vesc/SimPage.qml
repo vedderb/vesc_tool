@@ -228,7 +228,6 @@ Item {
 
                 Switch {
                     text: "CAN devices"
-                    visible: !mCommands.getSendCan() // Off would disconnect this page
                     checked: true
                     property var line: root.values.can
                     onLineChanged: checked = line[1] === "on"

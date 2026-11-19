@@ -480,6 +480,8 @@ void VirtualVesc::processPacket(QByteArray &data)
         double acc[3] = {p->accel / 9.81, latAcc / 9.81, 1.0};
         double gyro[3] = {noise(), noise(), p->speed / VirtualPlant::gnssRadius * 180.0 / M_PI + noise()};
         double mag[3] = {cos(p->heading), -sin(p->heading), 0.4};
+        // Gravity as the IMU reads it, which gives roll and pitch below
+        double g[3] = {-sin(pitch), -sin(roll) * cos(pitch), cos(roll) * cos(pitch)};
 
         // Or the IMU of the phone, with the top of the phone as forward
         PhoneImu::Reading r;
@@ -489,15 +491,36 @@ void VirtualVesc::processPacket(QByteArray &data)
                 res[1] = -v[0];
                 res[2] = v[2];
             };
-            double g[3];
             toVesc(r.gravity, g);
             toVesc(r.acc, acc);
             toVesc(r.gyro, gyro);
             toVesc(r.mag, mag);
-            roll = -atan2(g[1], g[2]);
-            pitch = atan2(-g[0], sqrt(g[1] * g[1] + g[2] * g[2]));
             yaw = -r.yaw;
         }
+
+        // Mounting rotation (ZYX) and offsets from the app configuration, applied as in the firmware
+        auto rad = [this](const char *name) { return mAppConf.getParamDouble(QString("imu_conf.") + name) * M_PI / 180.0; };
+        double s1 = sin(rad("rot_yaw")), c1 = cos(rad("rot_yaw"));
+        double s2 = sin(rad("rot_pitch")), c2 = cos(rad("rot_pitch"));
+        double s3 = sin(rad("rot_roll")), c3 = cos(rad("rot_roll"));
+        auto rotate = [&](double *v) {
+            double x = v[0], y = v[1], z = v[2];
+            v[0] = x * c1 * c2 + y * (c1 * s2 * s3 - c3 * s1) + z * (s1 * s3 + c1 * c3 * s2);
+            v[1] = x * c2 * s1 + y * (c1 * c3 + s1 * s2 * s3) + z * (c3 * s1 * s2 - c1 * s3);
+            v[2] = -x * s2 + y * c2 * s3 + z * c2 * c3;
+        };
+        rotate(acc);
+        rotate(gyro);
+        rotate(mag);
+        rotate(g);
+        for (int i = 0;i < 3;i++) {
+            double accOffset = mAppConf.getParamDouble(QString("imu_conf.accel_offsets__%1").arg(i));
+            acc[i] -= accOffset;
+            g[i] -= accOffset;
+            gyro[i] -= mAppConf.getParamDouble(QString("imu_conf.gyro_offsets__%1").arg(i));
+        }
+        roll = -atan2(g[1], g[2]);
+        pitch = atan2(-g[0], sqrt(g[1] * g[1] + g[2] * g[2]));
 
         // The quaternion uses the standard angles, the firmware negates roll and yaw
         double cr = cos(-roll / 2), sr = sin(-roll / 2), cp = cos(pitch / 2);

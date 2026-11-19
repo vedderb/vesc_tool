@@ -49,8 +49,10 @@ extern "C" uint64_t vl_time_us(void)
 }
 
 namespace {
+#ifdef HAS_LISPBM
 // One per device, in the order of devices()
 const vl_api_t *const lbmApis[] = {&vl0_api, &vl1_api, &vl2_api, &vl3_api, &vl4_api};
+#endif
 
 QMutex displayLock;
 QHash<int, QImage> displays; // By CAN-ID
@@ -85,8 +87,10 @@ void VirtualVesc::lispStart(bool loadCode)
 
     lispStop();
 
+#ifdef HAS_LISPBM
     mLbm = lbmApis[devices().indexOf(this)];
-    if (!mLbm->init(&fns, this)) {
+#endif
+    if (!mLbm || !mLbm->init(&fns, this)) {
         mLbm = nullptr;
         return;
     }
@@ -230,6 +234,8 @@ bool VirtualVesc::processLisp(COMM_PACKET_ID id, VByteArray &vb)
             print(">", COMM_LISP_PRINT);
         } else if (mLbm) {
             mLbm->eval(vb.constData(), false);
+        } else {
+            print("LispBM is not running", COMM_LISP_PRINT);
         }
         return true;
 

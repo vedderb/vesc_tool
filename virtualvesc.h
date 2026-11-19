@@ -47,7 +47,8 @@
  * command, and the Sim page of the main VESC.
  *
  * All devices run their Lisp code in LispBM, with the firmware extensions in
- * lispBM/vl_node.c. Native libraries do not run.
+ * lispBM/vl_node.c. Native libraries do not run. Builds with CONFIG += no_lispbm
+ * (the default on iOS and Android) only store the code and have no Dash.
  *
  * Custom configs from packages (e.g. Refloat) are normally registered at
  * runtime by native code. The XML they serve is a static qCompress-blob

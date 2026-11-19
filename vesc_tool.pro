@@ -266,7 +266,13 @@ include(mobile/mobile.pri)
 include(map/map.pri)
 include(lzokay/lzokay.pri)
 include(heatshrink/heatshrink.pri)
-include(lispBM/lispbm.pri)
+# LispBM runs the Lisp code on the devices of the Virtual ESC. CONFIG += no_lispbm
+# leaves it out, which is the default on iOS; CONFIG += lispbm keeps it there.
+ios: !lispbm: CONFIG += no_lispbm
+!no_lispbm {
+    DEFINES += HAS_LISPBM
+    include(lispBM/lispbm.pri)
+}
 include(QCodeEditor/qcodeeditor.pri)
 include(esp32/esp32.pri)
 include(display_tool/display_tool.pri)

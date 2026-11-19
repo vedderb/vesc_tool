@@ -129,7 +129,9 @@ VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QSt
     // The rest of the vehicle, on the CAN-bus
     mCanNodes.append(new VirtualVesc(this, 1, HW_TYPE_VESC, VIRTUAL_HW_NAME, "VIRTUALVESC2", this));
     mCanNodes.append(new VirtualVesc(this, 2, HW_TYPE_CUSTOM_MODULE, "Express", "VIRTUALEXPR1", this));
+#ifdef HAS_LISPBM
     mCanNodes.append(new VirtualVesc(this, 4, HW_TYPE_CUSTOM_MODULE, "VDisp 900", "VIRTUALDASH1", this)); // Dash 35B
+#endif
     mCanNodes.append(new VirtualVesc(this, BMS_CAN_ID, HW_TYPE_VESC_BMS, "BMS", "VIRTUALBMS01", this));
     for (auto node: mCanNodes) {
         connect(node, &VirtualVesc::dataToSend, this, &VirtualVesc::dataToSend);
@@ -1060,6 +1062,9 @@ void VirtualVesc::terminalCmd(const QString &cmd)
             print(QString("fault %1").arg(p->faultForced));
             print(QString("can %1").arg(root->mCanOn ? "on" : "off"));
             print(QString("imu %1").arg(!PhoneImu::available() ? "none" : (root->mPhoneImu ? "phone" : "model")));
+#ifdef HAS_LISPBM
+            print("dash on");
+#endif
             return;
         } else if (!sub.isEmpty()) {
             print("Invalid argument, type help to list all available commands");

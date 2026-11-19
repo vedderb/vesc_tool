@@ -65,7 +65,7 @@ Item {
 
             var t = str.trim().split(/\s+/)
             if ((t.length === 6 && !isNaN(t[1])) ||
-                    (t.length === 2 && ["scenario", "throttle", "fault", "can", "imu"].includes(t[0]))) {
+                    (t.length === 2 && ["scenario", "throttle", "fault", "can", "imu", "dash"].includes(t[0]))) {
                 var v = Object.assign({}, values)
                 v[t[0]] = t
                 values = v
@@ -297,35 +297,41 @@ Item {
                     }
                 }
 
-                SectionHeader { text: "Dash 35B" }
-
-                Text {
+                // Only in builds with LispBM
+                ColumnLayout {
                     Layout.fillWidth: true
-                    color: Utility.getAppHexColor("disabledText")
-                    wrapMode: Text.WordWrap
-                    text: "On CAN ID 4. The display shows what its Lisp code draws, e.g. the Dash 35B package."
-                }
+                    visible: root.values.dash !== undefined
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: width * 2 / 3
-                    color: "black"
+                    SectionHeader { text: "Dash 35B" }
 
-                    VirtualDisplay {
-                        anchors.fill: parent
-                        canId: 4
+                    Text {
+                        Layout.fillWidth: true
+                        color: Utility.getAppHexColor("disabledText")
+                        wrapMode: Text.WordWrap
+                        text: "On CAN ID 4. The display shows what its Lisp code draws, e.g. the Dash 35B package."
                     }
-                }
 
-                RowLayout {
-                    Repeater {
-                        model: 4
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Button " + index
-                            onPressed: root.sim("button " + index + " on")
-                            onReleased: root.sim("button " + index + " off")
-                            onCanceled: root.sim("button " + index + " off")
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: width * 2 / 3
+                        color: "black"
+
+                        VirtualDisplay {
+                            anchors.fill: parent
+                            canId: 4
+                        }
+                    }
+
+                    RowLayout {
+                        Repeater {
+                            model: 4
+                            Button {
+                                Layout.fillWidth: true
+                                text: "Button " + index
+                                onPressed: root.sim("button " + index + " on")
+                                onReleased: root.sim("button " + index + " off")
+                                onCanceled: root.sim("button " + index + " off")
+                            }
                         }
                     }
                 }

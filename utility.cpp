@@ -427,6 +427,20 @@ bool Utility::waitSignal(QObject *sender, QString signal, int timeoutMs)
     return timeoutTimer.isActive();
 }
 
+bool Utility::writeConfigBlocking(VescInterface *vesc, bool motor)
+{
+    if (!vesc->isPortConnected()) {
+        return false;
+    }
+
+    if (motor) {
+        vesc->commands()->setMcconf(false);
+    } else {
+        vesc->commands()->setAppConf();
+    }
+    return waitSignal(motor ? vesc->mcConfig() : vesc->appConfig(), SIGNAL(writeConfirmed()), 4000);
+}
+
 void Utility::sleepWithEventLoop(int timeMs)
 {
     QEventLoop loop;
@@ -889,7 +903,7 @@ bool Utility::setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int
 
 /**
  * @brief Utility::setMcParamsFromCurrentConfigAllCan
- * Take the list of parameters from the current config and apply them on all VESCs on the CAN-bus (including the local one)
+ * Apply parameters to the selected VESC, or to the local VESC and the listed CAN devices.
  *
  * @param vesc
  * VescInterface pointer
@@ -936,9 +950,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
             config->updateParamFromOther(p.first, p.second, nullptr);
         }
 
-        vesc->commands()->setMcconf(false);
-
-        if (!waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000)) {
+        if (!writeConfigBlocking(vesc, true)) {
             vesc->emitMessageDialog("Write Motor Configuration",
                                     "Could not write motor configuration.",
                                     false, false);
@@ -949,8 +961,9 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
         return true;
     };
 
-    // Start with local VESC
-    vesc->canTmpOverride(false, 0);
+    auto *cmd = vesc->commands();
+    bool forward = canIds.isEmpty() && cmd->getSendCan();
+    vesc->canTmpOverride(forward, forward ? cmd->getCanSendId() : 0);
 
     if (isConnectedToHwVesc(vesc)) {
         res = updateConf();

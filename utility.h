@@ -73,6 +73,7 @@ public:
     Q_INVOKABLE static void keepScreenOn(bool on);
     Q_INVOKABLE static void allowScreenRotation(bool enabled);
     Q_INVOKABLE static bool waitSignal(QObject *sender, QString signal, int timeoutMs);
+    Q_INVOKABLE static bool writeConfigBlocking(VescInterface *vesc, bool motor);
     Q_INVOKABLE static void sleepWithEventLoop(int timeMs);
     Q_INVOKABLE static bool canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud);
     Q_INVOKABLE static QString detectAllFoc(VescInterface *vesc,

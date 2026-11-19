@@ -26,7 +26,9 @@ import Vedder.vesc.utility 1.0
 // Search for parameters by name, path or description, and for pages and tools
 SheetDialog {
     id: search
-    signal paramSelected(bool isApp, string group, string subgroup, string name)
+    // Configs to search, each with title, params, pageIndex and optionally the groups to include
+    property var sources: []
+    signal paramSelected(int sourceIndex, string group, string subgroup, string name)
     signal pageSelected(string title)
 
     // No title on landscape phones, which leaves room for results above the keyboard
@@ -36,10 +38,16 @@ SheetDialog {
     onOpened: field.forceActiveFocus()
     onClosed: field.text = ""
 
-    function addConfig(conf, isApp, query) {
+    function addConfig(sourceIndex, query) {
+        var source = sources[sourceIndex]
+        var conf = source.params
+        if (!conf) {
+            return
+        }
+
         var byName = []
         var byOther = []
-        var groups = conf.getParamGroups()
+        var groups = source.groups || conf.getParamGroups()
 
         for (var g = 0;g < groups.length;g++) {
             var subgroups = conf.getParamSubgroups(groups[g])
@@ -52,8 +60,8 @@ SheetDialog {
 
                     var label = conf.getLongName(names[n])
                     var path = groups[g] + " › " + subgroups[s]
-                    var entry = {"section": isApp ? "App Cfg" : "Motor Cfg", "label": label, "path": path,
-                                 "isApp": isApp, "group": groups[g], "subgroup": subgroups[s], "param": names[n]}
+                    var entry = {"section": source.title, "label": label, "path": path,
+                                 "sourceIndex": sourceIndex, "group": groups[g], "subgroup": subgroups[s], "param": names[n]}
 
                     if (label.toLowerCase().indexOf(query) >= 0) {
                         byName.push(entry)
@@ -76,8 +84,9 @@ SheetDialog {
             return
         }
 
-        addConfig(VescIf.mcConfig(), false, query)
-        addConfig(VescIf.appConfig(), true, query)
+        for (var s = 0;s < sources.length;s++) {
+            addConfig(s, query)
+        }
 
         var pages = ["Controls", "Multi Settings", "Settings"]
         for (var i = 0;i < tabBar.count;i++) {
@@ -87,7 +96,7 @@ SheetDialog {
         pages.forEach(function(p) {
             if (p.toLowerCase().indexOf(query) >= 0) {
                 resultModel.append({"section": qsTr("Pages and tools"), "label": p, "path": "",
-                                    "isApp": false, "group": "", "subgroup": "", "param": ""})
+                                    "sourceIndex": -1, "group": "", "subgroup": "", "param": ""})
             }
         })
     }
@@ -121,10 +130,11 @@ SheetDialog {
 
             delegate: ItemDelegate {
                 width: ListView.view.width
+                enabled: sourceIndex < 0 || search.sources[sourceIndex].pageIndex >= 0
                 onClicked: {
                     search.close()
                     if (param !== "") {
-                        search.paramSelected(isApp, group, subgroup, param)
+                        search.paramSelected(sourceIndex, group, subgroup, param)
                     } else {
                         search.pageSelected(label)
                     }
@@ -154,7 +164,8 @@ SheetDialog {
 
                     Text {
                         visible: param !== ""
-                        text: param !== "" ? (isApp ? VescIf.appConfig() : VescIf.mcConfig()).getParamValueString(param) : ""
+                        text: param !== "" && search.sources[sourceIndex].params ?
+                                  search.sources[sourceIndex].params.getParamValueString(param) : ""
                         font.weight: Font.Medium
                         color: Utility.getAppHexColor("lightText")
                     }

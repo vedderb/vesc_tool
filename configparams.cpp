@@ -647,6 +647,31 @@ void ConfigParams::storeReference()
     emit referenceStored();
 }
 
+void ConfigParams::recordWrite()
+{
+    mWrittenParams = mParams;
+}
+
+// The reference becomes what was written, not what was edited since. The ack
+// for the duplicate write packet finds nothing left to confirm.
+void ConfigParams::confirmWrite()
+{
+    if (mWrittenParams.isEmpty()) {
+        return;
+    }
+
+    if (!mReference) {
+        mReference = new ConfigParams(this);
+    }
+
+    *mReference = *this;
+    mReference->mParams = mWrittenParams;
+    mWrittenParams.clear();
+
+    emit referenceStored();
+    emit writeConfirmed();
+}
+
 // Many parameters change at once on reads, so the difference is checked once afterwards
 void ConfigParams::scheduleChangedUpdate()
 {

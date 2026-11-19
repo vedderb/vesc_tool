@@ -108,7 +108,8 @@ Item {
                     onClicked: {
                         mCommands.setMcconfTemp(VescIf.getProfile(index),
                                                 true, false, true, false, true)
-                        VescIf.updateMcconfFromProfile(VescIf.getProfile(index))
+                        // Read back what the VESC runs now, so the profile does not show as unwritten changes
+                        mCommands.getMcconf()
                         showToast(qsTr("Applied until reboot"), name, "ok", qsTr("Use permanently"), function() {
                             permanentDialog.open()
                         })
@@ -206,7 +207,7 @@ Item {
         onAccepted: {
             mCommands.setMcconfTemp(VescIf.getProfile(index),
                                     true, true, true, false, true)
-            VescIf.updateMcconfFromProfile(VescIf.getProfile(index))
+            mCommands.getMcconf()
         }
     }
 

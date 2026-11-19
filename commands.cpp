@@ -432,22 +432,19 @@ void Commands::processPacket(QByteArray data)
 
     case COMM_SET_MCCONF:
         if (mMcConfig) {
-            mMcConfig->storeReference();
+            mMcConfig->confirmWrite();
         }
         emit ackReceived("Motor config write OK");
         break;
 
     case COMM_SET_APPCONF:
         if (mAppConfig) {
-            mAppConfig->storeReference();
+            mAppConfig->confirmWrite();
         }
         emit ackReceived("App config write OK");
         break;
 
     case COMM_SET_APPCONF_NO_STORE:
-        if (mAppConfig) {
-            mAppConfig->storeReference();
-        }
         emit ackReceived("App config set OK");
         break;
 
@@ -1441,6 +1438,7 @@ void Commands::setMcconf(bool check)
 {
     if (mMcConfig) {
         mMcConfigLast = *mMcConfig;
+        mMcConfig->recordWrite();
         VByteArray vb;
         vb.vbAppendInt8(COMM_SET_MCCONF);
         mMcConfig->serialize(vb);
@@ -1488,6 +1486,7 @@ void Commands::setAppConf()
         VByteArray vb;
         vb.vbAppendInt8(COMM_SET_APPCONF);
 
+        mAppConfig->recordWrite();
         mAppConfig->serialize(vb);
         emitData(vb);
         emitData(vb);
@@ -2101,6 +2100,7 @@ void Commands::customConfigSet(int confInd, ConfigParams *conf)
     VByteArray vb;
     vb.vbAppendUint8(COMM_SET_CUSTOM_CONFIG);
     vb.vbAppendInt8(int8_t(confInd));
+    conf->recordWrite();
     conf->serialize(vb);
     emitData(vb);
 }

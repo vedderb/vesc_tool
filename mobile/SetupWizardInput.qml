@@ -75,7 +75,7 @@ Item {
 
             if (mCommands.getSendCan()) {
                 canIdModel.append({"name": "This VESC (CAN FWD)",
-                                      "canId": mAppConf.getParamInt("controller_id"),
+                                      "canId": mCanIdAtStart,
                                       "isCan": true})
                 dialog.open()
                 canScanBar.value = 100
@@ -795,21 +795,25 @@ Item {
 
     function closeWizard(finished) {
         if (finished) {
-            workaroundTimerClose.start()
+            var receiver = canIdModel.get(canIdList.currentIndex)
+            if (receiver.isCan !== mCommands.getSendCan() ||
+                    (receiver.isCan && receiver.canId !== mCommands.getCanSendId())) {
+                VescIf.emitMessageDialog(qsTr("Write Input Configuration"),
+                                         qsTr("The selected VESC is no longer connected, so the input configuration was not written."),
+                                         false, false)
+            } else {
+                disableDialog()
+                var saved = Utility.writeConfigBlocking(VescIf, false)
+                enableDialog()
+                if (!saved) {
+                    VescIf.emitMessageDialog(qsTr("Write Input Configuration"),
+                                             qsTr("The VESC did not confirm the write. Check the connection and try Finish again."),
+                                             false, false)
+                    return
+                }
+            }
         }
         mCommands.setSendCan(mSendCanAtStart, mCanIdAtStart)
         dialog.close()
-    }
-    Timer {
-        id: workaroundTimerClose
-        interval: 0
-        repeat: false
-        running: false
-        onTriggered: {
-            disableDialog()
-            mCommands.setAppConf()
-            Utility.waitSignal(mCommands, "2ackReceived(QString)", 2000)
-            enableDialog()
-        }
     }
 }

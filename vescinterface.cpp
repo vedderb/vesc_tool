@@ -585,7 +585,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         ConfigParams *custConf = customConfig(confId);
         QString name;
         if (custConf) {
-            custConf->storeReference();
+            custConf->confirmWrite();
             name = custConf->getLongName("hw_name");
         } else {
             name = tr("Custom config %1").arg(confId);

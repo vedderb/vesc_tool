@@ -83,6 +83,8 @@ public:
     Q_INVOKABLE QString enumLabel(const QString &enumName);
     Q_INVOKABLE ConfigParams *getReference();
     void storeReference();
+    void recordWrite();
+    void confirmWrite();
     void setParamOrder(const QStringList &order);
 
     QWidget *getEditor(const QString &name, QWidget *parent = nullptr);
@@ -166,6 +168,7 @@ signals:
     void updated();
     void savingXml();
     void referenceStored();
+    void writeConfirmed();
     void paramChanged(QObject *src, QString name);
     void changedParamsChanged();
 
@@ -191,6 +194,7 @@ private:
     int mConfigVersion;
     int mUpdateCnt;
     ConfigParams *mReference;
+    QHash<QString, ConfigParam> mWrittenParams;
     QStringList mChangedParams;
     bool mChangedUpdatePending;
 

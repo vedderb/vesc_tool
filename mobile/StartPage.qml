@@ -76,7 +76,10 @@ Item {
                     onDisconnectClicked: requestDisconnect()
                     onCanClicked: canDrawerLoader.item.open()
                     onUpdateClicked: firmwareDialog.open()
-                    onChangesClicked: reviewChanges(mMcConf.changedParams.length > 0 ? confPageMotor : confPageApp)
+                    onChangesClicked: {
+                        var conf = dirtyConfigs()[0]
+                        reviewChanges(conf === mMcConf ? confPageMotor : conf === mAppConf ? confPageApp : confCustomPage)
+                    }
                 }
 
                 Button {

@@ -69,6 +69,15 @@ Item {
         e.Layout.fillsWidth = true
     }
 
+    function review() {
+        writeButton.review()
+    }
+
+    function jumpTo(group, subgroup, name) {
+        tabBox.currentIndex = tabBox.model.indexOf(subgroup)
+        editors.showParam(scroll, scrollCol, name)
+    }
+
     function updateEditors() {
         if (tabBox.currentText === "") {
             return
@@ -130,6 +139,7 @@ Item {
             Layout.fillWidth: !phoneLandscape
             Layout.alignment: Qt.AlignTop
             WriteButton {
+                id: writeButton
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
                 params: conf

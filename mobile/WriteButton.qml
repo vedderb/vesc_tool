@@ -45,6 +45,7 @@ Button {
     }
 
     function write() {
+        if (!writeReady(params)) return
         undoParams = referenceValues()
         writeRequested()
     }
@@ -65,14 +66,23 @@ Button {
     Connections {
         target: VescIf
 
+        function onFwRxChanged(rx, limited) {
+            if (!rx) {
+                undoParams = []
+                reviewSheet.close()
+            }
+        }
+
         function onStatusMessage(msg, isGood) {
             if (msg === ackText && undoParams.length > 0) {
                 var undo = undoParams
+                var target = VescIf.getConnectedUuid() + fwCanId
                 undoParams = []
                 showToast(msg, qsTr("%1 changed").arg(undo.length === 1 ?
                                                               params.getLongName(undo[0][0]) :
                                                               qsTr("%1 parameters").arg(undo.length)),
                           "ok", qsTr("Undo"), function() {
+                              if (target !== VescIf.getConnectedUuid() + fwCanId || !writeReady(params)) return
                               revert(undo)
                               writeRequested()
                           })

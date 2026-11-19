@@ -1020,8 +1020,8 @@ Item {
 
             WarningBanner {
                 Layout.fillWidth: true
-                text: "This is going to spin up all motors. Make " +
-                      "sure that nothing is in the way."
+                text: detectCanBox.checked ? qsTr("All motors will spin. Make sure nothing is in the way.") :
+                                            qsTr("Motors on the selected controller will spin. Make sure nothing is in the way.")
             }
 
             CheckBox {
@@ -1048,12 +1048,14 @@ Item {
             onTriggered: {
                 Utility.waitSignal(mCommands, "2ackReceived(QString)", 4000)
 
-                if (!Utility.setBatteryCutCan(VescIf, canDevs, 6.0, 6.0)) {
+                // Without CAN detection only the selected controller is set up
+                var targets = detectCanBox.checked ? canDevs : []
+                if (!Utility.setBatteryCutCan(VescIf, targets, 6.0, 6.0)) {
                     enableDialog()
                     return
                 }
 
-                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, ["m_motor_temp_sens_type", "m_ntc_motor_beta"])
+                Utility.setMcParamsFromCurrentConfigAllCan(VescIf, targets, ["m_motor_temp_sens_type", "m_ntc_motor_beta"])
 
                 detecting = true
                 var res  = Utility.detectAllFoc(VescIf, detectCanBox.checked,
@@ -1068,7 +1070,7 @@ Item {
                 if (res.startsWith("Success!")) {
                     resDetect = true
 
-                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, canDevs, usageModel.get(usageList.currentIndex).batt_cut_cautious)
+                    Utility.setBatteryCutCanFromCurrentConfig(VescIf, targets, usageModel.get(usageList.currentIndex).batt_cut_cautious)
 
                     var updateAllParams = ["l_duty_start"]
 
@@ -1091,7 +1093,7 @@ Item {
                         updateAllParams.push("foc_sensor_mode")
                     }
 
-                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, canDevs, updateAllParams)
+                    Utility.setMcParamsFromCurrentConfigAllCan(VescIf, targets, updateAllParams)
                 }
                 enableDialog()
 
@@ -1350,7 +1352,8 @@ Item {
         running: false
 
         onTriggered: {
-            dirSetup.setCanDevs(canDevs)
+            dirSetup.setCanDevs(detectCanBox.checked ? canDevs :
+                                (mCommands.getSendCan() ? [mCommands.getCanSendId()] : []))
         }
     }
 

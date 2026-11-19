@@ -63,6 +63,7 @@ ApplicationWindow {
     property string connLink: ""
     property string hwName: ""
     property string hwType: ""
+    property int fwCanId: -1
     // First motor controller on CAN when the connected device is not one, from the CAN scan
     property int canMotorId: -1
     property string fwVersion: ""
@@ -78,7 +79,12 @@ ApplicationWindow {
     property string statusFlash: ""
     property var warnings: []
     property int canCount: 0
-    property int changedCount: mMcConf.changedParams.length + mAppConf.changedParams.length
+    readonly property ConfigParams customConf: fwReadCorrectly && confCustomPage.visible && confCustomLoader.item ?
+                                                   confCustomLoader.item.conf : null
+    readonly property int customChangedCount: customConf ? customConf.changedParams.length : 0
+    readonly property var writableConfigs: [fwReadCorrectly && confTimer.mcConfRx ? mMcConf : null,
+                                            fwReadCorrectly && confTimer.appConfRx ? mAppConf : null, customConf]
+    readonly property int changedCount: dirtyConfigs().reduce((count, conf) => count + conf.changedParams.length, 0)
     property alias lastDeviceName: lastDevice.name
     property alias lastDeviceTime: lastDevice.time
     property alias lastDeviceIcon: lastDevice.icon
@@ -137,8 +143,22 @@ ApplicationWindow {
         return params.major + "." + ("0" + params.minor).slice(-2)
     }
 
+    function dirtyConfigs() {
+        return writableConfigs.filter(conf => conf && conf.changedParams.length > 0)
+    }
+
+    // Writes go to the device the config was read from, not to a CAN device that a scan is probing
+    function writeReady(conf) {
+        var ready = writableConfigs.includes(conf) && fwCanId === (mCommands.getSendCan() ? mCommands.getCanSendId() : -1)
+        if (!ready) {
+            showToast(qsTr("Not ready to write"), qsTr("Wait until the configuration is read from the VESC."), "warn")
+        }
+        return ready
+    }
+
     function requestDisconnect() {
-        if (changedCount > 0) {
+        if (disconnectTimer.running) return
+        if (dirtyConfigs().length > 0) {
             disconnectSheet.open()
         } else {
             VescIf.disconnectPort()
@@ -146,7 +166,7 @@ ApplicationWindow {
     }
 
     function reviewChanges(page) {
-        var loader = page === confPageMotor ? confMotorLoader : confAppLoader
+        var loader = page === confPageMotor ? confMotorLoader : page === confPageApp ? confAppLoader : confCustomLoader
         mainSwipeView.setCurrentIndex(page.SwipeView.index)
         loader.item.review()
     }
@@ -905,6 +925,7 @@ ApplicationWindow {
 
     MainTabButton {
         id: confCustomButton
+        dot: customChangedCount > 0
         visible: confCustomPage.visible
         text: "Custom Cfg"
     }
@@ -1174,16 +1195,17 @@ ApplicationWindow {
         running: true
         repeat: true
 
-        property bool mcConfRx: false
-        property bool appConfRx: false
+        // Null while waiting for a read, false if it could not be decoded.
+        property var mcConfRx: null
+        property var appConfRx: null
 
         onTriggered: {
             if (VescIf.isPortConnected() && VescIf.getLastFwRxParams().hwTypeStr() === "VESC") {
-                if (!mcConfRx) {
+                if (mcConfRx === null) {
                     mCommands.getMcconf()
                 }
 
-                if (!appConfRx) {
+                if (appConfRx === null) {
                     mCommands.getAppConf()
                 }
             }
@@ -1468,8 +1490,8 @@ ApplicationWindow {
         function onPortConnectedChanged() {
             updateConnectionInfo()
             if (!VescIf.isPortConnected()) {
-                confTimer.mcConfRx = false
-                confTimer.appConfRx = false
+                confTimer.mcConfRx = null
+                confTimer.appConfRx = null
                 connected = false
                 fwReadCorrectly = false
                 hwName = ""
@@ -1515,6 +1537,7 @@ ApplicationWindow {
 
         function onFwRxChanged(rx, limited) {
             if (rx) {
+                fwCanId = mCommands.getSendCan() ? mCommands.getCanSendId() : -1
                 if (VescIf.getFwSupportsConfiguration()) {
                     confPageMotor.visible = true
                     confPageApp.visible = true
@@ -1531,8 +1554,8 @@ ApplicationWindow {
 
                 if (VescIf.getFwSupportsConfiguration()) {
                     confTimer.restart()
-                    confTimer.mcConfRx = false
-                    confTimer.appConfRx = false
+                    confTimer.mcConfRx = null
+                    confTimer.appConfRx = null
 
                     mCommands.getMcconf()
                     mCommands.getAppConf()
@@ -1560,6 +1583,8 @@ ApplicationWindow {
                 lastDevice.addr = connLink.startsWith("BLE") ? VescIf.getLastBleAddr() :
                                   tcp ? VescIf.getLastTcpServer() : ""
             } else {
+                disconnectTimer.stop()
+                disconnectSheet.close()
                 updateConfCustom()
             }
 
@@ -1582,18 +1607,25 @@ ApplicationWindow {
 
     Connections {
         target: mMcConf
+        function onWriteConfirmed() { disconnectTimer.confirm(mMcConf) }
 
-        function onUpdated() {
+        function onReferenceStored() {
             confTimer.mcConfRx = true
         }
     }
 
     Connections {
         target: mAppConf
+        function onWriteConfirmed() { disconnectTimer.confirm(mAppConf) }
 
-        function onUpdated() {
+        function onReferenceStored() {
             confTimer.appConfRx = true
         }
+    }
+
+    Connections {
+        target: customConf
+        function onWriteConfirmed() { disconnectTimer.confirm(customConf) }
     }
 
     Connections {
@@ -1622,13 +1654,6 @@ ApplicationWindow {
             }
         }
 
-        function onAckReceived(ackType) {
-            if (disconnectTimer.running && changedCount === 0) {
-                disconnectTimer.stop()
-                VescIf.disconnectPort()
-            }
-        }
-
         function onValuesImuReceived(values, mask) {
             if (tabBar.currentIndex === (1 + indexOffset()) && rtSwipeView.currentIndex === 2) {
                 vesc3dLoader.item.setRotation(values.roll, values.pitch,
@@ -1639,11 +1664,11 @@ ApplicationWindow {
 
         function onDeserializeConfigFailed(isMc, isApp) {
             if (isMc) {
-                confTimer.mcConfRx = true
+                confTimer.mcConfRx = false
             }
 
             if (isApp) {
-                confTimer.appConfRx = true
+                confTimer.appConfRx = false
             }
         }
     }
@@ -1656,10 +1681,13 @@ ApplicationWindow {
         function onCurrentItemChanged() {
             var page = lastPage
             var count = page === confPageMotor ? mMcConf.changedParams.length :
-                        page === confPageApp ? mAppConf.changedParams.length : 0
+                        page === confPageApp ? mAppConf.changedParams.length :
+                        page === confCustomPage ? customChangedCount : 0
 
             if (count > 0 && page.SwipeView.index >= 0) {
-                showToast(qsTr("%1 unwritten in %2").arg(count).arg(page === confPageMotor ? "Motor Cfg" : "App Cfg"),
+                var name = page === confPageMotor ? confMotorButton.text :
+                           page === confPageApp ? confAppButton.text : confCustomButton.text
+                showToast(qsTr("%1 unwritten in %2").arg(count).arg(name),
                           "", "warn", qsTr("Review"), function() {
                               reviewChanges(page)
                           })
@@ -1895,26 +1923,30 @@ ApplicationWindow {
         id: disconnectSheet
         title: qsTr("Write changes before disconnecting?")
         acceptText: qsTr("Write")
-        rejectText: qsTr("Discard")
+        rejectText: qsTr("Disconnect anyway")
         closePolicy: Popup.NoAutoClose
 
-        onAccepted: {
-            if (mMcConf.changedParams.length > 0) {
-                mCommands.setMcconf(false)
-            }
+        onAccepted: writeChanges()
 
-            if (mAppConf.changedParams.length > 0) {
-                mCommands.setAppConf()
+        function writeChanges() {
+            var groups = dirtyConfigs()
+            if (!groups.length) {
+                VescIf.disconnectPort()
+                return
             }
-
+            if (!groups.every(writeReady)) return
+            disconnectTimer.pending = groups
             disconnectTimer.restart()
+            if (groups.includes(mMcConf)) mCommands.setMcconf(false)
+            if (groups.includes(mAppConf)) mCommands.setAppConf()
+            if (groups.includes(customConf)) mCommands.customConfigSet(0, customConf)
         }
 
         onRejected: VescIf.disconnectPort()
 
         Text {
             anchors.fill: parent
-            text: qsTr("Motor Cfg or App Cfg has values that are not written to the VESC.")
+            text: qsTr("The connected device has unwritten configuration changes.")
             wrapMode: Text.WordWrap
             color: Utility.getAppHexColor("lightText")
         }
@@ -1922,8 +1954,29 @@ ApplicationWindow {
 
     Timer {
         id: disconnectTimer
-        interval: 3000
-        onTriggered: VescIf.disconnectPort()
+        interval: 5000
+        property var pending: []
+        onRunningChanged: if (running) showToast(qsTr("Writing changes..."), qsTr("Disconnecting when the VESC confirms."), "ok")
+
+        function confirm(conf) {
+            if (!running || !pending.includes(conf)) return
+            pending = pending.filter(p => p !== conf)
+            if (!pending.length) {
+                Qt.callLater(function() {
+                    if (disconnectTimer.running) {
+                        disconnectTimer.stop()
+                        requestDisconnect()
+                    }
+                })
+            }
+        }
+
+        onTriggered: {
+            var uuid = VescIf.getConnectedUuid()
+            showToast(qsTr("Write not confirmed"), qsTr("You are still connected."), "warn", qsTr("Retry"), function() {
+                if (connected && fwReadCorrectly && VescIf.getConnectedUuid() === uuid) disconnectSheet.writeChanges()
+            })
+        }
     }
 
     Popup {
@@ -2021,11 +2074,21 @@ ApplicationWindow {
     ParamSearch {
         id: paramSearch
 
-        onParamSelected: function(isApp, group, subgroup, name) {
-            var page = isApp ? confPageApp : confPageMotor
-            var loader = isApp ? confAppLoader : confMotorLoader
-            mainSwipeView.setCurrentIndex(page.SwipeView.index)
-            loader.item.jumpTo(group, subgroup, name)
+        sources: [
+            {title: confMotorButton.text, params: mMcConf,
+                pageIndex: confPageMotor.SwipeView.index, editor: confMotorLoader.item},
+            {title: confAppButton.text, params: mAppConf,
+                pageIndex: confPageApp.SwipeView.index, editor: confAppLoader.item},
+            {title: confCustomButton.text, params: customConf,
+                pageIndex: confCustomPage.SwipeView.index, editor: confCustomLoader.item, groups: ["General"]}
+        ]
+
+        onParamSelected: function(sourceIndex, group, subgroup, name) {
+            var target = sources[sourceIndex]
+            if (target.editor) {
+                mainSwipeView.setCurrentIndex(target.pageIndex)
+                target.editor.jumpTo(group, subgroup, name)
+            }
         }
 
         onPageSelected: function(title) {

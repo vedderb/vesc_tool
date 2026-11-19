@@ -333,49 +333,38 @@ results in
 ## Tables
 
 ```
-
-|table>
-Left header | middle header | last header
-- | - | -
-cell 1 | cell 2 | cell 3
-cell 4 | cell 5 | cell 6
-- | - | -
-foot a | foot b | foot c
-|<table
-
+| Left header | Middle header | Right header |
+|:------------|:-------------:|-------------:|
+| cell 1      | cell 2        | cell 3       |
+| cell 4      | cell 5        | cell 6       |
 ```
 becomes
 ```html
 <table>
   <thead>
     <tr>
-      <th>Left header</th>
-      <th>middle header</th>
-      <th>last header</th>
+      <th align="left">Left header</th>
+      <th align="center">Middle header</th>
+      <th align="right">Right header</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>cell 1</td>
-      <td>cell 2</td>
-      <td>cell 3</td>
+      <td align="left">cell 1</td>
+      <td align="center">cell 2</td>
+      <td align="right">cell 3</td>
     </tr>
     <tr>
-      <td>cell 4</td>
-      <td>cell 5</td>
-      <td>cell 6</td>
+      <td align="left">cell 4</td>
+      <td align="center">cell 5</td>
+      <td align="right">cell 6</td>
     </tr>
   </tbody>
-  <tfoot>
-    <tr>
-      <td>foot a</td>
-      <td>foot b</td>
-      <td>foot c</td>
-    </tr>
-  </tfoot>
 </table>
 ```
-table header and footer are optional
+Every row starts with `|`, the second row is required and sets the alignment,
+and `\|` writes a pipe inside a cell. The table ends at the first line that
+does not start with `|`.
 
 ## LaTeX(MathJax) block support
 

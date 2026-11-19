@@ -62,16 +62,24 @@ LispHighlighter::LispHighlighter(QTextDocument* document) :
 
 void LispHighlighter::highlightBlock(const QString& text)
 {
+    forEachMatch(text, [this](int start, int length, const QString& format) {
+        setFormat(start, length, syntaxStyle()->getFormat(format));
+    });
+}
+
+void LispHighlighter::forEachMatch(const QString& text,
+                                   const std::function<void(int, int, const QString&)>& apply) const
+{
     for (auto&& rule : m_highlightRulesLang) {
         auto matchIterator = rule.pattern.globalMatch(QString(text).replace("-", "_").replace("#", "_").replace("?", "_"));
 
         while (matchIterator.hasNext()) {
             auto match = matchIterator.next();
 
-            setFormat(
+            apply(
                 match.capturedStart(),
                 match.capturedLength(),
-                syntaxStyle()->getFormat(rule.formatName)
+                rule.formatName
             );
         }
     }
@@ -82,10 +90,10 @@ void LispHighlighter::highlightBlock(const QString& text)
         while (matchIterator.hasNext()) {
             auto match = matchIterator.next();
 
-            setFormat(
+            apply(
                 match.capturedStart(),
                 match.capturedLength(),
-                syntaxStyle()->getFormat(rule.formatName)
+                rule.formatName
             );
         }
     }
@@ -96,10 +104,10 @@ void LispHighlighter::highlightBlock(const QString& text)
     while (matchIterator.hasNext()) {
         auto match = matchIterator.next();
 
-        setFormat(
+        apply(
             match.capturedStart(1),
             match.capturedLength(1),
-            syntaxStyle()->getFormat("Keyword")
+            "Keyword"
         );
     }
 }
